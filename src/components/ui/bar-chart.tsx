@@ -1,13 +1,13 @@
 
 import * as React from 'react';
 import { 
-  ResponsiveContainer, 
   BarChart as RechartsBarChart, 
   Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
-  Tooltip
+  Tooltip,
+  TooltipProps
 } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from './chart';
 
@@ -44,12 +44,19 @@ export function BarChart({ data }: BarChartProps) {
           fontSize={12}
         />
         <Tooltip
-          content={(props) => (
-            <ChartTooltipContent
-              formatter={(value) => `€${value}`}
-              {...props}
-            />
-          )}
+          content={({ active, payload, label }) => {
+            if (active && payload && payload.length) {
+              return (
+                <ChartTooltipContent
+                  formatter={(value) => `€${value}`}
+                  active={active}
+                  payload={payload}
+                  label={label}
+                />
+              );
+            }
+            return null;
+          }}
         />
         <Bar
           dataKey="total"
