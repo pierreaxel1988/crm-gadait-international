@@ -81,6 +81,8 @@ const Leads = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<LeadStatus | 'All'>('All');
   const [selectedTags, setSelectedTags] = useState<LeadTag[]>([]);
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const [showTagsDropdown, setShowTagsDropdown] = useState(false);
 
   const statuses: (LeadStatus | 'All')[] = [
     'All',
@@ -130,19 +132,19 @@ const Leads = () => {
   });
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-semibold">Leads</h1>
+          <h1 className="text-2xl md:text-3xl font-semibold">Leads</h1>
           <p className="text-muted-foreground">Manage your leads and prospects</p>
         </div>
-        <CustomButton className="bg-primary text-white flex items-center gap-1.5">
+        <CustomButton className="bg-primary text-white flex items-center gap-1.5 w-full sm:w-auto">
           <Plus className="h-4 w-4" /> New Lead
         </CustomButton>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-4">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
@@ -153,57 +155,76 @@ const Leads = () => {
           />
         </div>
 
-        <div className="flex gap-4">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row gap-2 md:gap-4">
+          <div className="relative w-full sm:w-auto">
             <button
-              className="luxury-input pl-3 pr-10 flex items-center gap-2"
+              className="luxury-input pl-3 pr-10 flex items-center gap-2 w-full justify-between"
+              onClick={() => {
+                setShowStatusDropdown(!showStatusDropdown);
+                setShowTagsDropdown(false);
+              }}
             >
-              <Filter className="h-4 w-4" />
-              <span>{selectedStatus}</span>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4" />
-            </button>
-            <div className="absolute right-0 mt-1 w-48 bg-card rounded-md border border-border shadow-luxury z-10">
-              <div className="py-1">
-                {statuses.map((status) => (
-                  <button
-                    key={status}
-                    className="flex items-center justify-between w-full px-4 py-2 text-sm text-foreground hover:bg-accent"
-                    onClick={() => setSelectedStatus(status)}
-                  >
-                    {status}
-                    {selectedStatus === status && <Check className="h-4 w-4" />}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <span>{selectedStatus}</span>
               </div>
-            </div>
+              <ChevronDown className="h-4 w-4" />
+            </button>
+            {showStatusDropdown && (
+              <div className="absolute left-0 right-0 sm:left-auto sm:w-48 mt-1 bg-card rounded-md border border-border shadow-luxury z-10">
+                <div className="py-1">
+                  {statuses.map((status) => (
+                    <button
+                      key={status}
+                      className="flex items-center justify-between w-full px-4 py-2 text-sm text-foreground hover:bg-accent"
+                      onClick={() => {
+                        setSelectedStatus(status);
+                        setShowStatusDropdown(false);
+                      }}
+                    >
+                      {status}
+                      {selectedStatus === status && <Check className="h-4 w-4" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <button
-              className="luxury-input pl-3 pr-10 flex items-center gap-2"
+              className="luxury-input pl-3 pr-10 flex items-center gap-2 w-full justify-between"
+              onClick={() => {
+                setShowTagsDropdown(!showTagsDropdown);
+                setShowStatusDropdown(false);
+              }}
             >
-              <Tag className="h-4 w-4" />
-              <span>
-                {selectedTags.length === 0
-                  ? 'Tags'
-                  : `${selectedTags.length} selected`}
-              </span>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4" />
-            </button>
-            <div className="absolute right-0 mt-1 w-48 bg-card rounded-md border border-border shadow-luxury z-10">
-              <div className="py-1">
-                {tags.map((tag) => (
-                  <button
-                    key={tag}
-                    className="flex items-center justify-between w-full px-4 py-2 text-sm text-foreground hover:bg-accent"
-                    onClick={() => toggleTag(tag)}
-                  >
-                    {tag}
-                    {selectedTags.includes(tag) && <Check className="h-4 w-4" />}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                <span>
+                  {selectedTags.length === 0
+                    ? 'Tags'
+                    : `${selectedTags.length} selected`}
+                </span>
               </div>
-            </div>
+              <ChevronDown className="h-4 w-4" />
+            </button>
+            {showTagsDropdown && (
+              <div className="absolute left-0 right-0 sm:left-auto sm:w-48 mt-1 bg-card rounded-md border border-border shadow-luxury z-10">
+                <div className="py-1">
+                  {tags.map((tag) => (
+                    <button
+                      key={tag}
+                      className="flex items-center justify-between w-full px-4 py-2 text-sm text-foreground hover:bg-accent"
+                      onClick={() => toggleTag(tag)}
+                    >
+                      {tag}
+                      {selectedTags.includes(tag) && <Check className="h-4 w-4" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -230,7 +251,7 @@ const Leads = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {filteredLeads.map((lead) => (
           <LeadCard key={lead.id} lead={lead} />
         ))}

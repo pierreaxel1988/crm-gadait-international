@@ -78,18 +78,18 @@ const chartData = [
 
 const Index = () => {
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-semibold">Dashboard</h1>
+          <h1 className="text-2xl md:text-3xl font-semibold">Dashboard</h1>
           <p className="text-muted-foreground">Welcome back, here's what's happening today.</p>
         </div>
-        <CustomButton className="bg-primary text-white flex items-center gap-1.5">
+        <CustomButton className="bg-primary text-white flex items-center gap-1.5 w-full sm:w-auto">
           <Plus className="h-4 w-4" /> New Lead
         </CustomButton>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         <LeadStatCard
           title="Total Leads"
           value="1,547"
@@ -116,14 +116,14 @@ const Index = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         <DashboardCard
           title="Lead Acquisition"
           subtitle="Last 7 months"
           icon={<BarChart3 className="h-5 w-5" />}
           className="lg:col-span-2"
         >
-          <div className="h-80">
+          <div className="h-64 md:h-80">
             <BarChart data={chartData} />
           </div>
         </DashboardCard>
@@ -131,18 +131,18 @@ const Index = () => {
         <RecentActivityCard activities={mockActivities} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <DashboardCard title="Top Performing Agents">
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {['Sophie Martin', 'Thomas Bernard', 'Julie Dubois', 'Lucas Petit'].map((agent, index) => (
               <div key={agent} className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                  <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     {agent.charAt(0)}
                   </div>
                   <div className="ml-3">
-                    <p className="font-medium">{agent}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-medium text-sm md:text-base">{agent}</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">
                       {['28', '21', '18', '15'][index]} leads this month
                     </p>
                   </div>
@@ -166,19 +166,17 @@ const Index = () => {
         </DashboardCard>
 
         <DashboardCard title="Recent Conversions">
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {['Villa Saint-Tropez', 'Penthouse Paris 8e', 'Chalet Megève', 'Appartement Cannes Croisette'].map(
               (property, index) => (
                 <div key={property} className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div
-                      className="h-10 w-10 rounded bg-luxury-100 flex items-center justify-center text-luxury-800"
-                    >
+                    <div className="h-8 w-8 md:h-10 md:w-10 rounded bg-luxury-100 flex items-center justify-center text-luxury-800">
                       #{index + 1}
                     </div>
                     <div className="ml-3">
-                      <p className="font-medium">{property}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-sm md:text-base">{property}</p>
+                      <p className="text-xs md:text-sm text-muted-foreground">
                         {['€4.2M', '€3.8M', '€2.7M', '€1.9M'][index]} • {['Yesterday', '2 days ago', '3 days ago', '4 days ago'][index]}
                       </p>
                     </div>
