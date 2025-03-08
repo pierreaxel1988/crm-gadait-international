@@ -3,7 +3,7 @@ import React, { ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'secondary';
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'secondary' | 'loropiana';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   isLoading?: boolean;
@@ -27,8 +27,10 @@ const CustomButton = ({
         return 'text-primary hover:underline';
       case 'secondary':
         return 'bg-secondary text-secondary-foreground hover:bg-secondary/90';
+      case 'loropiana':
+        return 'bg-[#F1F1F1] text-[#222222] border border-[#E0E0E0] hover:bg-[#E8E8E8] dark:bg-[#2A2A2A] dark:text-[#F5F5F5] dark:border-[#3A3A3A] dark:hover:bg-[#333333]';
       default:
-        return 'bg-primary text-primary-foreground hover:bg-primary/90';
+        return 'bg-[#222222] text-white hover:bg-[#333333] dark:bg-[#F1F1F1] dark:text-[#222222] dark:hover:bg-[#E0E0E0]';
     }
   };
 
@@ -46,7 +48,7 @@ const CustomButton = ({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center rounded-md font-medium transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:pointer-events-none',
+        'inline-flex items-center justify-center rounded-none font-medium transition-colors duration-300 focus:outline-none focus:ring-1 focus:ring-[#222222] dark:focus:ring-[#F1F1F1] disabled:opacity-50 disabled:pointer-events-none',
         getVariantClasses(variant),
         getSizeClasses(size),
         className
