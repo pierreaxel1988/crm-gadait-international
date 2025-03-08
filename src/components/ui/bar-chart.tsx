@@ -7,7 +7,8 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip,
-  TooltipProps
+  TooltipProps,
+  ResponsiveContainer
 } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from './chart';
 
@@ -28,43 +29,48 @@ export function BarChart({ data }: BarChartProps) {
         }
       }}
     >
-      <RechartsBarChart data={data} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-        <XAxis
-          dataKey="name"
-          tickLine={false}
-          axisLine={false}
-          padding={{ left: 10, right: 10 }}
-          fontSize={12}
-        />
-        <YAxis
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(value) => `€${value}`}
-          fontSize={12}
-        />
-        <Tooltip
-          content={({ active, payload, label }) => {
-            if (active && payload && payload.length) {
-              return (
-                <ChartTooltipContent
-                  formatter={(value) => `€${value}`}
-                  active={active}
-                  payload={payload}
-                  label={label}
-                />
-              );
-            }
-            return null;
-          }}
-        />
-        <Bar
-          dataKey="total"
-          radius={[4, 4, 0, 0]}
-          fill="var(--color-total)"
-          maxBarSize={40}
-        />
-      </RechartsBarChart>
+      <ResponsiveContainer width="100%" height="100%">
+        <RechartsBarChart data={data} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <XAxis
+            dataKey="name"
+            tickLine={false}
+            axisLine={false}
+            padding={{ left: 10, right: 10 }}
+            fontSize={12}
+            // Using JS default parameter instead of defaultProps
+          />
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => `€${value}`}
+            fontSize={12}
+            // Using JS default parameter instead of defaultProps
+          />
+          <Tooltip
+            content={({ active, payload, label }) => {
+              if (active && payload && payload.length) {
+                return (
+                  <ChartTooltipContent
+                    formatter={(value) => `€${value}`}
+                    active={active}
+                    payload={payload}
+                    label={label}
+                  />
+                );
+              }
+              return null;
+            }}
+          />
+          <Bar
+            dataKey="total"
+            radius={[4, 4, 0, 0]}
+            fill="var(--color-total)"
+            maxBarSize={40}
+            animationDuration={500}
+          />
+        </RechartsBarChart>
+      </ResponsiveContainer>
     </ChartContainer>
   );
 }
