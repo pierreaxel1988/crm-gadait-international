@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { BarChart3, CalendarDays, Phone, Plus, Users } from 'lucide-react';
 import LeadStatCard from '@/components/dashboard/LeadStatCard';
 import DashboardCard from '@/components/dashboard/DashboardCard';
 import RecentActivityCard from '@/components/dashboard/RecentActivityCard';
 import CustomButton from '@/components/ui/CustomButton';
-import { BarChart } from '@/components/ui/chart';
+import { BarChart } from '@/components/ui/bar-chart';
 
 const mockActivities = [
   {
@@ -46,38 +45,38 @@ const mockActivities = [
   },
 ];
 
-const Index = () => {
-  const chartData = [
-    {
-      name: 'Jan',
-      total: 1200,
-    },
-    {
-      name: 'Feb',
-      total: 1900,
-    },
-    {
-      name: 'Mar',
-      total: 2100,
-    },
-    {
-      name: 'Apr',
-      total: 1800,
-    },
-    {
-      name: 'May',
-      total: 2800,
-    },
-    {
-      name: 'Jun',
-      total: 2300,
-    },
-    {
-      name: 'Jul',
-      total: 3500,
-    },
-  ];
+const chartData = [
+  {
+    name: 'Jan',
+    total: 1200,
+  },
+  {
+    name: 'Feb',
+    total: 1900,
+  },
+  {
+    name: 'Mar',
+    total: 2100,
+  },
+  {
+    name: 'Apr',
+    total: 1800,
+  },
+  {
+    name: 'May',
+    total: 2800,
+  },
+  {
+    name: 'Jun',
+    total: 2300,
+  },
+  {
+    name: 'Jul',
+    total: 3500,
+  },
+];
 
+const Index = () => {
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
