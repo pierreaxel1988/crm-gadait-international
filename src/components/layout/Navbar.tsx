@@ -4,7 +4,11 @@ import { Link } from 'react-router-dom';
 import { Bell, Menu, Moon, Search, Sun, User, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const Navbar = () => {
+interface NavbarProps {
+  toggleSidebar?: () => void;
+}
+
+const Navbar = ({ toggleSidebar }: NavbarProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,6 +20,13 @@ const Navbar = () => {
     document.documentElement.classList.toggle('dark', newMode);
   };
 
+  const handleMenuToggle = () => {
+    setIsMenuOpen(!isMenuOpen);
+    if (toggleSidebar) {
+      toggleSidebar();
+    }
+  };
+
   return (
     <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border transition-all duration-300">
       <div className="content-container">
@@ -23,8 +34,9 @@ const Navbar = () => {
           <div className="flex items-center">
             {isMobile && (
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={handleMenuToggle}
                 className="mr-2 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                aria-label="Toggle menu"
               >
                 {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>

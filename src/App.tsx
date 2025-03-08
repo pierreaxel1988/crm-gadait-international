@@ -20,11 +20,15 @@ const AppRoutes = () => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Navbar />
+        <Navbar toggleSidebar={toggleSidebar} />
         <main className="flex-1 overflow-y-auto">
           <Routes>
             <Route path="/" element={<Index />} />
