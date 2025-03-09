@@ -1,7 +1,7 @@
-
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
+import { ActionHistory } from "@/services/leadService";
 
 export type LeadSource = 
   | "Site web" 
@@ -82,17 +82,8 @@ export interface LeadDetailed {
   assignedTo?: string;
   createdAt: string;
   lastContactedAt?: string;
-  
-  // Pipeline information
-  pipelineType?: PipelineType;
-  taskType?: TaskType;
-  
-  // Nouvelles informations générales
   source?: LeadSource;
   propertyReference?: string;
-  country?: Country;
-  
-  // Critères de recherche
   budget?: string;
   desiredLocation?: string;
   propertyType?: PropertyType;
@@ -105,8 +96,9 @@ export interface LeadDetailed {
   propertyUse?: PropertyUse;
   nationality?: string;
   taxResidence?: string;
-  
-  // Suivi supplémentaire
   nextFollowUpDate?: string;
   notes?: string;
+  taskType?: TaskType;
+  country?: Country;
+  actionHistory?: ActionHistory[];
 }

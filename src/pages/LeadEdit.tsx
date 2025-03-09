@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trash2, Plus, CalendarClock } from 'lucide-react';
 import { format } from 'date-fns';
 import LeadForm from '@/components/leads/LeadForm';
 import { LeadDetailed } from '@/types/lead';
-import { getLead, updateLead, deleteLead } from '@/services/leadService';
+import { getLead, updateLead, deleteLead, addActionToLead } from '@/services/leadService';
 import CustomButton from '@/components/ui/CustomButton';
 import { toast } from '@/hooks/use-toast';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -29,6 +30,7 @@ const LeadEdit = () => {
   const [selectedAction, setSelectedAction] = useState<TaskType | null>(null);
   const [actionDate, setActionDate] = useState<Date | undefined>(undefined);
   const [actionTime, setActionTime] = useState<string>('12:00');
+  const [actionNotes, setActionNotes] = useState<string>('');
   const [activeTab, setActiveTab] = useState('informations');
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -84,6 +86,7 @@ const LeadEdit = () => {
     setSelectedAction(null);
     setActionDate(undefined);
     setActionTime('12:00');
+    setActionNotes('');
     setIsActionDialogOpen(true);
   };
 
@@ -102,19 +105,21 @@ const LeadEdit = () => {
           scheduledDateTime = dateTime.toISOString();
         }
         
-        const updatedLead = {
-          ...lead,
-          taskType: selectedAction,
-          nextFollowUpDate: scheduledDateTime
-        };
-        updateLead(updatedLead);
-        setLead(updatedLead);
-        toast({
-          title: "Action ajoutée",
-          description: `${selectedAction} a été ajouté à ${lead.name}${
-            scheduledDateTime ? ` pour le ${format(new Date(scheduledDateTime), 'dd/MM/yyyy à HH:mm')}` : ''
-          }`
+        const updatedLead = addActionToLead(id, {
+          actionType: selectedAction,
+          scheduledDate: scheduledDateTime,
+          notes: actionNotes
         });
+        
+        if (updatedLead) {
+          setLead(updatedLead);
+          toast({
+            title: "Action ajoutée",
+            description: `${selectedAction} a été ajouté à ${lead.name}${
+              scheduledDateTime ? ` pour le ${format(new Date(scheduledDateTime), 'dd/MM/yyyy à HH:mm')}` : ''
+            }`
+          });
+        }
       } catch (error) {
         toast({
           variant: "destructive",
@@ -123,6 +128,43 @@ const LeadEdit = () => {
         });
       } finally {
         setIsActionDialogOpen(false);
+      }
+    }
+  };
+
+  const markActionComplete = (actionId: string) => {
+    if (lead && id) {
+      try {
+        // Find the action in history
+        const actionHistory = [...(lead.actionHistory || [])];
+        const actionIndex = actionHistory.findIndex(action => action.id === actionId);
+        
+        if (actionIndex !== -1) {
+          // Update the action to completed
+          actionHistory[actionIndex] = {
+            ...actionHistory[actionIndex],
+            completedDate: new Date().toISOString()
+          };
+          
+          // Update the lead with the modified action history
+          const updatedLead = updateLead({
+            ...lead,
+            actionHistory
+          });
+          
+          setLead(updatedLead);
+          
+          toast({
+            title: "Action complétée",
+            description: `${actionHistory[actionIndex].actionType} a été marquée comme complétée`
+          });
+        }
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de mettre à jour l'action."
+        });
       }
     }
   };
@@ -145,6 +187,22 @@ const LeadEdit = () => {
   }
 
   const actionTypes: TaskType[] = ['Call', 'Visites', 'Compromis', 'Acte de vente', 'Contrat de Location', 'Propositions', 'Follow up', 'Estimation', 'Prospection', 'Admin'];
+  
+  const getActionTypeIcon = (type: TaskType) => {
+    switch (type) {
+      case 'Call': return <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Appel</span>;
+      case 'Visites': return <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">Visite</span>;
+      case 'Compromis': return <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs">Compromis</span>;
+      case 'Acte de vente': return <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Acte de vente</span>;
+      case 'Contrat de Location': return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Contrat Location</span>;
+      case 'Propositions': return <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs">Proposition</span>;
+      case 'Follow up': return <span className="bg-pink-100 text-pink-800 px-2 py-1 rounded-full text-xs">Follow-up</span>;
+      case 'Estimation': return <span className="bg-teal-100 text-teal-800 px-2 py-1 rounded-full text-xs">Estimation</span>;
+      case 'Prospection': return <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs">Prospection</span>;
+      case 'Admin': return <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">Admin</span>;
+      default: return null;
+    }
+  };
   
   return <div className="p-4 md:p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -381,9 +439,7 @@ const LeadEdit = () => {
                   <div>
                     <h4 className="font-medium">Action actuelle</h4>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="px-2 py-1 bg-stone-100 text-stone-800 rounded-full text-xs">
-                        {lead.taskType}
-                      </span>
+                      {getActionTypeIcon(lead.taskType)}
                     </div>
                     
                     {lead.nextFollowUpDate && (
@@ -416,9 +472,61 @@ const LeadEdit = () => {
             
             <div className="mt-6">
               <h4 className="font-medium mb-3">Historique des actions</h4>
-              <div className="text-center py-6 text-muted-foreground">
-                Aucune action dans l'historique
-              </div>
+              {lead?.actionHistory && lead.actionHistory.length > 0 ? (
+                <div className="space-y-3">
+                  {lead.actionHistory.map((action) => (
+                    <div 
+                      key={action.id} 
+                      className={cn(
+                        "p-3 border rounded-md",
+                        action.completedDate ? "bg-gray-50" : "bg-white"
+                      )}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            {getActionTypeIcon(action.actionType)}
+                            <span className="text-sm font-medium">
+                              {action.completedDate ? "Terminé" : "À faire"}
+                            </span>
+                          </div>
+                          
+                          {action.scheduledDate && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Prévu le: {format(new Date(action.scheduledDate), 'dd/MM/yyyy à HH:mm')}
+                            </p>
+                          )}
+                          
+                          {action.notes && (
+                            <p className="text-sm mt-2 bg-gray-50 p-2 rounded">
+                              {action.notes}
+                            </p>
+                          )}
+                          
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Créé le {format(new Date(action.createdAt), 'dd/MM/yyyy')}
+                          </p>
+                        </div>
+                        
+                        {!action.completedDate && (
+                          <CustomButton
+                            variant="outline"
+                            size="sm"
+                            onClick={() => markActionComplete(action.id)}
+                            className="text-xs"
+                          >
+                            Marquer comme terminé
+                          </CustomButton>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-muted-foreground">
+                  Aucune action dans l'historique
+                </div>
+              )}
             </div>
           </div>
         </TabsContent>
@@ -497,6 +605,16 @@ const LeadEdit = () => {
                       value={actionTime}
                       onChange={(e) => setActionTime(e.target.value)}
                       className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Notes</label>
+                    <textarea
+                      value={actionNotes}
+                      onChange={(e) => setActionNotes(e.target.value)}
+                      className="w-full p-2 border rounded-md resize-none h-24"
+                      placeholder="Notes sur cette action..."
                     />
                   </div>
                 </div>

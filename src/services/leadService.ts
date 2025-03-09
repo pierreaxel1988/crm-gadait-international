@@ -4,6 +4,16 @@ import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
 import { toast } from "@/hooks/use-toast";
 
+// Define a type for action history
+export interface ActionHistory {
+  id: string;
+  actionType: TaskType;
+  scheduledDate?: string;
+  completedDate?: string;
+  notes?: string;
+  createdAt: string;
+}
+
 // Mock data avec des champs étendus
 const mockLeadsDetailed: LeadDetailed[] = [
   {
@@ -34,6 +44,23 @@ const mockLeadsDetailed: LeadDetailed[] = [
     nextFollowUpDate: '2023-07-01',
     notes: 'Client très sérieux et pressé',
     taskType: 'Visites',
+    actionHistory: [
+      {
+        id: '1',
+        actionType: 'Call',
+        scheduledDate: '2023-06-20',
+        completedDate: '2023-06-20',
+        notes: 'Premier contact établi',
+        createdAt: '2023-06-15'
+      },
+      {
+        id: '2',
+        actionType: 'Visites',
+        scheduledDate: '2023-07-01',
+        notes: 'Visite programmée pour 3 propriétés',
+        createdAt: '2023-06-18'
+      }
+    ]
   },
   {
     id: '2',
@@ -205,6 +232,32 @@ export const updateLead = (updatedLead: LeadDetailed): LeadDetailed => {
   }
 };
 
+export const addActionToLead = (leadId: string, action: Omit<ActionHistory, 'id' | 'createdAt'>): LeadDetailed | undefined => {
+  const lead = getLead(leadId);
+  
+  if (lead) {
+    // Create a new action with ID and createdAt
+    const newAction: ActionHistory = {
+      id: Date.now().toString(),
+      ...action,
+      createdAt: new Date().toISOString()
+    };
+    
+    // Update the lead with the new action in history
+    const updatedLead: LeadDetailed = {
+      ...lead,
+      taskType: action.actionType,
+      nextFollowUpDate: action.scheduledDate,
+      actionHistory: [...(lead.actionHistory || []), newAction]
+    };
+    
+    // Save the updated lead
+    return updateLead(updatedLead);
+  }
+  
+  return undefined;
+};
+
 export const createLead = (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>): LeadDetailed => {
   const id = (leadsData.length + 1).toString();
   const createdAt = new Date().toISOString().split('T')[0];
@@ -245,7 +298,6 @@ export const deleteLead = (id: string): boolean => {
   return false;
 };
 
-// Convertir les types détaillés en types simplifiés pour la compatibilité avec les composants existants
 export const convertToSimpleLead = (lead: LeadDetailed) => {
   return {
     id: lead.id,
