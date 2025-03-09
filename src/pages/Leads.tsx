@@ -1,81 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Check, ChevronDown, Filter, Plus, Search, Tag, X } from 'lucide-react';
-import LeadCard, { Lead } from '@/components/leads/LeadCard';
+import LeadCard from '@/components/leads/LeadCard';
 import CustomButton from '@/components/ui/CustomButton';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
-
-const mockLeads: Lead[] = [
-  {
-    id: '1',
-    name: 'Jean Dupont',
-    email: 'jean.dupont@example.com',
-    phone: '+33 6 12 34 56 78',
-    location: 'Paris, France',
-    status: 'Qualified',
-    tags: ['Vip', 'Hot'],
-    assignedTo: 'Sophie Martin',
-    createdAt: '2023-06-15',
-    lastContactedAt: '2023-06-18',
-  },
-  {
-    id: '2',
-    name: 'Marie Lambert',
-    email: 'marie.lambert@example.com',
-    phone: '+33 6 23 45 67 89',
-    location: 'Lyon, France',
-    status: 'New',
-    tags: ['Serious'],
-    assignedTo: 'Thomas Bernard',
-    createdAt: '2023-06-17',
-  },
-  {
-    id: '3',
-    name: 'Pierre Moreau',
-    email: 'pierre.moreau@example.com',
-    phone: '+33 6 34 56 78 90',
-    location: 'Nice, France',
-    status: 'Contacted',
-    tags: ['Cold', 'No response'],
-    assignedTo: 'Julie Dubois',
-    createdAt: '2023-06-14',
-    lastContactedAt: '2023-06-16',
-  },
-  {
-    id: '4',
-    name: 'Claire Simon',
-    email: 'claire.simon@example.com',
-    location: 'Cannes, France',
-    status: 'Visit',
-    tags: ['Hot'],
-    assignedTo: 'Lucas Petit',
-    createdAt: '2023-06-12',
-    lastContactedAt: '2023-06-16',
-  },
-  {
-    id: '5',
-    name: 'Antoine Richard',
-    email: 'antoine.richard@example.com',
-    phone: '+33 6 56 78 90 12',
-    location: 'Bordeaux, France',
-    status: 'Proposal',
-    tags: ['Serious'],
-    assignedTo: 'Sophie Martin',
-    createdAt: '2023-06-10',
-    lastContactedAt: '2023-06-15',
-  },
-  {
-    id: '6',
-    name: 'Camille Martin',
-    email: 'camille.martin@example.com',
-    phone: '+33 6 67 89 01 23',
-    location: 'Marseille, France',
-    status: 'New',
-    tags: ['No phone', 'Cold'],
-    createdAt: '2023-06-18',
-  },
-];
+import { getLeads, convertToSimpleLead } from '@/services/leadService';
 
 const Leads = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,6 +14,14 @@ const Leads = () => {
   const [selectedTags, setSelectedTags] = useState<LeadTag[]>([]);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [showTagsDropdown, setShowTagsDropdown] = useState(false);
+  const [leads, setLeads] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Charger les leads depuis le service
+    const allLeads = getLeads();
+    setLeads(allLeads);
+  }, []);
 
   const statuses: (LeadStatus | 'All')[] = [
     'All',
@@ -114,7 +53,7 @@ const Leads = () => {
     }
   };
 
-  const filteredLeads = mockLeads.filter((lead) => {
+  const filteredLeads = leads.filter((lead) => {
     // Filter by search term (name or email)
     const matchesSearch =
       searchTerm === '' ||
@@ -131,15 +70,26 @@ const Leads = () => {
     return matchesSearch && matchesStatus && matchesTags;
   });
 
+  const handleViewLead = (id: string) => {
+    navigate(`/leads/${id}`);
+  };
+
+  const handleNewLead = () => {
+    navigate('/leads/new');
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold">Leads</h1>
-          <p className="text-muted-foreground">Manage your leads and prospects</p>
+          <p className="text-muted-foreground">Gérez vos leads et prospects</p>
         </div>
-        <CustomButton className="bg-primary text-white flex items-center gap-1.5 w-full sm:w-auto">
-          <Plus className="h-4 w-4" /> New Lead
+        <CustomButton 
+          className="bg-primary text-white flex items-center gap-1.5 w-full sm:w-auto"
+          onClick={handleNewLead}
+        >
+          <Plus className="h-4 w-4" /> Nouveau Lead
         </CustomButton>
       </div>
 
@@ -148,7 +98,7 @@ const Leads = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search leads..."
+            placeholder="Rechercher des leads..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="luxury-input pl-10 w-full"
@@ -246,19 +196,23 @@ const Leads = () => {
             className="text-xs text-muted-foreground hover:text-foreground"
             onClick={() => setSelectedTags([])}
           >
-            Clear all
+            Tout effacer
           </button>
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {filteredLeads.map((lead) => (
-          <LeadCard key={lead.id} lead={lead} />
+          <LeadCard 
+            key={lead.id} 
+            lead={convertToSimpleLead(lead)} 
+            onView={() => handleViewLead(lead.id)}
+          />
         ))}
 
         {filteredLeads.length === 0 && (
           <div className="col-span-full flex flex-col items-center justify-center py-12">
-            <p className="text-center text-muted-foreground mb-4">No leads found matching your filters</p>
+            <p className="text-center text-muted-foreground mb-4">Aucun lead trouvé correspondant à vos filtres</p>
             <CustomButton
               variant="outline"
               onClick={() => {
@@ -267,7 +221,7 @@ const Leads = () => {
                 setSelectedTags([]);
               }}
             >
-              Clear filters
+              Effacer les filtres
             </CustomButton>
           </div>
         )}

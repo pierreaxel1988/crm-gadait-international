@@ -21,9 +21,11 @@ export interface Lead {
 interface LeadCardProps {
   lead: Lead;
   className?: string;
+  onView?: () => void;
+  onContact?: () => void;
 }
 
-const LeadCard = ({ lead, className }: LeadCardProps) => {
+const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
   return (
     <div className={cn('luxury-card p-5 scale-in', className)}>
       <div className="flex justify-between items-start">
@@ -60,23 +62,29 @@ const LeadCard = ({ lead, className }: LeadCardProps) => {
           <div className="flex items-center text-sm text-muted-foreground">
             <User className="h-3.5 w-3.5 mr-1" />
             <span>
-              {lead.assignedTo || 'Unassigned'}
+              {lead.assignedTo || 'Non assigné'}
             </span>
           </div>
           <div className="text-xs text-muted-foreground">
             {lead.lastContactedAt
-              ? `Last contacted: ${lead.lastContactedAt}`
-              : `Created: ${lead.createdAt}`}
+              ? `Dernier contact: ${lead.lastContactedAt}`
+              : `Créé le: ${lead.createdAt}`}
           </div>
         </div>
       </div>
 
       <div className="mt-4 flex space-x-2">
-        <button className="w-full luxury-button bg-accent text-accent-foreground hover:bg-accent/90">
-          View
+        <button 
+          className="w-full luxury-button bg-accent text-accent-foreground hover:bg-accent/90"
+          onClick={onView}
+        >
+          Voir
         </button>
-        <button className="w-full luxury-button">
-          Contact
+        <button 
+          className="w-full luxury-button"
+          onClick={onContact}
+        >
+          Contacter
         </button>
       </div>
     </div>
