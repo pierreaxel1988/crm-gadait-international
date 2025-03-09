@@ -1,236 +1,150 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import { Eye, EyeOff } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-
-// Predefined admin user credentials
-const PREDEFINED_ADMIN = {
-  email: 'pierre@gadait-international.com',
-  password: '@Gadait2025',
-  name: 'Pierre Axel Gadait'
-};
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
-  const { signInWithGoogle, session } = useAuth();
-
-  useEffect(() => {
-    // Check if user is already logged in
-    if (session) {
-      console.log("User session found, redirecting to dashboard");
-      navigate('/');
-    }
-  }, [navigate, session]);
+  const { toast } = useToast();
+  const { signInWithGoogle } = useAuth();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      if (isLogin) {
-        // Check if this is the predefined admin account
-        if (email === PREDEFINED_ADMIN.email && password === PREDEFINED_ADMIN.password) {
-          // For predefined admin account, try the following sequence of steps
-          try {
-            // First attempt to sign in directly
-            const { error } = await supabase.auth.signInWithPassword({
-              email,
-              password,
-            });
-
-            // If there's an email_not_confirmed error, try to handle it
-            if (error && error.message.includes('Email not confirmed')) {
-              console.log("Email not confirmed, attempting to auto-verify...");
-              
-              // Alternative approach: try to sign up again (which will give the account if it exists)
-              const { error: signUpError } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                  data: {
-                    name: PREDEFINED_ADMIN.name,
-                  },
-                  emailRedirectTo: window.location.origin,
-                },
-              });
-              
-              if (signUpError) {
-                // If sign up fails, let's try one more thing - admin token override
-                // This is a special flow for the predefined admin
-                const { error: adminError } = await supabase.auth.signInWithPassword({
-                  email,
-                  password,
-                });
-                
-                if (adminError) throw adminError;
-                
-                toast.success('Admin account authenticated successfully!');
-                navigate('/');
-                return;
-              }
-              
-              // If sign up worked, we can continue - this normally means the email would need to be verified
-              // but for testing, we'll try to sign in again immediately
-              const { error: secondError } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-              });
-              
-              if (secondError) {
-                toast.error('Account created but requires email verification. Please check your email.');
-                return;
-              }
-              
-              toast.success('Admin account created and signed in successfully!');
-              navigate('/');
-            } else if (error) {
-              throw error;
-            } else {
-              toast.success('Successfully signed in as admin!');
-              navigate('/');
-            }
-          } catch (adminError: any) {
-            console.error("Admin auth error:", adminError);
-            toast.error(`Admin authentication error: ${adminError.message}`);
-          }
-        } else {
-          // Handle regular login
-          const { error } = await supabase.auth.signInWithPassword({
-            email,
+      const { error } = isSignUp 
+        ? await supabase.auth.signUp({ 
+            email, 
             password,
-          });
+            options: {
+              emailRedirectTo: `${window.location.origin}/auth`
+            }
+          }) 
+        : await supabase.auth.signInWithPassword({ email, password });
 
-          if (error) throw error;
-          
-          toast.success('Successfully signed in!');
-          navigate('/');
-        }
+      if (error) throw error;
+      
+      if (isSignUp) {
+        toast({
+          title: "Compte créé avec succès",
+          description: "Veuillez vérifier votre email pour confirmer votre compte.",
+        });
       } else {
-        // Handle signup (disabled for now since we're using predetermined accounts)
-        toast.error('Signup is currently disabled. Please contact an administrator.');
+        toast({
+          title: "Connexion réussie",
+          description: "Bienvenue sur votre espace Immofusion.",
+        });
+        navigate('/');
       }
     } catch (error: any) {
-      toast.error(error.message || 'An error occurred during authentication');
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
+  const handleGoogleAuth = async () => {
     try {
       await signInWithGoogle();
-      // No need for success toast here as the page will redirect
     } catch (error: any) {
-      toast.error(error.message || 'An error occurred during Google authentication');
-    } finally {
-      setGoogleLoading(false);
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue avec Google",
+        variant: "destructive",
+      });
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-    <div className="flex flex-col min-h-screen bg-loro-white">
-      {/* Header */}
-      <header className="w-full py-6 border-b border-loro-sand/30">
-        <div className="container max-w-screen-xl mx-auto px-6">
-          <div className="flex justify-center">
-            <h1 className="font-futura text-3xl text-loro-navy tracking-wider">GADAIT.</h1>
-          </div>
-        </div>
-      </header>
-      
-      {/* Main content */}
-      <div className="flex-1 flex items-center justify-center px-4">
-        <div className="w-full max-w-md">
-          <div className="mb-10 text-center">
-            <h1 className="font-optima text-2xl text-loro-navy mb-3">Welcome</h1>
-            <p className="font-optima text-loro-text/70 text-sm">
-              {isLogin 
-                ? 'Please enter your login details' 
-                : 'Please contact an administrator to create an account'}
-            </p>
-          </div>
-          
-          <form onSubmit={handleAuth} className="space-y-8">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-optima text-loro-text/80 uppercase tracking-wide">
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
-                  required
-                  className="border-loro-sand/50 focus-visible:ring-loro-hazel py-6"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-optima text-loro-text/80 uppercase tracking-wide">
-                  Password
-                </label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    required
-                    className="border-loro-sand/50 focus-visible:ring-loro-hazel pr-10 py-6"
-                  />
-                  <button 
-                    type="button" 
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-loro-text/50 hover:text-loro-hazel"
-                    onClick={togglePasswordVisibility}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
+    <div className="min-h-screen flex items-center justify-center bg-loro-white/80 px-4">
+      <Card className="w-full max-w-md shadow-luxury">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-3xl font-times text-loro-hazel">
+            {isSignUp ? 'Créer un compte' : 'Connexion'}
+          </CardTitle>
+          <CardDescription className="font-times text-chocolate-light">
+            {isSignUp 
+              ? 'Créez votre compte pour accéder à toutes les fonctionnalités' 
+              : 'Connectez-vous pour accéder à votre espace personnel'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleAuth} className="space-y-4">
+            <div className="space-y-2">
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="luxury-input"
+              />
             </div>
-
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Mot de passe"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="luxury-input"
+              />
+            </div>
             <Button 
               type="submit" 
-              className="w-full bg-loro-hazel hover:bg-loro-hazel/90 py-6 uppercase tracking-wider font-optima text-sm"
+              className="w-full bg-loro-hazel text-white hover:bg-loro-hazel/90"
               disabled={loading}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Chargement...' : isSignUp ? 'Créer un compte' : 'Se connecter'}
             </Button>
-            
-            {/* Google sign-in section removed */}
-            
           </form>
-          
-          <div className="mt-8 pt-6 border-t border-loro-sand/30 text-center">
-            <p className="text-sm font-times text-loro-text/70 italic">
-              Gadait International Business Solutions
-            </p>
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-loro-sand" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground font-times">
+                Ou
+              </span>
+            </div>
           </div>
-        </div>
-      </div>
-      
-      {/* Footer */}
-      <footer className="py-4 text-center text-xs text-loro-text/50 font-optima border-t border-loro-sand/30">
-        <p>&copy; {new Date().getFullYear()} Gadait International. All rights reserved.</p>
-      </footer>
+          <Button 
+            onClick={handleGoogleAuth}
+            variant="outline" 
+            className="w-full"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 48 48" className="mr-2">
+              <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
+              <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
+              <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
+              <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
+            </svg>
+            Continuer avec Google
+          </Button>
+        </CardContent>
+        <CardFooter className="text-center block">
+          <Button 
+            variant="link" 
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="text-loro-hazel hover:text-loro-hazel/90"
+          >
+            {isSignUp ? 'Déjà un compte ? Se connecter' : 'Créer un compte'}
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };
