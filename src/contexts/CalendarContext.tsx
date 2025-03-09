@@ -1,5 +1,6 @@
 
 import React, { createContext, useState, useContext } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 export type Event = {
   id: string;
