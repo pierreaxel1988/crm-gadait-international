@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { X } from 'lucide-react';
@@ -26,8 +25,8 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
       path: '/leads',
     },
     {
-      name: 'Kanban',
-      path: '/kanban',
+      name: 'Pipeline',
+      path: '/pipeline',
     },
     {
       name: 'Properties',

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -8,7 +9,7 @@ import Index from "./pages/Index";
 import Leads from "./pages/Leads";
 import LeadEdit from "./pages/LeadEdit";
 import LeadNew from "./pages/LeadNew";
-import Kanban from "./pages/Kanban";
+import Pipeline from "./pages/Pipeline";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/layout/Navbar";
 import Sidebar from "./components/layout/Sidebar";
@@ -41,7 +42,7 @@ const AppRoutes = () => {
             <Route path="/leads" element={<Leads />} />
             <Route path="/leads/new" element={<LeadNew />} />
             <Route path="/leads/:id" element={<LeadEdit />} />
-            <Route path="/kanban" element={<Kanban />} />
+            <Route path="/pipeline" element={<Pipeline />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
