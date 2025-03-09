@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { 
   Banknote, Building, CalendarClock, CalendarDays, Clipboard, Flag, HelpCircle, 
-  Home, MapPin, Phone, PlusCircle, Tag, User, Mail, Check, Buildings 
+  Home, MapPin, Phone, PlusCircle, Tag, User, Mail, Check, Building2 
 } from 'lucide-react';
 import { LeadDetailed, LeadSource, PropertyType, ViewType, Amenity, 
   PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
@@ -336,7 +335,7 @@ const LeadForm = ({ lead, onSubmit, onCancel }: LeadFormProps) => {
           <div className="space-y-2">
             <label className="block text-sm font-medium">
               <span className="flex items-center">
-                <Buildings className="h-4 w-4 mr-1" /> Surface habitable
+                <Building2 className="h-4 w-4 mr-1" /> Surface habitable
               </span>
             </label>
             <input
