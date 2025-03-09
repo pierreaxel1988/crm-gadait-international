@@ -4,6 +4,7 @@ import { Mail, MapPin, Phone, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import StatusBadge, { LeadStatus } from '@/components/common/StatusBadge';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
+import CustomButton from '@/components/ui/CustomButton';
 
 export interface Lead {
   id: string;
@@ -74,18 +75,20 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
       </div>
 
       <div className="mt-4 flex space-x-2">
-        <button 
-          className="w-full luxury-button bg-accent text-accent-foreground hover:bg-accent/90"
+        <CustomButton 
+          variant="outline" 
+          className="w-full text-chocolate-dark border-chocolate-dark hover:bg-chocolate-dark/10"
           onClick={onView}
         >
           Voir
-        </button>
-        <button 
-          className="w-full luxury-button"
+        </CustomButton>
+        <CustomButton 
+          variant="chocolate"
+          className="w-full"
           onClick={onContact}
         >
           Contacter
-        </button>
+        </CustomButton>
       </div>
     </div>
   );

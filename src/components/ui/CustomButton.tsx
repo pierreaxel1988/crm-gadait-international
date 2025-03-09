@@ -3,7 +3,7 @@ import React, { ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'secondary' | 'loropiana';
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'secondary' | 'loropiana' | 'chocolate';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   isLoading?: boolean;
@@ -31,6 +31,8 @@ const CustomButton = ({
         return 'bg-secondary text-secondary-foreground hover:bg-secondary/90';
       case 'loropiana':
         return 'bg-loro-white text-loro-navy border border-loro-pearl hover:bg-loro-pearl dark:bg-loro-navy dark:text-loro-white dark:border-loro-navy/50 dark:hover:bg-loro-navy/80';
+      case 'chocolate':
+        return 'bg-chocolate-dark text-white hover:bg-chocolate-light dark:bg-chocolate-dark dark:text-white dark:hover:bg-chocolate-light';
       default:
         return 'bg-loro-hazel text-white hover:bg-loro-hazel/90 dark:bg-loro-sand dark:text-loro-navy dark:hover:bg-loro-sand/90';
     }

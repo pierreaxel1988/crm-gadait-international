@@ -64,7 +64,7 @@ const LeadEdit = () => {
   if (isLoading) {
     return (
       <div className="p-6 flex justify-center items-center">
-        <div className="animate-spin h-8 w-8 border-4 border-primary rounded-full border-t-transparent"></div>
+        <div className="animate-spin h-8 w-8 border-4 border-chocolate-dark rounded-full border-t-transparent"></div>
       </div>
     );
   }
@@ -76,7 +76,8 @@ const LeadEdit = () => {
           <h2 className="text-2xl font-semibold">Lead introuvable</h2>
           <p className="text-muted-foreground mt-2">Le lead que vous recherchez n'existe pas.</p>
           <CustomButton 
-            className="mt-4" 
+            className="mt-4"
+            variant="chocolate" 
             onClick={() => navigate('/leads')}
           >
             Retour à la liste
@@ -93,7 +94,7 @@ const LeadEdit = () => {
           <CustomButton 
             variant="outline" 
             onClick={() => navigate('/leads')}
-            className="w-auto p-2"
+            className="w-auto p-2 border-chocolate-light text-chocolate-dark hover:bg-chocolate-light/10"
           >
             <ArrowLeft className="h-4 w-4" />
           </CustomButton>

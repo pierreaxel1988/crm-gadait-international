@@ -81,6 +81,10 @@ export default {
 					700: '#5F4B36',
 					800: '#433528',
 					900: '#2C2419',
+				},
+				chocolate: {
+					'dark': '#403E43',        // Dark Chocolate
+					'light': '#8E9196',       // Light Chocolate
 				}
 			},
 			borderRadius: {
