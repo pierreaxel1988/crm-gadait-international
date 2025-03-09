@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 @tailwind base;
@@ -36,14 +37,14 @@
 
     --radius: 0rem;
 
-    --sidebar-background: 30 30% 96%;
-    --sidebar-foreground: 25 25% 42%;
-    --sidebar-primary: 25 15% 65%;
+    --sidebar-background: 33 29% 94%;
+    --sidebar-foreground: 28 17% 35%;
+    --sidebar-primary: 28 20% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 25 20% 94%;
-    --sidebar-accent-foreground: 25 25% 34%;
-    --sidebar-border: 25 25% 85%;
-    --sidebar-ring: 25 25% 40%;
+    --sidebar-accent: 28 20% 92%;
+    --sidebar-accent-foreground: 28 20% 30%;
+    --sidebar-border: 28 15% 85%;
+    --sidebar-ring: 28 20% 40%;
   }
 
   .dark {
@@ -107,7 +108,7 @@
   }
   
   .luxury-button {
-    @apply rounded-none bg-[#222222] text-white px-4 py-2 transition-all duration-300 hover:bg-[#333333] dark:bg-[#F1F1F1] dark:text-[#222222] dark:hover:bg-[#E0E0E0];
+    @apply rounded-none bg-[#86755D] text-white px-4 py-2 transition-all duration-300 hover:bg-[#96856D] dark:bg-[#F1F1F1] dark:text-[#86755D] dark:hover:bg-[#E0E0E0];
   }
   
   .luxury-input {

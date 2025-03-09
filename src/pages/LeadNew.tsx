@@ -31,17 +31,17 @@ const LeadNew = () => {
         <CustomButton 
           variant="outline" 
           onClick={() => navigate('/leads')}
-          className="w-auto p-2"
+          className="w-auto p-2 border-[#D6C8B6] text-[#86755D] hover:bg-[#F5F2ED]"
         >
           <ArrowLeft className="h-4 w-4" />
         </CustomButton>
         <div>
-          <h1 className="text-2xl md:text-3xl font-semibold">Nouveau Lead</h1>
-          <p className="text-muted-foreground">Ajouter un nouveau lead dans le système</p>
+          <h1 className="text-2xl md:text-3xl font-semibold text-[#6A5940]">Nouveau Lead</h1>
+          <p className="text-[#96856D]">Ajouter un nouveau lead dans le système</p>
         </div>
       </div>
 
-      <div className="luxury-card p-6">
+      <div className="luxury-card p-6 border-[#E5DCD0]">
         <LeadForm 
           onSubmit={handleSubmit} 
           onCancel={() => navigate('/leads')}
