@@ -82,7 +82,7 @@ const AddEventDialog = ({
 
           {categories.length > 0 && (
             <div className="grid gap-2">
-              <Label>Catégorie</Label>
+              <Label>Type d'action</Label>
               <Select 
                 value={newEvent.category} 
                 onValueChange={(value: TaskType) => {
@@ -95,7 +95,7 @@ const AddEventDialog = ({
                 }}
               >
                 <SelectTrigger className="border-loro-sand focus:ring-loro-terracotta">
-                  <SelectValue placeholder="Sélectionner une catégorie" />
+                  <SelectValue placeholder="Sélectionner un type d'action" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map(category => (

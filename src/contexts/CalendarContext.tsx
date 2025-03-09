@@ -12,13 +12,18 @@ export type Event = {
   category?: TaskType;
 };
 
-// Define event categories with colors matching task types
+// Define event categories with colors matching task types from KanbanCard
 export const eventCategories = [
-  { name: 'Visite', color: '#FDE1D3', value: 'Visite' as TaskType },
-  { name: 'Contrat', color: '#E5DEFF', value: 'Contrat' as TaskType },
-  { name: 'Finance', color: '#D3E4FD', value: 'Finance' as TaskType },
-  { name: 'Marketing', color: '#F2FCE2', value: 'Marketing' as TaskType },
-  { name: 'Personnel', color: '#FEF7CD', value: 'Personnel' as TaskType },
+  { name: 'Call', color: '#FDE1D3', value: 'Call' as TaskType },
+  { name: 'Visites', color: '#E5DEFF', value: 'Visites' as TaskType },
+  { name: 'Compromis', color: '#D3E4FD', value: 'Compromis' as TaskType },
+  { name: 'Acte de vente', color: '#F2FCE2', value: 'Acte de vente' as TaskType },
+  { name: 'Contrat de Location', color: '#FEF7CD', value: 'Contrat de Location' as TaskType },
+  { name: 'Propositions', color: '#FFD6E0', value: 'Propositions' as TaskType },
+  { name: 'Follow up', color: '#D3FDFC', value: 'Follow up' as TaskType },
+  { name: 'Estimation', color: '#E8D3FD', value: 'Estimation' as TaskType },
+  { name: 'Prospection', color: '#FDD3D3', value: 'Prospection' as TaskType },
+  { name: 'Admin', color: '#D3D3D3', value: 'Admin' as TaskType },
 ];
 
 // Initial mock data for events
@@ -28,40 +33,40 @@ export const initialEvents: Event[] = [
     title: 'Visite propriété',
     description: 'Visite du bien avec la famille Martin',
     date: new Date(new Date().setDate(new Date().getDate() + 2)),
-    color: '#FDE1D3', // Soft Peach
-    category: 'Visite',
+    color: '#E5DEFF',
+    category: 'Visites',
   },
   {
     id: '2',
     title: 'Signature contrat',
     description: 'Signature du compromis pour la villa des Lilas',
     date: new Date(new Date().setDate(new Date().getDate() + 5)),
-    color: '#E5DEFF', // Soft Purple
-    category: 'Contrat',
+    color: '#D3E4FD',
+    category: 'Compromis',
   },
   {
     id: '3',
     title: 'Rendez-vous banque',
     description: 'Discussion financement avec Crédit Immobilier',
     date: new Date(),
-    color: '#D3E4FD', // Soft Blue
-    category: 'Finance',
+    color: '#FDD3D3',
+    category: 'Prospection',
   },
   {
     id: '4',
     title: 'Tournage vidéo',
     description: 'Tournage du bien rue Victor Hugo',
     date: new Date(new Date().setDate(new Date().getDate() + 1)),
-    color: '#F2FCE2', // Soft Green
-    category: 'Marketing',
+    color: '#FFD6E0',
+    category: 'Propositions',
   },
   {
     id: '5',
     title: 'Déjeuner équipe',
     description: 'Restaurant Le Bistrot',
     date: new Date(new Date().setDate(new Date().getDate() + 4)),
-    color: '#FEF7CD', // Soft Yellow
-    category: 'Personnel',
+    color: '#D3D3D3',
+    category: 'Admin',
   },
 ];
 
@@ -94,7 +99,7 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     title: '',
     description: '',
     color: '#FDE1D3',
-    category: 'Visite',
+    category: 'Call',
   });
 
   const { toast } = useToast();
@@ -128,7 +133,7 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     setEvents([...events, event]);
     setIsAddEventOpen(false);
-    setNewEvent({ title: '', description: '', color: '#FDE1D3', category: 'Visite' });
+    setNewEvent({ title: '', description: '', color: '#FDE1D3', category: 'Call' });
     
     toast({
       title: "Événement ajouté",
