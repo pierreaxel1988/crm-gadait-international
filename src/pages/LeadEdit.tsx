@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trash2, Plus, CalendarClock } from 'lucide-react';
@@ -370,7 +369,7 @@ const LeadEdit = () => {
               <CustomButton 
                 variant="chocolate" 
                 onClick={handleAddAction} 
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 shadow-luxury hover:translate-y-[-2px] transition-all duration-300"
               >
                 <Plus className="h-4 w-4" /> Ajouter une action
               </CustomButton>
