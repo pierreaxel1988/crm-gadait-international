@@ -74,12 +74,18 @@ const Sidebar = ({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProp
   );
 
   const toggleButtonClasses = cn(
-    'absolute right-0 top-20 translate-x-1/2 flex items-center justify-center h-7 w-7 rounded-full cursor-pointer',
-    'border border-[#E0E0E0] bg-white text-[#222222] shadow-[0_2px_8px_rgba(0,0,0,0.05)]',
-    'hover:border-[#C2A487] hover:shadow-[0_2px_10px_rgba(194,164,135,0.15)]',
-    'dark:bg-[#2A2A2A] dark:text-[#F5F5F5] dark:border-[#3A3A3A] dark:hover:border-[#C2A487]',
-    'transition-all duration-300',
+    'absolute right-0 top-20 translate-x-1/2 flex items-center justify-center',
+    'h-8 w-8 rounded-full cursor-pointer transform transition-all duration-300',
+    'border border-luxury-200 bg-white text-luxury-700 shadow-[0_2px_8px_rgba(194,164,135,0.1)]',
+    'hover:border-luxury-400 hover:shadow-[0_2px_12px_rgba(194,164,135,0.2)]',
+    'dark:bg-[#2A2A2A] dark:text-luxury-300 dark:border-[#3A3A3A] dark:hover:border-luxury-500',
     isMobile ? 'hidden' : 'block'
+  );
+
+  // Add animation class for icon rotation
+  const iconClasses = cn(
+    'transition-transform duration-300',
+    isCollapsed ? 'rotate-0' : 'rotate-180'
   );
 
   return (
@@ -145,10 +151,11 @@ const Sidebar = ({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProp
           onClick={onToggleCollapse}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {isCollapsed ? 
-            <ChevronRight size={14} className="text-luxury-700" /> : 
-            <ChevronLeft size={14} className="text-luxury-700" />
-          }
+          <ChevronLeft 
+            size={15} 
+            className={iconClasses} 
+            strokeWidth={2.5}
+          />
         </div>
       </div>
     </>
