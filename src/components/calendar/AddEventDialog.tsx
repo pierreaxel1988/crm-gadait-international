@@ -45,6 +45,13 @@ const AddEventDialog = ({
   categories = []
 }: AddEventDialogProps) => {
   
+  // Générer les options d'heures de 00:00 à 23:30 par intervalle de 30 minutes
+  const timeOptions = Array.from({ length: 48 }, (_, i) => {
+    const hour = Math.floor(i / 2).toString().padStart(2, '0');
+    const minute = (i % 2) === 0 ? '00' : '30';
+    return `${hour}:${minute}`;
+  });
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-white">
@@ -78,6 +85,26 @@ const AddEventDialog = ({
               onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
               className="border-loro-sand focus-visible:ring-loro-terracotta"
             />
+          </div>
+
+          {/* Nouveau champ pour la sélection de l'heure */}
+          <div className="grid gap-2">
+            <Label htmlFor="time">Heure</Label>
+            <Select 
+              value={newEvent.time || '09:00'} 
+              onValueChange={(value) => setNewEvent({...newEvent, time: value})}
+            >
+              <SelectTrigger id="time" className="border-loro-sand focus:ring-loro-terracotta">
+                <SelectValue placeholder="Sélectionner une heure" />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {timeOptions.map(time => (
+                  <SelectItem key={time} value={time}>
+                    {time}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {categories.length > 0 && (

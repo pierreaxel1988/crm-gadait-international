@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -8,11 +7,11 @@ export type Event = {
   title: string;
   description: string;
   date: Date;
+  time?: string;
   color?: string;
   category?: TaskType;
 };
 
-// Define event categories with colors matching task types from KanbanCard
 export const eventCategories = [
   { name: 'Call', color: '#FDE1D3', value: 'Call' as TaskType },
   { name: 'Visites', color: '#E5DEFF', value: 'Visites' as TaskType },
@@ -26,7 +25,6 @@ export const eventCategories = [
   { name: 'Admin', color: '#D3D3D3', value: 'Admin' as TaskType },
 ];
 
-// Initial mock data for events
 export const initialEvents: Event[] = [
   {
     id: '1',
@@ -100,6 +98,7 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     description: '',
     color: '#FDE1D3',
     category: 'Call',
+    time: '09:00',
   });
 
   const { toast } = useToast();
@@ -133,11 +132,17 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     setEvents([...events, event]);
     setIsAddEventOpen(false);
-    setNewEvent({ title: '', description: '', color: '#FDE1D3', category: 'Call' });
+    setNewEvent({ 
+      title: '', 
+      description: '', 
+      color: '#FDE1D3', 
+      category: 'Call',
+      time: '09:00'
+    });
     
     toast({
       title: "Événement ajouté",
-      description: `L'événement "${event.title}" a été ajouté au ${selectedDate.toLocaleDateString('fr-FR')}`,
+      description: `L'événement "${event.title}" a été ajouté au ${selectedDate.toLocaleDateString('fr-FR')}${event.time ? ' à ' + event.time : ''}`,
     });
   };
 
