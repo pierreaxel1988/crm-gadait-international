@@ -36,8 +36,8 @@ const Navbar = ({ toggleSidebar, sidebarCollapsed }: NavbarProps) => {
               <Menu size={20} />
             </button>
             <Link to="/" className="flex items-center space-x-2">
-              <span className="font-serif text-xl font-semibold tracking-tight text-loro-navy">Gadait</span>
-              <span className="font-sans text-xs uppercase tracking-widest text-loro-hazel">International</span>
+              <span className="font-optima text-xl font-semibold tracking-tight text-loro-navy">Gadait</span>
+              <span className="font-optima text-xs uppercase tracking-widest text-loro-hazel">International</span>
             </Link>
           </div>
 
@@ -47,7 +47,7 @@ const Navbar = ({ toggleSidebar, sidebarCollapsed }: NavbarProps) => {
                 <input
                   type="text"
                   placeholder="Search..."
-                  className="luxury-input w-full md:w-64 border-loro-pearl"
+                  className="luxury-input w-full md:w-64 border-loro-pearl font-optima"
                   autoFocus
                   onBlur={() => setIsSearchOpen(false)}
                 />
@@ -81,7 +81,7 @@ const Navbar = ({ toggleSidebar, sidebarCollapsed }: NavbarProps) => {
 
             <button className="flex items-center space-x-2 rounded-md p-2 text-loro-hazel hover:bg-loro-sand hover:text-loro-navy">
               <User size={20} />
-              <span className="hidden md:inline-block text-sm font-medium">Account</span>
+              <span className="hidden md:inline-block text-sm font-medium font-optima">Account</span>
             </button>
           </div>
         </div>

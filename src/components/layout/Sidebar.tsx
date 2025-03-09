@@ -96,9 +96,9 @@ const Sidebar = ({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProp
         <div className="flex h-full flex-col">
           <div className="flex h-16 items-center border-b border-loro-pearl px-4">
             {!isCollapsed ? (
-              <span className="font-serif text-xl font-semibold tracking-tight text-loro-hazel">Gadait CRM</span>
+              <span className="font-optima text-xl font-semibold tracking-tight text-loro-hazel">Gadait CRM</span>
             ) : (
-              <span className="font-serif text-xl font-semibold tracking-tight mx-auto text-loro-hazel">G</span>
+              <span className="font-optima text-xl font-semibold tracking-tight mx-auto text-loro-hazel">G</span>
             )}
           </div>
           <nav className="flex-1 overflow-y-auto px-3 py-4">
@@ -109,7 +109,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProp
                     to={item.path}
                     className={({ isActive }) =>
                       cn(
-                        'flex items-center rounded-none px-3 py-2 transition-colors duration-200',
+                        'flex items-center rounded-none px-3 py-2 transition-colors duration-200 font-optima',
                         isCollapsed ? 'justify-center' : 'space-x-3',
                         isActive
                           ? 'bg-loro-sand text-loro-navy'
@@ -129,11 +129,11 @@ const Sidebar = ({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProp
           {!isCollapsed && (
             <div className="border-t border-loro-pearl p-4">
               <div className="rounded-none bg-loro-sand p-3">
-                <p className="text-sm font-medium text-loro-navy">Need help?</p>
-                <p className="mt-1 text-xs text-loro-hazel">
+                <p className="text-sm font-medium text-loro-navy font-optima">Need help?</p>
+                <p className="mt-1 text-xs text-loro-hazel font-optima">
                   Contact support for assistance with your CRM.
                 </p>
-                <button className="mt-2 w-full rounded-none bg-loro-hazel px-3 py-1 text-xs font-medium text-white hover:bg-loro-hazel/90">
+                <button className="mt-2 w-full rounded-none bg-loro-hazel px-3 py-1 text-xs font-medium text-white hover:bg-loro-hazel/90 font-optima">
                   Contact Support
                 </button>
               </div>
@@ -141,7 +141,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProp
           )}
           {isCollapsed && (
             <div className="border-t border-loro-pearl p-4 flex justify-center">
-              <button className="rounded-none bg-loro-sand p-2" title="Need help?">
+              <button className="rounded-none bg-loro-sand p-2 font-optima" title="Need help?">
                 <span className="text-loro-navy">?</span>
               </button>
             </div>

@@ -48,7 +48,7 @@ const CustomButton = ({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center rounded-none font-medium transition-colors duration-300 focus:outline-none focus:ring-1 focus:ring-loro-hazel dark:focus:ring-loro-sand disabled:opacity-50 disabled:pointer-events-none',
+        'inline-flex items-center justify-center rounded-none font-medium transition-colors duration-300 focus:outline-none focus:ring-1 focus:ring-loro-hazel dark:focus:ring-loro-sand disabled:opacity-50 disabled:pointer-events-none font-optima',
         getVariantClasses(variant),
         getSizeClasses(size),
         className
