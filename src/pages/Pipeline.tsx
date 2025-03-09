@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Filter, Plus, Settings, Home, Key } from 'lucide-react';
 import KanbanBoard from '@/components/kanban/KanbanBoard';
@@ -206,7 +207,7 @@ const Kanban = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="font-timesNowSemi text-3xl font-normal text-loro-text leading-[28px]">Sales Pipeline</h1>
+          <h1 className="text-2xl md:text-3xl font-semibold">Sales Pipeline</h1>
           <p className="text-muted-foreground">Drag and drop leads through your sales stages</p>
         </div>
         <div className="flex space-x-3">
