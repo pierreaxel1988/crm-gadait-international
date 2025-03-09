@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { isSameDay } from 'date-fns';
-import { Event } from '@/pages/Calendar';
+import { Event } from '@/contexts/CalendarContext';
 
 interface CalendarEventsListProps {
   events: Event[];

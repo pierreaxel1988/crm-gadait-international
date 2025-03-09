@@ -1,10 +1,9 @@
-
 import React from 'react';
-import { isSameDay, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
+import { isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Event } from '@/pages/Calendar';
+import { Event } from '@/contexts/CalendarContext';
 
 interface CalendarViewProps {
   selectedDate: Date | undefined;

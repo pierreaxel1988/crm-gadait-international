@@ -1,12 +1,10 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar as CalendarIcon, PlusCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Event } from '@/pages/Calendar';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import CalendarEventsList from './CalendarEventsList';
+import { Event } from '@/contexts/CalendarContext';
 
 interface DayDetailProps {
   selectedDate: Date | undefined;
