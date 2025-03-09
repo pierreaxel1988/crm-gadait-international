@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, ChevronDown, Filter, Plus, Search, Tag, X } from 'lucide-react';
@@ -82,6 +83,11 @@ const Leads = () => {
         variant: "destructive"
       });
     }
+  };
+
+  // Added the missing handleNewLead function
+  const handleNewLead = () => {
+    navigate('/leads/new');
   };
 
   return (
