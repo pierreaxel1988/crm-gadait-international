@@ -67,7 +67,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
           <div className="flex h-16 items-center justify-end px-6 pt-6">
             <button
               onClick={onClose}
-              className="text-loro-navy hover:text-loro-hazel transition-colors duration-200"
+              className="text-loro-navy hover:text-loro-terracotta transition-colors duration-200"
               aria-label="Close menu"
             >
               <X size={24} />
@@ -84,11 +84,11 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
                       cn(
                         'block transition-colors duration-200',
                         item.isPrimary 
-                          ? 'text-loro-hazel font-optima text-2xl mb-12 tracking-wide' 
+                          ? 'text-loro-terracotta font-optima text-2xl mb-12 tracking-wide' 
                           : 'text-loro-navy font-times text-xl tracking-wide',
                         isActive
-                          ? item.isPrimary ? 'text-loro-hazel' : 'text-loro-hazel'
-                          : item.isPrimary ? 'text-loro-hazel' : 'hover:text-loro-hazel'
+                          ? item.isPrimary ? 'text-loro-terracotta' : 'text-loro-terracotta'
+                          : item.isPrimary ? 'text-loro-terracotta' : 'hover:text-loro-terracotta'
                       )
                     }
                     onClick={isMobile ? onClose : undefined}

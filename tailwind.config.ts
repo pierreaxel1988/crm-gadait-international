@@ -69,6 +69,7 @@ export default {
 					'sand': '#D3C5B4',        // Beige Sable
 					'hazel': '#8B6F4E',       // Marron Noisette
 					'navy': '#2C3E50',        // Bleu Nuit
+					'terracotta': 'rgb(157, 82, 72)', // New terracotta color from image
 					50: '#F5F5F0',
 					100: '#E0E0E0',
 					200: '#D3C5B4',
