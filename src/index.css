@@ -1,11 +1,28 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
-/* Définition de la police OptimaLTStd */
+/* Définition des polices inspirées de Loro Piana */
 @font-face {
   font-family: 'OptimaLTStd';
   src: url('/fonts/OptimaLTStd.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TimesNow-SemiLight';
+  src: url('/lovable-uploads/ff01d8fc-eccf-4f3f-932b-55cf10ca8e06.png') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TimesNow-LightItalic';
+  src: url('/lovable-uploads/19c487e2-a1e1-4fab-b202-f85007fbeece.png') format('woff2');
+  font-weight: normal;
+  font-style: italic;
   font-display: swap;
 }
 

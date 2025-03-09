@@ -7,6 +7,7 @@ interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   isLoading?: boolean;
+  fontStyle?: 'optima' | 'times' | 'timesItalic';
 }
 
 const CustomButton = ({
@@ -14,6 +15,7 @@ const CustomButton = ({
   size = 'md',
   className,
   isLoading,
+  fontStyle = 'optima',
   children,
   ...props
 }: CustomButtonProps) => {
@@ -45,12 +47,24 @@ const CustomButton = ({
     }
   };
 
+  const getFontClasses = (fontStyle: string) => {
+    switch (fontStyle) {
+      case 'times':
+        return 'font-times';
+      case 'timesItalic':
+        return 'font-timesItalic';
+      default:
+        return 'font-optima';
+    }
+  };
+
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center rounded-none font-medium transition-colors duration-300 focus:outline-none focus:ring-1 focus:ring-loro-hazel dark:focus:ring-loro-sand disabled:opacity-50 disabled:pointer-events-none font-optima',
+        'inline-flex items-center justify-center rounded-none font-medium transition-colors duration-300 focus:outline-none focus:ring-1 focus:ring-loro-hazel dark:focus:ring-loro-sand disabled:opacity-50 disabled:pointer-events-none',
         getVariantClasses(variant),
         getSizeClasses(size),
+        getFontClasses(fontStyle),
         className
       )}
       disabled={isLoading || props.disabled}

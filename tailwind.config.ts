@@ -90,6 +90,8 @@ export default {
 				sans: ['Inter', 'sans-serif'],
 				serif: ['Playfair Display', 'serif'],
 				optima: ['OptimaLTStd', 'Inter', 'sans-serif'],
+				times: ['TimesNow-SemiLight', 'serif'],
+				timesItalic: ['TimesNow-LightItalic', 'serif'],
 			},
 			keyframes: {
 				'accordion-down': {
