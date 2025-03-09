@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Filter, Plus, Settings, Home, Key } from 'lucide-react';
 import KanbanBoard from '@/components/kanban/KanbanBoard';
@@ -7,6 +6,8 @@ import CustomButton from '@/components/ui/CustomButton';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useIsMobile } from '@/hooks/use-mobile';
+import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
 
 // Mock data for purchase leads
 const mockPurchaseLeads: KanbanItem[] = [
@@ -121,6 +122,7 @@ const mockRentalLeads: KanbanItem[] = [
 const Kanban = () => {
   const [activeTab, setActiveTab] = useState<string>("purchase");
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const purchaseColumns = [
     {
@@ -204,44 +206,47 @@ const Kanban = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-3 md:p-6 space-y-4 md:space-y-6">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold">Pipeline</h1>
-          <p className="text-muted-foreground">Drag and drop leads through your sales stages</p>
+          <p className="text-muted-foreground text-sm md:text-base">Drag and drop leads through your sales stages</p>
         </div>
-        <div className="flex space-x-3">
-          <CustomButton
-            variant="outline"
-            className="flex items-center gap-1.5"
-          >
-            <Filter className="h-4 w-4" /> Filter
-          </CustomButton>
-          <CustomButton
-            variant="outline"
-            className="flex items-center gap-1.5"
-          >
-            <Settings className="h-4 w-4" /> Customize
-          </CustomButton>
-          <CustomButton 
-            variant="chocolate" 
-            className="flex items-center gap-1.5"
-            onClick={() => navigate('/leads/new')}
-          >
-            <Plus className="h-4 w-4" /> New Lead
-          </CustomButton>
-        </div>
+        
+        {!isMobile && (
+          <div className="flex space-x-3">
+            <CustomButton
+              variant="outline"
+              className="flex items-center gap-1.5"
+            >
+              <Filter className="h-4 w-4" /> Filter
+            </CustomButton>
+            <CustomButton
+              variant="outline"
+              className="flex items-center gap-1.5"
+            >
+              <Settings className="h-4 w-4" /> Customize
+            </CustomButton>
+            <CustomButton 
+              variant="chocolate" 
+              className="flex items-center gap-1.5"
+              onClick={() => navigate('/leads/new')}
+            >
+              <Plus className="h-4 w-4" /> New Lead
+            </CustomButton>
+          </div>
+        )}
       </div>
 
       <Tabs defaultValue="purchase" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-6 w-[400px] mx-auto">
+        <TabsList className="mb-4 md:mb-6 w-full md:w-[400px] mx-auto">
           <TabsTrigger value="purchase" className="flex items-center gap-2 w-1/2">
             <Home className="h-4 w-4" />
-            <span>Achat (Purchase)</span>
+            <span className="truncate">Achat (Purchase)</span>
           </TabsTrigger>
           <TabsTrigger value="rental" className="flex items-center gap-2 w-1/2">
             <Key className="h-4 w-4" />
-            <span>Location (Rental)</span>
+            <span className="truncate">Location (Rental)</span>
           </TabsTrigger>
         </TabsList>
         
@@ -253,6 +258,12 @@ const Kanban = () => {
           <KanbanBoard columns={rentalColumns} />
         </TabsContent>
       </Tabs>
+
+      {isMobile && (
+        <FloatingActionButtons
+          onAddAction={() => navigate('/leads/new')}
+        />
+      )}
     </div>
   );
 };
