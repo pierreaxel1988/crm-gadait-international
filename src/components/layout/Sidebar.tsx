@@ -74,8 +74,8 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
             </button>
           </div>
           
-          <nav className="flex-1 px-8 py-12">
-            <ul className="space-y-8">
+          <nav className="flex-1 px-10 py-16">
+            <ul className="space-y-7">
               {navigationItems.map((item) => (
                 <li key={item.name}>
                   <NavLink
@@ -84,11 +84,11 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
                       cn(
                         'block transition-colors duration-200',
                         item.isSeasonal 
-                          ? 'text-loro-hazel font-optima text-2xl mb-10' 
-                          : 'text-loro-navy font-times text-2xl',
+                          ? 'text-loro-hazel font-optima text-2xl mb-12 tracking-wide' 
+                          : 'text-loro-navy font-times text-xl tracking-wide',
                         isActive
-                          ? 'text-loro-hazel'
-                          : 'hover:text-loro-hazel'
+                          ? item.isSeasonal ? 'text-loro-hazel' : 'text-loro-hazel'
+                          : item.isSeasonal ? 'text-loro-hazel' : 'hover:text-loro-hazel'
                       )
                     }
                     onClick={isMobile ? onClose : undefined}
