@@ -1,6 +1,7 @@
 
 import React, { createContext, useState, useContext } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 export type Event = {
   id: string;
@@ -8,16 +9,16 @@ export type Event = {
   description: string;
   date: Date;
   color?: string;
-  category?: string;
+  category?: TaskType;
 };
 
-// Define event categories with colors
+// Define event categories with colors matching task types
 export const eventCategories = [
-  { name: 'Visite', color: '#FDE1D3', value: 'visit' },
-  { name: 'Contrat', color: '#E5DEFF', value: 'contract' },
-  { name: 'Finance', color: '#D3E4FD', value: 'finance' },
-  { name: 'Marketing', color: '#F2FCE2', value: 'marketing' },
-  { name: 'Personnel', color: '#FEF7CD', value: 'personal' },
+  { name: 'Visite', color: '#FDE1D3', value: 'Visite' as TaskType },
+  { name: 'Contrat', color: '#E5DEFF', value: 'Contrat' as TaskType },
+  { name: 'Finance', color: '#D3E4FD', value: 'Finance' as TaskType },
+  { name: 'Marketing', color: '#F2FCE2', value: 'Marketing' as TaskType },
+  { name: 'Personnel', color: '#FEF7CD', value: 'Personnel' as TaskType },
 ];
 
 // Initial mock data for events
@@ -28,7 +29,7 @@ export const initialEvents: Event[] = [
     description: 'Visite du bien avec la famille Martin',
     date: new Date(new Date().setDate(new Date().getDate() + 2)),
     color: '#FDE1D3', // Soft Peach
-    category: 'visit',
+    category: 'Visite',
   },
   {
     id: '2',
@@ -36,7 +37,7 @@ export const initialEvents: Event[] = [
     description: 'Signature du compromis pour la villa des Lilas',
     date: new Date(new Date().setDate(new Date().getDate() + 5)),
     color: '#E5DEFF', // Soft Purple
-    category: 'contract',
+    category: 'Contrat',
   },
   {
     id: '3',
@@ -44,7 +45,7 @@ export const initialEvents: Event[] = [
     description: 'Discussion financement avec Crédit Immobilier',
     date: new Date(),
     color: '#D3E4FD', // Soft Blue
-    category: 'finance',
+    category: 'Finance',
   },
   {
     id: '4',
@@ -52,7 +53,7 @@ export const initialEvents: Event[] = [
     description: 'Tournage du bien rue Victor Hugo',
     date: new Date(new Date().setDate(new Date().getDate() + 1)),
     color: '#F2FCE2', // Soft Green
-    category: 'marketing',
+    category: 'Marketing',
   },
   {
     id: '5',
@@ -60,7 +61,7 @@ export const initialEvents: Event[] = [
     description: 'Restaurant Le Bistrot',
     date: new Date(new Date().setDate(new Date().getDate() + 4)),
     color: '#FEF7CD', // Soft Yellow
-    category: 'personal',
+    category: 'Personnel',
   },
 ];
 
@@ -71,13 +72,13 @@ export type CalendarContextType = {
   setEvents: React.Dispatch<React.SetStateAction<Event[]>>;
   view: 'month' | 'week';
   setView: React.Dispatch<React.SetStateAction<'month' | 'week'>>;
-  activeFilters: string[];
-  setActiveFilters: React.Dispatch<React.SetStateAction<string[]>>;
+  activeFilters: TaskType[];
+  setActiveFilters: React.Dispatch<React.SetStateAction<TaskType[]>>;
   isAddEventOpen: boolean;
   setIsAddEventOpen: (isOpen: boolean) => void;
   newEvent: Omit<Event, 'id' | 'date'>;
   setNewEvent: React.Dispatch<React.SetStateAction<Omit<Event, 'id' | 'date'>>>;
-  toggleFilter: (category: string) => void;
+  toggleFilter: (category: TaskType) => void;
   handleAddEvent: () => void;
 };
 
@@ -88,17 +89,17 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [events, setEvents] = useState<Event[]>(initialEvents);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [view, setView] = useState<'month' | 'week'>('month');
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [activeFilters, setActiveFilters] = useState<TaskType[]>([]);
   const [newEvent, setNewEvent] = useState<Omit<Event, 'id' | 'date'>>({
     title: '',
     description: '',
     color: '#FDE1D3',
-    category: 'visit',
+    category: 'Visite',
   });
 
   const { toast } = useToast();
 
-  const toggleFilter = (category: string) => {
+  const toggleFilter = (category: TaskType) => {
     setActiveFilters(prev => 
       prev.includes(category) 
         ? prev.filter(c => c !== category) 
@@ -127,7 +128,7 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     setEvents([...events, event]);
     setIsAddEventOpen(false);
-    setNewEvent({ title: '', description: '', color: '#FDE1D3', category: 'visit' });
+    setNewEvent({ title: '', description: '', color: '#FDE1D3', category: 'Visite' });
     
     toast({
       title: "Événement ajouté",

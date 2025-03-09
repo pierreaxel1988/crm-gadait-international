@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Event } from '@/contexts/CalendarContext';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 interface ColorOption {
   name: string;
@@ -18,7 +19,7 @@ interface ColorOption {
 
 interface CategoryOption {
   name: string;
-  value: string;
+  value: TaskType;
   color: string;
 }
 
@@ -84,7 +85,7 @@ const AddEventDialog = ({
               <Label>Catégorie</Label>
               <Select 
                 value={newEvent.category} 
-                onValueChange={(value) => {
+                onValueChange={(value: TaskType) => {
                   const selectedCategory = categories.find(cat => cat.value === value);
                   setNewEvent({
                     ...newEvent, 

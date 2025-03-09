@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Filter } from 'lucide-react';
 import { eventCategories } from '@/contexts/CalendarContext';
 import { useCalendar } from '@/contexts/CalendarContext';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 const CategoryFilter = () => {
   const { activeFilters, toggleFilter } = useCalendar();

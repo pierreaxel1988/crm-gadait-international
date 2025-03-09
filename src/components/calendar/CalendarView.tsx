@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Event } from '@/contexts/CalendarContext';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 interface CalendarViewProps {
   selectedDate: Date | undefined;
@@ -11,7 +13,7 @@ interface CalendarViewProps {
   events: Event[];
   view: 'month' | 'week';
   setView: (view: 'month' | 'week') => void;
-  activeFilters: string[];
+  activeFilters: TaskType[];
 }
 
 const CalendarView = ({ 

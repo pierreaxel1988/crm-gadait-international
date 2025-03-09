@@ -6,12 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Calendar as CalendarIcon } from 'lucide-react';
 import CalendarEventsList from './CalendarEventsList';
 import { Event } from '@/contexts/CalendarContext';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 interface DayDetailProps {
   selectedDate: Date | undefined;
   events: Event[];
   setIsAddEventOpen: (isOpen: boolean) => void;
-  activeFilters: string[];
+  activeFilters: TaskType[];
 }
 
 const DayDetail = ({ selectedDate, events, setIsAddEventOpen, activeFilters }: DayDetailProps) => {
