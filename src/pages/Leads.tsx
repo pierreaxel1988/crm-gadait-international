@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, ChevronDown, Filter, Plus, Search, Tag, X } from 'lucide-react';
@@ -7,6 +6,7 @@ import CustomButton from '@/components/ui/CustomButton';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import { getLeads, convertToSimpleLead } from '@/services/leadService';
+import { toast } from '@/hooks/use-toast';
 
 const Leads = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,7 +18,6 @@ const Leads = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Charger les leads depuis le service
     const allLeads = getLeads();
     setLeads(allLeads);
   }, []);
@@ -54,16 +53,13 @@ const Leads = () => {
   };
 
   const filteredLeads = leads.filter((lead) => {
-    // Filter by search term (name or email)
     const matchesSearch =
       searchTerm === '' ||
       lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.email.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // Filter by status
     const matchesStatus = selectedStatus === 'All' || lead.status === selectedStatus;
 
-    // Filter by tags
     const matchesTags =
       selectedTags.length === 0 || selectedTags.some((tag) => lead.tags.includes(tag));
 
@@ -74,8 +70,18 @@ const Leads = () => {
     navigate(`/leads/${id}`);
   };
 
-  const handleNewLead = () => {
-    navigate('/leads/new');
+  const handleContactLead = (id: string, email: string, phone?: string) => {
+    if (phone) {
+      window.open(`tel:${phone}`);
+    } else if (email) {
+      window.open(`mailto:${email}`);
+    } else {
+      toast({
+        title: "Information manquante",
+        description: "Ce lead n'a pas de coordonnées de contact",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -202,13 +208,16 @@ const Leads = () => {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {filteredLeads.map((lead) => (
-          <LeadCard 
-            key={lead.id} 
-            lead={convertToSimpleLead(lead)} 
-            onView={() => handleViewLead(lead.id)}
-          />
-        ))}
+        {filteredLeads.map((lead) => {
+          const simpleLead = convertToSimpleLead(lead);
+          return (
+            <LeadCard 
+              key={lead.id} 
+              lead={simpleLead}
+              onContact={() => handleContactLead(lead.id, lead.email, lead.phone)}
+            />
+          );
+        })}
 
         {filteredLeads.length === 0 && (
           <div className="col-span-full flex flex-col items-center justify-center py-12">

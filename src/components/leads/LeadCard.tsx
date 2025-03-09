@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import StatusBadge, { LeadStatus } from '@/components/common/StatusBadge';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import CustomButton from '@/components/ui/CustomButton';
+import { useNavigate } from 'react-router-dom';
 
 export interface Lead {
   id: string;
@@ -27,8 +28,33 @@ interface LeadCardProps {
 }
 
 const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/leads/${lead.id}`);
+  };
+
+  const handleViewClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Empêche le clic du bouton de déclencher le clic de la carte
+    if (onView) {
+      onView();
+    } else {
+      navigate(`/leads/${lead.id}`);
+    }
+  };
+
+  const handleContactClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Empêche le clic du bouton de déclencher le clic de la carte
+    if (onContact) {
+      onContact();
+    }
+  };
+
   return (
-    <div className={cn('luxury-card p-5 scale-in', className)}>
+    <div 
+      className={cn('luxury-card p-5 scale-in cursor-pointer hover:shadow-md transition-shadow duration-200', className)}
+      onClick={handleCardClick}
+    >
       <div className="flex justify-between items-start">
         <div>
           <h3 className="font-medium text-foreground">{lead.name}</h3>
@@ -78,14 +104,14 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
         <CustomButton 
           variant="outline" 
           className="w-full text-chocolate-dark border-chocolate-dark hover:bg-chocolate-dark/10"
-          onClick={onView}
+          onClick={handleViewClick}
         >
           Voir
         </CustomButton>
         <CustomButton 
           variant="chocolate"
           className="w-full"
-          onClick={onContact}
+          onClick={handleContactClick}
         >
           Contacter
         </CustomButton>
