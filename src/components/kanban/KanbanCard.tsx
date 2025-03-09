@@ -34,13 +34,28 @@ export interface KanbanItem {
 interface KanbanCardProps {
   item: KanbanItem;
   className?: string;
+  draggable?: boolean;
 }
 
-const KanbanCard = ({ item, className }: KanbanCardProps) => {
+const KanbanCard = ({ item, className, draggable = false }: KanbanCardProps) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
     navigate(`/leads/${item.id}`);
+  };
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    e.dataTransfer.setData('application/json', JSON.stringify(item));
+    e.dataTransfer.effectAllowed = 'move';
+    
+    // Add a subtle visual effect
+    setTimeout(() => {
+      e.currentTarget.classList.add('opacity-50');
+    }, 0);
+  };
+  
+  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    e.currentTarget.classList.remove('opacity-50');
   };
 
   const getTaskTypeIcon = (type?: TaskType) => {
@@ -74,9 +89,13 @@ const KanbanCard = ({ item, className }: KanbanCardProps) => {
     <div 
       className={cn(
         'luxury-card p-4 cursor-pointer hover:shadow-md transition-shadow duration-200',
+        draggable && 'cursor-grab active:cursor-grabbing',
         className
       )}
       onClick={handleCardClick}
+      draggable={draggable}
+      onDragStart={draggable ? handleDragStart : undefined}
+      onDragEnd={draggable ? handleDragEnd : undefined}
     >
       <div className="flex justify-between items-start mb-2">
         <h3 className="font-medium text-sm">{item.name}</h3>

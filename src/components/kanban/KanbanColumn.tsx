@@ -11,14 +11,33 @@ interface KanbanColumnProps {
   status: LeadStatus;
   items: KanbanItem[];
   className?: string;
+  onDrop?: (item: KanbanItem, status: LeadStatus) => void;
 }
 
-const KanbanColumn = ({ title, status, items, className }: KanbanColumnProps) => {
+const KanbanColumn = ({ title, status, items, className, onDrop }: KanbanColumnProps) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   
   const handleAddLead = () => {
     navigate('/leads/new');
+  };
+  
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+  
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    
+    try {
+      const itemData = JSON.parse(e.dataTransfer.getData('application/json'));
+      if (itemData && itemData.id && onDrop) {
+        onDrop(itemData, status);
+      }
+    } catch (error) {
+      console.error('Error parsing dropped data:', error);
+    }
   };
   
   return (
@@ -34,9 +53,13 @@ const KanbanColumn = ({ title, status, items, className }: KanbanColumnProps) =>
         </span>
       </div>
       
-      <div className="flex-1 p-2 md:p-3 overflow-y-auto space-y-2 md:space-y-3">
+      <div 
+        className="flex-1 p-2 md:p-3 overflow-y-auto space-y-2 md:space-y-3"
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
         {items.map((item) => (
-          <KanbanCard key={item.id} item={item} />
+          <KanbanCard key={item.id} item={item} draggable />
         ))}
         
         {items.length === 0 && (
