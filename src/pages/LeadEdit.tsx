@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const LeadEdit = () => {
   const {
@@ -28,6 +29,7 @@ const LeadEdit = () => {
   const [selectedAction, setSelectedAction] = useState<TaskType | null>(null);
   const [actionDate, setActionDate] = useState<Date | undefined>(undefined);
   const [actionTime, setActionTime] = useState<string>('12:00');
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -172,8 +174,14 @@ const LeadEdit = () => {
       </div>
 
       {isActionDialogOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsActionDialogOpen(false)}>
+          <div 
+            className={cn(
+              "bg-white dark:bg-gray-800 p-6 rounded-lg w-full",
+              isMobile ? "max-w-[92%] mx-4" : "max-w-md"
+            )} 
+            onClick={(e) => e.stopPropagation()}
+          >
             {!selectedAction ? (
               <>
                 <h2 className="text-xl font-semibold mb-4">Sélectionner une action</h2>
@@ -218,9 +226,14 @@ const LeadEdit = () => {
                         <Calendar
                           mode="single"
                           selected={actionDate}
-                          onSelect={setActionDate}
+                          onSelect={(date) => {
+                            setActionDate(date);
+                            if (isMobile) {
+                              document.querySelector('[role="dialog"]')?.classList.add('pointer-events-auto');
+                            }
+                          }}
                           initialFocus
-                          className="p-3"
+                          className="p-3 pointer-events-auto"
                         />
                       </PopoverContent>
                     </Popover>
@@ -239,7 +252,10 @@ const LeadEdit = () => {
               </>
             )}
             
-            <div className="mt-6 flex justify-end space-x-2">
+            <div className={cn(
+              "mt-6 flex justify-end space-x-2",
+              isMobile ? "flex-col space-y-2 space-x-0" : ""
+            )}>
               <CustomButton 
                 variant="outline" 
                 onClick={() => {
@@ -249,7 +265,10 @@ const LeadEdit = () => {
                     setIsActionDialogOpen(false);
                   }
                 }} 
-                className="text-stone-800 font-light"
+                className={cn(
+                  "text-stone-800 font-light",
+                  isMobile && "order-2"
+                )}
               >
                 {selectedAction ? 'Retour' : 'Annuler'}
               </CustomButton>
@@ -258,7 +277,10 @@ const LeadEdit = () => {
                 <CustomButton 
                   variant="chocolate" 
                   onClick={handleActionConfirm}
-                  className="bg-chocolate-dark text-white hover:bg-chocolate"
+                  className={cn(
+                    "bg-chocolate-dark text-white hover:bg-chocolate",
+                    isMobile && "order-1"
+                  )}
                 >
                   Confirmer
                 </CustomButton>
