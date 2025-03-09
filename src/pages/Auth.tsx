@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -72,7 +73,7 @@ const Auth = () => {
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="mb-10 text-center">
-            <h2 className="font-times text-2xl text-loro-navy mb-3">Welcome</h2>
+            <h1 className="font-optima text-2xl text-loro-navy mb-3">Welcome</h1>
             <p className="font-optima text-loro-text/70 text-sm">
               {isLogin 
                 ? 'Please enter your login details' 
