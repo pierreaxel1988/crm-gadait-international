@@ -17,33 +17,33 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
 
   const navigationItems = [
     {
-      name: 'Spring/Summer 2025',
-      path: '/spring-summer',
-      isSeasonal: true,
+      name: 'Dashboard',
+      path: '/',
+      isPrimary: true,
     },
     {
-      name: 'Woman',
-      path: '/woman',
+      name: 'Leads',
+      path: '/leads',
     },
     {
-      name: 'Man',
-      path: '/man',
+      name: 'Kanban',
+      path: '/kanban',
     },
     {
-      name: 'Kids',
-      path: '/kids',
+      name: 'Properties',
+      path: '/properties',
     },
     {
-      name: 'Gifts',
-      path: '/gifts',
+      name: 'Calendar',
+      path: '/calendar',
     },
     {
-      name: 'Art of Living',
-      path: '/art-of-living',
+      name: 'Reports',
+      path: '/reports',
     },
     {
-      name: 'House of Mastery',
-      path: '/house-of-mastery',
+      name: 'Settings',
+      path: '/settings',
     },
   ];
 
@@ -83,12 +83,12 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
                     className={({ isActive }) =>
                       cn(
                         'block transition-colors duration-200',
-                        item.isSeasonal 
+                        item.isPrimary 
                           ? 'text-loro-hazel font-optima text-2xl mb-12 tracking-wide' 
                           : 'text-loro-navy font-times text-xl tracking-wide',
                         isActive
-                          ? item.isSeasonal ? 'text-loro-hazel' : 'text-loro-hazel'
-                          : item.isSeasonal ? 'text-loro-hazel' : 'hover:text-loro-hazel'
+                          ? item.isPrimary ? 'text-loro-hazel' : 'text-loro-hazel'
+                          : item.isPrimary ? 'text-loro-hazel' : 'hover:text-loro-hazel'
                       )
                     }
                     onClick={isMobile ? onClose : undefined}
