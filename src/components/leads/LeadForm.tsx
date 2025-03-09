@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Banknote, Building, CalendarClock, CalendarDays, Clipboard, Flag, HelpCircle, 
@@ -493,23 +492,6 @@ const LeadForm = ({ lead, onSubmit, onCancel, activeTab = 'informations' }: Lead
         >
           {leadStatuses.map(status => (
             <option key={status} value={status}>{status}</option>
-          ))}
-        </select>
-      </div>
-      
-      <div className="space-y-2">
-        <label className="block text-sm font-medium">
-          Type de tâche
-        </label>
-        <select
-          name="taskType"
-          value={formData.taskType || ''}
-          onChange={handleInputChange}
-          className="luxury-input w-full"
-        >
-          <option value="">Sélectionner un type</option>
-          {taskTypes.map(type => (
-            <option key={type} value={type}>{type}</option>
           ))}
         </select>
       </div>
