@@ -1,12 +1,15 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, Menu, Moon, Search, Sun, User, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+
 interface NavbarProps {
   toggleSidebar?: () => void;
   sidebarCollapsed?: boolean;
 }
+
 const Navbar = ({
   toggleSidebar,
   sidebarCollapsed
@@ -14,16 +17,18 @@ const Navbar = ({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const isMobile = useIsMobile();
+
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
     document.documentElement.classList.toggle('dark', newMode);
   };
+
   return <nav className={cn("sticky top-0 z-50 w-full bg-loro-white border-b border-loro-pearl transition-all duration-300")}>
       <div className="content-container">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <button onClick={toggleSidebar} aria-label="Toggle menu" className="mr-2 rounded-md p-2 transition-colors duration-200 px-0 py-0 text-xs text-zinc-300 my-0">
+            <button onClick={toggleSidebar} aria-label="Toggle menu" className="mr-2 rounded-md p-2 transition-colors duration-200 px-0 py-0 text-loro-navy my-0">
               <Menu size={20} />
             </button>
             <Link to="/" className="flex items-center space-x-2">
@@ -60,4 +65,5 @@ const Navbar = ({
       </div>
     </nav>;
 };
+
 export default Navbar;
