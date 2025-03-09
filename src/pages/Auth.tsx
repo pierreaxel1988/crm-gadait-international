@@ -63,7 +63,13 @@ const Auth = () => {
       {/* Header */}
       <header className="w-full py-6 border-b border-loro-sand/30">
         <div className="container max-w-screen-xl mx-auto px-6">
-          <h1 className="text-3xl font-optima text-loro-navy tracking-wider uppercase text-center">GADAIT.</h1>
+          <div className="flex justify-center">
+            <img 
+              src="/lovable-uploads/93989ed3-8a9e-4d33-9bd7-58c151ab1911.png" 
+              alt="GADAIT Logo" 
+              className="h-12" 
+            />
+          </div>
         </div>
       </header>
       
