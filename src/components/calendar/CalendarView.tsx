@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { isSameDay, startOfWeek, endOfWeek } from 'date-fns';
+import React, { useEffect } from 'react';
+import { isSameDay, startOfWeek, endOfWeek, addDays } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -59,6 +59,15 @@ const CalendarView = ({
     return { from: start, to: end };
   };
 
+  // Effect to handle view change - when switching to week view, reset the visible dates
+  useEffect(() => {
+    if (view === 'week' && selectedDate) {
+      // Reset date to the first day of the current week when switching to week view
+      const start = startOfWeek(selectedDate, { weekStartsOn: 1 });
+      setSelectedDate(start);
+    }
+  }, [view, setSelectedDate]);
+
   // Different calendar props for month and week views
   const calendarProps = view === 'week' 
     ? {
@@ -68,7 +77,10 @@ const CalendarView = ({
         className: "border-0",
         weekStartsOn: 1 as const, // Start week on Monday
         numberOfMonths: 1,
-        disabled: { before: getWeekRange()?.from, after: getWeekRange()?.to },
+        disabled: [
+          { before: getWeekRange()?.from },
+          { after: getWeekRange()?.to }
+        ],
         fromDate: getWeekRange()?.from,
         toDate: getWeekRange()?.to,
         components: {
@@ -109,6 +121,13 @@ const CalendarView = ({
         }
       };
 
+  // Generate array of weekdays for week view
+  const weekDays = selectedDate && view === 'week' 
+    ? Array.from({ length: 7 }, (_, i) => 
+        addDays(startOfWeek(selectedDate, { weekStartsOn: 1 }), i)
+      )
+    : [];
+
   return (
     <Card className="bg-white shadow-luxury">
       <CardHeader className="pb-2">
@@ -124,7 +143,7 @@ const CalendarView = ({
               </TabsTrigger>
               <TabsTrigger 
                 value="week" 
-                className="data-[state=active]:bg-loro-terracotta data-[state=active]:text-white"
+                className="data-[state=active]:bg-loro-terracotta data-[state=active]:text-white transition-all duration-300"
               >
                 Semaine
               </TabsTrigger>
@@ -136,6 +155,22 @@ const CalendarView = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {view === 'week' && (
+          <div className="mb-2 animate-fade-in">
+            <div className="flex justify-between text-xs text-gray-500 px-2">
+              {weekDays.map((day, index) => (
+                <div 
+                  key={index} 
+                  className={`text-center w-9 py-1 rounded-md ${
+                    isSameDay(day, new Date()) ? 'bg-loro-sand/30 font-medium' : ''
+                  }`}
+                >
+                  {day.getDate()}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <Calendar
           {...calendarProps}
         />
