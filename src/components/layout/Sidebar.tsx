@@ -85,7 +85,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
                         'block transition-colors duration-200 text-base leading-[22px]',
                         item.isPrimary 
                           ? 'text-loro-terracotta font-optima text-2xl mb-12 tracking-wide' 
-                          : 'text-loro-navy font-optima text-[16px] leading-[22px] font-normal',
+                          : 'text-loro-text font-optima text-[16px] leading-[22px] font-normal',
                         isActive
                           ? item.isPrimary ? 'text-loro-terracotta' : 'text-loro-terracotta'
                           : item.isPrimary ? 'text-loro-terracotta' : 'hover:text-loro-terracotta'
