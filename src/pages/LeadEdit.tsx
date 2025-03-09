@@ -142,7 +142,7 @@ const LeadEdit = () => {
                 </CustomButton>)}
             </div>
             <div className="mt-4 flex justify-end">
-              <CustomButton variant="outline" onClick={() => setIsActionDialogOpen(false)} className="mr-2 text-stone-800">
+              <CustomButton variant="outline" onClick={() => setIsActionDialogOpen(false)} className="mr-2 text-stone-800 font-light">
                 Annuler
               </CustomButton>
             </div>
