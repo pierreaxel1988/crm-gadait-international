@@ -101,6 +101,7 @@ export default {
 				times: ['TimesNow-SemiLight', 'Georgia', 'serif'],
 				timesItalic: ['TimesNow-LightItalic', 'Georgia', 'serif'],
 				timesNowSemi: ['TimesNow-Semi-Light', 'Georgia', 'serif'],
+				futura: ['Futura Medium', 'Futura', 'sans-serif'],
 			},
 			keyframes: {
 				'accordion-down': {

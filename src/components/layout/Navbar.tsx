@@ -32,7 +32,7 @@ const Navbar = ({
               <Menu size={20} />
             </button>
             <Link to="/" className="flex items-center">
-              <span className="font-optima text-xl tracking-tight text-loro-navy font-medium text-left">Gadait.</span>
+              <span className="font-futura text-xl tracking-tight text-loro-navy uppercase">GADAIT.</span>
             </Link>
           </div>
 
