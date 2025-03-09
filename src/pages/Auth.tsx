@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -64,11 +63,7 @@ const Auth = () => {
       <header className="w-full py-6 border-b border-loro-sand/30">
         <div className="container max-w-screen-xl mx-auto px-6">
           <div className="flex justify-center">
-            <img 
-              src="/lovable-uploads/93989ed3-8a9e-4d33-9bd7-58c151ab1911.png" 
-              alt="GADAIT Logo" 
-              className="h-12" 
-            />
+            <h1 className="font-futura text-3xl text-loro-navy tracking-wider">GADAIT.</h1>
           </div>
         </div>
       </header>
