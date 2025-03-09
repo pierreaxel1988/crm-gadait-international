@@ -106,7 +106,7 @@ const AddEventDialog = ({
               <SelectTrigger id="time" className="border-loro-sand focus:ring-loro-terracotta">
                 <SelectValue placeholder="Sélectionner une heure" />
               </SelectTrigger>
-              <SelectContent className="max-h-60">
+              <SelectContent className="max-h-60 overflow-y-auto">
                 {timeOptions.map(time => (
                   <SelectItem key={time.value} value={time.value}>
                     {time.display}
