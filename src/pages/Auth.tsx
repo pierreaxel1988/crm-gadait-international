@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -71,10 +70,6 @@ const Auth = () => {
                 const { error: adminError } = await supabase.auth.signInWithPassword({
                   email,
                   password,
-                  options: {
-                    // Add a special flag that some Supabase configurations recognize
-                    data: { admin_login: true }
-                  }
                 });
                 
                 if (adminError) throw adminError;

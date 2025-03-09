@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { isSameDay } from 'date-fns';
+import { isSameDay, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -50,6 +50,64 @@ const CalendarView = ({
     );
   };
 
+  // For week view, calculate the current week's date range
+  const getWeekRange = () => {
+    if (!selectedDate) return undefined;
+    const start = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Week starts on Monday
+    const end = endOfWeek(selectedDate, { weekStartsOn: 1 });
+    return { from: start, to: end };
+  };
+
+  // Different calendar props for month and week views
+  const calendarProps = view === 'week' 
+    ? {
+        mode: "single" as const,
+        selected: selectedDate,
+        onSelect: setSelectedDate,
+        className: "border-0",
+        weekStartsOn: 1 as const, // Start week on Monday
+        numberOfMonths: 1,
+        disabled: { before: getWeekRange()?.from, after: getWeekRange()?.to },
+        fromDate: getWeekRange()?.from,
+        toDate: getWeekRange()?.to,
+        components: {
+          DayContent: ({ date }: { date: Date }) => (
+            <>
+              {date.getDate()}
+              {renderDayContent(date)}
+            </>
+          ),
+        },
+        modifiers: {
+          hasEvent: (date: Date) => filteredEvents.some(event => isSameDay(event.date, date)),
+        },
+        modifiersClassNames: {
+          hasEvent: "font-medium text-loro-navy",
+        }
+      }
+    : {
+        mode: "single" as const,
+        selected: selectedDate,
+        onSelect: setSelectedDate,
+        className: "border-0",
+        weekStartsOn: 1 as const, // Start week on Monday
+        numberOfMonths: 1,
+        components: {
+          DayContent: ({ date }: { date: Date }) => (
+            <>
+              {date.getDate()}
+              {renderDayContent(date)}
+            </>
+          ),
+        },
+        modifiers: {
+          hasEvent: (date: Date) => filteredEvents.some(event => isSameDay(event.date, date)),
+        },
+        modifiersClassNames: {
+          hasEvent: "font-medium text-loro-navy",
+        }
+      };
+
   return (
     <Card className="bg-white shadow-luxury">
       <CardHeader className="pb-2">
@@ -78,27 +136,7 @@ const CalendarView = ({
       </CardHeader>
       <CardContent>
         <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={setSelectedDate}
-          className="border-0"
-          weekStartsOn={1} // Start week on Monday
-          numberOfMonths={1}
-          numberOfRows={view === 'week' ? 1 : undefined} // Show only 1 row for week view
-          components={{
-            DayContent: ({ date }) => (
-              <>
-                {date.getDate()}
-                {renderDayContent(date)}
-              </>
-            ),
-          }}
-          modifiers={{
-            hasEvent: (date) => filteredEvents.some(event => isSameDay(event.date, date)),
-          }}
-          modifiersClassNames={{
-            hasEvent: "font-medium text-loro-navy",
-          }}
+          {...calendarProps}
         />
       </CardContent>
     </Card>
