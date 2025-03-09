@@ -73,8 +73,9 @@ const Sidebar = ({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProp
     isMobile && isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
   );
 
+  // Updated toggle button styles to match the Loro Piana inspiration
   const toggleButtonClasses = cn(
-    'absolute right-0 top-20 translate-x-1/2 flex items-center justify-center',
+    'absolute -right-4 top-20 flex items-center justify-center',
     'h-8 w-8 rounded-full cursor-pointer transform transition-all duration-300',
     'border border-luxury-200 bg-white text-luxury-700 shadow-[0_2px_8px_rgba(194,164,135,0.1)]',
     'hover:border-luxury-400 hover:shadow-[0_2px_12px_rgba(194,164,135,0.2)]',
