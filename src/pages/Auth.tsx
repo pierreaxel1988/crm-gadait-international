@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +7,13 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+
+// Predefined admin user credentials
+const PREDEFINED_ADMIN = {
+  email: 'pierre@gadait-international.com',
+  password: '@Gadait2025',
+  name: 'Pierre Axel Gadait'
+};
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -35,16 +43,51 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        // Handle login
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        // Check if this is the predefined admin account
+        if (email === PREDEFINED_ADMIN.email && password === PREDEFINED_ADMIN.password) {
+          // Use the regular Supabase auth flow
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
 
-        if (error) throw error;
-        
-        toast.success('Successfully signed in!');
-        navigate('/');
+          if (error) {
+            // If the account doesn't exist yet in Supabase, try to create it
+            if (error.message.includes('Invalid login credentials')) {
+              const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                  data: {
+                    name: PREDEFINED_ADMIN.name,
+                  },
+                },
+              });
+              
+              if (signUpError) throw signUpError;
+              
+              toast.success('Admin account created and signed in successfully!');
+              navigate('/');
+              return;
+            } else {
+              throw error;
+            }
+          }
+          
+          toast.success('Successfully signed in as admin!');
+          navigate('/');
+        } else {
+          // Handle regular login
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (error) throw error;
+          
+          toast.success('Successfully signed in!');
+          navigate('/');
+        }
       } else {
         // Handle signup (disabled for now since we're using predetermined accounts)
         toast.error('Signup is currently disabled. Please contact an administrator.');
