@@ -46,6 +46,15 @@ const FloatingActionButtons = ({
       isMobile ? "gap-3" : "gap-2",
       className
     )}>
+      <CustomButton
+        variant="chocolate"
+        className="rounded-full p-0 w-12 h-12 flex items-center justify-center shadow-luxury"
+        onClick={onAddAction}
+        title="Ajouter une action"
+      >
+        <Plus className="h-5 w-5" />
+      </CustomButton>
+      
       {(phoneNumber || onCall) && (
         <CustomButton
           variant="chocolate"
@@ -67,15 +76,6 @@ const FloatingActionButtons = ({
           <Mail className="h-5 w-5" />
         </CustomButton>
       )}
-      
-      <CustomButton
-        variant="chocolate"
-        className="rounded-full p-0 w-12 h-12 flex items-center justify-center shadow-luxury"
-        onClick={onAddAction}
-        title="Ajouter une action"
-      >
-        <Plus className="h-5 w-5" />
-      </CustomButton>
     </div>
   );
 };
