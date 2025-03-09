@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Filter, Plus, Settings, Home, Key } from 'lucide-react';
+import { Filter, Plus, Settings, Home, Key, X } from 'lucide-react';
 import KanbanBoard from '@/components/kanban/KanbanBoard';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import CustomButton from '@/components/ui/CustomButton';

@@ -6,12 +6,21 @@ import { KanbanItem } from './KanbanCard';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { FilterOptions } from '../pipeline/PipelineFilters';
+import { PropertyType, PurchaseTimeframe } from '@/types/lead';
+
+// Extend KanbanItem with the additional properties needed for filtering
+interface ExtendedKanbanItem extends KanbanItem {
+  budget?: string;
+  desiredLocation?: string;
+  purchaseTimeframe?: PurchaseTimeframe;
+  propertyType?: PropertyType;
+}
 
 interface KanbanBoardProps {
   columns: {
     title: string;
     status: LeadStatus;
-    items: KanbanItem[];
+    items: ExtendedKanbanItem[];
   }[];
   className?: string;
   filters?: FilterOptions;

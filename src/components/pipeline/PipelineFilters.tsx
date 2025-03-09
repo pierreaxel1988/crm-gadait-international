@@ -8,6 +8,7 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import TagBadge from '@/components/common/TagBadge';
 import { PropertyType, PurchaseTimeframe } from '@/types/lead';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export interface FilterOptions {
   status: LeadStatus | null;
@@ -36,6 +37,7 @@ const PipelineFilters = ({
   isFilterActive
 }: PipelineFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleStatusChange = (status: LeadStatus | null) => {
     onFilterChange({ ...filters, status });
@@ -111,7 +113,10 @@ const PipelineFilters = ({
         <PopoverTrigger asChild>
           <div />
         </PopoverTrigger>
-        <PopoverContent className="w-[340px] sm:w-[420px] p-4 shadow-md" align="start">
+        <PopoverContent className={cn(
+          "w-[340px] sm:w-[420px] p-4 shadow-md", 
+          isMobile && "max-h-[70vh] overflow-y-auto"
+        )} align="start">
           <h3 className="text-lg font-medium mb-4">Filtres</h3>
           
           <div className="space-y-4">
@@ -287,5 +292,8 @@ const PipelineFilters = ({
     </div>
   );
 };
+
+// Add import for cn util
+import { cn } from '@/lib/utils';
 
 export default PipelineFilters;
