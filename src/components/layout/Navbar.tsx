@@ -1,9 +1,11 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, Menu, Moon, Search, Sun, User, X } from 'lucide-react';
+import { Bell, LogOut, Menu, Moon, Search, Sun, User, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface NavbarProps {
   toggleSidebar?: () => void;
@@ -17,11 +19,21 @@ const Navbar = ({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const isMobile = useIsMobile();
+  const { user, signOut } = useAuth();
 
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
     document.documentElement.classList.toggle('dark', newMode);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success('Successfully signed out');
+    } catch (error) {
+      toast.error('Error signing out');
+    }
   };
 
   return <nav className={cn("sticky top-0 z-50 w-full bg-loro-white border-b border-loro-pearl transition-all duration-300")}>
@@ -55,10 +67,22 @@ const Navbar = ({
               <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-loro-hazel"></span>
             </button>
 
-            <button className="flex items-center space-x-2 rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
-              <User size={20} />
-              <span className="hidden md:inline-block text-sm font-medium font-optima">Account</span>
-            </button>
+            <div className="flex items-center space-x-2">
+              <button className="flex items-center space-x-2 rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
+                <User size={20} />
+                <span className="hidden md:inline-block text-sm font-medium font-optima">
+                  {user?.email ? user.email.split('@')[0] : 'Account'}
+                </span>
+              </button>
+              
+              <button 
+                onClick={handleSignOut}
+                className="rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200"
+                title="Sign out"
+              >
+                <LogOut size={20} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
