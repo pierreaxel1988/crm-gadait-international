@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { BarChart3, ChevronLeft, Home, Phone, PieChart, Settings, Tag, Users } from 'lucide-react';
+import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -12,81 +12,51 @@ interface SidebarProps {
   onToggleCollapse: () => void;
 }
 
-const Sidebar = ({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProps) => {
+const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
   const isMobile = useIsMobile();
 
   const navigationItems = [
     {
-      name: 'Dashboard',
-      icon: Home,
-      path: '/',
+      name: 'Spring/Summer 2025',
+      path: '/spring-summer',
+      isSeasonal: true,
     },
     {
-      name: 'Leads',
-      icon: Users,
-      path: '/leads',
+      name: 'Woman',
+      path: '/woman',
     },
     {
-      name: 'Pipeline',
-      icon: PieChart,
-      path: '/kanban',
+      name: 'Man',
+      path: '/man',
     },
     {
-      name: 'Analytics',
-      icon: BarChart3,
-      path: '/analytics',
+      name: 'Kids',
+      path: '/kids',
     },
     {
-      name: 'Communications',
-      icon: Phone,
-      path: '/communications',
+      name: 'Gifts',
+      path: '/gifts',
     },
     {
-      name: 'Tags',
-      icon: Tag,
-      path: '/tags',
+      name: 'Art of Living',
+      path: '/art-of-living',
     },
     {
-      name: 'Settings',
-      icon: Settings,
-      path: '/settings',
+      name: 'House of Mastery',
+      path: '/house-of-mastery',
     },
   ];
 
   // For mobile: sidebar is either fully visible or hidden
-  // For desktop: sidebar can be expanded or collapsed (icons only)
+  // For desktop: sidebar is a permanent element that slides in from the left
   const sidebarClasses = cn(
-    'fixed inset-y-0 left-0 z-40 bg-loro-white border-r border-loro-pearl transform transition-all duration-300 ease-in-out',
-    isMobile ? (
-      isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'
-    ) : (
-      isOpen ? (
-        isCollapsed ? 'translate-x-0 w-20' : 'translate-x-0 w-64'
-      ) : (
-        '-translate-x-full w-64'
-      )
-    )
+    'fixed inset-y-0 left-0 z-40 bg-loro-white transform transition-all duration-300 ease-in-out w-80',
+    isOpen ? 'translate-x-0' : '-translate-x-full'
   );
 
   const overlayClasses = cn(
-    'fixed inset-0 z-30 bg-black/50 transition-opacity',
-    isMobile && isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-  );
-
-  // Updated toggle button styles to match the Loro Piana inspiration
-  const toggleButtonClasses = cn(
-    'absolute -right-4 top-20 flex items-center justify-center',
-    'h-8 w-8 rounded-full cursor-pointer transform transition-all duration-300',
-    'border border-loro-pearl bg-white text-loro-hazel shadow-[0_2px_8px_rgba(139,111,78,0.1)]',
-    'hover:border-loro-sand hover:shadow-[0_2px_12px_rgba(139,111,78,0.2)]',
-    'dark:bg-loro-white dark:text-loro-hazel dark:border-loro-pearl dark:hover:border-loro-sand',
-    isMobile ? 'hidden' : 'block'
-  );
-
-  // Add animation class for icon rotation
-  const iconClasses = cn(
-    'transition-transform duration-300',
-    isCollapsed ? 'rotate-0' : 'rotate-180'
+    'fixed inset-0 z-30 bg-black/30 transition-opacity',
+    isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
   );
 
   return (
@@ -94,69 +64,41 @@ const Sidebar = ({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProp
       <div className={overlayClasses} onClick={onClose}></div>
       <div className={sidebarClasses}>
         <div className="flex h-full flex-col">
-          <div className="flex h-16 items-center border-b border-loro-pearl px-4">
-            {!isCollapsed ? (
-              <span className="font-optima text-xl font-semibold tracking-tight text-loro-hazel">Gadait CRM</span>
-            ) : (
-              <span className="font-optima text-xl font-semibold tracking-tight mx-auto text-loro-hazel">G</span>
-            )}
+          <div className="flex h-16 items-center justify-end px-6 pt-6">
+            <button
+              onClick={onClose}
+              className="text-loro-navy hover:text-loro-hazel transition-colors duration-200"
+              aria-label="Close menu"
+            >
+              <X size={24} />
+            </button>
           </div>
-          <nav className="flex-1 overflow-y-auto px-3 py-4">
-            <ul className="space-y-1">
+          
+          <nav className="flex-1 px-8 py-12">
+            <ul className="space-y-8">
               {navigationItems.map((item) => (
                 <li key={item.name}>
                   <NavLink
                     to={item.path}
                     className={({ isActive }) =>
                       cn(
-                        'flex items-center rounded-none px-3 py-2 transition-colors duration-200 font-optima',
-                        isCollapsed ? 'justify-center' : 'space-x-3',
+                        'block transition-colors duration-200',
+                        item.isSeasonal 
+                          ? 'text-loro-hazel font-optima text-2xl mb-10' 
+                          : 'text-loro-navy font-times text-2xl',
                         isActive
-                          ? 'bg-loro-sand text-loro-navy'
-                          : 'text-loro-hazel hover:bg-loro-white hover:text-loro-navy'
+                          ? 'text-loro-hazel'
+                          : 'hover:text-loro-hazel'
                       )
                     }
                     onClick={isMobile ? onClose : undefined}
-                    title={isCollapsed ? item.name : undefined}
                   >
-                    <item.icon size={18} />
-                    {!isCollapsed && <span>{item.name}</span>}
+                    {item.name}
                   </NavLink>
                 </li>
               ))}
             </ul>
           </nav>
-          {!isCollapsed && (
-            <div className="border-t border-loro-pearl p-4">
-              <div className="rounded-none bg-loro-sand p-3">
-                <p className="text-sm font-medium text-loro-navy font-optima">Need help?</p>
-                <p className="mt-1 text-xs text-loro-hazel font-optima">
-                  Contact support for assistance with your CRM.
-                </p>
-                <button className="mt-2 w-full rounded-none bg-loro-hazel px-3 py-1 text-xs font-medium text-white hover:bg-loro-hazel/90 font-optima">
-                  Contact Support
-                </button>
-              </div>
-            </div>
-          )}
-          {isCollapsed && (
-            <div className="border-t border-loro-pearl p-4 flex justify-center">
-              <button className="rounded-none bg-loro-sand p-2 font-optima" title="Need help?">
-                <span className="text-loro-navy">?</span>
-              </button>
-            </div>
-          )}
-        </div>
-        <div 
-          className={toggleButtonClasses}
-          onClick={onToggleCollapse}
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          <ChevronLeft 
-            size={15} 
-            className={iconClasses} 
-            strokeWidth={2.5}
-          />
         </div>
       </div>
     </>

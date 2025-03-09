@@ -23,21 +23,21 @@ const Navbar = ({ toggleSidebar, sidebarCollapsed }: NavbarProps) => {
 
   return (
     <nav className={cn(
-      "sticky top-0 z-50 w-full bg-loro-white/80 backdrop-blur-md border-b border-loro-pearl transition-all duration-300",
+      "sticky top-0 z-50 w-full bg-loro-white border-b border-loro-pearl transition-all duration-300",
     )}>
       <div className="content-container">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <button
               onClick={toggleSidebar}
-              className="mr-2 rounded-md p-2 text-loro-hazel hover:bg-loro-sand hover:text-loro-navy"
+              className="mr-2 rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200"
               aria-label="Toggle menu"
             >
               <Menu size={20} />
             </button>
             <Link to="/" className="flex items-center space-x-2">
-              <span className="font-optima text-xl font-semibold tracking-tight text-loro-navy">Gadait</span>
-              <span className="font-optima text-xs uppercase tracking-widest text-loro-hazel">International</span>
+              <span className="font-optima text-xl font-medium tracking-tight text-loro-navy">Gadait</span>
+              <span className="font-timesItalic text-xs tracking-widest text-loro-hazel">International</span>
             </Link>
           </div>
 
@@ -61,7 +61,7 @@ const Navbar = ({ toggleSidebar, sidebarCollapsed }: NavbarProps) => {
             ) : (
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="rounded-md p-2 text-loro-hazel hover:bg-loro-sand hover:text-loro-navy"
+                className="rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200"
               >
                 <Search size={20} />
               </button>
@@ -69,17 +69,17 @@ const Navbar = ({ toggleSidebar, sidebarCollapsed }: NavbarProps) => {
 
             <button
               onClick={toggleDarkMode}
-              className="rounded-md p-2 text-loro-hazel hover:bg-loro-sand hover:text-loro-navy"
+              className="rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200"
             >
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
-            <button className="relative rounded-md p-2 text-loro-hazel hover:bg-loro-sand hover:text-loro-navy">
+            <button className="relative rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
               <Bell size={20} />
               <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-loro-hazel"></span>
             </button>
 
-            <button className="flex items-center space-x-2 rounded-md p-2 text-loro-hazel hover:bg-loro-sand hover:text-loro-navy">
+            <button className="flex items-center space-x-2 rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
               <User size={20} />
               <span className="hidden md:inline-block text-sm font-medium font-optima">Account</span>
             </button>
