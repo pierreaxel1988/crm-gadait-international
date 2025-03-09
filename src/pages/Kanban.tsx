@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Filter, Plus, Settings, Home, Key } from 'lucide-react';
 import KanbanBoard from '@/components/kanban/KanbanBoard';
@@ -19,7 +18,8 @@ const mockPurchaseLeads: KanbanItem[] = [
     tags: ['Vip', 'Hot'],
     assignedTo: 'Sophie Martin',
     dueDate: 'Jun 25',
-    pipelineType: 'purchase'
+    pipelineType: 'purchase',
+    taskType: 'Visites'
   },
   {
     id: '2',
@@ -29,7 +29,8 @@ const mockPurchaseLeads: KanbanItem[] = [
     status: 'New',
     tags: ['Serious'],
     assignedTo: 'Thomas Bernard',
-    pipelineType: 'purchase'
+    pipelineType: 'purchase',
+    taskType: 'Call'
   },
   {
     id: '5',
@@ -40,7 +41,8 @@ const mockPurchaseLeads: KanbanItem[] = [
     tags: ['Serious'],
     assignedTo: 'Sophie Martin',
     dueDate: 'Jun 18',
-    pipelineType: 'purchase'
+    pipelineType: 'purchase',
+    taskType: 'Propositions'
   },
   {
     id: '8',
@@ -51,7 +53,8 @@ const mockPurchaseLeads: KanbanItem[] = [
     tags: ['Vip'],
     assignedTo: 'Julie Dubois',
     dueDate: 'Jun 15',
-    pipelineType: 'purchase'
+    pipelineType: 'purchase',
+    taskType: 'Compromis'
   },
   {
     id: '9',
@@ -61,7 +64,8 @@ const mockPurchaseLeads: KanbanItem[] = [
     status: 'Signed',
     tags: ['Vip', 'Hot'],
     assignedTo: 'Lucas Petit',
-    pipelineType: 'purchase'
+    pipelineType: 'purchase',
+    taskType: 'Acte de vente'
   }
 ];
 
@@ -76,7 +80,8 @@ const mockRentalLeads: KanbanItem[] = [
     tags: ['Cold', 'No response'],
     assignedTo: 'Julie Dubois',
     dueDate: 'Jun 20',
-    pipelineType: 'rental'
+    pipelineType: 'rental',
+    taskType: 'Follow up'
   },
   {
     id: '4',
@@ -86,7 +91,8 @@ const mockRentalLeads: KanbanItem[] = [
     tags: ['Hot'],
     assignedTo: 'Lucas Petit',
     dueDate: 'Jun 22',
-    pipelineType: 'rental'
+    pipelineType: 'rental',
+    taskType: 'Visites'
   },
   {
     id: '6',
@@ -95,7 +101,8 @@ const mockRentalLeads: KanbanItem[] = [
     phone: '+33 6 67 89 01 23',
     status: 'New',
     tags: ['No phone', 'Cold'],
-    pipelineType: 'rental'
+    pipelineType: 'rental',
+    taskType: 'Prospection'
   },
   {
     id: '7',
@@ -105,7 +112,8 @@ const mockRentalLeads: KanbanItem[] = [
     tags: ['Hot'],
     assignedTo: 'Thomas Bernard',
     dueDate: 'Jun 19',
-    pipelineType: 'rental'
+    pipelineType: 'rental',
+    taskType: 'Estimation'
   }
 ];
 
@@ -179,12 +187,12 @@ const Kanban = () => {
     },
     {
       title: 'Application',
-      status: 'Proposal' as LeadStatus, // Reusing Proposal status for Applications
+      status: 'Proposal' as LeadStatus,
       items: mockRentalLeads.filter(lead => lead.status === 'Proposal'),
     },
     {
       title: 'Approval',
-      status: 'Offer' as LeadStatus, // Reusing Offer status for Approval
+      status: 'Offer' as LeadStatus,
       items: mockRentalLeads.filter(lead => lead.status === 'Offer'),
     },
     {

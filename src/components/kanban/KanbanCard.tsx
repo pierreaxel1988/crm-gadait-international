@@ -1,20 +1,22 @@
 
 import React from 'react';
-import { Calendar, Mail, Phone, User, FileText, MessageSquare, CheckCircle, Tag, Star } from 'lucide-react';
+import { Calendar, Mail, Phone, User, FileText, MessageSquare, CheckCircle, Tag, Star, Home, FileCheck, FileSignature, Calculator, Search, AreaChart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import { useNavigate } from 'react-router-dom';
 
 export type TaskType = 
-  | 'Email'
-  | 'Phone call'
-  | 'Meeting'
-  | 'Document'
-  | 'Follow-up'
-  | 'Review'
-  | 'Reminder'
-  | 'Priority';
+  | 'Call'
+  | 'Visites'
+  | 'Compromis'
+  | 'Acte de vente'
+  | 'Contrat de Location'
+  | 'Propositions'
+  | 'Follow up'
+  | 'Estimation'
+  | 'Prospection'
+  | 'Admin';
 
 export interface KanbanItem {
   id: string;
@@ -43,22 +45,26 @@ const KanbanCard = ({ item, className }: KanbanCardProps) => {
 
   const getTaskTypeIcon = (type?: TaskType) => {
     switch (type) {
-      case 'Email':
-        return <Mail className="h-4 w-4 text-blue-500" />;
-      case 'Phone call':
+      case 'Call':
         return <Phone className="h-4 w-4 text-green-500" />;
-      case 'Meeting':
-        return <Calendar className="h-4 w-4 text-purple-500" />;
-      case 'Document':
-        return <FileText className="h-4 w-4 text-yellow-500" />;
-      case 'Follow-up':
-        return <MessageSquare className="h-4 w-4 text-pink-500" />;
-      case 'Review':
-        return <CheckCircle className="h-4 w-4 text-teal-500" />;
-      case 'Reminder':
-        return <Tag className="h-4 w-4 text-orange-500" />;
-      case 'Priority':
-        return <Star className="h-4 w-4 text-red-500" />;
+      case 'Visites':
+        return <Home className="h-4 w-4 text-purple-500" />;
+      case 'Compromis':
+        return <FileCheck className="h-4 w-4 text-amber-500" />;
+      case 'Acte de vente':
+        return <FileSignature className="h-4 w-4 text-red-500" />;
+      case 'Contrat de Location':
+        return <FileSignature className="h-4 w-4 text-blue-500" />;
+      case 'Propositions':
+        return <MessageSquare className="h-4 w-4 text-indigo-500" />;
+      case 'Follow up':
+        return <Calendar className="h-4 w-4 text-pink-500" />;
+      case 'Estimation':
+        return <Calculator className="h-4 w-4 text-teal-500" />;
+      case 'Prospection':
+        return <Search className="h-4 w-4 text-orange-500" />;
+      case 'Admin':
+        return <AreaChart className="h-4 w-4 text-gray-500" />;
       default:
         return null;
     }

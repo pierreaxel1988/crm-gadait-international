@@ -33,7 +33,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     taxResidence: 'France',
     nextFollowUpDate: '2023-07-01',
     notes: 'Client très sérieux et pressé',
-    taskType: 'Meeting',
+    taskType: 'Visites',
   },
   {
     id: '2',
@@ -59,7 +59,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     propertyUse: 'Résidence principale',
     nationality: 'France',
     taxResidence: 'France',
-    taskType: 'Email',
+    taskType: 'Call',
   },
   {
     id: '3',
@@ -88,7 +88,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     taxResidence: 'Belgique',
     nextFollowUpDate: '2023-07-10',
     notes: 'Difficile à joindre, semblait intéressé initialement',
-    taskType: 'Follow-up',
+    taskType: 'Follow up',
   },
   {
     id: '4',

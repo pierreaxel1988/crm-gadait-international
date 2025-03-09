@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { 
   Banknote, Building, CalendarClock, CalendarDays, Clipboard, Flag, HelpCircle, 
   Home, MapPin, Phone, PlusCircle, Tag, User, Mail, Check, Building2, Globe,
-  FileText, MessageSquare, CheckCircle, Star
+  FileText, MessageSquare, CheckCircle, Star, FileCheck, FileSignature, Calculator,
+  Search, AreaChart
 } from 'lucide-react';
 import { LeadDetailed, LeadSource, PropertyType, ViewType, Amenity, 
   PurchaseTimeframe, FinancingMethod, PropertyUse, Country } from '@/types/lead';
@@ -68,8 +69,8 @@ const LeadForm = ({ lead, onSubmit, onCancel }: LeadFormProps) => {
   ];
 
   const taskTypes: TaskType[] = [
-    'Email', 'Phone call', 'Meeting', 'Document', 
-    'Follow-up', 'Review', 'Reminder', 'Priority'
+    'Call', 'Visites', 'Compromis', 'Acte de vente', 'Contrat de Location',
+    'Propositions', 'Follow up', 'Estimation', 'Prospection', 'Admin'
   ];
 
   const propertyTypes: PropertyType[] = [
