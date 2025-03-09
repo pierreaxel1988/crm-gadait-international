@@ -177,7 +177,6 @@ const LeadEdit = () => {
       </div>
 
       <Tabs 
-        defaultValue="informations" 
         value={activeTab} 
         onValueChange={setActiveTab} 
         className="w-full"
@@ -218,22 +217,156 @@ const LeadEdit = () => {
         <TabsContent value="criteres" className="mt-4">
           <div className="luxury-card p-6">
             <h3 className="text-xl font-semibold mb-4">Critères de recherche</h3>
-            <p className="text-muted-foreground">Les critères de recherche du lead seront affichés ici.</p>
+            <div className="space-y-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Budget</h4>
+                  <p className="text-muted-foreground">{lead?.budget || "Non spécifié"}</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Localisation souhaitée</h4>
+                  <p className="text-muted-foreground">{lead?.desiredLocation || "Non spécifié"}</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Type de bien</h4>
+                  <p className="text-muted-foreground">{lead?.propertyType || "Non spécifié"}</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Surface habitable</h4>
+                  <p className="text-muted-foreground">{lead?.livingArea || "Non spécifié"}</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Nombre de chambres</h4>
+                  <p className="text-muted-foreground">{lead?.bedrooms || "Non spécifié"}</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Vue souhaitée</h4>
+                  <p className="text-muted-foreground">
+                    {lead?.views && lead.views.length > 0 
+                      ? lead.views.join(", ") 
+                      : "Non spécifié"}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Prestations souhaitées</h4>
+                  <p className="text-muted-foreground">
+                    {lead?.amenities && lead.amenities.length > 0 
+                      ? lead.amenities.join(", ") 
+                      : "Non spécifié"}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Date d'achat souhaitée</h4>
+                  <p className="text-muted-foreground">{lead?.purchaseTimeframe || "Non spécifié"}</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Mode de financement</h4>
+                  <p className="text-muted-foreground">{lead?.financingMethod || "Non spécifié"}</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Type d'investissement</h4>
+                  <p className="text-muted-foreground">{lead?.propertyUse || "Non spécifié"}</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Nationalité</h4>
+                  <p className="text-muted-foreground">{lead?.nationality || "Non spécifié"}</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Résidence fiscale</h4>
+                  <p className="text-muted-foreground">{lead?.taxResidence || "Non spécifié"}</p>
+                </div>
+              </div>
+              <div className="space-y-2 mt-6">
+                <h4 className="font-medium">Notes</h4>
+                <p className="text-muted-foreground whitespace-pre-line">{lead?.notes || "Aucune note"}</p>
+              </div>
+            </div>
           </div>
         </TabsContent>
         
         <TabsContent value="statut" className="mt-4">
           <div className="luxury-card p-6">
             <h3 className="text-xl font-semibold mb-4">Statut et suivi</h3>
-            <p className="text-muted-foreground">Les informations de statut et de suivi du lead seront affichées ici.</p>
+            <div className="space-y-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Statut actuel</h4>
+                  <div className="flex">
+                    <span className={cn(
+                      "px-2 py-1 text-xs rounded-full",
+                      lead?.status === "New" && "bg-blue-100 text-blue-800",
+                      lead?.status === "Contacted" && "bg-purple-100 text-purple-800",
+                      lead?.status === "Qualified" && "bg-sky-100 text-sky-800",
+                      lead?.status === "Proposal" && "bg-amber-100 text-amber-800",
+                      lead?.status === "Visit" && "bg-lime-100 text-lime-800",
+                      lead?.status === "Offer" && "bg-orange-100 text-orange-800",
+                      lead?.status === "Deposit" && "bg-teal-100 text-teal-800",
+                      lead?.status === "Signed" && "bg-green-100 text-green-800",
+                    )}>
+                      {lead?.status}
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Tags</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {lead?.tags && lead.tags.length > 0 ? (
+                      lead.tags.map((tag, index) => (
+                        <span key={index} className={cn(
+                          "px-2 py-1 text-xs rounded-full",
+                          tag === "Vip" && "bg-amber-100 text-amber-800",
+                          tag === "Hot" && "bg-red-100 text-red-800",
+                          tag === "Serious" && "bg-green-100 text-green-800",
+                          tag === "Cold" && "bg-blue-100 text-blue-800",
+                          tag === "No response" && "bg-gray-100 text-gray-800",
+                          tag === "No phone" && "bg-purple-100 text-purple-800",
+                          tag === "Fake" && "bg-stone-100 text-stone-800",
+                        )}>
+                          {tag}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-muted-foreground text-sm">Aucun tag</span>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Source du lead</h4>
+                  <p className="text-muted-foreground">{lead?.source || "Non spécifié"}</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Responsable du suivi</h4>
+                  <p className="text-muted-foreground">{lead?.assignedTo || "Non assigné"}</p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Date de création</h4>
+                  <p className="text-muted-foreground">
+                    {lead?.createdAt ? format(new Date(lead.createdAt), 'dd/MM/yyyy') : "Non spécifié"}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Dernier contact</h4>
+                  <p className="text-muted-foreground">
+                    {lead?.lastContactedAt ? format(new Date(lead.lastContactedAt), 'dd/MM/yyyy') : "Aucun contact"}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Prochain suivi prévu</h4>
+                  <p className="text-muted-foreground">
+                    {lead?.nextFollowUpDate 
+                      ? format(new Date(lead.nextFollowUpDate), 'dd/MM/yyyy à HH:mm') 
+                      : "Aucun suivi planifié"}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </TabsContent>
         
         <TabsContent value="actions" className="mt-4">
           <div className="luxury-card p-6">
-            <h3 className="text-xl font-semibold mb-4">Actions et tâches</h3>
-            <p className="text-muted-foreground">Les actions et tâches associées au lead seront affichées ici.</p>
-            <div className="mt-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">Actions et tâches</h3>
               <CustomButton 
                 variant="chocolate" 
                 onClick={handleAddAction} 
@@ -241,6 +374,52 @@ const LeadEdit = () => {
               >
                 <Plus className="h-4 w-4" /> Ajouter une action
               </CustomButton>
+            </div>
+            
+            {lead?.taskType ? (
+              <div className="mt-4 p-4 border rounded-md">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-medium">Action actuelle</h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="px-2 py-1 bg-stone-100 text-stone-800 rounded-full text-xs">
+                        {lead.taskType}
+                      </span>
+                    </div>
+                    
+                    {lead.nextFollowUpDate && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Prévue le: {format(new Date(lead.nextFollowUpDate), 'dd/MM/yyyy à HH:mm')}
+                      </p>
+                    )}
+                  </div>
+                  <CustomButton 
+                    variant="outline" 
+                    onClick={handleAddAction}
+                    className="text-xs"
+                  >
+                    Modifier
+                  </CustomButton>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 border rounded-md border-dashed mt-4">
+                <p className="text-muted-foreground">Aucune action en cours</p>
+                <CustomButton 
+                  variant="chocolate" 
+                  onClick={handleAddAction} 
+                  className="mt-4"
+                >
+                  Ajouter une action
+                </CustomButton>
+              </div>
+            )}
+            
+            <div className="mt-6">
+              <h4 className="font-medium mb-3">Historique des actions</h4>
+              <div className="text-center py-6 text-muted-foreground">
+                Aucune action dans l'historique
+              </div>
             </div>
           </div>
         </TabsContent>
