@@ -10,6 +10,7 @@ import Leads from "./pages/Leads";
 import LeadEdit from "./pages/LeadEdit";
 import LeadNew from "./pages/LeadNew";
 import Pipeline from "./pages/Pipeline";
+import Calendar from "./pages/Calendar";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/layout/Navbar";
@@ -71,6 +72,7 @@ const AppRoutes = () => {
             <Route path="/leads/new" element={<ProtectedRoute><LeadNew /></ProtectedRoute>} />
             <Route path="/leads/:id" element={<ProtectedRoute><LeadEdit /></ProtectedRoute>} />
             <Route path="/pipeline" element={<ProtectedRoute><Pipeline /></ProtectedRoute>} />
+            <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
             <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
