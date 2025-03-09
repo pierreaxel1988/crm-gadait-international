@@ -31,9 +31,8 @@ const Navbar = ({
             <button onClick={toggleSidebar} aria-label="Toggle menu" className="mr-2 rounded-md p-2 transition-colors duration-200 px-0 py-0 text-loro-navy my-0">
               <Menu size={20} />
             </button>
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center">
               <span className="font-optima text-xl tracking-tight text-loro-navy font-medium text-left">Gadait.</span>
-              <span className="font-timesItalic text-xs tracking-widest text-loro-hazel">International</span>
             </Link>
           </div>
 
