@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trash2, Plus } from 'lucide-react';
@@ -137,7 +138,7 @@ const LeadEdit = () => {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full">
             <h2 className="text-xl font-semibold mb-4">Sélectionner une action</h2>
             <div className="grid grid-cols-2 gap-2">
-              {actionTypes.map(actionType => <CustomButton key={actionType} variant="outline" onClick={() => handleActionSelect(actionType)} className="justify-start text-left py-2 text-zinc-800 font-normal">
+              {actionTypes.map(actionType => <CustomButton key={actionType} variant="outline" onClick={() => handleActionSelect(actionType)} className="justify-start text-left py-2 text-zinc-800 font-normal border-zinc-800">
                   {actionType}
                 </CustomButton>)}
             </div>
