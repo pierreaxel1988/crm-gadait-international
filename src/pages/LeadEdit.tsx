@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ArrowLeft, Trash2, Plus, CalendarClock, Banknote, 
   MapPin, Building2, Building, Flag, HelpCircle, 
-  User, Mail, Phone, Globe, Tag, Clipboard
+  User, Mail, Phone, Globe, Tag, Clipboard, Check, X
 } from 'lucide-react';
 import { format } from 'date-fns';
 import LeadForm from '@/components/leads/LeadForm';
