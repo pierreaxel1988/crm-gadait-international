@@ -66,6 +66,10 @@ export type PropertyUse =
   | "Investissement locatif" 
   | "Résidence principale";
 
+export type PipelineType = 
+  | "purchase" 
+  | "rental";
+
 export interface LeadDetailed {
   id: string;
   name: string;
@@ -77,6 +81,9 @@ export interface LeadDetailed {
   assignedTo?: string;
   createdAt: string;
   lastContactedAt?: string;
+  
+  // Pipeline information
+  pipelineType?: PipelineType;
   
   // Nouvelles informations générales
   source?: LeadSource;

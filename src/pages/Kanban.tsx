@@ -1,12 +1,15 @@
 
-import React from 'react';
-import { Filter, Plus, Settings } from 'lucide-react';
+import React, { useState } from 'react';
+import { Filter, Plus, Settings, Home, Key } from 'lucide-react';
 import KanbanBoard from '@/components/kanban/KanbanBoard';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import CustomButton from '@/components/ui/CustomButton';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { useNavigate } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const mockLeads: KanbanItem[] = [
+// Mock data for purchase leads
+const mockPurchaseLeads: KanbanItem[] = [
   {
     id: '1',
     name: 'Jean Dupont',
@@ -15,7 +18,8 @@ const mockLeads: KanbanItem[] = [
     status: 'Qualified',
     tags: ['Vip', 'Hot'],
     assignedTo: 'Sophie Martin',
-    dueDate: 'Jun 25'
+    dueDate: 'Jun 25',
+    pipelineType: 'purchase'
   },
   {
     id: '2',
@@ -25,25 +29,7 @@ const mockLeads: KanbanItem[] = [
     status: 'New',
     tags: ['Serious'],
     assignedTo: 'Thomas Bernard',
-  },
-  {
-    id: '3',
-    name: 'Pierre Moreau',
-    email: 'pierre.moreau@example.com',
-    phone: '+33 6 34 56 78 90',
-    status: 'Contacted',
-    tags: ['Cold', 'No response'],
-    assignedTo: 'Julie Dubois',
-    dueDate: 'Jun 20'
-  },
-  {
-    id: '4',
-    name: 'Claire Simon',
-    email: 'claire.simon@example.com',
-    status: 'Visit',
-    tags: ['Hot'],
-    assignedTo: 'Lucas Petit',
-    dueDate: 'Jun 22'
+    pipelineType: 'purchase'
   },
   {
     id: '5',
@@ -53,24 +39,8 @@ const mockLeads: KanbanItem[] = [
     status: 'Proposal',
     tags: ['Serious'],
     assignedTo: 'Sophie Martin',
-    dueDate: 'Jun 18'
-  },
-  {
-    id: '6',
-    name: 'Camille Martin',
-    email: 'camille.martin@example.com',
-    phone: '+33 6 67 89 01 23',
-    status: 'New',
-    tags: ['No phone', 'Cold'],
-  },
-  {
-    id: '7',
-    name: 'Philippe Petit',
-    email: 'philippe.petit@example.com',
-    status: 'Contacted',
-    tags: ['Hot'],
-    assignedTo: 'Thomas Bernard',
-    dueDate: 'Jun 19'
+    dueDate: 'Jun 18',
+    pipelineType: 'purchase'
   },
   {
     id: '8',
@@ -80,7 +50,8 @@ const mockLeads: KanbanItem[] = [
     status: 'Deposit',
     tags: ['Vip'],
     assignedTo: 'Julie Dubois',
-    dueDate: 'Jun 15'
+    dueDate: 'Jun 15',
+    pipelineType: 'purchase'
   },
   {
     id: '9',
@@ -90,50 +61,136 @@ const mockLeads: KanbanItem[] = [
     status: 'Signed',
     tags: ['Vip', 'Hot'],
     assignedTo: 'Lucas Petit',
+    pipelineType: 'purchase'
+  }
+];
+
+// Mock data for rental leads
+const mockRentalLeads: KanbanItem[] = [
+  {
+    id: '3',
+    name: 'Pierre Moreau',
+    email: 'pierre.moreau@example.com',
+    phone: '+33 6 34 56 78 90',
+    status: 'Contacted',
+    tags: ['Cold', 'No response'],
+    assignedTo: 'Julie Dubois',
+    dueDate: 'Jun 20',
+    pipelineType: 'rental'
+  },
+  {
+    id: '4',
+    name: 'Claire Simon',
+    email: 'claire.simon@example.com',
+    status: 'Visit',
+    tags: ['Hot'],
+    assignedTo: 'Lucas Petit',
+    dueDate: 'Jun 22',
+    pipelineType: 'rental'
+  },
+  {
+    id: '6',
+    name: 'Camille Martin',
+    email: 'camille.martin@example.com',
+    phone: '+33 6 67 89 01 23',
+    status: 'New',
+    tags: ['No phone', 'Cold'],
+    pipelineType: 'rental'
+  },
+  {
+    id: '7',
+    name: 'Philippe Petit',
+    email: 'philippe.petit@example.com',
+    status: 'Contacted',
+    tags: ['Hot'],
+    assignedTo: 'Thomas Bernard',
+    dueDate: 'Jun 19',
+    pipelineType: 'rental'
   }
 ];
 
 const Kanban = () => {
-  const columns = [
+  const [activeTab, setActiveTab] = useState<string>("purchase");
+  const navigate = useNavigate();
+
+  const purchaseColumns = [
     {
       title: 'New',
       status: 'New' as LeadStatus,
-      items: mockLeads.filter(lead => lead.status === 'New'),
+      items: mockPurchaseLeads.filter(lead => lead.status === 'New'),
     },
     {
       title: 'Contacted',
       status: 'Contacted' as LeadStatus,
-      items: mockLeads.filter(lead => lead.status === 'Contacted'),
+      items: mockPurchaseLeads.filter(lead => lead.status === 'Contacted'),
     },
     {
       title: 'Qualified',
       status: 'Qualified' as LeadStatus,
-      items: mockLeads.filter(lead => lead.status === 'Qualified'),
+      items: mockPurchaseLeads.filter(lead => lead.status === 'Qualified'),
     },
     {
       title: 'Proposal',
       status: 'Proposal' as LeadStatus,
-      items: mockLeads.filter(lead => lead.status === 'Proposal'),
+      items: mockPurchaseLeads.filter(lead => lead.status === 'Proposal'),
     },
     {
       title: 'Visit',
       status: 'Visit' as LeadStatus,
-      items: mockLeads.filter(lead => lead.status === 'Visit'),
+      items: mockPurchaseLeads.filter(lead => lead.status === 'Visit'),
     },
     {
       title: 'Offer',
       status: 'Offer' as LeadStatus,
-      items: mockLeads.filter(lead => lead.status === 'Offer'),
+      items: mockPurchaseLeads.filter(lead => lead.status === 'Offer'),
     },
     {
       title: 'Deposit',
       status: 'Deposit' as LeadStatus,
-      items: mockLeads.filter(lead => lead.status === 'Deposit'),
+      items: mockPurchaseLeads.filter(lead => lead.status === 'Deposit'),
     },
     {
       title: 'Signed',
       status: 'Signed' as LeadStatus,
-      items: mockLeads.filter(lead => lead.status === 'Signed'),
+      items: mockPurchaseLeads.filter(lead => lead.status === 'Signed'),
+    },
+  ];
+
+  const rentalColumns = [
+    {
+      title: 'New',
+      status: 'New' as LeadStatus,
+      items: mockRentalLeads.filter(lead => lead.status === 'New'),
+    },
+    {
+      title: 'Contacted',
+      status: 'Contacted' as LeadStatus,
+      items: mockRentalLeads.filter(lead => lead.status === 'Contacted'),
+    },
+    {
+      title: 'Qualified',
+      status: 'Qualified' as LeadStatus,
+      items: mockRentalLeads.filter(lead => lead.status === 'Qualified'),
+    },
+    {
+      title: 'Visit',
+      status: 'Visit' as LeadStatus,
+      items: mockRentalLeads.filter(lead => lead.status === 'Visit'),
+    },
+    {
+      title: 'Application',
+      status: 'Proposal' as LeadStatus, // Reusing Proposal status for Applications
+      items: mockRentalLeads.filter(lead => lead.status === 'Proposal'),
+    },
+    {
+      title: 'Approval',
+      status: 'Offer' as LeadStatus, // Reusing Offer status for Approval
+      items: mockRentalLeads.filter(lead => lead.status === 'Offer'),
+    },
+    {
+      title: 'Lease Signed',
+      status: 'Signed' as LeadStatus,
+      items: mockRentalLeads.filter(lead => lead.status === 'Signed'),
     },
   ];
 
@@ -157,13 +214,36 @@ const Kanban = () => {
           >
             <Settings className="h-4 w-4" /> Customize
           </CustomButton>
-          <CustomButton className="bg-primary text-white flex items-center gap-1.5">
+          <CustomButton 
+            variant="chocolate" 
+            className="flex items-center gap-1.5"
+            onClick={() => navigate('/leads/new')}
+          >
             <Plus className="h-4 w-4" /> New Lead
           </CustomButton>
         </div>
       </div>
 
-      <KanbanBoard columns={columns} />
+      <Tabs defaultValue="purchase" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-6 w-[400px] mx-auto">
+          <TabsTrigger value="purchase" className="flex items-center gap-2 w-1/2">
+            <Home className="h-4 w-4" />
+            <span>Achat (Purchase)</span>
+          </TabsTrigger>
+          <TabsTrigger value="rental" className="flex items-center gap-2 w-1/2">
+            <Key className="h-4 w-4" />
+            <span>Location (Rental)</span>
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="purchase" className="mt-0">
+          <KanbanBoard columns={purchaseColumns} />
+        </TabsContent>
+        
+        <TabsContent value="rental" className="mt-0">
+          <KanbanBoard columns={rentalColumns} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

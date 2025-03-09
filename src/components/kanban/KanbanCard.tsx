@@ -14,6 +14,7 @@ export interface KanbanItem {
   assignedTo?: string;
   dueDate?: string;
   status: LeadStatus;
+  pipelineType?: 'purchase' | 'rental';
 }
 
 interface KanbanCardProps {
