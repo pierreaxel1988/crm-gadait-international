@@ -1,7 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trash2, Plus, CalendarClock } from 'lucide-react';
+import { 
+  ArrowLeft, Trash2, Plus, CalendarClock, Banknote, 
+  MapPin, Building2, Building, Flag, HelpCircle 
+} from 'lucide-react';
 import { format } from 'date-fns';
 import LeadForm from '@/components/leads/LeadForm';
 import { LeadDetailed } from '@/types/lead';
@@ -273,69 +275,128 @@ const LeadEdit = () => {
         
         <TabsContent value="criteres" className="mt-4">
           <div className="luxury-card p-6">
-            <h3 className="text-xl font-semibold mb-4">Critères de recherche</h3>
-            <div className="space-y-4 mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <h4 className="font-medium">Budget</h4>
-                  <p className="text-muted-foreground">{lead?.budget || "Non spécifié"}</p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Localisation souhaitée</h4>
-                  <p className="text-muted-foreground">{lead?.desiredLocation || "Non spécifié"}</p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Type de bien</h4>
-                  <p className="text-muted-foreground">{lead?.propertyType || "Non spécifié"}</p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Surface habitable</h4>
-                  <p className="text-muted-foreground">{lead?.livingArea || "Non spécifié"}</p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Nombre de chambres</h4>
-                  <p className="text-muted-foreground">{lead?.bedrooms || "Non spécifié"}</p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Vue souhaitée</h4>
-                  <p className="text-muted-foreground">
-                    {lead?.views && lead.views.length > 0 
-                      ? lead.views.join(", ") 
-                      : "Non spécifié"}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Prestations souhaitées</h4>
-                  <p className="text-muted-foreground">
-                    {lead?.amenities && lead.amenities.length > 0 
-                      ? lead.amenities.join(", ") 
-                      : "Non spécifié"}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Date d'achat souhaitée</h4>
-                  <p className="text-muted-foreground">{lead?.purchaseTimeframe || "Non spécifié"}</p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Mode de financement</h4>
-                  <p className="text-muted-foreground">{lead?.financingMethod || "Non spécifié"}</p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Type d'investissement</h4>
-                  <p className="text-muted-foreground">{lead?.propertyUse || "Non spécifié"}</p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Nationalité</h4>
-                  <p className="text-muted-foreground">{lead?.nationality || "Non spécifié"}</p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Résidence fiscale</h4>
-                  <p className="text-muted-foreground">{lead?.taxResidence || "Non spécifié"}</p>
+            <h3 className="text-2xl font-semibold border-b pb-3 mb-6">Critères de Recherche</h3>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-lg font-medium">
+                  <Banknote className="h-5 w-5 text-gray-600" /> Budget
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                  {lead?.budget || "Non spécifié"}
                 </div>
               </div>
-              <div className="space-y-2 mt-6">
-                <h4 className="font-medium">Notes</h4>
-                <p className="text-muted-foreground whitespace-pre-line">{lead?.notes || "Aucune note"}</p>
+              
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-lg font-medium">
+                  <MapPin className="h-5 w-5 text-gray-600" /> Localisation souhaitée
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                  {lead?.desiredLocation || "Non spécifié"}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-lg font-medium">
+                  <Building className="h-5 w-5 text-gray-600" /> Type de bien
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                  {lead?.propertyType || "Non spécifié"}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-lg font-medium">
+                  <Building2 className="h-5 w-5 text-gray-600" /> Surface habitable
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                  {lead?.livingArea || "Non spécifié"}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-lg font-medium">
+                  Nombre de chambres
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                  {lead?.bedrooms || "Non spécifié"}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-lg font-medium">
+                  Vue souhaitée
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                  {lead?.views && lead.views.length > 0 
+                    ? lead.views.join(", ") 
+                    : "Non spécifié"}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-lg font-medium">
+                  Prestations souhaitées
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                  {lead?.amenities && lead.amenities.length > 0 
+                    ? lead.amenities.join(", ") 
+                    : "Non spécifié"}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-lg font-medium">
+                  Date d'achat souhaitée
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                  {lead?.purchaseTimeframe || "Non spécifié"}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-lg font-medium">
+                  Mode de financement
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                  {lead?.financingMethod || "Non spécifié"}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-lg font-medium">
+                  Type d'investissement
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                  {lead?.propertyUse || "Non spécifié"}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-lg font-medium">
+                  <Flag className="h-5 w-5 text-gray-600" /> Nationalité
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                  {lead?.nationality || "Non spécifié"}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-lg font-medium">
+                  <Flag className="h-5 w-5 text-gray-600" /> Résidence fiscale
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
+                  {lead?.taxResidence || "Non spécifié"}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-lg font-medium">
+                  <HelpCircle className="h-5 w-5 text-gray-600" /> Notes
+                </label>
+                <div className="p-4 bg-gray-50 rounded-md border border-gray-200 whitespace-pre-line">
+                  {lead?.notes || "Aucune note"}
+                </div>
               </div>
             </div>
           </div>
