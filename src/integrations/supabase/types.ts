@@ -9,13 +9,134 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      leads: {
+        Row: {
+          amenities: string[] | null
+          assigned_to: string | null
+          bedrooms: number | null
+          budget: string | null
+          created_at: string
+          desired_location: string | null
+          email: string | null
+          financing_method: string | null
+          id: string
+          last_contacted_at: string | null
+          living_area: string | null
+          location: string | null
+          name: string
+          nationality: string | null
+          next_follow_up_date: string | null
+          notes: string | null
+          phone: string | null
+          property_reference: string | null
+          property_type: string | null
+          property_use: string | null
+          purchase_timeframe: string | null
+          source: string | null
+          status: string
+          tags: string[] | null
+          task_type: string | null
+          tax_residence: string | null
+          views: string[] | null
+        }
+        Insert: {
+          amenities?: string[] | null
+          assigned_to?: string | null
+          bedrooms?: number | null
+          budget?: string | null
+          created_at?: string
+          desired_location?: string | null
+          email?: string | null
+          financing_method?: string | null
+          id?: string
+          last_contacted_at?: string | null
+          living_area?: string | null
+          location?: string | null
+          name: string
+          nationality?: string | null
+          next_follow_up_date?: string | null
+          notes?: string | null
+          phone?: string | null
+          property_reference?: string | null
+          property_type?: string | null
+          property_use?: string | null
+          purchase_timeframe?: string | null
+          source?: string | null
+          status: string
+          tags?: string[] | null
+          task_type?: string | null
+          tax_residence?: string | null
+          views?: string[] | null
+        }
+        Update: {
+          amenities?: string[] | null
+          assigned_to?: string | null
+          bedrooms?: number | null
+          budget?: string | null
+          created_at?: string
+          desired_location?: string | null
+          email?: string | null
+          financing_method?: string | null
+          id?: string
+          last_contacted_at?: string | null
+          living_area?: string | null
+          location?: string | null
+          name?: string
+          nationality?: string | null
+          next_follow_up_date?: string | null
+          notes?: string | null
+          phone?: string | null
+          property_reference?: string | null
+          property_type?: string | null
+          property_use?: string | null
+          purchase_timeframe?: string | null
+          source?: string | null
+          status?: string
+          tags?: string[] | null
+          task_type?: string | null
+          tax_residence?: string | null
+          views?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_current_team_member_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

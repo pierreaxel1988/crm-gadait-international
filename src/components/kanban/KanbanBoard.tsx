@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import KanbanColumn from './KanbanColumn';
 import { KanbanItem } from './KanbanCard';
@@ -7,6 +7,8 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { FilterOptions } from '../pipeline/PipelineFilters';
 import { PropertyType, PurchaseTimeframe } from '@/types/lead';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 // Extend KanbanItem with the additional properties needed for filtering
 interface ExtendedKanbanItem extends KanbanItem {
@@ -24,13 +26,92 @@ interface KanbanBoardProps {
   }[];
   className?: string;
   filters?: FilterOptions;
+  refreshTrigger?: number;
 }
 
-const KanbanBoard = ({ columns, className, filters }: KanbanBoardProps) => {
+const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0 }: KanbanBoardProps) => {
   const isMobile = useIsMobile();
+  const [loadedColumns, setLoadedColumns] = useState(columns);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLeads = async () => {
+      try {
+        setIsLoading(true);
+        const { data: teamMembers, error: teamError } = await supabase
+          .from('team_members')
+          .select('id, email, name');
+          
+        if (teamError) {
+          console.error('Error fetching team members:', teamError);
+          toast({
+            variant: "destructive",
+            title: "Erreur de chargement",
+            description: "Impossible de charger les membres de l'équipe."
+          });
+          return;
+        }
+          
+        const { data: leads, error: leadsError } = await supabase
+          .from('leads')
+          .select('*');
+          
+        if (leadsError) {
+          console.error('Error fetching leads:', leadsError);
+          toast({
+            variant: "destructive",
+            title: "Erreur de chargement",
+            description: "Impossible de charger les leads."
+          });
+          return;
+        }
+        
+        // Map Supabase data to KanbanItem format
+        const mappedLeads = leads.map(lead => {
+          const assignedTeamMember = teamMembers.find(tm => tm.id === lead.assigned_to);
+          
+          return {
+            id: lead.id,
+            name: lead.name,
+            email: lead.email || '',
+            phone: lead.phone,
+            status: lead.status as LeadStatus,
+            tags: lead.tags || [],
+            assignedTo: assignedTeamMember ? assignedTeamMember.name : undefined,
+            dueDate: lead.next_follow_up_date,
+            pipelineType: 'purchase',
+            taskType: lead.task_type,
+            budget: lead.budget,
+            desiredLocation: lead.desired_location,
+            purchaseTimeframe: lead.purchase_timeframe as PurchaseTimeframe,
+            propertyType: lead.property_type as PropertyType
+          };
+        });
+        
+        // Group leads by status
+        const updatedColumns = columns.map(column => ({
+          ...column,
+          items: mappedLeads.filter(lead => lead.status === column.status) as ExtendedKanbanItem[]
+        }));
+        
+        setLoadedColumns(updatedColumns);
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur est survenue lors du chargement des données."
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLeads();
+  }, [refreshTrigger]);
   
   // Apply filters to the items in each column
-  const filteredColumns = columns.map(column => {
+  const filteredColumns = loadedColumns.map(column => {
     let filteredItems = column.items;
     
     if (filters) {
@@ -95,18 +176,24 @@ const KanbanBoard = ({ columns, className, filters }: KanbanBoardProps) => {
         "flex overflow-x-auto",
         isMobile ? "h-[calc(100vh-130px)] pb-16" : "h-[calc(100vh-170px)]"
       )}>
-        {filteredColumns.map((column) => (
-          <KanbanColumn
-            key={column.status}
-            title={column.title}
-            status={column.status}
-            items={column.items}
-            className={cn(
-              "flex-1",
-              isMobile && "min-w-[250px]" // Slightly narrower columns on mobile
-            )}
-          />
-        ))}
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center p-8">
+            <p className="text-muted-foreground">Chargement des données...</p>
+          </div>
+        ) : (
+          filteredColumns.map((column) => (
+            <KanbanColumn
+              key={column.status}
+              title={column.title}
+              status={column.status}
+              items={column.items}
+              className={cn(
+                "flex-1",
+                isMobile && "min-w-[250px]" // Slightly narrower columns on mobile
+              )}
+            />
+          ))
+        )}
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import KanbanCard, { KanbanItem } from './KanbanCard';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 
 interface KanbanColumnProps {
   title: string;
@@ -14,6 +15,11 @@ interface KanbanColumnProps {
 
 const KanbanColumn = ({ title, status, items, className }: KanbanColumnProps) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  
+  const handleAddLead = () => {
+    navigate('/leads/new');
+  };
   
   return (
     <div className={cn(
@@ -42,7 +48,10 @@ const KanbanColumn = ({ title, status, items, className }: KanbanColumnProps) =>
       
       {!isMobile && (
         <div className="p-3 border-t border-border">
-          <button className="w-full rounded-md border border-dashed border-border p-2 text-sm text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors">
+          <button 
+            className="w-full rounded-md border border-dashed border-border p-2 text-sm text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors"
+            onClick={handleAddLead}
+          >
             + Add Lead
           </button>
         </div>

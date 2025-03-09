@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { Filter, Plus, Settings, Home, Key, X } from 'lucide-react';
+import { Filter, Plus, Settings, Home, Key, X, RefreshCcw } from 'lucide-react';
 import KanbanBoard from '@/components/kanban/KanbanBoard';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import CustomButton from '@/components/ui/CustomButton';
@@ -12,120 +11,13 @@ import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
 import PipelineFilters, { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { LeadTag } from '@/components/common/TagBadge';
 import TagBadge from '@/components/common/TagBadge';
-import { PropertyType, PurchaseTimeframe } from '@/types/lead';
-
-// Mock data for purchase leads
-const mockPurchaseLeads: KanbanItem[] = [
-  {
-    id: '1',
-    name: 'Jean Dupont',
-    email: 'jean.dupont@example.com',
-    phone: '+33 6 12 34 56 78',
-    status: 'Qualified',
-    tags: ['Vip', 'Hot'],
-    assignedTo: 'Sophie Martin',
-    dueDate: 'Jun 25',
-    pipelineType: 'purchase',
-    taskType: 'Visites'
-  },
-  {
-    id: '2',
-    name: 'Marie Lambert',
-    email: 'marie.lambert@example.com',
-    phone: '+33 6 23 45 67 89',
-    status: 'New',
-    tags: ['Serious'],
-    assignedTo: 'Thomas Bernard',
-    pipelineType: 'purchase',
-    taskType: 'Call'
-  },
-  {
-    id: '5',
-    name: 'Antoine Richard',
-    email: 'antoine.richard@example.com',
-    phone: '+33 6 56 78 90 12',
-    status: 'Proposal',
-    tags: ['Serious'],
-    assignedTo: 'Sophie Martin',
-    dueDate: 'Jun 18',
-    pipelineType: 'purchase',
-    taskType: 'Propositions'
-  },
-  {
-    id: '8',
-    name: 'Sophie Dubois',
-    email: 'sophie.dubois@example.com',
-    phone: '+33 6 78 90 12 34',
-    status: 'Deposit',
-    tags: ['Vip'],
-    assignedTo: 'Julie Dubois',
-    dueDate: 'Jun 15',
-    pipelineType: 'purchase',
-    taskType: 'Compromis'
-  },
-  {
-    id: '9',
-    name: 'Luc Martin',
-    email: 'luc.martin@example.com',
-    phone: '+33 6 89 01 23 45',
-    status: 'Signed',
-    tags: ['Vip', 'Hot'],
-    assignedTo: 'Lucas Petit',
-    pipelineType: 'purchase',
-    taskType: 'Acte de vente'
-  }
-];
-
-// Mock data for rental leads
-const mockRentalLeads: KanbanItem[] = [
-  {
-    id: '3',
-    name: 'Pierre Moreau',
-    email: 'pierre.moreau@example.com',
-    phone: '+33 6 34 56 78 90',
-    status: 'Contacted',
-    tags: ['Cold', 'No response'],
-    assignedTo: 'Julie Dubois',
-    dueDate: 'Jun 20',
-    pipelineType: 'rental',
-    taskType: 'Follow up'
-  },
-  {
-    id: '4',
-    name: 'Claire Simon',
-    email: 'claire.simon@example.com',
-    status: 'Visit',
-    tags: ['Hot'],
-    assignedTo: 'Lucas Petit',
-    dueDate: 'Jun 22',
-    pipelineType: 'rental',
-    taskType: 'Visites'
-  },
-  {
-    id: '6',
-    name: 'Camille Martin',
-    email: 'camille.martin@example.com',
-    phone: '+33 6 67 89 01 23',
-    status: 'New',
-    tags: ['No phone', 'Cold'],
-    pipelineType: 'rental',
-    taskType: 'Prospection'
-  },
-  {
-    id: '7',
-    name: 'Philippe Petit',
-    email: 'philippe.petit@example.com',
-    status: 'Contacted',
-    tags: ['Hot'],
-    assignedTo: 'Thomas Bernard',
-    dueDate: 'Jun 19',
-    pipelineType: 'rental',
-    taskType: 'Estimation'
-  }
-];
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const Kanban = () => {
   const [activeTab, setActiveTab] = useState<string>("purchase");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
@@ -141,13 +33,30 @@ const Kanban = () => {
     propertyType: null
   });
 
-  // Get unique assigned users from all leads
-  const assignedUsers = useMemo(() => {
-    const allLeads = [...mockPurchaseLeads, ...mockRentalLeads];
-    const users = allLeads
-      .map(lead => lead.assignedTo)
-      .filter((user): user is string => !!user);
-    return [...new Set(users)];
+  // Get unique assigned users from Supabase
+  const [assignedUsers, setAssignedUsers] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('name');
+          
+        if (error) {
+          console.error('Error fetching team members:', error);
+          return;
+        }
+        
+        if (data) {
+          setAssignedUsers(data.map(tm => tm.name));
+        }
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      }
+    };
+
+    fetchTeamMembers();
   }, []);
 
   // Check if any filters are active
@@ -161,6 +70,13 @@ const Kanban = () => {
       filters.purchaseTimeframe !== null || 
       filters.propertyType !== null;
   }, [filters]);
+
+  // Refresh data
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setRefreshTrigger(prev => prev + 1);
+    setTimeout(() => setIsRefreshing(false), 1000); // Visual feedback
+  };
 
   // Clear all filters
   const handleClearFilters = () => {
@@ -176,7 +92,7 @@ const Kanban = () => {
     });
   };
 
-  // Filter columns based on status if selected
+  // Define columns with empty items (will be populated by KanbanBoard)
   const getPurchaseColumns = () => {
     const statusesToShow = filters.status ? [filters.status] : [
       'New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offer', 'Deposit', 'Signed'
@@ -185,7 +101,7 @@ const Kanban = () => {
     return statusesToShow.map(status => ({
       title: status,
       status: status as LeadStatus,
-      items: mockPurchaseLeads.filter(lead => lead.status === status),
+      items: [],
     }));
   };
 
@@ -197,7 +113,7 @@ const Kanban = () => {
     return statusesToShow.map(status => ({
       title: status,
       status: status as LeadStatus,
-      items: mockRentalLeads.filter(lead => lead.status === status),
+      items: [],
     }));
   };
 
@@ -211,6 +127,15 @@ const Kanban = () => {
         
         {!isMobile && (
           <div className="flex space-x-3">
+            <CustomButton
+              variant="outline"
+              className="flex items-center gap-1.5"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} /> 
+              Actualiser
+            </CustomButton>
             <PipelineFilters 
               filters={filters}
               onFilterChange={setFilters}
@@ -235,13 +160,23 @@ const Kanban = () => {
         )}
 
         {isMobile && (
-          <PipelineFilters 
-            filters={filters}
-            onFilterChange={setFilters}
-            onClearFilters={handleClearFilters}
-            assignedToOptions={assignedUsers}
-            isFilterActive={isFilterActive}
-          />
+          <div className="flex space-x-2">
+            <CustomButton
+              variant="outline"
+              className="flex items-center justify-center w-10 h-10 p-0"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </CustomButton>
+            <PipelineFilters 
+              filters={filters}
+              onFilterChange={setFilters}
+              onClearFilters={handleClearFilters}
+              assignedToOptions={assignedUsers}
+              isFilterActive={isFilterActive}
+            />
+          </div>
         )}
       </div>
 
@@ -340,11 +275,19 @@ const Kanban = () => {
         </TabsList>
         
         <TabsContent value="purchase" className="mt-0">
-          <KanbanBoard columns={getPurchaseColumns()} filters={filters} />
+          <KanbanBoard 
+            columns={getPurchaseColumns()} 
+            filters={filters} 
+            refreshTrigger={refreshTrigger}
+          />
         </TabsContent>
         
         <TabsContent value="rental" className="mt-0">
-          <KanbanBoard columns={getRentalColumns()} filters={filters} />
+          <KanbanBoard 
+            columns={getRentalColumns()} 
+            filters={filters}
+            refreshTrigger={refreshTrigger}
+          />
         </TabsContent>
       </Tabs>
 
