@@ -63,18 +63,22 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				luxury: {
-					50: '#F5F2ED',
-					100: '#EBE5DC',
-					200: '#E5DCD0',
-					300: '#D6C8B6',
-					400: '#C2B19A',
-					500: '#A9977C',
-					600: '#96856D',
-					700: '#86755D',
-					800: '#6A5940',
-					900: '#4E4230',
-					950: '#322A1E',
+				loro: {
+					'white': '#F5F5F0',       // Blanc Cassé
+					'pearl': '#E0E0E0',       // Gris Perle
+					'sand': '#D3C5B4',        // Beige Sable
+					'hazel': '#8B6F4E',       // Marron Noisette
+					'navy': '#2C3E50',        // Bleu Nuit
+					50: '#F5F5F0',
+					100: '#E0E0E0',
+					200: '#D3C5B4',
+					300: '#BFB1A0',
+					400: '#A99A89',
+					500: '#8B6F4E',
+					600: '#7A6045',
+					700: '#5F4B36',
+					800: '#433528',
+					900: '#2C2419',
 				}
 			},
 			borderRadius: {
@@ -123,3 +127,4 @@ export default {
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+

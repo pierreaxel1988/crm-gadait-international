@@ -28,9 +28,9 @@ const CustomButton = ({
       case 'secondary':
         return 'bg-secondary text-secondary-foreground hover:bg-secondary/90';
       case 'loropiana':
-        return 'bg-[#F1F1F1] text-[#222222] border border-[#E0E0E0] hover:bg-[#E8E8E8] dark:bg-[#2A2A2A] dark:text-[#F5F5F5] dark:border-[#3A3A3A] dark:hover:bg-[#333333]';
+        return 'bg-loro-white text-loro-navy border border-loro-pearl hover:bg-loro-pearl dark:bg-loro-navy dark:text-loro-white dark:border-loro-navy/50 dark:hover:bg-loro-navy/80';
       default:
-        return 'bg-[#222222] text-white hover:bg-[#333333] dark:bg-[#F1F1F1] dark:text-[#222222] dark:hover:bg-[#E0E0E0]';
+        return 'bg-loro-hazel text-white hover:bg-loro-hazel/90 dark:bg-loro-sand dark:text-loro-navy dark:hover:bg-loro-sand/90';
     }
   };
 
@@ -48,7 +48,7 @@ const CustomButton = ({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center rounded-none font-medium transition-colors duration-300 focus:outline-none focus:ring-1 focus:ring-[#222222] dark:focus:ring-[#F1F1F1] disabled:opacity-50 disabled:pointer-events-none',
+        'inline-flex items-center justify-center rounded-none font-medium transition-colors duration-300 focus:outline-none focus:ring-1 focus:ring-loro-hazel dark:focus:ring-loro-sand disabled:opacity-50 disabled:pointer-events-none',
         getVariantClasses(variant),
         getSizeClasses(size),
         className

@@ -7,83 +7,83 @@
 
 @layer base {
   :root {
-    --background: 30 30% 98%;
-    --foreground: 25 25% 25%;
+    --background: 60 30% 97%;
+    --foreground: 215 30% 25%;
 
     --card: 0 0% 100%;
-    --card-foreground: 25 25% 25%;
+    --card-foreground: 215 30% 25%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 25 25% 25%;
+    --popover-foreground: 215 30% 25%;
 
-    --primary: 25 25% 40%;
+    --primary: 27 40% 43%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 20% 96%;
-    --secondary-foreground: 25 25% 25%;
+    --secondary: 60 20% 96%;
+    --secondary-foreground: 215 30% 25%;
 
-    --muted: 25 10% 96%;
-    --muted-foreground: 25 5% 45%;
+    --muted: 60 10% 96%;
+    --muted-foreground: 215 5% 45%;
 
-    --accent: 25 15% 94%;
-    --accent-foreground: 25 25% 25%;
+    --accent: 25 20% 92%;
+    --accent-foreground: 215 30% 25%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 25 20% 85%;
-    --input: 25 20% 85%;
-    --ring: 25 25% 40%;
+    --border: 27 20% 80%;
+    --input: 27 20% 80%;
+    --ring: 27 40% 43%;
 
     --radius: 0rem;
 
-    --sidebar-background: 33 29% 94%;
-    --sidebar-foreground: 28 17% 35%;
-    --sidebar-primary: 28 20% 55%;
+    --sidebar-background: 43 25% 95%;
+    --sidebar-foreground: 26 26% 38%;
+    --sidebar-primary: 27 40% 43%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 28 20% 92%;
-    --sidebar-accent-foreground: 28 20% 30%;
-    --sidebar-border: 28 15% 85%;
-    --sidebar-ring: 28 20% 40%;
+    --sidebar-accent: 27 20% 90%;
+    --sidebar-accent-foreground: 26 26% 38%;
+    --sidebar-border: 27 20% 85%;
+    --sidebar-ring: 27 40% 43%;
   }
 
   .dark {
-    --background: 30 15% 10%;
-    --foreground: 30 15% 90%;
+    --background: 215 35% 15%;
+    --foreground: 60 30% 96%;
 
-    --card: 30 10% 12%;
-    --card-foreground: 30 15% 90%;
+    --card: 215 30% 17%;
+    --card-foreground: 60 30% 96%;
 
-    --popover: 30 10% 12%;
-    --popover-foreground: 30 15% 90%;
+    --popover: 215 30% 17%;
+    --popover-foreground: 60 30% 96%;
 
-    --primary: 30 15% 70%;
-    --primary-foreground: 30 10% 10%;
+    --primary: 27 30% 65%;
+    --primary-foreground: 215 35% 15%;
 
-    --secondary: 30 10% 15%;
-    --secondary-foreground: 30 15% 90%;
+    --secondary: 215 30% 20%;
+    --secondary-foreground: 60 30% 96%;
 
-    --muted: 30 10% 15%;
-    --muted-foreground: 30 10% 70%;
+    --muted: 215 30% 20%;
+    --muted-foreground: 215 10% 70%;
 
-    --accent: 30 10% 20%;
-    --accent-foreground: 30 15% 90%;
+    --accent: 215 30% 25%;
+    --accent-foreground: 60 30% 96%;
 
     --destructive: 0 62.8% 50.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 30 10% 25%;
-    --input: 30 10% 25%;
-    --ring: 30 15% 70%;
+    --border: 215 30% 30%;
+    --input: 215 30% 30%;
+    --ring: 27 30% 65%;
 
-    --sidebar-background: 30 15% 12%;
-    --sidebar-foreground: 30 15% 85%;
-    --sidebar-primary: 30 15% 70%;
-    --sidebar-primary-foreground: 30 10% 10%;
-    --sidebar-accent: 30 10% 20%;
-    --sidebar-accent-foreground: 30 15% 85%;
-    --sidebar-border: 30 10% 25%;
-    --sidebar-ring: 30 15% 70%;
+    --sidebar-background: 215 35% 17%;
+    --sidebar-foreground: 60 30% 90%;
+    --sidebar-primary: 27 30% 65%;
+    --sidebar-primary-foreground: 215 35% 15%;
+    --sidebar-accent: 215 30% 25%;
+    --sidebar-accent-foreground: 60 30% 90%;
+    --sidebar-border: 215 30% 30%;
+    --sidebar-ring: 27 30% 65%;
   }
 }
 
@@ -108,7 +108,7 @@
   }
   
   .luxury-button {
-    @apply rounded-none bg-[#86755D] text-white px-4 py-2 transition-all duration-300 hover:bg-[#96856D] dark:bg-[#F1F1F1] dark:text-[#86755D] dark:hover:bg-[#E0E0E0];
+    @apply rounded-none bg-[#8B6F4E] text-white px-4 py-2 transition-all duration-300 hover:bg-[#9A7E5D] dark:bg-[#F5F5F0] dark:text-[#8B6F4E] dark:hover:bg-[#E0E0E0];
   }
   
   .luxury-input {
@@ -139,3 +139,4 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 }
+
