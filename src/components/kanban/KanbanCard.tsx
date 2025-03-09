@@ -1,10 +1,20 @@
 
 import React from 'react';
-import { Calendar, Mail, Phone, User } from 'lucide-react';
+import { Calendar, Mail, Phone, User, FileText, MessageSquare, CheckCircle, Tag, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import { useNavigate } from 'react-router-dom';
+
+export type TaskType = 
+  | 'Email'
+  | 'Phone call'
+  | 'Meeting'
+  | 'Document'
+  | 'Follow-up'
+  | 'Review'
+  | 'Reminder'
+  | 'Priority';
 
 export interface KanbanItem {
   id: string;
@@ -16,6 +26,7 @@ export interface KanbanItem {
   dueDate?: string;
   status: LeadStatus;
   pipelineType?: 'purchase' | 'rental';
+  taskType?: TaskType;
 }
 
 interface KanbanCardProps {
@@ -30,6 +41,29 @@ const KanbanCard = ({ item, className }: KanbanCardProps) => {
     navigate(`/leads/${item.id}`);
   };
 
+  const getTaskTypeIcon = (type?: TaskType) => {
+    switch (type) {
+      case 'Email':
+        return <Mail className="h-4 w-4 text-blue-500" />;
+      case 'Phone call':
+        return <Phone className="h-4 w-4 text-green-500" />;
+      case 'Meeting':
+        return <Calendar className="h-4 w-4 text-purple-500" />;
+      case 'Document':
+        return <FileText className="h-4 w-4 text-yellow-500" />;
+      case 'Follow-up':
+        return <MessageSquare className="h-4 w-4 text-pink-500" />;
+      case 'Review':
+        return <CheckCircle className="h-4 w-4 text-teal-500" />;
+      case 'Reminder':
+        return <Tag className="h-4 w-4 text-orange-500" />;
+      case 'Priority':
+        return <Star className="h-4 w-4 text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div 
       className={cn(
@@ -40,6 +74,12 @@ const KanbanCard = ({ item, className }: KanbanCardProps) => {
     >
       <div className="flex justify-between items-start mb-2">
         <h3 className="font-medium text-sm">{item.name}</h3>
+        {item.taskType && (
+          <div className="flex items-center gap-1 bg-accent/50 rounded-full px-2 py-0.5">
+            {getTaskTypeIcon(item.taskType)}
+            <span className="text-xs">{item.taskType}</span>
+          </div>
+        )}
       </div>
       
       <div className="mb-3 flex items-center text-xs text-muted-foreground">

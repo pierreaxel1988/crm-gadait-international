@@ -1,7 +1,7 @@
-
 import { LeadDetailed } from "@/types/lead";
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
+import { TaskType } from "@/components/kanban/KanbanCard";
 import { toast } from "@/hooks/use-toast";
 
 // Mock data avec des champs étendus
@@ -33,6 +33,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     taxResidence: 'France',
     nextFollowUpDate: '2023-07-01',
     notes: 'Client très sérieux et pressé',
+    taskType: 'Meeting',
   },
   {
     id: '2',
@@ -58,6 +59,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     propertyUse: 'Résidence principale',
     nationality: 'France',
     taxResidence: 'France',
+    taskType: 'Email',
   },
   {
     id: '3',
@@ -86,6 +88,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     taxResidence: 'Belgique',
     nextFollowUpDate: '2023-07-10',
     notes: 'Difficile à joindre, semblait intéressé initialement',
+    taskType: 'Follow-up',
   },
   {
     id: '4',
@@ -113,6 +116,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     taxResidence: 'Royaume-Uni',
     nextFollowUpDate: '2023-06-25',
     notes: 'Visite programmée pour 3 propriétés',
+    taskType: 'Document',
   },
   {
     id: '5',
@@ -141,6 +145,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     taxResidence: 'Suisse',
     nextFollowUpDate: '2023-06-28',
     notes: 'Intéressé par l\'exploitation viticole, pas seulement l\'immobilier',
+    taskType: 'Review',
   },
   {
     id: '6',
@@ -165,6 +170,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     propertyUse: 'Résidence principale',
     nationality: 'France',
     taxResidence: 'France',
+    taskType: 'Reminder',
   },
 ];
 

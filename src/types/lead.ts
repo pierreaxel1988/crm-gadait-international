@@ -1,6 +1,7 @@
 
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
+import { TaskType } from "@/components/kanban/KanbanCard";
 
 export type LeadSource = 
   | "Site web" 
@@ -84,6 +85,7 @@ export interface LeadDetailed {
   
   // Pipeline information
   pipelineType?: PipelineType;
+  taskType?: TaskType;
   
   // Nouvelles informations générales
   source?: LeadSource;

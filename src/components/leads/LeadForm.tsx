@@ -1,13 +1,14 @@
-
 import React, { useState } from 'react';
 import { 
   Banknote, Building, CalendarClock, CalendarDays, Clipboard, Flag, HelpCircle, 
-  Home, MapPin, Phone, PlusCircle, Tag, User, Mail, Check, Building2, Globe 
+  Home, MapPin, Phone, PlusCircle, Tag, User, Mail, Check, Building2, Globe,
+  FileText, MessageSquare, CheckCircle, Star
 } from 'lucide-react';
 import { LeadDetailed, LeadSource, PropertyType, ViewType, Amenity, 
   PurchaseTimeframe, FinancingMethod, PropertyUse, Country } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
+import { TaskType } from '@/components/kanban/KanbanCard';
 import CustomButton from '@/components/ui/CustomButton';
 import { cn } from '@/lib/utils';
 
@@ -64,6 +65,11 @@ const LeadForm = ({ lead, onSubmit, onCancel }: LeadFormProps) => {
   const leadSources: LeadSource[] = [
     'Site web', 'Réseaux sociaux', 'Portails immobiliers', 
     'Network', 'Repeaters', 'Recommandations', 'Apporteur d\'affaire'
+  ];
+
+  const taskTypes: TaskType[] = [
+    'Email', 'Phone call', 'Meeting', 'Document', 
+    'Follow-up', 'Review', 'Reminder', 'Priority'
   ];
 
   const propertyTypes: PropertyType[] = [
@@ -239,6 +245,23 @@ const LeadForm = ({ lead, onSubmit, onCancel }: LeadFormProps) => {
             
             <div className="space-y-2">
               <label className="block text-sm font-medium">
+                Type de tâche
+              </label>
+              <select
+                name="taskType"
+                value={formData.taskType || ''}
+                onChange={handleInputChange}
+                className="luxury-input w-full"
+              >
+                <option value="">Sélectionner un type</option>
+                {taskTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">
                 Tags
               </label>
               <div className="flex flex-wrap gap-2">
@@ -377,10 +400,8 @@ const LeadForm = ({ lead, onSubmit, onCancel }: LeadFormProps) => {
           
           <div className="space-y-2">
             <label className="block text-sm font-medium">
-              <span className="flex items-center">
-                <Home className="h-4 w-4 mr-1" /> Nombre de chambres
-              </span>
-            </label>
+              Nombre de chambres
+              </label>
             <input
               type="number"
               name="bedrooms"
