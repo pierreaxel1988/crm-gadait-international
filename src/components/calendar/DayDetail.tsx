@@ -12,11 +12,17 @@ interface DayDetailProps {
   selectedDate: Date | undefined;
   events: Event[];
   setIsAddEventOpen: (isOpen: boolean) => void;
+  activeFilters: string[];
 }
 
-const DayDetail = ({ selectedDate, events, setIsAddEventOpen }: DayDetailProps) => {
+const DayDetail = ({ selectedDate, events, setIsAddEventOpen, activeFilters }: DayDetailProps) => {
+  // Filter events based on active filters
+  const filteredEvents = activeFilters.length > 0
+    ? events.filter(event => event.category && activeFilters.includes(event.category))
+    : events;
+
   const eventsForSelectedDate = selectedDate
-    ? events.filter((event) => format(event.date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd'))
+    ? filteredEvents.filter((event) => format(event.date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd'))
     : [];
 
   return (
@@ -36,7 +42,7 @@ const DayDetail = ({ selectedDate, events, setIsAddEventOpen }: DayDetailProps) 
       </CardHeader>
       <CardContent>
         <CalendarEventsList 
-          events={events} 
+          events={filteredEvents} 
           selectedDate={selectedDate} 
           openAddEventDialog={() => setIsAddEventOpen(true)} 
         />
