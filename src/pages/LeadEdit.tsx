@@ -156,6 +156,13 @@ const LeadEdit = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <CustomButton 
+            variant="outline" 
+            onClick={handleAddAction} 
+            className="w-auto p-2 rounded text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 border-zinc-800"
+          >
+            <Plus className="h-4 w-4" />
+          </CustomButton>
           {lead && <CustomButton variant="outline" onClick={handleDelete} className="w-auto p-2 rounded text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30">
               <Trash2 className="h-4 w-4" />
             </CustomButton>}
