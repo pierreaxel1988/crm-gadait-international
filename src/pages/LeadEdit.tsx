@@ -14,6 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 const LeadEdit = () => {
   const {
@@ -172,7 +173,7 @@ const LeadEdit = () => {
 
       {isActionDialogOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             {!selectedAction ? (
               <>
                 <h2 className="text-xl font-semibold mb-4">Sélectionner une action</h2>
@@ -198,7 +199,7 @@ const LeadEdit = () => {
                     <label className="text-sm font-medium">Date</label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <CustomButton
+                        <Button
                           variant="outline"
                           className={cn(
                             "w-full justify-start text-left font-normal",
@@ -207,15 +208,19 @@ const LeadEdit = () => {
                         >
                           <CalendarClock className="mr-2 h-4 w-4" />
                           {actionDate ? format(actionDate, 'dd/MM/yyyy') : <span>Sélectionner une date</span>}
-                        </CustomButton>
+                        </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
+                      <PopoverContent 
+                        className="w-auto p-0" 
+                        align="start"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Calendar
                           mode="single"
                           selected={actionDate}
                           onSelect={setActionDate}
                           initialFocus
-                          className="p-3 pointer-events-auto"
+                          className="p-3"
                         />
                       </PopoverContent>
                     </Popover>
