@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trash2, Plus, CalendarClock } from 'lucide-react';
@@ -208,13 +209,13 @@ const LeadEdit = () => {
                           {actionDate ? format(actionDate, 'dd/MM/yyyy') : <span>Sélectionner une date</span>}
                         </CustomButton>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
                         <Calendar
                           mode="single"
                           selected={actionDate}
                           onSelect={setActionDate}
                           initialFocus
-                          className={cn("p-3 pointer-events-auto")}
+                          className="p-3 pointer-events-auto"
                         />
                       </PopoverContent>
                     </Popover>
