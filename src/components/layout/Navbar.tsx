@@ -23,7 +23,7 @@ const Navbar = ({
       <div className="content-container">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <button onClick={toggleSidebar} className="mr-2 rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200" aria-label="Toggle menu">
+            <button onClick={toggleSidebar} aria-label="Toggle menu" className="mr-2 rounded-md p-2 transition-colors duration-200 px-0 py-0 text-xs text-zinc-300 my-0">
               <Menu size={20} />
             </button>
             <Link to="/" className="flex items-center space-x-2">
