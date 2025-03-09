@@ -44,7 +44,7 @@ const Auth = () => {
           // For predefined admin account, try the following sequence of steps
           try {
             // First attempt to sign in directly
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { error } = await supabase.auth.signInWithPassword({
               email,
               password,
             });
@@ -54,7 +54,7 @@ const Auth = () => {
               console.log("Email not confirmed, attempting to auto-verify...");
               
               // Alternative approach: try to sign up again (which will give the account if it exists)
-              const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+              const { error: signUpError } = await supabase.auth.signUp({
                 email,
                 password,
                 options: {
@@ -68,7 +68,7 @@ const Auth = () => {
               if (signUpError) {
                 // If sign up fails, let's try one more thing - admin token override
                 // This is a special flow for the predefined admin
-                const { data: adminSignIn, error: adminError } = await supabase.auth.signInWithPassword({
+                const { error: adminError } = await supabase.auth.signInWithPassword({
                   email,
                   password,
                   options: {
@@ -86,7 +86,7 @@ const Auth = () => {
               
               // If sign up worked, we can continue - this normally means the email would need to be verified
               // but for testing, we'll try to sign in again immediately
-              const { data: secondAttempt, error: secondError } = await supabase.auth.signInWithPassword({
+              const { error: secondError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
               });
@@ -110,7 +110,7 @@ const Auth = () => {
           }
         } else {
           // Handle regular login
-          const { data, error } = await supabase.auth.signInWithPassword({
+          const { error } = await supabase.auth.signInWithPassword({
             email,
             password,
           });
