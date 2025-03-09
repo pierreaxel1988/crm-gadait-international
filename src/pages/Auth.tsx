@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -69,7 +70,13 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-loro-white/80 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80 px-4">
+      <div className="mb-8">
+        <div className="flex items-center justify-center">
+          <span className="font-futura text-3xl tracking-tight text-loro-navy uppercase">GADAIT.</span>
+        </div>
+      </div>
+      
       <Card className="w-full max-w-md shadow-luxury">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-3xl font-times text-loro-hazel">
