@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trash2, Plus } from 'lucide-react';
+import { ArrowLeft, Trash2, Plus, CalendarClock } from 'lucide-react';
+import { format } from 'date-fns';
 import LeadForm from '@/components/leads/LeadForm';
 import { LeadDetailed } from '@/types/lead';
 import { getLead, updateLead, deleteLead } from '@/services/leadService';
@@ -8,6 +9,11 @@ import CustomButton from '@/components/ui/CustomButton';
 import { toast } from '@/hooks/use-toast';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+
 const LeadEdit = () => {
   const {
     id
@@ -17,7 +23,11 @@ const LeadEdit = () => {
   const [lead, setLead] = useState<LeadDetailed | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
+  const [selectedAction, setSelectedAction] = useState<TaskType | null>(null);
+  const [actionDate, setActionDate] = useState<Date | undefined>(undefined);
+  const [actionTime, setActionTime] = useState<string>('12:00');
   const navigate = useNavigate();
+
   useEffect(() => {
     if (id) {
       try {
@@ -34,6 +44,7 @@ const LeadEdit = () => {
       }
     }
   }, [id]);
+
   const handleSubmit = (data: LeadDetailed) => {
     try {
       updateLead(data);
@@ -46,6 +57,7 @@ const LeadEdit = () => {
       });
     }
   };
+
   const handleDelete = () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce lead ?')) {
       try {
@@ -62,23 +74,41 @@ const LeadEdit = () => {
       }
     }
   };
+
   const handleAddAction = () => {
-    // Afficher un dialogue pour choisir le type d'action
+    setSelectedAction(null);
+    setActionDate(undefined);
+    setActionTime('12:00');
     setIsActionDialogOpen(true);
   };
+
   const handleActionSelect = (actionType: TaskType) => {
-    if (lead && id) {
+    setSelectedAction(actionType);
+  };
+
+  const handleActionConfirm = () => {
+    if (lead && id && selectedAction) {
       try {
-        // Mettre à jour le lead avec la nouvelle action
+        let scheduledDateTime = undefined;
+        if (actionDate) {
+          const [hours, minutes] = actionTime.split(':').map(part => parseInt(part, 10));
+          const dateTime = new Date(actionDate);
+          dateTime.setHours(hours, minutes);
+          scheduledDateTime = dateTime.toISOString();
+        }
+        
         const updatedLead = {
           ...lead,
-          taskType: actionType
+          taskType: selectedAction,
+          nextFollowUpDate: scheduledDateTime
         };
         updateLead(updatedLead);
         setLead(updatedLead);
         toast({
           title: "Action ajoutée",
-          description: `${actionType} a été ajouté à ${lead.name}`
+          description: `${selectedAction} a été ajouté à ${lead.name}${
+            scheduledDateTime ? ` pour le ${format(new Date(scheduledDateTime), 'dd/MM/yyyy à HH:mm')}` : ''
+          }`
         });
       } catch (error) {
         toast({
@@ -91,6 +121,7 @@ const LeadEdit = () => {
       }
     }
   };
+
   if (isLoading) {
     return <div className="p-6 flex justify-center items-center">
         <div className="animate-spin h-8 w-8 border-4 border-chocolate-dark rounded-full border-t-transparent"></div>
@@ -108,7 +139,6 @@ const LeadEdit = () => {
       </div>;
   }
 
-  // Les types d'actions disponibles
   const actionTypes: TaskType[] = ['Call', 'Visites', 'Compromis', 'Acte de vente', 'Contrat de Location', 'Propositions', 'Follow up', 'Estimation', 'Prospection', 'Admin'];
   return <div className="p-4 md:p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -132,29 +162,105 @@ const LeadEdit = () => {
         </div>
       </div>
 
-      {/* Modal/Popup pour sélectionner le type d'action */}
-      {isActionDialogOpen && <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      {isActionDialogOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full">
-            <h2 className="text-xl font-semibold mb-4">Sélectionner une action</h2>
-            <div className="grid grid-cols-2 gap-2">
-              {actionTypes.map(actionType => <CustomButton key={actionType} variant="outline" onClick={() => handleActionSelect(actionType)} className="justify-start text-left py-2 text-zinc-800 font-normal border-zinc-800">
-                  {actionType}
-                </CustomButton>)}
-            </div>
-            <div className="mt-4 flex justify-end">
-              <CustomButton variant="outline" onClick={() => setIsActionDialogOpen(false)} className="mr-2 text-stone-800 font-light">
-                Annuler
+            {!selectedAction ? (
+              <>
+                <h2 className="text-xl font-semibold mb-4">Sélectionner une action</h2>
+                <div className="grid grid-cols-2 gap-2">
+                  {actionTypes.map(actionType => (
+                    <CustomButton 
+                      key={actionType} 
+                      variant="outline" 
+                      onClick={() => handleActionSelect(actionType)} 
+                      className="justify-start text-left py-2 text-zinc-800 font-normal border-zinc-800"
+                    >
+                      {actionType}
+                    </CustomButton>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-xl font-semibold mb-4">Planifier {selectedAction}</h2>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Date</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <CustomButton
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !actionDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarClock className="mr-2 h-4 w-4" />
+                          {actionDate ? format(actionDate, 'dd/MM/yyyy') : <span>Sélectionner une date</span>}
+                        </CustomButton>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={actionDate}
+                          onSelect={setActionDate}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Heure</label>
+                    <Input
+                      type="time"
+                      value={actionTime}
+                      onChange={(e) => setActionTime(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+            
+            <div className="mt-6 flex justify-end space-x-2">
+              <CustomButton 
+                variant="outline" 
+                onClick={() => {
+                  if (selectedAction) {
+                    setSelectedAction(null);
+                  } else {
+                    setIsActionDialogOpen(false);
+                  }
+                }} 
+                className="text-stone-800 font-light"
+              >
+                {selectedAction ? 'Retour' : 'Annuler'}
               </CustomButton>
+              
+              {selectedAction && (
+                <CustomButton 
+                  variant="chocolate" 
+                  onClick={handleActionConfirm}
+                  className="bg-chocolate-dark text-white hover:bg-chocolate"
+                >
+                  Confirmer
+                </CustomButton>
+              )}
             </div>
           </div>
-        </div>}
+        </div>
+      )}
 
       <div className="luxury-card p-6">
         <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} />
       </div>
 
-      {/* Floating action buttons that are always visible while scrolling */}
       {lead && <FloatingActionButtons onAddAction={handleAddAction} phoneNumber={lead.phone} email={lead.email} />}
     </div>;
 };
+
 export default LeadEdit;
