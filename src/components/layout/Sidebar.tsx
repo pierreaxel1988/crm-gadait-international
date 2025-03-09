@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { BarChart3, Home, Phone, PieChart, Settings, Tag, Users } from 'lucide-react';
+import { BarChart3, ChevronLeft, ChevronRight, Home, Phone, PieChart, Settings, Tag, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -52,13 +52,19 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   ];
 
   const sidebarClasses = cn(
-    'fixed inset-y-0 left-0 z-40 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-300 ease-in-out',
-    isMobile && !isOpen ? '-translate-x-full' : 'translate-x-0'
+    'fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-transform duration-300 ease-in-out',
+    isOpen ? 'translate-x-0' : isMobile ? '-translate-x-full' : '-translate-x-[200px]',
+    isOpen ? 'w-64' : 'w-[200px]'
   );
 
   const overlayClasses = cn(
     'fixed inset-0 z-30 bg-black/50 transition-opacity',
     isMobile && isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+  );
+
+  const toggleButtonClasses = cn(
+    'absolute right-0 top-20 translate-x-1/2 flex items-center justify-center h-8 w-8 rounded-full bg-primary text-white cursor-pointer shadow-md',
+    isMobile ? 'hidden' : 'block'
   );
 
   return (
@@ -86,23 +92,32 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                     onClick={isMobile ? onClose : undefined}
                   >
                     <item.icon size={18} />
-                    <span>{item.name}</span>
+                    {isOpen && <span>{item.name}</span>}
                   </NavLink>
                 </li>
               ))}
             </ul>
           </nav>
-          <div className="border-t border-sidebar-border p-4">
-            <div className="rounded-md bg-sidebar-accent p-3">
-              <p className="text-sm font-medium text-sidebar-accent-foreground">Need help?</p>
-              <p className="mt-1 text-xs text-sidebar-foreground">
-                Contact support for assistance with your CRM.
-              </p>
-              <button className="mt-2 w-full rounded-md bg-sidebar-primary px-3 py-1 text-xs font-medium text-sidebar-primary-foreground">
-                Contact Support
-              </button>
+          {isOpen && (
+            <div className="border-t border-sidebar-border p-4">
+              <div className="rounded-md bg-sidebar-accent p-3">
+                <p className="text-sm font-medium text-sidebar-accent-foreground">Need help?</p>
+                <p className="mt-1 text-xs text-sidebar-foreground">
+                  Contact support for assistance with your CRM.
+                </p>
+                <button className="mt-2 w-full rounded-md bg-sidebar-primary px-3 py-1 text-xs font-medium text-sidebar-primary-foreground">
+                  Contact Support
+                </button>
+              </div>
             </div>
-          </div>
+          )}
+        </div>
+        <div 
+          className={toggleButtonClasses}
+          onClick={onClose}
+          aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
+        >
+          {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
         </div>
       </div>
     </>

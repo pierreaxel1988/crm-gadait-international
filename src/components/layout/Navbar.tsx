@@ -11,7 +11,6 @@ interface NavbarProps {
 const Navbar = ({ toggleSidebar }: NavbarProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useIsMobile();
 
   const toggleDarkMode = () => {
@@ -20,27 +19,18 @@ const Navbar = ({ toggleSidebar }: NavbarProps) => {
     document.documentElement.classList.toggle('dark', newMode);
   };
 
-  const handleMenuToggle = () => {
-    setIsMenuOpen(!isMenuOpen);
-    if (toggleSidebar) {
-      toggleSidebar();
-    }
-  };
-
   return (
     <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border transition-all duration-300">
       <div className="content-container">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            {isMobile && (
-              <button
-                onClick={handleMenuToggle}
-                className="mr-2 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                aria-label="Toggle menu"
-              >
-                {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
-            )}
+            <button
+              onClick={toggleSidebar}
+              className="mr-2 rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              aria-label="Toggle menu"
+            >
+              <Menu size={20} />
+            </button>
             <Link to="/" className="flex items-center space-x-2">
               <span className="font-serif text-xl font-semibold tracking-tight">Gadait</span>
               <span className="font-sans text-xs uppercase tracking-widest text-muted-foreground">International</span>
