@@ -31,7 +31,7 @@ const LeadNew = () => {
         <CustomButton 
           variant="outline" 
           onClick={() => navigate('/leads')}
-          className="w-auto p-2 border-chocolate-light text-chocolate-dark hover:bg-chocolate-light/10"
+          className="w-auto p-2 rounded border-chocolate-light text-chocolate-dark hover:bg-chocolate-light/10"
         >
           <ArrowLeft className="h-4 w-4" />
         </CustomButton>
