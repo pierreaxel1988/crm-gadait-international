@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
@@ -174,6 +173,38 @@ const LeadEdit = () => {
     }
   };
 
+  const renderActionTypeSelector = () => {
+    const actionGroups = [
+      ['Call', 'Follow up', 'Visites'],
+      ['Estimation', 'Propositions', 'Prospection'],
+      ['Compromis', 'Acte de vente', 'Contrat de Location', 'Admin']
+    ];
+    
+    return (
+      <div className="space-y-4">
+        {actionGroups.map((group, groupIndex) => (
+          <div key={groupIndex} className="grid grid-cols-3 gap-2">
+            {group.map(actionType => (
+              <CustomButton 
+                key={actionType} 
+                variant={selectedAction === actionType ? "chocolate" : "outline"}
+                onClick={() => handleActionSelect(actionType as TaskType)} 
+                className={cn(
+                  "justify-center text-center py-2 text-sm h-auto",
+                  selectedAction === actionType 
+                    ? "bg-chocolate-dark text-white"
+                    : "text-zinc-800 font-normal border-zinc-200"
+                )}
+              >
+                {actionType}
+              </CustomButton>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   if (isLoading) {
     return <div className="p-6 flex justify-center items-center">
         <div className="animate-spin h-8 w-8 border-4 border-chocolate-dark rounded-full border-t-transparent"></div>
@@ -239,7 +270,6 @@ const LeadEdit = () => {
           </div>
         </div>
         
-        {/* Affichage des tags dans l'en-tête */}
         {lead && lead.tags && lead.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-1">
             {lead.tags.map((tag) => (
@@ -300,7 +330,7 @@ const LeadEdit = () => {
         </TabsContent>
         
         <TabsContent value="actions" className="mt-4">
-          <div className="luxury-card p-6">
+          <div className="luxury-card p-4 md:p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold">Actions et tâches</h3>
               <CustomButton 
@@ -308,12 +338,12 @@ const LeadEdit = () => {
                 onClick={handleAddAction} 
                 className="flex items-center gap-2 shadow-luxury hover:translate-y-[-2px] transition-all duration-300"
               >
-                <Plus className="h-4 w-4" /> Ajouter une action
+                <Plus className="h-4 w-4" /> Ajouter
               </CustomButton>
             </div>
             
             {lead?.taskType ? (
-              <div className="mt-4 p-4 border rounded-md">
+              <div className="mt-4 p-4 border rounded-md bg-white">
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="font-medium">Action actuelle</h4>
@@ -330,21 +360,21 @@ const LeadEdit = () => {
                   <CustomButton 
                     variant="outline" 
                     onClick={handleAddAction}
-                    className="text-xs"
+                    className="text-xs flex items-center gap-1"
                   >
-                    Modifier
+                    <Plus className="h-3 w-3" /> Modifier
                   </CustomButton>
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8 border rounded-md border-dashed mt-4">
+              <div className="text-center py-8 border rounded-md border-dashed mt-4 bg-white">
                 <p className="text-muted-foreground">Aucune action en cours</p>
                 <CustomButton 
                   variant="chocolate" 
                   onClick={handleAddAction} 
-                  className="mt-4"
+                  className="mt-4 flex mx-auto items-center gap-2"
                 >
-                  Ajouter une action
+                  <Plus className="h-4 w-4" /> Ajouter une action
                 </CustomButton>
               </div>
             )}
@@ -362,7 +392,7 @@ const LeadEdit = () => {
                       )}
                     >
                       <div className="flex justify-between items-start">
-                        <div>
+                        <div className="flex-1">
                           <div className="flex items-center gap-2">
                             {getActionTypeIcon(action.actionType)}
                             <span className="text-sm font-medium">
@@ -392,9 +422,9 @@ const LeadEdit = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => markActionComplete(action.id)}
-                            className="text-xs"
+                            className="text-xs flex items-center gap-1 whitespace-nowrap"
                           >
-                            Marquer comme terminé
+                            <Check className="h-3 w-3" /> Terminé
                           </CustomButton>
                         )}
                       </div>
@@ -402,7 +432,7 @@ const LeadEdit = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-6 text-muted-foreground">
+                <div className="text-center py-6 text-muted-foreground border border-dashed rounded-md">
                   Aucune action dans l'historique
                 </div>
               )}
@@ -412,34 +442,48 @@ const LeadEdit = () => {
       </Tabs>
 
       {isActionDialogOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsActionDialogOpen(false)}>
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50" onClick={() => setIsActionDialogOpen(false)}>
           <div 
             className={cn(
-              "bg-white dark:bg-gray-800 p-6 rounded-lg w-full",
-              isMobile ? "max-w-[92%] mx-4" : "max-w-md"
+              "bg-white dark:bg-gray-800 rounded-t-lg sm:rounded-lg w-full shadow-luxury transition-all duration-300 animate-slide-in",
+              isMobile ? "max-h-[85vh] overflow-y-auto" : "max-w-md"
             )} 
             onClick={(e) => e.stopPropagation()}
           >
-            {!selectedAction ? (
-              <>
-                <h2 className="text-xl font-semibold mb-4">Sélectionner une action</h2>
-                <div className="grid grid-cols-2 gap-2">
-                  {actionTypes.map(actionType => (
-                    <CustomButton 
-                      key={actionType} 
-                      variant="outline" 
-                      onClick={() => handleActionSelect(actionType)} 
-                      className="justify-start text-left py-2 text-zinc-800 font-normal border-zinc-800"
-                    >
-                      {actionType}
-                    </CustomButton>
-                  ))}
+            <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 p-4 border-b">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">
+                  {!selectedAction ? "Nouvelle action" : `Planifier ${selectedAction}`}
+                </h2>
+                <button 
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                  onClick={() => setIsActionDialogOpen(false)}
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              
+              {selectedAction && (
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    {getActionTypeIcon(selectedAction)}
+                  </div>
+                  <button 
+                    className="text-xs text-blue-600 hover:underline"
+                    onClick={() => setSelectedAction(null)}
+                  >
+                    Changer
+                  </button>
                 </div>
-              </>
-            ) : (
-              <>
-                <h2 className="text-xl font-semibold mb-4">Planifier {selectedAction}</h2>
-                
+              )}
+            </div>
+            
+            <div className="p-4">
+              {!selectedAction ? (
+                <div className="py-2">
+                  {renderActionTypeSelector()}
+                </div>
+              ) : (
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Date</label>
@@ -448,7 +492,7 @@ const LeadEdit = () => {
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full justify-start text-left font-normal",
+                            "w-full justify-start text-left font-normal border rounded-md h-11",
                             !actionDate && "text-muted-foreground"
                           )}
                         >
@@ -459,19 +503,13 @@ const LeadEdit = () => {
                       <PopoverContent 
                         className="w-auto p-0" 
                         align="start"
-                        onClick={(e) => e.stopPropagation()}
                       >
                         <Calendar
                           mode="single"
                           selected={actionDate}
-                          onSelect={(date) => {
-                            setActionDate(date);
-                            if (isMobile) {
-                              document.querySelector('[role="dialog"]')?.classList.add('pointer-events-auto');
-                            }
-                          }}
+                          onSelect={setActionDate}
                           initialFocus
-                          className="p-3 pointer-events-auto"
+                          className="p-3"
                         />
                       </PopoverContent>
                     </Popover>
@@ -483,7 +521,7 @@ const LeadEdit = () => {
                       type="time"
                       value={actionTime}
                       onChange={(e) => setActionTime(e.target.value)}
-                      className="w-full"
+                      className="w-full h-11 rounded-md"
                     />
                   </div>
                   
@@ -492,45 +530,39 @@ const LeadEdit = () => {
                     <textarea
                       value={actionNotes}
                       onChange={(e) => setActionNotes(e.target.value)}
-                      className="w-full p-2 border rounded-md resize-none h-24"
+                      className="w-full p-3 border rounded-md resize-none h-24"
                       placeholder="Notes sur cette action..."
                     />
                   </div>
                 </div>
-              </>
-            )}
+              )}
+            </div>
             
-            <div className={cn(
-              "mt-6 flex justify-end space-x-2",
-              isMobile ? "flex-col space-y-2 space-x-0" : ""
-            )}>
-              <CustomButton 
-                variant="outline" 
-                onClick={() => {
-                  if (selectedAction) {
-                    setSelectedAction(null);
-                  } else {
-                    setIsActionDialogOpen(false);
-                  }
-                }} 
-                className={cn(
-                  "text-stone-800 font-light",
-                  isMobile && "order-2"
-                )}
-              >
-                {selectedAction ? 'Retour' : 'Annuler'}
-              </CustomButton>
-              
-              {selectedAction && (
+            <div className="p-4 border-t bg-gray-50 dark:bg-gray-800 sticky bottom-0">
+              {selectedAction ? (
+                <div className="flex gap-3">
+                  <CustomButton 
+                    variant="outline" 
+                    onClick={() => setSelectedAction(null)}
+                    className="flex-1 flex justify-center"
+                  >
+                    Retour
+                  </CustomButton>
+                  <CustomButton 
+                    variant="chocolate" 
+                    onClick={handleActionConfirm}
+                    className="flex-1 flex justify-center"
+                  >
+                    Confirmer
+                  </CustomButton>
+                </div>
+              ) : (
                 <CustomButton 
-                  variant="chocolate" 
-                  onClick={handleActionConfirm}
-                  className={cn(
-                    "bg-chocolate-dark text-white hover:bg-chocolate",
-                    isMobile && "order-1"
-                  )}
+                  variant="outline" 
+                  onClick={() => setIsActionDialogOpen(false)}
+                  className="w-full"
                 >
-                  Confirmer
+                  Annuler
                 </CustomButton>
               )}
             </div>
