@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
@@ -20,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import TagBadge from '@/components/common/TagBadge';
 
 const LeadEdit = () => {
   const {
@@ -208,32 +210,43 @@ const LeadEdit = () => {
   };
   
   return <div className="p-4 md:p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <CustomButton variant="outline" onClick={() => navigate('/leads')} className="w-auto p-2 rounded border-chocolate-light text-chocolate-dark hover:bg-chocolate-light/10">
-            <ArrowLeft className="h-4 w-4" />
-          </CustomButton>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-semibold">
-              {lead ? `${lead.name}` : 'Nouveau Lead'}
-            </h1>
-            <p className="text-muted-foreground">
-              {lead ? 'Modifier les informations du lead' : 'Ajouter un nouveau lead'}
-            </p>
+      <div className="flex flex-col gap-3">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <CustomButton variant="outline" onClick={() => navigate('/leads')} className="w-auto p-2 rounded border-chocolate-light text-chocolate-dark hover:bg-chocolate-light/10">
+              <ArrowLeft className="h-4 w-4" />
+            </CustomButton>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-semibold">
+                {lead ? `${lead.name}` : 'Nouveau Lead'}
+              </h1>
+              <p className="text-muted-foreground">
+                {lead ? 'Modifier les informations du lead' : 'Ajouter un nouveau lead'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <CustomButton 
+              variant="outline" 
+              onClick={handleAddAction} 
+              className="w-auto p-2 rounded text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 border-zinc-800"
+            >
+              <Plus className="h-4 w-4" />
+            </CustomButton>
+            {lead && <CustomButton variant="outline" onClick={handleDelete} className="w-auto p-2 rounded text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30">
+                <Trash2 className="h-4 w-4" />
+              </CustomButton>}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <CustomButton 
-            variant="outline" 
-            onClick={handleAddAction} 
-            className="w-auto p-2 rounded text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 border-zinc-800"
-          >
-            <Plus className="h-4 w-4" />
-          </CustomButton>
-          {lead && <CustomButton variant="outline" onClick={handleDelete} className="w-auto p-2 rounded text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30">
-              <Trash2 className="h-4 w-4" />
-            </CustomButton>}
-        </div>
+        
+        {/* Affichage des tags dans l'en-tête */}
+        {lead && lead.tags && lead.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-1">
+            {lead.tags.map((tag) => (
+              <TagBadge key={tag} tag={tag} />
+            ))}
+          </div>
+        )}
       </div>
 
       <Tabs 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, ChevronDown, Filter, Plus, Search, Tag, X } from 'lucide-react';
@@ -6,6 +5,7 @@ import LeadCard from '@/components/leads/LeadCard';
 import CustomButton from '@/components/ui/CustomButton';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
+import TagBadge from '@/components/common/TagBadge';
 import { getLeads, convertToSimpleLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 
@@ -85,9 +85,48 @@ const Leads = () => {
     }
   };
 
-  // Added the missing handleNewLead function
   const handleNewLead = () => {
     navigate('/leads/new');
+  };
+
+  const renderTagsFilter = () => {
+    return (
+      <div className="relative w-full sm:w-auto">
+        <button
+          className="luxury-input pl-3 pr-10 flex items-center gap-2 w-full justify-between"
+          onClick={() => {
+            setShowTagsDropdown(!showTagsDropdown);
+            setShowStatusDropdown(false);
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <Tag className="h-4 w-4" />
+            <span>
+              {selectedTags.length === 0
+                ? 'Tags'
+                : `${selectedTags.length} selected`}
+            </span>
+          </div>
+          <ChevronDown className="h-4 w-4" />
+        </button>
+        {showTagsDropdown && (
+          <div className="absolute left-0 right-0 sm:left-auto sm:w-48 mt-1 bg-card rounded-md border border-border shadow-luxury z-10">
+            <div className="py-1">
+              {tags.map((tag) => (
+                <button
+                  key={tag}
+                  className="flex items-center justify-between w-full px-4 py-2 text-sm text-foreground hover:bg-accent"
+                  onClick={() => toggleTag(tag)}
+                >
+                  <TagBadge tag={tag} className="text-xs" />
+                  {selectedTags.includes(tag) && <Check className="h-4 w-4 ml-2" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -153,59 +192,25 @@ const Leads = () => {
             )}
           </div>
 
-          <div className="relative w-full sm:w-auto">
-            <button
-              className="luxury-input pl-3 pr-10 flex items-center gap-2 w-full justify-between"
-              onClick={() => {
-                setShowTagsDropdown(!showTagsDropdown);
-                setShowStatusDropdown(false);
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                <span>
-                  {selectedTags.length === 0
-                    ? 'Tags'
-                    : `${selectedTags.length} selected`}
-                </span>
-              </div>
-              <ChevronDown className="h-4 w-4" />
-            </button>
-            {showTagsDropdown && (
-              <div className="absolute left-0 right-0 sm:left-auto sm:w-48 mt-1 bg-card rounded-md border border-border shadow-luxury z-10">
-                <div className="py-1">
-                  {tags.map((tag) => (
-                    <button
-                      key={tag}
-                      className="flex items-center justify-between w-full px-4 py-2 text-sm text-foreground hover:bg-accent"
-                      onClick={() => toggleTag(tag)}
-                    >
-                      {tag}
-                      {selectedTags.includes(tag) && <Check className="h-4 w-4" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          {renderTagsFilter()}
         </div>
       </div>
 
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {selectedTags.map((tag) => (
-            <div
-              key={tag}
-              className="flex items-center gap-1 bg-accent text-accent-foreground rounded-full pl-3 pr-2 py-1 text-xs"
-            >
-              {tag}
-              <button onClick={() => toggleTag(tag)}>
+            <div key={tag} className="flex items-center gap-1">
+              <TagBadge tag={tag} />
+              <button 
+                onClick={() => toggleTag(tag)}
+                className="ml-1 bg-gray-200 dark:bg-gray-700 rounded-full w-5 h-5 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600"
+              >
                 <X className="h-3 w-3" />
               </button>
             </div>
           ))}
           <button
-            className="text-xs text-muted-foreground hover:text-foreground"
+            className="text-xs text-muted-foreground hover:text-foreground mt-2"
             onClick={() => setSelectedTags([])}
           >
             Tout effacer
