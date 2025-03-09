@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const LeadEdit = () => {
   const {
@@ -29,6 +30,7 @@ const LeadEdit = () => {
   const [selectedAction, setSelectedAction] = useState<TaskType | null>(null);
   const [actionDate, setActionDate] = useState<Date | undefined>(undefined);
   const [actionTime, setActionTime] = useState<string>('12:00');
+  const [activeTab, setActiveTab] = useState('informations');
   const isMobile = useIsMobile();
   const navigate = useNavigate();
 
@@ -144,6 +146,7 @@ const LeadEdit = () => {
   }
 
   const actionTypes: TaskType[] = ['Call', 'Visites', 'Compromis', 'Acte de vente', 'Contrat de Location', 'Propositions', 'Follow up', 'Estimation', 'Prospection', 'Admin'];
+  
   return <div className="p-4 md:p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
@@ -152,7 +155,7 @@ const LeadEdit = () => {
           </CustomButton>
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold">
-              {lead ? `Modifier ${lead.name}` : 'Nouveau Lead'}
+              {lead ? `${lead.name}` : 'Nouveau Lead'}
             </h1>
             <p className="text-muted-foreground">
               {lead ? 'Modifier les informations du lead' : 'Ajouter un nouveau lead'}
@@ -172,6 +175,76 @@ const LeadEdit = () => {
             </CustomButton>}
         </div>
       </div>
+
+      <Tabs 
+        defaultValue="informations" 
+        value={activeTab} 
+        onValueChange={setActiveTab} 
+        className="w-full"
+      >
+        <TabsList className="w-full bg-background border-b flex justify-between overflow-x-auto">
+          <TabsTrigger 
+            value="informations" 
+            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+          >
+            Informations générales
+          </TabsTrigger>
+          <TabsTrigger 
+            value="criteres" 
+            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+          >
+            Critères de recherche
+          </TabsTrigger>
+          <TabsTrigger 
+            value="statut" 
+            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+          >
+            Statut et suivi
+          </TabsTrigger>
+          <TabsTrigger 
+            value="actions" 
+            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+          >
+            Actions/Tâches
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="informations" className="mt-4">
+          <div className="luxury-card p-6">
+            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="criteres" className="mt-4">
+          <div className="luxury-card p-6">
+            <h3 className="text-xl font-semibold mb-4">Critères de recherche</h3>
+            <p className="text-muted-foreground">Les critères de recherche du lead seront affichés ici.</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="statut" className="mt-4">
+          <div className="luxury-card p-6">
+            <h3 className="text-xl font-semibold mb-4">Statut et suivi</h3>
+            <p className="text-muted-foreground">Les informations de statut et de suivi du lead seront affichées ici.</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="actions" className="mt-4">
+          <div className="luxury-card p-6">
+            <h3 className="text-xl font-semibold mb-4">Actions et tâches</h3>
+            <p className="text-muted-foreground">Les actions et tâches associées au lead seront affichées ici.</p>
+            <div className="mt-4">
+              <CustomButton 
+                variant="chocolate" 
+                onClick={handleAddAction} 
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" /> Ajouter une action
+              </CustomButton>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {isActionDialogOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsActionDialogOpen(false)}>
@@ -289,10 +362,6 @@ const LeadEdit = () => {
           </div>
         </div>
       )}
-
-      <div className="luxury-card p-6">
-        <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} />
-      </div>
 
       {lead && <FloatingActionButtons onAddAction={handleAddAction} phoneNumber={lead.phone} email={lead.email} />}
     </div>;
