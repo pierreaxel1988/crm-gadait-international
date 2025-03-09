@@ -4,6 +4,7 @@ import { Calendar, Mail, Phone, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
+import { useNavigate } from 'react-router-dom';
 
 export interface KanbanItem {
   id: string;
@@ -23,13 +24,19 @@ interface KanbanCardProps {
 }
 
 const KanbanCard = ({ item, className }: KanbanCardProps) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/leads/${item.id}`);
+  };
+
   return (
     <div 
       className={cn(
-        'luxury-card p-4 cursor-grab active:cursor-grabbing',
+        'luxury-card p-4 cursor-pointer hover:shadow-md transition-shadow duration-200',
         className
       )}
-      draggable="true"
+      onClick={handleCardClick}
     >
       <div className="flex justify-between items-start mb-2">
         <h3 className="font-medium text-sm">{item.name}</h3>
