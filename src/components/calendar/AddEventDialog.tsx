@@ -52,7 +52,7 @@ const AddEventDialog = ({
             Ajouter un événement 
             {selectedDate && 
               <span className="font-timesItalic text-loro-navy text-lg ml-2">
-                {format(selectedDate, 'le d MMMM yyyy', { locale: fr })}
+                {format(selectedDate, 'd MMMM yyyy', { locale: fr })}
               </span>
             }
           </DialogTitle>
