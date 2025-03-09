@@ -8,6 +8,7 @@ import { getLead, updateLead, deleteLead } from '@/services/leadService';
 import CustomButton from '@/components/ui/CustomButton';
 import { toast } from '@/hooks/use-toast';
 import { TaskType } from '@/components/kanban/KanbanCard';
+import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
 
 const LeadEdit = () => {
   const { id } = useParams<{ id: string }>();
@@ -152,14 +153,6 @@ const LeadEdit = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <CustomButton
-            variant="outline"
-            onClick={handleAddAction}
-            className="w-auto p-2 rounded border-chocolate-light text-chocolate-dark hover:bg-chocolate-light/10"
-            title="Ajouter une action"
-          >
-            <Plus className="h-4 w-4" />
-          </CustomButton>
           {lead && (
             <CustomButton 
               variant="outline" 
@@ -209,6 +202,15 @@ const LeadEdit = () => {
           onCancel={() => navigate('/leads')}
         />
       </div>
+
+      {/* Floating action buttons that are always visible while scrolling */}
+      {lead && (
+        <FloatingActionButtons 
+          onAddAction={handleAddAction}
+          phoneNumber={lead.phone}
+          email={lead.email}
+        />
+      )}
     </div>
   );
 };
