@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { 
   Banknote, Building, CalendarClock, CalendarDays, Clipboard, Flag, HelpCircle, 
-  Home, MapPin, Phone, PlusCircle, Tag, User, Mail, Check, Building2 
+  Home, MapPin, Phone, PlusCircle, Tag, User, Mail, Check, Building2, Globe 
 } from 'lucide-react';
 import { LeadDetailed, LeadSource, PropertyType, ViewType, Amenity, 
-  PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
+  PurchaseTimeframe, FinancingMethod, PropertyUse, Country } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import CustomButton from '@/components/ui/CustomButton';
@@ -66,8 +67,15 @@ const LeadForm = ({ lead, onSubmit, onCancel }: LeadFormProps) => {
   ];
 
   const propertyTypes: PropertyType[] = [
-    'Villa', 'Appartement', 'Penthouse', 'Terrain', 
-    'Commercial', 'Hotel', 'Vignoble', 'Autres'
+    'Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 
+    'Chalet', 'Terrain', 'Manoir', 'Maison de ville', 'Château', 
+    'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'
+  ];
+
+  const countries: Country[] = [
+    'Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 
+    'Portugal', 'Seychelles', 'Spain', 'Switzerland', 
+    'United Arab Emirates', 'United Kingdom', 'United States'
   ];
 
   const viewTypes: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
@@ -188,6 +196,25 @@ const LeadForm = ({ lead, onSubmit, onCancel }: LeadFormProps) => {
               onChange={handleInputChange}
               className="luxury-input w-full"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">
+              <span className="flex items-center">
+                <Globe className="h-4 w-4 mr-1" /> Pays
+              </span>
+            </label>
+            <select
+              name="country"
+              value={formData.country || ''}
+              onChange={handleInputChange}
+              className="luxury-input w-full"
+            >
+              <option value="">Sélectionner un pays</option>
+              {countries.map(country => (
+                <option key={country} value={country}>{country}</option>
+              ))}
+            </select>
           </div>
           
           <div className="space-y-4">

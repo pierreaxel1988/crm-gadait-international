@@ -15,11 +15,32 @@ export type PropertyType =
   | "Villa" 
   | "Appartement" 
   | "Penthouse" 
+  | "Maison"
+  | "Duplex"
+  | "Chalet"
   | "Terrain" 
+  | "Manoir"
+  | "Maison de ville"
+  | "Château"
+  | "Local commercial"
   | "Commercial" 
   | "Hotel" 
   | "Vignoble" 
   | "Autres";
+
+export type Country =
+  | "Croatia"
+  | "France"
+  | "Greece"
+  | "Maldives"
+  | "Mauritius"
+  | "Portugal"
+  | "Seychelles"
+  | "Spain"
+  | "Switzerland"
+  | "United Arab Emirates"
+  | "United Kingdom"
+  | "United States";
 
 export type ViewType = 
   | "Mer" 
@@ -60,6 +81,7 @@ export interface LeadDetailed {
   // Nouvelles informations générales
   source?: LeadSource;
   propertyReference?: string;
+  country?: Country;
   
   // Critères de recherche
   budget?: string;
