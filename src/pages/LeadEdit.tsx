@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trash2, Plus } from 'lucide-react';
@@ -143,7 +142,7 @@ const LeadEdit = () => {
                 </CustomButton>)}
             </div>
             <div className="mt-4 flex justify-end">
-              <CustomButton variant="outline" onClick={() => setIsActionDialogOpen(false)} className="mr-2">
+              <CustomButton variant="outline" onClick={() => setIsActionDialogOpen(false)} className="mr-2 text-stone-800">
                 Annuler
               </CustomButton>
             </div>
