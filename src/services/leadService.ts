@@ -116,7 +116,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     taxResidence: 'Royaume-Uni',
     nextFollowUpDate: '2023-06-25',
     notes: 'Visite programmée pour 3 propriétés',
-    taskType: 'Document',
+    taskType: 'Visites',
   },
   {
     id: '5',
@@ -145,7 +145,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     taxResidence: 'Suisse',
     nextFollowUpDate: '2023-06-28',
     notes: 'Intéressé par l\'exploitation viticole, pas seulement l\'immobilier',
-    taskType: 'Review',
+    taskType: 'Propositions',
   },
   {
     id: '6',
@@ -170,7 +170,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     propertyUse: 'Résidence principale',
     nationality: 'France',
     taxResidence: 'France',
-    taskType: 'Reminder',
+    taskType: 'Admin',
   },
 ];
 
