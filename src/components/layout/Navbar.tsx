@@ -3,12 +3,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, Menu, Moon, Search, Sun, User, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 interface NavbarProps {
   toggleSidebar?: () => void;
+  sidebarCollapsed?: boolean;
 }
 
-const Navbar = ({ toggleSidebar }: NavbarProps) => {
+const Navbar = ({ toggleSidebar, sidebarCollapsed }: NavbarProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const isMobile = useIsMobile();
@@ -20,7 +22,9 @@ const Navbar = ({ toggleSidebar }: NavbarProps) => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border transition-all duration-300">
+    <nav className={cn(
+      "sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border transition-all duration-300",
+    )}>
       <div className="content-container">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">

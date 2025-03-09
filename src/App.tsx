@@ -20,16 +20,30 @@ const AppRoutes = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+    if (isMobile) {
+      setSidebarOpen(!sidebarOpen);
+    } else {
+      setSidebarCollapsed(!sidebarCollapsed);
+    }
   };
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Navbar toggleSidebar={toggleSidebar} />
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        isCollapsed={sidebarCollapsed} 
+        onClose={() => setSidebarOpen(false)} 
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+      />
+      <div className={cn(
+        "flex-1 flex flex-col overflow-hidden",
+        sidebarOpen && !sidebarCollapsed && !isMobile ? "ml-64" : "",
+        sidebarOpen && sidebarCollapsed && !isMobile ? "ml-20" : ""
+      )}>
+        <Navbar toggleSidebar={toggleSidebar} sidebarCollapsed={sidebarCollapsed} />
         <main className="flex-1 overflow-y-auto">
           <Routes>
             <Route path="/" element={<Index />} />

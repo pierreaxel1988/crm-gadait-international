@@ -7,10 +7,12 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SidebarProps {
   isOpen: boolean;
+  isCollapsed: boolean;
   onClose: () => void;
+  onToggleCollapse: () => void;
 }
 
-const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
+const Sidebar = ({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProps) => {
   const isMobile = useIsMobile();
 
   const navigationItems = [
@@ -51,10 +53,19 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     },
   ];
 
+  // For mobile: sidebar is either fully visible or hidden
+  // For desktop: sidebar can be expanded or collapsed (icons only)
   const sidebarClasses = cn(
-    'fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-transform duration-300 ease-in-out',
-    isOpen ? 'translate-x-0' : isMobile ? '-translate-x-full' : '-translate-x-[200px]',
-    isOpen ? 'w-64' : 'w-[200px]'
+    'fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 ease-in-out',
+    isMobile ? (
+      isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'
+    ) : (
+      isOpen ? (
+        isCollapsed ? 'translate-x-0 w-20' : 'translate-x-0 w-64'
+      ) : (
+        '-translate-x-full w-64'
+      )
+    )
   );
 
   const overlayClasses = cn(
@@ -73,7 +84,11 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       <div className={sidebarClasses}>
         <div className="flex h-full flex-col">
           <div className="flex h-16 items-center border-b border-sidebar-border px-4">
-            <span className="font-serif text-xl font-semibold tracking-tight">Gadait CRM</span>
+            {!isCollapsed ? (
+              <span className="font-serif text-xl font-semibold tracking-tight">Gadait CRM</span>
+            ) : (
+              <span className="font-serif text-xl font-semibold tracking-tight mx-auto">G</span>
+            )}
           </div>
           <nav className="flex-1 overflow-y-auto px-3 py-4">
             <ul className="space-y-1">
@@ -83,22 +98,24 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                     to={item.path}
                     className={({ isActive }) =>
                       cn(
-                        'flex items-center space-x-3 rounded-md px-3 py-2 transition-colors duration-200',
+                        'flex items-center rounded-md px-3 py-2 transition-colors duration-200',
+                        isCollapsed ? 'justify-center' : 'space-x-3',
                         isActive
                           ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                           : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                       )
                     }
                     onClick={isMobile ? onClose : undefined}
+                    title={isCollapsed ? item.name : undefined}
                   >
                     <item.icon size={18} />
-                    {isOpen && <span>{item.name}</span>}
+                    {!isCollapsed && <span>{item.name}</span>}
                   </NavLink>
                 </li>
               ))}
             </ul>
           </nav>
-          {isOpen && (
+          {!isCollapsed && (
             <div className="border-t border-sidebar-border p-4">
               <div className="rounded-md bg-sidebar-accent p-3">
                 <p className="text-sm font-medium text-sidebar-accent-foreground">Need help?</p>
@@ -111,13 +128,20 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               </div>
             </div>
           )}
+          {isCollapsed && (
+            <div className="border-t border-sidebar-border p-4 flex justify-center">
+              <button className="rounded-md bg-sidebar-accent p-2" title="Need help?">
+                <span className="text-sidebar-accent-foreground">?</span>
+              </button>
+            </div>
+          )}
         </div>
         <div 
           className={toggleButtonClasses}
-          onClick={onClose}
-          aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
+          onClick={onToggleCollapse}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </div>
       </div>
     </>
