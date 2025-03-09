@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
@@ -271,215 +270,19 @@ const LeadEdit = () => {
         
         <TabsContent value="informations" className="mt-4">
           <div className="luxury-card p-6">
-            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} />
+            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="informations" />
           </div>
         </TabsContent>
         
         <TabsContent value="criteres" className="mt-4">
           <div className="luxury-card p-6">
-            <h3 className="text-2xl font-semibold border-b pb-3 mb-6">Critères de Recherche</h3>
-            
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-lg font-medium">
-                  <Banknote className="h-5 w-5 text-gray-600" /> Budget
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-                  {lead?.budget || "Non spécifié"}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-lg font-medium">
-                  <MapPin className="h-5 w-5 text-gray-600" /> Localisation souhaitée
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-                  {lead?.desiredLocation || "Non spécifié"}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-lg font-medium">
-                  <Building className="h-5 w-5 text-gray-600" /> Type de bien
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-                  {lead?.propertyType || "Non spécifié"}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-lg font-medium">
-                  <Building2 className="h-5 w-5 text-gray-600" /> Surface habitable
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-                  {lead?.livingArea || "Non spécifié"}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-lg font-medium">
-                  Nombre de chambres
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-                  {lead?.bedrooms || "Non spécifié"}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-lg font-medium">
-                  Vue souhaitée
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-                  {lead?.views && lead.views.length > 0 
-                    ? lead.views.join(", ") 
-                    : "Non spécifié"}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-lg font-medium">
-                  Prestations souhaitées
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-                  {lead?.amenities && lead.amenities.length > 0 
-                    ? lead.amenities.join(", ") 
-                    : "Non spécifié"}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-lg font-medium">
-                  Date d'achat souhaitée
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-                  {lead?.purchaseTimeframe || "Non spécifié"}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-lg font-medium">
-                  Mode de financement
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-                  {lead?.financingMethod || "Non spécifié"}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-lg font-medium">
-                  Type d'investissement
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-                  {lead?.propertyUse || "Non spécifié"}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-lg font-medium">
-                  <Flag className="h-5 w-5 text-gray-600" /> Nationalité
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-                  {lead?.nationality || "Non spécifié"}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-lg font-medium">
-                  <Flag className="h-5 w-5 text-gray-600" /> Résidence fiscale
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-                  {lead?.taxResidence || "Non spécifié"}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-lg font-medium">
-                  <HelpCircle className="h-5 w-5 text-gray-600" /> Notes
-                </label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200 whitespace-pre-line">
-                  {lead?.notes || "Aucune note"}
-                </div>
-              </div>
-            </div>
+            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="criteres" />
           </div>
         </TabsContent>
         
         <TabsContent value="statut" className="mt-4">
           <div className="luxury-card p-6">
-            <h3 className="text-xl font-semibold mb-4">Statut et suivi</h3>
-            <div className="space-y-4 mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <h4 className="font-medium">Statut actuel</h4>
-                  <div className="flex">
-                    <span className={cn(
-                      "px-2 py-1 text-xs rounded-full",
-                      lead?.status === "New" && "bg-blue-100 text-blue-800",
-                      lead?.status === "Contacted" && "bg-purple-100 text-purple-800",
-                      lead?.status === "Qualified" && "bg-sky-100 text-sky-800",
-                      lead?.status === "Proposal" && "bg-amber-100 text-amber-800",
-                      lead?.status === "Visit" && "bg-lime-100 text-lime-800",
-                      lead?.status === "Offer" && "bg-orange-100 text-orange-800",
-                      lead?.status === "Deposit" && "bg-teal-100 text-teal-800",
-                      lead?.status === "Signed" && "bg-green-100 text-green-800",
-                    )}>
-                      {lead?.status}
-                    </span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Tags</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {lead?.tags && lead.tags.length > 0 ? (
-                      lead.tags.map((tag, index) => (
-                        <span key={index} className={cn(
-                          "px-2 py-1 text-xs rounded-full",
-                          tag === "Vip" && "bg-amber-100 text-amber-800",
-                          tag === "Hot" && "bg-red-100 text-red-800",
-                          tag === "Serious" && "bg-green-100 text-green-800",
-                          tag === "Cold" && "bg-blue-100 text-blue-800",
-                          tag === "No response" && "bg-gray-100 text-gray-800",
-                          tag === "No phone" && "bg-purple-100 text-purple-800",
-                          tag === "Fake" && "bg-stone-100 text-stone-800",
-                        )}>
-                          {tag}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-muted-foreground text-sm">Aucun tag</span>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Source du lead</h4>
-                  <p className="text-muted-foreground">{lead?.source || "Non spécifié"}</p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Responsable du suivi</h4>
-                  <p className="text-muted-foreground">{lead?.assignedTo || "Non assigné"}</p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Date de création</h4>
-                  <p className="text-muted-foreground">
-                    {lead?.createdAt ? format(new Date(lead.createdAt), 'dd/MM/yyyy') : "Non spécifié"}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Dernier contact</h4>
-                  <p className="text-muted-foreground">
-                    {lead?.lastContactedAt ? format(new Date(lead.lastContactedAt), 'dd/MM/yyyy') : "Aucun contact"}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium">Prochain suivi prévu</h4>
-                  <p className="text-muted-foreground">
-                    {lead?.nextFollowUpDate 
-                      ? format(new Date(lead.nextFollowUpDate), 'dd/MM/yyyy à HH:mm') 
-                      : "Aucun suivi planifié"}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="statut" />
           </div>
         </TabsContent>
         
