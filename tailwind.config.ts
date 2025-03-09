@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -85,6 +84,9 @@ export default {
 				chocolate: {
 					'dark': '#403E43',        // Dark Chocolate
 					'light': '#8E9196',       // Light Chocolate
+				},
+				times: {
+					'text': 'rgb(18, 16, 16)', // Exact RGB value from the image
 				}
 			},
 			borderRadius: {
@@ -96,8 +98,9 @@ export default {
 				sans: ['Inter', 'sans-serif'],
 				serif: ['Playfair Display', 'serif'],
 				optima: ['OptimaLTStd', 'Inter', 'sans-serif'],
-				times: ['TimesNow-SemiLight', 'serif'],
-				timesItalic: ['TimesNow-LightItalic', 'serif'],
+				times: ['TimesNow-SemiLight', 'Georgia', 'serif'],
+				timesItalic: ['TimesNow-LightItalic', 'Georgia', 'serif'],
+				timesNowSemi: ['TimesNow-Semi-Light', 'Georgia', 'serif'],
 			},
 			keyframes: {
 				'accordion-down': {

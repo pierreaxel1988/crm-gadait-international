@@ -12,8 +12,16 @@
 
 @font-face {
   font-family: 'TimesNow-SemiLight';
-  src: url('/lovable-uploads/ff01d8fc-eccf-4f3f-932b-55cf10ca8e06.png') format('woff2');
-  font-weight: normal;
+  src: url('/lovable-uploads/7670f170-bb54-4195-b002-a6072a77fd9d.png') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TimesNow-Semi-Light';
+  src: url('/lovable-uploads/7670f170-bb54-4195-b002-a6072a77fd9d.png') format('woff2');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
