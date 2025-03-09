@@ -45,11 +45,20 @@ const AddEventDialog = ({
   categories = []
 }: AddEventDialogProps) => {
   
-  // Générer les options d'heures de 00:00 à 23:30 par intervalle de 30 minutes
+  // Générer les options d'heures de 00:00 à 23:30 par intervalle de 30 minutes avec format AM/PM
   const timeOptions = Array.from({ length: 48 }, (_, i) => {
-    const hour = Math.floor(i / 2).toString().padStart(2, '0');
+    const hour = Math.floor(i / 2);
     const minute = (i % 2) === 0 ? '00' : '30';
-    return `${hour}:${minute}`;
+    const hourFormatted = hour.toString().padStart(2, '0');
+    const timeValue = `${hourFormatted}:${minute}`;
+    
+    // Créer un affichage avec AM/PM
+    const ampm = hour < 12 ? 'AM' : 'PM';
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    const hour12Formatted = hour12.toString();
+    const displayTime = `${hour12Formatted}:${minute} ${ampm} (${hourFormatted}:${minute})`;
+    
+    return { value: timeValue, display: displayTime };
   });
   
   return (
@@ -87,7 +96,7 @@ const AddEventDialog = ({
             />
           </div>
 
-          {/* Nouveau champ pour la sélection de l'heure */}
+          {/* Champ pour la sélection de l'heure avec format AM/PM */}
           <div className="grid gap-2">
             <Label htmlFor="time">Heure</Label>
             <Select 
@@ -99,8 +108,8 @@ const AddEventDialog = ({
               </SelectTrigger>
               <SelectContent className="max-h-60">
                 {timeOptions.map(time => (
-                  <SelectItem key={time} value={time}>
-                    {time}
+                  <SelectItem key={time.value} value={time.value}>
+                    {time.display}
                   </SelectItem>
                 ))}
               </SelectContent>
