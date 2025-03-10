@@ -1,5 +1,6 @@
-import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+
+import React, { useState } from 'react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Sector } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LeadSourceDistributionProps {
@@ -8,6 +9,7 @@ interface LeadSourceDistributionProps {
 
 const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributionProps) => {
   const isMobile = useIsMobile();
+  const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
   
   // Données mockées pour la distribution des sources/types
   const data = isLeadSources ? [
@@ -23,10 +25,40 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
     { name: 'Maison', value: 10 },
   ];
   
-  const COLORS = ['#2C3E50', '#34495E', '#3D5A80', '#446A9E', '#6A8CBB'];
+  // Custom color palette with more elegant, sophisticated colors
+  const COLORS = isLeadSources 
+    ? ['#9b87f5', '#33C3F0', '#FEC6A1', '#D3E4FD', '#8E9196'] 
+    : ['#2C3E50', '#7E69AB', '#6E59A5', '#1A1F2C'];
   
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
-    if (isMobile) return null; // Hide labels on mobile
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+  
+  const onPieLeave = () => {
+    setActiveIndex(undefined);
+  };
+
+  const renderActiveShape = (props: any) => {
+    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+  
+    return (
+      <g>
+        <Sector
+          cx={cx}
+          cy={cy}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius + 6}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          fill={fill}
+          className="filter drop-shadow-md"
+        />
+      </g>
+    );
+  };
+
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
+    if (isMobile || innerRadius > 60) return null;
     
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
@@ -40,46 +72,69 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
         textAnchor="middle" 
         dominantBaseline="central"
         fontSize={12}
-        fontWeight="bold"
+        fontWeight="semibold"
+        className="select-none"
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
     );
   };
   
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-slate-800 p-3 rounded-md shadow-md border dark:border-slate-700 text-left">
+          <p className="font-medium text-foreground">{payload[0].name}</p>
+          <p className="text-sm text-muted-foreground">{`${payload[0].value}%`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+  
   return (
-    <div className="w-full h-full">
-      <ResponsiveContainer width="100%" height={isMobile ? 300 : 400}>
+    <div className="w-full h-full flex items-center justify-center">
+      <ResponsiveContainer width="100%" height={isMobile ? 280 : 350}>
         <PieChart>
           <Pie
+            activeIndex={activeIndex}
+            activeShape={renderActiveShape}
             data={data}
             cx="50%"
             cy="50%"
             labelLine={false}
             label={renderCustomizedLabel}
-            outerRadius={isMobile ? 100 : 150}
+            outerRadius={isMobile ? 90 : 130}
+            innerRadius={isMobile ? 60 : 80}
             fill="#8884d8"
             dataKey="value"
+            onMouseEnter={onPieEnter}
+            onMouseLeave={onPieLeave}
+            animationDuration={800}
+            animationBegin={300}
+            animationEasing="ease-out"
+            className="drop-shadow-sm"
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Cell 
+                key={`cell-${index}`} 
+                fill={COLORS[index % COLORS.length]} 
+                stroke="transparent"
+                className="hover:opacity-90 transition-opacity"
+              />
             ))}
           </Pie>
-          <Tooltip 
-            formatter={(value) => [`${value}%`, 'Pourcentage']}
-            contentStyle={{ 
-              backgroundColor: 'white', 
-              borderRadius: '8px', 
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              border: 'none'
-            }}
-          />
+          <Tooltip content={<CustomTooltip />} />
           <Legend 
-            verticalAlign="bottom" 
-            align="center"
-            layout={isMobile ? "vertical" : "horizontal"}
+            verticalAlign={isMobile ? "bottom" : "middle"}
+            align={isMobile ? "center" : "right"}
+            layout={isMobile ? "horizontal" : "vertical"}
             iconType="circle"
             iconSize={10}
+            wrapperStyle={isMobile ? {} : { right: 20 }}
+            formatter={(value: string) => (
+              <span className="text-sm text-foreground font-medium">{value}</span>
+            )}
           />
         </PieChart>
       </ResponsiveContainer>
