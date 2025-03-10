@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   BrowserRouter,
@@ -9,26 +8,12 @@ import {
 import { Toaster } from "@/components/ui/toaster"
 import { useAuth } from '@/hooks/useAuth';
 import Auth from '@/pages/Auth';
-import Index from '@/pages/Index';
-import Leads from '@/pages/Leads';
-import LeadNew from '@/pages/LeadNew';
-import LeadEdit from '@/pages/LeadEdit';
-import Pipeline from '@/pages/Pipeline';
-import Calendar from '@/pages/Calendar';
-import Reports from '@/pages/Reports';
-import NotFound from '@/pages/NotFound';
 import Layout from '@/components/layout/Layout';
 import { cn as cx } from "@/lib/utils";
-import Properties from '@/pages/Properties';
-import PropertySelection from '@/pages/PropertySelection';
-import PropertySelectionView from '@/pages/PropertySelectionView';
 import { Loader } from 'lucide-react';
 
 function App() {
-  // For demonstration, let's ensure authentication is active
-  const { isLoading } = useAuth();
-  // Set authentication to true for demo purposes
-  const isAuthenticated = true;
+  const { isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) {
     return (
