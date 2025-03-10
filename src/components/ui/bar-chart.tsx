@@ -20,8 +20,8 @@ interface BarChartProps {
 }
 
 export function BarChart({ data }: BarChartProps) {
-  // Define color gradients for bars
-  const COLORS = ['#8B5CF6', '#9B87F5', '#A78DF6', '#B39DF7', '#C0ADF8'];
+  // Define color gradients for bars - Updated to navy blue tones
+  const COLORS = ['#2C3E50', '#34495E', '#3D5A80', '#446A9E', '#4A7ABB'];
   
   // Calculate a better Y-axis domain
   const maxValue = Math.max(...data.map(item => item.total));
@@ -33,7 +33,7 @@ export function BarChart({ data }: BarChartProps) {
       config={{
         total: {
           label: "Total",
-          color: "hsl(var(--primary))"
+          color: "#2C3E50"
         }
       }}
     >
@@ -43,14 +43,14 @@ export function BarChart({ data }: BarChartProps) {
           margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
           barCategoryGap="20%"
         >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.1)" />
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(44, 62, 80, 0.1)" />
           <XAxis
             dataKey="name"
             tickLine={false}
             axisLine={false}
             padding={{ left: 20, right: 20 }}
             fontSize={12}
-            tick={{ fill: 'rgba(0,0,0,0.7)' }}
+            tick={{ fill: 'rgba(44, 62, 80, 0.8)' }}
           />
           <YAxis
             tickLine={false}
@@ -58,7 +58,7 @@ export function BarChart({ data }: BarChartProps) {
             tickFormatter={(value) => `€${value}`}
             fontSize={12}
             domain={[Math.floor(minValue * 0.9), Math.ceil(maxValue * 1.1)]} // Better domain calculation
-            tick={{ fill: 'rgba(0,0,0,0.7)' }}
+            tick={{ fill: 'rgba(44, 62, 80, 0.8)' }}
           />
           <Tooltip
             content={({ active, payload, label }) => {
