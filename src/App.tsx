@@ -25,7 +25,7 @@ import PropertySelectionView from '@/pages/PropertySelectionView';
 import { Loader } from 'lucide-react';
 
 function App() {
-  const { isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -39,20 +39,30 @@ function App() {
     <div className={cx('App')}>
       <BrowserRouter>
         <Routes>
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/selections/:token" element={<PropertySelectionView />} />
-          <Route element={<Layout />}>
-            <Route path="/" element={<Navigate to="/reports" replace />} />
-            <Route path="/leads" element={<Leads />} />
-            <Route path="/leads/new" element={<LeadNew />} />
-            <Route path="/leads/:id" element={<LeadEdit />} />
-            <Route path="/pipeline" element={<Pipeline />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/properties" element={<Properties />} />
-            <Route path="/lead-selection" element={<PropertySelection />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
+          {!isAuthenticated ? (
+            <>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/selections/:token" element={<PropertySelectionView />} />
+              <Route path="*" element={<Navigate to="/auth" replace />} />
+            </>
+          ) : (
+            <>
+              <Route path="/auth" element={<Navigate to="/" replace />} />
+              <Route path="/selections/:token" element={<PropertySelectionView />} />
+              <Route element={<Layout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/leads" element={<Leads />} />
+                <Route path="/leads/new" element={<LeadNew />} />
+                <Route path="/leads/:id" element={<LeadEdit />} />
+                <Route path="/pipeline" element={<Pipeline />} />
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/properties" element={<Properties />} />
+                <Route path="/lead-selection" element={<PropertySelection />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </>
+          )}
         </Routes>
       </BrowserRouter>
       <Toaster />
