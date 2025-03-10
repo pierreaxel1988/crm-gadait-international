@@ -23,9 +23,26 @@ export function BarChart({ data }: BarChartProps) {
   // Define color gradients for bars - Updated to navy blue tones
   const COLORS = ['#2C3E50', '#34495E', '#3D5A80', '#446A9E', '#4A7ABB'];
   
+  // Check for data in localStorage
+  const [chartData, setChartData] = React.useState(data);
+  
+  React.useEffect(() => {
+    const savedData = localStorage.getItem('adminChartData');
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          setChartData(parsedData);
+        }
+      } catch (e) {
+        console.error('Error parsing chart data from localStorage:', e);
+      }
+    }
+  }, [data]);
+  
   // Calculate a better Y-axis domain
-  const maxValue = Math.max(...data.map(item => item.total));
-  const minValue = Math.min(...data.map(item => item.total));
+  const maxValue = Math.max(...chartData.map(item => item.total));
+  const minValue = Math.min(...chartData.map(item => item.total));
   const buffer = (maxValue - minValue) * 0.1; // 10% buffer
   
   return (
@@ -39,7 +56,7 @@ export function BarChart({ data }: BarChartProps) {
     >
       <ResponsiveContainer width="100%" height="100%">
         <RechartsBarChart 
-          data={data} 
+          data={chartData} 
           margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
           barCategoryGap="20%"
         >
@@ -81,7 +98,7 @@ export function BarChart({ data }: BarChartProps) {
             maxBarSize={60}
             animationDuration={800}
           >
-            {data.map((entry, index) => (
+            {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Bar>

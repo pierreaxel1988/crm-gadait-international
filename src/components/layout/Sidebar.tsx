@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { X } from 'lucide-react';
@@ -41,13 +42,17 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
       path: '/reports',
     },
     {
+      name: 'Admin',
+      path: '/admin',
+    },
+    {
       name: 'Settings',
       path: '/settings',
     },
   ];
 
-  // For mobile: sidebar is either fully visible or hidden
-  // For desktop: sidebar is a permanent element that slides in from the left
+  // Pour mobile: sidebar est soit entièrement visible soit cachée
+  // Pour desktop: sidebar est un élément permanent qui glisse depuis la gauche
   const sidebarClasses = cn(
     'fixed inset-y-0 left-0 z-40 bg-loro-white transform transition-all duration-300 ease-in-out w-80',
     isOpen ? 'translate-x-0' : '-translate-x-full'
