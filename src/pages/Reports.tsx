@@ -7,7 +7,7 @@ import LeadsTabContent from '@/components/reports/LeadsTabContent';
 import ConversionTabContent from '@/components/reports/ConversionTabContent';
 
 const Reports = () => {
-  const [period, setPeriod] = useState('month');
+  const [period, setPeriod] = useState<string>('month');
   
   return (
     <div className="p-4 lg:p-8 space-y-6 max-w-[1920px] mx-auto">

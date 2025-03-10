@@ -33,8 +33,9 @@ const ReportsHeader: React.FC<ReportsHeaderProps> = ({ period, setPeriod }) => {
           </SelectContent>
         </Select>
         
-        <Button variant="outline" size="icon" className="w-full sm:w-auto">
+        <Button variant="outline" className="w-full sm:w-auto px-3 py-2 flex items-center gap-2">
           <Download className="h-4 w-4" />
+          <span>Exporter</span>
         </Button>
       </div>
     </div>
