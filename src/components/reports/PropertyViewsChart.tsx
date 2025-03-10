@@ -3,25 +3,18 @@ import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { getProperties } from '@/services/propertyService';
 import { Property } from '@/types/property';
+import { useQuery } from '@tanstack/react-query';
 
 const PropertyViewsChart = () => {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const propertiesData = await getProperties();
-        setProperties(propertiesData);
-      } catch (error) {
-        console.error("Error fetching properties:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProperties();
-  }, []);
+  // Use react-query for data fetching with proper caching
+  const { data: properties = [], isLoading, error } = useQuery({
+    queryKey: ['properties'],
+    queryFn: async () => {
+      const propertiesData = await getProperties();
+      return propertiesData || [];
+    },
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+  });
   
   // Prendre les 5 premières propriétés et simuler des vues
   const topProperties = properties.slice(0, 5).map(property => ({
@@ -29,8 +22,24 @@ const PropertyViewsChart = () => {
     views: Math.floor(Math.random() * 50) + 10 // Simuler des vues entre 10 et 60
   }));
 
-  if (loading) {
+  if (isLoading) {
     return <div className="flex items-center justify-center h-64">Chargement des données...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64 text-red-500">
+        Erreur lors du chargement des propriétés
+      </div>
+    );
+  }
+
+  if (properties.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-muted-foreground">
+        Aucune propriété disponible
+      </div>
+    );
   }
 
   return (

@@ -9,8 +9,12 @@ import LeadStatusPieChart from '@/components/reports/LeadStatusPieChart';
 import PropertyViewsChart from '@/components/reports/PropertyViewsChart';
 import LeadSourcesTable from '@/components/reports/LeadSourcesTable';
 import DateRangeFilter from '@/components/reports/DateRangeFilter';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const Reports = () => {
+// Create a client
+const queryClient = new QueryClient();
+
+const ReportsContent = () => {
   const [dateRange, setDateRange] = useState<{from: Date | undefined, to: Date | undefined}>({
     from: new Date(new Date().setDate(new Date().getDate() - 30)),
     to: new Date()
@@ -83,6 +87,15 @@ const Reports = () => {
         <LeadSourcesTable />
       </DashboardCard>
     </div>
+  );
+};
+
+// Wrap everything in QueryClientProvider
+const Reports = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ReportsContent />
+    </QueryClientProvider>
   );
 };
 
