@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BarChart3, CalendarDays, Phone, Plus, Users } from 'lucide-react';
 import LeadStatCard from '@/components/dashboard/LeadStatCard';
@@ -89,9 +88,9 @@ const Index = () => {
           title="Lead Acquisition" 
           subtitle="Last 7 months" 
           icon={<BarChart3 className="h-5 w-5" />} 
-          className="lg:col-span-2 h-[450px] lg:h-[550px]"
+          className="lg:col-span-2 h-[500px] lg:h-[600px]"
         >
-          <div className="h-full w-full pt-6 px-2">
+          <div className="h-full w-full">
             <BarChart data={chartData} />
           </div>
         </DashboardCard>
