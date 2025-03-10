@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Sector } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -22,16 +21,20 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
     { name: 'Recommandations', value: 12 },
     { name: "Apporteur d'affaire", value: 5 },
   ] : [
-    { name: 'Villa', value: 40 },
-    { name: 'Appartement', value: 30 },
-    { name: 'Penthouse', value: 20 },
-    { name: 'Maison', value: 10 },
+    { name: 'Villa', value: 25 },
+    { name: 'Appartement', value: 20 },
+    { name: 'Penthouse', value: 10 },
+    { name: 'Terrain', value: 10 },
+    { name: 'Commercial', value: 15 },
+    { name: 'Hotel', value: 10 },
+    { name: 'Vignoble', value: 5 },
+    { name: 'Autres', value: 5 },
   ];
   
   // Custom color palette with more elegant, sophisticated colors
   const COLORS = isLeadSources 
     ? ['#9b87f5', '#33C3F0', '#FEC6A1', '#D3E4FD', '#E5DEFF', '#7E69AB', '#8E9196'] 
-    : ['#2C3E50', '#7E69AB', '#6E59A5', '#1A1F2C'];
+    : ['#2C3E50', '#7E69AB', '#6E59A5', '#1A1F2C', '#4A6D8C', '#8C6E4A', '#A58C6E', '#8E9196'];
   
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);
@@ -99,18 +102,18 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
     <div className="w-full h-full flex items-center justify-center">
       <ResponsiveContainer width="100%" height={isMobile ? 280 : 350}>
         <PieChart 
-          margin={{ top: 0, right: 0, bottom: 20, left: 0 }} // Added bottom margin
+          margin={{ top: 0, right: 0, bottom: 30, left: 0 }}
         >
           <Pie
             activeIndex={activeIndex}
             activeShape={renderActiveShape}
             data={data}
             cx="50%"
-            cy="45%" // Shifted up to prevent overflow
+            cy="42%"
             labelLine={false}
             label={renderCustomizedLabel}
-            outerRadius={isMobile ? 85 : 120} // Slightly reduced
-            innerRadius={isMobile ? 55 : 75} // Slightly reduced
+            outerRadius={isMobile ? 80 : 115}
+            innerRadius={isMobile ? 50 : 70}
             fill="#8884d8"
             dataKey="value"
             onMouseEnter={onPieEnter}
@@ -136,7 +139,7 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
             layout="horizontal"
             iconType="circle"
             iconSize={10}
-            wrapperStyle={{ paddingTop: 20 }} // Add padding at the top of the legend
+            wrapperStyle={{ paddingTop: 25 }}
             formatter={(value: string) => (
               <span className="text-sm text-foreground font-medium">{value}</span>
             )}
