@@ -8,9 +8,7 @@ import { Loader } from 'lucide-react';
 const PropertyViewsChart = () => {
   const { data: properties = [], isLoading, error } = useQuery({
     queryKey: ['properties'],
-    queryFn: async () => {
-      return await getProperties();
-    },
+    queryFn: getProperties,
   });
   
   // Generate view data for properties
