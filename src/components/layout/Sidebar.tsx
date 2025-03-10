@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Sheet,
@@ -13,7 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { ModeToggle } from "@/components/ModeToggle"
+import ModeToggle from "@/components/ModeToggle"
 import { useTheme } from 'next-themes'
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';

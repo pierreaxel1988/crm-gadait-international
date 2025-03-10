@@ -8,6 +8,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   user: any | null;
+  signInWithGoogle?: () => Promise<void>; // Add optional signInWithGoogle method
 }
 
 // Create the context with a default value
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: () => {},
   user: null,
+  signInWithGoogle: async () => {}, // Add default implementation
 });
 
 // Hook to use the auth context
@@ -67,12 +69,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
+  // Add signInWithGoogle method
+  const signInWithGoogle = async () => {
+    setIsLoading(true);
+    try {
+      // Mock Google auth for now
+      const mockGoogleUser = { id: '2', email: 'google-user@example.com', name: 'Google User' };
+      localStorage.setItem('user', JSON.stringify(mockGoogleUser));
+      setUser(mockGoogleUser);
+    } catch (error) {
+      console.error('Google login failed:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value = {
     isAuthenticated: !!user,
     isLoading,
     login,
     logout,
     user,
+    signInWithGoogle, // Add the method to the context value
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

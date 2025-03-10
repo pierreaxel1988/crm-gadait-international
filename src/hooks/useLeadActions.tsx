@@ -6,6 +6,9 @@ import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { addActionToLead, updateLead } from '@/services/leadService';
 
+// Export ActionType to resolve the import error in LeadTabs
+export type ActionType = TaskType;
+
 export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: LeadDetailed) => void) => {
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState<TaskType | null>(null);

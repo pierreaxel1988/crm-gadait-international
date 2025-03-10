@@ -19,7 +19,7 @@ const Navbar = ({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const isMobile = useIsMobile();
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
 
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
@@ -29,7 +29,7 @@ const Navbar = ({
 
   const handleSignOut = async () => {
     try {
-      await signOut();
+      await logout();
       toast.success('Successfully signed out');
     } catch (error) {
       toast.error('Error signing out');
