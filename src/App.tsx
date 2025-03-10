@@ -1,8 +1,10 @@
+
 import React from 'react';
 import {
   BrowserRouter,
   Routes,
   Route,
+  Navigate,
 } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster"
 import { useAuth } from '@/hooks/useAuth';
@@ -40,7 +42,7 @@ function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/selections/:token" element={<PropertySelectionView />} />
           <Route element={<Layout />}>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Navigate to="/reports" replace />} />
             <Route path="/leads" element={<Leads />} />
             <Route path="/leads/new" element={<LeadNew />} />
             <Route path="/leads/:id" element={<LeadEdit />} />
