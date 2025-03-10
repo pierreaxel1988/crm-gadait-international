@@ -24,9 +24,9 @@ interface SalesPerformanceChartProps {
 const SalesPerformanceChart = ({ data, isConversionFunnel = false }: SalesPerformanceChartProps) => {
   const isMobile = useIsMobile();
   
-  // Enhanced colors for better visibility, especially on mobile
+  // Palette de couleurs améliorée avec une progression plus claire
   const COLORS = isConversionFunnel 
-    ? ['#1A5276', '#2471A3', '#2E86C1', '#3498DB', '#5DADE2', '#85C1E9']
+    ? ['#0D47A1', '#1565C0', '#1976D2', '#1E88E5', '#2196F3', '#42A5F5', '#64B5F6', '#90CAF9', '#BBDEFB']
     : ['#2C3E50', '#34495E', '#3D5A80', '#446A9E', '#4A7ABB'];
   
   const formatYAxis = (value: number) => {
@@ -41,21 +41,25 @@ const SalesPerformanceChart = ({ data, isConversionFunnel = false }: SalesPerfor
       : `€${value.toLocaleString()}`;
   };
 
-  // Adjust margins and other properties based on mobile
+  // Toujours utiliser une disposition verticale sur mobile pour le funnel
+  const layout = isMobile && isConversionFunnel ? "vertical" : "horizontal";
+  
+  // Ajustement des marges et autres propriétés pour une meilleure lisibilité sur mobile
   const chartMargin = isMobile
-    ? { top: 10, right: 10, bottom: isConversionFunnel ? 50 : 30, left: 20 }
+    ? { top: 10, right: 20, bottom: 10, left: isConversionFunnel ? 120 : 40 }
     : { top: 20, right: 30, bottom: 30, left: 30 };
 
+  // Taille des barres optimisée pour mobile
   const barSize = isMobile
-    ? (isConversionFunnel ? 20 : 40)
-    : (isConversionFunnel ? 40 : 60);
+    ? (isConversionFunnel ? 18 : 30)
+    : (isConversionFunnel ? 30 : 60);
 
-  // Optimize bar gap for better mobile display
+  // Espacement entre les barres
   const barGap = isMobile
-    ? (isConversionFunnel ? "5%" : "10%")
-    : (isConversionFunnel ? "10%" : "20%");
+    ? (isConversionFunnel ? "2%" : "8%")
+    : (isConversionFunnel ? "8%" : "15%");
 
-  // Dynamic font size
+  // Taille de police adaptative
   const fontSize = isMobile ? 10 : 12;
   
   return (
@@ -72,31 +76,34 @@ const SalesPerformanceChart = ({ data, isConversionFunnel = false }: SalesPerfor
           data={data}
           margin={chartMargin}
           barCategoryGap={barGap}
-          layout={isMobile && isConversionFunnel ? "vertical" : "horizontal"}
+          layout={layout}
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(44, 62, 80, 0.1)" />
           <XAxis
-            dataKey={isMobile && isConversionFunnel ? "total" : "name"}
-            type={isMobile && isConversionFunnel ? "number" : "category"}
+            dataKey={layout === "vertical" ? "total" : "name"}
+            type={layout === "vertical" ? "number" : "category"}
             tickLine={false}
             axisLine={false}
             padding={{ left: 20, right: 20 }}
             fontSize={fontSize}
             tick={{ fill: 'rgba(44, 62, 80, 0.8)' }}
-            angle={isMobile && !isConversionFunnel ? -45 : 0}
-            textAnchor={isMobile && !isConversionFunnel ? "end" : "middle"}
-            height={isMobile && !isConversionFunnel ? 60 : 30}
-            tickFormatter={isMobile && isConversionFunnel ? formatYAxis : undefined}
+            angle={isMobile && layout === "horizontal" ? -45 : 0}
+            textAnchor={isMobile && layout === "horizontal" ? "end" : "middle"}
+            height={isMobile && layout === "horizontal" ? 70 : 30}
+            width={isMobile && layout === "vertical" ? 40 : undefined}
+            tickFormatter={layout === "vertical" ? formatYAxis : undefined}
+            interval={0} // Afficher toutes les étiquettes
           />
           <YAxis
-            dataKey={isMobile && isConversionFunnel ? "name" : "total"}
-            type={isMobile && isConversionFunnel ? "category" : "number"}
+            dataKey={layout === "vertical" ? "name" : "total"}
+            type={layout === "vertical" ? "category" : "number"}
             tickLine={false}
             axisLine={false}
-            width={isMobile && isConversionFunnel ? 70 : undefined}
-            tickFormatter={isMobile && isConversionFunnel ? undefined : formatYAxis}
+            width={layout === "vertical" ? 110 : undefined}
+            tickFormatter={layout === "vertical" ? undefined : formatYAxis}
             fontSize={fontSize}
             tick={{ fill: 'rgba(44, 62, 80, 0.8)' }}
+            interval={0} // Afficher toutes les étiquettes
           />
           <Tooltip
             content={({ active, payload, label }) => {
@@ -114,7 +121,7 @@ const SalesPerformanceChart = ({ data, isConversionFunnel = false }: SalesPerfor
             }}
           />
           <Bar
-            dataKey={isMobile && isConversionFunnel ? "total" : "total"}
+            dataKey="total"
             radius={[4, 4, 0, 0]}
             maxBarSize={barSize}
             animationDuration={800}
@@ -123,7 +130,7 @@ const SalesPerformanceChart = ({ data, isConversionFunnel = false }: SalesPerfor
               <Cell 
                 key={`cell-${index}`} 
                 fill={COLORS[index % COLORS.length]} 
-                fillOpacity={isConversionFunnel ? 0.9 : 0.8}
+                fillOpacity={0.9}
               />
             ))}
           </Bar>

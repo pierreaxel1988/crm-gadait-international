@@ -8,6 +8,19 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const ConversionTabContent: React.FC = () => {
   const isMobile = useIsMobile();
+  
+  // Données du parcours de conversion avec les nouvelles étapes
+  const conversionData = [
+    { name: 'Nouveaux', total: 180 },
+    { name: 'Contactés', total: 150 },
+    { name: 'Qualifiés', total: 120 },
+    { name: 'Propositions', total: 100 },
+    { name: 'Visites en cours', total: 80 },
+    { name: 'Offre en cours', total: 60 },
+    { name: 'Dépôt reçu', total: 40 },
+    { name: 'Signature finale', total: 30 },
+    { name: 'Conclus', total: 25 }
+  ];
 
   return (
     <div className="space-y-6">
@@ -36,19 +49,12 @@ const ConversionTabContent: React.FC = () => {
         title="Parcours de conversion" 
         subtitle="Évolution du statut des leads dans le pipeline" 
         icon={<ArrowDownUp className="h-5 w-5" />}
-        className={isMobile ? "h-[600px]" : "h-[500px]"}
+        className={isMobile ? "h-[750px]" : "h-[500px]"}
       >
         <div className={`h-full w-full ${isMobile ? "pt-2" : "pt-6"}`}>
           <SalesPerformanceChart 
-            data={[
-              { name: 'Nouveaux', total: 180 },
-              { name: 'Contactés', total: 150 },
-              { name: 'Qualifiés', total: 120 },
-              { name: 'Visite', total: 80 },
-              { name: 'Offre', total: 40 },
-              { name: 'Gagnés', total: 25 }
-            ]} 
-            isConversionFunnel 
+            data={conversionData} 
+            isConversionFunnel={true} 
           />
         </div>
       </DashboardCard>
