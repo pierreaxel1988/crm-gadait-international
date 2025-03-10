@@ -26,16 +26,16 @@ const Reports = () => {
   ];
   
   return (
-    <div className="p-6 lg:p-10 space-y-8 max-w-[1920px] mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+    <div className="p-4 lg:p-8 space-y-6 max-w-[1920px] mx-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold">Rapports</h1>
           <p className="text-muted-foreground mt-1">Analysez les performances et visualisez les tendances</p>
         </div>
         
-        <div className="flex items-center gap-3">
-          <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-[180px]">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <Select value={period} onValueChange={setPeriod} className="w-full sm:w-[180px]">
+            <SelectTrigger>
               <div className="flex items-center gap-2">
                 <CalendarRange className="h-4 w-4" />
                 <SelectValue placeholder="Période" />
@@ -49,21 +49,21 @@ const Reports = () => {
             </SelectContent>
           </Select>
           
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" className="w-full sm:w-auto">
             <Download className="h-4 w-4" />
           </Button>
         </div>
       </div>
       
       <Tabs defaultValue="performance" className="w-full">
-        <TabsList className="mb-8">
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="leads">Leads</TabsTrigger>
-          <TabsTrigger value="conversion">Conversion</TabsTrigger>
+        <TabsList className="mb-6 flex flex-wrap">
+          <TabsTrigger value="performance" className="flex-1 sm:flex-none">Performance</TabsTrigger>
+          <TabsTrigger value="leads" className="flex-1 sm:flex-none">Leads</TabsTrigger>
+          <TabsTrigger value="conversion" className="flex-1 sm:flex-none">Conversion</TabsTrigger>
         </TabsList>
         
         <TabsContent value="performance" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <ConversionRateCard 
               title="Taux de conversion" 
               value={28} 
@@ -89,7 +89,7 @@ const Reports = () => {
             title="Performance des ventes" 
             subtitle="Montant total des ventes par mois" 
             icon={<BarChart3 className="h-5 w-5" />}
-            className="h-[500px]"
+            className="h-[400px] lg:h-[500px]"
           >
             <div className="h-full w-full pt-2">
               <SalesPerformanceChart data={salesData} />
@@ -103,8 +103,9 @@ const Reports = () => {
               title="Distribution par type de propriété" 
               subtitle="Répartition des ventes par catégorie" 
               icon={<PieChart className="h-5 w-5" />}
+              className="h-[400px]"
             >
-              <div className="h-[400px] flex items-center justify-center">
+              <div className="h-[350px] flex items-center justify-center">
                 <LeadSourceDistribution />
               </div>
             </DashboardCard>

@@ -1,12 +1,14 @@
-
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LeadSourceDistributionProps {
   isLeadSources?: boolean;
 }
 
 const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributionProps) => {
+  const isMobile = useIsMobile();
+  
   // Données mockées pour la distribution des sources/types
   const data = isLeadSources ? [
     { name: 'Site web', value: 35 },
@@ -24,6 +26,8 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
   const COLORS = ['#2C3E50', '#34495E', '#3D5A80', '#446A9E', '#6A8CBB'];
   
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+    if (isMobile) return null; // Hide labels on mobile
+    
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
     const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
@@ -45,7 +49,7 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
   
   return (
     <div className="w-full h-full">
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={isMobile ? 300 : 400}>
         <PieChart>
           <Pie
             data={data}
@@ -53,7 +57,7 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
             cy="50%"
             labelLine={false}
             label={renderCustomizedLabel}
-            outerRadius={150}
+            outerRadius={isMobile ? 100 : 150}
             fill="#8884d8"
             dataKey="value"
           >
@@ -73,7 +77,7 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
           <Legend 
             verticalAlign="bottom" 
             align="center"
-            layout="horizontal"
+            layout={isMobile ? "vertical" : "horizontal"}
             iconType="circle"
             iconSize={10}
           />

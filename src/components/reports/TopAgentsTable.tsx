@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -57,21 +56,21 @@ const TopAgentsTable = () => {
       <CardHeader className="pb-3">
         <CardTitle>Top Agents Commerciaux</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Agent</TableHead>
-              <TableHead className="text-right">Ventes</TableHead>
-              <TableHead className="text-right">Valeur</TableHead>
-              <TableHead className="text-right">Conversion</TableHead>
-              <TableHead className="text-right">Tendance</TableHead>
+              <TableHead className="w-[200px]">Agent</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Ventes</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Valeur</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Conversion</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Tendance</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {agentsData.map((agent) => (
               <TableRow key={agent.name}>
-                <TableCell className="font-medium">{agent.name}</TableCell>
+                <TableCell className="font-medium whitespace-nowrap">{agent.name}</TableCell>
                 <TableCell className="text-right">{agent.sales}</TableCell>
                 <TableCell className="text-right">{agent.value}</TableCell>
                 <TableCell className="text-right">{agent.conversion}%</TableCell>
@@ -79,10 +78,8 @@ const TopAgentsTable = () => {
                   <div className="flex items-center justify-end">
                     <span 
                       className={cn(
-                        "flex items-center px-2 py-1 rounded-full text-xs font-medium",
-                        agent.change > 0 
-                          ? "text-green-700 bg-green-100" 
-                          : "text-red-700 bg-red-100"
+                        "flex items-center px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap",
+                        agent.change > 0 ? "text-green-700 bg-green-100" : "text-red-700 bg-red-100"
                       )}
                     >
                       {agent.change > 0 ? (
