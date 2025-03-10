@@ -20,7 +20,7 @@ const DashboardCard = ({
   children,
 }: DashboardCardProps) => {
   return (
-    <div className={cn('luxury-card p-6 lg:p-8 scale-in', className)}>
+    <div className={cn('luxury-card p-6 lg:p-8 scale-in flex flex-col', className)}>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-medium">{title}</h3>
@@ -31,7 +31,7 @@ const DashboardCard = ({
           {icon && <div className="text-muted-foreground">{icon}</div>}
         </div>
       </div>
-      <div className="h-[calc(100%-4.5rem)]">{children}</div>
+      <div className="flex-1 overflow-hidden">{children}</div>
     </div>
   );
 };

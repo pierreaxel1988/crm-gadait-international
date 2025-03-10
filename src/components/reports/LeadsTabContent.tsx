@@ -14,7 +14,7 @@ const LeadsTabContent: React.FC = () => {
   const [displayMode, setDisplayMode] = useState<'chart' | 'table'>('chart');
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 flex flex-col h-full min-h-[calc(100vh-250px)]">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <ConversionRateCard 
           title="Nouveaux leads" 
@@ -73,9 +73,9 @@ const LeadsTabContent: React.FC = () => {
             </Select>
           </div>
         }
-        className="h-[450px]"
+        className="flex-1 min-h-[500px] flex flex-col"
       >
-        <div className="h-[400px] w-full pt-4">
+        <div className="flex-1 w-full">
           {displayMode === 'chart' ? (
             <LeadsPerAgentChart period={leadsPeriod} />
           ) : (

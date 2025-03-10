@@ -68,94 +68,97 @@ const LeadsPerAgentChart = ({ period }: LeadsPerAgentChartProps) => {
   };
   
   return (
-    <ChartContainer 
-      config={{
-        [period]: {
-          label: period === 'semaine' ? 'Leads par semaine' : 
-                 period === 'mois' ? 'Leads par mois' : 'Leads par année',
-          color: '#3D5A80'
-        }
-      }}
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <RechartsBarChart 
-          data={mockLeadsData}
-          margin={chartMargin}
-          barCategoryGap={barGap}
-          onMouseLeave={handleMouseLeave}
-          layout={layout}
-        >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(44, 62, 80, 0.1)" />
-          <XAxis
-            dataKey={layout === "vertical" ? period : "name"}
-            type={layout === "vertical" ? "number" : "category"}
-            tickLine={false}
-            axisLine={false}
-            padding={{ left: 20, right: 20 }}
-            fontSize={isMobile ? 10 : 12}
-            tick={{ fill: 'rgba(44, 62, 80, 0.8)' }}
-            angle={isMobile && layout === "horizontal" ? -45 : 0}
-            textAnchor={isMobile && layout === "horizontal" ? "end" : "middle"}
-            height={isMobile && layout === "horizontal" ? 80 : 60}
-            width={isMobile && layout === "vertical" ? 40 : undefined}
-            tickFormatter={layout === "vertical" ? formatYAxis : undefined}
-          />
-          <YAxis
-            dataKey={layout === "vertical" ? "name" : period}
-            type={layout === "vertical" ? "category" : "number"}
-            tickLine={false}
-            axisLine={false}
-            width={layout === "vertical" ? 90 : undefined}
-            tickFormatter={layout === "vertical" ? undefined : formatYAxis}
-            fontSize={isMobile ? 10 : 12}
-            tick={{ fill: 'rgba(44, 62, 80, 0.8)' }}
-            interval={0} // Afficher toutes les étiquettes
-          />
-          <Tooltip
-            content={({ active, payload, label }) => {
-              if (active && payload && payload.length) {
-                return (
-                  <ChartTooltipContent
-                    active={active}
-                    payload={payload}
-                    label={label}
-                  />
-                );
-              }
-              return null;
-            }}
-          />
-          {!isMobile && (
-            <Legend 
-              wrapperStyle={{ paddingTop: 20 }}
-              formatter={(value: string) => (
-                <span className="text-sm text-foreground font-medium capitalize">
-                  {value === 'semaine' ? 'Cette semaine' : 
-                  value === 'mois' ? 'Ce mois' : 'Cette année'}
-                </span>
-              )}
-            />
-          )}
-          <Bar
-            dataKey={period}
-            radius={[4, 4, 0, 0]}
-            maxBarSize={barSize}
-            animationDuration={800}
-            onMouseEnter={handleMouseEnter}
-            className="hover:opacity-80 transition-opacity"
+    <div className="h-full w-full min-h-[450px]">
+      <ChartContainer 
+        config={{
+          [period]: {
+            label: period === 'semaine' ? 'Leads par semaine' : 
+                  period === 'mois' ? 'Leads par mois' : 'Leads par année',
+            color: '#3D5A80'
+          }
+        }}
+        className="h-full w-full"
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <RechartsBarChart 
+            data={mockLeadsData}
+            margin={chartMargin}
+            barCategoryGap={barGap}
+            onMouseLeave={handleMouseLeave}
+            layout={layout}
           >
-            {mockLeadsData.map((entry, index) => (
-              <Cell 
-                key={`cell-${index}`} 
-                fill={COLORS[index % COLORS.length]} 
-                fillOpacity={activeBar === index ? 1 : 0.85}
-                style={{ filter: activeBar === index ? "drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1))" : "none" }}
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(44, 62, 80, 0.1)" />
+            <XAxis
+              dataKey={layout === "vertical" ? period : "name"}
+              type={layout === "vertical" ? "number" : "category"}
+              tickLine={false}
+              axisLine={false}
+              padding={{ left: 20, right: 20 }}
+              fontSize={isMobile ? 10 : 12}
+              tick={{ fill: 'rgba(44, 62, 80, 0.8)' }}
+              angle={isMobile && layout === "horizontal" ? -45 : 0}
+              textAnchor={isMobile && layout === "horizontal" ? "end" : "middle"}
+              height={isMobile && layout === "horizontal" ? 80 : 60}
+              width={isMobile && layout === "vertical" ? 40 : undefined}
+              tickFormatter={layout === "vertical" ? formatYAxis : undefined}
+            />
+            <YAxis
+              dataKey={layout === "vertical" ? "name" : period}
+              type={layout === "vertical" ? "category" : "number"}
+              tickLine={false}
+              axisLine={false}
+              width={layout === "vertical" ? 90 : undefined}
+              tickFormatter={layout === "vertical" ? undefined : formatYAxis}
+              fontSize={isMobile ? 10 : 12}
+              tick={{ fill: 'rgba(44, 62, 80, 0.8)' }}
+              interval={0} // Afficher toutes les étiquettes
+            />
+            <Tooltip
+              content={({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                  return (
+                    <ChartTooltipContent
+                      active={active}
+                      payload={payload}
+                      label={label}
+                    />
+                  );
+                }
+                return null;
+              }}
+            />
+            {!isMobile && (
+              <Legend 
+                wrapperStyle={{ paddingTop: 20 }}
+                formatter={(value: string) => (
+                  <span className="text-sm text-foreground font-medium capitalize">
+                    {value === 'semaine' ? 'Cette semaine' : 
+                    value === 'mois' ? 'Ce mois' : 'Cette année'}
+                  </span>
+                )}
               />
-            ))}
-          </Bar>
-        </RechartsBarChart>
-      </ResponsiveContainer>
-    </ChartContainer>
+            )}
+            <Bar
+              dataKey={period}
+              radius={[4, 4, 0, 0]}
+              maxBarSize={barSize}
+              animationDuration={800}
+              onMouseEnter={handleMouseEnter}
+              className="hover:opacity-80 transition-opacity"
+            >
+              {mockLeadsData.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={COLORS[index % COLORS.length]} 
+                  fillOpacity={activeBar === index ? 1 : 0.85}
+                  style={{ filter: activeBar === index ? "drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1))" : "none" }}
+                />
+              ))}
+            </Bar>
+          </RechartsBarChart>
+        </ResponsiveContainer>
+      </ChartContainer>
+    </div>
   );
 };
 
