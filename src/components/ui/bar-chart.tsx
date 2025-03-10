@@ -7,8 +7,8 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip,
-  TooltipProps,
-  ResponsiveContainer
+  ResponsiveContainer,
+  Cell
 } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from './chart';
 
@@ -20,9 +20,14 @@ interface BarChartProps {
 }
 
 export function BarChart({ data }: BarChartProps) {
+  // Define color gradients for bars
+  const COLORS = ['#8B5CF6', '#9B87F5', '#A78DF6', '#B39DF7', '#C0ADF8'];
+  
+  // Calculate a better Y-axis domain
+  const maxValue = Math.max(...data.map(item => item.total));
   const minValue = Math.min(...data.map(item => item.total));
-  const padding = minValue * 0.1; // Add 10% padding below the minimum value
-
+  const buffer = (maxValue - minValue) * 0.1; // 10% buffer
+  
   return (
     <ChartContainer 
       config={{
@@ -35,22 +40,25 @@ export function BarChart({ data }: BarChartProps) {
       <ResponsiveContainer width="100%" height="100%">
         <RechartsBarChart 
           data={data} 
-          margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+          margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
+          barCategoryGap="20%"
         >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.1)" />
           <XAxis
             dataKey="name"
             tickLine={false}
             axisLine={false}
-            padding={{ left: 10, right: 10 }}
+            padding={{ left: 20, right: 20 }}
             fontSize={12}
+            tick={{ fill: 'rgba(0,0,0,0.7)' }}
           />
           <YAxis
             tickLine={false}
             axisLine={false}
             tickFormatter={(value) => `€${value}`}
             fontSize={12}
-            domain={[minValue - padding, 'auto']}
+            domain={[Math.floor(minValue * 0.9), Math.ceil(maxValue * 1.1)]} // Better domain calculation
+            tick={{ fill: 'rgba(0,0,0,0.7)' }}
           />
           <Tooltip
             content={({ active, payload, label }) => {
@@ -69,11 +77,14 @@ export function BarChart({ data }: BarChartProps) {
           />
           <Bar
             dataKey="total"
-            radius={[4, 4, 0, 0]}
-            fill="var(--color-total)"
-            maxBarSize={40}
-            animationDuration={500}
-          />
+            radius={[6, 6, 0, 0]}
+            maxBarSize={60}
+            animationDuration={800}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Bar>
         </RechartsBarChart>
       </ResponsiveContainer>
     </ChartContainer>
