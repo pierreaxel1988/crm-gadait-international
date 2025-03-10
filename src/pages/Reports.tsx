@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { CalendarRange, Filter, PieChart, BarChart3, ArrowDownUp, Download } from 'lucide-react';
+import { CalendarRange, Filter, PieChart, BarChart3, ArrowDownUp, Download, Users } from 'lucide-react';
 import DashboardCard from '@/components/dashboard/DashboardCard';
 import { BarChart } from '@/components/ui/bar-chart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,9 +10,11 @@ import SalesPerformanceChart from '@/components/reports/SalesPerformanceChart';
 import LeadSourceDistribution from '@/components/reports/LeadSourceDistribution';
 import TopAgentsTable from '@/components/reports/TopAgentsTable';
 import ConversionRateCard from '@/components/reports/ConversionRateCard';
+import LeadsPerAgentChart from '@/components/reports/LeadsPerAgentChart';
 
 const Reports = () => {
   const [period, setPeriod] = useState('month');
+  const [leadsPeriod, setLeadsPeriod] = useState<'semaine' | 'mois' | 'annee'>('mois');
   
   // Données mockées pour le graphique des ventes
   const salesData = [
@@ -142,6 +144,29 @@ const Reports = () => {
           >
             <div className="h-[400px] flex items-center justify-center">
               <LeadSourceDistribution isLeadSources />
+            </div>
+          </DashboardCard>
+          
+          <DashboardCard 
+            title="Leads par commercial" 
+            subtitle="Nombre de leads par agent commercial"
+            icon={<Users className="h-5 w-5" />}
+            action={
+              <Select value={leadsPeriod} onValueChange={(value) => setLeadsPeriod(value as 'semaine' | 'mois' | 'annee')}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Période" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="semaine">Par semaine</SelectItem>
+                  <SelectItem value="mois">Par mois</SelectItem>
+                  <SelectItem value="annee">Par année</SelectItem>
+                </SelectContent>
+              </Select>
+            }
+            className="h-[450px]"
+          >
+            <div className="h-[400px] w-full pt-4">
+              <LeadsPerAgentChart period={leadsPeriod} />
             </div>
           </DashboardCard>
         </TabsContent>

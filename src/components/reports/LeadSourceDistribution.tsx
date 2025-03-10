@@ -103,7 +103,7 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
     <div className="w-full h-full flex items-center justify-center">
       <ResponsiveContainer width="100%" height={isMobile ? 300 : 360}>
         <PieChart 
-          margin={{ top: 20, right: 0, bottom: 40, left: 0 }}
+          margin={{ top: 40, right: 0, bottom: 40, left: 0 }}
         >
           <Pie
             activeIndex={activeIndex}
@@ -113,8 +113,8 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
             cy="50%"
             labelLine={false}
             label={renderCustomizedLabel}
-            outerRadius={isMobile ? 80 : 110}
-            innerRadius={isMobile ? 50 : 70}
+            outerRadius={isMobile ? 80 : 100}
+            innerRadius={isMobile ? 50 : 65}
             fill="#8884d8"
             dataKey="value"
             onMouseEnter={onPieEnter}
