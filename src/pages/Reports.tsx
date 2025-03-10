@@ -34,8 +34,8 @@ const Reports = () => {
         </div>
         
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-          <Select value={period} onValueChange={setPeriod} className="w-full sm:w-[180px]">
-            <SelectTrigger>
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger className="w-full sm:w-[180px]">
               <div className="flex items-center gap-2">
                 <CalendarRange className="h-4 w-4" />
                 <SelectValue placeholder="Période" />
