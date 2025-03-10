@@ -1,14 +1,18 @@
 
 import React, { useState } from 'react';
-import { Filter, Users } from 'lucide-react';
+import { Filter, Users, BarChart, Table as TableIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import DashboardCard from '@/components/dashboard/DashboardCard';
 import ConversionRateCard from '@/components/reports/ConversionRateCard';
 import LeadSourceDistribution from '@/components/reports/LeadSourceDistribution';
 import LeadsPerAgentChart from '@/components/reports/LeadsPerAgentChart';
+import LeadsAgentsTable from '@/components/reports/LeadsAgentsTable';
 
 const LeadsTabContent: React.FC = () => {
   const [leadsPeriod, setLeadsPeriod] = useState<'semaine' | 'mois' | 'annee'>('mois');
+  const [displayMode, setDisplayMode] = useState<'chart' | 'table'>('chart');
   
   return (
     <div className="space-y-6">
@@ -49,21 +53,35 @@ const LeadsTabContent: React.FC = () => {
         subtitle="Nombre de leads par agent commercial"
         icon={<Users className="h-5 w-5" />}
         action={
-          <Select value={leadsPeriod} onValueChange={(value) => setLeadsPeriod(value as 'semaine' | 'mois' | 'annee')}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Période" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="semaine">Par semaine</SelectItem>
-              <SelectItem value="mois">Par mois</SelectItem>
-              <SelectItem value="annee">Par année</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center space-x-2">
+            <ToggleGroup type="single" value={displayMode} onValueChange={(value) => value && setDisplayMode(value as 'chart' | 'table')}>
+              <ToggleGroupItem value="chart" aria-label="Afficher en graphique">
+                <BarChart className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="table" aria-label="Afficher en tableau">
+                <TableIcon className="h-4 w-4" />
+              </ToggleGroupItem>
+            </ToggleGroup>
+            <Select value={leadsPeriod} onValueChange={(value) => setLeadsPeriod(value as 'semaine' | 'mois' | 'annee')}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Période" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="semaine">Par semaine</SelectItem>
+                <SelectItem value="mois">Par mois</SelectItem>
+                <SelectItem value="annee">Par année</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         }
         className="h-[450px]"
       >
         <div className="h-[400px] w-full pt-4">
-          <LeadsPerAgentChart period={leadsPeriod} />
+          {displayMode === 'chart' ? (
+            <LeadsPerAgentChart period={leadsPeriod} />
+          ) : (
+            <LeadsAgentsTable period={leadsPeriod} />
+          )}
         </div>
       </DashboardCard>
     </div>
