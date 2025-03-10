@@ -1,22 +1,20 @@
-
 import React, { useState } from 'react';
-import { FileChartLine, Users, Calendar, Filter, ChevronDown, PieChart } from 'lucide-react';
+import { FileChartLine, Users, Calendar, PieChart } from 'lucide-react';
 import { BarChart } from '@/components/ui/bar-chart';
 import DashboardCard from '@/components/dashboard/DashboardCard';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import LeadStatusPieChart from '@/components/reports/LeadStatusPieChart';
 import PropertyViewsChart from '@/components/reports/PropertyViewsChart';
 import LeadSourcesTable from '@/components/reports/LeadSourcesTable';
 import DateRangeFilter from '@/components/reports/DateRangeFilter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Create a client with default options
+// Configure the query client with more aggressive settings
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+      retry: 1, // Only retry failed requests once
       refetchOnWindowFocus: false,
-      retry: 1,
     },
   },
 });
@@ -97,13 +95,10 @@ const ReportsContent = () => {
   );
 };
 
-// Wrap everything in QueryClientProvider
-const Reports = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ReportsContent />
-    </QueryClientProvider>
-  );
-};
+const Reports = () => (
+  <QueryClientProvider client={queryClient}>
+    <ReportsContent />
+  </QueryClientProvider>
+);
 
 export default Reports;
