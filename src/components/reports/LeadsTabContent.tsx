@@ -14,7 +14,7 @@ const LeadsTabContent: React.FC = () => {
   const [displayMode, setDisplayMode] = useState<'chart' | 'table'>('chart');
   
   return (
-    <div className="space-y-6 flex flex-col h-full min-h-[calc(100vh-250px)]">
+    <div className="grid grid-cols-1 gap-6 h-full min-h-[calc(100vh-250px)]">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <ConversionRateCard 
           title="Nouveaux leads" 
@@ -52,17 +52,33 @@ const LeadsTabContent: React.FC = () => {
         subtitle="Nombre de leads par agent commercial"
         icon={<Users className="h-5 w-5" />}
         action={
-          <div className="flex items-center space-x-2">
-            <ToggleGroup type="single" value={displayMode} onValueChange={(value) => value && setDisplayMode(value as 'chart' | 'table')}>
-              <ToggleGroupItem value="chart" aria-label="Afficher en graphique" className="data-[state=on]:bg-blue-50 data-[state=on]:text-blue-700">
+          <div className="flex items-center space-x-3">
+            <ToggleGroup 
+              type="single" 
+              value={displayMode} 
+              onValueChange={(value) => value && setDisplayMode(value as 'chart' | 'table')}
+              className="border border-gray-200 rounded-md bg-gray-50"
+            >
+              <ToggleGroupItem 
+                value="chart" 
+                aria-label="Afficher en graphique" 
+                className="data-[state=on]:bg-blue-600 data-[state=on]:text-white h-9 px-3"
+              >
                 <BarChart className="h-4 w-4" />
               </ToggleGroupItem>
-              <ToggleGroupItem value="table" aria-label="Afficher en tableau" className="data-[state=on]:bg-blue-50 data-[state=on]:text-blue-700">
+              <ToggleGroupItem 
+                value="table" 
+                aria-label="Afficher en tableau" 
+                className="data-[state=on]:bg-blue-600 data-[state=on]:text-white h-9 px-3"
+              >
                 <TableIcon className="h-4 w-4" />
               </ToggleGroupItem>
             </ToggleGroup>
-            <Select value={leadsPeriod} onValueChange={(value) => setLeadsPeriod(value as 'semaine' | 'mois' | 'annee')}>
-              <SelectTrigger className="w-[140px] border-gray-200 focus:ring-blue-200">
+            <Select 
+              value={leadsPeriod} 
+              onValueChange={(value) => setLeadsPeriod(value as 'semaine' | 'mois' | 'annee')}
+            >
+              <SelectTrigger className="w-[150px] border-gray-200 focus:ring-blue-200">
                 <SelectValue placeholder="Période" />
               </SelectTrigger>
               <SelectContent>
@@ -73,9 +89,9 @@ const LeadsTabContent: React.FC = () => {
             </Select>
           </div>
         }
-        className="flex-1 min-h-[500px] flex flex-col"
+        className="flex-1 flex flex-col"
       >
-        <div className="flex-1 w-full">
+        <div className="flex-1 w-full h-full min-h-[500px]">
           {displayMode === 'chart' ? (
             <LeadsPerAgentChart period={leadsPeriod} />
           ) : (

@@ -38,22 +38,22 @@ const LeadsPerAgentChart = ({ period }: LeadsPerAgentChartProps) => {
   const isMobile = useIsMobile();
   const [activeBar, setActiveBar] = useState<number | null>(null);
   
-  // Couleurs plus attrayantes pour le graphique - dégradé de bleus
-  const COLORS = ['#3D5A80', '#507DBC', '#6E9DE4', '#94B9F2', '#C5D9F7'];
+  // Couleurs premium pour le graphique - dégradé de bleus
+  const COLORS = ['#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE'];
   
   // Utiliser le layout vertical sur mobile pour une meilleure lisibilité
   const layout = isMobile ? "vertical" : "horizontal";
   
-  // Ajustements des marges et propriétés pour une meilleure lisibilité sur mobile
+  // Ajustements des marges et propriétés pour une meilleure lisibilité
   const chartMargin = isMobile
-    ? { top: 10, right: 10, bottom: 10, left: 100 }
-    : { top: 20, right: 30, bottom: 40, left: 30 };
+    ? { top: 20, right: 20, bottom: 20, left: 100 }
+    : { top: 30, right: 30, bottom: 40, left: 20 };
   
   // Taille des barres optimisée selon l'appareil
-  const barSize = isMobile ? 15 : 30;
+  const barSize = isMobile ? 20 : 40;
   
   // Espacement entre les barres
-  const barGap = isMobile ? "5%" : "20%";
+  const barGap = isMobile ? "8%" : "25%";
   
   const formatYAxis = (value: number) => {
     return value.toString();
@@ -68,16 +68,16 @@ const LeadsPerAgentChart = ({ period }: LeadsPerAgentChartProps) => {
   };
   
   return (
-    <div className="h-full w-full min-h-[450px]">
+    <div className="h-full w-full flex-1 flex flex-col">
       <ChartContainer 
         config={{
           [period]: {
             label: period === 'semaine' ? 'Leads par semaine' : 
                   period === 'mois' ? 'Leads par mois' : 'Leads par année',
-            color: '#3D5A80'
+            color: '#2563EB'
           }
         }}
-        className="h-full w-full"
+        className="h-full w-full flex-1"
       >
         <ResponsiveContainer width="100%" height="100%">
           <RechartsBarChart 
@@ -86,16 +86,25 @@ const LeadsPerAgentChart = ({ period }: LeadsPerAgentChartProps) => {
             barCategoryGap={barGap}
             onMouseLeave={handleMouseLeave}
             layout={layout}
+            className="pb-4"
           >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(44, 62, 80, 0.1)" />
+            <defs>
+              {COLORS.map((color, index) => (
+                <linearGradient key={`gradient-${index}`} id={`colorBar${index}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={color} stopOpacity={0.9} />
+                  <stop offset="100%" stopColor={color} stopOpacity={0.6} />
+                </linearGradient>
+              ))}
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0, 0, 0, 0.06)" />
             <XAxis
               dataKey={layout === "vertical" ? period : "name"}
               type={layout === "vertical" ? "number" : "category"}
               tickLine={false}
               axisLine={false}
               padding={{ left: 20, right: 20 }}
-              fontSize={isMobile ? 10 : 12}
-              tick={{ fill: 'rgba(44, 62, 80, 0.8)' }}
+              fontSize={isMobile ? 12 : 13}
+              tick={{ fill: '#64748B' }}
               angle={isMobile && layout === "horizontal" ? -45 : 0}
               textAnchor={isMobile && layout === "horizontal" ? "end" : "middle"}
               height={isMobile && layout === "horizontal" ? 80 : 60}
@@ -107,21 +116,23 @@ const LeadsPerAgentChart = ({ period }: LeadsPerAgentChartProps) => {
               type={layout === "vertical" ? "category" : "number"}
               tickLine={false}
               axisLine={false}
-              width={layout === "vertical" ? 90 : undefined}
+              width={layout === "vertical" ? 110 : undefined}
               tickFormatter={layout === "vertical" ? undefined : formatYAxis}
-              fontSize={isMobile ? 10 : 12}
-              tick={{ fill: 'rgba(44, 62, 80, 0.8)' }}
+              fontSize={isMobile ? 12 : 13}
+              tick={{ fill: '#64748B' }}
               interval={0} // Afficher toutes les étiquettes
             />
             <Tooltip
               content={({ active, payload, label }) => {
                 if (active && payload && payload.length) {
                   return (
-                    <ChartTooltipContent
-                      active={active}
-                      payload={payload}
-                      label={label}
-                    />
+                    <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
+                      <p className="font-medium text-gray-800 mb-1">{label}</p>
+                      <p className="text-blue-600 font-bold">
+                        {payload[0].value} {' '}
+                        <span className="text-gray-600 font-normal text-sm">leads</span>
+                      </p>
+                    </div>
                   );
                 }
                 return null;
@@ -131,7 +142,7 @@ const LeadsPerAgentChart = ({ period }: LeadsPerAgentChartProps) => {
               <Legend 
                 wrapperStyle={{ paddingTop: 20 }}
                 formatter={(value: string) => (
-                  <span className="text-sm text-foreground font-medium capitalize">
+                  <span className="text-sm text-gray-600 font-medium capitalize">
                     {value === 'semaine' ? 'Cette semaine' : 
                     value === 'mois' ? 'Ce mois' : 'Cette année'}
                   </span>
@@ -140,7 +151,7 @@ const LeadsPerAgentChart = ({ period }: LeadsPerAgentChartProps) => {
             )}
             <Bar
               dataKey={period}
-              radius={[4, 4, 0, 0]}
+              radius={[6, 6, 0, 0]}
               maxBarSize={barSize}
               animationDuration={800}
               onMouseEnter={handleMouseEnter}
@@ -149,9 +160,12 @@ const LeadsPerAgentChart = ({ period }: LeadsPerAgentChartProps) => {
               {mockLeadsData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
-                  fill={COLORS[index % COLORS.length]} 
+                  fill={`url(#colorBar${index % COLORS.length})`}
                   fillOpacity={activeBar === index ? 1 : 0.85}
-                  style={{ filter: activeBar === index ? "drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1))" : "none" }}
+                  style={{ 
+                    filter: activeBar === index ? "drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))" : "none",
+                    transition: "all 0.3s ease"
+                  }}
                 />
               ))}
             </Bar>
