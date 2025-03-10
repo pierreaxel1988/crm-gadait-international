@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody } from "@/components/ui/table";
@@ -10,16 +9,15 @@ import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 const TopAgentsTable = () => {
-  const [period, setPeriod] = useState<PeriodType>('mois');
+  const [period, setPeriod] = useState<Period>({ type: 'mois' });
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'leads' | 'sales' | 'value' | 'conversion' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
-  // Fonction de tri et filtrage
   const filteredAndSortedAgents = useMemo(() => {
-    let filtered = agentsDataByPeriod[period].filter(agent => 
-      agent.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let filtered = period.type === 'custom' 
+      ? agentsDataByPeriod['mois']
+      : agentsDataByPeriod[period.type];
     
     if (sortBy) {
       filtered = [...filtered].sort((a, b) => {
@@ -41,7 +39,6 @@ const TopAgentsTable = () => {
     return filtered;
   }, [period, searchTerm, sortBy, sortDirection]);
   
-  // Gestion du tri
   const handleSort = (column: 'name' | 'leads' | 'sales' | 'value' | 'conversion') => {
     if (sortBy === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
