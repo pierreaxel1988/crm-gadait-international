@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChartDataForm from '@/components/admin/ChartDataForm';
 import DashboardCard from '@/components/dashboard/DashboardCard';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, Settings2 } from 'lucide-react';
 
 // Données mockées initiales pour le graphique
 const initialChartData = [
@@ -29,7 +28,7 @@ const Admin = () => {
       <Tabs defaultValue="chart-data" className="w-full">
         <TabsList className="mb-8">
           <TabsTrigger value="chart-data">Données du graphique</TabsTrigger>
-          <TabsTrigger value="settings" disabled>Paramètres</TabsTrigger>
+          <TabsTrigger value="settings">Paramètres</TabsTrigger>
           <TabsTrigger value="users" disabled>Utilisateurs</TabsTrigger>
         </TabsList>
         
@@ -56,6 +55,18 @@ const Admin = () => {
               </div>
             </DashboardCard>
           </div>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <DashboardCard 
+            title="Paramètres généraux" 
+            subtitle="Configurez les paramètres de l'application"
+            icon={<Settings2 className="h-5 w-5" />}
+          >
+            <div className="p-6">
+              <p className="text-muted-foreground">Les paramètres seront disponibles prochainement</p>
+            </div>
+          </DashboardCard>
         </TabsContent>
       </Tabs>
     </div>
