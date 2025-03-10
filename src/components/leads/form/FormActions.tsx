@@ -4,9 +4,10 @@ import CustomButton from '@/components/ui/CustomButton';
 
 interface FormActionsProps {
   onCancel: () => void;
+  isSaving?: boolean;
 }
 
-const FormActions: React.FC<FormActionsProps> = ({ onCancel }) => {
+const FormActions: React.FC<FormActionsProps> = ({ onCancel, isSaving = false }) => {
   return (
     <div className="flex justify-end gap-3">
       <CustomButton 
@@ -16,7 +17,10 @@ const FormActions: React.FC<FormActionsProps> = ({ onCancel }) => {
       >
         Annuler
       </CustomButton>
-      <CustomButton type="submit">
+      <CustomButton 
+        type="submit" 
+        isLoading={isSaving}
+      >
         Enregistrer
       </CustomButton>
     </div>
