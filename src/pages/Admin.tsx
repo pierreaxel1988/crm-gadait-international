@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChartDataForm from '@/components/admin/ChartDataForm';
 import DashboardCard from '@/components/dashboard/DashboardCard';
-import { BarChart3, Settings2 } from 'lucide-react';
+import { BarChart3, Settings2, Users } from 'lucide-react';
+import UsersManagement from '@/components/admin/UsersManagement';
 
 // Données mockées initiales pour le graphique
 const initialChartData = [
@@ -29,7 +31,7 @@ const Admin = () => {
         <TabsList className="mb-8">
           <TabsTrigger value="chart-data">Données du graphique</TabsTrigger>
           <TabsTrigger value="settings">Paramètres</TabsTrigger>
-          <TabsTrigger value="users" disabled>Utilisateurs</TabsTrigger>
+          <TabsTrigger value="users">Utilisateurs</TabsTrigger>
         </TabsList>
         
         <TabsContent value="chart-data" className="space-y-6">
@@ -66,6 +68,16 @@ const Admin = () => {
             <div className="p-6">
               <p className="text-muted-foreground">Les paramètres seront disponibles prochainement</p>
             </div>
+          </DashboardCard>
+        </TabsContent>
+
+        <TabsContent value="users" className="space-y-6">
+          <DashboardCard 
+            title="Gestion des utilisateurs" 
+            subtitle="Ajoutez, modifiez ou supprimez des utilisateurs"
+            icon={<Users className="h-5 w-5" />}
+          >
+            <UsersManagement />
           </DashboardCard>
         </TabsContent>
       </Tabs>
