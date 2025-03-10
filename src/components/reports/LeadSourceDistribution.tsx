@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Sector } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { LeadSource, PropertyType } from '@/types/lead';
 
 interface LeadSourceDistributionProps {
   isLeadSources?: boolean;
@@ -13,11 +14,13 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
   
   // Données mockées pour la distribution des sources/types
   const data = isLeadSources ? [
-    { name: 'Site web', value: 35 },
-    { name: 'Référence', value: 25 },
-    { name: 'Réseaux sociaux', value: 20 },
-    { name: 'Événements', value: 15 },
-    { name: 'Autre', value: 5 },
+    { name: 'Site web', value: 30 },
+    { name: 'Réseaux sociaux', value: 15 },
+    { name: 'Portails immobiliers', value: 20 },
+    { name: 'Network', value: 10 },
+    { name: 'Repeaters', value: 8 },
+    { name: 'Recommandations', value: 12 },
+    { name: "Apporteur d'affaire", value: 5 },
   ] : [
     { name: 'Villa', value: 40 },
     { name: 'Appartement', value: 30 },
@@ -27,7 +30,7 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
   
   // Custom color palette with more elegant, sophisticated colors
   const COLORS = isLeadSources 
-    ? ['#9b87f5', '#33C3F0', '#FEC6A1', '#D3E4FD', '#8E9196'] 
+    ? ['#9b87f5', '#33C3F0', '#FEC6A1', '#D3E4FD', '#E5DEFF', '#7E69AB', '#8E9196'] 
     : ['#2C3E50', '#7E69AB', '#6E59A5', '#1A1F2C'];
   
   const onPieEnter = (_: any, index: number) => {
