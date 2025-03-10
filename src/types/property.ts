@@ -37,6 +37,7 @@ export interface PropertySelection {
 }
 
 export interface PropertyFilter {
+  searchTerm?: string;
   minPrice?: number;
   maxPrice?: number;
   location?: string;

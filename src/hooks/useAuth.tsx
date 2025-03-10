@@ -1,88 +1,79 @@
 
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Session, User } from '@supabase/supabase-js';
-import { Provider } from '@supabase/supabase-js';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-interface AuthContextType {
-  session: Session | null;
-  user: User | null;
-  loading: boolean;
-  signOut: () => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
+// Define the shape of our AuthContext
+export interface AuthContextType {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  user: any | null;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Create the context with a default value
+const AuthContext = createContext<AuthContextType>({
+  isAuthenticated: false,
+  isLoading: true,
+  login: async () => {},
+  logout: () => {},
+  user: null,
+});
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+// Hook to use the auth context
+export const useAuth = () => useContext(AuthContext);
+
+// Provider component to wrap the app and provide auth context
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
+    // Check if user is logged in on mount
+    const checkAuth = async () => {
       try {
-        const { data } = await supabase.auth.getSession();
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
+        // This would normally be a call to your auth service
+        const savedUser = localStorage.getItem('user');
+        
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+        }
       } catch (error) {
-        console.error('Error getting initial session:', error);
+        console.error('Auth check failed:', error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    getInitialSession();
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    checkAuth();
   }, []);
 
-  const signOut = async () => {
+  const login = async (email: string, password: string) => {
+    setIsLoading(true);
     try {
-      await supabase.auth.signOut();
+      // This would be a real authentication call
+      const mockUser = { id: '1', email, name: 'Test User' };
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUser(mockUser);
     } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
-
-  const signInWithGoogle = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin,
-        }
-      });
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
+      console.error('Login failed:', error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  return (
-    <AuthContext.Provider value={{ session, user, loading, signOut, signInWithGoogle }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  const logout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+  };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const value = {
+    isAuthenticated: !!user,
+    isLoading,
+    login,
+    logout,
+    user,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
