@@ -8,7 +8,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { ChevronUp, ChevronDown, Search, X } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -33,8 +33,13 @@ interface LeadsAgentsTableProps {
   period: 'semaine' | 'mois' | 'annee';
 }
 
+type SortColumn = 'name' | 'leads';
+type SortDirection = 'asc' | 'desc';
+
 const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortColumn, setSortColumn] = useState<SortColumn>('leads');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   // Calculer la différence par rapport à la période précédente
   // Dans un cas réel, cette donnée proviendrait de l'API
@@ -47,12 +52,42 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
     period === 'semaine' ? 'Cette semaine' : 
     period === 'mois' ? 'Ce mois' : 'Cette année';
 
-  const filteredAgents = mockLeadsData
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      // Changer la direction si on clique sur la même colonne
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Nouvelle colonne, définir le tri par défaut
+      setSortColumn(column);
+      setSortDirection(column === 'name' ? 'asc' : 'desc');
+    }
+  };
+
+  const sortedAgents = [...mockLeadsData]
     .filter(agent => agent.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    .sort((a, b) => b[period] - a[period]);
+    .sort((a, b) => {
+      if (sortColumn === 'name') {
+        return sortDirection === 'asc' 
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      } else {
+        // Tri par nombre de leads
+        return sortDirection === 'asc'
+          ? a[period] - b[period]
+          : b[period] - a[period];
+      }
+    });
 
   const handleClearSearch = () => {
     setSearchTerm('');
+  };
+
+  const renderSortIcon = (column: SortColumn) => {
+    if (sortColumn !== column) return null;
+    
+    return sortDirection === 'asc' 
+      ? <ArrowUp className="h-4 w-4 ml-1 inline" />
+      : <ArrowDown className="h-4 w-4 ml-1 inline" />;
   };
 
   return (
@@ -81,14 +116,24 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[300px]">Agent commercial</TableHead>
-            <TableHead className="text-right">Leads ({periodLabel})</TableHead>
+            <TableHead 
+              className="w-[300px] cursor-pointer hover:bg-muted/50"
+              onClick={() => handleSort('name')}
+            >
+              Agent commercial {renderSortIcon('name')}
+            </TableHead>
+            <TableHead 
+              className="text-right cursor-pointer hover:bg-muted/50"
+              onClick={() => handleSort('leads')}
+            >
+              Leads ({periodLabel}) {renderSortIcon('leads')}
+            </TableHead>
             <TableHead className="text-right">Évolution</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredAgents.length > 0 ? (
-            filteredAgents.map((agent) => {
+          {sortedAgents.length > 0 ? (
+            sortedAgents.map((agent) => {
               const change = getChange(agent[period]);
               return (
                 <TableRow key={agent.name}>
