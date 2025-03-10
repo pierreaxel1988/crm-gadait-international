@@ -20,6 +20,9 @@ interface BarChartProps {
 }
 
 export function BarChart({ data }: BarChartProps) {
+  const minValue = Math.min(...data.map(item => item.total));
+  const padding = minValue * 0.1; // Add 10% padding below the minimum value
+
   return (
     <ChartContainer 
       config={{
@@ -30,7 +33,10 @@ export function BarChart({ data }: BarChartProps) {
       }}
     >
       <ResponsiveContainer width="100%" height="100%">
-        <RechartsBarChart data={data} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+        <RechartsBarChart 
+          data={data} 
+          margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+        >
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="name"
@@ -38,14 +44,13 @@ export function BarChart({ data }: BarChartProps) {
             axisLine={false}
             padding={{ left: 10, right: 10 }}
             fontSize={12}
-            // Using JS default parameter instead of defaultProps
           />
           <YAxis
             tickLine={false}
             axisLine={false}
             tickFormatter={(value) => `€${value}`}
             fontSize={12}
-            // Using JS default parameter instead of defaultProps
+            domain={[minValue - padding, 'auto']}
           />
           <Tooltip
             content={({ active, payload, label }) => {
