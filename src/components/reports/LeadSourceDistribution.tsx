@@ -98,17 +98,19 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
   return (
     <div className="w-full h-full flex items-center justify-center">
       <ResponsiveContainer width="100%" height={isMobile ? 280 : 350}>
-        <PieChart>
+        <PieChart 
+          margin={{ top: 0, right: 0, bottom: 20, left: 0 }} // Added bottom margin
+        >
           <Pie
             activeIndex={activeIndex}
             activeShape={renderActiveShape}
             data={data}
             cx="50%"
-            cy="50%"
+            cy="45%" // Shifted up to prevent overflow
             labelLine={false}
             label={renderCustomizedLabel}
-            outerRadius={isMobile ? 90 : 130}
-            innerRadius={isMobile ? 60 : 80}
+            outerRadius={isMobile ? 85 : 120} // Slightly reduced
+            innerRadius={isMobile ? 55 : 75} // Slightly reduced
             fill="#8884d8"
             dataKey="value"
             onMouseEnter={onPieEnter}
@@ -129,12 +131,12 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
           </Pie>
           <Tooltip content={<CustomTooltip />} />
           <Legend 
-            verticalAlign={isMobile ? "bottom" : "middle"}
-            align={isMobile ? "center" : "right"}
-            layout={isMobile ? "horizontal" : "vertical"}
+            verticalAlign="bottom"
+            align="center"
+            layout="horizontal"
             iconType="circle"
             iconSize={10}
-            wrapperStyle={isMobile ? {} : { right: 20 }}
+            wrapperStyle={{ paddingTop: 20 }} // Add padding at the top of the legend
             formatter={(value: string) => (
               <span className="text-sm text-foreground font-medium">{value}</span>
             )}
