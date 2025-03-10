@@ -6,9 +6,12 @@ import { useQuery } from '@tanstack/react-query';
 import { Loader } from 'lucide-react';
 
 const PropertyViewsChart = () => {
+  // Fix the query function to properly handle the context parameter
   const { data: properties = [], isLoading, error } = useQuery({
     queryKey: ['properties'],
-    queryFn: () => getProperties(),
+    queryFn: async () => {
+      return await getProperties();
+    },
     retry: 1,
   });
   
