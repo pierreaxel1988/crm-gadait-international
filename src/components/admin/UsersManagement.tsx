@@ -16,11 +16,16 @@ interface User {
   role: string;
 }
 
-// Données mockées pour les utilisateurs
+// Données mockées pour les utilisateurs avec l'équipe commerciale ajoutée
 const mockUsers: User[] = [
   { id: '1', name: 'Admin User', email: 'admin@example.com', role: 'Admin' },
   { id: '2', name: 'John Doe', email: 'john@example.com', role: 'Éditeur' },
   { id: '3', name: 'Jane Smith', email: 'jane@example.com', role: 'Visiteur' },
+  { id: '4', name: 'Jade Diouane', email: 'jade@gadait-international.com', role: 'Commercial' },
+  { id: '5', name: 'Ophelie Durand', email: 'ophelie@gadait-international.com', role: 'Commercial' },
+  { id: '6', name: 'Jean Marc Perrissol', email: 'jeanmarc@gadait-international.com', role: 'Commercial' },
+  { id: '7', name: 'Jacques Charles', email: 'jacques@gadait-international.com', role: 'Commercial' },
+  { id: '8', name: 'Sharon Ramdiane', email: 'sharon@gadait-international.com', role: 'Commercial' },
 ];
 
 const UsersManagement = () => {
@@ -81,7 +86,7 @@ const UsersManagement = () => {
   };
 
   // Options de rôle
-  const roleOptions = ['Admin', 'Éditeur', 'Visiteur'];
+  const roleOptions = ['Admin', 'Éditeur', 'Visiteur', 'Commercial'];
 
   return (
     <div className="space-y-6 p-4">
