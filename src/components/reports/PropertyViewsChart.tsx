@@ -9,14 +9,8 @@ const PropertyViewsChart = () => {
   const { data: properties = [], isLoading, error } = useQuery({
     queryKey: ['properties'],
     queryFn: async () => {
-      try {
-        return await getProperties();
-      } catch (error) {
-        console.error('Error fetching properties:', error);
-        return [];
-      }
+      return await getProperties();
     },
-    retry: 1,
   });
   
   // Generate view data for properties

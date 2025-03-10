@@ -25,7 +25,10 @@ import PropertySelectionView from '@/pages/PropertySelectionView';
 import { Loader } from 'lucide-react';
 
 function App() {
-  const { isAuthenticated, isLoading } = useAuth();
+  // For demonstration, let's bypass the authentication check
+  const { isLoading } = useAuth();
+  // Hardcode authentication to true for demo purposes
+  const isAuthenticated = true;
 
   if (isLoading) {
     return (
@@ -50,7 +53,7 @@ function App() {
               <Route path="/auth" element={<Navigate to="/" replace />} />
               <Route path="/selections/:token" element={<PropertySelectionView />} />
               <Route element={<Layout />}>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<Navigate to="/reports" replace />} />
                 <Route path="/leads" element={<Leads />} />
                 <Route path="/leads/new" element={<LeadNew />} />
                 <Route path="/leads/:id" element={<LeadEdit />} />
