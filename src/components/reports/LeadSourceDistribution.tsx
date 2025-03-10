@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Sector } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -100,19 +101,19 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
   
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <ResponsiveContainer width="100%" height={isMobile ? 280 : 350}>
+      <ResponsiveContainer width="100%" height={isMobile ? 300 : 360}>
         <PieChart 
-          margin={{ top: 0, right: 0, bottom: 30, left: 0 }}
+          margin={{ top: 20, right: 0, bottom: 40, left: 0 }}
         >
           <Pie
             activeIndex={activeIndex}
             activeShape={renderActiveShape}
             data={data}
             cx="50%"
-            cy="42%"
+            cy="50%"
             labelLine={false}
             label={renderCustomizedLabel}
-            outerRadius={isMobile ? 80 : 115}
+            outerRadius={isMobile ? 80 : 110}
             innerRadius={isMobile ? 50 : 70}
             fill="#8884d8"
             dataKey="value"
@@ -139,7 +140,7 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
             layout="horizontal"
             iconType="circle"
             iconSize={10}
-            wrapperStyle={{ paddingTop: 25 }}
+            wrapperStyle={{ paddingTop: 30 }}
             formatter={(value: string) => (
               <span className="text-sm text-foreground font-medium">{value}</span>
             )}
