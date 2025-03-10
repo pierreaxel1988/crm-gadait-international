@@ -19,12 +19,12 @@ interface DateRangePickerProps {
 
 export function DateRangePicker({ dateRange, onDateRangeChange }: DateRangePickerProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="w-full">
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-[280px] justify-start text-left font-normal border-gray-200 focus:ring-blue-200"
+            className="w-full justify-start text-left font-normal border-gray-200 focus:ring-blue-200"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {dateRange?.from ? (
@@ -37,7 +37,7 @@ export function DateRangePicker({ dateRange, onDateRangeChange }: DateRangePicke
                 format(dateRange.from, "d MMM yyyy", { locale: fr })
               )
             ) : (
-              <span>Sélectionner une période</span>
+              <span>Période personnalisée</span>
             )}
           </Button>
         </PopoverTrigger>

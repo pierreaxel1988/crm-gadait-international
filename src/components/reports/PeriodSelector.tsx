@@ -68,7 +68,7 @@ const PeriodSelector = ({ period, setPeriod }: PeriodSelectorProps) => {
             </div>
           ))}
           <Separator className="my-2" />
-          <div className="p-4">
+          <div className="p-4 w-full">
             <DateRangePicker 
               dateRange={dateRange || { from: undefined, to: undefined }}
               onDateRangeChange={handleDateRangeChange}
