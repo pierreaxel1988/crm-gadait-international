@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { CalendarClock, CalendarDays } from 'lucide-react';
+import { CalendarClock, CalendarDays, UserCircle, Activity } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import FormSection from './FormSection';
-import FormField from './FormField';
+import FormInput from './FormInput';
 import MultiSelectButtons from './MultiSelectButtons';
 
 interface StatusSectionProps {
@@ -25,65 +25,57 @@ const StatusSection = ({
 }: StatusSectionProps) => {
   return (
     <FormSection title="Statut et Suivi">
-      <FormField label="Statut du lead*">
-        <select
-          name="status"
-          required
-          value={formData.status}
-          onChange={handleInputChange}
-          className="luxury-input w-full"
-        >
-          {leadStatuses.map(status => (
-            <option key={status} value={status}>{status}</option>
-          ))}
-        </select>
-      </FormField>
+      <FormInput
+        label="Statut du lead"
+        name="status"
+        type="select"
+        value={formData.status}
+        onChange={handleInputChange}
+        required
+        icon={Activity}
+        options={leadStatuses.map(status => ({ value: status, label: status }))}
+      />
 
-      <FormField label="Tags">
-        <MultiSelectButtons
-          options={leadTags}
-          selectedValues={formData.tags}
-          onToggle={handleTagToggle}
-        />
-      </FormField>
+      <FormInput
+        label="Tags"
+        name="tags"
+        value=""
+        onChange={() => {}}
+        icon={Activity}
+        renderCustomField={() => (
+          <MultiSelectButtons
+            options={leadTags}
+            selectedValues={formData.tags}
+            onToggle={handleTagToggle}
+          />
+        )}
+      />
 
-      <FormField label="Responsable du suivi">
-        <input
-          type="text"
-          name="assignedTo"
-          value={formData.assignedTo || ''}
-          onChange={handleInputChange}
-          className="luxury-input w-full"
-        />
-      </FormField>
+      <FormInput
+        label="Responsable du suivi"
+        name="assignedTo"
+        value={formData.assignedTo || ''}
+        onChange={handleInputChange}
+        icon={UserCircle}
+      />
 
-      <FormField label={
-        <span className="flex items-center">
-          <CalendarClock className="h-4 w-4 mr-1" /> Date du dernier contact
-        </span>
-      }>
-        <input
-          type="date"
-          name="lastContactedAt"
-          value={formData.lastContactedAt || ''}
-          onChange={handleInputChange}
-          className="luxury-input w-full"
-        />
-      </FormField>
+      <FormInput
+        label="Date du dernier contact"
+        name="lastContactedAt"
+        type="date"
+        value={formData.lastContactedAt || ''}
+        onChange={handleInputChange}
+        icon={CalendarClock}
+      />
 
-      <FormField label={
-        <span className="flex items-center">
-          <CalendarDays className="h-4 w-4 mr-1" /> Prochain suivi prévu
-        </span>
-      }>
-        <input
-          type="date"
-          name="nextFollowUpDate"
-          value={formData.nextFollowUpDate || ''}
-          onChange={handleInputChange}
-          className="luxury-input w-full"
-        />
-      </FormField>
+      <FormInput
+        label="Prochain suivi prévu"
+        name="nextFollowUpDate"
+        type="date"
+        value={formData.nextFollowUpDate || ''}
+        onChange={handleInputChange}
+        icon={CalendarDays}
+      />
     </FormSection>
   );
 };

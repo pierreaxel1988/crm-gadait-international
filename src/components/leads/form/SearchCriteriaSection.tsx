@@ -1,6 +1,9 @@
 
 import React from 'react';
-import { Banknote, MapPin, Building, Building2, Flag, HelpCircle } from 'lucide-react';
+import { 
+  Banknote, MapPin, Building, Building2, Flag, HelpCircle, 
+  Home, BedDouble, Eye, Package, Timer, CreditCard, Map 
+} from 'lucide-react';
 import { 
   LeadDetailed, 
   PropertyType, 
@@ -11,7 +14,7 @@ import {
   PropertyUse 
 } from '@/types/lead';
 import FormSection from './FormSection';
-import FormField from './FormField';
+import FormInput from './FormInput';
 import MultiSelectButtons from './MultiSelectButtons';
 import RadioSelectButtons from './RadioSelectButtons';
 
@@ -42,159 +45,152 @@ const SearchCriteriaSection = ({
 }: SearchCriteriaSectionProps) => {
   return (
     <FormSection title="Critères de Recherche">
-      <FormField label={
-        <span className="flex items-center">
-          <Banknote className="h-4 w-4 mr-1" /> Budget
-        </span>
-      }>
-        <input
-          type="text"
-          name="budget"
-          value={formData.budget || ''}
-          onChange={handleInputChange}
-          className="luxury-input w-full"
-          placeholder="ex: 1.500.000€ - 2.000.000€"
-        />
-      </FormField>
+      <FormInput
+        label="Budget"
+        name="budget"
+        value={formData.budget || ''}
+        onChange={handleInputChange}
+        placeholder="ex: 1.500.000€ - 2.000.000€"
+        icon={Banknote}
+      />
 
-      <FormField label={
-        <span className="flex items-center">
-          <MapPin className="h-4 w-4 mr-1" /> Localisation souhaitée
-        </span>
-      }>
-        <input
-          type="text"
-          name="desiredLocation"
-          value={formData.desiredLocation || ''}
-          onChange={handleInputChange}
-          className="luxury-input w-full"
-        />
-      </FormField>
+      <FormInput
+        label="Localisation souhaitée"
+        name="desiredLocation"
+        value={formData.desiredLocation || ''}
+        onChange={handleInputChange}
+        icon={MapPin}
+      />
 
-      <FormField label={
-        <span className="flex items-center">
-          <Building className="h-4 w-4 mr-1" /> Type de bien
-        </span>
-      }>
-        <select
-          name="propertyType"
-          value={formData.propertyType || ''}
-          onChange={handleInputChange}
-          className="luxury-input w-full"
-        >
-          <option value="">Sélectionner un type</option>
-          {propertyTypes.map(type => (
-            <option key={type} value={type}>{type}</option>
-          ))}
-        </select>
-      </FormField>
+      <FormInput
+        label="Type de bien"
+        name="propertyType"
+        type="select"
+        value={formData.propertyType || ''}
+        onChange={handleInputChange}
+        icon={Building}
+        options={propertyTypes.map(type => ({ value: type, label: type }))}
+        placeholder="Sélectionner un type"
+      />
 
-      <FormField label={
-        <span className="flex items-center">
-          <Building2 className="h-4 w-4 mr-1" /> Surface habitable
-        </span>
-      }>
-        <input
-          type="text"
-          name="livingArea"
-          value={formData.livingArea || ''}
-          onChange={handleInputChange}
-          className="luxury-input w-full"
-          placeholder="ex: 200-300m²"
-        />
-      </FormField>
+      <FormInput
+        label="Surface habitable"
+        name="livingArea"
+        value={formData.livingArea || ''}
+        onChange={handleInputChange}
+        placeholder="ex: 200-300m²"
+        icon={Building2}
+      />
 
-      <FormField label="Nombre de chambres">
-        <input
-          type="number"
-          name="bedrooms"
-          value={formData.bedrooms || ''}
-          onChange={handleNumberChange}
-          className="luxury-input w-full"
-          min="0"
-        />
-      </FormField>
+      <FormInput
+        label="Nombre de chambres"
+        name="bedrooms"
+        type="number"
+        value={formData.bedrooms || ''}
+        onChange={handleNumberChange}
+        min={0}
+        icon={BedDouble}
+      />
 
-      <FormField label="Vue souhaitée">
-        <MultiSelectButtons
-          options={viewTypes}
-          selectedValues={formData.views}
-          onToggle={(value) => handleMultiSelectToggle('views', value)}
-        />
-      </FormField>
+      <FormInput
+        label="Vue souhaitée"
+        name="views"
+        value=""
+        onChange={() => {}}
+        icon={Eye}
+        renderCustomField={() => (
+          <MultiSelectButtons
+            options={viewTypes}
+            selectedValues={formData.views}
+            onToggle={(value) => handleMultiSelectToggle('views', value)}
+          />
+        )}
+      />
 
-      <FormField label="Prestations souhaitées">
-        <MultiSelectButtons
-          options={amenities}
-          selectedValues={formData.amenities}
-          onToggle={(value) => handleMultiSelectToggle('amenities', value)}
-        />
-      </FormField>
+      <FormInput
+        label="Prestations souhaitées"
+        name="amenities"
+        value=""
+        onChange={() => {}}
+        icon={Package}
+        renderCustomField={() => (
+          <MultiSelectButtons
+            options={amenities}
+            selectedValues={formData.amenities}
+            onToggle={(value) => handleMultiSelectToggle('amenities', value)}
+          />
+        )}
+      />
 
-      <FormField label="Date d'achat souhaitée">
-        <RadioSelectButtons
-          options={purchaseTimeframes}
-          selectedValue={formData.purchaseTimeframe}
-          onSelect={(value) => formData.purchaseTimeframe = value}
-        />
-      </FormField>
+      <FormInput
+        label="Date d'achat souhaitée"
+        name="purchaseTimeframe"
+        value=""
+        onChange={() => {}}
+        icon={Timer}
+        renderCustomField={() => (
+          <RadioSelectButtons
+            options={purchaseTimeframes}
+            selectedValue={formData.purchaseTimeframe}
+            onSelect={(value) => handleMultiSelectToggle('purchaseTimeframe', value)}
+          />
+        )}
+      />
 
-      <FormField label="Mode de financement">
-        <RadioSelectButtons
-          options={financingMethods}
-          selectedValue={formData.financingMethod}
-          onSelect={(value) => formData.financingMethod = value}
-        />
-      </FormField>
+      <FormInput
+        label="Mode de financement"
+        name="financingMethod"
+        value=""
+        onChange={() => {}}
+        icon={CreditCard}
+        renderCustomField={() => (
+          <RadioSelectButtons
+            options={financingMethods}
+            selectedValue={formData.financingMethod}
+            onSelect={(value) => handleMultiSelectToggle('financingMethod', value)}
+          />
+        )}
+      />
 
-      <FormField label="Type d'investissement">
-        <RadioSelectButtons
-          options={propertyUses}
-          selectedValue={formData.propertyUse}
-          onSelect={(value) => formData.propertyUse = value}
-        />
-      </FormField>
+      <FormInput
+        label="Type d'investissement"
+        name="propertyUse"
+        value=""
+        onChange={() => {}}
+        icon={Home}
+        renderCustomField={() => (
+          <RadioSelectButtons
+            options={propertyUses}
+            selectedValue={formData.propertyUse}
+            onSelect={(value) => handleMultiSelectToggle('propertyUse', value)}
+          />
+        )}
+      />
 
-      <FormField label={
-        <span className="flex items-center">
-          <Flag className="h-4 w-4 mr-1" /> Nationalité
-        </span>
-      }>
-        <input
-          type="text"
-          name="nationality"
-          value={formData.nationality || ''}
-          onChange={handleInputChange}
-          className="luxury-input w-full"
-        />
-      </FormField>
+      <FormInput
+        label="Nationalité"
+        name="nationality"
+        value={formData.nationality || ''}
+        onChange={handleInputChange}
+        icon={Flag}
+      />
 
-      <FormField label={
-        <span className="flex items-center">
-          <Flag className="h-4 w-4 mr-1" /> Résidence fiscale
-        </span>
-      }>
-        <input
-          type="text"
-          name="taxResidence"
-          value={formData.taxResidence || ''}
-          onChange={handleInputChange}
-          className="luxury-input w-full"
-        />
-      </FormField>
+      <FormInput
+        label="Résidence fiscale"
+        name="taxResidence"
+        value={formData.taxResidence || ''}
+        onChange={handleInputChange}
+        icon={Map}
+      />
 
-      <FormField label={
-        <span className="flex items-center">
-          <HelpCircle className="h-4 w-4 mr-1" /> Notes
-        </span>
-      }>
-        <textarea
-          name="notes"
-          value={formData.notes || ''}
-          onChange={handleInputChange}
-          className="luxury-input w-full min-h-[100px]"
-        />
-      </FormField>
+      <FormInput
+        label="Notes"
+        name="notes"
+        type="textarea"
+        value={formData.notes || ''}
+        onChange={handleInputChange}
+        icon={HelpCircle}
+      />
     </FormSection>
   );
 };
