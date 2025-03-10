@@ -9,9 +9,17 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { ArrowUp, ArrowDown, Calendar } from 'lucide-react';
+import { ArrowUp, ArrowDown, Calendar, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 const TopAgentsTable = () => {
   const [period, setPeriod] = useState<'semaine' | 'mois' | 'annee'>('mois');
@@ -160,22 +168,36 @@ const TopAgentsTable = () => {
     <Card>
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
         <CardTitle>Top Agents Commerciaux</CardTitle>
-        <Select 
-          value={period} 
-          onValueChange={(value) => setPeriod(value as 'semaine' | 'mois' | 'annee')}
-        >
-          <SelectTrigger className="w-[150px] border-gray-200 focus:ring-blue-200">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <SelectValue placeholder="Période" />
+        
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-[160px] justify-between border-gray-200 focus:ring-blue-200">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <span>{periodLabels[period]}</span>
+              </div>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-0" align="end">
+            <div className="rounded-md overflow-hidden">
+              {Object.entries(periodLabels).map(([key, label]) => (
+                <div 
+                  key={key}
+                  className={cn(
+                    "px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-gray-100",
+                    period === key && "bg-gray-100"
+                  )}
+                  onClick={() => {
+                    setPeriod(key as 'semaine' | 'mois' | 'annee');
+                  }}
+                >
+                  <span className="text-gray-800">{label}</span>
+                  {period === key && <Check className="h-4 w-4 text-blue-600" />}
+                </div>
+              ))}
             </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="semaine">Cette semaine</SelectItem>
-            <SelectItem value="mois">Ce mois</SelectItem>
-            <SelectItem value="annee">Cette année</SelectItem>
-          </SelectContent>
-        </Select>
+          </PopoverContent>
+        </Popover>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         <Table>
