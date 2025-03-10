@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define the shape of our AuthContext
 export interface AuthContextType {
@@ -30,32 +31,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on mount
-    const checkAuth = async () => {
-      try {
-        // This would normally be a call to your auth service
-        const savedUser = localStorage.getItem('user');
-        
-        if (savedUser) {
-          setUser(JSON.parse(savedUser));
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-      } finally {
+    // Check if user is logged in on mount and setup auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
         setIsLoading(false);
       }
-    };
+    );
 
-    checkAuth();
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    // Cleanup subscription
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // This would be a real authentication call
-      const mockUser = { id: '1', email, name: 'Test User' };
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      setUser(mockUser);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -64,24 +64,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('user');
-    setUser(null);
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   // Add signInWithGoogle method
   const signInWithGoogle = async () => {
-    setIsLoading(true);
     try {
-      // Mock Google auth for now
-      const mockGoogleUser = { id: '2', email: 'google-user@example.com', name: 'Google User' };
-      localStorage.setItem('user', JSON.stringify(mockGoogleUser));
-      setUser(mockGoogleUser);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth`,
+        },
+      });
+      if (error) throw error;
     } catch (error) {
       console.error('Google login failed:', error);
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
