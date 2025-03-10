@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BarChart3, CalendarDays, Phone, Plus, Users } from 'lucide-react';
 import LeadStatCard from '@/components/dashboard/LeadStatCard';
@@ -65,7 +66,7 @@ const chartData = [{
 
 const Index = () => {
   return (
-    <div className="p-4 lg:p-8 space-y-6 max-w-[1920px] mx-auto">
+    <div className="p-6 lg:p-10 space-y-8 max-w-[1920px] mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold">Dashboard</h1>
@@ -76,35 +77,35 @@ const Index = () => {
         </CustomButton>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8">
         <LeadStatCard title="Total Leads" value="1,547" change={12} icon={<Users className="h-5 w-5" />} />
         <LeadStatCard title="Qualified Leads" value="835" change={8} icon={<Users className="h-5 w-5" />} />
         <LeadStatCard title="Visits This Month" value="32" change={-4} icon={<CalendarDays className="h-5 w-5" />} />
         <LeadStatCard title="Calls This Week" value="128" change={16} icon={<Phone className="h-5 w-5" />} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         <DashboardCard 
           title="Lead Acquisition" 
           subtitle="Last 7 months" 
           icon={<BarChart3 className="h-5 w-5" />} 
-          className="lg:col-span-2 h-[400px] lg:h-[500px]"
+          className="lg:col-span-2 h-[450px] lg:h-[550px]"
         >
-          <div className="h-full w-full pt-4">
+          <div className="h-full w-full pt-6 px-2">
             <BarChart data={chartData} />
           </div>
         </DashboardCard>
 
-        <RecentActivityCard activities={mockActivities} />
+        <RecentActivityCard activities={mockActivities} className="h-[450px] lg:h-[550px]" />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
         <DashboardCard title="Top Performing Agents" className="h-full">
-          <div className="space-y-4 lg:space-y-6 p-2">
+          <div className="space-y-6 lg:space-y-8 p-3 pt-5">
             {['Sophie Martin', 'Thomas Bernard', 'Julie Dubois', 'Lucas Petit'].map((agent, index) => (
-              <div key={agent} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded-lg transition-colors">
+              <div key={agent} className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg transition-colors">
                 <div className="flex items-center">
-                  <div className="h-10 w-10 lg:h-12 lg:w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary text-lg">
+                  <div className="h-12 w-12 lg:h-14 lg:w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary text-lg">
                     {agent.charAt(0)}
                   </div>
                   <div className="ml-4">
@@ -129,10 +130,10 @@ const Index = () => {
         </DashboardCard>
 
         <DashboardCard title="Recent Conversions" className="h-full">
-          <div className="space-y-4 lg:space-y-6 p-2">
+          <div className="space-y-6 lg:space-y-8 p-3 pt-5">
             {['Villa Saint-Tropez', 'Penthouse Paris 8e', 'Chalet Megève', 'Appartement Cannes Croisette'].map((property, index) => (
-              <div key={property} className="flex items-center p-2 hover:bg-muted/50 rounded-lg transition-colors">
-                <div className="h-10 w-10 lg:h-12 lg:w-12 rounded bg-luxury-100 flex items-center justify-center text-luxury-800 text-lg font-medium">
+              <div key={property} className="flex items-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <div className="h-12 w-12 lg:h-14 lg:w-14 rounded bg-luxury-100 flex items-center justify-center text-luxury-800 text-lg font-medium">
                   #{index + 1}
                 </div>
                 <div className="ml-4">
