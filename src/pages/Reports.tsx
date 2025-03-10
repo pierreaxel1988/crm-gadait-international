@@ -11,8 +11,15 @@ import LeadSourcesTable from '@/components/reports/LeadSourcesTable';
 import DateRangeFilter from '@/components/reports/DateRangeFilter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Create a client
-const queryClient = new QueryClient();
+// Create a client with default options
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const ReportsContent = () => {
   const [dateRange, setDateRange] = useState<{from: Date | undefined, to: Date | undefined}>({
