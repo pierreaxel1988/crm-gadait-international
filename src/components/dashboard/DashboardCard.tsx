@@ -6,6 +6,7 @@ interface DashboardCardProps {
   title: string;
   subtitle?: string;
   icon?: ReactNode;
+  action?: ReactNode;
   className?: string;
   children: ReactNode;
 }
@@ -14,6 +15,7 @@ const DashboardCard = ({
   title,
   subtitle,
   icon,
+  action,
   className,
   children,
 }: DashboardCardProps) => {
@@ -24,7 +26,10 @@ const DashboardCard = ({
           <h3 className="text-lg font-medium">{title}</h3>
           {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
         </div>
-        {icon && <div className="text-muted-foreground">{icon}</div>}
+        <div className="flex items-center gap-4">
+          {action && <div>{action}</div>}
+          {icon && <div className="text-muted-foreground">{icon}</div>}
+        </div>
       </div>
       <div className="h-[calc(100%-4.5rem)]">{children}</div>
     </div>
