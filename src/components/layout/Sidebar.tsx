@@ -1,106 +1,131 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { X } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { ModeToggle } from "@/components/ModeToggle"
+import { useTheme } from 'next-themes'
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { 
+  Home, Users, PieChart, Calendar, Settings, LogOut, ChevronRight, 
+  ChevronLeft, NotebookPen, Building, BriefcaseBusiness
+} from 'lucide-react';
 
 interface SidebarProps {
-  isOpen: boolean;
-  isCollapsed: boolean;
-  onClose: () => void;
-  onToggleCollapse: () => void;
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
 }
 
-const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
-  const isMobile = useIsMobile();
+const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
+  const { theme } = useTheme();
+  const [open, setOpen] = useState(false);
 
-  const navigationItems = [
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
+  };
+
+  const routes = [
     {
-      name: 'Dashboard',
+      label: 'Dashboard',
       path: '/',
-      isPrimary: true,
+      icon: <Home className="h-5 w-5" />
     },
     {
-      name: 'Leads',
+      label: 'Leads',
       path: '/leads',
+      icon: <Users className="h-5 w-5" />
     },
     {
-      name: 'Pipeline',
+      label: 'Pipeline',
       path: '/pipeline',
+      icon: <BriefcaseBusiness className="h-5 w-5" />
     },
     {
-      name: 'Properties',
+      label: 'Propriétés',
       path: '/properties',
+      icon: <Building className="h-5 w-5" />
     },
     {
-      name: 'Calendar',
+      label: 'Calendar',
       path: '/calendar',
-    },
-    {
-      name: 'Reports',
-      path: '/reports',
-    },
-    {
-      name: 'Settings',
-      path: '/settings',
-    },
+      icon: <Calendar className="h-5 w-5" />
+    }
   ];
 
-  // For mobile: sidebar is either fully visible or hidden
-  // For desktop: sidebar is a permanent element that slides in from the left
-  const sidebarClasses = cn(
-    'fixed inset-y-0 left-0 z-40 bg-loro-white transform transition-all duration-300 ease-in-out w-80',
-    isOpen ? 'translate-x-0' : '-translate-x-full'
-  );
-
-  const overlayClasses = cn(
-    'fixed inset-0 z-30 bg-black/30 transition-opacity',
-    isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-  );
-
   return (
-    <>
-      <div className={overlayClasses} onClick={onClose}></div>
-      <div className={sidebarClasses}>
-        <div className="flex h-full flex-col">
-          <div className="flex h-16 items-center justify-end px-6 pt-6">
-            <button
-              onClick={onClose}
-              className="text-loro-navy hover:text-loro-terracotta transition-colors duration-200"
-              aria-label="Close menu"
-            >
-              <X size={24} />
-            </button>
-          </div>
-          
-          <nav className="flex-1 px-10 py-16">
-            <ul className="space-y-7">
-              {navigationItems.map((item) => (
-                <li key={item.name}>
-                  <NavLink
-                    to={item.path}
-                    className={({ isActive }) =>
-                      cn(
-                        'block transition-all duration-200 text-base leading-[22px]',
-                        item.isPrimary 
-                          ? 'text-loro-terracotta font-times text-2xl mb-12 tracking-wide' 
-                          : 'text-times-text font-times text-[26px] leading-[28px] font-normal',
-                        isActive
-                          ? item.isPrimary ? 'text-loro-terracotta' : 'text-loro-terracotta'
-                          : item.isPrimary ? 'text-loro-terracotta' : 'hover:text-loro-terracotta hover:font-timesItalic'
-                      )
-                    }
-                    onClick={isMobile ? onClose : undefined}
-                  >
-                    {item.name}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </nav>
+    <nav className={cn(
+      "fixed top-0 z-50 flex h-full shrink-0 flex-col border-r bg-background shadow-sm transition-all duration-300",
+      collapsed ? "w-16" : "w-60",
+    )}>
+      <div className="flex h-[60px] items-center px-4">
+        <Link to="/" className="flex items-center">
+          <h1 className={cn(
+            "font-futura text-lg font-semibold tracking-tight text-loro-navy uppercase",
+            collapsed && "hidden"
+          )}>
+            GADAIT.
+          </h1>
+        </Link>
+        <button
+          onClick={toggleSidebar}
+          className="ml-auto rounded-sm p-2 transition-colors hover:bg-secondary/50"
+        >
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        </button>
+      </div>
+      <div className="flex-1 overflow-hidden text-sm">
+        <ul className="mt-6 space-y-1">
+          {routes.map((route) => (
+            <li key={route.label}>
+              <Link
+                to={route.path}
+                className={cn(
+                  "group relative flex h-9 w-full items-center justify-start space-x-2 rounded-lg px-3.5 font-medium text-muted-foreground hover:bg-secondary hover:text-foreground",
+                  collapsed && "justify-center"
+                )}
+              >
+                {route.icon}
+                <span className={cn(
+                  "overflow-hidden text-ellipsis whitespace-nowrap",
+                  collapsed && "hidden"
+                )}>
+                  {route.label}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <div className="absolute bottom-4 left-4">
+          <Accordion type="single" collapsible>
+            <AccordionItem value="item-1">
+              <AccordionTrigger>
+                <Settings className="mr-2 h-4 w-4" />
+                <span className={cn(
+                  "overflow-hidden text-ellipsis whitespace-nowrap",
+                  collapsed && "hidden"
+                )}>
+                  Settings
+                </span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <ModeToggle />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </div>
-    </>
+    </nav>
   );
 };
 
