@@ -42,10 +42,16 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   // Calculer la différence par rapport à la période précédente
-  // Dans un cas réel, cette donnée proviendrait de l'API
-  const getChange = (value: number): number => {
-    // Cette fonction simule une différence avec la période précédente
-    return Math.floor(Math.random() * 20) - 10; // Entre -10 et 10
+  const getChange = (agent: string): number => {
+    // Cette fonction simule une évolution - en réalité, ces données viendraient de l'API
+    const randomValues = {
+      'Jade Diouane': 3,
+      'Ophelie Durand': 2,
+      'Jean Marc Perrissol': 9,
+      'Jacques Charles': -10,
+      'Sharon Ramdiane': -5
+    };
+    return randomValues[agent as keyof typeof randomValues] || 0;
   };
 
   const periodLabel = 
@@ -98,7 +104,7 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
           placeholder="Rechercher un agent..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
+          className="pl-10 border border-gray-200 rounded-md"
         />
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         {searchTerm && (
@@ -113,61 +119,71 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
         )}
       </div>
       
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead 
-              className="w-[300px] cursor-pointer hover:bg-muted/50"
-              onClick={() => handleSort('name')}
-            >
-              Agent commercial {renderSortIcon('name')}
-            </TableHead>
-            <TableHead 
-              className="text-right cursor-pointer hover:bg-muted/50"
-              onClick={() => handleSort('leads')}
-            >
-              Leads ({periodLabel}) {renderSortIcon('leads')}
-            </TableHead>
-            <TableHead className="text-right">Évolution</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedAgents.length > 0 ? (
-            sortedAgents.map((agent) => {
-              const change = getChange(agent[period]);
-              return (
-                <TableRow key={agent.name}>
-                  <TableCell className="font-medium">{agent.name}</TableCell>
-                  <TableCell className="text-right">{agent[period]}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end">
-                      <span 
-                        className={cn(
-                          "flex items-center px-2 py-1 rounded-full text-xs font-medium",
-                          change > 0 ? "text-green-700 bg-green-100" : "text-red-700 bg-red-100"
-                        )}
-                      >
-                        {change > 0 ? (
-                          <ChevronUp className="mr-1 h-3 w-3" />
-                        ) : (
-                          <ChevronDown className="mr-1 h-3 w-3" />
-                        )}
-                        {Math.abs(change)}%
-                      </span>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })
-          ) : (
-            <TableRow>
-              <TableCell colSpan={3} className="text-center py-4">
-                Aucun agent trouvé pour "{searchTerm}"
-              </TableCell>
+      <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
+        <Table>
+          <TableHeader className="bg-gray-50">
+            <TableRow className="hover:bg-gray-50/80">
+              <TableHead 
+                className="w-[300px] cursor-pointer hover:bg-gray-100/80 px-6 py-4 text-sm font-medium text-gray-700"
+                onClick={() => handleSort('name')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Agent commercial</span>
+                  {renderSortIcon('name')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="text-right cursor-pointer hover:bg-gray-100/80 px-6 py-4 text-sm font-medium text-gray-700"
+                onClick={() => handleSort('leads')}
+              >
+                <div className="flex items-center justify-end space-x-1">
+                  <span>Leads ({periodLabel})</span>
+                  {renderSortIcon('leads')}
+                </div>
+              </TableHead>
+              <TableHead className="text-right px-6 py-4 text-sm font-medium text-gray-700">Évolution</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {sortedAgents.length > 0 ? (
+              sortedAgents.map((agent) => {
+                const change = getChange(agent.name);
+                return (
+                  <TableRow key={agent.name} className="border-t border-gray-100 hover:bg-gray-50/50">
+                    <TableCell className="font-medium px-6 py-4 text-gray-800">{agent.name}</TableCell>
+                    <TableCell className="text-right px-6 py-4 text-gray-800 font-medium">{agent[period]}</TableCell>
+                    <TableCell className="text-right px-6 py-4">
+                      <div className="flex items-center justify-end">
+                        <span 
+                          className={cn(
+                            "flex items-center px-3 py-1 rounded-full text-xs font-medium",
+                            change > 0 
+                              ? "text-green-700 bg-green-100" 
+                              : "text-red-700 bg-red-100"
+                          )}
+                        >
+                          {change > 0 ? (
+                            <ChevronUp className="mr-1 h-3 w-3" />
+                          ) : (
+                            <ChevronDown className="mr-1 h-3 w-3" />
+                          )}
+                          {Math.abs(change)}%
+                        </span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center py-8 text-gray-500 italic">
+                  Aucun agent trouvé pour "{searchTerm}"
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
