@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 
 export type PeriodType = 'semaine' | 'mois' | 'annee' | 'custom';
 
-interface Period {
+export interface Period {
   type: PeriodType;
   dateRange?: {
     from: Date | undefined;

@@ -1,8 +1,9 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody } from "@/components/ui/table";
 import { agentsDataByPeriod, PeriodType } from './agentsData';
-import PeriodSelector from './PeriodSelector';
+import PeriodSelector, { Period } from './PeriodSelector';
 import AgentsTableHeader from './AgentsTableHeader';
 import AgentTableRow from './AgentTableRow';
 import { Search } from 'lucide-react';
