@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   BrowserRouter,
@@ -21,6 +20,7 @@ import { cn as cx } from "@/lib/utils";
 import Properties from '@/pages/Properties';
 import PropertySelection from '@/pages/PropertySelection';
 import PropertySelectionView from '@/pages/PropertySelectionView';
+import { Loader } from 'lucide-react';
 
 function App() {
   const { isLoading } = useAuth();
@@ -28,7 +28,7 @@ function App() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        <Loader className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
@@ -58,4 +58,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
