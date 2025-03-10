@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import BaseSelectButtons from './BaseSelectButtons';
 
 interface RadioSelectButtonsProps<T extends string> {
   options: T[];
@@ -14,25 +13,14 @@ const RadioSelectButtons = <T extends string>({
   selectedValue, 
   onSelect 
 }: RadioSelectButtonsProps<T>) => {
+  const isSelected = (option: T) => option === selectedValue;
+  
   return (
-    <div className="flex gap-2">
-      {options.map(option => (
-        <button
-          key={option}
-          type="button"
-          onClick={() => onSelect(option)}
-          className={cn(
-            "flex items-center gap-1 py-1 px-2 rounded-full text-xs",
-            selectedValue === option
-              ? "bg-primary text-white"
-              : "bg-accent text-accent-foreground hover:bg-accent/80"
-          )}
-        >
-          {selectedValue === option && <Check className="h-3 w-3" />}
-          {option}
-        </button>
-      ))}
-    </div>
+    <BaseSelectButtons
+      options={options}
+      isSelected={isSelected}
+      onSelectOption={onSelect}
+    />
   );
 };
 
