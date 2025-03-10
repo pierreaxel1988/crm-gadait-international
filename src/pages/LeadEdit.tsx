@@ -1,16 +1,17 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import LeadForm from '@/components/leads/LeadForm';
 import { LeadDetailed } from '@/types/lead';
 import { getLead, updateLead, deleteLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useLeadActions } from '@/hooks/useLeadActions';
 import LeadHeader from '@/components/leads/LeadHeader';
+import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
-import LeadTabs from '@/components/leads/edit/LeadTabs';
-import LeadEditLoader from '@/components/leads/edit/LeadEditLoader';
-import LeadNotFound from '@/components/leads/edit/LeadNotFound';
+import CustomButton from '@/components/ui/CustomButton';
 
 const LeadEdit = () => {
   const { id } = useParams<{ id: string }>();
@@ -83,35 +84,98 @@ const LeadEdit = () => {
     }
   };
 
-  const navigateBack = () => navigate('/leads');
-
   if (isLoading) {
-    return <LeadEditLoader />;
+    return (
+      <div className="p-6 flex justify-center items-center">
+        <div className="animate-spin h-8 w-8 border-4 border-chocolate-dark rounded-full border-t-transparent"></div>
+      </div>
+    );
   }
 
   if (!lead && id) {
-    return <LeadNotFound onNavigateBack={navigateBack} />;
+    return (
+      <div className="p-6">
+        <div className="text-center py-10">
+          <h2 className="text-2xl font-semibold">Lead introuvable</h2>
+          <p className="text-muted-foreground mt-2">Le lead que vous recherchez n'existe pas.</p>
+          <CustomButton className="mt-4" variant="chocolate" onClick={() => navigate('/leads')}>
+            Retour à la liste
+          </CustomButton>
+        </div>
+      </div>
+    );
   }
   
   return (
     <div className="p-4 md:p-6 space-y-6">
       <LeadHeader 
         lead={lead} 
-        onBack={navigateBack} 
+        onBack={() => navigate('/leads')} 
         onAddAction={handleAddAction} 
         onDelete={handleDelete}
       />
 
-      <LeadTabs
-        lead={lead}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        handleSubmit={handleSubmit}
-        onNavigateBack={navigateBack}
-        getActionTypeIcon={getActionTypeIcon}
-        markActionComplete={markActionComplete}
-        onAddAction={handleAddAction}
-      />
+      <Tabs 
+        value={activeTab} 
+        onValueChange={setActiveTab} 
+        className="w-full"
+      >
+        <TabsList className="w-full bg-background border-b flex justify-between overflow-x-auto">
+          <TabsTrigger 
+            value="informations" 
+            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+          >
+            Informations générales
+          </TabsTrigger>
+          <TabsTrigger 
+            value="criteres" 
+            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+          >
+            Critères de recherche
+          </TabsTrigger>
+          <TabsTrigger 
+            value="statut" 
+            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+          >
+            Statut et suivi
+          </TabsTrigger>
+          <TabsTrigger 
+            value="actions" 
+            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+          >
+            Actions/Tâches
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="informations" className="mt-4">
+          <div className="luxury-card p-6">
+            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="informations" />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="criteres" className="mt-4">
+          <div className="luxury-card p-6">
+            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="criteres" />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="statut" className="mt-4">
+          <div className="luxury-card p-6">
+            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="statut" />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="actions" className="mt-4">
+          {lead && (
+            <ActionsPanel 
+              lead={lead}
+              getActionTypeIcon={getActionTypeIcon}
+              onMarkComplete={markActionComplete}
+              onAddAction={handleAddAction}
+            />
+          )}
+        </TabsContent>
+      </Tabs>
 
       <ActionDialog
         isOpen={isActionDialogOpen}
