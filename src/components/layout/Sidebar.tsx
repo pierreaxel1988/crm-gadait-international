@@ -20,7 +20,7 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
   Home, Users, PieChart, Calendar, Settings, LogOut, ChevronRight, 
-  ChevronLeft, NotebookPen, Building, BriefcaseBusiness
+  ChevronLeft, NotebookPen, Building, BriefcaseBusiness, FileChartLine
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -61,6 +61,11 @@ const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
       label: 'Calendar',
       path: '/calendar',
       icon: <Calendar className="h-5 w-5" />
+    },
+    {
+      label: 'Rapports',
+      path: '/reports',
+      icon: <FileChartLine className="h-5 w-5" />
     }
   ];
 

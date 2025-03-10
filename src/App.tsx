@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   BrowserRouter,
@@ -13,6 +14,7 @@ import LeadNew from '@/pages/LeadNew';
 import LeadEdit from '@/pages/LeadEdit';
 import Pipeline from '@/pages/Pipeline';
 import Calendar from '@/pages/Calendar';
+import Reports from '@/pages/Reports';
 import NotFound from '@/pages/NotFound';
 import Layout from '@/components/layout/Layout';
 import { cn as cx } from "@/lib/utils";
@@ -44,6 +46,7 @@ function App() {
             <Route path="/leads/:id" element={<LeadEdit />} />
             <Route path="/pipeline" element={<Pipeline />} />
             <Route path="/calendar" element={<Calendar />} />
+            <Route path="/reports" element={<Reports />} />
             <Route path="/properties" element={<Properties />} />
             <Route path="/lead-selection" element={<PropertySelection />} />
             <Route path="*" element={<NotFound />} />
