@@ -7,6 +7,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 }
 
+const DATOCMS_API_TOKEN = "99a90afc639c5900568ce6e9dfb5d3"
+const DATOCMS_ENDPOINT = "https://graphql.datocms.com/"
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -17,119 +20,99 @@ serve(async (req) => {
     // Récupérer les variables d'environnement
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    const apiUrl = Deno.env.get('PRIVATE_COLLECTION_API_URL') || ''
-    const apiKey = Deno.env.get('PRIVATE_COLLECTION_API_KEY') || ''
-    
-    if (!apiUrl || !apiKey) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Configuration API manquante. Veuillez configurer PRIVATE_COLLECTION_API_URL et PRIVATE_COLLECTION_API_KEY." 
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500 
-        }
-      )
-    }
     
     // Créer un client Supabase
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     
-    // Simulons pour l'instant une API fictive (à remplacer par l'API réelle)
-    // Dans un cas réel, on ferait un appel à l'API the-private-collection.com
-    console.log(`Fetching properties from API: ${apiUrl}`)
+    console.log(`Fetching properties from DatoCMS`)
     
-    // Note: Cette partie serait remplacée par un vrai appel API
-    // const response = await fetch(`${apiUrl}/properties`, {
-    //   headers: {
-    //     'Authorization': `Bearer ${apiKey}`,
-    //   },
-    // })
-    // const properties = await response.json()
-    
-    // Pour simulation, utilisez ces propriétés fictives
-    const mockProperties = [
-      {
-        external_id: "prop-001",
-        title: "Villa de luxe avec vue sur mer",
-        description: "Magnifique villa avec vue panoramique sur la mer",
-        price: 3500000,
-        currency: "EUR",
-        location: "Cannes",
-        country: "France",
-        property_type: "Villa",
-        bedrooms: 5,
-        bathrooms: 4,
-        area: 350,
-        area_unit: "m²",
-        features: ["Piscine", "Jardin", "Terrasse"],
-        amenities: ["Climatisation", "Garage", "Sécurité"],
-        images: ["https://example.com/image1.jpg", "https://example.com/image2.jpg"],
-        url: "https://the-private-collection.com/properties/villa-luxe-cannes"
-      },
-      {
-        external_id: "prop-002",
-        title: "Penthouse moderne au centre-ville",
-        description: "Penthouse avec terrasse sur le toit",
-        price: 2200000,
-        currency: "EUR",
-        location: "Nice",
-        country: "France",
-        property_type: "Penthouse",
-        bedrooms: 3,
-        bathrooms: 2,
-        area: 180,
-        area_unit: "m²",
-        features: ["Terrasse", "Vue panoramique"],
-        amenities: ["Climatisation", "Ascenseur privé"],
-        images: ["https://example.com/image3.jpg", "https://example.com/image4.jpg"],
-        url: "https://the-private-collection.com/properties/penthouse-nice"
-      },
-      {
-        external_id: "prop-003",
-        title: "Appartement haut de gamme",
-        description: "Appartement luxueux avec finitions premium",
-        price: 1800000,
-        currency: "EUR",
-        location: "Paris",
-        country: "France",
-        property_type: "Appartement",
-        bedrooms: 3,
-        bathrooms: 2,
-        area: 150,
-        area_unit: "m²",
-        features: ["Balcon", "Parquet ancien"],
-        amenities: ["Conciergerie", "Parking"],
-        images: ["https://example.com/image5.jpg", "https://example.com/image6.jpg"],
-        url: "https://the-private-collection.com/properties/appartement-paris"
+    // Requête GraphQL pour obtenir les propriétés
+    const query = `
+      query {
+        allProperties {
+          id
+          title
+          description
+          price
+          location
+          country
+          propertyType
+          bedrooms
+          bathrooms
+          area
+          features
+          amenities
+          images {
+            url
+          }
+          slug
+        }
       }
-    ]
+    `
+    
+    // Appel à l'API DatoCMS
+    const response = await fetch(DATOCMS_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${DATOCMS_API_TOKEN}`,
+      },
+      body: JSON.stringify({ query }),
+    })
+    
+    const responseData = await response.json()
+    
+    if (responseData.errors) {
+      throw new Error(`DatoCMS API error: ${JSON.stringify(responseData.errors)}`)
+    }
+    
+    const properties = responseData.data.allProperties
     
     let insertCount = 0
     let updateCount = 0
     
     // Traiter et insérer chaque propriété
-    for (const prop of mockProperties) {
+    for (const prop of properties) {
+      // Formater les données pour correspondre à notre schéma
+      const propertyData = {
+        external_id: prop.id,
+        title: prop.title,
+        description: prop.description,
+        price: prop.price,
+        currency: 'EUR',
+        location: prop.location,
+        country: prop.country,
+        property_type: prop.propertyType,
+        bedrooms: prop.bedrooms,
+        bathrooms: prop.bathrooms,
+        area: prop.area,
+        area_unit: 'm²',
+        features: prop.features || [],
+        amenities: prop.amenities || [],
+        images: prop.images ? prop.images.map(img => img.url) : [],
+        url: `https://the-private-collection.com/en/${prop.slug}`
+      }
+      
       // Vérifier si la propriété existe déjà (par external_id)
       const { data: existingProp } = await supabase
         .from('properties')
         .select('id')
-        .eq('external_id', prop.external_id)
+        .eq('external_id', prop.id)
         .single()
       
       if (existingProp) {
         // Mettre à jour la propriété existante
         await supabase
           .from('properties')
-          .update(prop)
-          .eq('external_id', prop.external_id)
+          .update(propertyData)
+          .eq('external_id', prop.id)
         
         updateCount++
       } else {
         // Insérer une nouvelle propriété
         await supabase
           .from('properties')
-          .insert(prop)
+          .insert(propertyData)
         
         insertCount++
       }
