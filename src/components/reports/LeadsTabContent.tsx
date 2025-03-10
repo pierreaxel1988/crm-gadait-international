@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Filter, Users, BarChart, Table as TableIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import DashboardCard from '@/components/dashboard/DashboardCard';
 import ConversionRateCard from '@/components/reports/ConversionRateCard';
@@ -55,15 +54,15 @@ const LeadsTabContent: React.FC = () => {
         action={
           <div className="flex items-center space-x-2">
             <ToggleGroup type="single" value={displayMode} onValueChange={(value) => value && setDisplayMode(value as 'chart' | 'table')}>
-              <ToggleGroupItem value="chart" aria-label="Afficher en graphique">
+              <ToggleGroupItem value="chart" aria-label="Afficher en graphique" className="data-[state=on]:bg-blue-50 data-[state=on]:text-blue-700">
                 <BarChart className="h-4 w-4" />
               </ToggleGroupItem>
-              <ToggleGroupItem value="table" aria-label="Afficher en tableau">
+              <ToggleGroupItem value="table" aria-label="Afficher en tableau" className="data-[state=on]:bg-blue-50 data-[state=on]:text-blue-700">
                 <TableIcon className="h-4 w-4" />
               </ToggleGroupItem>
             </ToggleGroup>
             <Select value={leadsPeriod} onValueChange={(value) => setLeadsPeriod(value as 'semaine' | 'mois' | 'annee')}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[140px] border-gray-200 focus:ring-blue-200">
                 <SelectValue placeholder="Période" />
               </SelectTrigger>
               <SelectContent>

@@ -8,10 +8,11 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { ChevronUp, ChevronDown, Search, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search, X, ArrowUp, ArrowDown, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LeadsData {
   name: string;
@@ -40,6 +41,7 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortColumn, setSortColumn] = useState<SortColumn>('leads');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const isMobile = useIsMobile();
 
   // Calculer la différence par rapport à la période précédente
   const getChange = (agent: string): number => {
@@ -97,7 +99,7 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
   };
 
   return (
-    <div className="w-full overflow-auto space-y-4">
+    <div className="w-full space-y-4">
       <div className="relative">
         <Input
           type="text"
@@ -119,12 +121,12 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
         )}
       </div>
       
-      <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-md border border-gray-200 shadow-sm overflow-hidden">
         <Table>
           <TableHeader className="bg-gray-50">
             <TableRow className="hover:bg-gray-50/80">
               <TableHead 
-                className="w-[300px] cursor-pointer hover:bg-gray-100/80 px-6 py-4 text-sm font-medium text-gray-700"
+                className="w-[300px] cursor-pointer hover:bg-gray-100/80 px-4 py-3 text-sm font-medium text-gray-700"
                 onClick={() => handleSort('name')}
               >
                 <div className="flex items-center space-x-1">
@@ -133,7 +135,7 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
                 </div>
               </TableHead>
               <TableHead 
-                className="text-right cursor-pointer hover:bg-gray-100/80 px-6 py-4 text-sm font-medium text-gray-700"
+                className="text-right cursor-pointer hover:bg-gray-100/80 px-4 py-3 text-sm font-medium text-gray-700"
                 onClick={() => handleSort('leads')}
               >
                 <div className="flex items-center justify-end space-x-1">
@@ -141,22 +143,56 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
                   {renderSortIcon('leads')}
                 </div>
               </TableHead>
-              <TableHead className="text-right px-6 py-4 text-sm font-medium text-gray-700">Évolution</TableHead>
+              <TableHead className="text-right px-4 py-3 text-sm font-medium text-gray-700">Évolution</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedAgents.length > 0 ? (
-              sortedAgents.map((agent) => {
+              sortedAgents.map((agent, index) => {
                 const change = getChange(agent.name);
+                const isTopAgent = index === 0;
+                
                 return (
-                  <TableRow key={agent.name} className="border-t border-gray-100 hover:bg-gray-50/50">
-                    <TableCell className="font-medium px-6 py-4 text-gray-800">{agent.name}</TableCell>
-                    <TableCell className="text-right px-6 py-4 text-gray-800 font-medium">{agent[period]}</TableCell>
-                    <TableCell className="text-right px-6 py-4">
+                  <TableRow 
+                    key={agent.name} 
+                    className={cn(
+                      "border-t border-gray-100 transition-colors",
+                      isTopAgent ? "bg-blue-50/50 hover:bg-blue-50/70" : "hover:bg-gray-50/50"
+                    )}
+                  >
+                    <TableCell className="font-medium px-4 py-3 text-gray-800">
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          "w-7 h-7 rounded-full flex items-center justify-center text-white text-xs",
+                          isTopAgent ? "bg-blue-600" : "bg-gray-500"
+                        )}>
+                          {agent.name.charAt(0)}
+                        </div>
+                        <span className={cn(
+                          isTopAgent && "font-semibold"
+                        )}>
+                          {agent.name}
+                        </span>
+                        {isTopAgent && !isMobile && (
+                          <span className="ml-1 text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-full">
+                            Top
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right px-4 py-3 text-gray-800 font-medium">
+                      <span className={cn(
+                        "px-3 py-1 rounded-full",
+                        isTopAgent ? "bg-blue-100" : ""
+                      )}>
+                        {agent[period]}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right px-4 py-3">
                       <div className="flex items-center justify-end">
                         <span 
                           className={cn(
-                            "flex items-center px-3 py-1 rounded-full text-xs font-medium",
+                            "flex items-center px-2 py-1 rounded-full text-xs font-medium",
                             change > 0 
                               ? "text-green-700 bg-green-100" 
                               : "text-red-700 bg-red-100"
