@@ -15,6 +15,8 @@ const UsersManagement = () => {
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [newUser, setNewUser] = useState<Omit<User, 'id'>>({ name: '', email: '', role: 'Visiteur' });
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('Tous');
 
   // Simuler l'ajout d'un utilisateur
   const handleAddUser = () => {
@@ -65,6 +67,12 @@ const UsersManagement = () => {
     setEditingUser(null);
   };
 
+  // Réinitialiser les filtres
+  const resetFilters = () => {
+    setSearchTerm('');
+    setRoleFilter('Tous');
+  };
+
   return (
     <div className="space-y-6 p-4">
       <div className="flex justify-between items-center">
@@ -99,6 +107,10 @@ const UsersManagement = () => {
         onSaveChanges={saveUserChanges}
         onCancelEditing={cancelEditing}
         onDeleteUser={handleDeleteUser}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        roleFilter={roleFilter}
+        setRoleFilter={setRoleFilter}
       />
     </div>
   );
