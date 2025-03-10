@@ -1,16 +1,37 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { getAllProperties } from '@/services/propertyService';
+import { getProperties } from '@/services/propertyService';
+import { Property } from '@/types/property';
 
 const PropertyViewsChart = () => {
-  const properties = getAllProperties();
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const propertiesData = await getProperties();
+        setProperties(propertiesData);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
   
   // Prendre les 5 premières propriétés et simuler des vues
   const topProperties = properties.slice(0, 5).map(property => ({
     name: property.title.length > 20 ? property.title.substring(0, 20) + '...' : property.title,
     views: Math.floor(Math.random() * 50) + 10 // Simuler des vues entre 10 et 60
   }));
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-64">Chargement des données...</div>;
+  }
 
   return (
     <ResponsiveContainer width="100%" height="100%">
