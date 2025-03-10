@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -8,8 +8,10 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface LeadsData {
   name: string;
@@ -32,6 +34,8 @@ interface LeadsAgentsTableProps {
 }
 
 const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Calculer la différence par rapport à la période précédente
   // Dans un cas réel, cette donnée proviendrait de l'API
   const getChange = (value: number): number => {
@@ -43,8 +47,37 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
     period === 'semaine' ? 'Cette semaine' : 
     period === 'mois' ? 'Ce mois' : 'Cette année';
 
+  const filteredAgents = mockLeadsData
+    .filter(agent => agent.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => b[period] - a[period]);
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
+  };
+
   return (
-    <div className="w-full overflow-auto">
+    <div className="w-full overflow-auto space-y-4">
+      <div className="relative">
+        <Input
+          type="text"
+          placeholder="Rechercher un agent..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        {searchTerm && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-2 h-6 w-6"
+            onClick={handleClearSearch}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+      
       <Table>
         <TableHeader>
           <TableRow>
@@ -54,9 +87,8 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {mockLeadsData
-            .sort((a, b) => b[period] - a[period])
-            .map((agent) => {
+          {filteredAgents.length > 0 ? (
+            filteredAgents.map((agent) => {
               const change = getChange(agent[period]);
               return (
                 <TableRow key={agent.name}>
@@ -81,7 +113,14 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
                   </TableCell>
                 </TableRow>
               );
-            })}
+            })
+          ) : (
+            <TableRow>
+              <TableCell colSpan={3} className="text-center py-4">
+                Aucun agent trouvé pour "{searchTerm}"
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>
