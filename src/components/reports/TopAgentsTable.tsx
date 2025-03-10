@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -15,35 +16,40 @@ const TopAgentsTable = () => {
   // Données mockées pour le tableau des agents
   const agentsData = [
     { 
-      name: 'Jade Diouane', 
+      name: 'Jade Diouane',
+      leads: 12, 
       sales: 3, 
       value: '€4.8M', 
       conversion: 32,
       change: 15
     },
     { 
-      name: 'Ophelie Durand', 
+      name: 'Ophelie Durand',
+      leads: 10, 
       sales: 2, 
       value: '€3.2M', 
       conversion: 28,
       change: 8
     },
     { 
-      name: 'Jean Marc Perrissol', 
+      name: 'Jean Marc Perrissol',
+      leads: 8, 
       sales: 2, 
       value: '€2.9M', 
       conversion: 25,
       change: -4
     },
     { 
-      name: 'Jacques Charles', 
+      name: 'Jacques Charles',
+      leads: 9, 
       sales: 1, 
       value: '€2.5M', 
       conversion: 20,
       change: 12
     },
     { 
-      name: 'Sharon Ramdiane', 
+      name: 'Sharon Ramdiane',
+      leads: 7, 
       sales: 1, 
       value: '€1.9M', 
       conversion: 18,
@@ -61,6 +67,7 @@ const TopAgentsTable = () => {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[200px]">Agent</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Leads</TableHead>
               <TableHead className="text-right whitespace-nowrap">Ventes</TableHead>
               <TableHead className="text-right whitespace-nowrap">Valeur</TableHead>
               <TableHead className="text-right whitespace-nowrap">Conversion</TableHead>
@@ -71,6 +78,7 @@ const TopAgentsTable = () => {
             {agentsData.map((agent) => (
               <TableRow key={agent.name}>
                 <TableCell className="font-medium whitespace-nowrap">{agent.name}</TableCell>
+                <TableCell className="text-right font-medium">{agent.leads}</TableCell>
                 <TableCell className="text-right">{agent.sales}</TableCell>
                 <TableCell className="text-right">{agent.value}</TableCell>
                 <TableCell className="text-right">{agent.conversion}%</TableCell>
