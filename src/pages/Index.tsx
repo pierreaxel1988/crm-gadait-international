@@ -54,21 +54,21 @@ const Index = () => {
         <LeadStatCard 
           title="Nouveaux Leads" 
           value={stats.newLeads} 
-          trendValue={+8} 
+          trend={+8} 
           period="cette semaine" 
           onClick={() => navigate('/leads')}
         />
         <LeadStatCard 
           title="Leads Qualifiés" 
           value={stats.qualifiedLeads}
-          trendValue={+5} 
+          trend={+5} 
           period="ce mois" 
           onClick={() => navigate('/leads')}
         />
         <LeadStatCard 
           title="Tâches à venir" 
           value={stats.upcomingTasks}
-          trendValue={-2} 
+          trend={-2} 
           period="aujourd'hui" 
           onClick={() => navigate('/calendar')}
         />
@@ -77,9 +77,9 @@ const Index = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <DashboardCard title="Activité Récente">
           <RecentActivityCard activities={[
-            { id: '1', leadName: 'Marie Lambert', date: '2023-06-17', status: 'New' },
-            { id: '2', leadName: 'Jean Dupont', date: '2023-06-15', status: 'Contacted' },
-            { id: '3', leadName: 'Claire Simon', date: '2023-06-12', status: 'Visit' }
+            { id: '1', type: 'Nouveau lead', name: 'Marie Lambert', date: '2023-06-17', status: 'New' },
+            { id: '2', type: 'Appel', name: 'Jean Dupont', date: '2023-06-15', status: 'Contacted' },
+            { id: '3', type: 'Visite', name: 'Claire Simon', date: '2023-06-12', status: 'Visit' }
           ]} />
         </DashboardCard>
         
