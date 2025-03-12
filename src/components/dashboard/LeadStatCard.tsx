@@ -9,14 +9,21 @@ interface LeadStatCardProps {
   change?: number;
   icon?: React.ReactNode;
   className?: string;
+  onClick?: () => void; // Added onClick property
 }
 
-const LeadStatCard = ({ title, value, change, icon, className }: LeadStatCardProps) => {
+const LeadStatCard = ({ title, value, change, icon, className, onClick }: LeadStatCardProps) => {
   const isPositive = typeof change === 'number' && change > 0;
   const isNegative = typeof change === 'number' && change < 0;
 
   return (
-    <div className={cn('luxury-card flex flex-col p-6 scale-in', className)}>
+    <div 
+      className={cn('luxury-card flex flex-col p-6 scale-in', 
+        onClick ? 'cursor-pointer hover:ring-1 hover:ring-primary/20' : '',
+        className
+      )}
+      onClick={onClick}
+    >
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm font-medium text-muted-foreground">{title}</span>
         {icon && <div className="text-primary">{icon}</div>}
