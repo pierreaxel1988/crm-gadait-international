@@ -41,7 +41,7 @@ const PeriodSelector = ({ period, setPeriod }: PeriodSelectorProps) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="w-[200px] justify-between border-gray-200 focus:ring-blue-200">
+        <Button variant="outline" className="w-full justify-between border-gray-200 focus:ring-blue-200">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             <span>

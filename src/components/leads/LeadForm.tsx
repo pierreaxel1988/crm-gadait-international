@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { LeadDetailed, LeadSource, PropertyType, ViewType, Amenity, 
   PurchaseTimeframe, FinancingMethod, PropertyUse, Country } from '@/types/lead';
@@ -66,7 +65,8 @@ const LeadForm = ({ lead, onSubmit, onCancel, activeTab = 'informations' }: Lead
   // Define constants for form options
   const leadSources: LeadSource[] = [
     'Site web', 'Réseaux sociaux', 'Portails immobiliers', 
-    'Network', 'Repeaters', 'Recommandations', 'Apporteur d\'affaire'
+    'Network', 'Repeaters', 'Recommandations', 'Apporteur d\'affaire',
+    'Idealista', 'Le Figaro', 'Properstar', 'Property Cloud', 'L\'express Property'
   ];
 
   const taskTypes: TaskType[] = [

@@ -10,7 +10,12 @@ export type LeadSource =
   | "Network" 
   | "Repeaters" 
   | "Recommandations"
-  | "Apporteur d'affaire";
+  | "Apporteur d'affaire"
+  | "Idealista"
+  | "Le Figaro"
+  | "Properstar"
+  | "Property Cloud"
+  | "L'express Property";
 
 export type PropertyType = 
   | "Villa" 
