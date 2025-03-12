@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -22,7 +21,6 @@ import { AuthProvider, useAuth } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
 
-// Protected route wrapper component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   
@@ -47,7 +45,6 @@ const AppRoutes = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Don't show layout for auth page
   if (location.pathname === '/auth') {
     return (
       <Routes>
@@ -77,6 +74,7 @@ const AppRoutes = () => {
             <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+            <Route path="/api" element={<ProtectedRoute><ApiGuide /></ProtectedRoute>} />
             <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

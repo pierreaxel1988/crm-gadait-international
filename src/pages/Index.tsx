@@ -1,16 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import DashboardCard from '@/components/dashboard/DashboardCard';
 import LeadStatCard from '@/components/dashboard/LeadStatCard';
 import RecentActivityCard from '@/components/dashboard/RecentActivityCard';
 import ImportedLeadsPanel from '@/components/leads/ImportedLeadsPanel';
-import LeadApiGuide from '@/components/leads/LeadApiGuide';
 import { useNavigate } from 'react-router-dom';
-import CustomButton from '@/components/ui/CustomButton';
 import { getLeads } from '@/services/leadService';
 
-// Define the correct Activity type to match RecentActivityCard
 interface Activity {
   id: string;
   user: {
@@ -31,7 +27,6 @@ const Index = () => {
   });
   
   useEffect(() => {
-    // Calcul des statistiques à partir des leads
     const leads = getLeads();
     
     const newLeadsCount = leads.filter(lead => 
@@ -112,22 +107,6 @@ const Index = () => {
         
         <ImportedLeadsPanel limit={3} />
       </div>
-      
-      <div className="flex justify-between items-center mt-8">
-        <h2 className="text-xl font-semibold">API d'importation de Leads</h2>
-        <CustomButton 
-          variant="outline" 
-          className="flex items-center gap-1.5 border-chocolate-light text-chocolate-dark hover:bg-chocolate-light/10"
-          onClick={() => {
-            // Naviguer vers une page dédiée si elle existe
-            // ou simplement afficher plus d'informations
-          }}
-        >
-          Voir la documentation <ArrowRight className="h-4 w-4" />
-        </CustomButton>
-      </div>
-      
-      <LeadApiGuide />
     </div>
   );
 };

@@ -42,6 +42,10 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
       path: '/reports',
     },
     {
+      name: 'API',
+      path: '/api',
+    },
+    {
       name: 'Admin',
       path: '/admin',
     },
