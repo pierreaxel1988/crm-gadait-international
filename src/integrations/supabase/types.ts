@@ -18,8 +18,11 @@ export type Database = {
           created_at: string
           desired_location: string | null
           email: string | null
+          external_id: string | null
           financing_method: string | null
           id: string
+          imported_at: string | null
+          integration_source: string | null
           last_contacted_at: string | null
           living_area: string | null
           location: string | null
@@ -32,6 +35,7 @@ export type Database = {
           property_type: string | null
           property_use: string | null
           purchase_timeframe: string | null
+          raw_data: Json | null
           source: string | null
           status: string
           tags: string[] | null
@@ -47,8 +51,11 @@ export type Database = {
           created_at?: string
           desired_location?: string | null
           email?: string | null
+          external_id?: string | null
           financing_method?: string | null
           id?: string
+          imported_at?: string | null
+          integration_source?: string | null
           last_contacted_at?: string | null
           living_area?: string | null
           location?: string | null
@@ -61,6 +68,7 @@ export type Database = {
           property_type?: string | null
           property_use?: string | null
           purchase_timeframe?: string | null
+          raw_data?: Json | null
           source?: string | null
           status: string
           tags?: string[] | null
@@ -76,8 +84,11 @@ export type Database = {
           created_at?: string
           desired_location?: string | null
           email?: string | null
+          external_id?: string | null
           financing_method?: string | null
           id?: string
+          imported_at?: string | null
+          integration_source?: string | null
           last_contacted_at?: string | null
           living_area?: string | null
           location?: string | null
@@ -90,6 +101,7 @@ export type Database = {
           property_type?: string | null
           property_use?: string | null
           purchase_timeframe?: string | null
+          raw_data?: Json | null
           source?: string | null
           status?: string
           tags?: string[] | null

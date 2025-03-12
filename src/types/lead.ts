@@ -1,3 +1,4 @@
+
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
@@ -106,4 +107,9 @@ export interface LeadDetailed {
   taskType?: TaskType;
   country?: Country;
   actionHistory?: ActionHistory[];
+  // Nouveaux champs pour l'API d'importation
+  integration_source?: string;
+  external_id?: string;
+  raw_data?: any;
+  imported_at?: string;
 }
