@@ -10,6 +10,18 @@ import { useNavigate } from 'react-router-dom';
 import CustomButton from '@/components/ui/CustomButton';
 import { getLeads } from '@/services/leadService';
 
+// Define the correct Activity type to match RecentActivityCard
+interface Activity {
+  id: string;
+  user: {
+    name: string;
+    avatar?: string;
+  };
+  action: string;
+  target: string;
+  timestamp: string;
+}
+
 const Index = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState({
@@ -54,22 +66,19 @@ const Index = () => {
         <LeadStatCard 
           title="Nouveaux Leads" 
           value={stats.newLeads} 
-          trend={+8} 
-          period="cette semaine" 
+          change={8} 
           onClick={() => navigate('/leads')}
         />
         <LeadStatCard 
           title="Leads Qualifiés" 
           value={stats.qualifiedLeads}
-          trend={+5} 
-          period="ce mois" 
+          change={5} 
           onClick={() => navigate('/leads')}
         />
         <LeadStatCard 
           title="Tâches à venir" 
           value={stats.upcomingTasks}
-          trend={-2} 
-          period="aujourd'hui" 
+          change={-2} 
           onClick={() => navigate('/calendar')}
         />
       </div>
@@ -77,9 +86,27 @@ const Index = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <DashboardCard title="Activité Récente">
           <RecentActivityCard activities={[
-            { id: '1', type: 'Nouveau lead', name: 'Marie Lambert', date: '2023-06-17', status: 'New' },
-            { id: '2', type: 'Appel', name: 'Jean Dupont', date: '2023-06-15', status: 'Contacted' },
-            { id: '3', type: 'Visite', name: 'Claire Simon', date: '2023-06-12', status: 'Visit' }
+            {
+              id: '1',
+              user: { name: 'Marie Lambert' },
+              action: 'a créé un nouveau lead',
+              target: 'Lead',
+              timestamp: '2023-06-17'
+            },
+            {
+              id: '2',
+              user: { name: 'Jean Dupont' },
+              action: 'a planifié un appel avec',
+              target: 'Client',
+              timestamp: '2023-06-15'
+            },
+            {
+              id: '3',
+              user: { name: 'Claire Simon' },
+              action: 'a organisé une visite pour',
+              target: 'Propriété',
+              timestamp: '2023-06-12'
+            }
           ]} />
         </DashboardCard>
         

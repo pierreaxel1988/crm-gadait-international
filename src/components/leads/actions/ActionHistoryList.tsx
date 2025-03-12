@@ -4,7 +4,7 @@ import { Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { TaskType } from '@/components/kanban/KanbanCard';
-import { ActionHistory } from '@/services/leadService';
+import { ActionHistory } from '@/types/actionHistory';
 import CustomButton from '@/components/ui/CustomButton';
 
 interface ActionHistoryListProps {
@@ -39,7 +39,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
           <div className="flex justify-between items-start">
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                {getActionTypeIcon(action.actionType)}
+                {getActionTypeIcon(action.actionType as TaskType)}
                 <span className="text-sm font-medium">
                   {action.completedDate ? "Terminé" : "À faire"}
                 </span>

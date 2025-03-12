@@ -1,9 +1,9 @@
 
 import { LeadDetailed } from "@/types/lead";
-import { ActionHistory } from "@/types/actionHistory";
+// Change export to export type
+export type { ActionHistory } from "@/types/actionHistory";
 
 // Re-export everything from the split files
-export { ActionHistory };
 export { 
   getLeads, 
   getLead, 
