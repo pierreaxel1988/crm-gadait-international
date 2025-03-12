@@ -1,4 +1,3 @@
-
 import { LeadDetailed } from "@/types/lead";
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
@@ -207,7 +206,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     phone: '+33 6 78 90 12 34',
     location: 'Lyon, France',
     status: 'New',
-    tags: ['Serious'],
+    tags: ['Serious', 'Imported'],
     createdAt: '2023-09-15',
     source: 'Idealista',
     propertyReference: 'VIL-567-LY',
@@ -224,7 +223,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     phone: '+33 6 89 01 23 45',
     location: 'Nice, France',
     status: 'New',
-    tags: ['Serious'],
+    tags: ['Serious', 'Imported'],
     createdAt: '2023-09-10',
     source: 'Le Figaro',
     propertyReference: 'APT-789-NI',
@@ -232,6 +231,28 @@ const mockLeadsDetailed: LeadDetailed[] = [
     integration_source: 'api',
     external_id: 'fg-789123',
     imported_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    taskType: 'Follow up',
+  },
+  {
+    id: '9',
+    name: 'Simona Jouron',
+    email: 'Simona.jouron@yahoo.fr',
+    phone: '(+41) 763010743',
+    location: 'Suisse',
+    status: 'New',
+    tags: ['Imported', 'Hot'],
+    createdAt: new Date().toISOString().split('T')[0],
+    source: 'Le Figaro',
+    propertyReference: '85697523',
+    budget: '1.800.000€ - 2.600.000€',
+    desiredLocation: 'Megeve',
+    propertyType: 'Chalet',
+    livingArea: '224m²',
+    bedrooms: 4,
+    integration_source: 'api',
+    external_id: '80884566',
+    imported_at: new Date().toISOString(),
+    notes: 'Je souhaite avoir plus d\'informations sur votre programme à Megeve notamment ce qu\'il est inclu dans le prix et le calendrier',
     taskType: 'Follow up',
   }
 ];
