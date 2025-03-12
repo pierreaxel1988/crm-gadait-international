@@ -1,3 +1,4 @@
+
 import { LeadDetailed } from "@/types/lead";
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
@@ -206,7 +207,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     phone: '+33 6 78 90 12 34',
     location: 'Lyon, France',
     status: 'New',
-    tags: ['Imported'],
+    tags: ['Serious'],
     createdAt: '2023-09-15',
     source: 'Idealista',
     propertyReference: 'VIL-567-LY',
@@ -223,7 +224,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     phone: '+33 6 89 01 23 45',
     location: 'Nice, France',
     status: 'New',
-    tags: ['Imported'],
+    tags: ['Serious'],
     createdAt: '2023-09-10',
     source: 'Le Figaro',
     propertyReference: 'APT-789-NI',

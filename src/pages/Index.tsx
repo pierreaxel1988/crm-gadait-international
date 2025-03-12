@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import DashboardCard from '@/components/dashboard/DashboardCard';
 import LeadStatCard from '@/components/dashboard/LeadStatCard';
@@ -7,9 +8,40 @@ import ImportedLeadsPanel from '@/components/leads/ImportedLeadsPanel';
 import LeadApiGuide from '@/components/leads/LeadApiGuide';
 import { useNavigate } from 'react-router-dom';
 import CustomButton from '@/components/ui/CustomButton';
+import { getLeads } from '@/services/leadService';
 
 const Index = () => {
   const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    newLeads: 0,
+    qualifiedLeads: 0,
+    upcomingTasks: 0
+  });
+  
+  useEffect(() => {
+    // Calcul des statistiques à partir des leads
+    const leads = getLeads();
+    
+    const newLeadsCount = leads.filter(lead => 
+      lead.status === "New" && 
+      new Date(lead.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    ).length;
+    
+    const qualifiedLeadsCount = leads.filter(lead => 
+      lead.status === "Qualified"
+    ).length;
+    
+    const upcomingTasksCount = leads.filter(lead => 
+      lead.nextFollowUpDate && 
+      new Date(lead.nextFollowUpDate) <= new Date(Date.now() + 24 * 60 * 60 * 1000)
+    ).length;
+    
+    setStats({
+      newLeads: newLeadsCount,
+      qualifiedLeads: qualifiedLeadsCount,
+      upcomingTasks: upcomingTasksCount
+    });
+  }, []);
   
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -21,21 +53,21 @@ const Index = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <LeadStatCard 
           title="Nouveaux Leads" 
-          count={12} 
+          value={stats.newLeads} 
           trend={+8} 
           period="cette semaine" 
           onClick={() => navigate('/leads')}
         />
         <LeadStatCard 
           title="Leads Qualifiés" 
-          count={34} 
+          value={stats.qualifiedLeads}
           trend={+5} 
           period="ce mois" 
           onClick={() => navigate('/leads')}
         />
         <LeadStatCard 
           title="Tâches à venir" 
-          count={8} 
+          value={stats.upcomingTasks}
           trend={-2} 
           period="aujourd'hui" 
           onClick={() => navigate('/calendar')}
@@ -44,7 +76,11 @@ const Index = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <DashboardCard title="Activité Récente">
-          <RecentActivityCard />
+          <RecentActivityCard activities={[
+            { id: '1', type: 'Nouveau lead', name: 'Marie Lambert', date: '2023-06-17', status: 'New' },
+            { id: '2', type: 'Appel', name: 'Jean Dupont', date: '2023-06-15', status: 'Contacted' },
+            { id: '3', type: 'Visite', name: 'Claire Simon', date: '2023-06-12', status: 'Visit' }
+          ]} />
         </DashboardCard>
         
         <ImportedLeadsPanel limit={3} />
