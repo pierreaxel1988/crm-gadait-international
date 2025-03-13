@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { parseEmailContent } from './emailParser';
+import { parseEmailContent, normalizeLeadData } from './emailParser';
 
 export const useLeadImport = () => {
   const [loading, setLoading] = useState(false);
@@ -113,23 +113,26 @@ export const useLeadImport = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Extraire les informations de l'email
+      // Extraire les informations de l'email avec le parseur amélioré
       const extractedData = parseEmailContent(emailContent);
+      
+      // Normaliser les données extraites
+      const normalizedData = normalizeLeadData(extractedData);
       
       // Ajouter le commercial assigné
       if (emailAssignedTo) {
-        extractedData.assigned_to = emailAssignedTo;
+        normalizedData.assigned_to = emailAssignedTo;
       }
 
       // Utiliser la fonction Edge Function de Supabase pour importer le lead
       const { data, error } = await supabase.functions.invoke('import-lead', {
-        body: extractedData
+        body: normalizedData
       });
       if (error) throw error;
       setResult(data);
       toast({
         title: data.isNew ? "Lead créé avec succès" : "Lead mis à jour",
-        description: `Le lead ${extractedData.name || 'sans nom'} a été ${data.isNew ? 'créé' : 'mis à jour'} avec succès.`
+        description: `Le lead ${normalizedData.name || 'sans nom'} a été ${data.isNew ? 'créé' : 'mis à jour'} avec succès.`
       });
 
       // Réinitialiser le formulaire

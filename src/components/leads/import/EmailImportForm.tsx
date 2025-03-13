@@ -1,10 +1,12 @@
 
 import React from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Info } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { PortalType } from './emailParser';
 
 interface EmailImportFormProps {
   emailContent: string;
@@ -27,6 +29,20 @@ const EmailImportForm: React.FC<EmailImportFormProps> = ({
 }) => {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
+      <Alert className="bg-blue-50 border-blue-100">
+        <Info className="h-4 w-4 text-blue-500" />
+        <AlertDescription className="text-blue-700">
+          Le système reconnaît automatiquement les emails des portails suivants : 
+          {Object.values(PortalType).filter(p => p !== PortalType.GENERIC).map((portal, i, arr) => (
+            <span key={portal}>
+              {i === 0 ? ' ' : i === arr.length - 1 ? ' et ' : ', '}
+              <strong>{portal}</strong>
+            </span>
+          ))}
+          .
+        </AlertDescription>
+      </Alert>
+      
       <div className="space-y-2">
         <Label htmlFor="emailContent">Contenu de l'email</Label>
         <Textarea 
@@ -34,10 +50,13 @@ const EmailImportForm: React.FC<EmailImportFormProps> = ({
           rows={10} 
           value={emailContent} 
           onChange={e => setEmailContent(e.target.value)} 
-          placeholder="Collez ici le contenu complet de l'email..." 
+          placeholder="Collez ici le contenu complet de l'email (en-têtes, destinataires, corps du message)..." 
           className="font-mono text-sm"
           required 
         />
+        <p className="text-xs text-muted-foreground">
+          Pour de meilleurs résultats, copiez le mail entier en incluant les en-têtes (From:, To:, Subject:, etc.) et tout le corps du message.
+        </p>
       </div>
       
       <div className="space-y-2">
