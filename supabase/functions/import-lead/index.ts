@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -61,6 +60,7 @@ serve(async (req) => {
         property_use: requestData.property_use,
         source: requestData.source,
         country: requestData.country,
+        assigned_to: requestData.assigned_to,
         ...extractAdditionalData(requestData)
       };
     }
@@ -77,6 +77,25 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
+    }
+
+    // Validate assigned_to if provided
+    if (leadData.assigned_to) {
+      // Check if the assigned user exists
+      const { data: assignedUser, error: userError } = await supabase
+        .from('team_members')
+        .select('id')
+        .eq('id', leadData.assigned_to)
+        .maybeSingle();
+      
+      if (userError) {
+        console.warn('Error checking team member:', userError);
+      }
+      
+      if (!assignedUser) {
+        console.warn('Assigned team member not found, ignoring assignment');
+        leadData.assigned_to = null;
+      }
     }
 
     // Vérifier si le lead existe déjà (par email ou par external_id)
@@ -134,6 +153,7 @@ serve(async (req) => {
           financing_method: leadData.financing_method || undefined,
           property_use: leadData.property_use || undefined,
           country: leadData.country || undefined,
+          assigned_to: leadData.assigned_to || undefined,
           imported_at: new Date().toISOString(),
           last_contacted_at: new Date().toISOString(),
           raw_data: leadData.additionalData ? JSON.stringify(leadData.additionalData) : null
@@ -179,6 +199,7 @@ serve(async (req) => {
           financing_method: leadData.financing_method || null,
           property_use: leadData.property_use || null,
           country: leadData.country || null,
+          assigned_to: leadData.assigned_to || null,
           raw_data: leadData.additionalData ? leadData.additionalData : null
         })
         .select()
@@ -234,7 +255,8 @@ function parseRealEstatePortalData(data) {
     property_reference: "",
     external_id: "",
     integrationSource: source,
-    additionalData: {}
+    additionalData: {},
+    assigned_to: data.assigned_to || null
   };
   
   // Copier toutes les données brutes pour référence future
@@ -353,7 +375,7 @@ function extractAdditionalData(requestData) {
     'name', 'email', 'phone', 'property_reference', 'external_id', 'message',
     'location', 'integrationSource', 'desired_location', 'budget', 'property_type',
     'living_area', 'bedrooms', 'views', 'amenities', 'purchase_timeframe',
-    'financing_method', 'property_use', 'source', 'country'
+    'financing_method', 'property_use', 'source', 'country', 'assigned_to'
   ];
   
   const additionalData = {};

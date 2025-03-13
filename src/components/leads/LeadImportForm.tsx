@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
+import TeamMemberSelect from './TeamMemberSelect';
 
 const LeadImportForm = () => {
   const isMobile = useIsMobile();
@@ -25,11 +27,13 @@ const LeadImportForm = () => {
     property_reference: '',
     source: 'Site web',
     message: '',
-    integration_source: 'Manual import'
+    integration_source: 'Manual import',
+    assigned_to: undefined as string | undefined
   });
 
   // État pour l'importation par email
   const [emailContent, setEmailContent] = useState('');
+  const [emailAssignedTo, setEmailAssignedTo] = useState<string | undefined>(undefined);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const {
@@ -69,7 +73,8 @@ const LeadImportForm = () => {
           property_reference: '',
           source: 'Site web',
           message: '',
-          integration_source: 'Manual import'
+          integration_source: 'Manual import',
+          assigned_to: undefined
         });
       }
     } catch (err) {
@@ -90,6 +95,11 @@ const LeadImportForm = () => {
     try {
       // Extraire les informations de l'email
       const extractedData = parseEmailContent(emailContent);
+      
+      // Add the assignment information
+      if (emailAssignedTo) {
+        extractedData.assigned_to = emailAssignedTo;
+      }
 
       // Utiliser la fonction Edge Function de Supabase pour importer le lead
       const {
@@ -108,6 +118,7 @@ const LeadImportForm = () => {
       // Réinitialiser le formulaire
       if (data.isNew) {
         setEmailContent('');
+        setEmailAssignedTo(undefined);
       }
     } catch (err) {
       console.error("Erreur lors de l'importation du lead:", err);
@@ -230,6 +241,11 @@ const LeadImportForm = () => {
                   <Label htmlFor="source" className={isMobile ? 'text-xs' : ''}>Source</Label>
                   <Input id="source" name="source" value={formData.source} onChange={handleInputChange} className={isMobile ? 'h-8 text-sm' : ''} />
                 </div>
+                
+                <TeamMemberSelect 
+                  value={formData.assigned_to}
+                  onChange={(value) => setFormData(prev => ({ ...prev, assigned_to: value }))}
+                />
               </div>
               
               <div className="space-y-1 md:space-y-2">
@@ -262,6 +278,11 @@ const LeadImportForm = () => {
                   required 
                 />
               </div>
+              
+              <TeamMemberSelect
+                value={emailAssignedTo}
+                onChange={setEmailAssignedTo}
+              />
               
               <Button type="submit" className={`w-full bg-loro-navy hover:bg-loro-navy/90 ${isMobile ? 'h-9 text-sm' : ''}`} disabled={loading}>
                 {loading ? (

@@ -40,6 +40,11 @@ const LeadApiGuide = () => {
     description: 'Localisation souhaitée'
   }];
   
+  const assignmentParameters = [{
+    name: 'assigned_to',
+    description: 'ID du membre de l\'équipe à qui assigner le lead (UUID)'
+  }];
+  
   return (
     <div className="luxury-card p-3 md:p-6 overflow-auto max-w-full">
       <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Guide d'intégration API</h2>
@@ -55,6 +60,8 @@ const LeadApiGuide = () => {
         <ParametersTable title="Paramètres obligatoires" parameters={requiredParameters} />
         
         <ParametersTable title="Paramètres spécifiques aux portails" parameters={portalParameters} />
+        
+        <ParametersTable title="Paramètres d'attribution" parameters={assignmentParameters} />
         
         <ApiExamples baseApiUrl={baseApiUrl} apiKeyPlaceholder={apiKeyPlaceholder} />
         
