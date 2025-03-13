@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { X, FileImport } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -28,7 +28,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
     {
       name: 'Import Leads',
       path: '/lead-import',
-      icon: FileImport,
+      icon: Upload,
     },
     {
       name: 'Pipeline',
