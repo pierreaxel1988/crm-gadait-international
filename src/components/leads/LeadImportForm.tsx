@@ -9,7 +9,10 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 const LeadImportForm = () => {
+  const isMobile = useIsMobile();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [formMode, setFormMode] = useState<'manual' | 'email'>('manual');
@@ -27,6 +30,7 @@ const LeadImportForm = () => {
 
   // État pour l'importation par email
   const [emailContent, setEmailContent] = useState('');
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const {
       name,
@@ -37,6 +41,7 @@ const LeadImportForm = () => {
       [name]: value
     }));
   };
+
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -78,6 +83,7 @@ const LeadImportForm = () => {
       setLoading(false);
     }
   };
+
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -184,87 +190,107 @@ const LeadImportForm = () => {
     }
     return data;
   };
-  return <Card>
-      <CardHeader>
-        <CardTitle>Importer un Lead</CardTitle>
+
+  return (
+    <Card className={isMobile ? 'shadow-sm border' : ''}>
+      <CardHeader className={isMobile ? 'px-3 py-2' : ''}>
+        <CardTitle className={isMobile ? 'text-lg' : ''}>Importer un Lead</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className={isMobile ? 'px-3 py-2' : ''}>
         <Tabs value={formMode} onValueChange={value => setFormMode(value as 'manual' | 'email')} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsList className={`grid w-full grid-cols-2 mb-3 md:mb-4 ${isMobile ? 'text-xs' : ''}`}>
             <TabsTrigger value="manual">Saisie Manuelle</TabsTrigger>
             <TabsTrigger value="email">Depuis un Email</TabsTrigger>
           </TabsList>
           
           <TabsContent value="manual">
-            <form onSubmit={handleManualSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nom complet *</Label>
-                  <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
+            <form onSubmit={handleManualSubmit} className="space-y-3 md:space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                <div className="space-y-1 md:space-y-2">
+                  <Label htmlFor="name" className={isMobile ? 'text-xs' : ''}>Nom complet *</Label>
+                  <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required className={isMobile ? 'h-8 text-sm' : ''} />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
-                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} required />
+                <div className="space-y-1 md:space-y-2">
+                  <Label htmlFor="email" className={isMobile ? 'text-xs' : ''}>Email *</Label>
+                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} required className={isMobile ? 'h-8 text-sm' : ''} />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Téléphone</Label>
-                  <Input id="phone" name="phone" value={formData.phone} onChange={handleInputChange} />
+                <div className="space-y-1 md:space-y-2">
+                  <Label htmlFor="phone" className={isMobile ? 'text-xs' : ''}>Téléphone</Label>
+                  <Input id="phone" name="phone" value={formData.phone} onChange={handleInputChange} className={isMobile ? 'h-8 text-sm' : ''} />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="property_reference">Référence Propriété</Label>
-                  <Input id="property_reference" name="property_reference" value={formData.property_reference} onChange={handleInputChange} />
+                <div className="space-y-1 md:space-y-2">
+                  <Label htmlFor="property_reference" className={isMobile ? 'text-xs' : ''}>Référence Propriété</Label>
+                  <Input id="property_reference" name="property_reference" value={formData.property_reference} onChange={handleInputChange} className={isMobile ? 'h-8 text-sm' : ''} />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="source">Source</Label>
-                  <Input id="source" name="source" value={formData.source} onChange={handleInputChange} />
+                <div className="space-y-1 md:space-y-2">
+                  <Label htmlFor="source" className={isMobile ? 'text-xs' : ''}>Source</Label>
+                  <Input id="source" name="source" value={formData.source} onChange={handleInputChange} className={isMobile ? 'h-8 text-sm' : ''} />
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="message">Message</Label>
-                <Textarea id="message" name="message" rows={4} value={formData.message} onChange={handleInputChange} />
+              <div className="space-y-1 md:space-y-2">
+                <Label htmlFor="message" className={isMobile ? 'text-xs' : ''}>Message</Label>
+                <Textarea id="message" name="message" rows={isMobile ? 3 : 4} value={formData.message} onChange={handleInputChange} className={isMobile ? 'text-sm' : ''} />
               </div>
               
-              <Button type="submit" className="w-full bg-loro-navy hover:bg-loro-navy/90" disabled={loading}>
-                {loading ? <>
+              <Button type="submit" className={`w-full bg-loro-navy hover:bg-loro-navy/90 ${isMobile ? 'h-9 text-sm' : ''}`} disabled={loading}>
+                {loading ? (
+                  <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Importation en cours...
-                  </> : "Importer le lead"}
+                  </>
+                ) : "Importer le lead"}
               </Button>
             </form>
           </TabsContent>
           
           <TabsContent value="email">
-            <form onSubmit={handleEmailSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="emailContent">Contenu de l'email</Label>
-                <Textarea id="emailContent" rows={12} value={emailContent} onChange={e => setEmailContent(e.target.value)} placeholder="Collez ici le contenu complet de l'email..." className="font-mono text-sm" required />
+            <form onSubmit={handleEmailSubmit} className="space-y-3 md:space-y-4">
+              <div className="space-y-1 md:space-y-2">
+                <Label htmlFor="emailContent" className={isMobile ? 'text-xs' : ''}>Contenu de l'email</Label>
+                <Textarea 
+                  id="emailContent" 
+                  rows={isMobile ? 8 : 12} 
+                  value={emailContent} 
+                  onChange={e => setEmailContent(e.target.value)} 
+                  placeholder="Collez ici le contenu complet de l'email..." 
+                  className={`font-mono ${isMobile ? 'text-xs' : 'text-sm'}`} 
+                  required 
+                />
               </div>
               
-              <Button type="submit" className="w-full bg-loro-navy hover:bg-loro-navy/90" disabled={loading}>
-                {loading ? <>
+              <Button type="submit" className={`w-full bg-loro-navy hover:bg-loro-navy/90 ${isMobile ? 'h-9 text-sm' : ''}`} disabled={loading}>
+                {loading ? (
+                  <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Analyse et importation en cours...
-                  </> : "Analyser et importer"}
+                  </>
+                ) : "Analyser et importer"}
               </Button>
             </form>
           </TabsContent>
         </Tabs>
         
-        {result && <Alert className="mt-4">
+        {result && (
+          <Alert className="mt-3 md:mt-4 text-sm">
             <AlertTitle>Résultat de l'importation</AlertTitle>
             <AlertDescription>
               <p>{result.message}</p>
-              {result.data && <pre className="mt-2 bg-gray-50 p-2 rounded text-xs overflow-auto">
+              {result.data && (
+                <pre className={`mt-2 bg-gray-50 p-2 rounded overflow-auto ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
                   {JSON.stringify(result.data, null, 2)}
-                </pre>}
+                </pre>
+              )}
             </AlertDescription>
-          </Alert>}
+          </Alert>
+        )}
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default LeadImportForm;

@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      import_statistics: {
+        Row: {
+          created_at: string
+          duplicates_count: number
+          error_count: number
+          id: string
+          import_date: string
+          imported_count: number
+          source_type: string
+          total_count: number
+          updated_count: number
+        }
+        Insert: {
+          created_at?: string
+          duplicates_count?: number
+          error_count: number
+          id?: string
+          import_date: string
+          imported_count: number
+          source_type: string
+          total_count: number
+          updated_count: number
+        }
+        Update: {
+          created_at?: string
+          duplicates_count?: number
+          error_count?: number
+          id?: string
+          import_date?: string
+          imported_count?: number
+          source_type?: string
+          total_count?: number
+          updated_count?: number
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           amenities: string[] | null
