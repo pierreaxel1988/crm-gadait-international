@@ -29,4 +29,3 @@ export interface ParsedLeadData {
   raw_content?: string;
   [key: string]: any;
 }
-
