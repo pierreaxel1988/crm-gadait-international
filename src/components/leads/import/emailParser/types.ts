@@ -1,44 +1,32 @@
 
 /**
- * Type definitions for email parsing functionality
+ * Types for email parsing functionality
  */
 
-// Définition des types pour le résultat du parsing
+export enum PortalType {
+  FIGARO = "Le Figaro",
+  IDEALISTA = "Idealista",
+  PROPERSTAR = "Properstar",
+  PROPERTY_CLOUD = "Property Cloud",
+  SELOGER = "SeLoger",
+  LUXURY_ESTATE = "Luxury Estate",
+  JAMESEDITION = "JamesEdition",
+  BELLESDEMEURES = "Belles Demeures",
+  GENERIC = "Format Inconnu"
+}
+
 export interface ParsedLeadData {
   name?: string;
   email?: string;
   phone?: string;
-  country?: string;
-  portal_name?: string;
-  source?: string;
-  property_reference?: string;
-  desired_location?: string;
-  budget?: string;
-  property_type?: string;
-  living_area?: string;
-  bedrooms?: number;
   message?: string;
-  integration_source: string;
-  // Champs supplémentaires
+  property_reference?: string;
   external_id?: string;
-  property_use?: string;
-  financing_method?: string;
-  purchase_timeframe?: string;
-  views?: string[];
-  amenities?: string[];
+  integration_source: string;
+  portal_name?: PortalType;
+  source?: string;
+  property_type?: string;
   raw_content?: string;
-  [key: string]: any; // Pour les champs supplémentaires non typés
+  [key: string]: any;
 }
 
-// Formats de portails connus
-export enum PortalType {
-  FIGARO = 'Le Figaro',
-  PROPERSTAR = 'Properstar',
-  PROPERTY_CLOUD = 'Property Cloud',
-  IDEALISTA = 'Idealista',
-  SELOGER = 'SeLoger',
-  LUXURY_ESTATE = "L'express Property",
-  JAMESEDITION = 'JamesEdition',
-  BELLESDEMEURES = 'Belles Demeures',
-  GENERIC = 'Generic'
-}
