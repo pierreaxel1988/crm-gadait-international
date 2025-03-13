@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -77,7 +78,7 @@ const AppRoutes = () => {
             <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="/api" element={<ProtectedRoute><ApiGuide /></ProtectedRoute>} />
-            <Route path="/lead-import" element={<LeadImport />} />
+            <Route path="/lead-import" element={<ProtectedRoute><LeadImport /></ProtectedRoute>} />
             <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

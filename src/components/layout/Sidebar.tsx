@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { X, FileImport } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -24,6 +24,11 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
     {
       name: 'Leads',
       path: '/leads',
+    },
+    {
+      name: 'Import Leads',
+      path: '/lead-import',
+      icon: FileImport,
     },
     {
       name: 'Pipeline',
@@ -90,7 +95,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
                     to={item.path}
                     className={({ isActive }) =>
                       cn(
-                        'block transition-all duration-200 text-base leading-[22px]',
+                        'block transition-all duration-200 text-base leading-[22px] flex items-center',
                         item.isPrimary 
                           ? 'text-loro-terracotta font-times text-2xl mb-12 tracking-wide' 
                           : 'text-times-text font-times text-[26px] leading-[28px] font-normal',
@@ -101,6 +106,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
                     }
                     onClick={isMobile ? onClose : undefined}
                   >
+                    {item.icon && <item.icon className="mr-2 h-5 w-5" />}
                     {item.name}
                   </NavLink>
                 </li>
