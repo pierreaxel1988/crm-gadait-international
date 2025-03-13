@@ -29,6 +29,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
       name: 'Import Leads',
       path: '/lead-import',
       icon: Upload,
+      highlight: true,
     },
     {
       name: 'Pipeline',
@@ -99,6 +100,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
                         item.isPrimary 
                           ? 'text-loro-terracotta font-times text-2xl mb-12 tracking-wide' 
                           : 'text-times-text font-times text-[26px] leading-[28px] font-normal',
+                        item.highlight && 'text-loro-terracotta',
                         isActive
                           ? item.isPrimary ? 'text-loro-terracotta' : 'text-loro-terracotta'
                           : item.isPrimary ? 'text-loro-terracotta' : 'hover:text-loro-terracotta hover:font-timesItalic'
