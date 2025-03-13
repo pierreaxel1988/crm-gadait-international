@@ -2,8 +2,12 @@
 import React from 'react';
 import StatsSection from '@/components/dashboard/StatsSection';
 import ActivitySection from '@/components/dashboard/ActivitySection';
+import ImportedLeadsSection from '@/components/dashboard/ImportedLeadsSection';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
+  const { user } = useAuth();
+
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div>
@@ -14,6 +18,10 @@ const Index = () => {
       <StatsSection />
       
       <ActivitySection />
+
+      {user && (
+        <ImportedLeadsSection />
+      )}
     </div>
   );
 };
