@@ -41,7 +41,7 @@ const LeadApiGuide = () => {
   }];
   
   return (
-    <div className="luxury-card p-3 md:p-6 overflow-auto">
+    <div className="luxury-card p-3 md:p-6 overflow-auto max-w-full">
       <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Guide d'intégration API</h2>
       
       <Alert className="mb-4 md:mb-6 text-sm md:text-base">
