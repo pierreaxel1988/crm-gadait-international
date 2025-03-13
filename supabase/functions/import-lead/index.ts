@@ -28,7 +28,35 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Extraire les données du lead depuis la requête
-    const requestData = await req.json();
+    let requestData;
+    try {
+      requestData = await req.json();
+    } catch (parseError) {
+      console.error("Erreur lors du parsing de la requête JSON:", parseError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Impossible de parser les données JSON de la requête"
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    
+    if (!requestData || typeof requestData !== 'object') {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Les données de la requête sont invalides ou manquantes"
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
     
     // Détecter si c'est un format de portail immobilier
     const isRealEstatePortal = requestData.portal_name || requestData.portal_reference;
@@ -66,12 +94,14 @@ serve(async (req) => {
       };
     }
 
-    // Corriger la validation pour éviter les erreurs
-    if (!leadData.name && !leadData.email) {
+    console.log("Données du lead à importer:", leadData);
+
+    // Validation minimale: au moins un identifiant est requis (nom, email ou téléphone)
+    if (!leadData.name && !leadData.email && !leadData.phone) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Au moins un des champs 'name' ou 'email' est obligatoire",
+          error: "Au moins un des champs 'name', 'email' ou 'phone' est obligatoire"
         }),
         {
           status: 400,
@@ -123,6 +153,19 @@ serve(async (req) => {
       
       if (leadByEmail) {
         existingLead = leadByEmail;
+      }
+    }
+
+    // Si toujours aucun lead trouvé, chercher par téléphone
+    if (!existingLead && leadData.phone) {
+      const { data: leadByPhone } = await supabase
+        .from('leads')
+        .select('id, name, email, phone')
+        .eq('phone', leadData.phone)
+        .maybeSingle();
+      
+      if (leadByPhone) {
+        existingLead = leadByPhone;
       }
     }
 
@@ -305,7 +348,10 @@ function parseRealEstatePortalData(data) {
     if (data.tipoInmueble) {
       lead.property_type = mapPropertyType(data.tipoInmueble);
     }
-  } else if (source.toLowerCase().includes("property cloud") || data.email_from?.includes("property") || data.email_from?.includes("cloud")) {
+  } else if (source.toLowerCase().includes("property cloud") || 
+            data.email_from?.includes("property") || 
+            data.email_from?.includes("cloud") ||
+            data.message?.includes("propertycloud.mu")) {
     // Format "Property Cloud"
     lead.source = "Property Cloud";
     
@@ -337,8 +383,35 @@ function parseRealEstatePortalData(data) {
     const refMatch = data.message?.match(/Property\s*:\s*(\d+)/i) || data.message?.match(/Reference\s*:\s*(\d+)/i);
     if (refMatch && refMatch[1]) {
       lead.property_reference = refMatch[1].trim();
-    } else {
-      lead.property_reference = data.reference || data.property_reference || "";
+      
+      // Essayer d'extraire plus d'informations depuis la ligne complète
+      const propertyFullLine = data.message?.match(/Property\s*:\s*(\d+)([^\r\n]+)/i);
+      if (propertyFullLine && propertyFullLine[2]) {
+        const propertyInfo = propertyFullLine[2].trim();
+        
+        // Essayer d'extraire la location et le prix (format: référence - location - prix)
+        const locationPriceMatch = propertyInfo.match(/\s*[-–]\s*([^-–]+)\s*[-–]\s*([^-–\r\n]+)/);
+        if (locationPriceMatch) {
+          lead.desired_location = locationPriceMatch[1].trim();
+          lead.budget = locationPriceMatch[2].trim();
+        }
+      }
+    }
+    
+    // Extraction de l'URL
+    const urlMatch = data.message?.match(/url\s*:\s*([^\r\n]+)/i) || 
+                    data.message?.match(/https?:\/\/[^\s\r\n]+/i);
+    if (urlMatch) {
+      const url = urlMatch[0].includes('://') ? urlMatch[0] : urlMatch[1];
+      lead.additionalData.property_url = url.trim();
+      
+      // Si la référence n'a pas été trouvée avant, essayer de l'extraire de l'URL
+      if (!lead.property_reference) {
+        const urlRefMatch = url.match(/gad(\d+)/i);
+        if (urlRefMatch && urlRefMatch[1]) {
+          lead.property_reference = urlRefMatch[1];
+        }
+      }
     }
     
     // Extraction du langage
@@ -347,12 +420,18 @@ function parseRealEstatePortalData(data) {
       lead.additionalData.language = langMatch[1].trim();
     }
     
-    // Extraction des critères
-    const criteriaMatch = data.message?.match(/Criterias\s*:\s*([\s\S]+?)(?=\n\n|$)/i);
-    if (criteriaMatch && criteriaMatch[1]) {
-      lead.message = criteriaMatch[1].trim();
+    // Extraction des critères ou du message
+    const messageMatch = data.message?.match(/Message\s*:\s*([\s\S]+?)(?=Date|$)/i);
+    if (messageMatch && messageMatch[1]) {
+      lead.message = messageMatch[1].trim();
     } else {
-      lead.message = data.message || "";
+      // Chercher tout le contenu entre "Message" et la fin ou autre section
+      const criteriaMatch = data.message?.match(/Message\s*:\s*([\s\S]+?)(?=\n\n|Date|$)/i);
+      if (criteriaMatch && criteriaMatch[1]) {
+        lead.message = criteriaMatch[1].trim();
+      } else {
+        lead.message = data.message || "";
+      }
     }
   } else {
     // Format générique pour les autres portails
@@ -397,6 +476,20 @@ function parseRealEstatePortalData(data) {
     if (data.bedrooms || data.property_bedrooms) {
       lead.bedrooms = parseInt(data.bedrooms || data.property_bedrooms, 10) || null;
     }
+  }
+  
+  // Vérifications finales et fallbacks
+  // Si on n'a pas de nom mais qu'on a un email, utiliser la partie locale de l'email
+  if (!lead.name && lead.email) {
+    const emailLocalPart = lead.email.split('@')[0];
+    lead.name = emailLocalPart
+      .replace(/[._]/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+  
+  // S'assurer qu'un nom est toujours présent
+  if (!lead.name) {
+    lead.name = "Contact sans nom";
   }
   
   return lead;

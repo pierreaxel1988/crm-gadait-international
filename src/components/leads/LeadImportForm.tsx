@@ -132,18 +132,29 @@ const LeadImportForm = () => {
       // Utiliser la fonction Edge Function de Supabase pour importer le lead
       const {
         data,
-        error
+        error: invokeError
       } = await supabase.functions.invoke('import-lead', {
         body: extractedData
       });
       
-      if (error) {
-        console.error("Erreur lors de l'importation du lead:", error);
-        setError(`Erreur lors de l'importation : ${error.message}`);
+      if (invokeError) {
+        console.error("Erreur lors de l'importation du lead:", invokeError);
+        setError(`Erreur lors de l'importation : ${invokeError.message}`);
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: `Erreur lors de l'importation du lead : ${error.message}`
+          description: `Erreur lors de l'importation du lead : ${invokeError.message}`
+        });
+        return;
+      }
+      
+      if (!data || !data.success) {
+        const errorMsg = data?.error || "Erreur inconnue lors de l'importation";
+        setError(errorMsg);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: errorMsg
         });
         return;
       }
@@ -178,14 +189,15 @@ const LeadImportForm = () => {
       integration_source: 'Email Parser'
     };
 
-    // Détecter la source du portail
+    // Détecter la source du portail immobilier
     if (emailText.includes('Propriétés Le Figaro')) {
       data.portal_name = 'Le Figaro';
       data.source = 'Le Figaro';
     } else if (emailText.includes('Properstar')) {
       data.portal_name = 'Properstar';
       data.source = 'Properstar';
-    } else if (emailText.includes('Property Cloud')) {
+    } else if (emailText.toLowerCase().includes('property cloud') || 
+              emailText.includes('propertycloud.mu')) {
       data.portal_name = 'Property Cloud';
       data.source = 'Property Cloud';
     } else if (emailText.includes('Idealista')) {
@@ -217,25 +229,51 @@ const LeadImportForm = () => {
       data.country = countryMatch[1].trim();
     }
 
-    // Extraction de la référence de la propriété et du prix
-    const propertyMatch = emailText.match(/Property\s*:\s*(\d+)\s*-\s*([^-\r\n]+)\s*-\s*([^\r\n]+)/i);
-    if (propertyMatch) {
-      data.property_reference = propertyMatch[1].trim();
-      data.desired_location = propertyMatch[2].trim();
-      data.budget = propertyMatch[3].trim();
+    // Extraction de la référence de la propriété pour Property Cloud
+    const propertyCloudRefMatch = emailText.match(/Property\s*:\s*(\d+)/i);
+    if (propertyCloudRefMatch && propertyCloudRefMatch[1]) {
+      data.property_reference = propertyCloudRefMatch[1].trim();
+      
+      // Chercher le reste des informations de propriété après la référence
+      const fullPropertyLine = emailText.match(/Property\s*:\s*(\d+)([^\r\n]+)/i);
+      if (fullPropertyLine && fullPropertyLine[2]) {
+        const propertyInfo = fullPropertyLine[2].trim();
+        
+        // Essayer d'extraire la location et le prix
+        const locationPriceMatch = propertyInfo.match(/\s*[-–]\s*([^-–]+)\s*[-–]\s*([^-–\r\n]+)/);
+        if (locationPriceMatch) {
+          data.desired_location = locationPriceMatch[1].trim();
+          data.budget = locationPriceMatch[2].trim();
+        }
+      }
+    }
+    
+    // Extraction plus générique de la référence de propriété et du prix
+    if (!data.property_reference) {
+      const genericPropertyMatch = emailText.match(/Property\s*:\s*(\d+)\s*-\s*([^-\r\n]+)\s*-\s*([^\r\n]+)/i);
+      if (genericPropertyMatch) {
+        data.property_reference = genericPropertyMatch[1].trim();
+        data.desired_location = genericPropertyMatch[2].trim();
+        data.budget = genericPropertyMatch[3].trim();
+      }
     }
 
     // Extraction de l'URL
-    const urlMatch = emailText.match(/url\s*:\s*([^\r\n]+)/i);
+    const urlMatch = emailText.match(/url\s*:\s*([^\r\n]+)/i) || 
+                     emailText.match(/https?:\/\/[^\s]+/i);
     if (urlMatch && urlMatch[1]) {
-      // Si la référence n'a pas été trouvée avant, utiliser l'URL comme référence
+      data.property_url = urlMatch[1].trim();
+      // Si la référence n'a pas été trouvée avant, essayer de l'extraire de l'URL
       if (!data.property_reference) {
-        data.property_reference = urlMatch[1].trim();
+        const urlRefMatch = urlMatch[1].match(/gad(\d+)/i);
+        if (urlRefMatch && urlRefMatch[1]) {
+          data.property_reference = urlRefMatch[1];
+        }
       }
     }
 
     // Extraction du message
-    const messageMatch = emailText.match(/Message\s*:\s*([\s\S]+?)(?=Date|$)/i);
+    const messageMatch = emailText.match(/Message\s*:\s*([\s\S]+?)(?=\s*Date|$)/i);
     if (messageMatch && messageMatch[1]) {
       data.message = messageMatch[1].trim();
     }
@@ -246,6 +284,19 @@ const LeadImportForm = () => {
       if (genericEmailMatch) {
         data.email = genericEmailMatch[0];
       }
+    }
+    
+    // Fallback - si on n'a pas de nom mais qu'on a un email, utiliser la partie locale de l'email
+    if (!data.name && data.email) {
+      const emailLocalPart = data.email.split('@')[0];
+      data.name = emailLocalPart
+        .replace(/[._]/g, ' ')
+        .replace(/\b\w/g, c => c.toUpperCase());
+    }
+    
+    // S'assurer qu'il y a au moins un champ important rempli
+    if (!data.name && !data.email && !data.phone) {
+      data.name = "Contact sans nom";
     }
     
     return data;
