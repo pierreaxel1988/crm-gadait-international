@@ -11,27 +11,43 @@ import { Separator } from '@/components/ui/separator';
 
 interface FileImportFormProps {
   fileAssignedTo: string;
+  fileSourceType?: string;
   salesReps: { id: string; name: string }[];
   loading: boolean;
   uploadProgress: number;
   selectedFile: File | null;
   onFileSelected: (files: File[]) => void;
   setFileAssignedTo: (repId: string) => void;
+  onSourceTypeChange?: (type: string) => void;
   onSubmit: (e: React.FormEvent) => Promise<void>;
   onClearFile: () => void;
 }
 
 const FileImportForm: React.FC<FileImportFormProps> = ({
   fileAssignedTo,
+  fileSourceType = 'CSV Import',
   salesReps,
   loading,
   uploadProgress,
   selectedFile,
   onFileSelected,
   setFileAssignedTo,
+  onSourceTypeChange,
   onSubmit,
   onClearFile
 }) => {
+  // Predefined source options
+  const sourceOptions = [
+    { value: 'CSV Import', label: 'Import CSV générique' },
+    { value: 'Le Figaro', label: 'Le Figaro' },
+    { value: 'Properstar', label: 'Properstar' },
+    { value: 'Idealista', label: 'Idealista' },
+    { value: 'Property Cloud', label: 'Property Cloud' },
+    { value: 'JamesEdition', label: 'JamesEdition' },
+    { value: 'GreenAcres', label: 'Green Acres' },
+    { value: 'LuxuryEstate', label: 'Luxury Estate' }
+  ];
+
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <Alert className="bg-blue-50 border-blue-100">
@@ -89,27 +105,51 @@ const FileImportForm: React.FC<FileImportFormProps> = ({
       
       <Separator />
       
-      <div className="space-y-2">
-        <Label htmlFor="file_assigned_to">Commercial assigné (par défaut)</Label>
-        <Select 
-          value={fileAssignedTo} 
-          onValueChange={setFileAssignedTo}
-        >
-          <SelectTrigger id="file_assigned_to">
-            <SelectValue placeholder="Sélectionner un commercial" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="unassigned">Non assigné</SelectItem>
-            {salesReps.map(rep => (
-              <SelectItem key={rep.id} value={rep.id}>
-                {rep.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-muted-foreground">
-          Ce commercial sera assigné à tous les leads importés, sauf si une colonne "assigned_to" est présente dans le fichier.
-        </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="file_assigned_to">Commercial assigné (par défaut)</Label>
+          <Select 
+            value={fileAssignedTo} 
+            onValueChange={setFileAssignedTo}
+          >
+            <SelectTrigger id="file_assigned_to">
+              <SelectValue placeholder="Sélectionner un commercial" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="unassigned">Non assigné</SelectItem>
+              {salesReps.map(rep => (
+                <SelectItem key={rep.id} value={rep.id}>
+                  {rep.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Ce commercial sera assigné à tous les leads importés, sauf si une colonne "assigned_to" est présente dans le fichier.
+          </p>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="file_source_type">Source d'importation</Label>
+          <Select 
+            value={fileSourceType} 
+            onValueChange={onSourceTypeChange ? onSourceTypeChange : () => {}}
+          >
+            <SelectTrigger id="file_source_type">
+              <SelectValue placeholder="Sélectionner une source" />
+            </SelectTrigger>
+            <SelectContent>
+              {sourceOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Cette information sera utilisée pour le suivi statistique des importations.
+          </p>
+        </div>
       </div>
       
       <Button 

@@ -92,6 +92,47 @@ function mapRecords(records: Record<string, any>[], assignedTo: string): Record<
   });
 }
 
+// Find potential duplicates for a lead
+async function findPotentialDuplicates(supabase: any, lead: Record<string, any>): Promise<any[]> {
+  const duplicates = [];
+
+  // Only check for duplicates if we have email or phone
+  if (!lead.email && !lead.phone) return duplicates;
+
+  // Check based on email
+  if (lead.email) {
+    const { data: emailDuplicates } = await supabase
+      .from('leads')
+      .select('id, name, email, phone, property_reference, source, status, created_at')
+      .eq('email', lead.email)
+      .limit(5);
+    
+    if (emailDuplicates && emailDuplicates.length > 0) {
+      duplicates.push(...emailDuplicates.map(dup => ({ ...dup, match_type: 'email' })));
+    }
+  }
+
+  // Check based on phone if we didn't find by email
+  if (lead.phone && duplicates.length === 0) {
+    const { data: phoneDuplicates } = await supabase
+      .from('leads')
+      .select('id, name, email, phone, property_reference, source, status, created_at')
+      .eq('phone', lead.phone)
+      .limit(5);
+    
+    if (phoneDuplicates && phoneDuplicates.length > 0) {
+      duplicates.push(...phoneDuplicates.map(dup => ({ ...dup, match_type: 'phone' })));
+    }
+  }
+
+  // Remove duplicates by id
+  const uniqueDuplicates = duplicates.filter((value, index, self) =>
+    index === self.findIndex((t) => t.id === value.id)
+  );
+
+  return uniqueDuplicates;
+}
+
 // Process a single lead using the import-lead function
 async function processLead(supabase: any, lead: Record<string, any>, results: any): Promise<void> {
   try {
@@ -102,6 +143,9 @@ async function processLead(supabase: any, lead: Record<string, any>, results: an
       return;
     }
 
+    // Find potential duplicates
+    const duplicates = await findPotentialDuplicates(supabase, lead);
+    
     // Add required flags for the import-lead function
     const leadData = {
       ...lead,
@@ -122,6 +166,17 @@ async function processLead(supabase: any, lead: Record<string, any>, results: an
       } else {
         results.updatedCount++;
       }
+      
+      // Store duplicates information
+      if (duplicates.length > 0) {
+        results.duplicatesCount = (results.duplicatesCount || 0) + 1;
+        if (!results.duplicates) results.duplicates = [];
+        results.duplicates.push({
+          lead: data.data,
+          matches: duplicates
+        });
+      }
+      
       results.imports.push(data.data);
     }
   } catch (err) {
@@ -138,6 +193,29 @@ async function parseFileData(file: File): Promise<Record<string, any>[]> {
     return await parseCSVFile(file);
   } else {
     return await parseExcelFile(file);
+  }
+}
+
+// Record import statistics
+async function recordImportStatistics(supabase: any, results: any, sourceType: string): Promise<void> {
+  try {
+    const statsData = {
+      source_type: sourceType,
+      total_count: results.totalCount,
+      imported_count: results.importedCount,
+      updated_count: results.updatedCount,
+      error_count: results.errorCount,
+      duplicates_count: results.duplicatesCount || 0,
+      import_date: new Date().toISOString()
+    };
+
+    await supabase
+      .from('import_statistics')
+      .insert(statsData);
+
+  } catch (error) {
+    console.error("Error recording import statistics:", error);
+    // Continue execution - statistics recording should not block the main process
   }
 }
 
@@ -164,6 +242,7 @@ serve(async (req) => {
     const formData = await req.formData();
     const file = formData.get("file") as File;
     const assignedTo = formData.get("assigned_to") as string;
+    const sourceType = formData.get("source_type") as string || "CSV Import";
 
     if (!file) {
       return createResponse({
@@ -199,8 +278,10 @@ serve(async (req) => {
       importedCount: 0,
       updatedCount: 0,
       errorCount: 0,
+      duplicatesCount: 0,
       errors: [] as string[],
-      imports: [] as any[]
+      imports: [] as any[],
+      duplicates: [] as any[]
     };
 
     // Process each lead
@@ -208,11 +289,14 @@ serve(async (req) => {
       await processLead(supabase, lead, results);
     }
 
+    // Record import statistics
+    await recordImportStatistics(supabase, results, sourceType);
+
     // Return results
     return createResponse({
       success: true,
       ...results,
-      message: `Processed ${results.totalCount} leads: ${results.importedCount} imported, ${results.updatedCount} updated, ${results.errorCount} errors`
+      message: `Processed ${results.totalCount} leads: ${results.importedCount} imported, ${results.updatedCount} updated, ${results.errorCount} errors, ${results.duplicatesCount} duplicates detected`
     }, 200);
     
   } catch (error) {

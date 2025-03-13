@@ -19,6 +19,7 @@ const LeadImportForm = () => {
     emailContent,
     emailAssignedTo,
     fileAssignedTo,
+    fileSourceType,
     selectedFile,
     uploadProgress,
     handleInputChange,
@@ -29,6 +30,7 @@ const LeadImportForm = () => {
     setEmailContent,
     setEmailAssignedTo,
     setFileAssignedTo,
+    handleSourceTypeChange,
     handleFileSelected,
     handleClearFile
   } = useLeadImport();
@@ -72,12 +74,14 @@ const LeadImportForm = () => {
           <TabsContent value="file">
             <FileImportForm
               fileAssignedTo={fileAssignedTo}
+              fileSourceType={fileSourceType}
               salesReps={salesReps}
               loading={loading}
               uploadProgress={uploadProgress}
               selectedFile={selectedFile}
               onFileSelected={handleFileSelected}
               setFileAssignedTo={setFileAssignedTo}
+              onSourceTypeChange={handleSourceTypeChange}
               onSubmit={handleFileSubmit}
               onClearFile={handleClearFile}
             />

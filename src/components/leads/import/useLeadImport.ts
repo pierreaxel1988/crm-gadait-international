@@ -31,6 +31,7 @@ export const useLeadImport = () => {
   
   // État pour l'importation par fichier
   const [fileAssignedTo, setFileAssignedTo] = useState('unassigned');
+  const [fileSourceType, setFileSourceType] = useState('CSV Import');
 
   // Chargement des commerciaux
   useEffect(() => {
@@ -189,6 +190,7 @@ export const useLeadImport = () => {
       const formData = new FormData();
       formData.append('file', selectedFile);
       formData.append('assigned_to', fileAssignedTo === 'unassigned' ? '' : fileAssignedTo);
+      formData.append('source_type', fileSourceType);
       
       // Appel à la fonction Edge pour importer le fichier
       const { data, error } = await supabase.functions.invoke('import-leads-csv', {
@@ -216,9 +218,11 @@ export const useLeadImport = () => {
           // Afficher les résultats
           setResult(data);
           
+          const hasDuplicates = data.duplicates && data.duplicates.length > 0;
+          
           toast({
             title: "Importation réussie",
-            description: `${data.importedCount} leads ont été importés avec succès.`
+            description: `${data.importedCount} leads importés, ${data.updatedCount} mis à jour${hasDuplicates ? `, ${data.duplicatesCount} doublons détectés` : ''}`
           });
           
           // Réinitialiser le formulaire après un court délai
@@ -241,6 +245,10 @@ export const useLeadImport = () => {
       setUploadProgress(0);
     }
   };
+  
+  const handleSourceTypeChange = (value: string) => {
+    setFileSourceType(value);
+  };
 
   return {
     loading,
@@ -253,6 +261,7 @@ export const useLeadImport = () => {
     emailContent,
     emailAssignedTo,
     fileAssignedTo,
+    fileSourceType,
     selectedFile,
     uploadProgress,
     handleInputChange,
@@ -263,6 +272,7 @@ export const useLeadImport = () => {
     setEmailContent,
     setEmailAssignedTo,
     setFileAssignedTo,
+    handleSourceTypeChange,
     handleFileSelected,
     handleClearFile
   };
