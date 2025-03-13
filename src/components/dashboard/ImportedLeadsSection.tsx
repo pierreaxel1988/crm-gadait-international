@@ -29,7 +29,7 @@ const ImportedLeadsSection = () => {
         const { data, error } = await supabase
           .from('leads')
           .select('id, name, email, phone, property_reference, source, integration_source, imported_at')
-          .is('imported_at', 'not.null')
+          .not('imported_at', 'is', null)
           .order('imported_at', { ascending: false })
           .limit(5);
 
