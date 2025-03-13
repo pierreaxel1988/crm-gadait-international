@@ -201,10 +201,85 @@ const LeadImportForm = () => {
                                   emailText.toLowerCase().includes('property cloud')) && 
                                  isWhatsAppRelated;
     
+    // Format spécifique pour Le Figaro
+    const isLeFigaro = emailText.includes('Propriétés Le Figaro') || 
+                       emailText.includes('Annonce concernée :');
+    
     // Détecter la source du portail immobilier
     if (emailText.includes('Propriétés Le Figaro')) {
       data.portal_name = 'Le Figaro';
       data.source = 'Le Figaro';
+      
+      // Extraction spécifique pour Le Figaro
+      const nameMatch = emailText.match(/•\s*Nom\s*:\s*([^\r\n]+)/i);
+      if (nameMatch && nameMatch[1]) {
+        data.name = nameMatch[1].trim();
+      }
+      
+      const emailMatch = emailText.match(/•\s*Email\s*:\s*([^\r\n]+)/i);
+      if (emailMatch && emailMatch[1]) {
+        data.email = emailMatch[1].trim();
+      }
+      
+      const phoneMatch = emailText.match(/•\s*Téléphone\s*:\s*([^\r\n]+)/i);
+      if (phoneMatch && phoneMatch[1]) {
+        data.phone = phoneMatch[1].trim();
+      }
+      
+      // Extraction de la localisation
+      const locationMatch = emailText.match(/•\s*([^•\r\n]+)\s*\(([^)]+)\)/i);
+      if (locationMatch) {
+        data.desired_location = locationMatch[1].trim();
+        data.country = locationMatch[2].trim();
+      }
+      
+      // Extraction du type de propriété
+      const propertyTypeMatch = emailText.match(/•\s*([^•\r\n]+)\s*\n•\s*de/i);
+      if (propertyTypeMatch) {
+        data.property_type = propertyTypeMatch[1].trim();
+      }
+      
+      // Extraction du budget
+      const budgetMatch = emailText.match(/•\s*de\s*([0-9\s]+)\s*à\s*([0-9\s]+)\s*€/i);
+      if (budgetMatch) {
+        data.budget_min = budgetMatch[1].replace(/\s/g, '');
+        data.budget_max = budgetMatch[2].replace(/\s/g, '');
+        data.budget = `${data.budget_min} - ${data.budget_max} €`;
+      }
+      
+      // Extraction des options souhaitées
+      const optionsMatch = emailText.match(/•\s*Autres options souhaitées par l'internaute:\s*([^\r\n]+)/i);
+      if (optionsMatch && optionsMatch[1]) {
+        data.amenities = [optionsMatch[1].trim()];
+      }
+      
+      // Extraction du message
+      const messageMatch = emailText.match(/Bonjour,\s*([\s\S]*?)Cordialement\./i);
+      if (messageMatch && messageMatch[1]) {
+        data.message = messageMatch[1].trim();
+      }
+      
+      // Extraction de référence
+      const refMatch = emailText.match(/Votre Référence\s*:\s*([^-\r\n]+)/i);
+      if (refMatch && refMatch[1]) {
+        data.property_reference = refMatch[1].trim();
+      }
+      
+      // Extraction d'URL
+      const urlMatch = emailText.match(/Annonce concernée\s*:\s*(https?:\/\/[^\s\r\n]+)/i);
+      if (urlMatch && urlMatch[1]) {
+        data.property_url = urlMatch[1].trim();
+      }
+      
+      // Extraction des infos supplémentaires
+      const propertyDetailsMatch = emailText.match(/Prix\s*:\s*([^\r\n]+)[\s\S]*?(\d+)\s*m²\s*-\s*(\d+)\s*pièces\s*-\s*(\d+)\s*chambres/i);
+      if (propertyDetailsMatch) {
+        if (!data.budget) {
+          data.budget = propertyDetailsMatch[1].trim();
+        }
+        data.living_area = `${propertyDetailsMatch[2].trim()} m²`;
+        data.bedrooms = parseInt(propertyDetailsMatch[4], 10);
+      }
     } else if (emailText.includes('Properstar')) {
       data.portal_name = 'Properstar';
       data.source = 'Properstar';
@@ -219,38 +294,44 @@ const LeadImportForm = () => {
       data.source = 'Idealista';
     }
 
-    // Extraction du nom - pattern standard
-    const nameMatch = emailText.match(/Name\s*:\s*([^\r\n]+)/i) || 
-                     emailText.match(/Coordonates\s*:[\s\S]*?Name\s*:\s*([^\r\n]+)/i);
-    
-    if (nameMatch && nameMatch[1]) {
-      data.name = nameMatch[1].trim();
-    } else if (isWhatsAppRelated && !data.name) {
-      data.name = "Contact via WhatsApp";
-    }
-
-    // Extraction de l'email - différents patterns
-    const emailMatch = emailText.match(/e-?mail\s*:\s*([^\r\n]+)/i) || 
-                      emailText.match(/Coordonates\s*:[\s\S]*?e-?mail\s*:\s*([^\r\n]+)/i);
-    
-    if (emailMatch && emailMatch[1]) {
-      data.email = emailMatch[1].trim();
-    } else {
-      // Recherche générique d'adresse email si non trouvée par les patterns précédents
-      const genericEmailMatch = emailText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-      if (genericEmailMatch) {
-        data.email = genericEmailMatch[0];
+    // Extraction du nom - pattern standard si non déjà extrait
+    if (!data.name) {
+      const nameMatch = emailText.match(/Name\s*:\s*([^\r\n]+)/i) || 
+                        emailText.match(/Coordonates\s*:[\s\S]*?Name\s*:\s*([^\r\n]+)/i);
+      
+      if (nameMatch && nameMatch[1]) {
+        data.name = nameMatch[1].trim();
+      } else if (isWhatsAppRelated) {
+        data.name = "Contact via WhatsApp";
       }
     }
 
-    // Extraction du téléphone - différents patterns
-    const phoneMatch = emailText.match(/Phone\s*:\s*([^\r\n]+)/i) || 
-                      emailText.match(/Telephone\s*:\s*([^\r\n]+)/i) ||
-                      emailText.match(/Tel\s*:\s*([^\r\n]+)/i) ||
-                      emailText.match(/Coordonates\s*:[\s\S]*?Phone\s*:\s*([^\r\n]+)/i);
-    
-    if (phoneMatch && phoneMatch[1]) {
-      data.phone = phoneMatch[1].trim();
+    // Extraction de l'email - différents patterns si non déjà extrait
+    if (!data.email) {
+      const emailMatch = emailText.match(/e-?mail\s*:\s*([^\r\n]+)/i) || 
+                        emailText.match(/Coordonates\s*:[\s\S]*?e-?mail\s*:\s*([^\r\n]+)/i);
+      
+      if (emailMatch && emailMatch[1]) {
+        data.email = emailMatch[1].trim();
+      } else {
+        // Recherche générique d'adresse email si non trouvée par les patterns précédents
+        const genericEmailMatch = emailText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+        if (genericEmailMatch) {
+          data.email = genericEmailMatch[0];
+        }
+      }
+    }
+
+    // Extraction du téléphone - différents patterns si non déjà extrait
+    if (!data.phone) {
+      const phoneMatch = emailText.match(/Phone\s*:\s*([^\r\n]+)/i) || 
+                        emailText.match(/Telephone\s*:\s*([^\r\n]+)/i) ||
+                        emailText.match(/Tel\s*:\s*([^\r\n]+)/i) ||
+                        emailText.match(/Coordonates\s*:[\s\S]*?Phone\s*:\s*([^\r\n]+)/i);
+      
+      if (phoneMatch && phoneMatch[1]) {
+        data.phone = phoneMatch[1].trim();
+      }
     }
 
     // Extraction du langage
@@ -301,7 +382,7 @@ const LeadImportForm = () => {
           data.message = messageGeneric[1].trim();
         }
       }
-    } else {
+    } else if (!isLeFigaro) {
       // Format standard pour d'autres emails
       // Extraction du pays
       const countryMatch = emailText.match(/Country\s*:\s*([^\r\n]+)/i);
