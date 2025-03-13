@@ -1,310 +1,228 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { parse as csvParse } from "https://deno.land/std@0.168.0/encoding/csv.ts";
-import { read, utils } from "https://esm.sh/xlsx@0.18.5";
+import { parse as parseCSV } from "https://deno.land/std@0.168.0/encoding/csv.ts";
+import * as XLSX from "https://esm.sh/xlsx@0.18.5";
 
-// CORS headers for API requests
+// CORS headers for the function
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-// Create supabase client with environment variables
-function createSupabaseClient() {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
-  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
+// Response helper
+const createResponse = (body: any, status = 200) => {
+  return new Response(JSON.stringify(body), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    status,
+  });
+};
 
-  if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error("Missing environment variables");
-  }
-
+// Create a Supabase client
+const createSupabaseClient = () => {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   return createClient(supabaseUrl, supabaseServiceKey);
-}
+};
 
-// Create a response with appropriate headers
-function createResponse(body: any, status: number) {
-  return new Response(
-    JSON.stringify(body),
-    {
-      status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    }
-  );
-}
-
-// Validate file type (CSV or Excel)
-function validateFileType(fileName: string): boolean {
-  const lowercaseName = fileName.toLowerCase();
-  return lowercaseName.endsWith('.csv') || 
-         lowercaseName.endsWith('.xlsx') || 
-         lowercaseName.endsWith('.xls');
-}
+// Validate file type
+const validateFileType = (fileName: string): "csv" | "excel" | null => {
+  const extension = fileName.split(".").pop()?.toLowerCase();
+  if (extension === "csv") return "csv";
+  if (["xlsx", "xls"].includes(extension ?? "")) return "excel";
+  return null;
+};
 
 // Parse CSV file
-async function parseCSVFile(file: File): Promise<Record<string, any>[]> {
+const parseCSVFile = async (file: File): Promise<Record<string, string>[]> => {
   const text = await file.text();
-  // Parse CSV with encoding/csv API
-  const parsed = await csvParse(text, {
-    skipFirstRow: false,
+  const { rows } = parseCSV(text, { 
+    skipFirstRow: true,
     columns: true
   });
-  return parsed;
-}
+  return rows as Record<string, string>[];
+};
 
 // Parse Excel file
-async function parseExcelFile(file: File): Promise<Record<string, any>[]> {
+const parseExcelFile = async (file: File): Promise<Record<string, string>[]> => {
   const arrayBuffer = await file.arrayBuffer();
-  const workbook = read(arrayBuffer, { type: 'array' });
-  
-  // Get the first sheet
-  const firstSheetName = workbook.SheetNames[0];
-  const worksheet = workbook.Sheets[firstSheetName];
-  
-  // Convert to JSON with header row
-  return utils.sheet_to_json(worksheet);
-}
+  const workbook = XLSX.read(arrayBuffer);
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(worksheet);
+};
 
-// Map records from file to our database schema
-function mapRecords(records: Record<string, any>[], assignedTo: string): Record<string, any>[] {
+// Map records to standard format
+const mapRecords = (records: Record<string, string>[]): Record<string, any>[] => {
   return records.map(record => {
-    // Create a standardized object that maps to our schema
-    return {
-      name: record.name || record.fullname || record.full_name || record.nom || record['nom complet'] || '',
-      email: record.email || record.mail || record.courriel || record['e-mail'] || '',
-      phone: record.phone || record.telephone || record.tel || record.mobile || record.portable || '',
-      property_reference: record.property_reference || record.reference || record.ref || '',
-      source: record.source || record.canal || record.provenance || 'Import CSV',
-      message: record.message || record.notes || record.commentaire || '',
-      location: record.location || record.ville || record.city || '',
-      desired_location: record.desired_location || record.location_search || record.localisation || '',
-      budget: record.budget || '',
-      property_type: record.property_type || record.type || '',
-      living_area: record.living_area || record.surface || record.area || '',
-      bedrooms: record.bedrooms || record.chambres || '',
-      country: record.country || record.pays || '',
-      assigned_to: record.assigned_to || record.agent || assignedTo || '',
-      status: record.status || 'New',
-      external_id: record.external_id || record.id || '',
-      integration_source: 'CSV Import ' + new Date().toISOString().split('T')[0],
-    };
-  });
-}
-
-// Find potential duplicates for a lead
-async function findPotentialDuplicates(supabase: any, lead: Record<string, any>): Promise<any[]> {
-  const duplicates = [];
-
-  // Only check for duplicates if we have email or phone
-  if (!lead.email && !lead.phone) return duplicates;
-
-  // Check based on email
-  if (lead.email) {
-    const { data: emailDuplicates } = await supabase
-      .from('leads')
-      .select('id, name, email, phone, property_reference, source, status, created_at')
-      .eq('email', lead.email)
-      .limit(5);
-    
-    if (emailDuplicates && emailDuplicates.length > 0) {
-      duplicates.push(...emailDuplicates.map(dup => ({ ...dup, match_type: 'email' })));
-    }
-  }
-
-  // Check based on phone if we didn't find by email
-  if (lead.phone && duplicates.length === 0) {
-    const { data: phoneDuplicates } = await supabase
-      .from('leads')
-      .select('id, name, email, phone, property_reference, source, status, created_at')
-      .eq('phone', lead.phone)
-      .limit(5);
-    
-    if (phoneDuplicates && phoneDuplicates.length > 0) {
-      duplicates.push(...phoneDuplicates.map(dup => ({ ...dup, match_type: 'phone' })));
-    }
-  }
-
-  // Remove duplicates by id
-  const uniqueDuplicates = duplicates.filter((value, index, self) =>
-    index === self.findIndex((t) => t.id === value.id)
-  );
-
-  return uniqueDuplicates;
-}
-
-// Process a single lead using the import-lead function
-async function processLead(supabase: any, lead: Record<string, any>, results: any): Promise<void> {
-  try {
-    // Skip records without name or email
-    if (!lead.name && !lead.email) {
-      results.errorCount++;
-      results.errors.push(`Record missing both name and email: ${JSON.stringify(lead)}`);
-      return;
-    }
-
-    // Find potential duplicates
-    const duplicates = await findPotentialDuplicates(supabase, lead);
-    
-    // Add required flags for the import-lead function
-    const leadData = {
-      ...lead,
-      integration_source: 'CSV Import'
-    };
-
-    // Call the import-lead function for each record
-    const { data, error } = await supabase.functions.invoke('import-lead', {
-      body: leadData
+    // Convert property keys to lowercase for case-insensitive matching
+    const normalizedRecord: Record<string, string> = {};
+    Object.keys(record).forEach(key => {
+      normalizedRecord[key.toLowerCase().trim()] = record[key];
     });
 
-    if (error) {
-      results.errorCount++;
-      results.errors.push(`Error importing ${lead.name || lead.email}: ${error.message}`);
-    } else {
-      if (data.isNew) {
-        results.importedCount++;
-      } else {
-        results.updatedCount++;
-      }
-      
-      // Store duplicates information
-      if (duplicates.length > 0) {
-        results.duplicatesCount = (results.duplicatesCount || 0) + 1;
-        if (!results.duplicates) results.duplicates = [];
-        results.duplicates.push({
-          lead: data.data,
-          matches: duplicates
-        });
-      }
-      
-      results.imports.push(data.data);
-    }
-  } catch (err) {
-    results.errorCount++;
-    results.errors.push(`Error processing ${lead.name || lead.email}: ${err.message}`);
-  }
-}
-
-// Parse data from the uploaded file
-async function parseFileData(file: File): Promise<Record<string, any>[]> {
-  const fileName = file.name.toLowerCase();
-  
-  if (fileName.endsWith('.csv')) {
-    return await parseCSVFile(file);
-  } else {
-    return await parseExcelFile(file);
-  }
-}
-
-// Record import statistics
-async function recordImportStatistics(supabase: any, results: any, sourceType: string): Promise<void> {
-  try {
-    const statsData = {
-      source_type: sourceType,
-      total_count: results.totalCount,
-      imported_count: results.importedCount,
-      updated_count: results.updatedCount,
-      error_count: results.errorCount,
-      duplicates_count: results.duplicatesCount || 0,
-      import_date: new Date().toISOString()
+    // Map to standard field names
+    return {
+      name: normalizedRecord.name || normalizedRecord.nom || normalizedRecord.client || "",
+      email: normalizedRecord.email || normalizedRecord.courriel || normalizedRecord["e-mail"] || "",
+      phone: normalizedRecord.phone || normalizedRecord.telephone || normalizedRecord.tel || normalizedRecord.mobile || "",
+      source: normalizedRecord.source || "",
+      property_reference: normalizedRecord.property_reference || normalizedRecord.reference || normalizedRecord.ref || "",
+      property_type: normalizedRecord.property_type || normalizedRecord.type || "",
+      budget: normalizedRecord.budget || "",
+      desired_location: normalizedRecord.desired_location || normalizedRecord.location || normalizedRecord.lieu || "",
+      message: normalizedRecord.message || normalizedRecord.comments || normalizedRecord.commentaires || "",
+      // Additional fields might be mapped here
     };
+  }).filter(record => record.name && record.email); // Filter out records without name or email
+};
 
-    await supabase
-      .from('import_statistics')
-      .insert(statsData);
+// Process a single lead
+const processLead = async (
+  lead: Record<string, any>, 
+  assignedTo: string, 
+  sourceType: string,
+  supabase: any
+): Promise<{ status: string; id?: string; email?: string; message?: string }> => {
+  try {
+    // First check if lead already exists
+    const { data: existingLeads, error: searchError } = await supabase
+      .from("leads")
+      .select("id, email, phone")
+      .or(`email.eq.${lead.email}${lead.phone ? `,phone.eq.${lead.phone}` : ''}`);
 
+    if (searchError) {
+      console.error("Error searching for existing lead:", searchError);
+      return { status: "error", message: searchError.message };
+    }
+
+    // If lead exists, it's a duplicate
+    if (existingLeads && existingLeads.length > 0) {
+      return { 
+        status: "duplicate", 
+        id: existingLeads[0].id,
+        email: lead.email,
+        message: `Lead with email ${lead.email} already exists`
+      };
+    }
+
+    // Insert the new lead
+    const { data, error: insertError } = await supabase
+      .from("leads")
+      .insert({
+        ...lead,
+        assigned_to: assignedTo || null,
+        status: "new",
+        integration_source: sourceType,
+        imported_at: new Date().toISOString(),
+      })
+      .select();
+
+    if (insertError) {
+      console.error("Error inserting lead:", insertError);
+      return { status: "error", message: insertError.message };
+    }
+
+    return { status: "created", id: data[0].id, email: lead.email };
   } catch (error) {
-    console.error("Error recording import statistics:", error);
-    // Continue execution - statistics recording should not block the main process
+    console.error("Error processing lead:", error);
+    return { status: "error", message: error.message };
   }
-}
+};
 
-// Main server function
+// Parse file data
+const parseFileData = async (file: File): Promise<Record<string, any>[]> => {
+  const fileType = validateFileType(file.name);
+  
+  if (fileType === "csv") {
+    return mapRecords(await parseCSVFile(file));
+  } else if (fileType === "excel") {
+    return mapRecords(await parseExcelFile(file));
+  }
+  
+  throw new Error("Unsupported file type");
+};
+
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Handle CORS preflight request
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Create supabase client
-    const supabase = createSupabaseClient();
-
-    // Only process POST requests for file uploads
-    if (req.method !== "POST") {
-      return createResponse({
-        success: false,
-        error: "Method not allowed",
-      }, 405);
-    }
-
-    // Parse form data
+    // Parse the FormData from the request
     const formData = await req.formData();
     const file = formData.get("file") as File;
     const assignedTo = formData.get("assigned_to") as string;
-    const sourceType = formData.get("source_type") as string || "CSV Import";
+    const sourceType = formData.get("source_type") as string || "File Import";
 
     if (!file) {
-      return createResponse({
-        success: false,
-        error: "No file provided",
-      }, 400);
+      return createResponse({ error: "No file provided" }, 400);
     }
 
-    // Validate file type
-    if (!validateFileType(file.name)) {
-      return createResponse({
-        success: false,
-        error: "Unsupported file format. Please upload a CSV or Excel file.",
-      }, 400);
+    const fileType = validateFileType(file.name);
+    if (!fileType) {
+      return createResponse({ error: "Unsupported file type" }, 400);
     }
 
-    // Process the file
+    // Create Supabase client
+    const supabase = createSupabaseClient();
+
+    // Parse the file data
     const records = await parseFileData(file);
-    
-    if (!records.length) {
-      return createResponse({
-        success: false,
-        error: "The file contains no data",
-      }, 400);
+
+    if (records.length === 0) {
+      return createResponse({ error: "No valid records found in the file" }, 400);
     }
-
-    // Map fields from the file to our database schema
-    const mappedRecords = mapRecords(records, assignedTo);
-
-    // Initialize results object
-    const results = {
-      totalCount: mappedRecords.length,
-      importedCount: 0,
-      updatedCount: 0,
-      errorCount: 0,
-      duplicatesCount: 0,
-      errors: [] as string[],
-      imports: [] as any[],
-      duplicates: [] as any[]
-    };
 
     // Process each lead
-    for (const lead of mappedRecords) {
-      await processLead(supabase, lead, results);
+    const results = {
+      total: records.length,
+      created: [] as any[],
+      updated: [] as any[],
+      duplicates: [] as any[],
+      errors: [] as any[],
+    };
+
+    for (const lead of records) {
+      const result = await processLead(lead, assignedTo, sourceType, supabase);
+
+      if (result.status === "created") {
+        results.created.push(result);
+      } else if (result.status === "updated") {
+        results.updated.push(result);
+      } else if (result.status === "duplicate") {
+        results.duplicates.push(result);
+      } else {
+        results.errors.push(result);
+      }
     }
 
-    // Record import statistics
-    await recordImportStatistics(supabase, results, sourceType);
+    // Save import statistics
+    await supabase
+      .from("import_statistics")
+      .insert({
+        source_type: sourceType,
+        total_count: results.total,
+        imported_count: results.created.length,
+        updated_count: results.updated.length,
+        error_count: results.errors.length,
+        duplicates_count: results.duplicates.length,
+        import_date: new Date().toISOString(),
+      });
 
     // Return results
     return createResponse({
       success: true,
-      ...results,
-      message: `Processed ${results.totalCount} leads: ${results.importedCount} imported, ${results.updatedCount} updated, ${results.errorCount} errors, ${results.duplicatesCount} duplicates detected`
-    }, 200);
-    
+      totalCount: results.total,
+      importedCount: results.created.length,
+      updatedCount: results.updated.length,
+      duplicatesCount: results.duplicates.length,
+      errorCount: results.errors.length,
+      duplicates: results.duplicates,
+      errors: results.errors,
+    });
   } catch (error) {
-    console.error("Error processing request:", error);
-    
-    return createResponse({
-      success: false,
-      error: `Server error: ${error.message}`,
-    }, 500);
+    console.error("Error processing import:", error);
+    return createResponse({ error: error.message }, 500);
   }
 });

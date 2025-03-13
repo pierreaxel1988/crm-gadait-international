@@ -47,13 +47,14 @@ const ImportStatsDashboard: React.FC = () => {
   const fetchImportStats = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      // Using a raw query to work around type issues
+      const { data, error: queryError } = await supabase
         .from('import_statistics')
         .select('*')
         .order('import_date', { ascending: false })
         .limit(100);
 
-      if (error) throw error;
+      if (queryError) throw queryError;
       
       setStats(data as ImportStat[]);
       processSourceStats(data as ImportStat[]);
