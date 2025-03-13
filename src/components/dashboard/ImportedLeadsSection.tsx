@@ -5,7 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ExternalLink } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface ImportedLead {
   id: string;
@@ -55,10 +56,34 @@ const ImportedLeadsSection = () => {
     }
   };
 
+  const getSourceBadge = (source: string | null, integration_source: string | null) => {
+    const sourceText = integration_source || source || 'Inconnu';
+    let color = 'bg-gray-200 text-gray-800';
+    
+    if (sourceText.includes('Figaro')) {
+      color = 'bg-blue-100 text-blue-800';
+    } else if (sourceText.includes('Properstar')) {
+      color = 'bg-green-100 text-green-800';
+    } else if (sourceText.includes('Property Cloud')) {
+      color = 'bg-purple-100 text-purple-800';
+    } else if (sourceText.includes('Idealista')) {
+      color = 'bg-red-100 text-red-800';
+    }
+    
+    return (
+      <Badge className={`${color} border-0`}>
+        {sourceText}
+      </Badge>
+    );
+  };
+
   return (
     <Card className="col-span-full">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Derniers leads importés</CardTitle>
+        <Badge variant="outline" className="ml-2">
+          {leads.length} leads
+        </Badge>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -72,32 +97,64 @@ const ImportedLeadsSection = () => {
             Aucun lead importé récemment
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Téléphone</TableHead>
-                <TableHead>Référence</TableHead>
-                <TableHead>Source</TableHead>
-                <TableHead>Importé le</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {leads.map((lead) => (
-                <TableRow key={lead.id}>
-                  <TableCell className="font-medium">{lead.name}</TableCell>
-                  <TableCell>{lead.email}</TableCell>
-                  <TableCell>{lead.phone || '—'}</TableCell>
-                  <TableCell>{lead.property_reference || '—'}</TableCell>
-                  <TableCell>
-                    {lead.integration_source || lead.source || '—'}
-                  </TableCell>
-                  <TableCell>{formatDate(lead.imported_at)}</TableCell>
+          <div className="overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Téléphone</TableHead>
+                  <TableHead>Référence</TableHead>
+                  <TableHead>Source</TableHead>
+                  <TableHead>Importé le</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {leads.map((lead) => (
+                  <TableRow key={lead.id} className="hover:bg-gray-50">
+                    <TableCell className="font-medium">{lead.name}</TableCell>
+                    <TableCell>
+                      <a href={`mailto:${lead.email}`} className="text-blue-600 hover:underline">
+                        {lead.email}
+                      </a>
+                    </TableCell>
+                    <TableCell>
+                      {lead.phone ? (
+                        <a href={`tel:${lead.phone}`} className="text-blue-600 hover:underline">
+                          {lead.phone}
+                        </a>
+                      ) : (
+                        '—'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {lead.property_reference ? (
+                        <div className="flex items-center">
+                          <span className="font-mono text-sm">{lead.property_reference}</span>
+                          {lead.property_reference.startsWith('http') && (
+                            <a 
+                              href={lead.property_reference} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="ml-1 text-blue-600"
+                            >
+                              <ExternalLink size={14} />
+                            </a>
+                          )}
+                        </div>
+                      ) : (
+                        '—'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {getSourceBadge(lead.source, lead.integration_source)}
+                    </TableCell>
+                    <TableCell>{formatDate(lead.imported_at)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>
