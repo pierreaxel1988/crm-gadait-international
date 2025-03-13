@@ -9,7 +9,6 @@ import CustomButton from '@/components/ui/CustomButton';
 import LeadApiGuide from '@/components/leads/LeadApiGuide';
 import LeadImportForm from '@/components/leads/LeadImportForm';
 import ImportedLeadsPanel from '@/components/leads/ImportedLeadsPanel';
-import ImportStatsDashboard from '@/components/leads/import/ImportStatsDashboard';
 
 const LeadImport = () => {
   const navigate = useNavigate();
@@ -32,19 +31,14 @@ const LeadImport = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid grid-cols-4 max-w-md">
+        <TabsList className="grid grid-cols-3 max-w-md">
           <TabsTrigger value="import">Importer</TabsTrigger>
-          <TabsTrigger value="stats">Statistiques</TabsTrigger>
           <TabsTrigger value="api">API</TabsTrigger>
           <TabsTrigger value="recents">Récents</TabsTrigger>
         </TabsList>
         
         <TabsContent value="import" className="space-y-4">
           <LeadImportForm />
-        </TabsContent>
-        
-        <TabsContent value="stats" className="space-y-4">
-          <ImportStatsDashboard />
         </TabsContent>
         
         <TabsContent value="api" className="space-y-4">
