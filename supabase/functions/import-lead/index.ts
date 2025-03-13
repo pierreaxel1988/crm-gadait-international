@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -47,7 +48,7 @@ serve(async (req) => {
         external_id: requestData.external_id,
         message: requestData.message,
         location: requestData.location,
-        integrationSource: requestData.integrationSource || requestData.portal_name || "api",
+        integrationSource: requestData.integration_source || requestData.portal_name || "api",
         desired_location: requestData.desired_location,
         budget: requestData.budget,
         property_type: requestData.property_type,
@@ -65,12 +66,12 @@ serve(async (req) => {
       };
     }
 
-    // Valider les données minimales requises
-    if (!leadData.name || !leadData.email) {
+    // Corriger la validation pour éviter les erreurs
+    if (!leadData.name && !leadData.email) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Les champs 'name' et 'email' sont obligatoires",
+          error: "Au moins un des champs 'name' ou 'email' est obligatoire",
         }),
         {
           status: 400,
@@ -89,11 +90,11 @@ serve(async (req) => {
         .maybeSingle();
       
       if (userError) {
-        console.warn('Error checking team member:', userError);
+        console.log('Error checking team member:', userError);
       }
       
       if (!assignedUser) {
-        console.warn('Assigned team member not found, ignoring assignment');
+        console.log('Assigned team member not found, ignoring assignment');
         leadData.assigned_to = null;
       }
     }
@@ -125,44 +126,48 @@ serve(async (req) => {
       }
     }
 
+    // Préparation des données pour insertion/mise à jour en traitant les valeurs nulles
+    const leadDataToUpsert = {
+      name: leadData.name || "Sans nom",
+      email: leadData.email || null,
+      phone: leadData.phone || null,
+      location: leadData.location || null,
+      status: 'New',
+      source: leadData.source || null,
+      property_reference: leadData.property_reference || null,
+      external_id: leadData.external_id || null,
+      integration_source: leadData.integrationSource || "api",
+      notes: leadData.message || null,
+      desired_location: leadData.desired_location || null,
+      budget: leadData.budget || null,
+      property_type: leadData.property_type || null,
+      living_area: leadData.living_area || null,
+      bedrooms: leadData.bedrooms || null,
+      views: leadData.views || null,
+      amenities: leadData.amenities || null,
+      purchase_timeframe: leadData.purchase_timeframe || null,
+      financing_method: leadData.financing_method || null,
+      property_use: leadData.property_use || null,
+      country: leadData.country || null,
+      assigned_to: leadData.assigned_to || null,
+      imported_at: new Date().toISOString(),
+      last_contacted_at: new Date().toISOString(),
+      raw_data: leadData.additionalData ? JSON.stringify(leadData.additionalData) : null
+    };
+
     let result;
     
     if (existingLead) {
       // Mettre à jour le lead existant
       const { data: updatedLead, error: updateError } = await supabase
         .from('leads')
-        .update({
-          name: leadData.name || existingLead.name,
-          email: leadData.email || existingLead.email,
-          phone: leadData.phone || undefined,
-          location: leadData.location || undefined,
-          status: 'New', // Par défaut, le statut est 'New' pour les leads importés
-          source: leadData.source || undefined,
-          property_reference: leadData.property_reference || undefined,
-          external_id: leadData.external_id || undefined,
-          integration_source: leadData.integrationSource || "api",
-          notes: leadData.message || undefined,
-          desired_location: leadData.desired_location || undefined,
-          budget: leadData.budget || undefined,
-          property_type: leadData.property_type || undefined,
-          living_area: leadData.living_area || undefined,
-          bedrooms: leadData.bedrooms || undefined,
-          views: leadData.views || undefined,
-          amenities: leadData.amenities || undefined,
-          purchase_timeframe: leadData.purchase_timeframe || undefined,
-          financing_method: leadData.financing_method || undefined,
-          property_use: leadData.property_use || undefined,
-          country: leadData.country || undefined,
-          assigned_to: leadData.assigned_to || undefined,
-          imported_at: new Date().toISOString(),
-          last_contacted_at: new Date().toISOString(),
-          raw_data: leadData.additionalData ? JSON.stringify(leadData.additionalData) : null
-        })
+        .update(leadDataToUpsert)
         .eq('id', existingLead.id)
         .select()
         .single();
 
       if (updateError) {
+        console.error("Erreur lors de la mise à jour du lead:", updateError);
         throw updateError;
       }
       
@@ -177,35 +182,14 @@ serve(async (req) => {
       const { data: newLead, error: insertError } = await supabase
         .from('leads')
         .insert({
-          name: leadData.name,
-          email: leadData.email,
-          phone: leadData.phone || null,
-          location: leadData.location || null,
-          status: 'New', // Par défaut, le statut est 'New' pour les leads importés
-          tags: ['Imported'],
-          source: leadData.source || null,
-          property_reference: leadData.property_reference || null,
-          external_id: leadData.external_id || null,
-          integration_source: leadData.integrationSource || "api",
-          notes: leadData.message || null,
-          desired_location: leadData.desired_location || null,
-          budget: leadData.budget || null,
-          property_type: leadData.property_type || null,
-          living_area: leadData.living_area || null,
-          bedrooms: leadData.bedrooms || null,
-          views: leadData.views || null,
-          amenities: leadData.amenities || null,
-          purchase_timeframe: leadData.purchase_timeframe || null,
-          financing_method: leadData.financing_method || null,
-          property_use: leadData.property_use || null,
-          country: leadData.country || null,
-          assigned_to: leadData.assigned_to || null,
-          raw_data: leadData.additionalData ? leadData.additionalData : null
+          ...leadDataToUpsert,
+          tags: ['Imported']
         })
         .select()
         .single();
 
       if (insertError) {
+        console.error("Erreur lors de la création du lead:", insertError);
         throw insertError;
       }
       
@@ -321,6 +305,55 @@ function parseRealEstatePortalData(data) {
     if (data.tipoInmueble) {
       lead.property_type = mapPropertyType(data.tipoInmueble);
     }
+  } else if (source.toLowerCase().includes("property cloud") || data.email_from?.includes("property") || data.email_from?.includes("cloud")) {
+    // Format "Property Cloud"
+    lead.source = "Property Cloud";
+    
+    // Extraction du nom dans le format "Name : Dimitris Ulianov"
+    const nameMatch = data.message?.match(/Name\s*:\s*([^\r\n]+)/i) || data.message?.match(/Nom\s*:\s*([^\r\n]+)/i);
+    if (nameMatch && nameMatch[1]) {
+      lead.name = nameMatch[1].trim();
+    } else {
+      lead.name = data.name || "";
+    }
+    
+    // Extraction de l'email dans le format "e-mail : dimitris.ulianov@gmail.com"
+    const emailMatch = data.message?.match(/e-?mail\s*:\s*([^\r\n]+)/i);
+    if (emailMatch && emailMatch[1]) {
+      lead.email = emailMatch[1].trim();
+    } else {
+      lead.email = data.email || "";
+    }
+    
+    // Extraction du téléphone dans le format "Phone : +35799239654"
+    const phoneMatch = data.message?.match(/Phone\s*:\s*([^\r\n]+)/i) || data.message?.match(/Téléphone\s*:\s*([^\r\n]+)/i);
+    if (phoneMatch && phoneMatch[1]) {
+      lead.phone = phoneMatch[1].trim();
+    } else {
+      lead.phone = data.phone || "";
+    }
+    
+    // Extraction de la référence de la propriété
+    const refMatch = data.message?.match(/Property\s*:\s*(\d+)/i) || data.message?.match(/Reference\s*:\s*(\d+)/i);
+    if (refMatch && refMatch[1]) {
+      lead.property_reference = refMatch[1].trim();
+    } else {
+      lead.property_reference = data.reference || data.property_reference || "";
+    }
+    
+    // Extraction du langage
+    const langMatch = data.message?.match(/Language\s*:\s*([^\r\n]+)/i) || data.message?.match(/Langue\s*:\s*([^\r\n]+)/i);
+    if (langMatch && langMatch[1]) {
+      lead.additionalData.language = langMatch[1].trim();
+    }
+    
+    // Extraction des critères
+    const criteriaMatch = data.message?.match(/Criterias\s*:\s*([\s\S]+?)(?=\n\n|$)/i);
+    if (criteriaMatch && criteriaMatch[1]) {
+      lead.message = criteriaMatch[1].trim();
+    } else {
+      lead.message = data.message || "";
+    }
   } else {
     // Format générique pour les autres portails
     lead.name = data.name || data.full_name || data.contact_name || "";
@@ -373,7 +406,7 @@ function parseRealEstatePortalData(data) {
 function extractAdditionalData(requestData) {
   const mapped = [
     'name', 'email', 'phone', 'property_reference', 'external_id', 'message',
-    'location', 'integrationSource', 'desired_location', 'budget', 'property_type',
+    'location', 'integration_source', 'desired_location', 'budget', 'property_type',
     'living_area', 'bedrooms', 'views', 'amenities', 'purchase_timeframe',
     'financing_method', 'property_use', 'source', 'country', 'assigned_to'
   ];

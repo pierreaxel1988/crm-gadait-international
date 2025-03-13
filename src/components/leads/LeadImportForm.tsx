@@ -16,6 +16,7 @@ import TeamMemberSelect from './TeamMemberSelect';
 const LeadImportForm = () => {
   const isMobile = useIsMobile();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
   const [formMode, setFormMode] = useState<'manual' | 'email'>('manual');
 
@@ -49,6 +50,8 @@ const LeadImportForm = () => {
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+    
     try {
       // Utiliser la fonction Edge Function de Supabase pour importer le lead
       const {
@@ -57,7 +60,18 @@ const LeadImportForm = () => {
       } = await supabase.functions.invoke('import-lead', {
         body: formData
       });
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Erreur lors de l'importation du lead:", error);
+        setError(`Erreur lors de l'importation : ${error.message}`);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: `Erreur lors de l'importation du lead : ${error.message}`
+        });
+        return;
+      }
+      
       setResult(data);
       toast({
         title: data.isNew ? "Lead créé avec succès" : "Lead mis à jour",
@@ -77,8 +91,9 @@ const LeadImportForm = () => {
           assigned_to: undefined
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erreur lors de l'importation du lead:", err);
+      setError(`Erreur lors de l'importation : ${err.message || 'Erreur inconnue'}`);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -92,7 +107,20 @@ const LeadImportForm = () => {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+    
     try {
+      if (!emailContent.trim()) {
+        setError("Le contenu de l'email ne peut pas être vide");
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Le contenu de l'email ne peut pas être vide"
+        });
+        setLoading(false);
+        return;
+      }
+      
       // Extraire les informations de l'email
       const extractedData = parseEmailContent(emailContent);
       
@@ -108,7 +136,18 @@ const LeadImportForm = () => {
       } = await supabase.functions.invoke('import-lead', {
         body: extractedData
       });
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Erreur lors de l'importation du lead:", error);
+        setError(`Erreur lors de l'importation : ${error.message}`);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: `Erreur lors de l'importation du lead : ${error.message}`
+        });
+        return;
+      }
+      
       setResult(data);
       toast({
         title: data.isNew ? "Lead créé avec succès" : "Lead mis à jour",
@@ -120,8 +159,9 @@ const LeadImportForm = () => {
         setEmailContent('');
         setEmailAssignedTo(undefined);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erreur lors de l'importation du lead:", err);
+      setError(`Erreur lors de l'importation : ${err.message || 'Erreur inconnue'}`);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -199,6 +239,15 @@ const LeadImportForm = () => {
     if (messageMatch && messageMatch[1]) {
       data.message = messageMatch[1].trim();
     }
+    
+    // Si aucun email n'a été trouvé mais que le texte contient une adresse email, l'extraire
+    if (!data.email) {
+      const genericEmailMatch = emailText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+      if (genericEmailMatch) {
+        data.email = genericEmailMatch[0];
+      }
+    }
+    
     return data;
   };
 
@@ -214,17 +263,24 @@ const LeadImportForm = () => {
             <TabsTrigger value="email">Depuis un Email</TabsTrigger>
           </TabsList>
           
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>Erreur d'importation</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
           <TabsContent value="manual">
             <form onSubmit={handleManualSubmit} className="space-y-3 md:space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-1 md:space-y-2">
-                  <Label htmlFor="name" className={isMobile ? 'text-xs' : ''}>Nom complet *</Label>
-                  <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required className={isMobile ? 'h-8 text-sm' : ''} />
+                  <Label htmlFor="name" className={isMobile ? 'text-xs' : ''}>Nom complet</Label>
+                  <Input id="name" name="name" value={formData.name} onChange={handleInputChange} className={isMobile ? 'h-8 text-sm' : ''} />
                 </div>
                 
                 <div className="space-y-1 md:space-y-2">
-                  <Label htmlFor="email" className={isMobile ? 'text-xs' : ''}>Email *</Label>
-                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} required className={isMobile ? 'h-8 text-sm' : ''} />
+                  <Label htmlFor="email" className={isMobile ? 'text-xs' : ''}>Email</Label>
+                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} className={isMobile ? 'h-8 text-sm' : ''} />
                 </div>
                 
                 <div className="space-y-1 md:space-y-2">
