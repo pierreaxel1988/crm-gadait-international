@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ManualImportForm from './import/ManualImportForm';
 import EmailImportForm from './import/EmailImportForm';
+import FileImportForm from './import/FileImportForm';
 import ImportResult from './import/ImportResult';
 import { useLeadImport } from './import/useLeadImport';
 
@@ -17,12 +18,19 @@ const LeadImportForm = () => {
     formData,
     emailContent,
     emailAssignedTo,
+    fileAssignedTo,
+    selectedFile,
+    uploadProgress,
     handleInputChange,
     handleSelectChange,
     handleManualSubmit,
     handleEmailSubmit,
+    handleFileSubmit,
     setEmailContent,
-    setEmailAssignedTo
+    setEmailAssignedTo,
+    setFileAssignedTo,
+    handleFileSelected,
+    handleClearFile
   } = useLeadImport();
 
   return (
@@ -31,10 +39,11 @@ const LeadImportForm = () => {
         <CardTitle>Importer un Lead</CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs value={formMode} onValueChange={value => setFormMode(value as 'manual' | 'email')} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+        <Tabs value={formMode} onValueChange={value => setFormMode(value as 'manual' | 'email' | 'file')} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="manual">Saisie Manuelle</TabsTrigger>
             <TabsTrigger value="email">Depuis un Email</TabsTrigger>
+            <TabsTrigger value="file">Fichier CSV/Excel</TabsTrigger>
           </TabsList>
           
           <TabsContent value="manual">
@@ -57,6 +66,20 @@ const LeadImportForm = () => {
               setEmailContent={setEmailContent}
               setEmailAssignedTo={setEmailAssignedTo}
               onSubmit={handleEmailSubmit}
+            />
+          </TabsContent>
+          
+          <TabsContent value="file">
+            <FileImportForm
+              fileAssignedTo={fileAssignedTo}
+              salesReps={salesReps}
+              loading={loading}
+              uploadProgress={uploadProgress}
+              selectedFile={selectedFile}
+              onFileSelected={handleFileSelected}
+              setFileAssignedTo={setFileAssignedTo}
+              onSubmit={handleFileSubmit}
+              onClearFile={handleClearFile}
             />
           </TabsContent>
         </Tabs>
