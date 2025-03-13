@@ -61,6 +61,7 @@ serve(async (req) => {
         property_use: requestData.property_use,
         source: requestData.source,
         country: requestData.country,
+        assigned_to: requestData.assigned_to,
         ...extractAdditionalData(requestData)
       };
     }
@@ -134,6 +135,7 @@ serve(async (req) => {
           financing_method: leadData.financing_method || undefined,
           property_use: leadData.property_use || undefined,
           country: leadData.country || undefined,
+          assigned_to: leadData.assigned_to || undefined,
           imported_at: new Date().toISOString(),
           last_contacted_at: new Date().toISOString(),
           raw_data: leadData.additionalData ? JSON.stringify(leadData.additionalData) : null
@@ -179,6 +181,7 @@ serve(async (req) => {
           financing_method: leadData.financing_method || null,
           property_use: leadData.property_use || null,
           country: leadData.country || null,
+          assigned_to: leadData.assigned_to || null,
           raw_data: leadData.additionalData ? leadData.additionalData : null
         })
         .select()
@@ -234,6 +237,7 @@ function parseRealEstatePortalData(data) {
     property_reference: "",
     external_id: "",
     integrationSource: source,
+    assigned_to: data.assigned_to || null,
     additionalData: {}
   };
   
@@ -353,7 +357,7 @@ function extractAdditionalData(requestData) {
     'name', 'email', 'phone', 'property_reference', 'external_id', 'message',
     'location', 'integrationSource', 'desired_location', 'budget', 'property_type',
     'living_area', 'bedrooms', 'views', 'amenities', 'purchase_timeframe',
-    'financing_method', 'property_use', 'source', 'country'
+    'financing_method', 'property_use', 'source', 'country', 'assigned_to'
   ];
   
   const additionalData = {};

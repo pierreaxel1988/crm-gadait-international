@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,12 +7,16 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
 const LeadImportForm = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [formMode, setFormMode] = useState<'manual' | 'email'>('manual');
+  const [salesReps, setSalesReps] = useState<{id: string, name: string}[]>([]);
+  const [loadingReps, setLoadingReps] = useState(false);
 
   // État pour le formulaire manuel
   const [formData, setFormData] = useState({
@@ -22,30 +26,62 @@ const LeadImportForm = () => {
     property_reference: '',
     source: 'Site web',
     message: '',
-    integration_source: 'Manual import'
+    integration_source: 'Manual import',
+    assigned_to: ''
   });
 
   // État pour l'importation par email
   const [emailContent, setEmailContent] = useState('');
+  const [emailAssignedTo, setEmailAssignedTo] = useState('');
+
+  // Chargement des commerciaux
+  useEffect(() => {
+    const fetchSalesReps = async () => {
+      setLoadingReps(true);
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('id, name')
+          .order('name');
+        
+        if (error) throw error;
+        setSalesReps(data || []);
+      } catch (err) {
+        console.error("Erreur lors du chargement des commerciaux:", err);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger la liste des commerciaux."
+        });
+      } finally {
+        setLoadingReps(false);
+      }
+    };
+
+    fetchSalesReps();
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const {
-      name,
-      value
-    } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
   };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       // Utiliser la fonction Edge Function de Supabase pour importer le lead
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('import-lead', {
+      const { data, error } = await supabase.functions.invoke('import-lead', {
         body: formData
       });
       if (error) throw error;
@@ -64,7 +100,8 @@ const LeadImportForm = () => {
           property_reference: '',
           source: 'Site web',
           message: '',
-          integration_source: 'Manual import'
+          integration_source: 'Manual import',
+          assigned_to: formData.assigned_to // Conserver le commercial sélectionné
         });
       }
     } catch (err) {
@@ -78,18 +115,21 @@ const LeadImportForm = () => {
       setLoading(false);
     }
   };
+
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       // Extraire les informations de l'email
       const extractedData = parseEmailContent(emailContent);
+      
+      // Ajouter le commercial assigné
+      if (emailAssignedTo) {
+        extractedData.assigned_to = emailAssignedTo;
+      }
 
       // Utiliser la fonction Edge Function de Supabase pour importer le lead
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('import-lead', {
+      const { data, error } = await supabase.functions.invoke('import-lead', {
         body: extractedData
       });
       if (error) throw error;
@@ -102,6 +142,7 @@ const LeadImportForm = () => {
       // Réinitialiser le formulaire
       if (data.isNew) {
         setEmailContent('');
+        // On garde le commercial sélectionné
       }
     } catch (err) {
       console.error("Erreur lors de l'importation du lead:", err);
@@ -184,7 +225,9 @@ const LeadImportForm = () => {
     }
     return data;
   };
-  return <Card>
+
+  return (
+    <Card>
       <CardHeader>
         <CardTitle>Importer un Lead</CardTitle>
       </CardHeader>
@@ -222,6 +265,26 @@ const LeadImportForm = () => {
                   <Label htmlFor="source">Source</Label>
                   <Input id="source" name="source" value={formData.source} onChange={handleInputChange} />
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="assigned_to">Commercial assigné</Label>
+                  <Select 
+                    value={formData.assigned_to} 
+                    onValueChange={(value) => handleSelectChange('assigned_to', value)}
+                  >
+                    <SelectTrigger id="assigned_to">
+                      <SelectValue placeholder="Sélectionner un commercial" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Non assigné</SelectItem>
+                      {salesReps.map(rep => (
+                        <SelectItem key={rep.id} value={rep.id}>
+                          {rep.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               
               <div className="space-y-2">
@@ -242,7 +305,35 @@ const LeadImportForm = () => {
             <form onSubmit={handleEmailSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="emailContent">Contenu de l'email</Label>
-                <Textarea id="emailContent" rows={12} value={emailContent} onChange={e => setEmailContent(e.target.value)} placeholder="Collez ici le contenu complet de l'email..." className="font-mono text-sm" required />
+                <Textarea 
+                  id="emailContent" 
+                  rows={10} 
+                  value={emailContent} 
+                  onChange={e => setEmailContent(e.target.value)} 
+                  placeholder="Collez ici le contenu complet de l'email..." 
+                  className="font-mono text-sm"
+                  required 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email_assigned_to">Commercial assigné</Label>
+                <Select 
+                  value={emailAssignedTo} 
+                  onValueChange={setEmailAssignedTo}
+                >
+                  <SelectTrigger id="email_assigned_to">
+                    <SelectValue placeholder="Sélectionner un commercial" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Non assigné</SelectItem>
+                    {salesReps.map(rep => (
+                      <SelectItem key={rep.id} value={rep.id}>
+                        {rep.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <Button type="submit" className="w-full bg-loro-navy hover:bg-loro-navy/90" disabled={loading}>
@@ -265,6 +356,8 @@ const LeadImportForm = () => {
             </AlertDescription>
           </Alert>}
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default LeadImportForm;
