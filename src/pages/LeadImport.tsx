@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import CustomButton from '@/components/ui/CustomButton';
 import LeadApiGuide from '@/components/leads/LeadApiGuide';
 import LeadImportForm from '@/components/leads/LeadImportForm';
