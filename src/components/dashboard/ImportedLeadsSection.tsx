@@ -7,6 +7,8 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Loader2, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
+import CustomButton from '../ui/CustomButton';
 
 interface ImportedLead {
   id: string;
@@ -23,6 +25,7 @@ const ImportedLeadsSection = () => {
   const [leads, setLeads] = useState<ImportedLead[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchImportedLeads = async () => {
@@ -77,13 +80,27 @@ const ImportedLeadsSection = () => {
     );
   };
 
+  const handleGoToImportPage = () => {
+    navigate('/lead-import');
+  };
+
   return (
     <Card className="col-span-full">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Derniers leads importés</CardTitle>
-        <Badge variant="outline" className="ml-2">
-          {leads.length} leads
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="ml-2">
+            {leads.length} leads
+          </Badge>
+          <CustomButton 
+            variant="outline" 
+            size="sm"
+            className="text-chocolate-dark border-chocolate-light hover:bg-chocolate-light/10"
+            onClick={handleGoToImportPage}
+          >
+            Importer
+          </CustomButton>
+        </div>
       </CardHeader>
       <CardContent>
         {loading ? (
