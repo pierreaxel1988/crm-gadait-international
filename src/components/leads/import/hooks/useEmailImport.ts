@@ -2,8 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { parseEmailContent } from '../emailParser';
-import { normalizeLeadData } from '../emailParser/utils';
+import { parseEmailContent, normalizeLeadData } from '../emailParser';
 
 export const useEmailImport = (setResult: (result: any) => void) => {
   const [loading, setLoading] = useState(false);

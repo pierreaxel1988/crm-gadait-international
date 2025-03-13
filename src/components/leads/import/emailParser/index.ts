@@ -59,7 +59,6 @@ export const parseEmailContent = (emailText: string): ParsedLeadData => {
   }
 };
 
-// Re-export types and utilities for convenience - fixed with 'export type'
-export { normalizeLeadData };
-export type { ParsedLeadData, PortalType };
-
+// Re-export types and utilities for convenience
+export { normalizeLeadData, PortalType };
+export type { ParsedLeadData };
