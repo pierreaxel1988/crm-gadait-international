@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import TeamMemberSelect from './TeamMemberSelect';
@@ -20,7 +19,6 @@ const LeadImportForm = () => {
   const [result, setResult] = useState<any>(null);
   const [formMode, setFormMode] = useState<'manual' | 'email'>('manual');
 
-  // État pour le formulaire manuel
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -32,7 +30,6 @@ const LeadImportForm = () => {
     assigned_to: undefined as string | undefined
   });
 
-  // État pour l'importation par email
   const [emailContent, setEmailContent] = useState('');
   const [emailAssignedTo, setEmailAssignedTo] = useState<string | undefined>(undefined);
   
@@ -53,7 +50,6 @@ const LeadImportForm = () => {
     setError(null);
     
     try {
-      // Utiliser la fonction Edge Function de Supabase pour importer le lead
       const {
         data,
         error
@@ -78,7 +74,6 @@ const LeadImportForm = () => {
         description: `Le lead ${formData.name} a été ${data.isNew ? 'créé' : 'mis à jour'} avec succès.`
       });
 
-      // Réinitialiser le formulaire si c'est un nouveau lead
       if (data.isNew) {
         setFormData({
           name: '',
@@ -121,17 +116,14 @@ const LeadImportForm = () => {
         return;
       }
       
-      // Extraire les informations de l'email
       const extractedData = parseEmailContent(emailContent);
       
-      // Add the assignment information
       if (emailAssignedTo) {
         extractedData.assigned_to = emailAssignedTo;
       }
 
       console.log("Données extraites pour l'importation:", extractedData);
 
-      // Utiliser la fonction Edge Function de Supabase pour importer le lead
       const {
         data,
         error: invokeError
@@ -167,7 +159,6 @@ const LeadImportForm = () => {
         description: `Le lead ${extractedData.name || 'sans nom'} a été ${data.isNew ? 'créé' : 'mis à jour'} avec succès.`
       });
 
-      // Réinitialiser le formulaire
       if (data.isNew) {
         setEmailContent('');
         setEmailAssignedTo(undefined);
@@ -185,32 +176,26 @@ const LeadImportForm = () => {
     }
   };
 
-  // Fonction pour extraire les données d'un email
   const parseEmailContent = (emailText: string) => {
     const data: Record<string, any> = {
       integration_source: 'Email Parser'
     };
     
-    // Vérifier s'il s'agit d'un message WhatsApp ou d'un email concernant WhatsApp
     const isWhatsAppRelated = emailText.toLowerCase().includes('whatsapp') || 
                              (emailText.toLowerCase().includes('automated message') && 
                               emailText.toLowerCase().includes('contacted you through'));
 
-    // Détection spécifique pour Apimo/Property Cloud via message WhatsApp
     const isApimoProperyCloud = (emailText.toLowerCase().includes('apimo') || 
                                   emailText.toLowerCase().includes('property cloud')) && 
                                  isWhatsAppRelated;
     
-    // Format spécifique pour Le Figaro
     const isLeFigaro = emailText.includes('Propriétés Le Figaro') || 
                        emailText.includes('Annonce concernée :');
     
-    // Détecter la source du portail immobilier
     if (emailText.includes('Propriétés Le Figaro')) {
       data.portal_name = 'Le Figaro';
       data.source = 'Le Figaro';
       
-      // Extraction spécifique pour Le Figaro
       const nameMatch = emailText.match(/•\s*Nom\s*:\s*([^\r\n]+)/i);
       if (nameMatch && nameMatch[1]) {
         data.name = nameMatch[1].trim();
@@ -226,20 +211,17 @@ const LeadImportForm = () => {
         data.phone = phoneMatch[1].trim();
       }
       
-      // Extraction de la localisation
       const locationMatch = emailText.match(/•\s*([^•\r\n]+)\s*\(([^)]+)\)/i);
       if (locationMatch) {
         data.desired_location = locationMatch[1].trim();
         data.country = locationMatch[2].trim();
       }
       
-      // Extraction du type de propriété
       const propertyTypeMatch = emailText.match(/•\s*([^•\r\n]+)\s*\n•\s*de/i);
       if (propertyTypeMatch) {
         data.property_type = propertyTypeMatch[1].trim();
       }
       
-      // Extraction du budget
       const budgetMatch = emailText.match(/•\s*de\s*([0-9\s]+)\s*à\s*([0-9\s]+)\s*€/i);
       if (budgetMatch) {
         data.budget_min = budgetMatch[1].replace(/\s/g, '');
@@ -247,31 +229,26 @@ const LeadImportForm = () => {
         data.budget = `${data.budget_min} - ${data.budget_max} €`;
       }
       
-      // Extraction des options souhaitées
       const optionsMatch = emailText.match(/•\s*Autres options souhaitées par l'internaute:\s*([^\r\n]+)/i);
       if (optionsMatch && optionsMatch[1]) {
         data.amenities = [optionsMatch[1].trim()];
       }
       
-      // Extraction du message
       const messageMatch = emailText.match(/Bonjour,\s*([\s\S]*?)Cordialement\./i);
       if (messageMatch && messageMatch[1]) {
         data.message = messageMatch[1].trim();
       }
       
-      // Extraction de référence
       const refMatch = emailText.match(/Votre Référence\s*:\s*([^-\r\n]+)/i);
       if (refMatch && refMatch[1]) {
         data.property_reference = refMatch[1].trim();
       }
       
-      // Extraction d'URL
       const urlMatch = emailText.match(/Annonce concernée\s*:\s*(https?:\/\/[^\s\r\n]+)/i);
       if (urlMatch && urlMatch[1]) {
         data.property_url = urlMatch[1].trim();
       }
       
-      // Extraction des infos supplémentaires
       const propertyDetailsMatch = emailText.match(/Prix\s*:\s*([^\r\n]+)[\s\S]*?(\d+)\s*m²\s*-\s*(\d+)\s*pièces\s*-\s*(\d+)\s*chambres/i);
       if (propertyDetailsMatch) {
         if (!data.budget) {
@@ -294,7 +271,6 @@ const LeadImportForm = () => {
       data.source = 'Idealista';
     }
 
-    // Extraction du nom - pattern standard si non déjà extrait
     if (!data.name) {
       const nameMatch = emailText.match(/Name\s*:\s*([^\r\n]+)/i) || 
                         emailText.match(/Coordonates\s*:[\s\S]*?Name\s*:\s*([^\r\n]+)/i);
@@ -306,7 +282,6 @@ const LeadImportForm = () => {
       }
     }
 
-    // Extraction de l'email - différents patterns si non déjà extrait
     if (!data.email) {
       const emailMatch = emailText.match(/e-?mail\s*:\s*([^\r\n]+)/i) || 
                         emailText.match(/Coordonates\s*:[\s\S]*?e-?mail\s*:\s*([^\r\n]+)/i);
@@ -314,7 +289,6 @@ const LeadImportForm = () => {
       if (emailMatch && emailMatch[1]) {
         data.email = emailMatch[1].trim();
       } else {
-        // Recherche générique d'adresse email si non trouvée par les patterns précédents
         const genericEmailMatch = emailText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
         if (genericEmailMatch) {
           data.email = genericEmailMatch[0];
@@ -322,7 +296,6 @@ const LeadImportForm = () => {
       }
     }
 
-    // Extraction du téléphone - différents patterns si non déjà extrait
     if (!data.phone) {
       const phoneMatch = emailText.match(/Phone\s*:\s*([^\r\n]+)/i) || 
                         emailText.match(/Telephone\s*:\s*([^\r\n]+)/i) ||
@@ -334,20 +307,16 @@ const LeadImportForm = () => {
       }
     }
 
-    // Extraction du langage
     const langMatch = emailText.match(/Language\s*:\s*([^\r\n]+)/i);
     if (langMatch && langMatch[1]) {
       data.language = langMatch[1].trim();
     }
 
-    // Extraction de la référence de propriété - formats spécifiques pour Property Cloud
     if (isApimoProperyCloud) {
-      // Pattern pour le format "Criterias : Property : 85581152 - Tamarin - 2350000.00 USD"
       const criteriasPropMatch = emailText.match(/Criterias\s*:[\s\S]*?Property\s*:\s*(\d+)([^\r\n]+)/i);
       if (criteriasPropMatch) {
         data.property_reference = criteriasPropMatch[1].trim();
         
-        // Extraction de la location et du prix
         const propInfo = criteriasPropMatch[2].trim();
         const locationPriceMatch = propInfo.match(/\s*-\s*([^-]+)\s*-\s*([^-\r\n]+)/);
         if (locationPriceMatch) {
@@ -356,13 +325,11 @@ const LeadImportForm = () => {
         }
       }
       
-      // Extraction d'URL spécifique à Property Cloud
       const urlMatch = emailText.match(/url\s*:\s*(https?:\/\/[^\s\r\n]+)/i);
       if (urlMatch && urlMatch[1]) {
         const url = urlMatch[1].trim();
         data.property_url = url;
         
-        // Si la référence n'a pas été trouvée avant, essayer de l'extraire de l'URL
         if (!data.property_reference) {
           const urlRefMatch = url.match(/gad(\d+)/i);
           if (urlRefMatch && urlRefMatch[1]) {
@@ -371,36 +338,29 @@ const LeadImportForm = () => {
         }
       }
       
-      // Extraction du message spécifique pour WhatsApp
       const messageMatch = emailText.match(/Message\s*:\s*([^\r\n]+).*?url:/is);
       if (messageMatch && messageMatch[1]) {
         data.message = messageMatch[1].trim();
       } else {
-        // Fallback pour d'autres formats de message
         const messageGeneric = emailText.match(/Message\s*:\s*([^\r\n]+)/i);
         if (messageGeneric && messageGeneric[1]) {
           data.message = messageGeneric[1].trim();
         }
       }
     } else if (!isLeFigaro) {
-      // Format standard pour d'autres emails
-      // Extraction du pays
       const countryMatch = emailText.match(/Country\s*:\s*([^\r\n]+)/i);
       if (countryMatch && countryMatch[1]) {
         data.country = countryMatch[1].trim();
       }
 
-      // Extraction de la référence de la propriété pour format standard
       const propertyCloudRefMatch = emailText.match(/Property\s*:\s*(\d+)/i);
       if (propertyCloudRefMatch && propertyCloudRefMatch[1]) {
         data.property_reference = propertyCloudRefMatch[1].trim();
         
-        // Chercher le reste des informations de propriété après la référence
         const fullPropertyLine = emailText.match(/Property\s*:\s*(\d+)([^\r\n]+)/i);
         if (fullPropertyLine && fullPropertyLine[2]) {
           const propertyInfo = fullPropertyLine[2].trim();
           
-          // Essayer d'extraire la location et le prix
           const locationPriceMatch = propertyInfo.match(/\s*[-–]\s*([^-–]+)\s*[-–]\s*([^-–\r\n]+)/);
           if (locationPriceMatch) {
             data.desired_location = locationPriceMatch[1].trim();
@@ -409,14 +369,12 @@ const LeadImportForm = () => {
         }
       }
       
-      // Extraction de l'URL standard
       const urlMatch = emailText.match(/url\s*:\s*([^\r\n]+)/i) || 
                       emailText.match(/https?:\/\/[^\s\r\n]+/i);
       if (urlMatch) {
         const url = urlMatch[0].includes('://') ? urlMatch[0] : urlMatch[1];
         data.property_url = url.trim();
         
-        // Si la référence n'a pas été trouvée avant, essayer de l'extraire de l'URL
         if (!data.property_reference) {
           const urlRefMatch = url.match(/gad(\d+)/i);
           if (urlRefMatch && urlRefMatch[1]) {
@@ -425,14 +383,12 @@ const LeadImportForm = () => {
         }
       }
 
-      // Extraction du message standard
       const messageMatch = emailText.match(/Message\s*:\s*([\s\S]+?)(?=\s*Date|$)/i);
       if (messageMatch && messageMatch[1]) {
         data.message = messageMatch[1].trim();
       }
     }
     
-    // Si aucun email n'a été trouvé mais que le texte contient une adresse email, l'extraire
     if (!data.email) {
       const genericEmailMatch = emailText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
       if (genericEmailMatch) {
@@ -440,7 +396,6 @@ const LeadImportForm = () => {
       }
     }
     
-    // Fallback - si on n'a pas de nom mais qu'on a un email, utiliser la partie locale de l'email
     if (!data.name && data.email) {
       const emailLocalPart = data.email.split('@')[0];
       data.name = emailLocalPart
@@ -448,7 +403,6 @@ const LeadImportForm = () => {
         .replace(/\b\w/g, c => c.toUpperCase());
     }
     
-    // S'assurer qu'il y a au moins un nom pour les leads sans information
     if (!data.name) {
       if (isWhatsAppRelated) {
         data.name = "Contact via WhatsApp";

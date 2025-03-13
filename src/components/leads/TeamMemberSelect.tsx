@@ -1,76 +1,60 @@
 
-import React, { useState, useEffect } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
+import React from 'react';
+import { User } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-}
-
+// Définir les types pour les props
 interface TeamMemberSelectProps {
   value: string | undefined;
   onChange: (value: string | undefined) => void;
   label?: string;
-  required?: boolean;
 }
 
-const TeamMemberSelect = ({ value, onChange, label = "Attribuer à", required = false }: TeamMemberSelectProps) => {
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const TeamMemberSelect = ({ 
+  value, 
+  onChange, 
+  label = "Attribuer à" 
+}: TeamMemberSelectProps) => {
   const isMobile = useIsMobile();
+  
+  // Liste des membres de l'équipe (à remplacer par des données dynamiques)
+  const teamMembers = [
+    { id: "1", name: "Alexandre Dupont" },
+    { id: "2", name: "Sophie Martin" },
+    { id: "3", name: "Jean Lafitte" },
+  ];
 
-  useEffect(() => {
-    const fetchTeamMembers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id, name, email')
-          .order('name');
-
-        if (error) throw error;
-        setTeamMembers(data || []);
-      } catch (err) {
-        console.error("Erreur lors du chargement des membres de l'équipe:", err);
-        setError("Impossible de charger les membres de l'équipe");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTeamMembers();
-  }, []);
-
-  if (error) {
-    return <div className="text-red-500 text-sm">{error}</div>;
-  }
+  const handleChange = (newValue: string) => {
+    // Si "non_assigné" est sélectionné, on passe undefined
+    onChange(newValue === "non_assigné" ? undefined : newValue);
+  };
 
   return (
     <div className="space-y-1 md:space-y-2">
       <Label htmlFor="assigned_to" className={isMobile ? 'text-xs' : ''}>
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
       </Label>
-      {loading ? (
-        <div className="flex items-center space-x-2">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-sm">Chargement des membres...</span>
-        </div>
-      ) : (
-        <Select 
-          value={value} 
-          onValueChange={(val) => onChange(val || undefined)}
+      <div className="relative">
+        <Select
+          value={value || "non_assigné"}
+          onValueChange={handleChange}
         >
-          <SelectTrigger className={isMobile ? 'h-8 text-sm' : ''}>
-            <SelectValue placeholder="Sélectionner un membre" />
+          <SelectTrigger className={`w-full ${isMobile ? 'h-8 text-sm' : ''}`} id="assigned_to">
+            <div className="flex items-center gap-2">
+              <User className="h-3.5 w-3.5" />
+              <SelectValue placeholder="Non assigné" />
+            </div>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Non attribué</SelectItem>
+            <SelectItem value="non_assigné">Non assigné</SelectItem>
             {teamMembers.map((member) => (
               <SelectItem key={member.id} value={member.id}>
                 {member.name}
@@ -78,7 +62,7 @@ const TeamMemberSelect = ({ value, onChange, label = "Attribuer à", required = 
             ))}
           </SelectContent>
         </Select>
-      )}
+      </div>
     </div>
   );
 };
