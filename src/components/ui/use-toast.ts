@@ -1,5 +1,13 @@
 
-// Re-export de notre hook principal pour la rétrocompatibilité
-import { useToast, toast } from "@/hooks/use-toast";
+// Ce fichier exporte les fonctions du hook de toast
+// pour maintenir la rétrocompatibilité avec l'ancienne structure
+import { useToast as useToastOriginal, toast as toastOriginal } from "@/hooks/use-toast";
 
-export { useToast, toast };
+export const useToast = useToastOriginal;
+export const toast = toastOriginal;
+
+// Re-export des types nécessaires
+export type {
+  ToastProps,
+  ToastActionElement
+} from "@/components/ui/toast";
