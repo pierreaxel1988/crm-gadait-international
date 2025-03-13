@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { parse as csvParse } from "https://deno.land/std@0.179.0/csv/parse.ts";
+import { parse as csvParse } from "https://deno.land/std@0.168.0/encoding/csv.ts";
 import { read, utils } from "https://esm.sh/xlsx@0.18.5";
 
 const corsHeaders = {
@@ -81,7 +81,11 @@ serve(async (req) => {
     if (fileName.endsWith('.csv')) {
       // Parse CSV file
       const text = await file.text();
-      const parsed = csvParse(text, { skipFirstRow: true, columns: true });
+      // Parse CSV - Note: options changed to match the encoding/csv API
+      const parsed = await csvParse(text, {
+        skipFirstRow: false, // We'll handle headers manually
+        columns: true
+      });
       records = parsed;
     } else {
       // Parse Excel file
@@ -207,3 +211,4 @@ serve(async (req) => {
     );
   }
 });
+
