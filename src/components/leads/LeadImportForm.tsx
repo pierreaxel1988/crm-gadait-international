@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Loader2, User, Mail, Phone, Home, Globe, MessageSquare } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -186,190 +186,150 @@ const LeadImportForm = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-times text-loro-navy mb-6">Importer un Lead</h2>
-      
-      <Tabs value={formMode} onValueChange={(value) => setFormMode(value as 'manual' | 'email')} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8 bg-loro-white/50 p-1 rounded-md">
-          <TabsTrigger 
-            value="manual" 
-            className="rounded-sm py-3 text-base font-medium text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-terracotta data-[state=active]:shadow-md transition-all"
-          >
-            Saisie Manuelle
-          </TabsTrigger>
-          <TabsTrigger 
-            value="email" 
-            className="rounded-sm py-3 text-base font-medium text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-terracotta data-[state=active]:shadow-md transition-all"
-          >
-            Importer depuis un Email
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="manual" className="focus-visible:outline-none">
-          <form onSubmit={handleManualSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>Importer un Lead</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs value={formMode} onValueChange={(value) => setFormMode(value as 'manual' | 'email')} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="manual">Saisie Manuelle</TabsTrigger>
+            <TabsTrigger value="email">Importer depuis un Email</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="manual">
+            <form onSubmit={handleManualSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nom complet *</Label>
+                  <Input 
+                    id="name" 
+                    name="name" 
+                    value={formData.name} 
+                    onChange={handleInputChange} 
+                    required 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input 
+                    id="email" 
+                    name="email" 
+                    type="email" 
+                    value={formData.email} 
+                    onChange={handleInputChange} 
+                    required 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Téléphone</Label>
+                  <Input 
+                    id="phone" 
+                    name="phone" 
+                    value={formData.phone} 
+                    onChange={handleInputChange} 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="property_reference">Référence Propriété</Label>
+                  <Input 
+                    id="property_reference" 
+                    name="property_reference" 
+                    value={formData.property_reference} 
+                    onChange={handleInputChange} 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="source">Source</Label>
+                  <Input 
+                    id="source" 
+                    name="source" 
+                    value={formData.source} 
+                    onChange={handleInputChange} 
+                  />
+                </div>
+              </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-loro-navy font-medium flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Nom complet <span className="text-loro-terracotta">*</span>
-                </Label>
-                <Input 
-                  id="name" 
-                  name="name" 
-                  value={formData.name} 
+                <Label htmlFor="message">Message</Label>
+                <Textarea 
+                  id="message" 
+                  name="message" 
+                  rows={4} 
+                  value={formData.message} 
                   onChange={handleInputChange} 
+                />
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full bg-loro-navy hover:bg-loro-navy/90"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Importation en cours...
+                  </>
+                ) : (
+                  "Importer le lead"
+                )}
+              </Button>
+            </form>
+          </TabsContent>
+          
+          <TabsContent value="email">
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="emailContent">Contenu de l'email</Label>
+                <Textarea 
+                  id="emailContent" 
+                  rows={12} 
+                  value={emailContent} 
+                  onChange={(e) => setEmailContent(e.target.value)} 
+                  placeholder="Collez ici le contenu complet de l'email..."
+                  className="font-mono text-sm"
                   required 
-                  className="border-gray-200 focus:border-loro-terracotta focus:ring-loro-terracotta/20"
-                  placeholder="Prénom et nom du client"
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-loro-navy font-medium flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email <span className="text-loro-terracotta">*</span>
-                </Label>
-                <Input 
-                  id="email" 
-                  name="email" 
-                  type="email" 
-                  value={formData.email} 
-                  onChange={handleInputChange} 
-                  required 
-                  className="border-gray-200 focus:border-loro-terracotta focus:ring-loro-terracotta/20"
-                  placeholder="email@exemple.com"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-loro-navy font-medium flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  Téléphone
-                </Label>
-                <Input 
-                  id="phone" 
-                  name="phone" 
-                  value={formData.phone} 
-                  onChange={handleInputChange} 
-                  className="border-gray-200 focus:border-loro-terracotta focus:ring-loro-terracotta/20"
-                  placeholder="+33 6 12 34 56 78"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="property_reference" className="text-loro-navy font-medium flex items-center gap-2">
-                  <Home className="h-4 w-4" />
-                  Référence Propriété
-                </Label>
-                <Input 
-                  id="property_reference" 
-                  name="property_reference" 
-                  value={formData.property_reference} 
-                  onChange={handleInputChange} 
-                  className="border-gray-200 focus:border-loro-terracotta focus:ring-loro-terracotta/20"
-                  placeholder="REF123456"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="source" className="text-loro-navy font-medium flex items-center gap-2">
-                  <Globe className="h-4 w-4" />
-                  Source
-                </Label>
-                <Input 
-                  id="source" 
-                  name="source" 
-                  value={formData.source} 
-                  onChange={handleInputChange} 
-                  className="border-gray-200 focus:border-loro-terracotta focus:ring-loro-terracotta/20"
-                  placeholder="Site web, Portail, etc."
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="message" className="text-loro-navy font-medium flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                Message
-              </Label>
-              <Textarea 
-                id="message" 
-                name="message" 
-                rows={4} 
-                value={formData.message} 
-                onChange={handleInputChange} 
-                className="border-gray-200 focus:border-loro-terracotta focus:ring-loro-terracotta/20"
-                placeholder="Message ou notes concernant ce lead..."
-              />
-            </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full bg-loro-terracotta hover:bg-loro-terracotta/90 text-white transition-colors py-6 text-lg"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Importation en cours...
-                </>
-              ) : (
-                "Importer le lead"
-              )}
-            </Button>
-          </form>
-        </TabsContent>
+              <Button 
+                type="submit" 
+                className="w-full bg-loro-navy hover:bg-loro-navy/90"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Analyse et importation en cours...
+                  </>
+                ) : (
+                  "Analyser et importer"
+                )}
+              </Button>
+            </form>
+          </TabsContent>
+        </Tabs>
         
-        <TabsContent value="email" className="focus-visible:outline-none">
-          <form onSubmit={handleEmailSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="emailContent" className="text-loro-navy font-medium flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Contenu de l'email
-              </Label>
-              <Textarea 
-                id="emailContent" 
-                rows={12} 
-                value={emailContent} 
-                onChange={(e) => setEmailContent(e.target.value)} 
-                placeholder="Collez ici le contenu complet de l'email..."
-                className="font-mono text-sm border-gray-200 focus:border-loro-terracotta focus:ring-loro-terracotta/20"
-                required 
-              />
-            </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full bg-loro-terracotta hover:bg-loro-terracotta/90 text-white transition-colors py-6 text-lg"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Analyse et importation en cours...
-                </>
-              ) : (
-                "Analyser et importer"
+        {result && (
+          <Alert className="mt-4">
+            <AlertTitle>Résultat de l'importation</AlertTitle>
+            <AlertDescription>
+              <p>{result.message}</p>
+              {result.data && (
+                <pre className="mt-2 bg-gray-50 p-2 rounded text-xs overflow-auto">
+                  {JSON.stringify(result.data, null, 2)}
+                </pre>
               )}
-            </Button>
-          </form>
-        </TabsContent>
-      </Tabs>
-      
-      {result && (
-        <Alert className="mt-6 bg-loro-white border-loro-terracotta/30">
-          <AlertTitle className="text-loro-terracotta">Résultat de l'importation</AlertTitle>
-          <AlertDescription>
-            <p>{result.message}</p>
-            {result.data && (
-              <pre className="mt-4 bg-loro-white p-3 rounded text-xs overflow-auto border border-loro-sand/30">
-                {JSON.stringify(result.data, null, 2)}
-              </pre>
-            )}
-          </AlertDescription>
-        </Alert>
-      )}
-    </div>
+            </AlertDescription>
+          </Alert>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
