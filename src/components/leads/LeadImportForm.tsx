@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -188,6 +187,11 @@ const LeadImportForm = () => {
     const data: Record<string, any> = {
       integration_source: 'Email Parser'
     };
+    
+    // Vérifier s'il s'agit d'un message WhatsApp
+    const isWhatsAppMessage = emailText.includes('whatsapp') || 
+                              emailText.includes('WhatsApp') || 
+                              (emailText.includes('Message') && emailText.includes('automated message'));
 
     // Détecter la source du portail immobilier
     if (emailText.includes('Propriétés Le Figaro')) {
@@ -197,18 +201,25 @@ const LeadImportForm = () => {
       data.portal_name = 'Properstar';
       data.source = 'Properstar';
     } else if (emailText.toLowerCase().includes('property cloud') || 
-              emailText.includes('propertycloud.mu')) {
+              emailText.includes('propertycloud.mu') ||
+              emailText.includes('www.propertycloud.mu')) {
       data.portal_name = 'Property Cloud';
       data.source = 'Property Cloud';
+      // Si WhatsApp, spécifier la source
+      if (isWhatsAppMessage) {
+        data.source = 'Property Cloud - WhatsApp';
+      }
     } else if (emailText.includes('Idealista')) {
       data.portal_name = 'Idealista';
       data.source = 'Idealista';
     }
 
-    // Extraction du nom
+    // Extraction du nom - si non trouvé, fallback sur "Contact via WhatsApp" pour les messages WhatsApp
     const nameMatch = emailText.match(/Name\s*:\s*([^\r\n]+)/i);
     if (nameMatch && nameMatch[1]) {
       data.name = nameMatch[1].trim();
+    } else if (isWhatsAppMessage) {
+      data.name = "Contact via WhatsApp";
     }
 
     // Extraction de l'email
@@ -218,7 +229,9 @@ const LeadImportForm = () => {
     }
 
     // Extraction du téléphone
-    const phoneMatch = emailText.match(/Phone\s*:\s*([^\r\n]+)/i);
+    const phoneMatch = emailText.match(/Phone\s*:\s*([^\r\n]+)/i) || 
+                      emailText.match(/Telephone\s*:\s*([^\r\n]+)/i) ||
+                      emailText.match(/Tel\s*:\s*([^\r\n]+)/i);
     if (phoneMatch && phoneMatch[1]) {
       data.phone = phoneMatch[1].trim();
     }
@@ -229,7 +242,7 @@ const LeadImportForm = () => {
       data.country = countryMatch[1].trim();
     }
 
-    // Extraction de la référence de la propriété pour Property Cloud
+    // Extraction de la référence de la propriété pour Property Cloud - Format standard
     const propertyCloudRefMatch = emailText.match(/Property\s*:\s*(\d+)/i);
     if (propertyCloudRefMatch && propertyCloudRefMatch[1]) {
       data.property_reference = propertyCloudRefMatch[1].trim();
@@ -248,6 +261,18 @@ const LeadImportForm = () => {
       }
     }
     
+    // Format WhatsApp Property Cloud - Extraction de référence de propriété
+    if (!data.property_reference && isWhatsAppMessage) {
+      // Ce format est spécifique aux messages WhatsApp de Property Cloud
+      // Exemple: "Property : 85581152 - Tamarin - 2350000.00 USD"
+      const whatsappPropertyMatch = emailText.match(/Property\s*:\s*(\d+)\s*-\s*([^-\r\n]+)\s*-\s*([^-\r\n]+)/i);
+      if (whatsappPropertyMatch) {
+        data.property_reference = whatsappPropertyMatch[1].trim();
+        data.desired_location = whatsappPropertyMatch[2].trim();
+        data.budget = whatsappPropertyMatch[3].trim();
+      }
+    }
+    
     // Extraction plus générique de la référence de propriété et du prix
     if (!data.property_reference) {
       const genericPropertyMatch = emailText.match(/Property\s*:\s*(\d+)\s*-\s*([^-\r\n]+)\s*-\s*([^\r\n]+)/i);
@@ -259,13 +284,16 @@ const LeadImportForm = () => {
     }
 
     // Extraction de l'URL
+    // Format WhatsApp: "url: https://www.propertycloud.mu/for-sale/villas-gad271975"
     const urlMatch = emailText.match(/url\s*:\s*([^\r\n]+)/i) || 
-                     emailText.match(/https?:\/\/[^\s]+/i);
-    if (urlMatch && urlMatch[1]) {
-      data.property_url = urlMatch[1].trim();
+                     emailText.match(/https?:\/\/[^\s\r\n]+/i);
+    if (urlMatch) {
+      const url = urlMatch[0].includes('://') ? urlMatch[0] : urlMatch[1];
+      data.property_url = url.trim();
+      
       // Si la référence n'a pas été trouvée avant, essayer de l'extraire de l'URL
       if (!data.property_reference) {
-        const urlRefMatch = urlMatch[1].match(/gad(\d+)/i);
+        const urlRefMatch = url.match(/gad(\d+)/i);
         if (urlRefMatch && urlRefMatch[1]) {
           data.property_reference = urlRefMatch[1];
         }
@@ -294,11 +322,16 @@ const LeadImportForm = () => {
         .replace(/\b\w/g, c => c.toUpperCase());
     }
     
-    // S'assurer qu'il y a au moins un champ important rempli
-    if (!data.name && !data.email && !data.phone) {
-      data.name = "Contact sans nom";
+    // S'assurer qu'il y a au moins un nom pour les leads sans information
+    if (!data.name) {
+      if (isWhatsAppMessage) {
+        data.name = "Contact via WhatsApp";
+      } else {
+        data.name = "Contact sans nom";
+      }
     }
     
+    console.log("Données extraites:", data);
     return data;
   };
 

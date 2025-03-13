@@ -58,6 +58,8 @@ serve(async (req) => {
       );
     }
     
+    console.log("Données reçues:", requestData);
+    
     // Détecter si c'est un format de portail immobilier
     const isRealEstatePortal = requestData.portal_name || requestData.portal_reference;
     
@@ -96,7 +98,7 @@ serve(async (req) => {
 
     console.log("Données du lead à importer:", leadData);
 
-    // Validation minimale: au moins un identifiant est requis (nom, email ou téléphone)
+    // Validation minimale: au moins un identifiant est requis (nom ou email ou téléphone)
     if (!leadData.name && !leadData.email && !leadData.phone) {
       return new Response(
         JSON.stringify({
@@ -166,6 +168,20 @@ serve(async (req) => {
       
       if (leadByPhone) {
         existingLead = leadByPhone;
+      }
+    }
+
+    // S'il s'agit d'un lead via Property Cloud avec référence de propriété, chercher par référence
+    if (!existingLead && leadData.property_reference && leadData.source && 
+        leadData.source.toLowerCase().includes('property cloud')) {
+      const { data: leadByPropertyRef } = await supabase
+        .from('leads')
+        .select('id, name, email, phone, property_reference')
+        .eq('property_reference', leadData.property_reference)
+        .maybeSingle();
+      
+      if (leadByPropertyRef) {
+        existingLead = leadByPropertyRef;
       }
     }
 
@@ -247,7 +263,9 @@ serve(async (req) => {
     return new Response(
       JSON.stringify(result),
       {
-        status: 200,
+        status:
+        
+        200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
@@ -288,6 +306,11 @@ function parseRealEstatePortalData(data) {
   
   // Copier toutes les données brutes pour référence future
   lead.additionalData = { ...data };
+  
+  // Vérifier s'il s'agit d'un message WhatsApp
+  const isWhatsAppMessage = data.message?.includes('whatsapp') || 
+                           data.message?.includes('WhatsApp') || 
+                           (data.message?.includes('Message') && data.message?.includes('automated message'));
   
   // Parser selon le format du portail
   if (source.toLowerCase().includes("figaro") || data.email_from?.includes("lefigaro.fr")) {
@@ -353,14 +376,19 @@ function parseRealEstatePortalData(data) {
             data.email_from?.includes("cloud") ||
             data.message?.includes("propertycloud.mu")) {
     // Format "Property Cloud"
-    lead.source = "Property Cloud";
+    lead.source = isWhatsAppMessage ? "Property Cloud - WhatsApp" : "Property Cloud";
     
     // Extraction du nom dans le format "Name : Dimitris Ulianov"
     const nameMatch = data.message?.match(/Name\s*:\s*([^\r\n]+)/i) || data.message?.match(/Nom\s*:\s*([^\r\n]+)/i);
     if (nameMatch && nameMatch[1]) {
       lead.name = nameMatch[1].trim();
     } else {
-      lead.name = data.name || "";
+      // Si WhatsApp et aucun nom trouvé
+      if (isWhatsAppMessage) {
+        lead.name = "Contact via WhatsApp";
+      } else {
+        lead.name = data.name || "";
+      }
     }
     
     // Extraction de l'email dans le format "e-mail : dimitris.ulianov@gmail.com"
@@ -372,14 +400,16 @@ function parseRealEstatePortalData(data) {
     }
     
     // Extraction du téléphone dans le format "Phone : +35799239654"
-    const phoneMatch = data.message?.match(/Phone\s*:\s*([^\r\n]+)/i) || data.message?.match(/Téléphone\s*:\s*([^\r\n]+)/i);
+    const phoneMatch = data.message?.match(/Phone\s*:\s*([^\r\n]+)/i) || 
+                     data.message?.match(/Téléphone\s*:\s*([^\r\n]+)/i) ||
+                     data.message?.match(/Tel\s*:\s*([^\r\n]+)/i);
     if (phoneMatch && phoneMatch[1]) {
       lead.phone = phoneMatch[1].trim();
     } else {
       lead.phone = data.phone || "";
     }
     
-    // Extraction de la référence de la propriété
+    // Extraction de la référence de la propriété - format standard
     const refMatch = data.message?.match(/Property\s*:\s*(\d+)/i) || data.message?.match(/Reference\s*:\s*(\d+)/i);
     if (refMatch && refMatch[1]) {
       lead.property_reference = refMatch[1].trim();
@@ -398,7 +428,18 @@ function parseRealEstatePortalData(data) {
       }
     }
     
-    // Extraction de l'URL
+    // Format WhatsApp Property Cloud - Extraction de référence de propriété
+    if (!lead.property_reference && isWhatsAppMessage) {
+      // Format spécifique aux messages WhatsApp: "Property : 85581152 - Tamarin - 2350000.00 USD"
+      const whatsappPropertyMatch = data.message?.match(/Property\s*:\s*(\d+)\s*-\s*([^-\r\n]+)\s*-\s*([^-\r\n]+)/i);
+      if (whatsappPropertyMatch) {
+        lead.property_reference = whatsappPropertyMatch[1].trim();
+        lead.desired_location = whatsappPropertyMatch[2].trim();
+        lead.budget = whatsappPropertyMatch[3].trim();
+      }
+    }
+    
+    // Extraction de l'URL - Format WhatsApp: "url: https://www.propertycloud.mu/for-sale/villas-gad271975"
     const urlMatch = data.message?.match(/url\s*:\s*([^\r\n]+)/i) || 
                     data.message?.match(/https?:\/\/[^\s\r\n]+/i);
     if (urlMatch) {
@@ -489,7 +530,11 @@ function parseRealEstatePortalData(data) {
   
   // S'assurer qu'un nom est toujours présent
   if (!lead.name) {
-    lead.name = "Contact sans nom";
+    if (isWhatsAppMessage) {
+      lead.name = "Contact via WhatsApp";
+    } else {
+      lead.name = "Contact sans nom";
+    }
   }
   
   return lead;
