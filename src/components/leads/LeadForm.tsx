@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { LeadDetailed, LeadSource, PropertyType, ViewType, Amenity, 
   PurchaseTimeframe, FinancingMethod, PropertyUse, Country } from '@/types/lead';
@@ -111,7 +112,6 @@ const LeadForm = ({ lead, onSubmit, onCancel, activeTab = 'informations' }: Lead
           <GeneralInfoSection 
             formData={formData} 
             handleInputChange={handleInputChange} 
-            leadSources={leadSources}
             countries={countries}
           />
         )}
