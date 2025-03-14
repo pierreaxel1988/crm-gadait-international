@@ -1,11 +1,8 @@
 
-import { Toast, ToastActionElement, ToastProps } from "@/components/ui/toast"
+import { Toast, ToastActionElement, ToastProps } from "@/components/ui/toast";
+import { useToast as useToastShadcn } from "@/components/ui/use-toast";
 
-import {
-  useToast as useToastShadcn,
-} from "@/components/ui/use-toast"
-
-export type { ToastProps, ToastActionElement }
+export type { ToastProps, ToastActionElement };
 
 export const useToast = useToastShadcn;
 

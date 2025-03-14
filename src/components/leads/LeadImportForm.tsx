@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,14 +35,8 @@ const LeadImportForm = () => {
   const [emailAssignedTo, setEmailAssignedTo] = useState<string | undefined>(undefined);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const {
-      name,
-      value
-    } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleManualSubmit = async (e: React.FormEvent) => {
@@ -50,20 +45,30 @@ const LeadImportForm = () => {
     setError(null);
     
     try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('import-lead', {
+      console.log("Envoi de données pour importation manuelle:", formData);
+      
+      const { data, error: invokeError } = await supabase.functions.invoke('import-lead', {
         body: formData
       });
       
-      if (error) {
-        console.error("Erreur lors de l'importation du lead:", error);
-        setError(`Erreur lors de l'importation : ${error.message}`);
+      if (invokeError) {
+        console.error("Erreur lors de l'importation du lead:", invokeError);
+        setError(`Erreur lors de l'importation : ${invokeError.message}`);
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: `Erreur lors de l'importation du lead : ${error.message}`
+          description: `Erreur lors de l'importation du lead : ${invokeError.message}`
+        });
+        return;
+      }
+      
+      if (!data || !data.success) {
+        const errorMsg = data?.error || "Erreur inconnue lors de l'importation";
+        setError(errorMsg);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: errorMsg
         });
         return;
       }
@@ -75,6 +80,7 @@ const LeadImportForm = () => {
       });
 
       if (data.isNew) {
+        // Réinitialisation du formulaire après création réussie
         setFormData({
           name: '',
           email: '',
@@ -87,7 +93,7 @@ const LeadImportForm = () => {
         });
       }
     } catch (err: any) {
-      console.error("Erreur lors de l'importation du lead:", err);
+      console.error("Exception lors de l'importation du lead:", err);
       setError(`Erreur lors de l'importation : ${err.message || 'Erreur inconnue'}`);
       toast({
         variant: "destructive",
@@ -116,19 +122,17 @@ const LeadImportForm = () => {
         return;
       }
       
-      const extractedData = parseEmailContent(emailContent);
+      // Préparation des données à envoyer
+      const requestData = {
+        message: emailContent,
+        assigned_to: emailAssignedTo,
+        integration_source: 'Email Parser'
+      };
       
-      if (emailAssignedTo) {
-        extractedData.assigned_to = emailAssignedTo;
-      }
+      console.log("Envoi de données pour importation depuis email:", requestData);
 
-      console.log("Données extraites pour l'importation:", extractedData);
-
-      const {
-        data,
-        error: invokeError
-      } = await supabase.functions.invoke('import-lead', {
-        body: extractedData
+      const { data, error: invokeError } = await supabase.functions.invoke('import-lead', {
+        body: requestData
       });
       
       if (invokeError) {
@@ -156,7 +160,7 @@ const LeadImportForm = () => {
       setResult(data);
       toast({
         title: data.isNew ? "Lead créé avec succès" : "Lead mis à jour",
-        description: `Le lead ${extractedData.name || 'sans nom'} a été ${data.isNew ? 'créé' : 'mis à jour'} avec succès.`
+        description: `Le lead a été ${data.isNew ? 'créé' : 'mis à jour'} avec succès.`
       });
 
       if (data.isNew) {
@@ -164,7 +168,7 @@ const LeadImportForm = () => {
         setEmailAssignedTo(undefined);
       }
     } catch (err: any) {
-      console.error("Erreur lors de l'importation du lead:", err);
+      console.error("Exception lors de l'importation du lead:", err);
       setError(`Erreur lors de l'importation : ${err.message || 'Erreur inconnue'}`);
       toast({
         variant: "destructive",
