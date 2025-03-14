@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Upload } from 'lucide-react';
 import StatsSection from '@/components/dashboard/StatsSection';
@@ -7,9 +7,21 @@ import ActivitySection from '@/components/dashboard/ActivitySection';
 import ImportedLeadsSection from '@/components/dashboard/ImportedLeadsSection';
 import { useAuth } from '@/hooks/useAuth';
 import CustomButton from '@/components/ui/CustomButton';
+import { toast } from 'sonner';
 
 const Index = () => {
   const { user } = useAuth();
+  
+  useEffect(() => {
+    // Add debug logging to help diagnose
+    console.log("Index page rendering", { user });
+    
+    // Let the user know the page is loaded
+    toast.info("Dashboard loaded", {
+      description: "Welcome to your luxury real estate management dashboard",
+      duration: 3000
+    });
+  }, [user]);
 
   return (
     <div className="p-4 md:p-6 space-y-6">

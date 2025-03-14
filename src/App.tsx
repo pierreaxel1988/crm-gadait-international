@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -44,16 +43,24 @@ const AppRoutes = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, signOut } = useAuth();
 
+  // Add debug logging
+  useEffect(() => {
+    console.log("App route rendering", { pathname: location.pathname, user });
+  }, [location.pathname, user]);
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
   if (location.pathname === '/auth') {
     return (
-      <Routes>
-        <Route path="/auth" element={<Auth />} />
-        <Route path="*" element={<Navigate to="/auth" replace />} />
-      </Routes>
+      <>
+        <Sonner position="top-right" />
+        <Routes>
+          <Route path="/auth" element={<Auth />} />
+          <Route path="*" element={<Navigate to="/auth" replace />} />
+        </Routes>
+      </>
     );
   }
 
@@ -84,6 +91,7 @@ const AppRoutes = () => {
           </Routes>
         </main>
       </div>
+      <Sonner position="top-right" />
     </div>
   );
 };
