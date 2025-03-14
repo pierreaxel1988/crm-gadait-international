@@ -31,7 +31,6 @@ serve(async (req) => {
     let requestData;
     try {
       requestData = await req.json();
-      console.log("Données reçues:", requestData);
     } catch (parseError) {
       console.error("Erreur lors du parsing de la requête JSON:", parseError);
       return new Response(
@@ -59,47 +58,47 @@ serve(async (req) => {
       );
     }
     
-    // Vérifier si un email complet a été envoyé pour extraction
-    let leadData: any = {};
+    console.log("Données reçues:", requestData);
     
-    if (requestData.message && 
-        (requestData.message.includes("Propriétés Le Figaro") || 
-        requestData.message.includes("Un(e) internaute est intéressé(e)") ||
-        requestData.message.includes("Property Cloud") ||
-        requestData.message.includes("Apimo") ||
-        requestData.message.includes("WhatsApp"))) {
-      
-      console.log("Détection d'un email de portail immobilier, tentative d'extraction...");
-      leadData = parseEmailContent(requestData.message);
-      
-      // Si un assigné est fourni, l'ajouter aux données extraites
-      if (requestData.assigned_to) {
-        leadData.assigned_to = requestData.assigned_to;
-      }
-      
-      // Ajouter la source d'intégration
-      leadData.integration_source = requestData.integration_source || 'Email Parser';
-      
-      console.log("Données extraites de l'email:", leadData);
+    // Détecter si c'est un format de portail immobilier
+    const isRealEstatePortal = requestData.portal_name || requestData.portal_reference;
+    
+    let leadData;
+    
+    if (isRealEstatePortal) {
+      // Parser les données spécifiques du portail immobilier
+      leadData = parseRealEstatePortalData(requestData);
     } else {
-      // Utilisation directe des données transmises
+      // Format standard de l'API
       leadData = {
         name: requestData.name,
         email: requestData.email,
         phone: requestData.phone,
         property_reference: requestData.property_reference,
+        external_id: requestData.external_id,
         message: requestData.message,
-        source: requestData.source || 'Manuel',
-        integration_source: requestData.integration_source || 'Manual Import',
+        location: requestData.location,
+        integrationSource: requestData.integration_source || requestData.portal_name || "api",
+        desired_location: requestData.desired_location,
+        budget: requestData.budget,
+        property_type: requestData.property_type,
+        living_area: requestData.living_area,
+        bedrooms: requestData.bedrooms,
+        views: requestData.views,
+        amenities: requestData.amenities,
+        purchase_timeframe: requestData.purchase_timeframe,
+        financing_method: requestData.financing_method,
+        property_use: requestData.property_use,
+        source: requestData.source,
+        country: requestData.country,
         assigned_to: requestData.assigned_to,
-        country: requestData.country || null,
-        desired_location: requestData.desired_location || null,
-        property_type: requestData.property_type || null,
-        budget: requestData.budget || null
+        ...extractAdditionalData(requestData)
       };
     }
 
-    // Validation minimale: au moins un identifiant est requis
+    console.log("Données du lead à importer:", leadData);
+
+    // Validation minimale: au moins un identifiant est requis (nom ou email ou téléphone)
     if (!leadData.name && !leadData.email && !leadData.phone) {
       return new Response(
         JSON.stringify({
@@ -113,8 +112,9 @@ serve(async (req) => {
       );
     }
 
-    // Vérifier si l'utilisateur assigné existe
+    // Validate assigned_to if provided
     if (leadData.assigned_to) {
+      // Check if the assigned user exists
       const { data: assignedUser, error: userError } = await supabase
         .from('team_members')
         .select('id')
@@ -122,29 +122,39 @@ serve(async (req) => {
         .maybeSingle();
       
       if (userError) {
-        console.log('Erreur lors de la vérification du membre d\'équipe:', userError);
+        console.log('Error checking team member:', userError);
       }
       
       if (!assignedUser) {
-        console.log('Membre d\'équipe assigné non trouvé, assignation ignorée');
+        console.log('Assigned team member not found, ignoring assignment');
         leadData.assigned_to = null;
       }
     }
 
-    // Vérifier si le lead existe déjà (par email ou téléphone)
+    // Vérifier si le lead existe déjà (par email, external_id, téléphone ou référence de propriété)
     let existingLead = null;
     
-    // 1. Vérifier par email
-    if (leadData.email) {
-      const { data: leadByEmail, error: emailError } = await supabase
+    // 1. D'abord vérifier par external_id s'il existe
+    if (leadData.external_id) {
+      const { data: leadByExternalId } = await supabase
+        .from('leads')
+        .select('id, name, email')
+        .eq('external_id', leadData.external_id)
+        .maybeSingle();
+      
+      if (leadByExternalId) {
+        existingLead = leadByExternalId;
+        console.log("Lead existant trouvé par external_id:", existingLead);
+      }
+    }
+    
+    // 2. Ensuite vérifier par email
+    if (!existingLead && leadData.email) {
+      const { data: leadByEmail } = await supabase
         .from('leads')
         .select('id, name, email')
         .eq('email', leadData.email)
         .maybeSingle();
-      
-      if (emailError) {
-        console.error("Erreur lors de la recherche par email:", emailError);
-      }
       
       if (leadByEmail) {
         existingLead = leadByEmail;
@@ -152,17 +162,13 @@ serve(async (req) => {
       }
     }
 
-    // 2. Vérifier par téléphone si pas trouvé par email
+    // 3. Ensuite vérifier par téléphone
     if (!existingLead && leadData.phone) {
-      const { data: leadByPhone, error: phoneError } = await supabase
+      const { data: leadByPhone } = await supabase
         .from('leads')
         .select('id, name, email, phone')
         .eq('phone', leadData.phone)
         .maybeSingle();
-      
-      if (phoneError) {
-        console.error("Erreur lors de la recherche par téléphone:", phoneError);
-      }
       
       if (leadByPhone) {
         existingLead = leadByPhone;
@@ -170,20 +176,16 @@ serve(async (req) => {
       }
     }
 
-    // 3. Si propriété de référence et source Property Cloud, vérifier par référence
+    // 4. Enfin, pour Property Cloud, vérifier par référence de propriété
     if (!existingLead && leadData.property_reference && 
         (leadData.source?.toLowerCase().includes('property cloud') || 
-         leadData.integration_source?.toLowerCase().includes('property cloud'))) {
+         leadData.integrationSource?.toLowerCase().includes('property cloud'))) {
       
-      const { data: leadByPropertyRef, error: refError } = await supabase
+      const { data: leadByPropertyRef } = await supabase
         .from('leads')
         .select('id, name, email, phone, property_reference')
         .eq('property_reference', leadData.property_reference)
         .maybeSingle();
-      
-      if (refError) {
-        console.error("Erreur lors de la recherche par référence de propriété:", refError);
-      }
       
       if (leadByPropertyRef) {
         existingLead = leadByPropertyRef;
@@ -191,86 +193,81 @@ serve(async (req) => {
       }
     }
 
-    // Préparation des données pour insertion/mise à jour
+    // Préparation des données pour insertion/mise à jour en traitant les valeurs nulles
     const leadDataToUpsert = {
       name: leadData.name || "Sans nom",
       email: leadData.email || null,
       phone: leadData.phone || null,
+      location: leadData.location || null,
       status: 'New',
       source: leadData.source || null,
       property_reference: leadData.property_reference || null,
-      integration_source: leadData.integration_source || "api",
+      external_id: leadData.external_id || null,
+      integration_source: leadData.integrationSource || "api",
       notes: leadData.message || null,
       desired_location: leadData.desired_location || null,
       budget: leadData.budget || null,
       property_type: leadData.property_type || null,
+      living_area: leadData.living_area || null,
+      bedrooms: leadData.bedrooms || null,
+      views: leadData.views || null,
+      amenities: leadData.amenities || null,
+      purchase_timeframe: leadData.purchase_timeframe || null,
+      financing_method: leadData.financing_method || null,
+      property_use: leadData.property_use || null,
       country: leadData.country || null,
       assigned_to: leadData.assigned_to || null,
       imported_at: new Date().toISOString(),
-      last_contacted_at: new Date().toISOString()
+      last_contacted_at: new Date().toISOString(),
+      raw_data: leadData.additionalData ? JSON.stringify(leadData.additionalData) : null
     };
 
     let result;
     
-    try {
-      if (existingLead) {
-        // Mettre à jour le lead existant
-        console.log("Mise à jour d'un lead existant:", existingLead.id);
-        const { data: updatedLead, error: updateError } = await supabase
-          .from('leads')
-          .update(leadDataToUpsert)
-          .eq('id', existingLead.id)
-          .select()
-          .single();
+    if (existingLead) {
+      // Mettre à jour le lead existant
+      console.log("Mise à jour d'un lead existant:", existingLead.id);
+      const { data: updatedLead, error: updateError } = await supabase
+        .from('leads')
+        .update(leadDataToUpsert)
+        .eq('id', existingLead.id)
+        .select()
+        .single();
 
-        if (updateError) {
-          console.error("Erreur lors de la mise à jour du lead:", updateError);
-          throw updateError;
-        }
-        
-        result = {
-          success: true,
-          message: "Lead mis à jour avec succès",
-          data: updatedLead,
-          isNew: false
-        };
-      } else {
-        // Créer un nouveau lead
-        console.log("Création d'un nouveau lead");
-        const { data: newLead, error: insertError } = await supabase
-          .from('leads')
-          .insert({
-            ...leadDataToUpsert,
-            tags: ['Imported']
-          })
-          .select()
-          .single();
-
-        if (insertError) {
-          console.error("Erreur lors de la création du lead:", insertError);
-          throw insertError;
-        }
-        
-        result = {
-          success: true,
-          message: "Nouveau lead créé avec succès",
-          data: newLead,
-          isNew: true
-        };
+      if (updateError) {
+        console.error("Erreur lors de la mise à jour du lead:", updateError);
+        throw updateError;
       }
-    } catch (dbError: any) {
-      console.error("Erreur base de données:", dbError);
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: `Erreur base de données: ${dbError.message || 'Erreur inconnue'}`,
-          details: dbError
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      
+      result = {
+        success: true,
+        message: "Lead mis à jour avec succès",
+        data: updatedLead,
+        isNew: false
+      };
+    } else {
+      // Créer un nouveau lead
+      console.log("Création d'un nouveau lead");
+      const { data: newLead, error: insertError } = await supabase
+        .from('leads')
+        .insert({
+          ...leadDataToUpsert,
+          tags: ['Imported']
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error("Erreur lors de la création du lead:", insertError);
+        throw insertError;
+      }
+      
+      result = {
+        success: true,
+        message: "Nouveau lead créé avec succès",
+        data: newLead,
+        isNew: true
+      };
     }
 
     return new Response(
@@ -280,7 +277,7 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("Erreur lors du traitement de la requête:", error);
     
     return new Response(
@@ -296,128 +293,406 @@ serve(async (req) => {
   }
 });
 
-// Fonction pour parser le contenu des emails de portails immobiliers
-function parseEmailContent(emailContent: string) {
-  const data: Record<string, any> = {
-    integration_source: 'Email Parser'
+// Fonction pour parser les données spécifiques des portails immobiliers
+function parseRealEstatePortalData(data) {
+  // Identifier le portail immobilier
+  let source = data.portal_name || "";
+  
+  // Structure de base du lead
+  const lead = {
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+    source: "",
+    property_reference: "",
+    external_id: "",
+    integrationSource: source,
+    additionalData: {},
+    assigned_to: data.assigned_to || null
   };
   
-  // Détection du format Le Figaro
-  if (emailContent.includes('Propriétés Le Figaro')) {
-    data.source = 'Le Figaro';
+  // Copier toutes les données brutes pour référence future
+  lead.additionalData = { ...data };
+  
+  // Vérifier s'il s'agit d'un message WhatsApp ou lié à WhatsApp
+  const isWhatsAppRelated = data.message?.toLowerCase().includes('whatsapp') || 
+                           (data.message?.toLowerCase().includes('automated message') && 
+                            data.message?.toLowerCase().includes('contacted you through'));
+  
+  // Parser selon le format du portail
+  if (source.toLowerCase().includes("figaro") || data.email_from?.includes("lefigaro.fr")) {
+    // Format "Propriétés Le Figaro"
+    lead.source = "Le Figaro";
+    lead.name = data.name || data.nom || "";
+    lead.email = data.email || data.email_from || "";
+    lead.phone = data.phone || data.telephone || "";
+    lead.property_reference = data.reference || data.property_reference || data.votre_reference || "";
+    lead.external_id = data.portal_reference || data.reference_portal || "";
+    lead.message = data.message || data.commentaire || data.description || "";
     
-    // Extraction des informations de base
-    const nameMatch = emailContent.match(/•\s*Nom\s*:\s*([^\r\n]+)/i);
+    // Extraction des données supplémentaires
+    if (data.property_price) {
+      lead.budget = data.property_price;
+    } else if (data.budget_min && data.budget_max) {
+      lead.budget = `${data.budget_min} - ${data.budget_max} €`;
+    }
+    
+    if (data.property_location || data.property_city) {
+      lead.desired_location = data.property_location || data.property_city;
+    }
+    
+    if (data.property_type) {
+      lead.property_type = mapPropertyType(data.property_type);
+    }
+    
+    if (data.property_area) {
+      lead.living_area = `${data.property_area} m²`;
+    }
+    
+    if (data.property_bedrooms) {
+      lead.bedrooms = parseInt(data.property_bedrooms, 10) || null;
+    }
+    
+    if (data.country) {
+      lead.country = mapCountry(data.country);
+    }
+  } else if (source.toLowerCase().includes("idealista")) {
+    // Format "Idealista"
+    lead.source = "Idealista";
+    lead.name = data.name || data.nombreContacto || "";
+    lead.email = data.email || data.emailContacto || "";
+    lead.phone = data.phone || data.telefonoContacto || "";
+    lead.property_reference = data.reference || data.referenciaAnuncio || "";
+    lead.external_id = data.portal_reference || data.idContacto || "";
+    lead.message = data.message || data.mensaje || "";
+    
+    // Extraction des données supplémentaires (spécifiques à Idealista)
+    if (data.precioAnuncio) {
+      lead.budget = `${data.precioAnuncio} €`;
+    }
+    
+    if (data.ubicacionAnuncio) {
+      lead.desired_location = data.ubicacionAnuncio;
+    }
+    
+    if (data.tipoInmueble) {
+      lead.property_type = mapPropertyType(data.tipoInmueble);
+    }
+  } else if (source.toLowerCase().includes("property cloud") || 
+            data.email_from?.includes("property") || 
+            data.email_from?.includes("cloud") ||
+            data.email_from?.includes("apimo") ||
+            data.message?.includes("propertycloud.mu")) {
+    // Format "Property Cloud" - incluant les messages par Apimo
+    lead.source = isWhatsAppRelated ? "Property Cloud - WhatsApp" : "Property Cloud";
+    
+    // Extraction du nom - différents formats possibles
+    const nameMatch = data.message?.match(/Name\s*:\s*([^\r\n]+)/i) || 
+                     data.message?.match(/Nom\s*:\s*([^\r\n]+)/i) ||
+                     data.message?.match(/Coordonates\s*:[\s\S]*?Name\s*:\s*([^\r\n]+)/i);
+    
     if (nameMatch && nameMatch[1]) {
-      data.name = nameMatch[1].trim();
-    }
-    
-    const emailMatch = emailContent.match(/•\s*Email\s*:\s*([^\r\n]+)/i);
-    if (emailMatch && emailMatch[1]) {
-      data.email = emailMatch[1].trim();
-    }
-    
-    const phoneMatch = emailContent.match(/•\s*Téléphone\s*:\s*([^\r\n]+)/i);
-    if (phoneMatch && phoneMatch[1]) {
-      data.phone = phoneMatch[1].trim();
-    }
-    
-    // Extraction de la localisation
-    const locationMatch = emailContent.match(/•\s*([^•\r\n]+)\s*\(([^)]+)\)/i);
-    if (locationMatch) {
-      data.desired_location = locationMatch[1].trim();
-      data.country = locationMatch[2].trim();
-    }
-    
-    // Extraction du type de propriété
-    const propertyTypeMatch = emailContent.match(/•\s*([^•\r\n]+)\s*\n•\s*de/i);
-    if (propertyTypeMatch) {
-      data.property_type = propertyTypeMatch[1].trim();
-    }
-    
-    // Extraction du budget
-    const budgetMatch = emailContent.match(/•\s*de\s*([0-9\s]+)\s*à\s*([0-9\s]+)\s*€/i);
-    if (budgetMatch) {
-      data.budget = `${budgetMatch[1].replace(/\s/g, '')} - ${budgetMatch[2].replace(/\s/g, '')} €`;
-    }
-    
-    // Extraction du message
-    const messageMatch = emailContent.match(/Bonjour,\s*([\s\S]*?)Cordialement\./i);
-    if (messageMatch && messageMatch[1]) {
-      data.message = messageMatch[1].trim();
-    }
-    
-    // Extraction des références
-    const refMatch = emailContent.match(/Votre Référence\s*:\s*([^-\r\n]+)/i);
-    if (refMatch && refMatch[1]) {
-      data.property_reference = refMatch[1].trim();
-    }
-  } 
-  // Détection format Property Cloud / WhatsApp / Apimo
-  else if (emailContent.toLowerCase().includes('property cloud') || 
-          emailContent.includes('whatsapp') || 
-          emailContent.toLowerCase().includes('apimo')) {
-    
-    data.source = emailContent.includes('whatsapp') ? 
-      'Property Cloud - WhatsApp' : 'Property Cloud';
-    
-    // Extraction du nom
-    const nameMatch = emailContent.match(/Name\s*:\s*([^\r\n]+)/i);
-    if (nameMatch && nameMatch[1]) {
-      data.name = nameMatch[1].trim();
+      lead.name = nameMatch[1].trim();
+    } else if (isWhatsAppRelated) {
+      lead.name = "Contact via WhatsApp";
     } else {
-      data.name = "Contact via WhatsApp";
+      lead.name = data.name || "";
     }
     
-    // Extraction de l'email
-    const emailMatch = emailContent.match(/e-?mail\s*:\s*([^\r\n]+)/i);
+    // Extraction de l'email - différents formats possibles
+    const emailMatch = data.message?.match(/e-?mail\s*:\s*([^\r\n]+)/i) ||
+                      data.message?.match(/Coordonates\s*:[\s\S]*?e-?mail\s*:\s*([^\r\n]+)/i);
+    
     if (emailMatch && emailMatch[1]) {
-      data.email = emailMatch[1].trim();
+      lead.email = emailMatch[1].trim();
     } else {
-      // Recherche d'email générique dans le texte
-      const genericEmailMatch = emailContent.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+      // Recherche générique d'adresse email
+      const genericEmailMatch = data.message?.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
       if (genericEmailMatch) {
-        data.email = genericEmailMatch[0];
+        lead.email = genericEmailMatch[0];
+      } else {
+        lead.email = data.email || "";
       }
     }
     
-    // Extraction du téléphone
-    const phoneMatch = emailContent.match(/Phone\s*:\s*([^\r\n]+)/i) || 
-                      emailContent.match(/Tel\s*:\s*([^\r\n]+)/i);
+    // Extraction du téléphone - différents formats possibles
+    const phoneMatch = data.message?.match(/Phone\s*:\s*([^\r\n]+)/i) || 
+                      data.message?.match(/Téléphone\s*:\s*([^\r\n]+)/i) ||
+                      data.message?.match(/Tel\s*:\s*([^\r\n]+)/i) ||
+                      data.message?.match(/Coordonates\s*:[\s\S]*?Phone\s*:\s*([^\r\n]+)/i);
+    
     if (phoneMatch && phoneMatch[1]) {
-      data.phone = phoneMatch[1].trim();
+      lead.phone = phoneMatch[1].trim();
+    } else {
+      lead.phone = data.phone || "";
     }
     
-    // Extraction de la référence de propriété
-    const propRefMatch = emailContent.match(/Property\s*:\s*(\d+)/i);
-    if (propRefMatch && propRefMatch[1]) {
-      data.property_reference = propRefMatch[1].trim();
+    // Extraction du langage
+    const langMatch = data.message?.match(/Language\s*:\s*([^\r\n]+)/i);
+    if (langMatch && langMatch[1]) {
+      lead.additionalData.language = langMatch[1].trim();
+    }
+    
+    // Extraction de la référence de propriété - formats spécifiques
+    
+    // Format pour les emails Apimo/Property Cloud: "Criterias : Property : 85581152 - Tamarin - 2350000.00 USD"
+    const criteriasPropMatch = data.message?.match(/Criterias\s*:[\s\S]*?Property\s*:\s*(\d+)([^\r\n]+)/i);
+    if (criteriasPropMatch) {
+      lead.property_reference = criteriasPropMatch[1].trim();
+      
+      // Extraction de la location et du prix
+      const propInfo = criteriasPropMatch[2].trim();
+      const locationPriceMatch = propInfo.match(/\s*-\s*([^-]+)\s*-\s*([^-\r\n]+)/);
+      if (locationPriceMatch) {
+        lead.desired_location = locationPriceMatch[1].trim();
+        lead.budget = locationPriceMatch[2].trim();
+      }
+    } else {
+      // Format standard
+      const refMatch = data.message?.match(/Property\s*:\s*(\d+)/i) || 
+                      data.message?.match(/Reference\s*:\s*(\d+)/i);
+      
+      if (refMatch && refMatch[1]) {
+        lead.property_reference = refMatch[1].trim();
+        
+        // Format standard "Property : 12345 - Location - Price"
+        const propertyFullLine = data.message?.match(/Property\s*:\s*(\d+)([^\r\n]+)/i);
+        if (propertyFullLine && propertyFullLine[2]) {
+          const propertyInfo = propertyFullLine[2].trim();
+          
+          // Extraction de location et prix
+          const locationPriceMatch = propertyInfo.match(/\s*[-–]\s*([^-–]+)\s*[-–]\s*([^-–\r\n]+)/);
+          if (locationPriceMatch) {
+            lead.desired_location = locationPriceMatch[1].trim();
+            lead.budget = locationPriceMatch[2].trim();
+          }
+        }
+      }
+    }
+    
+    // Extraction d'URL
+    const urlMatch = data.message?.match(/url\s*:\s*(https?:\/\/[^\s\r\n]+)/i) ||
+                    data.message?.match(/https?:\/\/[^\s\r\n]+/i);
+    
+    if (urlMatch) {
+      const url = urlMatch[0].includes('://') ? urlMatch[0] : urlMatch[1];
+      lead.additionalData.property_url = url.trim();
+      
+      // Si la référence n'a pas été trouvée avant, essayer de l'extraire de l'URL
+      if (!lead.property_reference) {
+        const urlRefMatch = url.match(/gad(\d+)/i);
+        if (urlRefMatch && urlRefMatch[1]) {
+          lead.property_reference = urlRefMatch[1];
+        }
+      }
     }
     
     // Extraction du message
-    const messageMatch = emailContent.match(/Message\s*:\s*([^\r\n]+)/i);
-    if (messageMatch && messageMatch[1]) {
-      data.message = messageMatch[1].trim();
-    }
-  } 
-  // Format générique - tentative d'extraction basique
-  else {
-    // Extraction d'informations basiques si possible
-    const emailAddressMatch = emailContent.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-    if (emailAddressMatch) {
-      data.email = emailAddressMatch[0];
-      // Nom par défaut depuis l'email
-      const emailLocalPart = data.email.split('@')[0];
-      data.name = emailLocalPart
-        .replace(/[._]/g, ' ')
-        .replace(/\b\w/g, c => c.toUpperCase());
+    if (isWhatsAppRelated) {
+      // Pour les messages WhatsApp, format spécifique
+      const whatsappMessageMatch = data.message?.match(/Message\s*:\s*([^\r\n]+).*?url:/is) || 
+                                  data.message?.match(/Message\s*:\s*([^\r\n]+)/i);
+      
+      if (whatsappMessageMatch && whatsappMessageMatch[1]) {
+        lead.message = whatsappMessageMatch[1].trim();
+      }
     } else {
-      data.name = "Contact sans nom";
+      // Format standard pour les autres emails
+      const messageMatch = data.message?.match(/Message\s*:\s*([\s\S]+?)(?=Date|$)/i);
+      if (messageMatch && messageMatch[1]) {
+        lead.message = messageMatch[1].trim();
+      } else {
+        lead.message = data.message || "";
+      }
+    }
+  } else {
+    // Format générique pour les autres portails
+    lead.name = data.name || data.full_name || data.contact_name || "";
+    lead.email = data.email || data.contact_email || "";
+    lead.phone = data.phone || data.contact_phone || data.telephone || "";
+    lead.message = data.message || data.comments || data.description || "";
+    lead.property_reference = data.property_reference || data.reference || "";
+    lead.external_id = data.external_id || data.portal_reference || "";
+    
+    // Essayer de détecter la source
+    if (source === "") {
+      if (data.email_from) {
+        if (data.email_from.includes("properstar")) lead.source = "Properstar";
+        else if (data.email_from.includes("luxuryestate")) lead.source = "L'express Property";
+        else if (data.email_from.includes("propertycloud")) lead.source = "Property Cloud";
+        else if (data.email_from.includes("apimo")) lead.source = "Property Cloud";
+        else lead.source = "Portails immobiliers";
+      } else {
+        lead.source = "Portails immobiliers";
+      }
+    } else {
+      lead.source = mapPortalSource(source);
     }
     
-    data.message = emailContent.slice(0, 500); // Limiter la longueur
-    data.source = "Email";
+    // Extraction des données supplémentaires
+    if (data.price || data.property_price) {
+      lead.budget = `${data.price || data.property_price} €`;
+    }
+    
+    if (data.location || data.city || data.property_location) {
+      lead.desired_location = data.location || data.city || data.property_location;
+    }
+    
+    if (data.property_type) {
+      lead.property_type = mapPropertyType(data.property_type);
+    }
+    
+    if (data.area || data.surface || data.property_area) {
+      lead.living_area = `${data.area || data.surface || data.property_area} m²`;
+    }
+    
+    if (data.bedrooms || data.property_bedrooms) {
+      lead.bedrooms = parseInt(data.bedrooms || data.property_bedrooms, 10) || null;
+    }
   }
   
-  return data;
+  // Vérifications finales et fallbacks
+  // Si on n'a pas de nom mais qu'on a un email, utiliser la partie locale de l'email
+  if (!lead.name && lead.email) {
+    const emailLocalPart = lead.email.split('@')[0];
+    lead.name = emailLocalPart
+      .replace(/[._]/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+  
+  // S'assurer qu'un nom est toujours présent
+  if (!lead.name) {
+    if (isWhatsAppRelated) {
+      lead.name = "Contact via WhatsApp";
+    } else {
+      lead.name = "Contact sans nom";
+    }
+  }
+  
+  return lead;
+}
+
+// Fonction pour extraire les données supplémentaires (non mappées) de la requête
+function extractAdditionalData(requestData) {
+  const mapped = [
+    'name', 'email', 'phone', 'property_reference', 'external_id', 'message',
+    'location', 'integration_source', 'desired_location', 'budget', 'property_type',
+    'living_area', 'bedrooms', 'views', 'amenities', 'purchase_timeframe',
+    'financing_method', 'property_use', 'source', 'country', 'assigned_to'
+  ];
+  
+  const additionalData = {};
+  
+  for (const [key, value] of Object.entries(requestData)) {
+    if (!mapped.includes(key)) {
+      additionalData[key] = value;
+    }
+  }
+  
+  return { additionalData };
+}
+
+// Fonction pour mapper les types de propriétés
+function mapPropertyType(type) {
+  if (!type) return null;
+  
+  const typeMap = {
+    'villa': 'Villa',
+    'appartement': 'Appartement',
+    'apartment': 'Appartement',
+    'penthouse': 'Penthouse',
+    'maison': 'Maison',
+    'house': 'Maison',
+    'duplex': 'Duplex',
+    'chalet': 'Chalet',
+    'terrain': 'Terrain',
+    'land': 'Terrain',
+    'manoir': 'Manoir',
+    'manor': 'Manoir',
+    'town house': 'Maison de ville',
+    'maison de ville': 'Maison de ville',
+    'château': 'Château',
+    'castle': 'Château',
+    'commercial': 'Commercial',
+    'local commercial': 'Local commercial',
+    'hotel': 'Hotel',
+    'vineyard': 'Vignoble',
+    'vignoble': 'Vignoble'
+  };
+  
+  const lowerType = type.toLowerCase();
+  
+  for (const [key, value] of Object.entries(typeMap)) {
+    if (lowerType.includes(key)) {
+      return value;
+    }
+  }
+  
+  return "Autres";
+}
+
+// Fonction pour mapper les pays
+function mapCountry(country) {
+  if (!country) return null;
+  
+  const countryMap = {
+    'france': 'France',
+    'espagne': 'Spain',
+    'spain': 'Spain',
+    'suisse': 'Switzerland',
+    'switzerland': 'Switzerland',
+    'portugal': 'Portugal',
+    'royaume-uni': 'United Kingdom',
+    'uk': 'United Kingdom',
+    'united kingdom': 'United Kingdom',
+    'états-unis': 'United States',
+    'usa': 'United States',
+    'united states': 'United States',
+    'émirats arabes unis': 'United Arab Emirates',
+    'uae': 'United Arab Emirates',
+    'united arab emirates': 'United Arab Emirates',
+    'grèce': 'Greece',
+    'greece': 'Greece',
+    'croatie': 'Croatia',
+    'croatia': 'Croatia',
+    'maldives': 'Maldives',
+    'maurice': 'Mauritius',
+    'mauritius': 'Mauritius',
+    'seychelles': 'Seychelles'
+  };
+  
+  const lowerCountry = country.toLowerCase();
+  
+  for (const [key, value] of Object.entries(countryMap)) {
+    if (lowerCountry.includes(key)) {
+      return value;
+    }
+  }
+  
+  return null;
+}
+
+// Fonction pour mapper les sources des portails
+function mapPortalSource(source) {
+  if (!source) return "Portails immobiliers";
+  
+  const sourceMap = {
+    'figaro': 'Le Figaro',
+    'idealista': 'Idealista',
+    'properstar': 'Properstar',
+    'property cloud': 'Property Cloud',
+    'luxuryestate': 'L\'express Property',
+    'express': 'L\'express Property'
+  };
+  
+  const lowerSource = source.toLowerCase();
+  
+  for (const [key, value] of Object.entries(sourceMap)) {
+    if (lowerSource.includes(key)) {
+      return value;
+    }
+  }
+  
+  return "Portails immobiliers";
 }

@@ -51,7 +51,6 @@ export type Database = {
           assigned_to: string | null
           bedrooms: number | null
           budget: string | null
-          country: string | null
           created_at: string
           desired_location: string | null
           email: string | null
@@ -85,7 +84,6 @@ export type Database = {
           assigned_to?: string | null
           bedrooms?: number | null
           budget?: string | null
-          country?: string | null
           created_at?: string
           desired_location?: string | null
           email?: string | null
@@ -119,7 +117,6 @@ export type Database = {
           assigned_to?: string | null
           bedrooms?: number | null
           budget?: string | null
-          country?: string | null
           created_at?: string
           desired_location?: string | null
           email?: string | null
