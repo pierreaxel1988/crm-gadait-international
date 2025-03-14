@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,10 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import TeamMemberSelect from './TeamMemberSelect';
+import { LeadSource } from '@/types/lead';
 
 const LeadImportForm = () => {
   const isMobile = useIsMobile();
@@ -19,12 +22,28 @@ const LeadImportForm = () => {
   const [result, setResult] = useState<any>(null);
   const [formMode, setFormMode] = useState<'manual' | 'email'>('manual');
 
+  // Liste des sources définies dans les types
+  const leadSources: LeadSource[] = [
+    "Site web", 
+    "Réseaux sociaux", 
+    "Portails immobiliers", 
+    "Network", 
+    "Repeaters", 
+    "Recommandations",
+    "Apporteur d'affaire",
+    "Idealista",
+    "Le Figaro",
+    "Properstar",
+    "Property Cloud",
+    "L'express Property"
+  ];
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     property_reference: '',
-    source: 'Site web',
+    source: 'Site web' as LeadSource,
     message: '',
     integration_source: 'Manual import',
     assigned_to: undefined as string | undefined
@@ -41,6 +60,13 @@ const LeadImportForm = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handleSourceChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      source: value as LeadSource
     }));
   };
 
@@ -459,7 +485,18 @@ const LeadImportForm = () => {
                 
                 <div className="space-y-1 md:space-y-2">
                   <Label htmlFor="source" className={isMobile ? 'text-xs' : ''}>Source</Label>
-                  <Input id="source" name="source" value={formData.source} onChange={handleInputChange} className={isMobile ? 'h-8 text-sm' : ''} />
+                  <Select value={formData.source} onValueChange={handleSourceChange}>
+                    <SelectTrigger className={isMobile ? 'h-8 text-sm' : ''} id="source">
+                      <SelectValue placeholder="Sélectionner une source" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {leadSources.map((source) => (
+                        <SelectItem key={source} value={source}>
+                          {source}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <TeamMemberSelect 

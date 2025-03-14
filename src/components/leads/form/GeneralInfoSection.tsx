@@ -1,21 +1,19 @@
 
 import React from 'react';
-import { User, Mail, Phone, MapPin, Tag, Clipboard, Globe } from 'lucide-react';
-import { LeadDetailed, LeadSource, Country } from '@/types/lead';
+import { User, Mail, Phone, MapPin, Clipboard, Globe } from 'lucide-react';
+import { LeadDetailed, Country } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  leadSources: LeadSource[];
   countries: Country[];
 }
 
 const GeneralInfoSection = ({ 
   formData, 
-  handleInputChange, 
-  leadSources,
+  handleInputChange,
   countries 
 }: GeneralInfoSectionProps) => {
   return (
@@ -54,17 +52,6 @@ const GeneralInfoSection = ({
         value={formData.location || ''}
         onChange={handleInputChange}
         icon={MapPin}
-      />
-
-      <FormInput
-        label="Source du lead"
-        name="source"
-        type="select"
-        value={formData.source || ''}
-        onChange={handleInputChange}
-        icon={Tag}
-        options={leadSources.map(source => ({ value: source, label: source }))}
-        placeholder="Sélectionner une source"
       />
 
       <FormInput
