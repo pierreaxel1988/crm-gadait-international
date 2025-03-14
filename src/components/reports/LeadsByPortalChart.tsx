@@ -21,7 +21,7 @@ const LeadsByPortalChart = ({ period }: LeadsByPortalChartProps) => {
       { name: 'Le Figaro', value: 22 },
       { name: 'Properstar', value: 18 },
       { name: 'Property Cloud', value: 15 },
-      { name: 'L\'express Property', value: 17 },
+      { name: "L'express Property", value: 17 },
     ];
   }, [period]);
   

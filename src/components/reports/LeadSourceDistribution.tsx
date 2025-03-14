@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Sector } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -16,7 +15,7 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
   const data = isLeadSources ? [
     { name: 'Site web', value: 30 },
     { name: 'Réseaux sociaux', value: 15 },
-    { name: 'Portails immobiliers', value: 20 },
+    { name: 'Portails immobiliers', value: 45 },
     { name: 'Network', value: 10 },
     { name: 'Repeaters', value: 8 },
     { name: 'Recommandations', value: 12 },

@@ -40,6 +40,37 @@ const StatusSection = ({
     "L'express Property"
   ];
 
+  // Regroupement des sources de portail immobilier pour l'affichage
+  const isPortalSource = (source: string): boolean => {
+    return [
+      "Idealista",
+      "Le Figaro",
+      "Properstar",
+      "Property Cloud",
+      "L'express Property"
+    ].includes(source);
+  };
+
+  // Fonction pour obtenir la source parent (pour les statistiques)
+  const getParentSource = (source: string): string => {
+    if (isPortalSource(source)) {
+      return "Portails immobiliers";
+    }
+    return source;
+  };
+
+  // Traitement de la valeur de source pour les statistiques
+  const handleSourceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+    // La source originale est sauvegardée telle quelle
+    handleInputChange(e);
+    
+    // Dans une application réelle, vous pourriez ici enregistrer 
+    // l'information de catégorisation dans un champ séparé ou via une logique côté serveur
+    console.log(`Source sélectionnée: ${value}, Catégorie parent: ${getParentSource(value)}`);
+  };
+
   return (
     <FormSection title="Statut et Suivi">
       <FormInput
@@ -58,7 +89,7 @@ const StatusSection = ({
         name="source"
         type="select"
         value={formData.source || ''}
-        onChange={handleInputChange}
+        onChange={handleSourceChange}
         icon={Tag}
         options={leadSources.map(source => ({ value: source, label: source }))}
         placeholder="Sélectionner une source"
