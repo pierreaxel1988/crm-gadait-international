@@ -1,18 +1,30 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { Upload } from 'lucide-react';
 import StatsSection from '@/components/dashboard/StatsSection';
 import ActivitySection from '@/components/dashboard/ActivitySection';
 import ImportedLeadsSection from '@/components/dashboard/ImportedLeadsSection';
 import { useAuth } from '@/hooks/useAuth';
+import CustomButton from '@/components/ui/CustomButton';
 
 const Index = () => {
   const { user } = useAuth();
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-semibold text-loro-navy">Tableau de bord</h1>
-        <p className="text-loro-hazel">Bienvenue dans votre espace de gestion immobilière de luxe</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-semibold text-loro-navy">Tableau de bord</h1>
+          <p className="text-loro-hazel">Bienvenue dans votre espace de gestion immobilière de luxe</p>
+        </div>
+        
+        <Link to="/lead-import">
+          <CustomButton className="flex items-center gap-2 bg-loro-navy hover:bg-loro-navy/90">
+            <Upload size={18} />
+            <span>Importer des leads</span>
+          </CustomButton>
+        </Link>
       </div>
       
       <StatsSection />

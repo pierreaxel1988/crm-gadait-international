@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import CustomButton from '@/components/ui/CustomButton';
 import { createClient } from '@supabase/supabase-js';
 
@@ -37,10 +37,9 @@ const LeadImportForm = () => {
       setIsLoading(true);
       
       // Show loading toast
-      toast({
-        title: "Importation en cours...",
-        description: "Analyse et importation des leads...",
-      });
+      toast.loading("Analyse et importation des leads...");
+      
+      console.log("Submitting lead import data:", data);
       
       // Call the Supabase edge function
       const { data: functionData, error: functionError } = await supabase.functions.invoke('import-lead', {
@@ -50,22 +49,16 @@ const LeadImportForm = () => {
         },
       });
       
+      console.log("Supabase response:", { functionData, functionError });
+      
       if (functionError) {
         console.error('Error importing lead:', functionError);
-        toast({
-          variant: "destructive",
-          title: "Erreur d'importation",
-          description: `Une erreur est survenue: ${functionError.message || 'Erreur inconnue'}`,
-        });
+        toast.error(`Une erreur est survenue: ${functionError.message || 'Erreur inconnue'}`);
         return;
       }
       
       if (!functionData?.success) {
-        toast({
-          variant: "destructive",
-          title: "Échec de l'importation",
-          description: functionData?.error || "Impossible d'importer le lead. Vérifiez le format de l'email.",
-        });
+        toast.error(functionData?.error || "Impossible d'importer le lead. Vérifiez le format de l'email.");
         return;
       }
       
@@ -73,19 +66,14 @@ const LeadImportForm = () => {
       form.reset();
       
       // Display success message
-      toast({
-        title: functionData.isNew ? "Nouveau lead créé!" : "Lead mis à jour!",
-        description: `Le lead ${functionData.data?.name || ''} a été ${functionData.isNew ? 'créé' : 'mis à jour'} avec succès.`,
-        variant: "default",
-      });
+      toast.success(
+        functionData.isNew ? "Nouveau lead créé!" : "Lead mis à jour!",
+        { description: `Le lead ${functionData.data?.name || ''} a été ${functionData.isNew ? 'créé' : 'mis à jour'} avec succès.` }
+      );
       
     } catch (error: any) {
       console.error('Error in lead import:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur d'importation",
-        description: `Une erreur est survenue: ${error.message || 'Erreur inconnue'}`,
-      });
+      toast.error(`Une erreur est survenue: ${error.message || 'Erreur inconnue'}`);
     } finally {
       setIsLoading(false);
     }

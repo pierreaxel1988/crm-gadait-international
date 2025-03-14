@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from '@/components/ui/use-toast';
+import { Toaster } from 'sonner';
 import CustomButton from '@/components/ui/CustomButton';
 import LeadApiGuide from '@/components/leads/LeadApiGuide';
 import LeadImportForm from '@/components/leads/LeadImportForm';
@@ -17,6 +17,9 @@ const LeadImport = () => {
 
   return (
     <div className="p-3 md:p-6 space-y-4 md:space-y-6">
+      {/* Toaster for notifications */}
+      <Toaster position="top-right" richColors />
+      
       {/* Header with back button - adjusted for mobile */}
       <div className="flex items-center gap-2">
         <CustomButton 
