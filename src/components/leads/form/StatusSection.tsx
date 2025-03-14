@@ -1,12 +1,13 @@
 
 import React from 'react';
-import { CalendarClock, CalendarDays, UserCircle, Activity } from 'lucide-react';
+import { CalendarClock, CalendarDays, Activity } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
 import MultiSelectButtons from './MultiSelectButtons';
+import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 
 interface StatusSectionProps {
   formData: LeadDetailed;
@@ -55,8 +56,21 @@ const StatusSection = ({
         label="Responsable du suivi"
         name="assignedTo"
         value={formData.assignedTo || ''}
-        onChange={handleInputChange}
-        icon={UserCircle}
+        onChange={() => {}}
+        renderCustomField={() => (
+          <TeamMemberSelect
+            value={formData.assignedTo}
+            onChange={(value) => {
+              const event = {
+                target: {
+                  name: 'assignedTo',
+                  value: value || ''
+                }
+              } as React.ChangeEvent<HTMLInputElement>;
+              handleInputChange(event);
+            }}
+          />
+        )}
       />
 
       <FormInput
