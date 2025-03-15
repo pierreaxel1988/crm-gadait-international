@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   MessageSquare, 
@@ -360,25 +361,25 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
                 Collez le contenu d'un email pour extraire automatiquement les informations du lead.
               </p>
               <Textarea
-                className="w-full border-loro-sand focus-visible:ring-loro-navy"
+                className="w-full border-loro-sand focus-visible:ring-loro-navy mb-4"
                 placeholder="Collez le contenu de l'email ici..."
                 rows={8}
                 value={emailContent}
                 onChange={(e) => setEmailContent(e.target.value)}
               />
-              <div className="flex gap-2 mt-3">
-                <Button 
-                  className="flex-1 bg-loro-hazel hover:bg-loro-hazel/90 text-white font-medium"
-                  onClick={extractEmailData}
-                  disabled={isLoading || !emailContent.trim()}
-                >
-                  {isLoading ? 
-                    <Loader className="h-4 w-4 animate-spin mr-2" /> : 
-                    <FileText className="h-4 w-4 mr-2" />
-                  }
-                  Valider et extraire les données
-                </Button>
-              </div>
+              
+              {/* Updated more prominent validation button */}
+              <Button 
+                className="w-full py-3 bg-loro-hazel hover:bg-loro-hazel/90 text-white font-medium text-base"
+                onClick={extractEmailData}
+                disabled={isLoading || !emailContent.trim()}
+              >
+                {isLoading ? 
+                  <Loader className="h-5 w-5 animate-spin mr-2" /> : 
+                  <FileText className="h-5 w-5 mr-2" />
+                }
+                Valider et extraire les données
+              </Button>
             </div>
             
             {extractedData && (
