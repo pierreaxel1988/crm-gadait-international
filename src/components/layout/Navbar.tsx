@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import ChatGadaitButton from '@/components/chat/ChatGadaitButton';
 
 interface NavbarProps {
   toggleSidebar?: () => void;
@@ -61,6 +62,8 @@ const Navbar = ({
             <button onClick={toggleDarkMode} className="rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
+
+            <ChatGadaitButton />
 
             <button className="relative rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
               <Bell size={20} />

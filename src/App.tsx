@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -21,6 +20,7 @@ import Sidebar from "./components/layout/Sidebar";
 import { useIsMobile } from "./hooks/use-mobile";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import LeadImport from "./pages/LeadImport";
+import ChatGadaitPage from '@/pages/ChatGadaitPage';
 
 const queryClient = new QueryClient();
 
@@ -79,6 +79,7 @@ const AppRoutes = () => {
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="/api" element={<ProtectedRoute><ApiGuide /></ProtectedRoute>} />
             <Route path="/lead-import" element={<ProtectedRoute><LeadImport /></ProtectedRoute>} />
+            <Route path="/chat-gadait" element={<ChatGadaitPage />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -58,10 +57,14 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
       name: 'Settings',
       path: '/settings',
     },
+    {
+      title: "Chat Gadait",
+      icon: MessageSquare,
+      href: "/chat-gadait",
+      color: "text-emerald-600",
+    },
   ];
 
-  // Pour mobile: sidebar est soit entièrement visible soit cachée
-  // Pour desktop: sidebar est un élément permanent qui glisse depuis la gauche
   const sidebarClasses = cn(
     'fixed inset-y-0 left-0 z-40 bg-loro-white transform transition-all duration-300 ease-in-out w-80',
     isOpen ? 'translate-x-0' : '-translate-x-full'
