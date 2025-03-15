@@ -5,19 +5,14 @@ import ReportsHeader from '@/components/reports/ReportsHeader';
 import PerformanceTabContent from '@/components/reports/PerformanceTabContent';
 import LeadsTabContent from '@/components/reports/LeadsTabContent';
 import ConversionTabContent from '@/components/reports/ConversionTabContent';
-
-// Import the correct Period type from PeriodSelector
-export type Period = 'week' | 'month' | 'quarter' | 'year';
+import { Period } from '@/components/reports/PeriodSelector';
 
 const Reports = () => {
   const [period, setPeriod] = useState<Period>('month');
   
   return (
     <div className="p-4 lg:p-8 space-y-6 max-w-[1920px] mx-auto">
-      <ReportsHeader 
-        period={period} 
-        setPeriod={(value: Period) => setPeriod(value)} 
-      />
+      <ReportsHeader period={period} setPeriod={setPeriod} />
       
       <Tabs defaultValue="performance" className="w-full">
         <TabsList className="mb-6 flex flex-wrap">
