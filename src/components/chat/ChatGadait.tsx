@@ -18,6 +18,9 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LeadDetailed } from '@/types/lead';
 import { createLead } from '@/services/leadService';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useIsMobile } from '@/hooks/use-mobile';
 import StatusBadge from '@/components/common/StatusBadge';
 import TagBadge from '@/components/common/TagBadge';
 
@@ -43,6 +46,7 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
   const [propertyUrl, setPropertyUrl] = useState('');
   const [extractedData, setExtractedData] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   // Add welcome message when component mounts
   useEffect(() => {
@@ -253,36 +257,57 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
-      <div className="bg-white dark:bg-gray-950 w-full max-w-md flex flex-col h-full shadow-xl">
-        <div className="flex items-center justify-between p-4 border-b">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-end animate-fade-in">
+      <div 
+        className={`bg-loro-white w-full ${isMobile ? 'max-w-full' : 'max-w-md'} flex flex-col h-full shadow-luxury transition-all duration-300`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-loro-sand">
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-loro-navy" />
-            <h2 className="font-semibold text-lg">Chat Gadait</h2>
+            <MessageSquare className="h-6 w-6 text-loro-hazel" />
+            <h2 className="font-timesNowSemi text-xl text-loro-navy">Chat Gadait</h2>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClose}
+            className="hover:bg-loro-pearl rounded-full h-8 w-8"
+          >
+            <X className="h-5 w-5 text-loro-navy" />
           </Button>
         </div>
         
+        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid grid-cols-3 m-4">
-            <TabsTrigger value="chat">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Chat
-            </TabsTrigger>
-            <TabsTrigger value="email">
-              <Mail className="h-4 w-4 mr-2" />
-              Email
-            </TabsTrigger>
-            <TabsTrigger value="property">
-              <Home className="h-4 w-4 mr-2" />
-              Propriété
-            </TabsTrigger>
-          </TabsList>
+          <div className="bg-loro-pearl/50 p-2">
+            <TabsList className="grid grid-cols-3 w-full bg-loro-white border border-loro-sand">
+              <TabsTrigger 
+                value="chat" 
+                className="data-[state=active]:bg-loro-sand/20 data-[state=active]:text-loro-navy"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Chat
+              </TabsTrigger>
+              <TabsTrigger 
+                value="email"
+                className="data-[state=active]:bg-loro-sand/20 data-[state=active]:text-loro-navy"
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                Email
+              </TabsTrigger>
+              <TabsTrigger 
+                value="property"
+                className="data-[state=active]:bg-loro-sand/20 data-[state=active]:text-loro-navy"
+              >
+                <Home className="h-4 w-4 mr-2" />
+                Propriété
+              </TabsTrigger>
+            </TabsList>
+          </div>
           
+          {/* Chat Tab */}
           <TabsContent value="chat" className="flex-1 flex flex-col p-4 overflow-hidden">
-            <div className="flex-1 overflow-y-auto mb-4">
+            <div className="flex-1 overflow-y-auto mb-4 px-2">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
@@ -293,8 +318,8 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
                   <div
                     className={`p-3 rounded-lg ${
                       msg.role === 'user'
-                        ? 'bg-loro-navy text-white'
-                        : 'bg-gray-100 dark:bg-gray-800'
+                        ? 'bg-loro-hazel text-white'
+                        : 'bg-loro-pearl text-loro-navy'
                     }`}
                   >
                     {msg.content}
@@ -314,9 +339,10 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
               <div ref={messagesEndRef} />
             </div>
             
-            <div className="flex items-center">
-              <textarea
-                className="flex-1 border rounded-l-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-loro-navy resize-none"
+            {/* Message Input */}
+            <div className="relative border border-loro-sand rounded-md overflow-hidden">
+              <Textarea
+                className="resize-none pr-12 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[60px]"
                 placeholder="Posez votre question..."
                 rows={2}
                 value={input}
@@ -325,54 +351,62 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
                 disabled={isLoading}
               />
               <Button
-                className="rounded-l-none"
+                size="icon"
+                className={`absolute right-2 bottom-2 rounded-full h-8 w-8 ${input.trim() ? 'bg-loro-hazel hover:bg-loro-hazel/90' : 'bg-loro-sand/50'}`}
                 onClick={handleSendMessage}
                 disabled={isLoading || !input.trim()}
               >
-                {isLoading ? <Loader className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                {isLoading ? 
+                  <Loader className="h-4 w-4 animate-spin" /> : 
+                  <Send className="h-4 w-4" />
+                }
               </Button>
             </div>
           </TabsContent>
           
+          {/* Email Tab */}
           <TabsContent value="email" className="flex-1 flex flex-col p-4 overflow-hidden">
             <div className="mb-4">
-              <h3 className="font-medium mb-2">Extraction d'email</h3>
-              <p className="text-sm text-gray-500 mb-2">
+              <h3 className="font-timesNowSemi text-lg mb-2 text-loro-navy">Extraction d'email</h3>
+              <p className="text-sm text-loro-hazel mb-3">
                 Collez le contenu d'un email pour extraire automatiquement les informations du lead.
               </p>
-              <textarea
-                className="w-full border rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-loro-navy resize-none"
+              <Textarea
+                className="w-full border-loro-sand focus-visible:ring-loro-navy"
                 placeholder="Collez le contenu de l'email ici..."
                 rows={8}
                 value={emailContent}
                 onChange={(e) => setEmailContent(e.target.value)}
               />
               <Button 
-                className="mt-2 w-full"
+                className="mt-3 w-full bg-loro-hazel hover:bg-loro-hazel/90"
                 onClick={extractEmailData}
                 disabled={isLoading || !emailContent.trim()}
               >
-                {isLoading ? <Loader className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
+                {isLoading ? 
+                  <Loader className="h-4 w-4 animate-spin mr-2" /> : 
+                  <FileText className="h-4 w-4 mr-2" />
+                }
                 Extraire les données
               </Button>
             </div>
             
             {extractedData && (
-              <div className="border rounded-md p-3 mt-2 bg-gray-50 dark:bg-gray-800">
-                <h4 className="font-medium mb-2 flex items-center justify-between">
+              <div className="border border-loro-sand rounded-md p-4 mt-2 bg-loro-pearl/30">
+                <h4 className="font-timesNowSemi text-lg mb-3 flex items-center justify-between text-loro-navy">
                   Données extraites
                   <ChevronDown className="h-4 w-4" />
                 </h4>
                 <div className="space-y-2 text-sm">
                   {Object.entries(extractedData).map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <span className="font-medium">{key}:</span>
-                      <span className="text-gray-600 dark:text-gray-300">{String(value)}</span>
+                    <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                      <span className="font-medium text-loro-navy">{key}:</span>
+                      <span className="text-loro-hazel">{String(value)}</span>
                     </div>
                   ))}
                 </div>
                 <Button 
-                  className="mt-3 w-full" 
+                  className="mt-4 w-full bg-loro-navy hover:bg-loro-navy/90" 
                   variant="default"
                   onClick={createLeadFromData}
                 >
@@ -383,44 +417,49 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
             )}
           </TabsContent>
           
+          {/* Property Tab */}
           <TabsContent value="property" className="flex-1 flex flex-col p-4 overflow-hidden">
             <div className="mb-4">
-              <h3 className="font-medium mb-2">Extraction de propriété</h3>
-              <p className="text-sm text-gray-500 mb-2">
+              <h3 className="font-timesNowSemi text-lg mb-2 text-loro-navy">Extraction de propriété</h3>
+              <p className="text-sm text-loro-hazel mb-3">
                 Entrez l'URL d'une propriété pour extraire automatiquement ses informations.
               </p>
-              <input
-                type="text"
-                className="w-full border rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-loro-navy"
-                placeholder="https://www.exemple-immobilier.com/propriete/123"
-                value={propertyUrl}
-                onChange={(e) => setPropertyUrl(e.target.value)}
-              />
-              <Button 
-                className="mt-2 w-full"
-                onClick={extractPropertyData}
-                disabled={isLoading || !propertyUrl.trim()}
-              >
-                {isLoading ? <Loader className="h-4 w-4 animate-spin mr-2" /> : <Home className="h-4 w-4 mr-2" />}
-                Extraire les données
-              </Button>
+              <div className="relative">
+                <Input
+                  type="text"
+                  className="w-full border-loro-sand focus-visible:ring-loro-navy pr-14"
+                  placeholder="https://www.exemple-immobilier.com/propriete/123"
+                  value={propertyUrl}
+                  onChange={(e) => setPropertyUrl(e.target.value)}
+                />
+                <Button 
+                  className="absolute right-0 top-0 h-full px-3 bg-loro-hazel hover:bg-loro-hazel/90"
+                  onClick={extractPropertyData}
+                  disabled={isLoading || !propertyUrl.trim()}
+                >
+                  {isLoading ? 
+                    <Loader className="h-4 w-4 animate-spin" /> : 
+                    <ArrowRight className="h-4 w-4" />
+                  }
+                </Button>
+              </div>
             </div>
             
             {extractedData && (
-              <div className="border rounded-md p-3 mt-2 bg-gray-50 dark:bg-gray-800">
-                <h4 className="font-medium mb-2 flex items-center justify-between">
+              <div className="border border-loro-sand rounded-md p-4 mt-2 bg-loro-pearl/30">
+                <h4 className="font-timesNowSemi text-lg mb-3 flex items-center justify-between text-loro-navy">
                   Données extraites
                   <ChevronDown className="h-4 w-4" />
                 </h4>
                 <div className="space-y-2 text-sm">
                   {Object.entries(extractedData).map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <span className="font-medium">{key}:</span>
-                      <span className="text-gray-600 dark:text-gray-300">{String(value)}</span>
+                    <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                      <span className="font-medium text-loro-navy">{key}:</span>
+                      <span className="text-loro-hazel">{String(value)}</span>
                     </div>
                   ))}
                 </div>
-                <Button className="mt-3 w-full" variant="outline">
+                <Button className="mt-4 w-full bg-loro-navy hover:bg-loro-navy/90">
                   <ArrowRight className="h-4 w-4 mr-2" />
                   Utiliser ces données
                 </Button>

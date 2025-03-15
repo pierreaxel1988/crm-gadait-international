@@ -7,7 +7,7 @@ const ChatGadaitPage = () => {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-semibold text-loro-navy flex items-center gap-2">
+        <h1 className="text-2xl md:text-3xl font-timesNowSemi text-loro-navy flex items-center gap-2">
           <MessageSquare className="h-6 w-6" />
           Chat Gadait
         </h1>
