@@ -4,6 +4,7 @@ import { ArrowDownUp } from 'lucide-react';
 import DashboardCard from '@/components/dashboard/DashboardCard';
 import ConversionRateCard from '@/components/reports/ConversionRateCard';
 import SalesPerformanceChart from '@/components/reports/SalesPerformanceChart';
+import LeadSourceDistribution from '@/components/reports/LeadSourceDistribution';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const ConversionTabContent: React.FC = () => {
@@ -58,6 +59,30 @@ const ConversionTabContent: React.FC = () => {
           />
         </div>
       </DashboardCard>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <DashboardCard 
+          title="Distribution des sources de leads" 
+          subtitle="Répartition par canal d'acquisition" 
+          icon={<ArrowDownUp className="h-5 w-5" />}
+          className="h-[400px]"
+        >
+          <div className="h-full w-full pt-4">
+            <LeadSourceDistribution isLeadSources={true} />
+          </div>
+        </DashboardCard>
+        
+        <DashboardCard 
+          title="Distribution des types de biens" 
+          subtitle="Répartition par type de propriété recherchée" 
+          icon={<ArrowDownUp className="h-5 w-5" />}
+          className="h-[400px]"
+        >
+          <div className="h-full w-full pt-4">
+            <LeadSourceDistribution />
+          </div>
+        </DashboardCard>
+      </div>
     </div>
   );
 };
