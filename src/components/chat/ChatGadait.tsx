@@ -18,6 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LeadDetailed } from '@/types/lead';
 import { createLead } from '@/services/leadService';
+import StatusBadge from '@/components/common/StatusBadge';
+import TagBadge from '@/components/common/TagBadge';
 
 interface Message {
   id: string;
@@ -212,7 +214,9 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
     if (!extractedData) return;
     
     try {
-      const newLead: Partial<LeadDetailed> = {
+      // Here we need to properly map the extracted data to our Lead type
+      // and make sure we use the correct status values from our LeadStatus type
+      const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
         name: extractedData.Name || extractedData.name || "",
         email: extractedData.Email || extractedData.email || "",
         phone: extractedData.Phone || extractedData.phone || "",
@@ -222,9 +226,8 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
         desiredLocation: extractedData.desired_location || extractedData["Desired location"] || "",
         propertyType: extractedData.property_type || extractedData["Property type"] || "",
         notes: emailContent || "",
-        status: "Nouveau",
-        tags: ["AI Generated"],
-        createdAt: new Date().toISOString(),
+        status: "New", // Using a valid LeadStatus value
+        tags: ["Imported"], // Using a valid LeadTag value
       };
       
       createLead(newLead);

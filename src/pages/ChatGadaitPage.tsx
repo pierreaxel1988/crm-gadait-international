@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { MessageSquare } from 'lucide-react';
 import ChatGadait from '@/components/chat/ChatGadait';
 
