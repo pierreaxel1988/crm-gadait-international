@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Sector } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -11,24 +12,24 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
   const isMobile = useIsMobile();
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
   
-  // Données mockées pour la distribution des sources/types
+  // Données mockées pour la distribution des sources/types avec les nombres absolus
   const data = isLeadSources ? [
-    { name: 'Site web', value: 30 },
-    { name: 'Réseaux sociaux', value: 15 },
-    { name: 'Portails immobiliers', value: 45 },
-    { name: 'Network', value: 10 },
-    { name: 'Repeaters', value: 8 },
-    { name: 'Recommandations', value: 12 },
-    { name: "Apporteur d'affaire", value: 5 },
+    { name: 'Site web', value: 30, count: 148 },
+    { name: 'Réseaux sociaux', value: 15, count: 74 },
+    { name: 'Portails immobiliers', value: 45, count: 221 },
+    { name: 'Network', value: 10, count: 49 },
+    { name: 'Repeaters', value: 8, count: 39 },
+    { name: 'Recommandations', value: 12, count: 59 },
+    { name: "Apporteur d'affaire", value: 5, count: 25 },
   ] : [
-    { name: 'Villa', value: 25 },
-    { name: 'Appartement', value: 20 },
-    { name: 'Penthouse', value: 10 },
-    { name: 'Terrain', value: 10 },
-    { name: 'Commercial', value: 15 },
-    { name: 'Hotel', value: 10 },
-    { name: 'Vignoble', value: 5 },
-    { name: 'Autres', value: 5 },
+    { name: 'Villa', value: 25, count: 136 },
+    { name: 'Appartement', value: 20, count: 109 },
+    { name: 'Penthouse', value: 10, count: 54 },
+    { name: 'Terrain', value: 10, count: 54 },
+    { name: 'Commercial', value: 15, count: 82 },
+    { name: 'Hotel', value: 10, count: 54 },
+    { name: 'Vignoble', value: 5, count: 27 },
+    { name: 'Autres', value: 5, count: 27 },
   ];
   
   // Custom color palette with more elegant, sophisticated colors
@@ -91,7 +92,9 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
       return (
         <div className="bg-white dark:bg-slate-800 p-3 rounded-md shadow-md border dark:border-slate-700 text-left">
           <p className="font-medium text-foreground">{payload[0].name}</p>
-          <p className="text-sm text-muted-foreground">{`${payload[0].value}%`}</p>
+          <p className="text-sm text-muted-foreground">
+            {`${payload[0].payload.count} leads (${Math.round(payload[0].payload.percent * 100)}%)`}
+          </p>
         </div>
       );
     }
@@ -140,8 +143,10 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
             iconType="circle"
             iconSize={10}
             wrapperStyle={{ paddingTop: 30 }}
-            formatter={(value: string) => (
-              <span className="text-sm text-foreground font-medium">{value}</span>
+            formatter={(value: string, entry: any) => (
+              <span className="text-sm text-foreground font-medium">
+                {`${value} (${entry.payload.count})`}
+              </span>
             )}
           />
         </PieChart>

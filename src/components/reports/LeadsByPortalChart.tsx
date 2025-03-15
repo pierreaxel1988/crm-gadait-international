@@ -12,16 +12,16 @@ const LeadsByPortalChart = ({ period }: LeadsByPortalChartProps) => {
   const isMobile = useIsMobile();
   const [activeIndex, setActiveIndex] = React.useState<number | undefined>(undefined);
   
-  // Données mockées pour les leads par portail immobilier
+  // Données mockées pour les leads par portail immobilier avec nombres absolus
   const data = useMemo(() => {
     // Dans une vraie application, ces données viendraient de l'API
     // en fonction de la période sélectionnée
     return [
-      { name: 'Idealista', value: 28 },
-      { name: 'Le Figaro', value: 22 },
-      { name: 'Properstar', value: 18 },
-      { name: 'Property Cloud', value: 15 },
-      { name: "L'express Property", value: 17 },
+      { name: 'Idealista', value: 28, count: 62 },
+      { name: 'Le Figaro', value: 22, count: 49 },
+      { name: 'Properstar', value: 18, count: 40 },
+      { name: 'Property Cloud', value: 15, count: 33 },
+      { name: "L'express Property", value: 17, count: 37 },
     ];
   }, [period]);
   
@@ -83,7 +83,9 @@ const LeadsByPortalChart = ({ period }: LeadsByPortalChartProps) => {
       return (
         <div className="bg-white dark:bg-slate-800 p-3 rounded-md shadow-md border dark:border-slate-700 text-left">
           <p className="font-medium text-foreground">{payload[0].name}</p>
-          <p className="text-sm text-muted-foreground">{`${payload[0].value} leads (${Math.round(payload[0].payload.percent * 100)}%)`}</p>
+          <p className="text-sm text-muted-foreground">
+            {`${payload[0].payload.count} leads (${Math.round(payload[0].payload.percent * 100)}%)`}
+          </p>
         </div>
       );
     }
@@ -132,8 +134,10 @@ const LeadsByPortalChart = ({ period }: LeadsByPortalChartProps) => {
             iconType="circle"
             iconSize={10}
             wrapperStyle={{ paddingTop: 30 }}
-            formatter={(value: string) => (
-              <span className="text-sm text-foreground font-medium">{value}</span>
+            formatter={(value: string, entry: any) => (
+              <span className="text-sm text-foreground font-medium">
+                {`${value} (${entry.payload.count})`}
+              </span>
             )}
           />
         </PieChart>
