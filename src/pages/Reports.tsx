@@ -22,11 +22,11 @@ const Reports = () => {
         </TabsList>
         
         <TabsContent value="performance">
-          <PerformanceTabContent period={period} />
+          <PerformanceTabContent />
         </TabsContent>
         
         <TabsContent value="leads">
-          <LeadsTabContent period={period} />
+          <LeadsTabContent />
         </TabsContent>
         
         <TabsContent value="conversion">

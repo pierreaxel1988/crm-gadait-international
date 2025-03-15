@@ -8,8 +8,9 @@ import { DateRangePicker } from './DateRangePicker';
 import { Separator } from "@/components/ui/separator";
 
 export type PeriodType = 'semaine' | 'mois' | 'annee' | 'custom';
+export type Period = 'week' | 'month' | 'quarter' | 'year';
 
-export interface Period {
+export interface PeriodObject {
   type: PeriodType;
   dateRange?: {
     from: Date | undefined;
@@ -18,8 +19,8 @@ export interface Period {
 }
 
 interface PeriodSelectorProps {
-  period: Period;
-  setPeriod: (period: Period) => void;
+  period: PeriodObject;
+  setPeriod: (period: PeriodObject) => void;
 }
 
 const PeriodSelector = ({ period, setPeriod }: PeriodSelectorProps) => {
