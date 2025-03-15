@@ -93,9 +93,9 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
           <nav className="flex-1 px-10 py-16">
             <ul className="space-y-7">
               {navigationItems.map((item) => (
-                <li key={item.name}>
+                <li key={item.name || item.title}>
                   <NavLink
-                    to={item.path}
+                    to={item.path || item.href || '#'}
                     className={({ isActive }) =>
                       cn(
                         'block transition-all duration-200 text-base leading-[22px] flex items-center',
@@ -110,7 +110,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
                     onClick={isMobile ? onClose : undefined}
                   >
                     {item.icon && <item.icon className="mr-2 h-5 w-5" />}
-                    {item.name}
+                    {item.name || item.title}
                   </NavLink>
                 </li>
               ))}
