@@ -5,9 +5,10 @@ import ReportsHeader from '@/components/reports/ReportsHeader';
 import PerformanceTabContent from '@/components/reports/PerformanceTabContent';
 import LeadsTabContent from '@/components/reports/LeadsTabContent';
 import ConversionTabContent from '@/components/reports/ConversionTabContent';
+import { Period } from '@/components/reports/PeriodSelector';
 
 const Reports = () => {
-  const [period, setPeriod] = useState<string>('month');
+  const [period, setPeriod] = useState<Period>('month');
   
   return (
     <div className="p-4 lg:p-8 space-y-6 max-w-[1920px] mx-auto">
@@ -21,15 +22,15 @@ const Reports = () => {
         </TabsList>
         
         <TabsContent value="performance">
-          <PerformanceTabContent />
+          <PerformanceTabContent period={period} />
         </TabsContent>
         
         <TabsContent value="leads">
-          <LeadsTabContent />
+          <LeadsTabContent period={period} />
         </TabsContent>
         
         <TabsContent value="conversion">
-          <ConversionTabContent />
+          <ConversionTabContent period={period} />
         </TabsContent>
       </Tabs>
     </div>

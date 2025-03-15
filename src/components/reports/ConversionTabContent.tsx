@@ -5,42 +5,55 @@ import DashboardCard from '@/components/dashboard/DashboardCard';
 import ConversionRateCard from '@/components/reports/ConversionRateCard';
 import SalesPerformanceChart from '@/components/reports/SalesPerformanceChart';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Period } from './PeriodSelector';
 
-const ConversionTabContent: React.FC = () => {
+interface ConversionTabContentProps {
+  period?: Period;
+}
+
+const ConversionTabContent: React.FC<ConversionTabContentProps> = ({ period = 'month' }) => {
   const isMobile = useIsMobile();
   
-  // Données du parcours de conversion avec les nouvelles étapes
-  const conversionData = [
-    { name: 'Nouveaux', total: 180 },
-    { name: 'Contactés', total: 150 },
-    { name: 'Qualifiés', total: 120 },
-    { name: 'Propositions', total: 100 },
-    { name: 'Visites en cours', total: 80 },
-    { name: 'Offre en cours', total: 60 },
-    { name: 'Dépôt reçu', total: 40 },
-    { name: 'Signature finale', total: 30 },
-    { name: 'Conclus', total: 25 }
-  ];
+  // Données du parcours de conversion avec valeurs précises
+  const conversionData = React.useMemo(() => {
+    // Dans une application réelle, ces données seraient chargées depuis une API
+    // en fonction de la période sélectionnée
+    return [
+      { name: 'Nouveaux', total: 180, status: 'New' },
+      { name: 'Contactés', total: 153, status: 'Contacted' },
+      { name: 'Qualifiés', total: 120, status: 'Qualified' },
+      { name: 'Propositions', total: 98, status: 'Proposal' },
+      { name: 'Visites', total: 75, status: 'Visit' },
+      { name: 'Offres', total: 52, status: 'Offer' },
+      { name: 'Dépôt reçu', total: 38, status: 'Deposit' },
+      { name: 'Signés', total: 25, status: 'Signed' }
+    ];
+  }, [period]);
+
+  // Calcul des taux de conversion pour les cartes
+  const visitRate = Math.round((75 / 180) * 100); // Taux de visite
+  const offerRate = Math.round((52 / 75) * 100);  // Taux d'offre
+  const signatureRate = Math.round((25 / 38) * 100); // Taux de signature
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <ConversionRateCard 
           title="Taux de visite" 
-          value="38%" 
-          change={15} 
+          value={`${visitRate}%`} 
+          change={4} 
           period="vs dernier mois"
         />
         <ConversionRateCard 
           title="Taux d'offre" 
-          value="18%" 
-          change={-2} 
+          value={`${offerRate}%`} 
+          change={7} 
           period="vs dernier mois"
         />
         <ConversionRateCard 
           title="Taux de signature" 
-          value="72%" 
-          change={5} 
+          value={`${signatureRate}%`} 
+          change={-3} 
           period="vs dernier mois"
         />
       </div>
