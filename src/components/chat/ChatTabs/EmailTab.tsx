@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileText, Loader, MailPlus, ChevronDown } from 'lucide-react';
+import { FileText, Loader, MailPlus, ChevronDown, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -36,17 +36,19 @@ const EmailTab: React.FC<EmailTabProps> = ({
           onChange={(e) => setEmailContent(e.target.value)}
         />
         
-        <Button 
-          className="w-full py-8 text-xl font-bold bg-loro-hazel hover:bg-loro-hazel/90 text-white shadow-md my-6"
-          onClick={extractEmailData}
-          disabled={isLoading || !emailContent.trim()}
-        >
-          {isLoading ? 
-            <Loader className="h-6 w-6 animate-spin mr-3" /> : 
-            <FileText className="h-6 w-6 mr-3" />
-          }
-          Valider et extraire les données
-        </Button>
+        <div className="relative">
+          <Button 
+            className="w-full px-4 py-2 bg-loro-hazel hover:bg-loro-hazel/90 text-white"
+            onClick={extractEmailData}
+            disabled={isLoading || !emailContent.trim()}
+          >
+            {isLoading ? 
+              <Loader className="h-4 w-4 animate-spin mr-2" /> : 
+              <Send className="h-4 w-4 mr-2" />
+            }
+            Valider et extraire les données
+          </Button>
+        </div>
       </div>
       
       {extractedData && (
