@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   MessageSquare, 
@@ -48,7 +47,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
-  // Add welcome message when component mounts
   useEffect(() => {
     if (messages.length === 0) {
       setMessages([
@@ -62,7 +60,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
     }
   }, []);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -137,7 +134,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
         throw new Error(error.message);
       }
 
-      // Try to parse the response as JSON
       try {
         const jsonData = JSON.parse(data.response);
         setExtractedData(jsonData);
@@ -218,8 +214,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
     if (!extractedData) return;
     
     try {
-      // Here we need to properly map the extracted data to our Lead type
-      // and make sure we use the correct status values from our LeadStatus type
       const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
         name: extractedData.Name || extractedData.name || "",
         email: extractedData.Email || extractedData.email || "",
@@ -230,8 +224,8 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
         desiredLocation: extractedData.desired_location || extractedData["Desired location"] || "",
         propertyType: extractedData.property_type || extractedData["Property type"] || "",
         notes: emailContent || "",
-        status: "New", // Using a valid LeadStatus value
-        tags: ["Imported"], // Using a valid LeadTag value
+        status: "New",
+        tags: ["Imported"],
       };
       
       createLead(newLead);
@@ -241,7 +235,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
         description: `Le lead ${newLead.name} a été créé avec succès.`
       });
       
-      // Reset form
       setEmailContent("");
       setExtractedData(null);
     } catch (error) {
@@ -261,7 +254,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
       <div 
         className={`bg-loro-white w-full ${isMobile ? 'max-w-full' : 'max-w-md'} flex flex-col h-full shadow-luxury transition-all duration-300`}
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-loro-sand">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-6 w-6 text-loro-hazel" />
@@ -277,7 +269,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
           </Button>
         </div>
         
-        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
           <div className="bg-loro-pearl/50 p-2">
             <TabsList className="grid grid-cols-3 w-full bg-loro-white border border-loro-sand">
@@ -305,7 +296,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
             </TabsList>
           </div>
           
-          {/* Chat Tab */}
           <TabsContent value="chat" className="flex-1 flex flex-col p-4 overflow-hidden">
             <div className="flex-1 overflow-y-auto mb-4 px-2">
               {messages.map((msg) => (
@@ -339,7 +329,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
               <div ref={messagesEndRef} />
             </div>
             
-            {/* Message Input */}
             <div className="relative border border-loro-sand rounded-md overflow-hidden">
               <Textarea
                 className="resize-none pr-12 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[60px]"
@@ -364,7 +353,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
             </div>
           </TabsContent>
           
-          {/* Email Tab */}
           <TabsContent value="email" className="flex-1 flex flex-col p-4 overflow-hidden">
             <div className="mb-4">
               <h3 className="font-timesNowSemi text-lg mb-2 text-loro-navy">Extraction d'email</h3>
@@ -378,17 +366,19 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
                 value={emailContent}
                 onChange={(e) => setEmailContent(e.target.value)}
               />
-              <Button 
-                className="mt-3 w-full bg-loro-hazel hover:bg-loro-hazel/90"
-                onClick={extractEmailData}
-                disabled={isLoading || !emailContent.trim()}
-              >
-                {isLoading ? 
-                  <Loader className="h-4 w-4 animate-spin mr-2" /> : 
-                  <FileText className="h-4 w-4 mr-2" />
-                }
-                Extraire les données
-              </Button>
+              <div className="flex gap-2 mt-3">
+                <Button 
+                  className="flex-1 bg-loro-hazel hover:bg-loro-hazel/90 text-white font-medium"
+                  onClick={extractEmailData}
+                  disabled={isLoading || !emailContent.trim()}
+                >
+                  {isLoading ? 
+                    <Loader className="h-4 w-4 animate-spin mr-2" /> : 
+                    <FileText className="h-4 w-4 mr-2" />
+                  }
+                  Valider et extraire les données
+                </Button>
+              </div>
             </div>
             
             {extractedData && (
@@ -417,7 +407,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
             )}
           </TabsContent>
           
-          {/* Property Tab */}
           <TabsContent value="property" className="flex-1 flex flex-col p-4 overflow-hidden">
             <div className="mb-4">
               <h3 className="font-timesNowSemi text-lg mb-2 text-loro-navy">Extraction de propriété</h3>
