@@ -1,76 +1,95 @@
-
 import React from 'react';
-import { ArrowDownUp } from 'lucide-react';
-import DashboardCard from '@/components/dashboard/DashboardCard';
-import ConversionRateCard from '@/components/reports/ConversionRateCard';
-import SalesPerformanceChart from '@/components/reports/SalesPerformanceChart';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Period } from './PeriodSelector';
+import { Period } from '@/components/reports/PeriodSelector';
+import { Grid } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SalesPerformanceChart from './SalesPerformanceChart';
+import ConversionFunnelChart from './ConversionFunnelChart';
+import ConversionRateCard from './ConversionRateCard';
+import LeadSourceDistribution from './LeadSourceDistribution';
 
 interface ConversionTabContentProps {
-  period?: Period;
+  period: Period;
 }
 
-const ConversionTabContent: React.FC<ConversionTabContentProps> = ({ period = 'month' }) => {
-  const isMobile = useIsMobile();
-  
-  // Données du parcours de conversion avec valeurs précises
-  const conversionData = React.useMemo(() => {
-    // Dans une application réelle, ces données seraient chargées depuis une API
-    // en fonction de la période sélectionnée
-    return [
-      { name: 'Nouveaux', total: 180, status: 'New' },
-      { name: 'Contactés', total: 153, status: 'Contacted' },
-      { name: 'Qualifiés', total: 120, status: 'Qualified' },
-      { name: 'Propositions', total: 98, status: 'Proposal' },
-      { name: 'Visites', total: 75, status: 'Visit' },
-      { name: 'Offres', total: 52, status: 'Offer' },
-      { name: 'Dépôt reçu', total: 38, status: 'Deposit' },
-      { name: 'Signés', total: 25, status: 'Signed' }
-    ];
-  }, [period]);
-
-  // Calcul des taux de conversion pour les cartes
-  const visitRate = Math.round((75 / 180) * 100); // Taux de visite
-  const offerRate = Math.round((52 / 75) * 100);  // Taux d'offre
-  const signatureRate = Math.round((25 / 38) * 100); // Taux de signature
+const ConversionTabContent: React.FC<ConversionTabContentProps> = ({ period }) => {
+  const conversionFunnelData = [
+    { name: 'Nouveaux leads', total: 1240 },
+    { name: 'Contactés', total: 980 },
+    { name: 'Qualifiés', total: 620 },
+    { name: 'Visites', total: 410 },
+    { name: 'Offres', total: 180 },
+    { name: 'Réservations', total: 85 },
+    { name: 'Ventes', total: 62 },
+  ];
 
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 gap-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <ConversionRateCard 
-          title="Taux de visite" 
-          value={`${visitRate}%`} 
-          change={4} 
+          title="Taux de conversion" 
+          value="5.2%" 
+          change={0.8} 
           period="vs dernier mois"
         />
         <ConversionRateCard 
-          title="Taux d'offre" 
-          value={`${offerRate}%`} 
-          change={7} 
+          title="Délai moyen de conversion" 
+          value="42j" 
+          change={-5} 
           period="vs dernier mois"
+          inverse
         />
         <ConversionRateCard 
-          title="Taux de signature" 
-          value={`${signatureRate}%`} 
-          change={-3} 
+          title="Valeur moyenne" 
+          value="€485k" 
+          change={12} 
           period="vs dernier mois"
         />
       </div>
       
-      <DashboardCard 
-        title="Parcours de conversion" 
-        subtitle="Évolution du statut des leads dans le pipeline" 
-        icon={<ArrowDownUp className="h-5 w-5" />}
-        className={isMobile ? "h-[750px]" : "h-[500px]"}
-      >
-        <div className={`h-full w-full ${isMobile ? "pt-2" : "pt-6"}`}>
-          <SalesPerformanceChart 
-            data={conversionData} 
-            isConversionFunnel={true} 
-          />
-        </div>
-      </DashboardCard>
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl">Entonnoir de conversion</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[400px]">
+            <SalesPerformanceChart data={conversionFunnelData} isConversionFunnel />
+          </div>
+        </CardContent>
+      </Card>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xl">Conversion par source</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="rate" className="w-full">
+              <TabsList className="mb-4">
+                <TabsTrigger value="rate">Taux</TabsTrigger>
+                <TabsTrigger value="volume">Volume</TabsTrigger>
+              </TabsList>
+              <TabsContent value="rate" className="h-[300px]">
+                <LeadSourceDistribution isConversionRate />
+              </TabsContent>
+              <TabsContent value="volume" className="h-[300px]">
+                <LeadSourceDistribution />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xl">Conversion par étape</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ConversionFunnelChart />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

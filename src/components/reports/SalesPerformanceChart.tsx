@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   BarChart as RechartsBarChart,
@@ -13,7 +12,7 @@ import {
 } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { StatusBadge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 
 interface SalesPerformanceChartProps {
   data: {
