@@ -3,10 +3,11 @@ import React from 'react';
 import { CalendarRange, Download } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Period } from '@/pages/Reports';
 
 interface ReportsHeaderProps {
-  period: string;
-  setPeriod: (value: string) => void;
+  period: Period;
+  setPeriod: (value: Period) => void;
 }
 
 const ReportsHeader: React.FC<ReportsHeaderProps> = ({ period, setPeriod }) => {

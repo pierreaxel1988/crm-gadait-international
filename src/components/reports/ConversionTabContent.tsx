@@ -5,13 +5,13 @@ import DashboardCard from '@/components/dashboard/DashboardCard';
 import ConversionRateCard from '@/components/reports/ConversionRateCard';
 import SalesPerformanceChart from '@/components/reports/SalesPerformanceChart';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Period } from './PeriodSelector';
+import { Period } from '@/pages/Reports';
 
 interface ConversionTabContentProps {
-  period?: Period;
+  period: Period;
 }
 
-const ConversionTabContent: React.FC<ConversionTabContentProps> = ({ period = 'month' }) => {
+const ConversionTabContent: React.FC<ConversionTabContentProps> = ({ period }) => {
   const isMobile = useIsMobile();
   
   // Données du parcours de conversion avec valeurs précises
