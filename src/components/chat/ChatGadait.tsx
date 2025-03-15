@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   MessageSquare, 
@@ -368,20 +367,17 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
                 onChange={(e) => setEmailContent(e.target.value)}
               />
               
-              {/* Bouton de validation plus visible et proéminent */}
-              <div className="mt-4 mb-4">
-                <Button 
-                  className="w-full py-6 bg-loro-hazel hover:bg-loro-hazel/90 text-white font-semibold text-lg"
-                  onClick={extractEmailData}
-                  disabled={isLoading || !emailContent.trim()}
-                >
-                  {isLoading ? 
-                    <Loader className="h-5 w-5 animate-spin mr-2" /> : 
-                    <FileText className="h-5 w-5 mr-2" />
-                  }
-                  Valider et extraire les données
-                </Button>
-              </div>
+              <Button 
+                className="w-full py-8 text-xl font-bold bg-loro-hazel hover:bg-loro-hazel/90 text-white shadow-md my-6"
+                onClick={extractEmailData}
+                disabled={isLoading || !emailContent.trim()}
+              >
+                {isLoading ? 
+                  <Loader className="h-6 w-6 animate-spin mr-3" /> : 
+                  <FileText className="h-6 w-6 mr-3" />
+                }
+                Valider et extraire les données
+              </Button>
             </div>
             
             {extractedData && (
