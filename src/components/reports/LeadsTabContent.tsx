@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Filter, Users, BarChart, Table as TableIcon, PieChart } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,12 +9,12 @@ import LeadSourceDistribution from '@/components/reports/LeadSourceDistribution'
 import LeadsPerAgentChart from '@/components/reports/LeadsPerAgentChart';
 import LeadsAgentsTable from '@/components/reports/LeadsAgentsTable';
 import LeadsByPortalChart from '@/components/reports/LeadsByPortalChart';
-import { Period, PeriodObject } from '@/components/reports/PeriodSelector';
+import { Period } from '@/components/reports/PeriodSelector';
 
 const LeadsTabContent: React.FC = () => {
   const [leadsPeriod, setLeadsPeriod] = useState<'semaine' | 'mois' | 'annee'>('mois');
   const [displayMode, setDisplayMode] = useState<'chart' | 'table'>('chart');
-  const [period, setPeriod] = useState<PeriodObject>({ type: 'mois' });
+  const [period, setPeriod] = useState<Period>({ type: 'mois' });
   
   return (
     <div className="grid grid-cols-1 gap-6 h-full min-h-[calc(100vh-250px)]">
@@ -56,9 +57,7 @@ const LeadsTabContent: React.FC = () => {
           icon={<PieChart className="h-5 w-5" />}
         >
           <div className="h-[400px] flex items-center justify-center">
-            <LeadsByPortalChart period={period.type === 'mois' ? 'month' : 
-                              period.type === 'semaine' ? 'week' : 
-                              period.type === 'annee' ? 'year' : 'month'} />
+            <LeadsByPortalChart period={period} />
           </div>
         </DashboardCard>
       </div>

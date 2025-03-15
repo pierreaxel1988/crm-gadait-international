@@ -3,14 +3,14 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody } from "@/components/ui/table";
 import { agentsDataByPeriod, PeriodType } from './agentsData';
-import PeriodSelector, { PeriodObject } from './PeriodSelector';
+import PeriodSelector, { Period } from './PeriodSelector';
 import AgentsTableHeader from './AgentsTableHeader';
 import AgentTableRow from './AgentTableRow';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 const TopAgentsTable = () => {
-  const [period, setPeriod] = useState<PeriodObject>({ type: 'mois' });
+  const [period, setPeriod] = useState<Period>({ type: 'mois' });
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'leads' | 'sales' | 'value' | 'conversion' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
