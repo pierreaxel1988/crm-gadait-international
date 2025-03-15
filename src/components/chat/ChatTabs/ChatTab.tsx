@@ -91,18 +91,6 @@ const ChatTab: React.FC<ChatTabProps> = ({
           }
         </Button>
       </div>
-      
-      <Button 
-        className="w-full py-8 text-xl font-bold bg-loro-hazel hover:bg-loro-hazel/90 text-white shadow-md my-6"
-        onClick={handleSendMessage}
-        disabled={isLoading || !input.trim()}
-      >
-        {isLoading ? 
-          <Loader className="h-6 w-6 animate-spin mr-3" /> : 
-          <MessageSquare className="h-6 w-6 mr-3" />
-        }
-        Valider et envoyer le message
-      </Button>
     </div>
   );
 };
