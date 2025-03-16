@@ -31,7 +31,7 @@ const TeamMemberSelect = ({
   value, 
   onChange, 
   label = "Attribuer à",
-  autoSelectPierreAxel = true // Changé à true par défaut
+  autoSelectPierreAxel = false
 }: TeamMemberSelectProps) => {
   const isMobile = useIsMobile();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);

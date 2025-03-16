@@ -21,29 +21,25 @@ export const extractLefigaroPropertyDetails = (emailText: string): PropertyDetai
     details.url = urlMatch[1].trim();
     
     // Extract info from URL
-    try {
-      const urlPath = new URL(details.url).pathname;
-      const pathParts = urlPath.split('/');
-      
-      // Extract property type from URL if available
-      if (pathParts.length > 1) {
-        const typeLocationPart = pathParts[2] || '';
-        const typeMatch = typeLocationPart.match(/^([^-]+)/);
-        if (typeMatch && typeMatch[1]) {
-          const extractedType = typeMatch[1].replace(/-/g, ' ').trim();
-          details.type = normalizePropertyType(extractedType);
-        }
+    const urlPath = new URL(details.url).pathname;
+    const pathParts = urlPath.split('/');
+    
+    // Extract property type from URL if available
+    if (pathParts.length > 1) {
+      const typeLocationPart = pathParts[2] || '';
+      const typeMatch = typeLocationPart.match(/^([^-]+)/);
+      if (typeMatch && typeMatch[1]) {
+        const extractedType = typeMatch[1].replace(/-/g, ' ').trim();
+        details.type = normalizePropertyType(extractedType);
       }
-      
-      // Extract country from URL if available
-      if (pathParts.length > 2) {
-        const countryPart = pathParts[pathParts.length - 2] || '';
-        if (countryPart) {
-          details.country = countryPart.replace(/-/g, ' ').trim();
-        }
+    }
+    
+    // Extract country from URL if available
+    if (pathParts.length > 2) {
+      const countryPart = pathParts[pathParts.length - 2] || '';
+      if (countryPart) {
+        details.country = countryPart.replace(/-/g, ' ').trim();
       }
-    } catch (error) {
-      console.error('Error parsing URL:', error);
     }
   }
   
@@ -58,7 +54,7 @@ export const extractLefigaroPropertyDetails = (emailText: string): PropertyDetai
   }
   
   // Extract property description
-  const descriptionMatch = emailText.match(/GADAIT International vous (offre|présente)[\s\S]+?(?=\s*---)/i);
+  const descriptionMatch = emailText.match(/Gadait International vous présente[\s\S]+?(?=\s*---)/i);
   if (descriptionMatch && descriptionMatch[0]) {
     details.description = descriptionMatch[0].trim();
   }
@@ -117,17 +113,6 @@ export const extractLefigaroPropertyDetails = (emailText: string): PropertyDetai
   if (propertyTypeMatch && propertyTypeMatch[1] && !propertyTypeMatch[1].includes('Propriétés Le Figaro')) {
     const extractedType = propertyTypeMatch[1].trim();
     details['propertyType'] = normalizePropertyType(extractedType);
-  }
-  
-  // Extract views (special features)
-  const viewsMatch = emailText.match(/Autres options souhaitées[\s\S]+?:\s*([^\r\n]+)/i);
-  if (viewsMatch && viewsMatch[1]) {
-    // Check if it contains "Vue mer" or similar
-    if (viewsMatch[1].toLowerCase().includes('vue mer')) {
-      details['views'] = ['Vue mer'];
-    } else {
-      details['views'] = [viewsMatch[1].trim()];
-    }
   }
   
   return details;

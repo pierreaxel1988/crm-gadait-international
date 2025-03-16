@@ -5,7 +5,7 @@ import CustomButton from '@/components/ui/CustomButton';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import PipelineFilters, { FilterOptions } from '@/components/pipeline/PipelineFilters';
-import EmailImportModal from './email-import/EmailImportModal';
+import EmailImportModal from './EmailImportModal';
 
 interface PipelineHeaderProps {
   filters: FilterOptions;

@@ -1,8 +1,7 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 interface TeamMember {
   id: string;
@@ -16,23 +15,6 @@ interface AgentFilterProps {
 }
 
 const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: AgentFilterProps) => {
-  // Chercher Pierre Axel Gadait quand le composant est monté
-  // Mais seulement si aucun agent n'est déjà sélectionné
-  useEffect(() => {
-    const findPierreAxel = async () => {
-      if (assignedTo === null && assignedToOptions.length > 0) {
-        const pierreAxel = assignedToOptions.find(member => 
-          member.name.toLowerCase().includes('pierre axel gadait'));
-        
-        if (pierreAxel) {
-          onAssignedToChange(pierreAxel.id);
-        }
-      }
-    };
-    
-    findPierreAxel();
-  }, [assignedToOptions, assignedTo, onAssignedToChange]);
-
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
