@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { FileText, Loader, MailPlus, ChevronDown, Send, Check } from 'lucide-react';
+import { FileText, Loader, MailPlus, ChevronDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
+import EnhancedInput from '../EnhancedInput';
 
 interface EmailTabProps {
   emailContent: string;
@@ -66,37 +66,14 @@ const EmailTab: React.FC<EmailTabProps> = ({
             Collez le contenu d'un email pour extraire automatiquement les informations du lead.
           </p>
           
-          <div className="relative border border-loro-sand rounded-md overflow-hidden">
-            <Textarea
-              className="resize-none pr-12 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[150px]" 
-              placeholder="Collez le contenu de l'email ici..."
-              value={emailContent}
-              onChange={(e) => setEmailContent(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-            
-            <Button
-              size="icon"
-              className={`absolute right-2 bottom-2 rounded-full h-12 w-12 ${
-                emailContent.trim() 
-                  ? (extractionSuccess 
-                    ? 'bg-green-600 hover:bg-green-700' 
-                    : 'bg-loro-hazel hover:bg-loro-hazel/90') 
-                  : 'bg-loro-sand/50'
-              } text-white`}
-              onClick={handleExtraction}
-              disabled={isLoading || !emailContent.trim()}
-              title="Extraire les informations (ou appuyez sur Ctrl+Enter)"
-            >
-              {isLoading ? (
-                <Loader className="h-5 w-5 animate-spin" />
-              ) : extractionSuccess ? (
-                <Check className="h-5 w-5" />
-              ) : (
-                <Send className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
+          <EnhancedInput 
+            input={emailContent}
+            setInput={setEmailContent}
+            placeholder="Collez le contenu de l'email ici..."
+            isLoading={isLoading}
+            handleSend={handleExtraction}
+            onKeyDown={handleKeyDown}
+          />
         </Card>
       </div>
       

@@ -1,8 +1,7 @@
 
-import React, { useRef } from 'react';
-import { MessageSquare, Send, Loader } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import React from 'react';
+import { MessageSquare } from 'lucide-react';
+import EnhancedInput from '../EnhancedInput';
 
 interface Message {
   id: string;
@@ -69,28 +68,14 @@ const ChatTab: React.FC<ChatTabProps> = ({
         <div ref={messagesEndRef} />
       </div>
       
-      <div className="relative border border-loro-sand rounded-md overflow-hidden">
-        <Textarea
-          className="resize-none pr-12 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[60px]"
-          placeholder="Ask anything..."
-          rows={2}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={isLoading}
-        />
-        <Button
-          size="icon"
-          className={`absolute right-2 bottom-2 rounded-full h-8 w-8 ${input.trim() ? 'bg-loro-hazel hover:bg-loro-hazel/90' : 'bg-loro-sand/50'}`}
-          onClick={handleSendMessage}
-          disabled={isLoading || !input.trim()}
-        >
-          {isLoading ? 
-            <Loader className="h-4 w-4 animate-spin" /> : 
-            <Send className="h-4 w-4" />
-          }
-        </Button>
-      </div>
+      <EnhancedInput
+        input={input}
+        setInput={setInput}
+        placeholder="Ask anything..."
+        isLoading={isLoading}
+        handleSend={handleSendMessage}
+        onKeyDown={handleKeyDown}
+      />
     </div>
   );
 };
