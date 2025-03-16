@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Loader2, Mail, X, AlertTriangle, Check } from 'lucide-react';
+import { Loader2, Mail, X, AlertTriangle, Check, Edit } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -14,6 +15,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { normalizePropertyType } from '@/components/chat/utils/propertyTypeUtils';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 import { extractLefigaroPropertyDetails } from '@/components/chat/utils/emailParsingUtils';
+import { Input } from '@/components/ui/input';
+import FormInput from '@/components/leads/form/FormInput';
 
 interface EmailImportModalProps {
   isOpen: boolean;
@@ -33,11 +36,15 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
   const [extractedData, setExtractedData] = useState<any>(null);
   const [selectedAgent, setSelectedAgent] = useState<string | undefined>(undefined);
   const [selectedPipeline, setSelectedPipeline] = useState<'purchase' | 'rental'>('purchase');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableData, setEditableData] = useState<any>(null);
 
   const resetForm = () => {
     setEmailContent('');
     setExtractedData(null);
+    setEditableData(null);
     setSelectedAgent(undefined);
+    setIsEditing(false);
   };
 
   const handleExtractEmail = async () => {
@@ -90,6 +97,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         }
         
         setExtractedData(jsonData);
+        setEditableData(jsonData);
         
         toast({
           title: "Données extraites",
@@ -98,6 +106,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
       } catch (parseError) {
         console.error('Error parsing response:', parseError);
         setExtractedData({ raw: data.response });
+        setEditableData({ raw: data.response });
         toast({
           variant: "destructive",
           title: "Format incorrect",
@@ -117,7 +126,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
   };
 
   const handleCreateLead = () => {
-    if (!extractedData) return;
+    if (!editableData) return;
     
     if (!selectedAgent) {
       toast({
@@ -130,21 +139,21 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     
     try {
       const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
-        name: extractedData.name || extractedData.Name || "",
-        email: extractedData.email || extractedData.Email || "",
-        phone: extractedData.phone || extractedData.Phone || "",
-        source: extractedData.Source || extractedData.source || "Site web",
-        budget: extractedData.Budget || extractedData.budget || "",
-        propertyReference: extractedData.property_reference || extractedData.reference || extractedData["Property reference"] || "",
-        desiredLocation: extractedData.desired_location || extractedData.desiredLocation || extractedData["Desired location"] || "",
-        propertyType: extractedData.propertyType || extractedData.property_type || extractedData["Property type"] || "",
-        nationality: extractedData.nationality || "",
+        name: editableData.name || editableData.Name || "",
+        email: editableData.email || editableData.Email || "",
+        phone: editableData.phone || editableData.Phone || "",
+        source: editableData.Source || editableData.source || "Site web",
+        budget: editableData.Budget || editableData.budget || "",
+        propertyReference: editableData.property_reference || editableData.reference || editableData["Property reference"] || "",
+        desiredLocation: editableData.desired_location || editableData.desiredLocation || editableData["Desired location"] || "",
+        propertyType: editableData.propertyType || editableData.property_type || editableData["Property type"] || "",
+        nationality: editableData.nationality || "",
         notes: emailContent || "",
         status: "New",
         tags: ["Imported"],
         assignedTo: selectedAgent,
-        bedrooms: extractedData.bedrooms || undefined,
-        url: extractedData.url || "",
+        bedrooms: editableData.bedrooms || undefined,
+        url: editableData.url || "",
         taskType: "Call",
       };
       
@@ -169,6 +178,18 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         description: "Impossible de créer le lead."
       });
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setEditableData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
+  };
+
+  const toggleEditMode = () => {
+    setIsEditing(!isEditing);
   };
 
   const groupedData = React.useMemo(() => {
@@ -211,6 +232,32 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     };
   }, [extractedData]);
 
+  // Helper function to render editable fields or read-only fields based on mode
+  const renderField = (key: string, value: any, label: string) => {
+    if (!value) return null;
+    
+    if (isEditing) {
+      return (
+        <div key={key} className="mb-2">
+          <FormInput
+            label={label}
+            name={key}
+            value={String(editableData?.[key] ?? value)}
+            onChange={handleInputChange}
+            className="text-sm"
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+          <span className="font-medium capitalize">{label}:</span>
+          <span className="text-muted-foreground">{String(value)}</span>
+        </div>
+      );
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[90vh] flex flex-col">
@@ -251,79 +298,157 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
               </div>
             ) : (
               <div className="space-y-4">
-                {groupedData?.contact && (
-                  <div className="border rounded-md p-3">
-                    <h3 className="font-medium text-sm mb-2">Informations de contact</h3>
-                    <div className="space-y-1 text-sm">
-                      {Object.entries(groupedData.contact).map(([key, value]) => 
-                        value && (
-                          <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                            <span className="font-medium capitalize">{key === 'name' ? 'Nom' : 
-                                                                      key === 'email' ? 'Email' : 
-                                                                      key === 'phone' ? 'Téléphone' : 
-                                                                      key === 'country' ? 'Pays' : 
-                                                                      key === 'nationality' ? 'Nationalité' : 
-                                                                      key}:</span>
-                            <span className="text-muted-foreground">{String(value)}</span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
+                {!isEditing && (
+                  <Button
+                    variant="outline"
+                    className="mb-2 flex items-center gap-1"
+                    onClick={toggleEditMode}
+                  >
+                    <Edit className="h-4 w-4" />
+                    Modifier les informations
+                  </Button>
                 )}
                 
-                {groupedData?.property && (
-                  <div className="border rounded-md p-3">
-                    <h3 className="font-medium text-sm mb-2">Informations sur la propriété</h3>
-                    <div className="space-y-1 text-sm">
-                      {Object.entries(groupedData.property).map(([key, value]) => 
-                        value && (
-                          <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                            <span className="font-medium capitalize">{key === 'propertyType' ? 'Type de bien' :
-                                                                    key === 'desiredLocation' ? 'Emplacement désiré' :
-                                                                    key === 'budget' ? 'Budget' :
-                                                                    key === 'propertyReference' ? 'Référence' :
-                                                                    key === 'bedrooms' ? 'Chambres' :
-                                                                    key === 'url' ? 'URL de l\'annonce' :
-                                                                    key.replace(/([A-Z])/g, ' $1').trim()}:</span>
-                            <span className="text-muted-foreground">{String(value)}</span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
+                {isEditing && (
+                  <Button
+                    variant="outline"
+                    className="mb-2"
+                    onClick={toggleEditMode}
+                  >
+                    Terminer la modification
+                  </Button>
                 )}
                 
-                {groupedData?.source && Object.keys(groupedData.source).some(key => groupedData.source[key]) && (
-                  <div className="border rounded-md p-3">
-                    <h3 className="font-medium text-sm mb-2">Source</h3>
-                    <div className="space-y-1 text-sm">
-                      {Object.entries(groupedData.source).map(([key, value]) => 
-                        value && (
-                          <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                            <span className="font-medium capitalize">{key}:</span>
-                            <span className="text-muted-foreground">{String(value)}</span>
-                          </div>
-                        )
-                      )}
+                {isEditing ? (
+                  <div className="space-y-6">
+                    <div className="border rounded-md p-3">
+                      <h3 className="font-medium text-sm mb-2">Informations de contact</h3>
+                      <div className="space-y-2">
+                        {editableData && Object.entries({
+                          name: editableData.name || editableData.Name || "",
+                          email: editableData.email || editableData.Email || "",
+                          phone: editableData.phone || editableData.Phone || "",
+                          country: editableData.country || editableData.Country || "",
+                          nationality: editableData.nationality || ""
+                        }).map(([key, value]) => {
+                          if (!value) return null;
+                          const label = key === 'name' ? 'Nom' : 
+                                      key === 'email' ? 'Email' : 
+                                      key === 'phone' ? 'Téléphone' : 
+                                      key === 'country' ? 'Pays' : 
+                                      key === 'nationality' ? 'Nationalité' : key;
+                          return renderField(key, value, label);
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="border rounded-md p-3">
+                      <h3 className="font-medium text-sm mb-2">Informations sur la propriété</h3>
+                      <div className="space-y-2">
+                        {editableData && Object.entries({
+                          propertyType: editableData.propertyType || editableData.property_type || "",
+                          desiredLocation: editableData.desiredLocation || editableData.desired_location || "",
+                          budget: editableData.budget || editableData.Budget || "",
+                          propertyReference: editableData.propertyReference || editableData.reference || editableData.property_reference || "",
+                          bedrooms: editableData.bedrooms || "",
+                          url: editableData.url || ""
+                        }).map(([key, value]) => {
+                          if (!value) return null;
+                          const label = key === 'propertyType' ? 'Type de bien' :
+                                       key === 'desiredLocation' ? 'Emplacement désiré' :
+                                       key === 'budget' ? 'Budget' :
+                                       key === 'propertyReference' ? 'Référence' :
+                                       key === 'bedrooms' ? 'Chambres' :
+                                       key === 'url' ? 'URL de l\'annonce' : key;
+                          return renderField(key, value, label);
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="border rounded-md p-3">
+                      <h3 className="font-medium text-sm mb-2">Source</h3>
+                      <div className="space-y-2">
+                        {editableData && renderField('source', editableData.source || editableData.Source || "Le Figaro", 'Source')}
+                      </div>
                     </div>
                   </div>
-                )}
-                
-                {groupedData?.other && Object.keys(groupedData.other).length > 0 && (
-                  <div className="border rounded-md p-3">
-                    <h3 className="font-medium text-sm mb-2">Autres informations</h3>
-                    <div className="space-y-1 text-sm">
-                      {Object.entries(groupedData.other).map(([key, value]) => 
-                        value && (
-                          <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                            <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
-                            <span className="text-muted-foreground">{String(value)}</span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
+                ) : (
+                  <>
+                    {groupedData?.contact && (
+                      <div className="border rounded-md p-3">
+                        <h3 className="font-medium text-sm mb-2">Informations de contact</h3>
+                        <div className="space-y-1 text-sm">
+                          {Object.entries(groupedData.contact).map(([key, value]) => 
+                            value && (
+                              <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                                <span className="font-medium capitalize">{key === 'name' ? 'Nom' : 
+                                                                        key === 'email' ? 'Email' : 
+                                                                        key === 'phone' ? 'Téléphone' : 
+                                                                        key === 'country' ? 'Pays' : 
+                                                                        key === 'nationality' ? 'Nationalité' : 
+                                                                        key}:</span>
+                                <span className="text-muted-foreground">{String(value)}</span>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {groupedData?.property && (
+                      <div className="border rounded-md p-3">
+                        <h3 className="font-medium text-sm mb-2">Informations sur la propriété</h3>
+                        <div className="space-y-1 text-sm">
+                          {Object.entries(groupedData.property).map(([key, value]) => 
+                            value && (
+                              <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                                <span className="font-medium capitalize">{key === 'propertyType' ? 'Type de bien' :
+                                                                      key === 'desiredLocation' ? 'Emplacement désiré' :
+                                                                      key === 'budget' ? 'Budget' :
+                                                                      key === 'propertyReference' ? 'Référence' :
+                                                                      key === 'bedrooms' ? 'Chambres' :
+                                                                      key === 'url' ? 'URL de l\'annonce' :
+                                                                      key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                                <span className="text-muted-foreground">{String(value)}</span>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {groupedData?.source && Object.keys(groupedData.source).some(key => groupedData.source[key]) && (
+                      <div className="border rounded-md p-3">
+                        <h3 className="font-medium text-sm mb-2">Source</h3>
+                        <div className="space-y-1 text-sm">
+                          {Object.entries(groupedData.source).map(([key, value]) => 
+                            value && (
+                              <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                                <span className="font-medium capitalize">{key}:</span>
+                                <span className="text-muted-foreground">{String(value)}</span>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {groupedData?.other && Object.keys(groupedData.other).length > 0 && (
+                      <div className="border rounded-md p-3">
+                        <h3 className="font-medium text-sm mb-2">Autres informations</h3>
+                        <div className="space-y-1 text-sm">
+                          {Object.entries(groupedData.other).map(([key, value]) => 
+                            value && (
+                              <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                                <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
+                                <span className="text-muted-foreground">{String(value)}</span>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
                 
                 <Separator />
