@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadCore';
+import { Country } from '@/types/lead';
 
 const ChatGadaitPage = () => {
   const {
@@ -61,7 +62,7 @@ const ChatGadaitPage = () => {
         propertyReference: extractedData.reference || "",
         desiredLocation: extractedData.desiredLocation || "",
         propertyType: extractedData.propertyType || "",
-        country: extractedData.country || "Spain",
+        country: (extractedData.country || "Spain") as Country,
         notes: input || "",
         status: "New",
         tags: ["Imported"],

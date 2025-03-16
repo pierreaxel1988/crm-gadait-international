@@ -13,6 +13,7 @@ export const useChatGadait = () => {
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<string | undefined>(undefined);
+  const [isExtracting, setIsExtracting] = useState(false);
   
   const chatProps = useChatMessages();
   const emailProps = useEmailExtraction();
@@ -29,7 +30,7 @@ export const useChatGadait = () => {
       return;
     }
 
-    chatProps.setIsLoading(true);
+    setIsExtracting(true);
 
     try {
       // Try to parse it directly first
@@ -38,7 +39,7 @@ export const useChatGadait = () => {
       if (Object.keys(lefigaroDetails).length > 0 && lefigaroDetails.email) {
         setExtractedData(lefigaroDetails);
         setShowLeadForm(true);
-        chatProps.setIsLoading(false);
+        setIsExtracting(false);
         return;
       }
 
@@ -76,7 +77,7 @@ export const useChatGadait = () => {
         description: "Impossible d'extraire les données du lead."
       });
     } finally {
-      chatProps.setIsLoading(false);
+      setIsExtracting(false);
     }
   };
 
@@ -85,7 +86,7 @@ export const useChatGadait = () => {
     messages: chatProps.messages,
     input: chatProps.input,
     setInput: chatProps.setInput,
-    isLoading: chatProps.isLoading || emailProps.isLoading || propertyProps.isLoading,
+    isLoading: chatProps.isLoading || emailProps.isLoading || propertyProps.isLoading || isExtracting,
     messagesEndRef: chatProps.messagesEndRef,
     handleSendMessage: chatProps.handleSendMessage,
     
