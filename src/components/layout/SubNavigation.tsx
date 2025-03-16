@@ -48,18 +48,17 @@ const SubNavigation = () => {
           <NavigationMenuList className="space-x-0">
             {navigationItems.map((item) => (
               <NavigationMenuItem key={item.name}>
-                <Link to={item.path} legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={cn(
-                      "inline-flex h-12 items-center justify-center px-6 font-times text-[18px] transition-colors",
-                      "hover:text-loro-terracotta focus:text-loro-terracotta focus:outline-none",
-                      location.pathname === item.path
-                        ? "text-loro-terracotta border-b-2 border-loro-terracotta"
-                        : "text-loro-navy"
-                    )}
-                  >
-                    {item.name}
-                  </NavigationMenuLink>
+                <Link 
+                  to={item.path} 
+                  className={cn(
+                    "inline-flex h-12 items-center justify-center px-6 font-times text-[18px] transition-colors",
+                    "hover:text-loro-terracotta focus:text-loro-terracotta focus:outline-none",
+                    location.pathname === item.path
+                      ? "text-loro-terracotta border-b-2 border-loro-terracotta"
+                      : "text-loro-navy"
+                  )}
+                >
+                  {item.name}
                 </Link>
               </NavigationMenuItem>
             ))}
