@@ -1,10 +1,16 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { LucideIcon } from 'lucide-react';
 import FormField from './FormField';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type InputType = 'text' | 'email' | 'tel' | 'number' | 'date' | 'textarea' | 'select';
 
@@ -60,8 +66,18 @@ const FormInput = ({
     );
   };
 
+  const handleSelectChange = (selectedValue: string) => {
+    const syntheticEvent = {
+      target: {
+        name,
+        value: selectedValue
+      }
+    } as React.ChangeEvent<HTMLSelectElement>;
+    
+    onChange(syntheticEvent);
+  };
+
   const renderInput = () => {
-    // If there's a custom field render function, use it instead
     if (renderCustomField) {
       return renderCustomField();
     }
@@ -84,21 +100,23 @@ const FormInput = ({
         
       case 'select':
         return (
-          <select
+          <Select
             name={name}
-            value={value || ''}
-            onChange={onChange}
-            required={required}
-            className={baseClassName}
+            value={value?.toString() || ""}
+            onValueChange={handleSelectChange}
             disabled={readOnly}
           >
-            <option value="">{placeholder || 'Sélectionner une option'}</option>
-            {options?.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className={baseClassName}>
+              <SelectValue placeholder={placeholder || 'Sélectionner une option'} />
+            </SelectTrigger>
+            <SelectContent>
+              {options?.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         );
         
       case 'number':

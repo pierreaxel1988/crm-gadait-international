@@ -5,6 +5,14 @@ import FormSection from './FormSection';
 import PropertyDetailsSection from './sections/PropertyDetailsSection';
 import PurchaseDetailsSection from './sections/PurchaseDetailsSection';
 import BuyerInfoSection from './sections/BuyerInfoSection';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import FormInput from './FormInput';
 
 interface SearchCriteriaSectionProps {
   formData: LeadDetailed;
