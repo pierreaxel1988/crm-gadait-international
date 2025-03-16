@@ -1,35 +1,15 @@
 
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useChatGadait } from '@/components/chat/hooks/useChatGadait';
 import EnhancedInput from '@/components/chat/EnhancedInput';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
-import { toast } from '@/hooks/use-toast';
-import { createLead } from '@/services/leadCore';
-import { Country, PropertyType, Amenity } from '@/types/lead';
-import { LeadStatus } from '@/components/common/StatusBadge';
-import { LeadTag } from '@/components/common/TagBadge';
-import { TaskType } from '@/components/kanban/KanbanCard';
-import { supabase } from '@/integrations/supabase/client';
+import { useLeadExtraction } from '@/hooks/useLeadExtraction';
+import ChatGadaitHeader from '@/components/chat/ChatGadaitHeader';
+import ExtractedLeadForm from '@/components/chat/ExtractedLeadForm';
 
-// Helper function to map string amenities to Amenity enum values
-const mapStringToAmenity = (amenity: string): Amenity => {
-  const normalizedAmenity = amenity.toLowerCase().trim();
-  
-  if (normalizedAmenity.includes('piscine')) return 'Piscine';
-  if (normalizedAmenity.includes('jardin')) return 'Jardin';
-  if (normalizedAmenity.includes('garage')) return 'Garage';
-  if (normalizedAmenity.includes('sécurité') || normalizedAmenity.includes('securite')) return 'Sécurité';
-  if (normalizedAmenity.includes('vue mer') || normalizedAmenity.includes('sea view')) return 'Mer';
-  
-  return 'Piscine'; // Default value if no match is found
-};
-
-const ChatGadaitPage = () => {
-  const navigate = useNavigate();
+const ChatGadaitPage: React.FC = () => {
   const {
     messages,
     input,
@@ -37,46 +17,17 @@ const ChatGadaitPage = () => {
     isLoading,
     messagesEndRef,
     handleSendMessage,
-    extractedData,
-    extractLeadFromMessage,
-    setShowLeadForm,
-    showLeadForm,
-    selectedAgent,
-    setSelectedAgent
   } = useChatGadait();
 
-  const [agentName, setAgentName] = React.useState<string | undefined>();
-
-  // Récupérer le nom du commercial quand selectedAgent change
-  React.useEffect(() => {
-    const fetchAgentName = async () => {
-      if (!selectedAgent) {
-        setAgentName(undefined);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('name')
-          .eq('id', selectedAgent)
-          .single();
-          
-        if (error) {
-          console.error('Error fetching agent name:', error);
-          return;
-        }
-        
-        if (data) {
-          setAgentName(data.name);
-        }
-      } catch (error) {
-        console.error('Unexpected error:', error);
-      }
-    };
-
-    fetchAgentName();
-  }, [selectedAgent]);
+  const {
+    showLeadForm,
+    setShowLeadForm,
+    selectedAgent,
+    setSelectedAgent,
+    extractedData,
+    extractLeadFromMessage,
+    handleImportLead
+  } = useLeadExtraction();
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -85,97 +36,12 @@ const ChatGadaitPage = () => {
     }
   };
 
-  const handleImportLead = () => {
-    if (!selectedAgent) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Veuillez sélectionner un commercial à qui assigner ce lead."
-      });
-      return;
-    }
-
-    if (!extractedData) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Aucune donnée de lead n'a été extraite."
-      });
-      return;
-    }
-
-    try {
-      // Convert string[] amenities to Amenity[] if they exist
-      let mappedAmenities: Amenity[] | undefined = undefined;
-      
-      if (extractedData.amenities && Array.isArray(extractedData.amenities)) {
-        mappedAmenities = extractedData.amenities.map(amenity => 
-          typeof amenity === 'string' ? mapStringToAmenity(amenity) : amenity
-        ) as Amenity[];
-      }
-      
-      // Process views as ViewType[] if needed
-      const views = extractedData.views as string[] | undefined;
-      
-      // Prepare lead data using all available information from extractedData
-      const newLead = {
-        name: extractedData.name || "",
-        email: extractedData.email || "",
-        phone: extractedData.phone || "",
-        source: "Le Figaro" as const,
-        budget: extractedData.budget || "",
-        propertyReference: extractedData.reference || "",
-        desiredLocation: extractedData.desiredLocation || "",
-        propertyType: (extractedData.propertyType || extractedData.type || "") as PropertyType,
-        country: (extractedData.country || "Spain") as Country,
-        notes: input || "",
-        status: "New" as LeadStatus,
-        tags: ["Imported" as LeadTag],
-        assignedTo: selectedAgent,
-        assignedToName: agentName,
-        taskType: "Call" as TaskType,
-        // Add bedrooms information if available
-        bedrooms: extractedData.bedrooms,
-        // Add views information if available
-        views: views,
-        // Add properly mapped amenities if available
-        amenities: mappedAmenities
-      };
-      
-      const createdLead = createLead(newLead);
-      
-      toast({
-        title: "Lead importé",
-        description: `Le lead ${newLead.name} a été créé avec succès et assigné à ${agentName || 'un commercial'}.`
-      });
-      
-      setShowLeadForm(false);
-      setSelectedAgent(undefined);
-      
-      if (createdLead && createdLead.id) {
-        setTimeout(() => {
-          navigate(`/leads/${createdLead.id}`);
-        }, 500);
-      }
-    } catch (error) {
-      console.error('Error creating lead:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de créer le lead."
-      });
-    }
-  };
-
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] max-w-4xl mx-auto px-4">
-      <div className="mb-4">
-        <h1 className="text-2xl md:text-3xl font-timesNowSemi text-loro-navy flex items-center gap-2">
-          <MessageSquare className="h-6 w-6" />
-          Chat Gadait
-        </h1>
-        <p className="text-zinc-800">Assistant IA pour la gestion des leads et des propriétés</p>
-      </div>
+      <ChatGadaitHeader 
+        title="Chat Gadait" 
+        subtitle="Assistant IA pour la gestion des leads et des propriétés" 
+      />
       
       <div className="flex-1 flex flex-col bg-loro-white rounded-lg shadow-luxury overflow-hidden">
         <ScrollArea className="flex-1 p-4">
@@ -208,43 +74,13 @@ const ChatGadaitPage = () => {
         
         <div className="p-4 border-t border-loro-pearl">
           {showLeadForm && extractedData && (
-            <div className="mb-4 p-3 bg-loro-pearl/30 rounded-md">
-              <h3 className="font-medium text-loro-navy mb-2">Données du lead extraites</h3>
-              <div className="space-y-2 text-sm mb-3">
-                <p><span className="font-medium">Nom:</span> {extractedData.name}</p>
-                <p><span className="font-medium">Email:</span> {extractedData.email}</p>
-                <p><span className="font-medium">Téléphone:</span> {extractedData.phone}</p>
-                <p><span className="font-medium">Budget:</span> {extractedData.budget}</p>
-                <p><span className="font-medium">Localisation:</span> {extractedData.desiredLocation}</p>
-                <p><span className="font-medium">Type de propriété:</span> {extractedData.propertyType}</p>
-                <p><span className="font-medium">Référence:</span> {extractedData.reference}</p>
-              </div>
-              
-              <div className="mb-3">
-                <TeamMemberSelect
-                  value={selectedAgent}
-                  onChange={setSelectedAgent}
-                  label="Attribuer à un commercial"
-                />
-              </div>
-              
-              <div className="flex justify-end gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setShowLeadForm(false)}
-                >
-                  Annuler
-                </Button>
-                <Button 
-                  size="sm" 
-                  onClick={handleImportLead}
-                  className="bg-loro-navy hover:bg-loro-navy/90"
-                >
-                  Importer le lead
-                </Button>
-              </div>
-            </div>
+            <ExtractedLeadForm
+              extractedData={extractedData}
+              selectedAgent={selectedAgent}
+              setSelectedAgent={setSelectedAgent}
+              onCancel={() => setShowLeadForm(false)}
+              onImport={handleImportLead}
+            />
           )}
           
           <div className="flex gap-2 mb-3">
