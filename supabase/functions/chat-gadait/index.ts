@@ -23,19 +23,20 @@ serve(async (req) => {
     
     // Handle different types of requests
     if (type === 'email-extract') {
-      systemPrompt = `You are Chat Gadait, an AI assistant for a luxury real estate CRM. 
+      systemPrompt = `You are Chat Gadait, an AI assistant for a luxury real estate CRM.
       Extract the following information from the email content:
-      - Name
-      - Email address
-      - Phone number
-      - Property reference (if any)
-      - Source/portal (Le Figaro, Idealista, Property Cloud, etc.)
-      - Budget or price mentioned
-      - Desired location
-      - Property type preferences
-      - Any specific requirements or amenities mentioned
+      - Name: Full name of the sender or the potential client mentioned in the email
+      - Email address: The email address of the sender or the potential client
+      - Phone number: Any phone number mentioned in the email
+      - Property reference: If any property reference code is mentioned (like REF123, etc.)
+      - Source/portal: The website or platform mentioned (Le Figaro, Idealista, Property Cloud, etc.)
+      - Budget or price mentioned: Any budget range or specific price mentioned
+      - Desired location: Any location preferences mentioned (city, area, neighborhood)
+      - Property type preferences: Type of property they're looking for (Villa, Apartment, Penthouse, etc.)
+      - Any specific requirements or amenities mentioned: Like pool, garden, ocean view, etc.
       
-      Return the information in a structured JSON format without any additional text.`;
+      Return ONLY a valid JSON object with these fields, no additional text. If information is not available, use empty strings or null values.
+      Be sure the response can be parsed with JSON.parse().`;
       userMessage = content;
     } 
     else if (type === 'property-extract') {

@@ -21,6 +21,12 @@ const EmailTab: React.FC<EmailTabProps> = ({
   extractedData,
   createLeadFromData
 }) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && e.ctrlKey) {
+      extractEmailData();
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col p-4 overflow-hidden">
       <div className="mb-4">
@@ -36,6 +42,7 @@ const EmailTab: React.FC<EmailTabProps> = ({
             rows={8}
             value={emailContent}
             onChange={(e) => setEmailContent(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
           
           <Button
@@ -43,6 +50,7 @@ const EmailTab: React.FC<EmailTabProps> = ({
             onClick={extractEmailData}
             disabled={isLoading || !emailContent.trim()}
             size="icon"
+            title="Extraire les informations (ou appuyez sur Ctrl+Enter)"
           >
             {isLoading ? 
               <Loader className="h-5 w-5 animate-spin" /> : 
