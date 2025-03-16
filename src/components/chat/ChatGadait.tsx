@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useChatGadait } from './hooks/useChatGadait';
@@ -87,13 +86,15 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
     extractedData
   };
 
+  // For full-page mode, we'll adjust the UI to fill the available space
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-end animate-fade-in">
-      <div 
-        className={`bg-loro-white w-full ${isMobile ? 'max-w-full' : 'max-w-md'} flex flex-col h-full shadow-luxury transition-all duration-300 animate-slide-in-right`}
-      >
+    <div className="h-full flex flex-col">
+      {/* We'll keep the header for visual consistency but hide the close button in the full-page version */}
+      <div className="hidden">
         <ChatHeader onClose={onClose} />
-        
+      </div>
+      
+      <div className="flex-1 overflow-hidden">
         <ChatTabsComponent
           activeTab={activeTab}
           setActiveTab={setActiveTab}
