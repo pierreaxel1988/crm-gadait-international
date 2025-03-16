@@ -31,6 +31,8 @@ export const useChatGadait = () => {
     selectedAgent: emailProps.selectedAgent,
     setSelectedAgent: emailProps.setSelectedAgent,
     teamMembers: emailProps.teamMembers,
+    showAssignmentForm: emailProps.showAssignmentForm,
+    setShowAssignmentForm: emailProps.setShowAssignmentForm,
     
     // Property tab props
     propertyUrl: propertyProps.propertyUrl,

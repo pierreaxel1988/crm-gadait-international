@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
 import { ExtractedData, TeamMember, PropertyDetails } from '../types/chatTypes';
+import { useNavigate } from 'react-router-dom';
 
 export const useEmailExtraction = () => {
   const [emailContent, setEmailContent] = useState('');
@@ -13,6 +13,8 @@ export const useEmailExtraction = () => {
   const [selectedPipeline, setSelectedPipeline] = useState<'purchase' | 'rental'>('purchase');
   const [selectedAgent, setSelectedAgent] = useState<string | undefined>(undefined);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [showAssignmentForm, setShowAssignmentForm] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
@@ -84,6 +86,8 @@ export const useEmailExtraction = () => {
         }
         
         setExtractedData(jsonData);
+        // Show assignment form after successful extraction
+        setShowAssignmentForm(true);
         
         toast({
           title: "Données extraites",
@@ -106,6 +110,63 @@ export const useEmailExtraction = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const createLeadFromData = () => {
+    if (!extractedData) return;
+    
+    if (!selectedAgent) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Veuillez sélectionner un commercial à qui assigner ce lead."
+      });
+      return;
+    }
+    
+    try {
+      const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
+        name: extractedData.Name || extractedData.name || "",
+        email: extractedData.Email || extractedData.email || "",
+        phone: extractedData.Phone || extractedData.phone || "",
+        source: extractedData.Source || extractedData.source || "Site web",
+        budget: extractedData.Budget || extractedData.budget || "",
+        propertyReference: extractedData.property_reference || extractedData.reference || extractedData["Property reference"] || "",
+        desiredLocation: extractedData.desired_location || extractedData.desiredLocation || extractedData["Desired location"] || "",
+        propertyType: extractedData.property_type || extractedData.propertyType || extractedData["Property type"] || "",
+        notes: emailContent || "",
+        status: "New",
+        tags: ["Imported"],
+        assignedTo: selectedAgent,
+        taskType: "Call", // Always assign "Call" task regardless of pipeline
+      };
+      
+      const createdLead = createLead(newLead);
+      
+      toast({
+        title: "Lead créé",
+        description: `Le lead ${newLead.name} a été créé avec succès dans le pipeline ${selectedPipeline === 'purchase' ? 'achat' : 'location'}.`
+      });
+      
+      setEmailContent("");
+      setExtractedData(null);
+      setSelectedAgent(undefined);
+      setShowAssignmentForm(false);
+      
+      // Navigate to the lead detail page
+      if (createdLead && createdLead.id) {
+        setTimeout(() => {
+          navigate(`/leads/${createdLead.id}`);
+        }, 500);
+      }
+    } catch (error) {
+      console.error('Error creating lead:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de créer le lead."
+      });
     }
   };
 
@@ -208,46 +269,6 @@ export const useEmailExtraction = () => {
     return details;
   };
 
-  const createLeadFromData = () => {
-    if (!extractedData) return;
-    
-    try {
-      const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
-        name: extractedData.Name || extractedData.name || "",
-        email: extractedData.Email || extractedData.email || "",
-        phone: extractedData.Phone || extractedData.phone || "",
-        source: extractedData.Source || extractedData.source || "Site web",
-        budget: extractedData.Budget || extractedData.budget || "",
-        propertyReference: extractedData.property_reference || extractedData.reference || extractedData["Property reference"] || "",
-        desiredLocation: extractedData.desired_location || extractedData.desiredLocation || extractedData["Desired location"] || "",
-        propertyType: extractedData.property_type || extractedData.propertyType || extractedData["Property type"] || "",
-        notes: emailContent || "",
-        status: "New",
-        tags: ["Imported"],
-        assignedTo: selectedAgent,
-        taskType: "Call", // Always assign "Call" task regardless of pipeline
-      };
-      
-      createLead(newLead);
-      
-      toast({
-        title: "Lead créé",
-        description: `Le lead ${newLead.name} a été créé avec succès dans le pipeline ${selectedPipeline === 'purchase' ? 'achat' : 'location'}.`
-      });
-      
-      setEmailContent("");
-      setExtractedData(null);
-      setSelectedAgent(undefined);
-    } catch (error) {
-      console.error('Error creating lead:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de créer le lead."
-      });
-    }
-  };
-
   return {
     emailContent,
     setEmailContent,
@@ -259,6 +280,8 @@ export const useEmailExtraction = () => {
     setSelectedAgent,
     teamMembers,
     extractEmailData,
-    createLeadFromData
+    createLeadFromData,
+    showAssignmentForm,
+    setShowAssignmentForm
   };
 };

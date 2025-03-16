@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { FileText, Loader, MailPlus, ChevronDown, Check } from 'lucide-react';
+import { FileText, Loader, MailPlus, ChevronDown, Check, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
@@ -8,6 +9,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface EmailTabProps {
   emailContent: string;
@@ -21,6 +24,8 @@ interface EmailTabProps {
   selectedAgent: string | undefined;
   setSelectedAgent: (agent: string | undefined) => void;
   teamMembers: Array<{id: string, name: string}>;
+  showAssignmentForm: boolean;
+  setShowAssignmentForm: (show: boolean) => void;
 }
 
 const EmailTab: React.FC<EmailTabProps> = ({
@@ -34,7 +39,9 @@ const EmailTab: React.FC<EmailTabProps> = ({
   setSelectedPipeline,
   selectedAgent,
   setSelectedAgent,
-  teamMembers
+  teamMembers,
+  showAssignmentForm,
+  setShowAssignmentForm
 }) => {
   const [extractionSuccess, setExtractionSuccess] = React.useState(false);
 
@@ -67,6 +74,17 @@ const EmailTab: React.FC<EmailTabProps> = ({
         duration: 5000
       });
     }
+  };
+
+  const handleCreateLead = () => {
+    if (!selectedAgent) {
+      toast.error("Sélection requise", {
+        description: "Veuillez sélectionner un commercial à qui assigner ce lead",
+        duration: 5000
+      });
+      return;
+    }
+    createLeadFromData();
   };
 
   // Group the extracted data by category
@@ -197,6 +215,14 @@ const EmailTab: React.FC<EmailTabProps> = ({
           
           <Separator className="my-4" />
           
+          <Alert className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Action requise</AlertTitle>
+            <AlertDescription>
+              Veuillez sélectionner un commercial pour créer le lead dans le CRM
+            </AlertDescription>
+          </Alert>
+          
           <div className="space-y-4 mb-4">
             <div>
               <h5 className="text-sm font-medium mb-2 text-loro-navy">Pipeline</h5>
@@ -217,34 +243,91 @@ const EmailTab: React.FC<EmailTabProps> = ({
             </div>
             
             <div>
-              <h5 className="text-sm font-medium mb-2 text-loro-navy">Commercial assigné</h5>
+              <h5 className="text-sm font-medium mb-2 text-loro-navy">Commercial assigné <span className="text-red-500">*</span></h5>
               <Select 
                 value={selectedAgent} 
                 onValueChange={setSelectedAgent}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className={`w-full ${!selectedAgent ? 'border-red-500' : ''}`}>
                   <SelectValue placeholder="Sélectionner un commercial" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Non assigné</SelectItem>
                   {teamMembers.map(member => (
                     <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {!selectedAgent && (
+                <p className="text-xs text-red-500 mt-1">La sélection d'un commercial est obligatoire</p>
+              )}
             </div>
           </div>
           
           <Button 
             className="mt-2 w-full bg-loro-navy hover:bg-loro-navy/90" 
             variant="default"
-            onClick={createLeadFromData}
+            onClick={handleCreateLead}
+            disabled={!selectedAgent}
           >
             <MailPlus className="h-4 w-4 mr-2" />
-            Créer un lead
+            Créer un lead et ouvrir sa fiche
           </Button>
         </div>
       )}
+
+      {/* Assignment Reminder Dialog */}
+      <Dialog 
+        open={showAssignmentForm} 
+        onOpenChange={setShowAssignmentForm}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Lead extrait avec succès</DialogTitle>
+            <DialogDescription>
+              Veuillez assigner ce lead à un commercial pour le traiter.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Commercial assigné <span className="text-red-500">*</span></h5>
+              <Select 
+                value={selectedAgent} 
+                onValueChange={setSelectedAgent}
+              >
+                <SelectTrigger className={`w-full ${!selectedAgent ? 'border-red-500' : ''}`}>
+                  <SelectValue placeholder="Sélectionner un commercial" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teamMembers.map(member => (
+                    <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {!selectedAgent && (
+                <p className="text-xs text-red-500 mt-1">Ce champ est obligatoire</p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowAssignmentForm(false)}
+            >
+              Annuler
+            </Button>
+            <Button 
+              type="submit" 
+              className="bg-loro-navy hover:bg-loro-navy/90"
+              onClick={handleCreateLead}
+              disabled={!selectedAgent}
+            >
+              Créer et ouvrir la fiche
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
