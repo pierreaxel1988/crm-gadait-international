@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Paperclip, Send, Loader, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,8 +32,19 @@ const EnhancedInput: React.FC<EnhancedInputProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   
-  // Fonction pour gérer le collage de texte (déjà géré par le textarea natif)
+  // Fonction pour ajuster automatiquement la hauteur du textarea
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // Réinitialiser la hauteur pour bien mesurer le contenu
+      textarea.style.height = 'auto';
+      // Définir la hauteur basée sur le contenu (min 60px, max 200px)
+      const newHeight = Math.min(Math.max(textarea.scrollHeight, 60), 200);
+      textarea.style.height = `${newHeight}px`;
+    }
+  }, [input]);
   
   // Fonction pour gérer la saisie vocale
   const toggleVoiceRecording = async () => {
@@ -148,7 +159,9 @@ const EnhancedInput: React.FC<EnhancedInputProps> = ({
           toast.success("Analyse terminée");
           
           if (data.text) {
-            setInput(prev => `${prev ? prev + '\n\n' : ''}Document analysé: ${fileName}\n${data.text}`);
+            // Corriger l'erreur de type ici
+            const newValue = `${input ? input + '\n\n' : ''}Document analysé: ${fileName}\n${data.text}`;
+            setInput(newValue);
           }
         }
       };
@@ -169,13 +182,14 @@ const EnhancedInput: React.FC<EnhancedInputProps> = ({
   return (
     <div className="relative border border-loro-sand rounded-md overflow-hidden">
       <Textarea
-        className="resize-none pr-12 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[60px]"
+        ref={textareaRef}
+        className="resize-none pr-12 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[60px] max-h-[200px] overflow-y-auto"
         placeholder={placeholder}
-        rows={2}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={onKeyDown}
         disabled={isLoading}
+        style={{ height: 'auto' }}
       />
       
       <div className="absolute right-2 bottom-2 flex items-center gap-2">
