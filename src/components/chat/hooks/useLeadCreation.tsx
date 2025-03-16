@@ -1,16 +1,45 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadCore';
 import { LeadDetailed } from '@/types/lead';
 import { ExtractedData } from '../types/chatTypes';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useLeadCreation = () => {
   const [selectedPipeline, setSelectedPipeline] = useState<'purchase' | 'rental'>('purchase');
   const [selectedAgent, setSelectedAgent] = useState<string | undefined>(undefined);
   const [showAssignmentForm, setShowAssignmentForm] = useState(false);
   const navigate = useNavigate();
+  
+  // Set default agent when form is shown
+  useEffect(() => {
+    if (showAssignmentForm) {
+      fetchPierreAxelId();
+    }
+  }, [showAssignmentForm]);
+  
+  const fetchPierreAxelId = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('id')
+        .ilike('name', '%pierre axel gadait%')
+        .single();
+        
+      if (error) {
+        console.error('Error fetching Pierre Axel Gadait ID:', error);
+        return;
+      }
+      
+      if (data && data.id) {
+        setSelectedAgent(data.id);
+      }
+    } catch (error) {
+      console.error('Unexpected error fetching Pierre Axel Gadait ID:', error);
+    }
+  };
   
   const createLeadFromData = (extractedData: ExtractedData | null, emailContent: string, clearForm: () => void) => {
     if (!extractedData) return;

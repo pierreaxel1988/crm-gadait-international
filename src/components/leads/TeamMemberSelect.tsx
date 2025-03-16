@@ -18,6 +18,7 @@ interface TeamMemberSelectProps {
   value: string | undefined;
   onChange: (value: string | undefined) => void;
   label?: string;
+  autoSelectPierreAxel?: boolean;
 }
 
 interface TeamMember {
@@ -29,7 +30,8 @@ interface TeamMember {
 const TeamMemberSelect = ({ 
   value, 
   onChange, 
-  label = "Attribuer à" 
+  label = "Attribuer à",
+  autoSelectPierreAxel = false
 }: TeamMemberSelectProps) => {
   const isMobile = useIsMobile();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -49,6 +51,16 @@ const TeamMemberSelect = ({
         }
 
         setTeamMembers(data || []);
+        
+        // Auto-select Pierre Axel Gadait if requested and no value is already set
+        if (autoSelectPierreAxel && !value && data) {
+          const pierreAxel = data.find(member => 
+            member.name.toLowerCase().includes('pierre axel gadait'));
+          
+          if (pierreAxel) {
+            onChange(pierreAxel.id);
+          }
+        }
       } catch (error) {
         console.error('Erreur lors du chargement des commerciaux:', error);
         toast({
@@ -62,7 +74,7 @@ const TeamMemberSelect = ({
     };
 
     fetchTeamMembers();
-  }, []);
+  }, [autoSelectPierreAxel, onChange, value]);
 
   const handleChange = (newValue: string) => {
     // Si "non_assigné" est sélectionné, on passe undefined

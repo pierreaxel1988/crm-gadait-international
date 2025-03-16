@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Loader2, Mail, X, AlertTriangle, Check, Edit } from 'lucide-react';
@@ -38,6 +37,18 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
   const [selectedPipeline, setSelectedPipeline] = useState<'purchase' | 'rental'>('purchase');
   const [isEditing, setIsEditing] = useState(false);
   const [editableData, setEditableData] = useState<any>(null);
+
+  useEffect(() => {
+    // Auto-select Pierre Axel Gadait when the form is opened
+    if (isOpen && teamMembers.length > 0) {
+      const pierreAxel = teamMembers.find(member => 
+        member.name.toLowerCase().includes('pierre axel gadait'));
+      
+      if (pierreAxel) {
+        setSelectedAgent(pierreAxel.id);
+      }
+    }
+  }, [isOpen, teamMembers]);
 
   const resetForm = () => {
     setEmailContent('');
@@ -232,7 +243,6 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     };
   }, [extractedData]);
 
-  // Helper function to render editable fields or read-only fields based on mode
   const renderField = (key: string, value: any, label: string) => {
     if (!value) return null;
     
