@@ -5,6 +5,10 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
 import EnhancedInput from '../EnhancedInput';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 
 interface EmailTabProps {
   emailContent: string;
@@ -13,6 +17,11 @@ interface EmailTabProps {
   isLoading: boolean;
   extractedData: any;
   createLeadFromData: () => void;
+  selectedPipeline: 'purchase' | 'rental';
+  setSelectedPipeline: (pipeline: 'purchase' | 'rental') => void;
+  selectedAgent: string | undefined;
+  setSelectedAgent: (agent: string | undefined) => void;
+  teamMembers: Array<{id: string, name: string}>;
 }
 
 const EmailTab: React.FC<EmailTabProps> = ({
@@ -21,7 +30,12 @@ const EmailTab: React.FC<EmailTabProps> = ({
   extractEmailData,
   isLoading,
   extractedData,
-  createLeadFromData
+  createLeadFromData,
+  selectedPipeline,
+  setSelectedPipeline,
+  selectedAgent,
+  setSelectedAgent,
+  teamMembers
 }) => {
   const [extractionSuccess, setExtractionSuccess] = React.useState(false);
 
@@ -91,8 +105,49 @@ const EmailTab: React.FC<EmailTabProps> = ({
               </div>
             ))}
           </div>
+          
+          <Separator className="my-4" />
+          
+          <div className="space-y-4 mb-4">
+            <div>
+              <h5 className="text-sm font-medium mb-2 text-loro-navy">Pipeline</h5>
+              <RadioGroup 
+                value={selectedPipeline} 
+                onValueChange={(value) => setSelectedPipeline(value as 'purchase' | 'rental')}
+                className="flex space-x-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="purchase" id="purchase" />
+                  <Label htmlFor="purchase">Achat</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="rental" id="rental" />
+                  <Label htmlFor="rental">Location</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            
+            <div>
+              <h5 className="text-sm font-medium mb-2 text-loro-navy">Commercial assigné</h5>
+              <Select 
+                value={selectedAgent} 
+                onValueChange={setSelectedAgent}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Sélectionner un commercial" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Non assigné</SelectItem>
+                  {teamMembers.map(member => (
+                    <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
           <Button 
-            className="mt-4 w-full bg-loro-navy hover:bg-loro-navy/90" 
+            className="mt-2 w-full bg-loro-navy hover:bg-loro-navy/90" 
             variant="default"
             onClick={createLeadFromData}
           >

@@ -21,6 +21,9 @@ export const useChatGadait = () => {
   const [propertyUrl, setPropertyUrl] = useState('');
   const [extractedData, setExtractedData] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [selectedPipeline, setSelectedPipeline] = useState<'purchase' | 'rental'>('purchase');
+  const [selectedAgent, setSelectedAgent] = useState<string | undefined>(undefined);
+  const [teamMembers, setTeamMembers] = useState<Array<{id: string, name: string}>>([]);
 
   useEffect(() => {
     if (messages.length === 0) {
@@ -38,6 +41,31 @@ export const useChatGadait = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Fetch team members for agent assignment
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('id, name')
+          .order('name');
+
+        if (error) {
+          console.error('Error fetching team members:', error);
+          return;
+        }
+
+        if (data) {
+          setTeamMembers(data);
+        }
+      } catch (error) {
+        console.error('Unexpected error fetching team members:', error);
+      }
+    };
+
+    fetchTeamMembers();
+  }, []);
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -194,17 +222,20 @@ export const useChatGadait = () => {
         notes: emailContent || "",
         status: "New",
         tags: ["Imported"],
+        assignedTo: selectedAgent,
+        taskType: selectedPipeline === 'purchase' ? 'Buy' : 'Rent',
       };
       
       createLead(newLead);
       
       toast({
         title: "Lead créé",
-        description: `Le lead ${newLead.name} a été créé avec succès.`
+        description: `Le lead ${newLead.name} a été créé avec succès dans le pipeline ${selectedPipeline === 'purchase' ? 'achat' : 'location'}.`
       });
       
       setEmailContent("");
       setExtractedData(null);
+      setSelectedAgent(undefined);
     } catch (error) {
       console.error('Error creating lead:', error);
       toast({
@@ -231,6 +262,11 @@ export const useChatGadait = () => {
     handleSendMessage,
     extractEmailData,
     extractPropertyData,
-    createLeadFromData
+    createLeadFromData,
+    selectedPipeline,
+    setSelectedPipeline,
+    selectedAgent,
+    setSelectedAgent,
+    teamMembers
   };
 };
