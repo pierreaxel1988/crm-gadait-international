@@ -1,10 +1,9 @@
 
 import { LeadDetailed } from "@/types/lead";
 import { toast } from "@/hooks/use-toast";
-import mockLeadsDetailed from "@/data/mockLeads";
 
-// Variable to store leads in memory
-let leadsData = [...mockLeadsDetailed];
+// Starting with an empty array instead of mock data
+let leadsData: LeadDetailed[] = [];
 
 export const getLeads = (): LeadDetailed[] => {
   return leadsData;
@@ -90,4 +89,13 @@ export const convertToSimpleLead = (lead: LeadDetailed) => {
     createdAt: lead.createdAt,
     lastContactedAt: lead.lastContactedAt,
   };
+};
+
+// Add a function to reset all leads data
+export const resetLeadsData = (): void => {
+  leadsData = [];
+  toast({
+    title: "Données réinitialisées",
+    description: "Tous les leads ont été supprimés."
+  });
 };
