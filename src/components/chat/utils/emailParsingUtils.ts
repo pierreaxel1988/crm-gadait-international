@@ -135,6 +135,8 @@ export const extractLefigaroPropertyDetails = (emailText: string): PropertyDetai
   // Extract amenities/options
   const amenitiesMatch = emailText.match(/•\s*Autres options souhaitées par l'internaute:\s*([^\r\n]+)/i);
   if (amenitiesMatch && amenitiesMatch[1]) {
+    // Store amenities as an array with a single element for now
+    // This will be converted to proper Amenity types later
     details.amenities = [amenitiesMatch[1].trim()];
   }
   

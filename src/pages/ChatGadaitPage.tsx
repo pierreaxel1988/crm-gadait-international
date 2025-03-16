@@ -9,11 +9,24 @@ import { Button } from '@/components/ui/button';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadCore';
-import { Country, PropertyType } from '@/types/lead';
+import { Country, PropertyType, Amenity } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import { supabase } from '@/integrations/supabase/client';
+
+// Helper function to map string amenities to Amenity enum values
+const mapStringToAmenity = (amenity: string): Amenity => {
+  const normalizedAmenity = amenity.toLowerCase().trim();
+  
+  if (normalizedAmenity.includes('piscine')) return 'Piscine';
+  if (normalizedAmenity.includes('jardin')) return 'Jardin';
+  if (normalizedAmenity.includes('garage')) return 'Garage';
+  if (normalizedAmenity.includes('sécurité') || normalizedAmenity.includes('securite')) return 'Sécurité';
+  if (normalizedAmenity.includes('vue mer') || normalizedAmenity.includes('sea view')) return 'Mer';
+  
+  return 'Piscine'; // Default value if no match is found
+};
 
 const ChatGadaitPage = () => {
   const navigate = useNavigate();
@@ -92,6 +105,18 @@ const ChatGadaitPage = () => {
     }
 
     try {
+      // Convert string[] amenities to Amenity[] if they exist
+      let mappedAmenities: Amenity[] | undefined = undefined;
+      
+      if (extractedData.amenities && Array.isArray(extractedData.amenities)) {
+        mappedAmenities = extractedData.amenities.map(amenity => 
+          typeof amenity === 'string' ? mapStringToAmenity(amenity) : amenity
+        ) as Amenity[];
+      }
+      
+      // Process views as ViewType[] if needed
+      const views = extractedData.views as string[] | undefined;
+      
       // Prepare lead data using all available information from extractedData
       const newLead = {
         name: extractedData.name || "",
@@ -112,9 +137,9 @@ const ChatGadaitPage = () => {
         // Add bedrooms information if available
         bedrooms: extractedData.bedrooms,
         // Add views information if available
-        views: extractedData.views as string[] | undefined,
-        // Add amenities if available
-        amenities: extractedData.amenities as string[] | undefined
+        views: views,
+        // Add properly mapped amenities if available
+        amenities: mappedAmenities
       };
       
       const createdLead = createLead(newLead);
