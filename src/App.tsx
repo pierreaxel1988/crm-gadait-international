@@ -47,7 +47,9 @@ const AppRoutes = () => {
   const { user, signOut } = useAuth();
   
   // Define paths that should show the sub-navigation
-  const showSubNav = ['/pipeline', '/calendar', '/chat-gadait', '/reports', '/leads'].includes(location.pathname);
+  const showSubNav = ['/pipeline', '/calendar', '/chat-gadait', '/reports', '/leads', '/'].includes(location.pathname) || 
+                      location.pathname.startsWith('/leads/') || 
+                      location.pathname.startsWith('/lead-');
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);

@@ -42,7 +42,7 @@ const SubNavigation = () => {
   ];
 
   return (
-    <div className="border-b border-loro-pearl bg-white">
+    <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
       <div className="content-container">
         <NavigationMenu className="justify-center mx-auto">
           <NavigationMenuList className="space-x-0">
