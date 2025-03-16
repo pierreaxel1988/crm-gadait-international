@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadCore';
 import { Country } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { LeadTag } from '@/components/common/TagBadge';
 
 const ChatGadaitPage = () => {
   const {
@@ -66,7 +67,7 @@ const ChatGadaitPage = () => {
         country: (extractedData.country || "Spain") as Country,  // Cast to Country type
         notes: input || "",
         status: "New" as LeadStatus,  // Explicitly cast to LeadStatus
-        tags: ["Imported"],
+        tags: ["Imported" as LeadTag],  // Cast string to LeadTag
         assignedTo: selectedAgent,
         taskType: "Call"
       };
