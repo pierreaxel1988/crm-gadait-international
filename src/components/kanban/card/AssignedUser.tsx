@@ -47,7 +47,7 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
             {assignedToName.split(' ').map(part => part[0]).join('')}
           </AvatarFallback>
         </Avatar>
-        <span className="text-xs">{assignedToName}</span>
+        <span className="text-xs font-medium">{assignedToName}</span>
       </div>
     );
   }
