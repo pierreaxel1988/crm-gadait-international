@@ -128,7 +128,7 @@ const KanbanCard = ({ item, className, draggable = false }: KanbanCardProps) => 
       <div className="flex justify-between items-center mt-3 pt-3 border-t border-border text-xs text-muted-foreground">
         <div className="flex items-center">
           <User className="h-3 w-3 mr-1" />
-          <span>{item.assignedTo || 'Unassigned'}</span>
+          <span>{item.assignedTo || 'Non assigné'}</span>
         </div>
         
         {item.dueDate && (

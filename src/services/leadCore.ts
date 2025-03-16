@@ -87,6 +87,8 @@ export const convertToSimpleLead = (lead: LeadDetailed) => {
     status: lead.status,
     tags: lead.tags,
     assignedTo: lead.assignedTo,
+    // Utilisez assignedToName s'il existe, sinon utilisez assignedTo
+    assignedToName: lead.assignedToName,
     createdAt: lead.createdAt,
     lastContactedAt: lead.lastContactedAt,
   };

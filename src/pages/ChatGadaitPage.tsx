@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +12,8 @@ import { createLead } from '@/services/leadCore';
 import { Country, PropertyType } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
+import { TaskType } from '@/components/kanban/KanbanCard';
+import { supabase } from '@/integrations/supabase/client';
 
 const ChatGadaitPage = () => {
   const navigate = useNavigate();
@@ -28,6 +31,39 @@ const ChatGadaitPage = () => {
     selectedAgent,
     setSelectedAgent
   } = useChatGadait();
+
+  const [agentName, setAgentName] = React.useState<string | undefined>();
+
+  // Récupérer le nom du commercial quand selectedAgent change
+  React.useEffect(() => {
+    const fetchAgentName = async () => {
+      if (!selectedAgent) {
+        setAgentName(undefined);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('name')
+          .eq('id', selectedAgent)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching agent name:', error);
+          return;
+        }
+        
+        if (data) {
+          setAgentName(data.name);
+        }
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      }
+    };
+
+    fetchAgentName();
+  }, [selectedAgent]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -60,24 +96,26 @@ const ChatGadaitPage = () => {
         name: extractedData.name || "",
         email: extractedData.email || "",
         phone: extractedData.phone || "",
-        source: "Le Figaro" as const,  // Explicitly cast to LeadSource
+        source: "Le Figaro" as const,
         budget: extractedData.budget || "",
         propertyReference: extractedData.reference || "",
         desiredLocation: extractedData.desiredLocation || "",
-        propertyType: (extractedData.propertyType || "") as PropertyType,  // Cast to PropertyType
-        country: (extractedData.country || "Spain") as Country,  // Cast to Country type
+        propertyType: (extractedData.propertyType || "") as PropertyType,
+        country: (extractedData.country || "Spain") as Country,
         notes: input || "",
-        status: "New" as LeadStatus,  // Explicitly cast to LeadStatus
-        tags: ["Imported" as LeadTag],  // Cast string to LeadTag
+        status: "New" as LeadStatus,
+        tags: ["Imported" as LeadTag],
         assignedTo: selectedAgent,
-        taskType: "Call"
+        // Stockez également le nom du commercial pour l'affichage
+        assignedToName: agentName,
+        taskType: "Call" as TaskType // Cast explicite vers TaskType
       };
       
       const createdLead = createLead(newLead);
       
       toast({
         title: "Lead importé",
-        description: `Le lead ${newLead.name} a été créé avec succès et assigné.`
+        description: `Le lead ${newLead.name} a été créé avec succès et assigné à ${agentName || 'un commercial'}.`
       });
       
       setShowLeadForm(false);

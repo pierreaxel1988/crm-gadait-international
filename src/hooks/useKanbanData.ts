@@ -67,6 +67,10 @@ export const useKanbanData = (
         const mappedLeads = leads.map(lead => {
           const assignedTeamMember = teamMembers.find(tm => tm.id === lead.assigned_to);
           
+          // Si le lead a un assignedToName stocké, utilisez-le
+          const displayName = lead.assignedToName || 
+            (assignedTeamMember ? assignedTeamMember.name : undefined);
+          
           return {
             id: lead.id,
             name: lead.name,
@@ -74,7 +78,7 @@ export const useKanbanData = (
             phone: lead.phone,
             status: lead.status as LeadStatus,
             tags: lead.tags || [],
-            assignedTo: assignedTeamMember ? assignedTeamMember.name : undefined,
+            assignedTo: displayName, // Utilisez le nom pour l'affichage
             assignedToId: lead.assigned_to, // Store the original ID
             dueDate: lead.next_follow_up_date,
             pipelineType: 'purchase',
