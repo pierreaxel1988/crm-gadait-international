@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useChatGadait } from '@/components/chat/hooks/useChatGadait';
 import EnhancedInput from '@/components/chat/EnhancedInput';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -13,6 +13,7 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 
 const ChatGadaitPage = () => {
+  const navigate = useNavigate();
   const {
     messages,
     input,
@@ -81,6 +82,12 @@ const ChatGadaitPage = () => {
       
       setShowLeadForm(false);
       setSelectedAgent(undefined);
+      
+      if (createdLead && createdLead.id) {
+        setTimeout(() => {
+          navigate(`/leads/${createdLead.id}`);
+        }, 500);
+      }
     } catch (error) {
       console.error('Error creating lead:', error);
       toast({
