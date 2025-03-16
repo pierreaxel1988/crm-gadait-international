@@ -126,6 +126,7 @@ export const useLeadExtraction = () => {
         country: (extractedData.country || "Spain") as Country,
         notes: extractedData.notes || "",
         status: "New" as const,
+        // Fix the typing issue by casting to the expected LeadTag type
         tags: ["Imported"],
         assignedTo: selectedAgent,
         assignedToName: agentName,

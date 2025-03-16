@@ -4,7 +4,7 @@ import { toast } from "@/hooks/use-toast";
 import mockLeadsDetailed from "@/data/mockLeads";
 
 // Variable to store leads in memory
-let leadsData = [...mockLeadsDetailed];
+let leadsData: LeadDetailed[] = []; // Suppression des leads de test mockLeadsDetailed, on démarre avec un tableau vide
 
 export const getLeads = (): LeadDetailed[] => {
   return leadsData;
@@ -92,4 +92,14 @@ export const convertToSimpleLead = (lead: LeadDetailed) => {
     createdAt: lead.createdAt,
     lastContactedAt: lead.lastContactedAt,
   };
+};
+
+// Fonction pour réinitialiser les données des leads (utilisée uniquement pour le développement)
+export const resetLeadsData = () => {
+  leadsData = [];
+  toast({
+    title: "Base de données réinitialisée",
+    description: "Tous les leads ont été supprimés avec succès."
+  });
+  return true;
 };
