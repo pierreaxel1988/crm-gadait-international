@@ -1,19 +1,14 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Filter, Plus, Settings, Home, Key, X, RefreshCcw } from 'lucide-react';
-import KanbanBoard from '@/components/kanban/KanbanBoard';
-import { KanbanItem } from '@/components/kanban/KanbanCard';
-import CustomButton from '@/components/ui/CustomButton';
-import { LeadStatus } from '@/components/common/StatusBadge';
+import { Home, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from '@/hooks/use-mobile';
 import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
-import PipelineFilters, { FilterOptions } from '@/components/pipeline/PipelineFilters';
-import { LeadTag } from '@/components/common/TagBadge';
-import TagBadge from '@/components/common/TagBadge';
+import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import PipelineHeader from '@/components/pipeline/PipelineHeader';
+import PipelineTabContent from '@/components/pipeline/PipelineTabContent';
 
 const Kanban = () => {
   const [activeTab, setActiveTab] = useState<string>("purchase");
@@ -98,181 +93,17 @@ const Kanban = () => {
     });
   };
 
-  // Define columns with empty items (will be populated by KanbanBoard)
-  const getPurchaseColumns = () => {
-    const statusesToShow = filters.status ? [filters.status] : [
-      'New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offer', 'Deposit', 'Signed'
-    ] as LeadStatus[];
-    
-    return statusesToShow.map(status => ({
-      title: status,
-      status: status as LeadStatus,
-      items: [],
-    }));
-  };
-
-  const getRentalColumns = () => {
-    const statusesToShow = filters.status ? [filters.status] : [
-      'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Signed'
-    ] as LeadStatus[];
-    
-    return statusesToShow.map(status => ({
-      title: status,
-      status: status as LeadStatus,
-      items: [],
-    }));
-  };
-
-  // Get the team member name for display
-  const getTeamMemberName = (id: string) => {
-    const member = teamMembers.find(tm => tm.id === id);
-    return member ? member.name : id;
-  };
-
   return (
     <div className="p-3 md:p-6 space-y-4 md:space-y-6">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-semibold">Pipeline</h1>
-          <p className="text-muted-foreground text-sm md:text-base">Drag and drop leads through your sales stages</p>
-        </div>
-        
-        {!isMobile && (
-          <div className="flex space-x-3">
-            <CustomButton
-              variant="outline"
-              className="flex items-center gap-1.5"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-            >
-              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} /> 
-              Actualiser
-            </CustomButton>
-            <PipelineFilters 
-              filters={filters}
-              onFilterChange={setFilters}
-              onClearFilters={handleClearFilters}
-              assignedToOptions={teamMembers}
-              isFilterActive={isFilterActive}
-            />
-            <CustomButton
-              variant="outline"
-              className="flex items-center gap-1.5"
-            >
-              <Settings className="h-4 w-4" /> Customize
-            </CustomButton>
-            <CustomButton 
-              variant="chocolate" 
-              className="flex items-center gap-1.5"
-              onClick={() => navigate('/leads/new')}
-            >
-              <Plus className="h-4 w-4" /> New Lead
-            </CustomButton>
-          </div>
-        )}
-
-        {isMobile && (
-          <div className="flex space-x-2">
-            <CustomButton
-              variant="outline"
-              className="flex items-center justify-center w-10 h-10 p-0"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-            >
-              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </CustomButton>
-            <PipelineFilters 
-              filters={filters}
-              onFilterChange={setFilters}
-              onClearFilters={handleClearFilters}
-              assignedToOptions={teamMembers}
-              isFilterActive={isFilterActive}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Display active filters */}
-      {isFilterActive && (
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-sm text-muted-foreground mr-1">Filtres actifs:</span>
-          
-          {filters.status && (
-            <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-              {filters.status}
-              <button onClick={() => setFilters({...filters, status: null})}>
-                <X className="h-3 w-3 ml-1" />
-              </button>
-            </div>
-          )}
-          
-          {filters.tags.map(tag => (
-            <div key={tag} className="flex items-center">
-              <TagBadge tag={tag} className="text-xs" />
-              <button 
-                onClick={() => setFilters({...filters, tags: filters.tags.filter(t => t !== tag)})}
-                className="ml-1 bg-background rounded-full w-4 h-4 flex items-center justify-center"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </div>
-          ))}
-          
-          {filters.assignedTo && (
-            <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-              {getTeamMemberName(filters.assignedTo)}
-              <button onClick={() => setFilters({...filters, assignedTo: null})}>
-                <X className="h-3 w-3 ml-1" />
-              </button>
-            </div>
-          )}
-          
-          {(filters.minBudget || filters.maxBudget) && (
-            <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-              Budget: {filters.minBudget ? `${filters.minBudget}€` : '0€'} - {filters.maxBudget ? `${filters.maxBudget}€` : '∞'}
-              <button onClick={() => setFilters({...filters, minBudget: '', maxBudget: ''})}>
-                <X className="h-3 w-3 ml-1" />
-              </button>
-            </div>
-          )}
-          
-          {filters.location && (
-            <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-              {filters.location}
-              <button onClick={() => setFilters({...filters, location: ''})}>
-                <X className="h-3 w-3 ml-1" />
-              </button>
-            </div>
-          )}
-          
-          {filters.purchaseTimeframe && (
-            <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-              {filters.purchaseTimeframe === 'Moins de trois mois' ? '< 3 mois' : '> 3 mois'}
-              <button onClick={() => setFilters({...filters, purchaseTimeframe: null})}>
-                <X className="h-3 w-3 ml-1" />
-              </button>
-            </div>
-          )}
-          
-          {filters.propertyType && (
-            <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-              {filters.propertyType}
-              <button onClick={() => setFilters({...filters, propertyType: null})}>
-                <X className="h-3 w-3 ml-1" />
-              </button>
-            </div>
-          )}
-          
-          {isFilterActive && (
-            <button 
-              className="text-xs text-muted-foreground hover:text-foreground"
-              onClick={handleClearFilters}
-            >
-              Tout effacer
-            </button>
-          )}
-        </div>
-      )}
+      <PipelineHeader 
+        filters={filters}
+        onFilterChange={setFilters}
+        onClearFilters={handleClearFilters}
+        teamMembers={teamMembers}
+        isFilterActive={isFilterActive}
+        handleRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
+      />
 
       <Tabs defaultValue="purchase" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4 md:mb-6 w-full md:w-[400px] mx-auto">
@@ -287,18 +118,18 @@ const Kanban = () => {
         </TabsList>
         
         <TabsContent value="purchase" className="mt-0">
-          <KanbanBoard 
-            columns={getPurchaseColumns()} 
+          <PipelineTabContent 
+            contentType="purchase" 
             filters={filters} 
-            refreshTrigger={refreshTrigger}
+            refreshTrigger={refreshTrigger} 
           />
         </TabsContent>
         
         <TabsContent value="rental" className="mt-0">
-          <KanbanBoard 
-            columns={getRentalColumns()} 
-            filters={filters}
-            refreshTrigger={refreshTrigger}
+          <PipelineTabContent 
+            contentType="rental" 
+            filters={filters} 
+            refreshTrigger={refreshTrigger} 
           />
         </TabsContent>
       </Tabs>
