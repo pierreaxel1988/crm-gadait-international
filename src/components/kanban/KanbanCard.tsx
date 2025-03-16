@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Calendar, Mail, Phone, User, FileText, MessageSquare, CheckCircle, Tag, Star, Home, FileCheck, FileSignature, Calculator, Search, AreaChart } from 'lucide-react';
+import { Calendar, Mail, Phone, User, FileText, MessageSquare, CheckCircle, Tag, Star, Home, FileCheck, FileSignature, Calculator, Search, AreaChart, Key } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
@@ -36,11 +36,17 @@ interface KanbanCardProps {
   item: KanbanItem;
   className?: string;
   draggable?: boolean;
+  pipelineType?: 'purchase' | 'rental'; // Ajout pour permettre de passer explicitement le type
 }
 
-const KanbanCard = ({ item, className, draggable = false }: KanbanCardProps) => {
+const KanbanCard = ({ item, className, draggable = false, pipelineType }: KanbanCardProps) => {
   const navigate = useNavigate();
   const [assignedToName, setAssignedToName] = useState<string>('Non assigné');
+
+  // Si le type de pipeline ne correspond pas à celui du lead, ne pas afficher la carte
+  if (pipelineType && item.pipelineType && pipelineType !== item.pipelineType) {
+    return null;
+  }
 
   useEffect(() => {
     const fetchTeamMemberName = async () => {
@@ -114,6 +120,13 @@ const KanbanCard = ({ item, className, draggable = false }: KanbanCardProps) => 
     }
   };
 
+  // Affichage de l'icône du type de pipeline
+  const getPipelineTypeIcon = () => {
+    return item.pipelineType === 'purchase' 
+      ? <Home className="h-3 w-3 mr-1 text-blue-500" /> 
+      : <Key className="h-3 w-3 mr-1 text-amber-500" />;
+  };
+
   return (
     <div 
       className={cn(
@@ -166,6 +179,12 @@ const KanbanCard = ({ item, className, draggable = false }: KanbanCardProps) => 
             <span>{item.dueDate}</span>
           </div>
         )}
+      </div>
+      
+      {/* Indicateur du type de pipeline */}
+      <div className="mt-2 flex items-center text-xs text-muted-foreground">
+        {getPipelineTypeIcon()}
+        <span>{item.pipelineType === 'purchase' ? 'Achat' : 'Location'}</span>
       </div>
     </div>
   );

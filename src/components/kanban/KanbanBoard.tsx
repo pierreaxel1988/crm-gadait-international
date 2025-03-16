@@ -14,15 +14,17 @@ interface KanbanBoardProps {
     title: string;
     status: LeadStatus;
     items: any[]; // Will be populated by the hook
+    pipelineType?: 'purchase' | 'rental';
   }[];
   className?: string;
   filters?: FilterOptions;
   refreshTrigger?: number;
+  pipelineType: 'purchase' | 'rental'; // Ajout du type de pipeline comme prop
 }
 
-const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0 }: KanbanBoardProps) => {
+const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipelineType }: KanbanBoardProps) => {
   const isMobile = useIsMobile();
-  const { loadedColumns, isLoading } = useKanbanData(columns, refreshTrigger);
+  const { loadedColumns, isLoading } = useKanbanData(columns, refreshTrigger, pipelineType); // Passer le pipelineType
   const { handleDrop } = useKanbanDragDrop(loadedColumns => {
     // This is a hacky way to implement state setter in a hook,
     // but it works for this refactoring. In a more thorough refactoring,
@@ -56,6 +58,7 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0 }: Kanban
                 isMobile && "min-w-[250px]" // Slightly narrower columns on mobile
               )}
               onDrop={handleDrop}
+              pipelineType={pipelineType} // Passer le type de pipeline
             />
           ))
         )}

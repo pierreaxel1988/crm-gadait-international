@@ -21,6 +21,7 @@ const PipelineTabContent = ({ contentType, filters, refreshTrigger }: PipelineTa
       title: status,
       status: status as LeadStatus,
       items: [],
+      pipelineType: contentType // Ajout du type de pipeline
     }));
   };
 
@@ -29,6 +30,7 @@ const PipelineTabContent = ({ contentType, filters, refreshTrigger }: PipelineTa
       columns={getColumns()} 
       filters={filters} 
       refreshTrigger={refreshTrigger}
+      pipelineType={contentType} // Passer le type de pipeline au KanbanBoard
     />
   );
 };

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -19,11 +20,13 @@ interface KanbanColumn {
   title: string;
   status: LeadStatus;
   items: ExtendedKanbanItem[];
+  pipelineType?: 'purchase' | 'rental';
 }
 
 export const useKanbanData = (
   columns: KanbanColumn[],
-  refreshTrigger: number = 0
+  refreshTrigger: number = 0,
+  pipelineType: 'purchase' | 'rental' = 'purchase' // Par défaut, c'est le pipeline d'achat
 ) => {
   const [loadedColumns, setLoadedColumns] = useState<KanbanColumn[]>(columns);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,6 +69,10 @@ export const useKanbanData = (
         const mappedLeads = leads.map(lead => {
           const assignedTeamMember = teamMembers.find(tm => tm.id === lead.assigned_to);
           
+          // Déterminer le type de pipeline en fonction de lead.pipelineType ou d'une autre propriété
+          // Par défaut, si ce n'est pas spécifié, nous utilisons 'purchase'
+          const leadPipelineType = lead.pipelineType || 'purchase';
+          
           return {
             id: lead.id,
             name: lead.name,
@@ -76,7 +83,7 @@ export const useKanbanData = (
             assignedTo: assignedTeamMember ? assignedTeamMember.name : undefined,
             assignedToId: lead.assigned_to, // Store the original ID
             dueDate: lead.next_follow_up_date,
-            pipelineType: 'purchase',
+            pipelineType: leadPipelineType,
             taskType: lead.task_type,
             budget: lead.budget,
             desiredLocation: lead.desired_location,
@@ -87,10 +94,16 @@ export const useKanbanData = (
         
         console.log('Mapped leads:', mappedLeads);
         
+        // Filtre les leads par type de pipeline
+        const filteredLeads = mappedLeads.filter(lead => 
+          lead.pipelineType === pipelineType
+        );
+        
         // Group leads by status
         const updatedColumns = columns.map(column => ({
           ...column,
-          items: mappedLeads.filter(lead => lead.status === column.status) as ExtendedKanbanItem[]
+          items: filteredLeads.filter(lead => lead.status === column.status) as ExtendedKanbanItem[],
+          pipelineType // Ajouter le type de pipeline à la colonne
         }));
         
         setLoadedColumns(updatedColumns);
@@ -107,7 +120,7 @@ export const useKanbanData = (
     };
 
     fetchLeads();
-  }, [refreshTrigger, columns]);
+  }, [refreshTrigger, columns, pipelineType]);
 
   return { loadedColumns, isLoading };
 };

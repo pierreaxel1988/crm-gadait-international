@@ -114,4 +114,6 @@ export interface LeadDetailed {
   imported_at?: string;
   // Champ URL pour l'annonce immobilière
   url?: string;
+  // Ajout explicite du champ pipelineType
+  pipelineType?: PipelineType;
 }

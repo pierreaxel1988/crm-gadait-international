@@ -38,11 +38,13 @@ export const createLead = (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>): Lea
   const createdAt = new Date().toISOString().split('T')[0];
   
   // Ensure status is properly set, defaulting to "New" if not provided
+  // And set a default pipelineType to 'purchase' if not provided
   const lead: LeadDetailed = {
     id,
     createdAt,
     ...newLead,
-    status: newLead.status || "New" // Ensure status defaults to "New"
+    status: newLead.status || "New", // Ensure status defaults to "New"
+    pipelineType: newLead.pipelineType || "purchase" // Assurer que le type de pipeline est défini
   };
   
   // Always add to the beginning of the array to show newest leads first
@@ -88,6 +90,7 @@ export const convertToSimpleLead = (lead: LeadDetailed) => {
     assignedTo: lead.assignedTo,
     createdAt: lead.createdAt,
     lastContactedAt: lead.lastContactedAt,
+    pipelineType: lead.pipelineType, // Ajouter le type de pipeline
   };
 };
 

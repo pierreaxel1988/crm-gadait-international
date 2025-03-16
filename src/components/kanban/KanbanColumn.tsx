@@ -12,9 +12,10 @@ interface KanbanColumnProps {
   items: KanbanItem[];
   className?: string;
   onDrop?: (item: KanbanItem, status: LeadStatus) => void;
+  pipelineType: 'purchase' | 'rental'; // Ajout du type de pipeline
 }
 
-const KanbanColumn = ({ title, status, className, items, onDrop }: KanbanColumnProps) => {
+const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }: KanbanColumnProps) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   
@@ -59,12 +60,12 @@ const KanbanColumn = ({ title, status, className, items, onDrop }: KanbanColumnP
         onDrop={handleDrop}
       >
         {items.map((item) => (
-          <KanbanCard key={item.id} item={item} draggable />
+          <KanbanCard key={item.id} item={item} draggable pipelineType={pipelineType} />
         ))}
         
         {items.length === 0 && (
           <div className="flex items-center justify-center h-16 md:h-20 border border-dashed border-border rounded-md">
-            <p className="text-xs md:text-sm text-muted-foreground">No leads in this stage</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Aucun lead à cette étape</p>
           </div>
         )}
       </div>
@@ -75,7 +76,7 @@ const KanbanColumn = ({ title, status, className, items, onDrop }: KanbanColumnP
             className="w-full rounded-md border border-dashed border-border p-2 text-sm text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors"
             onClick={handleAddLead}
           >
-            + Add Lead
+            + Ajouter un lead
           </button>
         </div>
       )}
