@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { FileText, Loader, MailPlus, ChevronDown, ArrowUp } from 'lucide-react';
+import { FileText, Loader, MailPlus, ChevronDown, ArrowUp, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
 
 interface EmailTabProps {
   emailContent: string;
@@ -21,9 +22,36 @@ const EmailTab: React.FC<EmailTabProps> = ({
   extractedData,
   createLeadFromData
 }) => {
+  const [extractionSuccess, setExtractionSuccess] = React.useState(false);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && e.ctrlKey) {
-      extractEmailData();
+      handleExtraction();
+    }
+  };
+
+  const handleExtraction = async () => {
+    if (!emailContent.trim()) return;
+    
+    setExtractionSuccess(false);
+    try {
+      await extractEmailData();
+      // Show success state briefly
+      setExtractionSuccess(true);
+      toast.success("Extraction réussie", {
+        description: "Les informations ont été extraites avec succès",
+        duration: 3000
+      });
+      
+      // Reset success state after animation completes
+      setTimeout(() => {
+        setExtractionSuccess(false);
+      }, 2000);
+    } catch (error) {
+      toast.error("Échec de l'extraction", {
+        description: "Une erreur s'est produite lors de l'extraction",
+        duration: 5000
+      });
     }
   };
 
@@ -46,16 +74,23 @@ const EmailTab: React.FC<EmailTabProps> = ({
           />
           
           <Button
-            className="absolute bottom-6 right-4 rounded-full h-12 w-12 bg-black hover:bg-gray-800 text-white shadow-md"
-            onClick={extractEmailData}
+            className={`absolute bottom-6 right-4 rounded-full h-14 w-14 shadow-md transition-all duration-300 ${
+              extractionSuccess 
+                ? 'bg-green-600 hover:bg-green-700' 
+                : 'bg-black hover:bg-gray-800'
+            } text-white`}
+            onClick={handleExtraction}
             disabled={isLoading || !emailContent.trim()}
             size="icon"
             title="Extraire les informations (ou appuyez sur Ctrl+Enter)"
           >
-            {isLoading ? 
-              <Loader className="h-5 w-5 animate-spin" /> : 
-              <ArrowUp className="h-5 w-5" />
-            }
+            {isLoading ? (
+              <Loader className="h-6 w-6 animate-spin" />
+            ) : extractionSuccess ? (
+              <Check className="h-6 w-6" />
+            ) : (
+              <ArrowUp className="h-6 w-6" />
+            )}
           </Button>
         </div>
       </div>
