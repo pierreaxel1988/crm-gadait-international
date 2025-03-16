@@ -1,14 +1,24 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronDown, Filter, Tag, User, DollarSign, MapPin, Clock, Home, X } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
-import TagBadge from '@/components/common/TagBadge';
 import { PropertyType, PurchaseTimeframe } from '@/types/lead';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
+
+// Import des sous-composants de filtres
+import StatusFilter from './filters/StatusFilter';
+import TagsFilter from './filters/TagsFilter';
+import AgentFilter from './filters/AgentFilter';
+import BudgetFilter from './filters/BudgetFilter';
+import LocationFilter from './filters/LocationFilter';
+import TimeframeFilter from './filters/TimeframeFilter';
+import PropertyTypeFilter from './filters/PropertyTypeFilter';
+import ActionButtons from './filters/ActionButtons';
+import ActiveFiltersList from './filters/ActiveFiltersList';
 
 export interface FilterOptions {
   status: LeadStatus | null;
@@ -44,6 +54,7 @@ const PipelineFilters = ({
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
 
+  // Handler functions
   const handleStatusChange = (status: LeadStatus | null) => {
     onFilterChange({ ...filters, status });
   };
@@ -80,23 +91,11 @@ const PipelineFilters = ({
     onFilterChange({ ...filters, propertyType });
   };
 
-  const statuses: (LeadStatus | null)[] = [
-    null, 'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Deposit', 'Signed'
-  ];
-
-  const tags: LeadTag[] = [
-    'Vip', 'Hot', 'Serious', 'Cold', 'No response', 'No phone', 'Fake'
-  ];
-
-  const timeframes: (PurchaseTimeframe | null)[] = [
-    null, 'Moins de trois mois', 'Plus de trois mois'
-  ];
-
-  const propertyTypes: (PropertyType | null)[] = [
-    null, 'Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Chalet', 
-    'Terrain', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 
-    'Commercial', 'Hotel', 'Vignoble', 'Autres'
-  ];
+  // Récupère le nom du membre de l'équipe à partir de son ID
+  const getTeamMemberName = (id: string) => {
+    const member = assignedToOptions.find(tm => tm.id === id);
+    return member ? member.name : id;
+  };
 
   return (
     <div className="relative w-full">
@@ -126,179 +125,68 @@ const PipelineFilters = ({
           
           <div className="space-y-4">
             {/* Status Filter */}
-            <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <Filter className="h-4 w-4" /> Statut
-              </h4>
-              <div className="grid grid-cols-3 gap-2">
-                {statuses.map((status) => (
-                  <Button
-                    key={status || 'all'}
-                    variant={filters.status === status ? "default" : "outline"}
-                    size="sm"
-                    className="text-xs"
-                    onClick={() => handleStatusChange(status)}
-                  >
-                    {status || 'Tous'}
-                  </Button>
-                ))}
-              </div>
-            </div>
+            <StatusFilter 
+              status={filters.status} 
+              onStatusChange={handleStatusChange} 
+            />
             
             {/* Tags Filter */}
-            <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <Tag className="h-4 w-4" /> Tags
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <button
-                    key={tag}
-                    className={`flex items-center ${filters.tags.includes(tag) ? 'ring-2 ring-primary' : ''}`}
-                    onClick={() => toggleTag(tag)}
-                  >
-                    <TagBadge tag={tag} className="text-xs" />
-                  </button>
-                ))}
-              </div>
-            </div>
+            <TagsFilter 
+              selectedTags={filters.tags} 
+              onTagToggle={toggleTag} 
+            />
             
             {/* Assigned To Filter */}
-            <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <User className="h-4 w-4" /> Agent assigné
-              </h4>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant={filters.assignedTo === null ? "default" : "outline"}
-                  size="sm"
-                  className="text-xs"
-                  onClick={() => handleAssignedToChange(null)}
-                >
-                  Tous
-                </Button>
-                {assignedToOptions.map((member) => (
-                  <Button
-                    key={member.id}
-                    variant={filters.assignedTo === member.id ? "default" : "outline"}
-                    size="sm"
-                    className="text-xs"
-                    onClick={() => handleAssignedToChange(member.id)}
-                  >
-                    {member.name}
-                  </Button>
-                ))}
-              </div>
-            </div>
+            <AgentFilter 
+              assignedTo={filters.assignedTo} 
+              onAssignedToChange={handleAssignedToChange} 
+              assignedToOptions={assignedToOptions} 
+            />
             
             {/* Budget Filter */}
-            <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <DollarSign className="h-4 w-4" /> Budget
-              </h4>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-xs text-muted-foreground">Min €</label>
-                  <Input
-                    type="text"
-                    value={filters.minBudget}
-                    onChange={(e) => handleBudgetChange('min', e.target.value)}
-                    placeholder="Min"
-                    className="h-8 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground">Max €</label>
-                  <Input
-                    type="text"
-                    value={filters.maxBudget}
-                    onChange={(e) => handleBudgetChange('max', e.target.value)}
-                    placeholder="Max"
-                    className="h-8 text-sm"
-                  />
-                </div>
-              </div>
-            </div>
+            <BudgetFilter 
+              minBudget={filters.minBudget} 
+              maxBudget={filters.maxBudget} 
+              onBudgetChange={handleBudgetChange} 
+            />
             
             {/* Location Filter */}
-            <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <MapPin className="h-4 w-4" /> Localisation
-              </h4>
-              <Input
-                type="text"
-                value={filters.location}
-                onChange={(e) => handleLocationChange(e.target.value)}
-                placeholder="Ville, région, pays..."
-                className="h-8 text-sm"
-              />
-            </div>
+            <LocationFilter 
+              location={filters.location} 
+              onLocationChange={handleLocationChange} 
+            />
             
             {/* Purchase Timeframe Filter */}
-            <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <Clock className="h-4 w-4" /> Délai d'achat
-              </h4>
-              <div className="grid grid-cols-3 gap-2">
-                {timeframes.map((timeframe) => (
-                  <Button
-                    key={timeframe || 'all'}
-                    variant={filters.purchaseTimeframe === timeframe ? "default" : "outline"}
-                    size="sm"
-                    className="text-xs"
-                    onClick={() => handleTimeframeChange(timeframe)}
-                  >
-                    {timeframe ? (timeframe === 'Moins de trois mois' ? '< 3 mois' : '> 3 mois') : 'Tous'}
-                  </Button>
-                ))}
-              </div>
-            </div>
+            <TimeframeFilter 
+              purchaseTimeframe={filters.purchaseTimeframe} 
+              onTimeframeChange={handleTimeframeChange} 
+            />
             
             {/* Property Type Filter */}
-            <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <Home className="h-4 w-4" /> Type de bien
-              </h4>
-              <div className="grid grid-cols-3 gap-2 max-h-[100px] overflow-y-auto">
-                <Button
-                  variant={filters.propertyType === null ? "default" : "outline"}
-                  size="sm"
-                  className="text-xs"
-                  onClick={() => handlePropertyTypeChange(null)}
-                >
-                  Tous
-                </Button>
-                {propertyTypes.filter(t => t !== null).map((type) => (
-                  <Button
-                    key={type}
-                    variant={filters.propertyType === type ? "default" : "outline"}
-                    size="sm"
-                    className="text-xs truncate"
-                    onClick={() => handlePropertyTypeChange(type as PropertyType)}
-                  >
-                    {type}
-                  </Button>
-                ))}
-              </div>
-            </div>
+            <PropertyTypeFilter 
+              propertyType={filters.propertyType} 
+              onPropertyTypeChange={handlePropertyTypeChange} 
+            />
             
             {/* Action Buttons */}
-            <div className="flex justify-between pt-2 mt-2 border-t">
-              <Button variant="outline" size="sm" onClick={onClearFilters}>
-                <X className="h-4 w-4 mr-2" /> Effacer
-              </Button>
-              <Button size="sm" onClick={() => setIsOpen(false)}>
-                <Check className="h-4 w-4 mr-2" /> Appliquer
-              </Button>
-            </div>
+            <ActionButtons 
+              onClear={onClearFilters} 
+              onApply={() => setIsOpen(false)} 
+            />
           </div>
         </PopoverContent>
       </Popover>
+
+      {/* Liste des filtres actifs */}
+      <ActiveFiltersList 
+        filters={filters} 
+        onFilterChange={onFilterChange} 
+        onClearFilters={onClearFilters} 
+        getTeamMemberName={getTeamMemberName}
+        isFilterActive={isFilterActive} 
+      />
     </div>
   );
 };
-
-// Add import for cn util
-import { cn } from '@/lib/utils';
 
 export default PipelineFilters;
