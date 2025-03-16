@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Filter, Plus, Settings, Home, Key, X, RefreshCcw } from 'lucide-react';
 import KanbanBoard from '@/components/kanban/KanbanBoard';
@@ -57,6 +58,11 @@ const Kanban = () => {
     };
 
     fetchTeamMembers();
+  }, []);
+  
+  // Auto-refresh when component mounts to ensure we have the latest data
+  useEffect(() => {
+    handleRefresh();
   }, []);
 
   // Check if any filters are active

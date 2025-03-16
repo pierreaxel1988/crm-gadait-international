@@ -38,12 +38,15 @@ export const createLead = (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>): Lea
   const id = (leadsData.length + 1).toString();
   const createdAt = new Date().toISOString().split('T')[0];
   
-  const lead = {
+  // Ensure status is properly set, defaulting to "New" if not provided
+  const lead: LeadDetailed = {
     id,
     createdAt,
-    ...newLead
+    ...newLead,
+    status: newLead.status || "New" // Ensure status defaults to "New"
   };
   
+  // Always add to the beginning of the array to show newest leads first
   leadsData.unshift(lead);
   
   toast({

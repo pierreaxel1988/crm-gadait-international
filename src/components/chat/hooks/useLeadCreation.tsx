@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import { createLead } from '@/services/leadService';
+import { createLead } from '@/services/leadCore';
 import { LeadDetailed } from '@/types/lead';
 import { ExtractedData } from '../types/chatTypes';
 

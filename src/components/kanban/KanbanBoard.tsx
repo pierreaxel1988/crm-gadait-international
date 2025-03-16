@@ -9,6 +9,7 @@ import { FilterOptions } from '../pipeline/PipelineFilters';
 import { PropertyType, PurchaseTimeframe } from '@/types/lead';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { getLeads } from '@/services/leadCore';
 
 // Extend KanbanItem with the additional properties needed for filtering
 interface ExtendedKanbanItem extends KanbanItem {
@@ -39,6 +40,8 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0 }: Kanban
     const fetchLeads = async () => {
       try {
         setIsLoading(true);
+        
+        // Fetch team members for assignment information
         const { data: teamMembers, error: teamError } = await supabase
           .from('team_members')
           .select('id, email, name');
@@ -52,22 +55,22 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0 }: Kanban
           });
           return;
         }
-          
-        const { data: leads, error: leadsError } = await supabase
+        
+        // First try to get leads from Supabase
+        const { data: supabaseLeads, error: leadsError } = await supabase
           .from('leads')
           .select('*');
           
-        if (leadsError) {
-          console.error('Error fetching leads:', leadsError);
-          toast({
-            variant: "destructive",
-            title: "Erreur de chargement",
-            description: "Impossible de charger les leads."
-          });
-          return;
+        // If there's an error or no data from Supabase, fall back to local leads
+        let leads = [];
+        if (leadsError || !supabaseLeads || supabaseLeads.length === 0) {
+          console.log('Falling back to local leads data');
+          leads = getLeads();
+        } else {
+          leads = supabaseLeads;
         }
         
-        // Map Supabase data to KanbanItem format
+        // Map leads data to KanbanItem format
         const mappedLeads = leads.map(lead => {
           const assignedTeamMember = teamMembers.find(tm => tm.id === lead.assigned_to);
           
@@ -88,6 +91,8 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0 }: Kanban
             propertyType: lead.property_type as PropertyType
           };
         });
+        
+        console.log('Mapped leads:', mappedLeads);
         
         // Group leads by status
         const updatedColumns = columns.map(column => ({
