@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FileText, Loader, MailPlus, ChevronDown, Check, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -57,14 +56,12 @@ const EmailTab: React.FC<EmailTabProps> = ({
     setExtractionSuccess(false);
     try {
       await extractEmailData();
-      // Show success state briefly
       setExtractionSuccess(true);
       toast.success("Extraction réussie", {
         description: "Les informations ont été extraites avec succès",
         duration: 3000
       });
       
-      // Reset success state after animation completes
       setTimeout(() => {
         setExtractionSuccess(false);
       }, 2000);
@@ -87,7 +84,6 @@ const EmailTab: React.FC<EmailTabProps> = ({
     createLeadFromData();
   };
 
-  // Group the extracted data by category
   const groupedData = React.useMemo(() => {
     if (!extractedData) return null;
     
@@ -97,6 +93,7 @@ const EmailTab: React.FC<EmailTabProps> = ({
         email: extractedData.email || extractedData.Email,
         phone: extractedData.phone || extractedData.Phone,
         country: extractedData.country || extractedData.Country,
+        nationality: extractedData.nationality,
       },
       property: {
         propertyType: extractedData.propertyType || extractedData.property_type || extractedData["Property type"],
@@ -109,7 +106,7 @@ const EmailTab: React.FC<EmailTabProps> = ({
       },
       other: Object.entries(extractedData)
         .filter(([key]) => 
-          !['name', 'Name', 'email', 'Email', 'phone', 'Phone', 'country', 'Country',
+          !['name', 'Name', 'email', 'Email', 'phone', 'Phone', 'country', 'Country', 'nationality',
             'propertyType', 'property_type', 'Property type', 
             'desiredLocation', 'desired_location', 'Desired location',
             'budget', 'Budget', 
@@ -158,7 +155,12 @@ const EmailTab: React.FC<EmailTabProps> = ({
               {Object.entries(groupedData.contact).map(([key, value]) => 
                 value && (
                   <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                    <span className="font-medium text-loro-navy capitalize">{key}:</span>
+                    <span className="font-medium text-loro-navy capitalize">{key === 'name' ? 'Nom' : 
+                                                                              key === 'email' ? 'Email' : 
+                                                                              key === 'phone' ? 'Téléphone' : 
+                                                                              key === 'country' ? 'Pays' : 
+                                                                              key === 'nationality' ? 'Nationalité' : 
+                                                                              key}:</span>
                     <span className="text-loro-hazel">{String(value)}</span>
                   </div>
                 )
@@ -173,7 +175,11 @@ const EmailTab: React.FC<EmailTabProps> = ({
               {Object.entries(groupedData.property).map(([key, value]) => 
                 value && (
                   <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                    <span className="font-medium text-loro-navy capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                    <span className="font-medium text-loro-navy capitalize">{key === 'propertyType' ? 'Type de bien' :
+                                                                              key === 'desiredLocation' ? 'Emplacement désiré' :
+                                                                              key === 'budget' ? 'Budget' :
+                                                                              key === 'propertyReference' ? 'Référence' :
+                                                                              key.replace(/([A-Z])/g, ' $1').trim()}:</span>
                     <span className="text-loro-hazel">{String(value)}</span>
                   </div>
                 )

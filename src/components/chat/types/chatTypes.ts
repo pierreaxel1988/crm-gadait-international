@@ -8,6 +8,7 @@ export interface Message {
 
 export interface ExtractedData {
   [key: string]: any;
+  nationality?: string;
 }
 
 export interface TeamMember {
@@ -26,4 +27,6 @@ export interface PropertyDetails {
   bathrooms?: number;
   url?: string;
   description?: string;
+  nationality?: string;
+  propertyType?: string;
 }

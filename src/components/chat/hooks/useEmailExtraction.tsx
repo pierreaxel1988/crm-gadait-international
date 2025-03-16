@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadService';
-import { LeadDetailed } from '@/types/lead';
+import { LeadDetailed, PropertyType } from '@/types/lead';
 import { ExtractedData, TeamMember, PropertyDetails } from '../types/chatTypes';
 import { useNavigate } from 'react-router-dom';
 
@@ -85,6 +86,16 @@ export const useEmailExtraction = () => {
           });
         }
         
+        // Make sure property type is properly normalized to match our enum values
+        if (jsonData.propertyType || jsonData.property_type) {
+          jsonData.propertyType = normalizePropertyType(jsonData.propertyType || jsonData.property_type);
+        }
+        
+        // Add nationality based on country if available
+        if (jsonData.country && !jsonData.nationality) {
+          jsonData.nationality = deriveNationalityFromCountry(jsonData.country);
+        }
+        
         setExtractedData(jsonData);
         // Show assignment form after successful extraction
         setShowAssignmentForm(true);
@@ -134,7 +145,8 @@ export const useEmailExtraction = () => {
         budget: extractedData.Budget || extractedData.budget || "",
         propertyReference: extractedData.property_reference || extractedData.reference || extractedData["Property reference"] || "",
         desiredLocation: extractedData.desired_location || extractedData.desiredLocation || extractedData["Desired location"] || "",
-        propertyType: extractedData.property_type || extractedData.propertyType || extractedData["Property type"] || "",
+        propertyType: extractedData.propertyType || extractedData.property_type || extractedData["Property type"] || "",
+        nationality: extractedData.nationality || "",
         notes: emailContent || "",
         status: "New",
         tags: ["Imported"],
@@ -193,7 +205,8 @@ export const useEmailExtraction = () => {
         const typeLocationPart = pathParts[2] || '';
         const typeMatch = typeLocationPart.match(/^([^-]+)/);
         if (typeMatch && typeMatch[1]) {
-          details.type = typeMatch[1].replace(/-/g, ' ').trim();
+          const extractedType = typeMatch[1].replace(/-/g, ' ').trim();
+          details.type = normalizePropertyType(extractedType);
         }
       }
       
@@ -209,7 +222,8 @@ export const useEmailExtraction = () => {
     // Extract property details from the listing block
     const propertyDetailsMatch = emailText.match(/Vente\s+([^\n]+)\s+([^\n]+)\s+Prix\s*:\s*([^\n]+)\s+(\d+)\s*m²/i);
     if (propertyDetailsMatch) {
-      details.type = propertyDetailsMatch[1]?.trim() || details.type;
+      const extractedType = propertyDetailsMatch[1]?.trim() || '';
+      details.type = normalizePropertyType(extractedType) || details.type;
       details.location = propertyDetailsMatch[2]?.trim() || details.location;
       details.price = propertyDetailsMatch[3]?.trim() || details.price;
       details.area = propertyDetailsMatch[4] ? `${propertyDetailsMatch[4].trim()} m²` : details.area;
@@ -240,6 +254,11 @@ export const useEmailExtraction = () => {
     const countryMatch = emailText.match(/•\s*Pays\s*:\s*([^\r\n]+)/i);
     if (countryMatch && countryMatch[1]) {
       details['country'] = countryMatch[1].trim();
+      
+      // Derive nationality from country
+      if (details['country'] && !details['nationality']) {
+        details['nationality'] = deriveNationalityFromCountry(details['country']);
+      }
     }
     
     // Extract budget
@@ -257,16 +276,171 @@ export const useEmailExtraction = () => {
       details['desiredLocation'] = locationMatch[1].trim();
       if (!details['country']) {
         details['country'] = locationMatch[2].trim();
+        
+        // Also derive nationality if we now have a country
+        if (!details['nationality']) {
+          details['nationality'] = deriveNationalityFromCountry(details['country']);
+        }
       }
     }
     
     // Extract property type
     const propertyTypeMatch = emailText.match(/•\s*([^•\r\n:]+?)(?=\s*\n|•\s*de|$)/i);
     if (propertyTypeMatch && propertyTypeMatch[1] && !propertyTypeMatch[1].includes('Propriétés Le Figaro')) {
-      details['propertyType'] = propertyTypeMatch[1].trim();
+      const extractedType = propertyTypeMatch[1].trim();
+      details['propertyType'] = normalizePropertyType(extractedType);
     }
     
     return details;
+  };
+  
+  // Helper function to normalize property types to match our enum values
+  const normalizePropertyType = (type: string | undefined): PropertyType | undefined => {
+    if (!type) return undefined;
+    
+    const typeMap: Record<string, PropertyType> = {
+      'terrain': 'Terrain',
+      'terrains': 'Terrain',
+      'villa': 'Villa',
+      'villas': 'Villa',
+      'apartment': 'Appartement',
+      'appartement': 'Appartement',
+      'apartement': 'Appartement',
+      'appartements': 'Appartement',
+      'penthouse': 'Penthouse',
+      'penthouses': 'Penthouse',
+      'maison': 'Maison',
+      'maisons': 'Maison',
+      'house': 'Maison',
+      'houses': 'Maison',
+      'duplex': 'Duplex',
+      'chalet': 'Chalet',
+      'chalets': 'Chalet',
+      'manoir': 'Manoir',
+      'manoirs': 'Manoir',
+      'mansion': 'Manoir',
+      'mansions': 'Manoir',
+      'townhouse': 'Maison de ville',
+      'maison de ville': 'Maison de ville',
+      'château': 'Château',
+      'chateau': 'Château',
+      'châteaux': 'Château',
+      'chateaux': 'Château',
+      'local commercial': 'Local commercial',
+      'commercial': 'Commercial',
+      'hotel': 'Hotel',
+      'hôtel': 'Hotel',
+      'hotels': 'Hotel',
+      'hôtels': 'Hotel',
+      'vignoble': 'Vignoble',
+      'vineyard': 'Vignoble',
+      'vineyards': 'Vignoble',
+      'vignobles': 'Vignoble',
+      'plot': 'Terrain',
+      'land': 'Terrain',
+      'property': 'Autres',
+      'propriété': 'Autres',
+      'proprietes': 'Autres',
+      'propriétés': 'Autres'
+    };
+    
+    // Clean up input type for matching
+    const cleanType = type.toLowerCase().trim();
+    
+    // Try direct match
+    if (typeMap[cleanType]) {
+      return typeMap[cleanType];
+    }
+    
+    // Try partial matches
+    for (const [key, value] of Object.entries(typeMap)) {
+      if (cleanType.includes(key)) {
+        return value;
+      }
+    }
+    
+    // If direct match fails, check for substring matches
+    for (const validType of Object.values(typeMap)) {
+      if (cleanType.includes(validType.toLowerCase())) {
+        return validType;
+      }
+    }
+    
+    return undefined;
+  };
+  
+  // Helper function to derive nationality from country
+  const deriveNationalityFromCountry = (country: string | undefined): string | undefined => {
+    if (!country) return undefined;
+    
+    const countryToNationality: Record<string, string> = {
+      'france': 'Français',
+      'french': 'Français',
+      'france métropolitaine': 'Français',
+      'belgium': 'Belge',
+      'belgique': 'Belge',
+      'belge': 'Belge',
+      'swiss': 'Suisse',
+      'switzerland': 'Suisse',
+      'suisse': 'Suisse',
+      'united kingdom': 'Britannique',
+      'uk': 'Britannique',
+      'royaume-uni': 'Britannique',
+      'angleterre': 'Britannique',
+      'england': 'Britannique',
+      'british': 'Britannique',
+      'united states': 'Américain',
+      'usa': 'Américain',
+      'états-unis': 'Américain',
+      'etats-unis': 'Américain',
+      'american': 'Américain',
+      'spain': 'Espagnol',
+      'espagne': 'Espagnol',
+      'italian': 'Italien',
+      'italy': 'Italien',
+      'italie': 'Italien',
+      'german': 'Allemand',
+      'germany': 'Allemand',
+      'allemagne': 'Allemand',
+      'russia': 'Russe',
+      'russie': 'Russe',
+      'russian': 'Russe',
+      'netherlands': 'Néerlandais',
+      'pays-bas': 'Néerlandais',
+      'dutch': 'Néerlandais',
+      'hollandais': 'Néerlandais',
+      'holland': 'Néerlandais',
+      'portugal': 'Portugais',
+      'portuguese': 'Portugais',
+      'greece': 'Grec',
+      'grèce': 'Grec',
+      'greek': 'Grec',
+      'luxembourg': 'Luxembourgeois',
+      'maldives': 'Maldivien',
+      'mauritius': 'Mauricien',
+      'seychelles': 'Seychellois',
+      'croatia': 'Croate',
+      'united arab emirates': 'Émirati',
+      'uae': 'Émirati',
+      'émirats arabes unis': 'Émirati',
+      'emirats arabes unis': 'Émirati'
+    };
+    
+    const cleanCountry = country.toLowerCase().trim();
+    
+    // Try direct match
+    if (countryToNationality[cleanCountry]) {
+      return countryToNationality[cleanCountry];
+    }
+    
+    // Try partial matches
+    for (const [key, value] of Object.entries(countryToNationality)) {
+      if (cleanCountry.includes(key)) {
+        return value;
+      }
+    }
+    
+    return undefined;
   };
 
   return {
