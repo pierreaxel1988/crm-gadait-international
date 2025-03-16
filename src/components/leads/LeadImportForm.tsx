@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +21,6 @@ const LeadImportForm = () => {
   const [result, setResult] = useState<any>(null);
   const [formMode, setFormMode] = useState<'manual' | 'email'>('manual');
 
-  // Liste des sources définies dans les types
   const leadSources: LeadSource[] = [
     "Site web", 
     "Réseaux sociaux", 

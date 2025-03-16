@@ -21,6 +21,7 @@ export const useLeadData = (id: string | undefined) => {
         const leadData = getLead(id);
         
         // Si le lead n'est pas assigné, chercher l'ID de Pierre Axel Gadait
+        // Mais uniquement si le lead n'a pas déjà été assigné lors de l'importation
         if (leadData && !leadData.assignedTo) {
           const { data: pierreAxelData, error } = await supabase
             .from('team_members')

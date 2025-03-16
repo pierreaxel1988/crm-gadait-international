@@ -39,8 +39,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
   const [editableData, setEditableData] = useState<any>(null);
 
   useEffect(() => {
-    // Auto-select Pierre Axel Gadait when the form is opened
-    if (isOpen && teamMembers.length > 0) {
+    if (isOpen && teamMembers.length > 0 && !selectedAgent) {
       const pierreAxel = teamMembers.find(member => 
         member.name.toLowerCase().includes('pierre axel gadait'));
       
@@ -48,7 +47,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         setSelectedAgent(pierreAxel.id);
       }
     }
-  }, [isOpen, teamMembers]);
+  }, [isOpen, teamMembers, selectedAgent]);
 
   const resetForm = () => {
     setEmailContent('');
@@ -172,7 +171,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
       
       toast({
         title: "Lead créé",
-        description: `Le lead ${newLead.name} a été créé avec succès dans le pipeline ${selectedPipeline === 'purchase' ? 'achat' : 'location'}.`
+        description: `Le lead ${newLead.name} a été créé avec succès.`
       });
       
       resetForm();
@@ -218,7 +217,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         propertyType: extractedData.propertyType || extractedData.property_type || extractedData["Property type"],
         desiredLocation: extractedData.desiredLocation || extractedData.desired_location || extractedData["Desired location"],
         budget: extractedData.budget || extractedData.Budget,
-        propertyReference: extractedData.propertyReference || extractedData.reference || extractedData.property_reference || extractedData["Property reference"],
+        propertyReference: extractedData.propertyReference || extractedData.reference || extractedData.property_reference || "",
         bedrooms: extractedData.bedrooms || extractedData.Bedrooms,
         url: extractedData.url || extractedData.Url || extractedData["URL"],
       },

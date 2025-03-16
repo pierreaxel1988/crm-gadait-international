@@ -15,8 +15,11 @@ export const useLeadCreation = () => {
   
   // Set default agent when form is shown or component mounts
   useEffect(() => {
-    fetchPierreAxelId();
-  }, [showAssignmentForm]);
+    // Only fetch Pierre Axel if no agent is selected and the form is shown
+    if (showAssignmentForm && !selectedAgent) {
+      fetchPierreAxelId();
+    }
+  }, [showAssignmentForm, selectedAgent]);
   
   const fetchPierreAxelId = async () => {
     try {
@@ -49,7 +52,7 @@ export const useLeadCreation = () => {
           toast({
             variant: "destructive",
             title: "Erreur",
-            description: "Impossible d'assigner le lead à Pierre Axel Gadait."
+            description: "Veuillez sélectionner un commercial pour ce lead."
           });
         }
       });
@@ -78,7 +81,7 @@ export const useLeadCreation = () => {
       
       toast({
         title: "Lead créé",
-        description: `Le lead ${newLead.name} a été créé avec succès et assigné à Pierre Axel Gadait.`
+        description: `Le lead ${newLead.name} a été créé avec succès et assigné au commercial sélectionné.`
       });
       
       clearForm();
