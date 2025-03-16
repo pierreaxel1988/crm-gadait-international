@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -85,7 +84,7 @@ export const useKanbanData = (
             phone: lead.phone,
             status: lead.status as LeadStatus,
             tags: lead.tags || [],
-            assignedTo: lead.assigned_to,
+            assignedTo: lead.assigned_to, // Make sure this is correctly passed
             assignedToId: lead.assigned_to, // Store the original ID
             dueDate: lead.next_follow_up_date,
             pipelineType: leadPipelineType,

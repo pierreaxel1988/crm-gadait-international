@@ -11,10 +11,12 @@ interface AssignedUserProps {
 
 const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
   const [assignedToName, setAssignedToName] = useState<string>('Non assigné');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   
   useEffect(() => {
     const fetchTeamMemberInfo = async () => {
       if (assignedToId) {
+        setIsLoading(true);
         try {
           const { data, error } = await supabase
             .from('team_members')
@@ -32,6 +34,8 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
           }
         } catch (error) {
           console.error('Unexpected error fetching team member info:', error);
+        } finally {
+          setIsLoading(false);
         }
       }
     };
@@ -39,6 +43,7 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
     fetchTeamMemberInfo();
   }, [assignedToId]);
   
+  // Now properly check for assignedToId to determine whether to show the assigned user or the assign button
   if (assignedToId) {
     return (
       <div className="flex items-center">
