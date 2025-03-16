@@ -223,7 +223,8 @@ export const useChatGadait = () => {
         status: "New",
         tags: ["Imported"],
         assignedTo: selectedAgent,
-        taskType: selectedPipeline === 'purchase' ? 'Buy' : 'Rent',
+        // Update to use a valid TaskType value based on the pipeline
+        taskType: selectedPipeline === 'purchase' ? 'Propositions' : 'Contrat de Location',
       };
       
       createLead(newLead);
