@@ -29,65 +29,67 @@ const PipelineHeader = ({
   const isMobile = useIsMobile();
 
   return (
-    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-semibold">Pipeline</h1>
-        <p className="text-muted-foreground text-sm md:text-base">Drag and drop leads through your sales stages</p>
-      </div>
-      
-      {!isMobile && (
-        <div className="flex space-x-3">
-          <CustomButton
-            variant="outline"
-            className="flex items-center gap-1.5"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} /> 
-            Actualiser
-          </CustomButton>
-          <PipelineFilters 
-            filters={filters}
-            onFilterChange={onFilterChange}
-            onClearFilters={onClearFilters}
-            assignedToOptions={teamMembers}
-            isFilterActive={isFilterActive}
-          />
-          <CustomButton
-            variant="outline"
-            className="flex items-center gap-1.5"
-          >
-            <Settings className="h-4 w-4" /> Customize
-          </CustomButton>
-          <CustomButton 
-            variant="chocolate" 
-            className="flex items-center gap-1.5"
-            onClick={() => navigate('/leads/new')}
-          >
-            <Plus className="h-4 w-4" /> New Lead
-          </CustomButton>
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-semibold">Pipeline</h1>
+          <p className="text-muted-foreground text-sm md:text-base">Drag and drop leads through your sales stages</p>
         </div>
-      )}
+        
+        {!isMobile && (
+          <div className="flex space-x-3">
+            <CustomButton
+              variant="outline"
+              className="flex items-center gap-1.5"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} /> 
+              Actualiser
+            </CustomButton>
+            <PipelineFilters 
+              filters={filters}
+              onFilterChange={onFilterChange}
+              onClearFilters={onClearFilters}
+              assignedToOptions={teamMembers}
+              isFilterActive={isFilterActive}
+            />
+            <CustomButton
+              variant="outline"
+              className="flex items-center gap-1.5"
+            >
+              <Settings className="h-4 w-4" /> Customize
+            </CustomButton>
+            <CustomButton 
+              variant="chocolate" 
+              className="flex items-center gap-1.5"
+              onClick={() => navigate('/leads/new')}
+            >
+              <Plus className="h-4 w-4" /> New Lead
+            </CustomButton>
+          </div>
+        )}
 
-      {isMobile && (
-        <div className="flex space-x-2">
-          <CustomButton
-            variant="outline"
-            className="flex items-center justify-center w-10 h-10 p-0"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </CustomButton>
-          <PipelineFilters 
-            filters={filters}
-            onFilterChange={onFilterChange}
-            onClearFilters={onClearFilters}
-            assignedToOptions={teamMembers}
-            isFilterActive={isFilterActive}
-          />
-        </div>
-      )}
+        {isMobile && (
+          <div className="flex space-x-2">
+            <CustomButton
+              variant="outline"
+              className="flex items-center justify-center w-10 h-10 p-0"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </CustomButton>
+            <PipelineFilters 
+              filters={filters}
+              onFilterChange={onFilterChange}
+              onClearFilters={onClearFilters}
+              assignedToOptions={teamMembers}
+              isFilterActive={isFilterActive}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

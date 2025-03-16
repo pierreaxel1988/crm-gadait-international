@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -17,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import ApiGuide from "./pages/ApiGuide";
 import Navbar from "./components/layout/Navbar";
 import Sidebar from "./components/layout/Sidebar";
+import SubNavigation from "./components/layout/SubNavigation";
 import { useIsMobile } from "./hooks/use-mobile";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import LeadImport from "./pages/LeadImport";
@@ -43,6 +45,9 @@ const AppRoutes = () => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, signOut } = useAuth();
+  
+  // Define paths that should show the sub-navigation
+  const showSubNav = ['/pipeline', '/calendar', '/chat-gadait', '/reports', '/leads'].includes(location.pathname);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -67,6 +72,7 @@ const AppRoutes = () => {
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Navbar toggleSidebar={toggleSidebar} />
+        {showSubNav && <SubNavigation />}
         <main className="flex-1 overflow-y-auto">
           <Routes>
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />

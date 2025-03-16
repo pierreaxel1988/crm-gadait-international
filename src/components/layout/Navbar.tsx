@@ -38,7 +38,7 @@ const Navbar = ({
   };
 
   return <nav className={cn("sticky top-0 z-50 w-full bg-loro-white border-b border-loro-pearl transition-all duration-300")}>
-      <div className="content-container">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <button onClick={toggleSidebar} aria-label="Toggle menu" className="mr-2 rounded-md p-2 transition-colors duration-200 px-0 py-0 text-loro-navy my-0">
