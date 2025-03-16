@@ -7,6 +7,7 @@ import { Country, PropertyType, LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import { supabase } from '@/integrations/supabase/client';
 import { ExtractedData } from '@/components/chat/types/chatTypes';
+import { LeadTag } from '@/components/common/TagBadge';
 
 export const useLeadExtraction = () => {
   const navigate = useNavigate();
@@ -126,8 +127,8 @@ export const useLeadExtraction = () => {
         country: (extractedData.country || "Spain") as Country,
         notes: extractedData.notes || "",
         status: "New" as const,
-        // Fix the typing issue by casting to the expected LeadTag type
-        tags: ["Imported"],
+        // Fix: Explicitly cast the array to LeadTag[] type
+        tags: ["Imported" as LeadTag],
         assignedTo: selectedAgent,
         assignedToName: agentName,
         taskType: "Call" as TaskType,
