@@ -39,23 +39,23 @@ const ChatTab: React.FC<ChatTabProps> = ({
     }
   };
   
-  // Vérifier si on doit afficher le bouton de défilement
+  // Check if we should show the scroll button
   const checkScrollPosition = () => {
     const container = scrollContainerRef.current;
     if (container) {
       const { scrollTop, scrollHeight, clientHeight } = container;
-      // Afficher le bouton quand l'utilisateur a défilé vers le haut (pas en bas)
+      // Show button when user has scrolled up (not at bottom)
       const isNotAtBottom = scrollHeight - scrollTop - clientHeight > 100;
       setShowScrollButton(isNotAtBottom);
     }
   };
   
-  // Fonction pour défiler vers le bas
+  // Function to scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
   
-  // Défiler automatiquement vers le bas quand de nouveaux messages sont ajoutés
+  // Automatically scroll to bottom when new messages are added
   useEffect(() => {
     scrollToBottom();
   }, [messages.length]);
@@ -75,8 +75,8 @@ const ChatTab: React.FC<ChatTabProps> = ({
                 className={`p-3 rounded-lg ${
                   msg.role === 'user'
                     ? 'bg-loro-hazel text-white'
-                    : 'bg-loro-pearl text-loro-navy'
-                }`}
+                    : 'bg-loro-pearl/50 text-loro-navy'
+                } shadow-sm`}
               >
                 {msg.content}
               </div>
@@ -96,10 +96,10 @@ const ChatTab: React.FC<ChatTabProps> = ({
         </div>
       </ScrollArea>
       
-      {/* Bouton de défilement vers le bas */}
+      {/* Scroll down button */}
       {showScrollButton && (
         <Button
-          className="absolute bottom-20 right-4 h-10 w-10 rounded-full bg-loro-hazel text-white shadow-md hover:bg-loro-hazel/90"
+          className="absolute bottom-24 right-8 h-10 w-10 rounded-full bg-loro-hazel text-white shadow-md hover:bg-loro-hazel/90 z-10 transition-all duration-300"
           onClick={scrollToBottom}
           size="icon"
         >

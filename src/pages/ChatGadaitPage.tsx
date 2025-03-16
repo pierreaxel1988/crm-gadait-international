@@ -15,7 +15,7 @@ const ChatGadaitPage = () => {
       </div>
       
       <div className="max-w-4xl mx-auto">
-        <div className="luxury-card p-0 overflow-hidden h-[80vh]">
+        <div className="luxury-card p-0 overflow-hidden h-[75vh] md:h-[80vh] bg-loro-white shadow-luxury">
           <ChatGadait isOpen={true} onClose={() => {}} />
         </div>
       </div>

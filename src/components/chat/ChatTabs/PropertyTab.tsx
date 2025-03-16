@@ -27,7 +27,7 @@ const PropertyTab: React.FC<PropertyTabProps> = ({
         <div className="space-y-4">
           <h3 className="font-timesNowSemi text-lg mb-2 text-loro-navy">Extraction de propriété</h3>
           
-          <Card className="border-loro-sand p-4">
+          <Card className="border-loro-sand/30 p-4 shadow-sm bg-loro-white">
             <p className="text-sm text-loro-hazel mb-3">
               Entrez l'URL d'une propriété pour extraire automatiquement ses informations.
             </p>
@@ -42,10 +42,10 @@ const PropertyTab: React.FC<PropertyTabProps> = ({
           </Card>
           
           {extractedData && (
-            <div className="border border-loro-sand rounded-md p-4 mt-2 bg-loro-pearl/30">
+            <div className="border border-loro-sand/30 rounded-md p-4 mt-4 bg-loro-pearl/20 shadow-sm transition-all duration-300 animate-fade-in">
               <h4 className="font-timesNowSemi text-lg mb-3 flex items-center justify-between text-loro-navy">
                 Données extraites
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-4 w-4 text-loro-hazel" />
               </h4>
               <div className="space-y-2 text-sm max-h-[400px] overflow-y-auto">
                 {Object.entries(extractedData).map(([key, value]) => (
@@ -55,7 +55,7 @@ const PropertyTab: React.FC<PropertyTabProps> = ({
                   </div>
                 ))}
               </div>
-              <Button className="mt-4 w-full bg-loro-navy hover:bg-loro-navy/90">
+              <Button className="mt-4 w-full bg-loro-hazel hover:bg-loro-hazel/90 text-white transition-all duration-200">
                 <ArrowRight className="h-4 w-4 mr-2" />
                 Utiliser ces données
               </Button>
