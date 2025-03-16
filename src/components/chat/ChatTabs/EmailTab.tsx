@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileText, Loader, MailPlus, ChevronDown, Send } from 'lucide-react';
+import { FileText, Loader, MailPlus, ChevronDown, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -28,25 +28,26 @@ const EmailTab: React.FC<EmailTabProps> = ({
         <p className="text-sm text-loro-hazel mb-3">
           Collez le contenu d'un email pour extraire automatiquement les informations du lead.
         </p>
-        <Textarea
-          className="w-full border-loro-sand focus-visible:ring-loro-navy mb-4"
-          placeholder="Collez le contenu de l'email ici..."
-          rows={8}
-          value={emailContent}
-          onChange={(e) => setEmailContent(e.target.value)}
-        />
         
         <div className="relative">
-          <Button 
-            className="w-full px-4 py-2 bg-loro-hazel hover:bg-loro-hazel/90 text-white"
+          <Textarea
+            className="w-full border-loro-sand focus-visible:ring-loro-navy mb-4 pr-16" 
+            placeholder="Collez le contenu de l'email ici..."
+            rows={8}
+            value={emailContent}
+            onChange={(e) => setEmailContent(e.target.value)}
+          />
+          
+          <Button
+            className="absolute bottom-6 right-4 rounded-full h-12 w-12 bg-black hover:bg-gray-800 text-white shadow-md"
             onClick={extractEmailData}
             disabled={isLoading || !emailContent.trim()}
+            size="icon"
           >
             {isLoading ? 
-              <Loader className="h-4 w-4 animate-spin mr-2" /> : 
-              <Send className="h-4 w-4 mr-2" />
+              <Loader className="h-5 w-5 animate-spin" /> : 
+              <ArrowUp className="h-5 w-5" />
             }
-            Valider et extraire les données
           </Button>
         </div>
       </div>
