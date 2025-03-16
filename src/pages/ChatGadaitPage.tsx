@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadCore';
-import { Country } from '@/types/lead';
+import { Country, PropertyType } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 
@@ -63,7 +63,7 @@ const ChatGadaitPage = () => {
         budget: extractedData.budget || "",
         propertyReference: extractedData.reference || "",
         desiredLocation: extractedData.desiredLocation || "",
-        propertyType: extractedData.propertyType || "",
+        propertyType: (extractedData.propertyType || "") as PropertyType,  // Cast to PropertyType
         country: (extractedData.country || "Spain") as Country,  // Cast to Country type
         notes: input || "",
         status: "New" as LeadStatus,  // Explicitly cast to LeadStatus
