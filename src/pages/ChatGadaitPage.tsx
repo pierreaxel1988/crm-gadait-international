@@ -92,6 +92,7 @@ const ChatGadaitPage = () => {
     }
 
     try {
+      // Prepare lead data using all available information from extractedData
       const newLead = {
         name: extractedData.name || "",
         email: extractedData.email || "",
@@ -100,15 +101,20 @@ const ChatGadaitPage = () => {
         budget: extractedData.budget || "",
         propertyReference: extractedData.reference || "",
         desiredLocation: extractedData.desiredLocation || "",
-        propertyType: (extractedData.propertyType || "") as PropertyType,
+        propertyType: (extractedData.propertyType || extractedData.type || "") as PropertyType,
         country: (extractedData.country || "Spain") as Country,
         notes: input || "",
         status: "New" as LeadStatus,
         tags: ["Imported" as LeadTag],
         assignedTo: selectedAgent,
-        // Stockez également le nom du commercial pour l'affichage
         assignedToName: agentName,
-        taskType: "Call" as TaskType // Cast explicite vers TaskType
+        taskType: "Call" as TaskType,
+        // Add bedrooms information if available
+        bedrooms: extractedData.bedrooms,
+        // Add views information if available
+        views: extractedData.views as string[] | undefined,
+        // Add amenities if available
+        amenities: extractedData.amenities as string[] | undefined
       };
       
       const createdLead = createLead(newLead);

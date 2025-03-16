@@ -1,4 +1,3 @@
-
 export const parseEmailContent = (emailText: string) => {
   const data: Record<string, any> = {
     integration_source: 'Email Parser'
@@ -78,7 +77,15 @@ export const parseEmailContent = (emailText: string) => {
         data.budget = propertyDetailsMatch[1].trim();
       }
       data.living_area = `${propertyDetailsMatch[2].trim()} m²`;
+      data.rooms = parseInt(propertyDetailsMatch[3], 10);
       data.bedrooms = parseInt(propertyDetailsMatch[4], 10);
+    }
+    
+    if (emailText.toLowerCase().includes('vue mer')) {
+      data.views = data.views || [];
+      if (!data.views.includes('Mer')) {
+        data.views.push('Mer');
+      }
     }
   } else if (emailText.includes('Properstar')) {
     data.portal_name = 'Properstar';
@@ -94,7 +101,6 @@ export const parseEmailContent = (emailText: string) => {
     data.source = 'Idealista';
   }
 
-  // Process generic email data
   if (!data.name) {
     const nameMatch = emailText.match(/Name\s*:\s*([^\r\n]+)/i) || 
                       emailText.match(/Coordonates\s*:[\s\S]*?Name\s*:\s*([^\r\n]+)/i);
@@ -136,7 +142,6 @@ export const parseEmailContent = (emailText: string) => {
     data.language = langMatch[1].trim();
   }
 
-  // Handle Property Cloud specific data
   if (isApimoProperyCloud) {
     const criteriasPropMatch = emailText.match(/Criterias\s*:[\s\S]*?Property\s*:\s*(\d+)([^\r\n]+)/i);
     if (criteriasPropMatch) {
@@ -173,7 +178,6 @@ export const parseEmailContent = (emailText: string) => {
       }
     }
   } else if (!isLeFigaro) {
-    // Handle other email formats
     const countryMatch = emailText.match(/Country\s*:\s*([^\r\n]+)/i);
     if (countryMatch && countryMatch[1]) {
       data.country = countryMatch[1].trim();
@@ -215,7 +219,6 @@ export const parseEmailContent = (emailText: string) => {
     }
   }
   
-  // Fallbacks for important fields
   if (!data.email) {
     const genericEmailMatch = emailText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
     if (genericEmailMatch) {
