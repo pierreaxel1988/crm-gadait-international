@@ -9,6 +9,7 @@ import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadCore';
 import { Country } from '@/types/lead';
+import { LeadStatus } from '@/components/common/StatusBadge';
 
 const ChatGadaitPage = () => {
   const {
@@ -64,7 +65,7 @@ const ChatGadaitPage = () => {
         propertyType: extractedData.propertyType || "",
         country: (extractedData.country || "Spain") as Country,  // Cast to Country type
         notes: input || "",
-        status: "New",
+        status: "New" as LeadStatus,  // Explicitly cast to LeadStatus
         tags: ["Imported"],
         assignedTo: selectedAgent,
         taskType: "Call"
