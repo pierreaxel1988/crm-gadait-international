@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { Home, Loader, ArrowRight, ChevronDown } from 'lucide-react';
+import { Home, Loader, ArrowRight, ChevronDown, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 
 interface PropertyTabProps {
   propertyUrl: string;
@@ -23,28 +24,36 @@ const PropertyTab: React.FC<PropertyTabProps> = ({
     <div className="flex-1 flex flex-col p-4 overflow-hidden">
       <div className="mb-4">
         <h3 className="font-timesNowSemi text-lg mb-2 text-loro-navy">Extraction de propriété</h3>
-        <p className="text-sm text-loro-hazel mb-3">
-          Entrez l'URL d'une propriété pour extraire automatiquement ses informations.
-        </p>
-        <div className="relative">
-          <Input
-            type="text"
-            className="w-full border-loro-sand focus-visible:ring-loro-navy pr-14"
-            placeholder="https://www.exemple-immobilier.com/propriete/123"
-            value={propertyUrl}
-            onChange={(e) => setPropertyUrl(e.target.value)}
-          />
-          <Button 
-            className="absolute right-0 top-0 h-full px-3 bg-loro-hazel hover:bg-loro-hazel/90"
-            onClick={extractPropertyData}
-            disabled={isLoading || !propertyUrl.trim()}
-          >
-            {isLoading ? 
-              <Loader className="h-4 w-4 animate-spin" /> : 
-              <ArrowRight className="h-4 w-4" />
-            }
-          </Button>
-        </div>
+        
+        <Card className="border-loro-sand p-4">
+          <p className="text-sm text-loro-hazel mb-3">
+            Entrez l'URL d'une propriété pour extraire automatiquement ses informations.
+          </p>
+          
+          <div className="relative border border-loro-sand rounded-md overflow-hidden">
+            <Input
+              type="text"
+              className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 pr-12"
+              placeholder="https://www.exemple-immobilier.com/propriete/123"
+              value={propertyUrl}
+              onChange={(e) => setPropertyUrl(e.target.value)}
+            />
+            
+            <Button 
+              size="icon"
+              className={`absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full h-8 w-8 ${
+                propertyUrl.trim() ? 'bg-loro-hazel hover:bg-loro-hazel/90' : 'bg-loro-sand/50'
+              } text-white`}
+              onClick={extractPropertyData}
+              disabled={isLoading || !propertyUrl.trim()}
+            >
+              {isLoading ? 
+                <Loader className="h-4 w-4 animate-spin" /> : 
+                <Send className="h-4 w-4" />
+              }
+            </Button>
+          </div>
+        </Card>
       </div>
       
       {extractedData && (

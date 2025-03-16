@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileText, Loader, MailPlus, ChevronDown, ArrowUp, Check } from 'lucide-react';
+import { FileText, Loader, MailPlus, ChevronDown, Send, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
@@ -66,33 +66,34 @@ const EmailTab: React.FC<EmailTabProps> = ({
             Collez le contenu d'un email pour extraire automatiquement les informations du lead.
           </p>
           
-          <div className="relative">
+          <div className="relative border border-loro-sand rounded-md overflow-hidden">
             <Textarea
-              className="w-full border-loro-sand focus-visible:ring-loro-navy mb-4 pr-16" 
+              className="resize-none pr-12 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[150px]" 
               placeholder="Collez le contenu de l'email ici..."
-              rows={8}
               value={emailContent}
               onChange={(e) => setEmailContent(e.target.value)}
               onKeyDown={handleKeyDown}
             />
             
             <Button
-              className={`absolute bottom-6 right-4 rounded-full h-14 w-14 shadow-md transition-all duration-300 ${
-                extractionSuccess 
-                  ? 'bg-green-600 hover:bg-green-700' 
-                  : 'bg-black hover:bg-gray-800'
+              size="icon"
+              className={`absolute right-2 bottom-2 rounded-full h-12 w-12 ${
+                emailContent.trim() 
+                  ? (extractionSuccess 
+                    ? 'bg-green-600 hover:bg-green-700' 
+                    : 'bg-loro-hazel hover:bg-loro-hazel/90') 
+                  : 'bg-loro-sand/50'
               } text-white`}
               onClick={handleExtraction}
               disabled={isLoading || !emailContent.trim()}
-              size="icon"
               title="Extraire les informations (ou appuyez sur Ctrl+Enter)"
             >
               {isLoading ? (
-                <Loader className="h-6 w-6 animate-spin" />
+                <Loader className="h-5 w-5 animate-spin" />
               ) : extractionSuccess ? (
-                <Check className="h-6 w-6" />
+                <Check className="h-5 w-5" />
               ) : (
-                <ArrowUp className="h-6 w-6" />
+                <Send className="h-5 w-5" />
               )}
             </Button>
           </div>

@@ -72,7 +72,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
       <div className="relative border border-loro-sand rounded-md overflow-hidden">
         <Textarea
           className="resize-none pr-12 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[60px]"
-          placeholder="Posez votre question..."
+          placeholder="Ask anything..."
           rows={2}
           value={input}
           onChange={(e) => setInput(e.target.value)}
