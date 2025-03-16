@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -42,7 +41,6 @@ export const useChatGadait = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Fetch team members for agent assignment
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
@@ -223,8 +221,7 @@ export const useChatGadait = () => {
         status: "New",
         tags: ["Imported"],
         assignedTo: selectedAgent,
-        // Update to use a valid TaskType value based on the pipeline
-        taskType: selectedPipeline === 'purchase' ? 'Propositions' : 'Contrat de Location',
+        taskType: "Call",
       };
       
       createLead(newLead);
