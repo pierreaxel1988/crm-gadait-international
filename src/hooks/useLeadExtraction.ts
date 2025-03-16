@@ -3,10 +3,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadCore';
-import { Country, PropertyType, Amenity, ViewType, LeadStatus, LeadTag, LeadDetailed } from '@/types/lead';
+import { Country, PropertyType, LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import { supabase } from '@/integrations/supabase/client';
-import { mapStringToAmenity, mapStringToViewType } from '@/utils/amenityUtils';
 import { ExtractedData } from '@/components/chat/types/chatTypes';
 
 export const useLeadExtraction = () => {
@@ -114,25 +113,7 @@ export const useLeadExtraction = () => {
     }
 
     try {
-      // Convert string[] amenities to Amenity[] if they exist
-      let mappedAmenities: Amenity[] | undefined = undefined;
-      
-      if (extractedData.amenities && Array.isArray(extractedData.amenities)) {
-        mappedAmenities = extractedData.amenities.map(amenity => 
-          typeof amenity === 'string' ? mapStringToAmenity(amenity) : amenity
-        ) as Amenity[];
-      }
-      
-      // Process views as ViewType[] if needed
-      let mappedViews: ViewType[] | undefined = undefined;
-      
-      if (extractedData.views && Array.isArray(extractedData.views)) {
-        mappedViews = extractedData.views.map(view => 
-          typeof view === 'string' ? mapStringToViewType(view) : view
-        ) as ViewType[];
-      }
-      
-      // Prepare lead data using all available information from extractedData
+      // Prepare lead data using essential information from extractedData
       const newLead = {
         name: extractedData.name || "",
         email: extractedData.email || "",
@@ -144,17 +125,13 @@ export const useLeadExtraction = () => {
         propertyType: (extractedData.propertyType || extractedData.type || "") as PropertyType,
         country: (extractedData.country || "Spain") as Country,
         notes: extractedData.notes || "",
-        status: "New" as LeadStatus,
-        tags: ["Imported" as LeadTag],
+        status: "New" as const,
+        tags: ["Imported"],
         assignedTo: selectedAgent,
         assignedToName: agentName,
         taskType: "Call" as TaskType,
-        // Add bedrooms information if available
-        bedrooms: extractedData.bedrooms,
-        // Add views information if available
-        views: mappedViews,
-        // Add properly mapped amenities if available
-        amenities: mappedAmenities
+        // Only include bedrooms if available
+        bedrooms: extractedData.bedrooms
       };
       
       const createdLead = createLead(newLead);

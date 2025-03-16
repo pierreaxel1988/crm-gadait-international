@@ -9,8 +9,6 @@ export const mapStringToAmenity = (amenity: string): Amenity => {
   if (normalizedAmenity.includes('jardin')) return 'Jardin';
   if (normalizedAmenity.includes('garage')) return 'Garage';
   if (normalizedAmenity.includes('sécurité') || normalizedAmenity.includes('securite')) return 'Sécurité';
-  // Make sure to return a valid Amenity type value
-  if (normalizedAmenity.includes('vue mer') || normalizedAmenity.includes('sea view')) return 'Mer';
   
   return 'Piscine'; // Default value if no match is found
 };
