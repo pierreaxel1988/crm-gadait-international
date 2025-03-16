@@ -112,4 +112,6 @@ export interface LeadDetailed {
   external_id?: string;
   raw_data?: any;
   imported_at?: string;
+  // Champ URL pour l'annonce immobilière
+  url?: string;
 }

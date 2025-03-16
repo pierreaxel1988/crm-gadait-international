@@ -1,10 +1,11 @@
 
-import React from 'react';
-import { Filter, Plus, Settings, RefreshCcw } from 'lucide-react';
+import React, { useState } from 'react';
+import { Filter, Plus, Settings, RefreshCcw, Mail } from 'lucide-react';
 import CustomButton from '@/components/ui/CustomButton';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import PipelineFilters, { FilterOptions } from '@/components/pipeline/PipelineFilters';
+import EmailImportModal from './EmailImportModal';
 
 interface PipelineHeaderProps {
   filters: FilterOptions;
@@ -27,6 +28,7 @@ const PipelineHeader = ({
 }: PipelineHeaderProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
   return (
     <div className="space-y-4">
@@ -46,6 +48,13 @@ const PipelineHeader = ({
             >
               <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} /> 
               Actualiser
+            </CustomButton>
+            <CustomButton
+              variant="outline"
+              className="flex items-center gap-1.5"
+              onClick={() => setIsEmailModalOpen(true)}
+            >
+              <Mail className="h-4 w-4" /> Importer un email
             </CustomButton>
             <PipelineFilters 
               filters={filters}
@@ -80,6 +89,13 @@ const PipelineHeader = ({
             >
               <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </CustomButton>
+            <CustomButton
+              variant="outline"
+              className="flex items-center justify-center w-10 h-10 p-0"
+              onClick={() => setIsEmailModalOpen(true)}
+            >
+              <Mail className="h-4 w-4" />
+            </CustomButton>
             <PipelineFilters 
               filters={filters}
               onFilterChange={onFilterChange}
@@ -90,6 +106,13 @@ const PipelineHeader = ({
           </div>
         )}
       </div>
+
+      <EmailImportModal 
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        teamMembers={teamMembers}
+        onLeadCreated={handleRefresh}
+      />
     </div>
   );
 };
