@@ -86,6 +86,7 @@ export interface LeadDetailed {
   status: LeadStatus;
   tags: LeadTag[];
   assignedTo?: string;
+  assignedToName?: string; // Added property for storing the agent's name
   createdAt: string;
   lastContactedAt?: string;
   source?: LeadSource;
