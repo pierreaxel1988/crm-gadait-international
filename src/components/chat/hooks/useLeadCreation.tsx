@@ -13,11 +13,9 @@ export const useLeadCreation = () => {
   const [showAssignmentForm, setShowAssignmentForm] = useState(false);
   const navigate = useNavigate();
   
-  // Set default agent when form is shown
+  // Set default agent when form is shown or component mounts
   useEffect(() => {
-    if (showAssignmentForm) {
-      fetchPierreAxelId();
-    }
+    fetchPierreAxelId();
   }, [showAssignmentForm]);
   
   const fetchPierreAxelId = async () => {
@@ -45,10 +43,15 @@ export const useLeadCreation = () => {
     if (!extractedData) return;
     
     if (!selectedAgent) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Veuillez sélectionner un commercial à qui assigner ce lead."
+      // Même si l'agent n'est pas sélectionné, on essaie de récupérer Pierre Axel
+      fetchPierreAxelId().then(() => {
+        if (!selectedAgent) {
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible d'assigner le lead à Pierre Axel Gadait."
+          });
+        }
       });
       return;
     }
@@ -75,7 +78,7 @@ export const useLeadCreation = () => {
       
       toast({
         title: "Lead créé",
-        description: `Le lead ${newLead.name} a été créé avec succès dans le pipeline ${selectedPipeline === 'purchase' ? 'achat' : 'location'}.`
+        description: `Le lead ${newLead.name} a été créé avec succès et assigné à Pierre Axel Gadait.`
       });
       
       clearForm();
