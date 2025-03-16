@@ -1,12 +1,31 @@
 
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
-import ChatGadait from '@/components/chat/ChatGadait';
+import { useChatGadait } from '@/components/chat/hooks/useChatGadait';
+import EnhancedInput from '@/components/chat/EnhancedInput';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 
 const ChatGadaitPage = () => {
+  const {
+    messages,
+    input,
+    setInput,
+    isLoading,
+    messagesEndRef,
+    handleSendMessage
+  } = useChatGadait();
+  
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      <div>
+    <div className="flex flex-col h-[calc(100vh-8rem)] max-w-4xl mx-auto px-4">
+      <div className="mb-4">
         <h1 className="text-2xl md:text-3xl font-timesNowSemi text-loro-navy flex items-center gap-2">
           <MessageSquare className="h-6 w-6" />
           Chat Gadait
@@ -14,9 +33,62 @@ const ChatGadaitPage = () => {
         <p className="text-loro-hazel">Assistant IA pour la gestion des leads et des propriétés</p>
       </div>
       
-      <div className="max-w-4xl mx-auto">
-        <div className="luxury-card p-0 overflow-hidden h-[75vh] md:h-[80vh] bg-loro-white shadow-luxury">
-          <ChatGadait isOpen={true} onClose={() => {}} />
+      <div className="flex-1 flex flex-col bg-loro-white rounded-lg shadow-luxury overflow-hidden">
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-4 px-2">
+            {messages.length === 0 ? (
+              <div className="flex h-full items-center justify-center py-12">
+                <div className="text-center space-y-4">
+                  <MessageSquare className="h-12 w-12 mx-auto text-loro-hazel opacity-50" />
+                  <h3 className="text-xl font-medium text-loro-navy">Bienvenue sur Chat Gadait</h3>
+                  <p className="text-muted-foreground max-w-sm">
+                    Comment puis-je vous aider aujourd'hui avec vos leads et propriétés?
+                  </p>
+                </div>
+              </div>
+            ) : (
+              messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`max-w-[85%] ${
+                    msg.role === 'user' ? 'ml-auto' : 'mr-auto'
+                  }`}
+                >
+                  <div
+                    className={`p-3 rounded-lg ${
+                      msg.role === 'user'
+                        ? 'bg-loro-hazel text-white'
+                        : 'bg-loro-pearl/50 text-loro-navy'
+                    } shadow-sm`}
+                  >
+                    {msg.content}
+                  </div>
+                  <div
+                    className={`text-xs text-gray-500 mt-1 ${
+                      msg.role === 'user' ? 'text-right' : 'text-left'
+                    }`}
+                  >
+                    {msg.timestamp.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
+        
+        <div className="p-4 border-t border-loro-pearl">
+          <EnhancedInput
+            input={input}
+            setInput={setInput}
+            placeholder="Ask anything..."
+            isLoading={isLoading}
+            handleSend={handleSendMessage}
+            onKeyDown={handleKeyDown}
+          />
         </div>
       </div>
     </div>

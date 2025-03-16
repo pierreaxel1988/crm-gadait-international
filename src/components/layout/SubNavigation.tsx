@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { 
   NavigationMenu,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList
 } from "@/components/ui/navigation-menu";
 import { MessageSquare, PieChart, Users, Calendar, ListTodo } from 'lucide-react';

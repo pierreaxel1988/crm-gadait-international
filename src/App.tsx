@@ -87,7 +87,7 @@ const AppRoutes = () => {
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="/api" element={<ProtectedRoute><ApiGuide /></ProtectedRoute>} />
             <Route path="/lead-import" element={<ProtectedRoute><LeadImport /></ProtectedRoute>} />
-            <Route path="/chat-gadait" element={<ChatGadaitPage />} />
+            <Route path="/chat-gadait" element={<ProtectedRoute><ChatGadaitPage /></ProtectedRoute>} />
             <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
