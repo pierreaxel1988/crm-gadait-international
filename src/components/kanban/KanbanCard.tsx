@@ -73,7 +73,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
         try {
           const { data, error } = await supabase
             .from('team_members')
-            .select('id, name, avatar_url')
+            .select('id, name')
             .eq('id', item.assignedTo)
             .single();
             
@@ -85,9 +85,6 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
           if (data) {
             setAssignedToName(data.name);
             setAssignedToId(data.id);
-            if (data.avatar_url) {
-              setAssignedToAvatar(data.avatar_url);
-            }
           }
         } catch (error) {
           console.error('Unexpected error fetching team member info:', error);
@@ -312,7 +309,6 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
           {item.assignedTo ? (
             <div className="flex items-center">
               <Avatar className="h-5 w-5 mr-1">
-                {assignedToAvatar && <AvatarImage src={assignedToAvatar} alt={assignedToName} />}
                 <AvatarFallback className="text-[9px]">
                   {assignedToName.split(' ').map(part => part[0]).join('')}
                 </AvatarFallback>

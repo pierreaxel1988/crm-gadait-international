@@ -44,7 +44,7 @@ export const useKanbanData = (
         // Fetch team members for assignment information
         const { data: teamMembers, error: teamError } = await supabase
           .from('team_members')
-          .select('id, email, name, avatar_url');
+          .select('id, email, name');
           
         if (teamError) {
           console.error('Error fetching team members:', teamError);
