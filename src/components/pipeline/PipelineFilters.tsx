@@ -21,11 +21,16 @@ export interface FilterOptions {
   propertyType: PropertyType | null;
 }
 
+interface TeamMember {
+  id: string;
+  name: string;
+}
+
 interface PipelineFiltersProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
-  assignedToOptions: string[];
+  assignedToOptions: TeamMember[];
   isFilterActive: boolean;
 }
 
@@ -172,15 +177,15 @@ const PipelineFilters = ({
                 >
                   Tous
                 </Button>
-                {assignedToOptions.map((user) => (
+                {assignedToOptions.map((member) => (
                   <Button
-                    key={user}
-                    variant={filters.assignedTo === user ? "default" : "outline"}
+                    key={member.id}
+                    variant={filters.assignedTo === member.id ? "default" : "outline"}
                     size="sm"
                     className="text-xs"
-                    onClick={() => handleAssignedToChange(user)}
+                    onClick={() => handleAssignedToChange(member.id)}
                   >
-                    {user}
+                    {member.name}
                   </Button>
                 ))}
               </div>

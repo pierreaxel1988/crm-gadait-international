@@ -25,9 +25,15 @@ export const applyFiltersToColumns = (
     
     // Filter by assignedTo
     if (filters.assignedTo) {
-      filteredItems = filteredItems.filter(item => 
-        item.assignedTo === filters.assignedTo
-      );
+      filteredItems = filteredItems.filter(item => {
+        // Check if the item has an assignedTo property that matches the filter
+        // This can be either the name or the ID
+        if (typeof item.assignedTo === 'string') {
+          return item.assignedTo === filters.assignedTo || 
+                 item.assignedToId === filters.assignedTo;
+        }
+        return false;
+      });
     }
     
     // Apply budget filters if provided

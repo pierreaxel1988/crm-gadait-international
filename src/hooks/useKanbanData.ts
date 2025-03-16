@@ -13,6 +13,7 @@ export interface ExtendedKanbanItem extends KanbanItem {
   desiredLocation?: string;
   purchaseTimeframe?: PurchaseTimeframe;
   propertyType?: PropertyType;
+  assignedToId?: string; // Add this to store the original ID
 }
 
 interface KanbanColumn {
@@ -74,6 +75,7 @@ export const useKanbanData = (
             status: lead.status as LeadStatus,
             tags: lead.tags || [],
             assignedTo: assignedTeamMember ? assignedTeamMember.name : undefined,
+            assignedToId: lead.assigned_to, // Store the original ID
             dueDate: lead.next_follow_up_date,
             pipelineType: 'purchase',
             taskType: lead.task_type,

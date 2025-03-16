@@ -34,15 +34,15 @@ const Kanban = () => {
     propertyType: null
   });
 
-  // Get unique assigned users from Supabase
-  const [assignedUsers, setAssignedUsers] = useState<string[]>([]);
+  // Get team members from Supabase with both ID and name
+  const [teamMembers, setTeamMembers] = useState<{id: string, name: string}[]>([]);
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
         const { data, error } = await supabase
           .from('team_members')
-          .select('name');
+          .select('id, name');
           
         if (error) {
           console.error('Error fetching team members:', error);
@@ -50,7 +50,7 @@ const Kanban = () => {
         }
         
         if (data) {
-          setAssignedUsers(data.map(tm => tm.name));
+          setTeamMembers(data);
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -123,6 +123,12 @@ const Kanban = () => {
     }));
   };
 
+  // Get the team member name for display
+  const getTeamMemberName = (id: string) => {
+    const member = teamMembers.find(tm => tm.id === id);
+    return member ? member.name : id;
+  };
+
   return (
     <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
@@ -146,7 +152,7 @@ const Kanban = () => {
               filters={filters}
               onFilterChange={setFilters}
               onClearFilters={handleClearFilters}
-              assignedToOptions={assignedUsers}
+              assignedToOptions={teamMembers}
               isFilterActive={isFilterActive}
             />
             <CustomButton
@@ -179,7 +185,7 @@ const Kanban = () => {
               filters={filters}
               onFilterChange={setFilters}
               onClearFilters={handleClearFilters}
-              assignedToOptions={assignedUsers}
+              assignedToOptions={teamMembers}
               isFilterActive={isFilterActive}
             />
           </div>
@@ -214,7 +220,7 @@ const Kanban = () => {
           
           {filters.assignedTo && (
             <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-              {filters.assignedTo}
+              {getTeamMemberName(filters.assignedTo)}
               <button onClick={() => setFilters({...filters, assignedTo: null})}>
                 <X className="h-3 w-3 ml-1" />
               </button>
