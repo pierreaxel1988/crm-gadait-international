@@ -57,12 +57,12 @@ const ChatGadaitPage = () => {
         name: extractedData.name || "",
         email: extractedData.email || "",
         phone: extractedData.phone || "",
-        source: "Le Figaro",
+        source: "Le Figaro" as const,  // Explicitly cast to LeadSource
         budget: extractedData.budget || "",
         propertyReference: extractedData.reference || "",
         desiredLocation: extractedData.desiredLocation || "",
         propertyType: extractedData.propertyType || "",
-        country: (extractedData.country || "Spain") as Country,
+        country: (extractedData.country || "Spain") as Country,  // Cast to Country type
         notes: input || "",
         status: "New",
         tags: ["Imported"],
