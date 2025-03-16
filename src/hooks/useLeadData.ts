@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
-import { getLead } from '@/services/leadService';
+import { getLead } from '@/services/leadCore';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -18,7 +18,7 @@ export const useLeadData = (id: string | undefined) => {
 
       try {
         // Récupérer les données du lead
-        const leadData = getLead(id);
+        const leadData = await getLead(id);
         
         // Si le lead n'est pas assigné, chercher l'ID de Pierre Axel Gadait
         // Mais uniquement si le lead n'a pas déjà été assigné lors de l'importation

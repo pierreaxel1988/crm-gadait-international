@@ -30,6 +30,7 @@ export const useEmailDataExtraction = () => {
       // Check if it's a Le Figaro email
       if (emailContent.includes('Propriétés Le Figaro')) {
         propertyDetails = extractLefigaroPropertyDetails(emailContent);
+        console.log('Extracted Le Figaro details:', propertyDetails);
       }
       
       // Now proceed with the AI extraction, adding the property details we've extracted
@@ -67,6 +68,7 @@ export const useEmailDataExtraction = () => {
           jsonData.nationality = deriveNationalityFromCountry(jsonData.country);
         }
         
+        console.log('Final extracted data:', jsonData);
         setExtractedData(jsonData);
         
         toast({
@@ -74,6 +76,7 @@ export const useEmailDataExtraction = () => {
           description: "Les informations ont été extraites avec succès."
         });
       } catch (parseError) {
+        console.error('Error parsing AI response:', parseError);
         setExtractedData({ raw: data.response });
         toast({
           variant: "destructive",
