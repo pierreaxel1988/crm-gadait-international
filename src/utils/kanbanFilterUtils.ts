@@ -1,11 +1,12 @@
 
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
+import { LeadStatus } from '@/components/common/StatusBadge';
 
 export const applyFiltersToColumns = (
   columns: {
     title: string;
-    status: string;
+    status: LeadStatus;
     items: ExtendedKanbanItem[];
   }[],
   filters: FilterOptions | undefined

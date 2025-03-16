@@ -14,7 +14,7 @@ interface KanbanColumnProps {
   onDrop?: (item: KanbanItem, status: LeadStatus) => void;
 }
 
-const KanbanColumn = ({ title, status, items, className, onDrop }: KanbanColumnProps) => {
+const KanbanColumn = ({ title, status, className, items, onDrop }: KanbanColumnProps) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   
