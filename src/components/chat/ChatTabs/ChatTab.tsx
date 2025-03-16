@@ -62,7 +62,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
 
   return (
     <div className="flex-1 flex flex-col p-4 overflow-hidden">
-      <ScrollArea className="flex-1 mb-4 pr-4" viewportRef={scrollContainerRef} onScroll={checkScrollPosition}>
+      <ScrollArea className="flex-1 mb-4 pr-4" ref={scrollContainerRef} onScroll={checkScrollPosition}>
         <div className="space-y-4 px-2">
           {messages.map((msg) => (
             <div

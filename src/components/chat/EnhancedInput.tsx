@@ -88,7 +88,8 @@ const EnhancedInput: React.FC<EnhancedInputProps> = ({
               toast.success("Transcription terminée");
               
               if (data.text) {
-                setInput(prev => prev ? `${prev} ${data.text}` : data.text);
+                // Fix type error here - use concatenation instead of a function
+                setInput(input ? `${input} ${data.text}` : data.text);
               }
             } catch (error) {
               toast.dismiss();
@@ -159,7 +160,7 @@ const EnhancedInput: React.FC<EnhancedInputProps> = ({
           toast.success("Analyse terminée");
           
           if (data.text) {
-            // Corriger l'erreur de type ici
+            // Fix type error here - use a direct string assignment
             const newValue = `${input ? input + '\n\n' : ''}Document analysé: ${fileName}\n${data.text}`;
             setInput(newValue);
           }
