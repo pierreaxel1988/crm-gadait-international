@@ -4,6 +4,7 @@ import { FileText, Loader, MailPlus, ChevronDown, ArrowUp, Check } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { Card } from '@/components/ui/card';
 
 interface EmailTabProps {
   emailContent: string;
@@ -59,40 +60,43 @@ const EmailTab: React.FC<EmailTabProps> = ({
     <div className="flex-1 flex flex-col p-4 overflow-hidden">
       <div className="mb-4">
         <h3 className="font-timesNowSemi text-lg mb-2 text-loro-navy">Extraction d'email</h3>
-        <p className="text-sm text-loro-hazel mb-3">
-          Collez le contenu d'un email pour extraire automatiquement les informations du lead.
-        </p>
         
-        <div className="relative">
-          <Textarea
-            className="w-full border-loro-sand focus-visible:ring-loro-navy mb-4 pr-16" 
-            placeholder="Collez le contenu de l'email ici..."
-            rows={8}
-            value={emailContent}
-            onChange={(e) => setEmailContent(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
+        <Card className="border-loro-sand p-4">
+          <p className="text-sm text-loro-hazel mb-3">
+            Collez le contenu d'un email pour extraire automatiquement les informations du lead.
+          </p>
           
-          <Button
-            className={`absolute bottom-6 right-4 rounded-full h-14 w-14 shadow-md transition-all duration-300 ${
-              extractionSuccess 
-                ? 'bg-green-600 hover:bg-green-700' 
-                : 'bg-black hover:bg-gray-800'
-            } text-white`}
-            onClick={handleExtraction}
-            disabled={isLoading || !emailContent.trim()}
-            size="icon"
-            title="Extraire les informations (ou appuyez sur Ctrl+Enter)"
-          >
-            {isLoading ? (
-              <Loader className="h-6 w-6 animate-spin" />
-            ) : extractionSuccess ? (
-              <Check className="h-6 w-6" />
-            ) : (
-              <ArrowUp className="h-6 w-6" />
-            )}
-          </Button>
-        </div>
+          <div className="relative">
+            <Textarea
+              className="w-full border-loro-sand focus-visible:ring-loro-navy mb-4 pr-16" 
+              placeholder="Collez le contenu de l'email ici..."
+              rows={8}
+              value={emailContent}
+              onChange={(e) => setEmailContent(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            
+            <Button
+              className={`absolute bottom-6 right-4 rounded-full h-14 w-14 shadow-md transition-all duration-300 ${
+                extractionSuccess 
+                  ? 'bg-green-600 hover:bg-green-700' 
+                  : 'bg-black hover:bg-gray-800'
+              } text-white`}
+              onClick={handleExtraction}
+              disabled={isLoading || !emailContent.trim()}
+              size="icon"
+              title="Extraire les informations (ou appuyez sur Ctrl+Enter)"
+            >
+              {isLoading ? (
+                <Loader className="h-6 w-6 animate-spin" />
+              ) : extractionSuccess ? (
+                <Check className="h-6 w-6" />
+              ) : (
+                <ArrowUp className="h-6 w-6" />
+              )}
+            </Button>
+          </div>
+        </Card>
       </div>
       
       {extractedData && (
