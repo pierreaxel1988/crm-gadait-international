@@ -35,7 +35,9 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
     setSelectedPipeline,
     selectedAgent,
     setSelectedAgent,
-    teamMembers
+    teamMembers,
+    showAssignmentForm,
+    setShowAssignmentForm
   } = useChatGadait();
 
   // Handle escape key to close modal
@@ -72,7 +74,9 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
     setSelectedPipeline,
     selectedAgent,
     setSelectedAgent,
-    teamMembers
+    teamMembers,
+    showAssignmentForm,
+    setShowAssignmentForm
   };
 
   const propertyTabProps = {
