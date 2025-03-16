@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadCore';
 import { LeadDetailed } from '@/types/lead';
@@ -51,15 +52,12 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
 
     setIsLoading(true);
     try {
-      // Pre-process the email to extract property details if it's a Le Figaro email
       let propertyDetails = {};
       
-      // Check if it's a Le Figaro email
       if (emailContent.includes('Propriétés Le Figaro')) {
         propertyDetails = extractLefigaroPropertyDetails(emailContent);
       }
       
-      // Now proceed with the AI extraction, adding the property details we've extracted
       const { data, error } = await supabase.functions.invoke('chat-gadait', {
         body: { 
           type: 'email-extract', 
@@ -75,7 +73,6 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
       try {
         const jsonData = JSON.parse(data.response);
         
-        // Merge any property details we extracted with the AI response
         if (propertyDetails && Object.keys(propertyDetails).length > 0) {
           Object.keys(propertyDetails).forEach(key => {
             if (propertyDetails[key] && !jsonData[key]) {
@@ -84,12 +81,10 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
           });
         }
         
-        // Make sure property type is properly normalized to match our enum values
         if (jsonData.propertyType || jsonData.property_type) {
           jsonData.propertyType = normalizePropertyType(jsonData.propertyType || jsonData.property_type);
         }
         
-        // Add nationality based on country if available
         if (jsonData.country && !jsonData.nationality) {
           jsonData.nationality = deriveNationalityFromCountry(jsonData.country);
         }
@@ -135,9 +130,9 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     
     try {
       const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
-        name: extractedData.Name || extractedData.name || "",
-        email: extractedData.Email || extractedData.email || "",
-        phone: extractedData.Phone || extractedData.phone || "",
+        name: extractedData.name || extractedData.Name || "",
+        email: extractedData.email || extractedData.Email || "",
+        phone: extractedData.phone || extractedData.Phone || "",
         source: extractedData.Source || extractedData.source || "Site web",
         budget: extractedData.Budget || extractedData.budget || "",
         propertyReference: extractedData.property_reference || extractedData.reference || extractedData["Property reference"] || "",
@@ -150,7 +145,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         assignedTo: selectedAgent,
         bedrooms: extractedData.bedrooms || undefined,
         url: extractedData.url || "",
-        taskType: "Call", // Always assign "Call" task regardless of pipeline
+        taskType: "Call",
       };
       
       createLead(newLead);
@@ -176,7 +171,6 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     }
   };
 
-  // Format the extracted data for display
   const groupedData = React.useMemo(() => {
     if (!extractedData) return null;
     
@@ -219,7 +213,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md md:max-w-2xl">
+      <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mail className="h-5 w-5" />
@@ -230,185 +224,185 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {!extractedData ? (
-            <div>
-              <Textarea
-                placeholder="Collez le contenu de l'email ici..."
-                className="min-h-[200px] resize-none"
-                value={emailContent}
-                onChange={(e) => setEmailContent(e.target.value)}
-              />
-              <Button 
-                className="mt-2 w-full bg-loro-navy hover:bg-loro-navy/90" 
-                onClick={handleExtractEmail}
-                disabled={isLoading || !emailContent.trim()}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Extraction en cours...
-                  </>
-                ) : (
-                  'Extraire les informations'
-                )}
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Contact Information */}
-              {groupedData?.contact && (
-                <div className="border rounded-md p-3">
-                  <h3 className="font-medium text-sm mb-2">Informations de contact</h3>
-                  <div className="space-y-1 text-sm">
-                    {Object.entries(groupedData.contact).map(([key, value]) => 
-                      value && (
-                        <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                          <span className="font-medium capitalize">{key === 'name' ? 'Nom' : 
-                                                                     key === 'email' ? 'Email' : 
-                                                                     key === 'phone' ? 'Téléphone' : 
-                                                                     key === 'country' ? 'Pays' : 
-                                                                     key === 'nationality' ? 'Nationalité' : 
-                                                                     key}:</span>
-                          <span className="text-muted-foreground">{String(value)}</span>
-                        </div>
-                      )
-                    )}
+        <ScrollArea className="flex-1 overflow-auto pr-4">
+          <div className="space-y-4">
+            {!extractedData ? (
+              <div>
+                <Textarea
+                  placeholder="Collez le contenu de l'email ici..."
+                  className="min-h-[200px] resize-none"
+                  value={emailContent}
+                  onChange={(e) => setEmailContent(e.target.value)}
+                />
+                <Button 
+                  className="mt-2 w-full bg-loro-navy hover:bg-loro-navy/90" 
+                  onClick={handleExtractEmail}
+                  disabled={isLoading || !emailContent.trim()}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Extraction en cours...
+                    </>
+                  ) : (
+                    'Extraire les informations'
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {groupedData?.contact && (
+                  <div className="border rounded-md p-3">
+                    <h3 className="font-medium text-sm mb-2">Informations de contact</h3>
+                    <div className="space-y-1 text-sm">
+                      {Object.entries(groupedData.contact).map(([key, value]) => 
+                        value && (
+                          <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                            <span className="font-medium capitalize">{key === 'name' ? 'Nom' : 
+                                                                      key === 'email' ? 'Email' : 
+                                                                      key === 'phone' ? 'Téléphone' : 
+                                                                      key === 'country' ? 'Pays' : 
+                                                                      key === 'nationality' ? 'Nationalité' : 
+                                                                      key}:</span>
+                            <span className="text-muted-foreground">{String(value)}</span>
+                          </div>
+                        )
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-              
-              {/* Property Information */}
-              {groupedData?.property && (
-                <div className="border rounded-md p-3">
-                  <h3 className="font-medium text-sm mb-2">Informations sur la propriété</h3>
-                  <div className="space-y-1 text-sm">
-                    {Object.entries(groupedData.property).map(([key, value]) => 
-                      value && (
-                        <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                          <span className="font-medium capitalize">{key === 'propertyType' ? 'Type de bien' :
+                )}
+                
+                {groupedData?.property && (
+                  <div className="border rounded-md p-3">
+                    <h3 className="font-medium text-sm mb-2">Informations sur la propriété</h3>
+                    <div className="space-y-1 text-sm">
+                      {Object.entries(groupedData.property).map(([key, value]) => 
+                        value && (
+                          <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                            <span className="font-medium capitalize">{key === 'propertyType' ? 'Type de bien' :
                                                                     key === 'desiredLocation' ? 'Emplacement désiré' :
                                                                     key === 'budget' ? 'Budget' :
                                                                     key === 'propertyReference' ? 'Référence' :
                                                                     key === 'bedrooms' ? 'Chambres' :
                                                                     key === 'url' ? 'URL de l\'annonce' :
                                                                     key.replace(/([A-Z])/g, ' $1').trim()}:</span>
-                          <span className="text-muted-foreground">{String(value)}</span>
-                        </div>
-                      )
-                    )}
+                            <span className="text-muted-foreground">{String(value)}</span>
+                          </div>
+                        )
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-              
-              {/* Source Information */}
-              {groupedData?.source && Object.keys(groupedData.source).some(key => groupedData.source[key]) && (
-                <div className="border rounded-md p-3">
-                  <h3 className="font-medium text-sm mb-2">Source</h3>
-                  <div className="space-y-1 text-sm">
-                    {Object.entries(groupedData.source).map(([key, value]) => 
-                      value && (
-                        <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                          <span className="font-medium capitalize">{key}:</span>
-                          <span className="text-muted-foreground">{String(value)}</span>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              )}
-              
-              {/* Other Information */}
-              {groupedData?.other && Object.keys(groupedData.other).length > 0 && (
-                <div className="border rounded-md p-3">
-                  <h3 className="font-medium text-sm mb-2">Autres informations</h3>
-                  <div className="space-y-1 text-sm">
-                    {Object.entries(groupedData.other).map(([key, value]) => 
-                      value && (
-                        <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                          <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
-                          <span className="text-muted-foreground">{String(value)}</span>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              )}
-              
-              <Separator />
-              
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Action requise</AlertTitle>
-                <AlertDescription>
-                  Veuillez sélectionner un commercial pour créer le lead dans le CRM
-                </AlertDescription>
-              </Alert>
-              
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Pipeline</h3>
-                  <div className="flex space-x-4">
-                    <Button
-                      variant={selectedPipeline === 'purchase' ? 'default' : 'outline'}
-                      onClick={() => setSelectedPipeline('purchase')}
-                      className="flex-1"
-                    >
-                      Achat
-                    </Button>
-                    <Button
-                      variant={selectedPipeline === 'rental' ? 'default' : 'outline'}
-                      onClick={() => setSelectedPipeline('rental')}
-                      className="flex-1"
-                    >
-                      Location
-                    </Button>
-                  </div>
-                </div>
+                )}
                 
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Commercial assigné <span className="text-red-500">*</span></h3>
-                  <Select 
-                    value={selectedAgent} 
-                    onValueChange={setSelectedAgent}
-                  >
-                    <SelectTrigger className={`w-full ${!selectedAgent ? 'border-red-500' : ''}`}>
-                      <SelectValue placeholder="Sélectionner un commercial" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {teamMembers.map(member => (
-                        <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {!selectedAgent && (
-                    <p className="text-xs text-red-500 mt-1">La sélection d'un commercial est obligatoire</p>
-                  )}
+                {groupedData?.source && Object.keys(groupedData.source).some(key => groupedData.source[key]) && (
+                  <div className="border rounded-md p-3">
+                    <h3 className="font-medium text-sm mb-2">Source</h3>
+                    <div className="space-y-1 text-sm">
+                      {Object.entries(groupedData.source).map(([key, value]) => 
+                        value && (
+                          <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                            <span className="font-medium capitalize">{key}:</span>
+                            <span className="text-muted-foreground">{String(value)}</span>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {groupedData?.other && Object.keys(groupedData.other).length > 0 && (
+                  <div className="border rounded-md p-3">
+                    <h3 className="font-medium text-sm mb-2">Autres informations</h3>
+                    <div className="space-y-1 text-sm">
+                      {Object.entries(groupedData.other).map(([key, value]) => 
+                        value && (
+                          <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                            <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
+                            <span className="text-muted-foreground">{String(value)}</span>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <Separator />
+                
+                <Alert>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Action requise</AlertTitle>
+                  <AlertDescription>
+                    Veuillez sélectionner un commercial pour créer le lead dans le CRM
+                  </AlertDescription>
+                </Alert>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Pipeline</h3>
+                    <div className="flex space-x-4">
+                      <Button
+                        variant={selectedPipeline === 'purchase' ? 'default' : 'outline'}
+                        onClick={() => setSelectedPipeline('purchase')}
+                        className="flex-1"
+                      >
+                        Achat
+                      </Button>
+                      <Button
+                        variant={selectedPipeline === 'rental' ? 'default' : 'outline'}
+                        onClick={() => setSelectedPipeline('rental')}
+                        className="flex-1"
+                      >
+                        Location
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Commercial assigné <span className="text-red-500">*</span></h3>
+                    <Select 
+                      value={selectedAgent} 
+                      onValueChange={setSelectedAgent}
+                    >
+                      <SelectTrigger className={`w-full ${!selectedAgent ? 'border-red-500' : ''}`}>
+                        <SelectValue placeholder="Sélectionner un commercial" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {teamMembers.map(member => (
+                          <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {!selectedAgent && (
+                      <p className="text-xs text-red-500 mt-1">La sélection d'un commercial est obligatoire</p>
+                    )}
+                  </div>
                 </div>
               </div>
-              
-              <DialogFooter className="gap-2 sm:gap-0">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setExtractedData(null)}
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Modifier l'email
-                </Button>
-                <Button 
-                  type="button"
-                  className="bg-loro-navy hover:bg-loro-navy/90"
-                  onClick={handleCreateLead}
-                  disabled={!selectedAgent}
-                >
-                  <Check className="h-4 w-4 mr-2" />
-                  Créer le lead
-                </Button>
-              </DialogFooter>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        </ScrollArea>
+        
+        {extractedData && (
+          <DialogFooter className="mt-6 gap-2 sm:gap-0">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setExtractedData(null)}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Modifier l'email
+            </Button>
+            <Button 
+              type="button"
+              className="bg-loro-navy hover:bg-loro-navy/90"
+              onClick={handleCreateLead}
+              disabled={!selectedAgent}
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Créer le lead
+            </Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );
