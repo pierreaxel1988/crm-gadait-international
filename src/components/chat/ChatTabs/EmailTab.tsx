@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FileText, Loader, MailPlus, ChevronDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -70,6 +69,42 @@ const EmailTab: React.FC<EmailTabProps> = ({
     }
   };
 
+  // Group the extracted data by category
+  const groupedData = React.useMemo(() => {
+    if (!extractedData) return null;
+    
+    return {
+      contact: {
+        name: extractedData.name || extractedData.Name,
+        email: extractedData.email || extractedData.Email,
+        phone: extractedData.phone || extractedData.Phone,
+        country: extractedData.country || extractedData.Country,
+      },
+      property: {
+        propertyType: extractedData.propertyType || extractedData.property_type || extractedData["Property type"],
+        desiredLocation: extractedData.desiredLocation || extractedData.desired_location || extractedData["Desired location"],
+        budget: extractedData.budget || extractedData.Budget,
+        propertyReference: extractedData.propertyReference || extractedData.reference || extractedData.property_reference || extractedData["Property reference"],
+      },
+      source: {
+        source: extractedData.source || extractedData.Source || "Le Figaro",
+      },
+      other: Object.entries(extractedData)
+        .filter(([key]) => 
+          !['name', 'Name', 'email', 'Email', 'phone', 'Phone', 'country', 'Country',
+            'propertyType', 'property_type', 'Property type', 
+            'desiredLocation', 'desired_location', 'Desired location',
+            'budget', 'Budget', 
+            'propertyReference', 'reference', 'property_reference', 'Property reference',
+            'source', 'Source'].includes(key)
+        )
+        .reduce((acc, [key, value]) => {
+          acc[key] = value;
+          return acc;
+        }, {} as Record<string, any>)
+    };
+  }, [extractedData]);
+
   return (
     <div className="flex-1 flex flex-col p-4 overflow-hidden">
       <div className="mb-4">
@@ -91,20 +126,74 @@ const EmailTab: React.FC<EmailTabProps> = ({
         </Card>
       </div>
       
-      {extractedData && (
+      {extractedData && groupedData && (
         <div className="border border-loro-sand rounded-md p-4 mt-2 bg-loro-pearl/30">
           <h4 className="font-timesNowSemi text-lg mb-3 flex items-center justify-between text-loro-navy">
             Données extraites
             <ChevronDown className="h-4 w-4" />
           </h4>
-          <div className="space-y-2 text-sm">
-            {Object.entries(extractedData).map(([key, value]) => (
-              <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                <span className="font-medium text-loro-navy">{key}:</span>
-                <span className="text-loro-hazel">{String(value)}</span>
-              </div>
-            ))}
+          
+          {/* Contact Information */}
+          <div className="mb-4">
+            <h5 className="font-medium text-sm text-loro-navy mb-2">Informations de contact</h5>
+            <div className="space-y-1 text-sm">
+              {Object.entries(groupedData.contact).map(([key, value]) => 
+                value && (
+                  <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                    <span className="font-medium text-loro-navy capitalize">{key}:</span>
+                    <span className="text-loro-hazel">{String(value)}</span>
+                  </div>
+                )
+              )}
+            </div>
           </div>
+          
+          {/* Property Information */}
+          <div className="mb-4">
+            <h5 className="font-medium text-sm text-loro-navy mb-2">Informations sur la propriété</h5>
+            <div className="space-y-1 text-sm">
+              {Object.entries(groupedData.property).map(([key, value]) => 
+                value && (
+                  <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                    <span className="font-medium text-loro-navy capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                    <span className="text-loro-hazel">{String(value)}</span>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+          
+          {/* Source Information */}
+          <div className="mb-4">
+            <h5 className="font-medium text-sm text-loro-navy mb-2">Source</h5>
+            <div className="space-y-1 text-sm">
+              {Object.entries(groupedData.source).map(([key, value]) => 
+                value && (
+                  <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                    <span className="font-medium text-loro-navy capitalize">{key}:</span>
+                    <span className="text-loro-hazel">{String(value)}</span>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+          
+          {/* Other Information */}
+          {Object.keys(groupedData.other).length > 0 && (
+            <div className="mb-4">
+              <h5 className="font-medium text-sm text-loro-navy mb-2">Autres informations</h5>
+              <div className="space-y-1 text-sm">
+                {Object.entries(groupedData.other).map(([key, value]) => 
+                  value && (
+                    <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                      <span className="font-medium text-loro-navy capitalize">{key.replace(/_/g, ' ')}:</span>
+                      <span className="text-loro-hazel">{String(value)}</span>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          )}
           
           <Separator className="my-4" />
           

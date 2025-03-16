@@ -21,8 +21,50 @@ export const usePropertyExtraction = () => {
 
     setIsLoading(true);
     try {
+      // Try to pre-extract info from the URL structure
+      let initialPropertyData = {};
+      if (propertyUrl.includes('lefigaro.com') || propertyUrl.includes('properties.lefigaro.com')) {
+        const urlObj = new URL(propertyUrl);
+        const pathParts = urlObj.pathname.split('/');
+        
+        // Basic extraction from URL structure
+        if (pathParts.length > 2) {
+          const typeLocationPart = pathParts[2] || '';
+          const parts = typeLocationPart.split('-');
+          
+          if (parts.length > 0) {
+            initialPropertyData = {
+              ...initialPropertyData,
+              propertyType: parts[0].replace(/-/g, ' ').trim()
+            };
+          }
+          
+          // Look for country in URL
+          const countryPart = pathParts[pathParts.length - 2] || '';
+          if (countryPart) {
+            initialPropertyData = {
+              ...initialPropertyData,
+              country: countryPart.replace(/-/g, ' ').trim()
+            };
+          }
+          
+          // Look for ID at the end
+          const idPart = pathParts[pathParts.length - 1] || '';
+          if (idPart && /^\d+$/.test(idPart)) {
+            initialPropertyData = {
+              ...initialPropertyData,
+              propertyReference: idPart
+            };
+          }
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke('chat-gadait', {
-        body: { type: 'property-extract', content: propertyUrl }
+        body: { 
+          type: 'property-extract', 
+          content: propertyUrl,
+          initialData: initialPropertyData 
+        }
       });
 
       if (error) {

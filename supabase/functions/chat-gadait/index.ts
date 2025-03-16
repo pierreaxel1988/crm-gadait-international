@@ -16,7 +16,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, type, content } = await req.json();
+    const { message, type, content, propertyDetails, initialData } = await req.json();
     
     let systemPrompt = "You are Chat Gadait, an AI assistant for a luxury real estate CRM. Be concise and helpful.";
     let userMessage = message;
@@ -33,25 +33,54 @@ serve(async (req) => {
       - Budget or price mentioned: Any budget range or specific price mentioned
       - Desired location: Any location preferences mentioned (city, area, neighborhood)
       - Property type preferences: Type of property they're looking for (Villa, Apartment, Penthouse, etc.)
+      - Country: The country mentioned (if any)
       - Any specific requirements or amenities mentioned: Like pool, garden, ocean view, etc.
       
       Return ONLY a valid JSON object with these fields, no additional text. If information is not available, use empty strings or null values.
-      Be sure the response can be parsed with JSON.parse().`;
+      Be sure the response can be parsed with JSON.parse().
+      
+      If a field has already been extracted and provided in propertyDetails, use that value instead of trying to extract it again.`;
+      
+      // If we have property details already extracted, include them in the prompt
+      if (propertyDetails && Object.keys(propertyDetails).length > 0) {
+        systemPrompt += `\n\nSome fields have already been extracted from the email:\n`;
+        Object.entries(propertyDetails).forEach(([key, value]) => {
+          if (value) {
+            systemPrompt += `- ${key}: ${value}\n`;
+          }
+        });
+        systemPrompt += `\nFocus on extracting other fields.`;
+      }
+      
       userMessage = content;
     } 
     else if (type === 'property-extract') {
       systemPrompt = `You are Chat Gadait, an AI assistant for a luxury real estate CRM. 
-      Extract the following information from this property listing:
-      - Property reference
-      - Price
-      - Location
-      - Size (in m²)
-      - Number of bedrooms
-      - Number of bathrooms
-      - Property type
-      - Key features and amenities
+      Extract the following information from this property listing URL:
+      - Property reference: The unique identifier for this property
+      - Price: The listed price
+      - Location: Specific location of the property (city, area, etc.)
+      - Country: The country where the property is located
+      - Size or area: In m² if available
+      - Number of bedrooms: If specified
+      - Number of bathrooms: If specified
+      - Property type: Villa, Apartment, Land, etc.
+      - Key features and amenities: Pool, garden, sea view, etc.
+      - Description: A brief description of the property if available
       
       Return the information in a structured JSON format without any additional text.`;
+      
+      // If we have initial data already extracted from the URL, include it in the prompt
+      if (initialData && Object.keys(initialData).length > 0) {
+        systemPrompt += `\n\nSome information has already been extracted from the URL structure:\n`;
+        Object.entries(initialData).forEach(([key, value]) => {
+          if (value) {
+            systemPrompt += `- ${key}: ${value}\n`;
+          }
+        });
+        systemPrompt += `\nConfirm or enhance this information from the actual page content.`;
+      }
+      
       userMessage = content;
     }
     else if (type === 'email-draft') {

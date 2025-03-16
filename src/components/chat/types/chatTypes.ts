@@ -14,3 +14,16 @@ export interface TeamMember {
   id: string;
   name: string;
 }
+
+export interface PropertyDetails {
+  reference?: string;
+  type?: string;
+  location?: string;
+  country?: string;
+  price?: string;
+  area?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  url?: string;
+  description?: string;
+}
