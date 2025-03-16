@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, Mail, Phone, User, FileText, MessageSquare, CheckCircle, Tag, Star, Home, FileCheck, FileSignature, Calculator, Search, AreaChart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 export type TaskType = 
   | 'Call'
@@ -39,6 +40,34 @@ interface KanbanCardProps {
 
 const KanbanCard = ({ item, className, draggable = false }: KanbanCardProps) => {
   const navigate = useNavigate();
+  const [assignedToName, setAssignedToName] = useState<string>('Non assigné');
+
+  useEffect(() => {
+    const fetchTeamMemberName = async () => {
+      if (item.assignedTo) {
+        try {
+          const { data, error } = await supabase
+            .from('team_members')
+            .select('name')
+            .eq('id', item.assignedTo)
+            .single();
+            
+          if (error) {
+            console.error('Error fetching team member name:', error);
+            return;
+          }
+          
+          if (data && data.name) {
+            setAssignedToName(data.name);
+          }
+        } catch (error) {
+          console.error('Unexpected error fetching team member name:', error);
+        }
+      }
+    };
+
+    fetchTeamMemberName();
+  }, [item.assignedTo]);
 
   const handleCardClick = () => {
     navigate(`/leads/${item.id}`);
@@ -128,7 +157,7 @@ const KanbanCard = ({ item, className, draggable = false }: KanbanCardProps) => 
       <div className="flex justify-between items-center mt-3 pt-3 border-t border-border text-xs text-muted-foreground">
         <div className="flex items-center">
           <User className="h-3 w-3 mr-1" />
-          <span>{item.assignedTo || 'Unassigned'}</span>
+          <span>{assignedToName}</span>
         </div>
         
         {item.dueDate && (

@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Mail, MapPin, Phone, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import StatusBadge, { LeadStatus } from '@/components/common/StatusBadge';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import CustomButton from '@/components/ui/CustomButton';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Lead {
   id: string;
@@ -29,6 +30,34 @@ interface LeadCardProps {
 
 const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
   const navigate = useNavigate();
+  const [assignedToName, setAssignedToName] = useState<string>('Non assigné');
+
+  useEffect(() => {
+    const fetchTeamMemberName = async () => {
+      if (lead.assignedTo) {
+        try {
+          const { data, error } = await supabase
+            .from('team_members')
+            .select('name')
+            .eq('id', lead.assignedTo)
+            .single();
+            
+          if (error) {
+            console.error('Error fetching team member name:', error);
+            return;
+          }
+          
+          if (data && data.name) {
+            setAssignedToName(data.name);
+          }
+        } catch (error) {
+          console.error('Unexpected error fetching team member name:', error);
+        }
+      }
+    };
+
+    fetchTeamMemberName();
+  }, [lead.assignedTo]);
 
   const handleCardClick = () => {
     navigate(`/leads/${lead.id}`);
@@ -89,7 +118,7 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
           <div className="flex items-center text-sm text-muted-foreground">
             <User className="h-3.5 w-3.5 mr-1" />
             <span>
-              {lead.assignedTo || 'Non assigné'}
+              {assignedToName}
             </span>
           </div>
           <div className="text-xs text-muted-foreground">
