@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -154,13 +153,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
       if (editableData.country) {
         // Check if the country matches one of our Country types
         const formattedCountry = editableData.country as string;
-        const isValidCountry = ['France', 'Spain', 'Portugal', 'Greece', 'Switzerland', 
-                               'United Kingdom', 'United States', 'Croatia', 'Mauritius', 
-                               'Seychelles', 'Maldives', 'United Arab Emirates'].includes(formattedCountry);
-        
-        if (isValidCountry) {
-          country = formattedCountry as Country;
-        }
+        country = formattedCountry as Country;
       }
       
       // Extract any potential reference or external id
@@ -172,6 +165,9 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
       const external_id = editableData.external_id || 
                          editableData.externalId || 
                          editableData["external id"] || "";
+      
+      // Log important data before creation
+      console.log("Creating lead with pipeline type:", selectedPipeline);
       
       const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
         name: editableData.name || editableData.Name || "",
@@ -192,10 +188,9 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         url: editableData.url || "",
         taskType: "Call",
         country,
-        pipelineType: selectedPipeline // <-- Make sure this is set correctly
+        pipelineType: selectedPipeline // Ensure this is correctly set
       };
       
-      console.log("Creating lead with pipeline type:", selectedPipeline);
       console.log("Creating lead with data:", newLead);
       
       const createdLead = await createLead(newLead);
@@ -249,7 +244,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         propertyType: extractedData.propertyType || extractedData.property_type || extractedData["Property type"],
         desiredLocation: extractedData.desiredLocation || extractedData.desired_location || extractedData["Desired location"],
         budget: extractedData.budget || extractedData.Budget,
-        propertyReference: extractedData.propertyReference || extractedData.reference || extractedData.property_reference || extractedData["Property reference"],
+        propertyReference: extractedData.propertyReference || extractedData.reference || extractedData.property_reference || "",
         bedrooms: extractedData.bedrooms || extractedData.Bedrooms,
         url: extractedData.url || extractedData.Url || extractedData["URL"],
       },

@@ -1,3 +1,4 @@
+
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
@@ -45,7 +46,8 @@ export type Country =
   | 'Mauritius' 
   | 'Seychelles' 
   | 'Maldives' 
-  | 'United Arab Emirates';
+  | 'United Arab Emirates'
+  | string; // Adding string to make it more flexible
 
 export type ViewType = 
   | "Mer" 

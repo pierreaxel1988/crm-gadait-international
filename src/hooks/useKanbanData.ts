@@ -58,7 +58,7 @@ export const useKanbanData = (
           return;
         }
         
-        // First try to get leads from Supabase
+        // First try to get leads from Supabase directly for better filtering
         const { data: supabaseLeads, error: leadsError } = await supabase
           .from('leads')
           .select('*');
@@ -78,6 +78,9 @@ export const useKanbanData = (
         // Map leads data to KanbanItem format
         const mappedLeads = leads.map(lead => {
           const assignedTeamMember = teamMembers.find(tm => tm.id === lead.assigned_to);
+          
+          // Add explicit logging for pipeline_type debugging
+          console.log(`Lead ${lead.id} (${lead.name}): pipeline_type = "${lead.pipeline_type}", pipelineType = "${lead.pipelineType}"`);
           
           // Default pipelineType to 'purchase' if not specified
           const leadPipelineType = lead.pipeline_type || lead.pipelineType || 'purchase';
@@ -102,19 +105,22 @@ export const useKanbanData = (
             bedrooms: lead.bedrooms,
             url: lead.url,
             createdAt: lead.created_at ? new Date(lead.created_at).toLocaleDateString('fr-FR') : undefined,
-            importedAt: lead.imported_at ? new Date(lead.imported_at).toLocaleDateString('fr-FR') : undefined
+            importedAt: lead.imported_at ? new Date(lead.imported_at).toLocaleDateString('fr-FR') : undefined,
+            external_id: lead.external_id
           };
         });
         
         console.log('Mapped leads:', mappedLeads);
         console.log(`Current pipeline filter: ${pipelineType}`);
         
-        // Filter leads by pipeline type - make sure we're using strings for comparison
+        // Filter leads by pipeline type, using more detailed logging
         const filteredLeads = mappedLeads.filter(lead => {
-          const result = String(lead.pipelineType).toLowerCase() === String(pipelineType).toLowerCase();
-          if (!result) {
-            console.log(`Lead ${lead.id} (${lead.name}) has pipeline_type "${lead.pipelineType}" which doesn't match "${pipelineType}"`);
-          }
+          const leadPipelineType = String(lead.pipelineType || 'purchase').toLowerCase();
+          const targetPipelineType = String(pipelineType).toLowerCase();
+          const result = leadPipelineType === targetPipelineType;
+          
+          console.log(`Lead ${lead.id} (${lead.name}): comparing "${leadPipelineType}" with "${targetPipelineType}" = ${result}`);
+          
           return result;
         });
         

@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -217,6 +216,7 @@ serve(async (req) => {
       property_use: leadData.property_use || null,
       country: leadData.country || null,
       assigned_to: leadData.assigned_to || null,
+      pipeline_type: leadData.pipeline_type || "purchase", // Default to purchase pipeline
       imported_at: new Date().toISOString(),
       last_contacted_at: new Date().toISOString(),
       raw_data: leadData.additionalData ? JSON.stringify(leadData.additionalData) : null
@@ -309,7 +309,8 @@ function parseRealEstatePortalData(data) {
     external_id: "",
     integrationSource: source,
     additionalData: {},
-    assigned_to: data.assigned_to || null
+    assigned_to: data.assigned_to || null,
+    pipeline_type: data.pipeline_type || "purchase" // Default to purchase pipeline
   };
   
   // Copier toutes les données brutes pour référence future
@@ -696,3 +697,4 @@ function mapPortalSource(source) {
   
   return "Portails immobiliers";
 }
+
