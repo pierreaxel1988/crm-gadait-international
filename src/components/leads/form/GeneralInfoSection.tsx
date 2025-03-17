@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { User, Mail, Phone, Clipboard, Globe } from 'lucide-react';
+import { User, Mail, Clipboard, Globe } from 'lucide-react';
 import { LeadDetailed, Country } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
@@ -17,29 +16,8 @@ const GeneralInfoSection = ({
   handleInputChange,
   countries 
 }: GeneralInfoSectionProps) => {
-  const [countryCode, setCountryCode] = useState("+33");
+  // We're removing the phone-related state and handlers since it's duplicated elsewhere
   
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Strip any country code that might be in the input
-    const phoneValue = e.target.value.replace(/^\+\d+\s*/, '');
-    
-    // Create a new event with the same properties but modified value
-    const newEvent = {
-      ...e,
-      target: {
-        ...e.target,
-        name: 'phone',
-        value: phoneValue
-      }
-    };
-    
-    handleInputChange(newEvent);
-  };
-  
-  const handleCountryCodeChange = (value: string) => {
-    setCountryCode(value);
-  };
-
   return (
     <FormSection title="Informations Générales">
       <FormInput
@@ -59,17 +37,6 @@ const GeneralInfoSection = ({
         onChange={handleInputChange}
         required
         icon={Mail}
-      />
-
-      <FormInput
-        label="Numéro de téléphone"
-        name="phone"
-        type="tel-with-code"
-        value={formData.phone || ''}
-        onChange={handlePhoneChange}
-        icon={Phone}
-        countryCode={countryCode}
-        onCountryCodeChange={handleCountryCodeChange}
       />
 
       <FormInput
