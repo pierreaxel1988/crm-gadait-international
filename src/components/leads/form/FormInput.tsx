@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -130,7 +131,7 @@ const FormInput = ({
       case 'tel-with-code':
         return (
           <div className="flex">
-            <div className="w-24 mr-2">
+            <div className="w-28 mr-2">
               <Select
                 value={countryCode}
                 onValueChange={onCountryCodeChange}
@@ -154,6 +155,20 @@ const FormInput = ({
                   <SelectItem value="+971">+971 🇦🇪</SelectItem>
                   <SelectItem value="+966">+966 🇸🇦</SelectItem>
                   <SelectItem value="+86">+86 🇨🇳</SelectItem>
+                  <SelectItem value="+81">+81 🇯🇵</SelectItem>
+                  <SelectItem value="+61">+61 🇦🇺</SelectItem>
+                  <SelectItem value="+55">+55 🇧🇷</SelectItem>
+                  <SelectItem value="+351">+351 🇵🇹</SelectItem>
+                  <SelectItem value="+30">+30 🇬🇷</SelectItem>
+                  <SelectItem value="+45">+45 🇩🇰</SelectItem>
+                  <SelectItem value="+46">+46 🇸🇪</SelectItem>
+                  <SelectItem value="+47">+47 🇳🇴</SelectItem>
+                  <SelectItem value="+358">+358 🇫🇮</SelectItem>
+                  <SelectItem value="+420">+420 🇨🇿</SelectItem>
+                  <SelectItem value="+36">+36 🇭🇺</SelectItem>
+                  <SelectItem value="+48">+48 🇵🇱</SelectItem>
+                  <SelectItem value="+40">+40 🇷🇴</SelectItem>
+                  <SelectItem value="+90">+90 🇹🇷</SelectItem>
                 </SelectContent>
               </Select>
             </div>
