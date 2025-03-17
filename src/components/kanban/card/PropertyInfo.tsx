@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Home, MapPin, BedDouble, Link as LinkIcon } from 'lucide-react';
+import { extractNumericValue } from '@/utils/kanbanFilterUtils';
 
 interface PropertyInfoProps {
   propertyType?: string;
@@ -26,20 +27,20 @@ const PropertyInfo = ({
   const formatBudget = (budget?: string) => {
     if (!budget) return '';
     
-    // Enlever les caractères non numériques sauf points et virgules
-    const numericBudget = budget.replace(/[^\d.,]/g, '');
+    // Si le budget est déjà formaté correctement, le retourner tel quel
+    if (budget.includes('€') && (budget.includes('.') || budget.includes(','))) {
+      return budget;
+    }
     
-    // Convertir en nombre si possible
-    const parsedBudget = parseFloat(numericBudget.replace(',', '.'));
-    
-    if (isNaN(parsedBudget)) return budget;
+    // Extraire la valeur numérique et formater
+    const numericValue = extractNumericValue(budget);
     
     // Formatter avec séparateur de milliers
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'EUR',
       maximumFractionDigits: 0
-    }).format(parsedBudget);
+    }).format(numericValue);
   };
 
   return (

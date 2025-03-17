@@ -41,11 +41,12 @@ export const applyFiltersToColumns = (
       filteredItems = filteredItems.filter(item => {
         if (!item.budget) return false;
         
-        const budget = parseInt(item.budget.replace(/[^\d]/g, ''));
-        const min = filters.minBudget ? parseInt(filters.minBudget) : 0;
-        const max = filters.maxBudget ? parseInt(filters.maxBudget) : Infinity;
+        // Extraction des chiffres du budget en ignorant les caractères de formatage
+        const numericBudget = extractNumericValue(item.budget);
+        const min = filters.minBudget ? extractNumericValue(filters.minBudget) : 0;
+        const max = filters.maxBudget ? extractNumericValue(filters.maxBudget) : Infinity;
         
-        return budget >= min && budget <= max;
+        return numericBudget >= min && numericBudget <= max;
       });
     }
     
@@ -75,4 +76,13 @@ export const applyFiltersToColumns = (
       items: filteredItems
     };
   });
+};
+
+// Fonction utilitaire pour extraire la valeur numérique d'une chaîne de budget formatée
+export const extractNumericValue = (formattedValue: string): number => {
+  // Enlever tous les caractères non numériques
+  const numericString = formattedValue.replace(/[^\d]/g, '');
+  
+  // Convertir en nombre ou retourner 0 si vide
+  return numericString ? parseInt(numericString) : 0;
 };

@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Banknote, MapPin, Timer, CreditCard, Home } from 'lucide-react';
 import { LeadDetailed, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
 import FormInput from '../FormInput';
 import RadioSelectButtons from '../RadioSelectButtons';
+import { Input } from '@/components/ui/input';
 
 interface PurchaseDetailsSectionProps {
   formData: LeadDetailed;
@@ -22,15 +23,84 @@ const PurchaseDetailsSection = ({
   financingMethods,
   propertyUses,
 }: PurchaseDetailsSectionProps) => {
+  const [formattedBudget, setFormattedBudget] = useState(formData.budget || '');
+  
+  // Fonction pour formater le budget
+  const formatBudgetInput = (value: string) => {
+    // Supprime tous les caractères non numériques
+    const numericValue = value.replace(/[^\d]/g, '');
+    
+    if (!numericValue) return '';
+    
+    // Convertit en nombre
+    const number = parseInt(numericValue);
+    
+    // Formate avec séparateur de milliers
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0
+    }).format(number);
+  };
+  
+  // Gère le changement de budget
+  const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Stocke la valeur formatée pour l'affichage
+    setFormattedBudget(value);
+    
+    // Stocke la valeur d'origine pour les données
+    const rawValue = value.replace(/[^\d]/g, '') ? value : '';
+    
+    // Simule un événement pour mettre à jour formData
+    const syntheticEvent = {
+      target: {
+        name: 'budget',
+        value: rawValue
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(syntheticEvent);
+  };
+  
+  // Gère la perte de focus pour formater définitivement
+  const handleBudgetBlur = () => {
+    if (!formattedBudget) return;
+    
+    const formatted = formatBudgetInput(formattedBudget);
+    setFormattedBudget(formatted);
+    
+    // Mise à jour du formData avec la valeur formatée
+    const syntheticEvent = {
+      target: {
+        name: 'budget',
+        value: formatted
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(syntheticEvent);
+  };
+
   return (
     <div className="space-y-4">
       <FormInput
         label="Budget"
         name="budget"
-        value={formData.budget || ''}
-        onChange={handleInputChange}
-        placeholder="ex: 1.500.000€ - 2.000.000€"
+        value={formattedBudget}
+        onChange={handleBudgetChange}
+        placeholder="ex: 1.500.000€"
         icon={Banknote}
+        renderCustomField={() => (
+          <Input
+            name="budget"
+            value={formattedBudget}
+            onChange={handleBudgetChange}
+            onBlur={handleBudgetBlur}
+            placeholder="ex: 1.500.000€"
+            className="luxury-input w-full"
+          />
+        )}
       />
 
       <FormInput
