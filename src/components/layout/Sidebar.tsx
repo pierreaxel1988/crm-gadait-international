@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { X, Upload, MessageSquare } from 'lucide-react';
+import { X, Upload, MessageSquare, ListTodo, Calendar, PieChart, File, Settings, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -18,7 +19,34 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
     {
       name: 'Dashboard',
       path: '/',
+      icon: LayoutDashboard,
       isPrimary: true,
+    },
+    {
+      name: 'Pipeline',
+      path: '/pipeline',
+      icon: ListTodo,
+    },
+    {
+      name: 'Calendar',
+      path: '/calendar',
+      icon: Calendar,
+    },
+    {
+      name: 'Reports',
+      path: '/reports',
+      icon: PieChart,
+    },
+    {
+      name: 'Chat Gadait',
+      path: '/chat-gadait',
+      icon: MessageSquare,
+      color: "text-emerald-600",
+    },
+    {
+      name: 'Properties',
+      path: '/properties',
+      icon: File,
     },
     {
       name: 'Leads',
@@ -28,22 +56,6 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
       name: 'Import Leads',
       path: '/lead-import',
       icon: Upload,
-    },
-    {
-      name: 'Pipeline',
-      path: '/pipeline',
-    },
-    {
-      name: 'Properties',
-      path: '/properties',
-    },
-    {
-      name: 'Calendar',
-      path: '/calendar',
-    },
-    {
-      name: 'Reports',
-      path: '/reports',
     },
     {
       name: 'API',
@@ -56,12 +68,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
     {
       name: 'Settings',
       path: '/settings',
-    },
-    {
-      title: "Chat Gadait",
-      icon: MessageSquare,
-      href: "/chat-gadait",
-      color: "text-emerald-600",
+      icon: Settings,
     },
   ];
 

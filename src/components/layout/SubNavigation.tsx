@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -7,14 +8,12 @@ import {
   NavigationMenuLink,
   NavigationMenuList
 } from "@/components/ui/navigation-menu";
-import { MessageSquare, PieChart, Users, Calendar, ListTodo, ChevronDown, ChevronUp } from 'lucide-react';
+import { MessageSquare, PieChart, Calendar, ListTodo, File } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const SubNavigation = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const navigationItems = [
     {
@@ -28,19 +27,19 @@ const SubNavigation = () => {
       icon: Calendar,
     },
     {
-      name: 'Chat Gadait.',
-      path: '/chat-gadait',
-      icon: MessageSquare,
-    },
-    {
       name: 'Reports',
       path: '/reports',
       icon: PieChart,
     },
     {
-      name: 'Leads',
-      path: '/leads',
-      icon: Users,
+      name: 'Chat Gadait',
+      path: '/chat-gadait',
+      icon: MessageSquare,
+    },
+    {
+      name: 'Properties',
+      path: '/properties',
+      icon: File,
     },
   ];
 
