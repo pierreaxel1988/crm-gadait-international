@@ -1,9 +1,11 @@
 
 import React from 'react';
-import { LeadDetailed, PropertyType, ViewType, Amenity } from '@/types/lead';
+import { LeadDetailed, PropertyType, ViewType, Amenity, Country } from '@/types/lead';
 import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
 import PropertyUrlField from '../PropertyUrlField';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { COUNTRIES } from '@/utils/countries';
 
 interface PropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -26,6 +28,25 @@ const PropertyDetailsSection = ({
   amenities,
   onExtractUrl
 }: PropertyDetailsSectionProps) => {
+  // Helper for the country select
+  const handleCountryChange = (value: string) => {
+    const syntheticEvent = {
+      target: {
+        name: 'country',
+        value
+      }
+    } as React.ChangeEvent<HTMLSelectElement>;
+    
+    handleInputChange(syntheticEvent);
+  };
+
+  // Filter countries to only those we sell in (from LeadForm.tsx)
+  const sellableCountries = COUNTRIES.filter(country => 
+    ['Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 'Portugal', 
+    'Seychelles', 'Spain', 'Switzerland', 'United Arab Emirates', 
+    'United Kingdom', 'United States'].includes(country)
+  );
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold mb-2 text-chocolate-dark">
@@ -47,6 +68,27 @@ const PropertyDetailsSection = ({
         onChange={handleInputChange}
         onExtract={onExtractUrl}
       />
+      
+      <div className="space-y-2">
+        <label className="block text-sm font-medium mb-1">
+          Pays recherché
+        </label>
+        <Select
+          value={formData.country}
+          onValueChange={handleCountryChange}
+        >
+          <SelectTrigger className="w-full luxury-input">
+            <SelectValue placeholder="Sélectionner un pays" />
+          </SelectTrigger>
+          <SelectContent>
+            {sellableCountries.map((country) => (
+              <SelectItem key={country} value={country}>
+                {country}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       
       <FormInput
         label="Localisation souhaitée"
