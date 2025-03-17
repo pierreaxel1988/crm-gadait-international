@@ -5,6 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import { ExtendedKanbanItem } from './useKanbanData';
+import { updateLead, getLead } from '@/services/leadCore';
 
 export const useKanbanDragDrop = (
   setLoadedColumns: React.Dispatch<React.SetStateAction<{
@@ -21,23 +22,7 @@ export const useKanbanDragDrop = (
     if (item.status === newStatus) return;
     
     try {
-      // Update the lead status in Supabase
-      const { error } = await supabase
-        .from('leads')
-        .update({ status: newStatus })
-        .eq('id', item.id);
-        
-      if (error) {
-        console.error('Error updating lead status:', error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de mettre à jour le statut du lead."
-        });
-        return;
-      }
-      
-      // Update the local state to reflect the change
+      // First update the UI for immediate feedback
       setLoadedColumns(prev => {
         // Create a deep copy of the columns
         const newColumns = [...prev];
@@ -65,6 +50,44 @@ export const useKanbanDragDrop = (
         
         return newColumns;
       });
+      
+      // Get the full lead
+      const fullLead = await getLead(item.id);
+      
+      if (!fullLead) {
+        console.error('Lead not found:', item.id);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de trouver les détails du lead."
+        });
+        return;
+      }
+      
+      // Update the lead status
+      const updatedLead = {
+        ...fullLead,
+        status: newStatus
+      };
+      
+      // Save the changes using our service
+      await updateLead(updatedLead);
+      
+      // Also update directly in Supabase as a backup measure
+      const { error } = await supabase
+        .from('leads')
+        .update({ status: newStatus })
+        .eq('id', item.id);
+        
+      if (error) {
+        console.error('Error updating lead status in Supabase:', error);
+        toast({
+          variant: "warning",
+          title: "Synchronisation",
+          description: "Le statut a été mis à jour localement, mais la synchronisation complète a échoué."
+        });
+        return;
+      }
       
       toast({
         title: "Lead mis à jour",
