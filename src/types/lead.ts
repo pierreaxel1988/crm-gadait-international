@@ -1,4 +1,3 @@
-
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
@@ -104,12 +103,13 @@ export interface LeadDetailed {
   nextFollowUpDate?: string;
   country?: Country;
   url?: string;
-  livingArea?: string;
   pipelineType?: PipelineType;
+  external_id?: string;
   
-  // Add missing properties to fix TypeScript errors
+  // Other properties
   imported_at?: string;
   integration_source?: string;
   taxResidence?: string;
   actionHistory?: any[];
+  livingArea?: string;
 }

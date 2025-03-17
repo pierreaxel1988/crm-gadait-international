@@ -40,14 +40,16 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
       desiredLocation: lead.desired_location,
       propertyType: lead.property_type as PropertyType,
       propertyReference: lead.property_reference,
+      external_id: lead.external_id,
       bedrooms: lead.bedrooms,
       taskType: lead.task_type as TaskType,
       nextFollowUpDate: lead.next_follow_up_date,
       notes: lead.notes,
       nationality: lead.nationality,
-      pipelineType: 'purchase', // Default value if not in DB
+      pipelineType: lead.pipeline_type || 'purchase', // Use the pipeline_type from DB
       actionHistory: [], // Default empty array if not in DB
-      url: lead.url || '' // Include the url field with default
+      url: lead.url || '', // Include the url field with default
+      country: lead.country
     }));
     
     return leadsData;
@@ -92,14 +94,16 @@ export const getLead = async (id: string): Promise<LeadDetailed | undefined> => 
       desiredLocation: data.desired_location,
       propertyType: data.property_type as PropertyType,
       propertyReference: data.property_reference,
+      external_id: data.external_id,
       bedrooms: data.bedrooms,
       taskType: data.task_type as TaskType,
       nextFollowUpDate: data.next_follow_up_date,
       notes: data.notes,
       nationality: data.nationality,
-      pipelineType: 'purchase', // Default value if not in DB
+      pipelineType: data.pipeline_type || 'purchase', // Use the pipeline_type from DB
       actionHistory: [], // Default empty array if not in DB
-      url: data.url || '' // Include the url field with default
+      url: data.url || '', // Include the url field with default
+      country: data.country
     };
     
     return leadDetailed;
@@ -111,6 +115,8 @@ export const getLead = async (id: string): Promise<LeadDetailed | undefined> => 
 
 export const updateLead = async (updatedLead: LeadDetailed): Promise<LeadDetailed> => {
   try {
+    console.log("Updating lead with data:", updatedLead);
+    
     // Map the lead to Supabase column format
     const leadData = {
       name: updatedLead.name,
@@ -125,6 +131,7 @@ export const updateLead = async (updatedLead: LeadDetailed): Promise<LeadDetaile
       desired_location: updatedLead.desiredLocation,
       property_type: updatedLead.propertyType,
       property_reference: updatedLead.propertyReference,
+      external_id: updatedLead.external_id,
       bedrooms: updatedLead.bedrooms,
       task_type: updatedLead.taskType,
       next_follow_up_date: updatedLead.nextFollowUpDate,
@@ -132,8 +139,11 @@ export const updateLead = async (updatedLead: LeadDetailed): Promise<LeadDetaile
       nationality: updatedLead.nationality,
       url: updatedLead.url || '', // Include the url field with default
       pipeline_type: updatedLead.pipelineType || 'purchase',
+      country: updatedLead.country,
       action_history: updatedLead.actionHistory || []
     };
+    
+    console.log("Sending lead data to Supabase:", leadData);
     
     // Update the lead in Supabase
     const { data, error } = await supabase
@@ -158,6 +168,8 @@ export const updateLead = async (updatedLead: LeadDetailed): Promise<LeadDetaile
       
       return updatedLead;
     }
+    
+    console.log("Lead updated successfully in Supabase:", data);
     
     toast({
       title: "Lead mis à jour",
@@ -201,13 +213,15 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       desired_location: newLead.desiredLocation,
       property_type: newLead.propertyType,
       property_reference: newLead.propertyReference,
+      external_id: newLead.external_id,
       bedrooms: newLead.bedrooms,
       task_type: newLead.taskType,
       next_follow_up_date: newLead.nextFollowUpDate,
       notes: newLead.notes,
       nationality: newLead.nationality,
       url: newLead.url || '',  // Include the URL field with default
-      pipeline_type: newLead.pipelineType || 'purchase' // Add pipeline_type field
+      pipeline_type: newLead.pipelineType || 'purchase', // Use pipeline_type for Supabase
+      country: newLead.country
     };
     
     console.log('Sending lead data to Supabase:', leadData);
@@ -246,6 +260,8 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       return localLead;
     }
     
+    console.log('Created lead in Supabase:', data);
+    
     const createdLead: LeadDetailed = {
       id: data.id,
       name: data.name,
@@ -261,16 +277,16 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       desiredLocation: data.desired_location,
       propertyType: data.property_type as PropertyType,
       propertyReference: data.property_reference,
+      external_id: data.external_id,
       bedrooms: data.bedrooms,
       taskType: data.task_type as TaskType,
       nextFollowUpDate: data.next_follow_up_date,
       notes: data.notes,
       nationality: data.nationality,
       pipelineType: data.pipeline_type || "purchase",
-      url: data.url || ''
+      url: data.url || '',
+      country: data.country
     };
-    
-    console.log('Created lead in Supabase:', createdLead);
     
     toast({
       title: "Nouveau lead créé",
@@ -384,7 +400,7 @@ export const convertToSimpleLead = (lead: LeadDetailed) => {
     assignedTo: lead.assignedTo,
     createdAt: lead.createdAt,
     lastContactedAt: lead.lastContactedAt,
-    pipelineType: lead.pipelineType, // Ajouter le type de pipeline
+    pipelineType: lead.pipelineType,
   };
 };
 

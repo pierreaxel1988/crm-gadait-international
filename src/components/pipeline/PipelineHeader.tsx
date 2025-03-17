@@ -8,6 +8,7 @@ import PipelineFilters from './PipelineFilters';
 import { useIsMobile } from '@/hooks/use-mobile';
 import EmailImportModal from './EmailImportModal';
 import { useTeamMembers } from '@/components/chat/hooks/useTeamMembers';
+import { FilterOptions } from './PipelineFilters';
 
 interface PipelineHeaderProps {
   searchTerm: string;
@@ -28,6 +29,18 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   const isMobile = useIsMobile();
   const [emailImportOpen, setEmailImportOpen] = useState(false);
   const { teamMembers } = useTeamMembers();
+  
+  // Initialize filter state for PipelineFilters
+  const [filters, setFilters] = useState<FilterOptions>({
+    status: null,
+    tags: [],
+    assignedTo: null,
+    minBudget: '',
+    maxBudget: '',
+    location: '',
+    purchaseTimeframe: null,
+    propertyType: null
+  });
 
   const handleNewLead = () => {
     navigate('/leads/new');
@@ -35,6 +48,44 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
 
   const handleEmailImport = () => {
     setEmailImportOpen(true);
+  };
+  
+  const handleFilterChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+  };
+  
+  const handleClearFilters = () => {
+    setFilters({
+      status: null,
+      tags: [],
+      assignedTo: null,
+      minBudget: '',
+      maxBudget: '',
+      location: '',
+      purchaseTimeframe: null,
+      propertyType: null
+    });
+  };
+  
+  const isFilterActive = (filterName: string) => {
+    switch (filterName) {
+      case 'status':
+        return filters.status !== null;
+      case 'tags':
+        return filters.tags.length > 0;
+      case 'assignedTo':
+        return filters.assignedTo !== null;
+      case 'budget':
+        return filters.minBudget !== '' || filters.maxBudget !== '';
+      case 'location':
+        return filters.location !== '';
+      case 'purchaseTimeframe':
+        return filters.purchaseTimeframe !== null;
+      case 'propertyType':
+        return filters.propertyType !== null;
+      default:
+        return false;
+    }
   };
 
   return (
@@ -91,13 +142,22 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
         </Button>
       </div>
       
-      {filtersOpen && <PipelineFilters />}
+      {filtersOpen && (
+        <PipelineFilters 
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onClearFilters={handleClearFilters}
+          assignedToOptions={teamMembers.map(member => ({ id: member.id, name: member.name }))}
+          isFilterActive={isFilterActive}
+        />
+      )}
       
       <EmailImportModal 
         isOpen={emailImportOpen} 
         onClose={() => setEmailImportOpen(false)} 
         teamMembers={teamMembers}
         onLeadCreated={() => {
+          console.log("Lead created callback triggered");
           // Refresh the pipeline after lead creation
           window.location.reload();
         }}

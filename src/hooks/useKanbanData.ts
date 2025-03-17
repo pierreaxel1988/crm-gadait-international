@@ -70,6 +70,7 @@ export const useKanbanData = (
           leads = await getLeads();
         } else {
           leads = supabaseLeads;
+          console.log('Retrieved leads from Supabase:', leads.length);
         }
         
         console.log('All leads before filtering:', leads);
@@ -109,9 +110,13 @@ export const useKanbanData = (
         console.log(`Current pipeline filter: ${pipelineType}`);
         
         // Filter leads by pipeline type - make sure we're using strings for comparison
-        const filteredLeads = mappedLeads.filter(lead => 
-          String(lead.pipelineType) === String(pipelineType)
-        );
+        const filteredLeads = mappedLeads.filter(lead => {
+          const result = String(lead.pipelineType).toLowerCase() === String(pipelineType).toLowerCase();
+          if (!result) {
+            console.log(`Lead ${lead.id} (${lead.name}) has pipeline_type "${lead.pipelineType}" which doesn't match "${pipelineType}"`);
+          }
+          return result;
+        });
         
         console.log('Filtered leads for this pipeline:', filteredLeads);
         

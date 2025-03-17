@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadCore';
-import { LeadDetailed, Country } from '@/types/lead';
+import { LeadDetailed, Country, PipelineType } from '@/types/lead';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizePropertyType } from '@/components/chat/utils/propertyTypeUtils';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
@@ -34,7 +34,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [extractedData, setExtractedData] = useState<any>(null);
   const [selectedAgent, setSelectedAgent] = useState<string | undefined>(undefined);
-  const [selectedPipeline, setSelectedPipeline] = useState<'purchase' | 'rental'>('purchase');
+  const [selectedPipeline, setSelectedPipeline] = useState<PipelineType>('purchase');
   const [isEditing, setIsEditing] = useState(false);
   const [editableData, setEditableData] = useState<any>(null);
 
@@ -149,8 +149,29 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     }
     
     try {
-      // Ensure country is of type Country or undefined
-      const country = editableData.country ? (editableData.country as Country) : undefined;
+      // Normalize country to ensure it's a valid Country type
+      let country: Country | undefined = undefined;
+      if (editableData.country) {
+        // Check if the country matches one of our Country types
+        const formattedCountry = editableData.country as string;
+        const isValidCountry = ['France', 'Spain', 'Portugal', 'Greece', 'Switzerland', 
+                               'United Kingdom', 'United States', 'Croatia', 'Mauritius', 
+                               'Seychelles', 'Maldives', 'United Arab Emirates'].includes(formattedCountry);
+        
+        if (isValidCountry) {
+          country = formattedCountry as Country;
+        }
+      }
+      
+      // Extract any potential reference or external id
+      const propertyReference = editableData.property_reference || 
+                              editableData.propertyReference || 
+                              editableData.reference ||
+                              editableData["Property reference"] || "";
+      
+      const external_id = editableData.external_id || 
+                         editableData.externalId || 
+                         editableData["external id"] || "";
       
       const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
         name: editableData.name || editableData.Name || "",
@@ -158,7 +179,8 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         phone: editableData.phone || editableData.Phone || "",
         source: editableData.Source || editableData.source || "Site web",
         budget: editableData.Budget || editableData.budget || "",
-        propertyReference: editableData.property_reference || editableData.reference || editableData["Property reference"] || "",
+        propertyReference,
+        external_id,
         desiredLocation: editableData.desired_location || editableData.desiredLocation || editableData["Desired location"] || "",
         propertyType: editableData.propertyType || editableData.property_type || editableData["Property type"] || "",
         nationality: editableData.nationality || "",
@@ -169,11 +191,13 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         bedrooms: editableData.bedrooms || undefined,
         url: editableData.url || "",
         taskType: "Call",
-        country: country,
-        pipelineType: selectedPipeline
+        country,
+        pipelineType: selectedPipeline // <-- Make sure this is set correctly
       };
       
+      console.log("Creating lead with pipeline type:", selectedPipeline);
       console.log("Creating lead with data:", newLead);
+      
       const createdLead = await createLead(newLead);
       console.log("Created lead:", createdLead);
       
