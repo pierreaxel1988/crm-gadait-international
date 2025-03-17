@@ -25,7 +25,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
     setSelectedAction(actionType);
   };
 
-  const handleActionConfirm = () => {
+  const handleActionConfirm = async () => {
     if (lead && lead.id && selectedAction) {
       try {
         let scheduledDateTime = undefined;
@@ -36,7 +36,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           scheduledDateTime = dateTime.toISOString();
         }
         
-        const updatedLead = addActionToLead(lead.id, {
+        const updatedLead = await addActionToLead(lead.id, {
           actionType: selectedAction,
           scheduledDate: scheduledDateTime,
           notes: actionNotes
@@ -63,7 +63,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
     }
   };
 
-  const markActionComplete = (actionId: string) => {
+  const markActionComplete = async (actionId: string) => {
     if (lead && lead.id) {
       try {
         // Find the action in history
@@ -78,7 +78,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           };
           
           // Update the lead with the modified action history
-          const updatedLead = updateLead({
+          const updatedLead = await updateLead({
             ...lead,
             actionHistory
           });

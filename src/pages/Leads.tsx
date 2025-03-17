@@ -20,12 +20,25 @@ const Leads = () => {
   const [selectedTags, setSelectedTags] = useState<LeadTag[]>([]);
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [showTagsDropdown, setShowTagsDropdown] = useState(false);
-  const [leads, setLeads] = useState([]);
+  const [leads, setLeads] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const allLeads = getLeads();
-    setLeads(allLeads);
+    const fetchLeads = async () => {
+      try {
+        const allLeads = await getLeads();
+        setLeads(allLeads);
+      } catch (error) {
+        console.error('Error fetching leads:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger les leads."
+        });
+      }
+    };
+    
+    fetchLeads();
   }, []);
 
   const toggleTag = (tag: LeadTag) => {

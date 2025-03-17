@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -64,7 +65,7 @@ export const useKanbanData = (
         let leads = [];
         if (leadsError || !supabaseLeads || supabaseLeads.length === 0) {
           console.log('Falling back to local leads data');
-          leads = getLeads();
+          leads = await getLeads();
         } else {
           leads = supabaseLeads;
         }

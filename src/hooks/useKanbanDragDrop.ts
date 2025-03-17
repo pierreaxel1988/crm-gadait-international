@@ -82,7 +82,7 @@ export const useKanbanDragDrop = (
       if (error) {
         console.error('Error updating lead status in Supabase:', error);
         toast({
-          variant: "warning",
+          variant: "default",
           title: "Synchronisation",
           description: "Le statut a été mis à jour localement, mais la synchronisation complète a échoué."
         });

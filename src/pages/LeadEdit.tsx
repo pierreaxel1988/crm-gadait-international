@@ -38,25 +38,30 @@ const LeadEdit = () => {
   } = useLeadActions(lead, setLead);
 
   useEffect(() => {
-    if (id) {
-      try {
-        const leadData = getLead(id);
-        setLead(leadData);
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger les informations du lead."
-        });
-      } finally {
-        setIsLoading(false);
+    const fetchLead = async () => {
+      if (id) {
+        try {
+          setIsLoading(true);
+          const leadData = await getLead(id);
+          setLead(leadData);
+        } catch (error) {
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de charger les informations du lead."
+          });
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
+    };
+    
+    fetchLead();
   }, [id]);
 
-  const handleSubmit = (data: LeadDetailed) => {
+  const handleSubmit = async (data: LeadDetailed) => {
     try {
-      updateLead(data);
+      await updateLead(data);
       navigate('/leads');
     } catch (error) {
       toast({
@@ -67,11 +72,11 @@ const LeadEdit = () => {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce lead ?')) {
       try {
         if (id) {
-          deleteLead(id);
+          await deleteLead(id);
           navigate('/leads');
         }
       } catch (error) {

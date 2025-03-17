@@ -1,4 +1,3 @@
-
 import { LeadDetailed } from "@/types/lead";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,18 +24,18 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
       name: lead.name,
       email: lead.email || '',
       phone: lead.phone || '',
-      status: lead.status,
-      tags: lead.tags || [],
+      status: lead.status as any, // Cast to LeadStatus
+      tags: (lead.tags || []) as any[], // Cast to LeadTag[]
       createdAt: lead.created_at,
       lastContactedAt: lead.last_contacted_at,
       assignedTo: lead.assigned_to,
-      source: lead.source,
+      source: lead.source as any, // Cast to LeadSource
       budget: lead.budget,
       desiredLocation: lead.desired_location,
-      propertyType: lead.property_type,
+      propertyType: lead.property_type as any, // Cast to PropertyType
       propertyReference: lead.property_reference,
       bedrooms: lead.bedrooms,
-      taskType: lead.task_type,
+      taskType: lead.task_type as any, // Cast to TaskType
       nextFollowUpDate: lead.next_follow_up_date,
       notes: lead.notes,
       nationality: lead.nationality,
@@ -76,18 +75,18 @@ export const getLead = async (id: string): Promise<LeadDetailed | undefined> => 
       name: data.name,
       email: data.email || '',
       phone: data.phone || '',
-      status: data.status,
-      tags: data.tags || [],
+      status: data.status as any, // Cast to LeadStatus
+      tags: (data.tags || []) as any[], // Cast to LeadTag[]
       createdAt: data.created_at,
       lastContactedAt: data.last_contacted_at,
       assignedTo: data.assigned_to,
-      source: data.source,
+      source: data.source as any, // Cast to LeadSource
       budget: data.budget,
       desiredLocation: data.desired_location,
-      propertyType: data.property_type,
+      propertyType: data.property_type as any, // Cast to PropertyType
       propertyReference: data.property_reference,
       bedrooms: data.bedrooms,
-      taskType: data.task_type,
+      taskType: data.task_type as any, // Cast to TaskType
       nextFollowUpDate: data.next_follow_up_date,
       notes: data.notes,
       nationality: data.nationality,
@@ -218,7 +217,7 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
         id,
         createdAt,
         ...newLead,
-        status: newLead.status || "New",
+        status: newLead.status || "New" as any, // Cast to LeadStatus
         pipelineType: newLead.pipelineType || "purchase"
       };
       
@@ -238,18 +237,18 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       name: data.name,
       email: data.email || '',
       phone: data.phone || '',
-      status: data.status,
-      tags: data.tags || [],
+      status: data.status as any, // Cast to LeadStatus
+      tags: (data.tags || []) as any[], // Cast to LeadTag[]
       createdAt: data.created_at,
       lastContactedAt: data.last_contacted_at,
       assignedTo: data.assigned_to,
-      source: data.source,
+      source: data.source as any, // Cast to LeadSource
       budget: data.budget,
       desiredLocation: data.desired_location,
-      propertyType: data.property_type,
+      propertyType: data.property_type as any, // Cast to PropertyType
       propertyReference: data.property_reference,
       bedrooms: data.bedrooms,
-      taskType: data.task_type,
+      taskType: data.task_type as any, // Cast to TaskType
       nextFollowUpDate: data.next_follow_up_date,
       notes: data.notes,
       nationality: data.nationality,

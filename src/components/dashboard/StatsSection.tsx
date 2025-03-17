@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardStats from '@/components/dashboard/DashboardStats';
 import { getLeads } from '@/services/leadService';
@@ -11,27 +10,36 @@ const StatsSection = () => {
   });
   
   useEffect(() => {
-    const leads = getLeads();
+    const fetchStats = async () => {
+      try {
+        const leads = await getLeads();
+        
+        const newLeadsCount = leads.filter(lead => 
+          lead.status === "New" && 
+          new Date(lead.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        ).length;
+        
+        const qualifiedLeadsCount = leads.filter(lead => 
+          lead.status === "Qualified"
+        ).length;
+        
+        const upcomingTasksCount = leads.filter(lead => 
+          lead.nextFollowUpDate && 
+          new Date(lead.nextFollowUpDate) <= new Date(Date.now() + 24 * 60 * 60 * 1000)
+        ).length;
+        
+        setStats({
+          newLeads: newLeadsCount,
+          qualifiedLeads: qualifiedLeadsCount,
+          upcomingTasks: upcomingTasksCount
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        // Keep default stats in case of error
+      }
+    };
     
-    const newLeadsCount = leads.filter(lead => 
-      lead.status === "New" && 
-      new Date(lead.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-    ).length;
-    
-    const qualifiedLeadsCount = leads.filter(lead => 
-      lead.status === "Qualified"
-    ).length;
-    
-    const upcomingTasksCount = leads.filter(lead => 
-      lead.nextFollowUpDate && 
-      new Date(lead.nextFollowUpDate) <= new Date(Date.now() + 24 * 60 * 60 * 1000)
-    ).length;
-    
-    setStats({
-      newLeads: newLeadsCount,
-      qualifiedLeads: qualifiedLeadsCount,
-      upcomingTasks: upcomingTasksCount
-    });
+    fetchStats();
   }, []);
 
   return <DashboardStats stats={stats} />;

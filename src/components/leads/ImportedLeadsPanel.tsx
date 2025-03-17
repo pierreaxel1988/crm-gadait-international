@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Calendar, Mail, MapPin, Phone, ExternalLink, Clock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
@@ -21,20 +20,30 @@ const ImportedLeadsPanel = ({ limit = 5, className }: ImportedLeadsPanelProps) =
   const navigate = useNavigate();
 
   useEffect(() => {
-    const allLeads = getLeads();
+    const fetchLeads = async () => {
+      try {
+        setIsLoading(true);
+        const allLeads = await getLeads();
+        
+        // Filtrer et trier les leads importés
+        const importedLeads = allLeads
+          .filter(lead => lead.integration_source)
+          .sort((a, b) => {
+            const dateA = a.imported_at ? new Date(a.imported_at).getTime() : 0;
+            const dateB = b.imported_at ? new Date(b.imported_at).getTime() : 0;
+            return dateB - dateA;
+          })
+          .slice(0, limit);
+        
+        setRecentImports(importedLeads);
+      } catch (error) {
+        console.error('Error fetching imported leads:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    // Filtrer et trier les leads importés
-    const importedLeads = allLeads
-      .filter(lead => lead.integration_source)
-      .sort((a, b) => {
-        const dateA = a.imported_at ? new Date(a.imported_at).getTime() : 0;
-        const dateB = b.imported_at ? new Date(b.imported_at).getTime() : 0;
-        return dateB - dateA;
-      })
-      .slice(0, limit);
-    
-    setRecentImports(importedLeads);
-    setIsLoading(false);
+    fetchLeads();
   }, [limit]);
 
   const handleViewLead = (id: string) => {

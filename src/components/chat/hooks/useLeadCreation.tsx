@@ -41,7 +41,7 @@ export const useLeadCreation = () => {
     }
   };
   
-  const createLeadFromData = (extractedData: ExtractedData | null, emailContent: string, clearForm: () => void) => {
+  const createLeadFromData = async (extractedData: ExtractedData | null, emailContent: string, clearForm: () => void) => {
     if (!extractedData) return;
     
     if (!selectedAgent) {
@@ -71,7 +71,7 @@ export const useLeadCreation = () => {
         taskType: "Call", // Always assign "Call" task regardless of pipeline
       };
       
-      const createdLead = createLead(newLead);
+      const createdLead = await createLead(newLead);
       
       toast({
         title: "Lead créé",
