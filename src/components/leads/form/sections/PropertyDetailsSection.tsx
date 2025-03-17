@@ -94,25 +94,45 @@ const PropertyDetailsSection = ({
     handleInputChange(syntheticEvent);
   };
 
-  // Handler for bedroom selection
-  const handleBedroomChange = (value: string) => {
-    // Convert to number (use 11 for 10+)
+  // Convert string bedroom values to numbers for storage
+  const handleBedroomToggle = (value: string) => {
+    // Convert to number (use 10 for 10+)
     const numericValue = value === '10+' ? 10 : parseInt(value);
     
+    // Create a synthetic event for the toggle functionality
+    // We'll use an array for multiple selections
+    const currentBedrooms = formData.bedrooms ? [formData.bedrooms] : [];
+    const updatedBedrooms = currentBedrooms.includes(numericValue)
+      ? currentBedrooms.filter(b => b !== numericValue)
+      : [...currentBedrooms, numericValue];
+    
+    // Update the formData with string values (bedrooms should be an array now)
     const syntheticEvent = {
       target: {
         name: 'bedrooms',
-        value: numericValue
+        value: updatedBedrooms.length === 0 ? undefined : updatedBedrooms.sort((a, b) => a - b)
       }
-    } as React.ChangeEvent<HTMLInputElement>;
+    };
     
-    handleNumberChange(syntheticEvent);
+    // Use handleInputChange instead of handleNumberChange since we're working with an array
+    handleInputChange(syntheticEvent as unknown as React.ChangeEvent<HTMLInputElement>);
   };
 
   // Get current bedroom selection for the UI
-  const getSelectedBedroomOption = (): string => {
-    if (!formData.bedrooms) return '';
-    return formData.bedrooms >= 10 ? '10+' : formData.bedrooms.toString();
+  const getSelectedBedroomOptions = (): string[] => {
+    if (!formData.bedrooms) return [];
+    
+    // If bedrooms is a number (old format), convert to array
+    if (typeof formData.bedrooms === 'number') {
+      return [formData.bedrooms >= 10 ? '10+' : formData.bedrooms.toString()];
+    }
+    
+    // If it's already an array, map each value
+    if (Array.isArray(formData.bedrooms)) {
+      return formData.bedrooms.map(b => b >= 10 ? '10+' : b.toString());
+    }
+    
+    return [];
   };
 
   return (
@@ -202,9 +222,9 @@ const PropertyDetailsSection = ({
         </label>
         <MultiSelectButtons
           options={BEDROOM_OPTIONS}
-          selectedValues={[getSelectedBedroomOption()]}
-          onChange={handleBedroomChange}
-          singleSelect={true}
+          selectedValues={getSelectedBedroomOptions()}
+          onToggle={handleBedroomToggle}
+          singleSelect={false}
         />
       </div>
       

@@ -91,7 +91,7 @@ export interface LeadDetailed {
   currency?: Currency;
   desiredLocation?: string;
   propertyType?: string;
-  bedrooms?: number;
+  bedrooms?: number | number[];  // Updated to allow array of numbers
   views?: string[];
   amenities?: string[];
   purchaseTimeframe?: string;
