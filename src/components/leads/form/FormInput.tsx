@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,6 +12,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { COUNTRIES } from '@/utils/countries';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type InputType = 'text' | 'email' | 'tel' | 'number' | 'date' | 'textarea' | 'select' | 'tel-with-code';
 
@@ -53,6 +53,8 @@ const FormInput = ({
   countryCode,
   onCountryCodeChange
 }: FormInputProps) => {
+  const isMobile = useIsMobile();
+  
   const renderLabel = () => {
     if (typeof label === 'string' && Icon) {
       return (
@@ -131,16 +133,16 @@ const FormInput = ({
       case 'tel-with-code':
         return (
           <div className="flex">
-            <div className="w-28 mr-2">
+            <div className={`${isMobile ? 'w-20' : 'w-28'} mr-2`}>
               <Select
                 value={countryCode}
                 onValueChange={onCountryCodeChange}
                 disabled={readOnly}
               >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="+33" />
+                <SelectTrigger className="w-full overflow-hidden">
+                  <SelectValue placeholder="+33" className="truncate flex items-center" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[300px]">
                   <SelectItem value="+33">+33 🇫🇷</SelectItem>
                   <SelectItem value="+44">+44 🇬🇧</SelectItem>
                   <SelectItem value="+1">+1 🇺🇸</SelectItem>
