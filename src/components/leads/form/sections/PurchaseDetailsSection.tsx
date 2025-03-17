@@ -5,6 +5,7 @@ import { LeadDetailed, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@
 import FormInput from '../FormInput';
 import RadioSelectButtons from '../RadioSelectButtons';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface PurchaseDetailsSectionProps {
   formData: LeadDetailed;
@@ -24,36 +25,37 @@ const PurchaseDetailsSection = ({
   propertyUses,
 }: PurchaseDetailsSectionProps) => {
   const [formattedBudget, setFormattedBudget] = useState(formData.budget || '');
+  const [currency, setCurrency] = useState(formData.currency || 'EUR');
   
-  // Fonction pour formater le budget
-  const formatBudgetInput = (value: string) => {
-    // Supprime tous les caractères non numériques
+  // Format budget function
+  const formatBudgetInput = (value: string, currencyCode: string) => {
+    // Remove all non-numeric characters
     const numericValue = value.replace(/[^\d]/g, '');
     
     if (!numericValue) return '';
     
-    // Convertit en nombre
+    // Convert to number
     const number = parseInt(numericValue);
     
-    // Formate avec séparateur de milliers
+    // Format with thousands separator
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: currencyCode,
       maximumFractionDigits: 0
     }).format(number);
   };
   
-  // Gère le changement de budget
+  // Handle budget change
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     
-    // Stocke la valeur formatée pour l'affichage
+    // Store formatted value for display
     setFormattedBudget(value);
     
-    // Stocke la valeur d'origine pour les données
+    // Store the raw value for form data
     const rawValue = value.replace(/[^\d]/g, '') ? value : '';
     
-    // Simule un événement pour mettre à jour formData
+    // Simulate an event to update formData
     const syntheticEvent = {
       target: {
         name: 'budget',
@@ -64,14 +66,14 @@ const PurchaseDetailsSection = ({
     handleInputChange(syntheticEvent);
   };
   
-  // Gère la perte de focus pour formater définitivement
+  // Handle blur event to format budget
   const handleBudgetBlur = () => {
     if (!formattedBudget) return;
     
-    const formatted = formatBudgetInput(formattedBudget);
+    const formatted = formatBudgetInput(formattedBudget, currency);
     setFormattedBudget(formatted);
     
-    // Mise à jour du formData avec la valeur formatée
+    // Update the formData with the formatted value
     const syntheticEvent = {
       target: {
         name: 'budget',
@@ -81,27 +83,72 @@ const PurchaseDetailsSection = ({
     
     handleInputChange(syntheticEvent);
   };
+  
+  // Handle currency change
+  const handleCurrencyChange = (value: string) => {
+    setCurrency(value);
+    
+    // Update formData with new currency
+    const syntheticEvent = {
+      target: {
+        name: 'currency',
+        value
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(syntheticEvent);
+    
+    // Also reformat budget with new currency if there's a budget value
+    if (formattedBudget) {
+      const formatted = formatBudgetInput(formattedBudget, value);
+      setFormattedBudget(formatted);
+      
+      const budgetEvent = {
+        target: {
+          name: 'budget',
+          value: formatted
+        }
+      } as React.ChangeEvent<HTMLInputElement>;
+      
+      handleInputChange(budgetEvent);
+    }
+  };
 
   return (
     <div className="space-y-4">
-      <FormInput
-        label="Budget"
-        name="budget"
-        value={formattedBudget}
-        onChange={handleBudgetChange}
-        placeholder="ex: 1.500.000€"
-        icon={Banknote}
-        renderCustomField={() => (
-          <Input
-            name="budget"
-            value={formattedBudget}
-            onChange={handleBudgetChange}
-            onBlur={handleBudgetBlur}
-            placeholder="ex: 1.500.000€"
-            className="luxury-input w-full"
-          />
-        )}
-      />
+      <div className="space-y-2">
+        <FormInput
+          label="Budget"
+          name="budget"
+          value={formattedBudget}
+          onChange={handleBudgetChange}
+          placeholder="ex: 1.500.000€"
+          icon={Banknote}
+          renderCustomField={() => (
+            <div className="space-y-2">
+              <Input
+                name="budget"
+                value={formattedBudget}
+                onChange={handleBudgetChange}
+                onBlur={handleBudgetBlur}
+                placeholder="ex: 1.500.000"
+                className="luxury-input w-full"
+              />
+              <Select value={currency} onValueChange={handleCurrencyChange}>
+                <SelectTrigger className="luxury-input w-full">
+                  <SelectValue placeholder="Devise" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="EUR">Euro (€)</SelectItem>
+                  <SelectItem value="USD">Dollar ($)</SelectItem>
+                  <SelectItem value="GBP">Livre Sterling (£)</SelectItem>
+                  <SelectItem value="CHF">Franc Suisse (CHF)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        />
+      </div>
 
       <FormInput
         label="Date d'achat souhaitée"

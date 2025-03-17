@@ -31,6 +31,7 @@ serve(async (req) => {
       - Property reference: If any property reference code is mentioned (like REF123, etc.)
       - Source/portal: The website or platform mentioned (Le Figaro, Idealista, Property Cloud, etc.)
       - Budget or price mentioned: Any budget range or specific price mentioned
+      - Currency: The currency mentioned (EUR, USD, GBP, CHF)
       - Desired location: Any location preferences mentioned (city, area, neighborhood)
       - Property type preferences: Type of property they're looking for (Villa, Apartment, Penthouse, etc.)
       - Country: The country mentioned (if any)
@@ -59,6 +60,7 @@ serve(async (req) => {
       Extract the following information from this property listing URL:
       - Property reference: The unique identifier for this property
       - Price: The listed price
+      - Currency: The currency of the price (EUR, USD, GBP, CHF)
       - Location: Specific location of the property (city, area, etc.)
       - Country: The country where the property is located
       - Size or area: In m² if available

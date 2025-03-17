@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LeadDetailed, PropertyType, ViewType, Amenity, Country, PurchaseTimeframe, FinancingMethod, PropertyUse, LeadSource } from '@/types/lead';
+import { LeadDetailed, PropertyType, ViewType, Amenity, Country, PurchaseTimeframe, FinancingMethod, PropertyUse, LeadSource, Currency } from '@/types/lead';
 import GeneralInfoSection from './form/GeneralInfoSection';
 import SearchCriteriaSection from './form/SearchCriteriaSection';
 import StatusSection from './form/StatusSection';
@@ -29,6 +29,7 @@ const AMENITIES: Amenity[] = ['Piscine', 'Jardin', 'Garage', 'Sécurité'];
 const PURCHASE_TIMEFRAMES: PurchaseTimeframe[] = ['Moins de trois mois', 'Plus de trois mois'];
 const FINANCING_METHODS: FinancingMethod[] = ['Cash', 'Prêt bancaire'];
 const PROPERTY_USES: PropertyUse[] = ['Investissement locatif', 'Résidence principale'];
+const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'CHF'];
 const COUNTRIES: Country[] = [
   'Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 'Portugal', 
   'Seychelles', 'Spain', 'Switzerland', 'United Arab Emirates', 
@@ -57,6 +58,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ lead, onSubmit, onCancel, activeTab
     country: lead?.country || undefined,
     propertyReference: lead?.propertyReference || '',
     budget: lead?.budget || '',
+    currency: lead?.currency || 'EUR',
     desiredLocation: lead?.desiredLocation || '',
     propertyType: lead?.propertyType || undefined,
     bedrooms: lead?.bedrooms || undefined,

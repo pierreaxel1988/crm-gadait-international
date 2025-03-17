@@ -1,3 +1,4 @@
+
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -59,6 +60,12 @@ export type PipelineType =
   | "purchase" 
   | "rental";
 
+export type Currency =
+  | "EUR"
+  | "USD"
+  | "GBP"
+  | "CHF";
+
 import type { LeadStatus } from "@/components/common/StatusBadge";
 import type { LeadTag } from "@/components/common/TagBadge";
 import type { TaskType } from "@/components/kanban/KanbanCard";
@@ -79,6 +86,7 @@ export interface LeadDetailed {
   source?: LeadSource;
   propertyReference?: string;
   budget?: string;
+  currency?: Currency;
   desiredLocation?: string;
   propertyType?: string;
   bedrooms?: number;
