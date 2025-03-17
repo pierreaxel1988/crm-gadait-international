@@ -46,8 +46,16 @@ export const mapToLeadDetailed = (data: any): LeadDetailed => {
 
 /**
  * Maps a LeadDetailed object to a format suitable for Supabase
+ * Ensures bedrooms is converted to JSON before sending to Supabase
  */
 export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
+  // Convert bedrooms array to a JSON compatible format for Supabase
+  const formattedBedrooms = leadData.bedrooms !== undefined 
+    ? (Array.isArray(leadData.bedrooms) 
+        ? JSON.stringify(leadData.bedrooms) 
+        : leadData.bedrooms)
+    : undefined;
+  
   return {
     name: leadData.name,
     email: leadData.email,
@@ -61,7 +69,7 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
     budget: leadData.budget,
     desired_location: leadData.desiredLocation,
     property_type: leadData.propertyType,
-    bedrooms: leadData.bedrooms,
+    bedrooms: formattedBedrooms,
     views: leadData.views,
     amenities: leadData.amenities,
     purchase_timeframe: leadData.purchaseTimeframe,

@@ -25,7 +25,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     // First, try to create the lead in Supabase
     const { data, error } = await supabase
       .from('leads')
-      .insert([dataWithImportedDate])
+      .insert(dataWithImportedDate)
       .select()
       .single();
       

@@ -101,7 +101,10 @@ const PropertyDetailsSection = ({
     
     // Create a synthetic event for the toggle functionality
     // We'll use an array for multiple selections
-    const currentBedrooms = formData.bedrooms ? [formData.bedrooms] : [];
+    const currentBedrooms = formData.bedrooms 
+      ? (Array.isArray(formData.bedrooms) ? formData.bedrooms : [formData.bedrooms]) 
+      : [];
+      
     const updatedBedrooms = currentBedrooms.includes(numericValue)
       ? currentBedrooms.filter(b => b !== numericValue)
       : [...currentBedrooms, numericValue];
@@ -110,7 +113,7 @@ const PropertyDetailsSection = ({
     const syntheticEvent = {
       target: {
         name: 'bedrooms',
-        value: updatedBedrooms.length === 0 ? undefined : updatedBedrooms.sort((a, b) => a - b)
+        value: updatedBedrooms.length === 0 ? undefined : updatedBedrooms.sort((a, b) => Number(a) - Number(b))
       }
     };
     
