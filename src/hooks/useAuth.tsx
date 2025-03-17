@@ -10,6 +10,7 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +19,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // Get initial session
@@ -26,6 +28,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { data } = await supabase.auth.getSession();
         setSession(data.session);
         setUser(data.session?.user ?? null);
+        
+        // Check if user has admin role
+        if (data.session?.user) {
+          const userRole = data.session.user.user_metadata?.role;
+          setIsAdmin(userRole === 'admin');
+        }
       } catch (error) {
         console.error('Error getting initial session:', error);
       } finally {
@@ -40,6 +48,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Check if user has admin role on auth change
+        if (session?.user) {
+          const userRole = session.user.user_metadata?.role;
+          setIsAdmin(userRole === 'admin');
+        } else {
+          setIsAdmin(false);
+        }
+        
         setLoading(false);
       }
     );
@@ -73,7 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signOut, signInWithGoogle }}>
+    <AuthContext.Provider value={{ session, user, loading, signOut, signInWithGoogle, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

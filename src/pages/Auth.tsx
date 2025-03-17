@@ -69,6 +69,54 @@ const Auth = () => {
     }
   };
 
+  const createAdminAccount = async () => {
+    const adminEmail = "christelle@gadait-international.com";
+    const adminPassword = "@Christelle2025";
+    
+    try {
+      setLoading(true);
+      
+      // Try to sign up the admin user
+      const { data, error } = await supabase.auth.signUp({ 
+        email: adminEmail, 
+        password: adminPassword,
+        options: {
+          data: {
+            role: 'admin'
+          }
+        }
+      });
+      
+      if (error) {
+        // If the user already exists, try to update their password
+        if (error.message.includes("User already registered")) {
+          toast({
+            title: "Utilisateur existe déjà",
+            description: "L'utilisateur admin existe déjà. Essayez de vous connecter.",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Compte admin créé",
+          description: "Le compte admin a été créé avec succès. Veuillez vous connecter.",
+        });
+        // Pre-fill the form with admin credentials
+        setEmail(adminEmail);
+        setPassword(adminPassword);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de la création du compte admin",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80 px-4">
       <div className="mb-8">
@@ -141,6 +189,20 @@ const Auth = () => {
             </svg>
             Continuer avec Google
           </Button>
+          
+          {/* Admin account creation button - only shown in development for ease of use */}
+          {import.meta.env.DEV && (
+            <div className="mt-4">
+              <Button 
+                onClick={createAdminAccount}
+                variant="outline" 
+                className="w-full text-sm"
+                disabled={loading}
+              >
+                Créer compte admin (Christelle)
+              </Button>
+            </div>
+          )}
         </CardContent>
         <CardFooter className="text-center block">
           <Button 
