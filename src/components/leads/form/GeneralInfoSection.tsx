@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Mail, Phone, Globe } from 'lucide-react';
+import { User, Mail, Phone, Globe, Flag, Map } from 'lucide-react';
 import { LeadDetailed, Country } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
@@ -81,6 +81,22 @@ const GeneralInfoSection = ({
         icon={Globe}
         options={COUNTRIES.map(country => ({ value: country, label: country }))}
         placeholder="Sélectionner un pays d'origine"
+      />
+
+      <FormInput
+        label="Nationalité"
+        name="nationality"
+        value={formData.nationality || ''}
+        onChange={handleInputChange}
+        icon={Flag}
+      />
+
+      <FormInput
+        label="Résidence fiscale"
+        name="taxResidence"
+        value={formData.taxResidence || ''}
+        onChange={handleInputChange}
+        icon={Map}
       />
     </FormSection>
   );

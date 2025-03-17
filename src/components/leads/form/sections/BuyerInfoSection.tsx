@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Flag, Map, HelpCircle } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
 import FormInput from '../FormInput';
 
@@ -15,22 +15,6 @@ const BuyerInfoSection = ({
 }: BuyerInfoSectionProps) => {
   return (
     <div className="space-y-4">
-      <FormInput
-        label="Nationalité"
-        name="nationality"
-        value={formData.nationality || ''}
-        onChange={handleInputChange}
-        icon={Flag}
-      />
-
-      <FormInput
-        label="Résidence fiscale"
-        name="taxResidence"
-        value={formData.taxResidence || ''}
-        onChange={handleInputChange}
-        icon={Map}
-      />
-
       <FormInput
         label="Notes"
         name="notes"
