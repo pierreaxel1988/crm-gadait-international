@@ -55,14 +55,14 @@ const GeneralInfoSection = ({
       />
 
       <FormInput
-        label="Pays"
+        label="Pays d'origine"
         name="country"
         type="select"
         value={formData.country || ''}
         onChange={handleInputChange}
         icon={Globe}
         options={countries.map(country => ({ value: country, label: country }))}
-        placeholder="Sélectionner un pays"
+        placeholder="Sélectionner un pays d'origine"
       />
     </FormSection>
   );
