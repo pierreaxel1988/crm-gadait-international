@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { usePropertyExtraction } from '@/components/chat/hooks/usePropertyExtraction';
+import { Country } from '@/types/lead';
 
 interface QuickLeadImportProps {
   isOpen: boolean;
@@ -21,7 +22,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
   const navigate = useNavigate();
   const [leadName, setLeadName] = useState('');
   const [leadEmail, setLeadEmail] = useState('');
-  const [leadCountry, setLeadCountry] = useState('');
+  const [leadCountry, setLeadCountry] = useState<Country | ''>('');
   const {
     propertyUrl,
     setPropertyUrl,
@@ -67,7 +68,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
         propertyType: extractedData?.propertyType || "",
         bedrooms: extractedData?.bedrooms ? parseInt(extractedData.bedrooms.toString()) : undefined,
         nationality: "",
-        country: leadCountry,
+        country: (leadCountry as Country) || undefined,
         notes: `Intéressé par l'annonce: ${propertyUrl}`,
         url: propertyUrl,
         pipelineType: "purchase" as "purchase" | "rental"
@@ -144,8 +145,24 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
           <FormInput
             label="Pays"
             name="country"
+            type="select"
             value={leadCountry}
-            onChange={(e) => setLeadCountry(e.target.value)}
+            onChange={(e) => setLeadCountry(e.target.value as Country)}
+            options={[
+              { value: 'France', label: 'France' },
+              { value: 'Spain', label: 'Espagne' },
+              { value: 'Portugal', label: 'Portugal' },
+              { value: 'Greece', label: 'Grèce' },
+              { value: 'Switzerland', label: 'Suisse' },
+              { value: 'United Kingdom', label: 'Royaume-Uni' },
+              { value: 'United States', label: 'États-Unis' },
+              { value: 'Croatia', label: 'Croatie' },
+              { value: 'Mauritius', label: 'Maurice' },
+              { value: 'Seychelles', label: 'Seychelles' },
+              { value: 'Maldives', label: 'Maldives' },
+              { value: 'United Arab Emirates', label: 'Émirats Arabes Unis' }
+            ]}
+            placeholder="Sélectionner un pays"
           />
           
           <div className="space-y-2">

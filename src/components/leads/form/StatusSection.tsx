@@ -75,15 +75,21 @@ const StatusSection = ({
 
   // Handle tag toggle if provided, otherwise create an empty handler
   const handleTagToggleInternal = handleTagToggle || ((tag: LeadTag) => {
-    const event = {
+    // Create a new array with the updated tags
+    const updatedTags = formData.tags?.includes(tag)
+      ? formData.tags.filter(t => t !== tag)
+      : [...(formData.tags || []), tag];
+    
+    // Create a custom event-like object that conforms to the expected structure
+    const syntheticEvent = {
       target: {
         name: 'tags',
-        value: formData.tags?.includes(tag)
-          ? formData.tags.filter(t => t !== tag)
-          : [...(formData.tags || []), tag]
+        value: updatedTags
       }
-    } as React.ChangeEvent<HTMLInputElement>;
-    handleInputChange(event);
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    
+    // Pass this synthetic event to the handleInputChange function
+    handleInputChange(syntheticEvent);
   });
 
   return (

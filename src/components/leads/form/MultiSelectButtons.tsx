@@ -30,9 +30,8 @@ const MultiSelectButtons = <T extends string>({
   return (
     <BaseSelectButtons 
       options={options} 
-      selected={selectedValues}
-      onSelect={handleClick}
-      singleSelect={singleSelect}
+      isSelected={(option) => selectedValues.includes(option)}
+      onSelectOption={handleClick}
     />
   );
 };
