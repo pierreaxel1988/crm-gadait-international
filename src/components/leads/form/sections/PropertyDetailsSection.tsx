@@ -34,6 +34,9 @@ const LOCATIONS_BY_COUNTRY: Record<string, string[]> = {
   'Seychelles': ['Mahé', 'Praslin', 'La Digue', 'Silhouette']
 };
 
+// Options for bedrooms
+const BEDROOM_OPTIONS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'];
+
 const PropertyDetailsSection = ({
   formData,
   handleInputChange,
@@ -89,6 +92,27 @@ const PropertyDetailsSection = ({
     } as React.ChangeEvent<HTMLSelectElement>;
     
     handleInputChange(syntheticEvent);
+  };
+
+  // Handler for bedroom selection
+  const handleBedroomChange = (value: string) => {
+    // Convert to number (use 11 for 10+)
+    const numericValue = value === '10+' ? 10 : parseInt(value);
+    
+    const syntheticEvent = {
+      target: {
+        name: 'bedrooms',
+        value: numericValue
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleNumberChange(syntheticEvent);
+  };
+
+  // Get current bedroom selection for the UI
+  const getSelectedBedroomOption = (): string => {
+    if (!formData.bedrooms) return '';
+    return formData.bedrooms >= 10 ? '10+' : formData.bedrooms.toString();
   };
 
   return (
@@ -172,15 +196,17 @@ const PropertyDetailsSection = ({
         />
       </div>
       
-      <FormInput
-        label="Nombre de chambres"
-        name="bedrooms"
-        value={formData.bedrooms || ''}
-        onChange={handleNumberChange}
-        type="number"
-        min={0}
-        max={20}
-      />
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Nombre de chambres
+        </label>
+        <MultiSelectButtons
+          options={BEDROOM_OPTIONS}
+          selectedValues={[getSelectedBedroomOption()]}
+          onChange={handleBedroomChange}
+          singleSelect={true}
+        />
+      </div>
       
       <div>
         <label className="block text-sm font-medium mb-1">
