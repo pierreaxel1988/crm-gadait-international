@@ -40,14 +40,6 @@ const PropertyDetailsSection = ({
           onChange={handleInputChange}
           placeholder="REF-123456"
         />
-        
-        <FormInput
-          label="Budget"
-          name="budget"
-          value={formData.budget || ''}
-          onChange={handleInputChange}
-          placeholder="Ex: 500 000 €"
-        />
       </div>
       
       <PropertyUrlField 
