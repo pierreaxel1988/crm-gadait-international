@@ -50,7 +50,7 @@ const PropertyTab: React.FC<PropertyTabProps> = ({
         budget: extractedData.price || "",
         desiredLocation: extractedData.location || "",
         propertyType: extractedData.propertyType || "",
-        bedrooms: extractedData.bedrooms ? parseInt(extractedData.bedrooms) : undefined,
+        bedrooms: extractedData.bedrooms ? parseInt(extractedData.bedrooms.toString()) : undefined,
         nationality: "",
         notes: `Intéressé par l'annonce: ${propertyUrl}`,
         url: propertyUrl,

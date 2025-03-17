@@ -1,25 +1,60 @@
 
-import React from 'react';
-import { Plus } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, ArrowUpDown, Import } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import CustomButton from '@/components/ui/CustomButton';
+import QuickLeadImport from './QuickLeadImport';
 
 interface LeadsHeaderProps {
-  onNewLead: () => void;
+  onSortChange?: (sort: string) => void;
+  onRefresh?: () => void;
 }
 
-const LeadsHeader: React.FC<LeadsHeaderProps> = ({ onNewLead }) => {
+const LeadsHeader: React.FC<LeadsHeaderProps> = ({ onSortChange, onRefresh }) => {
+  const navigate = useNavigate();
+  const [showImportModal, setShowImportModal] = useState(false);
+
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="flex justify-between items-center pb-4">
       <div>
         <h1 className="text-2xl md:text-3xl font-semibold">Leads</h1>
-        <p className="text-muted-foreground">Gérez vos leads et prospects</p>
+        <p className="text-loro-hazel">Liste de vos leads et prospects</p>
       </div>
-      <CustomButton 
-        className="bg-primary text-white flex items-center gap-1.5 w-full sm:w-auto"
-        onClick={onNewLead}
-      >
-        <Plus className="h-4 w-4" /> Nouveau Lead
-      </CustomButton>
+
+      <div className="flex gap-3">
+        <CustomButton 
+          variant="outline" 
+          className="hidden md:flex items-center gap-1.5"
+          onClick={() => navigate('/leads/import')}
+        >
+          <ArrowUpDown className="h-4 w-4" /> 
+          Importer/Exporter
+        </CustomButton>
+        
+        <CustomButton 
+          variant="outline"
+          className="flex items-center gap-1.5"
+          onClick={() => setShowImportModal(true)}
+        >
+          <Import className="h-4 w-4" /> 
+          Import Rapide
+        </CustomButton>
+        
+        <CustomButton 
+          variant="chocolate" 
+          className="flex items-center gap-1.5"
+          onClick={() => navigate('/leads/new')}
+        >
+          <Plus className="h-4 w-4" /> 
+          Nouveau Lead
+        </CustomButton>
+      </div>
+
+      <QuickLeadImport 
+        isOpen={showImportModal} 
+        onClose={() => setShowImportModal(false)} 
+        onSuccess={onRefresh}
+      />
     </div>
   );
 };

@@ -1,153 +1,143 @@
 
-import React, { useState } from 'react';
-import { LeadDetailed, LeadSource, PropertyType, ViewType, Amenity, 
-  PurchaseTimeframe, FinancingMethod, PropertyUse, Country } from '@/types/lead';
-import { LeadStatus } from '@/components/common/StatusBadge';
-import { LeadTag } from '@/components/common/TagBadge';
-import { TaskType } from '@/components/kanban/KanbanCard';
-import CustomButton from '@/components/ui/CustomButton';
-import { usePropertyExtraction } from '@/components/chat/hooks/usePropertyExtraction';
-import { toast } from '@/hooks/use-toast';
-
-// Import refactored form sections
+import React, { useState, useEffect } from 'react';
+import { LeadDetailed, PropertyType, ViewType, Amenity, Country, PurchaseTimeframe, FinancingMethod, PropertyUse, LeadSource } from '@/types/lead';
+import { v4 as uuidv4 } from 'uuid';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import GeneralInfoSection from './form/GeneralInfoSection';
 import SearchCriteriaSection from './form/SearchCriteriaSection';
 import StatusSection from './form/StatusSection';
+import { usePropertyExtraction } from '../chat/hooks/usePropertyExtraction';
+import { toast } from '@/hooks/use-toast';
 
-type LeadFormProps = {
+interface LeadFormProps {
   lead?: LeadDetailed;
   onSubmit: (data: LeadDetailed) => void;
   onCancel: () => void;
-  activeTab?: string;
-};
+}
 
-const LeadForm = ({ lead, onSubmit, onCancel, activeTab = 'informations' }: LeadFormProps) => {
-  const [formData, setFormData] = useState<LeadDetailed>(
-    lead || {
-      id: '',
-      name: '',
-      email: '',
-      status: 'New',
-      tags: [],
-      createdAt: new Date().toISOString().split('T')[0],
+// Dummy data for form options
+const PROPERTY_TYPES: PropertyType[] = [
+  'Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 
+  'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château',
+  'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'
+];
+
+const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
+const AMENITIES: Amenity[] = ['Piscine', 'Jardin', 'Garage', 'Sécurité'];
+const PURCHASE_TIMEFRAMES: PurchaseTimeframe[] = ['Moins de trois mois', 'Plus de trois mois'];
+const FINANCING_METHODS: FinancingMethod[] = ['Cash', 'Prêt bancaire'];
+const PROPERTY_USES: PropertyUse[] = ['Investissement locatif', 'Résidence principale'];
+const COUNTRIES: Country[] = [
+  'Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 'Portugal', 
+  'Seychelles', 'Spain', 'Switzerland', 'United Arab Emirates', 
+  'United Kingdom', 'United States'
+];
+const LEAD_SOURCES: LeadSource[] = [
+  'Site web', 'Réseaux sociaux', 'Portails immobiliers', 'Network', 
+  'Repeaters', 'Recommandations', 'Apporteur d\'affaire', 'Idealista',
+  'Le Figaro', 'Properstar', 'Property Cloud', 'L\'express Property'
+];
+
+const LeadForm: React.FC<LeadFormProps> = ({ lead, onSubmit, onCancel }) => {
+  // Initialize form data with lead data or default values
+  const [formData, setFormData] = useState<LeadDetailed>({
+    id: lead?.id || uuidv4(),
+    name: lead?.name || '',
+    email: lead?.email || '',
+    phone: lead?.phone || '',
+    location: lead?.location || '',
+    status: lead?.status || 'New',
+    tags: lead?.tags || [],
+    assignedTo: lead?.assignedTo || undefined,
+    createdAt: lead?.createdAt || new Date().toISOString(),
+    lastContactedAt: lead?.lastContactedAt || undefined,
+    source: lead?.source || undefined,
+    country: lead?.country || undefined,
+    propertyReference: lead?.propertyReference || '',
+    budget: lead?.budget || '',
+    desiredLocation: lead?.desiredLocation || '',
+    propertyType: lead?.propertyType || undefined,
+    bedrooms: lead?.bedrooms || undefined,
+    views: lead?.views || [],
+    amenities: lead?.amenities || [],
+    purchaseTimeframe: lead?.purchaseTimeframe || undefined,
+    financingMethod: lead?.financingMethod || undefined,
+    propertyUse: lead?.propertyUse || undefined,
+    nationality: lead?.nationality || '',
+    taskType: lead?.taskType || undefined,
+    notes: lead?.notes || '',
+    url: lead?.url || '',
+    pipelineType: lead?.pipelineType || 'purchase'
+  });
+
+  // Property extraction hook
+  const { 
+    propertyUrl, 
+    setPropertyUrl, 
+    isLoading, 
+    extractedData, 
+    extractPropertyData 
+  } = usePropertyExtraction();
+  
+  // Update property URL in extraction hook
+  useEffect(() => {
+    if (formData.url) {
+      setPropertyUrl(formData.url);
     }
-  );
+  }, [formData.url, setPropertyUrl]);
 
-  const { extractPropertyData, isLoading: isExtracting, extractedData } = usePropertyExtraction();
-
+  // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Handle number input changes
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value ? parseInt(value) : undefined }));
   };
 
-  const handleTagToggle = (tag: LeadTag) => {
-    setFormData(prev => {
-      const tags = prev.tags || [];
-      return {
-        ...prev,
-        tags: tags.includes(tag) ? tags.filter(t => t !== tag) : [...tags, tag]
-      };
-    });
-  };
-
+  // Handle multi-select toggle
   const handleMultiSelectToggle = <T extends string>(name: keyof LeadDetailed, value: T) => {
     setFormData(prev => {
       const currentValues = prev[name] as T[] || [];
-      return {
-        ...prev,
-        [name]: currentValues.includes(value) 
-          ? currentValues.filter(v => v !== value) 
-          : [...currentValues, value]
-      };
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter(item => item !== value)
+        : [...currentValues, value];
+      return { ...prev, [name]: newValues };
     });
   };
 
-  const handleExtractUrl = async (url: string) => {
-    if (!url) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Veuillez entrer une URL d'annonce immobilière."
-      });
-      return;
-    }
-
-    try {
-      // Stocker temporairement l'URL dans usePropertyExtraction
-      usePropertyExtraction().setPropertyUrl(url);
-      
-      // Extraire les données
-      await extractPropertyData();
-      
-      // Si des données ont été extraites, les utiliser pour mettre à jour le formulaire
-      if (extractedData) {
-        setFormData(prev => ({
-          ...prev,
-          propertyReference: extractedData.reference || prev.propertyReference,
-          budget: extractedData.price || prev.budget,
-          desiredLocation: extractedData.location || prev.desiredLocation,
-          propertyType: extractedData.propertyType as PropertyType || prev.propertyType,
-          bedrooms: extractedData.bedrooms ? parseInt(extractedData.bedrooms) : prev.bedrooms,
-          country: extractedData.country as Country || prev.country
-        }));
-        
-        toast({
-          title: "Données extraites",
-          description: "Les informations de l'annonce ont été intégrées au formulaire."
-        });
-      }
-    } catch (error) {
-      console.error('Erreur lors de l\'extraction des données:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'extraire les données de l'annonce."
-      });
-    }
+  // Handle URL extraction
+  const handleExtractUrl = (url: string) => {
+    // Set the URL in the property extraction hook
+    setPropertyUrl(url);
+    extractPropertyData();
   };
 
-  // Define constants for form options
-  const leadSources: LeadSource[] = [
-    'Site web', 'Réseaux sociaux', 'Portails immobiliers', 
-    'Network', 'Repeaters', 'Recommandations', 'Apporteur d\'affaire',
-    'Idealista', 'Le Figaro', 'Properstar', 'Property Cloud', 'L\'express Property'
-  ];
+  // Apply extracted data to form
+  useEffect(() => {
+    if (extractedData) {
+      setFormData(prev => ({
+        ...prev,
+        propertyReference: extractedData.reference || prev.propertyReference,
+        budget: extractedData.price || prev.budget,
+        desiredLocation: extractedData.location || prev.desiredLocation,
+        propertyType: extractedData.propertyType as PropertyType || prev.propertyType,
+        bedrooms: extractedData.bedrooms ? parseInt(extractedData.bedrooms.toString()) : prev.bedrooms,
+        url: propertyUrl || prev.url
+      }));
 
-  const taskTypes: TaskType[] = [
-    'Call', 'Visites', 'Compromis', 'Acte de vente', 'Contrat de Location',
-    'Propositions', 'Follow up', 'Estimation', 'Prospection', 'Admin'
-  ];
+      toast({
+        title: "Données extraites",
+        description: "Les informations de la propriété ont été ajoutées au formulaire."
+      });
+    }
+  }, [extractedData, propertyUrl]);
 
-  const propertyTypes: PropertyType[] = [
-    'Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 
-    'Chalet', 'Terrain', 'Manoir', 'Maison de ville', 'Château', 
-    'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'
-  ];
-
-  const countries: Country[] = [
-    'Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 
-    'Portugal', 'Seychelles', 'Spain', 'Switzerland', 
-    'United Arab Emirates', 'United Kingdom', 'United States'
-  ];
-
-  const viewTypes: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
-  const amenities: Amenity[] = ['Piscine', 'Jardin', 'Garage', 'Sécurité'];
-  const purchaseTimeframes: PurchaseTimeframe[] = ['Moins de trois mois', 'Plus de trois mois'];
-  const financingMethods: FinancingMethod[] = ['Cash', 'Prêt bancaire'];
-  const propertyUses: PropertyUse[] = ['Investissement locatif', 'Résidence principale'];
-  
-  const leadTags: LeadTag[] = ['Vip', 'Hot', 'Serious', 'Cold', 'No response', 'No phone', 'Fake'];
-  
-  const leadStatuses: LeadStatus[] = [
-    'New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 
-    'Offer', 'Deposit', 'Signed'
-  ];
-
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
@@ -155,53 +145,53 @@ const LeadForm = ({ lead, onSubmit, onCancel, activeTab = 'informations' }: Lead
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-1">
-        {activeTab === 'informations' && (
+      <Tabs defaultValue="general" className="space-y-6">
+        <TabsList className="grid grid-cols-3 w-full max-w-md mb-4">
+          <TabsTrigger value="general">Général</TabsTrigger>
+          <TabsTrigger value="criteria">Critères</TabsTrigger>
+          <TabsTrigger value="status">Statut</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general" className="space-y-6">
           <GeneralInfoSection 
             formData={formData} 
             handleInputChange={handleInputChange} 
-            countries={countries}
+            countries={COUNTRIES}
           />
-        )}
-        
-        {activeTab === 'criteres' && (
+        </TabsContent>
+
+        <TabsContent value="criteria" className="space-y-6">
           <SearchCriteriaSection 
             formData={formData}
             handleInputChange={handleInputChange}
             handleNumberChange={handleNumberChange}
             handleMultiSelectToggle={handleMultiSelectToggle}
-            propertyTypes={propertyTypes}
-            viewTypes={viewTypes}
-            amenities={amenities}
-            purchaseTimeframes={purchaseTimeframes}
-            financingMethods={financingMethods}
-            propertyUses={propertyUses}
+            propertyTypes={PROPERTY_TYPES}
+            viewTypes={VIEW_TYPES}
+            amenities={AMENITIES}
+            purchaseTimeframes={PURCHASE_TIMEFRAMES}
+            financingMethods={FINANCING_METHODS}
+            propertyUses={PROPERTY_USES}
             onExtractUrl={handleExtractUrl}
           />
-        )}
-        
-        {activeTab === 'statut' && (
-          <StatusSection 
-            formData={formData}
-            handleInputChange={handleInputChange}
-            handleTagToggle={handleTagToggle}
-            leadStatuses={leadStatuses}
-            leadTags={leadTags}
-          />
-        )}
-      </div>
+        </TabsContent>
 
-      <div className="flex justify-end gap-3">
-        <CustomButton 
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-        >
+        <TabsContent value="status" className="space-y-6">
+          <StatusSection 
+            formData={formData} 
+            handleInputChange={handleInputChange}
+            sources={LEAD_SOURCES}
+          />
+        </TabsContent>
+      </Tabs>
+
+      <div className="flex justify-end space-x-3 pt-3">
+        <Button type="button" variant="outline" onClick={onCancel}>
           Annuler
-        </CustomButton>
-        <CustomButton type="submit">
-          Enregistrer
-        </CustomButton>
+        </Button>
+        <Button type="submit">
+          {lead ? 'Sauvegarder' : 'Créer'}
+        </Button>
       </div>
     </form>
   );

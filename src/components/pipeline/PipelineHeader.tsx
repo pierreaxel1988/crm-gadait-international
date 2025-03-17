@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
-import { Filter, Plus, Settings, RefreshCcw, Mail } from 'lucide-react';
+import { Filter, Plus, Settings, RefreshCcw, Mail, Import } from 'lucide-react';
 import CustomButton from '@/components/ui/CustomButton';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import PipelineFilters, { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import EmailImportModal from './EmailImportModal';
+import QuickLeadImport from '@/components/leads/QuickLeadImport';
 
 interface PipelineHeaderProps {
   filters: FilterOptions;
@@ -29,6 +30,7 @@ const PipelineHeader = ({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [isQuickImportOpen, setIsQuickImportOpen] = useState(false);
 
   return (
     <div className="space-y-4">
@@ -55,6 +57,13 @@ const PipelineHeader = ({
               onClick={() => setIsEmailModalOpen(true)}
             >
               <Mail className="h-4 w-4" /> Importer un email
+            </CustomButton>
+            <CustomButton
+              variant="outline"
+              className="flex items-center gap-1.5"
+              onClick={() => setIsQuickImportOpen(true)}
+            >
+              <Import className="h-4 w-4" /> Import Rapide
             </CustomButton>
             <PipelineFilters 
               filters={filters}
@@ -96,6 +105,13 @@ const PipelineHeader = ({
             >
               <Mail className="h-4 w-4" />
             </CustomButton>
+            <CustomButton
+              variant="outline"
+              className="flex items-center justify-center w-10 h-10 p-0"
+              onClick={() => setIsQuickImportOpen(true)}
+            >
+              <Import className="h-4 w-4" />
+            </CustomButton>
             <PipelineFilters 
               filters={filters}
               onFilterChange={onFilterChange}
@@ -112,6 +128,12 @@ const PipelineHeader = ({
         onClose={() => setIsEmailModalOpen(false)}
         teamMembers={teamMembers}
         onLeadCreated={handleRefresh}
+      />
+
+      <QuickLeadImport
+        isOpen={isQuickImportOpen}
+        onClose={() => setIsQuickImportOpen(false)}
+        onSuccess={handleRefresh}
       />
     </div>
   );
