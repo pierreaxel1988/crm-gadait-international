@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { LeadDetailed, PropertyType, ViewType, Amenity, Country, PurchaseTimeframe, FinancingMethod, PropertyUse, LeadSource } from '@/types/lead';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LeadDetailed, PropertyType, ViewType, Amenity, Country, PurchaseTimeframe, FinancingMethod, PropertyUse, LeadSource } from '@/types/lead';
 import GeneralInfoSection from './form/GeneralInfoSection';
 import SearchCriteriaSection from './form/SearchCriteriaSection';
 import StatusSection from './form/StatusSection';
@@ -14,6 +14,7 @@ interface LeadFormProps {
   lead?: LeadDetailed;
   onSubmit: (data: LeadDetailed) => void;
   onCancel: () => void;
+  activeTab?: string;
 }
 
 // Dummy data for form options
@@ -39,7 +40,7 @@ const LEAD_SOURCES: LeadSource[] = [
   'Le Figaro', 'Properstar', 'Property Cloud', 'L\'express Property'
 ];
 
-const LeadForm: React.FC<LeadFormProps> = ({ lead, onSubmit, onCancel }) => {
+const LeadForm: React.FC<LeadFormProps> = ({ lead, onSubmit, onCancel, activeTab = 'general' }) => {
   // Initialize form data with lead data or default values
   const [formData, setFormData] = useState<LeadDetailed>({
     id: lead?.id || uuidv4(),
@@ -145,7 +146,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ lead, onSubmit, onCancel }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <Tabs defaultValue="general" className="space-y-6">
+      <Tabs defaultValue={activeTab} className="space-y-6">
         <TabsList className="grid grid-cols-3 w-full max-w-md mb-4">
           <TabsTrigger value="general">Général</TabsTrigger>
           <TabsTrigger value="criteria">Critères</TabsTrigger>

@@ -12,20 +12,22 @@ import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 interface StatusSectionProps {
   formData: LeadDetailed;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  handleTagToggle: (tag: LeadTag) => void;
-  leadStatuses: LeadStatus[];
-  leadTags: LeadTag[];
+  handleTagToggle?: (tag: LeadTag) => void;
+  leadStatuses?: LeadStatus[];
+  leadTags?: LeadTag[];
+  sources?: LeadSource[];
 }
 
 const StatusSection = ({
   formData,
   handleInputChange,
   handleTagToggle,
-  leadStatuses,
-  leadTags
+  leadStatuses = ["New", "Contacted", "Qualified", "Proposal", "Negotiation", "Won", "Lost", "Archived"] as LeadStatus[],
+  leadTags = ["Hot", "Warm", "Cold", "VIP", "Urgent", "Follow-up"] as LeadTag[],
+  sources
 }: StatusSectionProps) => {
-  // Liste des sources définies dans les types
-  const leadSources: LeadSource[] = [
+  // Use provided sources or default sources list
+  const leadSources: LeadSource[] = sources || [
     "Site web", 
     "Réseaux sociaux", 
     "Portails immobiliers", 
@@ -71,6 +73,19 @@ const StatusSection = ({
     console.log(`Source sélectionnée: ${value}, Catégorie parent: ${getParentSource(value)}`);
   };
 
+  // Handle tag toggle if provided, otherwise create an empty handler
+  const handleTagToggleInternal = handleTagToggle || ((tag: LeadTag) => {
+    const event = {
+      target: {
+        name: 'tags',
+        value: formData.tags?.includes(tag)
+          ? formData.tags.filter(t => t !== tag)
+          : [...(formData.tags || []), tag]
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    handleInputChange(event);
+  });
+
   return (
     <FormSection title="Statut et Suivi">
       <FormInput
@@ -104,8 +119,8 @@ const StatusSection = ({
         renderCustomField={() => (
           <MultiSelectButtons
             options={leadTags}
-            selectedValues={formData.tags}
-            onToggle={handleTagToggle}
+            selectedValues={formData.tags || []}
+            onToggle={handleTagToggleInternal}
           />
         )}
       />

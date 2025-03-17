@@ -30,7 +30,7 @@ const MultiSelectButtons = <T extends string>({
   return (
     <BaseSelectButtons 
       options={options} 
-      selectedValues={selectedValues}
+      selected={selectedValues}
       onSelect={handleClick}
       singleSelect={singleSelect}
     />

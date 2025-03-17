@@ -8,11 +8,20 @@ import QuickLeadImport from './QuickLeadImport';
 interface LeadsHeaderProps {
   onSortChange?: (sort: string) => void;
   onRefresh?: () => void;
+  onNewLead?: () => void;
 }
 
-const LeadsHeader: React.FC<LeadsHeaderProps> = ({ onSortChange, onRefresh }) => {
+const LeadsHeader: React.FC<LeadsHeaderProps> = ({ onSortChange, onRefresh, onNewLead }) => {
   const navigate = useNavigate();
   const [showImportModal, setShowImportModal] = useState(false);
+
+  const handleNewLead = () => {
+    if (onNewLead) {
+      onNewLead();
+    } else {
+      navigate('/leads/new');
+    }
+  };
 
   return (
     <div className="flex justify-between items-center pb-4">
@@ -43,7 +52,7 @@ const LeadsHeader: React.FC<LeadsHeaderProps> = ({ onSortChange, onRefresh }) =>
         <CustomButton 
           variant="chocolate" 
           className="flex items-center gap-1.5"
-          onClick={() => navigate('/leads/new')}
+          onClick={handleNewLead}
         >
           <Plus className="h-4 w-4" /> 
           Nouveau Lead
