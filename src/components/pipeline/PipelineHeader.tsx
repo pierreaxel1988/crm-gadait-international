@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search, Filter, Plus, Upload, Mail } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -67,7 +68,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   };
   
   // Function to check if a specific filter is active
-  const isFilterActive = (filterName: string) => {
+  const isFilterActive = (filterName: string): boolean => {
     switch (filterName) {
       case 'status':
         return filters.status !== null;

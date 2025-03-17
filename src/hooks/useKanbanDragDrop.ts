@@ -5,7 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import { ExtendedKanbanItem } from './useKanbanData';
-import { updateLead, getLead } from '@/services/leadCore';
+import { updateLead, getLead } from '@/services/leadService';
 
 export const useKanbanDragDrop = (
   setLoadedColumns: React.Dispatch<React.SetStateAction<{

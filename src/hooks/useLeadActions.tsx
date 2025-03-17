@@ -83,12 +83,14 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
             actionHistory
           });
           
-          setLead(updatedLead);
-          
-          toast({
-            title: "Action complétée",
-            description: `${actionHistory[actionIndex].actionType} a été marquée comme complétée`
-          });
+          if (updatedLead) {
+            setLead(updatedLead);
+            
+            toast({
+              title: "Action complétée",
+              description: `${actionHistory[actionIndex].actionType} a été marquée comme complétée`
+            });
+          }
         }
       } catch (error) {
         toast({

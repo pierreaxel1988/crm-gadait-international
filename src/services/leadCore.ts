@@ -1,5 +1,6 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import { LeadDetailed, LeadStatus, LeadSource, LeadTag, TaskType, Country, PipelineType } from "@/types/lead";
+import { LeadDetailed, PipelineType, LeadStatus, LeadSource, LeadTag, TaskType, Country } from "@/types/lead";
 
 export const getLeads = async (): Promise<LeadDetailed[]> => {
   try {
@@ -51,6 +52,63 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
     return [];
   } catch (error) {
     console.error("Error in getLeads:", error);
+    throw error;
+  }
+};
+
+// Add the missing getLead function
+export const getLead = async (id: string): Promise<LeadDetailed | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('leads')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching lead:", error);
+      throw new Error(`Failed to fetch lead: ${error.message}`);
+    }
+
+    if (data) {
+      return {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        location: data.location,
+        status: data.status as LeadStatus,
+        tags: data.tags as LeadTag[],
+        createdAt: data.created_at,
+        lastContactedAt: data.last_contacted_at,
+        assignedTo: data.assigned_to,
+        source: data.source as LeadSource,
+        propertyReference: data.property_reference,
+        budget: data.budget,
+        desiredLocation: data.desired_location,
+        propertyType: data.property_type,
+        bedrooms: data.bedrooms,
+        views: data.views,
+        amenities: data.amenities,
+        purchaseTimeframe: data.purchase_timeframe,
+        financingMethod: data.financing_method,
+        propertyUse: data.property_use,
+        nationality: data.nationality,
+        taskType: data.task_type as TaskType,
+        nextFollowUpDate: data.next_follow_up_date,
+        notes: data.notes,
+        country: data.country as Country,
+        url: data.url,
+        external_id: data.external_id,
+        pipelineType: data.pipeline_type as PipelineType,
+        pipeline_type: data.pipeline_type as PipelineType,
+        imported_at: data.imported_at
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error in getLead:", error);
     throw error;
   }
 };
@@ -157,7 +215,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
   }
 };
 
-export const updateLead = async (id: string, leadData: LeadDetailed): Promise<LeadDetailed | null> => {
+export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed | null> => {
   try {
     const { data, error } = await supabase
       .from('leads')
@@ -187,9 +245,9 @@ export const updateLead = async (id: string, leadData: LeadDetailed): Promise<Le
         country: leadData.country,
         url: leadData.url,
         external_id: leadData.external_id,
-        pipeline_type: leadData.pipelineType
+        pipeline_type: leadData.pipelineType || leadData.pipeline_type
       })
-      .eq('id', id)
+      .eq('id', leadData.id)
       .select()
       .single();
 
@@ -258,4 +316,20 @@ export const deleteLead = async (id: string): Promise<boolean> => {
     console.error("Error in deleteLead:", error);
     throw error;
   }
+};
+
+// Add the missing convertToSimpleLead function
+export const convertToSimpleLead = (lead: LeadDetailed) => {
+  return {
+    id: lead.id,
+    name: lead.name,
+    email: lead.email || '',
+    phone: lead.phone || '',
+    status: lead.status,
+    tags: lead.tags || [],
+    assignedTo: lead.assignedTo,
+    createdAt: lead.createdAt,
+    source: lead.source,
+    pipelineType: lead.pipelineType || lead.pipeline_type || 'purchase'
+  };
 };

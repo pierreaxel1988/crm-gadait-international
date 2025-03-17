@@ -1,6 +1,3 @@
-import { LeadStatus } from "@/components/common/StatusBadge";
-import { LeadTag } from "@/components/common/TagBadge";
-import { TaskType } from "@/components/kanban/KanbanCard";
 
 export type LeadSource = 
   | "Site web" 
@@ -75,6 +72,14 @@ export type PropertyUse =
 export type PipelineType = 
   | "purchase" 
   | "rental";
+
+// Import these from their respective modules to re-export them
+import { LeadStatus } from "@/components/common/StatusBadge";
+import { LeadTag } from "@/components/common/TagBadge";
+import { TaskType } from "@/components/kanban/KanbanCard";
+
+// Re-export these types so they can be imported from lead.ts
+export { LeadStatus, LeadTag, TaskType };
 
 export interface LeadDetailed {
   id: string;

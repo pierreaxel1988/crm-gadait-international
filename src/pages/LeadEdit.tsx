@@ -43,7 +43,7 @@ const LeadEdit = () => {
         try {
           setIsLoading(true);
           const leadData = await getLead(id);
-          setLead(leadData);
+          setLead(leadData || undefined);
         } catch (error) {
           toast({
             variant: "destructive",
@@ -61,8 +61,10 @@ const LeadEdit = () => {
 
   const handleSubmit = async (data: LeadDetailed) => {
     try {
-      await updateLead(data);
-      navigate('/leads');
+      const updatedLead = await updateLead(data);
+      if (updatedLead) {
+        navigate('/leads');
+      }
     } catch (error) {
       toast({
         variant: "destructive",

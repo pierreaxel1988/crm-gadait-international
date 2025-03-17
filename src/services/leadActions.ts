@@ -56,7 +56,7 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       console.error('Unexpected error updating action history:', err);
     }
     
-    return result;
+    return result || undefined;
   } catch (err) {
     console.error('Error adding action to lead:', err);
     toast({
