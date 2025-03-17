@@ -1,12 +1,19 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { LucideIcon } from 'lucide-react';
 import FormField from './FormField';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { COUNTRIES } from '@/utils/countries';
 
-type InputType = 'text' | 'email' | 'tel' | 'number' | 'date' | 'textarea' | 'select';
+type InputType = 'text' | 'email' | 'tel' | 'number' | 'date' | 'textarea' | 'select' | 'tel-with-code';
 
 interface FormInputProps {
   label: React.ReactNode;
@@ -23,6 +30,8 @@ interface FormInputProps {
   max?: number;
   readOnly?: boolean;
   renderCustomField?: () => React.ReactNode;
+  countryCode?: string;
+  onCountryCodeChange?: (value: string) => void;
 }
 
 const FormInput = ({
@@ -39,7 +48,9 @@ const FormInput = ({
   min,
   max,
   readOnly = false,
-  renderCustomField
+  renderCustomField,
+  countryCode,
+  onCountryCodeChange
 }: FormInputProps) => {
   const renderLabel = () => {
     if (typeof label === 'string' && Icon) {
@@ -61,7 +72,6 @@ const FormInput = ({
   };
 
   const renderInput = () => {
-    // If there's a custom field render function, use it instead
     if (renderCustomField) {
       return renderCustomField();
     }
@@ -115,6 +125,49 @@ const FormInput = ({
             className={baseClassName}
             readOnly={readOnly}
           />
+        );
+        
+      case 'tel-with-code':
+        return (
+          <div className="flex">
+            <div className="w-24 mr-2">
+              <Select
+                value={countryCode}
+                onValueChange={onCountryCodeChange}
+                disabled={readOnly}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="+33" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="+33">+33 🇫🇷</SelectItem>
+                  <SelectItem value="+44">+44 🇬🇧</SelectItem>
+                  <SelectItem value="+1">+1 🇺🇸</SelectItem>
+                  <SelectItem value="+49">+49 🇩🇪</SelectItem>
+                  <SelectItem value="+39">+39 🇮🇹</SelectItem>
+                  <SelectItem value="+34">+34 🇪🇸</SelectItem>
+                  <SelectItem value="+41">+41 🇨🇭</SelectItem>
+                  <SelectItem value="+32">+32 🇧🇪</SelectItem>
+                  <SelectItem value="+352">+352 🇱🇺</SelectItem>
+                  <SelectItem value="+377">+377 🇲🇨</SelectItem>
+                  <SelectItem value="+7">+7 🇷🇺</SelectItem>
+                  <SelectItem value="+971">+971 🇦🇪</SelectItem>
+                  <SelectItem value="+966">+966 🇸🇦</SelectItem>
+                  <SelectItem value="+86">+86 🇨🇳</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Input
+              type="tel"
+              name={name}
+              value={value || ''}
+              onChange={onChange}
+              placeholder={placeholder}
+              required={required}
+              className={baseClassName}
+              readOnly={readOnly}
+            />
+          </div>
         );
         
       default:
