@@ -12,10 +12,19 @@ interface SidebarProps {
   onToggleCollapse: () => void;
 }
 
+// Define a clear interface for navigation items
+interface NavigationItem {
+  name: string;
+  path: string;
+  icon?: React.ComponentType<any>;
+  isPrimary?: boolean;
+  color?: string;
+}
+
 const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
   const isMobile = useIsMobile();
 
-  const navigationItems = [
+  const navigationItems: NavigationItem[] = [
     {
       name: 'Dashboard',
       path: '/',
@@ -100,9 +109,9 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
           <nav className="flex-1 px-10 py-16">
             <ul className="space-y-7">
               {navigationItems.map((item) => (
-                <li key={item.name || item.title}>
+                <li key={item.name}>
                   <NavLink
-                    to={item.path || item.href || '#'}
+                    to={item.path}
                     className={({ isActive }) =>
                       cn(
                         'block transition-all duration-200 text-base leading-[22px] flex items-center',
@@ -116,8 +125,8 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
                     }
                     onClick={isMobile ? onClose : undefined}
                   >
-                    {item.icon && <item.icon className="mr-2 h-5 w-5" />}
-                    {item.name || item.title}
+                    {item.icon && <item.icon className={cn("mr-2 h-5 w-5", item.color)} />}
+                    {item.name}
                   </NavLink>
                 </li>
               ))}
