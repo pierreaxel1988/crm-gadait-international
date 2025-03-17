@@ -71,7 +71,7 @@ const PropertyDetailsSection = ({
         <MultiSelectButtons
           options={propertyTypes}
           selectedValues={formData.propertyType ? [formData.propertyType] : []}
-          onChange={(value) => {
+          onToggle={(value) => {
             handleInputChange({
               target: { name: 'propertyType', value }
             } as React.ChangeEvent<HTMLInputElement>);

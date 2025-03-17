@@ -54,7 +54,7 @@ const PropertyTab: React.FC<PropertyTabProps> = ({
         nationality: "",
         notes: `Intéressé par l'annonce: ${propertyUrl}`,
         url: propertyUrl,
-        pipelineType: "purchase"
+        pipelineType: "purchase" as "purchase" | "rental" // Use a valid union type
       };
 
       // Créer le lead

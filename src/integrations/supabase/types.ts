@@ -78,6 +78,7 @@ export type Database = {
           tags: string[] | null
           task_type: string | null
           tax_residence: string | null
+          url: string | null
           views: string[] | null
         }
         Insert: {
@@ -112,6 +113,7 @@ export type Database = {
           tags?: string[] | null
           task_type?: string | null
           tax_residence?: string | null
+          url?: string | null
           views?: string[] | null
         }
         Update: {
@@ -146,6 +148,7 @@ export type Database = {
           tags?: string[] | null
           task_type?: string | null
           tax_residence?: string | null
+          url?: string | null
           views?: string[] | null
         }
         Relationships: [

@@ -1,3 +1,4 @@
+
 import { LeadDetailed } from "@/types/lead";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,7 +47,7 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
       nationality: lead.nationality,
       pipelineType: 'purchase', // Default value if not in DB
       actionHistory: [], // Default empty array if not in DB
-      url: lead.url // Add URL field
+      url: lead.url || '' // Include the url field with default
     }));
     
     return leadsData;
@@ -98,7 +99,7 @@ export const getLead = async (id: string): Promise<LeadDetailed | undefined> => 
       nationality: data.nationality,
       pipelineType: 'purchase', // Default value if not in DB
       actionHistory: [], // Default empty array if not in DB
-      url: data.url // Add URL field
+      url: data.url || '' // Include the url field with default
     };
     
     return leadDetailed;
@@ -129,6 +130,7 @@ export const updateLead = async (updatedLead: LeadDetailed): Promise<LeadDetaile
       next_follow_up_date: updatedLead.nextFollowUpDate,
       notes: updatedLead.notes,
       nationality: updatedLead.nationality,
+      url: updatedLead.url || '', // Include the url field with default
       pipeline_type: updatedLead.pipelineType || 'purchase',
       action_history: updatedLead.actionHistory || []
     };
@@ -202,7 +204,7 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       next_follow_up_date: newLead.nextFollowUpDate,
       notes: newLead.notes,
       nationality: newLead.nationality,
-      url: newLead.url  // Add the URL field to the insert
+      url: newLead.url || ''  // Include the URL field with default
     };
     
     // Create the lead in Supabase
@@ -225,7 +227,8 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
         ...newLead,
         status: newLead.status,
         pipelineType: newLead.pipelineType || "purchase",
-        actionHistory: []
+        actionHistory: [],
+        url: newLead.url || ''
       };
       
       // Add to local
@@ -261,7 +264,7 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       nationality: data.nationality,
       pipelineType: "purchase", // Default value
       actionHistory: [], // Default empty array
-      url: data.url // Include the URL field
+      url: data.url || '' // Include the URL field with default
     };
     
     toast({
@@ -286,7 +289,8 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       ...newLead,
       status: newLead.status,
       pipelineType: newLead.pipelineType || "purchase",
-      actionHistory: []
+      actionHistory: [],
+      url: newLead.url || ''
     };
     
     // Add to local cache
