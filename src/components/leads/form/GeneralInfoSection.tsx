@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User, Mail, Phone, MapPin, Clipboard, Globe } from 'lucide-react';
+import { User, Mail, Phone, Clipboard, Globe } from 'lucide-react';
 import { LeadDetailed, Country } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
@@ -44,14 +44,6 @@ const GeneralInfoSection = ({
         value={formData.phone || ''}
         onChange={handleInputChange}
         icon={Phone}
-      />
-
-      <FormInput
-        label="Localisation"
-        name="location"
-        value={formData.location || ''}
-        onChange={handleInputChange}
-        icon={MapPin}
       />
 
       <FormInput
