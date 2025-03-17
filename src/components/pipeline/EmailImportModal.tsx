@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -9,12 +10,11 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadCore';
-import { LeadDetailed } from '@/types/lead';
+import { LeadDetailed, Country } from '@/types/lead';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizePropertyType } from '@/components/chat/utils/propertyTypeUtils';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 import { extractLefigaroPropertyDetails } from '@/components/chat/utils/emailParsingUtils';
-import { Input } from '@/components/ui/input';
 import FormInput from '@/components/leads/form/FormInput';
 
 interface EmailImportModalProps {
@@ -136,7 +136,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     }
   };
 
-  const handleCreateLead = () => {
+  const handleCreateLead = async () => {
     if (!editableData) return;
     
     if (!selectedAgent) {
@@ -149,6 +149,9 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     }
     
     try {
+      // Ensure country is of type Country or undefined
+      const country = editableData.country ? (editableData.country as Country) : undefined;
+      
       const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
         name: editableData.name || editableData.Name || "",
         email: editableData.email || editableData.Email || "",
@@ -166,9 +169,11 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         bedrooms: editableData.bedrooms || undefined,
         url: editableData.url || "",
         taskType: "Call",
+        country: country,
+        pipelineType: selectedPipeline
       };
       
-      createLead(newLead);
+      const createdLead = await createLead(newLead);
       
       toast({
         title: "Lead créé",
@@ -312,7 +317,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                   <Button
                     variant="outline"
                     className="mb-2 flex items-center gap-1"
-                    onClick={toggleEditMode}
+                    onClick={() => setIsEditing(!isEditing)}
                   >
                     <Edit className="h-4 w-4" />
                     Modifier les informations
@@ -323,7 +328,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                   <Button
                     variant="outline"
                     className="mb-2"
-                    onClick={toggleEditMode}
+                    onClick={() => setIsEditing(!isEditing)}
                   >
                     Terminer la modification
                   </Button>

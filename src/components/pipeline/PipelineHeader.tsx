@@ -1,139 +1,111 @@
-
 import React, { useState } from 'react';
-import { Filter, Plus, Settings, RefreshCcw, Mail, Import } from 'lucide-react';
-import CustomButton from '@/components/ui/CustomButton';
+import { Search, Filter, Plus, Upload, Mail } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import PipelineFilters from './PipelineFilters';
 import { useIsMobile } from '@/hooks/use-mobile';
-import PipelineFilters, { FilterOptions } from '@/components/pipeline/PipelineFilters';
+import { QuickLeadImport } from '@/components/leads';
 import EmailImportModal from './EmailImportModal';
-import QuickLeadImport from '@/components/leads/QuickLeadImport';
+import { useTeamMembers } from '@/components/chat/hooks/useTeamMembers';
 
 interface PipelineHeaderProps {
-  filters: FilterOptions;
-  onFilterChange: (filters: FilterOptions) => void;
-  onClearFilters: () => void;
-  teamMembers: {id: string, name: string}[];
-  isFilterActive: boolean;
-  handleRefresh: () => void;
-  isRefreshing: boolean;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  onToggleFilters: () => void;
+  filtersOpen: boolean;
+  activeFilters: number;
 }
 
-const PipelineHeader = ({
-  filters,
-  onFilterChange,
-  onClearFilters,
-  teamMembers,
-  isFilterActive,
-  handleRefresh,
-  isRefreshing
-}: PipelineHeaderProps) => {
+const PipelineHeader: React.FC<PipelineHeaderProps> = ({
+  searchTerm,
+  setSearchTerm,
+  onToggleFilters,
+  filtersOpen,
+  activeFilters
+}) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
-  const [isQuickImportOpen, setIsQuickImportOpen] = useState(false);
+  const [quickImportOpen, setQuickImportOpen] = useState(false);
+  const [emailImportOpen, setEmailImportOpen] = useState(false);
+  const { teamMembers } = useTeamMembers();
+
+  const handleNewLead = () => {
+    navigate('/leads/new');
+  };
+
+  const handleQuickImport = () => {
+    setQuickImportOpen(true);
+  };
+
+  const handleEmailImport = () => {
+    setEmailImportOpen(true);
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-semibold">Pipeline</h1>
-          <p className="text-muted-foreground text-sm md:text-base">Drag and drop leads through your sales stages</p>
+    <div className="flex flex-col gap-3 mb-4">
+      <div className="flex flex-wrap gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            type="search"
+            placeholder="Rechercher..."
+            className="pl-8 h-9"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         
-        {!isMobile && (
-          <div className="flex space-x-3">
-            <CustomButton
-              variant="outline"
-              className="flex items-center gap-1.5"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-            >
-              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} /> 
-              Actualiser
-            </CustomButton>
-            <CustomButton
-              variant="outline"
-              className="flex items-center gap-1.5"
-              onClick={() => setIsEmailModalOpen(true)}
-            >
-              <Mail className="h-4 w-4" /> Importer un email
-            </CustomButton>
-            <CustomButton
-              variant="outline"
-              className="flex items-center gap-1.5"
-              onClick={() => setIsQuickImportOpen(true)}
-            >
-              <Import className="h-4 w-4" /> Import Rapide
-            </CustomButton>
-            <PipelineFilters 
-              filters={filters}
-              onFilterChange={onFilterChange}
-              onClearFilters={onClearFilters}
-              assignedToOptions={teamMembers}
-              isFilterActive={isFilterActive}
-            />
-            <CustomButton
-              variant="outline"
-              className="flex items-center gap-1.5"
-            >
-              <Settings className="h-4 w-4" /> Customize
-            </CustomButton>
-            <CustomButton 
-              variant="chocolate" 
-              className="flex items-center gap-1.5"
-              onClick={() => navigate('/leads/new')}
-            >
-              <Plus className="h-4 w-4" /> New Lead
-            </CustomButton>
-          </div>
-        )}
-
-        {isMobile && (
-          <div className="flex space-x-2">
-            <CustomButton
-              variant="outline"
-              className="flex items-center justify-center w-10 h-10 p-0"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-            >
-              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </CustomButton>
-            <CustomButton
-              variant="outline"
-              className="flex items-center justify-center w-10 h-10 p-0"
-              onClick={() => setIsEmailModalOpen(true)}
-            >
-              <Mail className="h-4 w-4" />
-            </CustomButton>
-            <CustomButton
-              variant="outline"
-              className="flex items-center justify-center w-10 h-10 p-0"
-              onClick={() => setIsQuickImportOpen(true)}
-            >
-              <Import className="h-4 w-4" />
-            </CustomButton>
-            <PipelineFilters 
-              filters={filters}
-              onFilterChange={onFilterChange}
-              onClearFilters={onClearFilters}
-              assignedToOptions={teamMembers}
-              isFilterActive={isFilterActive}
-            />
-          </div>
-        )}
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1.5" 
+            onClick={handleEmailImport}
+          >
+            <Mail className="h-4 w-4" />
+            Import Email
+          </Button>
+          
+          <Button 
+            variant="default"  
+            size="sm" 
+            className="flex items-center gap-1.5" 
+            onClick={handleNewLead}
+          >
+            <Plus className="h-4 w-4" />
+            {isMobile ? 'Nouveau' : 'Nouveau Lead'}
+          </Button>
+        </div>
       </div>
-
+      
+      <div className="flex items-center justify-between">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={onToggleFilters}
+          className={`flex items-center gap-1.5 ${filtersOpen || activeFilters > 0 ? 'border-blue-500 text-blue-500' : ''}`}
+        >
+          <Filter className="h-4 w-4" />
+          Filtres
+          {activeFilters > 0 && (
+            <span className="ml-1 rounded-full bg-blue-500 text-white text-xs px-1.5 py-0.5">
+              {activeFilters}
+            </span>
+          )}
+        </Button>
+      </div>
+      
+      {filtersOpen && <PipelineFilters />}
+      
       <EmailImportModal 
-        isOpen={isEmailModalOpen}
-        onClose={() => setIsEmailModalOpen(false)}
+        isOpen={emailImportOpen} 
+        onClose={() => setEmailImportOpen(false)} 
         teamMembers={teamMembers}
-        onLeadCreated={handleRefresh}
-      />
-
-      <QuickLeadImport
-        isOpen={isQuickImportOpen}
-        onClose={() => setIsQuickImportOpen(false)}
-        onSuccess={handleRefresh}
+        onLeadCreated={() => {
+          // Refresh the pipeline after lead creation
+          window.location.reload();
+        }}
       />
     </div>
   );

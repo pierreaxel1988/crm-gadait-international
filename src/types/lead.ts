@@ -1,4 +1,3 @@
-
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
@@ -35,19 +34,19 @@ export type PropertyType =
   | "Vignoble" 
   | "Autres";
 
-export type Country =
-  | "Croatia"
-  | "France"
-  | "Greece"
-  | "Maldives"
-  | "Mauritius"
-  | "Portugal"
-  | "Seychelles"
-  | "Spain"
-  | "Switzerland"
-  | "United Arab Emirates"
-  | "United Kingdom"
-  | "United States";
+export type Country = 
+  | 'France' 
+  | 'Spain' 
+  | 'Portugal' 
+  | 'Greece' 
+  | 'Switzerland' 
+  | 'United Kingdom' 
+  | 'United States' 
+  | 'Croatia' 
+  | 'Mauritius' 
+  | 'Seychelles' 
+  | 'Maldives' 
+  | 'United Arab Emirates';
 
 export type ViewType = 
   | "Mer" 
@@ -80,40 +79,31 @@ export type PipelineType =
 export interface LeadDetailed {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone?: string;
   location?: string;
   status: LeadStatus;
-  tags: LeadTag[];
-  assignedTo?: string;
+  tags?: LeadTag[];
   createdAt: string;
   lastContactedAt?: string;
+  assignedTo?: string;
   source?: LeadSource;
   propertyReference?: string;
   budget?: string;
   desiredLocation?: string;
-  propertyType?: PropertyType;
-  livingArea?: string;
+  propertyType?: string;
   bedrooms?: number;
-  views?: ViewType[];
-  amenities?: Amenity[];
-  purchaseTimeframe?: PurchaseTimeframe;
-  financingMethod?: FinancingMethod;
-  propertyUse?: PropertyUse;
+  views?: string[];
+  amenities?: string[];
+  purchaseTimeframe?: string;
+  financingMethod?: string;
+  propertyUse?: string;
   nationality?: string;
-  taxResidence?: string;
-  nextFollowUpDate?: string;
+  taskType?: string;
   notes?: string;
-  taskType?: TaskType;
+  nextFollowUpDate?: string;
   country?: Country;
-  actionHistory?: ActionHistory[];
-  // Nouveaux champs pour l'API d'importation
-  integration_source?: string;
-  external_id?: string;
-  raw_data?: any;
-  imported_at?: string;
-  // Champ URL pour l'annonce immobilière
   url?: string;
-  // Ajout explicite du champ pipelineType
-  pipelineType?: PipelineType;
+  livingArea?: string;
+  pipelineType?: 'purchase' | 'rental';
 }
