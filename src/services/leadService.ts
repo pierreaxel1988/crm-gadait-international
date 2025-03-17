@@ -1,5 +1,5 @@
 
-import { LeadDetailed } from "@/types/lead";
+import type { LeadDetailed } from "@/types/lead";
 // Change export to export type
 export type { ActionHistory } from "@/types/actionHistory";
 
@@ -13,3 +13,6 @@ export {
   convertToSimpleLead 
 } from "./leadCore";
 export { addActionToLead } from "./leadActions";
+
+// Also export the LeadDetailed type for convenience
+export type { LeadDetailed };
