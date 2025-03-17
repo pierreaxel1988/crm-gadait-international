@@ -16,7 +16,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, type, content, propertyDetails, initialData } = await req.json();
+    const { message, type, content, propertyDetails, initialData, url } = await req.json();
     
     let systemPrompt = "You are Chat Gadait, an AI assistant for a luxury real estate CRM. Be concise and helpful.";
     let userMessage = message;
@@ -54,7 +54,7 @@ serve(async (req) => {
       
       userMessage = content;
     } 
-    else if (type === 'property-extract') {
+    else if (type === 'property-extract' || type === 'extract-property') {
       systemPrompt = `You are Chat Gadait, an AI assistant for a luxury real estate CRM. 
       Extract the following information from this property listing URL:
       - Property reference: The unique identifier for this property
@@ -81,7 +81,7 @@ serve(async (req) => {
         systemPrompt += `\nConfirm or enhance this information from the actual page content.`;
       }
       
-      userMessage = content;
+      userMessage = content || url || "No URL provided";
     }
     else if (type === 'email-draft') {
       systemPrompt = `You are Chat Gadait, an AI assistant for a luxury real estate CRM. 
@@ -126,7 +126,7 @@ serve(async (req) => {
     const aiResponse = data.choices[0].message.content;
     console.log("Received response from OpenAI");
 
-    return new Response(JSON.stringify({ response: aiResponse }), {
+    return new Response(JSON.stringify({ response: aiResponse, data: aiResponse }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

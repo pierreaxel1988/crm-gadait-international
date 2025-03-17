@@ -24,6 +24,12 @@ export const usePropertyExtraction = () => {
 
     setIsLoading(true);
     try {
+      // Show loading toast
+      toast({
+        title: "Extraction en cours",
+        description: "Récupération des informations de l'annonce..."
+      });
+      
       // Determine what kind of property URL this is
       const isFigaroUrl = propertyUrl.includes('lefigaro.fr') || propertyUrl.includes('proprietes.lefigaro');
       const isIdealistaUrl = propertyUrl.includes('idealista.com') || propertyUrl.includes('idealista.es');
@@ -37,10 +43,11 @@ export const usePropertyExtraction = () => {
           }
         });
 
-        if (!aiError && aiData?.data) {
-          const propertyData = typeof aiData.data === 'string' 
-            ? JSON.parse(aiData.data) 
-            : aiData.data;
+        if (!aiError && (aiData?.data || aiData?.response)) {
+          const responseData = aiData?.data || aiData?.response;
+          const propertyData = typeof responseData === 'string' 
+            ? JSON.parse(responseData) 
+            : responseData;
           
           // Clean up and standardize the data
           const standardizedData = standardizePropertyData(propertyData, isFigaroUrl, isIdealistaUrl);
@@ -60,7 +67,7 @@ export const usePropertyExtraction = () => {
 
       // Fallback: Try web scraping via scrape-website function
       toast({
-        variant: "default", // Changed from "warning" to "default"
+        variant: "default",
         title: "Extraction avancée en cours",
         description: "Nous utilisons un système alternatif pour extraire les données..."
       });
@@ -84,7 +91,7 @@ export const usePropertyExtraction = () => {
         });
       } else {
         toast({
-          variant: "default", // Changed from "warning" to "default"
+          variant: "default",
           title: "Extraction limitée",
           description: "Nous n'avons pu extraire que des informations limitées de cette annonce."
         });
@@ -110,6 +117,8 @@ export const usePropertyExtraction = () => {
 
   // Helper function to standardize property data
   const standardizePropertyData = (data: any, isFigaro: boolean, isIdealista: boolean) => {
+    console.log("Raw data to standardize:", data);
+    
     const standardizedData: any = {};
 
     if (isFigaro) {
@@ -122,26 +131,28 @@ export const usePropertyExtraction = () => {
       standardizedData.reference = data.reference || data.property_reference || null;
     } else if (isIdealista) {
       // Standardize data from Idealista
-      standardizedData.propertyType = data.tipoInmueble || data.propertyType || null;
+      standardizedData.propertyType = data.tipoInmueble || data.propertyType || data.type || null;
       standardizedData.location = data.ubicacionAnuncio || data.location || null;
       standardizedData.price = data.precioAnuncio || data.price || null;
-      // Idealista doesn't always provide number of bedrooms directly
+      standardizedData.bedrooms = data.habitaciones || data.bedrooms || null;
       standardizedData.reference = data.referenciaAnuncio || data.reference || null;
     } else {
       // Generic standardization
-      standardizedData.propertyType = data.propertyType || data.type || null;
-      standardizedData.location = data.location || null;
-      standardizedData.price = data.price || null;
-      standardizedData.bedrooms = data.bedrooms || null;
-      standardizedData.area = data.area || null;
-      standardizedData.reference = data.reference || data.property_reference || null;
+      standardizedData.propertyType = data.propertyType || data.type || data['Property type'] || null;
+      standardizedData.location = data.location || data.Location || null;
+      standardizedData.price = data.price || data.Price || null;
+      standardizedData.bedrooms = data.bedrooms || data['Number of bedrooms'] || null;
+      standardizedData.area = data.area || data.Size || data['Size or area'] || null;
+      standardizedData.reference = data.reference || data['Property reference'] || null;
+      standardizedData.country = data.country || data.Country || null;
     }
 
     // Add more generic fields
     standardizedData.title = data.title || data.name || null;
-    standardizedData.description = data.description || data.details || null;
+    standardizedData.description = data.description || data.details || data.Description || null;
     standardizedData.url = data.url || propertyUrl || null;
 
+    console.log("Standardized data:", standardizedData);
     return standardizedData;
   };
 

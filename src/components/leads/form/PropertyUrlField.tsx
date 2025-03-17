@@ -46,7 +46,7 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({ url, onChange, onEx
               variant="outline" 
               size="sm" 
               onClick={handleExtractClick} 
-              className="ml-auto text-xs py-1 h-auto"
+              className="ml-auto text-xs py-1 h-auto bg-loro-navy text-white hover:bg-loro-navy/90"
             >
               Extraire les données
             </Button>
