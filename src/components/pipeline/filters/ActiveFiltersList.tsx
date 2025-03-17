@@ -12,7 +12,7 @@ interface ActiveFiltersListProps {
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
   getTeamMemberName: (id: string) => string;
-  isFilterActive: boolean;
+  isFilterActive: (filterName: string) => boolean;
 }
 
 const ActiveFiltersList = ({ 
@@ -22,7 +22,17 @@ const ActiveFiltersList = ({
   getTeamMemberName,
   isFilterActive 
 }: ActiveFiltersListProps) => {
-  if (!isFilterActive) return null;
+  // Check if any filters are active by using the isFilterActive function
+  const hasActiveFilters = 
+    isFilterActive('status') || 
+    isFilterActive('tags') || 
+    isFilterActive('assignedTo') || 
+    isFilterActive('budget') || 
+    isFilterActive('location') || 
+    isFilterActive('purchaseTimeframe') || 
+    isFilterActive('propertyType');
+
+  if (!hasActiveFilters) return null;
 
   return (
     <div className="flex flex-wrap gap-2 items-center">
@@ -94,7 +104,7 @@ const ActiveFiltersList = ({
         </div>
       )}
       
-      {isFilterActive && (
+      {hasActiveFilters && (
         <button 
           className="text-xs text-muted-foreground hover:text-foreground"
           onClick={onClearFilters}
