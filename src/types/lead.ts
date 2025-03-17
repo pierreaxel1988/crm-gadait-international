@@ -1,4 +1,3 @@
-
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
@@ -107,6 +106,7 @@ export interface LeadDetailed {
   url?: string;
   pipelineType?: PipelineType;
   external_id?: string;
+  pipeline_type?: PipelineType; // Adding this to match the database field name
   
   // Other properties
   imported_at?: string;

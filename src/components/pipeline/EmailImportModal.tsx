@@ -188,7 +188,8 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         url: editableData.url || "",
         taskType: "Call",
         country,
-        pipelineType: selectedPipeline // Ensure this is correctly set
+        pipelineType: selectedPipeline, // Ensure this is correctly set
+        pipeline_type: selectedPipeline // Also set database field name
       };
       
       console.log("Creating lead with data:", newLead);

@@ -66,8 +66,8 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
     });
   };
   
-  // This function returns a boolean directly now
-  const isFilterActive = (filterName: string): boolean => {
+  // Function to check if a specific filter is active
+  const isFilterActive = (filterName: string) => {
     switch (filterName) {
       case 'status':
         return filters.status !== null;

@@ -20,6 +20,7 @@ export interface ExtendedKanbanItem extends KanbanItem {
   createdAt?: string;
   importedAt?: string;
   pipelineType?: PipelineType;
+  pipeline_type?: PipelineType; // Add database field name for compatibility
 }
 
 interface KanbanColumn {
@@ -96,6 +97,7 @@ export const useKanbanData = (
             assignedToId: lead.assigned_to, // Store the original ID
             dueDate: lead.next_follow_up_date,
             pipelineType: leadPipelineType as PipelineType, // Ensure correct typing
+            pipeline_type: leadPipelineType as PipelineType, // Add database field name for compatibility
             taskType: lead.task_type,
             budget: lead.budget,
             desiredLocation: lead.desired_location,
@@ -115,7 +117,8 @@ export const useKanbanData = (
         
         // Filter leads by pipeline type, using more detailed logging
         const filteredLeads = mappedLeads.filter(lead => {
-          const leadPipelineType = String(lead.pipelineType || 'purchase').toLowerCase();
+          // Check both pipelineType and pipeline_type properties
+          const leadPipelineType = String(lead.pipelineType || lead.pipeline_type || 'purchase').toLowerCase();
           const targetPipelineType = String(pipelineType).toLowerCase();
           const result = leadPipelineType === targetPipelineType;
           
