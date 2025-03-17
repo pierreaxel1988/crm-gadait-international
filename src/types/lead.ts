@@ -74,12 +74,12 @@ export type PipelineType =
   | "rental";
 
 // Import these from their respective modules to re-export them
-import { LeadStatus } from "@/components/common/StatusBadge";
-import { LeadTag } from "@/components/common/TagBadge";
-import { TaskType } from "@/components/kanban/KanbanCard";
+import type { LeadStatus } from "@/components/common/StatusBadge";
+import type { LeadTag } from "@/components/common/TagBadge";
+import type { TaskType } from "@/components/kanban/KanbanCard";
 
 // Re-export these types so they can be imported from lead.ts
-export { LeadStatus, LeadTag, TaskType };
+export type { LeadStatus, LeadTag, TaskType };
 
 export interface LeadDetailed {
   id: string;
@@ -110,7 +110,6 @@ export interface LeadDetailed {
   country?: Country;
   url?: string;
   pipelineType?: PipelineType;
-  external_id?: string;
   pipeline_type?: PipelineType; // Adding this to match the database field name
   
   // Other properties
@@ -119,4 +118,5 @@ export interface LeadDetailed {
   taxResidence?: string;
   actionHistory?: any[];
   livingArea?: string;
+  external_id?: string;
 }

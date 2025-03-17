@@ -68,6 +68,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   };
   
   // Function to check if a specific filter is active
+  // This function should be called directly rather than passed as a prop
   const isFilterActive = (filterName: string): boolean => {
     switch (filterName) {
       case 'status':
@@ -149,7 +150,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
           onFilterChange={handleFilterChange}
           onClearFilters={handleClearFilters}
           assignedToOptions={teamMembers.map(member => ({ id: member.id, name: member.name }))}
-          isFilterActive={isFilterActive}
+          isFilterActive={(filterName) => isFilterActive(filterName)}
         />
       )}
       

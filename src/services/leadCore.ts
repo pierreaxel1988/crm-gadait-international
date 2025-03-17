@@ -45,7 +45,10 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
         external_id: lead.external_id,
         pipelineType: lead.pipeline_type as PipelineType,
         pipeline_type: lead.pipeline_type as PipelineType,
-        imported_at: lead.imported_at
+        imported_at: lead.imported_at,
+        integration_source: lead.integration_source,
+        // Add action_history if it exists in the database
+        actionHistory: lead.action_history || []
       }));
     }
 
@@ -102,7 +105,9 @@ export const getLead = async (id: string): Promise<LeadDetailed | null> => {
         external_id: data.external_id,
         pipelineType: data.pipeline_type as PipelineType,
         pipeline_type: data.pipeline_type as PipelineType,
-        imported_at: data.imported_at
+        imported_at: data.imported_at,
+        integration_source: data.integration_source,
+        actionHistory: data.action_history || []
       };
     }
 
@@ -147,7 +152,8 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       // Make sure both fields are set for compatibility
       pipeline_type: leadData.pipelineType || leadData.pipeline_type || 'purchase',
       // Always include the imported_at field for new leads
-      imported_at: new Date().toISOString()
+      imported_at: new Date().toISOString(),
+      action_history: leadData.actionHistory || []
     };
 
     console.log("Prepared Supabase lead data:", supabaseLeadData);
@@ -198,7 +204,9 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
         external_id: data.external_id,
         pipelineType: data.pipeline_type as PipelineType,
         pipeline_type: data.pipeline_type as PipelineType,
-        imported_at: data.imported_at
+        imported_at: data.imported_at,
+        integration_source: data.integration_source,
+        actionHistory: data.action_history || []
       };
     }
     
@@ -245,7 +253,8 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
         country: leadData.country,
         url: leadData.url,
         external_id: leadData.external_id,
-        pipeline_type: leadData.pipelineType || leadData.pipeline_type
+        pipeline_type: leadData.pipelineType || leadData.pipeline_type || 'purchase',
+        action_history: leadData.actionHistory || []
       })
       .eq('id', leadData.id)
       .select()
@@ -288,7 +297,9 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
         external_id: data.external_id,
         pipelineType: data.pipeline_type as PipelineType,
         pipeline_type: data.pipeline_type as PipelineType,
-        imported_at: data.imported_at
+        imported_at: data.imported_at,
+        integration_source: data.integration_source,
+        actionHistory: data.action_history || []
       };
     }
 
