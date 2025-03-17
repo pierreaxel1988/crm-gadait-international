@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Banknote, Timer, CreditCard, Home } from 'lucide-react';
-import { LeadDetailed, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
+import { LeadDetailed, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency } from '@/types/lead';
 import FormInput from '../FormInput';
 import RadioSelectButtons from '../RadioSelectButtons';
 import { Input } from '@/components/ui/input';
@@ -25,10 +25,10 @@ const PurchaseDetailsSection = ({
   propertyUses,
 }: PurchaseDetailsSectionProps) => {
   const [formattedBudget, setFormattedBudget] = useState(formData.budget || '');
-  const [currency, setCurrency] = useState(formData.currency || 'EUR');
+  const [currency, setCurrency] = useState<Currency>(formData.currency as Currency || 'EUR');
   
   // Format budget function
-  const formatBudgetInput = (value: string, currencyCode: string) => {
+  const formatBudgetInput = (value: string, currencyCode: Currency) => {
     // Remove all non-numeric characters
     const numericValue = value.replace(/[^\d]/g, '');
     
@@ -85,7 +85,7 @@ const PurchaseDetailsSection = ({
   };
   
   // Handle currency change
-  const handleCurrencyChange = (value: string) => {
+  const handleCurrencyChange = (value: Currency) => {
     setCurrency(value);
     
     // Update formData with new currency
@@ -143,6 +143,8 @@ const PurchaseDetailsSection = ({
                   <SelectItem value="USD">Dollar ($)</SelectItem>
                   <SelectItem value="GBP">Livre Sterling (£)</SelectItem>
                   <SelectItem value="CHF">Franc Suisse (CHF)</SelectItem>
+                  <SelectItem value="AED">Dirham (AED)</SelectItem>
+                  <SelectItem value="MUR">Roupie Mauricienne (MUR)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { DollarSign, EuroIcon } from 'lucide-react';
@@ -72,6 +71,8 @@ const BudgetFilter = ({
       case 'USD': return '$';
       case 'GBP': return '£';
       case 'CHF': return 'CHF';
+      case 'AED': return 'AED';
+      case 'MUR': return 'MUR';
       default: return currencyCode;
     }
   };
@@ -118,6 +119,8 @@ const BudgetFilter = ({
               <SelectItem value="USD">Dollar ($)</SelectItem>
               <SelectItem value="GBP">Livre (£)</SelectItem>
               <SelectItem value="CHF">Franc Suisse (CHF)</SelectItem>
+              <SelectItem value="AED">Dirham (AED)</SelectItem>
+              <SelectItem value="MUR">Roupie Mauricienne (MUR)</SelectItem>
             </SelectContent>
           </Select>
         </div>

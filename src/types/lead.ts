@@ -64,7 +64,9 @@ export type Currency =
   | "EUR"
   | "USD"
   | "GBP"
-  | "CHF";
+  | "CHF"
+  | "AED"
+  | "MUR";
 
 import type { LeadStatus } from "@/components/common/StatusBadge";
 import type { LeadTag } from "@/components/common/TagBadge";
