@@ -1,4 +1,3 @@
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -30,20 +29,7 @@ export type PropertyType =
   | "Vignoble" 
   | "Autres";
 
-export type Country = 
-  | 'France' 
-  | 'Spain' 
-  | 'Portugal' 
-  | 'Greece' 
-  | 'Switzerland' 
-  | 'United Kingdom' 
-  | 'United States' 
-  | 'Croatia' 
-  | 'Mauritius' 
-  | 'Seychelles' 
-  | 'Maldives' 
-  | 'United Arab Emirates'
-  | string; // Adding string to make it more flexible
+export type Country = string;
 
 export type ViewType = 
   | "Mer" 
@@ -73,12 +59,10 @@ export type PipelineType =
   | "purchase" 
   | "rental";
 
-// Import these from their respective modules to re-export them
 import type { LeadStatus } from "@/components/common/StatusBadge";
 import type { LeadTag } from "@/components/common/TagBadge";
 import type { TaskType } from "@/components/kanban/KanbanCard";
 
-// Re-export these types so they can be imported from lead.ts
 export type { LeadStatus, LeadTag, TaskType };
 
 export interface LeadDetailed {
@@ -110,9 +94,8 @@ export interface LeadDetailed {
   country?: Country;
   url?: string;
   pipelineType?: PipelineType;
-  pipeline_type?: PipelineType; // Adding this to match the database field name
+  pipeline_type?: PipelineType;
   
-  // Other properties
   imported_at?: string;
   integration_source?: string;
   taxResidence?: string;

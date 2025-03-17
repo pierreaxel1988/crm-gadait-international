@@ -4,6 +4,7 @@ import { User, Mail, Phone, Clipboard, Globe } from 'lucide-react';
 import { LeadDetailed, Country } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
+import { COUNTRIES } from '@/utils/countries';
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
@@ -61,7 +62,7 @@ const GeneralInfoSection = ({
         value={formData.country || ''}
         onChange={handleInputChange}
         icon={Globe}
-        options={countries.map(country => ({ value: country, label: country }))}
+        options={COUNTRIES.map(country => ({ value: country, label: country }))}
         placeholder="Sélectionner un pays d'origine"
       />
     </FormSection>

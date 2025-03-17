@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, X, ExternalLink } from 'lucide-react';
@@ -11,6 +10,7 @@ import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { usePropertyExtraction } from '@/components/chat/hooks/usePropertyExtraction';
 import { Country } from '@/types/lead';
+import { COUNTRIES } from '@/utils/countries';
 
 interface QuickLeadImportProps {
   isOpen: boolean;
@@ -55,7 +55,6 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
     }
 
     try {
-      // Préparer les données du lead
       const newLeadData = {
         name: leadName,
         email: leadEmail,
@@ -74,7 +73,6 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
         pipelineType: "purchase" as "purchase" | "rental"
       };
 
-      // Créer le lead
       const createdLead = await createLead(newLeadData);
       
       toast({
@@ -82,20 +80,16 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
         description: "Un nouveau lead a été créé avec les informations fournies."
       });
 
-      // Réinitialiser le formulaire
       setLeadName('');
       setLeadEmail('');
       setLeadCountry('');
       setPropertyUrl('');
       resetExtraction();
       
-      // Fermer la modal
       onClose();
       
-      // Callback de succès (rafraîchir la liste)
       if (onSuccess) onSuccess();
       
-      // Rediriger vers la page d'édition du lead
       navigate(`/leads/${createdLead.id}`);
     } catch (error) {
       console.error('Erreur lors de la création du lead:', error);
@@ -108,7 +102,6 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
   };
 
   const handleCancel = () => {
-    // Réinitialiser le formulaire
     setLeadName('');
     setLeadEmail('');
     setLeadCountry('');
@@ -148,21 +141,8 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
             type="select"
             value={leadCountry}
             onChange={(e) => setLeadCountry(e.target.value as Country)}
-            options={[
-              { value: 'France', label: 'France' },
-              { value: 'Spain', label: 'Espagne' },
-              { value: 'Portugal', label: 'Portugal' },
-              { value: 'Greece', label: 'Grèce' },
-              { value: 'Switzerland', label: 'Suisse' },
-              { value: 'United Kingdom', label: 'Royaume-Uni' },
-              { value: 'United States', label: 'États-Unis' },
-              { value: 'Croatia', label: 'Croatie' },
-              { value: 'Mauritius', label: 'Maurice' },
-              { value: 'Seychelles', label: 'Seychelles' },
-              { value: 'Maldives', label: 'Maldives' },
-              { value: 'United Arab Emirates', label: 'Émirats Arabes Unis' }
-            ]}
-            placeholder="Sélectionner un pays"
+            options={COUNTRIES.map(country => ({ value: country, label: country }))}
+            placeholder="Sélectionner un pays d'origine"
           />
           
           <div className="space-y-2">
