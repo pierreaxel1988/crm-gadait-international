@@ -39,8 +39,8 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
       nextFollowUpDate: lead.next_follow_up_date,
       notes: lead.notes,
       nationality: lead.nationality,
-      pipelineType: lead.pipelineType || 'purchase',
-      actionHistory: lead.action_history || []
+      pipelineType: 'purchase', // Default to 'purchase' if not present
+      actionHistory: []          // Default to empty array if not present
     }));
     
     return leadsData;
@@ -90,8 +90,8 @@ export const getLead = async (id: string): Promise<LeadDetailed | undefined> => 
       nextFollowUpDate: data.next_follow_up_date,
       notes: data.notes,
       nationality: data.nationality,
-      pipelineType: data.pipelineType || 'purchase',
-      actionHistory: data.action_history || []
+      pipelineType: 'purchase', // Default to 'purchase' if not present
+      actionHistory: []          // Default to empty array if not present
     };
     
     return leadDetailed;
@@ -122,8 +122,8 @@ export const updateLead = async (updatedLead: LeadDetailed): Promise<LeadDetaile
       next_follow_up_date: updatedLead.nextFollowUpDate,
       notes: updatedLead.notes,
       nationality: updatedLead.nationality,
-      pipelineType: updatedLead.pipelineType || 'purchase',
-      action_history: updatedLead.actionHistory
+      pipeline_type: updatedLead.pipelineType || 'purchase',
+      action_history: updatedLead.actionHistory || []
     };
     
     // Update the lead in Supabase
@@ -195,7 +195,7 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       next_follow_up_date: newLead.nextFollowUpDate,
       notes: newLead.notes,
       nationality: newLead.nationality,
-      pipelineType: newLead.pipelineType || 'purchase',
+      pipeline_type: newLead.pipelineType || 'purchase',
       action_history: newLead.actionHistory || []
     };
     
@@ -252,8 +252,8 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       nextFollowUpDate: data.next_follow_up_date,
       notes: data.notes,
       nationality: data.nationality,
-      pipelineType: data.pipelineType || 'purchase',
-      actionHistory: data.action_history || []
+      pipelineType: 'purchase', // Default to 'purchase' if not present
+      actionHistory: []          // Default to empty array if not present
     };
     
     toast({
