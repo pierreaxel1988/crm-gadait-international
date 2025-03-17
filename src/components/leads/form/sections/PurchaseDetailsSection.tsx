@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Banknote, MapPin, Timer, CreditCard, Home } from 'lucide-react';
+import { Banknote, Timer, CreditCard, Home } from 'lucide-react';
 import { LeadDetailed, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
 import FormInput from '../FormInput';
 import RadioSelectButtons from '../RadioSelectButtons';
@@ -101,14 +101,6 @@ const PurchaseDetailsSection = ({
             className="luxury-input w-full"
           />
         )}
-      />
-
-      <FormInput
-        label="Localisation souhaitée"
-        name="desiredLocation"
-        value={formData.desiredLocation || ''}
-        onChange={handleInputChange}
-        icon={MapPin}
       />
 
       <FormInput
