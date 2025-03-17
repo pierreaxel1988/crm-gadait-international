@@ -185,6 +185,8 @@ export const updateLead = async (updatedLead: LeadDetailed): Promise<LeadDetaile
 
 export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>): Promise<LeadDetailed> => {
   try {
+    console.log('Creating lead with data:', newLead);
+    
     // Map to Supabase column format
     const leadData = {
       name: newLead.name,
@@ -204,8 +206,11 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       next_follow_up_date: newLead.nextFollowUpDate,
       notes: newLead.notes,
       nationality: newLead.nationality,
-      url: newLead.url || ''  // Include the URL field with default
+      url: newLead.url || '',  // Include the URL field with default
+      pipeline_type: newLead.pipelineType || 'purchase' // Add pipeline_type field
     };
+    
+    console.log('Sending lead data to Supabase:', leadData);
     
     // Create the lead in Supabase
     const { data, error } = await supabase
@@ -227,7 +232,6 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
         ...newLead,
         status: newLead.status,
         pipelineType: newLead.pipelineType || "purchase",
-        actionHistory: [],
         url: newLead.url || ''
       };
       
@@ -262,10 +266,11 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       nextFollowUpDate: data.next_follow_up_date,
       notes: data.notes,
       nationality: data.nationality,
-      pipelineType: "purchase", // Default value
-      actionHistory: [], // Default empty array
-      url: data.url || '' // Include the URL field with default
+      pipelineType: data.pipeline_type || "purchase",
+      url: data.url || ''
     };
+    
+    console.log('Created lead in Supabase:', createdLead);
     
     toast({
       title: "Nouveau lead créé",
@@ -289,7 +294,6 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       ...newLead,
       status: newLead.status,
       pipelineType: newLead.pipelineType || "purchase",
-      actionHistory: [],
       url: newLead.url || ''
     };
     

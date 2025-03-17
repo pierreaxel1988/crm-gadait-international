@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search, Filter, Plus, Upload, Mail } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -5,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import PipelineFilters from './PipelineFilters';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { QuickLeadImport } from '@/components/leads';
 import EmailImportModal from './EmailImportModal';
 import { useTeamMembers } from '@/components/chat/hooks/useTeamMembers';
 
@@ -26,16 +26,11 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [quickImportOpen, setQuickImportOpen] = useState(false);
   const [emailImportOpen, setEmailImportOpen] = useState(false);
   const { teamMembers } = useTeamMembers();
 
   const handleNewLead = () => {
     navigate('/leads/new');
-  };
-
-  const handleQuickImport = () => {
-    setQuickImportOpen(true);
   };
 
   const handleEmailImport = () => {

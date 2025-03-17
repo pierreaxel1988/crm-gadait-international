@@ -1,7 +1,7 @@
+
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
-import { ActionHistory } from "@/services/leadService";
 
 export type LeadSource = 
   | "Site web" 
@@ -99,11 +99,17 @@ export interface LeadDetailed {
   financingMethod?: string;
   propertyUse?: string;
   nationality?: string;
-  taskType?: string;
+  taskType?: TaskType;
   notes?: string;
   nextFollowUpDate?: string;
   country?: Country;
   url?: string;
   livingArea?: string;
-  pipelineType?: 'purchase' | 'rental';
+  pipelineType?: PipelineType;
+  
+  // Add missing properties to fix TypeScript errors
+  imported_at?: string;
+  integration_source?: string;
+  taxResidence?: string;
+  actionHistory?: any[];
 }

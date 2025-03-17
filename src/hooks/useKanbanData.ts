@@ -5,7 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { getLeads } from '@/services/leadCore';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
-import { PropertyType, PurchaseTimeframe } from '@/types/lead';
+import { PropertyType, PurchaseTimeframe, PipelineType } from '@/types/lead';
 
 // Extend KanbanItem with the additional properties needed for filtering
 export interface ExtendedKanbanItem extends KanbanItem {
@@ -19,19 +19,20 @@ export interface ExtendedKanbanItem extends KanbanItem {
   url?: string;
   createdAt?: string;
   importedAt?: string;
+  pipelineType?: PipelineType;
 }
 
 interface KanbanColumn {
   title: string;
   status: LeadStatus;
   items: ExtendedKanbanItem[];
-  pipelineType?: 'purchase' | 'rental';
+  pipelineType?: PipelineType;
 }
 
 export const useKanbanData = (
   columns: KanbanColumn[],
   refreshTrigger: number = 0,
-  pipelineType: 'purchase' | 'rental' = 'purchase' // Par défaut, c'est le pipeline d'achat
+  pipelineType: PipelineType = 'purchase'
 ) => {
   const [loadedColumns, setLoadedColumns] = useState<KanbanColumn[]>(columns);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,6 +41,7 @@ export const useKanbanData = (
     const fetchLeads = async () => {
       try {
         setIsLoading(true);
+        console.log(`Fetching leads for pipeline: ${pipelineType}`);
         
         // Fetch team members for assignment information
         const { data: teamMembers, error: teamError } = await supabase
@@ -70,13 +72,14 @@ export const useKanbanData = (
           leads = supabaseLeads;
         }
         
+        console.log('All leads before filtering:', leads);
+        
         // Map leads data to KanbanItem format
         const mappedLeads = leads.map(lead => {
           const assignedTeamMember = teamMembers.find(tm => tm.id === lead.assigned_to);
           
-          // Déterminer le type de pipeline en fonction de lead.pipelineType ou d'une autre propriété
-          // Par défaut, si ce n'est pas spécifié, nous utilisons 'purchase'
-          const leadPipelineType = lead.pipelineType || 'purchase';
+          // Default pipelineType to 'purchase' if not specified
+          const leadPipelineType = lead.pipeline_type || lead.pipelineType || 'purchase';
           
           return {
             id: lead.id,
@@ -88,7 +91,7 @@ export const useKanbanData = (
             assignedTo: lead.assigned_to, // Make sure this is correctly passed
             assignedToId: lead.assigned_to, // Store the original ID
             dueDate: lead.next_follow_up_date,
-            pipelineType: leadPipelineType,
+            pipelineType: leadPipelineType as PipelineType, // Ensure correct typing
             taskType: lead.task_type,
             budget: lead.budget,
             desiredLocation: lead.desired_location,
@@ -103,17 +106,20 @@ export const useKanbanData = (
         });
         
         console.log('Mapped leads:', mappedLeads);
+        console.log(`Current pipeline filter: ${pipelineType}`);
         
-        // Filtre les leads par type de pipeline
+        // Filter leads by pipeline type - make sure we're using strings for comparison
         const filteredLeads = mappedLeads.filter(lead => 
-          lead.pipelineType === pipelineType
+          String(lead.pipelineType) === String(pipelineType)
         );
+        
+        console.log('Filtered leads for this pipeline:', filteredLeads);
         
         // Group leads by status
         const updatedColumns = columns.map(column => ({
           ...column,
           items: filteredLeads.filter(lead => lead.status === column.status) as ExtendedKanbanItem[],
-          pipelineType // Ajouter le type de pipeline à la colonne
+          pipelineType // Ensure the column has the pipeline type
         }));
         
         setLoadedColumns(updatedColumns);

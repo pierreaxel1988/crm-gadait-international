@@ -173,7 +173,9 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         pipelineType: selectedPipeline
       };
       
+      console.log("Creating lead with data:", newLead);
       const createdLead = await createLead(newLead);
+      console.log("Created lead:", createdLead);
       
       toast({
         title: "Lead créé",

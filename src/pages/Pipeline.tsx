@@ -16,6 +16,8 @@ const Kanban = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
   
   // Initialize filter state
   const [filters, setFilters] = useState<FilterOptions>({
@@ -61,15 +63,17 @@ const Kanban = () => {
   }, []);
 
   // Check if any filters are active
-  const isFilterActive = useMemo(() => {
-    return filters.status !== null || 
-      filters.tags.length > 0 || 
-      filters.assignedTo !== null || 
-      filters.minBudget !== '' || 
-      filters.maxBudget !== '' || 
-      filters.location !== '' || 
-      filters.purchaseTimeframe !== null || 
-      filters.propertyType !== null;
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (filters.status !== null) count++;
+    if (filters.tags.length > 0) count++;
+    if (filters.assignedTo !== null) count++;
+    if (filters.minBudget !== '') count++;
+    if (filters.maxBudget !== '') count++;
+    if (filters.location !== '') count++;
+    if (filters.purchaseTimeframe !== null) count++;
+    if (filters.propertyType !== null) count++;
+    return count;
   }, [filters]);
 
   // Refresh data
@@ -93,16 +97,19 @@ const Kanban = () => {
     });
   };
 
+  // Toggle filters visibility
+  const toggleFilters = () => {
+    setFiltersOpen(prev => !prev);
+  };
+
   return (
     <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       <PipelineHeader 
-        filters={filters}
-        onFilterChange={setFilters}
-        onClearFilters={handleClearFilters}
-        teamMembers={teamMembers}
-        isFilterActive={isFilterActive}
-        handleRefresh={handleRefresh}
-        isRefreshing={isRefreshing}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onToggleFilters={toggleFilters}
+        filtersOpen={filtersOpen}
+        activeFilters={activeFiltersCount}
       />
 
       <Tabs defaultValue="purchase" value={activeTab} onValueChange={setActiveTab} className="w-full">
