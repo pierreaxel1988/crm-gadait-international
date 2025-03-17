@@ -134,7 +134,7 @@ export const usePropertyExtraction = () => {
           });
           
           toast({
-            variant: "warning",
+            variant: "default",
             title: "Extraction limitée",
             description: "Seules des informations basiques ont pu être extraites."
           });
@@ -151,7 +151,7 @@ export const usePropertyExtraction = () => {
           });
           
           toast({
-            variant: "warning",
+            variant: "default",
             title: "Extraction limitée",
             description: "Seules des informations basiques ont pu être extraites."
           });

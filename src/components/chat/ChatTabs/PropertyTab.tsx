@@ -8,6 +8,8 @@ import EnhancedInput from '../EnhancedInput';
 import { useNavigate } from 'react-router-dom';
 import { createLead } from '@/services/leadCore';
 import { toast } from '@/hooks/use-toast';
+import { LeadStatus } from "@/components/common/StatusBadge";
+import { LeadTag } from "@/components/common/TagBadge";
 
 interface PropertyTabProps {
   propertyUrl: string;
@@ -42,8 +44,8 @@ const PropertyTab: React.FC<PropertyTabProps> = ({
         name: extractedData.title || "Prospect via annonce",
         email: "",
         phone: "",
-        status: "New",
-        tags: ["Imported"],
+        status: "New" as LeadStatus,
+        tags: ["Imported"] as LeadTag[],
         propertyReference: extractedData.reference || "",
         budget: extractedData.price || "",
         desiredLocation: extractedData.location || "",

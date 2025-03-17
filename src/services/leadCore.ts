@@ -1,7 +1,11 @@
-
 import { LeadDetailed } from "@/types/lead";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { LeadStatus } from "@/components/common/StatusBadge";
+import { LeadTag } from "@/components/common/TagBadge";
+import { TaskType } from "@/components/kanban/KanbanCard";
+import { LeadSource } from "@/types/lead";
+import { PropertyType } from "@/types/lead";
 
 // Starting with an empty array for local fallback
 let leadsData: LeadDetailed[] = [];
@@ -25,23 +29,24 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
       name: lead.name,
       email: lead.email || '',
       phone: lead.phone || '',
-      status: lead.status as any, // Cast to LeadStatus
-      tags: (lead.tags || []) as any[], // Cast to LeadTag[]
+      status: lead.status as LeadStatus,
+      tags: (lead.tags || []) as LeadTag[],
       createdAt: lead.created_at,
       lastContactedAt: lead.last_contacted_at,
       assignedTo: lead.assigned_to,
-      source: lead.source as any, // Cast to LeadSource
+      source: lead.source as LeadSource,
       budget: lead.budget,
       desiredLocation: lead.desired_location,
-      propertyType: lead.property_type as any, // Cast to PropertyType
+      propertyType: lead.property_type as PropertyType,
       propertyReference: lead.property_reference,
       bedrooms: lead.bedrooms,
-      taskType: lead.task_type as any, // Cast to TaskType
+      taskType: lead.task_type as TaskType,
       nextFollowUpDate: lead.next_follow_up_date,
       notes: lead.notes,
       nationality: lead.nationality,
-      pipelineType: lead.pipeline_type || 'purchase', // Use pipeline_type from DB
-      actionHistory: lead.action_history || []          // Use action_history from DB
+      pipelineType: 'purchase', // Default value if not in DB
+      actionHistory: [], // Default empty array if not in DB
+      url: lead.url // Add URL field
     }));
     
     return leadsData;
@@ -76,23 +81,24 @@ export const getLead = async (id: string): Promise<LeadDetailed | undefined> => 
       name: data.name,
       email: data.email || '',
       phone: data.phone || '',
-      status: data.status as any, // Cast to LeadStatus
-      tags: (data.tags || []) as any[], // Cast to LeadTag[]
+      status: data.status as LeadStatus,
+      tags: (data.tags || []) as LeadTag[],
       createdAt: data.created_at,
       lastContactedAt: data.last_contacted_at,
       assignedTo: data.assigned_to,
-      source: data.source as any, // Cast to LeadSource
+      source: data.source as LeadSource,
       budget: data.budget,
       desiredLocation: data.desired_location,
-      propertyType: data.property_type as any, // Cast to PropertyType
+      propertyType: data.property_type as PropertyType,
       propertyReference: data.property_reference,
       bedrooms: data.bedrooms,
-      taskType: data.task_type as any, // Cast to TaskType
+      taskType: data.task_type as TaskType,
       nextFollowUpDate: data.next_follow_up_date,
       notes: data.notes,
       nationality: data.nationality,
-      pipelineType: data.pipeline_type || 'purchase', // Use pipeline_type from DB
-      actionHistory: data.action_history || []       // Use action_history from DB
+      pipelineType: 'purchase', // Default value if not in DB
+      actionHistory: [], // Default empty array if not in DB
+      url: data.url // Add URL field
     };
     
     return leadDetailed;
@@ -182,8 +188,8 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       name: newLead.name,
       email: newLead.email,
       phone: newLead.phone,
-      status: newLead.status || "New",
-      tags: newLead.tags || [],
+      status: newLead.status,
+      tags: newLead.tags,
       last_contacted_at: newLead.lastContactedAt,
       assigned_to: newLead.assignedTo,
       source: newLead.source,
@@ -192,13 +198,11 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       property_type: newLead.propertyType,
       property_reference: newLead.propertyReference,
       bedrooms: newLead.bedrooms,
-      task_type: newLead.taskType || "Call",
+      task_type: newLead.taskType,
       next_follow_up_date: newLead.nextFollowUpDate,
       notes: newLead.notes,
       nationality: newLead.nationality,
-      pipeline_type: newLead.pipelineType || 'purchase',
-      action_history: newLead.actionHistory || [],
-      url: newLead.url  // Ajouter l'URL de l'annonce
+      url: newLead.url  // Add the URL field to the insert
     };
     
     // Create the lead in Supabase
@@ -219,8 +223,9 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
         id,
         createdAt,
         ...newLead,
-        status: newLead.status || "New" as any, // Cast to LeadStatus
-        pipelineType: newLead.pipelineType || "purchase"
+        status: newLead.status,
+        pipelineType: newLead.pipelineType || "purchase",
+        actionHistory: []
       };
       
       // Add to local
@@ -239,24 +244,24 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       name: data.name,
       email: data.email || '',
       phone: data.phone || '',
-      status: data.status as any, // Cast to LeadStatus
-      tags: (data.tags || []) as any[], // Cast to LeadTag[]
+      status: data.status as LeadStatus,
+      tags: (data.tags || []) as LeadTag[],
       createdAt: data.created_at,
       lastContactedAt: data.last_contacted_at,
       assignedTo: data.assigned_to,
-      source: data.source as any, // Cast to LeadSource
+      source: data.source as LeadSource,
       budget: data.budget,
       desiredLocation: data.desired_location,
-      propertyType: data.property_type as any, // Cast to PropertyType
+      propertyType: data.property_type as PropertyType,
       propertyReference: data.property_reference,
       bedrooms: data.bedrooms,
-      taskType: data.task_type as any, // Cast to TaskType
+      taskType: data.task_type as TaskType,
       nextFollowUpDate: data.next_follow_up_date,
       notes: data.notes,
       nationality: data.nationality,
-      pipelineType: data.pipeline_type || 'purchase', // Use pipeline_type from DB
-      actionHistory: data.action_history || [],       // Use action_history from DB
-      url: data.url // Inclure l'URL de l'annonce
+      pipelineType: "purchase", // Default value
+      actionHistory: [], // Default empty array
+      url: data.url // Include the URL field
     };
     
     toast({
@@ -279,8 +284,9 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       id,
       createdAt,
       ...newLead,
-      status: newLead.status || "New",
-      pipelineType: newLead.pipelineType || "purchase"
+      status: newLead.status,
+      pipelineType: newLead.pipelineType || "purchase",
+      actionHistory: []
     };
     
     // Add to local cache

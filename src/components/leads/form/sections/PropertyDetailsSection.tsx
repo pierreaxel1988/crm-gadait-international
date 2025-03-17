@@ -97,7 +97,7 @@ const PropertyDetailsSection = ({
         <MultiSelectButtons
           options={viewTypes}
           selectedValues={formData.views || []}
-          onChange={(value) => handleMultiSelectToggle('views', value as ViewType)}
+          onToggle={(value) => handleMultiSelectToggle('views', value as ViewType)}
         />
       </div>
       
@@ -108,7 +108,7 @@ const PropertyDetailsSection = ({
         <MultiSelectButtons
           options={amenities}
           selectedValues={formData.amenities || []}
-          onChange={(value) => handleMultiSelectToggle('amenities', value as Amenity)}
+          onToggle={(value) => handleMultiSelectToggle('amenities', value as Amenity)}
         />
       </div>
     </div>
