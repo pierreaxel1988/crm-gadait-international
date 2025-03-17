@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -45,50 +44,28 @@ const SubNavigation = () => {
     },
   ];
 
-  // Mobile dropdown navigation
+  // Mobile navigation with horizontal scrolling
   if (isMobile) {
-    const currentPage = navigationItems.find(item => item.path === location.pathname) || navigationItems[0];
-    
     return (
       <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
-        <div className="content-container py-2">
-          <Sheet>
-            <SheetTrigger asChild>
-              <button 
-                className="w-full flex items-center justify-between px-4 py-2 text-loro-navy hover:bg-loro-white/90 rounded-sm"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                <div className="flex items-center space-x-2">
-                  {currentPage.icon && <currentPage.icon className="h-5 w-5 text-loro-terracotta" />}
-                  <span className="font-times text-[18px]">{currentPage.name}</span>
-                </div>
-                {isMenuOpen ? (
-                  <ChevronUp className="h-4 w-4 text-loro-navy" />
-                ) : (
-                  <ChevronDown className="h-4 w-4 text-loro-navy" />
+        <div className="overflow-x-auto py-2">
+          <div className="flex px-4 space-x-4 min-w-min">
+            {navigationItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={cn(
+                  "flex flex-col items-center justify-center whitespace-nowrap rounded-md px-3 py-2 min-w-[70px]",
+                  location.pathname === item.path
+                    ? "text-loro-terracotta bg-loro-white"
+                    : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70"
                 )}
-              </button>
-            </SheetTrigger>
-            <SheetContent side="top" className="pt-12 pb-4">
-              <div className="flex flex-col space-y-4">
-                {navigationItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.path}
-                    className={cn(
-                      "flex items-center space-x-3 px-4 py-3 rounded-sm font-times text-[20px]",
-                      location.pathname === item.path
-                        ? "text-loro-terracotta bg-loro-white"
-                        : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70"
-                    )}
-                  >
-                    {item.icon && <item.icon className="h-5 w-5" />}
-                    <span>{item.name}</span>
-                  </Link>
-                ))}
-              </div>
-            </SheetContent>
-          </Sheet>
+              >
+                {item.icon && <item.icon className="h-5 w-5 mb-1" />}
+                <span className="font-times text-[14px]">{item.name}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     );
