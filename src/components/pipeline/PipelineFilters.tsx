@@ -41,7 +41,7 @@ interface PipelineFiltersProps {
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
   assignedToOptions: TeamMember[];
-  isFilterActive: boolean;
+  isFilterActive: (filterName: string) => boolean;
 }
 
 const PipelineFilters = ({
@@ -100,17 +100,12 @@ const PipelineFilters = ({
   return (
     <div className="relative w-full">
       <Button
-        variant={isFilterActive ? "default" : "outline"}
+        variant="outline"
         className="flex items-center gap-2"
         onClick={() => setIsOpen(!isOpen)}
       >
         <Filter className="h-4 w-4" />
         <span className="hidden md:inline">Filtres</span>
-        {isFilterActive && (
-          <span className="bg-background text-xs rounded-full h-5 w-5 flex items-center justify-center text-foreground">
-            !
-          </span>
-        )}
       </Button>
 
       <Popover open={isOpen} onOpenChange={setIsOpen}>

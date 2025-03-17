@@ -13,14 +13,19 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     
     // Prepare lead data for Supabase insertion
     const supabaseLeadData = mapToSupabaseFormat(leadData);
-    supabaseLeadData.imported_at = new Date().toISOString(); // Always include the imported_at field for new leads
+    
+    // We need to explicitly set imported_at date for new leads
+    const dataWithImportedDate = {
+      ...supabaseLeadData,
+      imported_at: new Date().toISOString()
+    };
 
-    console.log("Prepared Supabase lead data:", supabaseLeadData);
+    console.log("Prepared Supabase lead data:", dataWithImportedDate);
     
     // First, try to create the lead in Supabase
     const { data, error } = await supabase
       .from('leads')
-      .insert([supabaseLeadData])
+      .insert([dataWithImportedDate])
       .select()
       .single();
       
