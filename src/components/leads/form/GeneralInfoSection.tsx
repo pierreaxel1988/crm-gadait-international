@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Mail, Phone, Clipboard, Globe } from 'lucide-react';
+import { User, Mail, Phone, Globe } from 'lucide-react';
 import { LeadDetailed, Country } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
@@ -70,14 +70,6 @@ const GeneralInfoSection = ({
         icon={Phone}
         countryCode={countryCode}
         onCountryCodeChange={handleCountryCodeChange}
-      />
-
-      <FormInput
-        label="Référence du bien"
-        name="propertyReference"
-        value={formData.propertyReference || ''}
-        onChange={handleInputChange}
-        icon={Clipboard}
       />
 
       <FormInput
