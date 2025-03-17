@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import EnhancedInput from '../EnhancedInput';
+import { useNavigate } from 'react-router-dom';
+import { createLead } from '@/services/leadCore';
+import { toast } from '@/hooks/use-toast';
 
 interface PropertyTabProps {
   propertyUrl: string;
@@ -21,6 +24,57 @@ const PropertyTab: React.FC<PropertyTabProps> = ({
   isLoading,
   extractedData
 }) => {
+  const navigate = useNavigate();
+
+  const handleCreateLead = async () => {
+    if (!extractedData) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Aucune donnée extraite disponible."
+      });
+      return;
+    }
+
+    try {
+      // Préparer les données du lead à partir des données extraites
+      const newLeadData = {
+        name: extractedData.title || "Prospect via annonce",
+        email: "",
+        phone: "",
+        status: "New",
+        tags: ["Imported"],
+        propertyReference: extractedData.reference || "",
+        budget: extractedData.price || "",
+        desiredLocation: extractedData.location || "",
+        propertyType: extractedData.propertyType || "",
+        bedrooms: extractedData.bedrooms ? parseInt(extractedData.bedrooms) : undefined,
+        nationality: "",
+        notes: `Intéressé par l'annonce: ${propertyUrl}`,
+        url: propertyUrl,
+        pipelineType: "purchase"
+      };
+
+      // Créer le lead
+      const createdLead = await createLead(newLeadData);
+      
+      toast({
+        title: "Lead créé",
+        description: "Un nouveau lead a été créé avec les informations de l'annonce."
+      });
+
+      // Rediriger vers la page d'édition du lead
+      navigate(`/leads/${createdLead.id}`);
+    } catch (error) {
+      console.error('Erreur lors de la création du lead:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de créer le lead."
+      });
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col p-4 overflow-hidden">
       <ScrollArea className="flex-1 pr-4">
@@ -55,10 +109,22 @@ const PropertyTab: React.FC<PropertyTabProps> = ({
                   </div>
                 ))}
               </div>
-              <Button className="mt-4 w-full bg-loro-hazel hover:bg-loro-hazel/90 text-white transition-all duration-200">
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Utiliser ces données
-              </Button>
+              <div className="flex flex-col space-y-2 mt-4">
+                <Button 
+                  className="w-full bg-loro-hazel hover:bg-loro-hazel/90 text-white transition-all duration-200"
+                  onClick={handleCreateLead}
+                >
+                  <Home className="h-4 w-4 mr-2" />
+                  Créer un lead avec ces données
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full border-loro-hazel text-loro-hazel hover:bg-loro-hazel/10"
+                >
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                  Ajouter à un lead existant
+                </Button>
+              </div>
             </div>
           )}
         </div>

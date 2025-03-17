@@ -84,44 +84,79 @@ function extractProperties(url: string, html: string) {
   const properties = [];
   
   // Détection du site web
-  if (url.includes("the-private-collection.com")) {
-    console.log("Site détecté: The Private Collection");
+  if (url.includes("lefigaro.fr") || url.includes("properties.lefigaro.com")) {
+    console.log("Site détecté: Le Figaro Propriétés");
     
-    // Extraction spécifique pour The Private Collection
-    $(".property-item").each((index, element) => {
-      const item = $(element);
+    // Extraction pour une page de détail Le Figaro
+    const title = $("h1.product-title, h1.title-product").first().text().trim();
+    const price = $(".product-price, .price-product, [data-price], .price").first().text().trim();
+    const location = $(".product-location, .location-product, .location").first().text().trim();
+    const description = $(".product-description, .description, .description-product").first().text().trim();
+    
+    // Extraire les caractéristiques
+    let bedrooms = "";
+    let bathrooms = "";
+    let area = "";
+    let reference = "";
+    
+    // Chercher la référence
+    const refElement = $("[data-ref], .ref, .reference, .product-reference").first();
+    if (refElement.length) {
+      reference = refElement.text().trim() || refElement.attr("data-ref") || "";
+      reference = reference.replace(/[rR][eE][fF]\s*:?\s*/i, "").trim();
+    } else {
+      // Essayer d'extraire la référence de l'URL
+      const urlMatch = url.match(/\/(\d+)\/?$/);
+      if (urlMatch) {
+        reference = urlMatch[1];
+      }
+    }
+    
+    // Chercher les caractéristiques
+    $(".product-features li, .features li, .characteristics li, .specs li, .details li, [data-rooms], [data-bathrooms], [data-area]").each((_, el) => {
+      const text = $(el).text().trim().toLowerCase();
       
+      if (text.includes("chambre") || text.includes("bedroom")) {
+        const match = text.match(/(\d+)/);
+        if (match) bedrooms = match[1];
+      } else if (text.includes("salle de bain") || text.includes("bathroom")) {
+        const match = text.match(/(\d+)/);
+        if (match) bathrooms = match[1];
+      } else if (text.includes("surface") || text.includes("area") || text.includes("m²")) {
+        const match = text.match(/(\d+[\d\s,.]*)/);
+        if (match) area = match[1].trim();
+      }
+    });
+    
+    // Si nous avons trouvé au moins un titre, on considère que c'est une propriété valide
+    if (title) {
       const property = {
-        title: item.find(".property-title").text().trim(),
-        price: item.find(".property-price").text().trim(),
-        location: item.find(".property-location").text().trim(),
-        description: item.find(".property-description").text().trim(),
-        bedrooms: item.find(".property-bedrooms").text().trim(),
-        bathrooms: item.find(".property-bathrooms").text().trim(),
-        area: item.find(".property-area").text().trim(),
-        reference: item.find(".property-reference").text().trim() || 
-                  item.attr("data-reference") || 
-                  `TPC-${index + 1}`,
-        url: item.find("a.property-link").attr("href") || "",
-        image: item.find(".property-image img").attr("src") || "",
+        title,
+        price,
+        location,
+        description,
+        bedrooms,
+        bathrooms,
+        area,
+        reference,
+        url,
+        image: $(".product-image img, .carousel img, .gallery img").first().attr("src") || "",
       };
       
       properties.push(property);
-    });
-    
-    if (properties.length === 0) {
-      // Tentative alternative d'extraction si la première méthode échoue
-      $(".property, .property-card, .listing-item").each((index, element) => {
+    } else {
+      // Fallback pour la liste des propriétés
+      $(".property-item, .product-item, .listing-item").each((index, element) => {
         const item = $(element);
         
         const property = {
-          title: item.find("h2, h3, .title").first().text().trim(),
-          price: item.find(".price, [data-price]").first().text().trim(),
-          location: item.find(".location, .address, .city").first().text().trim(),
-          description: item.find(".description, .excerpt, p").first().text().trim(),
-          reference: item.find(".reference, .ref, .id").first().text().trim() || 
-                    item.attr("data-id") || 
-                    `TPC-ALT-${index + 1}`,
+          title: item.find(".property-title, .product-title, .title").text().trim(),
+          price: item.find(".property-price, .product-price, .price").text().trim(),
+          location: item.find(".property-location, .product-location, .location").text().trim(),
+          description: item.find(".property-description, .product-description, .description").text().trim(),
+          reference: item.find(".property-reference, .product-reference, .reference").text().trim() || 
+                    item.attr("data-ref") || 
+                    `LF-${index + 1}`,
           url: item.find("a").attr("href") || "",
           image: item.find("img").attr("src") || "",
         };
@@ -133,78 +168,101 @@ function extractProperties(url: string, html: string) {
     // Extraction générique pour d'autres sites immobiliers
     console.log("Site non spécifiquement supporté, tentative d'extraction générique");
     
-    // Tentative d'extraction basée sur des motifs communs d'annonces immobilières
-    $("div[class*='property'], div[class*='listing'], div[class*='estate'], div[class*='real'], article, .card").each((index, element) => {
-      const item = $(element);
+    // D'abord essayer de voir si c'est une page de détail
+    const title = $("h1, .property-title, .listing-title").first().text().trim();
+    const price = $(".price, [data-price], .property-price").first().text().trim();
+    const location = $(".location, .address, .property-location").first().text().trim();
+    const description = $(".description, .property-description, article p").first().text().trim();
+    
+    if (title && (price || description)) {
+      // C'est probablement une page de détail
+      const property = {
+        title,
+        price,
+        location,
+        description,
+        reference: $(".reference, .ref, [data-ref]").first().text().trim() || 
+                   url.match(/(\d+)\/?$/)?.[1] || 
+                   "REF-1",
+        url,
+        image: $("img.main-image, .carousel img, .gallery img, .property-image img").first().attr("src") || "",
+      };
       
-      // Vérifier si c'est probablement une annonce immobilière
-      const hasPrice = item.text().match(/(\$|€|£|USD|EUR)\s?[\d,.]+|[\d,.]+\s?(\$|€|£|USD|EUR)/i);
-      const hasArea = item.text().match(/\d+\s?(m²|m2|sq\.m|square meter|ft²|sqft)/i);
-      
-      if (hasPrice || hasArea) {
-        // Extraire tous les textes pour analyse
-        const allText = item.text().trim();
+      properties.push(property);
+    } else {
+      // Tentative d'extraction basée sur des motifs communs d'annonces immobilières
+      $("div[class*='property'], div[class*='listing'], div[class*='estate'], div[class*='real'], article, .card").each((index, element) => {
+        const item = $(element);
         
-        // Essayer de déduire le prix
-        let price = "";
-        const priceMatch = allText.match(/(\$|€|£|USD|EUR)\s?[\d,.]+|[\d,.]+\s?(\$|€|£|USD|EUR)/i);
-        if (priceMatch) {
-          price = priceMatch[0].trim();
-        }
+        // Vérifier si c'est probablement une annonce immobilière
+        const hasPrice = item.text().match(/(\$|€|£|USD|EUR)\s?[\d,.]+|[\d,.]+\s?(\$|€|£|USD|EUR)/i);
+        const hasArea = item.text().match(/\d+\s?(m²|m2|sq\.m|square meter|ft²|sqft)/i);
         
-        // Essayer de déduire la localisation (souvent un mot suivi d'une virgule)
-        let location = "";
-        const locationElem = item.find("[class*='location'], [class*='address'], [class*='city'], address");
-        if (locationElem.length) {
-          location = locationElem.first().text().trim();
-        }
-        
-        // Extraire le titre et la description
-        let title = "";
-        const titleElem = item.find("h1, h2, h3, h4, [class*='title']");
-        if (titleElem.length) {
-          title = titleElem.first().text().trim();
-        }
-        
-        let description = "";
-        const descElem = item.find("p, [class*='description'], [class*='excerpt']");
-        if (descElem.length) {
-          description = descElem.first().text().trim();
-        }
-        
-        // Extraire l'URL de l'image principale
-        let image = "";
-        const imgElem = item.find("img");
-        if (imgElem.length) {
-          image = imgElem.first().attr("src") || "";
-        }
-        
-        // Extraire l'URL de l'annonce
-        let propertyUrl = "";
-        const linkElem = item.find("a");
-        if (linkElem.length) {
-          propertyUrl = linkElem.first().attr("href") || "";
+        if (hasPrice || hasArea) {
+          // Extraire tous les textes pour analyse
+          const allText = item.text().trim();
           
-          // Convertir en URL absolue si nécessaire
-          if (propertyUrl && !propertyUrl.startsWith("http")) {
-            const urlObj = new URL(url);
-            propertyUrl = `${urlObj.origin}${propertyUrl.startsWith("/") ? "" : "/"}${propertyUrl}`;
+          // Essayer de déduire le prix
+          let price = "";
+          const priceMatch = allText.match(/(\$|€|£|USD|EUR)\s?[\d,.]+|[\d,.]+\s?(\$|€|£|USD|EUR)/i);
+          if (priceMatch) {
+            price = priceMatch[0].trim();
           }
+          
+          // Essayer de déduire la localisation (souvent un mot suivi d'une virgule)
+          let location = "";
+          const locationElem = item.find("[class*='location'], [class*='address'], [class*='city'], address");
+          if (locationElem.length) {
+            location = locationElem.first().text().trim();
+          }
+          
+          // Extraire le titre et la description
+          let title = "";
+          const titleElem = item.find("h1, h2, h3, h4, [class*='title']");
+          if (titleElem.length) {
+            title = titleElem.first().text().trim();
+          }
+          
+          let description = "";
+          const descElem = item.find("p, [class*='description'], [class*='excerpt']");
+          if (descElem.length) {
+            description = descElem.first().text().trim();
+          }
+          
+          // Extraire l'URL de l'image principale
+          let image = "";
+          const imgElem = item.find("img");
+          if (imgElem.length) {
+            image = imgElem.first().attr("src") || "";
+          }
+          
+          // Extraire l'URL de l'annonce
+          let propertyUrl = "";
+          const linkElem = item.find("a");
+          if (linkElem.length) {
+            propertyUrl = linkElem.first().attr("href") || "";
+            
+            // Convertir en URL absolue si nécessaire
+            if (propertyUrl && !propertyUrl.startsWith("http")) {
+              const urlObj = new URL(url);
+              propertyUrl = `${urlObj.origin}${propertyUrl.startsWith("/") ? "" : "/"}${propertyUrl}`;
+            }
+          }
+          
+          const property = {
+            title: title || "Propriété sans titre",
+            price: price || "Prix sur demande",
+            location: location || "Emplacement non spécifié",
+            description: description || "Aucune description disponible",
+            reference: `GEN-${index + 1}`,
+            url: propertyUrl || url,
+            image: image,
+          };
+          
+          properties.push(property);
         }
-        
-        const property = {
-          title: title || "Propriété sans titre",
-          price: price || "Prix sur demande",
-          location: location || "Emplacement non spécifié",
-          description: description || "Aucune description disponible",
-          reference: `GEN-${index + 1}`,
-          url: propertyUrl,
-          image: image,
-        };
-        
-        properties.push(property);
-      }
-    });
+      });
+    }
   }
   
   return properties;

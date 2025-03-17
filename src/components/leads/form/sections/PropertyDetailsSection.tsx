@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Building, Building2, BedDouble, Eye, Package } from 'lucide-react';
 import { LeadDetailed, PropertyType, ViewType, Amenity } from '@/types/lead';
 import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
+import PropertyUrlField from '../PropertyUrlField';
 
 interface PropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -13,6 +13,7 @@ interface PropertyDetailsSectionProps {
   propertyTypes: PropertyType[];
   viewTypes: ViewType[];
   amenities: Amenity[];
+  onExtractUrl?: (url: string) => void;
 }
 
 const PropertyDetailsSection = ({
@@ -23,68 +24,93 @@ const PropertyDetailsSection = ({
   propertyTypes,
   viewTypes,
   amenities,
+  onExtractUrl
 }: PropertyDetailsSectionProps) => {
   return (
     <div className="space-y-4">
-      <FormInput
-        label="Type de bien"
-        name="propertyType"
-        type="select"
-        value={formData.propertyType || ''}
+      <h3 className="text-lg font-semibold mb-2 text-chocolate-dark">
+        Détails de la propriété
+      </h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormInput
+          label="Référence propriété"
+          name="propertyReference"
+          value={formData.propertyReference || ''}
+          onChange={handleInputChange}
+          placeholder="REF-123456"
+        />
+        
+        <FormInput
+          label="Budget"
+          name="budget"
+          value={formData.budget || ''}
+          onChange={handleInputChange}
+          placeholder="Ex: 500 000 €"
+        />
+      </div>
+      
+      <PropertyUrlField 
+        url={formData.url} 
         onChange={handleInputChange}
-        icon={Building}
-        options={propertyTypes.map(type => ({ value: type, label: type }))}
-        placeholder="Sélectionner un type"
+        onExtract={onExtractUrl}
       />
-
+      
       <FormInput
-        label="Surface habitable"
-        name="livingArea"
-        value={formData.livingArea || ''}
+        label="Localisation souhaitée"
+        name="desiredLocation"
+        value={formData.desiredLocation || ''}
         onChange={handleInputChange}
-        placeholder="ex: 200-300m²"
-        icon={Building2}
+        placeholder="Ex: Marbella, Costa del Sol"
       />
-
+      
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Type de propriété
+        </label>
+        <MultiSelectButtons
+          options={propertyTypes}
+          selectedValues={formData.propertyType ? [formData.propertyType] : []}
+          onChange={(value) => {
+            handleInputChange({
+              target: { name: 'propertyType', value }
+            } as React.ChangeEvent<HTMLInputElement>);
+          }}
+          singleSelect={true}
+        />
+      </div>
+      
       <FormInput
         label="Nombre de chambres"
         name="bedrooms"
-        type="number"
         value={formData.bedrooms || ''}
         onChange={handleNumberChange}
+        type="number"
         min={0}
-        icon={BedDouble}
+        max={20}
       />
-
-      <FormInput
-        label="Vue souhaitée"
-        name="views"
-        value=""
-        onChange={() => {}}
-        icon={Eye}
-        renderCustomField={() => (
-          <MultiSelectButtons
-            options={viewTypes}
-            selectedValues={formData.views}
-            onToggle={(value) => handleMultiSelectToggle('views', value)}
-          />
-        )}
-      />
-
-      <FormInput
-        label="Prestations souhaitées"
-        name="amenities"
-        value=""
-        onChange={() => {}}
-        icon={Package}
-        renderCustomField={() => (
-          <MultiSelectButtons
-            options={amenities}
-            selectedValues={formData.amenities}
-            onToggle={(value) => handleMultiSelectToggle('amenities', value)}
-          />
-        )}
-      />
+      
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Vue souhaitée
+        </label>
+        <MultiSelectButtons
+          options={viewTypes}
+          selectedValues={formData.views || []}
+          onChange={(value) => handleMultiSelectToggle('views', value as ViewType)}
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Équipements souhaités
+        </label>
+        <MultiSelectButtons
+          options={amenities}
+          selectedValues={formData.amenities || []}
+          onChange={(value) => handleMultiSelectToggle('amenities', value as Amenity)}
+        />
+      </div>
     </div>
   );
 };

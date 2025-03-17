@@ -17,6 +17,7 @@ interface SearchCriteriaSectionProps {
   purchaseTimeframes: PurchaseTimeframe[];
   financingMethods: FinancingMethod[];
   propertyUses: PropertyUse[];
+  onExtractUrl?: (url: string) => void;
 }
 
 const SearchCriteriaSection = ({
@@ -29,7 +30,8 @@ const SearchCriteriaSection = ({
   amenities,
   purchaseTimeframes,
   financingMethods,
-  propertyUses
+  propertyUses,
+  onExtractUrl
 }: SearchCriteriaSectionProps) => {
   return (
     <FormSection title="Critères de Recherche">
@@ -42,6 +44,7 @@ const SearchCriteriaSection = ({
           propertyTypes={propertyTypes}
           viewTypes={viewTypes}
           amenities={amenities}
+          onExtractUrl={onExtractUrl}
         />
 
         <PurchaseDetailsSection

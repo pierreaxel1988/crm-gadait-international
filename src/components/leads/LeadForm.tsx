@@ -6,6 +6,8 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import CustomButton from '@/components/ui/CustomButton';
+import { usePropertyExtraction } from '@/components/chat/hooks/usePropertyExtraction';
+import { toast } from '@/hooks/use-toast';
 
 // Import refactored form sections
 import GeneralInfoSection from './form/GeneralInfoSection';
@@ -30,6 +32,8 @@ const LeadForm = ({ lead, onSubmit, onCancel, activeTab = 'informations' }: Lead
       createdAt: new Date().toISOString().split('T')[0],
     }
   );
+
+  const { extractPropertyData, isLoading: isExtracting, extractedData } = usePropertyExtraction();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -61,6 +65,50 @@ const LeadForm = ({ lead, onSubmit, onCancel, activeTab = 'informations' }: Lead
           : [...currentValues, value]
       };
     });
+  };
+
+  const handleExtractUrl = async (url: string) => {
+    if (!url) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Veuillez entrer une URL d'annonce immobilière."
+      });
+      return;
+    }
+
+    try {
+      // Stocker temporairement l'URL dans usePropertyExtraction
+      usePropertyExtraction().setPropertyUrl(url);
+      
+      // Extraire les données
+      await extractPropertyData();
+      
+      // Si des données ont été extraites, les utiliser pour mettre à jour le formulaire
+      if (extractedData) {
+        setFormData(prev => ({
+          ...prev,
+          propertyReference: extractedData.reference || prev.propertyReference,
+          budget: extractedData.price || prev.budget,
+          desiredLocation: extractedData.location || prev.desiredLocation,
+          propertyType: extractedData.propertyType as PropertyType || prev.propertyType,
+          bedrooms: extractedData.bedrooms ? parseInt(extractedData.bedrooms) : prev.bedrooms,
+          country: extractedData.country as Country || prev.country
+        }));
+        
+        toast({
+          title: "Données extraites",
+          description: "Les informations de l'annonce ont été intégrées au formulaire."
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'extraction des données:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'extraire les données de l'annonce."
+      });
+    }
   };
 
   // Define constants for form options
@@ -128,6 +176,7 @@ const LeadForm = ({ lead, onSubmit, onCancel, activeTab = 'informations' }: Lead
             purchaseTimeframes={purchaseTimeframes}
             financingMethods={financingMethods}
             propertyUses={propertyUses}
+            onExtractUrl={handleExtractUrl}
           />
         )}
         

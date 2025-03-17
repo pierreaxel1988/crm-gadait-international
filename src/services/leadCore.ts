@@ -1,3 +1,4 @@
+
 import { LeadDetailed } from "@/types/lead";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,8 +40,8 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
       nextFollowUpDate: lead.next_follow_up_date,
       notes: lead.notes,
       nationality: lead.nationality,
-      pipelineType: 'purchase', // Default to 'purchase' if not present
-      actionHistory: []          // Default to empty array if not present
+      pipelineType: lead.pipeline_type || 'purchase', // Use pipeline_type from DB
+      actionHistory: lead.action_history || []          // Use action_history from DB
     }));
     
     return leadsData;
@@ -90,8 +91,8 @@ export const getLead = async (id: string): Promise<LeadDetailed | undefined> => 
       nextFollowUpDate: data.next_follow_up_date,
       notes: data.notes,
       nationality: data.nationality,
-      pipelineType: 'purchase', // Default to 'purchase' if not present
-      actionHistory: []          // Default to empty array if not present
+      pipelineType: data.pipeline_type || 'purchase', // Use pipeline_type from DB
+      actionHistory: data.action_history || []       // Use action_history from DB
     };
     
     return leadDetailed;
@@ -196,7 +197,8 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       notes: newLead.notes,
       nationality: newLead.nationality,
       pipeline_type: newLead.pipelineType || 'purchase',
-      action_history: newLead.actionHistory || []
+      action_history: newLead.actionHistory || [],
+      url: newLead.url  // Ajouter l'URL de l'annonce
     };
     
     // Create the lead in Supabase
@@ -252,8 +254,9 @@ export const createLead = async (newLead: Omit<LeadDetailed, 'id' | 'createdAt'>
       nextFollowUpDate: data.next_follow_up_date,
       notes: data.notes,
       nationality: data.nationality,
-      pipelineType: 'purchase', // Default to 'purchase' if not present
-      actionHistory: []          // Default to empty array if not present
+      pipelineType: data.pipeline_type || 'purchase', // Use pipeline_type from DB
+      actionHistory: data.action_history || [],       // Use action_history from DB
+      url: data.url // Inclure l'URL de l'annonce
     };
     
     toast({
