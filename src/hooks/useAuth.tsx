@@ -29,10 +29,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(data.session);
         setUser(data.session?.user ?? null);
         
-        // Check if user has admin role
+        // Check if user has admin role or is Pierre Axel Gadait
         if (data.session?.user) {
           const userRole = data.session.user.user_metadata?.role;
-          setIsAdmin(userRole === 'admin');
+          const userEmail = data.session.user.email;
+          setIsAdmin(
+            userRole === 'admin' || 
+            userEmail === 'pierre@gadait-international.com' ||
+            userEmail === 'christelle@gadait-international.com' ||
+            userEmail === 'admin@gadait-international.com'
+          );
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
@@ -49,10 +55,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Check if user has admin role on auth change
+        // Check if user has admin role or is Pierre Axel Gadait on auth change
         if (session?.user) {
           const userRole = session.user.user_metadata?.role;
-          setIsAdmin(userRole === 'admin');
+          const userEmail = session.user.email;
+          setIsAdmin(
+            userRole === 'admin' || 
+            userEmail === 'pierre@gadait-international.com' ||
+            userEmail === 'christelle@gadait-international.com' ||
+            userEmail === 'admin@gadait-international.com'
+          );
         } else {
           setIsAdmin(false);
         }
