@@ -100,7 +100,7 @@ const PropertyDetailsSection = ({
     const syntheticEvent = {
       target: {
         name: 'bedrooms',
-        value: updatedBedrooms.length === 0 ? undefined : updatedBedrooms.sort((a, b) => Number(a) - Number(b))
+        value: updatedBedrooms.length === 0 ? undefined : updatedBedrooms.sort((a, b) => a - b)
       }
     };
     
@@ -118,11 +118,18 @@ const PropertyDetailsSection = ({
       return formData.bedrooms.map(b => b >= 10 ? '10+' : b.toString());
     }
     
-    if (typeof formData.bedrooms === 'string' && formData.bedrooms.startsWith('[')) {
+    if (typeof formData.bedrooms === 'string') {
       try {
-        const parsedBedrooms = JSON.parse(formData.bedrooms);
-        if (Array.isArray(parsedBedrooms)) {
-          return parsedBedrooms.map(b => b >= 10 ? '10+' : b.toString());
+        if (formData.bedrooms.startsWith('[')) {
+          const parsedBedrooms = JSON.parse(formData.bedrooms);
+          if (Array.isArray(parsedBedrooms)) {
+            return parsedBedrooms.map((b: number) => b >= 10 ? '10+' : b.toString());
+          }
+        } else {
+          const numValue = parseInt(formData.bedrooms);
+          if (!isNaN(numValue)) {
+            return [numValue >= 10 ? '10+' : numValue.toString()];
+          }
         }
       } catch (e) {
         console.error('Error parsing bedrooms string:', e);
