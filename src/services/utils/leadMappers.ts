@@ -5,6 +5,17 @@ import { LeadDetailed, PipelineType, LeadStatus, LeadTag, TaskType, Country } fr
  * Maps a Supabase lead record to the LeadDetailed type
  */
 export const mapToLeadDetailed = (data: any): LeadDetailed => {
+  // Parse bedrooms field if it's a string that looks like JSON
+  let parsedBedrooms = data.bedrooms;
+  try {
+    if (typeof data.bedrooms === 'string' && data.bedrooms.startsWith('[')) {
+      parsedBedrooms = JSON.parse(data.bedrooms);
+    }
+  } catch (e) {
+    console.error("Error parsing bedrooms:", e);
+    parsedBedrooms = data.bedrooms;
+  }
+
   return {
     id: data.id,
     name: data.name,
@@ -21,7 +32,7 @@ export const mapToLeadDetailed = (data: any): LeadDetailed => {
     budget: data.budget,
     desiredLocation: data.desired_location,
     propertyType: data.property_type,
-    bedrooms: data.bedrooms,
+    bedrooms: parsedBedrooms,
     views: data.views,
     amenities: data.amenities,
     purchaseTimeframe: data.purchase_timeframe,
@@ -50,11 +61,15 @@ export const mapToLeadDetailed = (data: any): LeadDetailed => {
  */
 export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
   // Convert bedrooms array to a JSON compatible format for Supabase
-  const formattedBedrooms = leadData.bedrooms !== undefined 
-    ? (Array.isArray(leadData.bedrooms) 
-        ? JSON.stringify(leadData.bedrooms) 
-        : leadData.bedrooms)
-    : undefined;
+  let formattedBedrooms = undefined;
+  
+  if (leadData.bedrooms !== undefined) {
+    if (Array.isArray(leadData.bedrooms)) {
+      formattedBedrooms = JSON.stringify(leadData.bedrooms);
+    } else {
+      formattedBedrooms = leadData.bedrooms;
+    }
+  }
   
   return {
     name: leadData.name,
