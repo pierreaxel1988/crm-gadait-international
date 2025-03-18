@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import AdminBadgeWrapper from './AdminBadgeWrapper';
 
 interface NavbarProps {
   toggleSidebar?: () => void;
@@ -45,6 +46,7 @@ const Navbar = ({
             </button>
             <Link to="/" className="flex items-center">
               <span className="font-futura text-xl tracking-tight text-loro-navy uppercase">GADAIT.</span>
+              <AdminBadgeWrapper />
             </Link>
           </div>
 

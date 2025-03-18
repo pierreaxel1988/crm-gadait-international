@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -47,7 +46,6 @@ const AppRoutes = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, signOut } = useAuth();
   
-  // Define paths that should show the sub-navigation
   const showSubNav = ['/pipeline', '/calendar', '/chat-gadait', '/reports', '/leads', '/'].includes(location.pathname) || 
                       location.pathname.startsWith('/leads/') || 
                       location.pathname.startsWith('/lead-');
@@ -74,10 +72,7 @@ const AppRoutes = () => {
         onToggleCollapse={() => {}} 
       />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center">
-          <Navbar toggleSidebar={toggleSidebar} />
-          <AdminBadgeWrapper />
-        </div>
+        <Navbar toggleSidebar={toggleSidebar} />
         {showSubNav && <SubNavigation />}
         <main className="flex-1 overflow-y-auto">
           <Routes>
