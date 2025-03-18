@@ -94,8 +94,9 @@ const PropertyDetailsSection = ({
     if (typeof formData.bedrooms === 'string') {
       try {
         // Check if it looks like a JSON string array
-        if (typeof formData.bedrooms === 'string' && formData.bedrooms.indexOf('[') !== -1) {
-          const parsedBedrooms = JSON.parse(formData.bedrooms);
+        const bedroomsString: string = formData.bedrooms; // Explicitly cast to string type
+        if (bedroomsString.includes('[')) { // Now TypeScript knows this is a string
+          const parsedBedrooms = JSON.parse(bedroomsString);
           if (Array.isArray(parsedBedrooms)) {
             return parsedBedrooms.map((b: number) => b >= 10 ? '10+' : b.toString());
           }
