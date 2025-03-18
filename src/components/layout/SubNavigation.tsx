@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { MessageSquare, PieChart, Calendar, ListTodo, File } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 const SubNavigation = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -44,9 +45,9 @@ const SubNavigation = () => {
       </div>;
   }
 
-  // Desktop navigation
-  return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
-      <div className="content-container bg-loro-white">
+  // Desktop navigation - modifié pour que toute la barre soit de couleur crème
+  return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-loro-white shadow-sm">
+      <div className="content-container">
         <NavigationMenu className="justify-center mx-auto">
           <NavigationMenuList className="space-x-0">
             {navigationItems.map(item => <NavigationMenuItem key={item.name}>
@@ -59,4 +60,5 @@ const SubNavigation = () => {
       </div>
     </div>;
 };
+
 export default SubNavigation;
