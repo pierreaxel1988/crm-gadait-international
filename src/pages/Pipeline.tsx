@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Home, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -127,9 +128,7 @@ const Kanban = () => {
           <PipelineTabContent 
             contentType="purchase" 
             filters={filters} 
-            refreshTrigger={refreshTrigger}
-            onToggleFilters={toggleFilters}
-            activeFilters={activeFiltersCount}
+            refreshTrigger={refreshTrigger} 
           />
         </TabsContent>
         
@@ -137,9 +136,7 @@ const Kanban = () => {
           <PipelineTabContent 
             contentType="rental" 
             filters={filters} 
-            refreshTrigger={refreshTrigger}
-            onToggleFilters={toggleFilters}
-            activeFilters={activeFiltersCount}
+            refreshTrigger={refreshTrigger} 
           />
         </TabsContent>
       </Tabs>
