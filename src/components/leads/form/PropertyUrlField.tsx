@@ -6,11 +6,15 @@ import { Button } from '@/components/ui/button';
 
 interface PropertyUrlFieldProps {
   url?: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (url: string) => void;
   onExtract?: (url: string) => void;
 }
 
 const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({ url, onChange, onExtract }) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
+  };
+
   const handleExtractClick = () => {
     if (url && onExtract) {
       onExtract(url);
@@ -23,7 +27,7 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({ url, onChange, onEx
         label="URL de l'annonce"
         name="url"
         value={url || ''}
-        onChange={onChange}
+        onChange={handleChange}
         placeholder="https://exemple-immobilier.com/propriete/123"
         icon={ExternalLink}
       />

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Hash, Home, Map, ArrowsMaximize, Coins, Search, Globe, Mountain, Building, Users } from 'lucide-react';
+import { Hash, Home, Map, Maximize2, Coins, Search, Globe, Mountain, Building, Users } from 'lucide-react';
 import { LeadDetailed, PropertyType, ViewType, Amenity } from '@/types/lead';
 import FormSection from '../FormSection';
 import FormInput from '../FormInput';
@@ -62,13 +62,13 @@ const PropertyDetailsSection = ({
   };
   
   const updateBedrooms = (value: number | number[] | undefined) => {
-    // Create a synthetic event that conforms to the expected structure
+    // Create a synthetic event that matches what handleInputChange expects
     const syntheticEvent = {
       target: {
         name: 'bedrooms',
         value: value
       }
-    } as React.ChangeEvent<HTMLInputElement>;
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
     
     // Pass this synthetic event to the handleInputChange function
     handleInputChange(syntheticEvent);
@@ -138,7 +138,7 @@ const PropertyDetailsSection = ({
     <FormSection title="Critères de recherche - Détails du bien">
       <PropertyUrlField 
         url={formData.url || ''}
-        onUrlChange={handleUrlUpdate}
+        onChange={handleUrlUpdate}
       />
 
       <FormInput
@@ -176,7 +176,7 @@ const PropertyDetailsSection = ({
         type="number"
         value={formData.livingArea || ''}
         onChange={handleInputChange}
-        icon={ArrowsMaximize}
+        icon={Maximize2}
         placeholder="Surface en m²"
         min={0}
       />
