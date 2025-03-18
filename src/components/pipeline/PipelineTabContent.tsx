@@ -3,14 +3,26 @@ import React from 'react';
 import KanbanBoard from '@/components/kanban/KanbanBoard';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { useIsMobile } from '@/hooks/use-mobile';
+import MobilePipelineView from './MobilePipelineView';
 
 interface PipelineTabContentProps {
   contentType: 'purchase' | 'rental';
   filters: FilterOptions;
   refreshTrigger: number;
+  onToggleFilters?: () => void;
+  activeFilters?: number;
 }
 
-const PipelineTabContent = ({ contentType, filters, refreshTrigger }: PipelineTabContentProps) => {
+const PipelineTabContent = ({ 
+  contentType, 
+  filters, 
+  refreshTrigger,
+  onToggleFilters,
+  activeFilters = 0
+}: PipelineTabContentProps) => {
+  const isMobile = useIsMobile();
+
   // Get the columns based on the content type
   const getColumns = () => {
     const statusesToShow = filters.status ? [filters.status] : contentType === 'purchase' 
@@ -21,16 +33,30 @@ const PipelineTabContent = ({ contentType, filters, refreshTrigger }: PipelineTa
       title: status,
       status: status as LeadStatus,
       items: [],
-      pipelineType: contentType // Ajout du type de pipeline
+      pipelineType: contentType
     }));
   };
 
+  const columns = getColumns();
+
+  if (isMobile) {
+    return (
+      <MobilePipelineView 
+        columns={columns}
+        filters={filters}
+        pipelineType={contentType}
+        onToggleFilters={onToggleFilters || (() => {})}
+        activeFilters={activeFilters}
+      />
+    );
+  }
+
   return (
     <KanbanBoard 
-      columns={getColumns()} 
+      columns={columns} 
       filters={filters} 
       refreshTrigger={refreshTrigger}
-      pipelineType={contentType} // Passer le type de pipeline au KanbanBoard
+      pipelineType={contentType}
     />
   );
 };
