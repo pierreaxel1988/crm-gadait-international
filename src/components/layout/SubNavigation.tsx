@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -45,7 +46,7 @@ const SubNavigation = () => {
 
   // Desktop navigation
   return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
-      <div className="content-container bg-zinc-200">
+      <div className="content-container bg-loro-white">
         <NavigationMenu className="justify-center mx-auto">
           <NavigationMenuList className="space-x-0">
             {navigationItems.map(item => <NavigationMenuItem key={item.name}>
