@@ -1,9 +1,26 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const AdminBadge = () => {
-  return <Badge className="text-[#F5F5F0] border-0 px-3 py-1 rounded-full font-medium text-xs bg-loro-hazel hover:text-[#F5F5F0]">
-      ADMIN
-    </Badge>;
+  const isMobile = useIsMobile();
+  
+  return (
+    <Badge className={`
+      text-[#F5F5F0] 
+      border-0 
+      ${isMobile ? 'px-2 py-0.5 text-[10px]' : 'px-3 py-1 text-xs'} 
+      rounded-full 
+      font-medium 
+      bg-loro-hazel 
+      hover:bg-loro-hazel/90
+      hover:text-[#F5F5F0]
+      shadow-sm
+      transition-all
+      duration-200
+    `}>
+      {isMobile ? 'ADM' : 'ADMIN'}
+    </Badge>
+  );
 };
