@@ -13,8 +13,8 @@ export const AdminBadge = () => {
       ${isMobile ? 'px-2 py-0.5 text-[10px]' : 'px-3 py-1 text-xs'} 
       rounded-full 
       font-medium 
-      bg-loro-hazel 
-      hover:bg-loro-hazel/90
+      bg-loro-terracotta 
+      hover:bg-loro-terracotta/90
       hover:text-[#F5F5F0]
       shadow-sm
       transition-all

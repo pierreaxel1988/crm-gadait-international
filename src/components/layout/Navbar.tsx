@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, LogOut, Menu, Moon, Search, Sun, User, X } from 'lucide-react';
@@ -32,30 +31,28 @@ const Navbar = ({
   const isMobile = useIsMobile();
   const { user, signOut } = useAuth();
 
-  // Load sample notifications
   useEffect(() => {
-    // In a real app, you would fetch these from an API
     const sampleNotifications: Notification[] = [
       {
         id: '1',
         title: 'New Lead',
         message: 'You have received a new lead from the website',
         read: false,
-        timestamp: new Date(Date.now() - 30 * 60000) // 30 minutes ago
+        timestamp: new Date(Date.now() - 30 * 60000)
       },
       {
         id: '2',
         title: 'Meeting Reminder',
         message: 'Client meeting in 1 hour',
         read: false,
-        timestamp: new Date(Date.now() - 120 * 60000) // 2 hours ago
+        timestamp: new Date(Date.now() - 120 * 60000)
       },
       {
         id: '3',
         title: 'Task Completed',
         message: 'Document processing completed successfully',
         read: true,
-        timestamp: new Date(Date.now() - 24 * 60 * 60000) // 1 day ago
+        timestamp: new Date(Date.now() - 24 * 60 * 60000)
       }
     ];
     
@@ -92,7 +89,6 @@ const Navbar = ({
     }
   };
 
-  // Helper function to capitalize the first letter of the username
   const formatUsername = (email: string) => {
     const username = email.split('@')[0];
     return username
@@ -101,7 +97,6 @@ const Navbar = ({
       .join(' ');
   };
 
-  // Helper to format the timestamp
   const formatTime = (date: Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
@@ -152,7 +147,7 @@ const Navbar = ({
               >
                 <Bell size={20} />
                 {unreadCount > 0 && (
-                  <span className="absolute right-1 top-1 h-4 w-4 rounded-full bg-loro-hazel text-[#F5F5F0] flex items-center justify-center text-xs font-semibold">
+                  <span className="absolute right-1 top-1 h-4 w-4 rounded-full bg-loro-terracotta text-[#F5F5F0] flex items-center justify-center text-xs font-semibold">
                     {unreadCount}
                   </span>
                 )}
