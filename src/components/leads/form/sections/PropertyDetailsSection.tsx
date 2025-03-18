@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
-import { LeadDetailed, PropertyType, ViewType, Amenity, Country } from '@/types/lead';
+
+import React from 'react';
+import { Hash, Home, Map, ArrowsMaximize, Coins, Search, Globe, Mountain, Building, Users } from 'lucide-react';
+import { LeadDetailed, PropertyType, ViewType, Amenity } from '@/types/lead';
+import FormSection from '../FormSection';
 import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
 import PropertyUrlField from '../PropertyUrlField';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { COUNTRIES } from '@/utils/countries';
 
 interface PropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -14,25 +15,8 @@ interface PropertyDetailsSectionProps {
   propertyTypes: PropertyType[];
   viewTypes: ViewType[];
   amenities: Amenity[];
-  onExtractUrl?: (url: string) => void;
+  onExtractUrl: (url: string) => void;
 }
-
-const LOCATIONS_BY_COUNTRY: Record<string, string[]> = {
-  'France': ['Paris', 'Nice', 'Cannes', 'Saint-Tropez', 'Courchevel', 'Megève', 'Provence', 'Côte d\'Azur', 'Normandie', 'Alsace'],
-  'Spain': ['Marbella', 'Ibiza', 'Barcelona', 'Madrid', 'Mallorca', 'Andalucía', 'Costa del Sol', 'Costa Brava', 'Tenerife', 'Valencia'],
-  'Portugal': ['Algarve', 'Lisbonne', 'Porto', 'Cascais', 'Comporta', 'Madère', 'Silver Coast', 'Alentejo'],
-  'Switzerland': ['Genève', 'Zürich', 'Gstaad', 'Verbier', 'St. Moritz', 'Zermatt', 'Lugano', 'Montreux'],
-  'Croatia': ['Dubrovnik', 'Split', 'Hvar', 'Zagreb', 'Istrie', 'Opatija', 'Zadar'],
-  'Greece': ['Athènes', 'Mykonos', 'Santorin', 'Crète', 'Corfou', 'Rhodes', 'Chalcidique'],
-  'United Kingdom': ['Londres', 'Cotswolds', 'Édimbourg', 'Bath', 'Oxford', 'Cambridge', 'Lake District'],
-  'United States': ['New York', 'Miami', 'Los Angeles', 'San Francisco', 'Aspen', 'Hamptons', 'Chicago', 'Boston'],
-  'United Arab Emirates': ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ras Al Khaimah'],
-  'Maldives': ['Malé', 'Atolls du Nord', 'Atolls du Sud'],
-  'Mauritius': ['Grand Baie', 'Tamarin', 'Belle Mare', 'Le Morne', 'Flic en Flac'],
-  'Seychelles': ['Mahé', 'Praslin', 'La Digue', 'Silhouette']
-};
-
-const BEDROOM_OPTIONS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'];
 
 const PropertyDetailsSection = ({
   formData,
@@ -44,216 +28,213 @@ const PropertyDetailsSection = ({
   amenities,
   onExtractUrl
 }: PropertyDetailsSectionProps) => {
-  const handleCountryChange = (value: string) => {
-    const syntheticEvent = {
-      target: {
-        name: 'country',
-        value
-      }
-    } as React.ChangeEvent<HTMLSelectElement>;
-    
-    handleInputChange(syntheticEvent);
-    
-    const resetLocationEvent = {
-      target: {
-        name: 'desiredLocation',
-        value: ''
-      }
-    } as React.ChangeEvent<HTMLSelectElement>;
-    
-    handleInputChange(resetLocationEvent);
-  };
-
-  const sellableCountries = COUNTRIES.filter(country => 
-    ['Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 'Portugal', 
-    'Seychelles', 'Spain', 'Switzerland', 'United Arab Emirates', 
-    'United Kingdom', 'United States'].includes(country)
-  );
-  
-  const availableLocations = useMemo(() => {
-    if (!formData.country) return [];
-    return LOCATIONS_BY_COUNTRY[formData.country] || [];
-  }, [formData.country]);
-
-  const handleLocationChange = (value: string) => {
-    const syntheticEvent = {
-      target: {
-        name: 'desiredLocation',
-        value
-      }
-    } as React.ChangeEvent<HTMLSelectElement>;
-    
-    handleInputChange(syntheticEvent);
-  };
-
   const handleBedroomToggle = (value: string) => {
-    const numericValue = value === '10+' ? 10 : parseInt(value);
+    // Convert the string value to a number for the array
+    const numValue = value === '10+' ? 10 : parseInt(value);
     
-    const currentBedrooms = formData.bedrooms 
-      ? (Array.isArray(formData.bedrooms) ? formData.bedrooms : [formData.bedrooms]) 
-      : [];
+    // If formData.bedrooms is already an array
+    if (Array.isArray(formData.bedrooms)) {
+      const bedroomsArray = [...formData.bedrooms];
       
-    const updatedBedrooms = currentBedrooms.includes(numericValue)
-      ? currentBedrooms.filter(b => b !== numericValue)
-      : [...currentBedrooms, numericValue];
-    
+      if (bedroomsArray.includes(numValue)) {
+        // Remove if already in array
+        const updatedBedrooms = bedroomsArray.filter(b => b !== numValue);
+        updateBedrooms(updatedBedrooms.length > 0 ? updatedBedrooms : undefined);
+      } else {
+        // Add if not in array
+        updateBedrooms([...bedroomsArray, numValue]);
+      }
+    } 
+    // If formData.bedrooms is a single number
+    else if (typeof formData.bedrooms === 'number') {
+      if (formData.bedrooms === numValue) {
+        // If clicking the same value, clear it
+        updateBedrooms(undefined);
+      } else {
+        // If clicking a different value, create an array with both values
+        updateBedrooms([formData.bedrooms, numValue]);
+      }
+    }
+    // If formData.bedrooms is empty or undefined
+    else {
+      updateBedrooms(numValue);
+    }
+  };
+  
+  const updateBedrooms = (value: number | number[] | undefined) => {
+    // Create a synthetic event that conforms to the expected structure
     const syntheticEvent = {
       target: {
         name: 'bedrooms',
-        value: updatedBedrooms.length === 0 ? undefined : updatedBedrooms.sort((a, b) => a - b)
+        value: value
       }
-    };
+    } as React.ChangeEvent<HTMLInputElement>;
     
-    handleInputChange(syntheticEvent as unknown as React.ChangeEvent<HTMLInputElement>);
+    // Pass this synthetic event to the handleInputChange function
+    handleInputChange(syntheticEvent);
   };
-
+  
+  // Helper to get all selected bedroom options
   const getSelectedBedroomOptions = (): string[] => {
-    if (!formData.bedrooms) return [];
+    if (!formData.bedrooms) {
+      return [];
+    }
     
+    // If bedrooms is a number
     if (typeof formData.bedrooms === 'number') {
       return [formData.bedrooms >= 10 ? '10+' : formData.bedrooms.toString()];
     }
     
+    // If bedrooms is an array
     if (Array.isArray(formData.bedrooms)) {
       return formData.bedrooms.map(b => b >= 10 ? '10+' : b.toString());
     }
     
+    // If bedrooms might be a stringified array
     if (typeof formData.bedrooms === 'string') {
       try {
+        // Check if it looks like a JSON string array
         if (formData.bedrooms.includes('[')) {
           const parsedBedrooms = JSON.parse(formData.bedrooms);
           if (Array.isArray(parsedBedrooms)) {
             return parsedBedrooms.map((b: number) => b >= 10 ? '10+' : b.toString());
           }
-        } else {
-          const numValue = parseInt(formData.bedrooms);
-          if (!isNaN(numValue)) {
-            return [numValue >= 10 ? '10+' : numValue.toString()];
-          }
+        }
+        // It could be a simple string number
+        const numBedrooms = parseInt(formData.bedrooms);
+        if (!isNaN(numBedrooms)) {
+          return [numBedrooms >= 10 ? '10+' : numBedrooms.toString()];
         }
       } catch (e) {
-        console.error('Error parsing bedrooms string:', e);
+        console.error('Error parsing bedrooms:', e);
       }
     }
     
     return [];
   };
+  
+  // All bedroom options to select from
+  const bedroomOptions = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'];
+  
+  const handleUrlUpdate = (url: string) => {
+    // Create a synthetic event for the URL field
+    const urlEvent = {
+      target: {
+        name: 'url',
+        value: url
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    // Update the form data with the URL
+    handleInputChange(urlEvent);
+    
+    // Call the extraction function
+    if (url) {
+      onExtractUrl(url);
+    }
+  };
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold mb-2 text-chocolate-dark">
-        Détails de la propriété
-      </h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormInput
-          label="Référence propriété"
-          name="propertyReference"
-          value={formData.propertyReference || ''}
-          onChange={handleInputChange}
-          placeholder="REF-123456"
-        />
-      </div>
-      
+    <FormSection title="Critères de recherche - Détails du bien">
       <PropertyUrlField 
-        url={formData.url} 
-        onChange={handleInputChange}
-        onExtract={onExtractUrl}
+        url={formData.url || ''}
+        onUrlChange={handleUrlUpdate}
       />
-      
-      <div className="space-y-2">
-        <label className="block text-sm font-medium mb-1">
-          Pays recherché
-        </label>
-        <Select
-          value={formData.country}
-          onValueChange={handleCountryChange}
-        >
-          <SelectTrigger className="w-full luxury-input">
-            <SelectValue placeholder="Sélectionner un pays" />
-          </SelectTrigger>
-          <SelectContent>
-            {sellableCountries.map((country) => (
-              <SelectItem key={country} value={country}>
-                {country}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <div className="space-y-2">
-        <label className="block text-sm font-medium mb-1">
-          Localisation souhaitée
-        </label>
-        <Select
-          value={formData.desiredLocation}
-          onValueChange={handleLocationChange}
-          disabled={!formData.country}
-        >
-          <SelectTrigger className="w-full luxury-input">
-            <SelectValue placeholder={formData.country ? "Sélectionner une localisation" : "Choisissez d'abord un pays"} />
-          </SelectTrigger>
-          <SelectContent>
-            {availableLocations.map((location) => (
-              <SelectItem key={location} value={location}>
-                {location}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium mb-1">
-          Type de propriété
-        </label>
-        <MultiSelectButtons
-          options={propertyTypes}
-          selectedValues={formData.propertyType ? [formData.propertyType] : []}
-          onChange={(value) => {
-            handleInputChange({
-              target: { name: 'propertyType', value }
-            } as React.ChangeEvent<HTMLInputElement>);
-          }}
-          singleSelect={true}
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium mb-1">
-          Nombre de chambres
-        </label>
-        <MultiSelectButtons
-          options={BEDROOM_OPTIONS}
-          selectedValues={getSelectedBedroomOptions()}
-          onToggle={handleBedroomToggle}
-          singleSelect={false}
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium mb-1">
-          Vue souhaitée
-        </label>
-        <MultiSelectButtons
-          options={viewTypes}
-          selectedValues={formData.views || []}
-          onToggle={(value) => handleMultiSelectToggle('views', value as ViewType)}
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium mb-1">
-          Équipements souhaités
-        </label>
-        <MultiSelectButtons
-          options={amenities}
-          selectedValues={formData.amenities || []}
-          onToggle={(value) => handleMultiSelectToggle('amenities', value as Amenity)}
-        />
-      </div>
-    </div>
+
+      <FormInput
+        label="Référence du bien"
+        name="propertyReference"
+        value={formData.propertyReference || ''}
+        onChange={handleInputChange}
+        icon={Hash}
+        placeholder="Référence du bien"
+      />
+
+      <FormInput
+        label="Type de bien"
+        name="propertyType"
+        type="select"
+        value={formData.propertyType || ''}
+        onChange={handleInputChange}
+        icon={Home}
+        options={propertyTypes.map(type => ({ value: type, label: type }))}
+        placeholder="Sélectionner un type de bien"
+      />
+
+      <FormInput
+        label="Localisation souhaitée"
+        name="desiredLocation"
+        value={formData.desiredLocation || ''}
+        onChange={handleInputChange}
+        icon={Map}
+        placeholder="Quartier, ville, ou région"
+      />
+
+      <FormInput
+        label="Surface habitable (m²)"
+        name="livingArea"
+        type="number"
+        value={formData.livingArea || ''}
+        onChange={handleInputChange}
+        icon={ArrowsMaximize}
+        placeholder="Surface en m²"
+        min={0}
+      />
+
+      <FormInput
+        label="Budget"
+        name="budget"
+        value={formData.budget || ''}
+        onChange={handleInputChange}
+        icon={Coins}
+        placeholder="Budget souhaité"
+      />
+
+      <FormInput
+        label="Nombre de chambres"
+        name="bedrooms"
+        value={formData.bedrooms?.toString() || ''}
+        onChange={handleNumberChange}
+        icon={Users}
+        renderCustomField={() => (
+          <MultiSelectButtons
+            options={bedroomOptions}
+            selectedValues={getSelectedBedroomOptions()}
+            onToggle={handleBedroomToggle}
+          />
+        )}
+      />
+
+      <FormInput
+        label="Vue"
+        name="views"
+        value={formData.views?.join(', ') || ''}
+        onChange={() => {}}
+        icon={Mountain}
+        renderCustomField={() => (
+          <MultiSelectButtons
+            options={viewTypes}
+            selectedValues={formData.views || []}
+            onToggle={(value) => handleMultiSelectToggle('views', value)}
+          />
+        )}
+      />
+
+      <FormInput
+        label="Équipements"
+        name="amenities"
+        value={formData.amenities?.join(', ') || ''}
+        onChange={() => {}}
+        icon={Building}
+        renderCustomField={() => (
+          <MultiSelectButtons
+            options={amenities}
+            selectedValues={formData.amenities || []}
+            onToggle={(value) => handleMultiSelectToggle('amenities', value)}
+          />
+        )}
+      />
+    </FormSection>
   );
 };
 

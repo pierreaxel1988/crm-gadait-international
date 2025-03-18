@@ -23,7 +23,7 @@ const StatusSection = ({
   handleInputChange,
   handleTagToggle,
   leadStatuses = ["New", "Contacted", "Qualified", "Proposal", "Negotiation", "Won", "Lost", "Archived"] as LeadStatus[],
-  leadTags = ["Hot", "Warm", "Cold", "VIP", "Urgent", "Follow-up"] as LeadTag[],
+  leadTags = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"] as LeadTag[],
   sources
 }: StatusSectionProps) => {
   // Use provided sources or default sources list
