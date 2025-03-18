@@ -160,6 +160,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ lead, onSubmit, onCancel, activeTab
             formData={formData} 
             handleInputChange={handleInputChange} 
             countries={COUNTRIES}
+            sources={LEAD_SOURCES}
           />
         </TabsContent>
 
@@ -183,7 +184,6 @@ const LeadForm: React.FC<LeadFormProps> = ({ lead, onSubmit, onCancel, activeTab
           <StatusSection 
             formData={formData} 
             handleInputChange={handleInputChange}
-            sources={LEAD_SOURCES}
           />
         </TabsContent>
       </Tabs>

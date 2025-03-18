@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, Globe, Flag, Map } from 'lucide-react';
-import { LeadDetailed, Country } from '@/types/lead';
+import React, { useState } from 'react';
+import { User, Mail, Phone, Globe, Flag, Map, Tag } from 'lucide-react';
+import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
 import { COUNTRIES } from '@/utils/countries';
@@ -11,14 +11,63 @@ interface GeneralInfoSectionProps {
   formData: LeadDetailed;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   countries: Country[];
+  sources?: LeadSource[];
 }
 
 const GeneralInfoSection = ({ 
   formData, 
   handleInputChange,
-  countries 
+  countries,
+  sources
 }: GeneralInfoSectionProps) => {
   const [countryCode, setCountryCode] = useState("+33");
+  
+  // Use provided sources or default sources list
+  const leadSources: LeadSource[] = sources || [
+    "Site web", 
+    "Réseaux sociaux", 
+    "Portails immobiliers", 
+    "Network", 
+    "Repeaters", 
+    "Recommandations",
+    "Apporteur d'affaire",
+    "Idealista",
+    "Le Figaro",
+    "Properstar",
+    "Property Cloud",
+    "L'express Property"
+  ];
+
+  // Regroupement des sources de portail immobilier pour l'affichage
+  const isPortalSource = (source: string): boolean => {
+    return [
+      "Idealista",
+      "Le Figaro",
+      "Properstar",
+      "Property Cloud",
+      "L'express Property"
+    ].includes(source);
+  };
+
+  // Fonction pour obtenir la source parent (pour les statistiques)
+  const getParentSource = (source: string): string => {
+    if (isPortalSource(source)) {
+      return "Portails immobiliers";
+    }
+    return source;
+  };
+
+  // Traitement de la valeur de source pour les statistiques
+  const handleSourceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+    // La source originale est sauvegardée telle quelle
+    handleInputChange(e);
+    
+    // Dans une application réelle, vous pourriez ici enregistrer 
+    // l'information de catégorisation dans un champ séparé ou via une logique côté serveur
+    console.log(`Source sélectionnée: ${value}, Catégorie parent: ${getParentSource(value)}`);
+  };
   
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Strip any country code that might be in the input
@@ -85,6 +134,17 @@ const GeneralInfoSection = ({
         icon={Phone}
         countryCode={countryCode}
         onCountryCodeChange={handleCountryCodeChange}
+      />
+
+      <FormInput
+        label="Source du lead"
+        name="source"
+        type="select"
+        value={formData.source || ''}
+        onChange={handleSourceChange}
+        icon={Tag}
+        options={leadSources.map(source => ({ value: source, label: source }))}
+        placeholder="Sélectionner une source"
       />
 
       <FormInput

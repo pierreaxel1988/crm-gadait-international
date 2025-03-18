@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CalendarClock, CalendarDays, Activity, Tag } from 'lucide-react';
+import { CalendarClock, CalendarDays, Activity } from 'lucide-react';
 import { LeadDetailed, LeadSource } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
@@ -26,53 +26,6 @@ const StatusSection = ({
   leadTags = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"] as LeadTag[],
   sources
 }: StatusSectionProps) => {
-  // Use provided sources or default sources list
-  const leadSources: LeadSource[] = sources || [
-    "Site web", 
-    "Réseaux sociaux", 
-    "Portails immobiliers", 
-    "Network", 
-    "Repeaters", 
-    "Recommandations",
-    "Apporteur d'affaire",
-    "Idealista",
-    "Le Figaro",
-    "Properstar",
-    "Property Cloud",
-    "L'express Property"
-  ];
-
-  // Regroupement des sources de portail immobilier pour l'affichage
-  const isPortalSource = (source: string): boolean => {
-    return [
-      "Idealista",
-      "Le Figaro",
-      "Properstar",
-      "Property Cloud",
-      "L'express Property"
-    ].includes(source);
-  };
-
-  // Fonction pour obtenir la source parent (pour les statistiques)
-  const getParentSource = (source: string): string => {
-    if (isPortalSource(source)) {
-      return "Portails immobiliers";
-    }
-    return source;
-  };
-
-  // Traitement de la valeur de source pour les statistiques
-  const handleSourceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    
-    // La source originale est sauvegardée telle quelle
-    handleInputChange(e);
-    
-    // Dans une application réelle, vous pourriez ici enregistrer 
-    // l'information de catégorisation dans un champ séparé ou via une logique côté serveur
-    console.log(`Source sélectionnée: ${value}, Catégorie parent: ${getParentSource(value)}`);
-  };
-
   // Handle tag toggle if provided, otherwise create an empty handler
   const handleTagToggleInternal = handleTagToggle || ((tag: LeadTag) => {
     // Create a new array with the updated tags
@@ -103,17 +56,6 @@ const StatusSection = ({
         required
         icon={Activity}
         options={leadStatuses.map(status => ({ value: status, label: status }))}
-      />
-
-      <FormInput
-        label="Source du lead"
-        name="source"
-        type="select"
-        value={formData.source || ''}
-        onChange={handleSourceChange}
-        icon={Tag}
-        options={leadSources.map(source => ({ value: source, label: source }))}
-        placeholder="Sélectionner une source"
       />
 
       <FormInput
