@@ -19,6 +19,7 @@ import ApiGuide from "./pages/ApiGuide";
 import Navbar from "./components/layout/Navbar";
 import Sidebar from "./components/layout/Sidebar";
 import SubNavigation from "./components/layout/SubNavigation";
+import AdminBadgeWrapper from "./components/layout/AdminBadgeWrapper";
 import { useIsMobile } from "./hooks/use-mobile";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import LeadImport from "./pages/LeadImport";
@@ -73,7 +74,10 @@ const AppRoutes = () => {
         onToggleCollapse={() => {}} 
       />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Navbar toggleSidebar={toggleSidebar} />
+        <div className="flex items-center">
+          <Navbar toggleSidebar={toggleSidebar} />
+          <AdminBadgeWrapper />
+        </div>
         {showSubNav && <SubNavigation />}
         <main className="flex-1 overflow-y-auto">
           <Routes>
