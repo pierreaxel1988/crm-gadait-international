@@ -37,6 +37,15 @@ const Navbar = ({
     }
   };
 
+  // Helper function to capitalize the first letter of the username
+  const formatUsername = (email: string) => {
+    const username = email.split('@')[0];
+    return username
+      .split(/[._-]/)
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  };
+
   return <nav className={cn("sticky top-0 z-50 w-full bg-loro-white border-b border-loro-pearl transition-all duration-300")}>
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between">
@@ -73,7 +82,7 @@ const Navbar = ({
               <button className="flex items-center space-x-2 rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
                 <User size={20} />
                 <span className="hidden md:inline-block text-sm font-medium font-optima">
-                  {user?.email ? user.email.split('@')[0] : 'Account'}
+                  {user?.email ? formatUsername(user.email) : 'Account'}
                 </span>
               </button>
               
