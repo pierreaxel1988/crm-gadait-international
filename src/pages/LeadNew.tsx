@@ -42,6 +42,11 @@ const LeadNew = () => {
     }
   };
 
+  // Handle agent selection and sync with form data
+  const handleAgentChange = (value: string | undefined) => {
+    setAssignedAgent(value);
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-center gap-2">
@@ -63,7 +68,7 @@ const LeadNew = () => {
           <h2 className="text-lg font-medium mb-4">Attribution du lead</h2>
           <TeamMemberSelect
             value={assignedAgent}
-            onChange={(value) => setAssignedAgent(value)}
+            onChange={handleAgentChange}
             label="Attribuer ce lead à"
           />
         </div>
@@ -73,6 +78,7 @@ const LeadNew = () => {
         <LeadForm 
           onSubmit={handleSubmit} 
           onCancel={() => navigate('/leads')}
+          adminAssignedAgent={assignedAgent}
         />
       </div>
     </div>

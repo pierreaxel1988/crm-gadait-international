@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -15,9 +14,9 @@ interface LeadFormProps {
   onSubmit: (data: LeadDetailed) => void;
   onCancel: () => void;
   activeTab?: string;
+  adminAssignedAgent?: string | undefined;
 }
 
-// Dummy data for form options
 const PROPERTY_TYPES: PropertyType[] = [
   'Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 
   'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château',
@@ -41,8 +40,13 @@ const LEAD_SOURCES: LeadSource[] = [
   'Le Figaro', 'Properstar', 'Property Cloud', 'L\'express Property'
 ];
 
-const LeadForm: React.FC<LeadFormProps> = ({ lead, onSubmit, onCancel, activeTab = 'general' }) => {
-  // Initialize form data with lead data or default values
+const LeadForm: React.FC<LeadFormProps> = ({ 
+  lead, 
+  onSubmit, 
+  onCancel, 
+  activeTab = 'general',
+  adminAssignedAgent 
+}) => {
   const [formData, setFormData] = useState<LeadDetailed>({
     id: lead?.id || uuidv4(),
     name: lead?.name || '',
@@ -74,7 +78,12 @@ const LeadForm: React.FC<LeadFormProps> = ({ lead, onSubmit, onCancel, activeTab
     pipelineType: lead?.pipelineType || 'purchase'
   });
 
-  // Property extraction hook
+  useEffect(() => {
+    if (adminAssignedAgent !== undefined) {
+      setFormData(prev => ({ ...prev, assignedTo: adminAssignedAgent }));
+    }
+  }, [adminAssignedAgent]);
+
   const { 
     propertyUrl, 
     setPropertyUrl, 
@@ -83,26 +92,22 @@ const LeadForm: React.FC<LeadFormProps> = ({ lead, onSubmit, onCancel, activeTab
     extractPropertyData 
   } = usePropertyExtraction();
   
-  // Update property URL in extraction hook
   useEffect(() => {
     if (formData.url) {
       setPropertyUrl(formData.url);
     }
   }, [formData.url, setPropertyUrl]);
 
-  // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handle number input changes
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value ? parseInt(value) : undefined }));
   };
 
-  // Handle multi-select toggle
   const handleMultiSelectToggle = <T extends string>(name: keyof LeadDetailed, value: T) => {
     setFormData(prev => {
       const currentValues = prev[name] as T[] || [];
@@ -113,14 +118,11 @@ const LeadForm: React.FC<LeadFormProps> = ({ lead, onSubmit, onCancel, activeTab
     });
   };
 
-  // Handle URL extraction
   const handleExtractUrl = (url: string) => {
-    // Set the URL in the property extraction hook
     setPropertyUrl(url);
     extractPropertyData();
   };
 
-  // Apply extracted data to form
   useEffect(() => {
     if (extractedData) {
       setFormData(prev => ({
@@ -140,7 +142,6 @@ const LeadForm: React.FC<LeadFormProps> = ({ lead, onSubmit, onCancel, activeTab
     }
   }, [extractedData, propertyUrl]);
 
-  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
