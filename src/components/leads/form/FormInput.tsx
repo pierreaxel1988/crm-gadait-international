@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -33,6 +34,7 @@ interface FormInputProps {
   renderCustomField?: () => React.ReactNode;
   countryCode?: string;
   onCountryCodeChange?: (value: string) => void;
+  onCustomChange?: (value: string) => void;
 }
 
 const FormInput = ({
@@ -51,7 +53,8 @@ const FormInput = ({
   readOnly = false,
   renderCustomField,
   countryCode,
-  onCountryCodeChange
+  onCountryCodeChange,
+  onCustomChange
 }: FormInputProps) => {
   const isMobile = useIsMobile();
   
@@ -96,6 +99,27 @@ const FormInput = ({
         );
         
       case 'select':
+        if (onCustomChange) {
+          return (
+            <Select
+              value={String(value || '')}
+              onValueChange={onCustomChange}
+              disabled={readOnly}
+            >
+              <SelectTrigger className={baseClassName}>
+                <SelectValue placeholder={placeholder || 'Sélectionner une option'} />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                {options?.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          );
+        }
+        
         return (
           <select
             name={name}

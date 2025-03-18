@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, Globe, Flag, Map } from 'lucide-react';
 import { LeadDetailed, Country } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
 import { COUNTRIES } from '@/utils/countries';
+import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
@@ -38,6 +39,20 @@ const GeneralInfoSection = ({
   
   const handleCountryCodeChange = (value: string) => {
     setCountryCode(value);
+  };
+  
+  const handleNationalityCountryChange = (value: string) => {
+    const nationality = deriveNationalityFromCountry(value);
+    
+    // Create synthetic event for nationality field
+    const syntheticEvent = {
+      target: {
+        name: 'nationality',
+        value: nationality || value
+      }
+    } as React.ChangeEvent<HTMLSelectElement>;
+    
+    handleInputChange(syntheticEvent);
   };
 
   return (
@@ -86,17 +101,27 @@ const GeneralInfoSection = ({
       <FormInput
         label="Nationalité"
         name="nationality"
+        type="select"
         value={formData.nationality || ''}
         onChange={handleInputChange}
+        onCustomChange={handleNationalityCountryChange}
         icon={Flag}
+        options={COUNTRIES.map(country => ({ 
+          value: deriveNationalityFromCountry(country) || country,
+          label: deriveNationalityFromCountry(country) || country 
+        }))}
+        placeholder="Sélectionner une nationalité"
       />
 
       <FormInput
         label="Résidence fiscale"
         name="taxResidence"
+        type="select"
         value={formData.taxResidence || ''}
         onChange={handleInputChange}
         icon={Map}
+        options={COUNTRIES.map(country => ({ value: country, label: country }))}
+        placeholder="Sélectionner une résidence fiscale"
       />
     </FormSection>
   );

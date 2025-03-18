@@ -120,7 +120,7 @@ const PropertyDetailsSection = ({
     
     if (typeof formData.bedrooms === 'string') {
       try {
-        if (formData.bedrooms.startsWith('[')) {
+        if (formData.bedrooms.includes('[')) {
           const parsedBedrooms = JSON.parse(formData.bedrooms);
           if (Array.isArray(parsedBedrooms)) {
             return parsedBedrooms.map((b: number) => b >= 10 ? '10+' : b.toString());
