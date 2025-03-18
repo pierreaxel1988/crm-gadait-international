@@ -23,11 +23,19 @@ const PipelineTabContent = ({
 }: PipelineTabContentProps) => {
   const isMobile = useIsMobile();
 
-  // Get the columns based on the content type
+  // Get the columns based on the content type with the correct order
   const getColumns = () => {
-    const statusesToShow = filters.status ? [filters.status] : contentType === 'purchase' 
-      ? ['New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offer', 'Deposit', 'Signed'] as LeadStatus[]
-      : ['New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Signed'] as LeadStatus[];
+    let statusesToShow: LeadStatus[];
+    
+    if (filters.status) {
+      statusesToShow = [filters.status];
+    } else if (contentType === 'purchase') {
+      // Ordered sequence for purchase pipeline
+      statusesToShow = ['New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Deposit', 'Signed'];
+    } else {
+      // Ordered sequence for rental pipeline
+      statusesToShow = ['New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Signed'];
+    }
     
     return statusesToShow.map(status => ({
       title: status,
