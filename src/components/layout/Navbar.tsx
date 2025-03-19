@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, LogOut, Menu, Moon, Search, Sun, User, X } from 'lucide-react';
+import { Bell, LogOut, Menu, Moon, Search, Shield, Sun, User, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import AdminBadgeWrapper from './AdminBadgeWrapper';
+
 interface NavbarProps {
   toggleSidebar?: () => void;
   sidebarCollapsed?: boolean;
 }
+
 interface Notification {
   id: string;
   title: string;
@@ -17,6 +19,7 @@ interface Notification {
   read: boolean;
   timestamp: Date;
 }
+
 const Navbar = ({
   toggleSidebar,
   sidebarCollapsed
@@ -30,6 +33,7 @@ const Navbar = ({
     user,
     signOut
   } = useAuth();
+
   useEffect(() => {
     const sampleNotifications: Notification[] = [{
       id: '1',
@@ -52,20 +56,24 @@ const Navbar = ({
     }];
     setNotifications(sampleNotifications);
   }, []);
+
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
     document.documentElement.classList.toggle('dark', newMode);
   };
+
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
   };
+
   const markAsRead = (id: string) => {
     setNotifications(notifications.map(notification => notification.id === id ? {
       ...notification,
       read: true
     } : notification));
   };
+
   const markAllAsRead = () => {
     setNotifications(notifications.map(notification => ({
       ...notification,
@@ -73,6 +81,7 @@ const Navbar = ({
     })));
     toast.success('All notifications marked as read');
   };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -81,10 +90,12 @@ const Navbar = ({
       toast.error('Error signing out');
     }
   };
+
   const formatUsername = (email: string) => {
     const username = email.split('@')[0];
     return username.split(/[._-]/).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
   };
+
   const formatTime = (date: Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
@@ -96,7 +107,9 @@ const Navbar = ({
       return `${Math.floor(diffInMinutes / (60 * 24))} days ago`;
     }
   };
+
   const unreadCount = notifications.filter(notification => !notification.read).length;
+
   return <nav className={cn("sticky top-0 z-50 w-full bg-loro-white border-b border-loro-pearl transition-all duration-300")}>
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between">
@@ -105,6 +118,7 @@ const Navbar = ({
               <Menu size={20} />
             </button>
             <Link to="/" className="flex items-center">
+              <Shield className="h-6 w-6 text-loro-hazel mr-2" />
               <span className="font-futura tracking-tight text-loro-navy uppercase text-sm">GADAIT. INTERNATIONAL</span>
               <AdminBadgeWrapper />
             </Link>
@@ -173,4 +187,5 @@ const Navbar = ({
       </div>
     </nav>;
 };
+
 export default Navbar;

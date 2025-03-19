@@ -8,14 +8,15 @@ export const AdminBadge = () => {
   
   return (
     <Badge className={`
-      text-[#F5F5F0] 
+      text-[#8B6F4E] 
       border-0 
-      ${isMobile ? 'px-2 py-0.5 text-[10px]' : 'px-3 py-1 text-xs'} 
+      ${isMobile ? 'px-2 py-0.5 text-[10px]' : 'px-3 py-0.5 text-xs'} 
       rounded-full 
       font-medium 
-      bg-loro-terracotta 
-      hover:bg-loro-terracotta/90
-      hover:text-[#F5F5F0]
+      bg-[#F3EFE2]
+      hover:bg-[#EAE4D3]
+      ml-2
+      tracking-wider
       shadow-sm
       transition-all
       duration-200
