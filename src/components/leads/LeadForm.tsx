@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -128,6 +129,19 @@ const LeadForm: React.FC<LeadFormProps> = ({
         if (extractedData.propertyType && !propertyTypes.includes(extractedData.propertyType as PropertyType)) {
           propertyTypes = [...propertyTypes, extractedData.propertyType as PropertyType];
         }
+        
+        // Convert single bedroom to array if extracted from property
+        let bedroomsValue = prev.bedrooms;
+        if (extractedData.bedrooms) {
+          const extractedBedrooms = parseInt(extractedData.bedrooms.toString());
+          if (Array.isArray(prev.bedrooms)) {
+            if (!prev.bedrooms.includes(extractedBedrooms)) {
+              bedroomsValue = [...prev.bedrooms, extractedBedrooms];
+            }
+          } else {
+            bedroomsValue = [extractedBedrooms];
+          }
+        }
 
         return {
           ...prev,
@@ -135,7 +149,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
           budget: extractedData.price || prev.budget,
           desiredLocation: extractedData.location || prev.desiredLocation,
           propertyTypes,
-          bedrooms: extractedData.bedrooms ? parseInt(extractedData.bedrooms.toString()) : prev.bedrooms,
+          bedrooms: bedroomsValue,
           url: propertyUrl || prev.url
         };
       });

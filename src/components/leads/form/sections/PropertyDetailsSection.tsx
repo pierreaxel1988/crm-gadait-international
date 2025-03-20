@@ -54,6 +54,45 @@ const PropertyDetailsSection = ({
     }
   };
 
+  // Convert bedroom numbers to strings for MultiSelectButtons
+  const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
+  
+  // Convert bedrooms data for display in the MultiSelectButtons
+  const getSelectedBedrooms = () => {
+    if (!formData.bedrooms) return [];
+    
+    if (Array.isArray(formData.bedrooms)) {
+      return formData.bedrooms.map(num => num.toString());
+    }
+    
+    return [formData.bedrooms.toString()];
+  };
+  
+  // Handle bedroom selection
+  const handleBedroomToggle = (value: string) => {
+    const numValue = value === "8+" ? 8 : parseInt(value);
+    
+    // Get current bedrooms array or create one
+    const currentBedrooms = Array.isArray(formData.bedrooms) 
+      ? [...formData.bedrooms] 
+      : formData.bedrooms ? [formData.bedrooms] : [];
+    
+    // Toggle the selected value
+    const newBedrooms = currentBedrooms.includes(numValue)
+      ? currentBedrooms.filter(b => b !== numValue)
+      : [...currentBedrooms, numValue];
+    
+    // Use handleInputChange with a synthetic event
+    const event = {
+      target: {
+        name: 'bedrooms',
+        value: newBedrooms.length ? newBedrooms : undefined
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(event);
+  };
+
   return (
     <div className="space-y-4">
       <PropertyUrlField 
@@ -91,15 +130,14 @@ const PropertyDetailsSection = ({
         />
       </div>
 
-      <FormInput
-        label="Chambres"
-        name="bedrooms"
-        type="number"
-        value={formData.bedrooms as number | string || ''}
-        onChange={handleNumberChange || handleInputChange}
-        min={0}
-        placeholder="Nombre de chambres"
-      />
+      <div className="pt-2">
+        <h4 className="text-sm font-medium mb-3">Chambres</h4>
+        <MultiSelectButtons
+          options={bedroomOptions}
+          selectedValues={getSelectedBedrooms()}
+          onChange={handleBedroomToggle}
+        />
+      </div>
 
       <FormInput
         label="Surface habitable (m²)"
