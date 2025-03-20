@@ -1,17 +1,17 @@
 
-import React, { useState } from 'react';
-import { User, Mail, Phone, Globe, Flag, Map, Tag } from 'lucide-react';
+import React from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
+import { User, Mail, Phone, MapPin, Globe, Users, BarChart } from 'lucide-react';
 import { COUNTRIES } from '@/utils/countries';
-import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
+import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   countries: Country[];
-  sources?: LeadSource[];
+  sources: LeadSource[];
 }
 
 const GeneralInfoSection = ({ 
@@ -20,169 +20,85 @@ const GeneralInfoSection = ({
   countries,
   sources
 }: GeneralInfoSectionProps) => {
-  const [countryCode, setCountryCode] = useState("+33");
-  
-  // Use provided sources or default sources list
-  const leadSources: LeadSource[] = sources || [
-    "Site web", 
-    "Réseaux sociaux", 
-    "Portails immobiliers", 
-    "Network", 
-    "Repeaters", 
-    "Recommandations",
-    "Apporteur d'affaire",
-    "Idealista",
-    "Le Figaro",
-    "Properstar",
-    "Property Cloud",
-    "L'express Property"
-  ];
-
-  // Regroupement des sources de portail immobilier pour l'affichage
-  const isPortalSource = (source: string): boolean => {
-    return [
-      "Idealista",
-      "Le Figaro",
-      "Properstar",
-      "Property Cloud",
-      "L'express Property"
-    ].includes(source);
-  };
-
-  // Fonction pour obtenir la source parent (pour les statistiques)
-  const getParentSource = (source: string): string => {
-    if (isPortalSource(source)) {
-      return "Portails immobiliers";
-    }
-    return source;
-  };
-
-  // Traitement de la valeur de source pour les statistiques
-  const handleSourceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    
-    // La source originale est sauvegardée telle quelle
-    handleInputChange(e);
-    
-    // Dans une application réelle, vous pourriez ici enregistrer 
-    // l'information de catégorisation dans un champ séparé ou via une logique côté serveur
-    console.log(`Source sélectionnée: ${value}, Catégorie parent: ${getParentSource(value)}`);
-  };
-  
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Strip any country code that might be in the input
-    const phoneValue = e.target.value.replace(/^\+\d+\s*/, '');
-    
-    // Create a new event with the same properties but modified value
-    const newEvent = {
-      ...e,
-      target: {
-        ...e.target,
-        name: 'phone',
-        value: phoneValue
-      }
-    };
-    
-    handleInputChange(newEvent);
-  };
-  
-  const handleCountryCodeChange = (value: string) => {
-    setCountryCode(value);
-  };
-  
-  const handleNationalityCountryChange = (value: string) => {
-    const nationality = deriveNationalityFromCountry(value);
-    
-    // Create synthetic event for nationality field
-    const syntheticEvent = {
-      target: {
-        name: 'nationality',
-        value: nationality || value
-      }
-    } as React.ChangeEvent<HTMLSelectElement>;
-    
-    handleInputChange(syntheticEvent);
-  };
+  // Filter countries to only include those we have location data for
+  const availableCountries = countries.filter(country => 
+    Object.keys(LOCATIONS_BY_COUNTRY).includes(country)
+  );
 
   return (
     <FormSection title="Informations Générales">
-      <FormInput
-        label="Nom complet"
-        name="name"
-        value={formData.name}
-        onChange={handleInputChange}
-        required
-        icon={User}
-      />
+      <div className="space-y-4">
+        <FormInput
+          label="Nom"
+          name="name"
+          value={formData.name || ''}
+          onChange={handleInputChange}
+          required
+          icon={User}
+          placeholder="Nom complet"
+        />
 
-      <FormInput
-        label="Adresse email"
-        name="email"
-        type="email"
-        value={formData.email}
-        onChange={handleInputChange}
-        required
-        icon={Mail}
-      />
+        <FormInput
+          label="Email"
+          name="email"
+          type="email"
+          value={formData.email || ''}
+          onChange={handleInputChange}
+          icon={Mail}
+          placeholder="Adresse email"
+        />
 
-      <FormInput
-        label="Numéro de téléphone"
-        name="phone"
-        type="tel-with-code"
-        value={formData.phone || ''}
-        onChange={handlePhoneChange}
-        icon={Phone}
-        countryCode={countryCode}
-        onCountryCodeChange={handleCountryCodeChange}
-      />
+        <FormInput
+          label="Téléphone"
+          name="phone"
+          type="tel-with-code"
+          value={formData.phone || ''}
+          onChange={handleInputChange}
+          icon={Phone}
+          placeholder="Numéro de téléphone"
+          countryCode={"+33"}
+        />
 
-      <FormInput
-        label="Source du lead"
-        name="source"
-        type="select"
-        value={formData.source || ''}
-        onChange={handleSourceChange}
-        icon={Tag}
-        options={leadSources.map(source => ({ value: source, label: source }))}
-        placeholder="Sélectionner une source"
-      />
+        <FormInput
+          label="Ville"
+          name="location"
+          value={formData.location || ''}
+          onChange={handleInputChange}
+          icon={MapPin}
+          placeholder="Ville actuelle"
+        />
 
-      <FormInput
-        label="Pays d'origine"
-        name="country"
-        type="select"
-        value={formData.country || ''}
-        onChange={handleInputChange}
-        icon={Globe}
-        options={COUNTRIES.map(country => ({ value: country, label: country }))}
-        placeholder="Sélectionner un pays d'origine"
-      />
+        <FormInput
+          label="Pays recherché"
+          name="country"
+          type="select"
+          value={formData.country || ''}
+          onChange={handleInputChange}
+          icon={Globe}
+          options={availableCountries.map(country => ({ value: country, label: country }))}
+          placeholder="Pays de recherche"
+        />
 
-      <FormInput
-        label="Nationalité"
-        name="nationality"
-        type="select"
-        value={formData.nationality || ''}
-        onChange={handleInputChange}
-        onCustomChange={handleNationalityCountryChange}
-        icon={Flag}
-        options={COUNTRIES.map(country => ({ 
-          value: deriveNationalityFromCountry(country) || country,
-          label: deriveNationalityFromCountry(country) || country 
-        }))}
-        placeholder="Sélectionner une nationalité"
-      />
+        <FormInput
+          label="Nationalité"
+          name="nationality"
+          value={formData.nationality || ''}
+          onChange={handleInputChange}
+          icon={Users}
+          placeholder="Nationalité du client"
+        />
 
-      <FormInput
-        label="Résidence fiscale"
-        name="taxResidence"
-        type="select"
-        value={formData.taxResidence || ''}
-        onChange={handleInputChange}
-        icon={Map}
-        options={COUNTRIES.map(country => ({ value: country, label: country }))}
-        placeholder="Sélectionner une résidence fiscale"
-      />
+        <FormInput
+          label="Source"
+          name="source"
+          type="select"
+          value={formData.source || ''}
+          onChange={handleInputChange}
+          icon={BarChart}
+          options={sources.map(source => ({ value: source, label: source }))}
+          placeholder="Source du lead"
+        />
+      </div>
     </FormSection>
   );
 };

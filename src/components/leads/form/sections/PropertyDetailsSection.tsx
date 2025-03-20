@@ -1,9 +1,11 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Hash, Home, Map, Maximize2, Users, Mountain, Building } from 'lucide-react';
 import { LeadDetailed, PropertyType, ViewType, Amenity } from '@/types/lead';
 import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
 import PropertyUrlField from '../PropertyUrlField';
+import { getLocationsByCountry } from '@/utils/locationsByCountry';
 
 interface PropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -26,6 +28,16 @@ const PropertyDetailsSection = ({
   amenities,
   onExtractUrl
 }: PropertyDetailsSectionProps) => {
+  const [availableLocations, setAvailableLocations] = useState<string[]>([]);
+  
+  useEffect(() => {
+    if (formData.country) {
+      setAvailableLocations(getLocationsByCountry(formData.country));
+    } else {
+      setAvailableLocations([]);
+    }
+  }, [formData.country]);
+
   const handleBedroomToggle = (value: string) => {
     const numValue = value === '10+' ? 10 : parseInt(value);
     
@@ -143,10 +155,13 @@ const PropertyDetailsSection = ({
       <FormInput
         label="Localisation souhaitée"
         name="desiredLocation"
+        type="select"
         value={formData.desiredLocation || ''}
         onChange={handleInputChange}
         icon={Map}
-        placeholder="Quartier, ville, ou région"
+        options={availableLocations.map(location => ({ value: location, label: location }))}
+        placeholder={formData.country ? "Sélectionner une localisation" : "Sélectionnez d'abord un pays"}
+        disabled={!formData.country || availableLocations.length === 0}
       />
 
       <FormInput

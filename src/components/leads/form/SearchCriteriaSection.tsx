@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
+import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country } from '@/types/lead';
 import FormSection from './FormSection';
 import PropertyDetailsSection from './sections/PropertyDetailsSection';
 import PurchaseDetailsSection from './sections/PurchaseDetailsSection';
