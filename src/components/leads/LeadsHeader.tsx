@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Plus, ArrowUpDown, Import } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +25,7 @@ const LeadsHeader: React.FC<LeadsHeaderProps> = ({
   };
   return <div className="flex justify-between items-center pb-4">
       <div>
-        <h1 className="text-2xl md:text-3xl font-medium">Leads</h1>
+        <h1 className="text-2xl md:text-3xl font-futuraMd">Leads</h1>
         <p className="text-loro-hazel">Liste de vos leads et prospects</p>
       </div>
 

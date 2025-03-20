@@ -11,7 +11,7 @@ const Index = () => {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-semibold text-loro-navy">Tableau de bord</h1>
+        <h1 className="text-2xl md:text-3xl font-futuraMd text-loro-navy">Tableau de bord</h1>
         <p className="text-zinc-800">
           Bienvenue dans votre espace de gestion immobilière de luxe
           {isAdmin && " (Accès Administrateur)"}

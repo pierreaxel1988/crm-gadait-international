@@ -27,7 +27,7 @@ const LeadImport = () => {
           <ArrowLeft className="h-3.5 w-3.5 md:h-4 md:w-4" />
         </CustomButton>
         <div>
-          <h1 className="text-xl md:text-3xl font-semibold text-loro-navy">Importation de Leads</h1>
+          <h1 className="text-xl md:text-3xl font-futuraMd text-loro-navy">Importation de Leads</h1>
           <p className="text-sm md:text-base text-loro-hazel">Importer des leads manuellement ou via l'API</p>
         </div>
       </div>

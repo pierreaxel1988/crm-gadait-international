@@ -22,7 +22,7 @@ const Admin = () => {
     <div className="p-6 lg:p-10 space-y-8 max-w-[1920px] mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold">Administration</h1>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-futuraMd">Administration</h1>
           <p className="text-muted-foreground mt-1">Gérez les données et paramètres de votre application.</p>
         </div>
       </div>

@@ -21,7 +21,7 @@ export const AdminBadge = () => {
       shadow-sm
       transition-all
       duration-200
-      font-futura
+      font-futuraMd
     `}>
       ADMIN
     </Badge>

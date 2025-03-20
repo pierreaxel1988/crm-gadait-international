@@ -30,7 +30,7 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
             <ArrowLeft className="h-4 w-4" />
           </CustomButton>
           <div>
-            <h1 className="text-2xl md:text-3xl font-semibold">
+            <h1 className="text-2xl md:text-3xl font-futuraMd">
               {lead ? `${lead.name}` : 'Nouveau Lead'}
             </h1>
             <p className="text-muted-foreground">

@@ -9,7 +9,7 @@ interface FormSectionProps {
 const FormSection = ({ title, children }: FormSectionProps) => {
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold border-b pb-2">{title}</h2>
+      <h2 className="text-xl font-futuraMd border-b pb-2">{title}</h2>
       {children}
     </div>
   );
