@@ -36,33 +36,36 @@ const SearchCriteriaSection = ({
   return (
     <FormSection title="Critères de Recherche">
       <div className="space-y-8">
+        <PropertyDetailsSection
+          formData={formData}
+          handleInputChange={handleInputChange}
+          handleNumberChange={handleNumberChange}
+          handleMultiSelectToggle={handleMultiSelectToggle}
+          propertyTypes={propertyTypes}
+          viewTypes={viewTypes}
+          amenities={amenities}
+          onExtractUrl={onExtractUrl || (() => {})}
+        />
+
         <div>
-          <h3 className="text-lg font-medium mb-4 text-loro-hazel">Détails du bien</h3>
-          <PropertyDetailsSection
+          <h3 className="text-lg font-medium mb-4 text-loro-hazel">Conditions d'achat</h3>
+          <PurchaseDetailsSection
             formData={formData}
             handleInputChange={handleInputChange}
-            handleNumberChange={handleNumberChange}
             handleMultiSelectToggle={handleMultiSelectToggle}
-            propertyTypes={propertyTypes}
-            viewTypes={viewTypes}
-            amenities={amenities}
-            onExtractUrl={onExtractUrl || (() => {})}
+            purchaseTimeframes={purchaseTimeframes}
+            financingMethods={financingMethods}
+            propertyUses={propertyUses}
           />
         </div>
 
-        <PurchaseDetailsSection
-          formData={formData}
-          handleInputChange={handleInputChange}
-          handleMultiSelectToggle={handleMultiSelectToggle}
-          purchaseTimeframes={purchaseTimeframes}
-          financingMethods={financingMethods}
-          propertyUses={propertyUses}
-        />
-
-        <BuyerInfoSection
-          formData={formData}
-          handleInputChange={handleInputChange}
-        />
+        <div>
+          <h3 className="text-lg font-medium mb-4 text-loro-hazel">Informations sur l'acheteur</h3>
+          <BuyerInfoSection
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
+        </div>
       </div>
     </FormSection>
   );

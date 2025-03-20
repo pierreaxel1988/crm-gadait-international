@@ -1,5 +1,5 @@
 import React from 'react';
-import { Hash, Home, Map, Maximize2, Coins, Search, Globe, Mountain, Building, Users } from 'lucide-react';
+import { Hash, Home, Map, Maximize2, Coins, Users, Mountain, Building } from 'lucide-react';
 import { LeadDetailed, PropertyType, ViewType, Amenity } from '@/types/lead';
 import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
@@ -113,6 +113,8 @@ const PropertyDetailsSection = ({
 
   return (
     <div className="space-y-4">
+      <h3 className="text-lg font-medium mb-4 text-loro-hazel">Détails du bien</h3>
+      
       <PropertyUrlField 
         url={formData.url || ''}
         onChange={handleUrlUpdate}
