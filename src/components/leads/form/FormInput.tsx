@@ -31,6 +31,7 @@ interface FormInputProps {
   min?: number;
   max?: number;
   readOnly?: boolean;
+  disabled?: boolean;
   renderCustomField?: () => React.ReactNode;
   countryCode?: string;
   onCountryCodeChange?: (value: string) => void;
@@ -51,6 +52,7 @@ const FormInput = ({
   min,
   max,
   readOnly = false,
+  disabled = false,
   renderCustomField,
   countryCode,
   onCountryCodeChange,
@@ -95,6 +97,7 @@ const FormInput = ({
             required={required}
             className={baseClassName}
             readOnly={readOnly}
+            disabled={disabled}
           />
         );
         
@@ -104,7 +107,7 @@ const FormInput = ({
             <Select
               value={String(value || '')}
               onValueChange={onCustomChange}
-              disabled={readOnly}
+              disabled={readOnly || disabled}
             >
               <SelectTrigger className={baseClassName}>
                 <SelectValue placeholder={placeholder || 'Sélectionner une option'} />
@@ -127,7 +130,7 @@ const FormInput = ({
             onChange={onChange}
             required={required}
             className={baseClassName}
-            disabled={readOnly}
+            disabled={readOnly || disabled}
           >
             <option value="">{placeholder || 'Sélectionner une option'}</option>
             {options?.map(option => (
@@ -151,6 +154,7 @@ const FormInput = ({
             max={max}
             className={baseClassName}
             readOnly={readOnly}
+            disabled={disabled}
           />
         );
         
@@ -161,7 +165,7 @@ const FormInput = ({
               <Select
                 value={countryCode}
                 onValueChange={onCountryCodeChange}
-                disabled={readOnly}
+                disabled={readOnly || disabled}
               >
                 <SelectTrigger className="w-full overflow-hidden">
                   <SelectValue placeholder="+33" className="truncate flex items-center" />
@@ -207,6 +211,7 @@ const FormInput = ({
               required={required}
               className={baseClassName}
               readOnly={readOnly}
+              disabled={disabled}
             />
           </div>
         );
@@ -222,6 +227,7 @@ const FormInput = ({
             required={required}
             className={baseClassName}
             readOnly={readOnly}
+            disabled={disabled}
           />
         );
     }
