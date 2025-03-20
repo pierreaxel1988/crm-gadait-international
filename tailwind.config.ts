@@ -70,7 +70,7 @@ export default {
 					'hazel': '#8B6F4E',       // Marron Noisette
 					'navy': '#2C3E50',        // Bleu Nuit
 					'terracotta': 'rgb(157, 82, 72)', // Terracotta color
-					'text': 'rgb(18, 16, 16)', // Nearly black text color from image
+					'text': 'rgb(33, 33, 33)', // Nearly black text color from image
 					50: '#F5F5F0',
 					100: '#E0E0E0',
 					200: '#D3C5B4',
@@ -87,7 +87,7 @@ export default {
 					'light': '#8E9196',       // Light Chocolate
 				},
 				times: {
-					'text': 'rgb(18, 16, 16)', // Exact RGB value from the image
+					'text': 'rgb(33, 33, 33)', // Exact RGB value from the image
 				}
 			},
 			borderRadius: {
@@ -103,6 +103,7 @@ export default {
 				timesItalic: ['TimesNow-LightItalic', 'Georgia', 'serif'],
 				timesNowSemi: ['TimesNow-Semi-Light', 'Georgia', 'serif'],
 				futura: ['Futura Medium', 'Futura', 'sans-serif'],
+				futuraMd: ['"Futura Md BT"', 'Futura Medium', 'sans-serif'],
 			},
 			keyframes: {
 				'accordion-down': {

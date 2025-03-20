@@ -34,6 +34,14 @@
 }
 
 @font-face {
+  font-family: 'Futura Md BT';
+  src: url('/lovable-uploads/e9e9bbcb-84e6-4545-b12f-dc6680544358.png') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Futura Medium';
   src: url('https://fonts.cdnfonts.com/css/futura-medium') format('woff2');
   font-weight: 500;
@@ -138,7 +146,9 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-optima tracking-tight;
+    @apply font-futuraMd tracking-tight text-[rgb(33,33,33)];
+    font-size: 36px;
+    line-height: 40px;
   }
 }
 
@@ -177,5 +187,13 @@
 
   .content-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .dropdown-menu-content {
+    @apply bg-white dark:bg-loro-navy border border-loro-pearl shadow-luxury z-50 rounded-none;
+  }
+  
+  .dropdown-menu-item {
+    @apply px-4 py-2 text-loro-navy dark:text-loro-white hover:bg-loro-pearl/20 dark:hover:bg-loro-hazel/20 cursor-pointer font-futuraMd;
   }
 }
