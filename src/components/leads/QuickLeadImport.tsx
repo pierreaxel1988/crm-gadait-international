@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, X, ExternalLink, Flag } from 'lucide-react';
+import { Check, X, ExternalLink, Flag, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import FormInput from './form/FormInput';
@@ -24,6 +23,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
   const navigate = useNavigate();
   const [leadName, setLeadName] = useState('');
   const [leadEmail, setLeadEmail] = useState('');
+  const [leadPhone, setLeadPhone] = useState('');
   const [leadCountry, setLeadCountry] = useState<Country | ''>('');
   const [leadNationality, setLeadNationality] = useState('');
   
@@ -36,10 +36,8 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
     resetExtraction
   } = usePropertyExtraction();
 
-  // Get available countries list
   const availableCountries = Object.keys(LOCATIONS_BY_COUNTRY) as Country[];
   
-  // Get country flag emoji
   const getCountryFlag = (country: string): string => {
     const countryToFlag: Record<string, string> = {
       'Croatia': '🇭🇷',
@@ -59,7 +57,6 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
     return countryToFlag[country] || '';
   };
   
-  // Update nationality when country changes
   useEffect(() => {
     if (leadCountry && !leadNationality) {
       const nationality = deriveNationalityFromCountry(leadCountry);
@@ -95,7 +92,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
       const newLeadData = {
         name: leadName,
         email: leadEmail,
-        phone: "",
+        phone: leadPhone,
         status: "New" as LeadStatus,
         tags: ["Imported"] as LeadTag[],
         propertyReference: extractedData?.reference || "",
@@ -119,6 +116,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
 
       setLeadName('');
       setLeadEmail('');
+      setLeadPhone('');
       setLeadCountry('');
       setLeadNationality('');
       setPropertyUrl('');
@@ -142,6 +140,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
   const handleCancel = () => {
     setLeadName('');
     setLeadEmail('');
+    setLeadPhone('');
     setLeadCountry('');
     setLeadNationality('');
     setPropertyUrl('');
@@ -172,6 +171,16 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
             value={leadEmail}
             onChange={(e) => setLeadEmail(e.target.value)}
             required
+          />
+          
+          <FormInput
+            label="Téléphone"
+            name="phone"
+            type="tel-with-code"
+            value={leadPhone}
+            onChange={(e) => setLeadPhone(e.target.value)}
+            icon={Phone}
+            countryCode="+33"
           />
           
           <FormInput
