@@ -91,6 +91,7 @@ export interface LeadDetailed {
   currency?: Currency;
   desiredLocation?: string;
   propertyType?: string;
+  propertyTypes?: PropertyType[];  // Added new field for multiple property types
   bedrooms?: number | number[];  // Updated to allow array of numbers
   views?: string[];
   amenities?: string[];

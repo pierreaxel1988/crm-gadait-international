@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -63,6 +62,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
     currency: lead?.currency || 'EUR',
     desiredLocation: lead?.desiredLocation || '',
     propertyType: lead?.propertyType || undefined,
+    propertyTypes: lead?.propertyTypes || [],
     bedrooms: lead?.bedrooms || undefined,
     views: lead?.views || [],
     amenities: lead?.amenities || [],
@@ -123,15 +123,22 @@ const LeadForm: React.FC<LeadFormProps> = ({
 
   useEffect(() => {
     if (extractedData) {
-      setFormData(prev => ({
-        ...prev,
-        propertyReference: extractedData.reference || prev.propertyReference,
-        budget: extractedData.price || prev.budget,
-        desiredLocation: extractedData.location || prev.desiredLocation,
-        propertyType: extractedData.propertyType as PropertyType || prev.propertyType,
-        bedrooms: extractedData.bedrooms ? parseInt(extractedData.bedrooms.toString()) : prev.bedrooms,
-        url: propertyUrl || prev.url
-      }));
+      setFormData(prev => {
+        let propertyTypes = prev.propertyTypes || [];
+        if (extractedData.propertyType && !propertyTypes.includes(extractedData.propertyType as PropertyType)) {
+          propertyTypes = [...propertyTypes, extractedData.propertyType as PropertyType];
+        }
+
+        return {
+          ...prev,
+          propertyReference: extractedData.reference || prev.propertyReference,
+          budget: extractedData.price || prev.budget,
+          desiredLocation: extractedData.location || prev.desiredLocation,
+          propertyTypes,
+          bedrooms: extractedData.bedrooms ? parseInt(extractedData.bedrooms.toString()) : prev.bedrooms,
+          url: propertyUrl || prev.url
+        };
+      });
 
       toast({
         title: "Données extraites",

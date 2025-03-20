@@ -82,15 +82,14 @@ const PropertyDetailsSection = ({
         placeholder="Localisation souhaitée"
       />
 
-      <FormInput
-        label="Type de propriété"
-        name="propertyType"
-        type="select"
-        value={formData.propertyType || ''}
-        onChange={handleInputChange}
-        options={propertyTypes.map(type => ({ value: type, label: type }))}
-        placeholder="Type de propriété recherché"
-      />
+      <div className="pt-2">
+        <h4 className="text-sm font-medium mb-3">Type de propriété</h4>
+        <MultiSelectButtons
+          options={propertyTypes}
+          selectedValues={Array.isArray(formData.propertyTypes) ? formData.propertyTypes : []}
+          onChange={(value) => handleMultiSelectToggle('propertyTypes', value)}
+        />
+      </div>
 
       <FormInput
         label="Chambres"
