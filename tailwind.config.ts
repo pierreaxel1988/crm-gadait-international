@@ -88,6 +88,13 @@ export default {
 				},
 				times: {
 					'text': 'rgb(33, 33, 33)', // Exact RGB value from the image
+				},
+				gadait: {
+					'green': '#006837',       // Green from the screenshot
+					'light-beige': '#F3EFE2', // Light beige for admin badge
+					'dark-beige': '#EAE4D3',  // Darker beige for admin badge hover
+					'red': '#DC3545',         // Red for danger buttons
+					'gold': '#B8860B',        // Gold color for accents
 				}
 			},
 			borderRadius: {

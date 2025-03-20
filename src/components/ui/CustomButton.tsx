@@ -3,8 +3,8 @@ import React, { ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'secondary' | 'loropiana' | 'chocolate';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'secondary' | 'loropiana' | 'chocolate' | 'admin' | 'action' | 'danger';
+  size?: 'sm' | 'md' | 'lg' | 'badge';
   className?: string;
   isLoading?: boolean;
   fontStyle?: 'inter' | 'times' | 'timesItalic' | 'futuraMd';
@@ -33,6 +33,12 @@ const CustomButton = ({
         return 'bg-loro-white text-loro-navy border border-loro-pearl hover:bg-loro-pearl dark:bg-loro-navy dark:text-loro-white dark:border-loro-navy/50 dark:hover:bg-loro-navy/80';
       case 'chocolate':
         return 'bg-chocolate-dark text-white hover:bg-chocolate-light dark:bg-chocolate-dark dark:text-white dark:hover:bg-chocolate-light';
+      case 'admin':
+        return 'bg-[#F3EFE2] text-[#8B6F4E] hover:bg-[#EAE4D3]';
+      case 'action':
+        return 'bg-[#006837] text-white hover:bg-[#005a2f]';
+      case 'danger':
+        return 'bg-[#DC3545] text-white hover:bg-[#bb2d3b]';
       default:
         return 'bg-loro-hazel text-white hover:bg-loro-hazel/90 dark:bg-loro-sand dark:text-loro-navy dark:hover:bg-loro-sand/90';
     }
@@ -44,6 +50,8 @@ const CustomButton = ({
         return 'h-8 px-3 text-xs';
       case 'lg':
         return 'h-12 px-6 text-base';
+      case 'badge':
+        return 'h-7 px-3 py-0.5 text-xs';
       default:
         return 'h-10 px-4 text-sm';
     }
@@ -65,7 +73,7 @@ const CustomButton = ({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center rounded-none font-medium transition-colors duration-300 focus:outline-none focus:ring-1 focus:ring-loro-hazel dark:focus:ring-loro-sand disabled:opacity-50 disabled:pointer-events-none',
+        'inline-flex items-center justify-center rounded-md font-medium transition-colors duration-300 focus:outline-none focus:ring-1 focus:ring-loro-hazel dark:focus:ring-loro-sand disabled:opacity-50 disabled:pointer-events-none',
         getVariantClasses(variant),
         getSizeClasses(size),
         getFontClasses(fontStyle),

@@ -11,14 +11,14 @@ export const AdminBadge = () => {
       text-[#8B6F4E] 
       border-0 
       ${isMobile ? 'px-3 py-0.5 text-xs' : 'px-3 py-0.5 text-xs'} 
-      rounded-sm
+      rounded-md
       font-futuraMd
       bg-[#F3EFE2]
       hover:bg-[#EAE4D3]
       ml-2
       tracking-wide
       uppercase
-      shadow-sm
+      shadow-none
       transition-all
       duration-200
     `}>
