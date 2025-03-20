@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, Country } from '@/types/lead';
 import FormInput from '../FormInput';
@@ -68,12 +67,20 @@ const PropertyDetailsSection: React.FC<PropertyDetailsSectionProps> = ({
     return [];
   };
 
+  // Update the onExtractUrl handler parameter type to accept the proper event object
+  const handleExtractUrl = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const url = e.target.value;
+    if (onExtractUrl && url) {
+      onExtractUrl(url);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <PropertyUrlField 
         value={formData.url || ''} 
         onChange={handleInputChange}
-        onExtract={onExtractUrl} 
+        onExtract={handleExtractUrl} 
       />
 
       <FormInput

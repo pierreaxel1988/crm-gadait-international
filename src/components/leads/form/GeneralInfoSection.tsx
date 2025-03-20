@@ -3,8 +3,7 @@ import React from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
-import { User, Mail, Phone, MapPin, Users, BarChart } from 'lucide-react';
-import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
+import { User, Mail, Phone, Users, BarChart } from 'lucide-react';
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
@@ -51,15 +50,6 @@ const GeneralInfoSection = ({
           icon={Phone}
           placeholder="Numéro de téléphone"
           countryCode={"+33"}
-        />
-
-        <FormInput
-          label="Ville"
-          name="location"
-          value={formData.location || ''}
-          onChange={handleInputChange}
-          icon={MapPin}
-          placeholder="Ville actuelle"
         />
 
         <FormInput

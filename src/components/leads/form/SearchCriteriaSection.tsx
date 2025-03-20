@@ -5,6 +5,7 @@ import FormSection from './FormSection';
 import PropertyDetailsSection from './sections/PropertyDetailsSection';
 import PurchaseDetailsSection from './sections/PurchaseDetailsSection';
 import BuyerInfoSection from './sections/BuyerInfoSection';
+import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 
 interface SearchCriteriaSectionProps {
   formData: LeadDetailed;
