@@ -8,6 +8,7 @@ import SearchCriteriaSection from './form/SearchCriteriaSection';
 import StatusSection from './form/StatusSection';
 import { usePropertyExtraction } from '../chat/hooks/usePropertyExtraction';
 import { toast } from '@/hooks/use-toast';
+import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
 
 interface LeadFormProps {
   lead?: LeadDetailed;
@@ -29,11 +30,7 @@ const PURCHASE_TIMEFRAMES: PurchaseTimeframe[] = ['Moins de trois mois', 'Plus d
 const FINANCING_METHODS: FinancingMethod[] = ['Cash', 'Prêt bancaire'];
 const PROPERTY_USES: PropertyUse[] = ['Investissement locatif', 'Résidence principale'];
 const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'CHF'];
-const COUNTRIES: Country[] = [
-  'Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 'Portugal', 
-  'Seychelles', 'Spain', 'Switzerland', 'United Arab Emirates', 
-  'United Kingdom', 'United States'
-];
+const COUNTRIES: Country[] = Object.keys(LOCATIONS_BY_COUNTRY) as Country[];
 const LEAD_SOURCES: LeadSource[] = [
   'Site web', 'Réseaux sociaux', 'Portails immobiliers', 'Network', 
   'Repeaters', 'Recommandations', 'Apporteur d\'affaire', 'Idealista',

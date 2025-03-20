@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, X, ExternalLink } from 'lucide-react';
+import { Check, X, ExternalLink, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import FormInput from './form/FormInput';
@@ -10,7 +11,8 @@ import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { usePropertyExtraction } from '@/components/chat/hooks/usePropertyExtraction';
 import { Country } from '@/types/lead';
-import { COUNTRIES } from '@/utils/countries';
+import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
+import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 
 interface QuickLeadImportProps {
   isOpen: boolean;
@@ -23,6 +25,8 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
   const [leadName, setLeadName] = useState('');
   const [leadEmail, setLeadEmail] = useState('');
   const [leadCountry, setLeadCountry] = useState<Country | ''>('');
+  const [leadNationality, setLeadNationality] = useState('');
+  
   const {
     propertyUrl,
     setPropertyUrl,
@@ -31,6 +35,39 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
     extractPropertyData,
     resetExtraction
   } = usePropertyExtraction();
+
+  // Get available countries list
+  const availableCountries = Object.keys(LOCATIONS_BY_COUNTRY) as Country[];
+  
+  // Get country flag emoji
+  const getCountryFlag = (country: string): string => {
+    const countryToFlag: Record<string, string> = {
+      'Croatia': '🇭🇷',
+      'France': '🇫🇷',
+      'Greece': '🇬🇷',
+      'Maldives': '🇲🇻',
+      'Mauritius': '🇲🇺',
+      'Portugal': '🇵🇹',
+      'Seychelles': '🇸🇨',
+      'Spain': '🇪🇸',
+      'Switzerland': '🇨🇭',
+      'United Arab Emirates': '🇦🇪',
+      'United Kingdom': '🇬🇧',
+      'United States': '🇺🇸'
+    };
+    
+    return countryToFlag[country] || '';
+  };
+  
+  // Update nationality when country changes
+  useEffect(() => {
+    if (leadCountry && !leadNationality) {
+      const nationality = deriveNationalityFromCountry(leadCountry);
+      if (nationality) {
+        setLeadNationality(nationality);
+      }
+    }
+  }, [leadCountry, leadNationality]);
 
   const handleExtractUrl = () => {
     if (propertyUrl) {
@@ -66,7 +103,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
         desiredLocation: extractedData?.location || "",
         propertyType: extractedData?.propertyType || "",
         bedrooms: extractedData?.bedrooms ? parseInt(extractedData.bedrooms.toString()) : undefined,
-        nationality: "",
+        nationality: leadNationality,
         country: (leadCountry as Country) || undefined,
         notes: `Intéressé par l'annonce: ${propertyUrl}`,
         url: propertyUrl,
@@ -83,6 +120,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
       setLeadName('');
       setLeadEmail('');
       setLeadCountry('');
+      setLeadNationality('');
       setPropertyUrl('');
       resetExtraction();
       
@@ -105,6 +143,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
     setLeadName('');
     setLeadEmail('');
     setLeadCountry('');
+    setLeadNationality('');
     setPropertyUrl('');
     resetExtraction();
     onClose();
@@ -141,8 +180,20 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
             type="select"
             value={leadCountry}
             onChange={(e) => setLeadCountry(e.target.value as Country)}
-            options={COUNTRIES.map(country => ({ value: country, label: country }))}
+            icon={Flag}
+            options={availableCountries.map(country => ({ 
+              value: country, 
+              label: `${getCountryFlag(country)} ${country}` 
+            }))}
             placeholder="Sélectionner un pays d'origine"
+          />
+          
+          <FormInput
+            label="Nationalité"
+            name="nationality"
+            value={leadNationality}
+            onChange={(e) => setLeadNationality(e.target.value)}
+            placeholder="Nationalité du client"
           />
           
           <div className="space-y-2">

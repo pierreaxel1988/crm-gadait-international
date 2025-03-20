@@ -3,9 +3,9 @@ import React from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
-import { User, Mail, Phone, MapPin, Globe, Users, BarChart } from 'lucide-react';
-import { COUNTRIES } from '@/utils/countries';
+import { User, Mail, Phone, MapPin, Flag, Users, BarChart } from 'lucide-react';
 import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
+import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
@@ -24,6 +24,48 @@ const GeneralInfoSection = ({
   const availableCountries = countries.filter(country => 
     Object.keys(LOCATIONS_BY_COUNTRY).includes(country)
   );
+
+  // Get country flag emoji
+  const getCountryFlag = (country: string): string => {
+    const countryToFlag: Record<string, string> = {
+      'Croatia': '🇭🇷',
+      'France': '🇫🇷',
+      'Greece': '🇬🇷',
+      'Maldives': '🇲🇻',
+      'Mauritius': '🇲🇺',
+      'Portugal': '🇵🇹',
+      'Seychelles': '🇸🇨',
+      'Spain': '🇪🇸',
+      'Switzerland': '🇨🇭',
+      'United Arab Emirates': '🇦🇪',
+      'United Kingdom': '🇬🇧',
+      'United States': '🇺🇸'
+    };
+    
+    return countryToFlag[country] || '';
+  };
+  
+  // Handle nationality auto-completion when country changes
+  const handleCountryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    handleInputChange(e);
+    
+    // If nationality is empty, try to derive it from country
+    if (!formData.nationality) {
+      const selectedCountry = e.target.value;
+      const nationality = deriveNationalityFromCountry(selectedCountry);
+      
+      if (nationality) {
+        const nationalityEvent = {
+          target: {
+            name: 'nationality',
+            value: nationality
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        
+        handleInputChange(nationalityEvent);
+      }
+    }
+  };
 
   return (
     <FormSection title="Informations Générales">
@@ -73,9 +115,12 @@ const GeneralInfoSection = ({
           name="country"
           type="select"
           value={formData.country || ''}
-          onChange={handleInputChange}
-          icon={Globe}
-          options={availableCountries.map(country => ({ value: country, label: country }))}
+          onChange={handleCountryChange}
+          icon={Flag}
+          options={availableCountries.map(country => ({ 
+            value: country, 
+            label: `${getCountryFlag(country)} ${country}` 
+          }))}
           placeholder="Pays de recherche"
         />
 
