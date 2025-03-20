@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -71,15 +70,19 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
         const actionIndex = actionHistory.findIndex(action => action.id === actionId);
         
         if (actionIndex !== -1) {
+          const now = new Date();
+          const currentDate = now.toISOString();
+          
           // Update the action to completed
           actionHistory[actionIndex] = {
             ...actionHistory[actionIndex],
-            completedDate: new Date().toISOString()
+            completedDate: currentDate
           };
           
-          // Update the lead with the modified action history
+          // Update the lead with the modified action history and last contacted date
           const updatedLead = await updateLead({
             ...lead,
+            lastContactedAt: currentDate, // Update last contacted date when action is completed
             actionHistory
           });
           

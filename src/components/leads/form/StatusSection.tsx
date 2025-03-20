@@ -8,6 +8,7 @@ import FormSection from './FormSection';
 import FormInput from './FormInput';
 import MultiSelectButtons from './MultiSelectButtons';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
+import { format } from 'date-fns';
 
 interface StatusSectionProps {
   formData: LeadDetailed;
@@ -44,6 +45,15 @@ const StatusSection = ({
     // Pass this synthetic event to the handleInputChange function
     handleInputChange(syntheticEvent);
   });
+
+  // Format dates for display, if they exist
+  const formattedLastContact = formData.lastContactedAt 
+    ? format(new Date(formData.lastContactedAt), 'dd/MM/yyyy HH:mm')
+    : '';
+    
+  const formattedNextFollowUp = formData.nextFollowUpDate 
+    ? format(new Date(formData.nextFollowUpDate), 'dd/MM/yyyy HH:mm')
+    : '';
 
   return (
     <FormSection title="Statut et Suivi">
@@ -97,19 +107,23 @@ const StatusSection = ({
       <FormInput
         label="Date du dernier contact"
         name="lastContactedAt"
-        type="date"
-        value={formData.lastContactedAt || ''}
-        onChange={handleInputChange}
+        type="text"
+        value={formattedLastContact}
+        onChange={() => {}}
         icon={CalendarClock}
+        disabled={true}
+        helpText="Mise à jour automatique lors d'une action"
       />
 
       <FormInput
         label="Prochain suivi prévu"
         name="nextFollowUpDate"
-        type="date"
-        value={formData.nextFollowUpDate || ''}
-        onChange={handleInputChange}
+        type="text"
+        value={formattedNextFollowUp}
+        onChange={() => {}}
         icon={CalendarDays}
+        disabled={true}
+        helpText="Programmé automatiquement lors de la création d'une action"
       />
     </FormSection>
   );

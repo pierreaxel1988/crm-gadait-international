@@ -27,11 +27,14 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       createdAt: new Date().toISOString()
     };
     
+    const currentDate = new Date().toISOString();
+    
     // Update the lead with the new action in history
     const updatedLead: LeadDetailed = {
       ...lead,
       taskType: action.actionType as TaskType, // Cast to TaskType here
       nextFollowUpDate: action.scheduledDate,
+      lastContactedAt: currentDate, // Update last contacted date to now
       actionHistory: [...(lead.actionHistory || []), newAction]
     };
     
@@ -45,6 +48,7 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
         .update({
           task_type: action.actionType,
           next_follow_up_date: action.scheduledDate,
+          last_contacted_at: currentDate, // Update this field in the database
           action_history: updatedLead.actionHistory
         })
         .eq('id', leadId);
