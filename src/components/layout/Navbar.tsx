@@ -120,7 +120,7 @@ const Navbar = ({
             <Link to="/" className="flex items-center">
               <Shield className={cn("text-loro-hazel mr-2", isMobile ? "h-4 w-4" : "h-5 w-5")} />
               <span className={cn("font-futura tracking-tight text-loro-navy uppercase", 
-                isMobile ? "text-base font-bold" : "text-sm")}>
+                isMobile ? "text-base" : "text-sm")}>
                 {isMobile ? "GADAIT" : "GADAIT. INTERNATIONAL"}
               </span>
               <AdminBadgeWrapper />
