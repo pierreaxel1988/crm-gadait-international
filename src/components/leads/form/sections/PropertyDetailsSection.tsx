@@ -47,7 +47,7 @@ const PropertyDetailsSection = ({
     return [];
   };
 
-  // Convert the event handling to match the expected signature
+  // Correctly handle the URL extraction by creating a proper function
   const handleExtractUrl = (url: string) => {
     if (onExtractUrl) {
       onExtractUrl(url);
