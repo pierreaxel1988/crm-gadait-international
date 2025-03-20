@@ -6,10 +6,12 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import AdminBadgeWrapper from './AdminBadgeWrapper';
+
 interface NavbarProps {
   toggleSidebar?: () => void;
   sidebarCollapsed?: boolean;
 }
+
 interface Notification {
   id: string;
   title: string;
@@ -17,6 +19,7 @@ interface Notification {
   read: boolean;
   timestamp: Date;
 }
+
 const Navbar = ({
   toggleSidebar,
   sidebarCollapsed
@@ -30,6 +33,7 @@ const Navbar = ({
     user,
     signOut
   } = useAuth();
+
   useEffect(() => {
     const sampleNotifications: Notification[] = [{
       id: '1',
@@ -52,20 +56,24 @@ const Navbar = ({
     }];
     setNotifications(sampleNotifications);
   }, []);
+
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
     document.documentElement.classList.toggle('dark', newMode);
   };
+
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
   };
+
   const markAsRead = (id: string) => {
     setNotifications(notifications.map(notification => notification.id === id ? {
       ...notification,
       read: true
     } : notification));
   };
+
   const markAllAsRead = () => {
     setNotifications(notifications.map(notification => ({
       ...notification,
@@ -73,6 +81,7 @@ const Navbar = ({
     })));
     toast.success('All notifications marked as read');
   };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -81,10 +90,12 @@ const Navbar = ({
       toast.error('Error signing out');
     }
   };
+
   const formatUsername = (email: string) => {
     const username = email.split('@')[0];
     return username.split(/[._-]/).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
   };
+
   const formatTime = (date: Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
@@ -96,42 +107,45 @@ const Navbar = ({
       return `${Math.floor(diffInMinutes / (60 * 24))} days ago`;
     }
   };
+
   const unreadCount = notifications.filter(notification => !notification.read).length;
+
   return <nav className={cn("sticky top-0 z-50 w-full bg-loro-white border-b border-loro-pearl transition-all duration-300")}>
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <button onClick={toggleSidebar} aria-label="Toggle menu" className="mr-2 rounded-md p-2 transition-colors duration-200 px-0 py-0 text-loro-navy my-0">
-              <Menu size={20} />
+              <Menu size={isMobile ? 18 : 20} />
             </button>
             <Link to="/" className="flex items-center">
-              <Shield className="h-5 w-5 text-loro-hazel mr-2" />
-              <span className={cn("font-futura tracking-tight text-loro-navy uppercase", isMobile ? "text-xs" : "text-sm")}>
-                {isMobile ? "GADAIT." : "GADAIT. INTERNATIONAL"}
+              <Shield className={cn("text-loro-hazel mr-2", isMobile ? "h-4 w-4" : "h-5 w-5")} />
+              <span className={cn("font-futura tracking-tight text-loro-navy uppercase", 
+                isMobile ? "text-base font-bold" : "text-sm")}>
+                {isMobile ? "GADAIT" : "GADAIT. INTERNATIONAL"}
               </span>
               <AdminBadgeWrapper />
             </Link>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-4">
             {isSearchOpen ? <div className="relative animate-fade-in">
                 <input type="text" placeholder="Search..." className="luxury-input w-full md:w-64 border-loro-pearl font-optima" autoFocus onBlur={() => setIsSearchOpen(false)} />
                 <button onClick={() => setIsSearchOpen(false)} className="absolute right-2 top-1/2 -translate-y-1/2 text-loro-hazel hover:text-loro-navy">
-                  <X size={16} />
+                  <X size={isMobile ? 14 : 16} />
                 </button>
-              </div> : <button onClick={() => setIsSearchOpen(true)} className="rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
-                <Search size={20} />
+              </div> : <button onClick={() => setIsSearchOpen(true)} className="rounded-md p-1 md:p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
+                <Search size={isMobile ? 18 : 20} />
               </button>}
 
-            <button onClick={toggleDarkMode} className="rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
-              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            <button onClick={toggleDarkMode} className="rounded-md p-1 md:p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
+              {isDarkMode ? <Sun size={isMobile ? 18 : 20} /> : <Moon size={isMobile ? 18 : 20} />}
             </button>
 
             <div className="relative">
-              <button onClick={toggleNotifications} className="relative rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200" aria-label="Notifications">
-                <Bell size={20} />
-                {unreadCount > 0 && <span className="absolute right-1 top-1 h-4 w-4 rounded-full bg-loro-terracotta text-[#F5F5F0] flex items-center justify-center text-xs font-semibold">
-                    {unreadCount}
+              <button onClick={toggleNotifications} className="relative rounded-md p-1 md:p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200" aria-label="Notifications">
+                <Bell size={isMobile ? 18 : 20} />
+                {unreadCount > 0 && <span className="absolute right-0 top-0 h-3 w-3 md:h-4 md:w-4 rounded-full bg-loro-terracotta text-[#F5F5F0] flex items-center justify-center text-[8px] md:text-xs font-semibold">
+                    {unreadCount > 9 ? '9+' : unreadCount}
                   </span>}
               </button>
               
@@ -159,16 +173,16 @@ const Navbar = ({
                 </div>}
             </div>
 
-            <div className="flex items-center space-x-2">
-              <button className="flex items-center space-x-2 rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
-                <User size={20} />
+            <div className="flex items-center">
+              <button className="flex items-center space-x-1 md:space-x-2 rounded-md p-1 md:p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200">
+                <User size={isMobile ? 18 : 20} />
                 <span className="hidden md:inline-block text-sm font-medium font-optima">
                   {user?.email ? formatUsername(user.email) : 'Account'}
                 </span>
               </button>
               
-              <button onClick={handleSignOut} className="rounded-md p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200" title="Sign out">
-                <LogOut size={20} />
+              <button onClick={handleSignOut} className="rounded-md p-1 md:p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200 ml-1" title="Sign out">
+                <LogOut size={isMobile ? 18 : 20} />
               </button>
             </div>
           </div>
@@ -176,4 +190,5 @@ const Navbar = ({
       </div>
     </nav>;
 };
+
 export default Navbar;

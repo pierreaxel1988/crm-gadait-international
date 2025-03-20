@@ -8,11 +8,7 @@ const AdminBadgeWrapper: React.FC = () => {
 
   if (!isAdmin) return null;
   
-  return (
-    <div className="ml-2">
-      <AdminBadge />
-    </div>
-  );
+  return <AdminBadge />;
 };
 
 export default AdminBadgeWrapper;
