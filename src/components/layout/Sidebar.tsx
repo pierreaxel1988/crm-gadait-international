@@ -107,7 +107,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
           </div>
           
           <nav className="flex-1 px-10 py-16">
-            <ul className="space-y-7">
+            <ul className="space-y-7 font-futura">
               {navigationItems.map((item) => (
                 <li key={item.name}>
                   <NavLink
@@ -117,7 +117,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
                         'block transition-all duration-200 text-base leading-[22px] flex items-center',
                         item.isPrimary 
                           ? 'text-loro-terracotta font-times text-2xl mb-12 tracking-wide' 
-                          : 'text-times-text font-times text-[26px] leading-[28px] font-normal',
+                          : 'text-times-text font-futura text-[26px] leading-[28px] font-normal',
                         isActive
                           ? item.isPrimary ? 'text-loro-terracotta' : 'text-loro-terracotta'
                           : item.isPrimary ? 'text-loro-terracotta' : 'hover:text-loro-terracotta hover:font-timesItalic'
