@@ -82,15 +82,15 @@ const PropertyDetailsSection = ({
       ? currentBedrooms.filter(b => b !== numValue)
       : [...currentBedrooms, numValue];
     
-    // Use handleInputChange with a synthetic event
-    const event = {
+    // Create a properly typed synthetic event object
+    const syntheticEvent = {
       target: {
         name: 'bedrooms',
         value: newBedrooms.length ? newBedrooms : undefined
       }
-    } as React.ChangeEvent<HTMLInputElement>;
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
     
-    handleInputChange(event);
+    handleInputChange(syntheticEvent);
   };
 
   return (
@@ -145,14 +145,6 @@ const PropertyDetailsSection = ({
         value={formData.livingArea || ''}
         onChange={handleInputChange}
         placeholder="Surface habitable approximative"
-      />
-
-      <FormInput
-        label="Budget maximum"
-        name="budget"
-        value={formData.budget || ''}
-        onChange={handleInputChange}
-        placeholder="Budget maximum"
       />
 
       <div className="pt-2">
