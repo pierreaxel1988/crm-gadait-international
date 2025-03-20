@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, LogOut, Menu, Moon, Search, Shield, Sun, User, X } from 'lucide-react';
@@ -121,7 +122,7 @@ const Navbar = ({
               <Shield className={cn("text-loro-hazel mr-2", isMobile ? "h-4 w-4" : "h-5 w-5")} />
               <span className={cn("font-futura tracking-tight text-loro-navy uppercase", 
                 isMobile ? "text-base" : "text-sm")}>
-                {isMobile ? "GADAIT" : "GADAIT. INTERNATIONAL"}
+                {isMobile ? "GADAIT." : "GADAIT. INTERNATIONAL"}
               </span>
               <AdminBadgeWrapper />
             </Link>
