@@ -88,15 +88,6 @@ export default {
 				},
 				times: {
 					'text': 'rgb(33, 33, 33)', // Exact RGB value from the image
-				},
-				gadait: {
-					'green': '#006837',       // Green from the screenshot
-					'light-beige': '#F3EFE2', // Light beige for admin badge
-					'dark-beige': '#EAE4D3',  // Darker beige for admin badge hover
-					'red': '#DC3545',         // Red for danger buttons
-					'gold': '#B8860B',        // Gold color for accents
-					'task-green': '#006837',  // Green color for task buttons
-					'task-green-hover': '#005a2f' // Darker green for hover states
 				}
 			},
 			borderRadius: {
@@ -107,7 +98,6 @@ export default {
 			fontFamily: {
 				sans: ['Inter', 'sans-serif'],
 				serif: ['Playfair Display', 'serif'],
-				inter: ['Inter', 'system-ui', 'sans-serif'],
 				optima: ['OptimaLTStd', 'Inter', 'sans-serif'],
 				times: ['TimesNow-SemiLight', 'Georgia', 'serif'],
 				timesItalic: ['TimesNow-LightItalic', 'Georgia', 'serif'],

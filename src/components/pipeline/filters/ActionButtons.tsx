@@ -14,7 +14,7 @@ const ActionButtons = ({ onClear, onApply }: ActionButtonsProps) => {
       <Button variant="outline" size="sm" onClick={onClear}>
         <X className="h-4 w-4 mr-2" /> Effacer
       </Button>
-      <Button variant="action" size="sm" onClick={onApply}>
+      <Button size="sm" onClick={onApply}>
         <Check className="h-4 w-4 mr-2" /> Appliquer
       </Button>
     </div>

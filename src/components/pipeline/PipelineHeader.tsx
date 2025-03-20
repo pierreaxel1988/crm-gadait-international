@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, Filter, Plus, Upload, Mail } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -9,7 +8,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import EmailImportModal from './EmailImportModal';
 import { useTeamMembers } from '@/components/chat/hooks/useTeamMembers';
 import { FilterOptions } from './PipelineFilters';
-
 interface PipelineHeaderProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
@@ -17,7 +15,6 @@ interface PipelineHeaderProps {
   filtersOpen: boolean;
   activeFilters: number;
 }
-
 const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   searchTerm,
   setSearchTerm,
@@ -43,19 +40,15 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
     purchaseTimeframe: null,
     propertyType: null
   });
-
   const handleNewLead = () => {
     navigate('/leads/new');
   };
-
   const handleEmailImport = () => {
     setEmailImportOpen(true);
   };
-
   const handleFilterChange = (newFilters: FilterOptions) => {
     setFilters(newFilters);
   };
-
   const handleClearFilters = () => {
     setFilters({
       status: null,
@@ -90,38 +83,20 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
         return false;
     }
   };
-
-  return (
-    <div className="flex flex-col gap-3 mb-4">
+  return <div className="flex flex-col gap-3 mb-4">
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input 
-            type="search" 
-            placeholder="Rechercher..." 
-            className="pl-8 h-9" 
-            value={searchTerm} 
-            onChange={e => setSearchTerm(e.target.value)} 
-          />
+          <Input type="search" placeholder="Rechercher..." className="pl-8 h-9" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
         
         <div className="flex space-x-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex items-center gap-1.5" 
-            onClick={handleEmailImport}
-          >
+          <Button variant="outline" size="sm" className="flex items-center gap-1.5" onClick={handleEmailImport}>
             <Mail className="h-4 w-4" />
             Import Email
           </Button>
           
-          <Button 
-            variant="task" 
-            size="sm" 
-            onClick={handleNewLead} 
-            className="flex items-center gap-1.5"
-          >
+          <Button variant="default" size="sm" onClick={handleNewLead} className="flex items-center gap-1.5 text-slate-50 bg-zinc-900 hover:bg-zinc-800">
             <Plus className="h-4 w-4" />
             {isMobile ? 'Nouveau' : 'Nouveau Lead'}
           </Button>
@@ -129,47 +104,25 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
       </div>
       
       <div className="flex items-center justify-between">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={onToggleFilters} 
-          className={`flex items-center gap-1.5 ${filtersOpen || activeFilters > 0 ? 'border-blue-500 text-blue-500' : ''}`}
-        >
+        <Button variant="outline" size="sm" onClick={onToggleFilters} className={`flex items-center gap-1.5 ${filtersOpen || activeFilters > 0 ? 'border-blue-500 text-blue-500' : ''}`}>
           <Filter className="h-4 w-4" />
           Filtres
-          {activeFilters > 0 && (
-            <span className="ml-1 rounded-full bg-blue-500 text-white text-xs px-1.5 py-0.5">
+          {activeFilters > 0 && <span className="ml-1 rounded-full bg-blue-500 text-white text-xs px-1.5 py-0.5">
               {activeFilters}
-            </span>
-          )}
+            </span>}
         </Button>
       </div>
       
-      {filtersOpen && (
-        <PipelineFilters 
-          filters={filters} 
-          onFilterChange={handleFilterChange} 
-          onClearFilters={handleClearFilters} 
-          assignedToOptions={teamMembers.map(member => ({
-            id: member.id,
-            name: member.name
-          }))}
-          isFilterActive={isFilterActive}
-        />
-      )}
+      {filtersOpen && <PipelineFilters filters={filters} onFilterChange={handleFilterChange} onClearFilters={handleClearFilters} assignedToOptions={teamMembers.map(member => ({
+      id: member.id,
+      name: member.name
+    }))} isFilterActive={isFilterActive} />}
       
-      <EmailImportModal 
-        isOpen={emailImportOpen} 
-        onClose={() => setEmailImportOpen(false)} 
-        teamMembers={teamMembers}
-        onLeadCreated={() => {
-          console.log("Lead created callback triggered");
-          // Refresh the pipeline after lead creation
-          window.location.reload();
-        }} 
-      />
-    </div>
-  );
+      <EmailImportModal isOpen={emailImportOpen} onClose={() => setEmailImportOpen(false)} teamMembers={teamMembers} onLeadCreated={() => {
+      console.log("Lead created callback triggered");
+      // Refresh the pipeline after lead creation
+      window.location.reload();
+    }} />
+    </div>;
 };
-
 export default PipelineHeader;

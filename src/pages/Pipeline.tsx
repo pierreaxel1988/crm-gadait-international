@@ -9,7 +9,6 @@ import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { supabase } from '@/integrations/supabase/client';
 import PipelineHeader from '@/components/pipeline/PipelineHeader';
 import PipelineTabContent from '@/components/pipeline/PipelineTabContent';
-import { Button } from '@/components/ui/button';
 
 const Kanban = () => {
   const [activeTab, setActiveTab] = useState<string>("purchase");
@@ -115,11 +114,11 @@ const Kanban = () => {
 
       <Tabs defaultValue="purchase" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4 md:mb-6 w-full md:w-[400px] mx-auto">
-          <TabsTrigger value="purchase" className="flex items-center gap-2 w-1/2 font-futuraMd">
+          <TabsTrigger value="purchase" className="flex items-center gap-2 w-1/2">
             <Home className="h-4 w-4" />
             <span className="truncate">Achat (Purchase)</span>
           </TabsTrigger>
-          <TabsTrigger value="rental" className="flex items-center gap-2 w-1/2 font-futuraMd">
+          <TabsTrigger value="rental" className="flex items-center gap-2 w-1/2">
             <Key className="h-4 w-4" />
             <span className="truncate">Location (Rental)</span>
           </TabsTrigger>
