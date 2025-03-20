@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -175,6 +176,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
             financingMethods={FINANCING_METHODS}
             propertyUses={PROPERTY_USES}
             onExtractUrl={handleExtractUrl}
+            countries={COUNTRIES}
           />
         </TabsContent>
 

@@ -18,6 +18,7 @@ interface SearchCriteriaSectionProps {
   financingMethods: FinancingMethod[];
   propertyUses: PropertyUse[];
   onExtractUrl?: (url: string) => void;
+  countries: Country[];
 }
 
 const SearchCriteriaSection = ({
@@ -31,8 +32,31 @@ const SearchCriteriaSection = ({
   purchaseTimeframes,
   financingMethods,
   propertyUses,
-  onExtractUrl
+  onExtractUrl,
+  countries
 }: SearchCriteriaSectionProps) => {
+  // Handle nationality auto-completion when country changes
+  const handleCountryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    handleInputChange(e);
+    
+    // If nationality is empty, try to derive it from country
+    if (!formData.nationality) {
+      const selectedCountry = e.target.value;
+      const nationality = deriveNationalityFromCountry(selectedCountry);
+      
+      if (nationality) {
+        const nationalityEvent = {
+          target: {
+            name: 'nationality',
+            value: nationality
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        
+        handleInputChange(nationalityEvent);
+      }
+    }
+  };
+  
   return (
     <FormSection title="Critères de Recherche">
       <div className="space-y-8">
@@ -45,6 +69,8 @@ const SearchCriteriaSection = ({
           viewTypes={viewTypes}
           amenities={amenities}
           onExtractUrl={onExtractUrl || (() => {})}
+          countries={countries}
+          handleCountryChange={handleCountryChange}
         />
 
         <div>
