@@ -1,4 +1,5 @@
 
+
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -38,11 +39,8 @@ export type ViewType =
   | "Golf" 
   | "Autres";
 
-export type Amenity = 
-  | "Piscine" 
-  | "Jardin" 
-  | "Garage" 
-  | "Sécurité";
+// Change Amenity type to a string for flexibility
+export type Amenity = string;
 
 export type PurchaseTimeframe = 
   | "Moins de trois mois" 
@@ -88,7 +86,7 @@ export interface LeadDetailed {
   source?: LeadSource;
   propertyReference?: string;
   budget?: string;
-  budgetMin?: string;  // New field for minimum budget
+  budgetMin?: string;
   currency?: Currency;
   desiredLocation?: string;
   propertyType?: string;
@@ -115,3 +113,4 @@ export interface LeadDetailed {
   livingArea?: string;
   external_id?: string;
 }
+

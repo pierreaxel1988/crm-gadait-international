@@ -6,6 +6,7 @@ import MultiSelectButtons from '../MultiSelectButtons';
 import PropertyUrlField from '../PropertyUrlField';
 import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
+import CustomTagInput from '../CustomTagInput';
 
 interface PropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -48,7 +49,7 @@ const PropertyDetailsSection = ({
     return [];
   };
 
-  // Correctly handle the URL extraction by creating a proper function
+  // Correctly handle the URL extraction
   const handleExtractUrl = (url: string) => {
     if (onExtractUrl) {
       onExtractUrl(url);
@@ -116,6 +117,18 @@ const PropertyDetailsSection = ({
       target: {
         name: 'currency',
         value
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(syntheticEvent);
+  };
+
+  // Handle amenities changes
+  const handleAmenitiesChange = (newAmenities: string[]) => {
+    const syntheticEvent = {
+      target: {
+        name: 'amenities',
+        value: newAmenities
       }
     } as React.ChangeEvent<HTMLInputElement>;
     
@@ -197,10 +210,11 @@ const PropertyDetailsSection = ({
 
       <div className="pt-2">
         <h4 className="text-sm font-medium mb-3">Commodités souhaitées</h4>
-        <MultiSelectButtons
-          options={amenities}
-          selectedValues={formData.amenities || []}
-          onChange={(value) => handleMultiSelectToggle('amenities', value)}
+        <CustomTagInput
+          tags={formData.amenities || []}
+          onChange={handleAmenitiesChange}
+          placeholder="Ajouter une commodité..."
+          predefinedOptions={amenities}
         />
       </div>
     </div>

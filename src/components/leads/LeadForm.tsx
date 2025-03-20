@@ -26,7 +26,7 @@ const PROPERTY_TYPES: PropertyType[] = [
 ];
 
 const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
-const AMENITIES: Amenity[] = ['Piscine', 'Jardin', 'Garage', 'Sécurité'];
+const AMENITIES: Amenity[] = ['Piscine', 'Jardin', 'Garage', 'Sécurité', 'Climatisation', 'Terrasse', 'Balcon', 'Vue mer', 'Vue montagne', 'Gym', 'Spa', 'Piscine intérieure', 'Jacuzzi', 'Court de tennis', 'Ascenseur', 'Parking'];
 const PURCHASE_TIMEFRAMES: PurchaseTimeframe[] = ['Moins de trois mois', 'Plus de trois mois'];
 const FINANCING_METHODS: FinancingMethod[] = ['Cash', 'Prêt bancaire'];
 const PROPERTY_USES: PropertyUse[] = ['Investissement locatif', 'Résidence principale'];
