@@ -11,10 +11,10 @@ interface ActionButtonsProps {
 const ActionButtons = ({ onClear, onApply }: ActionButtonsProps) => {
   return (
     <div className="flex justify-between pt-2 mt-2 border-t">
-      <Button variant="outline" size="sm" onClick={onClear}>
+      <Button variant="outline" size="sm" onClick={onClear} className="font-futura">
         <X className="h-4 w-4 mr-2" /> Effacer
       </Button>
-      <Button size="sm" onClick={onApply}>
+      <Button size="sm" onClick={onApply} className="font-futura">
         <Check className="h-4 w-4 mr-2" /> Appliquer
       </Button>
     </div>
