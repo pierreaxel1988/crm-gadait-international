@@ -1,5 +1,5 @@
 import React from 'react';
-import { Hash, Home, Map, Maximize2, Coins, Users, Mountain, Building } from 'lucide-react';
+import { Hash, Home, Map, Maximize2, Users, Mountain, Building } from 'lucide-react';
 import { LeadDetailed, PropertyType, ViewType, Amenity } from '@/types/lead';
 import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
@@ -158,15 +158,6 @@ const PropertyDetailsSection = ({
         icon={Maximize2}
         placeholder="Surface en m²"
         min={0}
-      />
-
-      <FormInput
-        label="Budget"
-        name="budget"
-        value={formData.budget || ''}
-        onChange={handleInputChange}
-        icon={Coins}
-        placeholder="Budget souhaité"
       />
 
       <FormInput
