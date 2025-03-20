@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 interface FormInputProps {
   label: string;
   name: string;
-  type?: 'text' | 'email' | 'tel' | 'number' | 'date' | 'select' | 'textarea';
+  type?: 'text' | 'email' | 'tel' | 'tel-with-code' | 'number' | 'date' | 'select' | 'textarea';
   value: string | number | undefined;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   placeholder?: string;
@@ -17,6 +17,7 @@ interface FormInputProps {
   helpText?: string;
   disabled?: boolean;
   renderCustomField?: () => React.ReactNode;
+  countryCode?: string;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -32,7 +33,8 @@ const FormInput: React.FC<FormInputProps> = ({
   className,
   helpText,
   disabled = false,
-  renderCustomField
+  renderCustomField,
+  countryCode
 }) => {
   return (
     <div className={cn('space-y-2', className)}>
@@ -94,6 +96,30 @@ const FormInput: React.FC<FormInputProps> = ({
                   Icon && "pl-9"
                 )}
               />
+            </div>
+          ) : type === 'tel-with-code' ? (
+            <div className="relative">
+              {Icon && (
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <Icon className="h-4 w-4" />
+                </div>
+              )}
+              <div className="flex">
+                <div className="flex-shrink-0 w-16 flex items-center justify-center bg-muted border border-r-0 border-input rounded-l-md">
+                  <span className="text-sm">{countryCode || '+33'}</span>
+                </div>
+                <Input
+                  id={name}
+                  name={name}
+                  type="tel"
+                  value={value ?? ''}
+                  onChange={onChange}
+                  placeholder={placeholder}
+                  required={required}
+                  disabled={disabled}
+                  className={cn("rounded-l-none", Icon && "pl-9")}
+                />
+              </div>
             </div>
           ) : (
             <div className="relative">

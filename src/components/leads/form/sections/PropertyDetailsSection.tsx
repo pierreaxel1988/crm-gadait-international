@@ -130,16 +130,21 @@ const PropertyDetailsSection = ({
         name: 'amenities',
         value: newAmenities
       }
-    } as React.ChangeEvent<HTMLInputElement>;
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
     
     handleInputChange(syntheticEvent);
+  };
+
+  // Wrap handleInputChange for URL changes
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleInputChange(e);
   };
 
   return (
     <div className="space-y-4">
       <PropertyUrlField 
         value={formData.url || ''} 
-        onChange={handleInputChange}
+        onChange={handleUrlChange} 
         onExtract={handleExtractUrl} 
       />
 

@@ -5,19 +5,15 @@ import FormInput from './FormInput';
 import { Button } from '@/components/ui/button';
 
 interface PropertyUrlFieldProps {
-  url?: string;
-  onChange: (url: string) => void;
+  value?: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onExtract?: (url: string) => void;
 }
 
-const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({ url, onChange, onExtract }) => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
-  };
-
+const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({ value, onChange, onExtract }) => {
   const handleExtractClick = () => {
-    if (url && onExtract) {
-      onExtract(url);
+    if (value && onExtract) {
+      onExtract(value);
     }
   };
 
@@ -26,16 +22,16 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({ url, onChange, onEx
       <FormInput
         label="URL de l'annonce"
         name="url"
-        value={url || ''}
-        onChange={handleChange}
+        value={value || ''}
+        onChange={onChange}
         placeholder="https://exemple-immobilier.com/propriete/123"
         icon={ExternalLink}
       />
       
-      {url && (
+      {value && (
         <div className="mt-2 flex gap-2">
           <a 
-            href={url} 
+            href={value} 
             target="_blank" 
             rel="noopener noreferrer" 
             className="text-sm text-blue-600 hover:underline flex items-center"
