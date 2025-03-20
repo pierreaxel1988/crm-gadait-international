@@ -1,6 +1,7 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
-/* Définition des polices inspirées de Loro Piana */
+/* Font definitions inspired by GADAIT Task Management */
 @font-face {
   font-family: 'OptimaLTStd';
   src: url('/fonts/OptimaLTStd.woff2') format('woff2');
@@ -141,14 +142,56 @@
   }
 
   body {
-    @apply bg-background text-foreground font-optima;
+    @apply bg-background text-foreground font-inter;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-size: 16px;
+    line-height: 1.5;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-futuraMd tracking-tight text-[rgb(33,33,33)];
-    font-size: 36px;
-    line-height: 40px;
+    @apply font-futuraMd tracking-normal text-[rgb(33,33,33)];
+  }
+
+  h1 {
+    font-size: 28px;
+    line-height: 36px;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: 24px;
+    line-height: 32px;
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    font-size: 20px;
+    line-height: 28px;
+    margin-bottom: 8px;
+  }
+
+  p {
+    @apply font-inter;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  a {
+    @apply text-loro-hazel hover:text-loro-hazel/80 transition-colors;
+  }
+
+  input, select, textarea {
+    font-size: 15px;
+    @apply font-inter;
+  }
+
+  button {
+    @apply font-futuraMd;
+  }
+
+  label {
+    @apply font-futuraMd text-sm;
   }
 }
 
@@ -195,5 +238,25 @@
   
   .dropdown-menu-item {
     @apply px-4 py-2 text-loro-navy dark:text-loro-white hover:bg-loro-pearl/20 dark:hover:bg-loro-hazel/20 cursor-pointer font-futuraMd;
+  }
+
+  .section-title {
+    @apply font-futuraMd text-2xl text-[rgb(33,33,33)] mb-4;
+  }
+
+  .card-title {
+    @apply font-futuraMd text-xl text-[rgb(33,33,33)] mb-2;
+  }
+
+  .form-label {
+    @apply font-futuraMd text-sm text-[rgb(33,33,33)] mb-1 block;
+  }
+
+  .sidebar-item {
+    @apply font-times text-[26px] leading-[28px] font-normal text-times-text hover:text-loro-terracotta transition-colors;
+  }
+
+  .sidebar-item-active {
+    @apply text-loro-terracotta;
   }
 }

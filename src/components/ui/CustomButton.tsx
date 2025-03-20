@@ -7,7 +7,7 @@ interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   isLoading?: boolean;
-  fontStyle?: 'optima' | 'times' | 'timesItalic';
+  fontStyle?: 'inter' | 'times' | 'timesItalic' | 'futuraMd';
 }
 
 const CustomButton = ({
@@ -15,7 +15,7 @@ const CustomButton = ({
   size = 'md',
   className,
   isLoading,
-  fontStyle = 'optima',
+  fontStyle = 'futuraMd',
   children,
   ...props
 }: CustomButtonProps) => {
@@ -55,8 +55,10 @@ const CustomButton = ({
         return 'font-times';
       case 'timesItalic':
         return 'font-timesItalic';
+      case 'inter':
+        return 'font-inter';
       default:
-        return 'font-optima';
+        return 'font-futuraMd';
     }
   };
 

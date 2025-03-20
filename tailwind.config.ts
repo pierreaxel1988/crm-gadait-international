@@ -98,6 +98,7 @@ export default {
 			fontFamily: {
 				sans: ['Inter', 'sans-serif'],
 				serif: ['Playfair Display', 'serif'],
+				inter: ['Inter', 'system-ui', 'sans-serif'],
 				optima: ['OptimaLTStd', 'Inter', 'sans-serif'],
 				times: ['TimesNow-SemiLight', 'Georgia', 'serif'],
 				timesItalic: ['TimesNow-LightItalic', 'Georgia', 'serif'],
