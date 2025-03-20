@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { X, Upload, MessageSquare, ListTodo, Calendar, PieChart, File, Settings, LayoutDashboard } from 'lucide-react';
+import { X, Upload, MessageSquare, ListTodo, Calendar, PieChart, File, Settings, LayoutDashboard, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -60,6 +60,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
     {
       name: 'Leads',
       path: '/leads',
+      icon: Users,
     },
     {
       name: 'Import Leads',
