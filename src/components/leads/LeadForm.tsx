@@ -60,6 +60,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
     country: lead?.country || undefined,
     propertyReference: lead?.propertyReference || '',
     budget: lead?.budget || '',
+    budgetMin: lead?.budgetMin || '',  // Add initialization for budgetMin
     currency: lead?.currency || 'EUR',
     desiredLocation: lead?.desiredLocation || '',
     propertyType: lead?.propertyType || undefined,
@@ -146,7 +147,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
         return {
           ...prev,
           propertyReference: extractedData.reference || prev.propertyReference,
-          budget: extractedData.price || prev.budget,
+          budget: extractedData.price || prev.budget,  // Keep populating max budget
           desiredLocation: extractedData.location || prev.desiredLocation,
           propertyTypes,
           bedrooms: bedroomsValue,

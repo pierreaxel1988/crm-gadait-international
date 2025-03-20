@@ -5,6 +5,7 @@ import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
 import PropertyUrlField from '../PropertyUrlField';
 import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
+import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 
 interface PropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -93,6 +94,34 @@ const PropertyDetailsSection = ({
     handleInputChange(syntheticEvent);
   };
 
+  // Handle budget changes
+  const handleBudgetChange = (type: 'min' | 'max', value: string) => {
+    // Create field name based on type
+    const fieldName = type === 'min' ? 'budgetMin' : 'budget';
+    
+    // Create a synthetic event to use with handleInputChange
+    const syntheticEvent = {
+      target: {
+        name: fieldName,
+        value: value
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(syntheticEvent);
+  };
+
+  // Handle currency changes
+  const handleCurrencyChange = (value: string) => {
+    const syntheticEvent = {
+      target: {
+        name: 'currency',
+        value
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(syntheticEvent);
+  };
+
   return (
     <div className="space-y-4">
       <PropertyUrlField 
@@ -146,6 +175,16 @@ const PropertyDetailsSection = ({
         onChange={handleInputChange}
         placeholder="Surface habitable approximative"
       />
+
+      <div className="pt-2">
+        <BudgetFilter 
+          minBudget={formData.budgetMin || ''}
+          maxBudget={formData.budget || ''}
+          onBudgetChange={handleBudgetChange}
+          currency={formData.currency as string || 'EUR'}
+          onCurrencyChange={handleCurrencyChange}
+        />
+      </div>
 
       <div className="pt-2">
         <h4 className="text-sm font-medium mb-3">Vue souhaitée</h4>

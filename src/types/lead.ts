@@ -88,11 +88,12 @@ export interface LeadDetailed {
   source?: LeadSource;
   propertyReference?: string;
   budget?: string;
+  budgetMin?: string;  // New field for minimum budget
   currency?: Currency;
   desiredLocation?: string;
   propertyType?: string;
-  propertyTypes?: PropertyType[];  // Added new field for multiple property types
-  bedrooms?: number | number[];  // Updated to allow array of numbers
+  propertyTypes?: PropertyType[];
+  bedrooms?: number | number[];
   views?: string[];
   amenities?: string[];
   purchaseTimeframe?: string;
