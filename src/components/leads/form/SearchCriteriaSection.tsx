@@ -36,16 +36,19 @@ const SearchCriteriaSection = ({
   return (
     <FormSection title="Critères de Recherche">
       <div className="space-y-8">
-        <PropertyDetailsSection
-          formData={formData}
-          handleInputChange={handleInputChange}
-          handleNumberChange={handleNumberChange}
-          handleMultiSelectToggle={handleMultiSelectToggle}
-          propertyTypes={propertyTypes}
-          viewTypes={viewTypes}
-          amenities={amenities}
-          onExtractUrl={onExtractUrl}
-        />
+        <div>
+          <h3 className="text-lg font-medium mb-4 text-loro-hazel">Détails du bien</h3>
+          <PropertyDetailsSection
+            formData={formData}
+            handleInputChange={handleInputChange}
+            handleNumberChange={handleNumberChange}
+            handleMultiSelectToggle={handleMultiSelectToggle}
+            propertyTypes={propertyTypes}
+            viewTypes={viewTypes}
+            amenities={amenities}
+            onExtractUrl={onExtractUrl || (() => {})}
+          />
+        </div>
 
         <PurchaseDetailsSection
           formData={formData}

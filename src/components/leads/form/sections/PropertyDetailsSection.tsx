@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { Hash, Home, Map, Maximize2, Coins, Search, Globe, Mountain, Building, Users } from 'lucide-react';
 import { LeadDetailed, PropertyType, ViewType, Amenity } from '@/types/lead';
-import FormSection from '../FormSection';
 import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
 import PropertyUrlField from '../PropertyUrlField';
@@ -29,40 +27,29 @@ const PropertyDetailsSection = ({
   onExtractUrl
 }: PropertyDetailsSectionProps) => {
   const handleBedroomToggle = (value: string) => {
-    // Convert the string value to a number for the array
     const numValue = value === '10+' ? 10 : parseInt(value);
     
-    // If formData.bedrooms is already an array
     if (Array.isArray(formData.bedrooms)) {
       const bedroomsArray = [...formData.bedrooms];
       
       if (bedroomsArray.includes(numValue)) {
-        // Remove if already in array
         const updatedBedrooms = bedroomsArray.filter(b => b !== numValue);
         updateBedrooms(updatedBedrooms.length > 0 ? updatedBedrooms : undefined);
       } else {
-        // Add if not in array
         updateBedrooms([...bedroomsArray, numValue]);
       }
-    } 
-    // If formData.bedrooms is a single number
-    else if (typeof formData.bedrooms === 'number') {
+    } else if (typeof formData.bedrooms === 'number') {
       if (formData.bedrooms === numValue) {
-        // If clicking the same value, clear it
         updateBedrooms(undefined);
       } else {
-        // If clicking a different value, create an array with both values
         updateBedrooms([formData.bedrooms, numValue]);
       }
-    }
-    // If formData.bedrooms is empty or undefined
-    else {
+    } else {
       updateBedrooms(numValue);
     }
   };
   
   const updateBedrooms = (value: number | number[] | undefined) => {
-    // Create a synthetic event that matches what handleInputChange expects
     const syntheticEvent = {
       target: {
         name: 'bedrooms',
@@ -70,38 +57,31 @@ const PropertyDetailsSection = ({
       }
     } as unknown as React.ChangeEvent<HTMLInputElement>;
     
-    // Pass this synthetic event to the handleInputChange function
     handleInputChange(syntheticEvent);
   };
   
-  // Helper to get all selected bedroom options
   const getSelectedBedroomOptions = (): string[] => {
     if (!formData.bedrooms) {
       return [];
     }
     
-    // If bedrooms is a number
     if (typeof formData.bedrooms === 'number') {
       return [formData.bedrooms >= 10 ? '10+' : formData.bedrooms.toString()];
     }
     
-    // If bedrooms is an array
     if (Array.isArray(formData.bedrooms)) {
       return formData.bedrooms.map(b => b >= 10 ? '10+' : b.toString());
     }
     
-    // If bedrooms might be a stringified array
     if (typeof formData.bedrooms === 'string') {
       try {
-        // Check if it looks like a JSON string array
-        const bedroomsString: string = formData.bedrooms; // Explicitly cast to string type
-        if (bedroomsString.includes('[')) { // Now TypeScript knows this is a string
+        const bedroomsString: string = formData.bedrooms;
+        if (bedroomsString.includes('[')) {
           const parsedBedrooms = JSON.parse(bedroomsString);
           if (Array.isArray(parsedBedrooms)) {
             return parsedBedrooms.map((b: number) => b >= 10 ? '10+' : b.toString());
           }
         }
-        // It could be a simple string number
         const numBedrooms = parseInt(formData.bedrooms);
         if (!isNaN(numBedrooms)) {
           return [numBedrooms >= 10 ? '10+' : numBedrooms.toString()];
@@ -114,11 +94,9 @@ const PropertyDetailsSection = ({
     return [];
   };
   
-  // All bedroom options to select from
   const bedroomOptions = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'];
   
   const handleUrlUpdate = (url: string) => {
-    // Create a synthetic event for the URL field
     const urlEvent = {
       target: {
         name: 'url',
@@ -126,17 +104,15 @@ const PropertyDetailsSection = ({
       }
     } as React.ChangeEvent<HTMLInputElement>;
     
-    // Update the form data with the URL
     handleInputChange(urlEvent);
     
-    // Call the extraction function
     if (url) {
       onExtractUrl(url);
     }
   };
 
   return (
-    <FormSection title="Critères de recherche - Détails du bien">
+    <div className="space-y-4">
       <PropertyUrlField 
         url={formData.url || ''}
         onChange={handleUrlUpdate}
@@ -235,7 +211,7 @@ const PropertyDetailsSection = ({
           />
         )}
       />
-    </FormSection>
+    </div>
   );
 };
 
