@@ -3,7 +3,7 @@ import React, { ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'secondary' | 'loropiana' | 'chocolate' | 'admin' | 'action' | 'danger';
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'secondary' | 'loropiana' | 'chocolate' | 'admin' | 'action' | 'danger' | 'task' | 'invite';
   size?: 'sm' | 'md' | 'lg' | 'badge';
   className?: string;
   isLoading?: boolean;
@@ -37,6 +37,10 @@ const CustomButton = ({
         return 'bg-[#F3EFE2] text-[#8B6F4E] hover:bg-[#EAE4D3]';
       case 'action':
         return 'bg-[#006837] text-white hover:bg-[#005a2f]';
+      case 'task':
+        return 'bg-[#006837] text-white hover:bg-[#005a2f] rounded-full';
+      case 'invite':
+        return 'border border-[#B8860B] text-[#B8860B] bg-white hover:bg-[#F3EFE2]';
       case 'danger':
         return 'bg-[#DC3545] text-white hover:bg-[#bb2d3b]';
       default:

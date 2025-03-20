@@ -21,6 +21,8 @@ const buttonVariants = cva(
         link: "text-loro-hazel underline-offset-4 hover:underline",
         admin: "bg-[#F3EFE2] text-[#8B6F4E] hover:bg-[#EAE4D3] font-futuraMd text-xs tracking-wide uppercase",
         action: "bg-[#006837] text-white hover:bg-[#005a2f] font-futuraMd",
+        task: "bg-[#006837] text-white hover:bg-[#005a2f] font-futuraMd rounded-full",
+        invite: "border border-[#B8860B] text-[#B8860B] bg-white hover:bg-[#F3EFE2] font-futuraMd",
         danger: "bg-[#DC3545] text-white hover:bg-[#bb2d3b] font-futuraMd",
       },
       size: {

@@ -95,6 +95,8 @@ export default {
 					'dark-beige': '#EAE4D3',  // Darker beige for admin badge hover
 					'red': '#DC3545',         // Red for danger buttons
 					'gold': '#B8860B',        // Gold color for accents
+					'task-green': '#006837',  // Green color for task buttons
+					'task-green-hover': '#005a2f' // Darker green for hover states
 				}
 			},
 			borderRadius: {
