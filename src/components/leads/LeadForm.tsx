@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -18,21 +19,20 @@ interface LeadFormProps {
   adminAssignedAgent?: string | undefined;
 }
 
-// Export these constants so they can be imported and used in EmailImportModal
-export const PROPERTY_TYPES: PropertyType[] = [
+const PROPERTY_TYPES: PropertyType[] = [
   'Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 
   'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château',
   'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'
 ];
 
-export const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
-export const AMENITIES: Amenity[] = ['Piscine', 'Jardin', 'Garage', 'Sécurité', 'Climatisation', 'Terrasse', 'Balcon', 'Vue mer', 'Vue montagne', 'Gym', 'Spa', 'Piscine intérieure', 'Jacuzzi', 'Court de tennis', 'Ascenseur', 'Parking'];
-export const PURCHASE_TIMEFRAMES: PurchaseTimeframe[] = ['Moins de trois mois', 'Plus de trois mois'];
-export const FINANCING_METHODS: FinancingMethod[] = ['Cash', 'Prêt bancaire'];
-export const PROPERTY_USES: PropertyUse[] = ['Investissement locatif', 'Résidence principale'];
-export const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'CHF'];
-export const COUNTRIES: Country[] = Object.keys(LOCATIONS_BY_COUNTRY) as Country[];
-export const LEAD_SOURCES: LeadSource[] = [
+const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
+const AMENITIES: Amenity[] = ['Piscine', 'Jardin', 'Garage', 'Sécurité', 'Climatisation', 'Terrasse', 'Balcon', 'Vue mer', 'Vue montagne', 'Gym', 'Spa', 'Piscine intérieure', 'Jacuzzi', 'Court de tennis', 'Ascenseur', 'Parking'];
+const PURCHASE_TIMEFRAMES: PurchaseTimeframe[] = ['Moins de trois mois', 'Plus de trois mois'];
+const FINANCING_METHODS: FinancingMethod[] = ['Cash', 'Prêt bancaire'];
+const PROPERTY_USES: PropertyUse[] = ['Investissement locatif', 'Résidence principale'];
+const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'CHF'];
+const COUNTRIES: Country[] = Object.keys(LOCATIONS_BY_COUNTRY) as Country[];
+const LEAD_SOURCES: LeadSource[] = [
   'Site web', 'Réseaux sociaux', 'Portails immobiliers', 'Network', 
   'Repeaters', 'Recommandations', 'Apporteur d\'affaire', 'Idealista',
   'Le Figaro', 'Properstar', 'Property Cloud', 'L\'express Property'

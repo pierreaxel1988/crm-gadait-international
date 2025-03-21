@@ -98,7 +98,7 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
     external_id: leadData.external_id,
     url: leadData.url,
     pipeline_type: leadData.pipelineType || leadData.pipeline_type || 'purchase',
-    // Remove action_history as it doesn't exist in the database schema
+    action_history: leadData.actionHistory || [],
     living_area: leadData.livingArea,
     tax_residence: leadData.taxResidence
   };

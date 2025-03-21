@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Loader2, Mail, X, AlertTriangle, Check, Edit } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -6,10 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadCore';
-import { LeadDetailed, Country, PipelineType, LeadSource } from '@/types/lead';
+import { LeadDetailed, Country, PipelineType } from '@/types/lead';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizePropertyType } from '@/components/chat/utils/propertyTypeUtils';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
@@ -36,9 +36,9 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
   const [selectedPipeline, setSelectedPipeline] = useState<PipelineType>('purchase');
   const [isEditing, setIsEditing] = useState(false);
   const [editableData, setEditableData] = useState<any>(null);
-  const [selectedSource, setSelectedSource] = useState<LeadSource | undefined>(undefined);
 
   useEffect(() => {
+    // Auto-select Pierre Axel Gadait when the form is opened
     if (isOpen && teamMembers.length > 0) {
       const pierreAxel = teamMembers.find(member => 
         member.name.toLowerCase().includes('pierre axel gadait'));
@@ -49,19 +49,11 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     }
   }, [isOpen, teamMembers]);
 
-  useEffect(() => {
-    if (extractedData) {
-      const extractedSource = extractedData.source || extractedData.Source;
-      setSelectedSource(extractedSource || "Le Figaro");
-    }
-  }, [extractedData]);
-
   const resetForm = () => {
     setEmailContent('');
     setExtractedData(null);
     setEditableData(null);
     setSelectedAgent(undefined);
-    setSelectedSource(undefined);
     setIsEditing(false);
   };
 
@@ -117,8 +109,6 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         setExtractedData(jsonData);
         setEditableData(jsonData);
         
-        setSelectedSource(jsonData.source || jsonData.Source || "Le Figaro");
-        
         toast({
           title: "Données extraites",
           description: "Les informations ont été extraites avec succès."
@@ -158,12 +148,15 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     }
     
     try {
+      // Normalize country to ensure it's a valid Country type
       let country: Country | undefined = undefined;
       if (editableData.country) {
+        // Check if the country matches one of our Country types
         const formattedCountry = editableData.country as string;
         country = formattedCountry as Country;
       }
       
+      // Extract any potential reference or external id
       const propertyReference = editableData.property_reference || 
                               editableData.propertyReference || 
                               editableData.reference ||
@@ -173,49 +166,30 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                          editableData.externalId || 
                          editableData["external id"] || "";
       
-      let propertyTypes = [];
-      if (editableData.propertyType || editableData.property_type) {
-        const type = editableData.propertyType || editableData.property_type;
-        propertyTypes = [type];
-      }
-      
-      let bedrooms;
-      if (editableData.bedrooms) {
-        bedrooms = Array.isArray(editableData.bedrooms) 
-          ? editableData.bedrooms 
-          : [parseInt(editableData.bedrooms)];
-      }
-      
+      // Log important data before creation
       console.log("Creating lead with pipeline type:", selectedPipeline);
       
       const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
         name: editableData.name || editableData.Name || "",
         email: editableData.email || editableData.Email || "",
         phone: editableData.phone || editableData.Phone || "",
-        source: selectedSource || "Site web",
+        source: editableData.Source || editableData.source || "Site web",
         budget: editableData.Budget || editableData.budget || "",
-        budgetMin: editableData.budgetMin || editableData.budget_min || "",
-        currency: editableData.currency || "EUR",
         propertyReference,
         external_id,
         desiredLocation: editableData.desired_location || editableData.desiredLocation || editableData["Desired location"] || "",
         propertyType: editableData.propertyType || editableData.property_type || editableData["Property type"] || "",
-        propertyTypes: propertyTypes,
         nationality: editableData.nationality || "",
         notes: emailContent || "",
         status: "New",
         tags: ["Imported"],
         assignedTo: selectedAgent,
-        bedrooms: bedrooms,
-        views: editableData.views || [],
-        amenities: editableData.amenities || [],
-        livingArea: editableData.livingArea || editableData.living_area || "",
+        bedrooms: editableData.bedrooms || undefined,
         url: editableData.url || "",
         taskType: "Call",
         country,
-        pipelineType: selectedPipeline,
-        pipeline_type: selectedPipeline,
-        taxResidence: editableData.taxResidence || editableData.tax_residence || ""
+        pipelineType: selectedPipeline, // Ensure this is correctly set
+        pipeline_type: selectedPipeline // Also set database field name
       };
       
       console.log("Creating lead with data:", newLead);
@@ -266,44 +240,26 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         phone: extractedData.phone || extractedData.Phone,
         country: extractedData.country || extractedData.Country,
         nationality: extractedData.nationality,
-        taxResidence: extractedData.taxResidence || extractedData.tax_residence,
       },
       property: {
         propertyType: extractedData.propertyType || extractedData.property_type || extractedData["Property type"],
         desiredLocation: extractedData.desiredLocation || extractedData.desired_location || extractedData["Desired location"],
         budget: extractedData.budget || extractedData.Budget,
-        budgetMin: extractedData.budgetMin || extractedData.budget_min,
-        currency: extractedData.currency,
         propertyReference: extractedData.propertyReference || extractedData.reference || extractedData.property_reference || "",
         bedrooms: extractedData.bedrooms || extractedData.Bedrooms,
         url: extractedData.url || extractedData.Url || extractedData["URL"],
-        livingArea: extractedData.livingArea || extractedData.living_area,
-        views: extractedData.views,
-        amenities: extractedData.amenities,
-      },
-      purchase: {
-        purchaseTimeframe: extractedData.purchaseTimeframe || extractedData.purchase_timeframe,
-        financingMethod: extractedData.financingMethod || extractedData.financing_method,
-        propertyUse: extractedData.propertyUse || extractedData.property_use,
       },
       source: {
-        source: extractedData.source || extractedData.Source || selectedSource,
+        source: extractedData.source || extractedData.Source || "Le Figaro",
       },
       other: Object.entries(extractedData)
         .filter(([key]) => 
           !['name', 'Name', 'email', 'Email', 'phone', 'Phone', 'country', 'Country', 'nationality',
-            'taxResidence', 'tax_residence',
             'propertyType', 'property_type', 'Property type', 
             'desiredLocation', 'desired_location', 'Desired location',
-            'budget', 'Budget', 'budgetMin', 'budget_min',
-            'currency',
+            'budget', 'Budget', 
             'propertyReference', 'reference', 'property_reference', 'Property reference',
             'bedrooms', 'Bedrooms',
-            'livingArea', 'living_area',
-            'views', 'amenities',
-            'purchaseTimeframe', 'purchase_timeframe',
-            'financingMethod', 'financing_method',
-            'propertyUse', 'property_use',
             'url', 'Url', 'URL',
             'source', 'Source'].includes(key)
         )
@@ -312,10 +268,10 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
           return acc;
         }, {} as Record<string, any>)
     };
-  }, [extractedData, selectedSource]);
+  }, [extractedData]);
 
   const renderField = (key: string, value: any, label: string) => {
-    if (value === undefined || value === null) return null;
+    if (!value) return null;
     
     if (isEditing) {
       return (
@@ -410,16 +366,14 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                           email: editableData.email || editableData.Email || "",
                           phone: editableData.phone || editableData.Phone || "",
                           country: editableData.country || editableData.Country || "",
-                          nationality: editableData.nationality || "",
-                          taxResidence: editableData.taxResidence || editableData.tax_residence || ""
+                          nationality: editableData.nationality || ""
                         }).map(([key, value]) => {
                           if (!value) return null;
                           const label = key === 'name' ? 'Nom' : 
                                       key === 'email' ? 'Email' : 
                                       key === 'phone' ? 'Téléphone' : 
                                       key === 'country' ? 'Pays' : 
-                                      key === 'nationality' ? 'Nationalité' : 
-                                      key === 'taxResidence' ? 'Pays de résidence fiscale' : key;
+                                      key === 'nationality' ? 'Nationalité' : key;
                           return renderField(key, value, label);
                         })}
                       </div>
@@ -432,40 +386,17 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                           propertyType: editableData.propertyType || editableData.property_type || "",
                           desiredLocation: editableData.desiredLocation || editableData.desired_location || "",
                           budget: editableData.budget || editableData.Budget || "",
-                          budgetMin: editableData.budgetMin || editableData.budget_min || "",
-                          currency: editableData.currency || "EUR",
                           propertyReference: editableData.propertyReference || editableData.reference || editableData.property_reference || "",
                           bedrooms: editableData.bedrooms || "",
-                          livingArea: editableData.livingArea || editableData.living_area || "",
                           url: editableData.url || ""
                         }).map(([key, value]) => {
                           if (!value) return null;
                           const label = key === 'propertyType' ? 'Type de bien' :
                                        key === 'desiredLocation' ? 'Emplacement désiré' :
-                                       key === 'budget' ? 'Budget max' :
-                                       key === 'budgetMin' ? 'Budget min' :
-                                       key === 'currency' ? 'Devise' :
+                                       key === 'budget' ? 'Budget' :
                                        key === 'propertyReference' ? 'Référence' :
                                        key === 'bedrooms' ? 'Chambres' :
-                                       key === 'livingArea' ? 'Surface habitable' :
                                        key === 'url' ? 'URL de l\'annonce' : key;
-                          return renderField(key, value, label);
-                        })}
-                      </div>
-                    </div>
-                    
-                    <div className="border rounded-md p-3">
-                      <h3 className="font-medium text-sm mb-2">Conditions d'achat</h3>
-                      <div className="space-y-2">
-                        {editableData && Object.entries({
-                          purchaseTimeframe: editableData.purchaseTimeframe || editableData.purchase_timeframe || "",
-                          financingMethod: editableData.financingMethod || editableData.financing_method || "",
-                          propertyUse: editableData.propertyUse || editableData.property_use || ""
-                        }).map(([key, value]) => {
-                          if (!value) return null;
-                          const label = key === 'purchaseTimeframe' ? 'Délai d\'achat' :
-                                       key === 'financingMethod' ? 'Mode de financement' :
-                                       key === 'propertyUse' ? 'Usage du bien' : key;
                           return renderField(key, value, label);
                         })}
                       </div>
@@ -474,17 +405,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                     <div className="border rounded-md p-3">
                       <h3 className="font-medium text-sm mb-2">Source</h3>
                       <div className="space-y-2">
-                        <FormInput
-                          label="Source"
-                          name="source"
-                          type="select"
-                          value={selectedSource || ""}
-                          onChange={(e) => {
-                            setSelectedSource(e.target.value as LeadSource);
-                          }}
-                          options={LEAD_SOURCES.map(source => ({ value: source, label: source }))}
-                          placeholder="Source du lead"
-                        />
+                        {editableData && renderField('source', editableData.source || editableData.Source || "Le Figaro", 'Source')}
                       </div>
                     </div>
                   </div>
@@ -497,14 +418,12 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                           {Object.entries(groupedData.contact).map(([key, value]) => 
                             value && (
                               <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                                <span className="font-medium capitalize">{
-                                  key === 'name' ? 'Nom' : 
-                                  key === 'email' ? 'Email' : 
-                                  key === 'phone' ? 'Téléphone' : 
-                                  key === 'country' ? 'Pays' : 
-                                  key === 'nationality' ? 'Nationalité' : 
-                                  key === 'taxResidence' ? 'Pays de résidence fiscale' : key
-                                }:</span>
+                                <span className="font-medium capitalize">{key === 'name' ? 'Nom' : 
+                                                                        key === 'email' ? 'Email' : 
+                                                                        key === 'phone' ? 'Téléphone' : 
+                                                                        key === 'country' ? 'Pays' : 
+                                                                        key === 'nationality' ? 'Nationalité' : 
+                                                                        key}:</span>
                                 <span className="text-muted-foreground">{String(value)}</span>
                               </div>
                             )
@@ -520,43 +439,13 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                           {Object.entries(groupedData.property).map(([key, value]) => 
                             value && (
                               <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                                <span className="font-medium capitalize">{
-                                  key === 'propertyType' ? 'Type de bien' :
-                                  key === 'desiredLocation' ? 'Emplacement désiré' :
-                                  key === 'budget' ? 'Budget max' :
-                                  key === 'budgetMin' ? 'Budget min' :
-                                  key === 'currency' ? 'Devise' :
-                                  key === 'propertyReference' ? 'Référence' :
-                                  key === 'bedrooms' ? 'Chambres' :
-                                  key === 'livingArea' ? 'Surface habitable' :
-                                  key === 'url' ? 'URL de l\'annonce' :
-                                  key === 'views' ? 'Vues' :
-                                  key === 'amenities' ? 'Équipements' :
-                                  key.replace(/([A-Z])/g, ' $1').trim()
-                                }:</span>
-                                <span className="text-muted-foreground">{
-                                  Array.isArray(value) ? value.join(', ') : String(value)
-                                }</span>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {groupedData?.purchase && Object.values(groupedData.purchase).some(v => v) && (
-                      <div className="border rounded-md p-3">
-                        <h3 className="font-medium text-sm mb-2">Conditions d'achat</h3>
-                        <div className="space-y-1 text-sm">
-                          {Object.entries(groupedData.purchase).map(([key, value]) => 
-                            value && (
-                              <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
-                                <span className="font-medium capitalize">{
-                                  key === 'purchaseTimeframe' ? 'Délai d\'achat' :
-                                  key === 'financingMethod' ? 'Mode de financement' :
-                                  key === 'propertyUse' ? 'Usage du bien' : 
-                                  key
-                                }:</span>
+                                <span className="font-medium capitalize">{key === 'propertyType' ? 'Type de bien' :
+                                                                      key === 'desiredLocation' ? 'Emplacement désiré' :
+                                                                      key === 'budget' ? 'Budget' :
+                                                                      key === 'propertyReference' ? 'Référence' :
+                                                                      key === 'bedrooms' ? 'Chambres' :
+                                                                      key === 'url' ? 'URL de l\'annonce' :
+                                                                      key.replace(/([A-Z])/g, ' $1').trim()}:</span>
                                 <span className="text-muted-foreground">{String(value)}</span>
                               </div>
                             )
@@ -565,28 +454,21 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                       </div>
                     )}
                     
-                    <div className="border rounded-md p-3">
-                      <h3 className="font-medium text-sm mb-2">Source</h3>
-                      <div className="space-y-1 text-sm mb-2">
-                        <div className="flex justify-between border-b border-loro-sand/30 pb-1">
-                          <span className="font-medium">Source:</span>
-                          <span className="text-muted-foreground">{selectedSource || "Le Figaro"}</span>
+                    {groupedData?.source && Object.keys(groupedData.source).some(key => groupedData.source[key]) && (
+                      <div className="border rounded-md p-3">
+                        <h3 className="font-medium text-sm mb-2">Source</h3>
+                        <div className="space-y-1 text-sm">
+                          {Object.entries(groupedData.source).map(([key, value]) => 
+                            value && (
+                              <div key={key} className="flex justify-between border-b border-loro-sand/30 pb-1">
+                                <span className="font-medium capitalize">{key}:</span>
+                                <span className="text-muted-foreground">{String(value)}</span>
+                              </div>
+                            )
+                          )}
                         </div>
                       </div>
-                      <Select 
-                        value={selectedSource} 
-                        onValueChange={setSelectedSource}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Sélectionner une source" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {LEAD_SOURCES.map(source => (
-                            <SelectItem key={source} value={source}>{source}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    )}
                     
                     {groupedData?.other && Object.keys(groupedData.other).length > 0 && (
                       <div className="border rounded-md p-3">
@@ -689,4 +571,3 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
 };
 
 export default EmailImportModal;
-
