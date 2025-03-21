@@ -180,7 +180,6 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
             value={leadPhone}
             onChange={(e) => setLeadPhone(e.target.value)}
             icon={Phone}
-            countryCode="+33"
           />
           
           <FormInput
@@ -200,8 +199,14 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
           <FormInput
             label="Nationalité"
             name="nationality"
+            type="select"
             value={leadNationality}
             onChange={(e) => setLeadNationality(e.target.value)}
+            icon={Flag}
+            options={availableCountries.map(country => ({ 
+              value: country, 
+              label: `${getCountryFlag(country)} ${country}` 
+            }))}
             placeholder="Nationalité du client"
           />
           

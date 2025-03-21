@@ -3,7 +3,14 @@ import React from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
-import { User, Mail, Phone, Users, BarChart, MapPin } from 'lucide-react';
+import { User, Mail, Phone, Flag, BarChart, MapPin } from 'lucide-react';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
@@ -18,6 +25,26 @@ const GeneralInfoSection = ({
   countries,
   sources
 }: GeneralInfoSectionProps) => {
+  // Function to get country flag emoji
+  const getCountryFlag = (country: string): string => {
+    const countryToFlag: Record<string, string> = {
+      'Croatia': '🇭🇷',
+      'France': '🇫🇷',
+      'Greece': '🇬🇷',
+      'Maldives': '🇲🇻',
+      'Mauritius': '🇲🇺',
+      'Portugal': '🇵🇹',
+      'Seychelles': '🇸🇨',
+      'Spain': '🇪🇸',
+      'Switzerland': '🇨🇭',
+      'United Arab Emirates': '🇦🇪',
+      'United Kingdom': '🇬🇧',
+      'United States': '🇺🇸'
+    };
+    
+    return countryToFlag[country] || '';
+  };
+
   return (
     <FormSection title="Informations Générales">
       <div className="space-y-4">
@@ -49,24 +76,33 @@ const GeneralInfoSection = ({
           onChange={handleInputChange}
           icon={Phone}
           placeholder="Numéro de téléphone"
-          countryCode={"+33"}
         />
 
         <FormInput
           label="Nationalité"
           name="nationality"
+          type="select"
           value={formData.nationality || ''}
           onChange={handleInputChange}
-          icon={Users}
+          icon={Flag}
+          options={countries.map(country => ({ 
+            value: country, 
+            label: `${getCountryFlag(country)} ${country}` 
+          }))}
           placeholder="Nationalité du client"
         />
 
         <FormInput
           label="Pays de résidence"
           name="taxResidence"
+          type="select"
           value={formData.taxResidence || ''}
           onChange={handleInputChange}
           icon={MapPin}
+          options={countries.map(country => ({ 
+            value: country, 
+            label: `${getCountryFlag(country)} ${country}` 
+          }))}
           placeholder="Pays de résidence fiscale"
         />
 
