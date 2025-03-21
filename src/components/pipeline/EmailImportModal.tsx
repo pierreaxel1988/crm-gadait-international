@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, Mail, X, AlertTriangle, Check, Edit } from 'lucide-react';
@@ -16,9 +15,6 @@ import { normalizePropertyType } from '@/components/chat/utils/propertyTypeUtils
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 import { extractLefigaroPropertyDetails } from '@/components/chat/utils/emailParsingUtils';
 import FormInput from '@/components/leads/form/FormInput';
-
-// Import the same constants from LeadForm to ensure consistency
-import { LEAD_SOURCES } from '@/components/leads/LeadForm';
 
 interface EmailImportModalProps {
   isOpen: boolean;
@@ -43,7 +39,6 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
   const [selectedSource, setSelectedSource] = useState<LeadSource | undefined>(undefined);
 
   useEffect(() => {
-    // Auto-select Pierre Axel Gadait when the form is opened
     if (isOpen && teamMembers.length > 0) {
       const pierreAxel = teamMembers.find(member => 
         member.name.toLowerCase().includes('pierre axel gadait'));
@@ -54,10 +49,8 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     }
   }, [isOpen, teamMembers]);
 
-  // Set default source when data is extracted
   useEffect(() => {
     if (extractedData) {
-      // Use extracted source or default to "Le Figaro"
       const extractedSource = extractedData.source || extractedData.Source;
       setSelectedSource(extractedSource || "Le Figaro");
     }
@@ -124,7 +117,6 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         setExtractedData(jsonData);
         setEditableData(jsonData);
         
-        // Set source based on extracted data or default
         setSelectedSource(jsonData.source || jsonData.Source || "Le Figaro");
         
         toast({
@@ -166,15 +158,12 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     }
     
     try {
-      // Normalize country to ensure it's a valid Country type
       let country: Country | undefined = undefined;
       if (editableData.country) {
-        // Check if the country matches one of our Country types
         const formattedCountry = editableData.country as string;
         country = formattedCountry as Country;
       }
       
-      // Extract any potential reference or external id
       const propertyReference = editableData.property_reference || 
                               editableData.propertyReference || 
                               editableData.reference ||
@@ -184,14 +173,12 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                          editableData.externalId || 
                          editableData["external id"] || "";
       
-      // Prepare property types array
       let propertyTypes = [];
       if (editableData.propertyType || editableData.property_type) {
         const type = editableData.propertyType || editableData.property_type;
         propertyTypes = [type];
       }
       
-      // Prepare bedrooms data
       let bedrooms;
       if (editableData.bedrooms) {
         bedrooms = Array.isArray(editableData.bedrooms) 
@@ -199,7 +186,6 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
           : [parseInt(editableData.bedrooms)];
       }
       
-      // Log important data before creation
       console.log("Creating lead with pipeline type:", selectedPipeline);
       
       const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
@@ -493,7 +479,9 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                           name="source"
                           type="select"
                           value={selectedSource || ""}
-                          onChange={(e) => setSelectedSource(e.target.value as LeadSource)}
+                          onChange={(e) => {
+                            setSelectedSource(e.target.value as LeadSource);
+                          }}
                           options={LEAD_SOURCES.map(source => ({ value: source, label: source }))}
                           placeholder="Source du lead"
                         />
@@ -701,3 +689,4 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
 };
 
 export default EmailImportModal;
+
