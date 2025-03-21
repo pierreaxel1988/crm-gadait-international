@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Loader2, Mail, X, AlertTriangle, Check, Edit, ListChecks } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Loader2, Mail, X, AlertTriangle, Check, Edit } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { createLead } from '@/services/leadCore';
-import { LeadDetailed, Country, PipelineType, LeadSource } from '@/types/lead';
+import { LeadDetailed, Country, PipelineType } from '@/types/lead';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizePropertyType } from '@/components/chat/utils/propertyTypeUtils';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
@@ -36,15 +36,9 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
   const [selectedPipeline, setSelectedPipeline] = useState<PipelineType>('purchase');
   const [isEditing, setIsEditing] = useState(false);
   const [editableData, setEditableData] = useState<any>(null);
-  const [selectedSource, setSelectedSource] = useState<LeadSource>("Le Figaro");
-  
-  const LEAD_SOURCES: LeadSource[] = [
-    'Site web', 'Réseaux sociaux', 'Portails immobiliers', 'Network', 
-    'Repeaters', 'Recommandations', 'Apporteur d\'affaire', 'Idealista',
-    'Le Figaro', 'Properstar', 'Property Cloud', 'L\'express Property'
-  ];
 
   useEffect(() => {
+    // Auto-select Pierre Axel Gadait when the form is opened
     if (isOpen && teamMembers.length > 0) {
       const pierreAxel = teamMembers.find(member => 
         member.name.toLowerCase().includes('pierre axel gadait'));
@@ -60,7 +54,6 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     setExtractedData(null);
     setEditableData(null);
     setSelectedAgent(undefined);
-    setSelectedSource("Le Figaro");
     setIsEditing(false);
   };
 
@@ -155,12 +148,15 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
     }
     
     try {
+      // Normalize country to ensure it's a valid Country type
       let country: Country | undefined = undefined;
       if (editableData.country) {
+        // Check if the country matches one of our Country types
         const formattedCountry = editableData.country as string;
         country = formattedCountry as Country;
       }
       
+      // Extract any potential reference or external id
       const propertyReference = editableData.property_reference || 
                               editableData.propertyReference || 
                               editableData.reference ||
@@ -170,13 +166,14 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                          editableData.externalId || 
                          editableData["external id"] || "";
       
+      // Log important data before creation
       console.log("Creating lead with pipeline type:", selectedPipeline);
       
       const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
         name: editableData.name || editableData.Name || "",
         email: editableData.email || editableData.Email || "",
         phone: editableData.phone || editableData.Phone || "",
-        source: selectedSource,
+        source: editableData.Source || editableData.source || "Site web",
         budget: editableData.Budget || editableData.budget || "",
         propertyReference,
         external_id,
@@ -191,8 +188,8 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         url: editableData.url || "",
         taskType: "Call",
         country,
-        pipelineType: selectedPipeline,
-        pipeline_type: selectedPipeline
+        pipelineType: selectedPipeline, // Ensure this is correctly set
+        pipeline_type: selectedPipeline // Also set database field name
       };
       
       console.log("Creating lead with data:", newLead);
@@ -253,7 +250,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
         url: extractedData.url || extractedData.Url || extractedData["URL"],
       },
       source: {
-        source: extractedData.source || extractedData.Source || selectedSource,
+        source: extractedData.source || extractedData.Source || "Le Figaro",
       },
       other: Object.entries(extractedData)
         .filter(([key]) => 
@@ -271,7 +268,7 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
           return acc;
         }, {} as Record<string, any>)
     };
-  }, [extractedData, selectedSource]);
+  }, [extractedData]);
 
   const renderField = (key: string, value: any, label: string) => {
     if (!value) return null;
@@ -540,30 +537,6 @@ const EmailImportModal: React.FC<EmailImportModalProps> = ({
                     {!selectedAgent && (
                       <p className="text-xs text-red-500 mt-1">La sélection d'un commercial est obligatoire</p>
                     )}
-                  </div>
-                  
-                  <div className="border rounded-md p-3">
-                    <h3 className="font-medium text-sm mb-2">Source</h3>
-                    <div className="space-y-2">
-                      <Select 
-                        value={selectedSource} 
-                        onValueChange={(value) => setSelectedSource(value as LeadSource)}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Sélectionner une source" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {LEAD_SOURCES.map((source) => (
-                            <SelectItem key={source} value={source}>
-                              <div className="flex items-center gap-2">
-                                <ListChecks className="h-4 w-4 text-muted-foreground" />
-                                <span>{source}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
                 </div>
               </div>
