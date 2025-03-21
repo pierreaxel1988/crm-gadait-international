@@ -49,7 +49,6 @@ export const mapToLeadDetailed = (data: any): LeadDetailed => {
     pipeline_type: data.pipeline_type as PipelineType,
     imported_at: data.imported_at,
     integration_source: data.integration_source,
-    actionHistory: data.action_history || [],
     livingArea: data.living_area,
     taxResidence: data.tax_residence
   };
@@ -98,7 +97,6 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
     external_id: leadData.external_id,
     url: leadData.url,
     pipeline_type: leadData.pipelineType || leadData.pipeline_type || 'purchase',
-    action_history: leadData.actionHistory || [],
     living_area: leadData.livingArea,
     tax_residence: leadData.taxResidence
   };
