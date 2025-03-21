@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import PipelineFilters from './PipelineFilters';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { FilterOptions } from './PipelineFilters';
+import CustomButton from '@/components/ui/CustomButton';
 
 interface PipelineHeaderProps {
   searchTerm: string;
@@ -90,10 +91,15 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
         </div>
         
         <div className="flex space-x-2">
-          <Button variant="default" size="sm" onClick={handleNewLead} className="flex items-center gap-1.5 text-slate-50 bg-zinc-900 hover:bg-zinc-800">
+          <CustomButton 
+            variant="chocolate" 
+            size="sm" 
+            onClick={handleNewLead} 
+            className="flex items-center gap-1.5"
+          >
             <Plus className="h-4 w-4" />
             {isMobile ? 'Nouveau' : 'Nouveau Lead'}
-          </Button>
+          </CustomButton>
         </div>
       </div>
       
