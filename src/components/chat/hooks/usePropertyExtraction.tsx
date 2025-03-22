@@ -203,21 +203,23 @@ export const usePropertyExtraction = () => {
       standardizedData.source = 'Le Figaro';
     } else if (isIdealista) {
       // Standardize data from Idealista
-      standardizedData.propertyType = mapPropertyType(data.tipoInmueble || data.propertyType || data.type || null);
-      standardizedData.location = data.ubicacionAnuncio || data.location || null;
-      standardizedData.price = data.precioAnuncio || data.price || null;
-      standardizedData.bedrooms = data.habitaciones || data.bedrooms || null;
-      standardizedData.reference = data.referenciaAnuncio || data.reference || null;
-      standardizedData.description = data.descripcion || data.description || null;
-      standardizedData.area = data.superficie || data.area || null;
+      standardizedData.propertyType = mapPropertyType(data.tipoInmueble || data.propertyType || data.type || data["Property type"] || null);
+      standardizedData.location = data.ubicacionAnuncio || data.location || data.Location || null;
+      standardizedData.price = data.precioAnuncio || data.price || data.Price || null;
+      standardizedData.bedrooms = data.habitaciones || data.bedrooms || data["Number of bedrooms"] || null;
+      standardizedData.reference = data.referenciaAnuncio || data.reference || data["Property reference"] || null;
+      standardizedData.description = data.descripcion || data.description || data.Description || null;
+      standardizedData.area = data.superficie || data.area || data["Size or area"] || null;
       
       // Déterminer le pays pour Idealista
-      if (propertyUrl.includes('.es')) {
+      if (propertyUrl.includes('.es') || data.Country === 'Spain') {
         standardizedData.country = 'Spain';
-      } else if (propertyUrl.includes('.pt')) {
+      } else if (propertyUrl.includes('.pt') || data.Country === 'Portugal') {
         standardizedData.country = 'Portugal';
-      } else if (propertyUrl.includes('.it')) {
+      } else if (propertyUrl.includes('.it') || data.Country === 'Italy') {
         standardizedData.country = 'Italy';
+      } else if (data.Country) {
+        standardizedData.country = data.Country;
       }
       
       standardizedData.source = 'Idealista';
@@ -236,6 +238,16 @@ export const usePropertyExtraction = () => {
     // Add more generic fields
     standardizedData.title = data.title || data.name || null;
     standardizedData.url = data.url || propertyUrl || null;
+    
+    // Add amenities if they exist
+    if (data["Key features and amenities"] && Array.isArray(data["Key features and amenities"])) {
+      standardizedData.amenities = data["Key features and amenities"];
+    }
+
+    // Add currency if it exists
+    if (data.Currency || data.currency) {
+      standardizedData.currency = data.Currency || data.currency;
+    }
 
     console.log("Standardized data:", standardizedData);
     return standardizedData;

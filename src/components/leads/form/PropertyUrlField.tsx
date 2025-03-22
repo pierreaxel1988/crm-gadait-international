@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ExternalLink, Download } from 'lucide-react';
+import { ExternalLink, Download, Sparkles } from 'lucide-react';
 import FormInput from './FormInput';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -48,8 +48,8 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({ value, onChange, on
         icon={ExternalLink}
       />
       
-      {value && (
-        <div className="mt-2 flex gap-2">
+      <div className="mt-2 flex gap-2 items-center">
+        {value && (
           <a 
             href={value} 
             target="_blank" 
@@ -59,28 +59,34 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({ value, onChange, on
             <ExternalLink size={14} className="mr-1" /> 
             Voir l'annonce {getPortalName(value) && `(${getPortalName(value)})`}
           </a>
-          
-          {onExtract && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleExtractClick} 
-                    className="ml-auto text-xs py-1 h-auto bg-loro-navy text-white hover:bg-loro-navy/90 flex items-center gap-1"
-                  >
-                    <Download size={14} />
-                    Extraire les données
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Récupère automatiquement les infos de l'annonce et remplit le formulaire</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+        )}
+        
+        {onExtract && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleExtractClick} 
+                  className="ml-auto text-xs py-1 h-auto bg-loro-navy text-white hover:bg-loro-navy/90 flex items-center gap-1"
+                >
+                  <Sparkles size={14} />
+                  Remplir le formulaire automatiquement
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Récupère automatiquement les infos de l'annonce et remplit le formulaire (pays, localisation, type de bien, etc.)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
+      
+      {value && !onExtract && (
+        <div className="mt-2 text-xs text-gray-500">
+          Collez l'URL d'une annonce Idealista, Le Figaro ou autre portail immobilier pour analyser la propriété.
         </div>
       )}
     </div>
