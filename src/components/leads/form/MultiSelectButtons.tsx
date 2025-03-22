@@ -5,7 +5,7 @@ import BaseSelectButtons from './BaseSelectButtons';
 interface MultiSelectButtonsProps<T extends string> {
   options: readonly T[] | T[];
   selectedValues: T[];
-  onChange: (value: T) => void;
+  onChange?: (value: T) => void; // Make onChange optional
   onToggle?: (value: T) => void; // Add back onToggle for backward compatibility
   specialOption?: T;
 }
