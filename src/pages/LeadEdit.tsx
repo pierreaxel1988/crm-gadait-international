@@ -18,7 +18,7 @@ const LeadEdit = () => {
   const { id } = useParams<{ id: string }>();
   const [lead, setLead] = useState<LeadDetailed | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('informations');
+  const [activeTab, setActiveTab] = useState('statut');
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const [assignedAgent, setAssignedAgent] = useState<string | undefined>(undefined);
@@ -154,12 +154,6 @@ const LeadEdit = () => {
       >
         <TabsList className="w-full bg-background border-b flex justify-between overflow-x-auto">
           <TabsTrigger 
-            value="criteres" 
-            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
-          >
-            Critères de recherche
-          </TabsTrigger>
-          <TabsTrigger 
             value="statut" 
             className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
           >
@@ -172,12 +166,6 @@ const LeadEdit = () => {
             Actions/Tâches
           </TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="criteres" className="mt-4">
-          <div className="luxury-card p-6">
-            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="criteres" />
-          </div>
-        </TabsContent>
         
         <TabsContent value="statut" className="mt-4">
           <div className="luxury-card p-6">
