@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, MapPin, BedDouble, Link as LinkIcon } from 'lucide-react';
+import { Home, MapPin, BedDouble, Link as LinkIcon, Euro } from 'lucide-react';
 import { extractNumericValue } from '@/utils/kanbanFilterUtils';
 
 interface PropertyInfoProps {
@@ -45,27 +45,35 @@ const PropertyInfo = ({
 
   return (
     <>
-      {/* Type de bien et budget */}
-      {(propertyType || budget) && (
-        <div className="mb-2 flex items-center text-xs">
-          <Home className="h-3 w-3 mr-1 text-green-600" />
-          <span className="font-medium">
-            {propertyType && propertyType}
-            {propertyType && budget && ' – '}
-            {budget && formatBudget(budget)}
-          </span>
+      {/* Budget maximum mis en évidence */}
+      {budget && (
+        <div className="mb-2 flex items-center text-xs font-semibold bg-loro-sand/20 p-1 rounded">
+          <Euro className="h-3 w-3 mr-1 text-chocolate-dark" />
+          <span>Budget max: {formatBudget(budget)}</span>
         </div>
       )}
       
-      {/* Localisation souhaitée */}
-      {(desiredLocation || country) && (
-        <div className="mb-2 flex items-center text-xs">
+      {/* Localisation souhaitée mise en évidence */}
+      {desiredLocation && (
+        <div className="mb-2 flex items-center text-xs font-semibold bg-gray-100 p-1 rounded">
           <MapPin className="h-3 w-3 mr-1 text-red-500" />
-          <span>
-            {desiredLocation}
-            {desiredLocation && country && ', '}
-            {country}
-          </span>
+          <span>{desiredLocation}</span>
+        </div>
+      )}
+      
+      {/* Type de bien */}
+      {propertyType && (
+        <div className="mb-2 flex items-center text-xs">
+          <Home className="h-3 w-3 mr-1 text-green-600" />
+          <span className="font-medium">{propertyType}</span>
+        </div>
+      )}
+      
+      {/* Pays */}
+      {country && (
+        <div className="mb-2 flex items-center text-xs">
+          <MapPin className="h-3 w-3 mr-1 text-indigo-500" />
+          <span>{country}</span>
         </div>
       )}
       
