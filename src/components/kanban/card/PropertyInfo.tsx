@@ -43,23 +43,25 @@ const PropertyInfo = ({
     }).format(numericValue);
   };
 
+  // Vérifier si le budget est valide pour l'affichage (non vide et non nul)
+  const hasBudget = budget && budget.trim() !== '';
+  
+  // Vérifier si la localisation est valide pour l'affichage (non vide et non nulle)
+  const hasLocation = desiredLocation && desiredLocation.trim() !== '';
+
   return (
     <>
-      {/* Budget maximum mis en évidence */}
-      {budget && (
-        <div className="mb-2 flex items-center text-xs font-semibold bg-loro-sand/20 p-1 rounded">
-          <Euro className="h-3 w-3 mr-1 text-chocolate-dark" />
-          <span>Budget max: {formatBudget(budget)}</span>
-        </div>
-      )}
+      {/* Budget maximum mis en évidence - Toujours afficher avec une valeur par défaut si nécessaire */}
+      <div className="mb-2 flex items-center text-xs font-semibold bg-loro-sand/20 p-1 rounded">
+        <Euro className="h-3 w-3 mr-1 text-chocolate-dark" />
+        <span>Budget max: {hasBudget ? formatBudget(budget) : 'Non spécifié'}</span>
+      </div>
       
-      {/* Localisation souhaitée mise en évidence */}
-      {desiredLocation && (
-        <div className="mb-2 flex items-center text-xs font-semibold bg-gray-100 p-1 rounded">
-          <MapPin className="h-3 w-3 mr-1 text-red-500" />
-          <span>{desiredLocation}</span>
-        </div>
-      )}
+      {/* Localisation souhaitée mise en évidence - Toujours afficher avec une valeur par défaut si nécessaire */}
+      <div className="mb-2 flex items-center text-xs font-semibold bg-gray-100 p-1 rounded">
+        <MapPin className="h-3 w-3 mr-1 text-red-500" />
+        <span>{hasLocation ? desiredLocation : 'Localisation non spécifiée'}</span>
+      </div>
       
       {/* Type de bien */}
       {propertyType && (
