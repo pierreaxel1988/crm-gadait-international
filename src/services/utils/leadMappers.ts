@@ -30,8 +30,11 @@ export const mapToLeadDetailed = (data: any): LeadDetailed => {
     source: data.source,
     propertyReference: data.property_reference,
     budget: data.budget,
+    budgetMin: data.budget_min,
+    currency: data.currency,
     desiredLocation: data.desired_location,
     propertyType: data.property_type,
+    propertyTypes: data.property_types,
     bedrooms: parsedBedrooms,
     views: data.views,
     amenities: data.amenities,
@@ -73,6 +76,8 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
   // Ensure pipeline_type is set from pipelineType for database consistency
   const pipelineType = leadData.pipelineType || leadData.pipeline_type || 'purchase';
   
+  console.log("Converting lead to Supabase format, budget:", leadData.budget, "location:", leadData.desiredLocation);
+  
   return {
     name: leadData.name,
     email: leadData.email,
@@ -84,8 +89,11 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
     source: leadData.source,
     property_reference: leadData.propertyReference,
     budget: leadData.budget,
+    budget_min: leadData.budgetMin,
+    currency: leadData.currency,
     desired_location: leadData.desiredLocation,
     property_type: leadData.propertyType,
+    property_types: leadData.propertyTypes,
     bedrooms: formattedBedrooms,
     views: leadData.views,
     amenities: leadData.amenities,

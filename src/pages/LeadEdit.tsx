@@ -18,6 +18,7 @@ const LeadEdit = () => {
   const { id } = useParams<{ id: string }>();
   const [lead, setLead] = useState<LeadDetailed | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('actions');
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
@@ -46,6 +47,7 @@ const LeadEdit = () => {
         try {
           setIsLoading(true);
           const leadData = await getLead(id);
+          console.log("Fetched lead data:", leadData);
           setLead(leadData || undefined);
           if (leadData) {
             setAssignedAgent(leadData.assignedTo);
@@ -67,24 +69,45 @@ const LeadEdit = () => {
 
   const handleSubmit = async (data: LeadDetailed) => {
     try {
+      setIsSaving(true);
+      console.log("Submitting lead update with data:", data);
+      
+      const leadDataToUpdate = {
+        ...data,
+        id: id || data.id
+      };
+      
       if (isAdmin && assignedAgent !== lead?.assignedTo) {
-        data.assignedTo = assignedAgent;
+        leadDataToUpdate.assignedTo = assignedAgent;
       }
       
-      const updatedLead = await updateLead(data);
+      console.log("Final data to update:", leadDataToUpdate);
+      
+      const updatedLead = await updateLead(leadDataToUpdate);
       if (updatedLead) {
         toast({
           title: "Lead mis à jour",
           description: "Les modifications ont été enregistrées avec succès."
         });
+        
         setLead(updatedLead);
+        
+        if (id) {
+          const refreshedLead = await getLead(id);
+          if (refreshedLead) {
+            setLead(refreshedLead);
+          }
+        }
       }
     } catch (error) {
+      console.error("Error saving lead:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Impossible d'enregistrer les modifications."
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -180,15 +203,33 @@ const LeadEdit = () => {
         </TabsList>
         
         <TabsContent value="general" className="mt-4">
-          <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="general" />
+          <LeadForm 
+            lead={lead} 
+            onSubmit={handleSubmit} 
+            onCancel={() => navigate('/leads')} 
+            activeTab="general"
+            isSubmitting={isSaving}
+          />
         </TabsContent>
         
         <TabsContent value="criteria" className="mt-4">
-          <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="criteria" />
+          <LeadForm 
+            lead={lead} 
+            onSubmit={handleSubmit} 
+            onCancel={() => navigate('/leads')} 
+            activeTab="criteria"
+            isSubmitting={isSaving}
+          />
         </TabsContent>
         
         <TabsContent value="status" className="mt-4">
-          <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="status" />
+          <LeadForm 
+            lead={lead} 
+            onSubmit={handleSubmit} 
+            onCancel={() => navigate('/leads')} 
+            activeTab="status"
+            isSubmitting={isSaving}
+          />
         </TabsContent>
         
         <TabsContent value="actions" className="mt-4">

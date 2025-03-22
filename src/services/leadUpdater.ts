@@ -8,7 +8,20 @@ import { mapToLeadDetailed, mapToSupabaseFormat } from "./utils/leadMappers";
  */
 export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed | null> => {
   try {
+    console.log("Updating lead with data:", leadData);
+    
     const supabaseLeadData = mapToSupabaseFormat(leadData);
+    
+    // Ensure critical fields are present
+    if (!supabaseLeadData.budget) {
+      console.log("Budget is empty in update request");
+    }
+    
+    if (!supabaseLeadData.desired_location) {
+      console.log("Desired location is empty in update request");
+    }
+    
+    console.log("Mapped Supabase lead data:", supabaseLeadData);
     
     const { data, error } = await supabase
       .from('leads')
@@ -22,6 +35,8 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
       throw new Error(`Failed to update lead: ${error.message}`);
     }
 
+    console.log("Lead update successful, response data:", data);
+    
     if (data) {
       return mapToLeadDetailed(data);
     }
