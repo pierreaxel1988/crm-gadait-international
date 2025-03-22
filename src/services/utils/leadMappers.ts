@@ -16,6 +16,9 @@ export const mapToLeadDetailed = (data: any): LeadDetailed => {
     parsedBedrooms = data.bedrooms;
   }
 
+  // Parse action history if present
+  let actionHistory = data.action_history || [];
+  
   return {
     id: data.id,
     name: data.name,
@@ -50,7 +53,8 @@ export const mapToLeadDetailed = (data: any): LeadDetailed => {
     imported_at: data.imported_at,
     integration_source: data.integration_source,
     livingArea: data.living_area,
-    taxResidence: data.tax_residence
+    taxResidence: data.tax_residence,
+    actionHistory: actionHistory
   };
 };
 
@@ -69,6 +73,9 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
       formattedBedrooms = leadData.bedrooms;
     }
   }
+  
+  // Ensure pipeline_type is set from pipelineType for database consistency
+  const pipelineType = leadData.pipelineType || leadData.pipeline_type || 'purchase';
   
   return {
     name: leadData.name,
@@ -96,9 +103,10 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
     country: leadData.country,
     external_id: leadData.external_id,
     url: leadData.url,
-    pipeline_type: leadData.pipelineType || leadData.pipeline_type || 'purchase',
+    pipeline_type: pipelineType,
     living_area: leadData.livingArea,
-    tax_residence: leadData.taxResidence
+    tax_residence: leadData.taxResidence,
+    action_history: leadData.actionHistory || []
   };
 };
 

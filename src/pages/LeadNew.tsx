@@ -37,7 +37,7 @@ const LeadNew = () => {
           notes: "Hola necesito contactar contigo en whatsapp para saber mas detalles de esta casa si no te importa gracias.",
           status: "New",
           tags: ["Imported"],
-          pipelineType: "purchase"
+          pipelineType: "purchase" // Explicitly set the pipeline type to purchase
         };
         
         try {
@@ -74,6 +74,12 @@ const LeadNew = () => {
       }
       
       const { id, createdAt, ...newLeadData } = data;
+      
+      // Ensure pipelineType is set if not already defined
+      if (!newLeadData.pipelineType) {
+        newLeadData.pipelineType = 'purchase';
+      }
+      
       createLead(newLeadData);
       
       toast({

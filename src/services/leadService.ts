@@ -11,6 +11,16 @@ import {
 import { addActionToLead } from "./leadActions";
 
 export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt">): Promise<LeadDetailed | null> => {
+  // Ensure pipelineType is properly set
+  if (!leadData.pipelineType) {
+    leadData.pipelineType = 'purchase';
+  }
+  
+  // If pipeline_type is not set (for database compatibility), set it the same as pipelineType
+  if (!leadData.pipeline_type) {
+    leadData.pipeline_type = leadData.pipelineType;
+  }
+  
   // Si un agent n'est pas déjà assigné, chercher l'ID de Pierre Axel Gadait
   if (!leadData.assignedTo) {
     try {

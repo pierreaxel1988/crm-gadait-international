@@ -152,5 +152,5 @@ export const useKanbanData = (
     fetchLeads();
   }, [refreshTrigger, columns, pipelineType]);
 
-  return { loadedColumns, isLoading };
+  return { loadedColumns, setLoadedColumns, isLoading };
 };

@@ -11,13 +11,24 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
   try {
     console.log("Creating lead with data:", leadData);
     
+    // Ensure pipelineType is set
+    if (!leadData.pipelineType) {
+      leadData.pipelineType = 'purchase';
+    }
+
+    // Ensure pipeline_type is also set for database compatibility
+    if (!leadData.pipeline_type) {
+      leadData.pipeline_type = leadData.pipelineType;
+    }
+    
     // Prepare lead data for Supabase insertion
     const supabaseLeadData = mapToSupabaseFormat(leadData);
     
     // We need to explicitly set imported_at date for new leads
     const dataWithImportedDate = {
       ...supabaseLeadData,
-      imported_at: new Date().toISOString()
+      imported_at: new Date().toISOString(),
+      pipeline_type: leadData.pipelineType // Make sure pipeline_type is explicitly set
     };
 
     console.log("Prepared Supabase lead data:", dataWithImportedDate);
@@ -42,7 +53,13 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     
     // If Supabase insertion fails, fall back to local storage
     const leads = await getLeads();
-    const newLead = { id: crypto.randomUUID(), createdAt: new Date().toISOString(), ...leadData };
+    const newLead = { 
+      id: crypto.randomUUID(), 
+      createdAt: new Date().toISOString(), 
+      ...leadData,
+      pipelineType: leadData.pipelineType || 'purchase',
+      pipeline_type: leadData.pipelineType || 'purchase'
+    };
     leads.push(newLead);
     localStorage.setItem('leads', JSON.stringify(leads));
 

@@ -12,7 +12,7 @@ interface KanbanColumnProps {
   items: KanbanItem[];
   className?: string;
   onDrop?: (item: KanbanItem, status: LeadStatus) => void;
-  pipelineType: 'purchase' | 'rental'; // Ajout du type de pipeline
+  pipelineType: 'purchase' | 'rental';
 }
 
 const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }: KanbanColumnProps) => {
@@ -20,7 +20,8 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
   const navigate = useNavigate();
   
   const handleAddLead = () => {
-    navigate('/leads/new');
+    // Pass the pipeline type as a URL parameter so the new lead form can pre-select it
+    navigate(`/leads/new?pipeline=${pipelineType}`);
   };
   
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -34,7 +35,8 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
     try {
       const itemData = JSON.parse(e.dataTransfer.getData('application/json'));
       if (itemData && itemData.id && onDrop) {
-        onDrop(itemData, status);
+        // Ensure we preserve the pipeline type when moving items
+        onDrop({...itemData, pipelineType}, status);
       }
     } catch (error) {
       console.error('Error parsing dropped data:', error);
@@ -60,7 +62,12 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
         onDrop={handleDrop}
       >
         {items.map((item) => (
-          <KanbanCard key={item.id} item={item} draggable pipelineType={pipelineType} />
+          <KanbanCard 
+            key={item.id} 
+            item={item} 
+            draggable 
+            pipelineType={pipelineType}
+          />
         ))}
         
         {items.length === 0 && (

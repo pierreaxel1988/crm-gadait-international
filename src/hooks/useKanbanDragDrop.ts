@@ -12,6 +12,7 @@ export const useKanbanDragDrop = (
     title: string;
     status: LeadStatus;
     items: ExtendedKanbanItem[];
+    pipelineType?: 'purchase' | 'rental';
   }[]>>
 ) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -64,10 +65,24 @@ export const useKanbanDragDrop = (
         return;
       }
       
-      // Update the lead status
+      // Add an action to the lead's history for the status change
+      const currentDate = new Date().toISOString();
+      const actionHistory = [...(fullLead.actionHistory || [])];
+      
+      // Add status change to action history
+      actionHistory.push({
+        id: crypto.randomUUID(),
+        actionType: 'Status Change',
+        notes: `Status changed from ${item.status} to ${newStatus}`,
+        createdAt: currentDate
+      });
+      
+      // Update the lead status and action history
       const updatedLead = {
         ...fullLead,
-        status: newStatus
+        status: newStatus,
+        lastContactedAt: currentDate,
+        actionHistory: actionHistory
       };
       
       // Save the changes using our service
@@ -76,7 +91,11 @@ export const useKanbanDragDrop = (
       // Also update directly in Supabase as a backup measure
       const { error } = await supabase
         .from('leads')
-        .update({ status: newStatus })
+        .update({ 
+          status: newStatus,
+          last_contacted_at: currentDate,
+          action_history: actionHistory
+        })
         .eq('id', item.id);
         
       if (error) {
