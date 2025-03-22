@@ -34,7 +34,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
 
     console.log("Prepared Supabase lead data:", dataWithImportedDate);
     
-    // First, try to create the lead in Supabase using maybeSingle instead of single
+    // Create the lead in Supabase using maybeSingle
     const { data, error } = await supabase
       .from('leads')
       .insert(dataWithImportedDate)
@@ -43,33 +43,15 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       
     if (error) {
       console.error("Error creating lead in Supabase:", error);
-      
-      // Try again with select() instead of maybeSingle
-      const retryResult = await supabase
-        .from('leads')
-        .insert(dataWithImportedDate)
-        .select('*');
-        
-      if (retryResult.error) {
-        console.error("Second attempt error:", retryResult.error);
-        throw new Error(`Failed to create lead: ${retryResult.error.message}`);
-      }
-      
-      if (retryResult.data && retryResult.data.length > 0) {
-        console.log("Lead created successfully (retry):", retryResult.data[0]);
-        return mapToLeadDetailed(retryResult.data[0]);
-      }
-      
       throw new Error(`Failed to create lead: ${error.message}`);
     }
     
     if (data) {
       console.log("Lead created successfully:", data);
-      // Map the Supabase response to LeadDetailed
       return mapToLeadDetailed(data);
     }
     
-    // If Supabase insertion fails but no error is thrown, fall back to local storage
+    // Fallback to local storage if needed
     console.log("No data returned from Supabase, using fallback storage");
     const leads = await getLeads();
     const newLead = { 

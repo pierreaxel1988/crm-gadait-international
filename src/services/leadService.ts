@@ -9,6 +9,7 @@ import {
   convertToSimpleLead
 } from "./leadCore";
 import { addActionToLead } from "./leadActions";
+import { toast } from "@/hooks/use-toast";
 
 export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt">): Promise<LeadDetailed | null> => {
   try {
@@ -30,11 +31,15 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
         console.log("No assignedTo value, looking for Pierre Axel");
         const { supabase } = await import('@/integrations/supabase/client');
         
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('team_members')
           .select('id')
           .ilike('name', '%pierre axel gadait%')
           .maybeSingle();
+          
+        if (error) {
+          console.error("Error fetching Pierre Axel:", error);
+        }
           
         if (data && data.id) {
           console.log("Found Pierre Axel, assigning lead to:", data.id);
@@ -52,9 +57,22 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     // Continue with the creation of the lead
     const result = await createLeadCore(leadData);
     console.log("Lead creation result:", result);
+    
+    if (result) {
+      toast({
+        title: "Lead créé avec succès",
+        description: "Le nouveau lead a été ajouté à la base de données.",
+      });
+    }
+    
     return result;
   } catch (error) {
     console.error("Error in leadService.createLead:", error);
+    toast({
+      variant: "destructive",
+      title: "Erreur lors de la création du lead",
+      description: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
+    });
     throw error; // Re-throw to allow handling by the caller
   }
 };
