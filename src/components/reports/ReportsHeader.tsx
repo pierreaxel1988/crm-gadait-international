@@ -13,7 +13,7 @@ const ReportsHeader: React.FC<ReportsHeaderProps> = ({ period, setPeriod }) => {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-futuraMd">Rapports</h1>
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-futura">Rapports</h1>
         <p className="text-chocolate-dark font-futuraLight mt-1">Analysez les performances et visualisez les tendances</p>
       </div>
       
