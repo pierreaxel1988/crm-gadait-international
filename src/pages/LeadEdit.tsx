@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LeadForm from '@/components/leads/LeadForm';
@@ -12,7 +13,6 @@ import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
 import CustomButton from '@/components/ui/CustomButton';
 import { useAuth } from '@/hooks/useAuth';
-import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 
 const LeadEdit = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,7 +22,6 @@ const LeadEdit = () => {
   const [activeTab, setActiveTab] = useState('actions');
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
-  const [assignedAgent, setAssignedAgent] = useState<string | undefined>(undefined);
   
   const {
     isActionDialogOpen,
@@ -49,9 +48,6 @@ const LeadEdit = () => {
           const leadData = await getLead(id);
           console.log("Fetched lead data:", leadData);
           setLead(leadData || undefined);
-          if (leadData) {
-            setAssignedAgent(leadData.assignedTo);
-          }
         } catch (error) {
           toast({
             variant: "destructive",
@@ -76,10 +72,6 @@ const LeadEdit = () => {
         ...data,
         id: id || data.id
       };
-      
-      if (isAdmin && assignedAgent !== lead?.assignedTo) {
-        leadDataToUpdate.assignedTo = assignedAgent;
-      }
       
       console.log("Final data to update:", leadDataToUpdate);
       
@@ -157,17 +149,6 @@ const LeadEdit = () => {
         onAddAction={handleAddAction} 
         onDelete={handleDelete}
       />
-
-      {isAdmin && lead && (
-        <div className="luxury-card p-4 border-loro-sand">
-          <h2 className="text-lg font-medium mb-4">Réattribution du lead</h2>
-          <TeamMemberSelect
-            value={assignedAgent}
-            onChange={(value) => setAssignedAgent(value)}
-            label="Attribuer ce lead à"
-          />
-        </div>
-      )}
 
       <Tabs 
         value={activeTab} 
