@@ -28,7 +28,8 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     const dataWithImportedDate = {
       ...supabaseLeadData,
       imported_at: new Date().toISOString(),
-      pipeline_type: leadData.pipelineType // Make sure pipeline_type is explicitly set
+      pipeline_type: leadData.pipelineType, // Make sure pipeline_type is explicitly set
+      assigned_to: leadData.assignedTo // Ensure assignment is preserved
     };
 
     console.log("Prepared Supabase lead data:", dataWithImportedDate);

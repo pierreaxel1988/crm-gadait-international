@@ -21,7 +21,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     leadData.pipeline_type = leadData.pipelineType;
   }
   
-  // Si un agent n'est pas déjà assigné, chercher l'ID de Pierre Axel Gadait
+  // If no agent is assigned and the user isn't already assigned, find Pierre Axel Gadait
   if (!leadData.assignedTo) {
     try {
       const { supabase } = await import('@/integrations/supabase/client');
@@ -40,7 +40,9 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     }
   }
 
-  // Continuer avec la création du lead
+  console.log("leadService: Creating lead with processed data:", leadData);
+  
+  // Continue with the creation of the lead
   return createLeadCore(leadData);
 };
 

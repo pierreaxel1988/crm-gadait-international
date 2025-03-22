@@ -13,49 +13,62 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 const LeadNew = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const [assignedAgent, setAssignedAgent] = useState<string | undefined>(undefined);
   const [pipelineType, setPipelineType] = useState<'purchase' | 'rental'>('purchase');
 
   const handleSubmit = (data: LeadDetailed) => {
     try {
-      // Si l'utilisateur est admin et a sélectionné un commercial
+      // Deep copy to avoid modifying the original data
+      const newLeadData = JSON.parse(JSON.stringify(data));
+      delete newLeadData.id;
+      delete newLeadData.createdAt;
+      
+      // If user is admin and has selected a commercial
       if (isAdmin && assignedAgent) {
-        data.assignedTo = assignedAgent;
+        newLeadData.assignedTo = assignedAgent;
+      } else if (!isAdmin && user) {
+        // If not admin and user is logged in, assign to themselves
+        newLeadData.assignedTo = user.id;
       }
       
-      const { id, createdAt, ...newLeadData } = data;
-      
-      // S'assurer que le type de pipeline est bien défini dans les deux champs
+      // Ensure pipeline type is properly set in both fields
       newLeadData.pipelineType = pipelineType;
-      newLeadData.pipeline_type = pipelineType; // Assurer la compatibilité avec la base de données
+      newLeadData.pipeline_type = pipelineType; // For database compatibility
       
-      // Créer le lead
+      console.log("Creating lead with data:", newLeadData);
+      
+      // Create the lead
       createLead(newLeadData)
         .then((createdLead) => {
-          toast({
-            title: "Lead créé",
-            description: assignedAgent 
-              ? "Le lead a été créé et attribué avec succès."
-              : "Le lead a été créé avec succès."
-          });
-          
-          // Rediriger vers la page pipeline au lieu de leads
-          navigate(`/pipeline?tab=${pipelineType}`);
+          if (createdLead) {
+            toast({
+              title: "Lead créé",
+              description: assignedAgent 
+                ? "Le lead a été créé et attribué avec succès."
+                : "Le lead a été créé avec succès."
+            });
+            
+            // Redirect to the pipeline page with the correct tab
+            navigate(`/pipeline?tab=${pipelineType}`);
+          } else {
+            throw new Error("No lead data returned");
+          }
         })
         .catch((error) => {
           console.error("Erreur lors de la création du lead:", error);
           toast({
             variant: "destructive",
             title: "Erreur",
-            description: "Impossible de créer le nouveau lead."
+            description: "Impossible de créer le nouveau lead. Veuillez réessayer."
           });
         });
     } catch (error) {
+      console.error("Exception in handleSubmit:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de créer le nouveau lead."
+        description: "Impossible de créer le nouveau lead. Veuillez réessayer."
       });
     }
   };
