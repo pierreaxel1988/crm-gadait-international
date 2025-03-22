@@ -9,11 +9,13 @@ import CustomButton from '@/components/ui/CustomButton';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const LeadNew = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const [assignedAgent, setAssignedAgent] = useState<string | undefined>(undefined);
+  const [pipelineType, setPipelineType] = useState<'purchase' | 'rental'>('purchase');
   const [autoCreatingLead, setAutoCreatingLead] = useState<boolean>(true);
 
   // Automatically create lead from Idealista message
@@ -75,10 +77,8 @@ const LeadNew = () => {
       
       const { id, createdAt, ...newLeadData } = data;
       
-      // Ensure pipelineType is set if not already defined
-      if (!newLeadData.pipelineType) {
-        newLeadData.pipelineType = 'purchase';
-      }
+      // Ensure pipelineType is set
+      newLeadData.pipelineType = pipelineType;
       
       createLead(newLeadData);
       
@@ -115,20 +115,37 @@ const LeadNew = () => {
           <ArrowLeft className="h-4 w-4" />
         </CustomButton>
         <div>
-          <h1 className="text-2xl md:text-3xl font-futuraMd text-loro-navy">Nouveau Lead</h1>
-          <p className="text-loro-hazel">Ajouter un nouveau lead dans le système</p>
+          <h1 className="text-2xl md:text-3xl font-futura text-loro-navy">Nouveau Lead</h1>
+          <p className="text-chocolate-dark font-futuraLight">Ajouter un nouveau lead dans le système</p>
         </div>
       </div>
 
       {isAdmin && (
         <div className="luxury-card p-4 border-loro-sand">
           <h2 className="text-lg font-medium mb-4">Attribution du lead</h2>
-          <TeamMemberSelect
-            value={assignedAgent}
-            onChange={handleAgentChange}
-            label="Attribuer ce lead à"
-            autoSelectPierreAxel={true}
-          />
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-1 block">Type de pipeline</label>
+              <Select
+                value={pipelineType}
+                onValueChange={(value: 'purchase' | 'rental') => setPipelineType(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Sélectionner un pipeline" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="purchase">Achat</SelectItem>
+                  <SelectItem value="rental">Location</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <TeamMemberSelect
+              value={assignedAgent}
+              onChange={handleAgentChange}
+              label="Attribuer ce lead à"
+              autoSelectPierreAxel={true}
+            />
+          </div>
         </div>
       )}
 
