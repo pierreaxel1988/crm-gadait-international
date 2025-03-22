@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const LeadNew = () => {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ const LeadNew = () => {
   const [assignedAgent, setAssignedAgent] = useState<string | undefined>(undefined);
   const [pipelineType, setPipelineType] = useState<'purchase' | 'rental'>('purchase');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (data: LeadDetailed) => {
     if (isSubmitting) {
@@ -25,11 +27,12 @@ const LeadNew = () => {
     }
     
     setIsSubmitting(true);
+    setError(null);
     console.log("Starting lead creation process...");
     
     try {
       // Deep copy to avoid modifying the original data
-      const newLeadData = JSON.parse(JSON.stringify(data));
+      const newLeadData = structuredClone(data);
       delete newLeadData.id;
       delete newLeadData.createdAt;
       
@@ -67,6 +70,7 @@ const LeadNew = () => {
       }
     } catch (error) {
       console.error("Error creating lead:", error);
+      setError(error instanceof Error ? error.message : "Une erreur inconnue est survenue");
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -98,6 +102,13 @@ const LeadNew = () => {
           <p className="text-chocolate-dark font-futuraLight">Ajouter un nouveau lead dans le système</p>
         </div>
       </div>
+
+      {error && (
+        <Alert variant="destructive" className="bg-red-100 border-red-400">
+          <AlertTitle>Erreur</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       {isAdmin && (
         <div className="luxury-card p-4 border-loro-sand">

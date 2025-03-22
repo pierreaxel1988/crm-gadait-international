@@ -15,9 +15,6 @@ export const mapToLeadDetailed = (data: any): LeadDetailed => {
     console.error("Error parsing bedrooms:", e);
     parsedBedrooms = data.bedrooms;
   }
-
-  // Parse action history if present
-  let actionHistory = data.action_history || [];
   
   return {
     id: data.id,
@@ -53,8 +50,7 @@ export const mapToLeadDetailed = (data: any): LeadDetailed => {
     imported_at: data.imported_at,
     integration_source: data.integration_source,
     livingArea: data.living_area,
-    taxResidence: data.tax_residence,
-    actionHistory: actionHistory
+    taxResidence: data.tax_residence
   };
 };
 
@@ -105,8 +101,7 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
     url: leadData.url,
     pipeline_type: pipelineType,
     living_area: leadData.livingArea,
-    tax_residence: leadData.taxResidence,
-    action_history: leadData.actionHistory || []
+    tax_residence: leadData.taxResidence
   };
 };
 

@@ -50,7 +50,9 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     console.log("leadService: Creating lead with processed data:", leadData);
     
     // Continue with the creation of the lead
-    return await createLeadCore(leadData);
+    const result = await createLeadCore(leadData);
+    console.log("Lead creation result:", result);
+    return result;
   } catch (error) {
     console.error("Error in leadService.createLead:", error);
     throw error; // Re-throw to allow handling by the caller

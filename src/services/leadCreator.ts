@@ -34,17 +34,17 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
 
     console.log("Prepared Supabase lead data:", dataWithImportedDate);
     
-    // First, try to create the lead in Supabase
+    // First, try to create the lead in Supabase using maybeSingle instead of single
     const { data, error } = await supabase
       .from('leads')
       .insert(dataWithImportedDate)
       .select('*')
-      .single();
+      .maybeSingle();
       
     if (error) {
       console.error("Error creating lead in Supabase:", error);
       
-      // Try again with .select() instead of .single()
+      // Try again with select() instead of maybeSingle
       const retryResult = await supabase
         .from('leads')
         .insert(dataWithImportedDate)
