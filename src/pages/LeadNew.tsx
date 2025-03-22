@@ -19,33 +19,40 @@ const LeadNew = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (data: LeadDetailed) => {
-    if (isSubmitting) return;
+    if (isSubmitting) {
+      console.log("Submission already in progress, ignoring");
+      return;
+    }
     
     setIsSubmitting(true);
+    console.log("Starting lead creation process...");
+    
     try {
       // Deep copy to avoid modifying the original data
       const newLeadData = JSON.parse(JSON.stringify(data));
       delete newLeadData.id;
       delete newLeadData.createdAt;
       
-      // If user is admin and has selected a commercial
+      // Handle assignment based on user role
       if (isAdmin && assignedAgent) {
+        console.log("Admin assigning lead to:", assignedAgent);
         newLeadData.assignedTo = assignedAgent;
       } else if (!isAdmin && user) {
-        // If not admin and user is logged in, assign to themselves
+        console.log("Non-admin user, self-assigning lead to:", user.id);
         newLeadData.assignedTo = user.id;
       }
       
-      // Ensure pipeline type is properly set in both fields
+      // Explicitly set pipeline type in both fields for database compatibility
       newLeadData.pipelineType = pipelineType;
-      newLeadData.pipeline_type = pipelineType; // For database compatibility
+      newLeadData.pipeline_type = pipelineType;
       
-      console.log("Creating lead with data:", newLeadData);
+      console.log("Creating lead with processed data:", newLeadData);
       
       // Create the lead
       const createdLead = await createLead(newLeadData);
       
       if (createdLead) {
+        console.log("Lead created successfully:", createdLead);
         toast({
           title: "Lead créé",
           description: assignedAgent 
@@ -56,10 +63,10 @@ const LeadNew = () => {
         // Redirect to the pipeline page with the correct tab
         navigate(`/pipeline?tab=${pipelineType}`);
       } else {
-        throw new Error("No lead data returned");
+        throw new Error("Aucune donnée de lead retournée après création");
       }
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
+      console.error("Error creating lead:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -72,6 +79,7 @@ const LeadNew = () => {
 
   // Handle agent selection and sync with form data
   const handleAgentChange = (value: string | undefined) => {
+    console.log("Agent changed to:", value);
     setAssignedAgent(value);
   };
 

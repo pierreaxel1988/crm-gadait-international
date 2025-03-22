@@ -12,6 +12,8 @@ import { addActionToLead } from "./leadActions";
 
 export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt">): Promise<LeadDetailed | null> => {
   try {
+    console.log("leadService: Starting lead creation process");
+    
     // Ensure pipelineType is properly set
     if (!leadData.pipelineType) {
       leadData.pipelineType = 'purchase';
@@ -25,6 +27,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     // If no agent is assigned and the user isn't already assigned, find Pierre Axel Gadait
     if (!leadData.assignedTo) {
       try {
+        console.log("No assignedTo value, looking for Pierre Axel");
         const { supabase } = await import('@/integrations/supabase/client');
         
         const { data } = await supabase
@@ -34,7 +37,10 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
           .maybeSingle();
           
         if (data && data.id) {
+          console.log("Found Pierre Axel, assigning lead to:", data.id);
           leadData.assignedTo = data.id;
+        } else {
+          console.log("Pierre Axel not found in team members");
         }
       } catch (error) {
         console.error('Error fetching Pierre Axel ID:', error);

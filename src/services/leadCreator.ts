@@ -38,17 +38,35 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     const { data, error } = await supabase
       .from('leads')
       .insert(dataWithImportedDate)
-      .select();
+      .select('*')
+      .single();
       
     if (error) {
       console.error("Error creating lead in Supabase:", error);
+      
+      // Try again with .select() instead of .single()
+      const retryResult = await supabase
+        .from('leads')
+        .insert(dataWithImportedDate)
+        .select('*');
+        
+      if (retryResult.error) {
+        console.error("Second attempt error:", retryResult.error);
+        throw new Error(`Failed to create lead: ${retryResult.error.message}`);
+      }
+      
+      if (retryResult.data && retryResult.data.length > 0) {
+        console.log("Lead created successfully (retry):", retryResult.data[0]);
+        return mapToLeadDetailed(retryResult.data[0]);
+      }
+      
       throw new Error(`Failed to create lead: ${error.message}`);
     }
     
-    if (data && data.length > 0) {
-      console.log("Lead created successfully:", data[0]);
+    if (data) {
+      console.log("Lead created successfully:", data);
       // Map the Supabase response to LeadDetailed
-      return mapToLeadDetailed(data[0]);
+      return mapToLeadDetailed(data);
     }
     
     // If Supabase insertion fails but no error is thrown, fall back to local storage
