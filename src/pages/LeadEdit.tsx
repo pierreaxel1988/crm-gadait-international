@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LeadForm from '@/components/leads/LeadForm';
@@ -154,12 +155,48 @@ const LeadEdit = () => {
       >
         <TabsList className="w-full bg-background border-b flex justify-between overflow-x-auto">
           <TabsTrigger 
+            value="general" 
+            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+          >
+            Général
+          </TabsTrigger>
+          <TabsTrigger 
+            value="criteria" 
+            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+          >
+            Critères
+          </TabsTrigger>
+          <TabsTrigger 
+            value="status" 
+            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+          >
+            Statut
+          </TabsTrigger>
+          <TabsTrigger 
             value="actions" 
             className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
           >
             Actions/Tâches
           </TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="general" className="mt-4">
+          <div className="luxury-card p-6">
+            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="general" />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="criteria" className="mt-4">
+          <div className="luxury-card p-6">
+            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="criteria" />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="status" className="mt-4">
+          <div className="luxury-card p-6">
+            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="status" />
+          </div>
+        </TabsContent>
         
         <TabsContent value="actions" className="mt-4">
           {lead && (
