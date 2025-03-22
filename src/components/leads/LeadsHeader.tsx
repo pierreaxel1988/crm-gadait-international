@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ArrowUpDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CustomButton from '@/components/ui/CustomButton';
@@ -19,7 +19,7 @@ const LeadsHeader: React.FC<LeadsHeaderProps> = ({
 
   return <div className="flex justify-between items-center pb-4">
       <div>
-        <h1 className="text-2xl md:text-3xl font-futuraMd">Leads</h1>
+        <h1 className="text-2xl md:text-3xl font-futura">Leads</h1>
         <p className="text-loro-hazel">Liste de vos leads et prospects</p>
       </div>
 
