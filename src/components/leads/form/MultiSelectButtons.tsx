@@ -2,36 +2,27 @@
 import React from 'react';
 import BaseSelectButtons from './BaseSelectButtons';
 
-export interface MultiSelectButtonsProps<T extends string> {
-  options: T[];
+interface MultiSelectButtonsProps<T extends string> {
+  options: readonly T[] | T[];
   selectedValues: T[];
-  onToggle?: (value: T) => void;
-  onChange?: (value: T) => void;
-  singleSelect?: boolean;
+  onChange: (value: T) => void;
+  specialOption?: T;
 }
 
-const MultiSelectButtons = <T extends string>({ 
-  options, 
-  selectedValues, 
-  onToggle, 
+const MultiSelectButtons = <T extends string>({
+  options,
+  selectedValues = [],
   onChange,
-  singleSelect = false 
+  specialOption,
 }: MultiSelectButtonsProps<T>) => {
-  const handleClick = (value: T) => {
-    if (onChange) {
-      // If onChange is provided, use it (typically for single select)
-      onChange(value);
-    } else if (onToggle) {
-      // If onToggle is provided, use it (for multi-select)
-      onToggle(value);
-    }
-  };
-
+  const isSelected = (option: T) => selectedValues.includes(option);
+  
   return (
-    <BaseSelectButtons 
-      options={options} 
-      isSelected={(option) => selectedValues.includes(option)}
-      onSelectOption={handleClick}
+    <BaseSelectButtons
+      options={options}
+      isSelected={isSelected}
+      onSelectOption={onChange}
+      specialOption={specialOption}
     />
   );
 };

@@ -8,6 +8,7 @@ interface BaseSelectButtonsProps<T extends string> {
   isSelected: (option: T) => boolean;
   onSelectOption: (option: T) => void;
   renderOptionContent?: (option: T, isSelected: boolean) => React.ReactNode;
+  specialOption?: T; // Special option like "8+" that needs special handling
 }
 
 const BaseSelectButtons = <T extends string>({
@@ -15,6 +16,7 @@ const BaseSelectButtons = <T extends string>({
   isSelected,
   onSelectOption,
   renderOptionContent,
+  specialOption,
 }: BaseSelectButtonsProps<T>) => {
   return (
     <div className="flex flex-wrap gap-2">

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, Country } from '@/types/lead';
 import FormInput from '../FormInput';
@@ -66,10 +65,14 @@ const PropertyDetailsSection = ({
     if (!formData.bedrooms) return [];
     
     if (Array.isArray(formData.bedrooms)) {
-      return formData.bedrooms.map(num => num.toString());
+      // Map bedrooms array to strings, handling special case for 8 and higher
+      return formData.bedrooms.map(num => {
+        return num >= 8 ? "8+" : num.toString();
+      });
     }
     
-    return [formData.bedrooms.toString()];
+    // Handle single value case
+    return [formData.bedrooms >= 8 ? "8+" : formData.bedrooms.toString()];
   };
   
   // Handle bedroom selection
@@ -186,6 +189,7 @@ const PropertyDetailsSection = ({
           options={bedroomOptions}
           selectedValues={getSelectedBedrooms()}
           onChange={handleBedroomToggle}
+          specialOption="8+"
         />
       </div>
 
