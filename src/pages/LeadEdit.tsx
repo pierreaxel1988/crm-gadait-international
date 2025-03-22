@@ -90,11 +90,10 @@ const LeadEdit = () => {
           description: "Les modifications ont été enregistrées avec succès."
         });
         
-        setLead(updatedLead);
-        
         if (id) {
           const refreshedLead = await getLead(id);
           if (refreshedLead) {
+            console.log("Lead refreshed after update:", refreshedLead);
             setLead(refreshedLead);
           }
         }
