@@ -173,12 +173,6 @@ const LeadEdit = () => {
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="informations" className="mt-4">
-          <div className="luxury-card p-6">
-            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="informations" />
-          </div>
-        </TabsContent>
-        
         <TabsContent value="criteres" className="mt-4">
           <div className="luxury-card p-6">
             <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="criteres" />
