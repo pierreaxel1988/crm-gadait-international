@@ -33,7 +33,7 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({
       try {
         toast({
           title: "Extraction en cours",
-          description: "Notre IA analyse l'annonce immobilière..."
+          description: "Nous analysons directement le HTML de l'annonce immobilière..."
         });
         onExtract(value);
       } catch (error) {
@@ -105,18 +105,18 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({
                   {isLoading ? (
                     <>
                       <Loader2 size={14} className="mr-1 animate-spin" />
-                      IA en analyse...
+                      Analyse HTML en cours...
                     </>
                   ) : (
                     <>
                       <Sparkles size={14} className="mr-1" />
-                      Extraire avec IA
+                      Extraire depuis HTML
                     </>
                   )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Notre IA analyse l'annonce pour extraire automatiquement le pays, la localisation, le type de bien, le prix et plus encore</p>
+                <p>Nous analysons le HTML de l'annonce pour extraire automatiquement le pays, la localisation, le type de bien, le prix et plus encore</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
