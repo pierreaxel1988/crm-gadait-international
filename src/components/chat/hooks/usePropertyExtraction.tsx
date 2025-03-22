@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizePropertyType } from '../utils/propertyTypeUtils';
+import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
 
 export const usePropertyExtraction = () => {
   const [propertyUrl, setPropertyUrl] = useState<string>('');
@@ -203,7 +205,7 @@ export const usePropertyExtraction = () => {
       standardizedData.source = 'Le Figaro';
     } else if (isIdealista) {
       // Standardize data from Idealista
-      standardizedData.propertyType = mapPropertyType(data.tipoInmueble || data.propertyType || data.type || data["Property type"] || null);
+      standardizedData.propertyType = normalizePropertyType(data.tipoInmueble || data.propertyType || data.type || data["Property type"] || null);
       standardizedData.location = data.ubicacionAnuncio || data.location || data.Location || null;
       standardizedData.price = data.precioAnuncio || data.price || data.Price || null;
       standardizedData.bedrooms = data.habitaciones || data.bedrooms || data["Number of bedrooms"] || null;
@@ -225,7 +227,7 @@ export const usePropertyExtraction = () => {
       standardizedData.source = 'Idealista';
     } else {
       // Generic standardization
-      standardizedData.propertyType = mapPropertyType(data.propertyType || data.type || data['Property type'] || null);
+      standardizedData.propertyType = normalizePropertyType(data.propertyType || data.type || data['Property type'] || null);
       standardizedData.location = data.location || data.Location || null;
       standardizedData.price = data.price || data.Price || null;
       standardizedData.bedrooms = data.bedrooms || data['Number of bedrooms'] || null;

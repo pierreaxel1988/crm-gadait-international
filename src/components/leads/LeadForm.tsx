@@ -142,23 +142,27 @@ const LeadForm: React.FC<LeadFormProps> = ({
     return 'Portails immobiliers';
   };
 
-  // Déterminer le pays en fonction de l'URL et du contenu
-  const detectCountryFromUrl = (url: string, location?: string): Country | undefined => {
-    if (!url) return undefined;
+  // Trouver la localisation dans LOCATIONS_BY_COUNTRY qui correspond le mieux
+  const findBestMatchingLocation = (location: string, country: string): string | undefined => {
+    if (!location || !country) return undefined;
     
-    if (url.includes('.es') || location?.includes('España') || location?.includes('Spain')) {
-      return 'Spain';
-    } else if (url.includes('.fr') || location?.includes('France')) {
-      return 'France';
-    } else if (url.includes('.pt') || location?.includes('Portugal')) {
-      return 'Portugal';
-    } else if (url.includes('.uk') || location?.includes('United Kingdom')) {
-      return 'United Kingdom';
-    } else if (url.includes('.ch') || location?.includes('Switzerland')) {
-      return 'Switzerland';
-    }
+    const availableLocations = LOCATIONS_BY_COUNTRY[country as keyof typeof LOCATIONS_BY_COUNTRY];
+    if (!availableLocations) return undefined;
     
-    return undefined;
+    // Recherche d'une correspondance exacte d'abord
+    const exactMatch = availableLocations.find(loc => 
+      loc.toLowerCase() === location.toLowerCase()
+    );
+    
+    if (exactMatch) return exactMatch;
+    
+    // Recherche d'une correspondance partielle
+    const partialMatch = availableLocations.find(loc => 
+      location.toLowerCase().includes(loc.toLowerCase()) || 
+      loc.toLowerCase().includes(location.toLowerCase())
+    );
+    
+    return partialMatch;
   };
 
   useEffect(() => {
@@ -166,7 +170,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
       setFormData(prev => {
         // Détecter la source et le pays à partir de l'URL
         const source = detectSourceFromUrl(propertyUrl);
-        const country = detectCountryFromUrl(propertyUrl, extractedData.location);
+        const country = extractedData.country || prev.country;
         
         // Traiter les types de propriété
         let propertyTypes = prev.propertyTypes || [];
@@ -178,12 +182,14 @@ const LeadForm: React.FC<LeadFormProps> = ({
         let bedroomsValue = prev.bedrooms;
         if (extractedData.bedrooms) {
           const extractedBedrooms = parseInt(extractedData.bedrooms.toString());
-          if (Array.isArray(prev.bedrooms)) {
-            if (!prev.bedrooms.includes(extractedBedrooms)) {
-              bedroomsValue = [...prev.bedrooms, extractedBedrooms];
+          if (!isNaN(extractedBedrooms)) {
+            if (Array.isArray(prev.bedrooms)) {
+              if (!prev.bedrooms.includes(extractedBedrooms)) {
+                bedroomsValue = [...prev.bedrooms, extractedBedrooms];
+              }
+            } else {
+              bedroomsValue = [extractedBedrooms];
             }
-          } else {
-            bedroomsValue = [extractedBedrooms];
           }
         }
 
@@ -202,6 +208,14 @@ const LeadForm: React.FC<LeadFormProps> = ({
 
         // Extraire et définir les aménités si disponibles
         let amenities = prev.amenities || [];
+        if (extractedData.amenities && Array.isArray(extractedData.amenities)) {
+          extractedData.amenities.forEach((amenity: string) => {
+            if (!amenities.includes(amenity)) {
+              amenities.push(amenity);
+            }
+          });
+        }
+        
         if (extractedData.description) {
           const description = extractedData.description.toLowerCase();
           AMENITIES.forEach(amenity => {
@@ -221,18 +235,28 @@ const LeadForm: React.FC<LeadFormProps> = ({
           }
         }
 
+        // Trouver la meilleure correspondance pour la localisation
+        let desiredLocation = prev.desiredLocation;
+        if (country && extractedData.location) {
+          const bestMatch = findBestMatchingLocation(extractedData.location, country);
+          if (bestMatch) {
+            desiredLocation = bestMatch;
+          }
+        }
+
         return {
           ...prev,
           propertyReference: extractedData.reference || prev.propertyReference,
           budget: budgetValue,
-          desiredLocation: extractedData.location || prev.desiredLocation,
+          desiredLocation,
           propertyTypes,
           bedrooms: bedroomsValue,
           url: propertyUrl || prev.url,
           source: source || prev.source,
-          country: country || prev.country,
+          country,
           amenities,
-          livingArea
+          livingArea,
+          currency: extractedData.currency || prev.currency
         };
       });
 

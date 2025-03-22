@@ -73,11 +73,11 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({ value, onChange, on
                   className="ml-auto text-xs py-1 h-auto bg-loro-navy text-white hover:bg-loro-navy/90 flex items-center gap-1"
                 >
                   <Sparkles size={14} />
-                  Remplir le formulaire automatiquement
+                  Extraire les données de l'annonce
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Récupère automatiquement les infos de l'annonce et remplit le formulaire (pays, localisation, type de bien, etc.)</p>
+                <p>Récupère automatiquement le pays, la localisation, le type de bien, le nombre de chambres, le budget et plus encore</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
