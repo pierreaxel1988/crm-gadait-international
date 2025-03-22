@@ -4,7 +4,7 @@ import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BaseSelectButtonsProps<T extends string> {
-  options: T[];
+  options: readonly T[] | T[]; // Update to handle readonly arrays
   isSelected: (option: T) => boolean;
   onSelectOption: (option: T) => void;
   renderOptionContent?: (option: T, isSelected: boolean) => React.ReactNode;
