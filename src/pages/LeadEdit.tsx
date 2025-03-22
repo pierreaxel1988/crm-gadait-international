@@ -154,12 +154,6 @@ const LeadEdit = () => {
       >
         <TabsList className="w-full bg-background border-b flex justify-between overflow-x-auto">
           <TabsTrigger 
-            value="informations" 
-            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
-          >
-            Informations générales
-          </TabsTrigger>
-          <TabsTrigger 
             value="criteres" 
             className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
           >
