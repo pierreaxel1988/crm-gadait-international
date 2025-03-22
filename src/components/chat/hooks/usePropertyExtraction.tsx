@@ -53,14 +53,29 @@ export const usePropertyExtraction = () => {
           
           // Amélioration: Extraire l'identifiant Idealista
           if (isIdealistaUrl) {
+            // Capture le numéro de référence d'Idealista plus efficacement
+            let idealistaId = '';
             const idealistaIdMatch = propertyUrl.match(/idealista\.(?:com|es)\/(\d+)/);
             if (idealistaIdMatch && idealistaIdMatch[1]) {
-              propertyData.reference = propertyData.reference || idealistaIdMatch[1];
+              idealistaId = idealistaIdMatch[1];
+            } else {
+              // Essayer d'extraire le numéro de référence du texte de l'URL
+              const refNumberMatch = propertyUrl.match(/\/(\d{6,})/);
+              if (refNumberMatch && refNumberMatch[1]) {
+                idealistaId = refNumberMatch[1];
+              }
+            }
+            
+            if (idealistaId) {
+              propertyData.reference = propertyData.reference || idealistaId;
             }
           }
           
           // Clean up and standardize the data
           const standardizedData = standardizePropertyData(propertyData, isFigaroUrl, isIdealistaUrl);
+          console.log("Raw data to standardize:", propertyData);
+          console.log("Standardized data:", standardizedData);
+          
           setExtractedData(standardizedData);
           setIsLoading(false);
           
@@ -90,17 +105,47 @@ export const usePropertyExtraction = () => {
         throw new Error(`Erreur lors du scraping: ${scrapeError.message}`);
       }
 
-      if (scrapedData && Object.keys(scrapedData).length > 0) {
-        // Amélioration: Extraire l'identifiant Idealista
+      // Extraire les données du premier élément de propriétés s'il existe
+      const propertyData = scrapedData && scrapedData.properties && scrapedData.properties.length > 0 
+        ? scrapedData.properties[0] 
+        : scrapedData;
+
+      if (propertyData && Object.keys(propertyData).length > 0) {
+        // Amélioration: Extraction de données depuis Idealista
         if (isIdealistaUrl) {
+          let idealistaId = '';
           const idealistaIdMatch = propertyUrl.match(/idealista\.(?:com|es)\/(\d+)/);
           if (idealistaIdMatch && idealistaIdMatch[1]) {
-            scrapedData.reference = scrapedData.reference || idealistaIdMatch[1];
+            idealistaId = idealistaIdMatch[1];
+          } else {
+            // Essayer d'extraire le numéro de référence du texte de l'URL
+            const refNumberMatch = propertyUrl.match(/\/(\d{6,})/);
+            if (refNumberMatch && refNumberMatch[1]) {
+              idealistaId = refNumberMatch[1];
+            }
+          }
+          
+          if (idealistaId) {
+            propertyData.reference = propertyData.reference || idealistaId;
+          }
+          
+          // Extraire manuellement les données de l'URL idealista si possible
+          const titleMatch = propertyUrl.match(/casa|chalet|villa|apartamento|piso/i);
+          if (titleMatch && !propertyData.type) {
+            propertyData.type = titleMatch[0];
+          }
+          
+          // Tenter d'extraire Marbella ou autre localisation
+          const locationMatch = propertyUrl.match(/marbella|malaga|barcelona|madrid|valencia/i);
+          if (locationMatch && !propertyData.location) {
+            propertyData.location = locationMatch[0];
           }
         }
         
         // Clean up and standardize the data
-        const standardizedData = standardizePropertyData(scrapedData, isFigaroUrl, isIdealistaUrl);
+        const standardizedData = standardizePropertyData(propertyData, isFigaroUrl, isIdealistaUrl);
+        console.log("Scraped property data:", propertyData);
+        console.log("Standardized data:", standardizedData);
         setExtractedData(standardizedData);
         
         toast({
@@ -160,11 +205,24 @@ export const usePropertyExtraction = () => {
     
     // Extraire l'identifiant de la propriété
     if (url.includes('idealista')) {
+      // Amélioration pour extraire la référence d'Idealista
+      let idealistaId = '';
       const idealistaIdMatch = url.match(/idealista\.(?:com|es)\/(\d+)/);
       if (idealistaIdMatch && idealistaIdMatch[1]) {
-        data.reference = idealistaIdMatch[1];
-        data.source = 'Idealista';
+        idealistaId = idealistaIdMatch[1];
+      } else {
+        // Alternative pour extraire le numéro de l'URL
+        const refNumberMatch = url.match(/\/(\d{6,})/);
+        if (refNumberMatch && refNumberMatch[1]) {
+          idealistaId = refNumberMatch[1];
+        }
       }
+      
+      if (idealistaId) {
+        data.reference = idealistaId;
+      }
+      
+      data.source = 'Idealista';
       
       // Essayer de détecter le pays pour Idealista
       if (url.includes('.es')) {
@@ -174,6 +232,24 @@ export const usePropertyExtraction = () => {
       } else if (url.includes('.it')) {
         data.country = 'Italy';
       }
+      
+      // Tenter d'extraire la localisation
+      const locationMatches = url.match(/marbella|malaga|madrid|barcelona|valencia|sevilla|granada|ibiza/i);
+      if (locationMatches && locationMatches[0]) {
+        data.location = locationMatches[0].charAt(0).toUpperCase() + locationMatches[0].slice(1);
+      }
+      
+      // Tenter d'extraire le type de propriété
+      const typeMatches = url.match(/villa|chalet|casa|piso|apartamento/i);
+      if (typeMatches && typeMatches[0]) {
+        data.propertyType = typeMatches[0];
+      }
+      
+      // Chercher un prix dans l'URL
+      const priceMatch = url.match(/(\d+[\d\.\,]*)\s*(?:euros?|€)/i);
+      if (priceMatch && priceMatch[1]) {
+        data.price = priceMatch[1].replace(/[^\d]/g, '');
+      }
     } else if (url.includes('lefigaro')) {
       const figaroIdMatch = url.match(/\/([a-zA-Z0-9-]+)(?:\?|$)/);
       if (figaroIdMatch && figaroIdMatch[1]) {
@@ -181,6 +257,12 @@ export const usePropertyExtraction = () => {
         data.source = 'Le Figaro';
       }
       data.country = 'France';
+      
+      // Tenter d'extraire la localisation
+      const locationMatches = url.match(/paris|nice|cannes|antibes|lyon|bordeaux/i);
+      if (locationMatches && locationMatches[0]) {
+        data.location = locationMatches[0].charAt(0).toUpperCase() + locationMatches[0].slice(1);
+      }
     }
     
     return data;
@@ -204,25 +286,81 @@ export const usePropertyExtraction = () => {
       standardizedData.country = 'France';
       standardizedData.source = 'Le Figaro';
     } else if (isIdealista) {
-      // Standardize data from Idealista
-      standardizedData.propertyType = normalizePropertyType(data.tipoInmueble || data.propertyType || data.type || data["Property type"] || null);
-      standardizedData.location = data.ubicacionAnuncio || data.location || data.Location || null;
-      standardizedData.price = data.precioAnuncio || data.price || data.Price || null;
-      standardizedData.bedrooms = data.habitaciones || data.bedrooms || data["Number of bedrooms"] || null;
+      // Standardize data from Idealista - Améliorer la capture de données
+      standardizedData.propertyType = normalizePropertyType(
+        data.tipoInmueble || 
+        data.propertyType || 
+        data.type || 
+        data["Property type"] || 
+        data.title ||  // Utiliser le titre s'il contient des infos sur le type
+        null
+      );
+      
+      // Extraire le pays
+      standardizedData.country = 
+        data.country || 
+        data.Country || 
+        (propertyUrl.includes('.es') ? 'Spain' : 
+        propertyUrl.includes('.pt') ? 'Portugal' : 
+        propertyUrl.includes('.it') ? 'Italy' : 'Spain');  // Par défaut Espagne pour Idealista
+        
+      // Meilleure extraction de la localisation
+      standardizedData.location = 
+        data.ubicacionAnuncio || 
+        data.location || 
+        data.Location || 
+        extractLocationFromTitle(data.title) ||
+        null;
+      
+      // Meilleure extraction du prix
+      let price = null;
+      if (data.precioAnuncio) {
+        price = data.precioAnuncio;
+      } else if (data.price || data.Price) {
+        price = data.price || data.Price;
+      } else if (data.title && /\d+[\.\,]?\d*\s*(€|EUR|euros)/i.test(data.title)) {
+        // Extraire le prix du titre s'il contient un montant
+        const priceMatch = data.title.match(/(\d+[\.\,]?\d*)\s*(€|EUR|euros)/i);
+        if (priceMatch) price = priceMatch[1];
+      }
+      standardizedData.price = price;
+      
+      // Meilleure extraction du nombre de chambres
+      let bedrooms = null;
+      if (data.habitaciones) {
+        bedrooms = data.habitaciones;
+      } else if (data.bedrooms || data["Number of bedrooms"]) {
+        bedrooms = data.bedrooms || data["Number of bedrooms"];
+      } else if (data.title && /\d+\s*(hab|dormitorios|bedrooms)/i.test(data.title)) {
+        // Extraire les chambres du titre
+        const bedroomsMatch = data.title.match(/(\d+)\s*(hab|dormitorios|bedrooms)/i);
+        if (bedroomsMatch) bedrooms = bedroomsMatch[1];
+      } else if (data.description && /\d+\s*(hab|dormitorios|bedrooms)/i.test(data.description)) {
+        // Extraire les chambres de la description
+        const bedroomsMatch = data.description.match(/(\d+)\s*(hab|dormitorios|bedrooms)/i);
+        if (bedroomsMatch) bedrooms = bedroomsMatch[1];
+      }
+      standardizedData.bedrooms = bedrooms;
+      
       standardizedData.reference = data.referenciaAnuncio || data.reference || data["Property reference"] || null;
       standardizedData.description = data.descripcion || data.description || data.Description || null;
-      standardizedData.area = data.superficie || data.area || data["Size or area"] || null;
       
-      // Déterminer le pays pour Idealista
-      if (propertyUrl.includes('.es') || data.Country === 'Spain') {
-        standardizedData.country = 'Spain';
-      } else if (propertyUrl.includes('.pt') || data.Country === 'Portugal') {
-        standardizedData.country = 'Portugal';
-      } else if (propertyUrl.includes('.it') || data.Country === 'Italy') {
-        standardizedData.country = 'Italy';
-      } else if (data.Country) {
-        standardizedData.country = data.Country;
+      // Extraction améliorée de la surface
+      let area = null;
+      if (data.superficie) {
+        area = data.superficie;
+      } else if (data.area || data["Size or area"]) {
+        area = data.area || data["Size or area"];
+      } else if (data.title && /\d+\s*m²/i.test(data.title)) {
+        // Extraire la surface du titre
+        const areaMatch = data.title.match(/(\d+)\s*m²/i);
+        if (areaMatch) area = areaMatch[1] + " m²";
+      } else if (data.description && /\d+\s*m²/i.test(data.description)) {
+        // Extraire la surface de la description
+        const areaMatch = data.description.match(/(\d+)\s*m²/i);
+        if (areaMatch) area = areaMatch[1] + " m²";
       }
+      standardizedData.area = area;
       
       standardizedData.source = 'Idealista';
     } else {
@@ -249,10 +387,39 @@ export const usePropertyExtraction = () => {
     // Add currency if it exists
     if (data.Currency || data.currency) {
       standardizedData.currency = data.Currency || data.currency;
+    } else if (standardizedData.country === 'Spain' || 
+              standardizedData.country === 'France' || 
+              standardizedData.country === 'Portugal' || 
+              standardizedData.country === 'Italy') {
+      standardizedData.currency = 'EUR';
     }
 
     console.log("Standardized data:", standardizedData);
     return standardizedData;
+  };
+  
+  // Extraire la localisation du titre
+  const extractLocationFromTitle = (title: string | null): string | null => {
+    if (!title) return null;
+    
+    // Liste des localisations communes en Espagne
+    const locations = [
+      'Marbella', 'Malaga', 'Madrid', 'Barcelona', 'Valencia', 
+      'Sevilla', 'Granada', 'Ibiza', 'La Zagaleta', 'Benahavis',
+      'Estepona', 'Sotogrande', 'Costa del Sol', 'Puerto Banus'
+    ];
+    
+    // Convertir le titre en minuscules pour la recherche insensible à la casse
+    const lowerTitle = title.toLowerCase();
+    
+    // Rechercher des correspondances
+    for (const location of locations) {
+      if (lowerTitle.includes(location.toLowerCase())) {
+        return location;
+      }
+    }
+    
+    return null;
   };
   
   // Fonction pour mapper les types de propriété

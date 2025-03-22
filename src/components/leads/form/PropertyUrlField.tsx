@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ExternalLink, Download, Sparkles } from 'lucide-react';
+import { ExternalLink, Download, Sparkles, Loader2 } from 'lucide-react';
 import FormInput from './FormInput';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -9,9 +9,15 @@ interface PropertyUrlFieldProps {
   value?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onExtract?: (url: string) => void;
+  isLoading?: boolean;
 }
 
-const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({ value, onChange, onExtract }) => {
+const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({ 
+  value, 
+  onChange, 
+  onExtract,
+  isLoading = false
+}) => {
   const handleExtractClick = () => {
     if (value && onExtract) {
       onExtract(value);
@@ -70,10 +76,20 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({ value, onChange, on
                   variant="outline" 
                   size="sm" 
                   onClick={handleExtractClick} 
+                  disabled={isLoading}
                   className="ml-auto text-xs py-1 h-auto bg-loro-navy text-white hover:bg-loro-navy/90 flex items-center gap-1"
                 >
-                  <Sparkles size={14} />
-                  Extraire les données de l'annonce
+                  {isLoading ? (
+                    <>
+                      <Loader2 size={14} className="mr-1 animate-spin" />
+                      Extraction en cours...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={14} />
+                      Extraire toutes les données de l'annonce
+                    </>
+                  )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>

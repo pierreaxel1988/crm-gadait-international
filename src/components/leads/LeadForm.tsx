@@ -170,7 +170,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
       setFormData(prev => {
         // Détecter la source et le pays à partir de l'URL
         const source = detectSourceFromUrl(propertyUrl);
-        const country = extractedData.country || prev.country;
+        let country = extractedData.country || prev.country;
         
         // Traiter les types de propriété
         let propertyTypes = prev.propertyTypes || [];
@@ -181,14 +181,18 @@ const LeadForm: React.FC<LeadFormProps> = ({
         // Convertir chambres en tableau si extrait de la propriété
         let bedroomsValue = prev.bedrooms;
         if (extractedData.bedrooms) {
-          const extractedBedrooms = parseInt(extractedData.bedrooms.toString());
-          if (!isNaN(extractedBedrooms)) {
+          // Convertir en nombre si c'est une chaîne
+          const bedrooms = typeof extractedData.bedrooms === 'string' 
+            ? parseInt(extractedData.bedrooms.toString())
+            : extractedData.bedrooms;
+          
+          if (!isNaN(bedrooms)) {
             if (Array.isArray(prev.bedrooms)) {
-              if (!prev.bedrooms.includes(extractedBedrooms)) {
-                bedroomsValue = [...prev.bedrooms, extractedBedrooms];
+              if (!prev.bedrooms.includes(bedrooms)) {
+                bedroomsValue = [...prev.bedrooms, bedrooms];
               }
             } else {
-              bedroomsValue = [extractedBedrooms];
+              bedroomsValue = [bedrooms];
             }
           }
         }
@@ -235,12 +239,24 @@ const LeadForm: React.FC<LeadFormProps> = ({
           }
         }
 
-        // Trouver la meilleure correspondance pour la localisation
+        // Rechercher et définir la localisation
         let desiredLocation = prev.desiredLocation;
-        if (country && extractedData.location) {
+        if (extractedData.location && country) {
+          // Chercher la meilleure correspondance dans les localisations disponibles
           const bestMatch = findBestMatchingLocation(extractedData.location, country);
           if (bestMatch) {
             desiredLocation = bestMatch;
+          } else if (country === 'Spain' && extractedData.location.toLowerCase().includes('marbella')) {
+            desiredLocation = 'Marbella';
+          } else if (country === 'Spain' && extractedData.location.toLowerCase().includes('malaga')) {
+            desiredLocation = 'Malaga';
+          }
+          
+          // Si aucune correspondance n'est trouvée, utiliser la localisation extraite
+          if (!desiredLocation) {
+            const formattedLocation = extractedData.location.charAt(0).toUpperCase() + 
+                                      extractedData.location.slice(1).toLowerCase();
+            desiredLocation = formattedLocation;
           }
         }
 
@@ -303,6 +319,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
             financingMethods={FINANCING_METHODS}
             propertyUses={PROPERTY_USES}
             onExtractUrl={handleExtractUrl}
+            extractLoading={isLoading}
             countries={COUNTRIES}
           />
         </TabsContent>

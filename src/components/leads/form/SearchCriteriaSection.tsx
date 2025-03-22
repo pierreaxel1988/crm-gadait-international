@@ -19,6 +19,7 @@ interface SearchCriteriaSectionProps {
   financingMethods: FinancingMethod[];
   propertyUses: PropertyUse[];
   onExtractUrl?: (url: string) => void;
+  extractLoading?: boolean;
   countries: Country[];
 }
 
@@ -34,6 +35,7 @@ const SearchCriteriaSection = ({
   financingMethods,
   propertyUses,
   onExtractUrl,
+  extractLoading = false,
   countries
 }: SearchCriteriaSectionProps) => {
   // Handle nationality auto-completion when country changes
@@ -70,6 +72,7 @@ const SearchCriteriaSection = ({
           viewTypes={viewTypes}
           amenities={amenities}
           onExtractUrl={onExtractUrl || (() => {})}
+          extractLoading={extractLoading}
           countries={countries}
           handleCountryChange={handleCountryChange}
         />

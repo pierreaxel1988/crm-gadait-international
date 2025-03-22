@@ -17,6 +17,7 @@ interface PropertyDetailsSectionProps {
   viewTypes: ViewType[];
   amenities: Amenity[];
   onExtractUrl?: (url: string) => void;
+  extractLoading?: boolean;
   countries: Country[];
   handleCountryChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
 }
@@ -30,6 +31,7 @@ const PropertyDetailsSection = ({
   viewTypes,
   amenities,
   onExtractUrl,
+  extractLoading = false,
   countries,
   handleCountryChange
 }: PropertyDetailsSectionProps) => {
@@ -145,7 +147,8 @@ const PropertyDetailsSection = ({
       <PropertyUrlField 
         value={formData.url || ''} 
         onChange={handleUrlChange} 
-        onExtract={handleExtractUrl} 
+        onExtract={handleExtractUrl}
+        isLoading={extractLoading}
       />
 
       <FormInput

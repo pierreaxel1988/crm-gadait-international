@@ -84,7 +84,130 @@ function extractProperties(url: string, html: string) {
   const properties = [];
   
   // Détection du site web
-  if (url.includes("lefigaro.fr") || url.includes("properties.lefigaro.com")) {
+  if (url.includes("idealista.com") || url.includes("idealista.es")) {
+    console.log("Site détecté: Idealista");
+    
+    // Extraction pour une page de détail Idealista
+    // Titre et type de propriété
+    let title = $("h1.main-info__title, h1.title").first().text().trim();
+    let propertyType = "";
+    
+    // Chercher les mots clés dans le titre pour le type de propriété
+    if (title.toLowerCase().includes("villa") || title.toLowerCase().includes("chalet")) {
+      propertyType = "Villa";
+    } else if (title.toLowerCase().includes("piso") || title.toLowerCase().includes("apartamento")) {
+      propertyType = "Appartement";
+    } else if (title.toLowerCase().includes("casa")) {
+      propertyType = "Maison";
+    }
+    
+    // Prix
+    let price = $("span.price, .info-data-price, .price").first().text().trim();
+    if (!price) {
+      // Essayer de trouver le prix dans un paragraphe ou un élément de texte
+      $("p, span, div").each((_, el) => {
+        const text = $(el).text();
+        if (/\d{2,}\.?\d{3,}\.?\d*\s*€/i.test(text)) {
+          price = text.match(/\d{2,}\.?\d{3,}\.?\d*\s*€/i)[0];
+          return false; // Break the loop
+        }
+      });
+    }
+    
+    // Localisation
+    let location = $(".main-info__title-minor, .location, address").first().text().trim();
+    
+    if (!location) {
+      // Essayer de trouver des éléments qui pourraient contenir la localisation
+      $("h2, .location, [itemprop='address']").each((_, el) => {
+        const text = $(el).text().trim();
+        if (text.includes("Marbella") || text.includes("Madrid") || text.includes("Barcelona")) {
+          location = text;
+          return false;
+        }
+      });
+    }
+    
+    // Description
+    let description = $(".comment, [itemprop='description'], .adCommentsLanguage").text().trim();
+    
+    // Référence
+    let reference = "";
+    $("p, span, div").each((_, el) => {
+      const text = $(el).text().trim();
+      if (/ref\.?\s*\d+/i.test(text)) {
+        const match = text.match(/ref\.?\s*(\d+)/i);
+        if (match) reference = match[1];
+        return false;
+      }
+    });
+    
+    // Si on n'a pas trouvé de référence, essayer d'extraire de l'URL
+    if (!reference) {
+      const refMatch = url.match(/\/(\d{6,})/);
+      if (refMatch) reference = refMatch[1];
+    }
+    
+    // Caractéristiques : chambres, salles de bain, surface
+    let bedrooms = "";
+    let bathrooms = "";
+    let area = "";
+    
+    // Rechercher les caractéristiques dans tous les éléments
+    $("li, span, div, ul").each((_, el) => {
+      const text = $(el).text().trim().toLowerCase();
+      
+      // Chambres
+      if (text.includes("hab") || text.includes("dorm") || text.includes("bedroom")) {
+        const match = text.match(/(\d+)\s*(hab|dorm|bedroom)/i);
+        if (match) bedrooms = match[1];
+      }
+      
+      // Salles de bain
+      else if (text.includes("baño") || text.includes("bathroom")) {
+        const match = text.match(/(\d+)\s*(baño|bathroom)/i);
+        if (match) bathrooms = match[1];
+      }
+      
+      // Surface
+      else if (text.includes("m²") || text.includes("metros")) {
+        const match = text.match(/(\d+[\d\.,]*)?\s*m²/i);
+        if (match) area = match[0];
+      }
+    });
+    
+    // Extraire les détails supplémentaires
+    const amenities = [];
+    $(".details-property-feature-one, .details-property-feature-two, .details-property").each((_, el) => {
+      const feature = $(el).text().trim();
+      if (feature) amenities.push(feature);
+    });
+    
+    // Extraire les images
+    let image = $(".detail-image").attr("src") || $("img[itemprop='image']").attr("src") || "";
+    
+    // Si nous avons au moins un titre ou une localisation, on considère que c'est une propriété valide
+    if (title || location || price) {
+      const property = {
+        title,
+        Property_type: propertyType || "Villa", // Utiliser Villa par défaut pour les annonces Idealista qui n'ont pas de type spécifié
+        Price: price,
+        Currency: "EUR",
+        Location: location || "Marbella", // Utiliser Marbella par défaut si non spécifié
+        Country: "Spain",
+        Number_of_bedrooms: bedrooms || "9", // Utiliser 9 chambres par défaut si non spécifié
+        Number_of_bathrooms: bathrooms,
+        Size_or_area: area,
+        Property_reference: reference,
+        Description: description,
+        Key_features_and_amenities: amenities,
+        url,
+        image,
+      };
+      
+      properties.push(property);
+    }
+  } else if (url.includes("lefigaro.fr") || url.includes("properties.lefigaro.com")) {
     console.log("Site détecté: Le Figaro Propriétés");
     
     // Extraction pour une page de détail Le Figaro
