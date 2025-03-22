@@ -18,6 +18,7 @@ serve(async (req) => {
     // Récupérer l'URL à partir de la requête
     const requestData = await req.json();
     const url = requestData.url;
+    const debug = requestData.debug || false;
 
     if (!url) {
       return new Response(
@@ -34,14 +35,30 @@ serve(async (req) => {
 
     console.log(`Tentative d'extraction des données depuis: ${url}`);
 
-    // Faire une requête à l'URL et récupérer le HTML avec un User-Agent de navigateur amélioré
+    // Faire une requête à l'URL avec plusieurs user-agents différents pour contourner les protections
+    const userAgents = [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+    ];
+    
+    // Choisir un user agent aléatoire
+    const userAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
+    
+    // Faire la requête avec le user agent choisi
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent": userAgent,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Language": "en-US,en;q=0.5,fr;q=0.3,es;q=0.2",
         "Cache-Control": "no-cache",
         "Pragma": "no-cache",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1"
       },
     });
 
@@ -52,8 +69,13 @@ serve(async (req) => {
     const html = await response.text();
     console.log(`HTML récupéré avec succès (${html.length} caractères)`);
 
+    // En mode debug, renvoyer un extrait du HTML
+    if (debug) {
+      console.log(`Premiers 500 caractères du HTML: ${html.substring(0, 500)}`);
+    }
+
     // Analyser le HTML pour extraire les propriétés
-    const properties = extractProperties(url, html);
+    const properties = extractProperties(url, html, debug);
     console.log(`${properties.length} propriétés extraites`);
 
     return new Response(
@@ -61,6 +83,7 @@ serve(async (req) => {
         success: true,
         message: `${properties.length} propriétés extraites avec succès`,
         properties,
+        htmlSize: html.length,
       }),
       {
         status: 200,
@@ -83,7 +106,7 @@ serve(async (req) => {
   }
 });
 
-function extractProperties(url: string, html: string) {
+function extractProperties(url: string, html: string, debug = false) {
   const $ = cheerio.load(html);
   const properties = [];
   
@@ -93,10 +116,26 @@ function extractProperties(url: string, html: string) {
     
     // Extraction améliorée pour les pages de détail Idealista
     // Titre et type de propriété
-    let title = $("h1.main-info__title, h1.title, span[data-testid='title']").first().text().trim();
-    if (!title) {
-      // Essayer avec des sélecteurs alternatifs
-      title = $("h1, .detail-info h1, .info-title h1").first().text().trim();
+    let title = "";
+    const titleSelectors = [
+      "h1.main-info__title", 
+      "h1.title", 
+      "span[data-testid='title']",
+      "h1.container-title",
+      "h1.property-title",
+      "h1"
+    ];
+    
+    for (const selector of titleSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        title = element.text().trim();
+        if (title) break;
+      }
+    }
+    
+    if (debug) {
+      console.log(`Titre trouvé: "${title}"`);
     }
     
     let propertyType = "";
@@ -109,9 +148,11 @@ function extractProperties(url: string, html: string) {
       propertyType = "Appartement";
     } else if (titleLower.includes("casa") || titleLower.includes("house")) {
       propertyType = "Maison";
+    } else if (titleLower.includes("penthouse") || titleLower.includes("ático") || titleLower.includes("atico")) {
+      propertyType = "Penthouse";
     } else {
-      // Si on ne peut pas déterminer à partir du titre, regarder les éléments de navigation ou de filiarisation
-      const breadcrumbs = $(".breadcrumb, .bread-crumb, nav.breadcrumbs");
+      // Si on ne peut pas déterminer à partir du titre, chercher dans d'autres éléments
+      const breadcrumbs = $(".breadcrumb, .bread-crumb, nav.breadcrumbs, .re-Breadcrumb");
       if (breadcrumbs.length) {
         const breadcrumbText = breadcrumbs.text().toLowerCase();
         if (breadcrumbText.includes("villa") || breadcrumbText.includes("chalet")) {
@@ -120,6 +161,8 @@ function extractProperties(url: string, html: string) {
           propertyType = "Appartement";
         } else if (breadcrumbText.includes("casa")) {
           propertyType = "Maison";
+        } else if (breadcrumbText.includes("penthouse") || breadcrumbText.includes("atico")) {
+          propertyType = "Penthouse";
         }
       }
     }
@@ -129,6 +172,10 @@ function extractProperties(url: string, html: string) {
       const metaDescription = $('meta[name="description"]').attr('content') || '';
       if (metaDescription.toLowerCase().includes('villa') || metaDescription.toLowerCase().includes('chalet')) {
         propertyType = "Villa";
+      } else if (metaDescription.toLowerCase().includes('piso') || metaDescription.toLowerCase().includes('apartamento')) {
+        propertyType = "Appartement";
+      } else if (metaDescription.toLowerCase().includes('casa')) {
+        propertyType = "Maison";
       }
     }
     
@@ -137,80 +184,137 @@ function extractProperties(url: string, html: string) {
       propertyType = "Villa";
     }
     
-    // Prix
-    let price = $("span.price, .info-data-price, .price, [data-testid='price']").first().text().trim();
+    if (debug) {
+      console.log(`Type de propriété détecté: "${propertyType}"`);
+    }
+    
+    // Prix - chercher dans de multiples sélecteurs
+    let price = "";
+    const priceSelectors = [
+      "span.price", 
+      ".info-data-price", 
+      ".price", 
+      "[data-testid='price']",
+      ".re-DetailHeader-price",
+      "span[itemprop='price']",
+      "div.price-container"
+    ];
+    
+    for (const selector of priceSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        price = element.text().trim();
+        if (price) break;
+      }
+    }
+    
     if (!price) {
-      // Essayer de trouver le prix dans un paragraphe ou un élément de texte avec un pattern plus spécifique
+      // Chercher le prix dans tout élément contenant "€"
       $("p, span, div").each((_, el) => {
         const text = $(el).text().trim();
-        if (/[\d\.]{2,}\.?\d{3,}\.?\d*\s*€/i.test(text) || text.includes("€")) {
-          price = text.match(/[\d\.]{2,}\.?\d{3,}\.?\d*\s*€|[\d\.,]+\s*€/i)?.[0] || "";
-          return false; // Break the loop
+        if (text.includes("€")) {
+          const priceMatch = text.match(/[\d\.]{1,3}(?:\.?\d{3})*(?:,\d+)?\s*€/);
+          if (priceMatch) {
+            price = priceMatch[0];
+            return false; // Break the loop
+          }
         }
       });
     }
     
-    // Fallback pour les propriétés de luxe sans prix affiché
-    if (!price || price.toLowerCase().includes("consultar") || price.toLowerCase().includes("precio a consultar")) {
-      price = "30000000 €"; // Prix par défaut pour les propriétés de luxe
+    if (debug) {
+      console.log(`Prix trouvé: "${price}"`);
     }
     
-    // Localisation
-    let location = $(".main-info__title-minor, .location, address, [data-testid='mapTitle'], .property-location").first().text().trim();
+    // Localisation - chercher dans de multiples sélecteurs
+    let location = "";
+    const locationSelectors = [
+      ".main-info__title-minor", 
+      ".location", 
+      "address", 
+      "[data-testid='mapTitle']", 
+      ".property-location",
+      ".re-DetailMap-address",
+      "span[itemprop='address']",
+      ".address"
+    ];
     
+    for (const selector of locationSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        location = element.text().trim();
+        if (location) break;
+      }
+    }
+    
+    // Si toujours pas de localisation, essayer d'autres méthodes
     if (!location) {
-      // Essayer de trouver des éléments qui pourraient contenir la localisation
-      $("h2, .location, [itemprop='address'], .map-link, .address").each((_, el) => {
-        const text = $(el).text().trim();
-        if (text.includes("Marbella") || text.includes("Madrid") || text.includes("Barcelona") || 
-            text.includes("Valencia") || text.includes("Málaga") || text.includes("Malaga")) {
-          location = text;
-          return false;
-        }
-      });
+      // Vérifier les métadonnées
+      const metaLocation = $('meta[property="og:locality"], meta[name="geo.placename"]').attr('content');
+      if (metaLocation) location = metaLocation;
     }
     
-    // Si toujours pas de localisation, essayer d'extraire de l'URL
+    // Si toujours pas de localisation, extraire de l'URL
     if (!location) {
       const urlParts = url.toLowerCase().split('/');
       for (const part of urlParts) {
-        if (part === 'marbella' || part === 'madrid' || part === 'barcelona' || 
-            part === 'valencia' || part === 'malaga' || part === 'málaga') {
+        if (['marbella', 'madrid', 'barcelona', 'valencia', 'malaga', 'sevilla', 'ibiza'].includes(part)) {
           location = part.charAt(0).toUpperCase() + part.slice(1);
           break;
         }
       }
     }
     
-    // Fallback pour les propriétés de luxe sans localisation
-    if (!location && url.toLowerCase().includes('marbella')) {
-      location = "Marbella";
-    } else if (!location) {
-      location = "Spain"; // Localisation par défaut
+    if (debug) {
+      console.log(`Localisation trouvée: "${location}"`);
     }
     
-    // Description
-    let description = $(".comment, [itemprop='description'], .adCommentsLanguage, .detail-description, .description").text().trim();
-    if (!description) {
-      // Chercher tout paragraphe qui pourrait contenir une description
-      description = $("article p, section p, .detail p").first().text().trim();
+    // Description - chercher dans de multiples sélecteurs
+    let description = "";
+    const descriptionSelectors = [
+      ".comment", 
+      "[itemprop='description']", 
+      ".adCommentsLanguage", 
+      ".detail-description", 
+      ".description",
+      ".re-DetailDescription",
+      "div[data-testid='description']",
+      "p.description"
+    ];
+    
+    for (const selector of descriptionSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        description = element.text().trim();
+        if (description) break;
+      }
     }
     
-    // Référence
+    if (debug) {
+      console.log(`Description trouvée: ${description ? "Oui" : "Non"}`);
+    }
+    
+    // Référence - chercher dans de multiples sélecteurs et patterns
     let reference = "";
+    
+    // Essayer de trouver un élément contenant la référence
     $("p, span, div, small").each((_, el) => {
       const text = $(el).text().trim();
-      if (/ref\.?\s*\d+|reference:?\s*\d+|código:?\s*\d+|id:?\s*\d+/i.test(text)) {
-        const match = text.match(/ref\.?\s*(\d+)|reference:?\s*(\d+)|código:?\s*(\d+)|id:?\s*(\d+)/i);
-        if (match) reference = match[1] || match[2] || match[3] || match[4];
-        return false;
+      const refMatch = text.match(/\b(?:ref|reference|referencia|código|codigo|id)[\.:]?\s*(\w+[\d]+\w*)/i);
+      if (refMatch && refMatch[1]) {
+        reference = refMatch[1];
+        return false; // Break the loop
       }
     });
     
-    // Si on n'a pas trouvé de référence, essayer d'extraire de l'URL
+    // Si pas de référence trouvée, extraire de l'URL
     if (!reference) {
       const refMatch = url.match(/\/(\d{6,})/);
       if (refMatch) reference = refMatch[1];
+    }
+    
+    if (debug) {
+      console.log(`Référence trouvée: "${reference}"`);
     }
     
     // Caractéristiques : chambres, salles de bain, surface
@@ -218,21 +322,39 @@ function extractProperties(url: string, html: string) {
     let bathrooms = "";
     let area = "";
     
-    // Rechercher les caractéristiques dans des éléments spécifiques
-    const detailItems = $(".detail-info li, .details-property-feature li, .details-property li, .property-features li, [data-testid='feature']");
+    // Approche 1: Rechercher dans les détails spécifiques
+    const featureSelectors = [
+      ".detail-info li", 
+      ".details-property-feature li", 
+      ".details-property li", 
+      ".property-features li", 
+      "[data-testid='feature']",
+      ".re-DetailFeatures li",
+      ".features-container li",
+      ".specs li"
+    ];
+    
+    let detailItems = $();
+    for (const selector of featureSelectors) {
+      const elements = $(selector);
+      if (elements.length) {
+        detailItems = elements;
+        break;
+      }
+    }
     
     detailItems.each((_, el) => {
       const text = $(el).text().trim().toLowerCase();
       
       // Chambres
       if (text.includes("hab") || text.includes("dorm") || text.includes("bedroom") || text.includes("dormitorio")) {
-        const match = text.match(/(\d+)\s*(hab|dorm|bedroom|dormitorio)/i);
+        const match = text.match(/(\d+)/);
         if (match) bedrooms = match[1];
       }
       
       // Salles de bain
       else if (text.includes("baño") || text.includes("bathroom") || text.includes("bath")) {
-        const match = text.match(/(\d+)\s*(baño|bathroom|bath)/i);
+        const match = text.match(/(\d+)/);
         if (match) bathrooms = match[1];
       }
       
@@ -243,54 +365,152 @@ function extractProperties(url: string, html: string) {
       }
     });
     
-    // Si le nombre de chambres n'est pas trouvé, regarder dans le titre ou la description
+    // Approche 2: Chercher des éléments spécifiques
     if (!bedrooms) {
-      const titleMatch = title.match(/(\d+)\s*(hab|dorm|bedroom|dormitorio)/i);
-      if (titleMatch) {
-        bedrooms = titleMatch[1];
-      } else if (description) {
-        const descMatch = description.match(/(\d+)\s*(hab|dorm|bedroom|dormitorio)/i);
-        if (descMatch) bedrooms = descMatch[1];
+      const bedroomSelectors = [
+        ".re-DetailHeader-features .re-DetailHeader-featuresItem:nth-child(1)",
+        "[data-testid='rooms']",
+        "span.rooms"
+      ];
+      
+      for (const selector of bedroomSelectors) {
+        const element = $(selector).first();
+        if (element.length) {
+          const text = element.text().trim();
+          const match = text.match(/(\d+)/);
+          if (match) {
+            bedrooms = match[1];
+            break;
+          }
+        }
       }
     }
     
-    // Fallback pour les propriétés de luxe sans chambres spécifiées
-    if (!bedrooms && (propertyType === "Villa" || url.toLowerCase().includes('marbella') || url.toLowerCase().includes('luxury'))) {
-      bedrooms = "9"; // 9 chambres par défaut pour les villas de luxe
+    if (!bathrooms) {
+      const bathroomSelectors = [
+        ".re-DetailHeader-features .re-DetailHeader-featuresItem:nth-child(2)",
+        "[data-testid='bathrooms']",
+        "span.bathrooms"
+      ];
+      
+      for (const selector of bathroomSelectors) {
+        const element = $(selector).first();
+        if (element.length) {
+          const text = element.text().trim();
+          const match = text.match(/(\d+)/);
+          if (match) {
+            bathrooms = match[1];
+            break;
+          }
+        }
+      }
     }
     
-    // Extraire les détails supplémentaires pour les aménités
-    const amenities = [];
+    if (!area) {
+      const areaSelectors = [
+        ".re-DetailHeader-features .re-DetailHeader-featuresItem:nth-child(3)",
+        "[data-testid='area']",
+        "span.area"
+      ];
+      
+      for (const selector of areaSelectors) {
+        const element = $(selector).first();
+        if (element.length) {
+          const text = element.text().trim();
+          const match = text.match(/(\d+[\d\.,]*)?\s*m²/i);
+          if (match) {
+            area = match[0];
+            break;
+          }
+        }
+      }
+    }
+    
+    // Approche 3: Si toujours pas trouvé, chercher dans le titre ou la description
+    if (!bedrooms && title) {
+      const titleMatch = title.match(/(\d+)\s*(hab|dorm|bedroom|dormitorio)/i);
+      if (titleMatch) bedrooms = titleMatch[1];
+    }
+    
+    if (!bedrooms && description) {
+      const descMatch = description.match(/(\d+)\s*(hab|dorm|bedroom|dormitorio)/i);
+      if (descMatch) bedrooms = descMatch[1];
+    }
+    
+    if (debug) {
+      console.log(`Chambres trouvées: "${bedrooms}"`);
+      console.log(`Salles de bain trouvées: "${bathrooms}"`);
+      console.log(`Surface trouvée: "${area}"`);
+    }
+    
+    // Extraire les amenities
+    const amenities: string[] = [];
     
     // Parcourir tous les éléments qui pourraient contenir des aménités
-    $(".details-property-feature-one, .details-property-feature-two, .details-property, .feature-container, .property-features li, [data-testid='feature']").each((_, el) => {
-      const feature = $(el).text().trim();
-      if (feature && !feature.includes("m²") && !feature.includes("hab") && !feature.includes("baño")) {
-        amenities.push(feature);
-      }
-    });
+    const amenitySelectors = [
+      ".details-property-feature-one li", 
+      ".details-property-feature-two li", 
+      ".details-property li", 
+      ".feature-container li", 
+      ".property-features li", 
+      "[data-testid='feature']",
+      ".re-DetailFeatures-feature",
+      ".amenities li"
+    ];
     
-    // Si peu d'aménités trouvées, ajouter des aménités courantes pour les propriétés de luxe
-    if (amenities.length < 3 && (propertyType === "Villa" || url.toLowerCase().includes('marbella') || url.toLowerCase().includes('luxury'))) {
-      const luxuryAmenities = ["Piscine", "Jardin", "Terrasse", "Vue mer", "Sécurité", "Parking", "Climatisation"];
-      luxuryAmenities.forEach(amenity => {
-        if (!amenities.includes(amenity)) {
-          amenities.push(amenity);
+    for (const selector of amenitySelectors) {
+      $(selector).each((_, el) => {
+        const feature = $(el).text().trim();
+        if (feature && 
+            !feature.includes("m²") && 
+            !feature.includes("hab") && 
+            !feature.includes("baño") && 
+            !amenities.includes(feature)) {
+          amenities.push(feature);
         }
       });
     }
     
-    // Extraire l'image principale
-    let image = $(".detail-image").attr("src") || $("img[itemprop='image']").attr("src") || "";
-    
-    if (!image) {
-      // Chercher dans les éléments d'image courants
-      image = $(".gallery img, .main-multimedia img, .media-container img, .bigPhotos img").first().attr("src") || "";
+    if (debug) {
+      console.log(`Amenities trouvées: ${amenities.length > 0 ? amenities.join(", ") : "Aucune"}`);
     }
     
-    // Si aucune image n'est trouvée via src, essayer data-src (images lazy-loaded)
+    // Extraire l'image principale
+    let image = "";
+    const imageSelectors = [
+      ".detail-image",
+      "img[itemprop='image']",
+      ".gallery img",
+      ".main-multimedia img",
+      ".media-container img",
+      ".bigPhotos img",
+      ".re-DetailMosaicPhoto img",
+      "picture img",
+      "img.main-image"
+    ];
+    
+    for (const selector of imageSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        image = element.attr("src") || element.attr("data-src") || "";
+        if (image) break;
+      }
+    }
+    
     if (!image) {
-      image = $(".gallery img, .main-multimedia img, .media-container img, .bigPhotos img").first().attr("data-src") || "";
+      // Essayer d'extraire du contenu du style background-image
+      $("[style*='background-image']").each((_, el) => {
+        const style = $(el).attr("style") || "";
+        const match = style.match(/background-image:\s*url\(['"]?([^'"]+)['"]?\)/i);
+        if (match) {
+          image = match[1];
+          return false;
+        }
+      });
+    }
+    
+    if (debug) {
+      console.log(`Image trouvée: ${image ? "Oui" : "Non"}`);
     }
     
     // Si nous avons au moins un titre ou une localisation, on considère que c'est une propriété valide
@@ -300,17 +520,17 @@ function extractProperties(url: string, html: string) {
       
       const property = {
         title: title || "Villa de luxe",
-        Property_type: propertyType || "Villa", // Utiliser Villa par défaut pour les annonces Idealista qui n'ont pas de type spécifié
-        Price: price || "30000000 €", // Par défaut pour les propriétés de luxe
+        Property_type: propertyType || "Villa",
+        Price: price || "Prix sur demande",
         Currency: "EUR",
-        Location: location || "Marbella", // Utiliser Marbella par défaut si non spécifié
+        Location: location || "Espagne",
         Country: country,
-        Number_of_bedrooms: bedrooms || "9", // Utiliser 9 chambres par défaut si non spécifié
-        Number_of_bathrooms: bathrooms || "7", // Par défaut pour les propriétés de luxe
-        Size_or_area: area || "1000 m²", // Par défaut pour les propriétés de luxe
+        Number_of_bedrooms: bedrooms || "4",
+        Number_of_bathrooms: bathrooms || "3",
+        Size_or_area: area || "",
         Property_reference: reference || url.split('/').pop() || "REF-IDEALISTA",
-        Description: description || "Propriété de luxe en Espagne",
-        Key_features_and_amenities: amenities.length > 0 ? amenities : ["Piscine", "Jardin", "Vue mer", "Sécurité", "Parking", "Climatisation"],
+        Description: description || "Propriété en Espagne",
+        Key_features_and_amenities: amenities.length > 0 ? amenities : [],
         url,
         image,
       };
@@ -321,10 +541,49 @@ function extractProperties(url: string, html: string) {
     console.log("Site détecté: Le Figaro Propriétés");
     
     // Extraction pour une page de détail Le Figaro
-    const title = $("h1.product-title, h1.title-product").first().text().trim();
-    const price = $(".product-price, .price-product, [data-price], .price").first().text().trim();
-    const location = $(".product-location, .location-product, .location").first().text().trim();
-    const description = $(".product-description, .description, .description-product").first().text().trim();
+    let title = "";
+    const titleSelectors = ["h1.product-title", "h1.title-product", "h1.property-title", "h1"];
+    
+    for (const selector of titleSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        title = element.text().trim();
+        if (title) break;
+      }
+    }
+    
+    let price = "";
+    const priceSelectors = [".product-price", ".price-product", "[data-price]", ".price", "span.price"];
+    
+    for (const selector of priceSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        price = element.text().trim();
+        if (price) break;
+      }
+    }
+    
+    let location = "";
+    const locationSelectors = [".product-location", ".location-product", ".location", "span.location"];
+    
+    for (const selector of locationSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        location = element.text().trim();
+        if (location) break;
+      }
+    }
+    
+    let description = "";
+    const descriptionSelectors = [".product-description", ".description", ".description-product", "div.description"];
+    
+    for (const selector of descriptionSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        description = element.text().trim();
+        if (description) break;
+      }
+    }
     
     // Extraire les caractéristiques
     let bedrooms = "";
@@ -333,20 +592,40 @@ function extractProperties(url: string, html: string) {
     let reference = "";
     
     // Chercher la référence
-    const refElement = $("[data-ref], .ref, .reference, .product-reference").first();
-    if (refElement.length) {
-      reference = refElement.text().trim() || refElement.attr("data-ref") || "";
-      reference = reference.replace(/[rR][eE][fF]\s*:?\s*/i, "").trim();
-    } else {
+    const refSelectors = ["[data-ref]", ".ref", ".reference", ".product-reference"];
+    
+    for (const selector of refSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        reference = element.text().trim() || element.attr("data-ref") || "";
+        if (reference) {
+          reference = reference.replace(/[rR][eE][fF]\s*:?\s*/i, "").trim();
+          break;
+        }
+      }
+    }
+    
+    if (!reference) {
       // Essayer d'extraire la référence de l'URL
-      const urlMatch = url.match(/\/(\d+)\/?$/);
+      const urlMatch = url.match(/\/([a-zA-Z0-9-]+)\/?$/);
       if (urlMatch) {
         reference = urlMatch[1];
       }
     }
     
-    // Chercher les caractéristiques
-    $(".product-features li, .features li, .characteristics li, .specs li, .details li, [data-rooms], [data-bathrooms], [data-area]").each((_, el) => {
+    // Chercher les caractéristiques dans divers sélecteurs
+    const featureSelectors = [".product-features li", ".features li", ".characteristics li", ".specs li", ".details li"];
+    
+    let featureElements = $();
+    for (const selector of featureSelectors) {
+      const elements = $(selector);
+      if (elements.length) {
+        featureElements = elements;
+        break;
+      }
+    }
+    
+    featureElements.each((_, el) => {
       const text = $(el).text().trim().toLowerCase();
       
       if (text.includes("chambre") || text.includes("bedroom")) {
@@ -361,19 +640,40 @@ function extractProperties(url: string, html: string) {
       }
     });
     
+    // Pour les éléments data-spécifiques
+    bedrooms = bedrooms || $("[data-rooms]").attr("data-rooms") || "";
+    bathrooms = bathrooms || $("[data-bathrooms]").attr("data-bathrooms") || "";
+    area = area || $("[data-area]").attr("data-area") || "";
+    
+    // Extraire l'image
+    let image = "";
+    const imageSelectors = [".product-image img", ".carousel img", ".gallery img", "img.main-image"];
+    
+    for (const selector of imageSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        image = element.attr("src") || element.attr("data-src") || "";
+        if (image) break;
+      }
+    }
+    
     // Si nous avons trouvé au moins un titre, on considère que c'est une propriété valide
-    if (title) {
+    if (title || location || price) {
       const property = {
-        title,
-        price,
-        location,
-        description,
-        bedrooms,
-        bathrooms,
-        area,
-        reference,
+        title: title || "Propriété en France",
+        Property_type: "Villa",
+        Price: price || "Prix sur demande",
+        Currency: "EUR",
+        Location: location || "France",
+        Country: "France",
+        Number_of_bedrooms: bedrooms || "",
+        Number_of_bathrooms: bathrooms || "",
+        Size_or_area: area || "",
+        Property_reference: reference || "REF-FIGARO",
+        Description: description || "",
+        Key_features_and_amenities: [],
         url,
-        image: $(".product-image img, .carousel img, .gallery img").first().attr("src") || "",
+        image,
       };
       
       properties.push(property);
@@ -383,11 +683,14 @@ function extractProperties(url: string, html: string) {
         const item = $(element);
         
         const property = {
-          title: item.find(".property-title, .product-title, .title").text().trim(),
-          price: item.find(".property-price, .product-price, .price").text().trim(),
-          location: item.find(".property-location, .product-location, .location").text().trim(),
-          description: item.find(".property-description, .product-description, .description").text().trim(),
-          reference: item.find(".property-reference, .product-reference, .reference").text().trim() || 
+          title: item.find(".property-title, .product-title, .title").text().trim() || "Propriété en France",
+          Property_type: "Villa",
+          Price: item.find(".property-price, .product-price, .price").text().trim() || "Prix sur demande",
+          Currency: "EUR",
+          Location: item.find(".property-location, .product-location, .location").text().trim() || "France",
+          Country: "France",
+          Description: item.find(".property-description, .product-description, .description").text().trim() || "",
+          Property_reference: item.find(".property-reference, .product-reference, .reference").text().trim() || 
                     item.attr("data-ref") || 
                     `LF-${index + 1}`,
           url: item.find("a").attr("href") || "",
@@ -402,23 +705,129 @@ function extractProperties(url: string, html: string) {
     console.log("Site non spécifiquement supporté, tentative d'extraction générique");
     
     // D'abord essayer de voir si c'est une page de détail
-    const title = $("h1, .property-title, .listing-title").first().text().trim();
-    const price = $(".price, [data-price], .property-price").first().text().trim();
-    const location = $(".location, .address, .property-location").first().text().trim();
-    const description = $(".description, .property-description, article p").first().text().trim();
+    let title = "";
+    const titleSelectors = ["h1", ".property-title", ".listing-title", "h1.title"];
+    
+    for (const selector of titleSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        title = element.text().trim();
+        if (title) break;
+      }
+    }
+    
+    let price = "";
+    const priceSelectors = [".price", "[data-price]", ".property-price", "span.price"];
+    
+    for (const selector of priceSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        price = element.text().trim();
+        if (price) break;
+      }
+    }
+    
+    let location = "";
+    const locationSelectors = [".location", ".address", ".property-location", "span.location", "address"];
+    
+    for (const selector of locationSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        location = element.text().trim();
+        if (location) break;
+      }
+    }
+    
+    let description = "";
+    const descriptionSelectors = [".description", ".property-description", "article p", "div.description"];
+    
+    for (const selector of descriptionSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        description = element.text().trim();
+        if (description) break;
+      }
+    }
+    
+    // Référence
+    let reference = "";
+    const refSelectors = [".reference", ".ref", "[data-ref]"];
+    
+    for (const selector of refSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        reference = element.text().trim() || element.attr("data-ref") || "";
+        if (reference) break;
+      }
+    }
+    
+    if (!reference) {
+      // Essayer d'extraire la référence de l'URL
+      const urlMatch = url.match(/\/([a-zA-Z0-9-]+)\/?$/);
+      if (urlMatch) {
+        reference = urlMatch[1];
+      }
+    }
+    
+    // Caractéristiques
+    let bedrooms = "";
+    let bathrooms = "";
+    let area = "";
+    
+    const featureSelectors = [".features li", ".specifications li", ".details li", ".property-details li"];
+    
+    let featureElements = $();
+    for (const selector of featureSelectors) {
+      const elements = $(selector);
+      if (elements.length) {
+        featureElements = elements;
+        break;
+      }
+    }
+    
+    featureElements.each((_, el) => {
+      const text = $(el).text().trim().toLowerCase();
+      
+      if (text.includes("chambre") || text.includes("bedroom") || text.includes("room")) {
+        const match = text.match(/(\d+)/);
+        if (match) bedrooms = match[1];
+      } else if (text.includes("salle de bain") || text.includes("bathroom") || text.includes("bath")) {
+        const match = text.match(/(\d+)/);
+        if (match) bathrooms = match[1];
+      } else if (text.includes("surface") || text.includes("area") || text.includes("m²") || text.includes("sqm")) {
+        const match = text.match(/(\d+[\d\s,.]*)/);
+        if (match) area = match[1].trim();
+      }
+    });
+    
+    // Image
+    let image = "";
+    const imageSelectors = ["img.main-image", ".carousel img", ".gallery img", ".property-image img", ".listing-image img"];
+    
+    for (const selector of imageSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        image = element.attr("src") || element.attr("data-src") || "";
+        if (image) break;
+      }
+    }
     
     if (title && (price || description)) {
       // C'est probablement une page de détail
       const property = {
-        title,
-        price,
-        location,
-        description,
-        reference: $(".reference, .ref, [data-ref]").first().text().trim() || 
-                   url.match(/(\d+)\/?$/)?.[1] || 
-                   "REF-1",
+        title: title || "Propriété immobilière",
+        Property_type: "",
+        Price: price || "Prix sur demande",
+        Location: location || "",
+        Country: "",
+        Number_of_bedrooms: bedrooms || "",
+        Number_of_bathrooms: bathrooms || "",
+        Size_or_area: area || "",
+        Property_reference: reference || url.split('/').pop() || "REF-1",
+        Description: description || "",
+        Key_features_and_amenities: [],
         url,
-        image: $("img.main-image, .carousel img, .gallery img, .property-image img").first().attr("src") || "",
+        image: image || "",
       };
       
       properties.push(property);
@@ -428,8 +837,9 @@ function extractProperties(url: string, html: string) {
         const item = $(element);
         
         // Vérifier si c'est probablement une annonce immobilière
-        const hasPrice = item.text().match(/(\$|€|£|USD|EUR)\s?[\d,.]+|[\d,.]+\s?(\$|€|£|USD|EUR)/i);
-        const hasArea = item.text().match(/\d+\s?(m²|m2|sq\.m|square meter|ft²|sqft)/i);
+        const itemText = item.text();
+        const hasPrice = itemText.match(/(\$|€|£|USD|EUR)\s?[\d,.]+|[\d,.]+\s?(\$|€|£|USD|EUR)/i);
+        const hasArea = itemText.match(/\d+\s?(m²|m2|sq\.m|square meter|ft²|sqft)/i);
         
         if (hasPrice || hasArea) {
           // Extraire tous les textes pour analyse
@@ -442,7 +852,7 @@ function extractProperties(url: string, html: string) {
             price = priceMatch[0].trim();
           }
           
-          // Essayer de déduire la localisation (souvent un mot suivi d'une virgule)
+          // Essayer de déduire la localisation
           let location = "";
           const locationElem = item.find("[class*='location'], [class*='address'], [class*='city'], address");
           if (locationElem.length) {
@@ -483,11 +893,11 @@ function extractProperties(url: string, html: string) {
           }
           
           const property = {
-            title: title || "Propriété sans titre",
-            price: price || "Prix sur demande",
-            location: location || "Emplacement non spécifié",
-            description: description || "Aucune description disponible",
-            reference: `GEN-${index + 1}`,
+            title: title || "Propriété immobilière",
+            Price: price || "Prix sur demande",
+            Location: location || "",
+            Description: description || "",
+            Property_reference: `GEN-${index + 1}`,
             url: propertyUrl || url,
             image: image,
           };

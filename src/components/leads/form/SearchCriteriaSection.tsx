@@ -71,7 +71,7 @@ const SearchCriteriaSection = ({
           propertyTypes={propertyTypes}
           viewTypes={viewTypes}
           amenities={amenities}
-          onExtractUrl={onExtractUrl || (() => {})}
+          onExtractUrl={onExtractUrl}
           extractLoading={extractLoading}
           countries={countries}
           handleCountryChange={handleCountryChange}

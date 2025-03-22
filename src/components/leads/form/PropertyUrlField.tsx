@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ExternalLink, Download, Sparkles, Loader2 } from 'lucide-react';
+import { ExternalLink, Download, Code, Loader2 } from 'lucide-react';
 import FormInput from './FormInput';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -33,7 +33,7 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({
       try {
         toast({
           title: "Extraction en cours",
-          description: "Nous analysons directement le HTML de l'annonce immobilière..."
+          description: "Nous extrayons les données de l'annonce immobilière..."
         });
         onExtract(value);
       } catch (error) {
@@ -105,18 +105,18 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({
                   {isLoading ? (
                     <>
                       <Loader2 size={14} className="mr-1 animate-spin" />
-                      Analyse HTML en cours...
+                      Extraction en cours...
                     </>
                   ) : (
                     <>
-                      <Sparkles size={14} className="mr-1" />
-                      Extraire depuis HTML
+                      <Code size={14} className="mr-1" />
+                      Extraire les données
                     </>
                   )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Nous analysons le HTML de l'annonce pour extraire automatiquement le pays, la localisation, le type de bien, le prix et plus encore</p>
+                <p>Notre système analysera l'URL pour extraire automatiquement les informations de l'annonce</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
