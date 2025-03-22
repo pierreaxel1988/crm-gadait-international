@@ -20,7 +20,7 @@ const LeadsHeader: React.FC<LeadsHeaderProps> = ({
   return <div className="flex justify-between items-center pb-4">
       <div>
         <h1 className="text-2xl md:text-3xl font-futura">Leads</h1>
-        <p className="text-loro-hazel">Liste de vos leads et prospects</p>
+        <p className="text-loro-hazel font-futura">Liste de vos leads et prospects</p>
       </div>
 
       <div className="flex gap-3">
