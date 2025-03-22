@@ -17,6 +17,7 @@ interface LeadFormProps {
   onCancel: () => void;
   activeTab?: string;
   adminAssignedAgent?: string | undefined;
+  isSubmitting?: boolean;
 }
 
 const PROPERTY_TYPES: PropertyType[] = [
@@ -43,7 +44,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
   onSubmit, 
   onCancel, 
   activeTab = 'general',
-  adminAssignedAgent 
+  adminAssignedAgent,
+  isSubmitting = false 
 }) => {
   const [formData, setFormData] = useState<LeadDetailed>({
     id: lead?.id || uuidv4(),
@@ -285,7 +287,9 @@ const LeadForm: React.FC<LeadFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    if (!isSubmitting) {
+      onSubmit(formData);
+    }
   };
 
   return (
@@ -333,11 +337,11 @@ const LeadForm: React.FC<LeadFormProps> = ({
       </Tabs>
 
       <div className="flex justify-end space-x-3 pt-3">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           Annuler
         </Button>
-        <Button type="submit">
-          {lead ? 'Sauvegarder' : 'Créer'}
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Création en cours...' : (lead ? 'Sauvegarder' : 'Créer')}
         </Button>
       </div>
     </form>

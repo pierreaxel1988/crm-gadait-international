@@ -38,18 +38,17 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     const { data, error } = await supabase
       .from('leads')
       .insert(dataWithImportedDate)
-      .select()
-      .single();
+      .select();
       
     if (error) {
       console.error("Error creating lead in Supabase:", error);
       throw new Error(`Failed to create lead: ${error.message}`);
     }
     
-    if (data) {
-      console.log("Lead created successfully:", data);
+    if (data && data.length > 0) {
+      console.log("Lead created successfully:", data[0]);
       // Map the Supabase response to LeadDetailed
-      return mapToLeadDetailed(data);
+      return mapToLeadDetailed(data[0]);
     }
     
     // If Supabase insertion fails but no error is thrown, fall back to local storage

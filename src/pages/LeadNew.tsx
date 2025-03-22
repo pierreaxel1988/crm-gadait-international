@@ -16,8 +16,12 @@ const LeadNew = () => {
   const { isAdmin, user } = useAuth();
   const [assignedAgent, setAssignedAgent] = useState<string | undefined>(undefined);
   const [pipelineType, setPipelineType] = useState<'purchase' | 'rental'>('purchase');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (data: LeadDetailed) => {
+  const handleSubmit = async (data: LeadDetailed) => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     try {
       // Deep copy to avoid modifying the original data
       const newLeadData = JSON.parse(JSON.stringify(data));
@@ -39,37 +43,30 @@ const LeadNew = () => {
       console.log("Creating lead with data:", newLeadData);
       
       // Create the lead
-      createLead(newLeadData)
-        .then((createdLead) => {
-          if (createdLead) {
-            toast({
-              title: "Lead créé",
-              description: assignedAgent 
-                ? "Le lead a été créé et attribué avec succès."
-                : "Le lead a été créé avec succès."
-            });
-            
-            // Redirect to the pipeline page with the correct tab
-            navigate(`/pipeline?tab=${pipelineType}`);
-          } else {
-            throw new Error("No lead data returned");
-          }
-        })
-        .catch((error) => {
-          console.error("Erreur lors de la création du lead:", error);
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Impossible de créer le nouveau lead. Veuillez réessayer."
-          });
+      const createdLead = await createLead(newLeadData);
+      
+      if (createdLead) {
+        toast({
+          title: "Lead créé",
+          description: assignedAgent 
+            ? "Le lead a été créé et attribué avec succès."
+            : "Le lead a été créé avec succès."
         });
+        
+        // Redirect to the pipeline page with the correct tab
+        navigate(`/pipeline?tab=${pipelineType}`);
+      } else {
+        throw new Error("No lead data returned");
+      }
     } catch (error) {
-      console.error("Exception in handleSubmit:", error);
+      console.error("Error in handleSubmit:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Impossible de créer le nouveau lead. Veuillez réessayer."
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -128,6 +125,7 @@ const LeadNew = () => {
           onSubmit={handleSubmit} 
           onCancel={() => navigate('/leads')}
           adminAssignedAgent={assignedAgent}
+          isSubmitting={isSubmitting}
         />
       </div>
     </div>
