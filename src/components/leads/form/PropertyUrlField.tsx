@@ -31,6 +31,10 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({
     
     if (value && onExtract) {
       try {
+        toast({
+          title: "Extraction en cours",
+          description: "Notre IA analyse l'annonce immobilière..."
+        });
         onExtract(value);
       } catch (error) {
         console.error("Erreur lors de l'extraction:", error);
@@ -101,18 +105,18 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({
                   {isLoading ? (
                     <>
                       <Loader2 size={14} className="mr-1 animate-spin" />
-                      Extraction en cours...
+                      IA en analyse...
                     </>
                   ) : (
                     <>
-                      <Sparkles size={14} />
-                      Extraire les données
+                      <Sparkles size={14} className="mr-1" />
+                      Extraire avec IA
                     </>
                   )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Récupère automatiquement le pays, la localisation, le type de bien, le nombre de chambres, le budget et plus encore</p>
+                <p>Notre IA analyse l'annonce pour extraire automatiquement le pays, la localisation, le type de bien, le prix et plus encore</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
