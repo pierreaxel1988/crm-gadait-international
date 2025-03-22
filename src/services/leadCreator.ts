@@ -29,10 +29,17 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       ...supabaseLeadData,
       imported_at: new Date().toISOString(),
       pipeline_type: leadData.pipelineType, // Make sure pipeline_type is explicitly set
-      assigned_to: leadData.assignedTo // Ensure assignment is preserved
+      assigned_to: leadData.assignedTo || null // Ensure assignment is preserved
     };
 
     console.log("Prepared Supabase lead data:", dataWithImportedDate);
+    
+    // Get current auth session to verify user is authenticated
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      console.error("No authenticated session found.");
+      throw new Error("Vous devez être connecté pour créer un lead.");
+    }
     
     // Create the lead in Supabase using maybeSingle
     const { data, error } = await supabase
@@ -43,7 +50,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       
     if (error) {
       console.error("Error creating lead in Supabase:", error);
-      throw new Error(`Failed to create lead: ${error.message}`);
+      throw new Error(`Échec de création du lead: ${error.message}`);
     }
     
     if (data) {

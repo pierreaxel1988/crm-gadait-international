@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import LeadForm from '@/components/leads/LeadForm';
@@ -11,14 +11,32 @@ import { useAuth } from '@/hooks/useAuth';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
 
 const LeadNew = () => {
   const navigate = useNavigate();
-  const { isAdmin, user } = useAuth();
+  const { isAdmin, user, session } = useAuth();
   const [assignedAgent, setAssignedAgent] = useState<string | undefined>(undefined);
   const [pipelineType, setPipelineType] = useState<'purchase' | 'rental'>('purchase');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Vérifier l'authentification avant de permettre la création de lead
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Vous devez être connecté pour créer un lead."
+        });
+        navigate('/auth');
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
 
   const handleSubmit = async (data: LeadDetailed) => {
     if (isSubmitting) {
@@ -31,6 +49,12 @@ const LeadNew = () => {
     console.log("Starting lead creation process...");
     
     try {
+      // Vérifier à nouveau l'authentification
+      const { data: authData } = await supabase.auth.getSession();
+      if (!authData.session) {
+        throw new Error("Vous devez être connecté pour créer un lead.");
+      }
+      
       // Deep copy to avoid modifying the original data
       const newLeadData = structuredClone(data);
       delete newLeadData.id;
