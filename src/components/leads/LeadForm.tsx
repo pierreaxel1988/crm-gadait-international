@@ -60,7 +60,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
     country: lead?.country || undefined,
     propertyReference: lead?.propertyReference || '',
     budget: lead?.budget || '',
-    budgetMin: lead?.budgetMin || '',  // Add initialization for budgetMin
+    budgetMin: lead?.budgetMin || '',
     currency: lead?.currency || 'EUR',
     desiredLocation: lead?.desiredLocation || '',
     propertyType: lead?.propertyType || undefined,
@@ -123,15 +123,58 @@ const LeadForm: React.FC<LeadFormProps> = ({
     extractPropertyData();
   };
 
+  // Déterminer la source de l'annonce en fonction de l'URL
+  const detectSourceFromUrl = (url: string): LeadSource | undefined => {
+    if (!url) return undefined;
+    
+    if (url.includes('idealista.com') || url.includes('idealista.es')) {
+      return 'Idealista';
+    } else if (url.includes('lefigaro.fr') || url.includes('properties.lefigaro.com')) {
+      return 'Le Figaro';
+    } else if (url.includes('properstar.com')) {
+      return 'Properstar';
+    } else if (url.includes('propertycloud.fr')) {
+      return 'Property Cloud';
+    } else if (url.includes('lexpress-property.com')) {
+      return 'L\'express Property';
+    }
+    
+    return 'Portails immobiliers';
+  };
+
+  // Déterminer le pays en fonction de l'URL et du contenu
+  const detectCountryFromUrl = (url: string, location?: string): Country | undefined => {
+    if (!url) return undefined;
+    
+    if (url.includes('.es') || location?.includes('España') || location?.includes('Spain')) {
+      return 'Spain';
+    } else if (url.includes('.fr') || location?.includes('France')) {
+      return 'France';
+    } else if (url.includes('.pt') || location?.includes('Portugal')) {
+      return 'Portugal';
+    } else if (url.includes('.uk') || location?.includes('United Kingdom')) {
+      return 'United Kingdom';
+    } else if (url.includes('.ch') || location?.includes('Switzerland')) {
+      return 'Switzerland';
+    }
+    
+    return undefined;
+  };
+
   useEffect(() => {
     if (extractedData) {
       setFormData(prev => {
+        // Détecter la source et le pays à partir de l'URL
+        const source = detectSourceFromUrl(propertyUrl);
+        const country = detectCountryFromUrl(propertyUrl, extractedData.location);
+        
+        // Traiter les types de propriété
         let propertyTypes = prev.propertyTypes || [];
         if (extractedData.propertyType && !propertyTypes.includes(extractedData.propertyType as PropertyType)) {
           propertyTypes = [...propertyTypes, extractedData.propertyType as PropertyType];
         }
         
-        // Convert single bedroom to array if extracted from property
+        // Convertir chambres en tableau si extrait de la propriété
         let bedroomsValue = prev.bedrooms;
         if (extractedData.bedrooms) {
           const extractedBedrooms = parseInt(extractedData.bedrooms.toString());
@@ -144,14 +187,52 @@ const LeadForm: React.FC<LeadFormProps> = ({
           }
         }
 
+        // Convertir le prix en valeur numérique si possible
+        let budgetValue = prev.budget;
+        if (extractedData.price) {
+          const priceText = extractedData.price.toString();
+          // Extraire uniquement les chiffres du prix
+          const priceNumbers = priceText.replace(/[^\d,\.]/g, '').replace(',', '.');
+          if (!isNaN(parseFloat(priceNumbers))) {
+            budgetValue = priceNumbers;
+          } else {
+            budgetValue = extractedData.price;
+          }
+        }
+
+        // Extraire et définir les aménités si disponibles
+        let amenities = prev.amenities || [];
+        if (extractedData.description) {
+          const description = extractedData.description.toLowerCase();
+          AMENITIES.forEach(amenity => {
+            if (description.includes(amenity.toLowerCase()) && !amenities.includes(amenity)) {
+              amenities.push(amenity);
+            }
+          });
+        }
+
+        // Définir la surface habitable si disponible
+        let livingArea = prev.livingArea;
+        if (extractedData.area) {
+          const areaString = extractedData.area.toString();
+          const areaMatch = areaString.match(/(\d+)/);
+          if (areaMatch) {
+            livingArea = areaMatch[1];
+          }
+        }
+
         return {
           ...prev,
           propertyReference: extractedData.reference || prev.propertyReference,
-          budget: extractedData.price || prev.budget,  // Keep populating max budget
+          budget: budgetValue,
           desiredLocation: extractedData.location || prev.desiredLocation,
           propertyTypes,
           bedrooms: bedroomsValue,
-          url: propertyUrl || prev.url
+          url: propertyUrl || prev.url,
+          source: source || prev.source,
+          country: country || prev.country,
+          amenities,
+          livingArea
         };
       });
 
