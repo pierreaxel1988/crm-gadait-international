@@ -51,7 +51,8 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       return mapToLeadDetailed(data);
     }
     
-    // If Supabase insertion fails, fall back to local storage
+    // If Supabase insertion fails but no error is thrown, fall back to local storage
+    console.log("No data returned from Supabase, using fallback storage");
     const leads = await getLeads();
     const newLead = { 
       id: crypto.randomUUID(), 

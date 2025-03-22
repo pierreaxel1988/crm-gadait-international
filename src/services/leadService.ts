@@ -30,7 +30,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
         .from('team_members')
         .select('id')
         .ilike('name', '%pierre axel gadait%')
-        .single();
+        .maybeSingle();
         
       if (data && data.id) {
         leadData.assignedTo = data.id;
