@@ -181,21 +181,15 @@ const LeadEdit = () => {
         </TabsList>
         
         <TabsContent value="general" className="mt-4">
-          <div className="luxury-card p-6">
-            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="general" />
-          </div>
+          <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="general" />
         </TabsContent>
         
         <TabsContent value="criteria" className="mt-4">
-          <div className="luxury-card p-6">
-            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="criteria" />
-          </div>
+          <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="criteria" />
         </TabsContent>
         
         <TabsContent value="status" className="mt-4">
-          <div className="luxury-card p-6">
-            <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="status" />
-          </div>
+          <LeadForm lead={lead} onSubmit={handleSubmit} onCancel={() => navigate('/leads')} activeTab="status" />
         </TabsContent>
         
         <TabsContent value="actions" className="mt-4">
