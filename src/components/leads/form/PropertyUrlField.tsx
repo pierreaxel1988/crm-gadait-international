@@ -4,6 +4,7 @@ import { ExternalLink, Download, Sparkles, Loader2 } from 'lucide-react';
 import FormInput from './FormInput';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { toast } from '@/hooks/use-toast';
 
 interface PropertyUrlFieldProps {
   value?: string;
@@ -19,8 +20,26 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({
   isLoading = false
 }) => {
   const handleExtractClick = () => {
+    if (!value) {
+      toast({
+        variant: "destructive",
+        title: "URL manquante",
+        description: "Veuillez entrer l'URL d'une annonce immobilière avant d'extraire les données."
+      });
+      return;
+    }
+    
     if (value && onExtract) {
-      onExtract(value);
+      try {
+        onExtract(value);
+      } catch (error) {
+        console.error("Erreur lors de l'extraction:", error);
+        toast({
+          variant: "destructive",
+          title: "Erreur d'extraction",
+          description: "Une erreur s'est produite lors de l'extraction des données."
+        });
+      }
     }
   };
 
@@ -76,7 +95,7 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({
                   variant="outline" 
                   size="sm" 
                   onClick={handleExtractClick} 
-                  disabled={isLoading}
+                  disabled={isLoading || !value}
                   className="ml-auto text-xs py-1 h-auto bg-loro-navy text-white hover:bg-loro-navy/90 flex items-center gap-1"
                 >
                   {isLoading ? (
@@ -87,7 +106,7 @@ const PropertyUrlField: React.FC<PropertyUrlFieldProps> = ({
                   ) : (
                     <>
                       <Sparkles size={14} />
-                      Extraire toutes les données de l'annonce
+                      Extraire les données
                     </>
                   )}
                 </Button>
