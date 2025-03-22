@@ -8,6 +8,7 @@ import PipelineFilters from './PipelineFilters';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { FilterOptions } from './PipelineFilters';
 import CustomButton from '@/components/ui/CustomButton';
+import { toast } from '@/hooks/use-toast';
 
 interface PipelineHeaderProps {
   searchTerm: string;
@@ -40,7 +41,16 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   });
 
   const handleNewLead = () => {
-    navigate('/leads/new');
+    try {
+      navigate('/leads/new');
+    } catch (error) {
+      console.error("Navigation error:", error);
+      toast({
+        title: "Erreur de navigation",
+        description: "Impossible d'accéder à la page de création de lead.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleFilterChange = (newFilters: FilterOptions) => {
