@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Home, Key } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from '@/hooks/use-mobile';
 import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
@@ -11,7 +11,11 @@ import PipelineHeader from '@/components/pipeline/PipelineHeader';
 import PipelineTabContent from '@/components/pipeline/PipelineTabContent';
 
 const Kanban = () => {
-  const [activeTab, setActiveTab] = useState<string>("purchase");
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const tabFromUrl = queryParams.get('tab');
+  
+  const [activeTab, setActiveTab] = useState<string>(tabFromUrl === 'rental' ? 'rental' : 'purchase');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const navigate = useNavigate();
@@ -61,6 +65,20 @@ const Kanban = () => {
   useEffect(() => {
     handleRefresh();
   }, []);
+
+  // Update URL when tab changes
+  useEffect(() => {
+    navigate(`/pipeline?tab=${activeTab}`, { replace: true });
+  }, [activeTab, navigate]);
+
+  // Update tab from URL when it changes
+  useEffect(() => {
+    if (tabFromUrl === 'rental' || tabFromUrl === 'purchase') {
+      setActiveTab(tabFromUrl);
+      // Force a refresh when switching tabs
+      setRefreshTrigger(prev => prev + 1);
+    }
+  }, [tabFromUrl]);
 
   // Check if any filters are active
   const activeFiltersCount = useMemo(() => {

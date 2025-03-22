@@ -26,19 +26,31 @@ const LeadNew = () => {
       
       const { id, createdAt, ...newLeadData } = data;
       
-      // Ensure pipelineType is set
+      // S'assurer que le type de pipeline est bien défini dans les deux champs
       newLeadData.pipelineType = pipelineType;
+      newLeadData.pipeline_type = pipelineType; // Assurer la compatibilité avec la base de données
       
-      createLead(newLeadData);
-      
-      toast({
-        title: "Lead créé",
-        description: assignedAgent 
-          ? "Le lead a été créé et attribué avec succès."
-          : "Le lead a été créé avec succès."
-      });
-      
-      navigate('/leads');
+      // Créer le lead
+      createLead(newLeadData)
+        .then((createdLead) => {
+          toast({
+            title: "Lead créé",
+            description: assignedAgent 
+              ? "Le lead a été créé et attribué avec succès."
+              : "Le lead a été créé avec succès."
+          });
+          
+          // Rediriger vers la page pipeline au lieu de leads
+          navigate(`/pipeline?tab=${pipelineType}`);
+        })
+        .catch((error) => {
+          console.error("Erreur lors de la création du lead:", error);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de créer le nouveau lead."
+          });
+        });
     } catch (error) {
       toast({
         variant: "destructive",
