@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import LeadForm from '@/components/leads/LeadForm';
@@ -14,6 +14,57 @@ const LeadNew = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const [assignedAgent, setAssignedAgent] = useState<string | undefined>(undefined);
+  const [autoCreatingLead, setAutoCreatingLead] = useState<boolean>(true);
+
+  // Automatically create lead from Idealista message
+  useEffect(() => {
+    if (autoCreatingLead) {
+      setAutoCreatingLead(false);
+      
+      // Create a lead for the Idealista message with the given data
+      const createIdealitaLead = async () => {
+        const idealitaLead: Omit<LeadDetailed, "id" | "createdAt"> = {
+          name: "Fatiha",
+          email: "fmohamed01@cuatrocaminos.net",
+          phone: "644 15 78 61",
+          source: "Idealista",
+          propertyReference: "85719297",
+          budget: "30.000.000",
+          currency: "EUR",
+          country: "Spain",
+          desiredLocation: "La Zagaleta, Benahavis",
+          propertyType: "Villa",
+          notes: "Hola necesito contactar contigo en whatsapp para saber mas detalles de esta casa si no te importa gracias.",
+          status: "New",
+          tags: ["Imported"],
+          pipelineType: "purchase"
+        };
+        
+        try {
+          const createdLead = await createLead(idealitaLead);
+          
+          toast({
+            title: "Lead créé",
+            description: "Le lead a été créé et attribué à Pierre Axel Gadait avec succès."
+          });
+          
+          // Navigate to the lead detail page
+          if (createdLead && createdLead.id) {
+            navigate(`/leads/${createdLead.id}`);
+          }
+        } catch (error) {
+          console.error('Error creating lead:', error);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de créer le lead automatiquement. Veuillez le créer manuellement."
+          });
+        }
+      };
+      
+      createIdealitaLead();
+    }
+  }, [autoCreatingLead, navigate]);
 
   const handleSubmit = (data: LeadDetailed) => {
     try {
@@ -70,6 +121,7 @@ const LeadNew = () => {
             value={assignedAgent}
             onChange={handleAgentChange}
             label="Attribuer ce lead à"
+            autoSelectPierreAxel={true}
           />
         </div>
       )}

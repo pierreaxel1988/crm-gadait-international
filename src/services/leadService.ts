@@ -1,18 +1,27 @@
 
-import type { LeadDetailed } from "@/types/lead";
-// Change export to export type
-export type { ActionHistory } from "@/types/actionHistory";
+import { LeadDetailed } from "@/types/lead";
+import { createLead as createLeadCore } from "./leadCore";
 
-// Re-export everything from the split files
-export { 
-  getLeads, 
-  getLead, 
-  updateLead, 
-  createLead, 
-  deleteLead,
-  convertToSimpleLead 
-} from "./leadCore";
-export { addActionToLead } from "./leadActions";
+export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt">): Promise<LeadDetailed | null> => {
+  // Si un agent n'est pas déjà assigné, chercher l'ID de Pierre Axel Gadait
+  if (!leadData.assignedTo) {
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      const { data } = await supabase
+        .from('team_members')
+        .select('id')
+        .ilike('name', '%pierre axel gadait%')
+        .single();
+        
+      if (data && data.id) {
+        leadData.assignedTo = data.id;
+      }
+    } catch (error) {
+      console.error('Error fetching Pierre Axel ID:', error);
+    }
+  }
 
-// Also export the LeadDetailed type for convenience
-export type { LeadDetailed };
+  // Continuer avec la création du lead
+  return createLeadCore(leadData);
+};
