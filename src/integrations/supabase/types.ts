@@ -68,6 +68,7 @@ export type Database = {
           next_follow_up_date: string | null
           notes: string | null
           phone: string | null
+          pipeline_type: string | null
           property_reference: string | null
           property_type: string | null
           property_use: string | null
@@ -103,6 +104,7 @@ export type Database = {
           next_follow_up_date?: string | null
           notes?: string | null
           phone?: string | null
+          pipeline_type?: string | null
           property_reference?: string | null
           property_type?: string | null
           property_use?: string | null
@@ -138,6 +140,7 @@ export type Database = {
           next_follow_up_date?: string | null
           notes?: string | null
           phone?: string | null
+          pipeline_type?: string | null
           property_reference?: string | null
           property_type?: string | null
           property_use?: string | null
