@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LeadForm from '@/components/leads/LeadForm';
@@ -78,7 +77,7 @@ const LeadEdit = () => {
           title: "Lead mis à jour",
           description: "Les modifications ont été enregistrées avec succès."
         });
-        navigate('/leads');
+        setLead(updatedLead);
       }
     } catch (error) {
       toast({
