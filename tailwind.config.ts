@@ -103,6 +103,7 @@ export default {
 				timesItalic: ['TimesNow-LightItalic', 'Georgia', 'serif'],
 				timesNowSemi: ['TimesNow-Semi-Light', 'Georgia', 'serif'],
 				futura: ['Futura Medium', 'Futura', 'sans-serif'],
+				futuraLight: ['Futura Light', 'Futura', 'sans-serif'],
 				futuraMd: ['"Futura Md BT"', 'Futura Medium', 'sans-serif'],
 			},
 			keyframes: {

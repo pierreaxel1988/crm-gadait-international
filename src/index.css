@@ -35,6 +35,14 @@
 }
 
 @font-face {
+  font-family: 'Futura Light';
+  src: url('https://fonts.cdnfonts.com/css/futura-light') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Futura Md BT';
   src: url('/lovable-uploads/e9e9bbcb-84e6-4545-b12f-dc6680544358.png') format('woff2');
   font-weight: 400;
