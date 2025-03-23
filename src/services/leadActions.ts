@@ -55,12 +55,14 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       
       if (error) {
         console.error('Error updating action history in Supabase:', error);
+        throw error; // Throw the error to be caught by the outer try/catch
       }
     } catch (err) {
       console.error('Unexpected error updating action history:', err);
+      throw err; // Rethrow to be caught by the outer try/catch
     }
     
-    return result || undefined;
+    return result;
   } catch (err) {
     console.error('Error adding action to lead:', err);
     toast({

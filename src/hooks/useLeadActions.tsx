@@ -3,7 +3,7 @@ import { LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
-import { addActionToLead, updateLead } from '@/services/leadService';
+import { addActionToLead } from '@/services/leadActions';
 
 export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: LeadDetailed) => void) => {
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
@@ -49,15 +49,15 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
               scheduledDateTime ? ` pour le ${format(new Date(scheduledDateTime), 'dd/MM/yyyy à HH:mm')}` : ''
             }`
           });
+          setIsActionDialogOpen(false);
         }
       } catch (error) {
+        console.error("Error in handleActionConfirm:", error);
         toast({
           variant: "destructive",
           title: "Erreur",
           description: "Impossible d'ajouter l'action."
         });
-      } finally {
-        setIsActionDialogOpen(false);
       }
     }
   };

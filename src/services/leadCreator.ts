@@ -48,7 +48,9 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
         // Ensure other required fields are present
         id: data.id || leadId,
         name: data.name || leadData.name,
-        status: data.status || leadData.status || 'New'
+        status: data.status || leadData.status || 'New',
+        // Make sure actionHistory is properly initialized
+        actionHistory: data.action_history || []
       } as LeadDetailed;
     }
     
