@@ -55,7 +55,12 @@ export const deriveNationalityFromCountry = (country: string | undefined): strin
     'united arab emirates': 'Émirati',
     'uae': 'Émirati',
     'émirats arabes unis': 'Émirati',
-    'emirats arabes unis': 'Émirati'
+    'emirats arabes unis': 'Émirati',
+    'morocco': 'Marocain',
+    'maroc': 'Marocain',
+    'tunisie': 'Tunisien',
+    'algeria': 'Algérien',
+    'algérie': 'Algérien'
   };
   
   const cleanCountry = country.toLowerCase().trim();
@@ -73,4 +78,16 @@ export const deriveNationalityFromCountry = (country: string | undefined): strin
   }
   
   return undefined;
+};
+
+/**
+ * Checks if a search term matches a country based on a flexible search approach
+ */
+export const countryMatchesSearch = (country: string, searchTerm: string): boolean => {
+  if (!searchTerm) return true;
+  
+  const normalizedCountry = country.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+  return normalizedCountry.includes(normalizedSearch);
 };

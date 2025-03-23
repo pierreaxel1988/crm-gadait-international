@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
 
 interface FormInputProps {
   label: string;
@@ -64,9 +66,36 @@ const FormInput: React.FC<FormInputProps> = ({
   onCountryCodeChange,
   searchable = false
 }) => {
-  const [selectedCountryCode, setSelectedCountryCode] = React.useState(countryCode);
-  const [showCountryDropdown, setShowCountryDropdown] = React.useState(false);
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedCountryCode, setSelectedCountryCode] = useState(countryCode);
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showOptions, setShowOptions] = useState(false);
+  const selectRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
+
+  // Handle outside click to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+        setShowOptions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Focus the search input when dropdown is shown
+  useEffect(() => {
+    if (showOptions && searchable && searchInputRef.current) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    }
+  }, [showOptions, searchable]);
 
   const handleCountryCodeChange = (code: string) => {
     setSelectedCountryCode(code);
@@ -118,6 +147,21 @@ const FormInput: React.FC<FormInputProps> = ({
     );
   }, [searchQuery]);
 
+  // Filter options based on search query
+  const filteredOptions = React.useMemo(() => {
+    if (!searchQuery || !searchable || !options) return options;
+    
+    return options.filter(option => {
+      const label = option.label.toLowerCase();
+      const query = searchQuery.toLowerCase();
+      // Remove accents for comparison
+      const normalizedLabel = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const normalizedQuery = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      
+      return normalizedLabel.includes(normalizedQuery);
+    });
+  }, [options, searchQuery, searchable]);
+
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     // Clear on escape
     if (e.key === 'Escape') {
@@ -135,6 +179,20 @@ const FormInput: React.FC<FormInputProps> = ({
     if (e.key.length === 1) {
       setSearchQuery(prev => prev + e.key);
     }
+  };
+
+  // Handle select option click
+  const handleOptionSelect = (optionValue: string) => {
+    const syntheticEvent = {
+      target: {
+        name,
+        value: optionValue
+      }
+    } as React.ChangeEvent<HTMLSelectElement>;
+    
+    onChange(syntheticEvent);
+    setShowOptions(false);
+    setSearchQuery("");
   };
 
   // Adapter la valeur du téléphone pour l'affichage dans le champ
@@ -168,39 +226,77 @@ const FormInput: React.FC<FormInputProps> = ({
       ) : (
         <>
           {type === 'select' ? (
-            <div className="relative">
+            <div className="relative" ref={selectRef}>
               {Icon && (
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-10">
                   <Icon className="h-4 w-4" />
                 </div>
               )}
-              <select
-                id={name}
-                name={name}
-                value={value || ''}
-                onChange={onChange}
-                required={required}
-                disabled={disabled}
+              <div
                 className={cn(
-                  "flex h-12 md:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none font-futura",
+                  "flex h-12 md:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer select-none",
                   Icon && "pl-9"
                 )}
+                onClick={() => setShowOptions(!showOptions)}
                 style={{ fontSize: '16px' }}
-                onKeyDown={searchable ? handleSearchKeyDown : undefined}
               >
-                <option value="">{placeholder || 'Sélectionner...'}</option>
-                {options
-                  .filter(option => !searchable || !searchQuery || option.label.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))
-                }
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1 flex items-center">
+                  {value ? (
+                    options.find(opt => opt.value === value)?.label || value
+                  ) : (
+                    <span className="text-muted-foreground">{placeholder || 'Sélectionner...'}</span>
+                  )}
+                </div>
+                <div className="flex items-center">
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </div>
               </div>
+              
+              {showOptions && (
+                <div className="absolute z-50 w-full mt-1 rounded-md border border-input bg-background shadow-md max-h-60 overflow-auto">
+                  {searchable && (
+                    <div className="sticky top-0 p-2 bg-background border-b border-input">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <input
+                          ref={searchInputRef}
+                          type="text"
+                          className="w-full p-2 pl-8 text-sm border rounded-md"
+                          placeholder="Rechercher..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <div className="py-1">
+                    <div 
+                      className="px-3 py-2 text-sm hover:bg-accent cursor-pointer font-futura text-muted-foreground"
+                      onClick={() => handleOptionSelect('')}
+                    >
+                      {placeholder || 'Sélectionner...'}
+                    </div>
+                    {filteredOptions.map((option) => (
+                      <div 
+                        key={option.value} 
+                        className={cn(
+                          "px-3 py-2 text-sm hover:bg-accent cursor-pointer font-futura",
+                          value === option.value ? "bg-accent font-medium" : ""
+                        )}
+                        onClick={() => handleOptionSelect(option.value)}
+                      >
+                        {option.label}
+                      </div>
+                    ))}
+                    {filteredOptions.length === 0 && (
+                      <div className="px-3 py-2 text-sm text-muted-foreground font-futura">
+                        Aucun résultat trouvé
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           ) : type === 'textarea' ? (
             <div className="relative">

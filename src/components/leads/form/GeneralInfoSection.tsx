@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
@@ -7,7 +7,8 @@ import { User, Mail, Phone, Flag, BarChart, MapPin, Clipboard } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { COUNTRIES } from '@/utils/countries';
-import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
+import { deriveNationalityFromCountry, countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
@@ -24,9 +25,26 @@ const GeneralInfoSection = ({
 }: GeneralInfoSectionProps) => {
   // State pour gérer le code pays
   const [phoneCountryCode, setPhoneCountryCode] = useState('+33');
+  const isMobile = useIsMobile();
+  
+  // Auto-set nationality when country changes
+  useEffect(() => {
+    if (formData.taxResidence && !formData.nationality) {
+      const derivedNationality = deriveNationalityFromCountry(formData.taxResidence);
+      if (derivedNationality) {
+        const syntheticEvent = {
+          target: {
+            name: 'nationality',
+            value: derivedNationality
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        handleInputChange(syntheticEvent);
+      }
+    }
+  }, [formData.taxResidence]);
   
   // Fonction pour extraire le code pays du numéro de téléphone existant
-  React.useEffect(() => {
+  useEffect(() => {
     if (formData.phone) {
       // Rechercher un code pays au début du numéro
       const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
