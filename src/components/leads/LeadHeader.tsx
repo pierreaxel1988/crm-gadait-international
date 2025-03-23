@@ -58,18 +58,12 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
               variant="chocolate" 
               onClick={onSave} 
               disabled={isSaving || !hasChanges}
-              className="w-auto flex items-center gap-1 px-3 py-1.5 rounded text-white"
+              className="w-auto p-2 rounded text-white"
             >
               {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Enregistrement...</span>
-                </>
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  <span>Sauvegarder</span>
-                </>
+                <Save className="h-4 w-4" />
               )}
             </CustomButton>
           )}
