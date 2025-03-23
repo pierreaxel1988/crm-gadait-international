@@ -102,7 +102,7 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
   let currencyValue: string = leadData.currency || defaultCurrency;
   
   // Safe type check that satisfies TypeScript
-  if (currencyValue !== null && typeof currencyValue === 'object' && 'value' in currencyValue) {
+  if (currencyValue && typeof currencyValue === 'object' && 'value' in currencyValue) {
     currencyValue = defaultCurrency;
   }
   

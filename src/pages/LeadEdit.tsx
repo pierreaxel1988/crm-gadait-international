@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LeadForm from '@/components/leads/LeadForm';
@@ -117,7 +116,6 @@ const LeadEdit = () => {
     if (lead && hasChanges) {
       handleSubmit(lead);
     } else if (lead) {
-      // Even if no changes detected, allow saving anyway
       handleSubmit(lead);
     }
   };
@@ -175,7 +173,7 @@ const LeadEdit = () => {
         onValueChange={setActiveTab} 
         className="w-full"
       >
-        <TabsList className="w-full bg-background border-b flex overflow-x-auto no-scrollbar">
+        <TabsList className="w-full bg-background border-b flex overflow-x-auto no-scrollbar sticky top-[105px] z-10">
           <TabsTrigger 
             value="general" 
             className="py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap text-sm"
@@ -273,7 +271,6 @@ const LeadEdit = () => {
             email={lead.email} 
           />
           
-          {/* Always show the Save button regardless of which tab is active */}
           <div className="fixed bottom-24 left-6 z-50">
             <CustomButton
               variant="chocolate"
