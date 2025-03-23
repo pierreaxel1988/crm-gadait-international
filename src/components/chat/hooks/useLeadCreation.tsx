@@ -54,7 +54,17 @@ export const useLeadCreation = () => {
     }
     
     try {
+      // Determine salutation based on name if possible
+      let salutation: 'M.' | 'Mme' | undefined = undefined;
+      const nameLower = (extractedData.Name || extractedData.name || "").toLowerCase();
+      if (nameLower.startsWith('m.') || nameLower.startsWith('mr') || nameLower.startsWith('monsieur')) {
+        salutation = 'M.';
+      } else if (nameLower.startsWith('mme') || nameLower.startsWith('ms') || nameLower.startsWith('mrs') || nameLower.startsWith('madame')) {
+        salutation = 'Mme';
+      }
+      
       const newLead: Omit<LeadDetailed, "id" | "createdAt"> = {
+        salutation: salutation,
         name: extractedData.Name || extractedData.name || "",
         email: extractedData.Email || extractedData.email || "",
         phone: extractedData.Phone || extractedData.phone || "",

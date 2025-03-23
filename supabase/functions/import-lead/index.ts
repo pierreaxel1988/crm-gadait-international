@@ -194,6 +194,7 @@ serve(async (req) => {
 
     // Préparation des données pour insertion/mise à jour en traitant les valeurs nulles
     const leadDataToUpsert = {
+      salutation: leadData.salutation || null,
       name: leadData.name || "Sans nom",
       email: leadData.email || null,
       phone: leadData.phone || null,
@@ -310,8 +311,24 @@ function parseRealEstatePortalData(data) {
     integrationSource: source,
     additionalData: {},
     assigned_to: data.assigned_to || null,
-    pipeline_type: data.pipeline_type || "purchase" // Default to purchase pipeline
+    pipeline_type: data.pipeline_type || "purchase", // Default to purchase pipeline
+    salutation: undefined // Add support for salutation
   };
+  
+  // Extract salutation from name if present
+  if (data.name) {
+    if (data.name.startsWith('M.') || data.name.startsWith('Mr') || data.name.startsWith('Monsieur')) {
+      lead.salutation = 'M.';
+      // Clean name by removing salutation prefix
+      lead.name = data.name.replace(/^(M\.|Mr|Monsieur)\s+/, '');
+    } else if (data.name.startsWith('Mme') || data.name.startsWith('Ms') || data.name.startsWith('Mrs') || data.name.startsWith('Madame')) {
+      lead.salutation = 'Mme';
+      // Clean name by removing salutation prefix
+      lead.name = data.name.replace(/^(Mme|Ms|Mrs|Madame)\s+/, '');
+    } else {
+      lead.name = data.name;
+    }
+  }
   
   // Copier toutes les données brutes pour référence future
   lead.additionalData = { ...data };
@@ -697,4 +714,3 @@ function mapPortalSource(source) {
   
   return "Portails immobiliers";
 }
-

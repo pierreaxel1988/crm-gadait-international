@@ -77,6 +77,7 @@ export type Database = {
           property_use: string | null
           purchase_timeframe: string | null
           raw_data: Json | null
+          salutation: string | null
           source: string | null
           status: string
           tags: string[] | null
@@ -116,6 +117,7 @@ export type Database = {
           property_use?: string | null
           purchase_timeframe?: string | null
           raw_data?: Json | null
+          salutation?: string | null
           source?: string | null
           status: string
           tags?: string[] | null
@@ -155,6 +157,7 @@ export type Database = {
           property_use?: string | null
           purchase_timeframe?: string | null
           raw_data?: Json | null
+          salutation?: string | null
           source?: string | null
           status?: string
           tags?: string[] | null
