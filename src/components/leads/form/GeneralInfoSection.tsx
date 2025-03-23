@@ -5,13 +5,6 @@ import FormSection from './FormSection';
 import FormInput from './FormInput';
 import { User, Mail, Phone, Flag, BarChart, MapPin, Clipboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from '@/hooks/use-toast';
 
 interface GeneralInfoSectionProps {
@@ -130,7 +123,7 @@ const GeneralInfoSection = ({
 
   return (
     <FormSection title="Informations Générales">
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-sm font-medium">Détails de contact</h3>
           <Button 
@@ -202,44 +195,53 @@ fmohamed01@cuatrocaminos.net"
           placeholder="Numéro de téléphone"
         />
 
-        <FormInput
-          label="Nationalité"
-          name="nationality"
-          type="select"
-          value={formData.nationality || ''}
-          onChange={handleInputChange}
-          icon={Flag}
-          options={countries.map(country => ({ 
-            value: country, 
-            label: `${getCountryFlag(country)} ${country}` 
-          }))}
-          placeholder="Nationalité du client"
-        />
+        <div className="mb-3">
+          <FormInput
+            label="Nationalité"
+            name="nationality"
+            type="select"
+            value={formData.nationality || ''}
+            onChange={handleInputChange}
+            icon={Flag}
+            options={countries.map(country => ({ 
+              value: country, 
+              label: `${getCountryFlag(country)} ${country}` 
+            }))}
+            placeholder="Sélectionner..."
+            className="mb-0"
+          />
+        </div>
 
-        <FormInput
-          label="Pays de résidence"
-          name="taxResidence"
-          type="select"
-          value={formData.taxResidence || ''}
-          onChange={handleInputChange}
-          icon={MapPin}
-          options={countries.map(country => ({ 
-            value: country, 
-            label: `${getCountryFlag(country)} ${country}` 
-          }))}
-          placeholder="Pays de résidence fiscale"
-        />
+        <div className="mb-3">
+          <FormInput
+            label="Pays de résidence"
+            name="taxResidence"
+            type="select"
+            value={formData.taxResidence || ''}
+            onChange={handleInputChange}
+            icon={MapPin}
+            options={countries.map(country => ({ 
+              value: country, 
+              label: `${getCountryFlag(country)} ${country}` 
+            }))}
+            placeholder="Sélectionner..."
+            className="mb-0"
+          />
+        </div>
 
-        <FormInput
-          label="Source"
-          name="source"
-          type="select"
-          value={formData.source || ''}
-          onChange={handleInputChange}
-          icon={BarChart}
-          options={sources.map(source => ({ value: source, label: source }))}
-          placeholder="Source du lead"
-        />
+        <div className="mb-3">
+          <FormInput
+            label="Source"
+            name="source"
+            type="select"
+            value={formData.source || ''}
+            onChange={handleInputChange}
+            icon={BarChart}
+            options={sources.map(source => ({ value: source, label: source }))}
+            placeholder="Sélectionner..."
+            className="mb-0"
+          />
+        </div>
       </div>
     </FormSection>
   );

@@ -91,17 +91,21 @@ const FormInput: React.FC<FormInputProps> = ({
                 required={required}
                 disabled={disabled}
                 className={cn(
-                  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                  "flex h-12 md:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none",
                   Icon && "pl-9"
                 )}
+                style={{ fontSize: '16px' }}
               >
-                <option value="">Sélectionner...</option>
+                <option value="">{placeholder || 'Sélectionner...'}</option>
                 {options.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
               </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </div>
             </div>
           ) : type === 'textarea' ? (
             <div className="relative">
@@ -122,6 +126,7 @@ const FormInput: React.FC<FormInputProps> = ({
                   "flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                   Icon && "pl-9"
                 )}
+                style={{ fontSize: '16px' }}
               />
             </div>
           ) : type === 'tel-with-code' ? (
@@ -134,7 +139,7 @@ const FormInput: React.FC<FormInputProps> = ({
               <div className="flex">
                 <div className="relative flex-shrink-0">
                   <div 
-                    className="flex items-center justify-between w-24 h-10 px-3 border border-r-0 border-input rounded-l-md bg-muted cursor-pointer"
+                    className="flex items-center justify-between w-24 h-12 md:h-10 px-3 border border-r-0 border-input rounded-l-md bg-muted cursor-pointer"
                     onClick={() => setShowCountryDropdown(prev => !prev)}
                   >
                     <span className="text-sm truncate">{selectedCountryCode}</span>
@@ -142,11 +147,11 @@ const FormInput: React.FC<FormInputProps> = ({
                   </div>
                   
                   {showCountryDropdown && (
-                    <div className="absolute z-10 mt-1 w-48 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md">
+                    <div className="absolute z-10 mt-1 w-56 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md">
                       {countryCodes.map(country => (
                         <div 
                           key={country.code} 
-                          className="px-3 py-2 text-sm hover:bg-accent cursor-pointer flex items-center"
+                          className="px-3 py-3 text-sm hover:bg-accent cursor-pointer flex items-center"
                           onClick={() => handleCountryCodeChange(country.code)}
                         >
                           <span className="mr-2">{country.country}</span>
@@ -165,7 +170,8 @@ const FormInput: React.FC<FormInputProps> = ({
                   placeholder={placeholder}
                   required={required}
                   disabled={disabled}
-                  className={cn("rounded-l-none", Icon && "pl-9")}
+                  className={cn("rounded-l-none h-12 md:h-10", Icon && "pl-9")}
+                  style={{ fontSize: '16px' }}
                 />
               </div>
             </div>
@@ -185,7 +191,8 @@ const FormInput: React.FC<FormInputProps> = ({
                 placeholder={placeholder}
                 required={required}
                 disabled={disabled}
-                className={cn(Icon && "pl-9")}
+                className={cn(Icon && "pl-9", "h-12 md:h-10")}
+                style={{ fontSize: '16px' }}
               />
             </div>
           )}
