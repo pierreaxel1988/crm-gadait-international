@@ -146,6 +146,16 @@ const PropertyDetailsSection = ({
     handleInputChange(e);
   };
 
+  // Handle property type selection
+  const handlePropertyTypeChange = (value: PropertyType) => {
+    handleMultiSelectToggle('propertyTypes', value);
+  };
+
+  // Handle view type selection
+  const handleViewTypeChange = (value: string) => {
+    handleMultiSelectToggle('views', value as ViewType);
+  };
+
   return (
     <div className="space-y-4">
       <PropertyUrlField 
@@ -180,7 +190,7 @@ const PropertyDetailsSection = ({
         <MultiSelectButtons
           options={propertyTypes}
           selectedValues={Array.isArray(formData.propertyTypes) ? formData.propertyTypes : []}
-          onChange={(value) => handleMultiSelectToggle('propertyTypes', value)}
+          onChange={handlePropertyTypeChange}
         />
       </div>
 
@@ -217,7 +227,7 @@ const PropertyDetailsSection = ({
         <MultiSelectButtons
           options={viewTypes}
           selectedValues={formData.views || []}
-          onChange={(value) => handleMultiSelectToggle('views', value)}
+          onChange={handleViewTypeChange}
         />
       </div>
 

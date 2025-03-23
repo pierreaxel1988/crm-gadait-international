@@ -8,6 +8,7 @@ interface MultiSelectButtonsProps<T extends string> {
   onChange?: (value: T) => void; // Make onChange optional
   onToggle?: (value: T) => void; // Add back onToggle for backward compatibility
   specialOption?: T;
+  className?: string; // Add className prop to be passed to BaseSelectButtons
 }
 
 const MultiSelectButtons = <T extends string>({
@@ -16,6 +17,7 @@ const MultiSelectButtons = <T extends string>({
   onChange,
   onToggle,
   specialOption,
+  className,
 }: MultiSelectButtonsProps<T>) => {
   const isSelected = (option: T) => selectedValues.includes(option);
   
@@ -34,6 +36,7 @@ const MultiSelectButtons = <T extends string>({
       isSelected={isSelected}
       onSelectOption={handleSelectOption}
       specialOption={specialOption}
+      className={className}
     />
   );
 };
