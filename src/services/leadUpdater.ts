@@ -16,6 +16,8 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     console.log("Budget is:", supabaseLeadData.budget);
     console.log("Budget min is:", supabaseLeadData.budget_min);
     console.log("Desired location is:", supabaseLeadData.desired_location);
+    console.log("Currency is:", supabaseLeadData.currency);
+    console.log("Property types is:", supabaseLeadData.property_types);
     
     console.log("Mapped Supabase lead data:", supabaseLeadData);
     

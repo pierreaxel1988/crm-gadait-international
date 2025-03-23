@@ -77,6 +77,10 @@ const LeadEdit = () => {
         id: id || data.id
       };
       
+      if (leadDataToUpdate.currency && typeof leadDataToUpdate.currency === 'object') {
+        leadDataToUpdate.currency = 'EUR';
+      }
+      
       console.log("Final data to update:", leadDataToUpdate);
       
       const updatedLead = await updateLead(leadDataToUpdate);
@@ -269,8 +273,8 @@ const LeadEdit = () => {
             email={lead.email} 
           />
           
-          {isMobile && hasChanges && (
-            <div className="fixed bottom-[80px] left-6 z-50">
+          {isMobile && (
+            <div className="fixed bottom-24 left-6 z-50">
               <CustomButton
                 variant="chocolate"
                 className="rounded-full p-0 w-12 h-12 flex items-center justify-center shadow-luxury"

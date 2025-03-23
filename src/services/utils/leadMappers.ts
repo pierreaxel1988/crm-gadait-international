@@ -16,6 +16,17 @@ export const mapToLeadDetailed = (data: any): LeadDetailed => {
     parsedBedrooms = data.bedrooms;
   }
   
+  // Parse property_types if needed
+  let parsedPropertyTypes = data.property_types || [];
+  try {
+    if (typeof data.property_types === 'string' && data.property_types.startsWith('[')) {
+      parsedPropertyTypes = JSON.parse(data.property_types);
+    }
+  } catch (e) {
+    console.error("Error parsing property_types:", e);
+    parsedPropertyTypes = data.property_types || [];
+  }
+  
   return {
     id: data.id,
     name: data.name,
@@ -31,10 +42,10 @@ export const mapToLeadDetailed = (data: any): LeadDetailed => {
     propertyReference: data.property_reference,
     budget: data.budget,
     budgetMin: data.budget_min,
-    currency: data.currency,
+    currency: data.currency || 'EUR',
     desiredLocation: data.desired_location,
     propertyType: data.property_type,
-    propertyTypes: data.property_types,
+    propertyTypes: parsedPropertyTypes,
     bedrooms: parsedBedrooms,
     views: data.views,
     amenities: data.amenities,
@@ -73,6 +84,25 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
     }
   }
   
+  // Convert propertyTypes array to a format Supabase can handle
+  let formattedPropertyTypes = undefined;
+  
+  if (leadData.propertyTypes !== undefined) {
+    if (Array.isArray(leadData.propertyTypes)) {
+      // Make sure it's a proper array of strings
+      const cleanPropertyTypes = leadData.propertyTypes.filter(p => p && typeof p === 'string');
+      formattedPropertyTypes = cleanPropertyTypes;
+    } else {
+      formattedPropertyTypes = [];
+    }
+  }
+  
+  // Ensure currency is a string, not an object
+  let currency = leadData.currency;
+  if (currency && typeof currency === 'object' && currency._type === 'undefined') {
+    currency = 'EUR'; // Default to EUR if we have an invalid currency object
+  }
+  
   // Ensure pipeline_type is set from pipelineType for database consistency
   const pipelineType = leadData.pipelineType || leadData.pipeline_type || 'purchase';
   
@@ -80,6 +110,8 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
   console.log("- Budget:", leadData.budget);
   console.log("- Budget Min:", leadData.budgetMin);
   console.log("- Location:", leadData.desiredLocation);
+  console.log("- Currency:", currency);
+  console.log("- Property Types:", formattedPropertyTypes);
   
   return {
     name: leadData.name,
@@ -93,10 +125,10 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
     property_reference: leadData.propertyReference,
     budget: leadData.budget,
     budget_min: leadData.budgetMin,
-    currency: leadData.currency,
+    currency: currency,
     desired_location: leadData.desiredLocation,
     property_type: leadData.propertyType,
-    property_types: leadData.propertyTypes,
+    property_types: formattedPropertyTypes,
     bedrooms: formattedBedrooms,
     views: leadData.views,
     amenities: leadData.amenities,

@@ -54,6 +54,7 @@ export type Database = {
           budget_min: string | null
           country: string | null
           created_at: string
+          currency: string | null
           desired_location: string | null
           email: string | null
           external_id: string | null
@@ -72,6 +73,7 @@ export type Database = {
           pipeline_type: string | null
           property_reference: string | null
           property_type: string | null
+          property_types: string[] | null
           property_use: string | null
           purchase_timeframe: string | null
           raw_data: Json | null
@@ -91,6 +93,7 @@ export type Database = {
           budget_min?: string | null
           country?: string | null
           created_at?: string
+          currency?: string | null
           desired_location?: string | null
           email?: string | null
           external_id?: string | null
@@ -109,6 +112,7 @@ export type Database = {
           pipeline_type?: string | null
           property_reference?: string | null
           property_type?: string | null
+          property_types?: string[] | null
           property_use?: string | null
           purchase_timeframe?: string | null
           raw_data?: Json | null
@@ -128,6 +132,7 @@ export type Database = {
           budget_min?: string | null
           country?: string | null
           created_at?: string
+          currency?: string | null
           desired_location?: string | null
           email?: string | null
           external_id?: string | null
@@ -146,6 +151,7 @@ export type Database = {
           pipeline_type?: string | null
           property_reference?: string | null
           property_type?: string | null
+          property_types?: string[] | null
           property_use?: string | null
           purchase_timeframe?: string | null
           raw_data?: Json | null
