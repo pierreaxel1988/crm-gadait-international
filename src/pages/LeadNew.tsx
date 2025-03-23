@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -116,11 +115,18 @@ const LeadNew = () => {
     setAssignedAgent(value);
   };
 
-  // Define available statuses for the lead
-  const availableStatuses: LeadStatus[] = [
-    'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Deposit', 'Signed',
-    'Offre', 'Gagné', 'Perdu'
+  // Define available statuses for the lead, matching those used in the pipeline
+  // This ensures consistency between lead creation and pipeline display
+  const purchaseStatuses: LeadStatus[] = [
+    'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Deposit', 'Signed', 'Gagné', 'Perdu'
   ];
+  
+  const rentalStatuses: LeadStatus[] = [
+    'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offre', 'Deposit', 'Signed', 'Gagné', 'Perdu'
+  ];
+  
+  // Use the appropriate statuses based on the selected pipeline type
+  const availableStatuses = pipelineType === 'purchase' ? purchaseStatuses : rentalStatuses;
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -153,7 +159,11 @@ const LeadNew = () => {
               <label className="text-sm font-medium mb-1 block">Type de pipeline</label>
               <Select
                 value={pipelineType}
-                onValueChange={(value: 'purchase' | 'rental') => setPipelineType(value)}
+                onValueChange={(value: 'purchase' | 'rental') => {
+                  setPipelineType(value);
+                  // Reset status to 'New' when pipeline type changes
+                  setLeadStatus('New');
+                }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Sélectionner un pipeline" />
