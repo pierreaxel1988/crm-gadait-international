@@ -18,7 +18,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
     onDataChange({ [field]: value } as Partial<LeadDetailed>);
   };
   
-  const leadStatuses: LeadStatus[] = ["New", "Contacted", "Qualified", "Proposal", "Negotiation", "Won", "Lost", "Archived"];
+  const leadStatuses: LeadStatus[] = ["New", "Contacted", "Qualified", "Proposal", "Visit", "Offer", "Deposit", "Signed"];
   const leadTags: LeadTag[] = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];
 
   const handleTagToggle = (tag: LeadTag) => {

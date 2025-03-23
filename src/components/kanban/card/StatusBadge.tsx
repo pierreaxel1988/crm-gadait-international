@@ -15,7 +15,11 @@ const StatusBadge = ({ status }: StatusBadgeProps) => {
     'Visit': { bg: 'bg-pink-100', text: 'text-pink-800', border: 'border-pink-200' },
     'Offer': { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
     'Deposit': { bg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-200' },
-    'Signed': { bg: 'bg-emerald-100', text: 'text-emerald-800', border: 'border-emerald-200' }
+    'Signed': { bg: 'bg-emerald-100', text: 'text-emerald-800', border: 'border-emerald-200' },
+    'Negotiation': { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
+    'Won': { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
+    'Lost': { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' },
+    'Archived': { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-200' }
   };
   
   const config = statusConfig[status] || { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-200' };

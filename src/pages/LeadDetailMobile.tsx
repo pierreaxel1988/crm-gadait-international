@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LeadDetailed } from '@/types/lead';
+import { ActionHistory } from '@/types/actionHistory';
 import { getLead, updateLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -137,6 +138,11 @@ const LeadDetailMobile = () => {
 
   const handleBackClick = () => {
     navigate('/pipeline');
+  };
+
+  // Cette fonction est un wrapper pour markActionComplete qui prend une ActionHistory au lieu d'un string
+  const handleMarkComplete = (action: ActionHistory) => {
+    markActionComplete(action.id);
   };
 
   if (isLoading) {
