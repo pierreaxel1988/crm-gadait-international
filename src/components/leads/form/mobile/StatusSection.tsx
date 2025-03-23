@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LeadDetailed, LeadTag } from '@/types/lead';
 import { Label } from '@/components/ui/label';

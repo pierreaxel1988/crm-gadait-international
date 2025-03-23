@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LeadStatus } from '@/types/lead';
+import { LeadStatus } from '@/components/common/StatusBadge';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
