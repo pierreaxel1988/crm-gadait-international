@@ -1,0 +1,155 @@
+
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { FilterOptions } from '@/components/pipeline/PipelineFilters';
+import { supabase } from '@/integrations/supabase/client';
+import { LeadStatus } from '@/components/common/StatusBadge';
+
+export function usePipelineState() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const queryParams = new URLSearchParams(location.search);
+  const tabFromUrl = queryParams.get('tab');
+  
+  // State management
+  const [activeTab, setActiveTab] = useState<string>(tabFromUrl === 'rental' ? 'rental' : 'purchase');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<{id: string, name: string}[]>([]);
+  
+  // Initialize filter state
+  const [filters, setFilters] = useState<FilterOptions>({
+    status: null,
+    tags: [],
+    assignedTo: null,
+    minBudget: '',
+    maxBudget: '',
+    location: '',
+    purchaseTimeframe: null,
+    propertyType: null
+  });
+
+  // Auto-refresh when component mounts
+  useEffect(() => {
+    handleRefresh();
+  }, []);
+
+  // Update URL when tab changes
+  useEffect(() => {
+    navigate(`/pipeline?tab=${activeTab}`, { replace: true });
+  }, [activeTab, navigate]);
+
+  // Update tab from URL when it changes
+  useEffect(() => {
+    if (tabFromUrl === 'rental' || tabFromUrl === 'purchase') {
+      setActiveTab(tabFromUrl);
+      // Force a refresh when switching tabs
+      setRefreshTrigger(prev => prev + 1);
+    }
+  }, [tabFromUrl]);
+
+  // Fetch team members
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('id, name');
+          
+        if (error) {
+          console.error('Error fetching team members:', error);
+          return;
+        }
+        
+        if (data) {
+          setTeamMembers(data);
+        }
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      }
+    };
+
+    fetchTeamMembers();
+  }, []);
+
+  // Check if any filters are active
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (filters.status !== null) count++;
+    if (filters.tags.length > 0) count++;
+    if (filters.assignedTo !== null) count++;
+    if (filters.minBudget !== '') count++;
+    if (filters.maxBudget !== '') count++;
+    if (filters.location !== '') count++;
+    if (filters.purchaseTimeframe !== null) count++;
+    if (filters.propertyType !== null) count++;
+    return count;
+  }, [filters]);
+
+  // Refresh data
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setRefreshTrigger(prev => prev + 1);
+    setTimeout(() => setIsRefreshing(false), 1000); // Visual feedback
+  };
+
+  // Clear all filters
+  const handleClearFilters = () => {
+    setFilters({
+      status: null,
+      tags: [],
+      assignedTo: null,
+      minBudget: '',
+      maxBudget: '',
+      location: '',
+      purchaseTimeframe: null,
+      propertyType: null
+    });
+  };
+
+  // Toggle filters visibility
+  const toggleFilters = () => {
+    setFiltersOpen(prev => !prev);
+  };
+
+  // Get all column data for mobile view
+  const getAllColumns = () => {
+    // Define the kanban columns with proper LeadStatus typing
+    return [
+      { title: 'Nouveaux', status: 'New' as LeadStatus },
+      { title: 'Contactés', status: 'Contacted' as LeadStatus },
+      { title: 'Qualifiés', status: 'Qualified' as LeadStatus },
+      { title: 'Propositions', status: 'Proposal' as LeadStatus },
+      { title: 'Visites en cours', status: 'Visit' as LeadStatus },
+      { title: 'Offre en cours', status: 'Offer' as LeadStatus },
+      { title: 'Dépôt reçu', status: 'Deposit' as LeadStatus },
+      { title: 'Signature finale', status: 'Signed' as LeadStatus },
+      { title: 'Conclus', status: 'Gagné' as LeadStatus },
+      { title: 'Perdu', status: 'Perdu' as LeadStatus }
+    ].map(col => ({
+      ...col,
+      items: [],
+      pipelineType: activeTab as 'purchase' | 'rental'
+    }));
+  };
+
+  return {
+    activeTab,
+    setActiveTab,
+    refreshTrigger,
+    isRefreshing,
+    searchTerm,
+    setSearchTerm,
+    filtersOpen,
+    toggleFilters,
+    filters,
+    setFilters,
+    teamMembers,
+    activeFiltersCount,
+    handleRefresh,
+    handleClearFilters,
+    getAllColumns
+  };
+}
