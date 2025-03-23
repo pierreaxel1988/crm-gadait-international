@@ -40,7 +40,7 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
           size="icon"
           className="h-8 w-8 rounded-full hover:bg-gray-100"
           onClick={handleEmailClick}
-          title={email}
+          title={`Envoyer un email à ${email}`}
         >
           <Mail className="h-4 w-4 text-gray-600" />
         </Button>
@@ -51,24 +51,24 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
             size="icon"
             className="h-8 w-8 rounded-full hover:bg-gray-100"
             onClick={handlePhoneClick}
-            title={phone}
+            title={`Appeler ${phone}`}
           >
             <Phone className="h-4 w-4 text-gray-600" />
           </Button>
         )}
+        
+        {leadId && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full hover:bg-gray-100"
+            onClick={handleAddAction}
+            title="Ajouter une action"
+          >
+            <PlusCircle className="h-4 w-4 text-gray-600" />
+          </Button>
+        )}
       </div>
-
-      {leadId && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-background shadow-sm hover:bg-gray-100"
-          onClick={handleAddAction}
-          title="Ajouter une action"
-        >
-          <PlusCircle className="h-4 w-4 text-gray-600" />
-        </Button>
-      )}
     </div>
   );
 };
