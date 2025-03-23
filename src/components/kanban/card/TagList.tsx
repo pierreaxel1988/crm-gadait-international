@@ -10,9 +10,9 @@ const TagList = ({ tags }: TagListProps) => {
   if (!tags || tags.length === 0) return null;
   
   return (
-    <div className="mb-3 flex flex-wrap gap-1.5">
+    <div className="mb-3 flex flex-wrap gap-1.5 mt-2">
       {tags.map((tag) => (
-        <TagBadge key={tag} tag={tag} className="text-[10px] py-0.5" />
+        <TagBadge key={tag} tag={tag} className="text-[10px] py-0.5 px-2" />
       ))}
     </div>
   );

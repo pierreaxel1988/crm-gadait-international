@@ -117,7 +117,11 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
         </div>
         
         {/* Informations de contact principales */}
-        <ContactInfo email={item.email} phone={item.phone} />
+        <ContactInfo 
+          email={item.email} 
+          phone={item.phone} 
+          leadId={item.id} 
+        />
         
         {/* Informations sur la propriété */}
         <PropertyInfo 
