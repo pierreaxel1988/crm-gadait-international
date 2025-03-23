@@ -4,11 +4,12 @@ import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BaseSelectButtonsProps<T extends string> {
-  options: readonly T[] | T[]; // Update to handle readonly arrays
+  options: readonly T[] | T[]; // Handle readonly arrays
   isSelected: (option: T) => boolean;
   onSelectOption: (option: T) => void;
   renderOptionContent?: (option: T, isSelected: boolean) => React.ReactNode;
   specialOption?: T; // Special option like "8+" that needs special handling
+  className?: string; // Add className prop
 }
 
 const BaseSelectButtons = <T extends string>({
@@ -17,9 +18,10 @@ const BaseSelectButtons = <T extends string>({
   onSelectOption,
   renderOptionContent,
   specialOption,
+  className,
 }: BaseSelectButtonsProps<T>) => {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={cn("flex flex-wrap gap-2", className)}>
       {options.map(option => {
         const selected = isSelected(option);
         return (
