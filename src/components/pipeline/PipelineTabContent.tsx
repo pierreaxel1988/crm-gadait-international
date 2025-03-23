@@ -14,14 +14,15 @@ const PipelineTabContent = ({ contentType, filters, refreshTrigger }: PipelineTa
   // Get the columns based on the content type
   const getColumns = () => {
     const statusesToShow = filters.status ? [filters.status] : contentType === 'purchase' 
-      ? ['New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offer', 'Deposit', 'Signed'] as LeadStatus[]
-      : ['New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Signed'] as LeadStatus[];
+      // Updated to match the image with French statuses
+      ? ['New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offre', 'Gagné', 'Perdu'] as LeadStatus[]
+      : ['New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offre', 'Gagné', 'Perdu'] as LeadStatus[];
     
     return statusesToShow.map(status => ({
       title: status,
       status: status as LeadStatus,
       items: [],
-      pipelineType: contentType // Ajout du type de pipeline
+      pipelineType: contentType
     }));
   };
 
@@ -30,7 +31,7 @@ const PipelineTabContent = ({ contentType, filters, refreshTrigger }: PipelineTa
       columns={getColumns()} 
       filters={filters} 
       refreshTrigger={refreshTrigger}
-      pipelineType={contentType} // Passer le type de pipeline au KanbanBoard
+      pipelineType={contentType}
     />
   );
 };

@@ -1,12 +1,13 @@
 
 import React from 'react';
-import { LeadDetailed, LeadTag, LeadStatus } from '@/types/lead';
+import { LeadDetailed, LeadTag } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
+import { LeadStatus } from '@/components/common/StatusBadge';
 
 interface StatusSectionProps {
   lead: LeadDetailed;
@@ -18,7 +19,18 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
     onDataChange({ [field]: value } as Partial<LeadDetailed>);
   };
   
-  const leadStatuses: LeadStatus[] = ["New", "Contacted", "Qualified", "Proposal", "Visit", "Offer", "Deposit", "Signed"];
+  // Updated to include all the statuses shown in the image
+  const leadStatuses: LeadStatus[] = [
+    "New", 
+    "Contacted", 
+    "Qualified", 
+    "Proposal", 
+    "Visit", 
+    "Offre", 
+    "Gagné", 
+    "Perdu"
+  ];
+  
   const leadTags: LeadTag[] = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];
 
   const handleTagToggle = (tag: LeadTag) => {

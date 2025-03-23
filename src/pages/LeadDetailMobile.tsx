@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LeadDetailed } from '@/types/lead';
@@ -20,6 +19,7 @@ import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSectio
 import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
 import NotesSection from '@/components/leads/form/mobile/NotesSection';
 import ActionsPanel from '@/components/leads/actions/ActionsPanelMobile';
+import ActionsPanelMobile from '@/components/leads/actions/ActionsPanelMobile';
 
 const LeadDetailMobile = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,7 +33,6 @@ const LeadDetailMobile = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // Use the existing useLeadActions hook for action management
   const {
     isActionDialogOpen,
     setIsActionDialogOpen,
@@ -102,15 +101,12 @@ const LeadDetailMobile = () => {
     }
   };
 
-  // Handle auto-save functionality
   useEffect(() => {
     if (hasChanges && autoSaveEnabled && lead) {
-      // Clear any existing timer
       if (autoSaveTimer) {
         clearTimeout(autoSaveTimer);
       }
       
-      // Set a new timer to save changes after 2 seconds of inactivity
       const timer = setTimeout(() => {
         handleSave();
       }, 2000);
@@ -140,9 +136,10 @@ const LeadDetailMobile = () => {
     navigate('/pipeline');
   };
 
-  // Cette fonction est un wrapper pour markActionComplete qui prend une ActionHistory au lieu d'un string
   const handleMarkComplete = (action: ActionHistory) => {
-    markActionComplete(action.id);
+    if (action && action.id) {
+      markActionComplete(action.id);
+    }
   };
 
   if (isLoading) {
@@ -170,8 +167,7 @@ const LeadDetailMobile = () => {
   if (!lead) return null;
   
   return (
-    <div className="pb-20">
-      {/* Fixed Header */}
+    <div className="flex flex-col h-[100vh] bg-white dark:bg-loro-night overflow-hidden">
       <div className="fixed top-0 left-0 right-0 bg-white z-10 shadow-sm border-b">
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-2">
@@ -208,11 +204,10 @@ const LeadDetailMobile = () => {
           </div>
         </div>
         
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs defaultValue="info" className="w-full">
           <TabsList className="w-full grid grid-cols-4 bg-transparent">
             <TabsTrigger 
-              value="general"
+              value="info"
               className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs"
             >
               Général
@@ -239,26 +234,37 @@ const LeadDetailMobile = () => {
         </Tabs>
       </div>
       
-      {/* Content with padding to avoid header overlap */}
-      <div className="pt-28 px-4">
-        <TabsContent value="general" className="mt-0">
-          <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
-        </TabsContent>
-        
-        <TabsContent value="criteria" className="mt-0">
-          <SearchCriteriaSection lead={lead} onDataChange={handleDataChange} />
-        </TabsContent>
-        
-        <TabsContent value="status" className="mt-0">
-          <StatusSection lead={lead} onDataChange={handleDataChange} />
-        </TabsContent>
-        
-        <TabsContent value="notes" className="mt-0">
-          <NotesSection lead={lead} onDataChange={handleDataChange} />
-        </TabsContent>
+      <div className="flex-1 overflow-y-auto pb-20">
+        <Tabs defaultValue="info" className="w-full">
+          <div className="px-4 pt-4">
+            <TabsContent value="info" className="mt-0">
+              <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
+            </TabsContent>
+            
+            <TabsContent value="criteria" className="mt-0">
+              <SearchCriteriaSection lead={lead} onDataChange={handleDataChange} />
+            </TabsContent>
+            
+            <TabsContent value="status" className="mt-0">
+              <StatusSection lead={lead} onDataChange={handleDataChange} />
+            </TabsContent>
+            
+            <TabsContent value="notes" className="mt-0">
+              <NotesSection lead={lead} onDataChange={handleDataChange} />
+            </TabsContent>
+            
+            <TabsContent value="actions" className="mt-0">
+              <ActionsPanelMobile 
+                leadId={lead.id} 
+                onAddAction={fetchLead}
+                onMarkComplete={handleMarkComplete} 
+                actionHistory={lead.actionHistory || []}
+              />
+            </TabsContent>
+          </div>
+        </Tabs>
       </div>
       
-      {/* Fixed Footer */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-3 flex justify-center items-center">
         <div className="flex gap-3 w-full justify-between">
           <div className="flex items-center gap-1 text-sm">

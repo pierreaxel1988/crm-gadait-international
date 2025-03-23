@@ -10,10 +10,13 @@ export type LeadStatus =
   | 'Visit'
   | 'Negotiation'
   | 'Offer'
+  | 'Offre'  // French variant
   | 'Deposit'
   | 'Signed'
   | 'Won'
+  | 'Gagné'  // French variant
   | 'Lost'
+  | 'Perdu'  // French variant
   | 'Archived';
 
 interface StatusBadgeProps {
@@ -34,17 +37,20 @@ const StatusBadge = ({ status, className }: StatusBadgeProps) => {
         return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300';
       case 'Visit':
         return 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300';
+      case 'Negotiation':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
       case 'Offer':
+      case 'Offre':
         return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
       case 'Deposit':
         return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
       case 'Signed':
         return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-      case 'Negotiation':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
       case 'Won':
+      case 'Gagné':
         return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
       case 'Lost':
+      case 'Perdu':
         return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
       case 'Archived':
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
