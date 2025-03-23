@@ -3,6 +3,7 @@ import React from 'react';
 import { ArrowUpDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CustomButton from '@/components/ui/CustomButton';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LeadsHeaderProps {
   onSortChange?: (sort: string) => void;
@@ -16,6 +17,7 @@ const LeadsHeader: React.FC<LeadsHeaderProps> = ({
   onNewLead
 }) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   return <div className="flex justify-between items-center pb-4">
       <div>

@@ -9,8 +9,9 @@ import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { supabase } from '@/integrations/supabase/client';
 import PipelineHeader from '@/components/pipeline/PipelineHeader';
 import PipelineTabContent from '@/components/pipeline/PipelineTabContent';
+import MobilePipelineView from '@/components/pipeline/MobilePipelineView';
 
-const Kanban = () => {
+const Pipeline = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const tabFromUrl = queryParams.get('tab');
@@ -120,6 +121,47 @@ const Kanban = () => {
     setFiltersOpen(prev => !prev);
   };
 
+  // Get all column data for mobile view
+  const getAllColumns = () => {
+    // Définition des colonnes du kanban
+    return [
+      { title: 'Nouveaux', status: 'New' },
+      { title: 'Contactés', status: 'Contacted' },
+      { title: 'Qualifiés', status: 'Qualified' },
+      { title: 'Proposition', status: 'Proposal' },
+      { title: 'Visites', status: 'Viewing' },
+      { title: 'Offre', status: 'Offer' },
+      { title: 'Gagné', status: 'Won' },
+      { title: 'Perdu', status: 'Lost' }
+    ].map(col => ({
+      ...col,
+      items: [],
+      pipelineType: activeTab as 'purchase' | 'rental'
+    }));
+  };
+
+  if (isMobile) {
+    return (
+      <div className="p-3 md:p-6 space-y-4">
+        <MobilePipelineView
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          filtersOpen={filtersOpen}
+          toggleFilters={toggleFilters}
+          activeFiltersCount={activeFiltersCount}
+          filters={filters}
+          onFilterChange={setFilters}
+          onClearFilters={handleClearFilters}
+          columns={getAllColumns()}
+          handleRefresh={handleRefresh}
+          isRefreshing={isRefreshing}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       <PipelineHeader 
@@ -158,14 +200,8 @@ const Kanban = () => {
           />
         </TabsContent>
       </Tabs>
-
-      {isMobile && (
-        <FloatingActionButtons
-          onAddAction={() => navigate('/leads/new')}
-        />
-      )}
     </div>
   );
 };
 
-export default Kanban;
+export default Pipeline;
