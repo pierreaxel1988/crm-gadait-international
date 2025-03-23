@@ -23,6 +23,7 @@ import { useIsMobile } from "./hooks/use-mobile";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import LeadImport from "./pages/LeadImport";
 import ChatGadaitPage from '@/pages/ChatGadaitPage';
+import LeadDetailMobile from './pages/LeadDetailMobile';
 
 const queryClient = new QueryClient();
 
@@ -79,7 +80,9 @@ const AppRoutes = () => {
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
             <Route path="/leads/new" element={<ProtectedRoute><LeadNew /></ProtectedRoute>} />
-            <Route path="/leads/:id" element={<ProtectedRoute><LeadEdit /></ProtectedRoute>} />
+            <Route path="/leads/:id" element={
+              isMobile ? <LeadDetailMobile /> : <LeadEdit />
+            } />
             <Route path="/pipeline" element={<ProtectedRoute><Pipeline /></ProtectedRoute>} />
             <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
