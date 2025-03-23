@@ -1,3 +1,4 @@
+
 import { LeadDetailed, PipelineType, LeadStatus, LeadTag, TaskType, Country } from "@/types/lead";
 
 /**
@@ -96,10 +97,13 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
     }
   }
   
-  // Ensure currency is a string, not an object
-  let currency = leadData.currency || 'EUR';
-  if (typeof currency === 'object' && currency !== null && 'value' in currency) {
-    currency = 'EUR'; // Default to EUR if we have an invalid currency object
+  // Ensure currency is a string, not an object - with proper null checking
+  const defaultCurrency = 'EUR';
+  let currencyValue = leadData.currency || defaultCurrency;
+  
+  // Safe type check that satisfies TypeScript
+  if (currencyValue !== null && typeof currencyValue === 'object' && 'value' in currencyValue) {
+    currencyValue = defaultCurrency;
   }
   
   // Ensure pipeline_type is set from pipelineType for database consistency
@@ -109,7 +113,7 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
   console.log("- Budget:", leadData.budget);
   console.log("- Budget Min:", leadData.budgetMin);
   console.log("- Location:", leadData.desiredLocation);
-  console.log("- Currency:", currency);
+  console.log("- Currency:", currencyValue);
   console.log("- Property Types:", formattedPropertyTypes);
   
   return {
@@ -124,7 +128,7 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
     property_reference: leadData.propertyReference,
     budget: leadData.budget,
     budget_min: leadData.budgetMin,
-    currency: currency,
+    currency: currencyValue,
     desired_location: leadData.desiredLocation,
     property_type: leadData.propertyType,
     property_types: formattedPropertyTypes,
