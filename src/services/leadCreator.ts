@@ -31,13 +31,16 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     }
     
     if (data) {
+      // The Supabase response uses snake_case, but our app uses camelCase
+      // We need to handle the conversion properly
       return {
         ...data,
         createdAt: data.created_at || createdAt,
         id: data.id || leadId,
         name: data.name || leadData.name,
         status: data.status || leadData.status || 'New',
-        actionHistory: data.action_history || []
+        // Access action_history with bracket notation to avoid TypeScript error
+        actionHistory: data.action_history || data['action_history'] || []
       } as LeadDetailed;
     }
     

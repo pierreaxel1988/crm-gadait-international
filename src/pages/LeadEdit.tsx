@@ -12,6 +12,7 @@ import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
+import CustomButton from '@/components/ui/CustomButton';
 
 const LeadEdit = () => {
   const { id } = useParams<{ id: string }>();
