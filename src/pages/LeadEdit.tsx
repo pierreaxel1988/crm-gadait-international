@@ -166,6 +166,9 @@ const LeadEdit = () => {
         onBack={() => navigate('/leads')} 
         onAddAction={handleAddAction} 
         onDelete={handleDelete}
+        onSave={handleSaveClick}
+        isSaving={isSaving}
+        hasChanges={hasChanges}
       />
 
       <Tabs 
@@ -264,29 +267,11 @@ const LeadEdit = () => {
       />
 
       {lead && (
-        <>
-          <FloatingActionButtons 
-            onAddAction={handleAddAction} 
-            phoneNumber={lead.phone} 
-            email={lead.email} 
-          />
-          
-          <div className="fixed bottom-24 left-6 z-50">
-            <CustomButton
-              variant="chocolate"
-              className="rounded-full p-0 w-12 h-12 flex items-center justify-center shadow-luxury"
-              onClick={handleSaveClick}
-              disabled={isSaving}
-              title="Sauvegarder"
-            >
-              {isSaving ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Save className="h-5 w-5" />
-              )}
-            </CustomButton>
-          </div>
-        </>
+        <FloatingActionButtons 
+          onAddAction={handleAddAction} 
+          phoneNumber={lead.phone} 
+          email={lead.email} 
+        />
       )}
     </div>
   );

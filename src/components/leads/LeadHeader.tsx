@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, Plus, Trash2, MapPin, Euro } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, MapPin, Euro, Save, Loader2 } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
 import CustomButton from '@/components/ui/CustomButton';
 import TagBadge from '@/components/common/TagBadge';
@@ -11,6 +11,9 @@ interface LeadHeaderProps {
   onBack: () => void;
   onAddAction: () => void;
   onDelete: () => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  hasChanges?: boolean;
 }
 
 const LeadHeader: React.FC<LeadHeaderProps> = ({
@@ -18,6 +21,9 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
   onBack,
   onAddAction,
   onDelete,
+  onSave,
+  isSaving = false,
+  hasChanges = false,
 }) => {
   // Use the formatBudget utility function
   const getBudgetDisplay = () => {
@@ -47,6 +53,26 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {onSave && (
+            <CustomButton 
+              variant="chocolate" 
+              onClick={onSave} 
+              disabled={isSaving || !hasChanges}
+              className="w-auto flex items-center gap-1 px-3 py-1.5 rounded text-white"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Enregistrement...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  <span>Sauvegarder</span>
+                </>
+              )}
+            </CustomButton>
+          )}
           <CustomButton 
             variant="outline" 
             onClick={onAddAction} 
