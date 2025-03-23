@@ -7,15 +7,8 @@ interface PipelineTypeIndicatorProps {
 }
 
 const PipelineTypeIndicator = ({ pipelineType }: PipelineTypeIndicatorProps) => {
-  if (!pipelineType) return null;
-  
-  return (
-    <div className="mt-2 flex items-center text-xs text-muted-foreground">
-      {pipelineType === 'purchase' 
-        ? <Home className="h-3 w-3 mr-1 text-blue-500" /> 
-        : <Key className="h-3 w-3 mr-1 text-amber-500" />}
-    </div>
-  );
+  // This component is now intentionally blank as we don't want to show the icon
+  return null;
 };
 
 export default PipelineTypeIndicator;

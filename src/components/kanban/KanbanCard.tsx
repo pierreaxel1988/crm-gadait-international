@@ -7,12 +7,10 @@ import { LeadTag } from '@/components/common/TagBadge';
 import { Card, CardContent } from "@/components/ui/card";
 
 // Import sub-components
-import StatusBadge from './card/StatusBadge';
 import ContactInfo from './card/ContactInfo';
 import PropertyInfo from './card/PropertyInfo';
 import TaskTypeIndicator from './card/TaskTypeIndicator';
 import AssignedUser from './card/AssignedUser';
-import PipelineTypeIndicator from './card/PipelineTypeIndicator';
 import ImportInfo from './card/ImportInfo';
 import TagList from './card/TagList';
 
@@ -134,11 +132,6 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
           onLinkClick={handleLinkClick}
         />
         
-        {/* Status badge - moved from header to where tags were */}
-        <div className="mb-3 mt-2">
-          <StatusBadge status={item.status} />
-        </div>
-        
         {/* Date d'importation */}
         <ImportInfo importedAt={item.importedAt} createdAt={item.createdAt} />
         
@@ -152,9 +145,6 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
           {/* Type de tâche */}
           <TaskTypeIndicator taskType={item.taskType} />
         </div>
-        
-        {/* Indicateur du type de pipeline */}
-        <PipelineTypeIndicator pipelineType={item.pipelineType} />
       </CardContent>
     </Card>
   );
