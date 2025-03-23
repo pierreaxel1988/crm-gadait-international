@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LeadForm from '@/components/leads/LeadForm';
 import { LeadDetailed } from '@/types/lead';
@@ -13,6 +13,8 @@ import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
 import CustomButton from '@/components/ui/CustomButton';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Loader2, Save } from 'lucide-react';
 
 const LeadEdit = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +24,8 @@ const LeadEdit = () => {
   const [activeTab, setActiveTab] = useState('actions');
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const isMobile = useIsMobile();
+  const [hasChanges, setHasChanges] = useState(false);
   
   const {
     isActionDialogOpen,
@@ -40,28 +44,29 @@ const LeadEdit = () => {
     getActionTypeIcon
   } = useLeadActions(lead, setLead);
 
-  useEffect(() => {
-    const fetchLead = async () => {
-      if (id) {
-        try {
-          setIsLoading(true);
-          const leadData = await getLead(id);
-          console.log("Fetched lead data:", leadData);
-          setLead(leadData || undefined);
-        } catch (error) {
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Impossible de charger les informations du lead."
-          });
-        } finally {
-          setIsLoading(false);
-        }
+  const fetchLead = useCallback(async () => {
+    if (id) {
+      try {
+        setIsLoading(true);
+        const leadData = await getLead(id);
+        console.log("Fetched lead data:", leadData);
+        setLead(leadData || undefined);
+        setHasChanges(false);
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger les informations du lead."
+        });
+      } finally {
+        setIsLoading(false);
       }
-    };
-    
-    fetchLead();
+    }
   }, [id]);
+  
+  useEffect(() => {
+    fetchLead();
+  }, [fetchLead]);
 
   const handleSubmit = async (data: LeadDetailed) => {
     try {
@@ -87,6 +92,7 @@ const LeadEdit = () => {
           if (refreshedLead) {
             console.log("Lead refreshed after update:", refreshedLead);
             setLead(refreshedLead);
+            setHasChanges(false);
           }
         }
       }
@@ -99,6 +105,17 @@ const LeadEdit = () => {
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDataChange = (data: LeadDetailed) => {
+    setLead(data);
+    setHasChanges(true);
+  };
+
+  const handleSaveClick = () => {
+    if (lead && hasChanges) {
+      handleSubmit(lead);
     }
   };
 
@@ -121,7 +138,7 @@ const LeadEdit = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 flex justify-center items-center">
+      <div className="p-6 flex justify-center items-center h-[80vh]">
         <div className="animate-spin h-8 w-8 border-4 border-chocolate-dark rounded-full border-t-transparent"></div>
       </div>
     );
@@ -142,7 +159,7 @@ const LeadEdit = () => {
   }
   
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="p-3 md:p-6 space-y-4 pb-24 md:pb-6">
       <LeadHeader 
         lead={lead} 
         onBack={() => navigate('/leads')} 
@@ -155,64 +172,70 @@ const LeadEdit = () => {
         onValueChange={setActiveTab} 
         className="w-full"
       >
-        <TabsList className="w-full bg-background border-b flex justify-between overflow-x-auto">
+        <TabsList className="w-full bg-background border-b flex overflow-x-auto no-scrollbar">
           <TabsTrigger 
             value="general" 
-            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+            className="py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap text-sm"
           >
             Général
           </TabsTrigger>
           <TabsTrigger 
             value="criteria" 
-            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+            className="py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap text-sm"
           >
             Critères
           </TabsTrigger>
           <TabsTrigger 
             value="status" 
-            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+            className="py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap text-sm"
           >
             Statut
           </TabsTrigger>
           <TabsTrigger 
             value="actions" 
-            className="py-3 px-4 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none"
+            className="py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap text-sm"
           >
-            Actions/Tâches
+            Actions
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="general" className="mt-4">
+        <TabsContent value="general" className="mt-4 pb-16">
           <LeadForm 
             lead={lead} 
-            onSubmit={handleSubmit} 
+            onSubmit={handleSubmit}
+            onChange={handleDataChange}
             onCancel={() => navigate('/leads')} 
             activeTab="general"
             isSubmitting={isSaving}
+            hideSubmitButton={isMobile}
           />
         </TabsContent>
         
-        <TabsContent value="criteria" className="mt-4">
+        <TabsContent value="criteria" className="mt-4 pb-16">
           <LeadForm 
             lead={lead} 
-            onSubmit={handleSubmit} 
+            onSubmit={handleSubmit}
+            onChange={handleDataChange}
             onCancel={() => navigate('/leads')} 
             activeTab="criteria"
             isSubmitting={isSaving}
+            hideSubmitButton={isMobile}
           />
         </TabsContent>
         
-        <TabsContent value="status" className="mt-4">
+        <TabsContent value="status" className="mt-4 pb-16">
           <LeadForm 
             lead={lead} 
-            onSubmit={handleSubmit} 
+            onSubmit={handleSubmit}
+            onChange={handleDataChange}
             onCancel={() => navigate('/leads')} 
             activeTab="status"
             isSubmitting={isSaving}
+            hideSubmitButton={isMobile}
           />
         </TabsContent>
         
-        <TabsContent value="actions" className="mt-4">
+        <TabsContent value="actions" className="mt-4 pb-16">
           {lead && (
             <ActionsPanel 
               lead={lead}
@@ -239,7 +262,33 @@ const LeadEdit = () => {
         getActionTypeIcon={getActionTypeIcon}
       />
 
-      {lead && <FloatingActionButtons onAddAction={handleAddAction} phoneNumber={lead.phone} email={lead.email} />}
+      {lead && (
+        <>
+          <FloatingActionButtons 
+            onAddAction={handleAddAction} 
+            phoneNumber={lead.phone} 
+            email={lead.email} 
+          />
+          
+          {isMobile && hasChanges && (
+            <div className="fixed bottom-[80px] right-6 z-50">
+              <CustomButton
+                variant="chocolate"
+                className="rounded-full p-0 w-12 h-12 flex items-center justify-center shadow-luxury"
+                onClick={handleSaveClick}
+                disabled={isSaving}
+                title="Sauvegarder"
+              >
+                {isSaving ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Save className="h-5 w-5" />
+                )}
+              </CustomButton>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

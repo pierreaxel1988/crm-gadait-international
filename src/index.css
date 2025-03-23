@@ -1,208 +1,112 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
-
-/* Définition des polices inspirées de Loro Piana */
-@font-face {
-  font-family: 'OptimaLTStd';
-  src: url('/fonts/OptimaLTStd.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'TimesNow-SemiLight';
-  src: url('/lovable-uploads/7670f170-bb54-4195-b002-a6072a77fd9d.png') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'TimesNow-Semi-Light';
-  src: url('/lovable-uploads/7670f170-bb54-4195-b002-a6072a77fd9d.png') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'TimesNow-LightItalic';
-  src: url('/lovable-uploads/19c487e2-a1e1-4fab-b202-f85007fbeece.png') format('woff2');
-  font-weight: normal;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Futura Light';
-  src: url('https://fonts.cdnfonts.com/css/futura-light') format('woff2');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Futura Md BT';
-  src: url('/lovable-uploads/e9e9bbcb-84e6-4545-b12f-dc6680544358.png') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Futura Medium';
-  src: url('https://fonts.cdnfonts.com/css/futura-medium') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+ 
 @layer base {
   :root {
-    --background: 60 30% 97%;
-    --foreground: 215 30% 25%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 215 30% 25%;
-
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 30% 25%;
-
-    --primary: 27 40% 43%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 60 20% 96%;
-    --secondary-foreground: 215 30% 25%;
-
-    --muted: 60 10% 96%;
-    --muted-foreground: 215 5% 45%;
-
-    --accent: 25 20% 92%;
-    --accent-foreground: 215 30% 25%;
-
+    --popover-foreground: 222.2 84% 4.9%;
+ 
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+ 
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+ 
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 27 20% 80%;
-    --input: 27 20% 80%;
-    --ring: 27 40% 43%;
-
-    --radius: 0rem;
-
-    --sidebar-background: 43 25% 95%;
-    --sidebar-foreground: 26 26% 38%;
-    --sidebar-primary: 27 40% 43%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 27 20% 90%;
-    --sidebar-accent-foreground: 26 26% 38%;
-    --sidebar-border: 27 20% 85%;
-    --sidebar-ring: 27 40% 43%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --ring: 215 20.2% 65.1%;
+ 
+    --radius: 0.5rem;
   }
-
+ 
   .dark {
-    --background: 215 35% 15%;
-    --foreground: 60 30% 96%;
-
-    --card: 215 30% 17%;
-    --card-foreground: 60 30% 96%;
-
-    --popover: 215 30% 17%;
-    --popover-foreground: 60 30% 96%;
-
-    --primary: 27 30% 65%;
-    --primary-foreground: 215 35% 15%;
-
-    --secondary: 215 30% 20%;
-    --secondary-foreground: 60 30% 96%;
-
-    --muted: 215 30% 20%;
-    --muted-foreground: 215 10% 70%;
-
-    --accent: 215 30% 25%;
-    --accent-foreground: 60 30% 96%;
-
-    --destructive: 0 62.8% 50.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 215 30% 30%;
-    --input: 215 30% 30%;
-    --ring: 27 30% 65%;
-
-    --sidebar-background: 215 35% 17%;
-    --sidebar-foreground: 60 30% 90%;
-    --sidebar-primary: 27 30% 65%;
-    --sidebar-primary-foreground: 215 35% 15%;
-    --sidebar-accent: 215 30% 25%;
-    --sidebar-accent-foreground: 60 30% 90%;
-    --sidebar-border: 215 30% 30%;
-    --sidebar-ring: 27 30% 65%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+ 
+    --ring: 217.2 32.6% 17.5%;
   }
 }
-
+ 
 @layer base {
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground font-optima;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-futuraMd tracking-tight text-[rgb(33,33,33)];
-    font-size: 36px;
-    line-height: 40px;
+    @apply bg-background text-foreground;
   }
 }
 
-@layer components {
-  .luxury-card {
-    @apply bg-card rounded-none border border-border shadow-luxury transition-all duration-300 hover:shadow-luxury-hover;
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
-  
-  .luxury-button {
-    @apply rounded-none bg-[#8B6F4E] text-white px-4 py-2 transition-all duration-300 hover:bg-[#9A7E5D] dark:bg-[#F5F5F0] dark:text-[#8B6F4E] dark:hover:bg-[#E0E0E0];
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
-  
-  .luxury-input {
-    @apply rounded-none border border-input bg-background px-4 py-2 text-foreground transition-all duration-300 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary;
-  }
-  
-  .luxury-badge {
-    @apply inline-flex items-center rounded-none px-2.5 py-0.5 text-xs font-medium transition-colors;
-  }
-  
-  .glass-morph {
-    @apply bg-white/20 backdrop-blur-sm border border-white/30 shadow-luxury;
-  }
-  
-  .fade-in {
-    @apply opacity-0 animate-fade-in;
-  }
-  
-  .slide-in {
-    @apply opacity-0 animate-slide-in;
-  }
-  
-  .scale-in {
-    @apply opacity-0 animate-scale-in;
-  }
+}
 
-  .content-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
+.luxury-card {
+  @apply bg-white rounded-md border border-slate-200 shadow-sm;
+}
 
-  .dropdown-menu-content {
-    @apply bg-white dark:bg-loro-navy border border-loro-pearl shadow-luxury z-50 rounded-none;
+.shadow-luxury {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
   }
-  
-  .dropdown-menu-item {
-    @apply px-4 py-2 text-loro-navy dark:text-loro-white hover:bg-loro-pearl/20 dark:hover:bg-loro-hazel/20 cursor-pointer font-futuraMd;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

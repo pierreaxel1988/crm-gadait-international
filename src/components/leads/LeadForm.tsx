@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -14,10 +13,12 @@ import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
 interface LeadFormProps {
   lead?: LeadDetailed;
   onSubmit: (data: LeadDetailed) => void;
+  onChange?: (data: LeadDetailed) => void;
   onCancel: () => void;
   activeTab?: string;
   adminAssignedAgent?: string | undefined;
   isSubmitting?: boolean;
+  hideSubmitButton?: boolean;
 }
 
 const PROPERTY_TYPES: PropertyType[] = [
@@ -42,10 +43,12 @@ const LEAD_SOURCES: LeadSource[] = [
 const LeadForm: React.FC<LeadFormProps> = ({ 
   lead, 
   onSubmit, 
+  onChange,
   onCancel, 
   activeTab = 'general',
   adminAssignedAgent,
-  isSubmitting = false 
+  isSubmitting = false,
+  hideSubmitButton = false
 }) => {
   const [formData, setFormData] = useState<LeadDetailed>({
     id: lead?.id || uuidv4(),
@@ -86,6 +89,12 @@ const LeadForm: React.FC<LeadFormProps> = ({
     }
   }, [adminAssignedAgent]);
 
+  useEffect(() => {
+    if (onChange) {
+      onChange(formData);
+    }
+  }, [formData, onChange]);
+
   const { 
     propertyUrl, 
     setPropertyUrl, 
@@ -125,7 +134,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
     extractPropertyData();
   };
 
-  // Déterminer la source de l'annonce en fonction de l'URL
   const detectSourceFromUrl = (url: string): LeadSource | undefined => {
     if (!url) return undefined;
     
@@ -144,21 +152,18 @@ const LeadForm: React.FC<LeadFormProps> = ({
     return 'Portails immobiliers';
   };
 
-  // Trouver la localisation dans LOCATIONS_BY_COUNTRY qui correspond le mieux
   const findBestMatchingLocation = (location: string, country: string): string | undefined => {
     if (!location || !country) return undefined;
     
     const availableLocations = LOCATIONS_BY_COUNTRY[country as keyof typeof LOCATIONS_BY_COUNTRY];
     if (!availableLocations) return undefined;
     
-    // Recherche d'une correspondance exacte d'abord
     const exactMatch = availableLocations.find(loc => 
       loc.toLowerCase() === location.toLowerCase()
     );
     
     if (exactMatch) return exactMatch;
     
-    // Recherche d'une correspondance partielle
     const partialMatch = availableLocations.find(loc => 
       location.toLowerCase().includes(loc.toLowerCase()) || 
       loc.toLowerCase().includes(location.toLowerCase())
@@ -170,20 +175,16 @@ const LeadForm: React.FC<LeadFormProps> = ({
   useEffect(() => {
     if (extractedData) {
       setFormData(prev => {
-        // Détecter la source et le pays à partir de l'URL
         const source = detectSourceFromUrl(propertyUrl);
         let country = extractedData.country || prev.country;
         
-        // Traiter les types de propriété
         let propertyTypes = prev.propertyTypes || [];
         if (extractedData.propertyType && !propertyTypes.includes(extractedData.propertyType as PropertyType)) {
           propertyTypes = [...propertyTypes, extractedData.propertyType as PropertyType];
         }
         
-        // Convertir chambres en tableau si extrait de la propriété
         let bedroomsValue = prev.bedrooms;
         if (extractedData.bedrooms) {
-          // Convertir en nombre si c'est une chaîne
           const bedrooms = typeof extractedData.bedrooms === 'string' 
             ? parseInt(extractedData.bedrooms.toString())
             : extractedData.bedrooms;
@@ -199,11 +200,9 @@ const LeadForm: React.FC<LeadFormProps> = ({
           }
         }
 
-        // Convertir le prix en valeur numérique si possible
         let budgetValue = prev.budget;
         if (extractedData.price) {
           const priceText = extractedData.price.toString();
-          // Extraire uniquement les chiffres du prix
           const priceNumbers = priceText.replace(/[^\d,\.]/g, '').replace(',', '.');
           if (!isNaN(parseFloat(priceNumbers))) {
             budgetValue = priceNumbers;
@@ -212,7 +211,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
           }
         }
 
-        // Extraire et définir les aménités si disponibles
         let amenities = prev.amenities || [];
         if (extractedData.amenities && Array.isArray(extractedData.amenities)) {
           extractedData.amenities.forEach((amenity: string) => {
@@ -231,7 +229,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
           });
         }
 
-        // Définir la surface habitable si disponible
         let livingArea = prev.livingArea;
         if (extractedData.area) {
           const areaString = extractedData.area.toString();
@@ -241,10 +238,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
           }
         }
 
-        // Rechercher et définir la localisation
         let desiredLocation = prev.desiredLocation;
         if (extractedData.location && country) {
-          // Chercher la meilleure correspondance dans les localisations disponibles
           const bestMatch = findBestMatchingLocation(extractedData.location, country);
           if (bestMatch) {
             desiredLocation = bestMatch;
@@ -254,7 +249,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
             desiredLocation = 'Malaga';
           }
           
-          // Si aucune correspondance n'est trouvée, utiliser la localisation extraite
           if (!desiredLocation) {
             const formattedLocation = extractedData.location.charAt(0).toUpperCase() + 
                                       extractedData.location.slice(1).toLowerCase();
@@ -290,7 +284,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
     console.log("Form submission triggered, isSubmitting:", isSubmitting);
     console.log("Submitting form data:", formData);
     
-    // Ensure the form is valid before submission
     if (!formData.name) {
       toast({
         variant: "destructive",
@@ -300,11 +293,9 @@ const LeadForm: React.FC<LeadFormProps> = ({
       return;
     }
     
-    // Log important fields to debug saving issues
     console.log("Budget value being submitted:", formData.budget);
     console.log("Desired location being submitted:", formData.desiredLocation);
     
-    // Only proceed if not already submitting
     if (!isSubmitting) {
       onSubmit(formData);
     } else {
@@ -315,7 +306,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Tabs defaultValue={activeTab} className="space-y-6">
-        <TabsList className="grid grid-cols-3 w-full max-w-md mb-4">
+        <TabsList className="grid grid-cols-3 w-full max-w-md mb-4 hidden">
           <TabsTrigger value="general">Général</TabsTrigger>
           <TabsTrigger value="criteria">Critères</TabsTrigger>
           <TabsTrigger value="status">Statut</TabsTrigger>
@@ -356,26 +347,28 @@ const LeadForm: React.FC<LeadFormProps> = ({
         </TabsContent>
       </Tabs>
 
-      <div className="flex justify-end space-x-3 pt-3">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-          Annuler
-        </Button>
-        <Button 
-          type="submit" 
-          disabled={isSubmitting}
-          className="relative bg-chocolate-dark hover:bg-chocolate-light"
-        >
-          {isSubmitting ? 'Sauvegarde en cours...' : (lead ? 'Sauvegarder' : 'Créer')}
-          {isSubmitting && (
-            <span className="absolute inset-0 flex items-center justify-center">
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </span>
-          )}
-        </Button>
-      </div>
+      {!hideSubmitButton && (
+        <div className="flex justify-end space-x-3 pt-3">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+            Annuler
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="relative bg-chocolate-dark hover:bg-chocolate-light"
+          >
+            {isSubmitting ? 'Sauvegarde en cours...' : (lead ? 'Sauvegarder' : 'Créer')}
+            {isSubmitting && (
+              <span className="absolute inset-0 flex items-center justify-center">
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+            )}
+          </Button>
+        </div>
+      )}
     </form>
   );
 };
