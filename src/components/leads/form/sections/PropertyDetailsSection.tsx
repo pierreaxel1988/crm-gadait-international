@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, Country } from '@/types/lead';
 import FormInput from '../FormInput';
@@ -184,7 +185,7 @@ const PropertyDetailsSection = ({
       </div>
 
       <div className="pt-2">
-        <h4 className="text-sm font-medium mb-3">Chambres</h4>
+        <h4 className="text-sm font-medium mb-3">Nombre de chambres recherchées</h4>
         <MultiSelectButtons
           options={bedroomOptions}
           selectedValues={getSelectedBedrooms()}
