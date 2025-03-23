@@ -1,9 +1,11 @@
+
 import { useState } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { addActionToLead } from '@/services/leadActions';
+import { updateLead } from '@/services/leadUpdater';
 
 export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: LeadDetailed) => void) => {
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
@@ -49,8 +51,8 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
               scheduledDateTime ? ` pour le ${format(new Date(scheduledDateTime), 'dd/MM/yyyy à HH:mm')}` : ''
             }`
           });
-          setIsActionDialogOpen(false);
         }
+        setIsActionDialogOpen(false);
       } catch (error) {
         console.error("Error in handleActionConfirm:", error);
         toast({
@@ -82,7 +84,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           // Update the lead with the modified action history and last contacted date
           const updatedLead = await updateLead({
             ...lead,
-            lastContactedAt: currentDate, // Update last contacted date when action is completed
+            lastContactedAt: currentDate,
             actionHistory
           });
           
@@ -96,6 +98,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           }
         }
       } catch (error) {
+        console.error("Error in markActionComplete:", error);
         toast({
           variant: "destructive",
           title: "Erreur",

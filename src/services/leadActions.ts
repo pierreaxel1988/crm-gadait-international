@@ -20,6 +20,11 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       return undefined;
     }
     
+    // Ensure actionHistory is initialized
+    if (!lead.actionHistory) {
+      lead.actionHistory = [];
+    }
+    
     // Create a new action with ID and createdAt
     const newAction: ActionHistory = {
       id: crypto.randomUUID(),
@@ -32,34 +37,45 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     // Update the lead with the new action in history
     const updatedLead: LeadDetailed = {
       ...lead,
-      taskType: action.actionType as TaskType, // Cast to TaskType here
+      taskType: action.actionType as TaskType,
       nextFollowUpDate: action.scheduledDate,
-      lastContactedAt: currentDate, // Update last contacted date to now
-      actionHistory: [...(lead.actionHistory || []), newAction]
+      lastContactedAt: currentDate,
+      actionHistory: [...lead.actionHistory, newAction]
     };
+    
+    console.log('Updating lead with new action:', { 
+      leadId, 
+      action, 
+      newAction, 
+      updatedActionHistory: updatedLead.actionHistory 
+    });
     
     // Save the updated lead
     const result = await updateLead(updatedLead);
     
-    // Also try to update the action history directly in Supabase for better data consistency
+    if (!result) {
+      throw new Error('Failed to update lead with new action');
+    }
+    
+    // Also update the action history directly in Supabase for better data consistency
     try {
       const { error } = await supabase
         .from('leads')
         .update({
           task_type: action.actionType,
           next_follow_up_date: action.scheduledDate,
-          last_contacted_at: currentDate, // Update this field in the database
+          last_contacted_at: currentDate,
           action_history: updatedLead.actionHistory
         })
         .eq('id', leadId);
       
       if (error) {
         console.error('Error updating action history in Supabase:', error);
-        throw error; // Throw the error to be caught by the outer try/catch
+        throw error;
       }
     } catch (err) {
       console.error('Unexpected error updating action history:', err);
-      throw err; // Rethrow to be caught by the outer try/catch
+      throw err;
     }
     
     return result;

@@ -21,7 +21,8 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       id: leadId,
       createdAt: createdAt,
       ...leadData,
-      status: leadData.status || 'New'
+      status: leadData.status || 'New',
+      actionHistory: leadData.actionHistory || []
     };
     
     // Convert to Supabase format
@@ -40,7 +41,6 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     }
     
     // Transform the returned data back to LeadDetailed format
-    // Ensure createdAt is properly mapped from created_at
     if (data) {
       return {
         ...data,
