@@ -40,7 +40,7 @@ const PurchaseDetailsSection = ({
           value=""
           onChange={() => {}}
           icon={Timer}
-          iconClassName={cn(isMobile && "h-4 w-4")}
+          className={cn(isMobile && "text-sm")}
           labelClassName={cn(isMobile && "text-sm")}
           renderCustomField={() => (
             <RadioSelectButtons
@@ -57,7 +57,7 @@ const PurchaseDetailsSection = ({
           value=""
           onChange={() => {}}
           icon={CreditCard}
-          iconClassName={cn(isMobile && "h-4 w-4")}
+          className={cn(isMobile && "text-sm")}
           labelClassName={cn(isMobile && "text-sm")}
           renderCustomField={() => (
             <RadioSelectButtons
@@ -74,7 +74,7 @@ const PurchaseDetailsSection = ({
           value=""
           onChange={() => {}}
           icon={Home}
-          iconClassName={cn(isMobile && "h-4 w-4")}
+          className={cn(isMobile && "text-sm")}
           labelClassName={cn(isMobile && "text-sm")}
           renderCustomField={() => (
             <RadioSelectButtons
