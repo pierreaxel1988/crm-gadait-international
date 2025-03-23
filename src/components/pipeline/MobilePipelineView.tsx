@@ -143,10 +143,7 @@ const MobilePipelineView = ({
             >
               <div className="flex items-center gap-2">
                 <h3 className="font-futura">
-                  {column.status} 
-                  <span className="text-muted-foreground text-sm font-futuraLight ml-1">
-                    ({statusTranslations[column.status]})
-                  </span>
+                  {statusTranslations[column.status]}
                 </h3>
                 <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-xs px-1.5 font-futura">
                   {column.items.length}
