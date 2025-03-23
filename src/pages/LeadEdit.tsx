@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LeadForm from '@/components/leads/LeadForm';
@@ -19,7 +20,7 @@ const LeadEdit = () => {
   const [lead, setLead] = useState<LeadDetailed | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('actions');
+  const [activeTab, setActiveTab] = useState('general');
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const isMobile = useIsMobile();
@@ -86,6 +87,7 @@ const LeadEdit = () => {
         });
         
         if (id) {
+          // Refresh lead data after update
           const refreshedLead = await getLead(id);
           if (refreshedLead) {
             console.log("Lead refreshed after update:", refreshedLead);
@@ -107,14 +109,14 @@ const LeadEdit = () => {
   };
 
   const handleDataChange = (data: LeadDetailed) => {
+    console.log("Form data changed:", data);
     setLead(data);
     setHasChanges(true);
   };
 
   const handleSaveClick = () => {
-    if (lead && hasChanges) {
-      handleSubmit(lead);
-    } else if (lead) {
+    if (lead) {
+      console.log("Save button clicked, saving lead:", lead);
       handleSubmit(lead);
     }
   };
@@ -124,6 +126,10 @@ const LeadEdit = () => {
       try {
         if (id) {
           await deleteLead(id);
+          toast({
+            title: "Lead supprimé",
+            description: "Le lead a été supprimé avec succès."
+          });
           navigate('/pipeline');
         }
       } catch (error) {

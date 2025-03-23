@@ -53,8 +53,8 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
               variant="chocolate" 
               onClick={onSave} 
               disabled={isSaving || !hasChanges}
-              className="w-auto p-2 rounded text-white"
-              title="Enregistrer"
+              className={`w-auto p-2 rounded text-white transition-all ${hasChanges ? 'bg-chocolate-dark' : 'bg-chocolate-dark/50'}`}
+              title="Enregistrer les modifications"
             >
               {isSaving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
