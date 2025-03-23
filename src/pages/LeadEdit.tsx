@@ -10,10 +10,8 @@ import { useLeadActions } from '@/hooks/useLeadActions';
 import LeadHeader from '@/components/leads/LeadHeader';
 import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
-import CustomButton from '@/components/ui/CustomButton';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Loader2, Save } from 'lucide-react';
 
 const LeadEdit = () => {
   const { id } = useParams<{ id: string }>();
