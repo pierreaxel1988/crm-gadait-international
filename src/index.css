@@ -5,34 +5,36 @@
  
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 94.1%; /* #f0f0f0 */
+    --foreground: 0 0% 20%; /* #333333 */
  
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
  
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 20%;
  
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 20%;
  
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 0 0% 86.3%; /* #dcdcdc */
+    --input: 0 0% 86.3%;
  
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 211.3 100% 50%; /* #007bff */
+    --primary-foreground: 0 0% 100%;
  
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 6% 45%; /* #6c757d */
+    --secondary-foreground: 0 0% 100%;
  
     --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent-foreground: 0 0% 20%;
  
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 354 70.3% 52.5%; /* #dc3545 */
+    --destructive-foreground: 0 0% 100%;
  
-    --ring: 215 20.2% 65.1%;
+    --success: 134.1 60.2% 40.2%; /* #28a745 */
+ 
+    --ring: 211.3 100% 50%;
  
     --radius: 0.5rem;
   }
@@ -68,25 +70,33 @@
     --ring: 217.2 32.6% 17.5%;
   }
 
-  /* Typography styles inspired by Loro Piana */
+  /* Styles de typographie selon la charte Gadait */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-futura tracking-tight;
+    @apply font-roboto tracking-tight;
   }
 
   h1 {
-    @apply text-2xl md:text-3xl font-medium;
+    @apply text-3xl md:text-4xl font-bold; /* 32px */
   }
 
   h2 {
-    @apply text-xl md:text-2xl font-medium;
+    @apply text-2xl md:text-3xl font-medium; /* 24px */
   }
 
   h3 {
-    @apply text-lg md:text-xl font-medium;
+    @apply text-xl md:text-2xl font-medium; /* 20px */
   }
 
-  p, span, div, button, input, select, textarea {
-    @apply font-futura text-base leading-relaxed;
+  p, span, div {
+    @apply font-roboto text-base text-gadait-text; /* 16px */
+  }
+
+  button, input, select, textarea {
+    @apply font-opensans text-sm; /* 14px */
+  }
+
+  label {
+    @apply font-opensans text-xs; /* 12px */
   }
 
   .text-small {
@@ -97,12 +107,21 @@
     @apply text-sm tracking-wide;
   }
 
-  .text-accent {
-    @apply font-futuraLight italic;
+  /* Styles par défaut pour les éléments avec la charte Gadait */
+  .gadait-card {
+    @apply bg-white rounded-gadait shadow-gadait border border-gadait-border;
   }
 
-  .text-heading {
-    @apply font-futura uppercase tracking-wider;
+  .gadait-button-primary {
+    @apply bg-gadait-primary text-white rounded-gadait px-4 py-2 font-opensans text-sm hover:shadow-gadait-hover transition-all;
+  }
+
+  .gadait-button-secondary {
+    @apply bg-gadait-secondary text-white rounded-gadait px-4 py-2 font-opensans text-sm hover:shadow-gadait-hover transition-all;
+  }
+
+  .gadait-input {
+    @apply border border-gadait-border rounded-gadait px-3 py-2 font-opensans text-sm focus:ring-1 focus:ring-gadait-primary focus:border-gadait-primary;
   }
 }
  
@@ -111,7 +130,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-futura;
+    @apply bg-gadait-background text-gadait-text font-roboto;
   }
 }
 
@@ -125,6 +144,7 @@
   }
 }
 
+/* Maintien des styles existants pour la rétrocompatibilité */
 .luxury-card {
   @apply bg-white rounded-md border border-slate-200 shadow-sm;
 }

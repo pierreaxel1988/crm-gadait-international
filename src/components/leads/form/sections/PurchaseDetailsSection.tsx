@@ -27,9 +27,9 @@ const PurchaseDetailsSection = ({
   const isMobile = useIsMobile();
   
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-6 md:space-y-8 p-4 bg-white rounded-gadait shadow-sm">
       <h2 className={cn(
-        "font-medium text-brown-700",
+        "font-roboto text-gadait-text",
         isMobile ? "text-xl" : "text-2xl"
       )}>Conditions d'achat</h2>
       

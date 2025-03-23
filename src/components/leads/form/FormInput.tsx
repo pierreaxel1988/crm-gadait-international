@@ -1,4 +1,6 @@
 
+// On ne modifie que les portions pertinentes du fichier pour éviter de le réécrire complètement
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -66,9 +68,9 @@ const FormInput: React.FC<FormInputProps> = ({
   return (
     <div className={cn('space-y-2', className)}>
       <div className="flex items-center justify-between">
-        <label htmlFor={name} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label htmlFor={name} className="text-xs font-opensans font-medium text-gadait-text leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-gadait-error ml-1">*</span>}
         </label>
       </div>
       
@@ -79,7 +81,7 @@ const FormInput: React.FC<FormInputProps> = ({
           {type === 'select' ? (
             <div className="relative">
               {Icon && (
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gadait-secondary">
                   <Icon className="h-4 w-4" />
                 </div>
               )}
@@ -91,7 +93,7 @@ const FormInput: React.FC<FormInputProps> = ({
                 required={required}
                 disabled={disabled}
                 className={cn(
-                  "flex h-12 md:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none",
+                  "flex h-12 md:h-10 w-full rounded-gadait border border-gadait-border bg-background px-3 py-2 text-sm font-opensans ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gadait-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gadait-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none",
                   Icon && "pl-9"
                 )}
                 style={{ fontSize: '16px' }}
@@ -104,13 +106,13 @@ const FormInput: React.FC<FormInputProps> = ({
                 ))}
               </select>
               <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                <ChevronDown className="h-4 w-4 text-gadait-secondary" />
               </div>
             </div>
           ) : type === 'textarea' ? (
             <div className="relative">
               {Icon && (
-                <div className="absolute left-3 top-3 text-muted-foreground">
+                <div className="absolute left-3 top-3 text-gadait-secondary">
                   <Icon className="h-4 w-4" />
                 </div>
               )}
@@ -123,7 +125,7 @@ const FormInput: React.FC<FormInputProps> = ({
                 required={required}
                 disabled={disabled}
                 className={cn(
-                  "flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                  "flex min-h-[100px] w-full rounded-gadait border border-gadait-border bg-background px-3 py-2 text-sm font-opensans ring-offset-background placeholder:text-gadait-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gadait-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
                   Icon && "pl-9"
                 )}
                 style={{ fontSize: '16px' }}
@@ -132,30 +134,30 @@ const FormInput: React.FC<FormInputProps> = ({
           ) : type === 'tel-with-code' ? (
             <div className="relative">
               {Icon && (
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gadait-secondary">
                   <Icon className="h-4 w-4" />
                 </div>
               )}
               <div className="flex">
                 <div className="relative flex-shrink-0">
                   <div 
-                    className="flex items-center justify-between w-24 h-12 md:h-10 px-3 border border-r-0 border-input rounded-l-md bg-muted cursor-pointer"
+                    className="flex items-center justify-between w-24 h-12 md:h-10 px-3 border border-r-0 border-gadait-border rounded-l-gadait bg-gadait-background cursor-pointer"
                     onClick={() => setShowCountryDropdown(prev => !prev)}
                   >
-                    <span className="text-sm truncate">{selectedCountryCode}</span>
+                    <span className="text-sm font-opensans truncate">{selectedCountryCode}</span>
                     <ChevronDown className="h-4 w-4 ml-1" />
                   </div>
                   
                   {showCountryDropdown && (
-                    <div className="absolute z-10 mt-1 w-56 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md">
+                    <div className="absolute z-10 mt-1 w-56 max-h-60 overflow-auto rounded-gadait border border-gadait-border bg-background shadow-gadait">
                       {countryCodes.map(country => (
                         <div 
                           key={country.code} 
-                          className="px-3 py-3 text-sm hover:bg-accent cursor-pointer flex items-center"
+                          className="px-3 py-3 text-sm font-opensans hover:bg-gadait-background cursor-pointer flex items-center"
                           onClick={() => handleCountryCodeChange(country.code)}
                         >
                           <span className="mr-2">{country.country}</span>
-                          <span className="text-muted-foreground">{country.code}</span>
+                          <span className="text-gadait-secondary">{country.code}</span>
                         </div>
                       ))}
                     </div>
@@ -170,7 +172,7 @@ const FormInput: React.FC<FormInputProps> = ({
                   placeholder={placeholder}
                   required={required}
                   disabled={disabled}
-                  className={cn("rounded-l-none h-12 md:h-10", Icon && "pl-9")}
+                  className={cn("rounded-l-none h-12 md:h-10 font-opensans", Icon && "pl-9")}
                   style={{ fontSize: '16px' }}
                 />
               </div>
@@ -178,7 +180,7 @@ const FormInput: React.FC<FormInputProps> = ({
           ) : (
             <div className="relative">
               {Icon && (
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gadait-secondary">
                   <Icon className="h-4 w-4" />
                 </div>
               )}
@@ -191,7 +193,7 @@ const FormInput: React.FC<FormInputProps> = ({
                 placeholder={placeholder}
                 required={required}
                 disabled={disabled}
-                className={cn(Icon && "pl-9", "h-12 md:h-10")}
+                className={cn(Icon && "pl-9", "h-12 md:h-10 font-opensans rounded-gadait")}
                 style={{ fontSize: '16px' }}
               />
             </div>
@@ -200,7 +202,7 @@ const FormInput: React.FC<FormInputProps> = ({
       )}
       
       {helpText && (
-        <p className="text-xs text-muted-foreground mt-1">{helpText}</p>
+        <p className="text-xs font-opensans text-gadait-secondary mt-1">{helpText}</p>
       )}
     </div>
   );
