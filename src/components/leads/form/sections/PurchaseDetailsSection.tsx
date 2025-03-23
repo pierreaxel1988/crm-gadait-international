@@ -4,6 +4,8 @@ import { Timer, CreditCard, Home } from 'lucide-react';
 import { LeadDetailed, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
 import FormInput from '../FormInput';
 import RadioSelectButtons from '../RadioSelectButtons';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 interface PurchaseDetailsSectionProps {
   formData: LeadDetailed;
@@ -22,17 +24,24 @@ const PurchaseDetailsSection = ({
   financingMethods,
   propertyUses,
 }: PurchaseDetailsSectionProps) => {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="space-y-8">
-      <h2 className="text-2xl font-medium text-brown-700">Conditions d'achat</h2>
+    <div className="space-y-6 md:space-y-8">
+      <h2 className={cn(
+        "font-medium text-brown-700",
+        isMobile ? "text-xl" : "text-2xl"
+      )}>Conditions d'achat</h2>
       
-      <div className="space-y-6">
+      <div className="space-y-5 md:space-y-6">
         <FormInput
           label="Date d'achat souhaitée"
           name="purchaseTimeframe"
           value=""
           onChange={() => {}}
           icon={Timer}
+          iconClassName={cn(isMobile && "h-4 w-4")}
+          labelClassName={cn(isMobile && "text-sm")}
           renderCustomField={() => (
             <RadioSelectButtons
               options={purchaseTimeframes}
@@ -48,6 +57,8 @@ const PurchaseDetailsSection = ({
           value=""
           onChange={() => {}}
           icon={CreditCard}
+          iconClassName={cn(isMobile && "h-4 w-4")}
+          labelClassName={cn(isMobile && "text-sm")}
           renderCustomField={() => (
             <RadioSelectButtons
               options={financingMethods}
@@ -63,6 +74,8 @@ const PurchaseDetailsSection = ({
           value=""
           onChange={() => {}}
           icon={Home}
+          iconClassName={cn(isMobile && "h-4 w-4")}
+          labelClassName={cn(isMobile && "text-sm")}
           renderCustomField={() => (
             <RadioSelectButtons
               options={propertyUses}

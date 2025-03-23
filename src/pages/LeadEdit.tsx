@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
 import CustomButton from '@/components/ui/CustomButton';
 import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
+import { cn } from '@/lib/utils';
 
 const LeadEdit = () => {
   const { id } = useParams<{ id: string }>();
@@ -148,7 +149,7 @@ const LeadEdit = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 flex justify-center items-center h-[80vh]">
+      <div className="p-4 md:p-6 flex justify-center items-center h-[80vh]">
         <div className="animate-spin h-8 w-8 border-4 border-chocolate-dark rounded-full border-t-transparent"></div>
       </div>
     );
@@ -156,9 +157,9 @@ const LeadEdit = () => {
 
   if (!lead && id) {
     return (
-      <div className="p-6">
-        <div className="text-center py-10">
-          <h2 className="text-2xl font-semibold">Lead introuvable</h2>
+      <div className="p-4 md:p-6">
+        <div className="text-center py-8 md:py-10">
+          <h2 className="text-xl md:text-2xl font-semibold">Lead introuvable</h2>
           <p className="text-muted-foreground mt-2">Le lead que vous recherchez n'existe pas.</p>
           <CustomButton className="mt-4" variant="chocolate" onClick={() => navigate('/pipeline')}>
             Retour à la liste
@@ -185,34 +186,49 @@ const LeadEdit = () => {
         onValueChange={setActiveTab} 
         className="w-full"
       >
-        <TabsList className="w-full bg-background border-b flex overflow-x-auto no-scrollbar sticky top-[105px] z-10">
+        <TabsList className={cn(
+          "w-full bg-background border-b flex sticky z-10",
+          isMobile ? "overflow-x-auto no-scrollbar top-[60px] px-0" : "top-[105px]"
+        )}>
           <TabsTrigger 
             value="general" 
-            className="py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap text-sm"
+            className={cn(
+              "py-2 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
+              isMobile ? "px-2 text-xs" : "px-3 text-sm"
+            )}
           >
             Général
           </TabsTrigger>
           <TabsTrigger 
             value="criteria" 
-            className="py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap text-sm"
+            className={cn(
+              "py-2 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
+              isMobile ? "px-2 text-xs" : "px-3 text-sm"
+            )}
           >
             Critères
           </TabsTrigger>
           <TabsTrigger 
             value="status" 
-            className="py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap text-sm"
+            className={cn(
+              "py-2 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
+              isMobile ? "px-2 text-xs" : "px-3 text-sm"
+            )}
           >
             Statut
           </TabsTrigger>
           <TabsTrigger 
             value="actions" 
-            className="py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap text-sm"
+            className={cn(
+              "py-2 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
+              isMobile ? "px-2 text-xs" : "px-3 text-sm"
+            )}
           >
             Actions
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="general" className="mt-4 pb-16">
+        <TabsContent value="general" className="mt-3 md:mt-4 pb-16">
           <LeadForm 
             lead={lead} 
             onSubmit={handleSubmit}
@@ -220,11 +236,11 @@ const LeadEdit = () => {
             onCancel={() => navigate('/pipeline')} 
             activeTab="general"
             isSubmitting={isSaving}
-            hideSubmitButton={true} // Always hide the form's submit button since we're using our floating button
+            hideSubmitButton={true}
           />
         </TabsContent>
         
-        <TabsContent value="criteria" className="mt-4 pb-16">
+        <TabsContent value="criteria" className="mt-3 md:mt-4 pb-16">
           <LeadForm 
             lead={lead} 
             onSubmit={handleSubmit}
@@ -232,11 +248,11 @@ const LeadEdit = () => {
             onCancel={() => navigate('/pipeline')} 
             activeTab="criteria"
             isSubmitting={isSaving}
-            hideSubmitButton={true} // Always hide the form's submit button
+            hideSubmitButton={true}
           />
         </TabsContent>
         
-        <TabsContent value="status" className="mt-4 pb-16">
+        <TabsContent value="status" className="mt-3 md:mt-4 pb-16">
           <LeadForm 
             lead={lead} 
             onSubmit={handleSubmit}
@@ -244,11 +260,11 @@ const LeadEdit = () => {
             onCancel={() => navigate('/pipeline')} 
             activeTab="status"
             isSubmitting={isSaving}
-            hideSubmitButton={true} // Always hide the form's submit button
+            hideSubmitButton={true}
           />
         </TabsContent>
         
-        <TabsContent value="actions" className="mt-4 pb-16">
+        <TabsContent value="actions" className="mt-3 md:mt-4 pb-16">
           {lead && (
             <ActionsPanel 
               lead={lead}

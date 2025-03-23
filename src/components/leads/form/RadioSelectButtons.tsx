@@ -3,6 +3,7 @@ import React from 'react';
 import { Check } from 'lucide-react';
 import BaseSelectButtons from './BaseSelectButtons';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface RadioSelectButtonsProps<T extends string> {
   options: T[];
@@ -15,13 +16,17 @@ const RadioSelectButtons = <T extends string>({
   selectedValue, 
   onSelect 
 }: RadioSelectButtonsProps<T>) => {
+  const isMobile = useIsMobile();
   const isSelected = (option: T) => option === selectedValue;
   
   const renderOption = (option: T, isSelected: boolean) => {
     return (
       <span className="flex items-center gap-1">
         {isSelected && <Check className="h-3 w-3" />}
-        <span>{option}</span>
+        <span className={cn(
+          "text-sm",
+          isMobile && "text-xs"
+        )}>{option}</span>
       </span>
     );
   };
@@ -32,7 +37,10 @@ const RadioSelectButtons = <T extends string>({
       isSelected={isSelected}
       onSelectOption={onSelect}
       renderOptionContent={renderOption}
-      className="gap-3 mt-2"
+      className={cn(
+        "gap-3 mt-2",
+        isMobile && "gap-2"
+      )}
     />
   );
 };
