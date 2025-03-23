@@ -21,7 +21,7 @@ const StatusBadge = ({ status }: StatusBadgeProps) => {
   const config = statusConfig[status] || { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-200' };
   
   return (
-    <div className={`px-2.5 py-0.5 rounded-full text-xs font-medium inline-flex items-center ${config.bg} ${config.text}`}>
+    <div className={`px-2.5 py-0.5 rounded-full text-xs font-futura tracking-wide uppercase ${config.bg} ${config.text}`}>
       {status}
     </div>
   );

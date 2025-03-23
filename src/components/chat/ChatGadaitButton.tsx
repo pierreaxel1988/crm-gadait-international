@@ -13,7 +13,7 @@ const ChatGadaitButton: React.FC = () => {
         variant="ghost" 
         size="icon" 
         onClick={() => setIsChatOpen(true)}
-        className="text-loro-navy hover:text-loro-hazel transition-colors duration-200"
+        className="text-loro-navy hover:text-loro-hazel transition-colors duration-200 font-futura"
         title="Chat Gadait"
       >
         <MessageSquare size={20} />

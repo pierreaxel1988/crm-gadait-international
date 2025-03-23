@@ -44,7 +44,7 @@ const TaskTypeIndicator = ({ taskType }: TaskTypeIndicatorProps) => {
   return (
     <div className="flex items-center gap-1 bg-accent/50 rounded-full px-2 py-0.5">
       {getTaskTypeIcon(taskType)}
-      <span className="text-xs">{taskType}</span>
+      <span className="text-xs font-futura uppercase tracking-wide">{taskType}</span>
     </div>
   );
 };

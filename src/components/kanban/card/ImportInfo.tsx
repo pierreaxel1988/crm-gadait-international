@@ -28,7 +28,7 @@ const ImportInfo = ({ importedAt, createdAt }: ImportInfoProps) => {
   }
   
   return (
-    <div className="flex items-center text-xs text-gray-500 mb-2">
+    <div className="flex items-center text-xs text-gray-500 mb-2 font-futura">
       <Calendar className="h-3.5 w-3.5 mr-1.5" />
       <span>{formattedDate}</span>
     </div>

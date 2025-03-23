@@ -125,13 +125,13 @@ const GeneralInfoSection = ({
     <FormSection title="Informations Générales">
       <div className="space-y-5">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-medium">Détails de contact</h3>
+          <h3 className="text-sm font-futura uppercase tracking-wider">Détails de contact</h3>
           <Button 
             type="button" 
             variant="outline" 
             size="sm" 
             onClick={() => setShowContactPaste(!showContactPaste)}
-            className="text-xs flex items-center gap-1"
+            className="text-xs flex items-center gap-1 font-futura"
           >
             <Clipboard className="h-3.5 w-3.5" />
             {showContactPaste ? 'Masquer' : 'Copier/Coller contact'}
@@ -140,11 +140,11 @@ const GeneralInfoSection = ({
 
         {showContactPaste && (
           <div className="space-y-2 mb-4 p-3 border border-dashed border-gray-300 rounded-md bg-gray-50">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground font-futura">
               Collez les informations de contact (nom, téléphone, email) puis cliquez sur Extraire :
             </p>
             <textarea 
-              className="w-full p-2 text-sm border rounded-md h-24" 
+              className="w-full p-2 text-sm border rounded-md h-24 font-futura" 
               placeholder="Exemple:
 Fatiha Mohamed
 +34 644 15 78 61
@@ -157,7 +157,7 @@ fmohamed01@cuatrocaminos.net"
                 type="button" 
                 size="sm" 
                 onClick={parseContactInfo}
-                className="text-xs"
+                className="text-xs font-futura uppercase tracking-wide"
               >
                 Extraire
               </Button>

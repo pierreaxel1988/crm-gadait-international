@@ -48,11 +48,11 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
     return (
       <div className="flex items-center">
         <Avatar className="h-5 w-5 mr-1">
-          <AvatarFallback className="text-[9px]">
+          <AvatarFallback className="text-[9px] font-futura">
             {assignedToName.split(' ').map(part => part[0]).join('')}
           </AvatarFallback>
         </Avatar>
-        <span className="text-xs font-medium">{assignedToName}</span>
+        <span className="text-xs font-futura">{assignedToName}</span>
       </div>
     );
   }
@@ -60,7 +60,7 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
   return (
     <button 
       onClick={onAssignClick}
-      className="text-xs font-medium text-primary hover:underline flex items-center"
+      className="text-xs font-futura text-primary hover:underline flex items-center"
     >
       <User className="h-3 w-3 mr-1" />
       Assigner
