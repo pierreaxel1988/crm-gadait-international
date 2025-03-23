@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LeadForm from '@/components/leads/LeadForm';
@@ -271,7 +270,7 @@ const LeadEdit = () => {
           />
           
           {isMobile && hasChanges && (
-            <div className="fixed bottom-[80px] right-6 z-50">
+            <div className="fixed bottom-[80px] left-6 z-50">
               <CustomButton
                 variant="chocolate"
                 className="rounded-full p-0 w-12 h-12 flex items-center justify-center shadow-luxury"
