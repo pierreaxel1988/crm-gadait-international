@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
@@ -339,6 +338,7 @@ fmohamed01@cuatrocaminos.net"
           placeholder="Numéro de téléphone"
           countryCode={phoneCountryCode}
           onCountryCodeChange={handlePhoneCodeChange}
+          searchable={true}
         />
 
         <div className="mb-3">
@@ -355,6 +355,7 @@ fmohamed01@cuatrocaminos.net"
             }))}
             placeholder="Sélectionner..."
             className="mb-0"
+            searchable={true}
           />
         </div>
 
@@ -372,6 +373,7 @@ fmohamed01@cuatrocaminos.net"
             }))}
             placeholder="Sélectionner..."
             className="mb-0"
+            searchable={true}
           />
         </div>
 
@@ -386,6 +388,7 @@ fmohamed01@cuatrocaminos.net"
             options={sources.map(source => ({ value: source, label: source }))}
             placeholder="Sélectionner..."
             className="mb-0"
+            searchable={true}
           />
         </div>
       </div>

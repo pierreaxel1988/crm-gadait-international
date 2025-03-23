@@ -1,7 +1,7 @@
 
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
-import { Check, ChevronRight, Circle } from "lucide-react"
+import { Check, ChevronRight, Circle, Search } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -55,22 +55,105 @@ const DropdownMenuSubContent = React.forwardRef<
 DropdownMenuSubContent.displayName =
   DropdownMenuPrimitive.SubContent.displayName
 
+interface DropdownMenuContentProps extends React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> {
+  searchable?: boolean;
+}
+
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <DropdownMenuPrimitive.Portal>
-    <DropdownMenuPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dropdown-menu-content",
-        className
-      )}
-      {...props}
-    />
-  </DropdownMenuPrimitive.Portal>
-))
+  DropdownMenuContentProps
+>(({ className, searchable = false, sideOffset = 4, children, ...props }, ref) => {
+  const [searchQuery, setSearchQuery] = React.useState("");
+  
+  // Filter children based on search query
+  const filteredChildren = React.useMemo(() => {
+    if (!searchQuery || !searchable) return children;
+    
+    return React.Children.map(children, (child) => {
+      if (!React.isValidElement(child)) return child;
+      
+      // Handle DropdownMenuGroup specifically
+      if (child.type === DropdownMenuGroup) {
+        const filteredGroupChildren = React.Children.toArray(child.props.children).filter((groupChild) => {
+          if (!React.isValidElement(groupChild)) return false;
+          
+          const itemText = groupChild.props.children?.toString().toLowerCase() || '';
+          return itemText.includes(searchQuery.toLowerCase());
+        });
+        
+        if (filteredGroupChildren.length === 0) return null;
+        return React.cloneElement(child, { ...child.props, children: filteredGroupChildren });
+      }
+      
+      // Handle DropdownMenuItem
+      if (child.type === DropdownMenuItem || child.props.className?.includes('dropdown-menu-item')) {
+        const itemText = child.props.children?.toString().toLowerCase() || '';
+        return itemText.includes(searchQuery.toLowerCase()) ? child : null;
+      }
+      
+      return child;
+    }).filter(Boolean);
+  }, [children, searchQuery, searchable]);
+  
+  // Handle keyboard navigation for filtering
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!searchable) return;
+    
+    // Allow keyboard navigation with up/down arrows
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      return;
+    }
+    
+    // Clear on escape or backspace if empty
+    if (e.key === 'Escape') {
+      setSearchQuery("");
+      return;
+    }
+    
+    if (e.key === 'Backspace') {
+      setSearchQuery(prev => prev.slice(0, -1));
+      return;
+    }
+    
+    // Only add printable characters (a-z, A-Z, 0-9, etc.)
+    if (e.key.length === 1) {
+      setSearchQuery(prev => prev + e.key);
+      e.preventDefault(); // Prevent default to avoid triggering selection
+    }
+  };
+  
+  React.useEffect(() => {
+    // Auto-clear search after 2 seconds of inactivity
+    const timer = setTimeout(() => {
+      if (searchQuery) setSearchQuery("");
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  return (
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.Content
+        ref={ref}
+        sideOffset={sideOffset}
+        className={cn(
+          "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dropdown-menu-content",
+          className
+        )}
+        onKeyDown={handleKeyDown}
+        {...props}
+      >
+        {searchable && searchQuery && (
+          <div className="flex items-center gap-2 px-2 py-1.5 border-b border-muted">
+            <Search className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground font-futura">{searchQuery}</span>
+          </div>
+        )}
+        {filteredChildren}
+      </DropdownMenuPrimitive.Content>
+    </DropdownMenuPrimitive.Portal>
+  )
+})
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
 
 const DropdownMenuItem = React.forwardRef<

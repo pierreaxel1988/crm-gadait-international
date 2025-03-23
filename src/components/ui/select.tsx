@@ -1,6 +1,7 @@
+
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
-import { Check, ChevronDown, ChevronUp } from "lucide-react"
+import { Check, ChevronDown, ChevronUp, Search } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -65,40 +66,121 @@ const SelectScrollDownButton = React.forwardRef<
 SelectScrollDownButton.displayName =
   SelectPrimitive.ScrollDownButton.displayName
 
+interface SelectContentProps extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> {
+  searchable?: boolean;
+}
+
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
->(({ className, children, position = "popper", ...props }, ref) => (
-  <SelectPrimitive.Portal>
-    <SelectPrimitive.Content
-      ref={ref}
-      className={cn(
-        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dropdown-menu-content",
-        position === "popper" &&
-          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
-        className
-      )}
-      position={position}
-      {...props}
-    >
-      <SelectScrollUpButton />
-      <SelectPrimitive.Viewport
+  SelectContentProps
+>(({ className, children, position = "popper", searchable = false, ...props }, ref) => {
+  const [searchQuery, setSearchQuery] = React.useState("");
+  
+  // Filter children based on search query
+  const filteredChildren = React.useMemo(() => {
+    if (!searchQuery || !searchable) return children;
+    
+    return React.Children.map(children, (child) => {
+      if (!React.isValidElement(child)) return child;
+      
+      // Handle SelectGroup specifically
+      if (child.type === SelectGroup) {
+        const filteredGroupChildren = React.Children.toArray(child.props.children).filter((groupChild) => {
+          if (!React.isValidElement(groupChild)) return false;
+          
+          const itemText = groupChild.props.children?.toString().toLowerCase() || '';
+          return itemText.includes(searchQuery.toLowerCase());
+        });
+        
+        if (filteredGroupChildren.length === 0) return null;
+        return React.cloneElement(child, { ...child.props, children: filteredGroupChildren });
+      }
+      
+      // Handle SelectItem
+      if (child.type === SelectItem || child.props.className?.includes('dropdown-menu-item')) {
+        const itemText = child.props.children?.toString().toLowerCase() || '';
+        return itemText.includes(searchQuery.toLowerCase()) ? child : null;
+      }
+      
+      return child;
+    }).filter(Boolean);
+  }, [children, searchQuery, searchable]);
+  
+  // Handle keyboard navigation for filtering
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!searchable) return;
+    
+    // Allow keyboard navigation with up/down arrows
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      return;
+    }
+    
+    // Clear on escape or backspace if empty
+    if (e.key === 'Escape') {
+      setSearchQuery("");
+      return;
+    }
+    
+    if (e.key === 'Backspace') {
+      setSearchQuery(prev => prev.slice(0, -1));
+      return;
+    }
+    
+    // Only add printable characters (a-z, A-Z, 0-9, etc.)
+    if (e.key.length === 1) {
+      setSearchQuery(prev => prev + e.key);
+      e.preventDefault(); // Prevent default to avoid triggering selection
+    }
+  };
+  
+  React.useEffect(() => {
+    // Auto-clear search after 2 seconds of inactivity
+    const timer = setTimeout(() => {
+      if (searchQuery) setSearchQuery("");
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  return (
+    <SelectPrimitive.Portal>
+      <SelectPrimitive.Content
+        ref={ref}
         className={cn(
-          "p-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-300 scrollbar-track-transparent",
+          "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dropdown-menu-content",
           position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+            "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+          className
         )}
-        style={{
-          scrollbarWidth: "thin",
-          WebkitOverflowScrolling: "touch"
-        }}
+        position={position}
+        onKeyDown={handleKeyDown}
+        {...props}
       >
-        {children}
-      </SelectPrimitive.Viewport>
-      <SelectScrollDownButton />
-    </SelectPrimitive.Content>
-  </SelectPrimitive.Portal>
-))
+        {searchable && searchQuery && (
+          <div className="flex items-center gap-2 px-2 py-1.5 border-b border-muted">
+            <Search className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground font-futura">{searchQuery}</span>
+          </div>
+        )}
+        <SelectScrollUpButton />
+        <SelectPrimitive.Viewport
+          className={cn(
+            "p-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-300 scrollbar-track-transparent",
+            position === "popper" &&
+              "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+          )}
+          style={{
+            scrollbarWidth: "thin",
+            WebkitOverflowScrolling: "touch"
+          }}
+        >
+          {filteredChildren}
+        </SelectPrimitive.Viewport>
+        <SelectScrollDownButton />
+      </SelectPrimitive.Content>
+    </SelectPrimitive.Portal>
+  );
+})
 SelectContent.displayName = SelectPrimitive.Content.displayName
 
 const SelectLabel = React.forwardRef<

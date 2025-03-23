@@ -20,6 +20,7 @@ interface FormInputProps {
   renderCustomField?: () => React.ReactNode;
   countryCode?: string;
   onCountryCodeChange?: (code: string) => void;
+  searchable?: boolean;
 }
 
 const countryCodes = [
@@ -60,10 +61,12 @@ const FormInput: React.FC<FormInputProps> = ({
   disabled = false,
   renderCustomField,
   countryCode = '+33',
-  onCountryCodeChange
+  onCountryCodeChange,
+  searchable = false
 }) => {
   const [selectedCountryCode, setSelectedCountryCode] = React.useState(countryCode);
   const [showCountryDropdown, setShowCountryDropdown] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
 
   const handleCountryCodeChange = (code: string) => {
     setSelectedCountryCode(code);
@@ -107,6 +110,50 @@ const FormInput: React.FC<FormInputProps> = ({
   // Trouver le pays correspondant au code sélectionné
   const selectedCountry = countryCodes.find(country => country.code === selectedCountryCode);
 
+  // Filter country codes based on search query
+  const filteredCountryCodes = React.useMemo(() => {
+    if (!searchQuery) return countryCodes;
+    return countryCodes.filter(country => 
+      country.country.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    // Clear on escape
+    if (e.key === 'Escape') {
+      setSearchQuery("");
+      return;
+    }
+    
+    // Backspace handling
+    if (e.key === 'Backspace') {
+      setSearchQuery(prev => prev.slice(0, -1));
+      return;
+    }
+    
+    // Only add printable characters
+    if (e.key.length === 1) {
+      setSearchQuery(prev => prev + e.key);
+    }
+  };
+
+  // Adapter la valeur du téléphone pour l'affichage dans le champ
+  const getPhoneValueWithoutCode = () => {
+    if (!value) return '';
+    
+    // Rechercher et supprimer le code pays du numéro de téléphone
+    const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
+    
+    let phoneNumber = value.toString();
+    for (const code of countryCodes) {
+      if (phoneNumber.startsWith(code)) {
+        return phoneNumber.substring(code.length).trim();
+      }
+    }
+    
+    return phoneNumber;
+  };
+
   return (
     <div className={cn('space-y-2', className)}>
       <div className="flex items-center justify-between">
@@ -139,13 +186,17 @@ const FormInput: React.FC<FormInputProps> = ({
                   Icon && "pl-9"
                 )}
                 style={{ fontSize: '16px' }}
+                onKeyDown={searchable ? handleSearchKeyDown : undefined}
               >
                 <option value="">{placeholder || 'Sélectionner...'}</option>
-                {options.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
+                {options
+                  .filter(option => !searchable || !searchQuery || option.label.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))
+                }
               </select>
               <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -193,7 +244,19 @@ const FormInput: React.FC<FormInputProps> = ({
                   
                   {showCountryDropdown && (
                     <div className="absolute z-10 mt-1 w-56 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md">
-                      {countryCodes.map(country => (
+                      <div className="sticky top-0 bg-background border-b border-input p-2">
+                        <input 
+                          type="text"
+                          className="w-full px-2 py-1 text-sm border rounded"
+                          placeholder="Rechercher un pays..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onKeyDown={handleSearchKeyDown}
+                          autoFocus
+                        />
+                      </div>
+                      
+                      {filteredCountryCodes.map(country => (
                         <div 
                           key={country.code} 
                           className="px-3 py-3 text-sm hover:bg-accent cursor-pointer flex items-center font-futura"
@@ -203,6 +266,12 @@ const FormInput: React.FC<FormInputProps> = ({
                           <span className="text-muted-foreground">{country.code}</span>
                         </div>
                       ))}
+                      
+                      {filteredCountryCodes.length === 0 && (
+                        <div className="px-3 py-3 text-sm text-muted-foreground font-futura">
+                          Aucun pays ne correspond à votre recherche
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -210,7 +279,7 @@ const FormInput: React.FC<FormInputProps> = ({
                   id={name}
                   name={name}
                   type="tel"
-                  value={value ?? ''}
+                  value={getPhoneValueWithoutCode() ?? ''}
                   onChange={onChange}
                   placeholder={placeholder}
                   required={required}
