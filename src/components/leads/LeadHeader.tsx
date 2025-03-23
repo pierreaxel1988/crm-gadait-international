@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, MapPin, Euro } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
 import CustomButton from '@/components/ui/CustomButton';
 import TagBadge from '@/components/common/TagBadge';
@@ -18,6 +18,31 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
   onAddAction,
   onDelete,
 }) => {
+  // Format budget to display
+  const formatBudget = () => {
+    if (!lead) return null;
+    
+    let budgetDisplay = '';
+    
+    if (lead.budget) {
+      budgetDisplay = lead.budget;
+      
+      if (lead.budgetMin) {
+        budgetDisplay = `${lead.budgetMin} - ${lead.budget}`;
+      }
+      
+      if (lead.currency) {
+        if (lead.currency === 'EUR') {
+          budgetDisplay = `${budgetDisplay} €`;
+        } else {
+          budgetDisplay = `${budgetDisplay} ${lead.currency}`;
+        }
+      }
+    }
+    
+    return budgetDisplay;
+  };
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex justify-between items-center">
@@ -58,13 +83,30 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
         </div>
       </div>
       
-      {lead && lead.tags && lead.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-1">
-          {lead.tags.map((tag) => (
+      <div className="flex flex-wrap gap-2 mt-1">
+        {/* Display tags */}
+        {lead && lead.tags && lead.tags.length > 0 && (
+          lead.tags.map((tag) => (
             <TagBadge key={tag} tag={tag} />
-          ))}
-        </div>
-      )}
+          ))
+        )}
+        
+        {/* Display budget if available */}
+        {lead && formatBudget() && (
+          <div className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium bg-emerald-100 text-emerald-800">
+            <Euro className="h-3 w-3" />
+            <span>{formatBudget()}</span>
+          </div>
+        )}
+        
+        {/* Display location if available */}
+        {lead && lead.desiredLocation && (
+          <div className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800">
+            <MapPin className="h-3 w-3" />
+            <span>{lead.desiredLocation}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

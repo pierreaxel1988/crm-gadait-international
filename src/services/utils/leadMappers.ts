@@ -1,4 +1,3 @@
-
 import { LeadDetailed, PipelineType, LeadStatus, LeadTag, TaskType, Country } from "@/types/lead";
 
 /**
@@ -99,7 +98,7 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
   
   // Ensure currency is a string, not an object
   let currency = leadData.currency || 'EUR';
-  if (currency && typeof currency === 'object' && 'value' in currency) {
+  if (typeof currency === 'object' && currency !== null && 'value' in currency) {
     currency = 'EUR'; // Default to EUR if we have an invalid currency object
   }
   
