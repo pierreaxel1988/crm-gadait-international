@@ -38,7 +38,7 @@ const SubNavigation = () => {
           <div className="flex px-4 space-x-4 min-w-min">
             {navigationItems.map(item => <Link key={item.name} to={item.path} className={cn("flex flex-col items-center justify-center whitespace-nowrap rounded-md px-3 py-2 min-w-[70px]", location.pathname === item.path ? "text-loro-terracotta bg-loro-white" : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70")}>
                 {item.icon && <item.icon className="h-5 w-5 mb-1" />}
-                <span className="font-louisvuitton text-[14px]">{item.name}</span>
+                <span className="font-futura text-[14px]">{item.name}</span>
               </Link>)}
           </div>
         </div>
@@ -51,7 +51,7 @@ const SubNavigation = () => {
         <NavigationMenu className="justify-center mx-auto">
           <NavigationMenuList className="space-x-0">
             {navigationItems.map(item => <NavigationMenuItem key={item.name}>
-                <Link to={item.path} className={cn("inline-flex h-12 items-center justify-center px-6 font-louisvuitton text-[18px] transition-colors", "hover:text-loro-terracotta focus:text-loro-terracotta focus:outline-none", location.pathname === item.path ? "text-loro-terracotta border-b-2 border-loro-terracotta" : "text-loro-navy")}>
+                <Link to={item.path} className={cn("inline-flex h-12 items-center justify-center px-6 font-futura text-[18px] transition-colors", "hover:text-loro-terracotta focus:text-loro-terracotta focus:outline-none", location.pathname === item.path ? "text-loro-terracotta border-b-2 border-loro-terracotta" : "text-loro-navy")}>
                   {item.name}
                 </Link>
               </NavigationMenuItem>)}

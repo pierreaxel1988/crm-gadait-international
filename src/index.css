@@ -5,36 +5,34 @@
  
 @layer base {
   :root {
-    --background: 0 0% 94.1%; /* #f0f0f0 */
-    --foreground: 0 0% 20%; /* #333333 */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
  
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
  
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
+    --popover-foreground: 222.2 84% 4.9%;
  
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 20%;
+    --card-foreground: 222.2 84% 4.9%;
  
-    --border: 0 0% 86.3%; /* #dcdcdc */
-    --input: 0 0% 86.3%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
  
-    --primary: 211.3 100% 50%; /* #007bff */
-    --primary-foreground: 0 0% 100%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
  
-    --secondary: 210 6% 45%; /* #6c757d */
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
  
     --accent: 210 40% 96.1%;
-    --accent-foreground: 0 0% 20%;
+    --accent-foreground: 222.2 47.4% 11.2%;
  
-    --destructive: 354 70.3% 52.5%; /* #dc3545 */
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
  
-    --success: 134.1 60.2% 40.2%; /* #28a745 */
- 
-    --ring: 211.3 100% 50%;
+    --ring: 215 20.2% 65.1%;
  
     --radius: 0.5rem;
   }
@@ -70,33 +68,25 @@
     --ring: 217.2 32.6% 17.5%;
   }
 
-  /* Styles de typographie selon la charte Gadait */
+  /* Typography styles inspired by Loro Piana */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-roboto tracking-tight;
+    @apply font-futura tracking-tight;
   }
 
   h1 {
-    @apply text-3xl md:text-4xl font-bold; /* 32px */
+    @apply text-2xl md:text-3xl font-medium;
   }
 
   h2 {
-    @apply text-2xl md:text-3xl font-medium; /* 24px */
+    @apply text-xl md:text-2xl font-medium;
   }
 
   h3 {
-    @apply text-xl md:text-2xl font-medium; /* 20px */
+    @apply text-lg md:text-xl font-medium;
   }
 
-  p, span, div {
-    @apply font-roboto text-base text-gadait-text; /* 16px */
-  }
-
-  button, input, select, textarea {
-    @apply font-opensans text-sm; /* 14px */
-  }
-
-  label {
-    @apply font-opensans text-xs; /* 12px */
+  p, span, div, button, input, select, textarea {
+    @apply font-futura text-base leading-relaxed;
   }
 
   .text-small {
@@ -107,42 +97,12 @@
     @apply text-sm tracking-wide;
   }
 
-  /* Styles par défaut pour les éléments avec la charte Gadait */
-  .gadait-card {
-    @apply bg-white rounded-gadait shadow-gadait border border-gadait-border;
+  .text-accent {
+    @apply font-futuraLight italic;
   }
 
-  .gadait-button-primary {
-    @apply bg-gadait-primary text-white rounded-gadait px-4 py-2 font-opensans text-sm hover:shadow-gadait-hover transition-all;
-  }
-
-  .gadait-button-secondary {
-    @apply bg-gadait-secondary text-white rounded-gadait px-4 py-2 font-opensans text-sm hover:shadow-gadait-hover transition-all;
-  }
-
-  .gadait-input {
-    @apply border border-gadait-border rounded-gadait px-3 py-2 font-opensans text-sm focus:ring-1 focus:ring-gadait-primary focus:border-gadait-primary;
-  }
-
-  /* Styles pour la police Louis Vuitton */
-  .louis-header {
-    @apply font-louisvuitton font-medium tracking-wide text-black uppercase;
-  }
-
-  .louis-title {
-    @apply font-louisvuitton font-medium tracking-wider text-2xl md:text-3xl lg:text-4xl uppercase;
-  }
-
-  .louis-subtitle {
-    @apply font-louisvuitton font-light tracking-wide text-lg md:text-xl uppercase;
-  }
-
-  .louis-text {
-    @apply font-louisvuitton text-base tracking-wide;
-  }
-
-  .louis-button {
-    @apply font-louisvuitton uppercase tracking-widest text-sm border border-black px-6 py-2 hover:bg-black hover:text-white transition-colors;
+  .text-heading {
+    @apply font-futura uppercase tracking-wider;
   }
 }
  
@@ -151,7 +111,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-gadait-background text-gadait-text font-roboto;
+    @apply bg-background text-foreground font-futura;
   }
 }
 
@@ -165,7 +125,6 @@
   }
 }
 
-/* Maintien des styles existants pour la rétrocompatibilité */
 .luxury-card {
   @apply bg-white rounded-md border border-slate-200 shadow-sm;
 }

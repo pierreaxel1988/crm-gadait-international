@@ -25,7 +25,7 @@ const AgentsTableHeader = ({ sortColumn, sortDirection, onSort, periodLabel }: A
     <TableHeader className="bg-gray-50">
       <TableRow className="hover:bg-gray-50/80">
         <TableHead 
-          className="w-[300px] cursor-pointer hover:bg-gray-100/80 px-4 py-3 text-sm font-medium text-gray-700 font-louisvuitton"
+          className="w-[300px] cursor-pointer hover:bg-gray-100/80 px-4 py-3 text-sm font-medium text-gray-700"
           onClick={() => onSort('name')}
         >
           <div className="flex items-center space-x-1">
@@ -34,7 +34,7 @@ const AgentsTableHeader = ({ sortColumn, sortDirection, onSort, periodLabel }: A
           </div>
         </TableHead>
         <TableHead 
-          className="text-right cursor-pointer hover:bg-gray-100/80 px-4 py-3 text-sm font-medium text-gray-700 font-louisvuitton"
+          className="text-right cursor-pointer hover:bg-gray-100/80 px-4 py-3 text-sm font-medium text-gray-700"
           onClick={() => onSort('leads')}
         >
           <div className="flex items-center justify-end space-x-1">
@@ -42,7 +42,7 @@ const AgentsTableHeader = ({ sortColumn, sortDirection, onSort, periodLabel }: A
             {renderSortIcon('leads')}
           </div>
         </TableHead>
-        <TableHead className="text-right px-4 py-3 text-sm font-medium text-gray-700 font-louisvuitton">
+        <TableHead className="text-right px-4 py-3 text-sm font-medium text-gray-700">
           Évolution
         </TableHead>
       </TableRow>

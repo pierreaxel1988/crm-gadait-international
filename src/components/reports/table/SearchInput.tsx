@@ -18,7 +18,7 @@ const SearchInput = ({ searchTerm, onSearchChange, onClearSearch }: SearchInputP
         placeholder="Rechercher un agent..."
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="pl-10 border border-gray-200 rounded-md font-louisvuitton"
+        className="pl-10 border border-gray-200 rounded-md"
       />
       <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
       {searchTerm && (

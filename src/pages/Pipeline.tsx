@@ -121,7 +121,7 @@ const Kanban = () => {
   };
 
   return (
-    <div className="p-3 md:p-6 space-y-4 md:space-y-6 font-louisvuitton">
+    <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       <PipelineHeader 
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -132,11 +132,11 @@ const Kanban = () => {
 
       <Tabs defaultValue="purchase" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4 md:mb-6 w-full md:w-[400px] mx-auto">
-          <TabsTrigger value="purchase" className="flex items-center gap-2 w-1/2 font-louisvuitton">
+          <TabsTrigger value="purchase" className="flex items-center gap-2 w-1/2">
             <Home className="h-4 w-4" />
             <span className="truncate">Achat (Purchase)</span>
           </TabsTrigger>
-          <TabsTrigger value="rental" className="flex items-center gap-2 w-1/2 font-louisvuitton">
+          <TabsTrigger value="rental" className="flex items-center gap-2 w-1/2">
             <Key className="h-4 w-4" />
             <span className="truncate">Location (Rental)</span>
           </TabsTrigger>

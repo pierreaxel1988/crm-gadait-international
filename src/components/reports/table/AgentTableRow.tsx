@@ -21,7 +21,7 @@ const AgentTableRow = ({ agent, period, isTopAgent, change }: AgentTableRowProps
   return (
     <TableRow 
       className={cn(
-        "border-t border-gray-100 transition-colors font-louisvuitton",
+        "border-t border-gray-100 transition-colors",
         isTopAgent ? "bg-blue-50/50 hover:bg-blue-50/70" : "hover:bg-gray-50/50"
       )}
     >

@@ -96,7 +96,7 @@ const Leads = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6 font-louisvuitton">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <LeadsHeader onNewLead={handleNewLead} />
 
       <div className="flex flex-col gap-4">

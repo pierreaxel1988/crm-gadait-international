@@ -3,11 +3,11 @@ import React, { ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'secondary' | 'success' | 'loropiana' | 'chocolate';
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'secondary' | 'loropiana' | 'chocolate';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   isLoading?: boolean;
-  fontStyle?: 'roboto' | 'opensans' | 'optima' | 'times' | 'timesItalic';
+  fontStyle?: 'optima' | 'times' | 'timesItalic';
 }
 
 const CustomButton = ({
@@ -15,28 +15,26 @@ const CustomButton = ({
   size = 'md',
   className,
   isLoading,
-  fontStyle = 'roboto',
+  fontStyle = 'optima',
   children,
   ...props
 }: CustomButtonProps) => {
   const getVariantClasses = (variant: string) => {
     switch (variant) {
       case 'outline':
-        return 'border border-gadait-primary text-gadait-primary hover:bg-gadait-primary/10';
+        return 'border border-primary text-primary hover:bg-primary/10';
       case 'ghost':
-        return 'text-gadait-primary hover:bg-gadait-primary/10';
+        return 'text-primary hover:bg-primary/10';
       case 'link':
-        return 'text-gadait-primary hover:underline';
+        return 'text-primary hover:underline';
       case 'secondary':
-        return 'bg-gadait-secondary text-white hover:bg-gadait-secondary/90';
-      case 'success':
-        return 'bg-gadait-success text-white hover:bg-gadait-success/90';
+        return 'bg-secondary text-secondary-foreground hover:bg-secondary/90';
       case 'loropiana':
         return 'bg-loro-white text-loro-navy border border-loro-pearl hover:bg-loro-pearl dark:bg-loro-navy dark:text-loro-white dark:border-loro-navy/50 dark:hover:bg-loro-navy/80';
       case 'chocolate':
         return 'bg-chocolate-dark text-white hover:bg-chocolate-light dark:bg-chocolate-dark dark:text-white dark:hover:bg-chocolate-light';
       default:
-        return 'bg-gadait-primary text-white hover:bg-gadait-primary/90 dark:bg-gadait-primary dark:text-white dark:hover:bg-gadait-primary/90';
+        return 'bg-loro-hazel text-white hover:bg-loro-hazel/90 dark:bg-loro-sand dark:text-loro-navy dark:hover:bg-loro-sand/90';
     }
   };
 
@@ -53,23 +51,19 @@ const CustomButton = ({
 
   const getFontClasses = (fontStyle: string) => {
     switch (fontStyle) {
-      case 'opensans':
-        return 'font-opensans';
       case 'times':
         return 'font-times';
       case 'timesItalic':
         return 'font-timesItalic';
-      case 'optima':
-        return 'font-optima';
       default:
-        return 'font-roboto';
+        return 'font-optima';
     }
   };
 
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center rounded-gadait font-medium transition-colors duration-300 focus:outline-none focus:ring-1 focus:ring-gadait-primary disabled:opacity-50 disabled:pointer-events-none shadow-sm hover:shadow-gadait-hover',
+        'inline-flex items-center justify-center rounded-none font-medium transition-colors duration-300 focus:outline-none focus:ring-1 focus:ring-loro-hazel dark:focus:ring-loro-sand disabled:opacity-50 disabled:pointer-events-none',
         getVariantClasses(variant),
         getSizeClasses(size),
         getFontClasses(fontStyle),
