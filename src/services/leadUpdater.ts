@@ -10,26 +10,20 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
   try {
     console.log("Updating lead with data:", leadData);
     
-    // Ensure actionHistory is always an array
-    if (!leadData.actionHistory) {
-      leadData.actionHistory = [];
-    }
-    
     const supabaseLeadData = mapToSupabaseFormat(leadData);
     
-    // Ensure all critical fields are present and log them for debugging
-    console.log("Complete Supabase lead data for update:", supabaseLeadData);
-    console.log("Action history for update:", supabaseLeadData.action_history);
+    // Log the data for debugging
+    console.log("Preparing lead data for update:", supabaseLeadData);
     
-    // Validate the action_history before sending to Supabase
-    if (!Array.isArray(supabaseLeadData.action_history)) {
-      console.warn("action_history is not an array, setting to empty array");
-      supabaseLeadData.action_history = [];
-    }
+    // Remove actionHistory from the data before sending to Supabase
+    // since this column doesn't exist in the leads table
+    const { action_history, ...dataToUpdate } = supabaseLeadData;
+    
+    console.log("Final data being sent to Supabase:", dataToUpdate);
     
     const { data, error } = await supabase
       .from('leads')
-      .update(supabaseLeadData)
+      .update(dataToUpdate)
       .eq('id', leadData.id)
       .select()
       .single();
@@ -42,10 +36,6 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     console.log("Lead update successful, response data:", data);
     
     if (data) {
-      // Safe extraction of action_history from the response
-      const actionHistory = data['action_history'] || [];
-      console.log("Action history after update:", actionHistory);
-      
       // Convert from Supabase format to our app format
       const mappedLead = mapToLeadDetailed(data);
       console.log("Mapped lead after update:", mappedLead);

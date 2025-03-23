@@ -39,6 +39,7 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     financingMethod: lead.financing_method,
     propertyUse: lead.property_use,
     nationality: lead.nationality,
+    taxResidence: lead.tax_residence,
     taskType: lead.task_type,
     notes: lead.notes || '',
     nextFollowUpDate: lead.next_follow_up_date,
@@ -48,7 +49,6 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     pipeline_type: lead.pipeline_type,
     imported_at: lead.imported_at,
     integration_source: lead.integration_source,
-    taxResidence: lead.tax_residence,
     actionHistory: actionHistory,
     livingArea: lead.living_area,
     external_id: lead.external_id
@@ -59,9 +59,8 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
   // Log lead fields to ensure they're all present
   console.log("Lead mapping to Supabase format - all fields:", lead);
   
-  // Ensure actionHistory is always an array before sending to Supabase
-  const actionHistory = Array.isArray(lead.actionHistory) ? lead.actionHistory : [];
-  console.log("Validated action_history before sending:", actionHistory);
+  // We won't include actionHistory in the data sent to Supabase
+  // since there's no corresponding column in the database
   
   return {
     id: lead.id,
@@ -97,9 +96,9 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     pipeline_type: lead.pipelineType || lead.pipeline_type,
     integration_source: lead.integration_source,
     tax_residence: lead.taxResidence,
-    action_history: actionHistory,
     living_area: lead.livingArea,
     external_id: lead.external_id
+    // Deliberately omitting action_history as it doesn't exist in the database
   };
 };
 
