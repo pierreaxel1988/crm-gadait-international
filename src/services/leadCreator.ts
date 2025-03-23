@@ -39,7 +39,20 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       throw error;
     }
     
-    return data;
+    // Transform the returned data back to LeadDetailed format
+    // Ensure createdAt is properly mapped from created_at
+    if (data) {
+      return {
+        ...data,
+        createdAt: data.created_at || createdAt,
+        // Ensure other required fields are present
+        id: data.id || leadId,
+        name: data.name || leadData.name,
+        status: data.status || leadData.status || 'New'
+      } as LeadDetailed;
+    }
+    
+    return completeLeadData;
   } catch (error) {
     console.error("Error in createLead:", error);
     return null;
