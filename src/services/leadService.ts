@@ -20,10 +20,13 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       leadData.pipelineType = 'purchase';
     }
     
-    // If pipeline_type is not set (for database compatibility), set it the same as pipelineType
-    if (!leadData.pipeline_type) {
-      leadData.pipeline_type = leadData.pipelineType;
-    }
+    // Always set pipeline_type (for database compatibility) to ensure it matches pipelineType
+    leadData.pipeline_type = leadData.pipelineType;
+    
+    console.log("leadService: Pipeline types set:", { 
+      pipelineType: leadData.pipelineType, 
+      pipeline_type: leadData.pipeline_type 
+    });
     
     // If no agent is assigned and the user isn't already assigned, find Pierre Axel Gadait
     if (!leadData.assignedTo) {

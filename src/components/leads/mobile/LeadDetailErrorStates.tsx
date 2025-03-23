@@ -39,3 +39,25 @@ export const NotFoundState: React.FC<NotFoundStateProps> = ({ show, id }) => {
     </div>
   );
 };
+
+// Add a new error state component for pipeline issues
+export const PipelineErrorState: React.FC<{show: boolean}> = ({ show }) => {
+  const navigate = useNavigate();
+  
+  if (!show) return null;
+  
+  return (
+    <div className="p-4">
+      <div className="text-center py-8">
+        <h2 className="text-xl font-semibold">Problème d'affichage</h2>
+        <p className="text-muted-foreground mt-2">
+          Votre lead a été créé mais n'est peut-être pas visible dans le pipeline. 
+          Essayez de rafraîchir la page ou de vérifier les filtres.
+        </p>
+        <CustomButton className="mt-4" variant="chocolate" onClick={() => navigate('/pipeline?refresh=true')}>
+          Rafraîchir le pipeline
+        </CustomButton>
+      </div>
+    </div>
+  );
+};

@@ -14,9 +14,9 @@ const PipelineTabContent = ({ contentType, filters, refreshTrigger }: PipelineTa
   // Get the columns based on the content type
   const getColumns = () => {
     const statusesToShow = filters.status ? [filters.status] : contentType === 'purchase' 
-      // Updated to match the image with French statuses
-      ? ['New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offre', 'Gagné', 'Perdu'] as LeadStatus[]
-      : ['New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offre', 'Gagné', 'Perdu'] as LeadStatus[];
+      // Updated to include all statuses in both French and English
+      ? ['New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Offre', 'Deposit', 'Signed', 'Gagné', 'Perdu'] as LeadStatus[]
+      : ['New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Offre', 'Deposit', 'Signed', 'Gagné', 'Perdu'] as LeadStatus[];
     
     return statusesToShow.map(status => ({
       title: status,

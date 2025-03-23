@@ -59,10 +59,11 @@ export const useKanbanData = (
           return;
         }
         
-        // First try to get leads from Supabase directly for better filtering
+        // Improved query to filter by pipeline_type directly in the database query
         const { data: supabaseLeads, error: leadsError } = await supabase
           .from('leads')
-          .select('*');
+          .select('*')
+          .eq('pipeline_type', pipelineType);
           
         // If there's an error or no data from Supabase, fall back to local leads
         let leads = [];
@@ -115,7 +116,7 @@ export const useKanbanData = (
         console.log('Mapped leads:', mappedLeads);
         console.log(`Current pipeline filter: ${pipelineType}`);
         
-        // Filter leads by pipeline type, using more detailed logging
+        // More flexible filtering to handle different pipeline type field names
         const filteredLeads = mappedLeads.filter(lead => {
           // Check both pipelineType and pipeline_type properties
           const leadPipelineType = String(lead.pipelineType || lead.pipeline_type || 'purchase').toLowerCase();
