@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
@@ -21,6 +22,21 @@ const GeneralInfoSection = ({
   countries,
   sources
 }: GeneralInfoSectionProps) => {
+  // State pour gérer le code pays
+  const [phoneCountryCode, setPhoneCountryCode] = useState('+33');
+  
+  // Fonction pour extraire le code pays du numéro de téléphone existant
+  React.useEffect(() => {
+    if (formData.phone) {
+      // Rechercher un code pays au début du numéro
+      const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
+      const foundCode = countryCodes.find(code => formData.phone?.startsWith(code));
+      if (foundCode) {
+        setPhoneCountryCode(foundCode);
+      }
+    }
+  }, [formData.phone]);
+  
   // Function to get country flag emoji
   const getCountryFlag = (country: string): string => {
     // Use emoji country flags
@@ -90,6 +106,51 @@ const GeneralInfoSection = ({
     return code ? countryToFlag(code) : '🌍';
   };
 
+  // Gérer le changement de code pays
+  const handlePhoneCodeChange = (code: string) => {
+    setPhoneCountryCode(code);
+    
+    // Extraire le numéro de téléphone sans code pays
+    let phoneNumber = formData.phone || '';
+    const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
+    
+    // Supprimer tout code pays existant
+    for (const existingCode of countryCodes) {
+      if (phoneNumber.startsWith(existingCode)) {
+        phoneNumber = phoneNumber.substring(existingCode.length).trim();
+        break;
+      }
+    }
+    
+    // Mettre à jour le numéro avec le nouveau code pays
+    const formattedPhone = phoneNumber ? `${code} ${phoneNumber}` : "";
+    const syntheticEvent = {
+      target: {
+        name: 'phone',
+        value: formattedPhone
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(syntheticEvent);
+  };
+
+  // Adapter la valeur du téléphone pour l'affichage dans le champ
+  const getPhoneValueWithoutCode = () => {
+    if (!formData.phone) return '';
+    
+    // Rechercher et supprimer le code pays du numéro de téléphone
+    const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
+    
+    let phoneNumber = formData.phone;
+    for (const code of countryCodes) {
+      if (phoneNumber.startsWith(code)) {
+        return phoneNumber.substring(code.length).trim();
+      }
+    }
+    
+    return formData.phone;
+  };
+
   // State to handle the contact info textarea for quick paste
   const [showContactPaste, setShowContactPaste] = useState(false);
   const [contactText, setContactText] = useState('');
@@ -123,6 +184,12 @@ const GeneralInfoSection = ({
       // Check if line contains phone number (has digits and possibly +)
       else if (/[\d\+]/.test(trimmedLine) && (trimmedLine.includes('+') || trimmedLine.includes(' '))) {
         phone = trimmedLine;
+        
+        // Tenter d'extraire un code pays s'il existe
+        const codeMatch = phone.match(/^\+\d+/);
+        if (codeMatch && codeMatch[0]) {
+          setPhoneCountryCode(codeMatch[0]);
+        }
       } 
       // If not email or phone, consider it as name
       else if (!name) {
@@ -169,6 +236,33 @@ const GeneralInfoSection = ({
       title: "Informations importées",
       description: "Les informations de contact ont été extraites avec succès."
     });
+  };
+
+  // Gérer les changements spécifiques au champ téléphone
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const phoneNumber = e.target.value;
+    
+    // Si le champ est vide, effacer complètement le numéro de téléphone
+    if (!phoneNumber) {
+      const syntheticEvent = {
+        target: {
+          name: 'phone',
+          value: ''
+        }
+      } as React.ChangeEvent<HTMLInputElement>;
+      handleInputChange(syntheticEvent);
+      return;
+    }
+    
+    // Sinon, ajouter le code pays actuel au numéro
+    const formattedPhone = `${phoneCountryCode} ${phoneNumber}`;
+    const syntheticEvent = {
+      target: {
+        name: 'phone',
+        value: formattedPhone
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    handleInputChange(syntheticEvent);
   };
 
   return (
@@ -239,10 +333,12 @@ fmohamed01@cuatrocaminos.net"
           label="Téléphone"
           name="phone"
           type="tel-with-code"
-          value={formData.phone || ''}
-          onChange={handleInputChange}
+          value={getPhoneValueWithoutCode()}
+          onChange={handlePhoneChange}
           icon={Phone}
           placeholder="Numéro de téléphone"
+          countryCode={phoneCountryCode}
+          onCountryCodeChange={handlePhoneCodeChange}
         />
 
         <div className="mb-3">

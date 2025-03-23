@@ -19,6 +19,7 @@ interface FormInputProps {
   disabled?: boolean;
   renderCustomField?: () => React.ReactNode;
   countryCode?: string;
+  onCountryCodeChange?: (code: string) => void;
 }
 
 const countryCodes = [
@@ -36,7 +37,12 @@ const countryCodes = [
   { code: '+966', country: '🇸🇦 Saudi Arabia' },
   { code: '+965', country: '🇰🇼 Kuwait' },
   { code: '+974', country: '🇶🇦 Qatar' },
-  { code: '+973', country: '🇧🇭 Bahrain' }
+  { code: '+973', country: '🇧🇭 Bahrain' },
+  { code: '+230', country: '🇲🇺 Mauritius' },
+  { code: '+212', country: '🇲🇦 Morocco' },
+  { code: '+216', country: '🇹🇳 Tunisia' },
+  { code: '+213', country: '🇩🇿 Algeria' },
+  { code: '+20', country: '🇪🇬 Egypt' }
 ];
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -53,7 +59,8 @@ const FormInput: React.FC<FormInputProps> = ({
   helpText,
   disabled = false,
   renderCustomField,
-  countryCode = '+33'
+  countryCode = '+33',
+  onCountryCodeChange
 }) => {
   const [selectedCountryCode, setSelectedCountryCode] = React.useState(countryCode);
   const [showCountryDropdown, setShowCountryDropdown] = React.useState(false);
@@ -61,12 +68,49 @@ const FormInput: React.FC<FormInputProps> = ({
   const handleCountryCodeChange = (code: string) => {
     setSelectedCountryCode(code);
     setShowCountryDropdown(false);
+    
+    if (onCountryCodeChange) {
+      onCountryCodeChange(code);
+    }
+    
+    // Si le numéro commence par un code pays, on le remplace
+    if (typeof value === 'string' && value) {
+      // Supprimer tout code pays existant au début du numéro
+      let cleanedNumber = value;
+      for (const codeObj of countryCodes) {
+        if (value.startsWith(codeObj.code)) {
+          cleanedNumber = value.substring(codeObj.code.length).trim();
+          break;
+        }
+      }
+      
+      // Créer un événement synthétique pour mettre à jour le numéro
+      const syntheticEvent = {
+        target: {
+          name,
+          value: cleanedNumber
+        }
+      } as React.ChangeEvent<HTMLInputElement>;
+      
+      onChange(syntheticEvent);
+    }
   };
+
+  // Ajuster la largeur du dropdown en fonction de la longueur du code pays
+  const getCodeButtonWidth = () => {
+    const baseWidth = 24;
+    return selectedCountryCode.length > 3 ? 
+      baseWidth + (selectedCountryCode.length - 3) * 6 : 
+      baseWidth;
+  };
+
+  // Trouver le pays correspondant au code sélectionné
+  const selectedCountry = countryCodes.find(country => country.code === selectedCountryCode);
 
   return (
     <div className={cn('space-y-2', className)}>
       <div className="flex items-center justify-between">
-        <label htmlFor={name} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label htmlFor={name} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-futura">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -91,7 +135,7 @@ const FormInput: React.FC<FormInputProps> = ({
                 required={required}
                 disabled={disabled}
                 className={cn(
-                  "flex h-12 md:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none",
+                  "flex h-12 md:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none font-futura",
                   Icon && "pl-9"
                 )}
                 style={{ fontSize: '16px' }}
@@ -123,7 +167,7 @@ const FormInput: React.FC<FormInputProps> = ({
                 required={required}
                 disabled={disabled}
                 className={cn(
-                  "flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                  "flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-futura",
                   Icon && "pl-9"
                 )}
                 style={{ fontSize: '16px' }}
@@ -139,10 +183,11 @@ const FormInput: React.FC<FormInputProps> = ({
               <div className="flex">
                 <div className="relative flex-shrink-0">
                   <div 
-                    className="flex items-center justify-between w-24 h-12 md:h-10 px-3 border border-r-0 border-input rounded-l-md bg-muted cursor-pointer"
+                    className="flex items-center justify-between w-24 h-12 md:h-10 px-3 border border-r-0 border-input rounded-l-md bg-muted cursor-pointer font-futura"
                     onClick={() => setShowCountryDropdown(prev => !prev)}
+                    style={{ minWidth: `${getCodeButtonWidth()}px` }}
                   >
-                    <span className="text-sm truncate">{selectedCountryCode}</span>
+                    <span className="text-sm truncate font-medium">{selectedCountryCode}</span>
                     <ChevronDown className="h-4 w-4 ml-1" />
                   </div>
                   
@@ -151,7 +196,7 @@ const FormInput: React.FC<FormInputProps> = ({
                       {countryCodes.map(country => (
                         <div 
                           key={country.code} 
-                          className="px-3 py-3 text-sm hover:bg-accent cursor-pointer flex items-center"
+                          className="px-3 py-3 text-sm hover:bg-accent cursor-pointer flex items-center font-futura"
                           onClick={() => handleCountryCodeChange(country.code)}
                         >
                           <span className="mr-2">{country.country}</span>
@@ -170,7 +215,7 @@ const FormInput: React.FC<FormInputProps> = ({
                   placeholder={placeholder}
                   required={required}
                   disabled={disabled}
-                  className={cn("rounded-l-none h-12 md:h-10", Icon && "pl-9")}
+                  className={cn("rounded-l-none h-12 md:h-10 font-futura", Icon && "pl-9")}
                   style={{ fontSize: '16px' }}
                 />
               </div>
@@ -191,7 +236,7 @@ const FormInput: React.FC<FormInputProps> = ({
                 placeholder={placeholder}
                 required={required}
                 disabled={disabled}
-                className={cn(Icon && "pl-9", "h-12 md:h-10")}
+                className={cn(Icon && "pl-9", "h-12 md:h-10 font-futura")}
                 style={{ fontSize: '16px' }}
               />
             </div>
@@ -200,7 +245,7 @@ const FormInput: React.FC<FormInputProps> = ({
       )}
       
       {helpText && (
-        <p className="text-xs text-muted-foreground mt-1">{helpText}</p>
+        <p className="text-xs text-muted-foreground mt-1 font-futura">{helpText}</p>
       )}
     </div>
   );

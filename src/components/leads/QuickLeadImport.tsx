@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, X, ExternalLink, Flag, Phone } from 'lucide-react';
@@ -24,6 +25,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
   const [leadName, setLeadName] = useState('');
   const [leadEmail, setLeadEmail] = useState('');
   const [leadPhone, setLeadPhone] = useState('');
+  const [leadPhoneCode, setLeadPhoneCode] = useState('+33');
   const [leadCountry, setLeadCountry] = useState<Country | ''>('');
   const [leadNationality, setLeadNationality] = useState('');
   
@@ -89,10 +91,12 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
     }
 
     try {
+      const formattedPhone = leadPhone ? `${leadPhoneCode} ${leadPhone}` : '';
+      
       const newLeadData = {
         name: leadName,
         email: leadEmail,
-        phone: leadPhone,
+        phone: formattedPhone,
         status: "New" as LeadStatus,
         tags: ["Imported"] as LeadTag[],
         propertyReference: extractedData?.reference || "",
@@ -117,6 +121,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
       setLeadName('');
       setLeadEmail('');
       setLeadPhone('');
+      setLeadPhoneCode('+33');
       setLeadCountry('');
       setLeadNationality('');
       setPropertyUrl('');
@@ -141,11 +146,16 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
     setLeadName('');
     setLeadEmail('');
     setLeadPhone('');
+    setLeadPhoneCode('+33');
     setLeadCountry('');
     setLeadNationality('');
     setPropertyUrl('');
     resetExtraction();
     onClose();
+  };
+
+  const handlePhoneCodeChange = (code: string) => {
+    setLeadPhoneCode(code);
   };
 
   return (
@@ -180,6 +190,8 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
             value={leadPhone}
             onChange={(e) => setLeadPhone(e.target.value)}
             icon={Phone}
+            countryCode={leadPhoneCode}
+            onCountryCodeChange={handlePhoneCodeChange}
           />
           
           <FormInput
@@ -226,7 +238,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
                 size="sm" 
                 onClick={handleExtractUrl}
                 disabled={isLoading || !propertyUrl}
-                className="text-xs"
+                className="text-xs font-futura"
               >
                 {isLoading ? "Extraction..." : "Extraire les données"}
               </Button>
@@ -234,7 +246,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
           </div>
           
           {extractedData && (
-            <div className="border border-gray-200 rounded-md p-3 mt-2 text-sm space-y-1">
+            <div className="border border-gray-200 rounded-md p-3 mt-2 text-sm space-y-1 font-futura">
               <h4 className="font-semibold mb-2">Données extraites:</h4>
               {extractedData.title && <p><span className="font-medium">Titre:</span> {extractedData.title}</p>}
               {extractedData.price && <p><span className="font-medium">Prix:</span> {extractedData.price}</p>}
@@ -251,7 +263,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
             type="button" 
             variant="outline"
             onClick={handleCancel}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 font-futura"
           >
             <X className="h-4 w-4" /> 
             Annuler
@@ -261,7 +273,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSu
             type="button" 
             onClick={handleImport}
             disabled={!leadName || !leadEmail}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 font-futura"
           >
             <Check className="h-4 w-4" /> 
             Importer

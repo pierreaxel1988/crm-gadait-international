@@ -184,7 +184,7 @@ const EnhancedInput: React.FC<EnhancedInputProps> = ({
     <div className="relative border border-loro-sand rounded-md overflow-hidden">
       <Textarea
         ref={textareaRef}
-        className="resize-none pr-12 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[60px] max-h-[200px] overflow-y-auto"
+        className="resize-none pr-12 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[60px] max-h-[200px] overflow-y-auto font-futura"
         placeholder={placeholder}
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -211,7 +211,7 @@ const EnhancedInput: React.FC<EnhancedInputProps> = ({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-full bg-loro-pearl hover:bg-loro-sand text-loro-navy"
+                className="h-8 w-8 rounded-full bg-loro-pearl hover:bg-loro-sand text-loro-navy font-futura"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading}
               >
@@ -219,7 +219,7 @@ const EnhancedInput: React.FC<EnhancedInputProps> = ({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Joindre un fichier</p>
+              <p className="font-futura">Joindre un fichier</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -234,7 +234,7 @@ const EnhancedInput: React.FC<EnhancedInputProps> = ({
                 size="icon"
                 className={`h-8 w-8 rounded-full ${
                   isRecording ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-loro-pearl hover:bg-loro-sand text-loro-navy'
-                }`}
+                } font-futura`}
                 onClick={toggleVoiceRecording}
                 disabled={isLoading}
               >
@@ -242,7 +242,7 @@ const EnhancedInput: React.FC<EnhancedInputProps> = ({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{isRecording ? "Arrêter l'enregistrement" : "Dicter un message"}</p>
+              <p className="font-futura">{isRecording ? "Arrêter l'enregistrement" : "Dicter un message"}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -250,7 +250,7 @@ const EnhancedInput: React.FC<EnhancedInputProps> = ({
         {/* Bouton d'envoi */}
         <Button
           size="icon"
-          className={`rounded-full h-8 w-8 ${input.trim() ? 'bg-loro-hazel hover:bg-loro-hazel/90' : 'bg-loro-sand/50'}`}
+          className={`rounded-full h-8 w-8 ${input.trim() ? 'bg-loro-hazel hover:bg-loro-hazel/90' : 'bg-loro-sand/50'} font-futura`}
           onClick={handleSend}
           disabled={isLoading || !input.trim()}
         >
