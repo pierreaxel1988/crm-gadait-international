@@ -39,14 +39,17 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       
       // The Supabase response uses snake_case, but our app uses camelCase
       // We need to handle the conversion properly
+      // Use bracket notation to access potentially missing properties
+      const actionHistory = data.action_history || [];
+      
       return {
         ...data,
         createdAt: data.created_at || createdAt,
         id: data.id || leadId,
         name: data.name || leadData.name,
         status: data.status || leadData.status || 'New',
-        // Safely access action_history
-        actionHistory: Array.isArray(data.action_history) ? data.action_history : []
+        // Use the extracted variable to avoid TypeScript error
+        actionHistory: Array.isArray(actionHistory) ? actionHistory : []
       } as LeadDetailed;
     }
     
