@@ -50,22 +50,29 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       updatedActionHistory: updatedLead.actionHistory 
     });
     
-    // Save the updated lead
+    // Save the updated lead to Supabase through two methods for redundancy
+    
+    // Method 1: Using the updateLead function that handles all lead fields
     const result = await updateLead(updatedLead);
     
     if (!result) {
       throw new Error('Failed to update lead with new action');
     }
     
-    // Also update the action history directly in Supabase for better data consistency
+    // Method 2: Direct update to Supabase for better data consistency
+    // This ensures even if our lead mapping has issues, the action is still recorded
     try {
+      const actionHistoryArray = Array.isArray(updatedLead.actionHistory) ? updatedLead.actionHistory : [];
+      
+      console.log('Direct Supabase update with action history:', actionHistoryArray);
+      
       const { error } = await supabase
         .from('leads')
         .update({
           task_type: action.actionType,
           next_follow_up_date: action.scheduledDate,
           last_contacted_at: currentDate,
-          action_history: updatedLead.actionHistory
+          action_history: actionHistoryArray
         })
         .eq('id', leadId);
       
@@ -73,12 +80,21 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
         console.error('Error updating action history in Supabase:', error);
         throw error;
       }
+      
+      // Refetch the lead to ensure we have the latest data
+      const refreshedLead = await getLead(leadId);
+      
+      if (refreshedLead) {
+        console.log('Lead refetched after action update:', refreshedLead);
+        console.log('Action history after refresh:', refreshedLead.actionHistory);
+        return refreshedLead;
+      }
+      
+      return result;
     } catch (err) {
       console.error('Unexpected error updating action history:', err);
       throw err;
     }
-    
-    return result;
   } catch (err) {
     console.error('Error adding action to lead:', err);
     toast({

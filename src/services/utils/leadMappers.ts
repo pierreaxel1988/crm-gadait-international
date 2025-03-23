@@ -4,6 +4,16 @@ import { ActionHistory } from '@/types/actionHistory';
 import { TaskType } from '@/components/kanban/KanbanCard';
 
 export const mapToLeadDetailed = (lead: any): LeadDetailed => {
+  // Safely extract action_history from lead
+  let actionHistory: ActionHistory[] = [];
+  try {
+    const rawActionHistory = lead.action_history || lead['action_history'] || [];
+    actionHistory = Array.isArray(rawActionHistory) ? rawActionHistory : [];
+  } catch (error) {
+    console.error('Error extracting action_history:', error);
+    actionHistory = [];
+  }
+
   return {
     id: lead.id || '',
     name: lead.name || '',
@@ -40,7 +50,7 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     imported_at: lead.imported_at,
     integration_source: lead.integration_source,
     taxResidence: lead.tax_residence,
-    actionHistory: Array.isArray(lead.action_history) ? lead.action_history : [],
+    actionHistory: actionHistory,
     livingArea: lead.living_area,
     external_id: lead.external_id
   };
@@ -49,6 +59,10 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
 export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
   // Log lead fields to ensure they're all present
   console.log("Lead mapping to Supabase format - all fields:", lead);
+  
+  // Ensure actionHistory is always an array before sending to Supabase
+  const actionHistory = Array.isArray(lead.actionHistory) ? lead.actionHistory : [];
+  console.log("Validated action_history before sending:", actionHistory);
   
   return {
     id: lead.id,
@@ -84,7 +98,7 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     pipeline_type: lead.pipelineType || lead.pipeline_type,
     integration_source: lead.integration_source,
     tax_residence: lead.taxResidence,
-    action_history: lead.actionHistory || [],
+    action_history: actionHistory,
     living_area: lead.livingArea,
     external_id: lead.external_id
   };

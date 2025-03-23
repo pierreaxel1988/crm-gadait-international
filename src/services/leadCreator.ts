@@ -21,6 +21,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     
     // Log all data before sending to Supabase
     console.log("Data being sent to Supabase:", supabaseData);
+    console.log("Action history being sent:", supabaseData.action_history);
     
     const { data, error } = await supabase
       .from("leads")
@@ -41,6 +42,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       // We need to handle the conversion properly
       // Utilisation de l'opérateur d'indexation avec une chaîne pour éviter l'erreur TypeScript
       const actionHistory = data['action_history'] || [];
+      console.log("Action history received:", actionHistory);
       
       return {
         ...data,
