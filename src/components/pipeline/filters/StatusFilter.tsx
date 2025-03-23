@@ -10,10 +10,20 @@ interface StatusFilterProps {
 }
 
 const StatusFilter = ({ status, onStatusChange }: StatusFilterProps) => {
-  // Include all valid statuses, both in English and French, including "Signed"
+  // Standardized statuses matching the database values
   const statuses: (LeadStatus | null)[] = [
-    null, 'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Deposit', 'Signed',
-    'Offre', 'Gagné', 'Perdu'
+    null, 
+    'New',       // Nouveaux
+    'Contacted', // Contactés
+    'Qualified', // Qualifiés
+    'Proposal',  // Propositions
+    'Visit',     // Visites en cours
+    'Offer',     // Offre en cours (English)
+    'Offre',     // Offre en cours (French)
+    'Deposit',   // Dépôt reçu
+    'Signed',    // Signature finale
+    'Gagné',     // Conclus
+    'Perdu'      // Perdu
   ];
 
   return (

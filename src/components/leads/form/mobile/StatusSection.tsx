@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed, LeadTag } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -19,18 +18,19 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
     onDataChange({ [field]: value } as Partial<LeadDetailed>);
   };
   
-  // Updated to include all the statuses shown in the image, including "Signed"
+  // Standardized statuses matching the database values
   const leadStatuses: LeadStatus[] = [
-    "New", 
-    "Contacted", 
-    "Qualified", 
-    "Proposal", 
-    "Visit", 
-    "Offre", 
-    "Deposit",
-    "Signed",
-    "Gagné", 
-    "Perdu"
+    "New",       // Nouveaux
+    "Contacted", // Contactés
+    "Qualified", // Qualifiés
+    "Proposal",  // Propositions
+    "Visit",     // Visites en cours
+    "Offer",     // Offre en cours (English)
+    "Offre",     // Offre en cours (French)
+    "Deposit",   // Dépôt reçu
+    "Signed",    // Signature finale
+    "Gagné",     // Conclus
+    "Perdu"      // Perdu
   ];
   
   const leadTags: LeadTag[] = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];

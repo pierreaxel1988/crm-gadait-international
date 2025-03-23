@@ -18,16 +18,20 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
   setShowStatusDropdown,
   setShowTagsDropdown
 }) => {
+  // Standardized statuses matching the database values
   const statuses: (LeadStatus | 'All')[] = [
     'All',
-    'New',
-    'Contacted',
-    'Qualified',
-    'Proposal',
-    'Visit',
-    'Offer',
-    'Deposit',
-    'Signed',
+    'New',       // Nouveaux
+    'Contacted', // Contactés
+    'Qualified', // Qualifiés
+    'Proposal',  // Propositions
+    'Visit',     // Visites en cours
+    'Offer',     // Offre en cours (English/Purchase)
+    'Offre',     // Offre en cours (French/Rental)
+    'Deposit',   // Dépôt reçu
+    'Signed',    // Signature finale
+    'Gagné',     // Conclus
+    'Perdu'      // Perdu
   ];
 
   return (

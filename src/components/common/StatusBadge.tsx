@@ -3,20 +3,20 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 export type LeadStatus =
-  | 'New'
-  | 'Contacted'
-  | 'Qualified'
-  | 'Proposal'
-  | 'Visit'
+  | 'New'              // Nouveaux
+  | 'Contacted'        // Contactés
+  | 'Qualified'        // Qualifiés
+  | 'Proposal'         // Propositions
+  | 'Visit'            // Visites en cours
   | 'Negotiation'
-  | 'Offer'
-  | 'Offre'  // French variant
-  | 'Deposit'
-  | 'Signed'
-  | 'Won'
-  | 'Gagné'  // French variant
-  | 'Lost'
-  | 'Perdu'  // French variant
+  | 'Offer'            // Offre en cours (English)
+  | 'Offre'            // Offre en cours (French)
+  | 'Deposit'          // Dépôt reçu
+  | 'Signed'           // Signature finale
+  | 'Won'              // Conclus (English)
+  | 'Gagné'            // Conclus (French)
+  | 'Lost'             // Perdu (English)
+  | 'Perdu'            // Perdu (French)
   | 'Archived';
 
 interface StatusBadgeProps {
