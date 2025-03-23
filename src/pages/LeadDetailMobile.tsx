@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LeadDetailed } from '@/types/lead';
@@ -6,11 +7,10 @@ import { getLead, updateLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLeadActions } from '@/hooks/useLeadActions';
-import { ArrowLeft, Check, Phone, Mail, Save } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CustomButton from '@/components/ui/CustomButton';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
-import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
@@ -18,7 +18,7 @@ import StatusSection from '@/components/leads/form/mobile/StatusSection';
 import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSection';
 import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
 import NotesSection from '@/components/leads/form/mobile/NotesSection';
-import ActionsPanel from '@/components/leads/actions/ActionsPanelMobile';
+import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import ActionsPanelMobile from '@/components/leads/actions/ActionsPanelMobile';
 
 const LeadDetailMobile = () => {

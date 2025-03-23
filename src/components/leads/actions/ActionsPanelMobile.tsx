@@ -1,33 +1,91 @@
 
-import React from 'react';
-import { LeadDetailed } from '@/types/lead';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
 import { format } from 'date-fns';
 import { Check, Clock, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getLead } from '@/services/leadService';
+import { LeadDetailed } from '@/types/lead';
+import { toast } from '@/hooks/use-toast';
 
-interface ActionsPanelProps {
-  lead: LeadDetailed;
-  getActionTypeIcon: (actionType: string) => React.ReactNode;
+interface ActionsPanelMobileProps {
+  leadId: string;
   onMarkComplete: (action: ActionHistory) => void;
   onAddAction: () => void;
+  actionHistory?: ActionHistory[];
 }
 
-const ActionsPanel: React.FC<ActionsPanelProps> = ({
-  lead,
-  getActionTypeIcon,
+const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
+  leadId,
   onMarkComplete,
-  onAddAction
+  onAddAction,
+  actionHistory: initialActionHistory
 }) => {
-  const sortedActions = lead.actionHistory 
-    ? [...lead.actionHistory].sort((a, b) => {
-        return new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime();
-      })
-    : [];
+  const [lead, setLead] = useState<LeadDetailed | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [actionHistory, setActionHistory] = useState<ActionHistory[]>(initialActionHistory || []);
+
+  useEffect(() => {
+    if (initialActionHistory) {
+      setActionHistory(initialActionHistory);
+    } else {
+      fetchLeadData();
+    }
+  }, [leadId, initialActionHistory]);
+
+  const fetchLeadData = async () => {
+    if (!leadId) return;
+    
+    try {
+      setIsLoading(true);
+      const fetchedLead = await getLead(leadId);
+      if (fetchedLead) {
+        setLead(fetchedLead);
+        setActionHistory(fetchedLead.actionHistory || []);
+      }
+    } catch (error) {
+      console.error("Error fetching lead data:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de charger les données du lead"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getActionTypeIcon = (actionType: string) => {
+    switch (actionType) {
+      case 'Call': return <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Appel</span>;
+      case 'Visites': return <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">Visite</span>;
+      case 'Compromis': return <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs">Compromis</span>;
+      case 'Acte de vente': return <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Acte de vente</span>;
+      case 'Contrat de Location': return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Contrat Location</span>;
+      case 'Propositions': return <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs">Proposition</span>;
+      case 'Follow up': return <span className="bg-pink-100 text-pink-800 px-2 py-1 rounded-full text-xs">Follow-up</span>;
+      case 'Estimation': return <span className="bg-teal-100 text-teal-800 px-2 py-1 rounded-full text-xs">Estimation</span>;
+      case 'Prospection': return <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs">Prospection</span>;
+      case 'Admin': return <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs">Admin</span>;
+      default: return null;
+    }
+  };
+
+  const sortedActions = [...actionHistory].sort((a, b) => {
+    return new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime();
+  });
 
   const pendingActions = sortedActions.filter(action => !action.completedDate);
   const completedActions = sortedActions.filter(action => action.completedDate);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-4">
+        <div className="animate-spin h-6 w-6 border-4 border-chocolate-dark rounded-full border-t-transparent"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -118,4 +176,4 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({
   );
 };
 
-export default ActionsPanel;
+export default ActionsPanelMobile;
