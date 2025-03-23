@@ -1,4 +1,3 @@
-
 import { LeadDetailed, PipelineType, LeadStatus, LeadTag, TaskType, Country } from "@/types/lead";
 
 /**
@@ -78,7 +77,7 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
   
   if (leadData.bedrooms !== undefined) {
     if (Array.isArray(leadData.bedrooms)) {
-      formattedBedrooms = JSON.stringify(leadData.bedrooms);
+      formattedBedrooms = leadData.bedrooms;
     } else {
       formattedBedrooms = leadData.bedrooms;
     }
@@ -98,8 +97,8 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
   }
   
   // Ensure currency is a string, not an object
-  let currency = leadData.currency;
-  if (currency && typeof currency === 'object' && currency._type === 'undefined') {
+  let currency = leadData.currency || 'EUR';
+  if (currency && typeof currency === 'object' && 'value' in currency) {
     currency = 'EUR'; // Default to EUR if we have an invalid currency object
   }
   

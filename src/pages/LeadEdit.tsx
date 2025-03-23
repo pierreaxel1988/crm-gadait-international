@@ -77,10 +77,6 @@ const LeadEdit = () => {
         id: id || data.id
       };
       
-      if (leadDataToUpdate.currency && typeof leadDataToUpdate.currency === 'object') {
-        leadDataToUpdate.currency = 'EUR';
-      }
-      
       console.log("Final data to update:", leadDataToUpdate);
       
       const updatedLead = await updateLead(leadDataToUpdate);
@@ -123,7 +119,7 @@ const LeadEdit = () => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce lead ?')) {
+    if (window.confirm('��tes-vous sûr de vouloir supprimer ce lead ?')) {
       try {
         if (id) {
           await deleteLead(id);
