@@ -55,7 +55,18 @@ const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
             <SelectContent>
               {availableStatuses.map(status => (
                 <SelectItem key={status} value={status}>
-                  {status}
+                  {status === 'New' ? 'Nouveaux' : 
+                   status === 'Contacted' ? 'Contactés' :
+                   status === 'Qualified' ? 'Qualifiés' :
+                   status === 'Proposal' ? 'Propositions' :
+                   status === 'Visit' ? 'Visites en cours' :
+                   status === 'Offer' ? 'Offre en cours' :
+                   status === 'Offre' ? 'Offre en cours' :
+                   status === 'Deposit' ? 'Dépôt reçu' :
+                   status === 'Signed' ? 'Signature finale' :
+                   status === 'Gagné' ? 'Conclus' :
+                   status === 'Perdu' ? 'Perdu' : 
+                   status}
                 </SelectItem>
               ))}
             </SelectContent>
