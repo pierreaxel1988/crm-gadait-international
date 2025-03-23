@@ -51,39 +51,43 @@ const PropertyInfo = ({
 
   return (
     <>
-      {/* Budget maximum mis en évidence - Toujours afficher avec une valeur par défaut si nécessaire */}
-      <div className="mb-2 flex items-center text-xs font-semibold bg-loro-sand/20 p-1 rounded">
-        <Euro className="h-3 w-3 mr-1 text-chocolate-dark" />
-        <span>Budget max: {hasBudget ? formatBudget(budget) : 'Non spécifié'}</span>
-      </div>
+      {/* Budget maximum mis en évidence */}
+      {hasBudget && (
+        <div className="mb-2 flex items-center text-xs font-medium bg-gray-100 px-3 py-2 rounded">
+          <Euro className="h-3.5 w-3.5 mr-1.5 text-gray-700" />
+          <span>Budget max: {formatBudget(budget)}</span>
+        </div>
+      )}
       
-      {/* Localisation souhaitée mise en évidence - Toujours afficher avec une valeur par défaut si nécessaire */}
-      <div className="mb-2 flex items-center text-xs font-semibold bg-gray-100 p-1 rounded">
-        <MapPin className="h-3 w-3 mr-1 text-red-500" />
-        <span>{hasLocation ? desiredLocation : 'Localisation non spécifiée'}</span>
-      </div>
-      
-      {/* Type de bien */}
-      {propertyType && (
-        <div className="mb-2 flex items-center text-xs">
-          <Home className="h-3 w-3 mr-1 text-green-600" />
-          <span className="font-medium">{propertyType}</span>
+      {/* Localisation souhaitée mise en évidence */}
+      {hasLocation && (
+        <div className="mb-2 flex items-center text-xs font-medium bg-gray-100 px-3 py-2 rounded">
+          <MapPin className="h-3.5 w-3.5 mr-1.5 text-red-500" />
+          <span>{desiredLocation}</span>
         </div>
       )}
       
       {/* Pays */}
       {country && (
         <div className="mb-2 flex items-center text-xs">
-          <MapPin className="h-3 w-3 mr-1 text-indigo-500" />
-          <span>{country}</span>
+          <MapPin className="h-3.5 w-3.5 mr-1.5 text-indigo-500" />
+          <span className="text-gray-700">{country}</span>
+        </div>
+      )}
+      
+      {/* Type de bien */}
+      {propertyType && (
+        <div className="mb-2 flex items-center text-xs">
+          <Home className="h-3.5 w-3.5 mr-1.5 text-green-600" />
+          <span className="text-gray-700">{propertyType}</span>
         </div>
       )}
       
       {/* Nombre de chambres */}
       {bedrooms && (
         <div className="mb-2 flex items-center text-xs">
-          <BedDouble className="h-3 w-3 mr-1 text-indigo-500" />
-          <span>{bedrooms} chambre{bedrooms > 1 ? 's' : ''}</span>
+          <BedDouble className="h-3.5 w-3.5 mr-1.5 text-indigo-500" />
+          <span className="text-gray-700">{bedrooms} chambre{bedrooms > 1 ? 's' : ''}</span>
         </div>
       )}
       
@@ -94,7 +98,7 @@ const PropertyInfo = ({
             onClick={onLinkClick}
             className="flex items-center text-xs text-blue-600 hover:text-blue-800 hover:underline"
           >
-            <LinkIcon className="h-3 w-3 mr-1" />
+            <LinkIcon className="h-3.5 w-3.5 mr-1.5" />
             <span>Voir l'annonce</span>
           </button>
         </div>

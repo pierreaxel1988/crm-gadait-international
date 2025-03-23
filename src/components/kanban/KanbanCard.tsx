@@ -99,7 +99,8 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
   return (
     <Card 
       className={cn(
-        'border border-border shadow-sm hover:shadow-md transition-shadow duration-200',
+        'border shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden',
+        'bg-white',
         draggable && 'cursor-grab active:cursor-grabbing',
         className
       )}
@@ -108,10 +109,10 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
       onDragStart={draggable ? handleDragStart : undefined}
       onDragEnd={draggable ? handleDragEnd : undefined}
     >
-      <CardContent className="p-3">
+      <CardContent className="p-4">
         {/* En-tête avec nom et statut */}
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-medium text-sm">{item.name}</h3>
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="font-medium text-sm text-gray-900">{item.name}</h3>
           <StatusBadge status={item.status} />
         </div>
         
@@ -136,7 +137,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
         <ImportInfo importedAt={item.importedAt} createdAt={item.createdAt} />
         
         {/* Commercial assigné ou bouton pour assigner */}
-        <div className="flex justify-between items-center mt-2 pt-2 border-t border-border">
+        <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
           <AssignedUser 
             assignedToId={item.assignedTo} 
             onAssignClick={handleAssignClick} 
