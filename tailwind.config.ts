@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -64,13 +63,14 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				loro: {
-					'white': '#F5F5F0',       // Blanc Cassé
-					'pearl': '#E0E0E0',       // Gris Perle
-					'sand': '#D3C5B4',        // Beige Sable
-					'hazel': '#8B6F4E',       // Marron Noisette
-					'navy': '#2C3E50',        // Bleu Nuit
-					'terracotta': 'rgb(157, 82, 72)', // Terracotta color
+					'white': '#F5F5F0',       // Blanc Cassé (Loro Piana background)
+					'pearl': '#E0E0E0',       // Gris Perle (light borders, subtle backgrounds)
+					'sand': '#D3C5B4',        // Beige Sable (main accent color)
+					'hazel': '#8B6F4E',       // Marron Noisette (primary brand color)
+					'navy': '#2C3E50',        // Bleu Nuit (text color)
+					'terracotta': 'rgb(157, 82, 72)', // Terracotta color for accents
 					'text': 'rgb(33, 33, 33)', // Nearly black text color from image
+					// Color scale for design system
 					50: '#F5F5F0',
 					100: '#E0E0E0',
 					200: '#D3C5B4',
