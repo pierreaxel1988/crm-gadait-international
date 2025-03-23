@@ -34,29 +34,29 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
 
   return (
     <div className="relative">
-      <div className="mb-2 flex items-center text-xs text-gray-600">
-        <Mail className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
-        <a 
-          href={`mailto:${email}`}
-          className="truncate hover:text-blue-600 transition-colors"
+      <div className="flex items-center gap-2 mb-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full hover:bg-gray-100"
           onClick={handleEmailClick}
+          title={email}
         >
-          {email}
-        </a>
-      </div>
-      
-      {phone && (
-        <div className="mb-2 flex items-center text-xs text-gray-600">
-          <Phone className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
-          <a 
-            href={`tel:${phone}`}
-            className="hover:text-blue-600 transition-colors"
+          <Mail className="h-4 w-4 text-gray-600" />
+        </Button>
+        
+        {phone && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full hover:bg-gray-100"
             onClick={handlePhoneClick}
+            title={phone}
           >
-            {phone}
-          </a>
-        </div>
-      )}
+            <Phone className="h-4 w-4 text-gray-600" />
+          </Button>
+        )}
+      </div>
 
       {leadId && (
         <Button
