@@ -28,6 +28,22 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({ lead, onDataCha
       
       <div className="space-y-4">
         <div className="space-y-2">
+          <Label htmlFor="salutation" className="text-sm">Civilité</Label>
+          <Select
+            value={lead.salutation || ''}
+            onValueChange={(value) => handleInputChange('salutation', value)}
+          >
+            <SelectTrigger id="salutation" className="w-full font-futura">
+              <SelectValue placeholder="Sélectionner une civilité" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="M." className="font-futura">M.</SelectItem>
+              <SelectItem value="Mme" className="font-futura">Mme</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      
+        <div className="space-y-2">
           <Label htmlFor="name" className="text-sm">Nom complet</Label>
           <Input
             id="name"

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
@@ -307,6 +308,21 @@ fmohamed01@cuatrocaminos.net"
             </div>
           </div>
         )}
+
+        <FormInput
+          label="Civilité"
+          name="salutation"
+          type="select"
+          value={formData.salutation || ''}
+          onChange={handleInputChange}
+          icon={User}
+          options={[
+            { value: 'M.', label: 'M.' },
+            { value: 'Mme', label: 'Mme' }
+          ]}
+          placeholder="Sélectionner..."
+          className="mb-3"
+        />
 
         <FormInput
           label="Nom"

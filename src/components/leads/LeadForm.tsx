@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -53,6 +54,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
   const [formData, setFormData] = useState<LeadDetailed>({
     id: lead?.id || uuidv4(),
     name: lead?.name || '',
+    salutation: lead?.salutation || undefined,
     email: lead?.email || '',
     phone: lead?.phone || '',
     location: lead?.location || '',

@@ -75,6 +75,7 @@ export type { LeadStatus, LeadTag, TaskType };
 export interface LeadDetailed {
   id: string;
   name: string;
+  salutation?: 'M.' | 'Mme';  // New field for "Civilité"
   email?: string;
   phone?: string;
   location?: string;

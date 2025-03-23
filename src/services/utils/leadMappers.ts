@@ -1,3 +1,4 @@
+
 import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -33,6 +34,7 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
   return {
     id: lead.id || '',
     name: lead.name || '',
+    salutation: lead.salutation,
     email: lead.email || '',
     phone: lead.phone || '',
     location: lead.location || '',
@@ -103,6 +105,7 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
   return {
     id: lead.id,
     name: lead.name,
+    salutation: lead.salutation,
     email: lead.email,
     phone: lead.phone,
     location: lead.location,
