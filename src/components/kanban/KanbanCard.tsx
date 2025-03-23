@@ -110,10 +110,10 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
       onDragEnd={draggable ? handleDragEnd : undefined}
     >
       <CardContent className="p-4">
-        {/* En-tête avec nom et statut */}
+        {/* En-tête avec nom et tags */}
         <div className="flex justify-between items-start mb-3">
           <h3 className="font-medium text-sm text-gray-900">{item.name}</h3>
-          <StatusBadge status={item.status} />
+          <TagList tags={item.tags} />
         </div>
         
         {/* Informations de contact principales */}
@@ -134,8 +134,10 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
           onLinkClick={handleLinkClick}
         />
         
-        {/* Tags */}
-        <TagList tags={item.tags} />
+        {/* Status badge - moved from header to where tags were */}
+        <div className="mb-3 mt-2">
+          <StatusBadge status={item.status} />
+        </div>
         
         {/* Date d'importation */}
         <ImportInfo importedAt={item.importedAt} createdAt={item.createdAt} />

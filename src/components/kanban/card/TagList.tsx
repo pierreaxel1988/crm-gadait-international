@@ -9,12 +9,11 @@ interface TagListProps {
 const TagList = ({ tags }: TagListProps) => {
   if (!tags || tags.length === 0) return null;
   
+  // Only display the first tag in the header
+  const firstTag = tags[0];
+  
   return (
-    <div className="mb-3 flex flex-wrap gap-1.5 mt-2">
-      {tags.map((tag) => (
-        <TagBadge key={tag} tag={tag} className="text-[10px] py-0.5 px-2" />
-      ))}
-    </div>
+    <TagBadge key={firstTag} tag={firstTag} className="text-xs py-0.5 px-2" />
   );
 };
 
