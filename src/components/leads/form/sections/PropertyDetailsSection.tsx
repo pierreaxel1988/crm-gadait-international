@@ -147,81 +147,62 @@ const PropertyDetailsSection = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-loro-white rounded-sm shadow-luxury p-5 border border-loro-pearl/30">
-        <h3 className="text-loro-navy font-futura text-lg mb-4 border-b border-loro-pearl pb-2">Propriété</h3>
-        <PropertyUrlField 
-          value={formData.url || ''} 
-          onChange={handleUrlChange} 
-          onExtract={handleExtractUrl}
-          isLoading={extractLoading}
+    <div className="space-y-4">
+      <PropertyUrlField 
+        value={formData.url || ''} 
+        onChange={handleUrlChange} 
+        onExtract={handleExtractUrl}
+        isLoading={extractLoading}
+      />
+
+      <FormInput
+        label="Pays recherché"
+        name="country"
+        type="select"
+        value={formData.country || ''}
+        onChange={handleCountryChange}
+        options={countries.map(country => ({ value: country, label: country }))}
+        placeholder="Pays de recherche"
+      />
+
+      <FormInput
+        label="Localisation souhaitée"
+        name="desiredLocation"
+        type="select"
+        value={formData.desiredLocation || ''}
+        onChange={handleInputChange}
+        options={getLocations()}
+        placeholder="Localisation souhaitée"
+      />
+
+      <div className="pt-2">
+        <h4 className="text-sm font-medium mb-3">Type de propriété</h4>
+        <MultiSelectButtons
+          options={propertyTypes}
+          selectedValues={Array.isArray(formData.propertyTypes) ? formData.propertyTypes : []}
+          onChange={(value) => handleMultiSelectToggle('propertyTypes', value)}
         />
       </div>
 
-      <div className="bg-loro-white rounded-sm shadow-luxury p-5 border border-loro-pearl/30">
-        <h3 className="text-loro-navy font-futura text-lg mb-4 border-b border-loro-pearl pb-2">Localisation</h3>
-        <div className="space-y-4">
-          <FormInput
-            label="Pays recherché"
-            name="country"
-            type="select"
-            value={formData.country || ''}
-            onChange={handleCountryChange}
-            options={countries.map(country => ({ value: country, label: country }))}
-            placeholder="Pays de recherche"
-            className="font-futura"
-          />
-
-          <FormInput
-            label="Localisation souhaitée"
-            name="desiredLocation"
-            type="select"
-            value={formData.desiredLocation || ''}
-            onChange={handleInputChange}
-            options={getLocations()}
-            placeholder="Localisation souhaitée"
-            className="font-futura"
-          />
-        </div>
+      <div className="pt-2">
+        <h4 className="text-sm font-medium mb-3">Nombre de chambres recherchées</h4>
+        <MultiSelectButtons
+          options={bedroomOptions}
+          selectedValues={getSelectedBedrooms()}
+          onChange={handleBedroomToggle}
+          specialOption="8+"
+        />
       </div>
 
-      <div className="bg-loro-white rounded-sm shadow-luxury p-5 border border-loro-pearl/30">
-        <h3 className="text-loro-navy font-futura text-lg mb-4 border-b border-loro-pearl pb-2">Type et caractéristiques</h3>
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-sm font-medium mb-3 font-futura text-loro-hazel">Type de propriété</h4>
-            <MultiSelectButtons
-              options={propertyTypes}
-              selectedValues={Array.isArray(formData.propertyTypes) ? formData.propertyTypes : []}
-              onChange={(value) => handleMultiSelectToggle('propertyTypes', value)}
-              className="font-futura"
-            />
-          </div>
+      <FormInput
+        label="Surface habitable (m²)"
+        name="livingArea"
+        value={formData.livingArea || ''}
+        onChange={handleInputChange}
+        placeholder="Surface habitable approximative"
+      />
 
-          <div>
-            <h4 className="text-sm font-medium mb-3 font-futura text-loro-hazel">Nombre de chambres recherchées</h4>
-            <MultiSelectButtons
-              options={bedroomOptions}
-              selectedValues={getSelectedBedrooms()}
-              onChange={handleBedroomToggle}
-              specialOption="8+"
-              className="font-futura"
-            />
-          </div>
-
-          <FormInput
-            label="Surface habitable (m²)"
-            name="livingArea"
-            value={formData.livingArea || ''}
-            onChange={handleInputChange}
-            placeholder="Surface habitable approximative"
-            className="font-futura"
-          />
-        </div>
-      </div>
-
-      <div className="bg-loro-white rounded-sm shadow-luxury p-5 border border-loro-pearl/30">
-        <h3 className="text-loro-navy font-futura text-lg mb-4 border-b border-loro-pearl pb-2">Budget</h3>
+      <div className="pt-2">
         <BudgetFilter 
           minBudget={formData.budgetMin || ''}
           maxBudget={formData.budget || ''}
@@ -231,30 +212,23 @@ const PropertyDetailsSection = ({
         />
       </div>
 
-      <div className="bg-loro-white rounded-sm shadow-luxury p-5 border border-loro-pearl/30">
-        <h3 className="text-loro-navy font-futura text-lg mb-4 border-b border-loro-pearl pb-2">Vue et commodités</h3>
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-sm font-medium mb-3 font-futura text-loro-hazel">Vue souhaitée</h4>
-            <MultiSelectButtons
-              options={viewTypes}
-              selectedValues={formData.views || []}
-              onChange={(value) => handleMultiSelectToggle('views', value)}
-              className="font-futura"
-            />
-          </div>
+      <div className="pt-2">
+        <h4 className="text-sm font-medium mb-3">Vue souhaitée</h4>
+        <MultiSelectButtons
+          options={viewTypes}
+          selectedValues={formData.views || []}
+          onChange={(value) => handleMultiSelectToggle('views', value)}
+        />
+      </div>
 
-          <div>
-            <h4 className="text-sm font-medium mb-3 font-futura text-loro-hazel">Commodités souhaitées</h4>
-            <CustomTagInput
-              tags={formData.amenities || []}
-              onChange={handleAmenitiesChange}
-              placeholder="Ajouter une commodité..."
-              predefinedOptions={amenities}
-              className="font-futura"
-            />
-          </div>
-        </div>
+      <div className="pt-2">
+        <h4 className="text-sm font-medium mb-3">Commodités souhaitées</h4>
+        <CustomTagInput
+          tags={formData.amenities || []}
+          onChange={handleAmenitiesChange}
+          placeholder="Ajouter une commodité..."
+          predefinedOptions={amenities}
+        />
       </div>
     </div>
   );
