@@ -13,7 +13,6 @@ const ImportInfo = ({ importedAt, createdAt }: ImportInfoProps) => {
   if (!importedAt && !createdAt) return null;
   
   const dateToUse = importedAt || createdAt;
-  const prefix = importedAt ? "Importé" : "Créé";
   
   // Tenter de formater la date
   let formattedDate = dateToUse;
@@ -31,7 +30,7 @@ const ImportInfo = ({ importedAt, createdAt }: ImportInfoProps) => {
   return (
     <div className="flex items-center text-xs text-gray-500 mb-2">
       <Calendar className="h-3.5 w-3.5 mr-1.5" />
-      <span>{prefix} le {formattedDate}</span>
+      <span>{formattedDate}</span>
     </div>
   );
 };
