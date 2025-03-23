@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { LeadDetailed } from "@/types/lead";
 import { mapToLeadDetailed, mapToSupabaseFormat } from "./utils/leadMappers";
@@ -13,6 +14,7 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     
     // Ensure critical fields are present and log them
     console.log("Budget is:", supabaseLeadData.budget);
+    console.log("Budget min is:", supabaseLeadData.budget_min);
     console.log("Desired location is:", supabaseLeadData.desired_location);
     
     console.log("Mapped Supabase lead data:", supabaseLeadData);

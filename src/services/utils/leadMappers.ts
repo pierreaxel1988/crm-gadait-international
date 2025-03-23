@@ -1,3 +1,4 @@
+
 import { LeadDetailed, PipelineType, LeadStatus, LeadTag, TaskType, Country } from "@/types/lead";
 
 /**
@@ -77,6 +78,7 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
   
   console.log("Converting lead to Supabase format:");
   console.log("- Budget:", leadData.budget);
+  console.log("- Budget Min:", leadData.budgetMin);
   console.log("- Location:", leadData.desiredLocation);
   
   return {
