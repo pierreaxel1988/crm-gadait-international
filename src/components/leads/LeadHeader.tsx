@@ -4,6 +4,7 @@ import { ArrowLeft, Plus, Trash2, MapPin, Euro } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
 import CustomButton from '@/components/ui/CustomButton';
 import TagBadge from '@/components/common/TagBadge';
+import { formatBudget } from '@/services/utils/leadMappers';
 
 interface LeadHeaderProps {
   lead?: LeadDetailed;
@@ -18,29 +19,11 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
   onAddAction,
   onDelete,
 }) => {
-  // Format budget to display
-  const formatBudget = () => {
+  // Use the formatBudget utility function
+  const getBudgetDisplay = () => {
     if (!lead) return null;
     
-    let budgetDisplay = '';
-    
-    if (lead.budget) {
-      budgetDisplay = lead.budget;
-      
-      if (lead.budgetMin) {
-        budgetDisplay = `${lead.budgetMin} - ${lead.budget}`;
-      }
-      
-      if (lead.currency) {
-        if (lead.currency === 'EUR') {
-          budgetDisplay = `${budgetDisplay} €`;
-        } else {
-          budgetDisplay = `${budgetDisplay} ${lead.currency}`;
-        }
-      }
-    }
-    
-    return budgetDisplay;
+    return formatBudget(lead.budgetMin, lead.budget, lead.currency);
   };
 
   return (
@@ -92,10 +75,10 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
         )}
         
         {/* Display budget if available */}
-        {lead && formatBudget() && (
+        {lead && getBudgetDisplay() && (
           <div className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium bg-emerald-100 text-emerald-800">
             <Euro className="h-3 w-3" />
-            <span>{formatBudget()}</span>
+            <span>{getBudgetDisplay()}</span>
           </div>
         )}
         
