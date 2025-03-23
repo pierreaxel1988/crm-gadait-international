@@ -19,7 +19,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
     onDataChange({ [field]: value } as Partial<LeadDetailed>);
   };
   
-  // Updated to include all the statuses shown in the image
+  // Updated to include all the statuses shown in the image, including "Signed"
   const leadStatuses: LeadStatus[] = [
     "New", 
     "Contacted", 
@@ -27,6 +27,8 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
     "Proposal", 
     "Visit", 
     "Offre", 
+    "Deposit",
+    "Signed",
     "Gagné", 
     "Perdu"
   ];

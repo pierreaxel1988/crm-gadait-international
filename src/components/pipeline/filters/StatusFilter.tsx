@@ -10,7 +10,7 @@ interface StatusFilterProps {
 }
 
 const StatusFilter = ({ status, onStatusChange }: StatusFilterProps) => {
-  // Include all valid statuses, both in English and French
+  // Include all valid statuses, both in English and French, including "Signed"
   const statuses: (LeadStatus | null)[] = [
     null, 'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Deposit', 'Signed',
     'Offre', 'Gagné', 'Perdu'
