@@ -48,11 +48,14 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
       const bedroomsArray = JSON.stringify(leadData.bedrooms);
       console.log("Updating bedrooms with array:", bedroomsArray);
       
-      const { error: bedroomsError } = await supabase
-        .rpc('update_lead_bedrooms', { 
+      // Fix: Use the correct function name that matches what we created in the database
+      const { error: bedroomsError } = await supabase.rpc(
+        'update_lead_bedrooms', 
+        { 
           lead_id: leadData.id, 
           bedroom_values: bedroomsArray 
-        });
+        }
+      );
         
       if (bedroomsError) {
         console.error("Error updating bedrooms:", bedroomsError);

@@ -1,3 +1,4 @@
+
 import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -15,7 +16,15 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
 
   // Handle bedrooms conversion from database
   let bedrooms;
-  if (Array.isArray(lead.bedrooms)) {
+  if (lead.raw_data && lead.raw_data.bedroom_values) {
+    // If we have stored bedroom values in raw_data, use those (for multiple selections)
+    try {
+      bedrooms = JSON.parse(lead.raw_data.bedroom_values);
+    } catch (e) {
+      console.error('Error parsing bedroom_values:', e);
+      bedrooms = lead.bedrooms ? [lead.bedrooms] : [];
+    }
+  } else if (Array.isArray(lead.bedrooms)) {
     bedrooms = lead.bedrooms;
   } else if (lead.bedrooms !== null && lead.bedrooms !== undefined) {
     // Convert single value to array for consistency in UI

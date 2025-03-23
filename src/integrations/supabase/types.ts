@@ -325,6 +325,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      update_lead_bedrooms: {
+        Args: {
+          lead_id: string
+          bedroom_values: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
