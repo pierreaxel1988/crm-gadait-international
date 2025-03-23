@@ -15,14 +15,14 @@ const CategoryFilter = () => {
       <CardContent className="p-4">
         <div className="flex items-center mb-2 gap-2">
           <Filter className="h-4 w-4 text-loro-navy" />
-          <span className="font-times text-sm">Filtrer par type d'action</span>
+          <span className="font-futura text-sm">Filtrer par type d'action</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {eventCategories.map(category => (
             <Badge
               key={category.value}
               variant="outline"
-              className={`cursor-pointer border-2 transition-colors ${
+              className={`cursor-pointer border-2 transition-colors font-futura ${
                 activeFilters.includes(category.value) 
                   ? 'bg-opacity-30'
                   : 'bg-white opacity-60'

@@ -20,11 +20,11 @@ const LeadsHeader: React.FC<LeadsHeaderProps> = ({
   return <div className="flex justify-between items-center pb-4">
       <div>
         <h1 className="text-2xl md:text-3xl font-futura">Leads</h1>
-        <p className="text-chocolate-dark font-futuraLight">Liste de vos leads et prospects</p>
+        <p className="text-chocolate-dark font-futura">Liste de vos leads et prospects</p>
       </div>
 
       <div className="flex gap-3">
-        <CustomButton variant="outline" className="hidden md:flex items-center gap-1.5" onClick={() => navigate('/leads/import')}>
+        <CustomButton variant="outline" className="hidden md:flex items-center gap-1.5 font-futura" onClick={() => navigate('/leads/import')}>
           <ArrowUpDown className="h-4 w-4" /> 
           Importer/Exporter
         </CustomButton>

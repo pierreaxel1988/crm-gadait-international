@@ -25,16 +25,16 @@ const LeadStatCard = ({ title, value, change, icon, className, onClick }: LeadSt
       onClick={onClick}
     >
       <div className="flex justify-between items-center mb-2">
-        <span className="text-sm font-medium text-muted-foreground">{title}</span>
+        <span className="text-sm font-futura font-medium text-muted-foreground">{title}</span>
         {icon && <div className="text-primary">{icon}</div>}
       </div>
       <div className="mt-1">
-        <span className="text-2xl font-serif font-semibold">{value}</span>
+        <span className="text-2xl font-futura font-semibold">{value}</span>
         {typeof change === 'number' && (
           <div className="flex items-center mt-2">
             <span
               className={cn(
-                'inline-flex items-center text-xs font-medium rounded px-1.5 py-0.5',
+                'inline-flex items-center text-xs font-futura font-medium rounded px-1.5 py-0.5',
                 isPositive && 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/30',
                 isNegative && 'text-red-700 bg-red-100 dark:text-red-400 dark:bg-red-900/30',
                 !isPositive && !isNegative && 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-900/30'
@@ -47,7 +47,7 @@ const LeadStatCard = ({ title, value, change, icon, className, onClick }: LeadSt
               ) : null}
               {Math.abs(change)}%
             </span>
-            <span className="ml-1.5 text-xs text-muted-foreground">from last month</span>
+            <span className="ml-1.5 text-xs font-futura text-muted-foreground">from last month</span>
           </div>
         )}
       </div>

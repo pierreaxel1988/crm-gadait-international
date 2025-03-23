@@ -24,7 +24,7 @@ const RadioSelectButtons = <T extends string>({
       <span className="flex items-center gap-1">
         {isSelected && <Check className="h-3 w-3" />}
         <span className={cn(
-          "text-sm",
+          "text-sm font-futura",
           isMobile && "text-xs"
         )}>{option}</span>
       </span>

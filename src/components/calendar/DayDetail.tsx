@@ -29,12 +29,12 @@ const DayDetail = ({ selectedDate, events, setIsAddEventOpen, activeFilters }: D
     <Card className="bg-white shadow-luxury h-full">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="font-times text-2xl text-loro-terracotta">
+          <CardTitle className="font-futura text-2xl text-loro-terracotta">
             {selectedDate ? format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr }) : 'Sélectionner une date'}
           </CardTitle>
           <CalendarIcon className="h-5 w-5 text-loro-terracotta" />
         </div>
-        <CardDescription className="font-times text-chocolate-dark">
+        <CardDescription className="font-futura text-chocolate-dark">
           {eventsForSelectedDate.length 
             ? `${eventsForSelectedDate.length} événement${eventsForSelectedDate.length > 1 ? 's' : ''}`
             : 'Aucun événement prévu'}
