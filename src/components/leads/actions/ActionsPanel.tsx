@@ -22,14 +22,15 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({
   onAddAction,
 }) => {
   return (
-    <Card className="border-chocolate-light/20 bg-white shadow-md">
-      <CardHeader className="border-b pb-4">
+    <Card className="border-loro-sand/30 bg-loro-white shadow-luxury">
+      <CardHeader className="border-b border-loro-pearl/50 pb-4">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl font-futura text-chocolate-dark">Actions et tâches</CardTitle>
+          <CardTitle className="text-xl font-futura text-loro-navy">Actions et tâches</CardTitle>
           <CustomButton 
-            variant="chocolate" 
+            variant="loropiana" 
             onClick={onAddAction} 
             className="flex items-center gap-2 shadow-sm"
+            fontStyle="optima"
           >
             <Plus className="h-4 w-4" /> Ajouter
           </CustomButton>
@@ -45,7 +46,7 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({
         />
         
         <div className="mt-6">
-          <h4 className="font-medium mb-3 font-futura text-chocolate-dark">Historique des actions</h4>
+          <h4 className="font-futura mb-3 text-loro-navy">Historique des actions</h4>
           <ActionHistoryList 
             actionHistory={lead.actionHistory}
             getActionTypeIcon={getActionTypeIcon}
