@@ -40,13 +40,16 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     imported_at: lead.imported_at,
     integration_source: lead.integration_source,
     taxResidence: lead.tax_residence,
-    actionHistory: lead.action_history || [],
+    actionHistory: Array.isArray(lead.action_history) ? lead.action_history : [],
     livingArea: lead.living_area,
     external_id: lead.external_id
   };
 };
 
 export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
+  // Log lead fields to ensure they're all present
+  console.log("Lead mapping to Supabase format - all fields:", lead);
+  
   return {
     id: lead.id,
     name: lead.name,
@@ -54,7 +57,7 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     phone: lead.phone,
     location: lead.location,
     status: lead.status,
-    tags: lead.tags,
+    tags: lead.tags || [],
     created_at: lead.createdAt,
     last_contacted_at: lead.lastContactedAt,
     assigned_to: lead.assignedTo,
@@ -62,13 +65,13 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     property_reference: lead.propertyReference,
     budget: lead.budget,
     budget_min: lead.budgetMin,
-    currency: lead.currency,
+    currency: lead.currency || 'EUR',
     desired_location: lead.desiredLocation,
     property_type: lead.propertyType,
-    property_types: lead.propertyTypes,
+    property_types: lead.propertyTypes || [],
     bedrooms: lead.bedrooms,
-    views: lead.views,
-    amenities: lead.amenities,
+    views: lead.views || [],
+    amenities: lead.amenities || [],
     purchase_timeframe: lead.purchaseTimeframe,
     financing_method: lead.financingMethod,
     property_use: lead.propertyUse,
@@ -81,7 +84,7 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     pipeline_type: lead.pipelineType || lead.pipeline_type,
     integration_source: lead.integration_source,
     tax_residence: lead.taxResidence,
-    action_history: lead.actionHistory,
+    action_history: lead.actionHistory || [],
     living_area: lead.livingArea,
     external_id: lead.external_id
   };

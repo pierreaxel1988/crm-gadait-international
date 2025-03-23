@@ -19,6 +19,9 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     
     const supabaseData = mapToSupabaseFormat(completeLeadData);
     
+    // Log all data before sending to Supabase
+    console.log("Data being sent to Supabase:", supabaseData);
+    
     const { data, error } = await supabase
       .from("leads")
       .insert(supabaseData)
@@ -31,6 +34,9 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     }
     
     if (data) {
+      // Log the response from Supabase
+      console.log("Data received from Supabase:", data);
+      
       // The Supabase response uses snake_case, but our app uses camelCase
       // We need to handle the conversion properly
       return {
@@ -39,8 +45,8 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
         id: data.id || leadId,
         name: data.name || leadData.name,
         status: data.status || leadData.status || 'New',
-        // Access action_history with bracket notation to avoid TypeScript error
-        actionHistory: data.action_history || data['action_history'] || []
+        // Safely access action_history
+        actionHistory: Array.isArray(data.action_history) ? data.action_history : []
       } as LeadDetailed;
     }
     

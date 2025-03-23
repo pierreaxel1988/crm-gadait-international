@@ -12,15 +12,23 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     
     const supabaseLeadData = mapToSupabaseFormat(leadData);
     
-    // Ensure critical fields are present and log them
+    // Ensure all critical fields are present and log them for debugging
+    console.log("Complete Supabase lead data for update:", supabaseLeadData);
     console.log("Budget is:", supabaseLeadData.budget);
     console.log("Budget min is:", supabaseLeadData.budget_min);
     console.log("Desired location is:", supabaseLeadData.desired_location);
     console.log("Currency is:", supabaseLeadData.currency);
     console.log("Property types is:", supabaseLeadData.property_types);
     console.log("Bedrooms is:", supabaseLeadData.bedrooms);
-    
-    console.log("Mapped Supabase lead data:", supabaseLeadData);
+    console.log("Views is:", supabaseLeadData.views);
+    console.log("Amenities is:", supabaseLeadData.amenities);
+    console.log("Purchase timeframe is:", supabaseLeadData.purchase_timeframe);
+    console.log("Financing method is:", supabaseLeadData.financing_method);
+    console.log("Property use is:", supabaseLeadData.property_use);
+    console.log("Nationality is:", supabaseLeadData.nationality);
+    console.log("Country is:", supabaseLeadData.country);
+    console.log("Living area is:", supabaseLeadData.living_area);
+    console.log("Action history is:", supabaseLeadData.action_history);
     
     const { data, error } = await supabase
       .from('leads')
@@ -37,7 +45,9 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     console.log("Lead update successful, response data:", data);
     
     if (data) {
-      return mapToLeadDetailed(data);
+      const mappedLead = mapToLeadDetailed(data);
+      console.log("Mapped lead after update:", mappedLead);
+      return mappedLead;
     }
 
     return null;
