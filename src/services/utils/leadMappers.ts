@@ -1,4 +1,3 @@
-
 import { LeadDetailed, PipelineType, LeadStatus, LeadTag, TaskType, Country } from "@/types/lead";
 
 /**
@@ -103,7 +102,7 @@ export const mapToSupabaseFormat = (leadData: Partial<LeadDetailed>) => {
   
   // Safe type check that satisfies TypeScript
   if (currencyValue && typeof currencyValue === 'object' && 'value' in currencyValue) {
-    currencyValue = defaultCurrency;
+    currencyValue = String(currencyValue.value || defaultCurrency);
   }
   
   // Ensure pipeline_type is set from pipelineType for database consistency
