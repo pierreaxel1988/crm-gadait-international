@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LeadForm from '@/components/leads/LeadForm';
@@ -115,11 +116,14 @@ const LeadEdit = () => {
   const handleSaveClick = () => {
     if (lead && hasChanges) {
       handleSubmit(lead);
+    } else if (lead) {
+      // Even if no changes detected, allow saving anyway
+      handleSubmit(lead);
     }
   };
 
   const handleDelete = async () => {
-    if (window.confirm('��tes-vous sûr de vouloir supprimer ce lead ?')) {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce lead ?')) {
       try {
         if (id) {
           await deleteLead(id);
@@ -206,7 +210,7 @@ const LeadEdit = () => {
             onCancel={() => navigate('/leads')} 
             activeTab="general"
             isSubmitting={isSaving}
-            hideSubmitButton={isMobile}
+            hideSubmitButton={true} // Always hide the form's submit button since we're using our floating button
           />
         </TabsContent>
         
@@ -218,7 +222,7 @@ const LeadEdit = () => {
             onCancel={() => navigate('/leads')} 
             activeTab="criteria"
             isSubmitting={isSaving}
-            hideSubmitButton={isMobile}
+            hideSubmitButton={true} // Always hide the form's submit button
           />
         </TabsContent>
         
@@ -230,7 +234,7 @@ const LeadEdit = () => {
             onCancel={() => navigate('/leads')} 
             activeTab="status"
             isSubmitting={isSaving}
-            hideSubmitButton={isMobile}
+            hideSubmitButton={true} // Always hide the form's submit button
           />
         </TabsContent>
         
@@ -269,23 +273,22 @@ const LeadEdit = () => {
             email={lead.email} 
           />
           
-          {isMobile && (
-            <div className="fixed bottom-24 left-6 z-50">
-              <CustomButton
-                variant="chocolate"
-                className="rounded-full p-0 w-12 h-12 flex items-center justify-center shadow-luxury"
-                onClick={handleSaveClick}
-                disabled={isSaving}
-                title="Sauvegarder"
-              >
-                {isSaving ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Save className="h-5 w-5" />
-                )}
-              </CustomButton>
-            </div>
-          )}
+          {/* Always show the Save button regardless of which tab is active */}
+          <div className="fixed bottom-24 left-6 z-50">
+            <CustomButton
+              variant="chocolate"
+              className="rounded-full p-0 w-12 h-12 flex items-center justify-center shadow-luxury"
+              onClick={handleSaveClick}
+              disabled={isSaving}
+              title="Sauvegarder"
+            >
+              {isSaving ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Save className="h-5 w-5" />
+              )}
+            </CustomButton>
+          </div>
         </>
       )}
     </div>
