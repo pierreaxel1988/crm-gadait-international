@@ -41,7 +41,7 @@ const PurchaseDetailsSection = ({
           onChange={() => {}}
           icon={Timer}
           className={cn(isMobile && "text-sm")}
-          labelClassName={cn(isMobile && "text-sm")}
+          helpText={isMobile ? "" : "Quand souhaitez-vous acheter?"}
           renderCustomField={() => (
             <RadioSelectButtons
               options={purchaseTimeframes}
@@ -58,7 +58,7 @@ const PurchaseDetailsSection = ({
           onChange={() => {}}
           icon={CreditCard}
           className={cn(isMobile && "text-sm")}
-          labelClassName={cn(isMobile && "text-sm")}
+          helpText={isMobile ? "" : "Comment allez-vous financer votre achat?"}
           renderCustomField={() => (
             <RadioSelectButtons
               options={financingMethods}
@@ -75,7 +75,7 @@ const PurchaseDetailsSection = ({
           onChange={() => {}}
           icon={Home}
           className={cn(isMobile && "text-sm")}
-          labelClassName={cn(isMobile && "text-sm")}
+          helpText={isMobile ? "" : "Quel est le but de cet achat?"}
           renderCustomField={() => (
             <RadioSelectButtons
               options={propertyUses}
