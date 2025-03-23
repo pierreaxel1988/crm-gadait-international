@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, Country } from '@/types/lead';
 import FormInput from '../FormInput';
@@ -35,7 +34,6 @@ const PropertyDetailsSection = ({
   countries,
   handleCountryChange
 }: PropertyDetailsSectionProps) => {
-  
   // Get locations based on selected country
   const getLocations = () => {
     if (!formData.country) return [];
@@ -61,7 +59,7 @@ const PropertyDetailsSection = ({
   // Convert bedroom numbers to strings for MultiSelectButtons
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
   
-  // Convert bedrooms data for display in the MultiSelectButtons
+  // Improved function to convert bedrooms data for display in the MultiSelectButtons
   const getSelectedBedrooms = () => {
     if (!formData.bedrooms) return [];
     
@@ -73,10 +71,11 @@ const PropertyDetailsSection = ({
     }
     
     // Handle single value case
-    return [formData.bedrooms >= 8 ? "8+" : formData.bedrooms.toString()];
+    const value = formData.bedrooms;
+    return [value >= 8 ? "8+" : value.toString()];
   };
   
-  // Handle bedroom selection
+  // Improved bedroom selection handler
   const handleBedroomToggle = (value: string) => {
     const numValue = value === "8+" ? 8 : parseInt(value);
     
@@ -99,6 +98,7 @@ const PropertyDetailsSection = ({
     } as unknown as React.ChangeEvent<HTMLInputElement>;
     
     handleInputChange(syntheticEvent);
+    console.log("Updated bedrooms:", newBedrooms);
   };
 
   // Handle budget changes

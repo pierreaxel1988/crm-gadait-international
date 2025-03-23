@@ -13,6 +13,15 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     actionHistory = [];
   }
 
+  // Handle bedrooms conversion from database
+  let bedrooms;
+  if (Array.isArray(lead.bedrooms)) {
+    bedrooms = lead.bedrooms;
+  } else if (lead.bedrooms !== null && lead.bedrooms !== undefined) {
+    // Convert single value to array for consistency in UI
+    bedrooms = [lead.bedrooms];
+  }
+
   return {
     id: lead.id || '',
     name: lead.name || '',
@@ -32,7 +41,7 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     desiredLocation: lead.desired_location,
     propertyType: lead.property_type,
     propertyTypes: lead.property_types,
-    bedrooms: lead.bedrooms,
+    bedrooms: bedrooms,
     views: lead.views,
     amenities: lead.amenities || [],
     purchaseTimeframe: lead.purchase_timeframe,
@@ -62,6 +71,26 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
   // We won't include actionHistory in the data sent to Supabase
   // since there's no corresponding column in the database
   
+  // Handle bedroom data for database storage
+  // If it's an array, we need to convert it appropriately for database storage
+  let bedroomsForDb = null;
+  if (Array.isArray(lead.bedrooms)) {
+    // If only one bedroom is selected, store as a single integer
+    // Otherwise, we'll need to use JSONB_AGG in SQL to query it properly
+    if (lead.bedrooms.length === 1) {
+      bedroomsForDb = lead.bedrooms[0];
+    } else if (lead.bedrooms.length > 1) {
+      // For multiple selections, we need to update through SQL
+      // Store the first value for now, we'll handle multiple in updateLead
+      bedroomsForDb = lead.bedrooms.length > 0 ? lead.bedrooms[0] : null;
+    }
+  } else if (lead.bedrooms !== undefined && lead.bedrooms !== null) {
+    // Handle non-array value
+    bedroomsForDb = lead.bedrooms;
+  }
+  
+  console.log("Bedrooms for database:", bedroomsForDb, "Original:", lead.bedrooms);
+  
   return {
     id: lead.id,
     name: lead.name,
@@ -81,7 +110,7 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     desired_location: lead.desiredLocation,
     property_type: lead.propertyType,
     property_types: lead.propertyTypes || [],
-    bedrooms: lead.bedrooms,
+    bedrooms: bedroomsForDb,
     views: lead.views || [],
     amenities: lead.amenities || [],
     purchase_timeframe: lead.purchaseTimeframe,
