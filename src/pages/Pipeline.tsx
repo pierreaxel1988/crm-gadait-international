@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import PipelineHeader from '@/components/pipeline/PipelineHeader';
 import PipelineTabContent from '@/components/pipeline/PipelineTabContent';
 import MobilePipelineView from '@/components/pipeline/MobilePipelineView';
+import { LeadStatus } from '@/components/common/StatusBadge';
 
 const Pipeline = () => {
   const location = useLocation();
@@ -123,16 +124,16 @@ const Pipeline = () => {
 
   // Get all column data for mobile view
   const getAllColumns = () => {
-    // Définition des colonnes du kanban
+    // Define the kanban columns with proper LeadStatus typing
     return [
-      { title: 'Nouveaux', status: 'New' },
-      { title: 'Contactés', status: 'Contacted' },
-      { title: 'Qualifiés', status: 'Qualified' },
-      { title: 'Proposition', status: 'Proposal' },
-      { title: 'Visites', status: 'Viewing' },
-      { title: 'Offre', status: 'Offer' },
-      { title: 'Gagné', status: 'Won' },
-      { title: 'Perdu', status: 'Lost' }
+      { title: 'Nouveaux', status: 'New' as LeadStatus },
+      { title: 'Contactés', status: 'Contacted' as LeadStatus },
+      { title: 'Qualifiés', status: 'Qualified' as LeadStatus },
+      { title: 'Proposition', status: 'Proposal' as LeadStatus },
+      { title: 'Visites', status: 'Visit' as LeadStatus },
+      { title: 'Offre', status: 'Offer' as LeadStatus },
+      { title: 'Gagné', status: 'Won' as LeadStatus },
+      { title: 'Perdu', status: 'Lost' as LeadStatus }
     ].map(col => ({
       ...col,
       items: [],
