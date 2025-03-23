@@ -124,7 +124,7 @@ const LeadEdit = () => {
       try {
         if (id) {
           await deleteLead(id);
-          navigate('/leads');
+          navigate('/pipeline');
         }
       } catch (error) {
         toast({
@@ -134,6 +134,10 @@ const LeadEdit = () => {
         });
       }
     }
+  };
+
+  const handleBackClick = () => {
+    navigate('/pipeline');
   };
 
   if (isLoading) {
@@ -150,7 +154,7 @@ const LeadEdit = () => {
         <div className="text-center py-10">
           <h2 className="text-2xl font-semibold">Lead introuvable</h2>
           <p className="text-muted-foreground mt-2">Le lead que vous recherchez n'existe pas.</p>
-          <CustomButton className="mt-4" variant="chocolate" onClick={() => navigate('/leads')}>
+          <CustomButton className="mt-4" variant="chocolate" onClick={() => navigate('/pipeline')}>
             Retour à la liste
           </CustomButton>
         </div>
@@ -162,7 +166,7 @@ const LeadEdit = () => {
     <div className="p-3 md:p-6 space-y-4 pb-24 md:pb-6">
       <LeadHeader 
         lead={lead} 
-        onBack={() => navigate('/leads')} 
+        onBack={handleBackClick} 
         onAddAction={handleAddAction} 
         onDelete={handleDelete}
         onSave={handleSaveClick}
@@ -207,7 +211,7 @@ const LeadEdit = () => {
             lead={lead} 
             onSubmit={handleSubmit}
             onChange={handleDataChange}
-            onCancel={() => navigate('/leads')} 
+            onCancel={() => navigate('/pipeline')} 
             activeTab="general"
             isSubmitting={isSaving}
             hideSubmitButton={true} // Always hide the form's submit button since we're using our floating button
@@ -219,7 +223,7 @@ const LeadEdit = () => {
             lead={lead} 
             onSubmit={handleSubmit}
             onChange={handleDataChange}
-            onCancel={() => navigate('/leads')} 
+            onCancel={() => navigate('/pipeline')} 
             activeTab="criteria"
             isSubmitting={isSaving}
             hideSubmitButton={true} // Always hide the form's submit button
@@ -231,7 +235,7 @@ const LeadEdit = () => {
             lead={lead} 
             onSubmit={handleSubmit}
             onChange={handleDataChange}
-            onCancel={() => navigate('/leads')} 
+            onCancel={() => navigate('/pipeline')} 
             activeTab="status"
             isSubmitting={isSaving}
             hideSubmitButton={true} // Always hide the form's submit button

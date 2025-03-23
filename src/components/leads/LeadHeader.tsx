@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArrowLeft, Plus, Trash2, MapPin, Euro, Save, Loader2 } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
@@ -87,14 +86,12 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
       </div>
       
       <div className="flex flex-wrap gap-2 mt-1">
-        {/* Display tags */}
         {lead && lead.tags && lead.tags.length > 0 && (
           lead.tags.map((tag) => (
             <TagBadge key={tag} tag={tag} />
           ))
         )}
         
-        {/* Display budget if available */}
         {lead && getBudgetDisplay() && (
           <div className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium bg-emerald-100 text-emerald-800">
             <Euro className="h-3 w-3" />
@@ -102,7 +99,6 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
           </div>
         )}
         
-        {/* Display location if available */}
         {lead && lead.desiredLocation && (
           <div className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800">
             <MapPin className="h-3 w-3" />
