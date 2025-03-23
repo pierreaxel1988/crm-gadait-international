@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Timer, CreditCard, Home } from 'lucide-react';
 import { LeadDetailed, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
 import FormInput from '../FormInput';
@@ -23,51 +23,55 @@ const PurchaseDetailsSection = ({
   propertyUses,
 }: PurchaseDetailsSectionProps) => {
   return (
-    <div className="space-y-4">
-      <FormInput
-        label="Date d'achat souhaitée"
-        name="purchaseTimeframe"
-        value=""
-        onChange={() => {}}
-        icon={Timer}
-        renderCustomField={() => (
-          <RadioSelectButtons
-            options={purchaseTimeframes}
-            selectedValue={formData.purchaseTimeframe}
-            onSelect={(value) => handleMultiSelectToggle('purchaseTimeframe', value)}
-          />
-        )}
-      />
+    <div className="space-y-8">
+      <h2 className="text-2xl font-medium text-brown-700">Conditions d'achat</h2>
+      
+      <div className="space-y-6">
+        <FormInput
+          label="Date d'achat souhaitée"
+          name="purchaseTimeframe"
+          value=""
+          onChange={() => {}}
+          icon={Timer}
+          renderCustomField={() => (
+            <RadioSelectButtons
+              options={purchaseTimeframes}
+              selectedValue={formData.purchaseTimeframe}
+              onSelect={(value) => handleMultiSelectToggle('purchaseTimeframe', value)}
+            />
+          )}
+        />
 
-      <FormInput
-        label="Mode de financement"
-        name="financingMethod"
-        value=""
-        onChange={() => {}}
-        icon={CreditCard}
-        renderCustomField={() => (
-          <RadioSelectButtons
-            options={financingMethods}
-            selectedValue={formData.financingMethod}
-            onSelect={(value) => handleMultiSelectToggle('financingMethod', value)}
-          />
-        )}
-      />
+        <FormInput
+          label="Mode de financement"
+          name="financingMethod"
+          value=""
+          onChange={() => {}}
+          icon={CreditCard}
+          renderCustomField={() => (
+            <RadioSelectButtons
+              options={financingMethods}
+              selectedValue={formData.financingMethod}
+              onSelect={(value) => handleMultiSelectToggle('financingMethod', value)}
+            />
+          )}
+        />
 
-      <FormInput
-        label="Type d'investissement"
-        name="propertyUse"
-        value=""
-        onChange={() => {}}
-        icon={Home}
-        renderCustomField={() => (
-          <RadioSelectButtons
-            options={propertyUses}
-            selectedValue={formData.propertyUse}
-            onSelect={(value) => handleMultiSelectToggle('propertyUse', value)}
-          />
-        )}
-      />
+        <FormInput
+          label="Type d'investissement"
+          name="propertyUse"
+          value=""
+          onChange={() => {}}
+          icon={Home}
+          renderCustomField={() => (
+            <RadioSelectButtons
+              options={propertyUses}
+              selectedValue={formData.propertyUse}
+              onSelect={(value) => handleMultiSelectToggle('propertyUse', value)}
+            />
+          )}
+        />
+      </div>
     </div>
   );
 };

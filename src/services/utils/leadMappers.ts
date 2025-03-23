@@ -1,4 +1,3 @@
-
 import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -75,10 +74,11 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
 
 export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
   // Log lead fields to ensure they're all present
-  console.log("Lead mapping to Supabase format - all fields:", lead);
-  
-  // We won't include actionHistory in the data sent to Supabase
-  // since there's no corresponding column in the database
+  console.log("Lead mapping to Supabase format - purchase conditions:", {
+    purchaseTimeframe: lead.purchaseTimeframe,
+    financingMethod: lead.financingMethod, 
+    propertyUse: lead.propertyUse
+  });
   
   // Handle bedroom data for database storage
   // If it's an array, we need to convert it appropriately for database storage

@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BaseSelectButtonsProps<T extends string> {
@@ -30,13 +29,12 @@ const BaseSelectButtons = <T extends string>({
             type="button"
             onClick={() => onSelectOption(option)}
             className={cn(
-              "flex items-center gap-1 py-1 px-2 rounded-full text-xs",
+              "flex items-center py-2 px-4 rounded-full text-sm font-medium transition-colors",
               selected
-                ? "bg-primary text-white"
-                : "bg-accent text-accent-foreground hover:bg-accent/80"
+                ? "bg-primary text-white shadow-sm"
+                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
             )}
           >
-            {selected && <Check className="h-3 w-3" />}
             {renderOptionContent ? renderOptionContent(option, selected) : option}
           </button>
         );

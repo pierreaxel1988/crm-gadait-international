@@ -10,6 +10,13 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
   try {
     console.log("Updating lead with data:", leadData);
     
+    // Log purchase conditions for debugging
+    console.log("Purchase conditions:", {
+      purchaseTimeframe: leadData.purchaseTimeframe,
+      financingMethod: leadData.financingMethod,
+      propertyUse: leadData.propertyUse
+    });
+    
     const supabaseLeadData = mapToSupabaseFormat(leadData);
     
     // Log the data for debugging
@@ -48,7 +55,7 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
       const bedroomsArray = JSON.stringify(leadData.bedrooms);
       console.log("Updating bedrooms with array:", bedroomsArray);
       
-      // Fix: Use the correct function name that matches what we created in the database
+      // Use the correct function name that matches what we created in the database
       const { error: bedroomsError } = await supabase.rpc(
         'update_lead_bedrooms', 
         { 
