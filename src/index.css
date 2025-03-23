@@ -123,6 +123,27 @@
   .gadait-input {
     @apply border border-gadait-border rounded-gadait px-3 py-2 font-opensans text-sm focus:ring-1 focus:ring-gadait-primary focus:border-gadait-primary;
   }
+
+  /* Styles pour la police Louis Vuitton */
+  .louis-header {
+    @apply font-louisvuitton font-medium tracking-wide text-black uppercase;
+  }
+
+  .louis-title {
+    @apply font-louisvuitton font-medium tracking-wider text-2xl md:text-3xl lg:text-4xl uppercase;
+  }
+
+  .louis-subtitle {
+    @apply font-louisvuitton font-light tracking-wide text-lg md:text-xl uppercase;
+  }
+
+  .louis-text {
+    @apply font-louisvuitton text-base tracking-wide;
+  }
+
+  .louis-button {
+    @apply font-louisvuitton uppercase tracking-widest text-sm border border-black px-6 py-2 hover:bg-black hover:text-white transition-colors;
+  }
 }
  
 @layer base {

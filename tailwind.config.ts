@@ -112,6 +112,8 @@ export default {
 				// Ajout des polices de la charte Gadait
 				roboto: ['Roboto', 'sans-serif'],
 				opensans: ['Open Sans', 'sans-serif'],
+				// Ajout de la police Louis Vuitton
+				louisvuitton: ['Cormorant Garamond', 'serif'],
 				// Garder les polices existantes pour la rétrocompatibilité
 				sans: ['Inter', 'sans-serif'],
 				serif: ['Playfair Display', 'serif'],
