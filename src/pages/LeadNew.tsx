@@ -12,12 +12,14 @@ import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
+import { LeadStatus } from '@/components/common/StatusBadge';
 
 const LeadNew = () => {
   const navigate = useNavigate();
   const { isAdmin, user, session } = useAuth();
   const [assignedAgent, setAssignedAgent] = useState<string | undefined>(undefined);
   const [pipelineType, setPipelineType] = useState<'purchase' | 'rental'>('purchase');
+  const [leadStatus, setLeadStatus] = useState<LeadStatus>('New');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,6 +75,9 @@ const LeadNew = () => {
       newLeadData.pipelineType = pipelineType;
       newLeadData.pipeline_type = pipelineType;
       
+      // Set the selected status
+      newLeadData.status = leadStatus;
+      
       console.log("Creating lead with processed data:", newLeadData);
       
       // Create the lead
@@ -110,6 +115,12 @@ const LeadNew = () => {
     console.log("Agent changed to:", value);
     setAssignedAgent(value);
   };
+
+  // Define available statuses for the lead
+  const availableStatuses: LeadStatus[] = [
+    'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Deposit', 'Signed',
+    'Offre', 'Gagné', 'Perdu'
+  ];
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -153,6 +164,26 @@ const LeadNew = () => {
                 </SelectContent>
               </Select>
             </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-1 block">Statut initial</label>
+              <Select
+                value={leadStatus}
+                onValueChange={(value: LeadStatus) => setLeadStatus(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Sélectionner un statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableStatuses.map(status => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
             <TeamMemberSelect
               value={assignedAgent}
               onChange={handleAgentChange}
