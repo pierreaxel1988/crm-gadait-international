@@ -33,6 +33,21 @@ interface MobilePipelineViewProps {
   isRefreshing: boolean;
 }
 
+// Map English status to French translations
+const statusTranslations: Record<LeadStatus, string> = {
+  'New': 'Nouveaux',
+  'Contacted': 'Contactés',
+  'Qualified': 'Qualifiés', 
+  'Proposal': 'Propositions',
+  'Visit': 'Visites en cours',
+  'Offer': 'Offre en cours',
+  'Offre': 'Offre en cours',
+  'Deposit': 'Dépôt reçu',
+  'Signed': 'Signature finale',
+  'Gagné': 'Conclus',
+  'Perdu': 'Perdu'
+};
+
 const MobilePipelineView = ({
   activeTab,
   setActiveTab,
@@ -127,7 +142,12 @@ const MobilePipelineView = ({
               onClick={() => toggleColumnExpand(column.status)}
             >
               <div className="flex items-center gap-2">
-                <h3 className="font-futura">{column.title}</h3>
+                <h3 className="font-futura">
+                  {column.status} 
+                  <span className="text-muted-foreground text-sm font-futuraLight ml-1">
+                    ({statusTranslations[column.status]})
+                  </span>
+                </h3>
                 <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-xs px-1.5 font-futura">
                   {column.items.length}
                 </span>
