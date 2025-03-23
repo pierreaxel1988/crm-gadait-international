@@ -2,17 +2,15 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LeadForm from '@/components/leads/LeadForm';
 import { LeadDetailed } from '@/types/lead';
-import { getLead, updateLead, deleteLead } from '@/services/leadService';
+import { getLead, updateLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
-import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLeadActions } from '@/hooks/useLeadActions';
 import LeadHeader from '@/components/leads/LeadHeader';
 import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
-import CustomButton from '@/components/ui/CustomButton';
 
 const LeadEdit = () => {
   const { id } = useParams<{ id: string }>();
