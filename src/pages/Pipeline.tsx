@@ -129,11 +129,13 @@ const Pipeline = () => {
       { title: 'Nouveaux', status: 'New' as LeadStatus },
       { title: 'Contactés', status: 'Contacted' as LeadStatus },
       { title: 'Qualifiés', status: 'Qualified' as LeadStatus },
-      { title: 'Proposition', status: 'Proposal' as LeadStatus },
-      { title: 'Visites', status: 'Visit' as LeadStatus },
-      { title: 'Offre', status: 'Offer' as LeadStatus },
-      { title: 'Gagné', status: 'Won' as LeadStatus },
-      { title: 'Perdu', status: 'Lost' as LeadStatus }
+      { title: 'Propositions', status: 'Proposal' as LeadStatus },
+      { title: 'Visites en cours', status: 'Visit' as LeadStatus },
+      { title: 'Offre en cours', status: 'Offer' as LeadStatus },
+      { title: 'Dépôt reçu', status: 'Deposit' as LeadStatus },
+      { title: 'Signature finale', status: 'Signed' as LeadStatus },
+      { title: 'Conclus', status: 'Gagné' as LeadStatus },
+      { title: 'Perdu', status: 'Perdu' as LeadStatus }
     ].map(col => ({
       ...col,
       items: [],
