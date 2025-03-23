@@ -44,7 +44,7 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 sticky top-0 z-10 bg-white pb-3 pt-3 px-3 border-b border-gray-100 shadow-sm">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <CustomButton 
