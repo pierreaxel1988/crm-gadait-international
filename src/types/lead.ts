@@ -1,5 +1,4 @@
 
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -66,9 +65,10 @@ export type Currency =
   | "AED"
   | "MUR";
 
-import type { LeadStatus } from "@/components/common/StatusBadge";
-import type { LeadTag } from "@/components/common/TagBadge";
-import type { TaskType } from "@/components/kanban/KanbanCard";
+// Import and re-export these types
+import { LeadStatus } from "@/components/common/StatusBadge";
+import { LeadTag } from "@/components/common/TagBadge";
+import { TaskType } from "@/components/kanban/KanbanCard";
 
 export type { LeadStatus, LeadTag, TaskType };
 
@@ -113,4 +113,3 @@ export interface LeadDetailed {
   livingArea?: string;
   external_id?: string;
 }
-

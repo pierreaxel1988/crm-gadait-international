@@ -1,94 +1,111 @@
-import { Lead, LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
+
+import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { TaskType } from '@/components/kanban/KanbanCard';
 
-export const mapLeadToDetailed = (lead: Lead): LeadDetailed => {
+export const mapToLeadDetailed = (lead: any): LeadDetailed => {
   return {
-    ...lead,
     id: lead.id || '',
-    firstName: lead.firstName || '',
-    lastName: lead.lastName || '',
+    name: lead.name || '',
     email: lead.email || '',
     phone: lead.phone || '',
-    source: lead.source || '',
-    status: lead.status || LeadStatus.NEW,
-    assignedTo: lead.assignedTo || '',
-    createdAt: lead.createdAt || new Date().toISOString(),
-    updatedAt: lead.updatedAt || new Date().toISOString(),
-    notes: lead.notes || '',
-    budget: lead.budget || '',
-    nationality: lead.nationality || '',
-    language: lead.language || '',
-    propertyType: lead.propertyType || PropertyType.APARTMENT,
-    bedrooms: lead.bedrooms || '',
-    bathrooms: lead.bathrooms || '',
     location: lead.location || '',
-    area: lead.area || '',
+    status: lead.status || 'New',
+    tags: lead.tags || [],
+    createdAt: lead.created_at || new Date().toISOString(),
+    lastContactedAt: lead.last_contacted_at,
+    assignedTo: lead.assigned_to,
+    source: lead.source,
+    propertyReference: lead.property_reference,
+    budget: lead.budget,
+    budgetMin: lead.budget_min,
+    currency: lead.currency,
+    desiredLocation: lead.desired_location,
+    propertyType: lead.property_type,
+    propertyTypes: lead.property_types,
+    bedrooms: lead.bedrooms,
+    views: lead.views,
     amenities: lead.amenities || [],
-    taskType: lead.taskType || undefined,
-    nextFollowUpDate: lead.nextFollowUpDate || undefined,
-    actionHistory: lead.actionHistory || [],
+    purchaseTimeframe: lead.purchase_timeframe,
+    financingMethod: lead.financing_method,
+    propertyUse: lead.property_use,
+    nationality: lead.nationality,
+    taskType: lead.task_type,
+    notes: lead.notes || '',
+    nextFollowUpDate: lead.next_follow_up_date,
+    country: lead.country,
+    url: lead.url,
+    pipelineType: lead.pipeline_type,
+    pipeline_type: lead.pipeline_type,
+    imported_at: lead.imported_at,
+    integration_source: lead.integration_source,
+    taxResidence: lead.tax_residence,
+    actionHistory: lead.action_history || [],
+    livingArea: lead.living_area,
+    external_id: lead.external_id
   };
 };
 
-export const mapDetailedToLead = (leadDetailed: LeadDetailed): Lead => {
+export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
   return {
-    id: leadDetailed.id,
-    firstName: leadDetailed.firstName,
-    lastName: leadDetailed.lastName,
-    email: leadDetailed.email,
-    phone: leadDetailed.phone,
-    source: leadDetailed.source,
-    status: leadDetailed.status,
-    assignedTo: leadDetailed.assignedTo,
-    createdAt: leadDetailed.createdAt,
-    updatedAt: leadDetailed.updatedAt,
-    notes: leadDetailed.notes,
-    budget: leadDetailed.budget,
-    nationality: leadDetailed.nationality,
-    language: leadDetailed.language,
-    propertyType: leadDetailed.propertyType,
-    bedrooms: leadDetailed.bedrooms,
-    bathrooms: leadDetailed.bathrooms,
-    location: leadDetailed.location,
-    area: leadDetailed.area,
-    amenities: leadDetailed.amenities,
-    taskType: leadDetailed.taskType,
-    nextFollowUpDate: leadDetailed.nextFollowUpDate,
-    actionHistory: leadDetailed.actionHistory,
+    id: lead.id,
+    name: lead.name,
+    email: lead.email,
+    phone: lead.phone,
+    location: lead.location,
+    status: lead.status,
+    tags: lead.tags,
+    created_at: lead.createdAt,
+    last_contacted_at: lead.lastContactedAt,
+    assigned_to: lead.assignedTo,
+    source: lead.source,
+    property_reference: lead.propertyReference,
+    budget: lead.budget,
+    budget_min: lead.budgetMin,
+    currency: lead.currency,
+    desired_location: lead.desiredLocation,
+    property_type: lead.propertyType,
+    property_types: lead.propertyTypes,
+    bedrooms: lead.bedrooms,
+    views: lead.views,
+    amenities: lead.amenities,
+    purchase_timeframe: lead.purchaseTimeframe,
+    financing_method: lead.financingMethod,
+    property_use: lead.propertyUse,
+    nationality: lead.nationality,
+    task_type: lead.taskType,
+    notes: lead.notes,
+    next_follow_up_date: lead.nextFollowUpDate,
+    country: lead.country,
+    url: lead.url,
+    pipeline_type: lead.pipelineType || lead.pipeline_type,
+    integration_source: lead.integration_source,
+    tax_residence: lead.taxResidence,
+    action_history: lead.actionHistory,
+    living_area: lead.livingArea,
+    external_id: lead.external_id
   };
 };
 
-export const createEmptyLead = (): LeadDetailed => {
+export const convertToSimpleLead = (lead: LeadDetailed) => {
   return {
-    id: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    source: '',
-    status: LeadStatus.NEW,
-    assignedTo: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    notes: '',
-    budget: '',
-    nationality: '',
-    language: '',
-    propertyType: PropertyType.APARTMENT,
-    bedrooms: '',
-    bathrooms: '',
-    location: '',
-    area: '',
-    amenities: [],
-    actionHistory: [],
+    id: lead.id,
+    name: lead.name || '',
+    email: lead.email || '',
+    phone: lead.phone || '',
+    status: lead.status || 'New',
+    source: lead.source || undefined,
+    createdAt: lead.createdAt || new Date().toISOString(),
+    budget: lead.budget || undefined,
+    location: lead.location || undefined,
+    tags: lead.tags || []
   };
 };
 
 export const createEmptyAction = (): ActionHistory => {
   return {
-    id: '',
-    actionType: TaskType.CALL,
+    id: crypto.randomUUID(),
+    actionType: 'Call' as TaskType,
     createdAt: new Date().toISOString(),
     scheduledDate: new Date().toISOString(),
     completedDate: undefined,
@@ -97,7 +114,7 @@ export const createEmptyAction = (): ActionHistory => {
 };
 
 // Fix the currencyValue null error with proper null checking
-const formatBudget = (min?: string | null, max?: string | null, currency?: string | null): string | undefined => {
+export const formatBudget = (min?: string | null, max?: string | null, currency?: string | null): string | undefined => {
   if (!min && !max) return undefined;
   
   const formatValue = (value: string | null | undefined): string => {
