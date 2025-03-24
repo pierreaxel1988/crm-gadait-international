@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobilePipelineHeader from './mobile/MobilePipelineHeader';
@@ -42,14 +42,8 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   isFilterActive,
   teamMembers
 }) => {
-  const [expandedColumn, setExpandedColumn] = useState<LeadStatus | null>(null);
-
-  const toggleColumnExpand = (status: LeadStatus) => {
-    setExpandedColumn(expandedColumn === status ? null : status);
-  };
-
   return (
-    <div>
+    <div className="flex flex-col h-[calc(100vh-80px)]">
       <MobilePipelineHeader 
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -71,26 +65,28 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
         </TabsList>
       </Tabs>
 
-      <MobileColumnList
-        columns={columns}
-        expandedColumn={expandedColumn}
-        toggleColumnExpand={toggleColumnExpand}
-        activeTab={activeTab}
-        searchTerm={searchTerm}
-        filters={filters}
-      />
+      <div className="flex-1 overflow-y-auto mt-4 pb-20">
+        <MobileColumnList
+          columns={columns}
+          activeTab={activeTab}
+          searchTerm={searchTerm}
+          filters={filters}
+        />
+      </div>
 
-      {/* Filters sheet with better scrolling */}
+      {/* Filters sheet */}
       {filtersOpen && (
         <Sheet open={filtersOpen} onOpenChange={toggleFilters}>
-          <PipelineFilters 
-            filters={filters}
-            onFilterChange={onFilterChange}
-            onClearFilters={onClearFilters}
-            assignedToOptions={teamMembers}
-            isFilterActive={isFilterActive}
-            isMobile={true}
-          />
+          <SheetContent side="right" className="w-full sm:max-w-md p-0">
+            <PipelineFilters 
+              filters={filters}
+              onFilterChange={onFilterChange}
+              onClearFilters={onClearFilters}
+              assignedToOptions={teamMembers}
+              isFilterActive={isFilterActive}
+              isMobile={true}
+            />
+          </SheetContent>
         </Sheet>
       )}
     </div>

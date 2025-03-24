@@ -3,8 +3,7 @@ import React from 'react';
 import { Search, SlidersHorizontal, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetTrigger } from '@/components/ui/sheet';
-import PipelineFilters, { FilterOptions } from '../PipelineFilters';
+import { FilterOptions } from '../PipelineFilters';
 
 interface MobilePipelineHeaderProps {
   searchTerm: string;
@@ -35,18 +34,36 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
 }) => {
   return (
     <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight">Pipeline</h1>
+        <Button
+          variant={activeFiltersCount > 0 ? "default" : "outline"}
+          size="sm"
+          className="h-9 relative"
+          onClick={toggleFilters}
+        >
+          <SlidersHorizontal className="h-4 w-4 mr-1" />
+          Filtres
+          {activeFiltersCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-white text-primary rounded-full h-5 w-5 flex items-center justify-center text-xs">
+              {activeFiltersCount}
+            </span>
+          )}
+        </Button>
+      </div>
+      
       {/* Search input */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
           placeholder="Rechercher un lead..."
-          className="pl-9 pr-16"
+          className="pl-9 pr-16 bg-gray-100 border-0"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
+        <div className="absolute right-2 top-1/2 -translate-y-1/2">
           <Button
             variant="ghost"
             size="icon"
@@ -56,21 +73,6 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
           >
             <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span className="sr-only">Refresh</span>
-          </Button>
-          
-          <Button
-            variant={activeFiltersCount > 0 ? "default" : "outline"}
-            size="sm"
-            className="h-7 relative"
-            onClick={toggleFilters}
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5 mr-1" />
-            Filtres
-            {activeFiltersCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-white text-primary rounded-full h-4 w-4 flex items-center justify-center text-[10px]">
-                {activeFiltersCount}
-              </span>
-            )}
           </Button>
         </div>
       </div>
