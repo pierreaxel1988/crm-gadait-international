@@ -88,6 +88,28 @@ export function usePipelineState() {
     return count;
   }, [filters]);
 
+  // Check if a specific filter is active
+  const isFilterActive = (filterName: string): boolean => {
+    switch (filterName) {
+      case 'status':
+        return filters.status !== null;
+      case 'tags':
+        return filters.tags.length > 0;
+      case 'assignedTo':
+        return filters.assignedTo !== null;
+      case 'budget':
+        return filters.minBudget !== '' || filters.maxBudget !== '';
+      case 'location':
+        return filters.location !== '';
+      case 'purchaseTimeframe':
+        return filters.purchaseTimeframe !== null;
+      case 'propertyType':
+        return filters.propertyType !== null;
+      default:
+        return false;
+    }
+  };
+
   // Refresh data
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -148,6 +170,7 @@ export function usePipelineState() {
     setFilters,
     teamMembers,
     activeFiltersCount,
+    isFilterActive,
     handleRefresh,
     handleClearFilters,
     getAllColumns

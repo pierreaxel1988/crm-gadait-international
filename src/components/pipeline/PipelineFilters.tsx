@@ -36,23 +36,24 @@ interface TeamMember {
   name: string;
 }
 
-interface PipelineFiltersProps {
+export interface PipelineFiltersProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
-  assignedToOptions: TeamMember[];
-  isFilterActive: (filterName: string) => boolean;
+  assignedToOptions?: TeamMember[];
+  isMobile?: boolean;
 }
 
 const PipelineFilters = ({
   filters,
   onFilterChange,
   onClearFilters,
-  assignedToOptions,
-  isFilterActive
+  assignedToOptions = [],
+  isMobile: forceMobile,
 }: PipelineFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const isMobile = useIsMobile();
+  const detectedMobile = useIsMobile();
+  const isMobile = forceMobile !== undefined ? forceMobile : detectedMobile;
 
   // Handler functions
   const handleStatusChange = (status: LeadStatus | null) => {
@@ -91,6 +92,28 @@ const PipelineFilters = ({
     onFilterChange({ ...filters, propertyType });
   };
 
+  // Check if any filters are active
+  const isFilterActive = (filterName: string): boolean => {
+    switch (filterName) {
+      case 'status':
+        return filters.status !== null;
+      case 'tags':
+        return filters.tags.length > 0;
+      case 'assignedTo':
+        return filters.assignedTo !== null;
+      case 'budget':
+        return filters.minBudget !== '' || filters.maxBudget !== '';
+      case 'location':
+        return filters.location !== '';
+      case 'purchaseTimeframe':
+        return filters.purchaseTimeframe !== null;
+      case 'propertyType':
+        return filters.propertyType !== null;
+      default:
+        return false;
+    }
+  };
+
   // Récupère le nom du membre de l'équipe à partir de son ID
   const getTeamMemberName = (id: string) => {
     const member = assignedToOptions.find(tm => tm.id === id);
@@ -99,78 +122,137 @@ const PipelineFilters = ({
 
   return (
     <div className="relative w-full">
-      <Button
-        variant="outline"
-        className="flex items-center gap-2"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <Filter className="h-4 w-4" />
-        <span className="hidden md:inline">Filtres</span>
-      </Button>
+      {!isMobile && (
+        <Button
+          variant="outline"
+          className="flex items-center gap-2"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <Filter className="h-4 w-4" />
+          <span className="hidden md:inline">Filtres</span>
+        </Button>
+      )}
 
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <div />
-        </PopoverTrigger>
-        <PopoverContent className={cn(
-          "w-[340px] sm:w-[420px] p-4 shadow-md", 
-          isMobile && "max-h-[70vh] overflow-y-auto"
-        )} align="start">
-          <h3 className="text-lg font-medium mb-4">Filtres</h3>
+      {!isMobile && (
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+          <PopoverTrigger asChild>
+            <div />
+          </PopoverTrigger>
+          <PopoverContent className={cn(
+            "w-[340px] sm:w-[420px] p-4 shadow-md", 
+            isMobile && "max-h-[70vh] overflow-y-auto"
+          )} align="start">
+            <h3 className="text-lg font-medium mb-4">Filtres</h3>
+            
+            <div className="space-y-4">
+              {/* Status Filter */}
+              <StatusFilter 
+                status={filters.status} 
+                onStatusChange={handleStatusChange} 
+              />
+              
+              {/* Tags Filter */}
+              <TagsFilter 
+                selectedTags={filters.tags} 
+                onTagToggle={toggleTag} 
+              />
+              
+              {/* Assigned To Filter */}
+              <AgentFilter 
+                assignedTo={filters.assignedTo} 
+                onAssignedToChange={handleAssignedToChange} 
+                assignedToOptions={assignedToOptions} 
+              />
+              
+              {/* Budget Filter */}
+              <BudgetFilter 
+                minBudget={filters.minBudget} 
+                maxBudget={filters.maxBudget} 
+                onBudgetChange={handleBudgetChange} 
+              />
+              
+              {/* Location Filter */}
+              <LocationFilter 
+                location={filters.location} 
+                onLocationChange={handleLocationChange} 
+              />
+              
+              {/* Purchase Timeframe Filter */}
+              <TimeframeFilter 
+                purchaseTimeframe={filters.purchaseTimeframe} 
+                onTimeframeChange={handleTimeframeChange} 
+              />
+              
+              {/* Property Type Filter */}
+              <PropertyTypeFilter 
+                propertyType={filters.propertyType} 
+                onPropertyTypeChange={handlePropertyTypeChange} 
+              />
+              
+              {/* Action Buttons */}
+              <ActionButtons 
+                onClear={onClearFilters} 
+                onApply={() => setIsOpen(false)} 
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
+
+      {/* For mobile or direct embedding, just show the filters directly */}
+      {isMobile && (
+        <div className="space-y-4">
+          {/* Status Filter */}
+          <StatusFilter 
+            status={filters.status} 
+            onStatusChange={handleStatusChange} 
+          />
           
-          <div className="space-y-4">
-            {/* Status Filter */}
-            <StatusFilter 
-              status={filters.status} 
-              onStatusChange={handleStatusChange} 
-            />
-            
-            {/* Tags Filter */}
-            <TagsFilter 
-              selectedTags={filters.tags} 
-              onTagToggle={toggleTag} 
-            />
-            
-            {/* Assigned To Filter */}
-            <AgentFilter 
-              assignedTo={filters.assignedTo} 
-              onAssignedToChange={handleAssignedToChange} 
-              assignedToOptions={assignedToOptions} 
-            />
-            
-            {/* Budget Filter */}
-            <BudgetFilter 
-              minBudget={filters.minBudget} 
-              maxBudget={filters.maxBudget} 
-              onBudgetChange={handleBudgetChange} 
-            />
-            
-            {/* Location Filter */}
-            <LocationFilter 
-              location={filters.location} 
-              onLocationChange={handleLocationChange} 
-            />
-            
-            {/* Purchase Timeframe Filter */}
-            <TimeframeFilter 
-              purchaseTimeframe={filters.purchaseTimeframe} 
-              onTimeframeChange={handleTimeframeChange} 
-            />
-            
-            {/* Property Type Filter */}
-            <PropertyTypeFilter 
-              propertyType={filters.propertyType} 
-              onPropertyTypeChange={handlePropertyTypeChange} 
-            />
-            
-            {/* Action Buttons */}
-            <ActionButtons 
-              onClear={onClearFilters} 
-              onApply={() => setIsOpen(false)} 
-            />
-          </div>
-        </PopoverContent>
-      </Popover>
+          {/* Tags Filter */}
+          <TagsFilter 
+            selectedTags={filters.tags} 
+            onTagToggle={toggleTag} 
+          />
+          
+          {/* Assigned To Filter */}
+          <AgentFilter 
+            assignedTo={filters.assignedTo} 
+            onAssignedToChange={handleAssignedToChange} 
+            assignedToOptions={assignedToOptions} 
+          />
+          
+          {/* Budget Filter */}
+          <BudgetFilter 
+            minBudget={filters.minBudget} 
+            maxBudget={filters.maxBudget} 
+            onBudgetChange={handleBudgetChange} 
+          />
+          
+          {/* Location Filter */}
+          <LocationFilter 
+            location={filters.location} 
+            onLocationChange={handleLocationChange} 
+          />
+          
+          {/* Purchase Timeframe Filter */}
+          <TimeframeFilter 
+            purchaseTimeframe={filters.purchaseTimeframe} 
+            onTimeframeChange={handleTimeframeChange} 
+          />
+          
+          {/* Property Type Filter */}
+          <PropertyTypeFilter 
+            propertyType={filters.propertyType} 
+            onPropertyTypeChange={handlePropertyTypeChange} 
+          />
+          
+          {/* Action Buttons */}
+          <ActionButtons 
+            onClear={onClearFilters} 
+            onApply={() => {}} 
+          />
+        </div>
+      )}
 
       {/* Liste des filtres actifs */}
       <ActiveFiltersList 

@@ -35,7 +35,7 @@ const ActiveFiltersList = ({
   if (!hasActiveFilters) return null;
 
   return (
-    <div className="flex flex-wrap gap-2 items-center">
+    <div className="flex flex-wrap gap-2 items-center mt-4">
       <span className="text-sm text-muted-foreground mr-1">Filtres actifs:</span>
       
       {filters.status && (
@@ -70,7 +70,7 @@ const ActiveFiltersList = ({
       
       {(filters.minBudget || filters.maxBudget) && (
         <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-          Budget: {filters.minBudget ? `${filters.minBudget}€` : '0€'} - {filters.maxBudget ? `${filters.maxBudget}€` : '∞'}
+          Budget: {filters.minBudget ? `${filters.minBudget}` : '0€'} - {filters.maxBudget ? `${filters.maxBudget}` : '∞'}
           <button onClick={() => onFilterChange({...filters, minBudget: '', maxBudget: ''})}>
             <X className="h-3 w-3 ml-1" />
           </button>

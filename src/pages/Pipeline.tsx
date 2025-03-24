@@ -21,7 +21,9 @@ const Pipeline = () => {
     toggleFilters,
     filters,
     setFilters,
+    teamMembers,
     activeFiltersCount,
+    isFilterActive,
     handleRefresh,
     handleClearFilters,
     getAllColumns
