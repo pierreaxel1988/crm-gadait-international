@@ -65,6 +65,9 @@ interface MobileColumnProps {
 }
 
 const MobileColumn = ({ column, isExpanded, onToggleExpand, activeTab }: MobileColumnProps) => {
+  // Debug de la colonne et ses éléments
+  console.log(`Colonne ${column.status}: ${column.items.length} leads`, column.items);
+  
   return (
     <div className="bg-white rounded-md border border-slate-200 overflow-hidden">
       <div 
@@ -73,7 +76,7 @@ const MobileColumn = ({ column, isExpanded, onToggleExpand, activeTab }: MobileC
       >
         <div className="flex items-center gap-2">
           <h3 className="font-futura">
-            {statusTranslations[column.status]}
+            {statusTranslations[column.status] || column.status}
           </h3>
           <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-xs px-1.5 font-futura">
             {column.items.length}

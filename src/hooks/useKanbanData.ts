@@ -62,8 +62,7 @@ export const useKanbanData = (
         // Improved query to filter by pipeline_type directly in the database query
         const { data: supabaseLeads, error: leadsError } = await supabase
           .from('leads')
-          .select('*')
-          .eq('pipeline_type', pipelineType);
+          .select('*');
           
         // If there's an error or no data from Supabase, fall back to local leads
         let leads = [];
@@ -116,19 +115,25 @@ export const useKanbanData = (
         console.log('Mapped leads:', mappedLeads);
         console.log(`Current pipeline filter: ${pipelineType}`);
         
-        // More flexible filtering to handle different pipeline type field names
-        const filteredLeads = mappedLeads.filter(lead => {
-          // Check both pipelineType and pipeline_type properties
-          const leadPipelineType = String(lead.pipelineType || lead.pipeline_type || 'purchase').toLowerCase();
-          const targetPipelineType = String(pipelineType).toLowerCase();
-          const result = leadPipelineType === targetPipelineType;
-          
-          console.log(`Lead ${lead.id} (${lead.name}): comparing "${leadPipelineType}" with "${targetPipelineType}" = ${result}`);
-          
-          return result;
-        });
+        // Filtrer les leads pour ce pipeline. Correction: assouplir le filtrage pour résoudre le problème
+        const filteredLeads = pipelineType ? 
+          mappedLeads.filter(lead => {
+            // Si aucun pipeline_type n'est défini, inclure dans l'affichage par défaut (purchase)
+            if (!lead.pipelineType && !lead.pipeline_type) {
+              return pipelineType === 'purchase';
+            }
+            
+            // Vérifier les deux propriétés et les normaliser pour la comparaison
+            const leadPipelineType = String(lead.pipelineType || lead.pipeline_type || '').toLowerCase();
+            const targetPipelineType = String(pipelineType).toLowerCase();
+            
+            console.log(`Lead ${lead.id} (${lead.name}): comparaison "${leadPipelineType}" avec "${targetPipelineType}"`);
+            
+            return leadPipelineType === targetPipelineType || leadPipelineType === '';
+          }) : 
+          mappedLeads;
         
-        console.log('Filtered leads for this pipeline:', filteredLeads);
+        console.log('Leads filtrés pour ce pipeline:', filteredLeads.length);
         
         // Group leads by status
         const updatedColumns = columns.map(column => ({

@@ -57,11 +57,12 @@ interface KanbanCardProps {
 
 const KanbanCard = ({ item, className, draggable = false, pipelineType }: KanbanCardProps) => {
   const navigate = useNavigate();
+  
+  // Debug des informations du lead
+  console.log(`KanbanCard: ${item.name}`, {item, pipelineType});
 
-  // Si le type de pipeline ne correspond pas à celui du lead, ne pas afficher la carte
-  if (pipelineType && item.pipelineType && pipelineType !== item.pipelineType) {
-    return null;
-  }
+  // Ne pas filtrer sur le type de pipeline pour le moment, pour voir tous les leads
+  // Nous allons corriger le filtrage dans useKanbanData.ts
 
   const handleCardClick = () => {
     navigate(`/leads/${item.id}`);
