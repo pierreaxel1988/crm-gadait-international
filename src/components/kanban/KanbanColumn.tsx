@@ -20,8 +20,19 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   
-  // Ajouter des logs pour déboguer
-  console.log(`KanbanColumn: ${title}, status: ${status}, pipelineType: ${pipelineType}, items:`, items);
+  // Logs détaillés pour le débogage
+  console.log(`===== COLONNE KANBAN: ${title} (${status}) =====`);
+  console.log(`Pipeline type actuel: ${pipelineType}`);
+  console.log(`Nombre de leads: ${items.length}`);
+  
+  if (items.length > 0) {
+    console.log('Leads dans cette colonne:');
+    items.forEach((item, index) => {
+      console.log(`  #${index + 1}: ${item.name} (ID: ${item.id}, Pipeline: ${item.pipelineType})`);
+    });
+  } else {
+    console.log('Aucun lead dans cette colonne');
+  }
   
   const handleAddLead = () => {
     // Pass the pipeline type and status as URL parameters so the new lead form can pre-select them

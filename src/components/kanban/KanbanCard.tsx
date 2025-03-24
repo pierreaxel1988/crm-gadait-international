@@ -59,10 +59,12 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
   const navigate = useNavigate();
   
   // Debug des informations du lead
-  console.log(`KanbanCard: ${item.name}`, {item, pipelineType});
-
-  // Ne pas filtrer sur le type de pipeline pour le moment, pour voir tous les leads
-  // Nous allons corriger le filtrage dans useKanbanData.ts
+  console.log(`KanbanCard: ${item.name}`, {
+    id: item.id,
+    status: item.status,
+    pipelineType: item.pipelineType,
+    providedPipelineType: pipelineType
+  });
 
   const handleCardClick = () => {
     navigate(`/leads/${item.id}`);

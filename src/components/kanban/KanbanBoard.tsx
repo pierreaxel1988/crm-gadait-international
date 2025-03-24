@@ -24,11 +24,26 @@ interface KanbanBoardProps {
 
 const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipelineType }: KanbanBoardProps) => {
   const isMobile = useIsMobile();
+  
+  console.log('===== KANBAN BOARD =====');
+  console.log(`Pipeline Type: ${pipelineType}`);
+  console.log(`Nombre de colonnes: ${columns.length}`);
+  console.log('Colonnes initiales:', columns.map(c => `${c.title} (${c.status})`).join(', '));
+  
   const { loadedColumns, isLoading, setLoadedColumns } = useKanbanData(columns, refreshTrigger, pipelineType);
+  
+  console.log('Colonnes après chargement:', loadedColumns.map(c => 
+    `${c.title} (${c.status}): ${c.items.length} leads`).join(', ')
+  );
+  
   const { handleDrop } = useKanbanDragDrop(setLoadedColumns);
   
   // Apply filters to the columns
   const filteredColumns = applyFiltersToColumns(loadedColumns, filters);
+  
+  console.log('Colonnes après filtrage:', filteredColumns.map(c => 
+    `${c.title} (${c.status}): ${c.items.length} leads`).join(', ')
+  );
   
   return (
     <div className={cn('luxury-card p-0 overflow-hidden', className)}>

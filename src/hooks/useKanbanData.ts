@@ -42,6 +42,7 @@ export const useKanbanData = (
     const fetchLeads = async () => {
       try {
         setIsLoading(true);
+        console.log(`===== DÉBUT DU CHARGEMENT DES LEADS =====`);
         console.log(`Fetching leads for pipeline: ${pipelineType}`);
         
         // Fetch team members for assignment information
@@ -70,6 +71,8 @@ export const useKanbanData = (
           console.error('Erreur lors de la vérification des leads:', countError);
         }
         
+        // Récupération des données brutes de leads depuis Supabase
+        console.log('Récupération des leads depuis Supabase...');
         const { data: supabaseLeads, error: leadsError } = await supabase
           .from('leads')
           .select('*');
@@ -77,29 +80,45 @@ export const useKanbanData = (
         // If there's an error or no data from Supabase, fall back to local leads
         let leads = [];
         if (leadsError || !supabaseLeads || supabaseLeads.length === 0) {
-          console.log('Falling back to local leads data');
+          console.log('Falling back to local leads data - Aucun lead trouvé dans Supabase');
           leads = await getLeads();
         } else {
           leads = supabaseLeads;
           console.log('Retrieved leads from Supabase:', leads.length);
         }
         
-        console.log('All leads before filtering:', leads);
+        console.log('===== TOUS LES LEADS AVANT TRAITEMENT =====');
+        if (leads.length === 0) {
+          console.warn('ATTENTION: Aucun lead trouvé dans la base de données!');
+        } else {
+          console.log(`${leads.length} leads trouvés, voici un exemple:`, leads[0]);
+        }
         
-        // Afficher les valeurs de pipeline_type pour chaque lead
-        leads.forEach(lead => {
-          console.log(`Lead ${lead.id} (${lead.name}): pipeline_type=${lead.pipeline_type}, pipelineType=${lead.pipelineType}, status=${lead.status}`);
+        // Afficher les détails de chaque lead pour comprendre où est le problème
+        console.log('===== DÉTAILS DE CHAQUE LEAD POUR DÉBOGAGE =====');
+        leads.forEach((lead, index) => {
+          console.log(`Lead #${index + 1} (${lead.name}):`);
+          console.log(`  - ID: ${lead.id}`);
+          console.log(`  - Status: ${lead.status}`);
+          console.log(`  - Pipeline type DB: ${lead.pipeline_type}`); 
+          console.log(`  - Pipeline type App: ${lead.pipelineType}`);
+          console.log(`  - Date de création: ${lead.created_at || lead.createdAt}`);
+          console.log(`  - Tags:`, lead.tags);
         });
         
         // Map leads data to KanbanItem format
+        console.log('===== CONVERSION DES LEADS AU FORMAT KANBAN =====');
         const mappedLeads = leads.map(lead => {
           const assignedTeamMember = teamMembers.find(tm => tm.id === lead.assigned_to);
           
-          // Add explicit logging for pipeline_type debugging
-          console.log(`Lead ${lead.id} (${lead.name}): pipeline_type = "${lead.pipeline_type}", pipelineType = "${lead.pipelineType}"`);
-          
-          // Default pipelineType to 'purchase' if not specified
+          // Détermine le pipeline_type avec une valeur par défaut
           const leadPipelineType = lead.pipeline_type || lead.pipelineType || 'purchase';
+          
+          // Log détaillé pour la détection du pipeline type
+          console.log(`Traitement du lead ${lead.id} (${lead.name}):`);
+          console.log(`  - pipeline_type de la DB: "${lead.pipeline_type}"`);
+          console.log(`  - pipelineType de l'app: "${lead.pipelineType}"`);
+          console.log(`  - Pipeline type final: "${leadPipelineType}"`);
           
           return {
             id: lead.id,
@@ -127,47 +146,38 @@ export const useKanbanData = (
           };
         });
         
-        console.log('Mapped leads:', mappedLeads);
-        console.log(`Current pipeline filter: ${pipelineType}`);
+        console.log('===== LEADS APRÈS CONVERSION =====');
+        console.log(`${mappedLeads.length} leads convertis au format Kanban`);
+        console.log(`Pipeline actuel recherché: ${pipelineType}`);
         
-        // Filtrer les leads pour ce pipeline - SIMPLIFIER LE FILTRAGE POUR DÉBOGUER
-        // Désactiver temporairement les filtres complexes pour voir tous les leads
+        // FILTRAGE DÉSACTIVÉ POUR DÉBOGAGE - Afficher tous les leads dans toutes les colonnes
+        console.log('===== DÉSACTIVATION DU FILTRAGE POUR DÉBOGAGE =====');
+        console.log('Affichage de tous les leads sans filtrage par pipeline');
         const filteredLeads = mappedLeads;
-        // Ancien code de filtrage:
-        // const filteredLeads = pipelineType ? 
-        //   mappedLeads.filter(lead => {
-        //     // Si aucun pipeline_type n'est défini, inclure dans l'affichage par défaut (purchase)
-        //     if (!lead.pipelineType && !lead.pipeline_type) {
-        //       return pipelineType === 'purchase';
-        //     }
-        //     
-        //     // Vérifier les deux propriétés et les normaliser pour la comparaison
-        //     const leadPipelineType = String(lead.pipelineType || lead.pipeline_type || '').toLowerCase();
-        //     const targetPipelineType = String(pipelineType).toLowerCase();
-        //     
-        //     console.log(`Lead ${lead.id} (${lead.name}): comparaison "${leadPipelineType}" avec "${targetPipelineType}"`);
-        //     
-        //     return leadPipelineType === targetPipelineType || leadPipelineType === '';
-        //   }) : 
-        //   mappedLeads;
         
-        console.log('Leads pour ce pipeline (sans filtrage):', filteredLeads.length);
+        console.log(`Total de leads à afficher: ${filteredLeads.length}`);
         
         // Group leads by status
+        console.log('===== RÉPARTITION DES LEADS PAR STATUT =====');
         const updatedColumns = columns.map(column => {
           const columnItems = filteredLeads.filter(lead => lead.status === column.status);
-          console.log(`Colonne ${column.status}: ${columnItems.length} leads`, columnItems);
+          console.log(`Colonne "${column.status}": ${columnItems.length} leads`);
+          
+          if (columnItems.length > 0) {
+            console.log(`  Premier lead dans la colonne "${column.status}":`, columnItems[0].name);
+          }
           
           return {
             ...column,
             items: columnItems as ExtendedKanbanItem[],
-            pipelineType // Ensure the column has the pipeline type
+            pipelineType
           };
         });
         
+        console.log('===== FIN DU CHARGEMENT DES LEADS =====');
         setLoadedColumns(updatedColumns);
       } catch (error) {
-        console.error('Unexpected error:', error);
+        console.error('ERREUR CRITIQUE dans useKanbanData:', error);
         toast({
           variant: "destructive",
           title: "Erreur",
