@@ -2,6 +2,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import StatusFilter from './filters/StatusFilter';
 import TagsFilter from './filters/TagsFilter';
 import AgentFilter from './filters/AgentFilter';
@@ -135,15 +136,15 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     );
   }
 
-  // For mobile, display in a sheet/drawer
+  // For mobile, display in a sheet/drawer with improved scrolling
   return (
     <SheetContent side="right" className="w-full sm:max-w-md p-0 pt-12">
       <SheetHeader className="px-4 py-2 border-b">
         <SheetTitle className="text-lg">Filtres</SheetTitle>
       </SheetHeader>
-      <div className="px-4 py-6 overflow-y-auto max-h-[calc(100vh-10rem)]">
+      <ScrollArea className="h-[calc(100vh-6rem)] px-4 py-6">
         {filtersContent}
-      </div>
+      </ScrollArea>
     </SheetContent>
   );
 };

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobilePipelineHeader from './mobile/MobilePipelineHeader';
 import MobileColumnList from './mobile/MobileColumnList';
@@ -80,19 +80,17 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
         filters={filters}
       />
 
-      {/* Filters sheet - properly wrapped */}
+      {/* Filters sheet with better scrolling */}
       {filtersOpen && (
         <Sheet open={filtersOpen} onOpenChange={toggleFilters}>
-          <SheetContent className="w-full sm:max-w-md overflow-auto">
-            <PipelineFilters 
-              filters={filters}
-              onFilterChange={onFilterChange}
-              onClearFilters={onClearFilters}
-              assignedToOptions={teamMembers}
-              isFilterActive={isFilterActive}
-              isMobile={true}
-            />
-          </SheetContent>
+          <PipelineFilters 
+            filters={filters}
+            onFilterChange={onFilterChange}
+            onClearFilters={onClearFilters}
+            assignedToOptions={teamMembers}
+            isFilterActive={isFilterActive}
+            isMobile={true}
+          />
         </Sheet>
       )}
     </div>
