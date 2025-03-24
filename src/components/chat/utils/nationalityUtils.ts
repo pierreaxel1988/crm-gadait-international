@@ -82,10 +82,12 @@ export const deriveNationalityFromCountry = (country: string | undefined): strin
 
 /**
  * Checks if a search term matches a country based on a flexible search approach
+ * This function is used for the searchable dropdowns to find matches even when accents are different
  */
 export const countryMatchesSearch = (country: string, searchTerm: string): boolean => {
   if (!searchTerm) return true;
   
+  // Normalize strings by converting to lowercase and removing accents
   const normalizedCountry = country.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   

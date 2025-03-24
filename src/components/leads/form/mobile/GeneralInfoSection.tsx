@@ -4,37 +4,40 @@ import { User, Mail, Phone, Flag, BarChart, MapPin, Clipboard } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { COUNTRIES } from '@/utils/countries';
-import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
+import { deriveNationalityFromCountry, countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
 import FormInput from '../FormInput';
 
 interface MobileGeneralInfoSectionProps {
-  formData: LeadDetailed;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  countries: Country[];
-  sources: LeadSource[];
+  lead: LeadDetailed;
+  onDataChange: (data: Partial<LeadDetailed>) => void;
+  countries?: Country[];
+  sources?: LeadSource[];
 }
 
 const MobileGeneralInfoSection = ({ 
-  formData, 
-  handleInputChange,
-  countries,
-  sources
+  lead, 
+  onDataChange,
+  countries = COUNTRIES,
+  sources = [] 
 }: MobileGeneralInfoSectionProps) => {
   // State pour gérer le code pays
   const [phoneCountryCode, setPhoneCountryCode] = useState('+33');
+  
+  // Create a reference to the form data
+  const formData = lead;
+  
+  // Create a handler function that wraps onDataChange
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    onDataChange({ [name]: value });
+  };
   
   // Auto-set nationality when country changes
   useEffect(() => {
     if (formData.taxResidence && !formData.nationality) {
       const derivedNationality = deriveNationalityFromCountry(formData.taxResidence);
       if (derivedNationality) {
-        const syntheticEvent = {
-          target: {
-            name: 'nationality',
-            value: derivedNationality
-          }
-        } as React.ChangeEvent<HTMLInputElement>;
-        handleInputChange(syntheticEvent);
+        onDataChange({ nationality: derivedNationality });
       }
     }
   }, [formData.taxResidence]);
@@ -138,14 +141,7 @@ const MobileGeneralInfoSection = ({
     
     // Mettre à jour le numéro avec le nouveau code pays
     const formattedPhone = phoneNumber ? `${code} ${phoneNumber}` : "";
-    const syntheticEvent = {
-      target: {
-        name: 'phone',
-        value: formattedPhone
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    
-    handleInputChange(syntheticEvent);
+    onDataChange({ phone: formattedPhone });
   };
 
   // Adapter la valeur du téléphone pour l'affichage dans le champ
@@ -211,35 +207,15 @@ const MobileGeneralInfoSection = ({
       }
     });
 
-    // Create synthetic events to update the form
-    if (name) {
-      const nameEvent = {
-        target: {
-          name: 'name',
-          value: name
-        }
-      } as React.ChangeEvent<HTMLInputElement>;
-      handleInputChange(nameEvent);
-    }
-
-    if (email) {
-      const emailEvent = {
-        target: {
-          name: 'email',
-          value: email
-        }
-      } as React.ChangeEvent<HTMLInputElement>;
-      handleInputChange(emailEvent);
-    }
-
-    if (phone) {
-      const phoneEvent = {
-        target: {
-          name: 'phone',
-          value: phone
-        }
-      } as React.ChangeEvent<HTMLInputElement>;
-      handleInputChange(phoneEvent);
+    // Create updates to the form data
+    const updates: Partial<LeadDetailed> = {};
+    if (name) updates.name = name;
+    if (email) updates.email = email;
+    if (phone) updates.phone = phone;
+    
+    // Apply updates if any
+    if (Object.keys(updates).length > 0) {
+      onDataChange(updates);
     }
 
     // Hide the paste area and show a success toast
@@ -258,26 +234,30 @@ const MobileGeneralInfoSection = ({
     
     // Si le champ est vide, effacer complètement le numéro de téléphone
     if (!phoneNumber) {
-      const syntheticEvent = {
-        target: {
-          name: 'phone',
-          value: ''
-        }
-      } as React.ChangeEvent<HTMLInputElement>;
-      handleInputChange(syntheticEvent);
+      onDataChange({ phone: '' });
       return;
     }
     
     // Sinon, ajouter le code pays actuel au numéro
     const formattedPhone = `${phoneCountryCode} ${phoneNumber}`;
-    const syntheticEvent = {
-      target: {
-        name: 'phone',
-        value: formattedPhone
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    handleInputChange(syntheticEvent);
+    onDataChange({ phone: formattedPhone });
   };
+
+  // Prepare the available sources list
+  const availableSources: LeadSource[] = sources.length > 0 ? sources : [
+    "Site web", 
+    "Réseaux sociaux", 
+    "Portails immobiliers", 
+    "Network", 
+    "Repeaters", 
+    "Recommandations",
+    "Apporteur d'affaire",
+    "Idealista",
+    "Le Figaro",
+    "Properstar",
+    "Property Cloud",
+    "L'express Property"
+  ];
 
   return (
     <div className="space-y-5 py-4">
@@ -414,7 +394,7 @@ fmohamed01@cuatrocaminos.net"
           value={formData.source || ''}
           onChange={handleInputChange}
           icon={BarChart}
-          options={sources.map(source => ({ value: source, label: source }))}
+          options={availableSources.map(source => ({ value: source, label: source }))}
           placeholder="Sélectionner..."
           className="mb-0"
           searchable={true}
