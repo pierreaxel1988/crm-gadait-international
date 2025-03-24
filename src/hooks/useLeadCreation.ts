@@ -81,6 +81,7 @@ export const useLeadCreation = () => {
       newLeadData.pipeline_type = pipelineType;
       
       // Set the selected status
+      console.log("Setting lead status to:", leadStatus);
       newLeadData.status = leadStatus;
       
       console.log("Creating lead with processed data:", newLeadData);

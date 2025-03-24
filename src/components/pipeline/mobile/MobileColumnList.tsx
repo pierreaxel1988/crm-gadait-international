@@ -37,6 +37,13 @@ const MobileColumnList = ({
   toggleColumnExpand,
   activeTab 
 }: MobileColumnListProps) => {
+  // Debug de toutes les colonnes et leur statut
+  console.log('MobileColumnList: Colonnes à afficher:', columns.map(c => ({ 
+    status: c.status, 
+    title: c.title, 
+    itemCount: c.items.length 
+  })));
+  
   return (
     <div className="space-y-3">
       {columns.map((column) => (

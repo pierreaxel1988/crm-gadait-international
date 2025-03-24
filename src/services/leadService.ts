@@ -25,7 +25,8 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     
     console.log("leadService: Pipeline types set:", { 
       pipelineType: leadData.pipelineType, 
-      pipeline_type: leadData.pipeline_type 
+      pipeline_type: leadData.pipeline_type,
+      status: leadData.status
     });
     
     // If no agent is assigned and the user isn't already assigned, find Pierre Axel Gadait

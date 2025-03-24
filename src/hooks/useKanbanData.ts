@@ -59,7 +59,6 @@ export const useKanbanData = (
           return;
         }
         
-        // Improved query to filter by pipeline_type directly in the database query
         const { data: supabaseLeads, error: leadsError } = await supabase
           .from('leads')
           .select('*');
@@ -115,7 +114,7 @@ export const useKanbanData = (
         console.log('Mapped leads:', mappedLeads);
         console.log(`Current pipeline filter: ${pipelineType}`);
         
-        // Filtrer les leads pour ce pipeline. Correction: assouplir le filtrage pour résoudre le problème
+        // Filtrer les leads pour ce pipeline
         const filteredLeads = pipelineType ? 
           mappedLeads.filter(lead => {
             // Si aucun pipeline_type n'est défini, inclure dans l'affichage par défaut (purchase)
@@ -136,11 +135,16 @@ export const useKanbanData = (
         console.log('Leads filtrés pour ce pipeline:', filteredLeads.length);
         
         // Group leads by status
-        const updatedColumns = columns.map(column => ({
-          ...column,
-          items: filteredLeads.filter(lead => lead.status === column.status) as ExtendedKanbanItem[],
-          pipelineType // Ensure the column has the pipeline type
-        }));
+        const updatedColumns = columns.map(column => {
+          const columnItems = filteredLeads.filter(lead => lead.status === column.status);
+          console.log(`Colonne ${column.status}: ${columnItems.length} leads`, columnItems);
+          
+          return {
+            ...column,
+            items: columnItems as ExtendedKanbanItem[],
+            pipelineType // Ensure the column has the pipeline type
+          };
+        });
         
         setLoadedColumns(updatedColumns);
       } catch (error) {
