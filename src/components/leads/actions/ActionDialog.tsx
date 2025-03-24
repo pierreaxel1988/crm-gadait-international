@@ -44,6 +44,11 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
 
   if (!isOpen) return null;
 
+  const handleConfirmClick = () => {
+    // Appeler la fonction onConfirm pour enregistrer l'action
+    onConfirm();
+  };
+
   return (
     <div 
       className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50" 
@@ -154,8 +159,10 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
               </CustomButton>
               <CustomButton 
                 variant="chocolate" 
-                onClick={onConfirm}
+                onClick={handleConfirmClick}
                 className="flex-1 flex justify-center"
+                type="button"
+                aria-label="Confirmer l'action"
               >
                 Confirmer
               </CustomButton>
