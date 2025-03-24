@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobilePipelineHeader from './mobile/MobilePipelineHeader';
 import MobileColumnList from './mobile/MobileColumnList';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
+import { LeadStatus } from '@/components/common/StatusBadge';
 
 interface MobilePipelineViewProps {
   activeTab: string;
@@ -41,6 +42,12 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   isFilterActive,
   teamMembers
 }) => {
+  const [expandedColumn, setExpandedColumn] = useState<LeadStatus | null>(null);
+
+  const toggleColumnExpand = (status: LeadStatus) => {
+    setExpandedColumn(expandedColumn === status ? null : status);
+  };
+
   return (
     <div>
       <MobilePipelineHeader 
@@ -65,10 +72,10 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
       </Tabs>
 
       <MobileColumnList
-        columns={columns.filter(col => 
-          // Show all columns for now, filtering will be handled by the backend
-          true
-        )}
+        columns={columns}
+        expandedColumn={expandedColumn}
+        toggleColumnExpand={toggleColumnExpand}
+        activeTab={activeTab}
         searchTerm={searchTerm}
         filters={filters}
       />

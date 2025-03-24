@@ -64,7 +64,7 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     <div className={`${isMobile ? 'pt-2' : 'p-4'} space-y-6`}>
       {/* Status filter */}
       <StatusFilter
-        selectedStatus={filters.status}
+        status={filters.status}
         onStatusChange={(status) => handleFilterChange('status', status)}
       />
 
@@ -85,8 +85,13 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
       <BudgetFilter
         minBudget={filters.minBudget}
         maxBudget={filters.maxBudget}
-        onMinBudgetChange={(value) => handleFilterChange('minBudget', value)}
-        onMaxBudgetChange={(value) => handleFilterChange('maxBudget', value)}
+        onBudgetChange={(type, value) => {
+          if (type === 'min') {
+            handleFilterChange('minBudget', value);
+          } else {
+            handleFilterChange('maxBudget', value);
+          }
+        }}
       />
 
       {/* Location filter */}

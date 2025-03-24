@@ -1,7 +1,7 @@
+
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import { DollarSign, EuroIcon } from 'lucide-react';
-import { Slider } from '@/components/ui/slider';
+import { DollarSign } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -11,17 +11,21 @@ import {
 } from '@/components/ui/select';
 
 interface BudgetFilterProps {
-  minBudget: string;
-  maxBudget: string;
-  onBudgetChange: (type: 'min' | 'max', value: string) => void;
+  minBudget?: string;
+  maxBudget?: string;
+  onBudgetChange?: (type: 'min' | 'max', value: string) => void;
+  onMinBudgetChange?: (value: string) => void;
+  onMaxBudgetChange?: (value: string) => void;
   currency?: string;
   onCurrencyChange?: (value: string) => void;
 }
 
 const BudgetFilter = ({ 
-  minBudget, 
-  maxBudget, 
-  onBudgetChange, 
+  minBudget = '', 
+  maxBudget = '', 
+  onBudgetChange,
+  onMinBudgetChange,
+  onMaxBudgetChange,
   currency = 'EUR',
   onCurrencyChange 
 }: BudgetFilterProps) => {
@@ -48,12 +52,16 @@ const BudgetFilter = ({
   
   // Handle minimum amount input
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onBudgetChange('min', e.target.value);
+    const value = e.target.value;
+    if (onBudgetChange) onBudgetChange('min', value);
+    if (onMinBudgetChange) onMinBudgetChange(value);
   };
   
   // Handle maximum amount input
   const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onBudgetChange('max', e.target.value);
+    const value = e.target.value;
+    if (onBudgetChange) onBudgetChange('max', value);
+    if (onMaxBudgetChange) onMaxBudgetChange(value);
   };
   
   // Format when focus is lost
@@ -61,19 +69,12 @@ const BudgetFilter = ({
     if (!value) return;
     
     const formatted = formatBudgetDisplay(value);
-    onBudgetChange(type, formatted);
-  };
-
-  // Get currency symbol
-  const getCurrencySymbol = (currencyCode: string) => {
-    switch (currencyCode) {
-      case 'EUR': return '€';
-      case 'USD': return '$';
-      case 'GBP': return '£';
-      case 'CHF': return 'CHF';
-      case 'AED': return 'AED';
-      case 'MUR': return 'MUR';
-      default: return currencyCode;
+    if (type === 'min') {
+      if (onBudgetChange) onBudgetChange('min', formatted);
+      if (onMinBudgetChange) onMinBudgetChange(formatted);
+    } else {
+      if (onBudgetChange) onBudgetChange('max', formatted);
+      if (onMaxBudgetChange) onMaxBudgetChange(formatted);
     }
   };
 

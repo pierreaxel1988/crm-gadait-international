@@ -5,11 +5,25 @@ import { Filter } from 'lucide-react';
 import { LeadStatus } from '@/components/common/StatusBadge';
 
 interface StatusFilterProps {
-  status: LeadStatus | null;
-  onStatusChange: (status: LeadStatus | null) => void;
+  status?: LeadStatus | null;
+  onStatusChange?: (status: LeadStatus | null) => void;
+  selectedStatus?: LeadStatus | null;
+  onSelectedStatusChange?: (status: LeadStatus | null) => void;
 }
 
-const StatusFilter = ({ status, onStatusChange }: StatusFilterProps) => {
+const StatusFilter = ({ 
+  status, 
+  onStatusChange,
+  selectedStatus,
+  onSelectedStatusChange
+}: StatusFilterProps) => {
+  // Use the appropriate props based on what's provided
+  const currentStatus = status !== undefined ? status : selectedStatus;
+  const handleStatusChange = (newStatus: LeadStatus | null) => {
+    if (onStatusChange) onStatusChange(newStatus);
+    if (onSelectedStatusChange) onSelectedStatusChange(newStatus);
+  };
+
   // Standardized statuses matching the database values
   const statuses: (LeadStatus | null)[] = [
     null, 
@@ -35,10 +49,10 @@ const StatusFilter = ({ status, onStatusChange }: StatusFilterProps) => {
         {statuses.map((statusOption) => (
           <Button
             key={statusOption || 'all'}
-            variant={status === statusOption ? "default" : "outline"}
+            variant={currentStatus === statusOption ? "default" : "outline"}
             size="sm"
             className="text-xs"
-            onClick={() => onStatusChange(statusOption)}
+            onClick={() => handleStatusChange(statusOption)}
           >
             {statusOption || 'Tous'}
           </Button>

@@ -5,14 +5,32 @@ import { LeadTag } from '@/components/common/TagBadge';
 import TagBadge from '@/components/common/TagBadge';
 
 interface TagsFilterProps {
-  selectedTags: LeadTag[];
-  onTagToggle: (tag: LeadTag) => void;
+  selectedTags?: LeadTag[];
+  onTagToggle?: (tag: LeadTag) => void;
+  onTagsChange?: (tags: LeadTag[]) => void;
 }
 
-const TagsFilter = ({ selectedTags, onTagToggle }: TagsFilterProps) => {
+const TagsFilter = ({ 
+  selectedTags = [], 
+  onTagToggle,
+  onTagsChange
+}: TagsFilterProps) => {
   const tags: LeadTag[] = [
     'Vip', 'Hot', 'Serious', 'Cold', 'No response', 'No phone', 'Fake'
   ];
+
+  const handleTagClick = (tag: LeadTag) => {
+    if (onTagToggle) {
+      onTagToggle(tag);
+    }
+    
+    if (onTagsChange) {
+      const newTags = selectedTags.includes(tag)
+        ? selectedTags.filter(t => t !== tag)
+        : [...selectedTags, tag];
+      onTagsChange(newTags);
+    }
+  };
 
   return (
     <div>
@@ -24,7 +42,7 @@ const TagsFilter = ({ selectedTags, onTagToggle }: TagsFilterProps) => {
           <button
             key={tag}
             className={`flex items-center ${selectedTags.includes(tag) ? 'ring-2 ring-primary' : ''}`}
-            onClick={() => onTagToggle(tag)}
+            onClick={() => handleTagClick(tag)}
           >
             <TagBadge tag={tag} className="text-xs" />
           </button>

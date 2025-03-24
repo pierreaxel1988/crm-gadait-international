@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import KanbanCard, { KanbanItem } from '@/components/kanban/KanbanCard';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { FilterOptions } from '../PipelineFilters';
 
 // Map English status to French translations
 const statusTranslations: Record<LeadStatus, string> = {
@@ -26,23 +27,33 @@ interface MobileColumnListProps {
     items: KanbanItem[];
     pipelineType?: 'purchase' | 'rental';
   }>;
-  expandedColumn: LeadStatus | null;
-  toggleColumnExpand: (status: LeadStatus) => void;
-  activeTab: string;
+  expandedColumn?: LeadStatus | null;
+  toggleColumnExpand?: (status: LeadStatus) => void;
+  activeTab?: string;
+  searchTerm?: string;
+  filters?: FilterOptions;
 }
 
 const MobileColumnList = ({ 
   columns, 
-  expandedColumn, 
-  toggleColumnExpand,
-  activeTab 
+  expandedColumn = null, 
+  toggleColumnExpand = () => {}, 
+  activeTab = 'purchase',
+  searchTerm,
+  filters
 }: MobileColumnListProps) => {
-  // Debug de toutes les colonnes et leur statut
-  console.log('MobileColumnList: Colonnes à afficher:', columns.map(c => ({ 
-    status: c.status, 
-    title: c.title, 
-    itemCount: c.items.length 
-  })));
+  // Local state for expanded columns if not provided
+  const [localExpandedColumn, setLocalExpandedColumn] = useState<LeadStatus | null>(null);
+  
+  // Use provided or local state
+  const currentExpandedColumn = expandedColumn !== undefined ? expandedColumn : localExpandedColumn;
+  const handleToggleExpand = (status: LeadStatus) => {
+    if (toggleColumnExpand) {
+      toggleColumnExpand(status);
+    } else {
+      setLocalExpandedColumn(currentExpandedColumn === status ? null : status);
+    }
+  };
   
   return (
     <div className="space-y-3">
@@ -50,8 +61,8 @@ const MobileColumnList = ({
         <MobileColumn
           key={column.status}
           column={column}
-          isExpanded={expandedColumn === column.status}
-          onToggleExpand={() => toggleColumnExpand(column.status)}
+          isExpanded={currentExpandedColumn === column.status}
+          onToggleExpand={() => handleToggleExpand(column.status)}
           activeTab={activeTab}
         />
       ))}
@@ -72,9 +83,6 @@ interface MobileColumnProps {
 }
 
 const MobileColumn = ({ column, isExpanded, onToggleExpand, activeTab }: MobileColumnProps) => {
-  // Debug de la colonne et ses éléments
-  console.log(`Colonne ${column.status}: ${column.items.length} leads`, column.items);
-  
   return (
     <div className="bg-white rounded-md border border-slate-200 overflow-hidden">
       <div 
