@@ -98,7 +98,7 @@ const TeamMemberSelect = ({
               <SelectValue placeholder="Non assigné" />
             </div>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent searchable>
             <SelectItem value="non_assigné">Non assigné</SelectItem>
             {teamMembers.map((member) => (
               <SelectItem key={member.id} value={member.id}>

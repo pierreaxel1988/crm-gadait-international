@@ -77,7 +77,7 @@ const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
           value={assignedAgent}
           onChange={onAgentChange}
           label="Attribuer ce lead à"
-          autoSelectPierreAxel={true}
+          autoSelectPierreAxel={false}
         />
       </div>
     </div>

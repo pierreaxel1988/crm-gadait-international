@@ -29,33 +29,9 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       status: leadData.status
     });
     
-    // If no agent is assigned and the user isn't already assigned, find Pierre Axel Gadait
-    if (!leadData.assignedTo) {
-      try {
-        console.log("No assignedTo value, looking for Pierre Axel");
-        const { supabase } = await import('@/integrations/supabase/client');
-        
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id')
-          .ilike('name', '%pierre axel gadait%')
-          .maybeSingle();
-          
-        if (error) {
-          console.error("Error fetching Pierre Axel:", error);
-        }
-          
-        if (data && data.id) {
-          console.log("Found Pierre Axel, assigning lead to:", data.id);
-          leadData.assignedTo = data.id;
-        } else {
-          console.log("Pierre Axel not found in team members");
-        }
-      } catch (error) {
-        console.error('Error fetching Pierre Axel ID:', error);
-      }
-    }
-
+    // Si aucun agent n'est assigné, on ne fait pas d'assignation automatique
+    // L'utilisateur doit explicitement choisir un agent
+    
     console.log("leadService: Creating lead with processed data:", leadData);
     
     // Continue with the creation of the lead
