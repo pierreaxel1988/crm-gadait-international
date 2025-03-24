@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, PlusCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import KanbanCard, { KanbanItem } from '@/components/kanban/KanbanCard';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { FilterOptions } from '../PipelineFilters';
@@ -83,6 +84,13 @@ interface MobileColumnProps {
 }
 
 const MobileColumn = ({ column, isExpanded, onToggleExpand, activeTab }: MobileColumnProps) => {
+  const navigate = useNavigate();
+  
+  const handleAddLead = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Empêche le déclenchement du toggle lorsqu'on clique sur l'icône
+    navigate(`/leads/new?pipeline=${activeTab}&status=${column.status}`);
+  };
+  
   return (
     <div className="bg-white rounded-md border border-slate-200 overflow-hidden">
       <div 
@@ -93,9 +101,18 @@ const MobileColumn = ({ column, isExpanded, onToggleExpand, activeTab }: MobileC
           <h3 className="font-futura">
             {statusTranslations[column.status] || column.status}
           </h3>
-          <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-xs px-1.5 font-futura">
-            {column.items.length}
-          </span>
+          <div className="flex items-center">
+            <span className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-xs px-1.5 font-futura">
+              {column.items.length}
+            </span>
+            <button 
+              onClick={handleAddLead}
+              className="ml-1 text-primary hover:text-primary/80"
+              aria-label={`Ajouter un lead dans ${statusTranslations[column.status] || column.status}`}
+            >
+              <PlusCircle className="h-4 w-4" />
+            </button>
+          </div>
         </div>
         {isExpanded ? (
           <ChevronUp className="h-4 w-4 text-muted-foreground" />

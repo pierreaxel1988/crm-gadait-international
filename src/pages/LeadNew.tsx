@@ -26,7 +26,7 @@ const LeadNew = () => {
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      <LeadNewHeader onBack={() => navigate('/leads')} />
+      <LeadNewHeader onBack={() => navigate(-1)} />
 
       {error && <LeadErrorAlert error={error} />}
 
@@ -44,7 +44,7 @@ const LeadNew = () => {
 
       <LeadFormWrapper 
         onSubmit={handleSubmit}
-        onCancel={() => navigate('/leads')}
+        onCancel={() => navigate(-1)}
         adminAssignedAgent={assignedAgent}
         isSubmitting={isSubmitting}
       />

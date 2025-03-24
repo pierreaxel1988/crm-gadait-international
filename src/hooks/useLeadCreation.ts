@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed, LeadStatus } from '@/types/lead';
 import { createLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
@@ -10,9 +10,16 @@ import { useAuth } from '@/hooks/useAuth';
 export const useLeadCreation = () => {
   const navigate = useNavigate();
   const { isAdmin, user } = useAuth();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  
+  // Get pipeline type and status from URL if available
+  const pipelineFromUrl = queryParams.get('pipeline') as 'purchase' | 'rental' | null;
+  const statusFromUrl = queryParams.get('status') as LeadStatus | null;
+  
   const [assignedAgent, setAssignedAgent] = useState<string | undefined>(undefined);
-  const [pipelineType, setPipelineType] = useState<'purchase' | 'rental'>('purchase');
-  const [leadStatus, setLeadStatus] = useState<LeadStatus>('New');
+  const [pipelineType, setPipelineType] = useState<'purchase' | 'rental'>(pipelineFromUrl || 'purchase');
+  const [leadStatus, setLeadStatus] = useState<LeadStatus>(statusFromUrl || 'New');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,8 +105,8 @@ export const useLeadCreation = () => {
             : "Le lead a été créé avec succès."
         });
         
-        // Redirect to the pipeline page with the correct tab
-        navigate(`/pipeline?tab=${pipelineType}`);
+        // Navigate to the lead detail page
+        navigate(`/leads/${createdLead.id}`);
       } else {
         throw new Error("Aucune donnée de lead retournée après création");
       }
@@ -125,8 +132,10 @@ export const useLeadCreation = () => {
   // Handle pipeline type change
   const handlePipelineTypeChange = (value: 'purchase' | 'rental') => {
     setPipelineType(value);
-    // Reset status to 'New' when pipeline type changes
-    setLeadStatus('New');
+    // Reset status to 'New' when pipeline type changes only if status wasn't explicitly set
+    if (!statusFromUrl) {
+      setLeadStatus('New');
+    }
   };
 
   return {

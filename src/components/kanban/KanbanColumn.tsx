@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { PlusCircle } from 'lucide-react';
 import KanbanCard, { KanbanItem } from './KanbanCard';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -20,8 +21,8 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
   const navigate = useNavigate();
   
   const handleAddLead = () => {
-    // Pass the pipeline type as a URL parameter so the new lead form can pre-select it
-    navigate(`/leads/new?pipeline=${pipelineType}`);
+    // Pass the pipeline type and status as URL parameters so the new lead form can pre-select them
+    navigate(`/leads/new?pipeline=${pipelineType}&status=${status}`);
   };
   
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -51,9 +52,18 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
     )}>
       <div className="flex items-center justify-between p-3 md:p-4 border-b border-border">
         <h3 className="font-medium text-sm md:text-base">{title}</h3>
-        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-xs font-medium text-primary">
-          {items.length}
-        </span>
+        <div className="flex items-center gap-1">
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-xs font-medium text-primary">
+            {items.length}
+          </span>
+          <button 
+            onClick={handleAddLead}
+            className="text-primary hover:text-primary/80"
+            aria-label={`Ajouter un lead dans ${title}`}
+          >
+            <PlusCircle className="h-4 w-4" />
+          </button>
+        </div>
       </div>
       
       <div 
