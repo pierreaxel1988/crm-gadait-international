@@ -20,6 +20,9 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   
+  // Ajouter des logs pour déboguer
+  console.log(`KanbanColumn: ${title}, status: ${status}, pipelineType: ${pipelineType}, items:`, items);
+  
   const handleAddLead = () => {
     // Pass the pipeline type and status as URL parameters so the new lead form can pre-select them
     navigate(`/leads/new?pipeline=${pipelineType}&status=${status}`);

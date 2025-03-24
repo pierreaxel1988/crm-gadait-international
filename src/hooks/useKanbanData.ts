@@ -59,6 +59,17 @@ export const useKanbanData = (
           return;
         }
         
+        // Vérifier si la table leads existe et contient des données
+        const { count, error: countError } = await supabase
+          .from('leads')
+          .select('*', { count: 'exact', head: true });
+          
+        console.log('Nombre total de leads dans la base de données:', count);
+        
+        if (countError) {
+          console.error('Erreur lors de la vérification des leads:', countError);
+        }
+        
         const { data: supabaseLeads, error: leadsError } = await supabase
           .from('leads')
           .select('*');
@@ -74,6 +85,11 @@ export const useKanbanData = (
         }
         
         console.log('All leads before filtering:', leads);
+        
+        // Afficher les valeurs de pipeline_type pour chaque lead
+        leads.forEach(lead => {
+          console.log(`Lead ${lead.id} (${lead.name}): pipeline_type=${lead.pipeline_type}, pipelineType=${lead.pipelineType}, status=${lead.status}`);
+        });
         
         // Map leads data to KanbanItem format
         const mappedLeads = leads.map(lead => {
@@ -114,25 +130,28 @@ export const useKanbanData = (
         console.log('Mapped leads:', mappedLeads);
         console.log(`Current pipeline filter: ${pipelineType}`);
         
-        // Filtrer les leads pour ce pipeline
-        const filteredLeads = pipelineType ? 
-          mappedLeads.filter(lead => {
-            // Si aucun pipeline_type n'est défini, inclure dans l'affichage par défaut (purchase)
-            if (!lead.pipelineType && !lead.pipeline_type) {
-              return pipelineType === 'purchase';
-            }
-            
-            // Vérifier les deux propriétés et les normaliser pour la comparaison
-            const leadPipelineType = String(lead.pipelineType || lead.pipeline_type || '').toLowerCase();
-            const targetPipelineType = String(pipelineType).toLowerCase();
-            
-            console.log(`Lead ${lead.id} (${lead.name}): comparaison "${leadPipelineType}" avec "${targetPipelineType}"`);
-            
-            return leadPipelineType === targetPipelineType || leadPipelineType === '';
-          }) : 
-          mappedLeads;
+        // Filtrer les leads pour ce pipeline - SIMPLIFIER LE FILTRAGE POUR DÉBOGUER
+        // Désactiver temporairement les filtres complexes pour voir tous les leads
+        const filteredLeads = mappedLeads;
+        // Ancien code de filtrage:
+        // const filteredLeads = pipelineType ? 
+        //   mappedLeads.filter(lead => {
+        //     // Si aucun pipeline_type n'est défini, inclure dans l'affichage par défaut (purchase)
+        //     if (!lead.pipelineType && !lead.pipeline_type) {
+        //       return pipelineType === 'purchase';
+        //     }
+        //     
+        //     // Vérifier les deux propriétés et les normaliser pour la comparaison
+        //     const leadPipelineType = String(lead.pipelineType || lead.pipeline_type || '').toLowerCase();
+        //     const targetPipelineType = String(pipelineType).toLowerCase();
+        //     
+        //     console.log(`Lead ${lead.id} (${lead.name}): comparaison "${leadPipelineType}" avec "${targetPipelineType}"`);
+        //     
+        //     return leadPipelineType === targetPipelineType || leadPipelineType === '';
+        //   }) : 
+        //   mappedLeads;
         
-        console.log('Leads filtrés pour ce pipeline:', filteredLeads.length);
+        console.log('Leads pour ce pipeline (sans filtrage):', filteredLeads.length);
         
         // Group leads by status
         const updatedColumns = columns.map(column => {
