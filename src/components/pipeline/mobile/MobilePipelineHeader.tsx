@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SearchInput from '@/components/reports/table/SearchInput';
 import { cn } from '@/lib/utils';
+import PipelineFilters from '@/components/pipeline/PipelineFilters';
 
 interface MobilePipelineHeaderProps {
   activeTab: string;
@@ -15,6 +16,9 @@ interface MobilePipelineHeaderProps {
   filtersOpen: boolean;
   toggleFilters: () => void;
   activeFiltersCount: number;
+  filters?: any;
+  onFilterChange?: (filters: any) => void;
+  onClearFilters?: () => void;
 }
 
 const MobilePipelineHeader = ({
@@ -25,6 +29,9 @@ const MobilePipelineHeader = ({
   filtersOpen,
   toggleFilters,
   activeFiltersCount,
+  filters,
+  onFilterChange,
+  onClearFilters,
 }: MobilePipelineHeaderProps) => {
   return (
     <div className="flex flex-col gap-2">
@@ -56,7 +63,14 @@ const MobilePipelineHeader = ({
           <SheetContent side="bottom" className="h-[85vh]">
             <div className="py-6">
               <h3 className="text-lg font-futura mb-4">Filtres</h3>
-              {/* PipelineFilters would be integrated here */}
+              {filters && onFilterChange && onClearFilters && (
+                <PipelineFilters
+                  filters={filters}
+                  onFilterChange={onFilterChange}
+                  onClearFilters={onClearFilters}
+                  isMobile={true}
+                />
+              )}
             </div>
           </SheetContent>
         </Sheet>

@@ -67,6 +67,9 @@ const MobilePipelineView = ({
         filtersOpen={filtersOpen}
         toggleFilters={toggleFilters}
         activeFiltersCount={activeFiltersCount}
+        filters={filters}
+        onFilterChange={onFilterChange}
+        onClearFilters={onClearFilters}
       />
 
       {/* Columns list */}
