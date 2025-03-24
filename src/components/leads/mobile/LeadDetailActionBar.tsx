@@ -48,6 +48,8 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
             onClick={onAddAction} 
             className="bg-chocolate-dark hover:bg-chocolate-light"
             size="sm"
+            type="button"
+            aria-label="Ajouter une nouvelle action"
           >
             Nouvelle action
           </Button>
