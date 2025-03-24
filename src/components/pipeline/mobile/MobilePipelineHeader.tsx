@@ -1,88 +1,81 @@
 
 import React from 'react';
-import { Filter } from 'lucide-react';
+import { Search, SlidersHorizontal, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SearchInput from '@/components/reports/table/SearchInput';
-import { cn } from '@/lib/utils';
-import PipelineFilters from '@/components/pipeline/PipelineFilters';
+import { Input } from '@/components/ui/input';
+import { Sheet, SheetTrigger } from '@/components/ui/sheet';
+import PipelineFilters, { FilterOptions } from '../PipelineFilters';
 
 interface MobilePipelineHeaderProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
   searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  filtersOpen: boolean;
-  toggleFilters: () => void;
+  setSearchTerm: (value: string) => void;
   activeFiltersCount: number;
-  filters?: any;
-  onFilterChange?: (filters: any) => void;
-  onClearFilters?: () => void;
+  toggleFilters: () => void;
+  handleRefresh: () => void;
+  isRefreshing: boolean;
+  filters: FilterOptions;
+  onFilterChange: (filters: FilterOptions) => void;
+  onClearFilters: () => void;
+  isFilterActive: (filterName: string) => boolean;
+  teamMembers: { id: string; name: string }[];
 }
 
-const MobilePipelineHeader = ({
-  activeTab,
-  setActiveTab,
+const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
   searchTerm,
   setSearchTerm,
-  filtersOpen,
-  toggleFilters,
   activeFiltersCount,
+  toggleFilters,
+  handleRefresh,
+  isRefreshing,
   filters,
   onFilterChange,
   onClearFilters,
-}: MobilePipelineHeaderProps) => {
+  isFilterActive,
+  teamMembers
+}) => {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between">
-        <SearchInput
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          onClearSearch={() => setSearchTerm('')}
+    <div className="space-y-3">
+      {/* Search input */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Rechercher un lead..."
+          className="pl-9 pr-16"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
         
-        <Sheet>
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span className="sr-only">Refresh</span>
+          </Button>
+          
           <SheetTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className={cn(
-                "ml-2", 
-                (filtersOpen || activeFiltersCount > 0) && "text-primary border-primary"
-              )}
+            <Button
+              variant={activeFiltersCount > 0 ? "default" : "outline"}
+              size="sm"
+              className="h-7 relative"
+              onClick={toggleFilters}
             >
-              <Filter className="h-4 w-4" />
+              <SlidersHorizontal className="h-3.5 w-3.5 mr-1" />
+              Filtres
               {activeFiltersCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-white text-primary rounded-full h-4 w-4 flex items-center justify-center text-[10px]">
                   {activeFiltersCount}
                 </span>
               )}
             </Button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-[85vh]">
-            <div className="py-6">
-              <h3 className="text-lg font-futura mb-4">Filtres</h3>
-              {filters && onFilterChange && onClearFilters && (
-                <PipelineFilters
-                  filters={filters}
-                  onFilterChange={onFilterChange}
-                  onClearFilters={onClearFilters}
-                  isMobile={true}
-                />
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
+        </div>
       </div>
-
-      {/* Tab navigation */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="purchase" className="font-futura">Achat</TabsTrigger>
-          <TabsTrigger value="rental" className="font-futura">Location</TabsTrigger>
-        </TabsList>
-      </Tabs>
     </div>
   );
 };

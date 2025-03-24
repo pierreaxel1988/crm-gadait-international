@@ -1,15 +1,7 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Filter } from 'lucide-react';
-import { LeadStatus } from '@/components/common/StatusBadge';
-import { LeadTag } from '@/components/common/TagBadge';
-import { PropertyType, PurchaseTimeframe } from '@/types/lead';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
-
-// Import des sous-composants de filtres
+import React from 'react';
+import { X } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import StatusFilter from './filters/StatusFilter';
 import TagsFilter from './filters/TagsFilter';
 import AgentFilter from './filters/AgentFilter';
@@ -19,6 +11,9 @@ import TimeframeFilter from './filters/TimeframeFilter';
 import PropertyTypeFilter from './filters/PropertyTypeFilter';
 import ActionButtons from './filters/ActionButtons';
 import ActiveFiltersList from './filters/ActiveFiltersList';
+import { LeadStatus } from '@/components/common/StatusBadge';
+import { LeadTag } from '@/components/common/TagBadge';
+import { PurchaseTimeframe, PropertyType } from '@/types/lead';
 
 export interface FilterOptions {
   status: LeadStatus | null;
@@ -31,238 +26,120 @@ export interface FilterOptions {
   propertyType: PropertyType | null;
 }
 
-interface TeamMember {
-  id: string;
-  name: string;
-}
-
 export interface PipelineFiltersProps {
   filters: FilterOptions;
-  onFilterChange: (filters: FilterOptions) => void;
+  onFilterChange: (newFilters: FilterOptions) => void;
   onClearFilters: () => void;
-  assignedToOptions?: TeamMember[];
+  assignedToOptions?: { id: string; name: string }[];
+  isFilterActive: (filterName: string) => boolean;
   isMobile?: boolean;
 }
 
-const PipelineFilters = ({
+const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   filters,
   onFilterChange,
   onClearFilters,
   assignedToOptions = [],
-  isMobile: forceMobile,
-}: PipelineFiltersProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const detectedMobile = useIsMobile();
-  const isMobile = forceMobile !== undefined ? forceMobile : detectedMobile;
-
-  // Handler functions
-  const handleStatusChange = (status: LeadStatus | null) => {
-    onFilterChange({ ...filters, status });
+  isFilterActive,
+  isMobile = false
+}) => {
+  // Helper to get team member name by ID
+  const getTeamMemberName = (id: string): string => {
+    const member = assignedToOptions.find(member => member.id === id);
+    return member ? member.name : 'Unknown';
   };
 
-  const toggleTag = (tag: LeadTag) => {
-    const newTags = filters.tags.includes(tag)
-      ? filters.tags.filter(t => t !== tag)
-      : [...filters.tags, tag];
-    
-    onFilterChange({ ...filters, tags: newTags });
+  // Handle change for a specific filter
+  const handleFilterChange = <K extends keyof FilterOptions>(
+    filterName: K,
+    value: FilterOptions[K]
+  ) => {
+    onFilterChange({
+      ...filters,
+      [filterName]: value
+    });
   };
 
-  const handleAssignedToChange = (assignedTo: string | null) => {
-    onFilterChange({ ...filters, assignedTo });
-  };
+  const filtersContent = (
+    <div className={`${isMobile ? 'pt-2' : 'p-4'} space-y-6`}>
+      {/* Status filter */}
+      <StatusFilter
+        selectedStatus={filters.status}
+        onStatusChange={(status) => handleFilterChange('status', status)}
+      />
 
-  const handleBudgetChange = (type: 'min' | 'max', value: string) => {
-    if (type === 'min') {
-      onFilterChange({ ...filters, minBudget: value });
-    } else {
-      onFilterChange({ ...filters, maxBudget: value });
-    }
-  };
+      {/* Tags filter */}
+      <TagsFilter
+        selectedTags={filters.tags}
+        onTagsChange={(tags) => handleFilterChange('tags', tags)}
+      />
 
-  const handleLocationChange = (location: string) => {
-    onFilterChange({ ...filters, location });
-  };
+      {/* Agent filter */}
+      <AgentFilter
+        assignedTo={filters.assignedTo}
+        onAssignedToChange={(agent) => handleFilterChange('assignedTo', agent)}
+        assignedToOptions={assignedToOptions}
+      />
 
-  const handleTimeframeChange = (timeframe: PurchaseTimeframe | null) => {
-    onFilterChange({ ...filters, purchaseTimeframe: timeframe });
-  };
+      {/* Budget filter */}
+      <BudgetFilter
+        minBudget={filters.minBudget}
+        maxBudget={filters.maxBudget}
+        onMinBudgetChange={(value) => handleFilterChange('minBudget', value)}
+        onMaxBudgetChange={(value) => handleFilterChange('maxBudget', value)}
+      />
 
-  const handlePropertyTypeChange = (propertyType: PropertyType | null) => {
-    onFilterChange({ ...filters, propertyType });
-  };
+      {/* Location filter */}
+      <LocationFilter
+        location={filters.location}
+        onLocationChange={(location) => handleFilterChange('location', location)}
+      />
 
-  // Check if any filters are active
-  const isFilterActive = (filterName: string): boolean => {
-    switch (filterName) {
-      case 'status':
-        return filters.status !== null;
-      case 'tags':
-        return filters.tags.length > 0;
-      case 'assignedTo':
-        return filters.assignedTo !== null;
-      case 'budget':
-        return filters.minBudget !== '' || filters.maxBudget !== '';
-      case 'location':
-        return filters.location !== '';
-      case 'purchaseTimeframe':
-        return filters.purchaseTimeframe !== null;
-      case 'propertyType':
-        return filters.propertyType !== null;
-      default:
-        return false;
-    }
-  };
+      {/* Timeframe filter */}
+      <TimeframeFilter
+        purchaseTimeframe={filters.purchaseTimeframe}
+        onTimeframeChange={(timeframe) => handleFilterChange('purchaseTimeframe', timeframe)}
+      />
 
-  // Récupère le nom du membre de l'équipe à partir de son ID
-  const getTeamMemberName = (id: string) => {
-    const member = assignedToOptions.find(tm => tm.id === id);
-    return member ? member.name : id;
-  };
+      {/* Property type filter */}
+      <PropertyTypeFilter
+        propertyType={filters.propertyType}
+        onPropertyTypeChange={(type) => handleFilterChange('propertyType', type)}
+      />
 
-  return (
-    <div className="relative w-full">
-      {!isMobile && (
-        <Button
-          variant="outline"
-          className="flex items-center gap-2"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <Filter className="h-4 w-4" />
-          <span className="hidden md:inline">Filtres</span>
-        </Button>
-      )}
+      {/* Action buttons */}
+      <ActionButtons onClearFilters={onClearFilters} />
 
-      {!isMobile && (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-          <PopoverTrigger asChild>
-            <div />
-          </PopoverTrigger>
-          <PopoverContent className={cn(
-            "w-[340px] sm:w-[420px] p-4 shadow-md", 
-            isMobile && "max-h-[70vh] overflow-y-auto"
-          )} align="start">
-            <h3 className="text-lg font-medium mb-4">Filtres</h3>
-            
-            <div className="space-y-4">
-              {/* Status Filter */}
-              <StatusFilter 
-                status={filters.status} 
-                onStatusChange={handleStatusChange} 
-              />
-              
-              {/* Tags Filter */}
-              <TagsFilter 
-                selectedTags={filters.tags} 
-                onTagToggle={toggleTag} 
-              />
-              
-              {/* Assigned To Filter */}
-              <AgentFilter 
-                assignedTo={filters.assignedTo} 
-                onAssignedToChange={handleAssignedToChange} 
-                assignedToOptions={assignedToOptions} 
-              />
-              
-              {/* Budget Filter */}
-              <BudgetFilter 
-                minBudget={filters.minBudget} 
-                maxBudget={filters.maxBudget} 
-                onBudgetChange={handleBudgetChange} 
-              />
-              
-              {/* Location Filter */}
-              <LocationFilter 
-                location={filters.location} 
-                onLocationChange={handleLocationChange} 
-              />
-              
-              {/* Purchase Timeframe Filter */}
-              <TimeframeFilter 
-                purchaseTimeframe={filters.purchaseTimeframe} 
-                onTimeframeChange={handleTimeframeChange} 
-              />
-              
-              {/* Property Type Filter */}
-              <PropertyTypeFilter 
-                propertyType={filters.propertyType} 
-                onPropertyTypeChange={handlePropertyTypeChange} 
-              />
-              
-              {/* Action Buttons */}
-              <ActionButtons 
-                onClear={onClearFilters} 
-                onApply={() => setIsOpen(false)} 
-              />
-            </div>
-          </PopoverContent>
-        </Popover>
-      )}
-
-      {/* For mobile or direct embedding, just show the filters directly */}
-      {isMobile && (
-        <div className="space-y-4">
-          {/* Status Filter */}
-          <StatusFilter 
-            status={filters.status} 
-            onStatusChange={handleStatusChange} 
-          />
-          
-          {/* Tags Filter */}
-          <TagsFilter 
-            selectedTags={filters.tags} 
-            onTagToggle={toggleTag} 
-          />
-          
-          {/* Assigned To Filter */}
-          <AgentFilter 
-            assignedTo={filters.assignedTo} 
-            onAssignedToChange={handleAssignedToChange} 
-            assignedToOptions={assignedToOptions} 
-          />
-          
-          {/* Budget Filter */}
-          <BudgetFilter 
-            minBudget={filters.minBudget} 
-            maxBudget={filters.maxBudget} 
-            onBudgetChange={handleBudgetChange} 
-          />
-          
-          {/* Location Filter */}
-          <LocationFilter 
-            location={filters.location} 
-            onLocationChange={handleLocationChange} 
-          />
-          
-          {/* Purchase Timeframe Filter */}
-          <TimeframeFilter 
-            purchaseTimeframe={filters.purchaseTimeframe} 
-            onTimeframeChange={handleTimeframeChange} 
-          />
-          
-          {/* Property Type Filter */}
-          <PropertyTypeFilter 
-            propertyType={filters.propertyType} 
-            onPropertyTypeChange={handlePropertyTypeChange} 
-          />
-          
-          {/* Action Buttons */}
-          <ActionButtons 
-            onClear={onClearFilters} 
-            onApply={() => {}} 
-          />
-        </div>
-      )}
-
-      {/* Liste des filtres actifs */}
-      <ActiveFiltersList 
-        filters={filters} 
-        onFilterChange={onFilterChange} 
-        onClearFilters={onClearFilters} 
+      {/* Display active filters */}
+      <ActiveFiltersList
+        filters={filters}
+        onFilterChange={onFilterChange}
+        onClearFilters={onClearFilters}
         getTeamMemberName={getTeamMemberName}
-        isFilterActive={isFilterActive} 
+        isFilterActive={isFilterActive}
       />
     </div>
+  );
+
+  // For desktop, display as a regular div
+  if (!isMobile) {
+    return (
+      <div className="bg-background border rounded-md shadow-sm">
+        {filtersContent}
+      </div>
+    );
+  }
+
+  // For mobile, display in a sheet/drawer
+  return (
+    <SheetContent side="right" className="w-full sm:max-w-md p-0 pt-12">
+      <SheetHeader className="px-4 py-2 border-b">
+        <SheetTitle className="text-lg">Filtres</SheetTitle>
+      </SheetHeader>
+      <div className="px-4 py-6 overflow-y-auto max-h-[calc(100vh-10rem)]">
+        {filtersContent}
+      </div>
+    </SheetContent>
   );
 };
 

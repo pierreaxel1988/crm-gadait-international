@@ -1,21 +1,22 @@
 
-import React, { useState } from 'react';
-import { Search, Filter, Plus } from 'lucide-react';
+import React from 'react';
+import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-import PipelineFilters from './PipelineFilters';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { FilterOptions } from './PipelineFilters';
-import CustomButton from '@/components/ui/CustomButton';
-import { toast } from '@/hooks/use-toast';
+import { Search, SlidersHorizontal } from 'lucide-react';
+import PipelineFilters, { FilterOptions } from './PipelineFilters';
 
 interface PipelineHeaderProps {
   searchTerm: string;
-  setSearchTerm: (term: string) => void;
+  setSearchTerm: (value: string) => void;
   onToggleFilters: () => void;
   filtersOpen: boolean;
   activeFilters: number;
+  isFilterActive: (filterName: string) => boolean;
+  filters: FilterOptions;
+  onFilterChange: (filters: FilterOptions) => void;
+  onClearFilters: () => void;
+  teamMembers: { id: string; name: string }[];
 }
 
 const PipelineHeader: React.FC<PipelineHeaderProps> = ({
@@ -23,116 +24,54 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   setSearchTerm,
   onToggleFilters,
   filtersOpen,
-  activeFilters
+  activeFilters,
+  isFilterActive,
+  filters,
+  onFilterChange,
+  onClearFilters,
+  teamMembers
 }) => {
-  const navigate = useNavigate();
-  const isMobile = useIsMobile();
-
-  // Initialize filter state for PipelineFilters
-  const [filters, setFilters] = useState<FilterOptions>({
-    status: null,
-    tags: [],
-    assignedTo: null,
-    minBudget: '',
-    maxBudget: '',
-    location: '',
-    purchaseTimeframe: null,
-    propertyType: null
-  });
-
-  const handleNewLead = () => {
-    try {
-      navigate('/leads/new');
-    } catch (error) {
-      console.error("Navigation error:", error);
-      toast({
-        title: "Erreur de navigation",
-        description: "Impossible d'accéder à la page de création de lead.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleFilterChange = (newFilters: FilterOptions) => {
-    setFilters(newFilters);
-  };
-
-  const handleClearFilters = () => {
-    setFilters({
-      status: null,
-      tags: [],
-      assignedTo: null,
-      minBudget: '',
-      maxBudget: '',
-      location: '',
-      purchaseTimeframe: null,
-      propertyType: null
-    });
-  };
-
-  // Function to check if a specific filter is active
-  const isFilterActive = (filterName: string): boolean => {
-    switch (filterName) {
-      case 'status':
-        return filters.status !== null;
-      case 'tags':
-        return filters.tags.length > 0;
-      case 'assignedTo':
-        return filters.assignedTo !== null;
-      case 'budget':
-        return filters.minBudget !== '' || filters.maxBudget !== '';
-      case 'location':
-        return filters.location !== '';
-      case 'purchaseTimeframe':
-        return filters.purchaseTimeframe !== null;
-      case 'propertyType':
-        return filters.propertyType !== null;
-      default:
-        return false;
-    }
-  };
-
   return (
-    <div className="flex flex-col gap-3 mb-4">
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input type="search" placeholder="Rechercher..." className="pl-8 h-9" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-        </div>
-        
-        <div className="flex space-x-2">
-          <CustomButton 
-            variant="chocolate" 
-            size="sm" 
-            onClick={handleNewLead} 
-            className="flex items-center gap-1.5"
-          >
-            <Plus className="h-4 w-4" />
-            {isMobile ? 'Nouveau' : 'Nouveau Lead'}
-          </CustomButton>
-        </div>
+    <div className="flex flex-col md:flex-row gap-3 md:items-center justify-between">
+      <div className="relative flex-1 max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Rechercher un lead..."
+          className="pl-9"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
       
-      <div className="flex items-center justify-between">
-        <Button variant="outline" size="sm" onClick={onToggleFilters} className={`flex items-center gap-1.5 ${filtersOpen || activeFilters > 0 ? 'border-blue-500 text-blue-500' : ''}`}>
-          <Filter className="h-4 w-4" />
+      <div className="flex items-center space-x-2">
+        <Button
+          variant={filtersOpen ? "default" : "outline"}
+          size="sm"
+          onClick={onToggleFilters}
+          className="flex items-center"
+        >
+          <SlidersHorizontal className="h-4 w-4 mr-2" />
           Filtres
           {activeFilters > 0 && (
-            <span className="ml-1 rounded-full bg-blue-500 text-white text-xs px-1.5 py-0.5">
+            <span className="ml-2 bg-white text-primary rounded-full h-5 w-5 flex items-center justify-center text-xs">
               {activeFilters}
             </span>
           )}
         </Button>
       </div>
-      
+
+      {/* Filters panel - only shown when filtersOpen is true */}
       {filtersOpen && (
-        <PipelineFilters 
-          filters={filters} 
-          onFilterChange={handleFilterChange} 
-          onClearFilters={handleClearFilters} 
-          assignedToOptions={[]} 
-          isFilterActive={isFilterActive} 
-        />
+        <div className="col-span-full mt-3">
+          <PipelineFilters 
+            filters={filters}
+            onFilterChange={onFilterChange}
+            onClearFilters={onClearFilters}
+            assignedToOptions={teamMembers}
+            isFilterActive={isFilterActive}
+          />
+        </div>
       )}
     </div>
   );

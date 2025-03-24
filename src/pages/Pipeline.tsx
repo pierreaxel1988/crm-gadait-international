@@ -46,6 +46,8 @@ const Pipeline = () => {
           columns={getAllColumns()}
           handleRefresh={handleRefresh}
           isRefreshing={isRefreshing}
+          isFilterActive={isFilterActive}
+          teamMembers={teamMembers}
         />
       </div>
     );
@@ -59,6 +61,11 @@ const Pipeline = () => {
         onToggleFilters={toggleFilters}
         filtersOpen={filtersOpen}
         activeFilters={activeFiltersCount}
+        isFilterActive={isFilterActive}
+        filters={filters}
+        onFilterChange={setFilters}
+        onClearFilters={handleClearFilters}
+        teamMembers={teamMembers}
       />
 
       <DesktopPipelineView

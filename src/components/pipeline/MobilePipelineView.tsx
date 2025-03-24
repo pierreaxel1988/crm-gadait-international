@@ -1,14 +1,10 @@
 
-import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { Sheet, SheetTrigger } from '@/components/ui/sheet';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobilePipelineHeader from './mobile/MobilePipelineHeader';
 import MobileColumnList from './mobile/MobileColumnList';
-import MobileActionsDrawer from './mobile/MobileActionsDrawer';
-import { FilterOptions } from '@/components/pipeline/PipelineFilters';
-import { LeadStatus } from '@/components/common/StatusBadge';
-import { KanbanItem } from '@/components/kanban/KanbanCard';
+import PipelineFilters, { FilterOptions } from './PipelineFilters';
 
 interface MobilePipelineViewProps {
   activeTab: string;
@@ -21,17 +17,14 @@ interface MobilePipelineViewProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
-  columns: Array<{
-    title: string;
-    status: LeadStatus;
-    items: KanbanItem[];
-    pipelineType?: 'purchase' | 'rental';
-  }>;
+  columns: any[];
   handleRefresh: () => void;
   isRefreshing: boolean;
+  isFilterActive: (filterName: string) => boolean;
+  teamMembers: { id: string; name: string }[];
 }
 
-const MobilePipelineView = ({
+const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   activeTab,
   setActiveTab,
   searchTerm,
@@ -45,58 +38,52 @@ const MobilePipelineView = ({
   columns,
   handleRefresh,
   isRefreshing,
-}: MobilePipelineViewProps) => {
-  const [expandedColumn, setExpandedColumn] = useState<LeadStatus | null>(null);
-
-  const toggleColumnExpand = (status: LeadStatus) => {
-    if (expandedColumn === status) {
-      setExpandedColumn(null);
-    } else {
-      setExpandedColumn(status);
-    }
-  };
-
+  isFilterActive,
+  teamMembers
+}) => {
   return (
-    <div className="space-y-4">
-      {/* Header with search and tabs */}
-      <MobilePipelineHeader
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
+    <div>
+      <MobilePipelineHeader 
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        filtersOpen={filtersOpen}
-        toggleFilters={toggleFilters}
         activeFiltersCount={activeFiltersCount}
+        toggleFilters={toggleFilters}
+        handleRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
         filters={filters}
         onFilterChange={onFilterChange}
         onClearFilters={onClearFilters}
+        isFilterActive={isFilterActive}
+        teamMembers={teamMembers}
       />
 
-      {/* Columns list */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+        <TabsList className="w-full">
+          <TabsTrigger value="purchase" className="flex-1">Achat</TabsTrigger>
+          <TabsTrigger value="rental" className="flex-1">Location</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       <MobileColumnList
-        columns={columns}
-        expandedColumn={expandedColumn}
-        toggleColumnExpand={toggleColumnExpand}
-        activeTab={activeTab}
+        columns={columns.filter(col => 
+          // Show all columns for now, filtering will be handled by the backend
+          true
+        )}
+        searchTerm={searchTerm}
+        filters={filters}
       />
 
-      {/* Floating action button and drawer */}
-      <Drawer>
-        <DrawerTrigger asChild>
-          <Button
-            className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-loro-terracotta hover:bg-loro-500 p-0 flex items-center justify-center"
-          >
-            <Plus className="h-6 w-6" />
-          </Button>
-        </DrawerTrigger>
-        <DrawerContent className="p-6">
-          <MobileActionsDrawer 
-            activeTab={activeTab}
-            handleRefresh={handleRefresh}
-            isRefreshing={isRefreshing}
-          />
-        </DrawerContent>
-      </Drawer>
+      {/* Filters sheet */}
+      <Sheet open={filtersOpen} onOpenChange={toggleFilters}>
+        <PipelineFilters 
+          filters={filters}
+          onFilterChange={onFilterChange}
+          onClearFilters={onClearFilters}
+          assignedToOptions={teamMembers}
+          isFilterActive={isFilterActive}
+          isMobile={true}
+        />
+      </Sheet>
     </div>
   );
 };
