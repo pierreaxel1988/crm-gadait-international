@@ -58,16 +58,16 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
   const getActionTypeIcon = (actionType: string) => {
     switch (actionType) {
-      case 'Call': return <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">Appel</span>;
-      case 'Visites': return <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium">Visite</span>;
-      case 'Compromis': return <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-medium">Compromis</span>;
-      case 'Acte de vente': return <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">Acte de vente</span>;
-      case 'Contrat de Location': return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">Contrat Location</span>;
-      case 'Propositions': return <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs font-medium">Proposition</span>;
-      case 'Follow up': return <span className="bg-pink-100 text-pink-800 px-2 py-1 rounded-full text-xs font-medium">Follow-up</span>;
-      case 'Estimation': return <span className="bg-teal-100 text-teal-800 px-2 py-1 rounded-full text-xs font-medium">Estimation</span>;
-      case 'Prospection': return <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">Prospection</span>;
-      case 'Admin': return <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">Admin</span>;
+      case 'Call': return <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
+      case 'Visites': return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs font-futura">Visite</span>;
+      case 'Compromis': return <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-futura">Compromis</span>;
+      case 'Acte de vente': return <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs font-futura">Acte de vente</span>;
+      case 'Contrat de Location': return <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-futura">Contrat Location</span>;
+      case 'Propositions': return <span className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full text-xs font-futura">Proposition</span>;
+      case 'Follow up': return <span className="bg-pink-100 text-pink-800 px-2 py-0.5 rounded-full text-xs font-futura">Follow-up</span>;
+      case 'Estimation': return <span className="bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full text-xs font-futura">Estimation</span>;
+      case 'Prospection': return <span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-xs font-futura">Prospection</span>;
+      case 'Admin': return <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs font-futura">Admin</span>;
       default: return null;
     }
   };
@@ -81,46 +81,46 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center p-8">
-        <div className="animate-spin h-6 w-6 border-4 border-chocolate-dark rounded-full border-t-transparent"></div>
+      <div className="flex justify-center items-center p-4">
+        <div className="animate-spin h-5 w-5 border-3 border-chocolate-dark rounded-full border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-base font-futura">Actions en attente</h3>
+    <div className="space-y-3">
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-sm font-futura">Actions en attente</h3>
         <Button 
           onClick={onAddAction}
-          className="bg-chocolate-dark hover:bg-chocolate-light transition-all duration-200 active:scale-95 flex items-center gap-1"
+          className="bg-chocolate-dark hover:bg-chocolate-light transition-all duration-200 active:scale-95 flex items-center gap-1 h-7 px-2"
           size="sm"
         >
-          <Plus className="h-3.5 w-3.5" />
-          <span className="font-futura">Nouvelle</span>
+          <Plus className="h-3 w-3" />
+          <span className="font-futura text-xs">Nouvelle</span>
         </Button>
       </div>
 
       {pendingActions.length === 0 ? (
-        <div className="text-center py-8 border rounded-md bg-gray-50 animate-[fade-in_0.3s_ease-out]">
-          <p className="text-muted-foreground text-sm font-futura">Aucune action en attente</p>
+        <div className="text-center py-5 border rounded-md bg-gray-50 animate-[fade-in_0.3s_ease-out]">
+          <p className="text-muted-foreground text-xs font-futura">Aucune action en attente</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {pendingActions.map((action) => (
             <div 
               key={action.id} 
-              className="border rounded-md p-3 bg-white shadow-sm hover:shadow-md transition-all duration-200 animate-[fade-in_0.3s_ease-out]"
+              className="border rounded-md p-2 bg-white shadow-sm hover:shadow-md transition-all duration-200 animate-[fade-in_0.3s_ease-out]"
             >
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
-                    {getActionTypeIcon(action.actionType)}
+              <div className="flex justify-between items-start mb-1">
+                <div className="flex items-center gap-1.5">
+                  <div className="h-6 w-6 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                    <Calendar className="h-3 w-3" />
                   </div>
                   <div>
-                    <h4 className="font-medium font-futura">{action.actionType}</h4>
+                    <h4 className="font-futura text-sm">{action.actionType}</h4>
                     <div className="flex items-center text-xs text-gray-500">
-                      <Calendar className="h-3 w-3 mr-1" />
+                      <Clock className="h-2.5 w-2.5 mr-1" />
                       {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
                     </div>
                   </div>
@@ -128,15 +128,15 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="h-7 px-2 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95"
+                  className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95"
                   onClick={() => onMarkComplete(action)}
                 >
-                  <Check className="h-4 w-4 mr-1" /> 
+                  <Check className="h-3 w-3 mr-1" /> 
                   <span className="text-xs font-futura">Terminer</span>
                 </Button>
               </div>
               {action.notes && (
-                <div className="text-sm bg-gray-50 p-2 rounded-md mt-2 animate-[fade-in_0.2s_ease-out]">
+                <div className="text-xs bg-gray-50 p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out]">
                   {action.notes}
                 </div>
               )}
@@ -147,31 +147,31 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {completedActions.length > 0 && (
         <>
-          <h3 className="text-base font-futura mt-6 mb-3">Historique des actions</h3>
-          <div className="space-y-3">
+          <h3 className="text-sm font-futura mt-4 mb-2">Historique des actions</h3>
+          <div className="space-y-2">
             {completedActions.map((action) => (
               <div 
                 key={action.id} 
                 className={cn(
-                  "border rounded-md p-3 bg-gray-50 transition-all duration-200 animate-[fade-in_0.3s_ease-out]",
+                  "border rounded-md p-2 bg-gray-50 transition-all duration-200 animate-[fade-in_0.3s_ease-out]",
                 )}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                      {getActionTypeIcon(action.actionType)}
+                <div className="flex justify-between items-start mb-1">
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                      <Check className="h-3 w-3" />
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-700 font-futura">{action.actionType}</h4>
+                      <h4 className="font-futura text-sm text-gray-700">{action.actionType}</h4>
                       <div className="flex items-center text-xs text-gray-500">
-                        <Check className="h-3 w-3 mr-1 text-green-500" />
+                        <Check className="h-2.5 w-2.5 mr-1 text-green-500" />
                         {action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}
                       </div>
                     </div>
                   </div>
                 </div>
                 {action.notes && (
-                  <div className="text-sm bg-white p-2 rounded-md mt-2 text-gray-600 animate-[fade-in_0.2s_ease-out]">
+                  <div className="text-xs bg-white p-1.5 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out]">
                     {action.notes}
                   </div>
                 )}
