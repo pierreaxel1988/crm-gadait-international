@@ -53,7 +53,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
         </Button>
         <div className="truncate">
           <h1 className="text-lg font-futura leading-tight truncate">{name}</h1>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-zinc-400">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
           <p className="text-xs flex items-center gap-1 text-zinc-800">
