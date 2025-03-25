@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import { User, Mail, Phone, Flag, BarChart, MapPin, Clipboard } from 'lucide-react';
@@ -7,42 +6,47 @@ import { toast } from '@/hooks/use-toast';
 import { COUNTRIES } from '@/utils/countries';
 import { deriveNationalityFromCountry, countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
 import FormInput from '../FormInput';
-
 interface MobileGeneralInfoSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
   countries?: Country[];
   sources?: LeadSource[];
 }
-
-const MobileGeneralInfoSection = ({ 
-  lead, 
+const MobileGeneralInfoSection = ({
+  lead,
   onDataChange,
   countries = COUNTRIES,
-  sources = [] 
+  sources = []
 }: MobileGeneralInfoSectionProps) => {
   // State pour gérer le code pays
   const [phoneCountryCode, setPhoneCountryCode] = useState('+33');
-  
+
   // Create a reference to the form data
   const formData = lead;
-  
+
   // Create a handler function that wraps onDataChange
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    onDataChange({ [name]: value });
+    const {
+      name,
+      value
+    } = e.target;
+    onDataChange({
+      [name]: value
+    });
   };
-  
+
   // Auto-set nationality when country changes
   useEffect(() => {
     if (formData.taxResidence && !formData.nationality) {
       const derivedNationality = deriveNationalityFromCountry(formData.taxResidence);
       if (derivedNationality) {
-        onDataChange({ nationality: derivedNationality });
+        onDataChange({
+          nationality: derivedNationality
+        });
       }
     }
   }, [formData.taxResidence]);
-  
+
   // Fonction pour extraire le code pays du numéro de téléphone existant
   useEffect(() => {
     if (formData.phone) {
@@ -78,15 +82,15 @@ const MobileGeneralInfoSection = ({
     '+213': 'Algeria',
     '+20': 'Egypt'
   };
-  
+
   // Gérer le changement de code pays
   const handlePhoneCodeChange = (code: string) => {
     setPhoneCountryCode(code);
-    
+
     // Extraire le numéro de téléphone sans code pays
     let phoneNumber = formData.phone || '';
     const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
-    
+
     // Supprimer tout code pays existant
     for (const existingCode of countryCodes) {
       if (phoneNumber.startsWith(existingCode)) {
@@ -94,27 +98,29 @@ const MobileGeneralInfoSection = ({
         break;
       }
     }
-    
+
     // Mettre à jour le numéro avec le nouveau code pays
     const formattedPhone = phoneNumber ? `${code} ${phoneNumber}` : "";
-    
+
     // Créer un objet pour les mises à jour
-    const updates: Partial<LeadDetailed> = { phone: formattedPhone };
-    
+    const updates: Partial<LeadDetailed> = {
+      phone: formattedPhone
+    };
+
     // Si un pays correspond au code pays, mettre à jour le pays de résidence et la nationalité
     if (countryCodeMapping[code]) {
       const country = countryCodeMapping[code];
-      
+
       // Toujours mettre à jour le pays de résidence
       updates.taxResidence = country;
-      
+
       // Dériver la nationalité du pays
       const nationality = deriveNationalityFromCountry(country);
       if (nationality) {
         updates.nationality = nationality;
       }
     }
-    
+
     // Appliquer toutes les mises à jour
     onDataChange(updates);
   };
@@ -122,17 +128,15 @@ const MobileGeneralInfoSection = ({
   // Adapter la valeur du téléphone pour l'affichage dans le champ
   const getPhoneValueWithoutCode = () => {
     if (!formData.phone) return '';
-    
+
     // Rechercher et supprimer le code pays du numéro de téléphone
     const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
-    
     let phoneNumber = formData.phone;
     for (const code of countryCodes) {
       if (phoneNumber.startsWith(code)) {
         return phoneNumber.substring(code.length).trim();
       }
     }
-    
     return formData.phone;
   };
 
@@ -153,29 +157,28 @@ const MobileGeneralInfoSection = ({
 
     // Split by new lines
     const lines = contactText.split('\n').filter(line => line.trim().length > 0);
-    
+
     // Extract data based on position and patterns
     let name = '';
     let email = '';
     let phone = '';
-
     lines.forEach(line => {
       const trimmedLine = line.trim();
-      
+
       // Check if line contains an email (has @ symbol)
       if (trimmedLine.includes('@')) {
         email = trimmedLine;
-      } 
+      }
       // Check if line contains phone number (has digits and possibly +)
       else if (/[\d\+]/.test(trimmedLine) && (trimmedLine.includes('+') || trimmedLine.includes(' '))) {
         phone = trimmedLine;
-        
+
         // Tenter d'extraire un code pays s'il existe
         const codeMatch = phone.match(/^\+\d+/);
         if (codeMatch && codeMatch[0]) {
           setPhoneCountryCode(codeMatch[0]);
         }
-      } 
+      }
       // If not email or phone, consider it as name
       else if (!name) {
         name = trimmedLine;
@@ -187,7 +190,7 @@ const MobileGeneralInfoSection = ({
     if (name) updates.name = name;
     if (email) updates.email = email;
     if (phone) updates.phone = phone;
-    
+
     // Apply updates if any
     if (Object.keys(updates).length > 0) {
       onDataChange(updates);
@@ -196,7 +199,6 @@ const MobileGeneralInfoSection = ({
     // Hide the paste area and show a success toast
     setShowContactPaste(false);
     setContactText('');
-    
     toast({
       title: "Informations importées",
       description: "Les informations de contact ont été extraites avec succès."
@@ -206,246 +208,292 @@ const MobileGeneralInfoSection = ({
   // Gérer les changements spécifiques au champ téléphone
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const phoneNumber = e.target.value;
-    
+
     // Si le champ est vide, effacer complètement le numéro de téléphone
     if (!phoneNumber) {
-      onDataChange({ phone: '' });
+      onDataChange({
+        phone: ''
+      });
       return;
     }
-    
+
     // Sinon, ajouter le code pays actuel au numéro
     const formattedPhone = `${phoneCountryCode} ${phoneNumber}`;
-    onDataChange({ phone: formattedPhone });
+    onDataChange({
+      phone: formattedPhone
+    });
   };
 
   // Prepare the available sources list
-  const availableSources: LeadSource[] = sources.length > 0 ? sources : [
-    "Site web", 
-    "Réseaux sociaux", 
-    "Portails immobiliers", 
-    "Network", 
-    "Repeaters", 
-    "Recommandations",
-    "Apporteur d'affaire",
-    "Idealista",
-    "Le Figaro",
-    "Properstar",
-    "Property Cloud",
-    "L'express Property"
-  ];
+  const availableSources: LeadSource[] = sources.length > 0 ? sources : ["Site web", "Réseaux sociaux", "Portails immobiliers", "Network", "Repeaters", "Recommandations", "Apporteur d'affaire", "Idealista", "Le Figaro", "Properstar", "Property Cloud", "L'express Property"];
 
   // Function to get country flag emoji
   const getCountryFlag = (country: string): string => {
     // Use emoji country flags
     const countryToFlag = (countryCode: string) => {
-      const codePoints = countryCode
-        .toUpperCase()
-        .split('')
-        .map(char => 127397 + char.charCodeAt(0));
+      const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
       return String.fromCodePoint(...codePoints);
     };
-    
+
     // Map country names to ISO 3166-1 alpha-2 codes
     const countryNameToCode: Record<string, string> = {
-      'Afghanistan': 'AF', 'Albania': 'AL', 'Algeria': 'DZ', 'Andorra': 'AD', 
-      'Angola': 'AO', 'Antigua and Barbuda': 'AG', 'Argentina': 'AR', 'Armenia': 'AM', 
-      'Australia': 'AU', 'Austria': 'AT', 'Azerbaijan': 'AZ', 'Bahamas': 'BS', 
-      'Bahrain': 'BH', 'Bangladesh': 'BD', 'Barbados': 'BB', 'Belarus': 'BY', 
-      'Belgium': 'BE', 'Belize': 'BZ', 'Benin': 'BJ', 'Bhutan': 'BT', 
-      'Bolivia': 'BO', 'Bosnia and Herzegovina': 'BA', 'Botswana': 'BW', 'Brazil': 'BR', 
-      'Brunei': 'BN', 'Bulgaria': 'BG', 'Burkina Faso': 'BF', 'Burundi': 'BI', 
-      'Cabo Verde': 'CV', 'Cambodia': 'KH', 'Cameroon': 'CM', 'Canada': 'CA', 
-      'Central African Republic': 'CF', 'Chad': 'TD', 'Chile': 'CL', 'China': 'CN', 
-      'Colombia': 'CO', 'Comoros': 'KM', 'Congo': 'CD', 'Costa Rica': 'CR', 
-      'Croatia': 'HR', 'Cuba': 'CU', 'Cyprus': 'CY', 'Czech Republic': 'CZ', 
-      'Denmark': 'DK', 'Djibouti': 'DJ', 'Dominica': 'DM', 'Dominican Republic': 'DO', 
-      'East Timor': 'TL', 'Ecuador': 'EC', 'Egypt': 'EG', 'El Salvador': 'SV', 
-      'Equatorial Guinea': 'GQ', 'Eritrea': 'ER', 'Estonia': 'EE', 'Eswatini': 'SZ', 
-      'Ethiopia': 'ET', 'Fiji': 'FJ', 'Finland': 'FI', 'France': 'FR', 
-      'Gabon': 'GA', 'Gambia': 'GM', 'Georgia': 'GE', 'Germany': 'DE', 
-      'Ghana': 'GH', 'Greece': 'GR', 'Grenada': 'GD', 'Guatemala': 'GT', 
-      'Guinea': 'GN', 'Guinea-Bissau': 'GW', 'Guyana': 'GY', 'Haiti': 'HT', 
-      'Honduras': 'HN', 'Hungary': 'HU', 'Iceland': 'IS', 'India': 'IN', 
-      'Indonesia': 'ID', 'Iran': 'IR', 'Iraq': 'IQ', 'Ireland': 'IE', 
-      'Israel': 'IL', 'Italy': 'IT', 'Ivory Coast': 'CI', 'Jamaica': 'JM', 
-      'Japan': 'JP', 'Jordan': 'JO', 'Kazakhstan': 'KZ', 'Kenya': 'KE', 
-      'Kiribati': 'KI', 'Korea, North': 'KP', 'Korea, South': 'KR', 'Kosovo': 'XK', 
-      'Kuwait': 'KW', 'Kyrgyzstan': 'KG', 'Laos': 'LA', 'Latvia': 'LV', 
-      'Lebanon': 'LB', 'Lesotho': 'LS', 'Liberia': 'LR', 'Libya': 'LY', 
-      'Liechtenstein': 'LI', 'Lithuania': 'LT', 'Luxembourg': 'LU', 'Madagascar': 'MG', 
-      'Malawi': 'MW', 'Malaysia': 'MY', 'Maldives': 'MV', 'Mali': 'ML', 
-      'Malta': 'MT', 'Marshall Islands': 'MH', 'Mauritania': 'MR', 'Mauritius': 'MU', 
-      'Mexico': 'MX', 'Micronesia': 'FM', 'Moldova': 'MD', 'Monaco': 'MC', 
-      'Mongolia': 'MN', 'Montenegro': 'ME', 'Morocco': 'MA', 'Mozambique': 'MZ', 
-      'Myanmar': 'MM', 'Namibia': 'NA', 'Nauru': 'NR', 'Nepal': 'NP', 
-      'Netherlands': 'NL', 'New Zealand': 'NZ', 'Nicaragua': 'NI', 'Niger': 'NE', 
-      'Nigeria': 'NG', 'North Macedonia': 'MK', 'Norway': 'NO', 'Oman': 'OM', 
-      'Pakistan': 'PK', 'Palau': 'PW', 'Panama': 'PA', 'Papua New Guinea': 'PG', 
-      'Paraguay': 'P', 'Peru': 'PE', 'Philippines': 'PH', 'Poland': 'PL', 
-      'Portugal': 'PT', 'Qatar': 'QA', 'Romania': 'RO', 'Russia': 'RU', 
-      'Rwanda': 'RW', 'Saint Kitts and Nevis': 'KN', 'Saint Lucia': 'LC', 
-      'Saint Vincent and the Grenadines': 'VC', 'Samoa': 'WS', 'San Marino': 'SM', 
-      'Sao Tome and Principe': 'ST', 'Saudi Arabia': 'SA', 'Senegal': 'SN', 
-      'Serbia': 'RS', 'Seychelles': 'SC', 'Sierra Leone': 'SL', 'Singapore': 'SG', 
-      'Slovakia': 'SK', 'Slovenia': 'SI', 'Solomon Islands': 'SB', 'Somalia': 'SO', 
-      'South Africa': 'ZA', 'South Sudan': 'SS', 'Spain': 'ES', 'Sri Lanka': 'LK', 
-      'Sudan': 'SD', 'Suriname': 'SR', 'Sweden': 'SE', 'Switzerland': 'CH', 
-      'Syria': 'SY', 'Taiwan': 'TW', 'Tajikistan': 'TJ', 'Tanzania': 'TZ', 
-      'Thailand': 'TH', 'Togo': 'TG', 'Tonga': 'TO', 'Trinidad and Tobago': 'TT', 
-      'Tunisia': 'TN', 'Turkey': 'TR', 'Turkmenistan': 'TM', 'Tuvalu': 'TV', 
-      'Uganda': 'UG', 'Ukraine': 'UA', 'United Arab Emirates': 'AE', 'United Kingdom': 'GB', 
-      'United States': 'US', 'Uruguay': 'UY', 'Uzbekistan': 'UZ', 'Vanuatu': 'VU', 
-      'Vatican City': 'VA', 'Venezuela': 'VE', 'Vietnam': 'VN', 'Yemen': 'YE', 
-      'Zambia': 'ZM', 'Zimbabwe': 'ZW'
+      'Afghanistan': 'AF',
+      'Albania': 'AL',
+      'Algeria': 'DZ',
+      'Andorra': 'AD',
+      'Angola': 'AO',
+      'Antigua and Barbuda': 'AG',
+      'Argentina': 'AR',
+      'Armenia': 'AM',
+      'Australia': 'AU',
+      'Austria': 'AT',
+      'Azerbaijan': 'AZ',
+      'Bahamas': 'BS',
+      'Bahrain': 'BH',
+      'Bangladesh': 'BD',
+      'Barbados': 'BB',
+      'Belarus': 'BY',
+      'Belgium': 'BE',
+      'Belize': 'BZ',
+      'Benin': 'BJ',
+      'Bhutan': 'BT',
+      'Bolivia': 'BO',
+      'Bosnia and Herzegovina': 'BA',
+      'Botswana': 'BW',
+      'Brazil': 'BR',
+      'Brunei': 'BN',
+      'Bulgaria': 'BG',
+      'Burkina Faso': 'BF',
+      'Burundi': 'BI',
+      'Cabo Verde': 'CV',
+      'Cambodia': 'KH',
+      'Cameroon': 'CM',
+      'Canada': 'CA',
+      'Central African Republic': 'CF',
+      'Chad': 'TD',
+      'Chile': 'CL',
+      'China': 'CN',
+      'Colombia': 'CO',
+      'Comoros': 'KM',
+      'Congo': 'CD',
+      'Costa Rica': 'CR',
+      'Croatia': 'HR',
+      'Cuba': 'CU',
+      'Cyprus': 'CY',
+      'Czech Republic': 'CZ',
+      'Denmark': 'DK',
+      'Djibouti': 'DJ',
+      'Dominica': 'DM',
+      'Dominican Republic': 'DO',
+      'East Timor': 'TL',
+      'Ecuador': 'EC',
+      'Egypt': 'EG',
+      'El Salvador': 'SV',
+      'Equatorial Guinea': 'GQ',
+      'Eritrea': 'ER',
+      'Estonia': 'EE',
+      'Eswatini': 'SZ',
+      'Ethiopia': 'ET',
+      'Fiji': 'FJ',
+      'Finland': 'FI',
+      'France': 'FR',
+      'Gabon': 'GA',
+      'Gambia': 'GM',
+      'Georgia': 'GE',
+      'Germany': 'DE',
+      'Ghana': 'GH',
+      'Greece': 'GR',
+      'Grenada': 'GD',
+      'Guatemala': 'GT',
+      'Guinea': 'GN',
+      'Guinea-Bissau': 'GW',
+      'Guyana': 'GY',
+      'Haiti': 'HT',
+      'Honduras': 'HN',
+      'Hungary': 'HU',
+      'Iceland': 'IS',
+      'India': 'IN',
+      'Indonesia': 'ID',
+      'Iran': 'IR',
+      'Iraq': 'IQ',
+      'Ireland': 'IE',
+      'Israel': 'IL',
+      'Italy': 'IT',
+      'Ivory Coast': 'CI',
+      'Jamaica': 'JM',
+      'Japan': 'JP',
+      'Jordan': 'JO',
+      'Kazakhstan': 'KZ',
+      'Kenya': 'KE',
+      'Kiribati': 'KI',
+      'Korea, North': 'KP',
+      'Korea, South': 'KR',
+      'Kosovo': 'XK',
+      'Kuwait': 'KW',
+      'Kyrgyzstan': 'KG',
+      'Laos': 'LA',
+      'Latvia': 'LV',
+      'Lebanon': 'LB',
+      'Lesotho': 'LS',
+      'Liberia': 'LR',
+      'Libya': 'LY',
+      'Liechtenstein': 'LI',
+      'Lithuania': 'LT',
+      'Luxembourg': 'LU',
+      'Madagascar': 'MG',
+      'Malawi': 'MW',
+      'Malaysia': 'MY',
+      'Maldives': 'MV',
+      'Mali': 'ML',
+      'Malta': 'MT',
+      'Marshall Islands': 'MH',
+      'Mauritania': 'MR',
+      'Mauritius': 'MU',
+      'Mexico': 'MX',
+      'Micronesia': 'FM',
+      'Moldova': 'MD',
+      'Monaco': 'MC',
+      'Mongolia': 'MN',
+      'Montenegro': 'ME',
+      'Morocco': 'MA',
+      'Mozambique': 'MZ',
+      'Myanmar': 'MM',
+      'Namibia': 'NA',
+      'Nauru': 'NR',
+      'Nepal': 'NP',
+      'Netherlands': 'NL',
+      'New Zealand': 'NZ',
+      'Nicaragua': 'NI',
+      'Niger': 'NE',
+      'Nigeria': 'NG',
+      'North Macedonia': 'MK',
+      'Norway': 'NO',
+      'Oman': 'OM',
+      'Pakistan': 'PK',
+      'Palau': 'PW',
+      'Panama': 'PA',
+      'Papua New Guinea': 'PG',
+      'Paraguay': 'P',
+      'Peru': 'PE',
+      'Philippines': 'PH',
+      'Poland': 'PL',
+      'Portugal': 'PT',
+      'Qatar': 'QA',
+      'Romania': 'RO',
+      'Russia': 'RU',
+      'Rwanda': 'RW',
+      'Saint Kitts and Nevis': 'KN',
+      'Saint Lucia': 'LC',
+      'Saint Vincent and the Grenadines': 'VC',
+      'Samoa': 'WS',
+      'San Marino': 'SM',
+      'Sao Tome and Principe': 'ST',
+      'Saudi Arabia': 'SA',
+      'Senegal': 'SN',
+      'Serbia': 'RS',
+      'Seychelles': 'SC',
+      'Sierra Leone': 'SL',
+      'Singapore': 'SG',
+      'Slovakia': 'SK',
+      'Slovenia': 'SI',
+      'Solomon Islands': 'SB',
+      'Somalia': 'SO',
+      'South Africa': 'ZA',
+      'South Sudan': 'SS',
+      'Spain': 'ES',
+      'Sri Lanka': 'LK',
+      'Sudan': 'SD',
+      'Suriname': 'SR',
+      'Sweden': 'SE',
+      'Switzerland': 'CH',
+      'Syria': 'SY',
+      'Taiwan': 'TW',
+      'Tajikistan': 'TJ',
+      'Tanzania': 'TZ',
+      'Thailand': 'TH',
+      'Togo': 'TG',
+      'Tonga': 'TO',
+      'Trinidad and Tobago': 'TT',
+      'Tunisia': 'TN',
+      'Turkey': 'TR',
+      'Turkmenistan': 'TM',
+      'Tuvalu': 'TV',
+      'Uganda': 'UG',
+      'Ukraine': 'UA',
+      'United Arab Emirates': 'AE',
+      'United Kingdom': 'GB',
+      'United States': 'US',
+      'Uruguay': 'UY',
+      'Uzbekistan': 'UZ',
+      'Vanuatu': 'VU',
+      'Vatican City': 'VA',
+      'Venezuela': 'VE',
+      'Vietnam': 'VN',
+      'Yemen': 'YE',
+      'Zambia': 'ZM',
+      'Zimbabwe': 'ZW'
     };
-
     const code = countryNameToCode[country];
     return code ? countryToFlag(code) : '🌍';
   };
-
-  return (
-    <div className="space-y-5 py-4">
+  return <div className="space-y-5 py-4 my-[10px]">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800">Détails de contact</h3>
-        <Button 
-          type="button" 
-          variant="outline" 
-          size="sm" 
-          onClick={() => setShowContactPaste(!showContactPaste)}
-          className="text-xs flex items-center gap-1 font-futura"
-        >
+        <Button type="button" variant="outline" size="sm" onClick={() => setShowContactPaste(!showContactPaste)} className="text-xs flex items-center gap-1 font-futura">
           <Clipboard className="h-3.5 w-3.5" />
           {showContactPaste ? 'Masquer' : 'Contact'}
         </Button>
       </div>
 
-      {showContactPaste && (
-        <div className="space-y-2 mb-4 p-3 border border-dashed border-gray-300 rounded-md bg-gray-50">
+      {showContactPaste && <div className="space-y-2 mb-4 p-3 border border-dashed border-gray-300 rounded-md bg-gray-50">
           <p className="text-xs text-muted-foreground font-futura">
             Collez les informations de contact (nom, téléphone, email) puis cliquez sur Extraire :
           </p>
-          <textarea 
-            className="w-full p-2 text-sm border rounded-md h-24 font-futura" 
-            placeholder="Exemple:
+          <textarea className="w-full p-2 text-sm border rounded-md h-24 font-futura" placeholder="Exemple:
 Fatiha Mohamed
 +34 644 15 78 61
-fmohamed01@cuatrocaminos.net"
-            value={contactText}
-            onChange={(e) => setContactText(e.target.value)}
-          />
+fmohamed01@cuatrocaminos.net" value={contactText} onChange={e => setContactText(e.target.value)} />
           <div className="flex justify-end">
-            <Button 
-              type="button" 
-              size="sm" 
-              onClick={parseContactInfo}
-              className="text-xs font-futura uppercase tracking-wide"
-            >
+            <Button type="button" size="sm" onClick={parseContactInfo} className="text-xs font-futura uppercase tracking-wide">
               Extraire
             </Button>
           </div>
-        </div>
-      )}
+        </div>}
 
-      <FormInput
-        label="Civilité"
-        name="salutation"
-        type="select"
-        value={formData.salutation || ''}
-        onChange={handleInputChange}
-        icon={User}
-        options={[
-          { value: 'M.', label: 'M.' },
-          { value: 'Mme', label: 'Mme' }
-        ]}
-        placeholder="Sélectionner..."
-        className="mb-3"
-      />
+      <FormInput label="Civilité" name="salutation" type="select" value={formData.salutation || ''} onChange={handleInputChange} icon={User} options={[{
+      value: 'M.',
+      label: 'M.'
+    }, {
+      value: 'Mme',
+      label: 'Mme'
+    }]} placeholder="Sélectionner..." className="mb-3" />
 
-      <FormInput
-        label="Nom"
-        name="name"
-        value={formData.name || ''}
-        onChange={handleInputChange}
-        required
-        icon={User}
-        placeholder="Nom complet"
-      />
+      <FormInput label="Nom" name="name" value={formData.name || ''} onChange={handleInputChange} required icon={User} placeholder="Nom complet" />
 
-      <FormInput
-        label="Email"
-        name="email"
-        type="email"
-        value={formData.email || ''}
-        onChange={handleInputChange}
-        icon={Mail}
-        placeholder="Adresse email"
-      />
+      <FormInput label="Email" name="email" type="email" value={formData.email || ''} onChange={handleInputChange} icon={Mail} placeholder="Adresse email" />
 
-      <FormInput
-        label="Téléphone"
-        name="phone"
-        type="tel-with-code"
-        value={getPhoneValueWithoutCode()}
-        onChange={handlePhoneChange}
-        icon={Phone}
-        placeholder="Numéro de téléphone"
-        countryCode={phoneCountryCode}
-        onCountryCodeChange={handlePhoneCodeChange}
-        searchable={true}
-      />
+      <FormInput label="Téléphone" name="phone" type="tel-with-code" value={getPhoneValueWithoutCode()} onChange={handlePhoneChange} icon={Phone} placeholder="Numéro de téléphone" countryCode={phoneCountryCode} onCountryCodeChange={handlePhoneCodeChange} searchable={true} />
 
       <div className="mb-3">
-        <FormInput
-          label="Nationalité"
-          name="nationality"
-          type="select"
-          value={formData.nationality || ''}
-          onChange={handleInputChange}
-          icon={Flag}
-          options={COUNTRIES.map(country => ({ 
-            value: country, 
-            label: `${getCountryFlag(country)} ${country}` 
-          }))}
-          placeholder="Sélectionner..."
-          className="mb-0"
-          searchable={true}
-        />
+        <FormInput label="Nationalité" name="nationality" type="select" value={formData.nationality || ''} onChange={handleInputChange} icon={Flag} options={COUNTRIES.map(country => ({
+        value: country,
+        label: `${getCountryFlag(country)} ${country}`
+      }))} placeholder="Sélectionner..." className="mb-0" searchable={true} />
       </div>
 
       <div className="mb-3">
-        <FormInput
-          label="Pays de résidence"
-          name="taxResidence"
-          type="select"
-          value={formData.taxResidence || ''}
-          onChange={handleInputChange}
-          icon={MapPin}
-          options={COUNTRIES.map(country => ({ 
-            value: country, 
-            label: `${getCountryFlag(country)} ${country}` 
-          }))}
-          placeholder="Sélectionner..."
-          className="mb-0"
-          searchable={true}
-        />
+        <FormInput label="Pays de résidence" name="taxResidence" type="select" value={formData.taxResidence || ''} onChange={handleInputChange} icon={MapPin} options={COUNTRIES.map(country => ({
+        value: country,
+        label: `${getCountryFlag(country)} ${country}`
+      }))} placeholder="Sélectionner..." className="mb-0" searchable={true} />
       </div>
 
       <div className="mb-3">
-        <FormInput
-          label="Source"
-          name="source"
-          type="select"
-          value={formData.source || ''}
-          onChange={handleInputChange}
-          icon={BarChart}
-          options={availableSources.map(source => ({ value: source, label: source }))}
-          placeholder="Sélectionner..."
-          className="mb-0"
-          searchable={true}
-        />
+        <FormInput label="Source" name="source" type="select" value={formData.source || ''} onChange={handleInputChange} icon={BarChart} options={availableSources.map(source => ({
+        value: source,
+        label: source
+      }))} placeholder="Sélectionner..." className="mb-0" searchable={true} />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default MobileGeneralInfoSection;
