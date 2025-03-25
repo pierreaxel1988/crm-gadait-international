@@ -98,7 +98,7 @@ export const useLeadCreation = () => {
           actionType: 'Creation',
           createdAt: new Date().toISOString(),
           scheduledDate: new Date().toISOString(),
-          notes: 'Lead créé avec statut: ' + leadStatus
+          notes: 'Lead créé avec statut: ' + leadStatus + (newLeadData.assignedTo ? ' et assigné à un agent' : '')
         }];
       }
       
@@ -112,7 +112,7 @@ export const useLeadCreation = () => {
         toast({
           title: "Lead créé",
           description: assignedAgent 
-            ? "Le lead a été créé et attribué avec succès."
+            ? `Le lead a été créé et attribué à un agent avec succès.`
             : "Le lead a été créé avec succès."
         });
         

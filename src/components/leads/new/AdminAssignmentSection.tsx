@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AdminAssignmentSectionProps {
   pipelineType: 'purchase' | 'rental';
@@ -14,6 +15,11 @@ interface AdminAssignmentSectionProps {
   onAgentChange: (value: string | undefined) => void;
 }
 
+interface TeamMember {
+  id: string;
+  name: string;
+}
+
 const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
   pipelineType,
   leadStatus,
@@ -23,6 +29,32 @@ const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
   onStatusChange,
   onAgentChange
 }) => {
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [agentName, setAgentName] = useState<string>('');
+
+  // Fetch team members for display name
+  useEffect(() => {
+    if (assignedAgent) {
+      const fetchAgentName = async () => {
+        try {
+          const { data } = await supabase
+            .from('team_members')
+            .select('name')
+            .eq('id', assignedAgent)
+            .single();
+            
+          if (data) {
+            setAgentName(data.name);
+          }
+        } catch (error) {
+          console.error('Error fetching agent name:', error);
+        }
+      };
+      
+      fetchAgentName();
+    }
+  }, [assignedAgent]);
+
   return (
     <div className="luxury-card p-4 border-loro-sand">
       <h2 className="text-lg font-medium mb-4">Attribution du lead</h2>
@@ -79,6 +111,12 @@ const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
           label="Attribuer ce lead à"
           autoSelectPierreAxel={false}
         />
+        
+        {assignedAgent && agentName && (
+          <div className="text-sm text-green-600 font-medium">
+            Lead sera attribué à: {agentName}
+          </div>
+        )}
       </div>
     </div>
   );

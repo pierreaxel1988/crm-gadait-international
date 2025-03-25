@@ -29,6 +29,13 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       }];
     }
     
+    // Ensure assignment is properly set
+    if (completeLeadData.assignedTo) {
+      console.log("Lead will be assigned to:", completeLeadData.assignedTo);
+    } else {
+      console.log("Lead will not be assigned to any agent");
+    }
+    
     // Map to Supabase format
     const supabaseData = mapToSupabaseFormat(completeLeadData);
     console.log("Data being sent to Supabase:", supabaseData);
@@ -48,6 +55,11 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     if (data) {
       console.log("Data received from Supabase:", data);
       
+      // Verify assigned_to was saved properly
+      if (completeLeadData.assignedTo && !data.assigned_to) {
+        console.warn("Assignment appears to have failed - assigned_to field is empty in response");
+      }
+      
       // Map database response back to LeadDetailed format
       return {
         ...data,
@@ -59,7 +71,9 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
         actionHistory: data.action_history || completeLeadData.actionHistory,
         // Ensure consistency between pipelineType and pipeline_type
         pipelineType: data.pipeline_type || completeLeadData.pipelineType,
-        pipeline_type: data.pipeline_type || completeLeadData.pipelineType
+        pipeline_type: data.pipeline_type || completeLeadData.pipelineType,
+        // Ensure assignedTo is properly mapped
+        assignedTo: data.assigned_to || completeLeadData.assignedTo
       } as LeadDetailed;
     }
     

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 // Définir les types pour les props
 interface TeamMemberSelectProps {
@@ -19,6 +19,7 @@ interface TeamMemberSelectProps {
   onChange: (value: string | undefined) => void;
   label?: string;
   autoSelectPierreAxel?: boolean;
+  disabled?: boolean;
 }
 
 interface TeamMember {
@@ -31,7 +32,8 @@ const TeamMemberSelect = ({
   value, 
   onChange, 
   label = "Attribuer à",
-  autoSelectPierreAxel = false
+  autoSelectPierreAxel = false,
+  disabled = false
 }: TeamMemberSelectProps) => {
   const isMobile = useIsMobile();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -55,10 +57,11 @@ const TeamMemberSelect = ({
         // Auto-select Pierre Axel Gadait if requested and no value is already set
         if (autoSelectPierreAxel && !value && data) {
           const pierreAxel = data.find(member => 
-            member.name.toLowerCase().includes('pierre axel gadait'));
+            member.name.toLowerCase().includes('pierre-axel gadait'));
           
           if (pierreAxel) {
             onChange(pierreAxel.id);
+            console.log("Auto-selected Pierre-Axel:", pierreAxel.id);
           }
         }
       } catch (error) {
@@ -77,6 +80,7 @@ const TeamMemberSelect = ({
   }, [autoSelectPierreAxel, onChange, value]);
 
   const handleChange = (newValue: string) => {
+    console.log("Selected agent value:", newValue);
     // Si "non_assigné" est sélectionné, on passe undefined
     onChange(newValue === "non_assigné" ? undefined : newValue);
   };
@@ -90,7 +94,7 @@ const TeamMemberSelect = ({
         <Select
           value={value || "non_assigné"}
           onValueChange={handleChange}
-          disabled={isLoading}
+          disabled={isLoading || disabled}
         >
           <SelectTrigger className={`w-full ${isMobile ? 'h-8 text-sm' : ''}`} id="assigned_to">
             <div className="flex items-center gap-2">
