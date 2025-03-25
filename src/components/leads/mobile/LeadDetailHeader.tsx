@@ -46,7 +46,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
     return budgetNumber.toLocaleString('fr-FR');
   };
   const formattedBudget = formatBudget(budget);
-  return <div className="flex items-center justify-between p-3">
+  return <div className="flex items-center justify-between p-3 bg-zinc-100">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2">
           <ArrowLeft className="h-5 w-5" />
