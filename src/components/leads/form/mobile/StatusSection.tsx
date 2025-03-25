@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed, LeadTag } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -19,7 +18,6 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
     onDataChange({ [field]: value } as Partial<LeadDetailed>);
   };
   
-  // Standardized statuses matching the database values
   const leadStatuses: LeadStatus[] = [
     "New",       // Nouveaux
     "Contacted", // Contactés
@@ -45,7 +43,6 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
     handleInputChange('tags', updatedTags);
   };
 
-  // Format dates for display, if they exist
   const formattedLastContact = lead.lastContactedAt 
     ? format(new Date(lead.lastContactedAt), 'dd/MM/yyyy HH:mm')
     : '';
@@ -56,7 +53,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
 
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-medium text-loro-navy mb-4">Statut & Suivi</h2>
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 mb-4">Statut & Suivi</h2>
       
       <div className="space-y-4">
         <div className="space-y-2">

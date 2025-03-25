@@ -90,7 +90,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   return (
     <div className="space-y-3 mt-4">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-sm font-futura">Actions en attente</h3>
+        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800">Actions en attente</h3>
       </div>
 
       {pendingActions.length === 0 ? (
@@ -139,7 +139,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {completedActions.length > 0 && (
         <>
-          <h3 className="text-sm font-futura mt-6 mb-3">Historique des actions</h3>
+          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3">Historique des actions</h3>
           <div className="space-y-2">
             {completedActions.map((action) => (
               <div 

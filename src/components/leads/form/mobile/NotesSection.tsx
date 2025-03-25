@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -139,10 +138,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({ lead, onDataChange }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <FileText className="h-5 w-5 text-chocolate-dark mr-2" />
-          <h2 className="text-lg font-medium text-loro-navy">Notes & Observations</h2>
-        </div>
+        <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800">Notes & Observations</h2>
         
         {lastSaved && !isModified && (
           <div className="flex items-center text-xs text-gray-500">

@@ -29,11 +29,9 @@ const COUNTRIES = [
   'Portugal', 'Seychelles', 'Spain', 'Switzerland', 'UAE', 'UK', 'USA', 'Autre'
 ];
 
-// Helper function to match countries for search
 const countryMatchesSearch = (country: string, searchTerm: string): boolean => {
   if (!searchTerm) return true;
   
-  // Normalize strings by converting to lowercase and removing accents
   const normalizedCountry = country.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   
@@ -78,12 +76,10 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
   }, [searchTerm, options]);
 
   useEffect(() => {
-    // Update search term when value changes externally
     setSearchTerm(value);
   }, [value]);
 
   useEffect(() => {
-    // Close dropdown when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current && 
@@ -174,7 +170,6 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
     onDataChange({ [field]: value } as Partial<LeadDetailed>);
   };
 
-  // Get locations based on selected country
   const getLocations = () => {
     if (!lead.country) return [];
     
@@ -189,10 +184,8 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
     return [];
   };
 
-  // Convert bedroom numbers to strings for MultiSelectButtons
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
   
-  // Function to convert bedrooms data for display in the MultiSelectButtons
   const getSelectedBedrooms = () => {
     if (!lead.bedrooms) return [];
     
@@ -206,7 +199,6 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
     return [value >= 8 ? "8+" : value.toString()];
   };
   
-  // Bedroom selection handler
   const handleBedroomToggle = (value: string) => {
     const numValue = value === "8+" ? 8 : parseInt(value);
     
@@ -221,11 +213,9 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
     handleInputChange('bedrooms', newBedrooms.length ? newBedrooms : undefined);
   };
 
-  // Handle nationality derivation when country changes
   const handleCountryChange = (value: string) => {
     handleInputChange('country', value);
     
-    // If nationality is empty, try to derive it from country
     if (!lead.nationality) {
       const nationality = deriveNationalityFromCountry(value);
       if (nationality) {
@@ -236,11 +226,11 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
 
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-medium text-loro-navy mb-4">Critères de Recherche</h2>
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 mb-4">Critères de Recherche</h2>
       
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="budget">
-          <AccordionTrigger className="py-3 text-sm font-medium">Budget</AccordionTrigger>
+          <AccordionTrigger className="py-3 text-sm font-futura">Budget</AccordionTrigger>
           <AccordionContent>
             <div className="space-y-4 py-2">
               <div className="space-y-2">
@@ -290,7 +280,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
         </AccordionItem>
 
         <AccordionItem value="location">
-          <AccordionTrigger className="py-3 text-sm font-medium">Localisation</AccordionTrigger>
+          <AccordionTrigger className="py-3 text-sm font-futura">Localisation</AccordionTrigger>
           <AccordionContent>
             <div className="space-y-4 py-2">
               <SmartSearchField
@@ -325,7 +315,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
         </AccordionItem>
 
         <AccordionItem value="property">
-          <AccordionTrigger className="py-3 text-sm font-medium">Caractéristiques du bien</AccordionTrigger>
+          <AccordionTrigger className="py-3 text-sm font-futura">Caractéristiques du bien</AccordionTrigger>
           <AccordionContent>
             <div className="space-y-4 py-2">
               <div className="space-y-2">
@@ -396,7 +386,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
         </AccordionItem>
 
         <AccordionItem value="purchase">
-          <AccordionTrigger className="py-3 text-sm font-medium">Conditions d'achat</AccordionTrigger>
+          <AccordionTrigger className="py-3 text-sm font-futura">Conditions d'achat</AccordionTrigger>
           <AccordionContent>
             <div className="space-y-4 py-2">
               <div className="space-y-2">

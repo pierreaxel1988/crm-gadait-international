@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import { User, Mail, Phone, Flag, BarChart, MapPin, Clipboard } from 'lucide-react';
@@ -305,7 +306,7 @@ const MobileGeneralInfoSection = ({
   return (
     <div className="space-y-5 py-4">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-sm font-futura uppercase tracking-wider">Détails de contact</h3>
+        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800">Détails de contact</h3>
         <Button 
           type="button" 
           variant="outline" 
