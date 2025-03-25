@@ -6,7 +6,7 @@ interface LeadDetailTabsProps {
   defaultTab?: string;
 }
 
-const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({ defaultTab = "status" }) => {
+const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({ defaultTab = "notes" }) => {
   return (
     <Tabs defaultValue={defaultTab} className="w-full">
       <TabsList className="w-full grid grid-cols-4 bg-transparent">

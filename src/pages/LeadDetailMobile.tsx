@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -25,7 +24,7 @@ import NotesSection from '@/components/leads/form/mobile/NotesSection';
 const LeadDetailMobile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab] = useState('status');
+  const [activeTab] = useState('notes');
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
   
   // Use our custom hook
@@ -102,11 +101,11 @@ const LeadDetailMobile = () => {
           hasChanges={hasChanges}
         />
         
-        <LeadDetailTabs defaultTab="status" />
+        <LeadDetailTabs defaultTab="notes" />
       </div>
       
       <div className="flex-1 overflow-y-auto pb-20">
-        <Tabs defaultValue="status" className="w-full">
+        <Tabs defaultValue="notes" className="w-full">
           <div className="px-4 pt-4">
             <TabsContent value="info" className="mt-0">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
