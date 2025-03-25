@@ -53,8 +53,8 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
     : '';
 
   return (
-    <div className="space-y-5">
-      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Statut & Suivi</h2>
+    <div className="space-y-5 pt-4 mt-2">
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Statut & Suivi</h2>
       
       <div className="space-y-4">
         <div className="space-y-2">
