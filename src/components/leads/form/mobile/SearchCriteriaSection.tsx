@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -453,29 +452,6 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
                   ))}
                 </RadioGroup>
               </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="personal">
-          <AccordionTrigger className="py-3 text-sm font-medium">Informations personnelles</AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-4 py-2">
-              <SmartSearchField
-                label="Nationalité"
-                value={lead.nationality || ''}
-                onChange={(value) => handleInputChange('nationality', value)}
-                options={ALL_COUNTRIES}
-                placeholder="Rechercher une nationalité"
-              />
-              
-              <SmartSearchField
-                label="Résidence fiscale"
-                value={lead.taxResidence || ''}
-                onChange={(value) => handleInputChange('taxResidence', value)}
-                options={ALL_COUNTRIES}
-                placeholder="Rechercher une résidence fiscale"
-              />
             </div>
           </AccordionContent>
         </AccordionItem>
