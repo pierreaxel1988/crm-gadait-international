@@ -35,6 +35,23 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   hasChanges,
   tags
 }) => {
+  // Format the budget number with thousand separators
+  const formatBudget = (budget?: string) => {
+    if (!budget) return '';
+    
+    // Remove any existing non-numeric characters
+    const numericValue = budget.replace(/[^\d]/g, '');
+    if (!numericValue) return '';
+    
+    // Convert to number and format with locale
+    const budgetNumber = parseInt(numericValue, 10);
+    if (isNaN(budgetNumber)) return budget;
+    
+    return budgetNumber.toLocaleString('fr-FR');
+  };
+  
+  const formattedBudget = formatBudget(budget);
+  
   return <div className="flex items-center justify-between p-3">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2">
@@ -46,8 +63,8 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
           <p className="text-xs text-muted-foreground flex items-center gap-1">
-            {budget && `${budget} ${currency || ''}`}
-            {budget && desiredLocation && ' • '}
+            {formattedBudget && `${formattedBudget} ${currency || ''}`}
+            {formattedBudget && desiredLocation && ' • '}
             {desiredLocation}
           </p>
         </div>
