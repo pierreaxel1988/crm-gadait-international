@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LeadDetailed, LeadTag } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -7,6 +8,7 @@ import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import FormSection from '@/components/leads/form/FormSection';
 
 interface StatusSectionProps {
   lead: LeadDetailed;
@@ -53,16 +55,16 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
 
   return (
     <div className="space-y-5">
-      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 mb-4">Statut & Suivi</h2>
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Statut & Suivi</h2>
       
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="status" className="text-sm">Statut du lead</Label>
+          <Label htmlFor="status" className="text-sm text-gray-700">Statut du lead</Label>
           <Select
             value={lead.status}
             onValueChange={(value) => handleInputChange('status', value)}
           >
-            <SelectTrigger id="status" className="w-full font-futura">
+            <SelectTrigger id="status" className="w-full font-futura h-9">
               <SelectValue placeholder="Sélectionner un statut" />
             </SelectTrigger>
             <SelectContent>
@@ -76,7 +78,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
         </div>
         
         <div className="space-y-2">
-          <Label className="text-sm">Tags</Label>
+          <Label className="text-sm text-gray-700">Tags</Label>
           <MultiSelectButtons
             options={leadTags}
             selectedValues={lead.tags || []}
@@ -85,7 +87,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
         </div>
         
         <div className="space-y-2">
-          <Label className="text-sm">Responsable du suivi</Label>
+          <Label className="text-sm text-gray-700">Responsable du suivi</Label>
           <TeamMemberSelect
             value={lead.assignedTo}
             onChange={(value) => handleInputChange('assignedTo', value)}
@@ -94,22 +96,22 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="lastContactedAt" className="text-sm">Date du dernier contact</Label>
+          <Label htmlFor="lastContactedAt" className="text-sm text-gray-700">Date du dernier contact</Label>
           <Input
             id="lastContactedAt"
             value={formattedLastContact}
-            className="w-full font-futura bg-gray-50"
+            className="w-full font-futura bg-gray-50 h-9 text-sm"
             readOnly
           />
           <p className="text-xs text-muted-foreground">Mise à jour automatique lors d'une action</p>
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="nextFollowUpDate" className="text-sm">Prochain suivi prévu</Label>
+          <Label htmlFor="nextFollowUpDate" className="text-sm text-gray-700">Prochain suivi prévu</Label>
           <Input
             id="nextFollowUpDate"
             value={formattedNextFollowUp}
-            className="w-full font-futura bg-gray-50"
+            className="w-full font-futura bg-gray-50 h-9 text-sm"
             readOnly
           />
           <p className="text-xs text-muted-foreground">Programmé automatiquement lors de la création d'une action</p>

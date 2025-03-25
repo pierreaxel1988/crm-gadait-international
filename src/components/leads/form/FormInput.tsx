@@ -182,7 +182,7 @@ const FormInput: React.FC<FormInputProps> = ({
   return (
     <div className={cn('space-y-2', className)}>
       <div className="flex items-center justify-between">
-        <label htmlFor={name} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-futura">
+        <label htmlFor={name} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-futura text-gray-700">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -201,11 +201,10 @@ const FormInput: React.FC<FormInputProps> = ({
               )}
               <div
                 className={cn(
-                  "flex h-12 md:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer select-none",
+                  "flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-chocolate-dark focus-visible:border-chocolate-dark disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer select-none",
                   Icon && "pl-9"
                 )}
                 onClick={() => setShowOptions(!showOptions)}
-                style={{ fontSize: '16px' }}
               >
                 <div className="flex-1 flex items-center">
                   {value ? (
@@ -281,10 +280,9 @@ const FormInput: React.FC<FormInputProps> = ({
                 required={required}
                 disabled={disabled}
                 className={cn(
-                  "flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-futura",
+                  "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-chocolate-dark focus-visible:border-chocolate-dark disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-200 font-futura",
                   Icon && "pl-9"
                 )}
-                style={{ fontSize: '16px' }}
               />
             </div>
           ) : type === 'tel-with-code' ? (
@@ -297,7 +295,7 @@ const FormInput: React.FC<FormInputProps> = ({
               <div className="flex">
                 <div className="relative flex-shrink-0">
                   <div 
-                    className="flex items-center justify-between w-24 h-12 md:h-10 px-3 border border-r-0 border-input rounded-l-md bg-muted cursor-pointer font-futura"
+                    className="flex items-center justify-between w-24 h-9 px-3 border border-r-0 border-input rounded-l-md bg-muted cursor-pointer font-futura"
                     onClick={() => setShowCountryDropdown(prev => !prev)}
                     style={{ minWidth: `${getCodeButtonWidth()}px` }}
                   >
@@ -321,7 +319,7 @@ const FormInput: React.FC<FormInputProps> = ({
                       {filteredCountryCodes.map(country => (
                         <div 
                           key={country.code} 
-                          className="px-3 py-3 text-sm hover:bg-accent cursor-pointer flex items-center font-futura"
+                          className="px-3 py-2 text-sm hover:bg-accent cursor-pointer flex items-center font-futura"
                           onClick={() => handleCountryCodeChange(country.code)}
                         >
                           <span className="mr-2">{country.country}</span>
@@ -330,7 +328,7 @@ const FormInput: React.FC<FormInputProps> = ({
                       ))}
                       
                       {filteredCountryCodes.length === 0 && (
-                        <div className="px-3 py-3 text-sm text-muted-foreground font-futura">
+                        <div className="px-3 py-2 text-sm text-muted-foreground font-futura">
                           Aucun pays ne correspond à votre recherche
                         </div>
                       )}
@@ -346,8 +344,7 @@ const FormInput: React.FC<FormInputProps> = ({
                   placeholder={placeholder}
                   required={required}
                   disabled={disabled}
-                  className={cn("rounded-l-none h-12 md:h-10 font-futura", Icon && "pl-9")}
-                  style={{ fontSize: '16px' }}
+                  className="rounded-l-none h-9 font-futura"
                 />
               </div>
             </div>
@@ -367,8 +364,7 @@ const FormInput: React.FC<FormInputProps> = ({
                 placeholder={placeholder}
                 required={required}
                 disabled={disabled}
-                className={cn(Icon && "pl-9", "h-12 md:h-10 font-futura")}
-                style={{ fontSize: '16px' }}
+                className={cn(Icon && "pl-9", "h-9 font-futura")}
               />
             </div>
           )}

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -138,7 +139,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({ lead, onDataChange }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800">Notes & Observations</h2>
+        <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Notes & Observations</h2>
         
         {lastSaved && !isModified && (
           <div className="flex items-center text-xs text-gray-500">
@@ -178,7 +179,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({ lead, onDataChange }) => {
             size="sm" 
             onClick={handleSaveNotes}
             disabled={localSaving || !isModified}
-            className={`transition-all duration-200 ${isModified ? 'bg-chocolate-dark text-white' : 'bg-gray-100 text-gray-400'}`}
+            className={`transition-all duration-200 ${isModified ? 'bg-chocolate-dark text-white hover:bg-chocolate-dark/90' : 'bg-gray-100 text-gray-400'}`}
           >
             {localSaving ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> 
