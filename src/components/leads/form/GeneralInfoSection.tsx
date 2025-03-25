@@ -54,6 +54,30 @@ const GeneralInfoSection = ({
       }
     }
   }, [formData.phone]);
+
+  // Mapping des codes pays vers les pays
+  const countryCodeMapping: Record<string, string> = {
+    '+33': 'France',
+    '+44': 'United Kingdom',
+    '+1': 'United States',
+    '+34': 'Spain',
+    '+39': 'Italy',
+    '+41': 'Switzerland',
+    '+32': 'Belgium',
+    '+49': 'Germany',
+    '+31': 'Netherlands',
+    '+7': 'Russia',
+    '+971': 'United Arab Emirates',
+    '+966': 'Saudi Arabia',
+    '+965': 'Kuwait',
+    '+974': 'Qatar',
+    '+973': 'Bahrain',
+    '+230': 'Mauritius',
+    '+212': 'Morocco',
+    '+216': 'Tunisia',
+    '+213': 'Algeria',
+    '+20': 'Egypt'
+  };
   
   // Function to get country flag emoji
   const getCountryFlag = (country: string): string => {
@@ -150,6 +174,35 @@ const GeneralInfoSection = ({
     } as React.ChangeEvent<HTMLInputElement>;
     
     handleInputChange(syntheticEvent);
+    
+    // Si un pays correspond au code pays, mettre à jour le pays de résidence et la nationalité
+    if (countryCodeMapping[code]) {
+      const country = countryCodeMapping[code];
+      
+      // Ne mettre à jour que si les champs sont vides ou si l'utilisateur n'a pas déjà fait une sélection manuelle
+      if (!formData.taxResidence) {
+        const taxResidenceEvent = {
+          target: {
+            name: 'taxResidence',
+            value: country
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        handleInputChange(taxResidenceEvent);
+      }
+      
+      if (!formData.nationality) {
+        const nationality = deriveNationalityFromCountry(country);
+        if (nationality) {
+          const nationalityEvent = {
+            target: {
+              name: 'nationality',
+              value: nationality
+            }
+          } as React.ChangeEvent<HTMLInputElement>;
+          handleInputChange(nationalityEvent);
+        }
+      }
+    }
   };
 
   // Adapter la valeur du téléphone pour l'affichage dans le champ
