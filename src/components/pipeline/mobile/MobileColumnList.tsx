@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, PlusCircle, Clock, Phone, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -111,15 +110,6 @@ const MobileColumnList = ({
   
   return (
     <div className="space-y-4">
-      {/* Debugging info */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="p-2 bg-yellow-100 rounded text-xs">
-          <p>Total leads: {totalLeadCount}</p>
-          <p>Active tab: {activeTab}</p>
-          <p>Leads count by status: {JSON.stringify(leadCountByStatus)}</p>
-        </div>
-      )}
-      
       {/* Status filters inspired by WhatsApp */}
       <div className="overflow-x-auto pb-1">
         <Tabs 
