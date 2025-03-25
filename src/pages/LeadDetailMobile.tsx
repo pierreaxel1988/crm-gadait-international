@@ -8,6 +8,7 @@ import { useLeadActions } from '@/hooks/useLeadActions';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
 import ActionsPanelMobile from '@/components/leads/actions/ActionsPanelMobile';
 import { CheckCircle } from 'lucide-react';
+import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
 
 // Import our new components
 import LeadDetailHeader from '@/components/leads/mobile/LeadDetailHeader';
@@ -94,7 +95,7 @@ const LeadDetailMobile = () => {
   if (!lead) return null;
   
   return (
-    <div className="flex flex-col h-[100vh] bg-white dark:bg-loro-night overflow-hidden">
+    <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
       <div className="fixed top-0 left-0 right-0 bg-white z-10 shadow-sm border-b">
         <LeadDetailHeader
           name={lead.name}
@@ -110,26 +111,26 @@ const LeadDetailMobile = () => {
         <LeadDetailTabs defaultTab={activeTab} />
       </div>
       
-      <div className="flex-1 overflow-y-auto pb-20">
+      <div className="flex-1 overflow-y-auto pb-20 mt-24 overscroll-contain">
         <Tabs value={activeTab} className="w-full">
-          <div className="px-4 pt-4">
-            <TabsContent value="info" className="mt-0">
+          <div className="px-4 pt-2">
+            <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="criteria" className="mt-0">
+            <TabsContent value="criteria" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <SearchCriteriaSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="status" className="mt-0">
+            <TabsContent value="status" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <StatusSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="notes" className="mt-0">
+            <TabsContent value="notes" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <NotesSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="actions" className="mt-0">
+            <TabsContent value="actions" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <ActionsPanelMobile 
                 leadId={lead.id} 
                 onAddAction={fetchLead}
@@ -152,9 +153,17 @@ const LeadDetailMobile = () => {
         onManualSave={handleSaveWithIndicator}
       />
 
-      {/* Conservons cet indicateur pour un feedback instantané après sauvegarde manuelle */}
+      {/* Add floating action button for quick actions */}
+      <FloatingActionButtons
+        onAddAction={handleAddAction}
+        phoneNumber={lead.phone}
+        email={lead.email}
+        className="bottom-20"
+      />
+
+      {/* Save indicator */}
       {showSaveIndicator && (
-        <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-fade-in">
+        <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
           <CheckCircle className="h-5 w-5" />
         </div>
       )}
