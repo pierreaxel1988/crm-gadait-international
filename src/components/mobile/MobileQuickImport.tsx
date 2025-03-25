@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, X, Flag, Phone, Home, Euro } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import FormInput from '@/components/leads/form/FormInput';
 import { createLead } from '@/services/leadCore';
 import { toast } from '@/hooks/use-toast';
@@ -85,13 +85,20 @@ const MobileQuickImport: React.FC<MobileQuickImportProps> = ({ isOpen, onClose, 
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Import Rapide de Lead</DialogTitle>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        onClose();
+      }
+    }}>
+      <DialogContent className="w-[95%] max-w-md p-4 max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="mb-2">
+          <DialogTitle className="text-lg">Import Rapide de Lead</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Remplissez les informations pour créer un nouveau lead
+          </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
+        <div className="space-y-3 py-2">
           <FormInput
             label="Nom"
             name="name"
@@ -177,11 +184,12 @@ const MobileQuickImport: React.FC<MobileQuickImportProps> = ({ isOpen, onClose, 
           />
         </div>
         
-        <DialogFooter className="sm:justify-between">
+        <DialogFooter className="flex flex-row justify-between mt-4 gap-2 pt-2">
           <Button 
             type="button" 
             variant="outline"
             onClick={onClose}
+            className="flex-1"
           >
             <X className="h-4 w-4 mr-1" /> 
             Annuler
@@ -191,6 +199,7 @@ const MobileQuickImport: React.FC<MobileQuickImportProps> = ({ isOpen, onClose, 
             type="button" 
             onClick={handleImport}
             disabled={isSubmitting || !leadName || !leadEmail}
+            className="flex-1"
           >
             <Check className="h-4 w-4 mr-1" /> 
             Importer

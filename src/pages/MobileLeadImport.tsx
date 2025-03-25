@@ -19,7 +19,7 @@ const MobileLeadImport = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 flex flex-col h-screen">
       <div className="flex items-center mb-4">
         <Button 
           variant="outline" 
@@ -32,13 +32,19 @@ const MobileLeadImport = () => {
         <h1 className="text-xl font-bold">Import de Lead</h1>
       </div>
 
-      <Button 
-        className="w-full"
-        onClick={() => setImportOpen(true)}
-      >
-        <PlusCircle className="h-4 w-4 mr-2" />
-        Importer un nouveau lead
-      </Button>
+      <div className="flex-1 flex flex-col justify-center items-center">
+        <p className="text-gray-500 mb-4 text-center">
+          Importez rapidement un nouveau lead pour votre pipeline
+        </p>
+        
+        <Button 
+          className="w-full max-w-xs"
+          onClick={() => setImportOpen(true)}
+        >
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Importer un nouveau lead
+        </Button>
+      </div>
 
       <MobileQuickImport 
         isOpen={importOpen}
