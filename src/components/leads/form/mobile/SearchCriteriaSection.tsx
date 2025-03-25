@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 import { COUNTRIES as ALL_COUNTRIES } from '@/utils/countries';
 import ActionButtons from '@/components/pipeline/filters/ActionButtons';
+
 const PROPERTY_TYPES: PropertyType[] = ['Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'];
 const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
 const AMENITIES: Amenity[] = ['Piscine', 'Jardin', 'Garage', 'Sécurité', 'Climatisation', 'Terrasse', 'Balcon', 'Vue mer', 'Vue montagne', 'Gym', 'Spa', 'Piscine intérieure', 'Jacuzzi', 'Court de tennis', 'Ascenseur', 'Parking'];
@@ -19,16 +20,19 @@ const FINANCING_METHODS: FinancingMethod[] = ['Cash', 'Prêt bancaire'];
 const PROPERTY_USES: PropertyUse[] = ['Investissement locatif', 'Résidence principale'];
 const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'CHF', 'AED', 'MUR'];
 const COUNTRIES = ['Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 'Portugal', 'Seychelles', 'Spain', 'Switzerland', 'UAE', 'UK', 'USA', 'Autre'];
+
 const countryMatchesSearch = (country: string, searchTerm: string): boolean => {
   if (!searchTerm) return true;
   const normalizedCountry = country.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   return normalizedCountry.includes(normalizedSearch);
 };
+
 interface SearchCriteriaSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
+
 interface SmartSearchFieldProps {
   label: string;
   value: string;
@@ -36,6 +40,7 @@ interface SmartSearchFieldProps {
   options: string[];
   placeholder?: string;
 }
+
 const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
   label,
   value,
@@ -48,6 +53,7 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
   const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (searchTerm) {
       const filtered = options.filter(option => countryMatchesSearch(option, searchTerm));
@@ -56,9 +62,11 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
       setFilteredOptions(options);
     }
   }, [searchTerm, options]);
+
   useEffect(() => {
     setSearchTerm(value);
   }, [value]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) && inputRef.current && !inputRef.current.contains(event.target as Node)) {
@@ -70,24 +78,29 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setIsOpen(true);
   };
+
   const handleOptionClick = (option: string) => {
     onChange(option);
     setSearchTerm(option);
     setIsOpen(false);
   };
+
   const handleApply = () => {
     onChange(searchTerm);
     setIsOpen(false);
   };
+
   const handleClear = () => {
     setSearchTerm('');
     onChange('');
     setIsOpen(false);
   };
+
   return <div className="space-y-2 relative">
       <Label htmlFor={label} className="text-sm">{label}</Label>
       <Input ref={inputRef} id={label} value={searchTerm} onChange={handleInputChange} placeholder={placeholder || `Rechercher ${label}`} className="w-full font-futura" onFocus={() => setIsOpen(true)} />
@@ -105,6 +118,7 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
         </div>}
     </div>;
 };
+
 const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
   lead,
   onDataChange
@@ -114,6 +128,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       [field]: value
     } as Partial<LeadDetailed>);
   };
+
   const getLocations = () => {
     if (!lead.country) return [];
     const locations = LOCATIONS_BY_COUNTRY[lead.country as keyof typeof LOCATIONS_BY_COUNTRY];
@@ -125,6 +140,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     }
     return [];
   };
+
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
   const getSelectedBedrooms = () => {
     if (!lead.bedrooms) return [];
@@ -136,12 +152,14 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     const value = lead.bedrooms;
     return [value >= 8 ? "8+" : value.toString()];
   };
+
   const handleBedroomToggle = (value: string) => {
     const numValue = value === "8+" ? 8 : parseInt(value);
     let currentBedrooms = Array.isArray(lead.bedrooms) ? [...lead.bedrooms] : lead.bedrooms ? [lead.bedrooms] : [];
     const newBedrooms = currentBedrooms.includes(numValue) ? currentBedrooms.filter(b => b !== numValue) : [...currentBedrooms, numValue];
     handleInputChange('bedrooms', newBedrooms.length ? newBedrooms : undefined);
   };
+
   const handleCountryChange = (value: string) => {
     handleInputChange('country', value);
     if (!lead.nationality) {
@@ -151,8 +169,9 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       }
     }
   };
-  return <div className="space-y-5 my-[20px]">
-      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 mb-4">Critères de Recherche</h2>
+
+  return <div className="space-y-5 pt-4 mt-2">
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Critères de Recherche</h2>
       
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="budget">
@@ -300,4 +319,5 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       </Accordion>
     </div>;
 };
+
 export default SearchCriteriaSection;

@@ -137,8 +137,8 @@ const NotesSection: React.FC<NotesSectionProps> = ({ lead, onDataChange }) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 pt-4 mt-2">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Notes & Observations</h2>
         
         {lastSaved && !isModified && (
