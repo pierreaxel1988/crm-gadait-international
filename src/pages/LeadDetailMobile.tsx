@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -102,6 +101,9 @@ const LeadDetailMobile = () => {
           createdAt={lead.createdAt}
           phone={lead.phone}
           email={lead.email}
+          budget={lead.budget}
+          currency={lead.currency}
+          desiredLocation={lead.desiredLocation}
           onBackClick={handleBackClick}
           onSave={handleSaveWithIndicator}
           isSaving={isSaving}
