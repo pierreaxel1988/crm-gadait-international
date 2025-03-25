@@ -42,8 +42,6 @@ export const useKanbanData = (
     const fetchLeads = async () => {
       try {
         setIsLoading(true);
-        console.log(`===== DÉBUT DU CHARGEMENT DES LEADS =====`);
-        console.log(`Fetching leads for pipeline: ${pipelineType}`);
         
         // Fetch team members for assignment information
         const { data: teamMembers, error: teamError } = await supabase
@@ -60,19 +58,7 @@ export const useKanbanData = (
           return;
         }
         
-        // Vérifier si la table leads existe et contient des données
-        const { count, error: countError } = await supabase
-          .from('leads')
-          .select('*', { count: 'exact', head: true });
-          
-        console.log('Nombre total de leads dans la base de données:', count);
-        
-        if (countError) {
-          console.error('Erreur lors de la vérification des leads:', countError);
-        }
-        
         // Récupération des données brutes de leads depuis Supabase
-        console.log('Récupération des leads depuis Supabase...');
         const { data: supabaseLeads, error: leadsError } = await supabase
           .from('leads')
           .select('*');
@@ -80,22 +66,12 @@ export const useKanbanData = (
         // If there's an error or no data from Supabase, fall back to local leads
         let leads = [];
         if (leadsError || !supabaseLeads || supabaseLeads.length === 0) {
-          console.log('Falling back to local leads data - Aucun lead trouvé dans Supabase');
           leads = await getLeads();
         } else {
           leads = supabaseLeads;
-          console.log('Retrieved leads from Supabase:', leads.length);
-        }
-        
-        console.log('===== TOUS LES LEADS AVANT TRAITEMENT =====');
-        if (leads.length === 0) {
-          console.warn('ATTENTION: Aucun lead trouvé dans la base de données!');
-        } else {
-          console.log(`${leads.length} leads trouvés, voici un exemple:`, leads[0]);
         }
         
         // Map leads data to KanbanItem format
-        console.log('===== CONVERSION DES LEADS AU FORMAT KANBAN =====');
         const mappedLeads = leads.map(lead => {
           const assignedTeamMember = teamMembers.find(tm => tm.id === lead.assigned_to);
           
@@ -122,33 +98,17 @@ export const useKanbanData = (
             country: lead.country,
             bedrooms: lead.bedrooms,
             url: lead.url,
-            createdAt: lead.created_at ? new Date(lead.created_at).toLocaleDateString('fr-FR') : undefined,
-            importedAt: lead.imported_at ? new Date(lead.imported_at).toLocaleDateString('fr-FR') : undefined,
+            createdAt: lead.created_at,
+            importedAt: lead.imported_at,
             external_id: lead.external_id
           };
         });
         
-        console.log('===== LEADS APRÈS CONVERSION =====');
-        console.log(`${mappedLeads.length} leads convertis au format Kanban`);
-        
         const updatedColumns = columns.map(column => {
-          let columnItems;
-          
-          if (window.innerWidth < 768) {
-            // Sur mobile, on montre les leads du statut correspondant pour le pipeline actif
-            columnItems = mappedLeads.filter(lead => {
-              return lead.status === column.status && 
-                    (lead.pipelineType === pipelineType || lead.pipeline_type === pipelineType);
-            });
-          } else {
-            // Sur desktop, on continue avec le comportement existant
-            columnItems = mappedLeads.filter(lead => lead.status === column.status);
-          }
-          
-          console.log(`Colonne "${column.status}": ${columnItems.length} leads (pipeline: ${pipelineType})`);
-          if (columnItems.length > 0) {
-            console.log(`  Premier lead dans la colonne "${column.status}":`, columnItems[0].name);
-          }
+          // Sur mobile et desktop, on ne filtre plus par le pipelineType ici
+          // Cela permettra d'afficher tous les leads dans MobileColumnList et
+          // le filtrage se fera au niveau de ce composant
+          const columnItems = mappedLeads.filter(lead => lead.status === column.status);
           
           return {
             ...column,
@@ -157,10 +117,9 @@ export const useKanbanData = (
           };
         });
         
-        console.log('===== FIN DU CHARGEMENT DES LEADS =====');
         setLoadedColumns(updatedColumns);
       } catch (error) {
-        console.error('ERREUR CRITIQUE dans useKanbanData:', error);
+        console.error('Erreur dans useKanbanData:', error);
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -176,4 +135,3 @@ export const useKanbanData = (
 
   return { loadedColumns, setLoadedColumns, isLoading };
 };
-

@@ -42,19 +42,15 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   isFilterActive,
   teamMembers
 }) => {
-  useEffect(() => {
-    console.log('MobilePipelineView - pipeline actif:', activeTab);
-    console.log('MobilePipelineView - colonnes reçues:', columns);
-    
-    // Vérifier si les colonnes ont des leads
-    const totalLeads = columns.reduce((sum, col) => sum + col.items.length, 0);
-    console.log('MobilePipelineView - Nombre total de leads:', totalLeads);
-    
-    // Afficher les leads par statut
-    columns.forEach(col => {
-      console.log(`Status ${col.status}: ${col.items.length} leads`);
-    });
-  }, [columns, activeTab]);
+  // Filtrer les colonnes selon le type de pipeline actif
+  const filteredColumns = columns.map(column => {
+    return {
+      ...column,
+      items: column.items.filter(item => 
+        item.pipelineType === activeTab || item.pipeline_type === activeTab
+      )
+    };
+  });
 
   return (
     <div className="flex flex-col h-[calc(100vh-80px)]">
@@ -81,7 +77,7 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
 
       <div className="flex-1 overflow-y-auto mt-4 pb-20">
         <MobileColumnList
-          columns={columns}
+          columns={filteredColumns}
           activeTab={activeTab}
           searchTerm={searchTerm}
           filters={filters}

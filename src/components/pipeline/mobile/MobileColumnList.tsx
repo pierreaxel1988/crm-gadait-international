@@ -48,32 +48,14 @@ const MobileColumnList = ({
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const navigate = useNavigate();
   
-  useEffect(() => {
-    console.log('MobileColumnList - Columns received:', columns);
-    console.log('MobileColumnList - Active tab:', activeTab);
-    console.log('Nombre de leads par status:', columns.map(col => `${col.status}: ${col.items.length}`).join(', '));
-    
-    // Vérifier si nous avons des leads filtrés par type de pipeline
-    const leadsForActiveTab = columns.flatMap(column => 
-      column.items.filter(item => item.pipelineType === activeTab || item.pipeline_type === activeTab)
-    );
-    console.log(`MobileColumnList - Leads pour le pipeline ${activeTab}:`, leadsForActiveTab.length);
-  }, [columns, activeTab]);
-  
   // Get all leads across all columns
   const allLeads = columns.flatMap(column => 
-    column.items
-      .filter(item => item.pipelineType === activeTab || item.pipeline_type === activeTab)
-      .map(item => ({ ...item, columnStatus: column.status }))
+    column.items.map(item => ({ ...item, columnStatus: column.status }))
   );
   
   // Count leads by status
   const leadCountByStatus = columns.reduce((acc, column) => {
-    // Filter items by pipeline type
-    const filteredItems = column.items.filter(
-      item => item.pipelineType === activeTab || item.pipeline_type === activeTab
-    );
-    acc[column.status] = filteredItems.length;
+    acc[column.status] = column.items.length;
     return acc;
   }, {} as Record<string, number>);
   
