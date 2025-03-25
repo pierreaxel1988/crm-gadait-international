@@ -23,9 +23,9 @@ const CurrentAction: React.FC<CurrentActionProps> = ({
 }) => {
   if (!taskType) {
     return (
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-loro-navy">Action actuelle</Label>
-        <Card className="border-dashed border-loro-sand/30 bg-white overflow-hidden shadow-sm animate-[fade-in_0.3s_ease-out]">
+      <div className="space-y-2 animate-[fade-in_0.3s_ease-out]">
+        <Label className="text-sm font-medium text-loro-navy/90">Action actuelle</Label>
+        <Card className="border border-loro-pearl/40 bg-white overflow-hidden shadow-sm hover:shadow transition-all duration-300">
           <div className="text-center py-5 px-4">
             <div className="mx-auto h-10 w-10 rounded-full bg-chocolate-dark/10 flex items-center justify-center mb-3">
               <AlertCircle className="h-5 w-5 text-chocolate-dark/70" />
@@ -46,13 +46,13 @@ const CurrentAction: React.FC<CurrentActionProps> = ({
   }
   
   return (
-    <div className="space-y-2">
-      <Label className="text-sm font-medium text-loro-navy">Action actuelle</Label>
-      <Card className="border-0 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 animate-[fade-in_0.3s_ease-out]">
+    <div className="space-y-2 animate-[fade-in_0.3s_ease-out]">
+      <Label className="text-sm font-medium text-loro-navy/90">Action actuelle</Label>
+      <Card className="border border-loro-pearl/40 bg-white overflow-hidden shadow-sm hover:shadow transition-all duration-300">
         <div className="p-4">
           <div className="flex justify-between items-start">
             <div className="space-y-3 w-full">
-              <div className="flex items-center gap-2 p-2.5 rounded-md border border-loro-pearl/40 bg-gray-50 shadow-sm">
+              <div className="flex items-center gap-2 p-2.5 rounded-md border border-loro-pearl/50 bg-gray-50/70">
                 <div className="bg-chocolate-dark/10 p-2 rounded-md">
                   {getActionTypeIcon(taskType)}
                 </div>
@@ -60,7 +60,7 @@ const CurrentAction: React.FC<CurrentActionProps> = ({
               </div>
               
               {nextFollowUpDate && (
-                <div className="bg-gray-50 p-3 rounded-md border border-loro-pearl/30 flex items-start shadow-sm">
+                <div className="bg-gray-50/70 p-3 rounded-md border border-loro-pearl/50 flex items-start">
                   <CalendarIcon className="h-4 w-4 text-chocolate-dark mt-0.5 mr-2" />
                   <div>
                     <p className="text-xs text-loro-navy/50 font-futuraLight mb-1">Date prévue</p>

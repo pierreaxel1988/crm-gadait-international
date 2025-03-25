@@ -22,8 +22,8 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({
   onAddAction,
 }) => {
   return (
-    <div className="space-y-5">
-      <div className="px-4 pt-2 pb-4">
+    <div className="space-y-4">
+      <div className="px-4 pt-2 pb-2">
         <CurrentAction 
           taskType={lead.taskType}
           nextFollowUpDate={lead.nextFollowUpDate}
@@ -32,8 +32,8 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({
         />
       </div>
       
-      <div className="bg-gray-50">
-        <div className="flex items-center gap-2 p-4 sticky top-0 z-10 bg-white border-b">
+      <div className="bg-white">
+        <div className="flex items-center gap-2 p-4 sticky top-0 z-10 bg-white border-b border-loro-pearl/30">
           <div className="h-6 w-6 rounded-full bg-chocolate-dark/10 flex items-center justify-center">
             <History className="h-3.5 w-3.5 text-chocolate-dark" />
           </div>
@@ -41,7 +41,7 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({
           <Separator className="flex-1 bg-loro-pearl/50" />
         </div>
         
-        <div className="px-4 pt-2 pb-6">
+        <div className="px-4 pt-1 pb-4">
           <ActionHistoryList 
             actionHistory={lead.actionHistory}
             getActionTypeIcon={getActionTypeIcon}

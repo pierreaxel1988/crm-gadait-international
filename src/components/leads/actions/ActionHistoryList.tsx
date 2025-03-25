@@ -81,10 +81,10 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
               <Card 
                 key={action.id} 
                 className={cn(
-                  "relative overflow-hidden transition-all duration-200 border-0",
+                  "relative overflow-hidden transition-all duration-200 border shadow-sm hover:shadow",
                   action.completedDate 
-                    ? "bg-white shadow-sm" 
-                    : "bg-white shadow hover:shadow-md"
+                    ? "border-loro-pearl/30 bg-white" 
+                    : "border-chocolate-dark/20 bg-white"
                 )}
               >
                 {/* Dot on timeline */}
@@ -124,7 +124,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                       </div>
                       
                       {action.notes && (
-                        <p className="text-sm mt-3 bg-gray-50 p-2.5 rounded-md font-futuraLight text-loro-navy/70 border border-loro-pearl/20">
+                        <p className="text-sm mt-3 bg-gray-50/70 p-2.5 rounded-md font-futuraLight text-loro-navy/70 border border-loro-pearl/30">
                           {action.notes}
                         </p>
                       )}

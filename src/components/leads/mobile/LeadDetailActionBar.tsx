@@ -78,12 +78,12 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
                 Historique
               </Button>
             </DrawerTrigger>
-            <DrawerContent className="max-h-[92vh] rounded-t-xl shadow-xl border-t-0 bg-loro-white">
+            <DrawerContent className="bg-loro-white border-0 max-h-[92vh] rounded-t-xl shadow-md">
               <div className="p-0 pb-0">
-                <div className="flex items-center justify-between px-4 py-3 bg-chocolate-dark text-white sticky top-0 z-10">
+                <div className="flex items-center justify-between px-4 py-3 bg-chocolate-dark/95 text-white sticky top-0 z-10 border-b border-chocolate-light/20">
                   <DrawerTitle className="text-xl font-optima">Historique des actions</DrawerTitle>
                   <DrawerClose asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-white hover:bg-chocolate-light">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-white hover:bg-chocolate-light/30">
                       <X className="h-4 w-4" />
                     </Button>
                   </DrawerClose>
