@@ -51,12 +51,16 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
         )}
         <Button 
           size="sm" 
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-chocolate-dark hover:bg-chocolate-light text-white shadow-sm transition-all duration-200 rounded-md"
           onClick={onSave}
           disabled={isSaving || !hasChanges}
         >
-          {isSaving ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <Save className="h-4 w-4 mr-1" />}
-          <span className="text-xs">Enregistrer</span>
+          {isSaving ? (
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-1" />
+          ) : (
+            <Save className="h-4 w-4 mr-1" />
+          )}
+          <span className="text-xs font-medium">Enregistrer</span>
         </Button>
       </div>
     </div>
