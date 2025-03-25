@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { Search, SlidersHorizontal, RefreshCcw } from 'lucide-react';
+import { Search, SlidersHorizontal, RefreshCcw, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FilterOptions } from '../PipelineFilters';
+import { useNavigate } from 'react-router-dom';
 
 interface MobilePipelineHeaderProps {
   searchTerm: string;
@@ -32,24 +33,36 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
   isFilterActive,
   teamMembers
 }) => {
+  const navigate = useNavigate();
+  
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Pipeline</h1>
-        <Button
-          variant={activeFiltersCount > 0 ? "default" : "outline"}
-          size="sm"
-          className="h-9 relative"
-          onClick={toggleFilters}
-        >
-          <SlidersHorizontal className="h-4 w-4 mr-1" />
-          Filtres
-          {activeFiltersCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-white text-primary rounded-full h-5 w-5 flex items-center justify-center text-xs">
-              {activeFiltersCount}
-            </span>
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-9 w-9"
+            onClick={() => navigate('/import-lead')}
+          >
+            <PlusCircle className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={activeFiltersCount > 0 ? "default" : "outline"}
+            size="sm"
+            className="h-9 relative"
+            onClick={toggleFilters}
+          >
+            <SlidersHorizontal className="h-4 w-4 mr-1" />
+            Filtres
+            {activeFiltersCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-white text-primary rounded-full h-5 w-5 flex items-center justify-center text-xs">
+                {activeFiltersCount}
+              </span>
+            )}
+          </Button>
+        </div>
       </div>
       
       {/* Search input */}
