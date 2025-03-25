@@ -131,13 +131,21 @@ export const useKanbanData = (
         console.log('===== LEADS APRÈS CONVERSION =====');
         console.log(`${mappedLeads.length} leads convertis au format Kanban`);
         
-        // IMPORTANT: Sur mobile, on affiche TOUS les leads sans filtrer par pipeline type
-        // C'est le problème à corriger - les leads n'apparaissaient pas car ils étaient filtrés
         const updatedColumns = columns.map(column => {
-          // Attribuer tous les leads du statut correspondant, sans filtrer par pipeline_type
-          const columnItems = mappedLeads.filter(lead => lead.status === column.status);
+          let columnItems;
           
-          console.log(`Colonne "${column.status}": ${columnItems.length} leads`);
+          if (window.innerWidth < 768) {
+            // Sur mobile, on montre les leads du statut correspondant pour le pipeline actif
+            columnItems = mappedLeads.filter(lead => {
+              return lead.status === column.status && 
+                    (lead.pipelineType === pipelineType || lead.pipeline_type === pipelineType);
+            });
+          } else {
+            // Sur desktop, on continue avec le comportement existant
+            columnItems = mappedLeads.filter(lead => lead.status === column.status);
+          }
+          
+          console.log(`Colonne "${column.status}": ${columnItems.length} leads (pipeline: ${pipelineType})`);
           if (columnItems.length > 0) {
             console.log(`  Premier lead dans la colonne "${column.status}":`, columnItems[0].name);
           }
@@ -168,3 +176,4 @@ export const useKanbanData = (
 
   return { loadedColumns, setLoadedColumns, isLoading };
 };
+

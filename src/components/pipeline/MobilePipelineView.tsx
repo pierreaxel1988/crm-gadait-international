@@ -43,12 +43,17 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   teamMembers
 }) => {
   useEffect(() => {
+    console.log('MobilePipelineView - pipeline actif:', activeTab);
     console.log('MobilePipelineView - colonnes reçues:', columns);
-    console.log('MobilePipelineView - activeTab:', activeTab);
-
+    
     // Vérifier si les colonnes ont des leads
     const totalLeads = columns.reduce((sum, col) => sum + col.items.length, 0);
     console.log('MobilePipelineView - Nombre total de leads:', totalLeads);
+    
+    // Afficher les leads par statut
+    columns.forEach(col => {
+      console.log(`Status ${col.status}: ${col.items.length} leads`);
+    });
   }, [columns, activeTab]);
 
   return (
