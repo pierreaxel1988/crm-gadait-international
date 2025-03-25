@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, PlusCircle, Clock, Phone, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -48,6 +49,11 @@ const MobileColumnList = ({
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const navigate = useNavigate();
   
+  useEffect(() => {
+    console.log('MobileColumnList - Columns received:', columns);
+    console.log('Nombre de leads par status:', columns.map(col => `${col.status}: ${col.items.length}`).join(', '));
+  }, [columns]);
+  
   // Get all leads across all columns
   const allLeads = columns.flatMap(column => 
     column.items.map(item => ({ ...item, columnStatus: column.status }))
@@ -92,6 +98,15 @@ const MobileColumnList = ({
   
   return (
     <div className="space-y-4">
+      {/* Debugging info */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="p-2 bg-yellow-100 rounded text-xs">
+          <p>Total leads: {totalLeadCount}</p>
+          <p>Active tab: {activeTab}</p>
+          <p>Leads count by status: {JSON.stringify(leadCountByStatus)}</p>
+        </div>
+      )}
+      
       {/* Status filters inspired by WhatsApp */}
       <div className="overflow-x-auto pb-1">
         <Tabs 

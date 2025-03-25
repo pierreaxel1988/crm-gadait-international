@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobilePipelineHeader from './mobile/MobilePipelineHeader';
@@ -42,6 +42,15 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   isFilterActive,
   teamMembers
 }) => {
+  useEffect(() => {
+    console.log('MobilePipelineView - colonnes reçues:', columns);
+    console.log('MobilePipelineView - activeTab:', activeTab);
+
+    // Vérifier si les colonnes ont des leads
+    const totalLeads = columns.reduce((sum, col) => sum + col.items.length, 0);
+    console.log('MobilePipelineView - Nombre total de leads:', totalLeads);
+  }, [columns, activeTab]);
+
   return (
     <div className="flex flex-col h-[calc(100vh-80px)]">
       <MobilePipelineHeader 

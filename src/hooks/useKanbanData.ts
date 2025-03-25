@@ -94,18 +94,6 @@ export const useKanbanData = (
           console.log(`${leads.length} leads trouvés, voici un exemple:`, leads[0]);
         }
         
-        // Afficher les détails de chaque lead pour comprendre où est le problème
-        console.log('===== DÉTAILS DE CHAQUE LEAD POUR DÉBOGAGE =====');
-        leads.forEach((lead, index) => {
-          console.log(`Lead #${index + 1} (${lead.name}):`);
-          console.log(`  - ID: ${lead.id}`);
-          console.log(`  - Status: ${lead.status}`);
-          console.log(`  - Pipeline type DB: ${lead.pipeline_type}`); 
-          console.log(`  - Pipeline type App: ${lead.pipelineType}`);
-          console.log(`  - Date de création: ${lead.created_at || lead.createdAt}`);
-          console.log(`  - Tags:`, lead.tags);
-        });
-        
         // Map leads data to KanbanItem format
         console.log('===== CONVERSION DES LEADS AU FORMAT KANBAN =====');
         const mappedLeads = leads.map(lead => {
@@ -113,12 +101,6 @@ export const useKanbanData = (
           
           // Détermine le pipeline_type avec une valeur par défaut
           const leadPipelineType = lead.pipeline_type || lead.pipelineType || 'purchase';
-          
-          // Log détaillé pour la détection du pipeline type
-          console.log(`Traitement du lead ${lead.id} (${lead.name}):`);
-          console.log(`  - pipeline_type de la DB: "${lead.pipeline_type}"`);
-          console.log(`  - pipelineType de l'app: "${lead.pipelineType}"`);
-          console.log(`  - Pipeline type final: "${leadPipelineType}"`);
           
           return {
             id: lead.id,
@@ -148,21 +130,14 @@ export const useKanbanData = (
         
         console.log('===== LEADS APRÈS CONVERSION =====');
         console.log(`${mappedLeads.length} leads convertis au format Kanban`);
-        console.log(`Pipeline actuel recherché: ${pipelineType}`);
         
-        // FILTRAGE DÉSACTIVÉ POUR DÉBOGAGE - Afficher tous les leads dans toutes les colonnes
-        console.log('===== DÉSACTIVATION DU FILTRAGE POUR DÉBOGAGE =====');
-        console.log('Affichage de tous les leads sans filtrage par pipeline');
-        const filteredLeads = mappedLeads;
-        
-        console.log(`Total de leads à afficher: ${filteredLeads.length}`);
-        
-        // Group leads by status
-        console.log('===== RÉPARTITION DES LEADS PAR STATUT =====');
+        // IMPORTANT: Sur mobile, on affiche TOUS les leads sans filtrer par pipeline type
+        // C'est le problème à corriger - les leads n'apparaissaient pas car ils étaient filtrés
         const updatedColumns = columns.map(column => {
-          const columnItems = filteredLeads.filter(lead => lead.status === column.status);
-          console.log(`Colonne "${column.status}": ${columnItems.length} leads`);
+          // Attribuer tous les leads du statut correspondant, sans filtrer par pipeline_type
+          const columnItems = mappedLeads.filter(lead => lead.status === column.status);
           
+          console.log(`Colonne "${column.status}": ${columnItems.length} leads`);
           if (columnItems.length > 0) {
             console.log(`  Premier lead dans la colonne "${column.status}":`, columnItems[0].name);
           }
