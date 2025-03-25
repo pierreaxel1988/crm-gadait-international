@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -88,8 +87,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex justify-between items-center mb-2">
+    <div className="space-y-3 mt-4">
+      <div className="flex justify-between items-center mb-3">
         <h3 className="text-sm font-futura">Actions en attente</h3>
         <Button 
           onClick={onAddAction}
@@ -147,7 +146,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {completedActions.length > 0 && (
         <>
-          <h3 className="text-sm font-futura mt-4 mb-2">Historique des actions</h3>
+          <h3 className="text-sm font-futura mt-6 mb-3">Historique des actions</h3>
           <div className="space-y-2">
             {completedActions.map((action) => (
               <div 
