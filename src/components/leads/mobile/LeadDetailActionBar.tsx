@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription, DrawerClose } from '@/components/ui/drawer';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import { LeadDetailed } from '@/types/lead';
 import { Save, Check, Clock, X } from 'lucide-react';
@@ -76,9 +77,9 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
                 Actions
               </Button>
             </DrawerTrigger>
-            <DrawerContent className="max-h-[90vh] rounded-t-xl shadow-xl">
-              <div className="p-4 pb-6">
-                <div className="flex items-center justify-between mb-4">
+            <DrawerContent className="max-h-[85vh] rounded-t-xl shadow-xl border-t-0 bg-gray-50">
+              <div className="p-0 pb-0">
+                <div className="flex items-center justify-between px-4 py-3 bg-white border-b sticky top-0 z-10">
                   <DrawerTitle className="text-lg font-futura">Historique des actions</DrawerTitle>
                   <DrawerClose asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
@@ -89,14 +90,16 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
                 <DrawerDescription className="sr-only">
                   Liste des actions pour ce lead
                 </DrawerDescription>
-                <div className="mt-2 overflow-y-auto">
-                  <ActionsPanel
-                    lead={lead}
-                    getActionTypeIcon={getActionTypeIcon}
-                    onMarkComplete={onMarkComplete}
-                    onAddAction={onAddAction}
-                  />
-                </div>
+                <ScrollArea className="h-[70vh] pb-safe overflow-y-auto overscroll-contain px-4 pt-2">
+                  <div className="pb-6">
+                    <ActionsPanel
+                      lead={lead}
+                      getActionTypeIcon={getActionTypeIcon}
+                      onMarkComplete={onMarkComplete}
+                      onAddAction={onAddAction}
+                    />
+                  </div>
+                </ScrollArea>
               </div>
             </DrawerContent>
           </Drawer>
