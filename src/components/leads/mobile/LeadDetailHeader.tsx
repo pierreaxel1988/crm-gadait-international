@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail, Save } from 'lucide-react';
 import { format } from 'date-fns';
+import CustomButton from '@/components/ui/CustomButton';
 
 interface LeadDetailHeaderProps {
   name: string;
@@ -49,19 +50,18 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
             <Mail className="h-4 w-4" />
           </a>
         )}
-        <Button 
-          size="sm" 
-          className="bg-chocolate-dark hover:bg-chocolate-light text-white shadow-sm transition-all duration-200 rounded-md"
-          onClick={onSave}
+        <CustomButton
+          variant="chocolate"
+          size="sm"
+          isLoading={isSaving}
           disabled={isSaving || !hasChanges}
+          onClick={onSave}
+          className="px-3 py-1.5 rounded-md"
+          fontStyle="optima"
         >
-          {isSaving ? (
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-1" />
-          ) : (
-            <Save className="h-4 w-4 mr-1" />
-          )}
-          <span className="text-xs font-medium">Enregistrer</span>
-        </Button>
+          <Save className="h-4 w-4 mr-1.5" />
+          <span className="text-xs">Enregistrer</span>
+        </CustomButton>
       </div>
     </div>
   );
