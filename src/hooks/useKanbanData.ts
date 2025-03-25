@@ -59,7 +59,7 @@ export const useKanbanData = (
         }
         
         // Récupération des leads depuis Supabase
-        const { data: leads, error: leadsError } = await supabase
+        const { data: supabaseLeads, error: leadsError } = await supabase
           .from('leads')
           .select('*');
           
@@ -73,25 +73,28 @@ export const useKanbanData = (
           return;
         }
         
+        // Utiliser les leads de Supabase ou récupérer des données locales
+        let allLeads = supabaseLeads || [];
+        
         // Si aucun lead n'est trouvé dans Supabase, essayer de récupérer des données locales
-        if (!leads || leads.length === 0) {
+        if (!allLeads || allLeads.length === 0) {
           const localLeads = await getLeads();
           if (localLeads && localLeads.length > 0) {
-            leads = localLeads;
+            allLeads = localLeads;
           }
         }
         
-        if (!leads || leads.length === 0) {
+        if (!allLeads || allLeads.length === 0) {
           console.log("Aucun lead trouvé dans la base de données ou localement");
           setLoadedColumns(columns.map(col => ({ ...col, items: [] })));
           setIsLoading(false);
           return;
         }
         
-        console.log(`Leads récupérés: ${leads.length}`);
+        console.log(`Leads récupérés: ${allLeads.length}`);
         
         // Map leads data to KanbanItem format
-        const mappedLeads = leads.map(lead => {
+        const mappedLeads = allLeads.map(lead => {
           const assignedTeamMember = teamMembers?.find(tm => tm.id === lead.assigned_to);
           
           // Utilise pipeline_type du lead ou une valeur par défaut
