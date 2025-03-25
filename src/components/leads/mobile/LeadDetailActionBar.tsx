@@ -53,7 +53,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               onClick={onManualSave} 
               size="sm" 
               variant="outline" 
-              className="h-8 px-2 text-xs transition-all duration-200 active:scale-95"
+              className="h-8 px-2 text-xs transition-all duration-200 active:scale-95 font-futura"
               disabled={isSaving || !hasChanges}
             >
               {isSaving ? (
@@ -72,7 +72,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="px-4 transition-all duration-200 active:scale-95 font-futura flex items-center gap-1.5 border-chocolate-dark/30 text-chocolate-dark hover:bg-chocolate-dark/10"
+                className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide flex items-center gap-2 border-chocolate-dark/30 text-chocolate-dark hover:bg-chocolate-dark/10"
               >
                 <History className="h-4 w-4 text-chocolate-dark" />
                 Historique
@@ -81,7 +81,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
             <DrawerContent className="bg-gradient-to-b from-loro-white to-loro-pearl/30 border-0 max-h-[92vh] rounded-t-xl shadow-xl">
               <div className="p-0 pb-0">
                 <div className="flex items-center justify-between px-4 py-4 bg-gradient-to-r from-chocolate-dark to-chocolate-dark/90 text-white sticky top-0 z-10 border-b border-chocolate-light/20 rounded-t-xl">
-                  <DrawerTitle className="text-xl font-optima flex items-center gap-2">
+                  <DrawerTitle className="text-xl font-futura flex items-center gap-3 tracking-wide">
                     <History className="h-5 w-5 text-loro-pearl/80" />
                     Historique des actions
                   </DrawerTitle>
@@ -109,7 +109,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
           </Drawer>
           <Button 
             onClick={onAddAction} 
-            className="bg-chocolate-dark hover:bg-chocolate-light transition-all duration-200 active:scale-95 font-futura"
+            className="bg-chocolate-dark hover:bg-chocolate-light transition-all duration-200 active:scale-95 font-futura tracking-wide"
             size="sm"
             type="button"
             aria-label="Ajouter une nouvelle action"
