@@ -45,6 +45,22 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
             <p className="text-xs text-muted-foreground">
               {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
             </p>
+            {/* Location and budget tags with smaller text and no background */}
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
+              {budget && (
+                <div className="flex items-center gap-1">
+                  <Euro className="h-2.5 w-2.5" />
+                  <span>{formatBudget("", budget, currency || "EUR")}</span>
+                </div>
+              )}
+              
+              {desiredLocation && (
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-2.5 w-2.5" />
+                  <span>{desiredLocation}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -70,23 +86,6 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
             <Save className="h-4 w-4" />
           </CustomButton>
         </div>
-      </div>
-      
-      {/* New section for budget and location tags */}
-      <div className="flex flex-wrap gap-1.5 mt-1">
-        {budget && (
-          <div className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-emerald-100 text-emerald-800">
-            <Euro className="h-2.5 w-2.5" />
-            <span>{formatBudget("", budget, currency || "EUR")}</span>
-          </div>
-        )}
-        
-        {desiredLocation && (
-          <div className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-800">
-            <MapPin className="h-2.5 w-2.5" />
-            <span>{desiredLocation}</span>
-          </div>
-        )}
       </div>
     </div>
   );
