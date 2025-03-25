@@ -80,7 +80,27 @@ export const useKanbanData = (
         if (!allLeads || allLeads.length === 0) {
           const localLeads = await getLeads();
           if (localLeads && localLeads.length > 0) {
-            allLeads = localLeads;
+            // Make sure the returned data from getLeads() is compatible with our expected structure
+            // We're only assigning to allLeads if we actually got data back
+            allLeads = localLeads.map(lead => ({
+              ...lead,
+              // Ensure all required database fields are present
+              id: lead.id,
+              name: lead.name,
+              email: lead.email || '',
+              phone: lead.phone || '',
+              status: lead.status || 'New',
+              tags: lead.tags || [],
+              assigned_to: lead.assignedTo,
+              pipeline_type: lead.pipelineType || lead.pipeline_type || 'purchase',
+              // Map any fields that might have different naming conventions
+              created_at: lead.createdAt,
+              desired_location: lead.desiredLocation,
+              purchase_timeframe: lead.purchaseTimeframe,
+              property_type: lead.propertyType,
+              next_follow_up_date: lead.nextFollowUpDate || lead.dueDate,
+              task_type: lead.taskType
+            }));
           }
         }
         
