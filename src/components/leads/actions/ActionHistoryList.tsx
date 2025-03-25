@@ -23,12 +23,12 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
 }) => {
   if (!actionHistory || actionHistory.length === 0) {
     return (
-      <div className="text-center py-8 px-4 animate-[fade-in_0.4s_ease-out]">
-        <div className="mx-auto h-12 w-12 rounded-full bg-chocolate-dark/10 flex items-center justify-center mb-4">
-          <AlertCircle className="h-6 w-6 text-chocolate-dark/70" />
+      <div className="text-center py-6 px-4 animate-[fade-in_0.4s_ease-out]">
+        <div className="mx-auto h-10 w-10 rounded-full bg-chocolate-dark/10 flex items-center justify-center mb-3">
+          <AlertCircle className="h-5 w-5 text-chocolate-dark/70" />
         </div>
-        <p className="text-loro-navy font-optima text-lg">Aucune action dans l'historique</p>
-        <p className="text-sm text-loro-navy/60 font-futuraLight mt-1">Les actions terminées apparaîtront ici</p>
+        <p className="text-loro-navy font-optima text-base">Aucune action dans l'historique</p>
+        <p className="text-xs text-loro-navy/60 font-futuraLight mt-1">Les actions terminées apparaîtront ici</p>
       </div>
     );
   }
@@ -63,12 +63,12 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
   };
 
   return (
-    <div className="space-y-6 px-4">
+    <div className="space-y-5">
       {sortedDates.map((dateString) => (
         <div key={dateString} className="animate-[fade-in_0.4s_ease-out]">
           <div className="flex items-center gap-2 mb-3">
-            <div className="h-8 w-8 rounded-full bg-chocolate-dark/10 flex items-center justify-center">
-              <Calendar className="h-4 w-4 text-chocolate-dark" />
+            <div className="h-6 w-6 rounded-full bg-chocolate-dark/10 flex items-center justify-center">
+              <Calendar className="h-3.5 w-3.5 text-chocolate-dark" />
             </div>
             <h3 className="text-sm font-optima text-loro-navy capitalize">
               {getFormattedDate(dateString)}
@@ -78,12 +78,12 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
           
           <div className="space-y-3 pl-4 border-l-2 border-chocolate-dark/20">
             {groupedActions[dateString].map((action) => (
-              <div 
+              <Card 
                 key={action.id} 
                 className={cn(
-                  "relative pl-4 pr-3 py-3 rounded-lg transition-all duration-200",
+                  "relative overflow-hidden transition-all duration-200 border-0",
                   action.completedDate 
-                    ? "bg-white border-0 shadow-sm" 
+                    ? "bg-white shadow-sm" 
                     : "bg-white shadow hover:shadow-md"
                 )}
               >
@@ -97,50 +97,52 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                   )}
                 />
                 
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className={cn(
-                        "p-1.5 rounded-md bg-chocolate-dark/10"
-                      )}>
-                        {getActionTypeIcon(action.actionType as TaskType)}
+                <div className="p-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className={cn(
+                          "p-1.5 rounded-md bg-chocolate-dark/10"
+                        )}>
+                          {getActionTypeIcon(action.actionType as TaskType)}
+                        </div>
+                        <span className={cn(
+                          "text-xs py-0.5 px-2 rounded-full font-futura",
+                          action.completedDate 
+                            ? "bg-green-50 text-green-700 border border-green-100" 
+                            : "bg-amber-50 text-amber-700 border border-amber-100"
+                        )}>
+                          {action.completedDate ? "Terminé" : "À faire"}
+                        </span>
                       </div>
-                      <span className={cn(
-                        "text-xs py-0.5 px-2 rounded-full font-optima",
-                        action.completedDate 
-                          ? "bg-green-50 text-green-700 border border-green-100" 
-                          : "bg-amber-50 text-amber-700 border border-amber-100"
-                      )}>
-                        {action.completedDate ? "Terminé" : "À faire"}
-                      </span>
+                      
+                      <div className="flex items-center gap-2 text-xs text-loro-navy/60 mt-1 font-futuraLight">
+                        <Clock className="h-3 w-3 text-chocolate-dark/70" />
+                        <span>
+                          {format(new Date(action.completedDate || action.scheduledDate), 'HH:mm')}
+                        </span>
+                      </div>
+                      
+                      {action.notes && (
+                        <p className="text-sm mt-3 bg-gray-50 p-2.5 rounded-md font-futuraLight text-loro-navy/70 border border-loro-pearl/20">
+                          {action.notes}
+                        </p>
+                      )}
                     </div>
                     
-                    <div className="flex items-center gap-2 text-xs text-loro-navy/60 mt-1 font-futuraLight">
-                      <Clock className="h-3 w-3 text-chocolate-dark/70" />
-                      <span>
-                        {format(new Date(action.completedDate || action.scheduledDate), 'HH:mm')}
-                      </span>
-                    </div>
-                    
-                    {action.notes && (
-                      <p className="text-sm mt-3 bg-gray-50 p-2.5 rounded-md font-futuraLight text-loro-navy/70 border border-loro-pearl/20">
-                        {action.notes}
-                      </p>
+                    {!action.completedDate && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onMarkComplete(action.id)}
+                        className="text-xs flex items-center gap-1 border-green-200 text-green-700 hover:bg-green-50"
+                      >
+                        <Check className="h-3 w-3" /> Terminer
+                      </Button>
                     )}
                   </div>
-                  
-                  {!action.completedDate && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onMarkComplete(action.id)}
-                      className="text-xs flex items-center gap-1 border-green-200 text-green-700 hover:bg-green-50"
-                    >
-                      <Check className="h-3 w-3" /> Terminer
-                    </Button>
-                  )}
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         </div>

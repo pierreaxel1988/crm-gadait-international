@@ -72,7 +72,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="px-4 transition-all duration-200 active:scale-95 font-futura flex items-center gap-1.5"
+                className="px-4 transition-all duration-200 active:scale-95 font-futura flex items-center gap-1.5 border-chocolate-dark/30 text-chocolate-dark hover:bg-chocolate-dark/10"
               >
                 <History className="h-4 w-4 text-chocolate-dark" />
                 Historique
