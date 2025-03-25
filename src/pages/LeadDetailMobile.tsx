@@ -108,6 +108,7 @@ const LeadDetailMobile = () => {
           onSave={handleSaveWithIndicator}
           isSaving={isSaving}
           hasChanges={hasChanges}
+          tags={lead.tags}
         />
         
         <LeadDetailTabs defaultTab={activeTab} />

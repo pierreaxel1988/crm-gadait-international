@@ -1,27 +1,39 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Phone, Mail, Save } from 'lucide-react';
+import { ArrowLeft, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import CustomButton from '@/components/ui/CustomButton';
+import TagBadge, { LeadTag } from '@/components/common/TagBadge';
+
 interface LeadDetailHeaderProps {
   name: string;
   createdAt?: string;
   phone?: string;
   email?: string;
+  budget?: string;
+  currency?: string;
+  desiredLocation?: string;
   onBackClick: () => void;
   onSave: () => void;
   isSaving: boolean;
   hasChanges: boolean;
+  tags?: LeadTag[];
 }
+
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   name,
   createdAt,
   phone,
   email,
+  budget,
+  currency,
+  desiredLocation,
   onBackClick,
   onSave,
   isSaving,
-  hasChanges
+  hasChanges,
+  tags
 }) => {
   return <div className="flex items-center justify-between p-3">
       <div className="flex items-center gap-2">
@@ -33,6 +45,11 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           <p className="text-xs text-muted-foreground">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            {budget && `${budget} ${currency || ''}`}
+            {budget && desiredLocation && ' • '}
+            {desiredLocation}
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -42,10 +59,9 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
         {email && <a href={`mailto:${email}`} className="p-2 rounded-full bg-blue-100 text-blue-600">
             <Mail className="h-4 w-4" />
           </a>}
-        <CustomButton variant="chocolate" size="sm" isLoading={isSaving} disabled={isSaving || !hasChanges} onClick={onSave} fontStyle="optima" className="p-2 rounded-full text-xs text-left px-0">
-          <Save className="h-4 w-4" />
-        </CustomButton>
+        {tags && tags.length > 0 && <TagBadge tag={tags[0]} />}
       </div>
     </div>;
 };
+
 export default LeadDetailHeader;
