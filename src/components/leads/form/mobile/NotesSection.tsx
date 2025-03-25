@@ -153,14 +153,15 @@ const NotesSection: React.FC<NotesSectionProps> = ({ lead, onDataChange }) => {
       </div>
       
       <div className="bg-white dark:bg-loro-night rounded-md border shadow-sm p-1">
-        <ScrollArea className="h-[200px] w-full">
+        <ScrollArea className="h-[200px] w-full rounded-sm">
           <Textarea
             ref={textareaRef}
             id="notes"
             value={notes}
             onChange={handleNotesChange}
             placeholder="Notez ici les détails importants, besoins spécifiques, préférences, objections..."
-            className="w-full min-h-[200px] font-futura border-none focus-visible:ring-0 resize-none"
+            className="w-full min-h-[200px] font-futura border-none focus-visible:ring-0 resize-none p-2 text-sm leading-relaxed transition-colors scrollbar-thin overflow-auto"
+            style={{ scrollBehavior: 'smooth' }}
           />
         </ScrollArea>
         
@@ -169,9 +170,9 @@ const NotesSection: React.FC<NotesSectionProps> = ({ lead, onDataChange }) => {
             <span className="text-xs text-gray-500 mr-3">{characterCount} caractères</span>
             <Button
               size="icon"
-              variant="outline"
+              variant="ghost"
               onClick={toggleVoiceRecording}
-              className={`rounded-full h-8 w-8 ${isRecording ? 'bg-red-500 text-white hover:bg-red-600' : ''}`}
+              className={`rounded-full h-8 w-8 transition-colors duration-200 ${isRecording ? 'bg-red-500 text-white hover:bg-red-600' : 'hover:bg-gray-100'}`}
             >
               {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             </Button>
@@ -181,7 +182,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({ lead, onDataChange }) => {
             size="sm" 
             onClick={handleSaveNotes}
             disabled={localSaving || !isModified}
-            className={`transition-all ${isModified ? 'bg-chocolate-dark text-white' : 'bg-gray-100 text-gray-400'}`}
+            className={`transition-all duration-200 ${isModified ? 'bg-chocolate-dark text-white' : 'bg-gray-100 text-gray-400'}`}
           >
             {localSaving ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> 
