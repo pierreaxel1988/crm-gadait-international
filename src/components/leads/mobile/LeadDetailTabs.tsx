@@ -25,7 +25,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({ defaultTab = "notes" })
 
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="w-full grid grid-cols-4 bg-transparent">
+      <TabsList className="w-full grid grid-cols-5 bg-transparent">
         <TabsTrigger 
           value="info"
           className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs"
@@ -49,6 +49,12 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({ defaultTab = "notes" })
           className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs"
         >
           Notes
+        </TabsTrigger>
+        <TabsTrigger 
+          value="actions"
+          className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs"
+        >
+          Actions
         </TabsTrigger>
       </TabsList>
     </Tabs>
