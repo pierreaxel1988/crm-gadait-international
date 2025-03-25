@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, Currency } from '@/types/lead';
+import React, { useState, useRef, useEffect } from 'react';
+import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency } from '@/types/lead';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,6 +9,9 @@ import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import CustomTagInput from '@/components/leads/form/CustomTagInput';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
+import { COUNTRIES as ALL_COUNTRIES } from '@/utils/countries';
+import ActionButtons from '@/components/pipeline/filters/ActionButtons';
 
 const PROPERTY_TYPES: PropertyType[] = [
   'Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 
@@ -22,15 +25,150 @@ const PURCHASE_TIMEFRAMES: PurchaseTimeframe[] = ['Moins de trois mois', 'Plus d
 const FINANCING_METHODS: FinancingMethod[] = ['Cash', 'Prêt bancaire'];
 const PROPERTY_USES: PropertyUse[] = ['Investissement locatif', 'Résidence principale'];
 const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'CHF', 'AED', 'MUR'];
-const COUNTRIES: Country[] = [
+const COUNTRIES = [
   'Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 
   'Portugal', 'Seychelles', 'Spain', 'Switzerland', 'UAE', 'UK', 'USA', 'Autre'
 ];
+
+// Helper function to match countries for search
+const countryMatchesSearch = (country: string, searchTerm: string): boolean => {
+  if (!searchTerm) return true;
+  
+  // Normalize strings by converting to lowercase and removing accents
+  const normalizedCountry = country.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+  return normalizedCountry.includes(normalizedSearch);
+};
 
 interface SearchCriteriaSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
+
+interface SmartSearchFieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+  placeholder?: string;
+}
+
+const SmartSearchField: React.FC<SmartSearchFieldProps> = ({ 
+  label, 
+  value, 
+  onChange, 
+  options, 
+  placeholder 
+}) => {
+  const [searchTerm, setSearchTerm] = useState(value);
+  const [isOpen, setIsOpen] = useState(false);
+  const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = options.filter(option => 
+        countryMatchesSearch(option, searchTerm)
+      );
+      setFilteredOptions(filtered);
+    } else {
+      setFilteredOptions(options);
+    }
+  }, [searchTerm, options]);
+
+  useEffect(() => {
+    // Update search term when value changes externally
+    setSearchTerm(value);
+  }, [value]);
+
+  useEffect(() => {
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current && 
+        !dropdownRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setIsOpen(true);
+  };
+
+  const handleOptionClick = (option: string) => {
+    onChange(option);
+    setSearchTerm(option);
+    setIsOpen(false);
+  };
+
+  const handleApply = () => {
+    onChange(searchTerm);
+    setIsOpen(false);
+  };
+
+  const handleClear = () => {
+    setSearchTerm('');
+    onChange('');
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="space-y-2 relative">
+      <Label htmlFor={label} className="text-sm">{label}</Label>
+      <Input
+        ref={inputRef}
+        id={label}
+        value={searchTerm}
+        onChange={handleInputChange}
+        placeholder={placeholder || `Rechercher ${label}`}
+        className="w-full font-futura"
+        onFocus={() => setIsOpen(true)}
+      />
+      
+      {isOpen && (
+        <div 
+          ref={dropdownRef} 
+          className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg border max-h-64 overflow-y-auto"
+        >
+          <div className="py-1 max-h-48 overflow-y-auto">
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((option) => (
+                <div
+                  key={option}
+                  className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer font-futura"
+                  onClick={() => handleOptionClick(option)}
+                >
+                  {option}
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-2 text-sm text-gray-500">
+                Aucun résultat
+              </div>
+            )}
+          </div>
+          
+          <ActionButtons 
+            onClear={handleClear}
+            onApply={handleApply}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
 
 const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onDataChange }) => {
   const handleInputChange = (field: keyof LeadDetailed, value: any) => {
@@ -82,6 +220,19 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
       : [...currentBedrooms, numValue];
     
     handleInputChange('bedrooms', newBedrooms.length ? newBedrooms : undefined);
+  };
+
+  // Handle nationality derivation when country changes
+  const handleCountryChange = (value: string) => {
+    handleInputChange('country', value);
+    
+    // If nationality is empty, try to derive it from country
+    if (!lead.nationality) {
+      const nationality = deriveNationalityFromCountry(value);
+      if (nationality) {
+        handleInputChange('nationality', nationality);
+      }
+    }
   };
 
   return (
@@ -143,24 +294,13 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
           <AccordionTrigger className="py-3 text-sm font-medium">Localisation</AccordionTrigger>
           <AccordionContent>
             <div className="space-y-4 py-2">
-              <div className="space-y-2">
-                <Label htmlFor="country" className="text-sm">Pays recherché</Label>
-                <Select
-                  value={lead.country || ''}
-                  onValueChange={(value) => handleInputChange('country', value)}
-                >
-                  <SelectTrigger id="country" className="w-full font-futura">
-                    <SelectValue placeholder="Sélectionner un pays" />
-                  </SelectTrigger>
-                  <SelectContent searchable={true}>
-                    {COUNTRIES.map((country) => (
-                      <SelectItem key={country} value={country} className="font-futura">
-                        {country}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <SmartSearchField
+                label="Pays recherché"
+                value={lead.country || ''}
+                onChange={handleCountryChange}
+                options={COUNTRIES}
+                placeholder="Rechercher un pays"
+              />
               
               <div className="space-y-2">
                 <Label htmlFor="desiredLocation" className="text-sm">Localisation souhaitée</Label>
@@ -321,27 +461,21 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
           <AccordionTrigger className="py-3 text-sm font-medium">Informations personnelles</AccordionTrigger>
           <AccordionContent>
             <div className="space-y-4 py-2">
-              <div className="space-y-2">
-                <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
-                <Input
-                  id="nationality"
-                  value={lead.nationality || ''}
-                  onChange={(e) => handleInputChange('nationality', e.target.value)}
-                  placeholder="Nationalité"
-                  className="w-full font-futura"
-                />
-              </div>
+              <SmartSearchField
+                label="Nationalité"
+                value={lead.nationality || ''}
+                onChange={(value) => handleInputChange('nationality', value)}
+                options={ALL_COUNTRIES}
+                placeholder="Rechercher une nationalité"
+              />
               
-              <div className="space-y-2">
-                <Label htmlFor="taxResidence" className="text-sm">Résidence fiscale</Label>
-                <Input
-                  id="taxResidence"
-                  value={lead.taxResidence || ''}
-                  onChange={(e) => handleInputChange('taxResidence', e.target.value)}
-                  placeholder="Résidence fiscale"
-                  className="w-full font-futura"
-                />
-              </div>
+              <SmartSearchField
+                label="Résidence fiscale"
+                value={lead.taxResidence || ''}
+                onChange={(value) => handleInputChange('taxResidence', value)}
+                options={ALL_COUNTRIES}
+                placeholder="Rechercher une résidence fiscale"
+              />
             </div>
           </AccordionContent>
         </AccordionItem>
