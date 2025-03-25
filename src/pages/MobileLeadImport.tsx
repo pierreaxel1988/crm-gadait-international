@@ -1,22 +1,37 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MobileQuickImport from '@/components/mobile/MobileQuickImport';
 
 const MobileLeadImport = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [importOpen, setImportOpen] = useState(true);
 
+  // Close dialog and navigate back when the dialog is closed
   const handleClose = () => {
     setImportOpen(false);
-    navigate('/pipeline');
+    navigate(-1);
   };
 
+  // Handle successful lead creation
   const handleSuccess = () => {
     // This will be handled by the dialog's navigation
   };
+
+  // Auto-close if user presses back button on the browser
+  useEffect(() => {
+    const handlePopState = () => {
+      setImportOpen(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   return (
     <div className="p-4 flex flex-col h-screen">
@@ -25,7 +40,7 @@ const MobileLeadImport = () => {
           variant="outline" 
           size="icon" 
           className="mr-2"
-          onClick={() => navigate('/pipeline')}
+          onClick={() => navigate(-1)}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>

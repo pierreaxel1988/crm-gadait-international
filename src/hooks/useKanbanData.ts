@@ -105,9 +105,6 @@ export const useKanbanData = (
         });
         
         const updatedColumns = columns.map(column => {
-          // Sur mobile et desktop, on ne filtre plus par le pipelineType ici
-          // Cela permettra d'afficher tous les leads dans MobileColumnList et
-          // le filtrage se fera au niveau de ce composant
           const columnItems = mappedLeads.filter(lead => lead.status === column.status);
           
           return {

@@ -42,16 +42,6 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   isFilterActive,
   teamMembers
 }) => {
-  // Filtrer les colonnes selon le type de pipeline actif
-  const filteredColumns = columns.map(column => {
-    return {
-      ...column,
-      items: column.items.filter(item => 
-        item.pipelineType === activeTab || item.pipeline_type === activeTab
-      )
-    };
-  });
-
   return (
     <div className="flex flex-col h-[calc(100vh-80px)]">
       <MobilePipelineHeader 
@@ -77,7 +67,7 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
 
       <div className="flex-1 overflow-y-auto mt-4 pb-20">
         <MobileColumnList
-          columns={filteredColumns}
+          columns={columns}
           activeTab={activeTab}
           searchTerm={searchTerm}
           filters={filters}

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, X, Flag, Phone, Home, Euro } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,11 +9,13 @@ import { createLead } from '@/services/leadCore';
 import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
+
 interface MobileQuickImportProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
 }
+
 const MobileQuickImport: React.FC<MobileQuickImportProps> = ({
   isOpen,
   onClose,
@@ -30,6 +33,14 @@ const MobileQuickImport: React.FC<MobileQuickImportProps> = ({
   const [currency, setCurrency] = useState('EUR');
   const [nationality, setNationality] = useState('Inde');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Reset form state when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      // Optional: reset form fields when dialog closes
+    }
+  }, [isOpen]);
+
   const handleImport = async () => {
     if (!leadName || !leadEmail) {
       toast({
@@ -39,7 +50,9 @@ const MobileQuickImport: React.FC<MobileQuickImportProps> = ({
       });
       return;
     }
+    
     setIsSubmitting(true);
+    
     try {
       const newLeadData = {
         name: leadName,
@@ -57,13 +70,18 @@ const MobileQuickImport: React.FC<MobileQuickImportProps> = ({
         pipelineType: "purchase" as "purchase" | "rental",
         living_area: "375 m²"
       };
+      
       const createdLead = await createLead(newLeadData);
+      
       toast({
         title: "Lead créé",
         description: "Le lead a été créé avec succès."
       });
-      onClose();
+      
       if (onSuccess) onSuccess();
+      
+      // Close the dialog and navigate to the new lead
+      onClose();
       navigate(`/leads/${createdLead.id}`);
     } catch (error) {
       console.error('Erreur lors de la création du lead:', error);
@@ -76,11 +94,17 @@ const MobileQuickImport: React.FC<MobileQuickImportProps> = ({
       setIsSubmitting(false);
     }
   };
-  return <Dialog open={isOpen} onOpenChange={open => {
+
+  // Handle dialog close properly
+  const handleDialogClose = (open: boolean) => {
     if (!open) {
+      // Only execute onClose if the dialog is being closed
       onClose();
     }
-  }}>
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleDialogClose}>
       <DialogContent className="w-[95%] max-w-md p-4 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="mb-2">
           <DialogTitle className="text-sm font-extralight">Import Rapide de Lead</DialogTitle>
@@ -125,6 +149,8 @@ const MobileQuickImport: React.FC<MobileQuickImportProps> = ({
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 };
+
 export default MobileQuickImport;

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, PlusCircle, Clock, Phone, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -48,18 +49,23 @@ const MobileColumnList = ({
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const navigate = useNavigate();
   
-  // Get all leads across all columns
+  // Get all leads across all columns that match the current pipeline type
   const allLeads = columns.flatMap(column => 
-    column.items.map(item => ({ ...item, columnStatus: column.status }))
+    column.items
+      .filter(item => item.pipelineType === activeTab || item.pipeline_type === activeTab)
+      .map(item => ({ ...item, columnStatus: column.status }))
   );
   
-  // Count leads by status
+  // Count leads by status for the current pipeline type
   const leadCountByStatus = columns.reduce((acc, column) => {
-    acc[column.status] = column.items.length;
+    const count = column.items.filter(
+      item => item.pipelineType === activeTab || item.pipeline_type === activeTab
+    ).length;
+    acc[column.status] = count;
     return acc;
   }, {} as Record<string, number>);
   
-  // Count all leads
+  // Count total leads for the current pipeline type
   const totalLeadCount = allLeads.length;
   
   // Filter leads by selected status
