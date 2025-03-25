@@ -103,7 +103,7 @@ export const useKanbanData = (
               desired_location: lead.desiredLocation || '',
               external_id: lead.external_id || null,
               financing_method: lead.financingMethod || null,
-              imported_at: lead.importedAt || null,
+              imported_at: lead.imported_at || null,
               integration_source: lead.integration_source || null,
               last_contacted_at: lead.lastContactedAt || null,
               living_area: lead.livingArea || null,
