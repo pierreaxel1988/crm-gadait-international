@@ -147,9 +147,12 @@ const LeadDetailMobile = () => {
         lead={lead}
         getActionTypeIcon={getActionTypeIcon}
         onMarkComplete={markActionComplete}
+        hasChanges={hasChanges}
+        isSaving={isSaving}
+        onManualSave={handleSaveWithIndicator}
       />
 
-      {/* Minimalist save indicator */}
+      {/* Conservons cet indicateur pour un feedback instantané après sauvegarde manuelle */}
       {showSaveIndicator && (
         <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-fade-in">
           <CheckCircle className="h-5 w-5" />
