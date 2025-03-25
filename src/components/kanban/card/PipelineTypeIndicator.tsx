@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Home, Key } from 'lucide-react';
 
 interface PipelineTypeIndicatorProps {
   pipelineType?: 'purchase' | 'rental';
