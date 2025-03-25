@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
 import { toast } from '@/hooks/use-toast';
@@ -7,6 +7,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { useLeadActions } from '@/hooks/useLeadActions';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
 import ActionsPanelMobile from '@/components/leads/actions/ActionsPanelMobile';
+import { CheckCircle } from 'lucide-react';
 
 // Import our new components
 import LeadDetailHeader from '@/components/leads/mobile/LeadDetailHeader';
@@ -25,6 +26,7 @@ const LeadDetailMobile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab] = useState('status');
+  const [showSaveIndicator, setShowSaveIndicator] = useState(false);
   
   // Use our custom hook
   const {
@@ -68,6 +70,13 @@ const LeadDetailMobile = () => {
     }
   };
 
+  // Show brief save indicator instead of toast
+  const handleSaveWithIndicator = async () => {
+    await handleSave();
+    setShowSaveIndicator(true);
+    setTimeout(() => setShowSaveIndicator(false), 2000);
+  };
+
   // Show loading or error states
   if (isLoading) {
     return <LoadingState isLoading={isLoading} />;
@@ -88,7 +97,7 @@ const LeadDetailMobile = () => {
           phone={lead.phone}
           email={lead.email}
           onBackClick={handleBackClick}
-          onSave={handleSave}
+          onSave={handleSaveWithIndicator}
           isSaving={isSaving}
           hasChanges={hasChanges}
         />
@@ -134,6 +143,13 @@ const LeadDetailMobile = () => {
         getActionTypeIcon={getActionTypeIcon}
         onMarkComplete={markActionComplete}
       />
+
+      {/* Minimalist save indicator */}
+      {showSaveIndicator && (
+        <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-fade-in">
+          <CheckCircle className="h-5 w-5" />
+        </div>
+      )}
 
       <ActionDialog
         isOpen={isActionDialogOpen}
