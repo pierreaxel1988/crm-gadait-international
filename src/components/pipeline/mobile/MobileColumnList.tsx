@@ -156,7 +156,7 @@ const MobileColumnList = ({
                           </span>}
                         {lead.taskType && <span className="flex items-center mr-2">
                             {lead.taskType === 'Call' ? <Phone className="h-3 w-3 mr-1" /> : lead.taskType === 'Follow up' ? <Clock className="h-3 w-3 mr-1" /> : lead.taskType === 'Visites' ? <Calendar className="h-3 w-3 mr-1" /> : null}
-                            <span className="truncate">{lead.taskType}</span>
+                            <span className="truncate text-xs">{lead.taskType}</span>
                           </span>}
                         {lead.budget && <span className="truncate text-xs">{lead.budget}</span>}
                       </div>
