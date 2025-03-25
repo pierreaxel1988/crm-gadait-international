@@ -9,6 +9,7 @@ import ActionDialog from '@/components/leads/actions/ActionDialog';
 import ActionsPanelMobile from '@/components/leads/actions/ActionsPanelMobile';
 import { CheckCircle } from 'lucide-react';
 import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Import our new components
 import LeadDetailHeader from '@/components/leads/mobile/LeadDetailHeader';
@@ -111,9 +112,10 @@ const LeadDetailMobile = () => {
         <LeadDetailTabs defaultTab={activeTab} />
       </div>
       
-      <div className="flex-1 overflow-y-auto pb-20 mt-24 overscroll-contain">
+      {/* Use ScrollArea for smooth native-like scrolling on mobile */}
+      <ScrollArea className="flex-1 pb-20 mt-24">
         <Tabs value={activeTab} className="w-full">
-          <div className="px-4 pt-2">
+          <div className="px-4 pt-2 pb-24">
             <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
@@ -140,7 +142,7 @@ const LeadDetailMobile = () => {
             </TabsContent>
           </div>
         </Tabs>
-      </div>
+      </ScrollArea>
       
       <LeadDetailActionBar
         autoSaveEnabled={autoSaveEnabled}

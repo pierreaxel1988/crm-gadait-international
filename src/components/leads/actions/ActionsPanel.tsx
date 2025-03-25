@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import CurrentAction from './CurrentAction';
 import ActionHistoryList from './ActionHistoryList';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ActionsPanelProps {
   lead: LeadDetailed;

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ActionHistoryListProps {
   actionHistory?: ActionHistory[];
@@ -66,90 +67,92 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
   };
 
   return (
-    <div className="space-y-5">
-      {sortedDates.map((dateString) => (
-        <div key={dateString} className="animate-[fade-in_0.4s_ease-out]">
-          <div className="flex items-center gap-2 mb-2.5">
-            <div className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} rounded-full bg-loro-pearl/30 flex items-center justify-center`}>
-              <Calendar className={`${isMobile ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-loro-navy/70`} />
+    <ScrollArea className="h-[calc(100vh-280px)]">
+      <div className="space-y-5 pr-3">
+        {sortedDates.map((dateString) => (
+          <div key={dateString} className="animate-[fade-in_0.4s_ease-out]">
+            <div className="flex items-center gap-2 mb-2.5 sticky top-0 bg-white py-1">
+              <div className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} rounded-full bg-loro-pearl/30 flex items-center justify-center`}>
+                <Calendar className={`${isMobile ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-loro-navy/70`} />
+              </div>
+              <h3 className={`${isMobile ? 'text-xs' : 'text-sm'} font-futura text-loro-navy/80 tracking-wide`}>
+                {getFormattedDate(dateString)}
+              </h3>
+              <Separator className="flex-1 bg-loro-pearl/30" />
             </div>
-            <h3 className={`${isMobile ? 'text-xs' : 'text-sm'} font-futura text-loro-navy/80 tracking-wide`}>
-              {getFormattedDate(dateString)}
-            </h3>
-            <Separator className="flex-1 bg-loro-pearl/30" />
-          </div>
-          
-          <div className={`space-y-2 pl-${isMobile ? '3' : '4'} border-l border-loro-pearl/20`}>
-            {groupedActions[dateString].map((action) => (
-              <Card 
-                key={action.id} 
-                className={cn(
-                  "relative overflow-hidden transition-all duration-300 rounded-lg border shadow-sm",
-                  action.completedDate 
-                    ? "border-loro-pearl/30 bg-loro-pearl/5" 
-                    : "border-loro-pearl/30 bg-white"
-                )}
-              >
-                {/* Dot on timeline */}
-                <div 
+            
+            <div className={`space-y-2 pl-${isMobile ? '3' : '4'} border-l border-loro-pearl/20`}>
+              {groupedActions[dateString].map((action) => (
+                <Card 
+                  key={action.id} 
                   className={cn(
-                    "absolute -left-[10px] top-1/2 transform -translate-y-1/2 h-4 w-4 rounded-full border-2 border-white",
+                    "relative overflow-hidden transition-all duration-300 rounded-lg border shadow-sm",
                     action.completedDate 
-                      ? "bg-green-500" 
-                      : "bg-amber-500"
+                      ? "border-loro-pearl/30 bg-loro-pearl/5" 
+                      : "border-loro-pearl/30 bg-white"
                   )}
-                />
-                
-                <div className={`${isMobile ? 'p-2.5' : 'p-3'}`}>
-                  <div className="flex justify-between items-start gap-2">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2.5">
-                        <div className={cn(
-                          `${isMobile ? 'p-1.5' : 'p-1.5'} rounded-md`,
-                          action.completedDate 
-                            ? "bg-green-50" 
-                            : "bg-amber-50"
-                        )}>
-                          {getActionTypeIcon(action.actionType as TaskType)}
-                        </div>
-                        <div>
-                          <span className={`text-loro-navy/80 font-futura ${isMobile ? 'text-xs' : 'text-sm'}`}>
-                            {action.actionType}
-                          </span>
-                          <div className="flex items-center gap-1 text-xs text-loro-navy/50 mt-0.5 font-futuraLight">
-                            <Clock className="h-3 w-3 text-loro-navy/40" />
-                            <span>
-                              {format(new Date(action.completedDate || action.scheduledDate), 'HH:mm', { locale: fr })}
+                >
+                  {/* Dot on timeline */}
+                  <div 
+                    className={cn(
+                      "absolute -left-[10px] top-1/2 transform -translate-y-1/2 h-4 w-4 rounded-full border-2 border-white",
+                      action.completedDate 
+                        ? "bg-green-500" 
+                        : "bg-amber-500"
+                    )}
+                  />
+                  
+                  <div className={`${isMobile ? 'p-2.5' : 'p-3'}`}>
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2.5">
+                          <div className={cn(
+                            `${isMobile ? 'p-1.5' : 'p-1.5'} rounded-md`,
+                            action.completedDate 
+                              ? "bg-green-50" 
+                              : "bg-amber-50"
+                          )}>
+                            {getActionTypeIcon(action.actionType as TaskType)}
+                          </div>
+                          <div>
+                            <span className={`text-loro-navy/80 font-futura ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                              {action.actionType}
                             </span>
+                            <div className="flex items-center gap-1 text-xs text-loro-navy/50 mt-0.5 font-futuraLight">
+                              <Clock className="h-3 w-3 text-loro-navy/40" />
+                              <span>
+                                {format(new Date(action.completedDate || action.scheduledDate), 'HH:mm', { locale: fr })}
+                              </span>
+                            </div>
                           </div>
                         </div>
+                        
+                        {action.notes && (
+                          <p className={`${isMobile ? 'text-xs mt-1.5 p-2' : 'text-sm mt-2 p-2.5'} bg-white rounded-md font-futuraLight text-loro-navy/70 border border-loro-pearl/20`}>
+                            {action.notes}
+                          </p>
+                        )}
                       </div>
                       
-                      {action.notes && (
-                        <p className={`${isMobile ? 'text-xs mt-1.5 p-2' : 'text-sm mt-2 p-2.5'} bg-white rounded-md font-futuraLight text-loro-navy/70 border border-loro-pearl/20`}>
-                          {action.notes}
-                        </p>
+                      {!action.completedDate && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onMarkComplete(action.id)}
+                          className={`${isMobile ? 'text-[10px] px-2 py-0.5 h-6' : 'text-xs px-2.5 py-1 h-7'} flex items-center gap-1 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 rounded-full font-futura`}
+                        >
+                          <Check className={`${isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'}`} /> Terminer
+                        </Button>
                       )}
                     </div>
-                    
-                    {!action.completedDate && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onMarkComplete(action.id)}
-                        className={`${isMobile ? 'text-[10px] px-2 py-0.5 h-6' : 'text-xs px-2.5 py-1 h-7'} flex items-center gap-1 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 rounded-full font-futura`}
-                      >
-                        <Check className={`${isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'}`} /> Terminer
-                      </Button>
-                    )}
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </ScrollArea>
   );
 };
 
