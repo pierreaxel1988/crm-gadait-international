@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, PlusCircle, Clock, Phone, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -57,15 +58,22 @@ const MobileColumnList = ({
     console.log(`Colonne ${col.title}: ${col.items.length} leads (pipelineType: ${col.pipelineType})`);
   });
   
-  // Get all leads across all columns
-  const allLeads = columns.flatMap(column => 
+  // Filtrer les colonnes en fonction du pipeline type actif
+  const filteredColumns = columns.filter(column => 
+    !column.pipelineType || column.pipelineType === activeTab
+  );
+  
+  console.log(`MobileColumnList - Colonnes filtrées par type (${activeTab}): ${filteredColumns.length}`);
+  
+  // Get all leads across filtered columns
+  const allLeads = filteredColumns.flatMap(column => 
     column.items.map(item => ({ ...item, columnStatus: column.status }))
   );
   
-  console.log(`MobileColumnList - Total leads (tous types): ${allLeads.length}`);
+  console.log(`MobileColumnList - Total leads (type ${activeTab}): ${allLeads.length}`);
   
-  // Count leads by status (for all pipeline types)
-  const leadCountByStatus = columns.reduce((acc, column) => {
+  // Count leads by status (for the current pipeline type)
+  const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     acc[column.status] = column.items.length;
     return acc;
   }, {} as Record<string, number>);
@@ -118,7 +126,7 @@ const MobileColumnList = ({
             >
               Tous ({totalLeadCount})
             </TabsTrigger>
-            {columns.map(column => (
+            {filteredColumns.map(column => (
               leadCountByStatus[column.status] > 0 && (
                 <TabsTrigger 
                   key={column.status}
