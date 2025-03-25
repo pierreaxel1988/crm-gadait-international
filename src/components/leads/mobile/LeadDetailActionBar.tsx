@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Drawer, DrawerTrigger, DrawerContent } from '@/components/ui/drawer';
 import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import { LeadDetailed } from '@/types/lead';
-import { Save, Check } from 'lucide-react';
+import { Save, Check, Clock } from 'lucide-react';
 
 interface LeadDetailActionBarProps {
   autoSaveEnabled: boolean;
@@ -30,24 +30,23 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-3 flex justify-center items-center">
       <div className="flex gap-3 w-full justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
           {autoSaveEnabled ? (
-            isSaving ? (
-              <div className="flex items-center gap-1 text-xs text-gray-600">
-                <div className="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></div>
-                <span>Enregistrement...</span>
-              </div>
-            ) : hasChanges ? (
-              <div className="flex items-center gap-1 text-xs text-gray-600">
-                <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                <span>Modifications en cours...</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1 text-xs text-gray-600">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span>Tout est enregistré</span>
-              </div>
-            )
+            <div className="flex items-center" title={isSaving ? "Enregistrement en cours" : hasChanges ? "Modifications en attente" : "Tout est enregistré"}>
+              {isSaving ? (
+                <div className="w-5 h-5 text-amber-500 animate-pulse">
+                  <Clock className="h-5 w-5" />
+                </div>
+              ) : hasChanges ? (
+                <div className="w-5 h-5 text-amber-500">
+                  <Clock className="h-5 w-5" />
+                </div>
+              ) : (
+                <div className="w-5 h-5 text-green-500">
+                  <Check className="h-5 w-5" />
+                </div>
+              )}
+            </div>
           ) : (
             <Button 
               onClick={onManualSave} 
@@ -57,20 +56,11 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               disabled={isSaving || !hasChanges}
             >
               {isSaving ? (
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></div>
-                  <span>Enregistrement...</span>
-                </div>
+                <Clock className="h-4 w-4 text-amber-500 animate-pulse" />
               ) : hasChanges ? (
-                <div className="flex items-center gap-1">
-                  <Save className="h-3 w-3" />
-                  <span>Enregistrer</span>
-                </div>
+                <Save className="h-4 w-4" />
               ) : (
-                <div className="flex items-center gap-1 text-green-600">
-                  <Check className="h-3 w-3" />
-                  <span>Enregistré</span>
-                </div>
+                <Check className="h-4 w-4 text-green-500" />
               )}
             </Button>
           )}
