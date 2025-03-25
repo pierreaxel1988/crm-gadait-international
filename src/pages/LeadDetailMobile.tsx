@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -24,7 +25,12 @@ import NotesSection from '@/components/leads/form/mobile/NotesSection';
 const LeadDetailMobile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab] = useState('notes');
+  const location = useLocation();
+  
+  // Get active tab from URL query params or default to notes
+  const searchParams = new URLSearchParams(location.search);
+  const activeTab = searchParams.get('tab') || 'notes';
+  
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
   
   // Use our custom hook
@@ -101,11 +107,11 @@ const LeadDetailMobile = () => {
           hasChanges={hasChanges}
         />
         
-        <LeadDetailTabs defaultTab="notes" />
+        <LeadDetailTabs defaultTab={activeTab} />
       </div>
       
       <div className="flex-1 overflow-y-auto pb-20">
-        <Tabs defaultValue="notes" className="w-full">
+        <Tabs value={activeTab} className="w-full">
           <div className="px-4 pt-4">
             <TabsContent value="info" className="mt-0">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
