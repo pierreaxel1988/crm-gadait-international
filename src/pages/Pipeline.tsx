@@ -31,7 +31,7 @@ const Pipeline = () => {
 
   if (isMobile) {
     return (
-      <div className="p-3 md:p-6 space-y-4">
+      <div className="flex flex-col h-[100dvh] overflow-hidden">
         <MobilePipelineView
           activeTab={activeTab}
           setActiveTab={setActiveTab}
