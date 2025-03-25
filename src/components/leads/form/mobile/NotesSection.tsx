@@ -150,17 +150,17 @@ const NotesSection: React.FC<NotesSectionProps> = ({ lead, onDataChange }) => {
       </div>
       
       <div className="bg-white dark:bg-loro-night rounded-md border shadow-sm p-1">
-        <ScrollArea className="h-[200px] w-full rounded-sm">
+        {/* Amélioré la ScrollArea pour un défilement plus fluide */}
+        <div className="h-[200px] w-full rounded-sm relative">
           <Textarea
             ref={textareaRef}
             id="notes"
             value={notes}
             onChange={handleNotesChange}
             placeholder="Notez ici les détails importants, besoins spécifiques, préférences, objections..."
-            className="w-full min-h-[200px] font-futura border-none focus-visible:ring-0 resize-none p-2 text-sm leading-relaxed transition-colors scrollbar-thin overflow-auto"
-            style={{ scrollBehavior: 'smooth' }}
+            className="w-full h-[200px] font-futura border-none focus-visible:ring-0 resize-none p-2 text-sm leading-relaxed transition-colors overflow-auto"
           />
-        </ScrollArea>
+        </div>
         
         <div className="flex items-center justify-between p-2 border-t">
           <div className="flex items-center">

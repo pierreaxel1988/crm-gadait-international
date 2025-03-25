@@ -8,7 +8,6 @@ import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { LeadStatus } from '@/components/common/StatusBadge';
-import FormSection from '@/components/leads/form/FormSection';
 
 interface StatusSectionProps {
   lead: LeadDetailed;
