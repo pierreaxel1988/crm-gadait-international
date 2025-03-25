@@ -9,6 +9,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     const leadId = uuidv4();
     const createdAt = new Date().toISOString();
     
+    // Create complete lead data
     const completeLeadData: LeadDetailed = {
       id: leadId,
       createdAt: createdAt,
@@ -17,12 +18,22 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       actionHistory: leadData.actionHistory || []
     };
     
+    // Add creation action to history if not present
+    if (!completeLeadData.actionHistory || completeLeadData.actionHistory.length === 0) {
+      completeLeadData.actionHistory = [{
+        id: uuidv4(),
+        actionType: 'Creation',
+        createdAt: createdAt,
+        scheduledDate: createdAt,
+        notes: 'Lead créé'
+      }];
+    }
+    
+    // Map to Supabase format
     const supabaseData = mapToSupabaseFormat(completeLeadData);
-    
-    // Log all data before sending to Supabase
     console.log("Data being sent to Supabase:", supabaseData);
-    console.log("Action history being sent:", supabaseData.action_history);
     
+    // Insert into database
     const { data, error } = await supabase
       .from("leads")
       .insert(supabaseData)
@@ -35,14 +46,9 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     }
     
     if (data) {
-      // Log the response from Supabase
       console.log("Data received from Supabase:", data);
       
-      // The Supabase response uses snake_case, but our app uses camelCase
-      // We need to handle the conversion properly
-      const actionHistory = data['action_history'] || [];
-      console.log("Action history received:", actionHistory);
-      
+      // Map database response back to LeadDetailed format
       return {
         ...data,
         createdAt: data.created_at || createdAt,
@@ -50,13 +56,16 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
         name: data.name || leadData.name,
         salutation: data.salutation || leadData.salutation,
         status: data.status || leadData.status || 'New',
-        actionHistory: Array.isArray(actionHistory) ? actionHistory : []
+        actionHistory: data.action_history || completeLeadData.actionHistory,
+        // Ensure consistency between pipelineType and pipeline_type
+        pipelineType: data.pipeline_type || completeLeadData.pipelineType,
+        pipeline_type: data.pipeline_type || completeLeadData.pipelineType
       } as LeadDetailed;
     }
     
     return completeLeadData;
   } catch (error) {
     console.error("Error in createLead:", error);
-    return null;
+    throw error;
   }
 };

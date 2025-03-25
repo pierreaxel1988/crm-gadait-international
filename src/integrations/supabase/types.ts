@@ -47,6 +47,7 @@ export type Database = {
       }
       leads: {
         Row: {
+          action_history: Json | null
           amenities: string[] | null
           assigned_to: string | null
           bedrooms: number | null
@@ -87,6 +88,7 @@ export type Database = {
           views: string[] | null
         }
         Insert: {
+          action_history?: Json | null
           amenities?: string[] | null
           assigned_to?: string | null
           bedrooms?: number | null
@@ -127,6 +129,7 @@ export type Database = {
           views?: string[] | null
         }
         Update: {
+          action_history?: Json | null
           amenities?: string[] | null
           assigned_to?: string | null
           bedrooms?: number | null

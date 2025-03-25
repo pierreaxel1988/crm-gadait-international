@@ -1,16 +1,27 @@
-
 import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { TaskType } from '@/components/kanban/KanbanCard';
 
 export const mapToLeadDetailed = (lead: any): LeadDetailed => {
-  // Safely extract action_history from lead
+  // Parse and validate action history
   let actionHistory: ActionHistory[] = [];
   try {
-    const rawActionHistory = lead.action_history || lead['action_history'] || [];
-    actionHistory = Array.isArray(rawActionHistory) ? rawActionHistory : [];
+    if (lead.action_history) {
+      // Handle both string and object formats
+      if (typeof lead.action_history === 'string') {
+        actionHistory = JSON.parse(lead.action_history);
+      } else {
+        actionHistory = lead.action_history;
+      }
+    }
+    
+    // Ensure it's an array
+    if (!Array.isArray(actionHistory)) {
+      actionHistory = [];
+      console.warn('Invalid action history format - reset to empty array');
+    }
   } catch (error) {
-    console.error('Error extracting action_history:', error);
+    console.error('Error parsing action_history:', error);
     actionHistory = [];
   }
 
@@ -75,23 +86,13 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
 };
 
 export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
-  // Log lead fields to ensure they're all present
-  console.log("Lead mapping to Supabase format - purchase conditions:", {
-    purchaseTimeframe: lead.purchaseTimeframe,
-    financingMethod: lead.financingMethod, 
-    propertyUse: lead.propertyUse
-  });
-  
   // Handle bedroom data for database storage
-  // If it's an array, we need to convert it appropriately for database storage
   let bedroomsForDb = null;
   if (Array.isArray(lead.bedrooms)) {
     // If only one bedroom is selected, store as a single integer
-    // Otherwise, we'll need to use JSONB_AGG in SQL to query it properly
     if (lead.bedrooms.length === 1) {
       bedroomsForDb = lead.bedrooms[0];
     } else if (lead.bedrooms.length > 1) {
-      // For multiple selections, we need to update through SQL
       // Store the first value for now, we'll handle multiple in updateLead
       bedroomsForDb = lead.bedrooms.length > 0 ? lead.bedrooms[0] : null;
     }
@@ -100,7 +101,18 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     bedroomsForDb = lead.bedrooms;
   }
   
-  console.log("Bedrooms for database:", bedroomsForDb, "Original:", lead.bedrooms);
+  // Ensure action history is properly formatted
+  let actionHistoryForDb = [];
+  if (Array.isArray(lead.actionHistory)) {
+    actionHistoryForDb = lead.actionHistory.map(action => ({
+      ...action,
+      // Ensure each action has all required fields
+      id: action.id || crypto.randomUUID(),
+      createdAt: action.createdAt || new Date().toISOString(),
+      scheduledDate: action.scheduledDate || new Date().toISOString(),
+      actionType: action.actionType || 'Note'
+    }));
+  }
   
   return {
     id: lead.id,
@@ -138,8 +150,8 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     integration_source: lead.integration_source,
     tax_residence: lead.taxResidence,
     living_area: lead.livingArea,
-    external_id: lead.external_id
-    // Deliberately omitting action_history as it doesn't exist in the database
+    external_id: lead.external_id,
+    action_history: actionHistoryForDb
   };
 };
 
@@ -169,7 +181,6 @@ export const createEmptyAction = (): ActionHistory => {
   };
 };
 
-// Fix the currencyValue null error with proper null checking
 export const formatBudget = (min?: string | null, max?: string | null, currency?: string | null): string | undefined => {
   if (!min && !max) return undefined;
   

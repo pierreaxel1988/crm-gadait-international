@@ -40,7 +40,7 @@ export const useLeadCreation = () => {
     checkAuth();
   }, [navigate]);
 
-  // Define available statuses for the lead, matching those used in the pipeline
+  // Define available statuses for the lead
   const purchaseStatuses: LeadStatus[] = [
     'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Deposit', 'Signed', 'Gagné', 'Perdu'
   ];
@@ -90,6 +90,17 @@ export const useLeadCreation = () => {
       // Set the selected status
       console.log("Setting lead status to:", leadStatus);
       newLeadData.status = leadStatus;
+      
+      // Add initial action to history if not present
+      if (!newLeadData.actionHistory || newLeadData.actionHistory.length === 0) {
+        newLeadData.actionHistory = [{
+          id: crypto.randomUUID(),
+          actionType: 'Creation',
+          createdAt: new Date().toISOString(),
+          scheduledDate: new Date().toISOString(),
+          notes: 'Lead créé avec statut: ' + leadStatus
+        }];
+      }
       
       console.log("Creating lead with processed data:", newLeadData);
       

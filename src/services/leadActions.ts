@@ -50,51 +50,27 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       updatedActionHistory: updatedLead.actionHistory 
     });
     
-    // Save the updated lead to Supabase through two methods for redundancy
-    
-    // Method 1: Using the updateLead function that handles all lead fields
+    // Update the lead in Supabase
     const result = await updateLead(updatedLead);
     
     if (!result) {
       throw new Error('Failed to update lead with new action');
     }
     
-    // Method 2: Direct update to Supabase for better data consistency
-    // This ensures even if our lead mapping has issues, the action is still recorded
-    try {
-      const actionHistoryArray = Array.isArray(updatedLead.actionHistory) ? updatedLead.actionHistory : [];
-      
-      console.log('Direct Supabase update with action history:', actionHistoryArray);
-      
-      const { error } = await supabase
-        .from('leads')
-        .update({
-          task_type: action.actionType,
-          next_follow_up_date: action.scheduledDate,
-          last_contacted_at: currentDate,
-          action_history: actionHistoryArray
-        })
-        .eq('id', leadId);
-      
-      if (error) {
-        console.error('Error updating action history in Supabase:', error);
-        throw error;
-      }
-      
-      // Refetch the lead to ensure we have the latest data
-      const refreshedLead = await getLead(leadId);
-      
-      if (refreshedLead) {
-        console.log('Lead refetched after action update:', refreshedLead);
-        console.log('Action history after refresh:', refreshedLead.actionHistory);
-        return refreshedLead;
-      }
-      
-      return result;
-    } catch (err) {
-      console.error('Unexpected error updating action history:', err);
-      throw err;
+    // Verify action history was saved properly with direct query
+    const { data, error } = await supabase
+      .from('leads')
+      .select('action_history')
+      .eq('id', leadId)
+      .single();
+    
+    if (error) {
+      console.error('Error verifying action history:', error);
+    } else if (data) {
+      console.log('Action history verified in database:', data.action_history);
     }
+    
+    return result;
   } catch (err) {
     console.error('Error adding action to lead:', err);
     toast({
