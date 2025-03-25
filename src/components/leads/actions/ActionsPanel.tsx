@@ -22,8 +22,8 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({
   onAddAction,
 }) => {
   return (
-    <div className="space-y-4">
-      <div className="px-4 pt-2 pb-2">
+    <div className="space-y-6">
+      <div className="px-4 pt-4 pb-2 animate-[fade-in_0.4s_ease-out]">
         <CurrentAction 
           taskType={lead.taskType}
           nextFollowUpDate={lead.nextFollowUpDate}
@@ -32,13 +32,13 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({
         />
       </div>
       
-      <div className="bg-white">
-        <div className="flex items-center gap-2 p-4 sticky top-0 z-10 bg-white border-b border-loro-pearl/30">
-          <div className="h-6 w-6 rounded-full bg-chocolate-dark/10 flex items-center justify-center">
-            <History className="h-3.5 w-3.5 text-chocolate-dark" />
+      <div className="bg-transparent">
+        <div className="flex items-center gap-2 p-4 sticky top-0 z-10 bg-gradient-to-r from-loro-white to-transparent">
+          <div className="h-7 w-7 rounded-full bg-chocolate-dark/20 flex items-center justify-center">
+            <History className="h-4 w-4 text-chocolate-dark" />
           </div>
           <h3 className="text-lg font-optima text-loro-navy">Historique</h3>
-          <Separator className="flex-1 bg-loro-pearl/50" />
+          <Separator className="flex-1 bg-gradient-to-r from-loro-pearl to-loro-pearl/20" />
         </div>
         
         <div className="px-4 pt-1 pb-4">
