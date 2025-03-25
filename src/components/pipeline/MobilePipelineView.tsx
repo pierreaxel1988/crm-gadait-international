@@ -6,6 +6,7 @@ import MobilePipelineHeader from './mobile/MobilePipelineHeader';
 import MobileColumnList from './mobile/MobileColumnList';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { PipelineType } from '@/types/lead';
 
 interface MobilePipelineViewProps {
   activeTab: string;
@@ -42,6 +43,9 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   isFilterActive,
   teamMembers
 }) => {
+  // Force a console log to track the active tab for debugging
+  console.log(`MobilePipelineView - activeTab: ${activeTab}`);
+  
   return (
     <div className="flex flex-col h-[calc(100vh-80px)]">
       <MobilePipelineHeader 
@@ -68,7 +72,7 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
       <div className="flex-1 overflow-y-auto mt-4 pb-20">
         <MobileColumnList
           columns={columns}
-          activeTab={activeTab}
+          activeTab={activeTab as PipelineType}
           searchTerm={searchTerm}
           filters={filters}
         />

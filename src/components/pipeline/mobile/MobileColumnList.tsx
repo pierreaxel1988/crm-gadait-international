@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, PlusCircle, Clock, Phone, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PipelineType } from '@/types/lead';
 
 // Map English status to French translations
 const statusTranslations: Record<LeadStatus, string> = {
@@ -29,11 +29,11 @@ interface MobileColumnListProps {
     title: string;
     status: LeadStatus;
     items: any[];
-    pipelineType?: 'purchase' | 'rental';
+    pipelineType?: PipelineType;
   }>;
   expandedColumn?: LeadStatus | null;
   toggleColumnExpand?: (status: LeadStatus) => void;
-  activeTab?: string;
+  activeTab?: PipelineType;
   searchTerm?: string;
   filters?: FilterOptions;
 }
@@ -49,24 +49,30 @@ const MobileColumnList = ({
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const navigate = useNavigate();
   
-  // Get all leads across all columns that match the current pipeline type
+  console.log(`MobileColumnList - activeTab: ${activeTab}`);
+  console.log(`MobileColumnList - columns: ${columns.length}`);
+  
+  // Log count of leads per column
+  columns.forEach(col => {
+    console.log(`Colonne ${col.title}: ${col.items.length} leads (pipelineType: ${col.pipelineType})`);
+  });
+  
+  // Get all leads across all columns
   const allLeads = columns.flatMap(column => 
-    column.items
-      .filter(item => item.pipelineType === activeTab || item.pipeline_type === activeTab)
-      .map(item => ({ ...item, columnStatus: column.status }))
+    column.items.map(item => ({ ...item, columnStatus: column.status }))
   );
   
-  // Count leads by status for the current pipeline type
+  console.log(`MobileColumnList - Total leads (tous types): ${allLeads.length}`);
+  
+  // Count leads by status (for all pipeline types)
   const leadCountByStatus = columns.reduce((acc, column) => {
-    const count = column.items.filter(
-      item => item.pipelineType === activeTab || item.pipeline_type === activeTab
-    ).length;
-    acc[column.status] = count;
+    acc[column.status] = column.items.length;
     return acc;
   }, {} as Record<string, number>);
   
-  // Count total leads for the current pipeline type
+  // Count total leads
   const totalLeadCount = allLeads.length;
+  console.log(`MobileColumnList - Total lead count: ${totalLeadCount}`);
   
   // Filter leads by selected status
   const displayedLeads = activeStatus === 'all' 

@@ -4,11 +4,38 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MobileQuickImport from '@/components/mobile/MobileQuickImport';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const MobileLeadImport = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const pipelineType = queryParams.get('pipelineType') || 'purchase';
   const [importOpen, setImportOpen] = useState(true);
+  const [leadCount, setLeadCount] = useState(0);
+
+  // Récupérer le nombre de leads au chargement
+  useEffect(() => {
+    const fetchLeadCount = async () => {
+      try {
+        const { count, error } = await supabase
+          .from('leads')
+          .select('*', { count: 'exact', head: true });
+          
+        if (error) {
+          console.error('Error fetching leads count:', error);
+          return;
+        }
+        
+        setLeadCount(count || 0);
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      }
+    };
+    
+    fetchLeadCount();
+  }, []);
 
   // Close dialog and navigate back when the dialog is closed
   const handleClose = () => {
@@ -18,7 +45,12 @@ const MobileLeadImport = () => {
 
   // Handle successful lead creation
   const handleSuccess = () => {
-    // This will be handled by the dialog's navigation
+    toast({
+      title: "Lead créé avec succès",
+      description: "Votre lead a été ajouté à la base de données.",
+      duration: 3000,
+    });
+    navigate('/pipeline');
   };
 
   // Auto-close if user presses back button on the browser
@@ -48,9 +80,15 @@ const MobileLeadImport = () => {
       </div>
 
       <div className="flex-1 flex flex-col justify-center items-center">
-        <p className="text-gray-500 mb-4 text-center">
-          Importez rapidement un nouveau lead pour votre pipeline
-        </p>
+        {leadCount === 0 ? (
+          <p className="text-gray-500 mb-4 text-center">
+            Vous n'avez pas encore de leads. Importez votre premier lead pour commencer.
+          </p>
+        ) : (
+          <p className="text-gray-500 mb-4 text-center">
+            Importez rapidement un nouveau lead pour votre pipeline
+          </p>
+        )}
         
         <Button 
           className="w-full max-w-xs"
@@ -58,6 +96,15 @@ const MobileLeadImport = () => {
         >
           <PlusCircle className="h-4 w-4 mr-2" />
           Importer un nouveau lead
+        </Button>
+        
+        <Button 
+          variant="outline"
+          className="w-full max-w-xs mt-3"
+          onClick={() => navigate(`/leads/new?pipeline=${pipelineType}`)}
+        >
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Créer un lead manuellement
         </Button>
       </div>
 

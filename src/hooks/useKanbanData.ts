@@ -58,25 +58,44 @@ export const useKanbanData = (
           return;
         }
         
-        // Récupération des données brutes de leads depuis Supabase
-        const { data: supabaseLeads, error: leadsError } = await supabase
+        // Récupération des leads depuis Supabase
+        const { data: leads, error: leadsError } = await supabase
           .from('leads')
           .select('*');
           
-        // If there's an error or no data from Supabase, fall back to local leads
-        let leads = [];
-        if (leadsError || !supabaseLeads || supabaseLeads.length === 0) {
-          leads = await getLeads();
-        } else {
-          leads = supabaseLeads;
+        if (leadsError) {
+          console.error('Error fetching leads:', leadsError);
+          toast({
+            variant: "destructive",
+            title: "Erreur de chargement",
+            description: "Impossible de charger les leads."
+          });
+          return;
         }
+        
+        // Si aucun lead n'est trouvé dans Supabase, essayer de récupérer des données locales
+        if (!leads || leads.length === 0) {
+          const localLeads = await getLeads();
+          if (localLeads && localLeads.length > 0) {
+            leads = localLeads;
+          }
+        }
+        
+        if (!leads || leads.length === 0) {
+          console.log("Aucun lead trouvé dans la base de données ou localement");
+          setLoadedColumns(columns.map(col => ({ ...col, items: [] })));
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log(`Leads récupérés: ${leads.length}`);
         
         // Map leads data to KanbanItem format
         const mappedLeads = leads.map(lead => {
-          const assignedTeamMember = teamMembers.find(tm => tm.id === lead.assigned_to);
+          const assignedTeamMember = teamMembers?.find(tm => tm.id === lead.assigned_to);
           
-          // Détermine le pipeline_type avec une valeur par défaut
-          const leadPipelineType = lead.pipeline_type || lead.pipelineType || 'purchase';
+          // Utilise pipeline_type du lead ou une valeur par défaut
+          const leadPipelineType = lead.pipeline_type || 'purchase';
           
           return {
             id: lead.id,
@@ -85,11 +104,11 @@ export const useKanbanData = (
             phone: lead.phone,
             status: lead.status as LeadStatus,
             tags: lead.tags || [],
-            assignedTo: lead.assigned_to, // Make sure this is correctly passed
-            assignedToId: lead.assigned_to, // Store the original ID
+            assignedTo: lead.assigned_to,
+            assignedToId: lead.assigned_to,
             dueDate: lead.next_follow_up_date,
-            pipelineType: leadPipelineType as PipelineType, // Ensure correct typing
-            pipeline_type: leadPipelineType as PipelineType, // Add database field name for compatibility
+            pipelineType: leadPipelineType as PipelineType,
+            pipeline_type: leadPipelineType as PipelineType,
             taskType: lead.task_type,
             budget: lead.budget,
             desiredLocation: lead.desired_location,
@@ -104,8 +123,22 @@ export const useKanbanData = (
           };
         });
         
+        console.log(`Leads mappés: ${mappedLeads.length}`);
+        console.log(`Pipeline type demandé: ${pipelineType}`);
+        
+        // Filter leads by pipeline type first
+        const filteredByPipelineType = mappedLeads.filter(lead => {
+          // Check both pipelineType and pipeline_type properties
+          return (lead.pipelineType === pipelineType || lead.pipeline_type === pipelineType);
+        });
+        
+        console.log(`Leads filtrés par pipeline type (${pipelineType}): ${filteredByPipelineType.length}`);
+        
+        // Distribute leads to their respective columns based on status
         const updatedColumns = columns.map(column => {
-          const columnItems = mappedLeads.filter(lead => lead.status === column.status);
+          const columnItems = filteredByPipelineType.filter(lead => lead.status === column.status);
+          
+          console.log(`Colonne ${column.title} (${column.status}): ${columnItems.length} leads`);
           
           return {
             ...column,

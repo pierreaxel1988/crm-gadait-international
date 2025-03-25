@@ -4,6 +4,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { supabase } from '@/integrations/supabase/client';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { toast } from '@/hooks/use-toast';
+import { PipelineType } from '@/types/lead';
 
 export function usePipelineState() {
   const location = useLocation();
@@ -39,14 +41,14 @@ export function usePipelineState() {
   // Update URL when tab changes
   useEffect(() => {
     navigate(`/pipeline?tab=${activeTab}`, { replace: true });
+    // Force a refresh when switching tabs
+    handleRefresh();
   }, [activeTab, navigate]);
 
   // Update tab from URL when it changes
   useEffect(() => {
     if (tabFromUrl === 'rental' || tabFromUrl === 'purchase') {
       setActiveTab(tabFromUrl);
-      // Force a refresh when switching tabs
-      setRefreshTrigger(prev => prev + 1);
     }
   }, [tabFromUrl]);
 
@@ -114,7 +116,36 @@ export function usePipelineState() {
   const handleRefresh = () => {
     setIsRefreshing(true);
     setRefreshTrigger(prev => prev + 1);
-    setTimeout(() => setIsRefreshing(false), 1000); // Visual feedback
+    
+    // Vérifier s'il y a des leads dans la base de données
+    const checkLeads = async () => {
+      try {
+        const { count, error } = await supabase
+          .from('leads')
+          .select('*', { count: 'exact', head: true });
+          
+        if (error) {
+          console.error('Error checking leads:', error);
+          return;
+        }
+        
+        console.log(`Nombre de leads dans la base de données: ${count}`);
+        
+        if (count === 0) {
+          toast({
+            title: "Aucun lead trouvé",
+            description: "La base de données ne contient pas de leads. Ajoutez-en un pour commencer.",
+            duration: 3000,
+          });
+        }
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      } finally {
+        setTimeout(() => setIsRefreshing(false), 1000); // Visual feedback
+      }
+    };
+    
+    checkLeads();
   };
 
   // Clear all filters
@@ -153,7 +184,7 @@ export function usePipelineState() {
     ].map(col => ({
       ...col,
       items: [],
-      pipelineType: activeTab as 'purchase' | 'rental'
+      pipelineType: activeTab as PipelineType
     }));
   };
 
