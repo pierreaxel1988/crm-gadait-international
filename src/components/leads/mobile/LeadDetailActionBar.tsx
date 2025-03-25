@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription, DrawerClose } from '@/components/ui/drawer';
@@ -40,7 +41,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   };
   
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex justify-center items-center transition-all animate-[slide-in_0.3s_ease-out] z-20">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex justify-center items-center transition-all animate-[slide-in_0.3s_ease-out] z-50">
       <div className="flex gap-3 w-full justify-between items-center">
         <div className="flex items-center">
           {autoSaveEnabled ? (

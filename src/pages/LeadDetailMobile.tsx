@@ -96,7 +96,7 @@ const LeadDetailMobile = () => {
   
   return (
     <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
-      <div className="fixed top-0 left-0 right-0 bg-white z-10 shadow-sm border-b">
+      <div className="fixed top-0 left-0 right-0 bg-white z-40 shadow-sm border-b">
         <LeadDetailHeader
           name={lead.name}
           createdAt={lead.createdAt}
@@ -115,7 +115,7 @@ const LeadDetailMobile = () => {
         <LeadDetailTabs defaultTab={activeTab} />
       </div>
       
-      {/* Improved ScrollArea with better scroll behavior */}
+      {/* Improved ScrollArea with better scroll behavior and bottom padding for the fixed action bar */}
       <ScrollArea className="flex-1 pb-24 mt-24 overflow-y-auto">
         <Tabs value={activeTab} className="w-full">
           <div className="px-4 pt-2 pb-32">
