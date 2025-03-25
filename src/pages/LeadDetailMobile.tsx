@@ -8,7 +8,6 @@ import { useLeadActions } from '@/hooks/useLeadActions';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
 import ActionsPanelMobile from '@/components/leads/actions/ActionsPanelMobile';
 import { CheckCircle } from 'lucide-react';
-import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Import our new components
@@ -153,14 +152,6 @@ const LeadDetailMobile = () => {
         hasChanges={hasChanges}
         isSaving={isSaving}
         onManualSave={handleSaveWithIndicator}
-      />
-
-      {/* Add floating action button for quick actions */}
-      <FloatingActionButtons
-        onAddAction={handleAddAction}
-        phoneNumber={lead.phone}
-        email={lead.email}
-        className="bottom-20"
       />
 
       {/* Save indicator */}
