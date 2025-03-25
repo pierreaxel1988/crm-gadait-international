@@ -24,7 +24,7 @@ import NotesSection from '@/components/leads/form/mobile/NotesSection';
 const LeadDetailMobile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab] = useState('general');
+  const [activeTab] = useState('criteria');
   
   // Use our custom hook
   const {
@@ -93,11 +93,11 @@ const LeadDetailMobile = () => {
           hasChanges={hasChanges}
         />
         
-        <LeadDetailTabs defaultTab="info" />
+        <LeadDetailTabs defaultTab="criteria" />
       </div>
       
       <div className="flex-1 overflow-y-auto pb-20">
-        <Tabs defaultValue="info" className="w-full">
+        <Tabs defaultValue="criteria" className="w-full">
           <div className="px-4 pt-4">
             <TabsContent value="info" className="mt-0">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
