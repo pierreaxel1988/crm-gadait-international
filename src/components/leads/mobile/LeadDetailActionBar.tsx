@@ -5,7 +5,7 @@ import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription, D
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import { LeadDetailed } from '@/types/lead';
-import { Save, Check, Clock, X } from 'lucide-react';
+import { Save, Check, Clock, X, History } from 'lucide-react';
 
 interface LeadDetailActionBarProps {
   autoSaveEnabled: boolean;
@@ -72,15 +72,16 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="px-4 transition-all duration-200 active:scale-95 font-futura"
+                className="px-4 transition-all duration-200 active:scale-95 font-futura flex items-center gap-1.5"
               >
-                Actions
+                <History className="h-4 w-4 text-chocolate-dark" />
+                Historique
               </Button>
             </DrawerTrigger>
-            <DrawerContent className="max-h-[85vh] rounded-t-xl shadow-xl border-t-0 bg-gray-50">
+            <DrawerContent className="max-h-[92vh] rounded-t-xl shadow-xl border-t-0 bg-loro-white">
               <div className="p-0 pb-0">
-                <div className="flex items-center justify-between px-4 py-3 bg-white border-b sticky top-0 z-10">
-                  <DrawerTitle className="text-lg font-futura">Historique des actions</DrawerTitle>
+                <div className="flex items-center justify-between px-4 py-3 bg-white border-b sticky top-0 z-10 shadow-sm">
+                  <DrawerTitle className="text-xl font-optima text-loro-navy">Historique des actions</DrawerTitle>
                   <DrawerClose asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
                       <X className="h-4 w-4" />
@@ -90,8 +91,8 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
                 <DrawerDescription className="sr-only">
                   Liste des actions pour ce lead
                 </DrawerDescription>
-                <ScrollArea className="h-[70vh] pb-safe overflow-y-auto overscroll-contain px-4 pt-2">
-                  <div className="pb-6">
+                <ScrollArea className="h-[78vh] pb-safe overflow-y-auto overscroll-contain px-4 pt-4">
+                  <div className="pb-8">
                     <ActionsPanel
                       lead={lead}
                       getActionTypeIcon={getActionTypeIcon}

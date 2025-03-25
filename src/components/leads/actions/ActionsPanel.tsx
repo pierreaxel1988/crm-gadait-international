@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, History } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import CustomButton from '@/components/ui/CustomButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import CurrentAction from './CurrentAction';
 import ActionHistoryList from './ActionHistoryList';
 
@@ -22,39 +23,32 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({
   onAddAction,
 }) => {
   return (
-    <Card className="border-loro-sand/30 bg-loro-white shadow-luxury">
-      <CardHeader className="border-b border-loro-pearl/50 pb-4">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-xl font-futura text-loro-navy">Actions et tâches</CardTitle>
-          <CustomButton 
-            variant="loropiana" 
-            onClick={onAddAction} 
-            className="flex items-center gap-2 shadow-sm"
-            fontStyle="optima"
-          >
-            <Plus className="h-4 w-4" /> Ajouter
-          </CustomButton>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="pt-6">
+    <div className="space-y-6">
+      <div className="mb-2">
         <CurrentAction 
           taskType={lead.taskType}
           nextFollowUpDate={lead.nextFollowUpDate}
           getActionTypeIcon={getActionTypeIcon}
           onAddAction={onAddAction}
         />
-        
-        <div className="mt-6">
-          <h4 className="font-futura mb-3 text-loro-navy">Historique des actions</h4>
-          <ActionHistoryList 
-            actionHistory={lead.actionHistory}
-            getActionTypeIcon={getActionTypeIcon}
-            onMarkComplete={onMarkComplete}
-          />
+      </div>
+      
+      <div className="mt-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="h-8 w-8 rounded-full bg-loro-pearl/30 flex items-center justify-center">
+            <History className="h-4 w-4 text-loro-hazel" />
+          </div>
+          <h3 className="text-lg font-optima text-loro-navy">Historique</h3>
+          <Separator className="flex-1 bg-loro-pearl/50" />
         </div>
-      </CardContent>
-    </Card>
+        
+        <ActionHistoryList 
+          actionHistory={lead.actionHistory}
+          getActionTypeIcon={getActionTypeIcon}
+          onMarkComplete={onMarkComplete}
+        />
+      </div>
+    </div>
   );
 };
 
