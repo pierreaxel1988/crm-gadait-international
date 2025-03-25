@@ -27,20 +27,21 @@ const CurrentAction: React.FC<CurrentActionProps> = ({
   if (!taskType) {
     return (
       <div className="space-y-2 animate-[fade-in_0.4s_ease-out]">
-        <Label className={`${isMobile ? 'text-lg' : 'text-xl'} font-futura text-loro-navy tracking-wide`}>Action actuelle</Label>
-        <Card className="border border-loro-pearl/60 bg-white overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
-          <div className="text-center py-6 px-4 bg-gradient-to-b from-white to-loro-pearl/10">
-            <div className={`mx-auto ${isMobile ? 'h-12 w-12 mb-3' : 'h-16 w-16 mb-5'} rounded-full bg-chocolate-dark/10 flex items-center justify-center shadow-inner`}>
-              <AlertCircle className={`${isMobile ? 'h-6 w-6' : 'h-8 w-8'} text-chocolate-dark/70`} />
+        <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-futura text-loro-navy mb-2`}>Action actuelle</h3>
+        <Card className="border border-loro-pearl/60 bg-white overflow-hidden rounded-lg">
+          <div className="text-center py-5 px-4">
+            <div className={`mx-auto ${isMobile ? 'h-10 w-10 mb-3' : 'h-12 w-12 mb-4'} rounded-full bg-loro-pearl/50 flex items-center justify-center`}>
+              <AlertCircle className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} text-loro-navy/70`} />
             </div>
-            <p className={`text-loro-navy font-futura ${isMobile ? 'text-lg' : 'text-xl'} tracking-wide`}>Aucune action en cours</p>
+            <p className={`text-loro-navy font-futura ${isMobile ? 'text-base' : 'text-lg'} tracking-wide`}>Aucune action en cours</p>
             <p className="text-sm text-loro-navy/60 font-futuraLight mt-2 mb-4">Programmez une action pour ce lead</p>
             <Button 
               onClick={onAddAction} 
-              className={`flex mx-auto items-center gap-2 bg-chocolate-dark hover:bg-chocolate-light shadow hover:shadow-lg transition-all duration-200 rounded-full ${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-5'}`}
-              size="sm"
+              className="font-futura flex mx-auto items-center gap-2 bg-chocolate-dark hover:bg-chocolate-light rounded-full"
+              size={isMobile ? "sm" : "default"}
             >
-              <Plus className="h-4 w-4" /> <span className="font-futura tracking-wide">Ajouter une action</span>
+              <Plus className={`${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'}`} /> 
+              <span className="tracking-wide">Ajouter une action</span>
             </Button>
           </div>
         </Card>
@@ -50,32 +51,35 @@ const CurrentAction: React.FC<CurrentActionProps> = ({
   
   return (
     <div className="space-y-2 animate-[fade-in_0.4s_ease-out]">
-      <Label className={`${isMobile ? 'text-lg' : 'text-xl'} font-futura text-loro-navy tracking-wide`}>Action actuelle</Label>
-      <Card className="border border-loro-pearl/60 bg-gradient-to-b from-white to-loro-pearl/10 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 rounded-xl">
-        <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
+      <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-futura text-loro-navy mb-2`}>Action actuelle</h3>
+      <Card className="border border-loro-pearl/60 bg-white overflow-hidden rounded-lg">
+        <div className={`${isMobile ? 'p-3' : 'p-4'}`}>
           <div className="space-y-4 w-full">
-            <div className={`flex items-center gap-3 ${isMobile ? 'p-3' : 'p-4'} rounded-xl border border-loro-pearl/70 bg-white shadow-sm`}>
-              <div className="bg-chocolate-dark/15 p-2 rounded-lg shadow-inner">
+            <div className={`flex items-center gap-3 ${isMobile ? 'p-2.5' : 'p-3'} rounded-lg border border-loro-pearl/50 bg-loro-pearl/10`}>
+              <div className="p-2 rounded-md bg-loro-pearl/30">
                 {getActionTypeIcon(taskType)}
               </div>
-              <span className={`text-loro-navy font-futura ${isMobile ? 'text-lg' : 'text-xl'} tracking-wide`}>{taskType}</span>
+              <span className={`text-loro-navy font-futura ${isMobile ? 'text-base' : 'text-lg'} tracking-wide`}>{taskType}</span>
             </div>
             
             {nextFollowUpDate && (
-              <div className={`bg-white ${isMobile ? 'p-3' : 'p-5'} rounded-xl border border-loro-pearl/70 flex items-start shadow-sm`}>
-                <CalendarIcon className={`${isMobile ? 'h-4 w-4 mt-0.5 mr-3' : 'h-5 w-5 mt-0.5 mr-4'} text-chocolate-dark`} />
-                <div>
-                  <p className="text-sm text-loro-navy/50 font-futuraLight mb-1">Date prévue</p>
-                  <p className={`${isMobile ? 'text-base' : 'text-lg'} text-loro-navy font-futura tracking-wide`}>
-                    {format(new Date(nextFollowUpDate), 'EEEE d MMMM yyyy', { locale: fr })}
+              <div className={`${isMobile ? 'p-2.5' : 'p-3'} rounded-lg border border-loro-pearl/50 bg-loro-pearl/10`}>
+                <p className="text-sm text-loro-navy/70 font-futuraLight mb-1">Prochain suivi prévu</p>
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-loro-navy`} />
+                  <p className={`${isMobile ? 'text-base' : 'text-base'} text-loro-navy font-futura tracking-wide`}>
+                    {format(new Date(nextFollowUpDate), 'dd/MM/yyyy', { locale: fr })}
                   </p>
-                  <div className="flex items-center mt-1 text-sm text-loro-navy/70">
-                    <Clock className="h-3.5 w-3.5 text-chocolate-dark/70 mr-2" />
-                    <span className="font-futuraLight">
-                      {format(new Date(nextFollowUpDate), 'HH:mm', { locale: fr })}
-                    </span>
-                  </div>
                 </div>
+                <div className="flex items-center mt-1 text-sm text-loro-navy/70 ml-6">
+                  <Clock className="h-3.5 w-3.5 text-loro-navy/70 mr-2" />
+                  <span className="font-futuraLight">
+                    {format(new Date(nextFollowUpDate), 'HH:mm', { locale: fr })}
+                  </span>
+                </div>
+                <p className="text-xs text-loro-navy/50 font-futuraLight mt-2 ml-6">
+                  Programmé automatiquement lors de la création d'une action
+                </p>
               </div>
             )}
             
@@ -84,7 +88,7 @@ const CurrentAction: React.FC<CurrentActionProps> = ({
                 variant="outline" 
                 onClick={onAddAction} 
                 size="sm"
-                className={`text-sm flex items-center gap-2 border-chocolate-dark/30 text-chocolate-dark hover:bg-chocolate-dark/10 rounded-full ${isMobile ? 'px-4 py-2' : 'px-5 py-4'} font-futura tracking-wide`}
+                className="text-sm flex items-center gap-2 border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20 rounded-full font-futura tracking-wide"
               >
                 <Plus className="h-3.5 w-3.5" /> Modifier
               </Button>

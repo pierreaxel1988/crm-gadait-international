@@ -93,7 +93,7 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
         <div className="flex flex-wrap gap-1.5 mt-1">
           {lead.tags && lead.tags.length > 0 && (
             lead.tags.map((tag) => (
-              <TagBadge key={tag} tag={tag} size={isMobile ? "sm" : "default"} />
+              <TagBadge key={tag} tag={tag} />
             ))
           )}
           

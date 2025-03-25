@@ -76,20 +76,20 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide flex items-center gap-2 border-chocolate-dark/30 text-chocolate-dark hover:bg-chocolate-dark/10"
+                className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide flex items-center gap-2 border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20"
               >
-                <History className="h-4 w-4 text-chocolate-dark" />
+                <History className="h-4 w-4 text-loro-navy" />
                 Historique
               </Button>
             </DrawerTrigger>
-            <DrawerContent className="bg-gradient-to-b from-loro-white to-loro-pearl/30 border-0 max-h-[92vh] rounded-t-xl shadow-xl">
+            <DrawerContent className="bg-white border-0 max-h-[92vh] rounded-t-xl shadow-xl">
               <div className="p-0 pb-0">
-                <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-chocolate-dark to-chocolate-dark/90 text-white sticky top-0 z-10 border-b border-chocolate-light/20 rounded-t-xl">
+                <div className="flex items-center justify-between px-4 py-3 bg-white text-loro-navy sticky top-0 z-10 border-b border-loro-pearl/30 rounded-t-xl">
                   <div className="flex-1">
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="h-8 w-8 mr-2 rounded-full text-white hover:bg-white/10 transition-colors"
+                      className="h-8 w-8 mr-2 rounded-full text-loro-navy hover:bg-loro-pearl/20 transition-colors"
                       asChild
                     >
                       <DrawerClose>
@@ -99,20 +99,20 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
                   </div>
                   
                   <DrawerTitle className="text-lg font-futura flex items-center gap-2 tracking-wide flex-[2] text-center">
-                    <History className="h-4 w-4 text-loro-pearl/80" />
+                    <History className="h-4 w-4 text-loro-navy/80" />
                     {lead.name}
                   </DrawerTitle>
                   
                   <div className="flex-1 flex justify-end">
                     <DrawerClose asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-white hover:bg-white/10 transition-colors">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-loro-navy hover:bg-loro-pearl/20 transition-colors">
                         <X className="h-4 w-4" />
                       </Button>
                     </DrawerClose>
                   </div>
                 </div>
                 
-                <div className="px-3 py-2 bg-loro-pearl/20 border-b border-loro-pearl/30">
+                <div className="px-3 py-2 bg-loro-pearl/10 border-b border-loro-pearl/30">
                   <div className="text-xs text-loro-navy/70 font-futuraLight">
                     {lead.email && <div className="mb-1">Email: {lead.email}</div>}
                     {lead.phone && <div>Tél: {lead.phone}</div>}
@@ -123,7 +123,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
                   Liste des actions pour ce lead
                 </DrawerDescription>
                 <ScrollArea className="h-[78vh] pb-safe overflow-y-auto overscroll-contain pt-0">
-                  <div className="pb-8">
+                  <div className="p-3 pb-8">
                     <ActionsPanel
                       lead={lead}
                       getActionTypeIcon={getActionTypeIcon}
