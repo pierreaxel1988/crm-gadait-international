@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, Currency } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -9,6 +8,8 @@ import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import CustomTagInput from '@/components/leads/form/CustomTagInput';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { COUNTRIES } from '@/utils/countries';
+import SmartSearchField from '@/components/leads/SmartSearchField';
 
 const PROPERTY_TYPES: PropertyType[] = [
   'Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 
@@ -37,7 +38,6 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
     onDataChange({ [field]: value } as Partial<LeadDetailed>);
   };
 
-  // Get locations based on selected country
   const getLocations = () => {
     if (!lead.country) return [];
     
@@ -52,10 +52,16 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
     return [];
   };
 
-  // Convert bedroom numbers to strings for MultiSelectButtons
+  const filteredCountries = COUNTRIES.filter(country => 
+    countryMatchesSearch(country, lead.nationality || '')
+  );
+
+  const filteredTaxResidences = COUNTRIES.filter(country => 
+    countryMatchesSearch(country, lead.taxResidence || '')
+  );
+
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
   
-  // Function to convert bedrooms data for display in the MultiSelectButtons
   const getSelectedBedrooms = () => {
     if (!lead.bedrooms) return [];
     
@@ -69,7 +75,6 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
     return [value >= 8 ? "8+" : value.toString()];
   };
   
-  // Bedroom selection handler
   const handleBedroomToggle = (value: string) => {
     const numValue = value === "8+" ? 8 : parseInt(value);
     
@@ -323,23 +328,25 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onD
             <div className="space-y-4 py-2">
               <div className="space-y-2">
                 <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
-                <Input
+                <SmartSearchField
                   id="nationality"
                   value={lead.nationality || ''}
-                  onChange={(e) => handleInputChange('nationality', e.target.value)}
+                  onChange={(value) => handleInputChange('nationality', value)}
                   placeholder="Nationalité"
-                  className="w-full font-futura"
+                  options={COUNTRIES}
+                  searchPlaceholder="Rechercher une nationalité..."
                 />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="taxResidence" className="text-sm">Résidence fiscale</Label>
-                <Input
+                <SmartSearchField
                   id="taxResidence"
                   value={lead.taxResidence || ''}
-                  onChange={(e) => handleInputChange('taxResidence', e.target.value)}
+                  onChange={(value) => handleInputChange('taxResidence', value)}
                   placeholder="Résidence fiscale"
-                  className="w-full font-futura"
+                  options={COUNTRIES}
+                  searchPlaceholder="Rechercher une résidence fiscale..."
                 />
               </div>
             </div>
