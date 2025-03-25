@@ -31,27 +31,39 @@ const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
 }) => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [agentName, setAgentName] = useState<string>('');
+  const [isLoadingAgentName, setIsLoadingAgentName] = useState<boolean>(false);
 
-  // Fetch team members for display name
+  // Fetch agent name when assignedAgent changes
   useEffect(() => {
     if (assignedAgent) {
+      setIsLoadingAgentName(true);
       const fetchAgentName = async () => {
         try {
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from('team_members')
             .select('name')
             .eq('id', assignedAgent)
             .single();
             
+          if (error) {
+            console.error('Error fetching agent name:', error);
+            return;
+          }
+          
           if (data) {
             setAgentName(data.name);
+            console.log("Assigned agent name:", data.name);
           }
         } catch (error) {
           console.error('Error fetching agent name:', error);
+        } finally {
+          setIsLoadingAgentName(false);
         }
       };
       
       fetchAgentName();
+    } else {
+      setAgentName('');
     }
   }, [assignedAgent]);
 
@@ -112,7 +124,13 @@ const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
           autoSelectPierreAxel={false}
         />
         
-        {assignedAgent && agentName && (
+        {isLoadingAgentName && (
+          <div className="text-sm text-gray-500">
+            Chargement des informations de l'agent...
+          </div>
+        )}
+        
+        {assignedAgent && agentName && !isLoadingAgentName && (
           <div className="text-sm text-green-600 font-medium">
             Lead sera attribué à: {agentName}
           </div>

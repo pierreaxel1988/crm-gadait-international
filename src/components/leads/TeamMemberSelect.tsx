@@ -38,6 +38,7 @@ const TeamMemberSelect = ({
   const isMobile = useIsMobile();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedMemberName, setSelectedMemberName] = useState<string | undefined>();
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
@@ -61,7 +62,17 @@ const TeamMemberSelect = ({
           
           if (pierreAxel) {
             onChange(pierreAxel.id);
+            setSelectedMemberName(pierreAxel.name);
             console.log("Auto-selected Pierre-Axel:", pierreAxel.id);
+          }
+        }
+        
+        // Set the name for the already selected member
+        if (value && data) {
+          const selectedMember = data.find(member => member.id === value);
+          if (selectedMember) {
+            setSelectedMemberName(selectedMember.name);
+            console.log("Found selected member:", selectedMember.name);
           }
         }
       } catch (error) {
@@ -81,6 +92,18 @@ const TeamMemberSelect = ({
 
   const handleChange = (newValue: string) => {
     console.log("Selected agent value:", newValue);
+    
+    // Update selected member name
+    if (newValue !== "non_assigné") {
+      const selectedMember = teamMembers.find(member => member.id === newValue);
+      if (selectedMember) {
+        setSelectedMemberName(selectedMember.name);
+        console.log("Selected agent name:", selectedMember.name);
+      }
+    } else {
+      setSelectedMemberName(undefined);
+    }
+    
     // Si "non_assigné" est sélectionné, on passe undefined
     onChange(newValue === "non_assigné" ? undefined : newValue);
   };
@@ -117,6 +140,11 @@ const TeamMemberSelect = ({
           </div>
         )}
       </div>
+      {selectedMemberName && (
+        <div className="text-sm text-green-600 mt-1">
+          Agent sélectionné: {selectedMemberName}
+        </div>
+      )}
     </div>
   );
 };

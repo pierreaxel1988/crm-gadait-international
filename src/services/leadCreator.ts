@@ -29,15 +29,34 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       }];
     }
     
-    // Ensure assignment is properly set
+    // Log assignment information to verify data
     if (completeLeadData.assignedTo) {
-      console.log("Lead will be assigned to:", completeLeadData.assignedTo);
+      console.log("Lead will be assigned to agent with ID:", completeLeadData.assignedTo);
+      
+      // Verify agent exists
+      const { data: agentData, error: agentError } = await supabase
+        .from("team_members")
+        .select("name")
+        .eq("id", completeLeadData.assignedTo)
+        .single();
+        
+      if (agentError) {
+        console.warn("Warning: Could not verify agent exists:", agentError);
+      } else {
+        console.log("Lead will be assigned to agent:", agentData.name);
+      }
     } else {
       console.log("Lead will not be assigned to any agent");
     }
     
     // Map to Supabase format
     const supabaseData = mapToSupabaseFormat(completeLeadData);
+    
+    // Ensure assigned_to is explicitly set in the data
+    if (completeLeadData.assignedTo) {
+      supabaseData.assigned_to = completeLeadData.assignedTo;
+    }
+    
     console.log("Data being sent to Supabase:", supabaseData);
     
     // Insert into database
@@ -58,6 +77,18 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       // Verify assigned_to was saved properly
       if (completeLeadData.assignedTo && !data.assigned_to) {
         console.warn("Assignment appears to have failed - assigned_to field is empty in response");
+        
+        // Attempt to update the assignment if it failed initially
+        const { error: updateError } = await supabase
+          .from("leads")
+          .update({ assigned_to: completeLeadData.assignedTo })
+          .eq("id", data.id);
+          
+        if (updateError) {
+          console.error("Error updating lead assignment:", updateError);
+        } else {
+          console.log("Assignment fixed via update");
+        }
       }
       
       // Map database response back to LeadDetailed format

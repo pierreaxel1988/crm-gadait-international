@@ -22,6 +22,7 @@ export const useLeadCreation = () => {
   const [leadStatus, setLeadStatus] = useState<LeadStatus>(statusFromUrl || 'New');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
 
   // Check authentication before allowing lead creation
   useEffect(() => {
@@ -61,6 +62,7 @@ export const useLeadCreation = () => {
     setIsSubmitting(true);
     setError(null);
     console.log("Starting lead creation process...");
+    console.log("Agent assignment:", assignedAgent);
     
     try {
       // Verify authentication again
@@ -78,6 +80,17 @@ export const useLeadCreation = () => {
       if (isAdmin && assignedAgent) {
         console.log("Admin assigning lead to:", assignedAgent);
         newLeadData.assignedTo = assignedAgent;
+        
+        // Get agent name for logging
+        const { data: agentData } = await supabase
+          .from("team_members")
+          .select("name")
+          .eq("id", assignedAgent)
+          .single();
+          
+        if (agentData) {
+          console.log("Assigning to agent:", agentData.name);
+        }
       } else if (!isAdmin && user) {
         console.log("Non-admin user, self-assigning lead to:", user.id);
         newLeadData.assignedTo = user.id;
@@ -109,11 +122,26 @@ export const useLeadCreation = () => {
       
       if (createdLead) {
         console.log("Lead created successfully:", createdLead);
+        console.log("Assigned to:", createdLead.assignedTo);
+        
+        let successMessage = "Le lead a été créé avec succès.";
+        if (createdLead.assignedTo) {
+          const { data: agentData } = await supabase
+            .from("team_members")
+            .select("name")
+            .eq("id", createdLead.assignedTo)
+            .single();
+            
+          if (agentData) {
+            successMessage = `Le lead a été créé et attribué à ${agentData.name} avec succès.`;
+          } else {
+            successMessage = `Le lead a été créé et attribué à un agent avec succès.`;
+          }
+        }
+        
         toast({
           title: "Lead créé",
-          description: assignedAgent 
-            ? `Le lead a été créé et attribué à un agent avec succès.`
-            : "Le lead a été créé avec succès."
+          description: successMessage
         });
         
         // Navigate to the lead detail page
@@ -138,6 +166,20 @@ export const useLeadCreation = () => {
   const handleAgentChange = (value: string | undefined) => {
     console.log("Agent changed to:", value);
     setAssignedAgent(value);
+    
+    if (value) {
+      // Fetch and log agent name for debugging
+      supabase
+        .from("team_members")
+        .select("name")
+        .eq("id", value)
+        .single()
+        .then(({ data }) => {
+          if (data) {
+            console.log("Selected agent name:", data.name);
+          }
+        });
+    }
   };
 
   // Handle pipeline type change
@@ -159,6 +201,8 @@ export const useLeadCreation = () => {
     handleSubmit,
     handleAgentChange,
     handlePipelineTypeChange,
-    setLeadStatus
+    setLeadStatus,
+    showDebugInfo,
+    setShowDebugInfo
   };
 };
