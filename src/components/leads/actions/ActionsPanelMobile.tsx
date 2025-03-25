@@ -88,9 +88,9 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   }
 
   return (
-    <div className="space-y-3 mt-4">
-      <div className="flex justify-between items-center mb-3">
-        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800">Actions en attente</h3>
+    <div className="space-y-3 pt-4 mt-2">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Actions en attente</h3>
       </div>
 
       {pendingActions.length === 0 ? (
