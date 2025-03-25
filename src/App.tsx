@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -6,11 +7,11 @@ import {
   Navigate
 } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
-import { Toast } from '@/components/ui/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 import Auth from './pages/Auth';
 import Pipeline from './pages/Pipeline';
-import LeadsPage from './pages/LeadsPage';
-import LeadDetail from './pages/LeadDetail';
+import LeadsPage from './pages/Leads';
+import LeadDetail from './pages/LeadDetailMobile';
 import LeadNew from './pages/LeadNew';
 import LeadImport from './pages/LeadImport';
 import MobileLeadImport from './pages/MobileLeadImport';
@@ -29,7 +30,7 @@ function App() {
           <Route path="/import-lead" element={<MobileLeadImport />} />
           <Route path="/auth" element={<Auth />} />
         </Routes>
-        <Toast />
+        <Toaster />
       </Router>
     </AuthProvider>
   );
