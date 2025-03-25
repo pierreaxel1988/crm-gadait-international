@@ -104,16 +104,13 @@ const MobileGeneralInfoSection = ({
     if (countryCodeMapping[code]) {
       const country = countryCodeMapping[code];
       
-      // Ne mettre à jour que si les champs sont vides ou si l'utilisateur n'a pas déjà fait une sélection manuelle
-      if (!formData.taxResidence) {
-        updates.taxResidence = country;
-      }
+      // Toujours mettre à jour le pays de résidence
+      updates.taxResidence = country;
       
-      if (!formData.nationality) {
-        const nationality = deriveNationalityFromCountry(country);
-        if (nationality) {
-          updates.nationality = nationality;
-        }
+      // Dériver la nationalité du pays
+      const nationality = deriveNationalityFromCountry(country);
+      if (nationality) {
+        updates.nationality = nationality;
       }
     }
     
@@ -451,4 +448,3 @@ fmohamed01@cuatrocaminos.net"
 };
 
 export default MobileGeneralInfoSection;
-
