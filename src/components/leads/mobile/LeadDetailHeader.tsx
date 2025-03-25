@@ -56,11 +56,10 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           isLoading={isSaving}
           disabled={isSaving || !hasChanges}
           onClick={onSave}
-          className="px-3 py-1.5 rounded-md"
+          className="p-2 rounded-full"
           fontStyle="optima"
         >
-          <Save className="h-4 w-4 mr-1.5" />
-          <span className="text-xs">Enregistrer</span>
+          <Save className="h-4 w-4" />
         </CustomButton>
       </div>
     </div>
