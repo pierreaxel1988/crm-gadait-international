@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
 import { format } from 'date-fns';
-import { Check, Clock, Calendar, Plus } from 'lucide-react';
+import { Check, Clock, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
@@ -90,14 +91,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     <div className="space-y-3 mt-4">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-sm font-futura">Actions en attente</h3>
-        <Button 
-          onClick={onAddAction}
-          className="bg-chocolate-dark hover:bg-chocolate-light transition-all duration-200 active:scale-95 flex items-center gap-1 h-7 px-2"
-          size="sm"
-        >
-          <Plus className="h-3 w-3" />
-          <span className="font-futura text-xs">Nouvelle</span>
-        </Button>
       </div>
 
       {pendingActions.length === 0 ? (
