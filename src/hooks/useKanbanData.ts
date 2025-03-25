@@ -6,6 +6,7 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { getLeads } from '@/services/leadCore';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import { PropertyType, PurchaseTimeframe, PipelineType } from '@/types/lead';
+import type { Json } from '@/integrations/supabase/types';
 
 // Extend KanbanItem with the additional properties needed for filtering
 export interface ExtendedKanbanItem extends KanbanItem {
@@ -83,23 +84,46 @@ export const useKanbanData = (
             // Make sure the returned data from getLeads() is compatible with our expected structure
             // We're only assigning to allLeads if we actually got data back
             allLeads = localLeads.map(lead => ({
-              ...lead,
-              // Ensure all required database fields are present
+              // Required fields with defaults to satisfy TypeScript
               id: lead.id,
               name: lead.name,
               email: lead.email || '',
               phone: lead.phone || '',
               status: lead.status || 'New',
               tags: lead.tags || [],
+              action_history: (lead.actionHistory as Json) || ([] as Json),
+              amenities: lead.amenities || [],
               assigned_to: lead.assignedTo,
-              pipeline_type: lead.pipelineType || lead.pipeline_type || 'purchase',
-              // Map any fields that might have different naming conventions
+              bedrooms: typeof lead.bedrooms === 'number' ? lead.bedrooms : null,
+              budget: lead.budget || '',
+              budget_min: lead.budgetMin || '',
+              country: lead.country || '',
               created_at: lead.createdAt,
-              desired_location: lead.desiredLocation,
-              purchase_timeframe: lead.purchaseTimeframe,
-              property_type: lead.propertyType,
-              next_follow_up_date: lead.nextFollowUpDate || lead.dueDate,
-              task_type: lead.taskType
+              currency: lead.currency || 'EUR',
+              desired_location: lead.desiredLocation || '',
+              external_id: lead.external_id || null,
+              financing_method: lead.financingMethod || null,
+              imported_at: lead.importedAt || null,
+              integration_source: lead.integration_source || null,
+              last_contacted_at: lead.lastContactedAt || null,
+              living_area: lead.livingArea || null,
+              location: lead.location || '',
+              nationality: lead.nationality || null,
+              next_follow_up_date: lead.nextFollowUpDate || null,
+              notes: lead.notes || null,
+              pipeline_type: lead.pipelineType || lead.pipeline_type || 'purchase',
+              property_reference: lead.propertyReference || null,
+              property_type: lead.propertyType || null,
+              property_types: lead.propertyTypes || [],
+              property_use: lead.propertyUse || null,
+              purchase_timeframe: lead.purchaseTimeframe || null,
+              raw_data: null,
+              salutation: lead.salutation || null,
+              source: lead.source || null,
+              tax_residence: lead.taxResidence || null,
+              task_type: lead.taskType || null,
+              url: lead.url || null,
+              views: lead.views || []
             }));
           }
         }
