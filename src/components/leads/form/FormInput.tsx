@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -74,7 +73,6 @@ const FormInput: React.FC<FormInputProps> = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
 
-  // Handle outside click to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
@@ -88,7 +86,6 @@ const FormInput: React.FC<FormInputProps> = ({
     };
   }, []);
 
-  // Focus the search input when dropdown is shown
   useEffect(() => {
     if (showOptions && searchable && searchInputRef.current) {
       setTimeout(() => {
@@ -105,9 +102,7 @@ const FormInput: React.FC<FormInputProps> = ({
       onCountryCodeChange(code);
     }
     
-    // Si le numéro commence par un code pays, on le remplace
     if (typeof value === 'string' && value) {
-      // Supprimer tout code pays existant au début du numéro
       let cleanedNumber = value;
       for (const codeObj of countryCodes) {
         if (value.startsWith(codeObj.code)) {
@@ -116,7 +111,6 @@ const FormInput: React.FC<FormInputProps> = ({
         }
       }
       
-      // Créer un événement synthétique pour mettre à jour le numéro
       const syntheticEvent = {
         target: {
           name,
@@ -128,7 +122,6 @@ const FormInput: React.FC<FormInputProps> = ({
     }
   };
 
-  // Ajuster la largeur du dropdown en fonction de la longueur du code pays
   const getCodeButtonWidth = () => {
     const baseWidth = 24;
     return selectedCountryCode.length > 3 ? 
@@ -136,10 +129,8 @@ const FormInput: React.FC<FormInputProps> = ({
       baseWidth;
   };
 
-  // Trouver le pays correspondant au code sélectionné
   const selectedCountry = countryCodes.find(country => country.code === selectedCountryCode);
 
-  // Filter country codes based on search query
   const filteredCountryCodes = React.useMemo(() => {
     if (!searchQuery) return countryCodes;
     return countryCodes.filter(country => 
@@ -147,14 +138,12 @@ const FormInput: React.FC<FormInputProps> = ({
     );
   }, [searchQuery]);
 
-  // Filter options based on search query
   const filteredOptions = React.useMemo(() => {
     if (!searchQuery || !searchable || !options) return options;
     
     return options.filter(option => {
       const label = option.label.toLowerCase();
       const query = searchQuery.toLowerCase();
-      // Remove accents for comparison
       const normalizedLabel = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const normalizedQuery = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       
@@ -162,26 +151,6 @@ const FormInput: React.FC<FormInputProps> = ({
     });
   }, [options, searchQuery, searchable]);
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
-    // Clear on escape
-    if (e.key === 'Escape') {
-      setSearchQuery("");
-      return;
-    }
-    
-    // Backspace handling
-    if (e.key === 'Backspace') {
-      setSearchQuery(prev => prev.slice(0, -1));
-      return;
-    }
-    
-    // Only add printable characters
-    if (e.key.length === 1) {
-      setSearchQuery(prev => prev + e.key);
-    }
-  };
-
-  // Handle select option click
   const handleOptionSelect = (optionValue: string) => {
     const syntheticEvent = {
       target: {
@@ -195,11 +164,9 @@ const FormInput: React.FC<FormInputProps> = ({
     setSearchQuery("");
   };
 
-  // Adapter la valeur du téléphone pour l'affichage dans le champ
   const getPhoneValueWithoutCode = () => {
     if (!value) return '';
     
-    // Rechercher et supprimer le code pays du numéro de téléphone
     const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
     
     let phoneNumber = value.toString();
@@ -347,7 +314,6 @@ const FormInput: React.FC<FormInputProps> = ({
                           placeholder="Rechercher un pays..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          onKeyDown={handleSearchKeyDown}
                           autoFocus
                         />
                       </div>
