@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import CustomButton from '@/components/ui/CustomButton';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
-
 interface LeadDetailHeaderProps {
   name: string;
   createdAt?: string;
@@ -20,7 +18,6 @@ interface LeadDetailHeaderProps {
   hasChanges: boolean;
   tags?: LeadTag[];
 }
-
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   name,
   createdAt,
@@ -38,20 +35,17 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   // Format the budget number with thousand separators
   const formatBudget = (budget?: string) => {
     if (!budget) return '';
-    
+
     // Remove any existing non-numeric characters
     const numericValue = budget.replace(/[^\d]/g, '');
     if (!numericValue) return '';
-    
+
     // Convert to number and format with locale
     const budgetNumber = parseInt(numericValue, 10);
     if (isNaN(budgetNumber)) return budget;
-    
     return budgetNumber.toLocaleString('fr-FR');
   };
-  
   const formattedBudget = formatBudget(budget);
-  
   return <div className="flex items-center justify-between p-3">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2">
@@ -62,7 +56,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           <p className="text-xs text-muted-foreground">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
+          <p className="text-xs flex items-center gap-1 text-zinc-800">
             {formattedBudget && `${formattedBudget} ${currency || ''}`}
             {formattedBudget && desiredLocation && ' • '}
             {desiredLocation}
@@ -80,5 +74,4 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       </div>
     </div>;
 };
-
 export default LeadDetailHeader;
