@@ -60,7 +60,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
         <div className="space-y-2">
           <Label htmlFor="status" className="text-sm text-gray-700">Statut du lead</Label>
           <Select
-            value={lead.status}
+            value={lead.status || "New"}
             onValueChange={(value) => handleInputChange('status', value)}
           >
             <SelectTrigger id="status" className="w-full font-futura h-9">

@@ -101,22 +101,36 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
     setIsOpen(false);
   };
 
-  return <div className="space-y-2 relative">
+  return (
+    <div className="space-y-2 relative">
       <Label htmlFor={label} className="text-sm">{label}</Label>
       <Input ref={inputRef} id={label} value={searchTerm} onChange={handleInputChange} placeholder={placeholder || `Rechercher ${label}`} className="w-full font-futura" onFocus={() => setIsOpen(true)} />
       
-      {isOpen && <div ref={dropdownRef} className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg border max-h-64 overflow-y-auto">
+      {isOpen && (
+        <div ref={dropdownRef} className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg border max-h-64 overflow-y-auto">
           <div className="py-1 max-h-48 overflow-y-auto">
-            {filteredOptions.length > 0 ? filteredOptions.map(option => <div key={option} className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer font-futura" onClick={() => handleOptionClick(option)}>
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map(option => (
+                <div
+                  key={option}
+                  className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer font-futura"
+                  onClick={() => handleOptionClick(option)}
+                >
                   {option}
-                </div>) : <div className="px-4 py-2 text-sm text-gray-500">
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-2 text-sm text-gray-500">
                 Aucun résultat
-              </div>}
+              </div>
+            )}
           </div>
           
           <ActionButtons onClear={handleClear} onApply={handleApply} />
-        </div>}
-    </div>;
+        </div>
+      )}
+    </div>
+  );
 };
 
 const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
@@ -170,7 +184,8 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     }
   };
 
-  return <div className="space-y-5 pt-4 mt-2">
+  return (
+    <div className="space-y-5 pt-4 mt-2">
       <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Critères de Recherche</h2>
       
       <Accordion type="single" collapsible className="w-full">
@@ -195,9 +210,11 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                     <SelectValue placeholder="Sélectionner une devise" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CURRENCIES.map(currency => <SelectItem key={currency} value={currency} className="font-futura">
+                    {CURRENCIES.map(currency => (
+                      <SelectItem key={currency} value={currency} className="font-futura">
                         {currency}
-                      </SelectItem>)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -209,18 +226,31 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
           <AccordionTrigger className="py-3 text-sm font-futura">Localisation</AccordionTrigger>
           <AccordionContent>
             <div className="space-y-4 py-2">
-              <SmartSearchField label="Pays recherché" value={lead.country || ''} onChange={handleCountryChange} options={COUNTRIES} placeholder="Rechercher un pays" />
+              <SmartSearchField 
+                label="Pays recherché" 
+                value={lead.country || ''} 
+                onChange={handleCountryChange} 
+                options={COUNTRIES} 
+                placeholder="Rechercher un pays" 
+              />
               
               <div className="space-y-2">
                 <Label htmlFor="desiredLocation" className="text-sm">Localisation souhaitée</Label>
-                <Select value={lead.desiredLocation || ''} onValueChange={value => handleInputChange('desiredLocation', value)} disabled={!lead.country}>
+                <Select 
+                  value={lead.desiredLocation || 'none'} 
+                  onValueChange={value => handleInputChange('desiredLocation', value === 'none' ? undefined : value)} 
+                  disabled={!lead.country}
+                >
                   <SelectTrigger id="desiredLocation" className="w-full font-futura">
                     <SelectValue placeholder="Sélectionner une localisation" />
                   </SelectTrigger>
                   <SelectContent searchable={true}>
-                    {getLocations().map(location => <SelectItem key={location.value} value={location.value} className="font-futura">
+                    <SelectItem value="none" className="font-futura">Aucune localisation</SelectItem>
+                    {getLocations().map(location => (
+                      <SelectItem key={location.value} value={location.value} className="font-futura">
                         {location.label}
-                      </SelectItem>)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -317,7 +347,8 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-    </div>;
+    </div>
+  );
 };
 
 export default SearchCriteriaSection;

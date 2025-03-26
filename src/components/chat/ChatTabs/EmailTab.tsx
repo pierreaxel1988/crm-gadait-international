@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { FileText, Loader, MailPlus, ChevronDown, Check, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -251,13 +252,14 @@ const EmailTab: React.FC<EmailTabProps> = ({
             <div>
               <h5 className="text-sm font-medium mb-2 text-loro-navy">Commercial assigné <span className="text-red-500">*</span></h5>
               <Select 
-                value={selectedAgent} 
-                onValueChange={setSelectedAgent}
+                value={selectedAgent || "unassigned"} 
+                onValueChange={(value) => setSelectedAgent(value === "unassigned" ? undefined : value)}
               >
                 <SelectTrigger className={`w-full ${!selectedAgent ? 'border-red-500' : ''}`}>
                   <SelectValue placeholder="Sélectionner un commercial" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="unassigned">Non assigné</SelectItem>
                   {teamMembers.map(member => (
                     <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
                   ))}
@@ -298,13 +300,14 @@ const EmailTab: React.FC<EmailTabProps> = ({
             <div>
               <h5 className="text-sm font-medium mb-2">Commercial assigné <span className="text-red-500">*</span></h5>
               <Select 
-                value={selectedAgent} 
-                onValueChange={setSelectedAgent}
+                value={selectedAgent || "unassigned"} 
+                onValueChange={(value) => setSelectedAgent(value === "unassigned" ? undefined : value)}
               >
                 <SelectTrigger className={`w-full ${!selectedAgent ? 'border-red-500' : ''}`}>
                   <SelectValue placeholder="Sélectionner un commercial" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="unassigned">Non assigné</SelectItem>
                   {teamMembers.map(member => (
                     <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
                   ))}

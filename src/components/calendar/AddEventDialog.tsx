@@ -120,7 +120,7 @@ const AddEventDialog = ({
             <div className="grid gap-2">
               <Label>Type d'action</Label>
               <Select 
-                value={newEvent.category} 
+                value={newEvent.category || 'default'} 
                 onValueChange={(value: TaskType) => {
                   const selectedCategory = categories.find(cat => cat.value === value);
                   setNewEvent({
@@ -134,6 +134,7 @@ const AddEventDialog = ({
                   <SelectValue placeholder="Sélectionner un type d'action" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="default">Par défaut</SelectItem>
                   {categories.map(category => (
                     <SelectItem key={category.value} value={category.value}>
                       <div className="flex items-center gap-2">

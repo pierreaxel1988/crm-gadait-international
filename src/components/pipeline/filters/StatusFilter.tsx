@@ -37,7 +37,7 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
 
   // Map status values to display labels
   const statusLabels: Record<string, string> = {
-    '': 'Tous les statuts',
+    'null': 'Tous les statuts', // Use 'null' as a string key for null value
     'New': 'Nouveaux',
     'Contacted': 'Contactés',
     'Qualified': 'Qualifiés',
@@ -55,8 +55,8 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
     <div className="space-y-2">
       <label className="text-sm font-medium">Statut</label>
       <Select 
-        value={status || ''} 
-        onValueChange={(value) => onStatusChange(value ? value as LeadStatus : null)}
+        value={status === null ? 'null' : status} 
+        onValueChange={(value) => onStatusChange(value === 'null' ? null : value as LeadStatus)}
       >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Tous les statuts" />
@@ -64,10 +64,10 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
         <SelectContent>
           {statuses.map((statusValue) => (
             <SelectItem 
-              key={statusValue || 'all'} 
-              value={statusValue || ''}
+              key={statusValue || 'null'} 
+              value={statusValue === null ? 'null' : statusValue}
             >
-              {statusLabels[statusValue || '']}
+              {statusLabels[statusValue === null ? 'null' : statusValue]}
             </SelectItem>
           ))}
         </SelectContent>
