@@ -160,6 +160,8 @@ export function usePipelineState() {
       purchaseTimeframe: null,
       propertyType: null
     });
+    // Trigger a refresh to update data
+    handleRefresh();
   };
 
   // Toggle filters visibility

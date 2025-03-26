@@ -1,63 +1,77 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
 import { Filter } from 'lucide-react';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 interface StatusFilterProps {
-  status?: LeadStatus | null;
-  onStatusChange?: (status: LeadStatus | null) => void;
-  selectedStatus?: LeadStatus | null;
-  onSelectedStatusChange?: (status: LeadStatus | null) => void;
+  status: LeadStatus | null;
+  onStatusChange: (status: LeadStatus | null) => void;
 }
 
-const StatusFilter = ({ 
-  status, 
-  onStatusChange,
-  selectedStatus,
-  onSelectedStatusChange
-}: StatusFilterProps) => {
-  // Use the appropriate props based on what's provided
-  const currentStatus = status !== undefined ? status : selectedStatus;
-  const handleStatusChange = (newStatus: LeadStatus | null) => {
-    if (onStatusChange) onStatusChange(newStatus);
-    if (onSelectedStatusChange) onSelectedStatusChange(newStatus);
-  };
-
+const StatusFilter: React.FC<StatusFilterProps> = ({
+  status,
+  onStatusChange
+}) => {
   // Standardized statuses matching the database values
   const statuses: (LeadStatus | null)[] = [
-    null, 
+    null, // All / None
     'New',       // Nouveaux
     'Contacted', // Contactés
     'Qualified', // Qualifiés
     'Proposal',  // Propositions
     'Visit',     // Visites en cours
-    'Offer',     // Offre en cours (English)
-    'Offre',     // Offre en cours (French)
+    'Offer',     // Offre en cours (English/Purchase)
+    'Offre',     // Offre en cours (French/Rental)
     'Deposit',   // Dépôt reçu
     'Signed',    // Signature finale
     'Gagné',     // Conclus
     'Perdu'      // Perdu
   ];
 
+  // Map status values to display labels
+  const statusLabels: Record<string, string> = {
+    '': 'Tous les statuts',
+    'New': 'Nouveaux',
+    'Contacted': 'Contactés',
+    'Qualified': 'Qualifiés',
+    'Proposal': 'Propositions',
+    'Visit': 'Visites en cours',
+    'Offer': 'Offre en cours',
+    'Offre': 'Offre en cours',
+    'Deposit': 'Dépôt reçu',
+    'Signed': 'Signature finale',
+    'Gagné': 'Conclus',
+    'Perdu': 'Perdu'
+  };
+
   return (
-    <div>
-      <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-        <Filter className="h-4 w-4" /> Statut
-      </h4>
-      <div className="grid grid-cols-3 gap-2">
-        {statuses.map((statusOption) => (
-          <Button
-            key={statusOption || 'all'}
-            variant={currentStatus === statusOption ? "default" : "outline"}
-            size="sm"
-            className="text-xs"
-            onClick={() => handleStatusChange(statusOption)}
-          >
-            {statusOption || 'Tous'}
-          </Button>
-        ))}
-      </div>
+    <div className="space-y-2">
+      <label className="text-sm font-medium">Statut</label>
+      <Select 
+        value={status || ''} 
+        onValueChange={(value) => onStatusChange(value ? value as LeadStatus : null)}
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Tous les statuts" />
+        </SelectTrigger>
+        <SelectContent>
+          {statuses.map((statusValue) => (
+            <SelectItem 
+              key={statusValue || 'all'} 
+              value={statusValue || ''}
+            >
+              {statusLabels[statusValue || '']}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };
