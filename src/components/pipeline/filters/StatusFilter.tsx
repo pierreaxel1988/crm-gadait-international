@@ -1,14 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Filter } from 'lucide-react';
 import { LeadStatus } from '@/components/common/StatusBadge';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 interface StatusFilterProps {
   status: LeadStatus | null;
@@ -52,26 +46,31 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
   };
 
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium">Statut</label>
-      <Select 
-        value={status === null ? 'null' : status} 
-        onValueChange={(value) => onStatusChange(value === 'null' ? null : value as LeadStatus)}
-      >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Tous les statuts" />
-        </SelectTrigger>
-        <SelectContent>
-          {statuses.map((statusValue) => (
-            <SelectItem 
-              key={statusValue || 'null'} 
-              value={statusValue === null ? 'null' : statusValue}
-            >
-              {statusLabels[statusValue === null ? 'null' : statusValue]}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div>
+      <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+        <Filter className="h-4 w-4" /> Statut
+      </h4>
+      <div className="grid grid-cols-2 gap-2">
+        <Button
+          variant={status === null ? "default" : "outline"}
+          size="sm"
+          className="text-xs"
+          onClick={() => onStatusChange(null)}
+        >
+          Tous
+        </Button>
+        {statuses.filter(s => s !== null).map((statusValue) => (
+          <Button
+            key={statusValue}
+            variant={status === statusValue ? "default" : "outline"}
+            size="sm"
+            className="text-xs"
+            onClick={() => onStatusChange(statusValue)}
+          >
+            {statusLabels[statusValue || 'null']}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 };
