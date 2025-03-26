@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Tag } from 'lucide-react';
+import { Tag, X } from 'lucide-react';
 import { LeadTag } from '@/components/common/TagBadge';
 import TagBadge from '@/components/common/TagBadge';
 import { Button } from '@/components/ui/button';
@@ -72,6 +72,12 @@ const TagsFilter: React.FC<TagsFilterProps> = ({
           {selectedTags.map(tag => (
             <div key={tag} className="flex items-center">
               <TagBadge tag={tag} className="text-xs" />
+              <button 
+                onClick={() => toggleTag(tag)}
+                className="ml-1 rounded-full w-4 h-4 flex items-center justify-center bg-muted-foreground/10 hover:bg-muted-foreground/20"
+              >
+                <X className="h-3 w-3" />
+              </button>
             </div>
           ))}
         </div>
