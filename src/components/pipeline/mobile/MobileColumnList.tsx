@@ -174,7 +174,7 @@ const MobileColumnList = ({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline">
-                        <h3 className="font-medium text-base truncate">{lead.name}</h3>
+                        <h3 className="font-medium text-base truncate text-loro-hazel">{lead.name}</h3>
                         <span className="text-xs text-muted-foreground ml-2 whitespace-nowrap">
                           {formatDate(lead.createdAt)}
                         </span>
@@ -184,14 +184,19 @@ const MobileColumnList = ({
                             {statusTranslations[lead.columnStatus]}
                           </span>}
                         {lead.taskType && <span className="flex items-center mr-2">
-                            {lead.taskType === 'Call' ? <Phone className="h-3 w-3 mr-1" /> : lead.taskType === 'Follow up' ? <Clock className="h-3 w-3 mr-1" /> : lead.taskType === 'Visites' ? <Calendar className="h-3 w-3 mr-1" /> : null}
-                            <span className="truncate text-xs">{lead.taskType}</span>
+                            {lead.taskType === 'Call' ? 
+                              <Phone className="h-3 w-3 mr-1 text-loro-sand" /> : 
+                              lead.taskType === 'Follow up' ? 
+                              <Clock className="h-3 w-3 mr-1 text-loro-terracotta" /> : 
+                              lead.taskType === 'Visites' ? 
+                              <Calendar className="h-3 w-3 mr-1 text-primary" /> : null}
+                            <span className="truncate text-xs text-loro-navy">{lead.taskType}</span>
                           </span>}
                         {lead.desiredLocation && <span className="flex items-center mr-2">
-                            <MapPin className="h-3 w-3 mr-1" />
-                            <span className="truncate text-xs">{lead.desiredLocation}</span>
+                            <MapPin className="h-3 w-3 mr-1 text-loro-hazel" />
+                            <span className="truncate text-xs text-loro-navy/90">{lead.desiredLocation}</span>
                           </span>}
-                        {lead.budget && <span className="truncate text-xs">
+                        {lead.budget && <span className="truncate text-xs text-loro-terracotta font-medium">
                           {(lead.taskType || lead.desiredLocation) ? ", " : ""}
                           {formatBudget(lead.budget, lead.currency)}
                         </span>}
@@ -202,7 +207,7 @@ const MobileColumnList = ({
           </div>
           
           <div className="fixed bottom-20 right-6 z-50">
-            <button onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} className="bg-primary text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors">
+            <button onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} className="bg-loro-hazel text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg hover:bg-loro-hazel/90 transition-colors">
               <PlusCircle className="h-6 w-6" />
             </button>
           </div>
