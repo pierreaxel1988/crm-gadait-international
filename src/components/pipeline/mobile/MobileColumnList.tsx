@@ -150,19 +150,19 @@ const MobileColumnList = ({
     
     if (isPast(followUpDateTime) && !isToday(followUpDateTime)) {
       return {
-        taskClassName: "bg-red-100 text-red-800",
+        taskClassName: "bg-red-100 text-red-800 rounded-full px-2 py-0.5",
         iconClassName: "text-red-600",
         containerClassName: "border-red-200 bg-red-50/50"
       };
     } else if (isToday(followUpDateTime)) {
       return {
-        taskClassName: "bg-amber-100 text-amber-800",
+        taskClassName: "bg-amber-100 text-amber-800 rounded-full px-2 py-0.5",
         iconClassName: "text-amber-600",
         containerClassName: "border-amber-200 bg-amber-50/50"
       };
     } else {
       return {
-        taskClassName: "bg-green-100 text-green-800",
+        taskClassName: "bg-green-100 text-green-800 rounded-full px-2 py-0.5",
         iconClassName: "text-green-600",
         containerClassName: "border-green-200 bg-green-50/50"
       };
@@ -223,13 +223,13 @@ const MobileColumnList = ({
                           {activeStatus === 'all' && <span className="inline-flex items-center bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full mr-2">
                               {statusTranslations[lead.columnStatus]}
                             </span>}
-                          {lead.taskType && <span className={`flex items-center mr-2 ${lead.nextFollowUpDate ? actionStyle.taskClassName : ''}`}>
+                          {lead.taskType && <span className={`flex items-center mr-2 ${lead.nextFollowUpDate ? actionStyle.taskClassName : 'bg-gray-100 text-gray-700 rounded-full px-2 py-0.5'}`}>
                               {lead.taskType === 'Call' ? <Phone className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-sand'}`} /> : 
                                lead.taskType === 'Follow up' ? <Clock className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-terracotta'}`} /> : 
                                lead.taskType === 'Visites' ? <Calendar className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-primary'}`} /> : null}
                               <span className={`truncate text-xs ${lead.nextFollowUpDate ? '' : 'text-loro-navy'}`}>{lead.taskType}</span>
                             </span>}
-                          {lead.desiredLocation && <span className="flex items-center mr-2">
+                          {lead.desiredLocation && <span className="flex items-center mr-2 bg-gray-100 text-gray-700 rounded-full px-2 py-0.5">
                               <MapPin className="h-3 w-3 mr-1 text-loro-hazel" />
                               <span className="truncate text-xs text-loro-navy/90">{lead.desiredLocation}</span>
                             </span>}
