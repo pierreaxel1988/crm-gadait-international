@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, PlusCircle, Clock, Phone, Calendar, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -168,6 +167,13 @@ const MobileColumnList = ({
     }
   };
 
+  const formatName = (name: string): string => {
+    if (!name) return '';
+    return name.split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   return (
     <div className="space-y-4">
       {isLoading ? (
@@ -232,13 +238,13 @@ const MobileColumnList = ({
                       <div className="mr-3">
                         <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
                           <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium">
-                            {lead.name.charAt(0)}
+                            {lead.name ? lead.name.charAt(0).toUpperCase() : ''}
                           </div>
                         </Avatar>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-baseline">
-                          <h3 className="font-medium text-base truncate text-zinc-900">{lead.name}</h3>
+                          <h3 className="font-medium text-base truncate text-zinc-900">{formatName(lead.name)}</h3>
                           <span className="text-xs text-zinc-500 ml-2 whitespace-nowrap">
                             {formatDate(lead.createdAt)}
                           </span>
