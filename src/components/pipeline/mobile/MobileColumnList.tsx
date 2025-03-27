@@ -102,7 +102,7 @@ const MobileColumnList = ({
     }
   };
 
-  const formatBudget = (budgetStr?: string) => {
+  const formatBudget = (budgetStr?: string, currency?: string) => {
     if (!budgetStr) return '';
     
     if (budgetStr.includes(',') || budgetStr.includes(' ') || 
@@ -113,11 +113,27 @@ const MobileColumnList = ({
     const numValue = parseInt(budgetStr.replace(/[^\d]/g, ''));
     if (isNaN(numValue)) return budgetStr;
     
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0
-    }).format(numValue);
+    const currencySymbol = getCurrencySymbol(currency);
+    
+    const formattedNumber = new Intl.NumberFormat('fr-FR').format(numValue);
+    
+    if (currency === 'EUR') {
+      return `${formattedNumber} ${currencySymbol}`;
+    } else {
+      return `${currencySymbol}${formattedNumber}`;
+    }
+  };
+
+  const getCurrencySymbol = (currency?: string): string => {
+    switch(currency) {
+      case 'EUR': return '€';
+      case 'USD': return '$';
+      case 'GBP': return '£';
+      case 'CHF': return 'CHF';
+      case 'AED': return 'AED';
+      case 'MUR': return 'Rs';
+      default: return '€';
+    }
   };
 
   return <div className="space-y-4">
@@ -171,7 +187,7 @@ const MobileColumnList = ({
                             <span className="truncate text-xs">{lead.taskType}</span>
                           </span>}
                         {lead.budget && <span className="truncate text-xs">
-                          {lead.taskType ? ", " : ""}{formatBudget(lead.budget)}
+                          {lead.taskType ? ", " : ""}{formatBudget(lead.budget, lead.currency)}
                         </span>}
                       </div>
                     </div>
