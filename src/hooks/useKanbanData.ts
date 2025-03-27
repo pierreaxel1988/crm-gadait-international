@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -23,6 +22,7 @@ export interface ExtendedKanbanItem extends KanbanItem {
   pipelineType?: PipelineType;
   pipeline_type?: PipelineType; // Add database field name for compatibility
   currency?: Currency; // Ensure currency is included in the type
+  nextFollowUpDate?: string; // Add nextFollowUpDate for action status
 }
 
 interface KanbanColumn {
@@ -155,6 +155,7 @@ export const useKanbanData = (
             assignedTo: lead.assigned_to,
             assignedToId: lead.assigned_to,
             dueDate: lead.next_follow_up_date,
+            nextFollowUpDate: lead.next_follow_up_date, // Include nextFollowUpDate for action status
             pipelineType: leadPipelineType as PipelineType,
             pipeline_type: leadPipelineType as PipelineType,
             taskType: lead.task_type,

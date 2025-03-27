@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { FilterOptions } from '../PipelineFilters';
 import { Avatar } from "@/components/ui/avatar";
-import { format } from 'date-fns';
+import { format, isPast, isFuture, isToday } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PipelineType, Currency } from '@/types/lead';
 import { useKanbanData } from '@/hooks/useKanbanData';
+
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
   'Contacted': 'Contactés',
@@ -23,7 +24,6 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Perdu': 'Perdu'
 };
 
-// Extend the lead type to include the properties we need
 interface MobileLeadItem {
   id: string;
   name: string;
@@ -33,7 +33,9 @@ interface MobileLeadItem {
   desiredLocation?: string;
   taskType?: string;
   createdAt?: string;
+  nextFollowUpDate?: string;
 }
+
 interface MobileColumnListProps {
   columns: Array<{
     title: string;
@@ -47,6 +49,7 @@ interface MobileColumnListProps {
   searchTerm?: string;
   filters?: FilterOptions;
 }
+
 const MobileColumnList = ({
   columns,
   expandedColumn = null,
@@ -69,7 +72,6 @@ const MobileColumnList = ({
   const filteredColumns = loadedColumns.filter(column => !column.pipelineType || column.pipelineType === activeTab);
   console.log(`MobileColumnList - Colonnes filtrées par type (${activeTab}): ${filteredColumns.length}`);
 
-  // Map the leads adding the column status to each lead
   const allLeads = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
     columnStatus: column.status
@@ -82,12 +84,15 @@ const MobileColumnList = ({
   const totalLeadCount = allLeads.length;
   console.log(`MobileColumnList - Total lead count: ${totalLeadCount}`);
   const displayedLeads = activeStatus === 'all' ? allLeads : allLeads.filter(lead => lead.columnStatus === activeStatus);
+
   const handleAddLead = (status: LeadStatus) => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
   };
+
   const handleLeadClick = (leadId: string) => {
     navigate(`/leads/${leadId}`);
   };
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     try {
@@ -102,6 +107,7 @@ const MobileColumnList = ({
       return dateString;
     }
   };
+
   const formatBudget = (budgetStr?: string, currency?: string) => {
     if (!budgetStr) return '';
     if (budgetStr.includes(',') || budgetStr.includes(' ') || budgetStr.includes('$') || budgetStr.includes('€')) {
@@ -117,6 +123,7 @@ const MobileColumnList = ({
       return `${currencySymbol}${formattedNumber}`;
     }
   };
+
   const getCurrencySymbol = (currency?: string): string => {
     switch (currency) {
       case 'EUR':
@@ -135,6 +142,33 @@ const MobileColumnList = ({
         return '€';
     }
   };
+
+  const getActionStatusStyle = (followUpDate?: string) => {
+    if (!followUpDate) return {};
+    
+    const followUpDateTime = new Date(followUpDate);
+    
+    if (isPast(followUpDateTime) && !isToday(followUpDateTime)) {
+      return {
+        taskClassName: "bg-red-100 text-red-800",
+        iconClassName: "text-red-600",
+        containerClassName: "border-red-200 bg-red-50/50"
+      };
+    } else if (isToday(followUpDateTime)) {
+      return {
+        taskClassName: "bg-amber-100 text-amber-800",
+        iconClassName: "text-amber-600",
+        containerClassName: "border-amber-200 bg-amber-50/50"
+      };
+    } else {
+      return {
+        taskClassName: "bg-green-100 text-green-800",
+        iconClassName: "text-green-600",
+        containerClassName: "border-green-200 bg-green-50/50"
+      };
+    }
+  };
+
   return <div className="space-y-4">
       {isLoading ? <div className="flex items-center justify-center h-40">
           <p className="text-sm text-muted-foreground">Chargement des leads...</p>
@@ -162,40 +196,52 @@ const MobileColumnList = ({
                   </button>
                 </div>
               </div> : <div className="bg-white rounded-md border border-slate-200 divide-y">
-                {displayedLeads.map(lead => <div key={lead.id} className="py-3 px-4 flex items-center hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => handleLeadClick(lead.id)}>
-                    <div className="mr-3">
-                      <Avatar className="h-12 w-12 border-2 border-white">
-                        <div className="bg-slate-200 h-full w-full flex items-center justify-center text-slate-500 text-lg font-medium">
-                          {lead.name.charAt(0)}
+                {displayedLeads.map(lead => {
+                  const actionStyle = getActionStatusStyle(lead.nextFollowUpDate);
+                  
+                  return (
+                    <div 
+                      key={lead.id} 
+                      className={`py-3 px-4 flex items-center hover:bg-slate-50 transition-colors cursor-pointer ${lead.nextFollowUpDate ? actionStyle.containerClassName : ''}`} 
+                      onClick={() => handleLeadClick(lead.id)}
+                    >
+                      <div className="mr-3">
+                        <Avatar className="h-12 w-12 border-2 border-white">
+                          <div className="bg-slate-200 h-full w-full flex items-center justify-center text-slate-500 text-lg font-medium">
+                            {lead.name.charAt(0)}
+                          </div>
+                        </Avatar>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-baseline">
+                          <h3 className="font-medium text-base truncate text-loro-hazel">{lead.name}</h3>
+                          <span className="text-xs text-muted-foreground ml-2 whitespace-nowrap">
+                            {formatDate(lead.createdAt)}
+                          </span>
                         </div>
-                      </Avatar>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-baseline">
-                        <h3 className="font-medium text-base truncate text-zinc-900">{lead.name}</h3>
-                        <span className="text-xs text-muted-foreground ml-2 whitespace-nowrap">
-                          {formatDate(lead.createdAt)}
-                        </span>
-                      </div>
-                      <div className="flex items-center text-sm text-muted-foreground mt-0.5">
-                        {activeStatus === 'all' && <span className="inline-flex items-center bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full mr-2">
-                            {statusTranslations[lead.columnStatus]}
+                        <div className="flex items-center text-sm text-muted-foreground mt-0.5">
+                          {activeStatus === 'all' && <span className="inline-flex items-center bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full mr-2">
+                              {statusTranslations[lead.columnStatus]}
+                            </span>}
+                          {lead.taskType && <span className={`flex items-center mr-2 ${lead.nextFollowUpDate ? actionStyle.taskClassName : ''}`}>
+                              {lead.taskType === 'Call' ? <Phone className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-sand'}`} /> : 
+                               lead.taskType === 'Follow up' ? <Clock className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-terracotta'}`} /> : 
+                               lead.taskType === 'Visites' ? <Calendar className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-primary'}`} /> : null}
+                              <span className={`truncate text-xs ${lead.nextFollowUpDate ? '' : 'text-loro-navy'}`}>{lead.taskType}</span>
+                            </span>}
+                          {lead.desiredLocation && <span className="flex items-center mr-2">
+                              <MapPin className="h-3 w-3 mr-1 text-loro-hazel" />
+                              <span className="truncate text-xs text-loro-navy/90">{lead.desiredLocation}</span>
+                            </span>}
+                          {lead.budget && <span className="truncate text-xs text-loro-terracotta font-medium">
+                            {lead.taskType || lead.desiredLocation ? ", " : ""}
+                            {formatBudget(lead.budget, lead.currency)}
                           </span>}
-                        {lead.taskType && <span className="flex items-center mr-2">
-                            {lead.taskType === 'Call' ? <Phone className="h-3 w-3 mr-1 text-loro-sand" /> : lead.taskType === 'Follow up' ? <Clock className="h-3 w-3 mr-1 text-loro-terracotta" /> : lead.taskType === 'Visites' ? <Calendar className="h-3 w-3 mr-1 text-primary" /> : null}
-                            <span className="truncate text-xs text-loro-navy">{lead.taskType}</span>
-                          </span>}
-                        {lead.desiredLocation && <span className="flex items-center mr-2">
-                            <MapPin className="h-3 w-3 mr-1 text-loro-hazel" />
-                            <span className="truncate text-xs text-loro-navy/90">{lead.desiredLocation}</span>
-                          </span>}
-                        {lead.budget && <span className="truncate text-xs text-loro-terracotta font-medium">
-                          {lead.taskType || lead.desiredLocation ? ", " : ""}
-                          {formatBudget(lead.budget, lead.currency)}
-                        </span>}
+                        </div>
                       </div>
                     </div>
-                  </div>)}
+                  );
+                })}
               </div>}
           </div>
           
@@ -207,4 +253,5 @@ const MobileColumnList = ({
         </>}
     </div>;
 };
+
 export default MobileColumnList;
