@@ -46,6 +46,12 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   // Force a console log to track the active tab for debugging
   console.log(`MobilePipelineView - activeTab: ${activeTab}`);
   
+  // Fonction pour appliquer les filtres et fermer le drawer
+  const handleApplyFilters = () => {
+    handleRefresh();
+    toggleFilters();
+  };
+  
   return (
     <div className="flex flex-col h-[calc(100vh-80px)]">
       <MobilePipelineHeader 
@@ -98,6 +104,7 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
             assignedToOptions={teamMembers}
             isFilterActive={isFilterActive}
             isMobile={true}
+            onApplyFilters={handleApplyFilters}
           />
         </Sheet>
       )}

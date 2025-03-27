@@ -37,6 +37,7 @@ export interface PipelineFiltersProps {
   }[];
   isFilterActive: (filterName: string) => boolean;
   isMobile?: boolean;
+  onApplyFilters?: () => void;
 }
 
 const PipelineFilters: React.FC<PipelineFiltersProps> = ({
@@ -45,7 +46,8 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   onClearFilters,
   assignedToOptions = [],
   isFilterActive,
-  isMobile = false
+  isMobile = false,
+  onApplyFilters
 }) => {
   // Helper to get team member name by ID
   const getTeamMemberName = (id: string): string => {
@@ -116,7 +118,7 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
       {/* Action buttons */}
       <ActionButtons 
         onClearFilters={onClearFilters} 
-        onApply={() => {}} 
+        onApply={onApplyFilters} 
       />
 
       {/* Display active filters */}

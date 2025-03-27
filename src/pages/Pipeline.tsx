@@ -66,6 +66,7 @@ const Pipeline = () => {
         onFilterChange={setFilters}
         onClearFilters={handleClearFilters}
         teamMembers={teamMembers}
+        handleRefresh={handleRefresh}
       />
 
       <DesktopPipelineView

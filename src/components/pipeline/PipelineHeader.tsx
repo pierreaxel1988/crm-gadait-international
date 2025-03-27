@@ -18,6 +18,7 @@ interface PipelineHeaderProps {
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
   teamMembers: { id: string; name: string }[];
+  handleRefresh?: () => void;
 }
 
 const PipelineHeader: React.FC<PipelineHeaderProps> = ({
@@ -30,9 +31,18 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   filters,
   onFilterChange,
   onClearFilters,
-  teamMembers
+  teamMembers,
+  handleRefresh
 }) => {
   const navigate = useNavigate();
+
+  // Fonction pour appliquer les filtres
+  const handleApplyFilters = () => {
+    if (handleRefresh) {
+      handleRefresh();
+    }
+    onToggleFilters();
+  };
 
   return (
     <div className="mb-6">
@@ -79,6 +89,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
             onClearFilters={onClearFilters}
             assignedToOptions={teamMembers}
             isFilterActive={isFilterActive}
+            onApplyFilters={handleApplyFilters}
           />
         </div>
       )}
