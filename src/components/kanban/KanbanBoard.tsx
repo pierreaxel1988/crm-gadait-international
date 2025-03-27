@@ -20,7 +20,7 @@ interface KanbanBoardProps {
   filters?: FilterOptions;
   refreshTrigger?: number;
   pipelineType: 'purchase' | 'rental';
-  searchTerm?: string; // Add the searchTerm property
+  searchTerm?: string;
 }
 
 const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipelineType, searchTerm }: KanbanBoardProps) => {
@@ -30,7 +30,7 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
   console.log(`Pipeline Type: ${pipelineType}`);
   console.log(`Nombre de colonnes: ${columns.length}`);
   console.log('Colonnes initiales:', columns.map(c => `${c.title} (${c.status})`).join(', '));
-  console.log('Search Term:', searchTerm); // Log the search term
+  console.log('Search Term:', searchTerm); 
   
   const { loadedColumns, isLoading, setLoadedColumns } = useKanbanData(columns, refreshTrigger, pipelineType);
   

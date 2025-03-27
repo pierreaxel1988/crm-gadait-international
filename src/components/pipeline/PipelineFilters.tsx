@@ -32,6 +32,7 @@ interface PipelineFiltersProps {
   assignedToOptions: { id: string; name: string }[];
   isFilterActive: (filterName: string) => boolean;
   onApplyFilters?: () => void;
+  getTeamMemberName?: (id: string) => string;
 }
 
 const PipelineFilters = ({
@@ -40,7 +41,8 @@ const PipelineFilters = ({
   onClearFilters,
   assignedToOptions,
   isFilterActive,
-  onApplyFilters
+  onApplyFilters,
+  getTeamMemberName
 }: PipelineFiltersProps) => {
   
   // Handler for status filter changes
@@ -94,6 +96,8 @@ const PipelineFilters = ({
           filters={filters} 
           onClearFilters={onClearFilters}
           isFilterActive={isFilterActive}
+          onFilterChange={onFilterChange}
+          getTeamMemberName={getTeamMemberName || ((id) => id)}
         />
       )}
       
@@ -112,8 +116,8 @@ const PipelineFilters = ({
         
         {/* Agent Assignment Filter */}
         <AgentFilter 
-          selectedAgent={filters.assignedTo} 
-          onAgentChange={handleAssignedToChange}
+          assignedTo={filters.assignedTo} 
+          onAssignedToChange={handleAssignedToChange}
           agents={assignedToOptions}
         />
         
