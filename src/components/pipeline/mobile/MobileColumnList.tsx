@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, PlusCircle, Clock, Phone, Calendar, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -60,30 +61,28 @@ const MobileColumnList = ({
 }: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const navigate = useNavigate();
-  console.log(`MobileColumnList - activeTab: ${activeTab}`);
-  console.log(`MobileColumnList - columns reçues: ${columns.length}`);
+  
   const {
     loadedColumns,
     isLoading
   } = useKanbanData(columns, 0, activeTab);
-  loadedColumns.forEach(col => {
-    console.log(`Colonne ${col.title} (${col.status}): ${col.items.length} leads (pipelineType: ${col.pipelineType})`);
-  });
+  
   const filteredColumns = loadedColumns.filter(column => !column.pipelineType || column.pipelineType === activeTab);
-  console.log(`MobileColumnList - Colonnes filtrées par type (${activeTab}): ${filteredColumns.length}`);
 
   const allLeads = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
     columnStatus: column.status
   })));
-  console.log(`MobileColumnList - Total leads (type ${activeTab}): ${allLeads.length}`);
+  
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     acc[column.status] = column.items.length;
     return acc;
   }, {} as Record<string, number>);
+  
   const totalLeadCount = allLeads.length;
-  console.log(`MobileColumnList - Total lead count: ${totalLeadCount}`);
-  const displayedLeads = activeStatus === 'all' ? allLeads : allLeads.filter(lead => lead.columnStatus === activeStatus);
+  const displayedLeads = activeStatus === 'all' 
+    ? allLeads 
+    : allLeads.filter(lead => lead.columnStatus === activeStatus);
 
   const handleAddLead = (status: LeadStatus) => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
@@ -169,33 +168,58 @@ const MobileColumnList = ({
     }
   };
 
-  return <div className="space-y-4">
-      {isLoading ? <div className="flex items-center justify-center h-40">
+  return (
+    <div className="space-y-4">
+      {isLoading ? (
+        <div className="flex items-center justify-center h-40">
           <p className="text-sm text-muted-foreground">Chargement des leads...</p>
-        </div> : <>
+        </div>
+      ) : (
+        <>
           <div className="overflow-x-auto pb-1">
-            <Tabs value={activeStatus === 'all' ? 'all' : activeStatus} onValueChange={value => setActiveStatus(value as LeadStatus | 'all')} className="w-full">
+            <Tabs 
+              value={activeStatus === 'all' ? 'all' : activeStatus} 
+              onValueChange={value => setActiveStatus(value as LeadStatus | 'all')} 
+              className="w-full"
+            >
               <TabsList className="inline-flex w-auto p-1 h-10 bg-gray-100 rounded-full">
-                <TabsTrigger value="all" className="rounded-full px-4 data-[state=active]:bg-white">
+                <TabsTrigger 
+                  value="all" 
+                  className="rounded-full px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
                   Tous ({totalLeadCount})
                 </TabsTrigger>
-                {filteredColumns.map(column => leadCountByStatus[column.status] > 0 && <TabsTrigger key={column.status} value={column.status} className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white">
+                {filteredColumns.map(column => 
+                  leadCountByStatus[column.status] > 0 && (
+                    <TabsTrigger 
+                      key={column.status} 
+                      value={column.status} 
+                      className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                    >
                       {statusTranslations[column.status]} ({leadCountByStatus[column.status]})
-                    </TabsTrigger>)}
+                    </TabsTrigger>
+                  )
+                )}
               </TabsList>
             </Tabs>
           </div>
           
           <div className="space-y-px">
-            {displayedLeads.length === 0 ? <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
+            {displayedLeads.length === 0 ? (
+              <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground font-medium">Aucun lead trouvé</p>
-                  <button onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} className="mt-2 text-primary hover:text-primary/80 text-sm flex items-center justify-center mx-auto">
+                  <button 
+                    onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
+                    className="mt-2 text-primary hover:text-primary/80 text-sm flex items-center justify-center mx-auto"
+                  >
                     <PlusCircle className="h-4 w-4 mr-1" />
                     Ajouter un lead
                   </button>
                 </div>
-              </div> : <div className="bg-white rounded-md border border-slate-200 divide-y">
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
                 {displayedLeads.map(lead => {
                   const actionStyle = getActionStatusStyle(lead.nextFollowUpDate);
                   
@@ -206,8 +230,8 @@ const MobileColumnList = ({
                       onClick={() => handleLeadClick(lead.id)}
                     >
                       <div className="mr-3">
-                        <Avatar className="h-12 w-12 border-2 border-white">
-                          <div className="bg-slate-200 h-full w-full flex items-center justify-center text-slate-500 text-lg font-medium">
+                        <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
+                          <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-loro-hazel text-lg font-medium">
                             {lead.name.charAt(0)}
                           </div>
                         </Avatar>
@@ -219,39 +243,61 @@ const MobileColumnList = ({
                             {formatDate(lead.createdAt)}
                           </span>
                         </div>
-                        <div className="flex items-center text-sm text-muted-foreground mt-0.5">
-                          {activeStatus === 'all' && <span className="inline-flex items-center bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full mr-2">
+                        <div className="flex flex-wrap items-center text-sm text-muted-foreground mt-1 gap-1">
+                          {activeStatus === 'all' && (
+                            <span className="inline-flex items-center bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
                               {statusTranslations[lead.columnStatus]}
-                            </span>}
-                          {lead.taskType && <span className={`flex items-center mr-2 ${lead.nextFollowUpDate ? actionStyle.taskClassName : 'bg-gray-100 text-gray-700 rounded-full px-2 py-0.5'}`}>
-                              {lead.taskType === 'Call' ? <Phone className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-sand'}`} /> : 
-                               lead.taskType === 'Follow up' ? <Clock className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-terracotta'}`} /> : 
-                               lead.taskType === 'Visites' ? <Calendar className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-primary'}`} /> : null}
-                              <span className={`truncate text-xs ${lead.nextFollowUpDate ? '' : 'text-loro-navy'}`}>{lead.taskType}</span>
-                            </span>}
-                          {lead.desiredLocation && <span className="flex items-center mr-2 bg-gray-100 text-gray-700 rounded-full px-2 py-0.5">
+                            </span>
+                          )}
+                          {lead.taskType && (
+                            <span className={`flex items-center ${lead.nextFollowUpDate ? actionStyle.taskClassName : 'bg-gray-100 text-gray-700 rounded-full px-2 py-0.5'}`}>
+                              {lead.taskType === 'Call' ? 
+                                <Phone className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-sand'}`} /> : 
+                               lead.taskType === 'Follow up' ? 
+                                <Clock className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-terracotta'}`} /> : 
+                               lead.taskType === 'Visites' ? 
+                                <Calendar className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-primary'}`} /> : 
+                                null
+                              }
+                              <span className={`truncate text-xs ${lead.nextFollowUpDate ? '' : 'text-loro-navy'}`}>
+                                {lead.taskType}
+                              </span>
+                            </span>
+                          )}
+                          {lead.desiredLocation && (
+                            <span className="flex items-center bg-gray-100 text-gray-700 rounded-full px-2 py-0.5">
                               <MapPin className="h-3 w-3 mr-1 text-loro-hazel" />
-                              <span className="truncate text-xs text-loro-navy/90">{lead.desiredLocation}</span>
-                            </span>}
-                          {lead.budget && <span className="truncate text-xs text-loro-terracotta font-medium">
-                            {lead.taskType || lead.desiredLocation ? ", " : ""}
-                            {formatBudget(lead.budget, lead.currency)}
-                          </span>}
+                              <span className="truncate text-xs text-loro-navy/90">
+                                {lead.desiredLocation}
+                              </span>
+                            </span>
+                          )}
+                          {lead.budget && (
+                            <span className="truncate text-xs font-medium bg-loro-sand/10 text-loro-terracotta rounded-full px-2 py-0.5">
+                              {formatBudget(lead.budget, lead.currency)}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
                   );
                 })}
-              </div>}
+              </div>
+            )}
           </div>
           
           <div className="fixed bottom-20 right-6 z-50">
-            <button onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} className="text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-colors bg-zinc-900 hover:bg-zinc-800">
+            <button 
+              onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
+              className="text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-colors bg-loro-hazel hover:bg-loro-hazel/90"
+            >
               <PlusCircle className="h-6 w-6" />
             </button>
           </div>
-        </>}
-    </div>;
+        </>
+      )}
+    </div>
+  );
 };
 
 export default MobileColumnList;

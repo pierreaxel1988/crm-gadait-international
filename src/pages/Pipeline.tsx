@@ -31,7 +31,7 @@ const Pipeline = () => {
 
   if (isMobile) {
     return (
-      <div className="p-3 md:p-6 space-y-4">
+      <div className="p-3 md:p-6 bg-white">
         <MobilePipelineView
           activeTab={activeTab}
           setActiveTab={setActiveTab}

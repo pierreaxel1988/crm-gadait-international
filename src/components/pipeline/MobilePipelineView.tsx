@@ -62,14 +62,14 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
         teamMembers={teamMembers}
       />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-        <TabsList className="w-full">
-          <TabsTrigger value="purchase" className="flex-1">Achat</TabsTrigger>
-          <TabsTrigger value="rental" className="flex-1">Location</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3">
+        <TabsList className="w-full bg-gray-100 p-0.5 rounded-xl h-11">
+          <TabsTrigger value="purchase" className="flex-1 rounded-lg text-sm font-medium">Achat</TabsTrigger>
+          <TabsTrigger value="rental" className="flex-1 rounded-lg text-sm font-medium">Location</TabsTrigger>
         </TabsList>
       </Tabs>
 
-      <div className="flex-1 overflow-y-auto mt-4 pb-20">
+      <div className="flex-1 overflow-y-auto mt-3 pb-20 -mx-3 px-3 bg-gray-50">
         <MobileColumnList
           columns={columns}
           activeTab={activeTab as PipelineType}
