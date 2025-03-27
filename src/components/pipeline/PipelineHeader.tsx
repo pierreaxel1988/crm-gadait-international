@@ -3,7 +3,7 @@ import React from 'react';
 import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Search, SlidersHorizontal } from 'lucide-react';
+import { PlusCircle, Search, SlidersHorizontal, RefreshCw } from 'lucide-react';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ interface PipelineHeaderProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
+  onApplyFilters?: () => void;
   teamMembers: { id: string; name: string }[];
   handleRefresh?: () => void;
 }
@@ -31,24 +32,27 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   filters,
   onFilterChange,
   onClearFilters,
+  onApplyFilters,
   teamMembers,
   handleRefresh
 }) => {
   const navigate = useNavigate();
-
-  // Fonction pour appliquer les filtres
-  const handleApplyFilters = () => {
-    if (handleRefresh) {
-      handleRefresh();
-    }
-    onToggleFilters();
-  };
 
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="tracking-tight text-xl font-medium text-zinc-900">Pipeline</h1>
         <div className="flex items-center gap-2">
+          {handleRefresh && (
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-10 w-10"
+              onClick={handleRefresh}
+            >
+              <RefreshCw className="h-5 w-5" />
+            </Button>
+          )}
           <Button variant="outline" size="icon" className="h-10 w-10" onClick={() => navigate('/import-lead')}>
             <PlusCircle className="h-5 w-5" />
           </Button>
@@ -89,7 +93,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
             onClearFilters={onClearFilters}
             assignedToOptions={teamMembers}
             isFilterActive={isFilterActive}
-            onApplyFilters={handleApplyFilters}
+            onApplyFilters={onApplyFilters}
           />
         </div>
       )}

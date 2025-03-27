@@ -29,6 +29,14 @@ const Pipeline = () => {
     getAllColumns
   } = usePipelineState();
 
+  // Function to apply filters and refresh
+  const handleApplyFilters = () => {
+    handleRefresh();
+    if (isMobile) {
+      toggleFilters(); // Close filters on mobile after applying
+    }
+  };
+
   if (isMobile) {
     return (
       <div className="p-3 md:p-6 bg-white">
@@ -65,6 +73,7 @@ const Pipeline = () => {
         filters={filters}
         onFilterChange={setFilters}
         onClearFilters={handleClearFilters}
+        onApplyFilters={handleApplyFilters}
         teamMembers={teamMembers}
         handleRefresh={handleRefresh}
       />
