@@ -5,6 +5,9 @@ import { Home, Key, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MobileColumnList from './mobile/MobileColumnList';
 import { FilterOptions } from './PipelineFilters';
+import { PipelineType } from '@/types/lead';
+import { useKanbanData } from '@/hooks/useKanbanData';
+import { LeadStatus } from '@/components/common/StatusBadge';
 
 interface DesktopPipelineViewProps {
   activeTab: string;
@@ -25,6 +28,28 @@ const DesktopPipelineView = ({
   handleRefresh,
   isRefreshing
 }: DesktopPipelineViewProps) => {
+  
+  // Définir les colonnes pour l'utilisation avec useKanbanData
+  const getColumns = () => {
+    const statusesToShow = activeTab === 'purchase' 
+      ? ['New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offer', 'Deposit', 'Signed', 'Gagné', 'Perdu'] as LeadStatus[]
+      : ['New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offre', 'Deposit', 'Signed', 'Gagné', 'Perdu'] as LeadStatus[];
+    
+    return statusesToShow.map(status => ({
+      title: status,
+      status: status as LeadStatus,
+      items: [],
+      pipelineType: activeTab as PipelineType
+    }));
+  };
+  
+  // Récupérer les données avec useKanbanData
+  const { loadedColumns } = useKanbanData(
+    getColumns(), 
+    refreshTrigger, 
+    activeTab as PipelineType
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -42,7 +67,13 @@ const DesktopPipelineView = ({
         </Tabs>
         
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleRefresh} disabled={isRefreshing}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-9 w-9" 
+            onClick={handleRefresh} 
+            disabled={isRefreshing}
+          >
             <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span className="sr-only">Refresh</span>
           </Button>
@@ -51,8 +82,8 @@ const DesktopPipelineView = ({
       
       <div className="bg-white rounded-lg p-4 shadow-sm">
         <MobileColumnList
-          columns={[]}
-          activeTab={activeTab as 'purchase' | 'rental'}
+          columns={loadedColumns}
+          activeTab={activeTab as PipelineType}
           searchTerm={searchTerm}
           filters={filters}
         />
