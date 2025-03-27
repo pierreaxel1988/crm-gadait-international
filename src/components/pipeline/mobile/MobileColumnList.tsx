@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, PlusCircle, Clock, Phone, Calendar, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +9,6 @@ import { fr } from 'date-fns/locale';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PipelineType } from '@/types/lead';
 import { useKanbanData } from '@/hooks/useKanbanData';
-
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
   'Contacted': 'Contactés',
@@ -24,7 +22,6 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Gagné': 'Conclus',
   'Perdu': 'Perdu'
 };
-
 interface MobileColumnListProps {
   columns: Array<{
     title: string;
@@ -38,7 +35,6 @@ interface MobileColumnListProps {
   searchTerm?: string;
   filters?: FilterOptions;
 }
-
 const MobileColumnList = ({
   columns,
   expandedColumn = null,
@@ -51,43 +47,33 @@ const MobileColumnList = ({
   const navigate = useNavigate();
   console.log(`MobileColumnList - activeTab: ${activeTab}`);
   console.log(`MobileColumnList - columns reçues: ${columns.length}`);
-
   const {
     loadedColumns,
     isLoading
   } = useKanbanData(columns, 0, activeTab);
-
   loadedColumns.forEach(col => {
     console.log(`Colonne ${col.title} (${col.status}): ${col.items.length} leads (pipelineType: ${col.pipelineType})`);
   });
-
   const filteredColumns = loadedColumns.filter(column => !column.pipelineType || column.pipelineType === activeTab);
   console.log(`MobileColumnList - Colonnes filtrées par type (${activeTab}): ${filteredColumns.length}`);
-
   const allLeads = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
     columnStatus: column.status
   })));
   console.log(`MobileColumnList - Total leads (type ${activeTab}): ${allLeads.length}`);
-
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     acc[column.status] = column.items.length;
     return acc;
   }, {} as Record<string, number>);
-
   const totalLeadCount = allLeads.length;
   console.log(`MobileColumnList - Total lead count: ${totalLeadCount}`);
-
   const displayedLeads = activeStatus === 'all' ? allLeads : allLeads.filter(lead => lead.columnStatus === activeStatus);
-
   const handleAddLead = (status: LeadStatus) => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
   };
-
   const handleLeadClick = (leadId: string) => {
     navigate(`/leads/${leadId}`);
   };
-
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     try {
@@ -102,41 +88,39 @@ const MobileColumnList = ({
       return dateString;
     }
   };
-
   const formatBudget = (budgetStr?: string, currency?: string) => {
     if (!budgetStr) return '';
-    
-    if (budgetStr.includes(',') || budgetStr.includes(' ') || 
-        budgetStr.includes('$') || budgetStr.includes('€')) {
+    if (budgetStr.includes(',') || budgetStr.includes(' ') || budgetStr.includes('$') || budgetStr.includes('€')) {
       return budgetStr;
     }
-    
     const numValue = parseInt(budgetStr.replace(/[^\d]/g, ''));
     if (isNaN(numValue)) return budgetStr;
-    
     const currencySymbol = getCurrencySymbol(currency);
-    
     const formattedNumber = new Intl.NumberFormat('fr-FR').format(numValue);
-    
     if (currency === 'EUR') {
       return `${formattedNumber} ${currencySymbol}`;
     } else {
       return `${currencySymbol}${formattedNumber}`;
     }
   };
-
   const getCurrencySymbol = (currency?: string): string => {
-    switch(currency) {
-      case 'EUR': return '€';
-      case 'USD': return '$';
-      case 'GBP': return '£';
-      case 'CHF': return 'CHF';
-      case 'AED': return 'AED';
-      case 'MUR': return 'Rs';
-      default: return '€';
+    switch (currency) {
+      case 'EUR':
+        return '€';
+      case 'USD':
+        return '$';
+      case 'GBP':
+        return '£';
+      case 'CHF':
+        return 'CHF';
+      case 'AED':
+        return 'AED';
+      case 'MUR':
+        return 'Rs';
+      default:
+        return '€';
     }
   };
-
   return <div className="space-y-4">
       {isLoading ? <div className="flex items-center justify-center h-40">
           <p className="text-sm text-muted-foreground">Chargement des leads...</p>
@@ -174,7 +158,7 @@ const MobileColumnList = ({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline">
-                        <h3 className="font-medium text-base truncate text-loro-hazel">{lead.name}</h3>
+                        <h3 className="font-medium text-base truncate text-zinc-800">{lead.name}</h3>
                         <span className="text-xs text-muted-foreground ml-2 whitespace-nowrap">
                           {formatDate(lead.createdAt)}
                         </span>
@@ -184,12 +168,7 @@ const MobileColumnList = ({
                             {statusTranslations[lead.columnStatus]}
                           </span>}
                         {lead.taskType && <span className="flex items-center mr-2">
-                            {lead.taskType === 'Call' ? 
-                              <Phone className="h-3 w-3 mr-1 text-loro-sand" /> : 
-                              lead.taskType === 'Follow up' ? 
-                              <Clock className="h-3 w-3 mr-1 text-loro-terracotta" /> : 
-                              lead.taskType === 'Visites' ? 
-                              <Calendar className="h-3 w-3 mr-1 text-primary" /> : null}
+                            {lead.taskType === 'Call' ? <Phone className="h-3 w-3 mr-1 text-loro-sand" /> : lead.taskType === 'Follow up' ? <Clock className="h-3 w-3 mr-1 text-loro-terracotta" /> : lead.taskType === 'Visites' ? <Calendar className="h-3 w-3 mr-1 text-primary" /> : null}
                             <span className="truncate text-xs text-loro-navy">{lead.taskType}</span>
                           </span>}
                         {lead.desiredLocation && <span className="flex items-center mr-2">
@@ -197,7 +176,7 @@ const MobileColumnList = ({
                             <span className="truncate text-xs text-loro-navy/90">{lead.desiredLocation}</span>
                           </span>}
                         {lead.budget && <span className="truncate text-xs text-loro-terracotta font-medium">
-                          {(lead.taskType || lead.desiredLocation) ? ", " : ""}
+                          {lead.taskType || lead.desiredLocation ? ", " : ""}
                           {formatBudget(lead.budget, lead.currency)}
                         </span>}
                       </div>
@@ -214,5 +193,4 @@ const MobileColumnList = ({
         </>}
     </div>;
 };
-
 export default MobileColumnList;
