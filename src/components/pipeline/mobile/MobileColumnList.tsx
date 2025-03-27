@@ -208,10 +208,10 @@ const MobileColumnList = ({
             {displayedLeads.length === 0 ? (
               <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground font-medium">Aucun lead trouvé</p>
+                  <p className="text-sm text-zinc-900 font-medium">Aucun lead trouvé</p>
                   <button 
                     onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
-                    className="mt-2 text-primary hover:text-primary/80 text-sm flex items-center justify-center mx-auto"
+                    className="mt-2 text-loro-hazel hover:text-loro-hazel/80 text-sm flex items-center justify-center mx-auto"
                   >
                     <PlusCircle className="h-4 w-4 mr-1" />
                     Ajouter un lead
@@ -231,49 +231,49 @@ const MobileColumnList = ({
                     >
                       <div className="mr-3">
                         <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
-                          <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-loro-hazel text-lg font-medium">
+                          <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium">
                             {lead.name.charAt(0)}
                           </div>
                         </Avatar>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-baseline">
-                          <h3 className="font-medium text-base truncate text-loro-hazel">{lead.name}</h3>
-                          <span className="text-xs text-muted-foreground ml-2 whitespace-nowrap">
+                          <h3 className="font-medium text-base truncate text-zinc-900">{lead.name}</h3>
+                          <span className="text-xs text-zinc-500 ml-2 whitespace-nowrap">
                             {formatDate(lead.createdAt)}
                           </span>
                         </div>
-                        <div className="flex flex-wrap items-center text-sm text-muted-foreground mt-1 gap-1">
+                        <div className="flex flex-wrap items-center text-sm text-zinc-700 mt-1 gap-1">
                           {activeStatus === 'all' && (
-                            <span className="inline-flex items-center bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
+                            <span className="inline-flex items-center bg-zinc-100 text-zinc-900 text-xs px-2 py-0.5 rounded-full">
                               {statusTranslations[lead.columnStatus]}
                             </span>
                           )}
                           {lead.taskType && (
-                            <span className={`flex items-center ${lead.nextFollowUpDate ? actionStyle.taskClassName : 'bg-gray-100 text-gray-700 rounded-full px-2 py-0.5'}`}>
+                            <span className={`flex items-center ${lead.nextFollowUpDate ? actionStyle.taskClassName : 'bg-zinc-100 text-zinc-700 rounded-full px-2 py-0.5'}`}>
                               {lead.taskType === 'Call' ? 
-                                <Phone className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-sand'}`} /> : 
+                                <Phone className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
                                lead.taskType === 'Follow up' ? 
-                                <Clock className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-terracotta'}`} /> : 
+                                <Clock className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
                                lead.taskType === 'Visites' ? 
-                                <Calendar className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-primary'}`} /> : 
+                                <Calendar className={`h-3 w-3 mr-1 ${lead.nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
                                 null
                               }
-                              <span className={`truncate text-xs ${lead.nextFollowUpDate ? '' : 'text-loro-navy'}`}>
+                              <span className={`truncate text-xs ${lead.nextFollowUpDate ? '' : 'text-zinc-900'}`}>
                                 {lead.taskType}
                               </span>
                             </span>
                           )}
                           {lead.desiredLocation && (
-                            <span className="flex items-center bg-gray-100 text-gray-700 rounded-full px-2 py-0.5">
-                              <MapPin className="h-3 w-3 mr-1 text-loro-hazel" />
-                              <span className="truncate text-xs text-loro-navy/90">
+                            <span className="flex items-center bg-zinc-100 text-zinc-700 rounded-full px-2 py-0.5">
+                              <MapPin className="h-3 w-3 mr-1 text-zinc-600" />
+                              <span className="truncate text-xs text-zinc-900">
                                 {lead.desiredLocation}
                               </span>
                             </span>
                           )}
                           {lead.budget && (
-                            <span className="truncate text-xs font-medium bg-loro-sand/10 text-loro-terracotta rounded-full px-2 py-0.5">
+                            <span className="truncate text-xs font-medium bg-zinc-100 text-zinc-900 rounded-full px-2 py-0.5">
                               {formatBudget(lead.budget, lead.currency)}
                             </span>
                           )}
@@ -289,7 +289,7 @@ const MobileColumnList = ({
           <div className="fixed bottom-20 right-6 z-50">
             <button 
               onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
-              className="text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-colors bg-loro-hazel hover:bg-loro-hazel/90"
+              className="text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-colors bg-zinc-900 hover:bg-zinc-800"
             >
               <PlusCircle className="h-6 w-6" />
             </button>
