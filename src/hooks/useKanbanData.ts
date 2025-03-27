@@ -5,7 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { getLeads } from '@/services/leadCore';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
-import { PropertyType, PurchaseTimeframe, PipelineType } from '@/types/lead';
+import { PropertyType, PurchaseTimeframe, PipelineType, Currency } from '@/types/lead';
 import type { Json } from '@/integrations/supabase/types';
 
 // Extend KanbanItem with the additional properties needed for filtering
@@ -22,6 +22,7 @@ export interface ExtendedKanbanItem extends KanbanItem {
   importedAt?: string;
   pipelineType?: PipelineType;
   pipeline_type?: PipelineType; // Add database field name for compatibility
+  currency?: Currency; // Ensure currency is included in the type
 }
 
 interface KanbanColumn {
@@ -166,7 +167,8 @@ export const useKanbanData = (
             url: lead.url,
             createdAt: lead.created_at,
             importedAt: lead.imported_at,
-            external_id: lead.external_id
+            external_id: lead.external_id,
+            currency: lead.currency as Currency // Make sure to include the currency
           };
         });
         
