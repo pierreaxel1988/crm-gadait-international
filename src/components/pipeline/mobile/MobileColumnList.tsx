@@ -10,7 +10,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PipelineType } from '@/types/lead';
 import { useKanbanData } from '@/hooks/useKanbanData';
 
-// Map English status to French translations
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
   'Contacted': 'Contactés',
@@ -24,6 +23,7 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Gagné': 'Conclus',
   'Perdu': 'Perdu'
 };
+
 interface MobileColumnListProps {
   columns: Array<{
     title: string;
@@ -37,6 +37,7 @@ interface MobileColumnListProps {
   searchTerm?: string;
   filters?: FilterOptions;
 }
+
 const MobileColumnList = ({
   columns,
   expandedColumn = null,
@@ -50,39 +51,32 @@ const MobileColumnList = ({
   console.log(`MobileColumnList - activeTab: ${activeTab}`);
   console.log(`MobileColumnList - columns reçues: ${columns.length}`);
 
-  // Récupérer les leads depuis le hook useKanbanData
   const {
     loadedColumns,
     isLoading
   } = useKanbanData(columns, 0, activeTab);
 
-  // Log count of leads per column from loadedColumns
   loadedColumns.forEach(col => {
     console.log(`Colonne ${col.title} (${col.status}): ${col.items.length} leads (pipelineType: ${col.pipelineType})`);
   });
 
-  // Filtrer les colonnes en fonction du pipeline type actif
   const filteredColumns = loadedColumns.filter(column => !column.pipelineType || column.pipelineType === activeTab);
   console.log(`MobileColumnList - Colonnes filtrées par type (${activeTab}): ${filteredColumns.length}`);
 
-  // Get all leads across filtered columns
   const allLeads = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
     columnStatus: column.status
   })));
   console.log(`MobileColumnList - Total leads (type ${activeTab}): ${allLeads.length}`);
 
-  // Count leads by status (for the current pipeline type)
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     acc[column.status] = column.items.length;
     return acc;
   }, {} as Record<string, number>);
 
-  // Count total leads
   const totalLeadCount = allLeads.length;
   console.log(`MobileColumnList - Total lead count: ${totalLeadCount}`);
 
-  // Filter leads by selected status
   const displayedLeads = activeStatus === 'all' ? allLeads : allLeads.filter(lead => lead.columnStatus === activeStatus);
   const handleAddLead = (status: LeadStatus) => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
@@ -94,11 +88,9 @@ const MobileColumnList = ({
     if (!dateString) return '';
     try {
       const date = new Date(dateString);
-      // For today, just show the time
       if (new Date().toDateString() === date.toDateString()) {
         return format(date, 'HH:mm');
       }
-      // Otherwise show abbreviated date
       return format(date, 'dd MMM', {
         locale: fr
       });
@@ -106,11 +98,11 @@ const MobileColumnList = ({
       return dateString;
     }
   };
+
   return <div className="space-y-4">
       {isLoading ? <div className="flex items-center justify-center h-40">
           <p className="text-sm text-muted-foreground">Chargement des leads...</p>
         </div> : <>
-          {/* Status filters inspired by WhatsApp */}
           <div className="overflow-x-auto pb-1">
             <Tabs value={activeStatus === 'all' ? 'all' : activeStatus} onValueChange={value => setActiveStatus(value as LeadStatus | 'all')} className="w-full">
               <TabsList className="inline-flex w-auto p-1 h-10 bg-gray-100 rounded-full">
@@ -124,7 +116,6 @@ const MobileColumnList = ({
             </Tabs>
           </div>
           
-          {/* Leads list */}
           <div className="space-y-px">
             {displayedLeads.length === 0 ? <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
                 <div className="text-center">
@@ -158,14 +149,15 @@ const MobileColumnList = ({
                             {lead.taskType === 'Call' ? <Phone className="h-3 w-3 mr-1" /> : lead.taskType === 'Follow up' ? <Clock className="h-3 w-3 mr-1" /> : lead.taskType === 'Visites' ? <Calendar className="h-3 w-3 mr-1" /> : null}
                             <span className="truncate text-xs">{lead.taskType}</span>
                           </span>}
-                        {lead.budget && <span className="truncate text-xs">{lead.budget}</span>}
+                        {lead.budget && <span className="truncate text-xs">
+                          {lead.taskType ? ", " : ""}{lead.budget}
+                        </span>}
                       </div>
                     </div>
                   </div>)}
               </div>}
           </div>
           
-          {/* Add lead button */}
           <div className="fixed bottom-20 right-6 z-50">
             <button onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} className="bg-primary text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors">
               <PlusCircle className="h-6 w-6" />
@@ -174,4 +166,5 @@ const MobileColumnList = ({
         </>}
     </div>;
 };
+
 export default MobileColumnList;
