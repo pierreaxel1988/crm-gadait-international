@@ -44,7 +44,7 @@ const DesktopPipelineView = ({
   };
   
   // Récupérer les données avec useKanbanData
-  const { loadedColumns } = useKanbanData(
+  const { loadedColumns, isLoading } = useKanbanData(
     getColumns(), 
     refreshTrigger, 
     activeTab as PipelineType
@@ -80,14 +80,20 @@ const DesktopPipelineView = ({
         </div>
       </div>
       
-      <div className="bg-white rounded-lg p-4 shadow-sm">
-        <MobileColumnList
-          columns={loadedColumns}
-          activeTab={activeTab as PipelineType}
-          searchTerm={searchTerm}
-          filters={filters}
-        />
-      </div>
+      {isLoading ? (
+        <div className="bg-white rounded-lg p-4 shadow-sm flex items-center justify-center h-40">
+          <p className="text-sm text-muted-foreground">Chargement des leads...</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg p-4 shadow-sm">
+          <MobileColumnList
+            columns={loadedColumns}
+            activeTab={activeTab as PipelineType}
+            searchTerm={searchTerm}
+            filters={filters}
+          />
+        </div>
+      )}
     </div>
   );
 };
