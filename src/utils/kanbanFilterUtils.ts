@@ -35,7 +35,7 @@ export const applyFiltersToColumns = (
       }
       
       // Filter by propertyType
-      if (filters.propertyType && filters.propertyType !== 'all') {
+      if (filters.propertyType) {
         filteredItems = filteredItems.filter(item => 
           item.propertyType === filters.propertyType
         );
@@ -62,7 +62,7 @@ export const applyFiltersToColumns = (
       }
       
       // Filter by location
-      if (filters.location && filters.location !== 'all') {
+      if (filters.location && filters.location !== '') {
         filteredItems = filteredItems.filter(item => 
           item.desiredLocation?.toLowerCase().includes(filters.location?.toLowerCase() || '') ||
           item.country?.toLowerCase() === filters.location?.toLowerCase()
@@ -70,7 +70,7 @@ export const applyFiltersToColumns = (
       }
       
       // Filter by purchaseTimeframe
-      if (filters.purchaseTimeframe && filters.purchaseTimeframe !== 'all') {
+      if (filters.purchaseTimeframe) {
         filteredItems = filteredItems.filter(item => item.purchaseTimeframe === filters.purchaseTimeframe);
       }
       

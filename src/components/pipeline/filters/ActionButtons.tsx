@@ -7,9 +7,10 @@ interface ActionButtonsProps {
   onClear?: () => void;
   onApply?: () => void;
   onClearFilters?: () => void;
+  onApplyFilters?: () => void;
 }
 
-const ActionButtons = ({ onClear, onApply, onClearFilters }: ActionButtonsProps) => {
+const ActionButtons = ({ onClear, onApply, onClearFilters, onApplyFilters }: ActionButtonsProps) => {
   const handleClear = () => {
     if (onClear) onClear();
     if (onClearFilters) onClearFilters();
@@ -17,6 +18,7 @@ const ActionButtons = ({ onClear, onApply, onClearFilters }: ActionButtonsProps)
 
   const handleApply = () => {
     if (onApply) onApply();
+    if (onApplyFilters) onApplyFilters();
   };
 
   return (
