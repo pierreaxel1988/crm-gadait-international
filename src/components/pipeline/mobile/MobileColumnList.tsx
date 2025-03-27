@@ -8,7 +8,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PipelineType } from '@/types/lead';
+import { PipelineType, Currency } from '@/types/lead';
 import { useKanbanData } from '@/hooks/useKanbanData';
 
 const statusTranslations: Record<LeadStatus, string> = {
@@ -24,6 +24,18 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Gagné': 'Conclus',
   'Perdu': 'Perdu'
 };
+
+// Extend the lead type to include the properties we need
+interface MobileLeadItem {
+  id: string;
+  name: string;
+  columnStatus: LeadStatus;
+  budget?: string;
+  currency?: Currency;
+  desiredLocation?: string;
+  taskType?: string;
+  createdAt?: string;
+}
 
 interface MobileColumnListProps {
   columns: Array<{
@@ -49,45 +61,48 @@ const MobileColumnList = ({
 }: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const navigate = useNavigate();
+  
   console.log(`MobileColumnList - activeTab: ${activeTab}`);
   console.log(`MobileColumnList - columns reçues: ${columns.length}`);
-
+  
   const {
     loadedColumns,
     isLoading
   } = useKanbanData(columns, 0, activeTab);
-
+  
   loadedColumns.forEach(col => {
     console.log(`Colonne ${col.title} (${col.status}): ${col.items.length} leads (pipelineType: ${col.pipelineType})`);
   });
-
+  
   const filteredColumns = loadedColumns.filter(column => !column.pipelineType || column.pipelineType === activeTab);
   console.log(`MobileColumnList - Colonnes filtrées par type (${activeTab}): ${filteredColumns.length}`);
-
+  
+  // Map the leads adding the column status to each lead
   const allLeads = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
     columnStatus: column.status
   })));
+  
   console.log(`MobileColumnList - Total leads (type ${activeTab}): ${allLeads.length}`);
-
+  
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     acc[column.status] = column.items.length;
     return acc;
   }, {} as Record<string, number>);
-
+  
   const totalLeadCount = allLeads.length;
   console.log(`MobileColumnList - Total lead count: ${totalLeadCount}`);
-
+  
   const displayedLeads = activeStatus === 'all' ? allLeads : allLeads.filter(lead => lead.columnStatus === activeStatus);
-
+  
   const handleAddLead = (status: LeadStatus) => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
   };
-
+  
   const handleLeadClick = (leadId: string) => {
     navigate(`/leads/${leadId}`);
   };
-
+  
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     try {
@@ -102,38 +117,39 @@ const MobileColumnList = ({
       return dateString;
     }
   };
-
+  
   const formatBudget = (budgetStr?: string, currency?: string) => {
     if (!budgetStr) return '';
-    
-    if (budgetStr.includes(',') || budgetStr.includes(' ') || 
-        budgetStr.includes('$') || budgetStr.includes('€')) {
+    if (budgetStr.includes(',') || budgetStr.includes(' ') || budgetStr.includes('$') || budgetStr.includes('€')) {
       return budgetStr;
     }
-    
     const numValue = parseInt(budgetStr.replace(/[^\d]/g, ''));
     if (isNaN(numValue)) return budgetStr;
-    
     const currencySymbol = getCurrencySymbol(currency);
-    
     const formattedNumber = new Intl.NumberFormat('fr-FR').format(numValue);
-    
     if (currency === 'EUR') {
       return `${formattedNumber} ${currencySymbol}`;
     } else {
       return `${currencySymbol}${formattedNumber}`;
     }
   };
-
+  
   const getCurrencySymbol = (currency?: string): string => {
-    switch(currency) {
-      case 'EUR': return '€';
-      case 'USD': return '$';
-      case 'GBP': return '£';
-      case 'CHF': return 'CHF';
-      case 'AED': return 'AED';
-      case 'MUR': return 'Rs';
-      default: return '€';
+    switch (currency) {
+      case 'EUR':
+        return '€';
+      case 'USD':
+        return '$';
+      case 'GBP':
+        return '£';
+      case 'CHF':
+        return 'CHF';
+      case 'AED':
+        return 'AED';
+      case 'MUR':
+        return 'Rs';
+      default:
+        return '€';
     }
   };
 
@@ -184,12 +200,7 @@ const MobileColumnList = ({
                             {statusTranslations[lead.columnStatus]}
                           </span>}
                         {lead.taskType && <span className="flex items-center mr-2">
-                            {lead.taskType === 'Call' ? 
-                              <Phone className="h-3 w-3 mr-1 text-loro-sand" /> : 
-                              lead.taskType === 'Follow up' ? 
-                              <Clock className="h-3 w-3 mr-1 text-loro-terracotta" /> : 
-                              lead.taskType === 'Visites' ? 
-                              <Calendar className="h-3 w-3 mr-1 text-primary" /> : null}
+                            {lead.taskType === 'Call' ? <Phone className="h-3 w-3 mr-1 text-loro-sand" /> : lead.taskType === 'Follow up' ? <Clock className="h-3 w-3 mr-1 text-loro-terracotta" /> : lead.taskType === 'Visites' ? <Calendar className="h-3 w-3 mr-1 text-primary" /> : null}
                             <span className="truncate text-xs text-loro-navy">{lead.taskType}</span>
                           </span>}
                         {lead.desiredLocation && <span className="flex items-center mr-2">
@@ -197,7 +208,7 @@ const MobileColumnList = ({
                             <span className="truncate text-xs text-loro-navy/90">{lead.desiredLocation}</span>
                           </span>}
                         {lead.budget && <span className="truncate text-xs text-loro-terracotta font-medium">
-                          {(lead.taskType || lead.desiredLocation) ? ", " : ""}
+                          {lead.taskType || lead.desiredLocation ? ", " : ""}
                           {formatBudget(lead.budget, lead.currency)}
                         </span>}
                       </div>
