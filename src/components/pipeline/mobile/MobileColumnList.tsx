@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, PlusCircle, Clock, Phone, Calendar } from 'lucide-react';
+import { ChevronDown, ChevronUp, PlusCircle, Clock, Phone, Calendar, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { FilterOptions } from '../PipelineFilters';
@@ -186,8 +187,13 @@ const MobileColumnList = ({
                             {lead.taskType === 'Call' ? <Phone className="h-3 w-3 mr-1" /> : lead.taskType === 'Follow up' ? <Clock className="h-3 w-3 mr-1" /> : lead.taskType === 'Visites' ? <Calendar className="h-3 w-3 mr-1" /> : null}
                             <span className="truncate text-xs">{lead.taskType}</span>
                           </span>}
+                        {lead.desiredLocation && <span className="flex items-center mr-2">
+                            <MapPin className="h-3 w-3 mr-1" />
+                            <span className="truncate text-xs">{lead.desiredLocation}</span>
+                          </span>}
                         {lead.budget && <span className="truncate text-xs">
-                          {lead.taskType ? ", " : ""}{formatBudget(lead.budget, lead.currency)}
+                          {(lead.taskType || lead.desiredLocation) ? ", " : ""}
+                          {formatBudget(lead.budget, lead.currency)}
                         </span>}
                       </div>
                     </div>
