@@ -117,6 +117,15 @@ export function usePipelineState() {
     setIsRefreshing(true);
     setRefreshTrigger(prev => prev + 1);
     
+    // Provide visual confirmation that filters are being applied
+    if (activeFiltersCount > 0) {
+      toast({
+        title: "Filtres appliqués",
+        description: `${activeFiltersCount} filtres actifs`,
+        duration: 2000,
+      });
+    }
+    
     // Vérifier s'il y a des leads dans la base de données
     const checkLeads = async () => {
       try {
@@ -141,7 +150,7 @@ export function usePipelineState() {
       } catch (error) {
         console.error('Unexpected error:', error);
       } finally {
-        setTimeout(() => setIsRefreshing(false), 1000); // Visual feedback
+        setTimeout(() => setIsRefreshing(false), 500); // Reduced time for a more efficient feel
       }
     };
     
@@ -160,6 +169,14 @@ export function usePipelineState() {
       purchaseTimeframe: null,
       propertyType: null
     });
+    
+    // Notification that filters were cleared
+    toast({
+      title: "Filtres effacés",
+      description: "Tous les filtres ont été supprimés",
+      duration: 2000,
+    });
+    
     // Trigger a refresh to update data
     handleRefresh();
   };
