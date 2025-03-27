@@ -8,10 +8,9 @@ interface PipelineTabContentProps {
   contentType: 'purchase' | 'rental';
   filters: FilterOptions;
   refreshTrigger: number;
-  searchTerm?: string;
 }
 
-const PipelineTabContent = ({ contentType, filters, refreshTrigger, searchTerm }: PipelineTabContentProps) => {
+const PipelineTabContent = ({ contentType, filters, refreshTrigger }: PipelineTabContentProps) => {
   // Get the columns based on the content type
   const getColumns = () => {
     const statusesToShow = filters.status ? [filters.status] : contentType === 'purchase' 
@@ -33,7 +32,6 @@ const PipelineTabContent = ({ contentType, filters, refreshTrigger, searchTerm }
       filters={filters} 
       refreshTrigger={refreshTrigger}
       pipelineType={contentType}
-      searchTerm={searchTerm}
     />
   );
 };

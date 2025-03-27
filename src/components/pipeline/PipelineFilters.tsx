@@ -1,18 +1,20 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import AgentFilter from './filters/AgentFilter';
+import { X } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import StatusFilter from './filters/StatusFilter';
 import TagsFilter from './filters/TagsFilter';
+import AgentFilter from './filters/AgentFilter';
 import BudgetFilter from './filters/BudgetFilter';
 import LocationFilter from './filters/LocationFilter';
-import PropertyTypeFilter from './filters/PropertyTypeFilter';
 import TimeframeFilter from './filters/TimeframeFilter';
-import ActiveFiltersList from './filters/ActiveFiltersList';
+import PropertyTypeFilter from './filters/PropertyTypeFilter';
 import ActionButtons from './filters/ActionButtons';
+import ActiveFiltersList from './filters/ActiveFiltersList';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
-import { PropertyType, PurchaseTimeframe } from '@/types/lead';
+import { PurchaseTimeframe, PropertyType } from '@/types/lead';
 
 export interface FilterOptions {
   status: LeadStatus | null;
@@ -25,134 +27,130 @@ export interface FilterOptions {
   propertyType: PropertyType | null;
 }
 
-interface PipelineFiltersProps {
+export interface PipelineFiltersProps {
   filters: FilterOptions;
-  onFilterChange: (filters: FilterOptions) => void;
+  onFilterChange: (newFilters: FilterOptions) => void;
   onClearFilters: () => void;
-  assignedToOptions: { id: string; name: string }[];
+  assignedToOptions?: {
+    id: string;
+    name: string;
+  }[];
   isFilterActive: (filterName: string) => boolean;
+  isMobile?: boolean;
   onApplyFilters?: () => void;
-  getTeamMemberName?: (id: string) => string;
 }
 
-const PipelineFilters = ({
+const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   filters,
   onFilterChange,
   onClearFilters,
-  assignedToOptions,
+  assignedToOptions = [],
   isFilterActive,
-  onApplyFilters,
-  getTeamMemberName
-}: PipelineFiltersProps) => {
-  
-  // Handler for status filter changes
-  const handleStatusChange = (status: LeadStatus | null) => {
-    onFilterChange({ ...filters, status });
+  isMobile = false,
+  onApplyFilters
+}) => {
+  // Helper to get team member name by ID
+  const getTeamMemberName = (id: string): string => {
+    const member = assignedToOptions.find(member => member.id === id);
+    return member ? member.name : 'Unknown';
   };
 
-  // Handler for tag filter changes
-  const handleTagsChange = (tags: LeadTag[]) => {
-    onFilterChange({ ...filters, tags });
+  // Handle change for a specific filter
+  const handleFilterChange = <K extends keyof FilterOptions,>(filterName: K, value: FilterOptions[K]) => {
+    onFilterChange({
+      ...filters,
+      [filterName]: value
+    });
   };
 
-  // Handler for assigned agent filter changes
-  const handleAssignedToChange = (assignedTo: string | null) => {
-    onFilterChange({ ...filters, assignedTo });
-  };
+  const filtersContent = (
+    <div className={`${isMobile ? 'pt-2' : 'p-4'} space-y-6`}>
+      {/* Status filter */}
+      <StatusFilter 
+        status={filters.status} 
+        onStatusChange={status => handleFilterChange('status', status)} 
+      />
 
-  // Handler for budget filter changes
-  const handleBudgetChange = (type: 'min' | 'max', value: string) => {
-    if (type === 'min') {
-      onFilterChange({ ...filters, minBudget: value });
-    } else {
-      onFilterChange({ ...filters, maxBudget: value });
-    }
-  };
+      {/* Tags filter */}
+      <TagsFilter 
+        selectedTags={filters.tags} 
+        onTagsChange={tags => handleFilterChange('tags', tags)} 
+      />
 
-  // Handler for location filter changes
-  const handleLocationChange = (location: string) => {
-    onFilterChange({ ...filters, location });
-  };
+      {/* Agent filter */}
+      <AgentFilter 
+        assignedTo={filters.assignedTo} 
+        onAssignedToChange={agent => handleFilterChange('assignedTo', agent)} 
+        assignedToOptions={assignedToOptions} 
+      />
 
-  // Handler for purchase timeframe filter changes
-  const handleTimeframeChange = (purchaseTimeframe: PurchaseTimeframe | null) => {
-    onFilterChange({ ...filters, purchaseTimeframe });
-  };
+      {/* Budget filter */}
+      <BudgetFilter 
+        minBudget={filters.minBudget} 
+        maxBudget={filters.maxBudget} 
+        onBudgetChange={(type, value) => {
+          if (type === 'min') {
+            handleFilterChange('minBudget', value);
+          } else {
+            handleFilterChange('maxBudget', value);
+          }
+        }} 
+      />
 
-  // Handler for property type filter changes
-  const handlePropertyTypeChange = (propertyType: PropertyType | null) => {
-    onFilterChange({ ...filters, propertyType });
-  };
+      {/* Location filter */}
+      <LocationFilter 
+        location={filters.location} 
+        onLocationChange={location => handleFilterChange('location', location)} 
+      />
 
-  // Display active filters at the top, if any
-  const hasActiveFilters = Object.values(filters).some(val => 
-    val !== null && (Array.isArray(val) ? val.length > 0 : val !== '')
-  );
+      {/* Timeframe filter */}
+      <TimeframeFilter 
+        purchaseTimeframe={filters.purchaseTimeframe} 
+        onTimeframeChange={timeframe => handleFilterChange('purchaseTimeframe', timeframe)} 
+      />
 
-  return (
-    <div className="space-y-4">
-      {hasActiveFilters && (
-        <ActiveFiltersList 
-          filters={filters} 
-          onClearFilters={onClearFilters}
-          isFilterActive={isFilterActive}
-          onFilterChange={onFilterChange}
-          getTeamMemberName={getTeamMemberName || ((id) => id)}
-        />
-      )}
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Status Filter */}
-        <StatusFilter 
-          status={filters.status} 
-          onStatusChange={handleStatusChange} 
-        />
-        
-        {/* Tags Filter */}
-        <TagsFilter 
-          selectedTags={filters.tags} 
-          onTagsChange={handleTagsChange} 
-        />
-        
-        {/* Agent Assignment Filter */}
-        <AgentFilter 
-          assignedTo={filters.assignedTo} 
-          onAssignedToChange={handleAssignedToChange}
-          agents={assignedToOptions}
-        />
-        
-        {/* Budget Filter */}
-        <BudgetFilter 
-          minBudget={filters.minBudget}
-          maxBudget={filters.maxBudget}
-          onBudgetChange={handleBudgetChange}
-        />
-        
-        {/* Location Filter */}
-        <LocationFilter 
-          location={filters.location} 
-          onLocationChange={handleLocationChange} 
-        />
-        
-        {/* Purchase Timeframe Filter */}
-        <TimeframeFilter 
-          purchaseTimeframe={filters.purchaseTimeframe} 
-          onTimeframeChange={handleTimeframeChange} 
-        />
-        
-        {/* Property Type Filter */}
-        <PropertyTypeFilter 
-          propertyType={filters.propertyType} 
-          onPropertyTypeChange={handlePropertyTypeChange} 
-        />
-      </div>
-      
-      {/* Action Buttons */}
+      {/* Property type filter */}
+      <PropertyTypeFilter 
+        propertyType={filters.propertyType} 
+        onPropertyTypeChange={type => handleFilterChange('propertyType', type)} 
+      />
+
+      {/* Action buttons */}
       <ActionButtons 
         onClearFilters={onClearFilters} 
-        onApplyFilters={onApplyFilters}
+        onApply={onApplyFilters} 
+      />
+
+      {/* Display active filters */}
+      <ActiveFiltersList 
+        filters={filters} 
+        onFilterChange={onFilterChange} 
+        onClearFilters={onClearFilters} 
+        getTeamMemberName={getTeamMemberName} 
+        isFilterActive={isFilterActive} 
       />
     </div>
+  );
+
+  // For desktop, display as a regular div
+  if (!isMobile) {
+    return (
+      <div className="bg-background border rounded-md shadow-sm">
+        {filtersContent}
+      </div>
+    );
+  }
+
+  // For mobile, display in a sheet/drawer with improved scrolling
+  return (
+    <SheetContent side="right" className="w-full sm:max-w-md p-0 pt-12">
+      <SheetHeader className="px-4 py-2 border-b">
+        <SheetTitle className="text-sm font-normal">Filtres</SheetTitle>
+      </SheetHeader>
+      <ScrollArea className="h-[calc(100vh-6rem)] px-4 pb-6">
+        {filtersContent}
+      </ScrollArea>
+    </SheetContent>
   );
 };
 

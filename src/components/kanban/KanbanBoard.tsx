@@ -20,17 +20,15 @@ interface KanbanBoardProps {
   filters?: FilterOptions;
   refreshTrigger?: number;
   pipelineType: 'purchase' | 'rental';
-  searchTerm?: string;
 }
 
-const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipelineType, searchTerm }: KanbanBoardProps) => {
+const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipelineType }: KanbanBoardProps) => {
   const isMobile = useIsMobile();
   
   console.log('===== KANBAN BOARD =====');
   console.log(`Pipeline Type: ${pipelineType}`);
   console.log(`Nombre de colonnes: ${columns.length}`);
   console.log('Colonnes initiales:', columns.map(c => `${c.title} (${c.status})`).join(', '));
-  console.log('Search Term:', searchTerm); 
   
   const { loadedColumns, isLoading, setLoadedColumns } = useKanbanData(columns, refreshTrigger, pipelineType);
   
@@ -41,7 +39,7 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
   const { handleDrop } = useKanbanDragDrop(setLoadedColumns);
   
   // Apply filters to the columns
-  const filteredColumns = applyFiltersToColumns(loadedColumns, filters, searchTerm);
+  const filteredColumns = applyFiltersToColumns(loadedColumns, filters);
   
   console.log('Colonnes après filtrage:', filteredColumns.map(c => 
     `${c.title} (${c.status}): ${c.items.length} leads`).join(', ')
@@ -62,7 +60,7 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
             <KanbanColumn
               key={column.status}
               title={column.title}
-              status={column.status as LeadStatus}
+              status={column.status}
               items={column.items}
               className={cn(
                 "flex-1",

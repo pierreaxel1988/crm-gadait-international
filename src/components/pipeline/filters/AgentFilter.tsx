@@ -3,13 +3,18 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
 
+interface TeamMember {
+  id: string;
+  name: string;
+}
+
 interface AgentFilterProps {
   assignedTo: string | null;
   onAssignedToChange: (assignedTo: string | null) => void;
-  agents: { id: string; name: string }[];
+  assignedToOptions: TeamMember[];
 }
 
-const AgentFilter = ({ assignedTo, onAssignedToChange, agents }: AgentFilterProps) => {
+const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: AgentFilterProps) => {
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -24,7 +29,7 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, agents }: AgentFilterProp
         >
           Tous
         </Button>
-        {agents.map((member) => (
+        {assignedToOptions.map((member) => (
           <Button
             key={member.id}
             variant={assignedTo === member.id ? "default" : "outline"}
