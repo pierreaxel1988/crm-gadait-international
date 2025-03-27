@@ -62,7 +62,7 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
             <KanbanColumn
               key={column.status}
               title={column.title}
-              status={column.status}
+              status={column.status as LeadStatus}
               items={column.items}
               className={cn(
                 "flex-1",

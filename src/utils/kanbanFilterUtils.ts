@@ -2,6 +2,13 @@
 import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 
+// Add this utility function to extract numeric values from budget strings
+export const extractNumericValue = (value: string): number => {
+  // Remove all non-digit characters and parse as float
+  const numericString = value.replace(/[^\d]/g, '');
+  return numericString ? parseFloat(numericString) : 0;
+};
+
 export const applyFiltersToColumns = (
   columns: { 
     title: string; 
@@ -30,24 +37,23 @@ export const applyFiltersToColumns = (
       // Filter by propertyType
       if (filters.propertyType && filters.propertyType !== 'all') {
         filteredItems = filteredItems.filter(item => 
-          item.propertyType === filters.propertyType || 
-          (Array.isArray(item.propertyTypes) && item.propertyTypes.includes(filters.propertyType))
+          item.propertyType === filters.propertyType
         );
       }
       
-      // Filter by budget - if budgetMin and budgetMax are defined
-      if (filters.budgetMin !== undefined || filters.budgetMax !== undefined) {
+      // Filter by budget - if minBudget and maxBudget are defined
+      if (filters.minBudget !== undefined || filters.maxBudget !== undefined) {
         filteredItems = filteredItems.filter(item => {
           // Extract numeric value from budget string (e.g., "1,000,000" -> 1000000)
-          const itemBudget = item.budget ? parseFloat(item.budget.replace(/,/g, '')) : 0;
+          const itemBudget = item.budget ? extractNumericValue(item.budget) : 0;
           
           // Apply min filter if defined
-          if (filters.budgetMin !== undefined && itemBudget < filters.budgetMin) {
+          if (filters.minBudget !== undefined && filters.minBudget !== '' && itemBudget < extractNumericValue(filters.minBudget)) {
             return false;
           }
           
           // Apply max filter if defined
-          if (filters.budgetMax !== undefined && itemBudget > filters.budgetMax) {
+          if (filters.maxBudget !== undefined && filters.maxBudget !== '' && itemBudget > extractNumericValue(filters.maxBudget)) {
             return false;
           }
           
@@ -63,9 +69,9 @@ export const applyFiltersToColumns = (
         );
       }
       
-      // Filter by timeframe
-      if (filters.timeframe && filters.timeframe !== 'all') {
-        filteredItems = filteredItems.filter(item => item.purchaseTimeframe === filters.timeframe);
+      // Filter by purchaseTimeframe
+      if (filters.purchaseTimeframe && filters.purchaseTimeframe !== 'all') {
+        filteredItems = filteredItems.filter(item => item.purchaseTimeframe === filters.purchaseTimeframe);
       }
       
       // Filter by tags

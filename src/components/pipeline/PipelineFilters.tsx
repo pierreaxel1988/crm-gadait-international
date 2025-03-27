@@ -1,11 +1,18 @@
 
 import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import AgentFilter from './filters/AgentFilter';
+import StatusFilter from './filters/StatusFilter';
+import TagsFilter from './filters/TagsFilter';
+import BudgetFilter from './filters/BudgetFilter';
+import LocationFilter from './filters/LocationFilter';
+import PropertyTypeFilter from './filters/PropertyTypeFilter';
+import TimeframeFilter from './filters/TimeframeFilter';
+import ActiveFiltersList from './filters/ActiveFiltersList';
+import ActionButtons from './filters/ActionButtons';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
-import ActionButtons from './filters/ActionButtons';
+import { PropertyType, PurchaseTimeframe } from '@/types/lead';
 
 export interface FilterOptions {
   status: LeadStatus | null;
@@ -14,150 +21,132 @@ export interface FilterOptions {
   minBudget: string;
   maxBudget: string;
   location: string;
-  purchaseTimeframe: string | null;
-  propertyType: string | null;
+  purchaseTimeframe: PurchaseTimeframe | null;
+  propertyType: PropertyType | null;
 }
 
 interface PipelineFiltersProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
-  onApplyFilters?: () => void;
   assignedToOptions: { id: string; name: string }[];
   isFilterActive: (filterName: string) => boolean;
+  onApplyFilters?: () => void;
 }
 
-const PipelineFilters: React.FC<PipelineFiltersProps> = ({
+const PipelineFilters = ({
   filters,
   onFilterChange,
   onClearFilters,
-  onApplyFilters,
   assignedToOptions,
-  isFilterActive
-}) => {
-  // Update filter state for string/null values
-  const handleFilterChange = (key: keyof FilterOptions, value: any) => {
-    onFilterChange({
-      ...filters,
-      [key]: value
-    });
+  isFilterActive,
+  onApplyFilters
+}: PipelineFiltersProps) => {
+  
+  // Handler for status filter changes
+  const handleStatusChange = (status: LeadStatus | null) => {
+    onFilterChange({ ...filters, status });
   };
 
-  // Update filter state for array values (tags)
-  const handleTagToggle = (tag: LeadTag) => {
-    const updatedTags = filters.tags.includes(tag)
-      ? filters.tags.filter(t => t !== tag)
-      : [...filters.tags, tag];
-    
-    handleFilterChange('tags', updatedTags);
+  // Handler for tag filter changes
+  const handleTagsChange = (tags: LeadTag[]) => {
+    onFilterChange({ ...filters, tags });
   };
 
-  // Définir les statuts disponibles
-  const statuses: LeadStatus[] = [
-    'New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 
-    'Offer', 'Deposit', 'Signed', 'Gagné', 'Perdu'
-  ];
+  // Handler for assigned agent filter changes
+  const handleAssignedToChange = (assignedTo: string | null) => {
+    onFilterChange({ ...filters, assignedTo });
+  };
 
-  // Définir les tags disponibles
-  const tags: LeadTag[] = [
-    'Hot', 'Cold', 'Vip', 'No response', 'Serious'
-  ];
+  // Handler for budget filter changes
+  const handleBudgetChange = (type: 'min' | 'max', value: string) => {
+    if (type === 'min') {
+      onFilterChange({ ...filters, minBudget: value });
+    } else {
+      onFilterChange({ ...filters, maxBudget: value });
+    }
+  };
+
+  // Handler for location filter changes
+  const handleLocationChange = (location: string) => {
+    onFilterChange({ ...filters, location });
+  };
+
+  // Handler for purchase timeframe filter changes
+  const handleTimeframeChange = (purchaseTimeframe: PurchaseTimeframe | null) => {
+    onFilterChange({ ...filters, purchaseTimeframe });
+  };
+
+  // Handler for property type filter changes
+  const handlePropertyTypeChange = (propertyType: PropertyType | null) => {
+    onFilterChange({ ...filters, propertyType });
+  };
+
+  // Display active filters at the top, if any
+  const hasActiveFilters = Object.values(filters).some(val => 
+    val !== null && (Array.isArray(val) ? val.length > 0 : val !== '')
+  );
 
   return (
-    <div className="space-y-4 pb-2">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Statut</label>
-          <Select
-            value={filters.status || ''}
-            onValueChange={(value) => handleFilterChange('status', value || null)}
-          >
-            <SelectTrigger className={isFilterActive('status') ? 'border-primary' : ''}>
-              <SelectValue placeholder="Tous les statuts" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Tous les statuts</SelectItem>
-              {statuses.map(status => (
-                <SelectItem key={status} value={status}>{status}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="space-y-4">
+      {hasActiveFilters && (
+        <ActiveFiltersList 
+          filters={filters} 
+          onClearFilters={onClearFilters}
+          isFilterActive={isFilterActive}
+        />
+      )}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Status Filter */}
+        <StatusFilter 
+          status={filters.status} 
+          onStatusChange={handleStatusChange} 
+        />
         
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Assigné à</label>
-          <Select
-            value={filters.assignedTo || ''}
-            onValueChange={(value) => handleFilterChange('assignedTo', value || null)}
-          >
-            <SelectTrigger className={isFilterActive('assignedTo') ? 'border-primary' : ''}>
-              <SelectValue placeholder="Tous les agents" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Tous les agents</SelectItem>
-              {assignedToOptions.map(agent => (
-                <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Tags</label>
-        <div className="flex flex-wrap gap-2">
-          {tags.map(tag => (
-            <div key={tag} className="flex items-center space-x-2">
-              <Checkbox
-                id={`tag-${tag}`}
-                checked={filters.tags.includes(tag)}
-                onCheckedChange={() => handleTagToggle(tag)}
-                className={filters.tags.includes(tag) ? 'text-primary' : ''}
-              />
-              <label
-                htmlFor={`tag-${tag}`}
-                className="text-sm"
-              >
-                {tag}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Budget</label>
-        <div className="grid grid-cols-2 gap-2">
-          <Input
-            type="number"
-            placeholder="Min"
-            value={filters.minBudget}
-            onChange={(e) => handleFilterChange('minBudget', e.target.value)}
-            className={isFilterActive('budget') ? 'border-primary' : ''}
-          />
-          <Input
-            type="number"
-            placeholder="Max"
-            value={filters.maxBudget}
-            onChange={(e) => handleFilterChange('maxBudget', e.target.value)}
-            className={isFilterActive('budget') ? 'border-primary' : ''}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Lieu</label>
-        <Input
-          placeholder="Ville ou région"
-          value={filters.location}
-          onChange={(e) => handleFilterChange('location', e.target.value)}
-          className={isFilterActive('location') ? 'border-primary' : ''}
+        {/* Tags Filter */}
+        <TagsFilter 
+          selectedTags={filters.tags} 
+          onTagsChange={handleTagsChange} 
+        />
+        
+        {/* Agent Assignment Filter */}
+        <AgentFilter 
+          selectedAgent={filters.assignedTo} 
+          onAgentChange={handleAssignedToChange}
+          agents={assignedToOptions}
+        />
+        
+        {/* Budget Filter */}
+        <BudgetFilter 
+          minBudget={filters.minBudget}
+          maxBudget={filters.maxBudget}
+          onBudgetChange={handleBudgetChange}
+        />
+        
+        {/* Location Filter */}
+        <LocationFilter 
+          location={filters.location} 
+          onLocationChange={handleLocationChange} 
+        />
+        
+        {/* Purchase Timeframe Filter */}
+        <TimeframeFilter 
+          purchaseTimeframe={filters.purchaseTimeframe} 
+          onTimeframeChange={handleTimeframeChange} 
+        />
+        
+        {/* Property Type Filter */}
+        <PropertyTypeFilter 
+          propertyType={filters.propertyType} 
+          onPropertyTypeChange={handlePropertyTypeChange} 
         />
       </div>
-
+      
+      {/* Action Buttons */}
       <ActionButtons 
-        onClear={onClearFilters} 
-        onApply={onApplyFilters} 
+        onClearFilters={onClearFilters} 
+        onApplyFilters={onApplyFilters}
       />
     </div>
   );
