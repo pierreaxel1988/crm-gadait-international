@@ -78,12 +78,15 @@ const MobileColumnList = ({
   console.log(`MobileColumnList - Total lead count: ${totalLeadCount}`);
 
   const displayedLeads = activeStatus === 'all' ? allLeads : allLeads.filter(lead => lead.columnStatus === activeStatus);
+
   const handleAddLead = (status: LeadStatus) => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
   };
+
   const handleLeadClick = (leadId: string) => {
     navigate(`/leads/${leadId}`);
   };
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     try {
@@ -97,6 +100,24 @@ const MobileColumnList = ({
     } catch (error) {
       return dateString;
     }
+  };
+
+  const formatBudget = (budgetStr?: string) => {
+    if (!budgetStr) return '';
+    
+    if (budgetStr.includes(',') || budgetStr.includes(' ') || 
+        budgetStr.includes('$') || budgetStr.includes('€')) {
+      return budgetStr;
+    }
+    
+    const numValue = parseInt(budgetStr.replace(/[^\d]/g, ''));
+    if (isNaN(numValue)) return budgetStr;
+    
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
+    }).format(numValue);
   };
 
   return <div className="space-y-4">
@@ -150,7 +171,7 @@ const MobileColumnList = ({
                             <span className="truncate text-xs">{lead.taskType}</span>
                           </span>}
                         {lead.budget && <span className="truncate text-xs">
-                          {lead.taskType ? ", " : ""}{lead.budget}
+                          {lead.taskType ? ", " : ""}{formatBudget(lead.budget)}
                         </span>}
                       </div>
                     </div>
