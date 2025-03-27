@@ -54,7 +54,7 @@ const Pipeline = () => {
   }
 
   return (
-    <div className="p-3 md:p-6 space-y-4 md:space-y-6">
+    <div className="p-3 md:p-6 bg-white min-h-screen">
       <PipelineHeader 
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -73,6 +73,9 @@ const Pipeline = () => {
         setActiveTab={setActiveTab}
         filters={filters}
         refreshTrigger={refreshTrigger}
+        searchTerm={searchTerm}
+        handleRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
       />
     </div>
   );

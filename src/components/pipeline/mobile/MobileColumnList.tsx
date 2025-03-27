@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, PlusCircle, Clock, Phone, Calendar, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -98,7 +99,7 @@ const MobileColumnList = ({
       if (new Date().toDateString() === date.toDateString()) {
         return format(date, 'HH:mm');
       }
-      return format(date, 'dd MMM', {
+      return format(date, 'd MMM', {
         locale: fr
       });
     } catch (error) {
@@ -217,7 +218,7 @@ const MobileColumnList = ({
                   <p className="text-sm text-zinc-900 font-medium">Aucun lead trouvé</p>
                   <button 
                     onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
-                    className="mt-2 text-loro-hazel hover:text-loro-hazel/80 text-sm flex items-center justify-center mx-auto"
+                    className="mt-2 text-zinc-900 hover:text-zinc-700 text-sm flex items-center justify-center mx-auto"
                   >
                     <PlusCircle className="h-4 w-4 mr-1" />
                     Ajouter un lead
@@ -292,7 +293,7 @@ const MobileColumnList = ({
             )}
           </div>
           
-          <div className="fixed bottom-20 right-6 z-50">
+          <div className="fixed bottom-20 right-6 z-50 md:hidden">
             <button 
               onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
               className="text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-colors bg-zinc-900 hover:bg-zinc-800"
