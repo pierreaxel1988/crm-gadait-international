@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
-import { MessageSquare, PieChart, Calendar, ListTodo, File } from 'lucide-react';
+import { MessageSquare, PieChart, Calendar, ListTodo, File, ClipboardList } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const SubNavigation = () => {
@@ -13,6 +13,10 @@ const SubNavigation = () => {
     name: 'Pipeline',
     path: '/pipeline',
     icon: ListTodo
+  }, {
+    name: 'Actions',
+    path: '/actions',
+    icon: ClipboardList
   }, {
     name: 'Calendar',
     path: '/calendar',
