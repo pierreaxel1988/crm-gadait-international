@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Navbar } from '@/components/layout/Navbar';
+import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { CalendarProvider } from '@/contexts/CalendarContext';
 import CalendarPageContent from '@/components/calendar/CalendarPageContent';

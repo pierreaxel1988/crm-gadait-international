@@ -20,7 +20,7 @@ interface AddEventDialogProps {
   setNewEvent: React.Dispatch<React.SetStateAction<Omit<Event, 'id' | 'date'>>>;
   onAddEvent: () => void;
   colors: { name: string; value: string }[];
-  categories: { name: string; value: TaskType }[];
+  categories: { name: string; value: TaskType; color: string }[];
 }
 
 const AddEventDialog = ({ 
