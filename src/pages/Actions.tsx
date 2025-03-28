@@ -41,8 +41,16 @@ const ActionsPage = () => {
           const { data: userData, error: userError } = await supabase.auth.getUser();
           if (!userError && userData && userData.user) {
             const currentUserEmail = userData.user.email;
-            const currentUser = data.find(member => member.email === currentUserEmail);
-            setIsAdmin(currentUser?.is_admin || false);
+            // Get the team member with current user's email
+            const { data: teamMemberData, error: teamMemberError } = await supabase
+              .from('team_members')
+              .select('is_admin')
+              .eq('email', currentUserEmail)
+              .single();
+              
+            if (!teamMemberError && teamMemberData) {
+              setIsAdmin(teamMemberData.is_admin || false);
+            }
           }
         }
       } catch (error) {
@@ -100,37 +108,39 @@ const ActionsPage = () => {
         leads?.forEach((lead: any) => {
           const leadActions = lead.action_history || [];
           
-          leadActions.forEach((action: any) => {
-            // Determine action status
-            let status: ActionStatus = 'todo';
-            
-            if (action.completedDate) {
-              status = 'done';
-            } else if (action.scheduledDate) {
-              const scheduledDate = new Date(action.scheduledDate);
-              const now = new Date();
+          if (Array.isArray(leadActions)) {
+            leadActions.forEach((action: any) => {
+              // Determine action status
+              let status: ActionStatus = 'todo';
               
-              if (scheduledDate < now && !action.completedDate) {
-                status = 'overdue';
-              } else {
-                status = 'todo';
+              if (action.completedDate) {
+                status = 'done';
+              } else if (action.scheduledDate) {
+                const scheduledDate = new Date(action.scheduledDate);
+                const now = new Date();
+                
+                if (scheduledDate < now && !action.completedDate) {
+                  status = 'overdue';
+                } else {
+                  status = 'todo';
+                }
               }
-            }
-            
-            allActions.push({
-              id: action.id,
-              leadId: lead.id,
-              leadName: lead.name,
-              actionType: action.actionType as TaskType,
-              createdAt: action.createdAt,
-              scheduledDate: action.scheduledDate,
-              completedDate: action.completedDate,
-              notes: action.notes,
-              assignedToId: lead.assigned_to,
-              assignedToName: memberMap.get(lead.assigned_to) || 'Non assigné',
-              status
+              
+              allActions.push({
+                id: action.id,
+                leadId: lead.id,
+                leadName: lead.name,
+                actionType: action.actionType as TaskType,
+                createdAt: action.createdAt,
+                scheduledDate: action.scheduledDate,
+                completedDate: action.completedDate,
+                notes: action.notes,
+                assignedToId: lead.assigned_to,
+                assignedToName: memberMap.get(lead.assigned_to) || 'Non assigné',
+                status
+              });
             });
-          });
+          }
         });
         
         // Sort actions: overdue first, then todo by scheduled date, then done
@@ -225,8 +235,8 @@ const ActionsPage = () => {
       
       if (leadError) throw leadError;
       
-      if (lead) {
-        const actionHistory = lead.action_history || [];
+      if (lead && lead.action_history) {
+        const actionHistory = lead.action_history as any[];
         const actionIndex = actionHistory.findIndex((a: any) => a.id === actionId);
         
         if (actionIndex !== -1) {
