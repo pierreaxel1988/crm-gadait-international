@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Sheet } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobilePipelineHeader from './mobile/MobilePipelineHeader';
@@ -46,7 +46,7 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   // Force a console log to track the active tab for debugging
   console.log(`MobilePipelineView - activeTab: ${activeTab}`);
   
-  // Fonction pour appliquer les filtres et fermer le drawer
+  // Function to apply filters and close the drawer
   const handleApplyFilters = () => {
     handleRefresh();
     toggleFilters();

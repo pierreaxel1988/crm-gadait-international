@@ -35,19 +35,22 @@ const Pipeline = () => {
 
   return (
     <div className="p-3 md:p-6 bg-white min-h-screen">
-      <PipelineHeader 
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        onToggleFilters={toggleFilters}
-        filtersOpen={filtersOpen}
-        activeFilters={activeFiltersCount}
-        isFilterActive={isFilterActive}
-        filters={filters}
-        onFilterChange={setFilters}
-        onClearFilters={handleClearFilters}
-        teamMembers={teamMembers}
-        handleRefresh={handleRefresh}
-      />
+      {/* Only render PipelineHeader for desktop view */}
+      {!isMobile && (
+        <PipelineHeader 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onToggleFilters={toggleFilters}
+          filtersOpen={filtersOpen}
+          activeFilters={activeFiltersCount}
+          isFilterActive={isFilterActive}
+          filters={filters}
+          onFilterChange={setFilters}
+          onClearFilters={handleClearFilters}
+          teamMembers={teamMembers}
+          handleRefresh={handleRefresh}
+        />
+      )}
 
       {isMobile ? (
         <MobilePipelineView
