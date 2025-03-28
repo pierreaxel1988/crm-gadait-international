@@ -52,6 +52,14 @@ export function usePipelineState() {
     }
   }, [tabFromUrl]);
 
+  // Apply filters when they change
+  useEffect(() => {
+    // When filters change, trigger a refresh to update the data
+    if (refreshTrigger > 0) { // Skip the initial render
+      handleRefresh();
+    }
+  }, [filters]);
+
   // Fetch team members
   useEffect(() => {
     const fetchTeamMembers = async () => {

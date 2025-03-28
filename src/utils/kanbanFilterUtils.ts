@@ -1,4 +1,3 @@
-
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -16,6 +15,17 @@ export const applyFiltersToColumns = (
 
   return columns.map(column => {
     let filteredItems = column.items;
+    
+    // Filter by status if status filter is applied
+    if (filters.status !== null) {
+      // Only keep items in columns that match the selected status
+      if (column.status !== filters.status) {
+        return {
+          ...column,
+          items: [] // Empty the column if it doesn't match the selected status
+        };
+      }
+    }
     
     // Filter by tags if any are selected
     if (filters.tags.length > 0) {
