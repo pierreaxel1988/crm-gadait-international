@@ -58,7 +58,7 @@ const AddEventDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="font-times text-2xl text-loro-terracotta">
+          <DialogTitle className="font-futura text-xl text-zinc-900">
             Ajouter un événement
           </DialogTitle>
         </DialogHeader>

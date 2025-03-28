@@ -1,37 +1,36 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { eventCategories, useCalendar } from '@/contexts/CalendarContext';
-import { Check } from 'lucide-react';
 import { TaskType } from '@/components/kanban/KanbanCard';
 
 const CategoryFilter = () => {
   const { activeFilters, toggleFilter } = useCalendar();
 
   return (
-    <Card className="bg-white shadow-luxury">
-      <CardHeader className="pb-2">
-        <CardTitle className="font-times text-2xl text-loro-terracotta">Catégories</CardTitle>
-        <CardDescription className="font-times text-chocolate-dark">
-          Filtrer les événements par catégorie
-        </CardDescription>
+    <Card className="border border-gray-200 shadow-sm">
+      <CardHeader className="pb-3 pt-4">
+        <CardTitle className="text-base font-medium text-zinc-900">Filtrer par catégorie</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         <div className="flex flex-wrap gap-2">
           {eventCategories.map((category) => {
             const isActive = activeFilters.includes(category.value);
             return (
-              <button
+              <Badge
                 key={category.value}
+                variant={isActive ? "default" : "outline"}
+                className="cursor-pointer select-none font-futura text-xs hover:bg-muted"
+                style={{
+                  backgroundColor: isActive ? category.color : 'transparent',
+                  borderColor: category.color,
+                  color: isActive ? 'white' : 'inherit',
+                }}
                 onClick={() => toggleFilter(category.value)}
-                className={`flex items-center gap-2 rounded-full py-1 px-3 text-sm font-medium transition-all ${
-                  isActive ? 'ring-2 ring-loro-terracotta ring-offset-1' : 'opacity-70 hover:opacity-100'
-                }`}
-                style={{ backgroundColor: `${category.color}80` }} // 50% opacity
               >
                 {category.name}
-                {isActive && <Check className="h-3 w-3" />}
-              </button>
+              </Badge>
             );
           })}
         </div>

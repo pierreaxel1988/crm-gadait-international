@@ -1,168 +1,244 @@
-import React, { createContext, useState, useContext } from 'react';
-import { useToast } from '@/hooks/use-toast';
+
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { TaskType } from '@/components/kanban/KanbanCard';
+import { supabase } from '@/integrations/supabase/client';
+import { ActionItem, ActionStatus } from '@/types/actionHistory';
+import { format, parseISO } from 'date-fns';
+import { toast } from '@/hooks/use-toast';
 
 export type Event = {
   id: string;
+  date: Date;
   title: string;
   description: string;
-  date: Date;
-  time?: string;
-  color?: string;
-  category?: TaskType;
+  time: string;
+  color: string;
+  category: TaskType;
+  leadId?: string;
+  actionId?: string;
+  assignedToName?: string;
 };
 
 export const eventCategories = [
-  { name: 'Call', color: '#FDE1D3', value: 'Call' as TaskType },
-  { name: 'Visites', color: '#E5DEFF', value: 'Visites' as TaskType },
-  { name: 'Compromis', color: '#D3E4FD', value: 'Compromis' as TaskType },
-  { name: 'Acte de vente', color: '#F2FCE2', value: 'Acte de vente' as TaskType },
-  { name: 'Contrat de Location', color: '#FEF7CD', value: 'Contrat de Location' as TaskType },
-  { name: 'Propositions', color: '#FFD6E0', value: 'Propositions' as TaskType },
-  { name: 'Follow up', color: '#D3FDFC', value: 'Follow up' as TaskType },
-  { name: 'Estimation', color: '#E8D3FD', value: 'Estimation' as TaskType },
-  { name: 'Prospection', color: '#FDD3D3', value: 'Prospection' as TaskType },
-  { name: 'Admin', color: '#D3D3D3', value: 'Admin' as TaskType },
+  { name: 'Appel', value: 'Call' as TaskType, color: '#10b981' },
+  { name: 'Visite', value: 'Visites' as TaskType, color: '#8b5cf6' },
+  { name: 'Compromis', value: 'Compromis' as TaskType, color: '#f59e0b' },
+  { name: 'Acte de vente', value: 'Acte de vente' as TaskType, color: '#ef4444' },
+  { name: 'Contrat de Location', value: 'Contrat de Location' as TaskType, color: '#3b82f6' },
+  { name: 'Propositions', value: 'Propositions' as TaskType, color: '#6366f1' },
+  { name: 'Follow up', value: 'Follow up' as TaskType, color: '#ec4899' },
+  { name: 'Estimation', value: 'Estimation' as TaskType, color: '#14b8a6' },
+  { name: 'Prospection', value: 'Prospection' as TaskType, color: '#f97316' },
+  { name: 'Admin', value: 'Admin' as TaskType, color: '#6b7280' },
 ];
 
-export const initialEvents: Event[] = [
-  {
-    id: '1',
-    title: 'Visite propriété',
-    description: 'Visite du bien avec la famille Martin',
-    date: new Date(new Date().setDate(new Date().getDate() + 2)),
-    color: '#E5DEFF',
-    category: 'Visites',
-  },
-  {
-    id: '2',
-    title: 'Signature contrat',
-    description: 'Signature du compromis pour la villa des Lilas',
-    date: new Date(new Date().setDate(new Date().getDate() + 5)),
-    color: '#D3E4FD',
-    category: 'Compromis',
-  },
-  {
-    id: '3',
-    title: 'Rendez-vous banque',
-    description: 'Discussion financement avec Crédit Immobilier',
-    date: new Date(),
-    color: '#FDD3D3',
-    category: 'Prospection',
-  },
-  {
-    id: '4',
-    title: 'Tournage vidéo',
-    description: 'Tournage du bien rue Victor Hugo',
-    date: new Date(new Date().setDate(new Date().getDate() + 1)),
-    color: '#FFD6E0',
-    category: 'Propositions',
-  },
-  {
-    id: '5',
-    title: 'Déjeuner équipe',
-    description: 'Restaurant Le Bistrot',
-    date: new Date(new Date().setDate(new Date().getDate() + 4)),
-    color: '#D3D3D3',
-    category: 'Admin',
-  },
-];
-
-export type CalendarContextType = {
+interface CalendarContextProps {
+  events: Event[];
   selectedDate: Date | undefined;
   setSelectedDate: (date: Date | undefined) => void;
-  events: Event[];
-  setEvents: React.Dispatch<React.SetStateAction<Event[]>>;
-  view: 'month' | 'week';
-  setView: React.Dispatch<React.SetStateAction<'month' | 'week'>>;
-  activeFilters: TaskType[];
-  setActiveFilters: React.Dispatch<React.SetStateAction<TaskType[]>>;
+  view: 'month' | 'week' | 'day';
+  setView: (view: 'month' | 'week' | 'day') => void;
   isAddEventOpen: boolean;
   setIsAddEventOpen: (isOpen: boolean) => void;
+  activeFilters: TaskType[];
+  setActiveFilters: (filters: TaskType[]) => void;
+  toggleFilter: (filter: TaskType) => void;
   newEvent: Omit<Event, 'id' | 'date'>;
   setNewEvent: React.Dispatch<React.SetStateAction<Omit<Event, 'id' | 'date'>>>;
-  toggleFilter: (category: TaskType) => void;
   handleAddEvent: () => void;
-};
+  refreshEvents: () => void;
+}
 
-export const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
+export const CalendarContext = createContext<CalendarContextProps>({
+  events: [],
+  selectedDate: undefined,
+  setSelectedDate: () => {},
+  view: 'month',
+  setView: () => {},
+  isAddEventOpen: false,
+  setIsAddEventOpen: () => {},
+  activeFilters: [],
+  setActiveFilters: () => {},
+  toggleFilter: () => {},
+  newEvent: { title: '', description: '', time: '', color: '', category: 'Call' },
+  setNewEvent: () => {},
+  handleAddEvent: () => {},
+  refreshEvents: () => {},
+});
 
 export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [events, setEvents] = useState<Event[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [events, setEvents] = useState<Event[]>(initialEvents);
+  const [view, setView] = useState<'month' | 'week' | 'day'>('month');
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  const [view, setView] = useState<'month' | 'week'>('month');
   const [activeFilters, setActiveFilters] = useState<TaskType[]>([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
   const [newEvent, setNewEvent] = useState<Omit<Event, 'id' | 'date'>>({
     title: '',
     description: '',
-    color: '#FDE1D3',
-    category: 'Call',
-    time: '09:00',
+    time: '12:00',
+    color: eventCategories[0].color,
+    category: eventCategories[0].value,
   });
 
-  const { toast } = useToast();
+  const refreshEvents = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
-  const toggleFilter = (category: TaskType) => {
+  // Toggle category filter
+  const toggleFilter = (filter: TaskType) => {
     setActiveFilters(prev => 
-      prev.includes(category) 
-        ? prev.filter(c => c !== category) 
-        : [...prev, category]
+      prev.includes(filter) 
+        ? prev.filter(f => f !== filter) 
+        : [...prev, filter]
     );
   };
 
-  const handleAddEvent = () => {
-    if (!selectedDate || !newEvent.title.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez saisir au moins un titre pour l'événement",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const categoryInfo = eventCategories.find(cat => cat.value === newEvent.category);
-
-    const event: Event = {
-      id: Date.now().toString(),
-      ...newEvent,
-      date: selectedDate,
-      color: categoryInfo?.color || newEvent.color,
+  // Load actions from Supabase and convert them to calendar events
+  useEffect(() => {
+    const fetchActions = async () => {
+      try {
+        // Get current user info
+        const { data: userData } = await supabase.auth.getUser();
+        const currentUserEmail = userData?.user?.email;
+        
+        // Get the current user's team member id
+        const { data: teamMemberData } = await supabase
+          .from('team_members')
+          .select('id, is_admin')
+          .eq('email', currentUserEmail)
+          .single();
+        
+        const isUserAdmin = teamMemberData?.is_admin || false;
+        const currentUserId = teamMemberData?.id;
+        
+        // Fetch leads with their action history
+        let query = supabase
+          .from('leads')
+          .select('id, name, action_history, assigned_to, status');
+        
+        // Non-admin users can only see their assigned leads
+        if (!isUserAdmin && currentUserId) {
+          query = query.eq('assigned_to', currentUserId);
+        }
+        
+        const { data: leads, error } = await query;
+        
+        if (error) throw error;
+        
+        // Fetch team members for assigned_to mapping
+        const { data: members } = await supabase
+          .from('team_members')
+          .select('id, name');
+        
+        const memberMap = new Map();
+        members?.forEach(member => memberMap.set(member.id, member.name));
+        
+        // Extract actions and convert to calendar events
+        let calendarEvents: Event[] = [];
+        
+        leads?.forEach((lead: any) => {
+          const leadActions = lead.action_history || [];
+          
+          if (Array.isArray(leadActions)) {
+            leadActions.forEach((action: any) => {
+              if (action.scheduledDate) {
+                // Find the category color
+                const categoryInfo = eventCategories.find(cat => cat.value === action.actionType);
+                const scheduledDate = new Date(action.scheduledDate);
+                
+                calendarEvents.push({
+                  id: action.id,
+                  date: scheduledDate,
+                  title: `${action.actionType} - ${lead.name}`,
+                  description: action.notes || '',
+                  time: format(scheduledDate, 'HH:mm'),
+                  color: categoryInfo?.color || '#6b7280',
+                  category: action.actionType as TaskType,
+                  leadId: lead.id,
+                  actionId: action.id,
+                  assignedToName: memberMap.get(lead.assigned_to) || 'Non assigné'
+                });
+              }
+            });
+          }
+        });
+        
+        setEvents(calendarEvents);
+      } catch (error) {
+        console.error('Error fetching actions for calendar:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger les actions pour le calendrier."
+        });
+      }
     };
-
-    setEvents([...events, event]);
-    setIsAddEventOpen(false);
-    setNewEvent({ 
-      title: '', 
-      description: '', 
-      color: '#FDE1D3', 
-      category: 'Call',
-      time: '09:00'
-    });
     
-    toast({
-      title: "Événement ajouté",
-      description: `L'événement "${event.title}" a été ajouté au ${selectedDate.toLocaleDateString('fr-FR')}${event.time ? ' à ' + event.time : ''}`,
-    });
+    fetchActions();
+  }, [refreshTrigger]);
+
+  // Handle adding a new event
+  const handleAddEvent = async () => {
+    if (!selectedDate) return;
+    
+    try {
+      const eventDate = new Date(selectedDate);
+      const [hours, minutes] = newEvent.time.split(':').map(Number);
+      eventDate.setHours(hours, minutes, 0, 0);
+      
+      // If we're adding a stand-alone calendar event (not tied to a lead)
+      const eventToAdd: Event = {
+        id: crypto.randomUUID(),
+        date: eventDate,
+        ...newEvent
+      };
+      
+      setEvents(prev => [...prev, eventToAdd]);
+      
+      // Reset form
+      setNewEvent({
+        title: '',
+        description: '',
+        time: '12:00',
+        color: eventCategories[0].color,
+        category: eventCategories[0].value,
+      });
+      
+      setIsAddEventOpen(false);
+      
+      toast({
+        title: "Événement ajouté",
+        description: `${eventToAdd.title} a été ajouté au calendrier.`
+      });
+    } catch (error) {
+      console.error('Error adding event:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'ajouter l'événement."
+      });
+    }
   };
 
   return (
     <CalendarContext.Provider
       value={{
+        events,
         selectedDate,
         setSelectedDate,
-        events,
-        setEvents,
-        isAddEventOpen,
-        setIsAddEventOpen,
         view,
         setView,
+        isAddEventOpen,
+        setIsAddEventOpen,
         activeFilters,
         setActiveFilters,
+        toggleFilter,
         newEvent,
         setNewEvent,
-        toggleFilter,
         handleAddEvent,
+        refreshEvents
       }}
     >
       {children}
@@ -170,10 +246,4 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   );
 };
 
-export const useCalendar = () => {
-  const context = useContext(CalendarContext);
-  if (context === undefined) {
-    throw new Error('useCalendar must be used within a CalendarProvider');
-  }
-  return context;
-};
+export const useCalendar = () => useContext(CalendarContext);
