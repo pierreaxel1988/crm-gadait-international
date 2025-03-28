@@ -59,14 +59,14 @@ export const applyFiltersToColumns = (
     }
     
     // Filter by purchase timeframe
-    if (filters.purchaseTimeframe && filters.purchaseTimeframe !== 'all') {
+    if (filters.purchaseTimeframe !== null) {
       filteredItems = filteredItems.filter(item => 
         item.purchaseTimeframe === filters.purchaseTimeframe
       );
     }
     
     // Filter by property type
-    if (filters.propertyType && filters.propertyType !== 'all') {
+    if (filters.propertyType !== null) {
       filteredItems = filteredItems.filter(item => 
         item.propertyType === filters.propertyType
       );
