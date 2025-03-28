@@ -121,7 +121,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   
   return (
     <div className="flex flex-col h-[calc(100vh-170px)]">
-      {/* Pipeline Header Block - New design as per the image */}
+      {/* Pipeline Header Block */}
       <div className="flex flex-col gap-4 mb-6">
         {/* Header row with title and action buttons */}
         <div className="flex items-center justify-between">
