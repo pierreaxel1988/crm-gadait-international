@@ -24,7 +24,14 @@ const CalendarEventsList = ({ events, selectedDate, openAddEventDialog }: Calend
               className="p-4 rounded-lg border transition-all hover:shadow-luxury-hover"
               style={{ backgroundColor: `${event.color}30` /* 30% opacity */ }}
             >
-              <h3 className="font-futura text-lg font-medium">{event.title}</h3>
+              <div className="flex justify-between items-start">
+                <h3 className="font-futura text-lg font-medium">{event.title}</h3>
+                {event.time && (
+                  <span className="text-sm font-medium px-2 py-1 rounded-md bg-white">
+                    {event.time}
+                  </span>
+                )}
+              </div>
               <p className="text-loro-navy font-futura mt-1">{event.description}</p>
             </div>
           ))}
