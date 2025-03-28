@@ -2,6 +2,7 @@
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { PropertyType, PurchaseTimeframe } from '@/types/lead';
 
 export const applyFiltersToColumns = (
   columns: {
@@ -58,14 +59,14 @@ export const applyFiltersToColumns = (
     }
     
     // Filter by purchase timeframe
-    if (filters.purchaseTimeframe) {
+    if (filters.purchaseTimeframe && filters.purchaseTimeframe !== 'all') {
       filteredItems = filteredItems.filter(item => 
         item.purchaseTimeframe === filters.purchaseTimeframe
       );
     }
     
     // Filter by property type
-    if (filters.propertyType) {
+    if (filters.propertyType && filters.propertyType !== 'all') {
       filteredItems = filteredItems.filter(item => 
         item.propertyType === filters.propertyType
       );

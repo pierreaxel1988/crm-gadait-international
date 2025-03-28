@@ -29,7 +29,7 @@ const DesktopPipelineView = ({
   isRefreshing
 }: DesktopPipelineViewProps) => {
   
-  // Définir les colonnes pour l'utilisation avec useKanbanData
+  // Define columns for use with useKanbanData
   const getColumns = () => {
     const statusesToShow = activeTab === 'purchase' 
       ? ['New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offer', 'Deposit', 'Signed', 'Gagné', 'Perdu'] as LeadStatus[]
@@ -43,7 +43,7 @@ const DesktopPipelineView = ({
     }));
   };
   
-  // Récupérer les données avec useKanbanData
+  // Fetch data with useKanbanData
   const { loadedColumns, isLoading } = useKanbanData(
     getColumns(), 
     refreshTrigger, 
