@@ -42,22 +42,32 @@ const SubNavigation = () => {
     icon: File
   }];
 
-  // Mobile navigation with horizontal scrolling and back button
+  // Get current page name
+  const getCurrentPageName = () => {
+    const currentPath = location.pathname;
+    const currentItem = navigationItems.find(item => item.path === currentPath);
+    return currentItem ? currentItem.name : '';
+  };
+
+  // Mobile navigation with back button to the left of the page name
   if (isMobile) {
     return (
       <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
-        <div className="flex items-center px-4 py-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleGoBack} 
-            className="mr-2"
-            aria-label="Retour à la page précédente"
-          >
-            <ArrowLeft className="h-5 w-5 text-loro-navy" />
-          </Button>
+        <div className="flex items-center justify-between px-4 py-2">
+          <div className="flex items-center">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleGoBack} 
+              className="mr-2"
+              aria-label="Retour à la page précédente"
+            >
+              <ArrowLeft className="h-5 w-5 text-loro-navy" />
+            </Button>
+            <h2 className="text-loro-navy font-futura text-lg">{getCurrentPageName()}</h2>
+          </div>
           
-          <div className="overflow-x-auto flex-1">
+          <div className="overflow-x-auto">
             <div className="flex space-x-4 min-w-min">
               {navigationItems.map(item => (
                 <Link 
@@ -85,15 +95,17 @@ const SubNavigation = () => {
   return (
     <div className="sticky top-16 z-40 border-b border-loro-pearl bg-loro-white shadow-sm">
       <div className="content-container flex items-center">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={handleGoBack} 
-          className="ml-4"
-          aria-label="Retour à la page précédente"
-        >
-          <ArrowLeft className="h-5 w-5 text-loro-navy" />
-        </Button>
+        <div className="flex items-center ml-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleGoBack} 
+            aria-label="Retour à la page précédente"
+          >
+            <ArrowLeft className="h-5 w-5 text-loro-navy" />
+          </Button>
+          <h2 className="text-loro-navy font-futura text-lg ml-2">{getCurrentPageName()}</h2>
+        </div>
         
         <NavigationMenu className="justify-center mx-auto">
           <NavigationMenuList className="space-x-0">
