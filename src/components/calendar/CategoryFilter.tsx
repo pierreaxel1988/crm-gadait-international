@@ -21,11 +21,15 @@ const CategoryFilter = () => {
               <Badge
                 key={category.value}
                 variant={isActive ? "default" : "outline"}
-                className="cursor-pointer select-none font-futura text-xs hover:bg-muted"
+                className="cursor-pointer select-none font-futura text-xs hover:opacity-90 transition-all shadow-sm"
                 style={{
-                  backgroundColor: isActive ? category.color : 'transparent',
+                  backgroundColor: isActive ? category.color : `${category.color}20`,
                   borderColor: category.color,
-                  color: isActive ? 'white' : 'inherit',
+                  color: isActive ? 'white' : category.color,
+                  fontWeight: isActive ? 600 : 500,
+                  padding: '0.5rem 0.75rem',
+                  borderWidth: '1px',
+                  borderRadius: '1rem',
                 }}
                 onClick={() => toggleFilter(category.value)}
               >
