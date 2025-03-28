@@ -4,9 +4,7 @@ import { cn } from '@/lib/utils';
 import KanbanColumn from './KanbanColumn';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
-import { useKanbanData } from '@/hooks/useKanbanData';
 import { useKanbanDragDrop } from '@/hooks/useKanbanDragDrop';
-import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import { LeadStatus } from '@/components/common/StatusBadge';
 
 interface KanbanBoardProps {
@@ -28,9 +26,8 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
   console.log('===== KANBAN BOARD =====');
   console.log(`Pipeline Type: ${pipelineType}`);
   console.log(`Nombre de colonnes: ${columns.length}`);
-  console.log('Colonnes initiales:', columns.map(c => `${c.title} (${c.status})`).join(', '));
+  console.log('Colonnes initiales:', columns.map(c => `${c.title} (${c.status}): ${c.items.length} leads`).join(', '));
   
-  // Note: We don't need to call useKanbanData here since the columns are already passed with data
   const { handleDrop } = useKanbanDragDrop(() => {});
   
   return (
