@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -64,38 +63,31 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const navigate = useNavigate();
   
-  // Load column data with the hook
   const {
     loadedColumns,
     isLoading
   } = useKanbanData(columns, 0, activeTab as PipelineType);
   
-  // Filter the columns by pipeline type
   const filteredColumns = loadedColumns.filter(column => 
     !column.pipelineType || column.pipelineType === activeTab
   );
   
-  // Collect all leads across columns
   const allLeads = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
     columnStatus: column.status
   })));
   
-  // Calculate lead count by status for the tabs
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     acc[column.status] = column.items.length;
     return acc;
   }, {} as Record<string, number>);
   
-  // Get total lead count
   const totalLeadCount = allLeads.length;
   
-  // Filter leads by active status tab
   const displayedLeads = activeStatus === 'all' 
     ? allLeads 
     : allLeads.filter(lead => lead.columnStatus === activeStatus);
   
-  // Apply search term
   const searchFilteredLeads = searchTerm 
     ? displayedLeads.filter(item => 
         item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -103,17 +95,14 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
       )
     : displayedLeads;
   
-  // Handle adding a new lead
   const handleAddLead = () => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${activeStatus === 'all' ? 'New' : activeStatus}`);
   };
   
-  // Handle clicking on a lead
   const handleLeadClick = (leadId: string) => {
     navigate(`/leads/${leadId}`);
   };
   
-  // Handle filters apply
   const handleApplyFilters = () => {
     handleRefresh();
     toggleFilters();
@@ -121,11 +110,9 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   
   return (
     <div className="flex flex-col h-[calc(100vh-170px)]">
-      {/* Pipeline Header Block */}
       <div className="flex flex-col gap-4 mb-6">
-        {/* Header row with title and action buttons */}
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-zinc-900">Pipeline</h1>
+          <h1 className="tracking-tight text-base font-medium">Pipeline</h1>
           <div className="flex items-center gap-2">
             <Button 
               variant="outline" 
@@ -152,7 +139,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
           </div>
         </div>
 
-        {/* Search bar with refresh button */}
         <div className="relative w-full bg-gray-100 rounded-md flex items-center">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -271,7 +257,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         </button>
       </div>
       
-      {/* Filters drawer */}
       {filtersOpen && (
         <Sheet open={filtersOpen} onOpenChange={toggleFilters}>
           <PipelineFilters 
