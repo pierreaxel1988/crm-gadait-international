@@ -1,8 +1,8 @@
 
 import React from 'react';
-import KanbanBoard from '@/components/kanban/KanbanBoard';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { PipelineType } from '@/types/lead';
 
 interface PipelineTabContentProps {
   contentType: 'purchase' | 'rental';
@@ -26,14 +26,9 @@ const PipelineTabContent = ({ contentType, filters, refreshTrigger }: PipelineTa
     }));
   };
 
-  return (
-    <KanbanBoard 
-      columns={getColumns()} 
-      filters={filters} 
-      refreshTrigger={refreshTrigger}
-      pipelineType={contentType}
-    />
-  );
+  // Return empty div as we no longer use this component for rendering
+  // The rendering is now handled directly by DesktopPipelineView
+  return <div></div>;
 };
 
 export default PipelineTabContent;

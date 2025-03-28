@@ -10,7 +10,9 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { useKanbanData } from '@/hooks/useKanbanData';
 import { PipelineType } from '@/types/lead';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
-import KanbanBoard from '@/components/kanban/KanbanBoard';
+import LeadListItem from './mobile/LeadListItem';
+import { useNavigate } from 'react-router-dom';
+import { PlusCircle } from 'lucide-react';
 
 interface DesktopPipelineViewProps {
   activeTab: string;
@@ -30,6 +32,20 @@ interface DesktopPipelineViewProps {
   teamMembers: { id: string; name: string }[];
 }
 
+const statusTranslations: Record<LeadStatus, string> = {
+  'New': 'Nouveaux',
+  'Contacted': 'Contactés',
+  'Qualified': 'Qualifiés',
+  'Proposal': 'Propositions',
+  'Visit': 'Visites en cours',
+  'Offer': 'Offre en cours',
+  'Offre': 'Offre en cours',
+  'Deposit': 'Dépôt reçu',
+  'Signed': 'Signature finale',
+  'Gagné': 'Conclus',
+  'Perdu': 'Perdu'
+};
+
 const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   activeTab,
   setActiveTab,
@@ -47,6 +63,9 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   isFilterActive,
   teamMembers
 }) => {
+  const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
+  const navigate = useNavigate();
+  
   console.log("DesktopPipelineView - activeTab:", activeTab);
   console.log("DesktopPipelineView - Initial columns:", columns);
   
@@ -58,27 +77,52 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   
   console.log("DesktopPipelineView - loadedColumns:", loadedColumns);
   
-  // Apply search term and filters
-  const filteredColumns = React.useMemo(() => {
-    console.log("Applying filters to columns...");
-    let filtered = loadedColumns;
-    
-    // Apply search term filtering
-    if (searchTerm) {
-      filtered = filtered.map(column => ({
-        ...column,
-        items: column.items.filter(item => 
-          item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.desiredLocation?.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      }));
-    }
-    
-    // Apply other filters
-    const result = applyFiltersToColumns(filtered, filters);
-    console.log("Filtered columns result:", result);
-    return result;
-  }, [loadedColumns, searchTerm, filters]);
+  // Filter the columns by pipeline type
+  const filteredColumns = loadedColumns.filter(column => 
+    !column.pipelineType || column.pipelineType === activeTab
+  );
+  
+  // Collect all leads across columns
+  const allLeads = filteredColumns.flatMap(column => column.items.map(item => ({
+    ...item,
+    columnStatus: column.status
+  })));
+  
+  console.log("DesktopPipelineView - allLeads:", allLeads.length);
+  
+  // Calculate lead count by status for the tabs
+  const leadCountByStatus = filteredColumns.reduce((acc, column) => {
+    acc[column.status] = column.items.length;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  // Get total lead count
+  const totalLeadCount = allLeads.length;
+  
+  // Filter leads by active status tab
+  const displayedLeads = activeStatus === 'all' 
+    ? allLeads 
+    : allLeads.filter(lead => lead.columnStatus === activeStatus);
+  
+  console.log("DesktopPipelineView - displayedLeads:", displayedLeads.length);
+  
+  // Apply search term
+  const searchFilteredLeads = searchTerm 
+    ? displayedLeads.filter(item => 
+        item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.desiredLocation?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : displayedLeads;
+  
+  // Handle adding a new lead
+  const handleAddLead = (status: LeadStatus) => {
+    navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
+  };
+  
+  // Handle clicking on a lead
+  const handleLeadClick = (leadId: string) => {
+    navigate(`/leads/${leadId}`);
+  };
   
   // Handle filters apply
   const handleApplyFilters = () => {
@@ -140,21 +184,84 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         </Button>
       </div>
       
-      <div className="relative flex-1 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+      <div className="overflow-x-auto pb-3">
+        <Tabs 
+          value={activeStatus === 'all' ? 'all' : activeStatus} 
+          onValueChange={value => setActiveStatus(value as LeadStatus | 'all')} 
+          className="w-full"
+        >
+          <TabsList className="inline-flex w-auto p-1 h-10 bg-gray-100 rounded-full">
+            <TabsTrigger 
+              value="all" 
+              className="rounded-full px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              Tous ({totalLeadCount})
+            </TabsTrigger>
+            {filteredColumns.map(column => 
+              leadCountByStatus[column.status] > 0 && (
+                <TabsTrigger 
+                  key={column.status} 
+                  value={column.status} 
+                  className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
+                  {statusTranslations[column.status]} ({leadCountByStatus[column.status]})
+                </TabsTrigger>
+              )
+            )}
+          </TabsList>
+        </Tabs>
+      </div>
+      
+      <div className="relative flex-1 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden mt-4">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-sm text-muted-foreground">Chargement des leads...</p>
           </div>
         ) : (
-          <div className="h-full overflow-hidden">
-            <KanbanBoard
-              columns={filteredColumns}
-              className="h-full"
-              pipelineType={activeTab as PipelineType}
-              refreshTrigger={0}
-            />
+          <div className="h-full overflow-y-auto p-4">
+            {searchFilteredLeads.length === 0 ? (
+              <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
+                <div className="text-center">
+                  <p className="text-sm text-zinc-900 font-medium">Aucun lead trouvé</p>
+                  <button 
+                    onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
+                    className="mt-2 text-zinc-900 hover:text-zinc-700 text-sm flex items-center justify-center mx-auto"
+                  >
+                    <PlusCircle className="h-4 w-4 mr-1" />
+                    Ajouter un lead
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
+                {searchFilteredLeads.map(lead => (
+                  <LeadListItem 
+                    key={lead.id}
+                    id={lead.id}
+                    name={lead.name}
+                    columnStatus={lead.columnStatus}
+                    budget={lead.budget}
+                    currency={lead.currency}
+                    desiredLocation={lead.desiredLocation}
+                    taskType={lead.taskType}
+                    createdAt={lead.createdAt}
+                    nextFollowUpDate={lead.nextFollowUpDate}
+                    onClick={handleLeadClick}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
+      </div>
+      
+      <div className="fixed bottom-6 right-6 z-50 hidden md:block">
+        <button 
+          onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
+          className="text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-colors bg-zinc-900 hover:bg-zinc-800"
+        >
+          <PlusCircle className="h-6 w-6" />
+        </button>
       </div>
       
       {/* Filters drawer */}
