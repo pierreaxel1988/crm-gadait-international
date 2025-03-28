@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -41,6 +42,11 @@ export const useKanbanData = (
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    console.log("useKanbanData useEffect triggered");
+    console.log("Initial columns:", columns);
+    console.log("Pipeline type:", pipelineType);
+    console.log("Refresh trigger:", refreshTrigger);
+    
     const fetchLeads = async () => {
       try {
         setIsLoading(true);
@@ -60,7 +66,7 @@ export const useKanbanData = (
           return;
         }
         
-        // Récupération des leads depuis Supabase
+        // Get leads from Supabase
         const { data: supabaseLeads, error: leadsError } = await supabase
           .from('leads')
           .select('*');
@@ -75,15 +81,18 @@ export const useKanbanData = (
           return;
         }
         
-        // Utiliser les leads de Supabase ou récupérer des données locales
+        // Use Supabase leads or get data locally
         let allLeads = supabaseLeads || [];
+        console.log("Fetched leads from Supabase:", allLeads.length);
         
-        // Si aucun lead n'est trouvé dans Supabase, essayer de récupérer des données locales
+        // If no leads found in Supabase, try to get data locally
         if (!allLeads || allLeads.length === 0) {
+          console.log("No leads in Supabase, trying local data");
           const localLeads = await getLeads();
           if (localLeads && localLeads.length > 0) {
+            console.log("Found local leads:", localLeads.length);
+            
             // Make sure the returned data from getLeads() is compatible with our expected structure
-            // We're only assigning to allLeads if we actually got data back
             allLeads = localLeads.map(lead => ({
               // Required fields with defaults to satisfy TypeScript
               id: lead.id,
@@ -130,19 +139,19 @@ export const useKanbanData = (
         }
         
         if (!allLeads || allLeads.length === 0) {
-          console.log("Aucun lead trouvé dans la base de données ou localement");
+          console.log("No leads found in database or locally");
           setLoadedColumns(columns.map(col => ({ ...col, items: [] })));
           setIsLoading(false);
           return;
         }
         
-        console.log(`Leads récupérés: ${allLeads.length}`);
+        console.log(`Retrieved leads: ${allLeads.length}`);
         
         // Map leads data to KanbanItem format
         const mappedLeads = allLeads.map(lead => {
           const assignedTeamMember = teamMembers?.find(tm => tm.id === lead.assigned_to);
           
-          // Utilise pipeline_type du lead ou une valeur par défaut
+          // Use lead's pipeline_type or default
           const leadPipelineType = lead.pipeline_type || 'purchase';
           
           return {
@@ -173,22 +182,24 @@ export const useKanbanData = (
           };
         });
         
-        console.log(`Leads mappés: ${mappedLeads.length}`);
-        console.log(`Pipeline type demandé: ${pipelineType}`);
+        console.log(`Mapped leads: ${mappedLeads.length}`);
+        console.log(`Requested pipeline type: ${pipelineType}`);
         
         // Filter leads by pipeline type first
         const filteredByPipelineType = mappedLeads.filter(lead => {
           // Check both pipelineType and pipeline_type properties
-          return (lead.pipelineType === pipelineType || lead.pipeline_type === pipelineType);
+          const leadType = lead.pipelineType || lead.pipeline_type;
+          console.log(`Lead ${lead.id} (${lead.name}) has pipeline type: ${leadType}`);
+          return leadType === pipelineType;
         });
         
-        console.log(`Leads filtrés par pipeline type (${pipelineType}): ${filteredByPipelineType.length}`);
+        console.log(`Leads filtered by pipeline type (${pipelineType}): ${filteredByPipelineType.length}`);
         
         // Distribute leads to their respective columns based on status
         const updatedColumns = columns.map(column => {
           const columnItems = filteredByPipelineType.filter(lead => lead.status === column.status);
           
-          console.log(`Colonne ${column.title} (${column.status}): ${columnItems.length} leads`);
+          console.log(`Column ${column.title} (${column.status}): ${columnItems.length} leads`);
           
           return {
             ...column,
@@ -199,7 +210,7 @@ export const useKanbanData = (
         
         setLoadedColumns(updatedColumns);
       } catch (error) {
-        console.error('Erreur dans useKanbanData:', error);
+        console.error('Error in useKanbanData:', error);
         toast({
           variant: "destructive",
           title: "Erreur",

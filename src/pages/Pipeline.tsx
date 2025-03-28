@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
 import PipelineHeader from '@/components/pipeline/PipelineHeader';
@@ -28,6 +28,11 @@ const Pipeline = () => {
     handleClearFilters,
     getAllColumns
   } = usePipelineState();
+
+  useEffect(() => {
+    // Force a refresh when the component mounts to ensure data is loaded
+    handleRefresh();
+  }, []);
 
   console.log("Pipeline page - isMobile:", isMobile);
   console.log("Pipeline page - activeTab:", activeTab);

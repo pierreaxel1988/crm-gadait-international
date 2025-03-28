@@ -26,20 +26,26 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
   // Log information for debugging
   console.log('===== KANBAN BOARD =====');
   console.log(`Pipeline Type: ${pipelineType}`);
-  console.log(`Nombre de colonnes: ${columns.length}`);
+  console.log(`Number of columns: ${columns.length}`);
   
   // Only log column information if there are columns (avoid errors)
   if (columns.length > 0) {
-    console.log('Colonnes:', columns.map(c => `${c.title} (${c.status}): ${c.items.length} leads`).join(', '));
+    console.log('Columns:', columns.map(c => `${c.title} (${c.status}): ${c.items?.length || 0} leads`).join(', '));
   }
   
   const { handleDrop } = useKanbanDragDrop(() => {});
   
   // Memoize columns to prevent unnecessary re-renders
-  const memoizedColumns = useMemo(() => columns, [
-    // Only update when these values change
-    columns.length,
-    columns.map(col => col.items.length).join(','),
+  const memoizedColumns = useMemo(() => {
+    console.log("Memoizing columns:", columns);
+    // Ensure all columns have an items array even if it's empty
+    return columns.map(col => ({
+      ...col,
+      items: col.items || [],
+      pipelineType: col.pipelineType || pipelineType
+    }));
+  }, [
+    columns,
     pipelineType
   ]);
   
@@ -59,7 +65,7 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
               key={column.status}
               title={column.title}
               status={column.status}
-              items={column.items}
+              items={column.items || []}
               className={cn(
                 "flex-1 min-w-[240px]",
                 isMobile && "min-w-[250px]" // Slightly narrower columns on mobile

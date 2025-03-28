@@ -47,14 +47,20 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   isFilterActive,
   teamMembers
 }) => {
+  console.log("DesktopPipelineView - activeTab:", activeTab);
+  console.log("DesktopPipelineView - Initial columns:", columns);
+  
   // Load column data with the hook
   const {
     loadedColumns,
     isLoading
   } = useKanbanData(columns, 0, activeTab as PipelineType);
   
+  console.log("DesktopPipelineView - loadedColumns:", loadedColumns);
+  
   // Apply search term and filters
   const filteredColumns = React.useMemo(() => {
+    console.log("Applying filters to columns...");
     let filtered = loadedColumns;
     
     // Apply search term filtering
@@ -69,7 +75,9 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     }
     
     // Apply other filters
-    return applyFiltersToColumns(filtered, filters);
+    const result = applyFiltersToColumns(filtered, filters);
+    console.log("Filtered columns result:", result);
+    return result;
   }, [loadedColumns, searchTerm, filters]);
   
   // Handle filters apply
@@ -143,6 +151,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
               columns={filteredColumns}
               className="h-full"
               pipelineType={activeTab as PipelineType}
+              refreshTrigger={0}
             />
           </div>
         )}
