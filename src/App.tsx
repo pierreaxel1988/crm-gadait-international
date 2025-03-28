@@ -15,6 +15,7 @@ import LeadDetail from './pages/LeadDetailMobile';
 import LeadNew from './pages/LeadNew';
 import LeadImport from './pages/LeadImport';
 import MobileLeadImport from './pages/MobileLeadImport';
+import ActionsPage from './pages/Actions';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/leads/new" element={<LeadNew />} />
           <Route path="/leads/import" element={<LeadImport />} />
           <Route path="/import-lead" element={<MobileLeadImport />} />
+          <Route path="/actions" element={<ActionsPage />} />
           <Route path="/auth" element={<Auth />} />
         </Routes>
         <Toaster />
