@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { DayPicker } from 'react-day-picker';
+import { DayPicker, DayProps } from 'react-day-picker';
 import { fr } from 'date-fns/locale';
 import { format, isEqual, isSameDay, isSameMonth, add, sub, startOfMonth, endOfMonth, eachDayOfInterval, addDays, startOfWeek, endOfWeek } from 'date-fns';
 import { Event } from '@/contexts/CalendarContext';
@@ -295,7 +295,7 @@ const CalendarView = ({
             locale={fr}
             weekStartsOn={1}
             components={{
-              Day: ({ date, activeModifiers }) => renderDay(date),
+              Day: ({ date }: DayProps) => renderDay(date),
             }}
             modifiersClassNames={{
               selected: 'bg-loro-navy text-white',
