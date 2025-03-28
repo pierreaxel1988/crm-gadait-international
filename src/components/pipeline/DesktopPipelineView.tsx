@@ -54,12 +54,12 @@ const DesktopPipelineView = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <Tabs defaultValue="purchase" value={activeTab} onValueChange={setActiveTab} className="w-full md:w-[400px]">
-          <TabsList className="w-full">
-            <TabsTrigger value="purchase" className="flex items-center gap-2 w-1/2">
+          <TabsList className="w-full bg-gray-100 p-0.5 rounded-xl h-11">
+            <TabsTrigger value="purchase" className="flex items-center gap-2 w-1/2 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white">
               <Home className="h-4 w-4" />
               <span className="truncate">Achat</span>
             </TabsTrigger>
-            <TabsTrigger value="rental" className="flex items-center gap-2 w-1/2">
+            <TabsTrigger value="rental" className="flex items-center gap-2 w-1/2 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white">
               <Key className="h-4 w-4" />
               <span className="truncate">Location</span>
             </TabsTrigger>
@@ -85,7 +85,7 @@ const DesktopPipelineView = ({
           <p className="text-sm text-muted-foreground">Chargement des leads...</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg p-4 shadow-sm">
+        <div className="flex-1 overflow-y-auto mt-3 pb-20 -mx-3 px-3 bg-gray-50">
           <MobileColumnList
             columns={loadedColumns}
             activeTab={activeTab as PipelineType}

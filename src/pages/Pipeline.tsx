@@ -29,9 +29,23 @@ const Pipeline = () => {
     getAllColumns
   } = usePipelineState();
 
-  if (isMobile) {
-    return (
-      <div className="p-3 md:p-6 bg-white">
+  return (
+    <div className="p-3 md:p-6 bg-white min-h-screen">
+      <PipelineHeader 
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onToggleFilters={toggleFilters}
+        filtersOpen={filtersOpen}
+        activeFilters={activeFiltersCount}
+        isFilterActive={isFilterActive}
+        filters={filters}
+        onFilterChange={setFilters}
+        onClearFilters={handleClearFilters}
+        teamMembers={teamMembers}
+        handleRefresh={handleRefresh}
+      />
+
+      {isMobile ? (
         <MobilePipelineView
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -49,35 +63,17 @@ const Pipeline = () => {
           isFilterActive={isFilterActive}
           teamMembers={teamMembers}
         />
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-3 md:p-6 bg-white min-h-screen">
-      <PipelineHeader 
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        onToggleFilters={toggleFilters}
-        filtersOpen={filtersOpen}
-        activeFilters={activeFiltersCount}
-        isFilterActive={isFilterActive}
-        filters={filters}
-        onFilterChange={setFilters}
-        onClearFilters={handleClearFilters}
-        teamMembers={teamMembers}
-        handleRefresh={handleRefresh}
-      />
-
-      <DesktopPipelineView
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        filters={filters}
-        refreshTrigger={refreshTrigger}
-        searchTerm={searchTerm}
-        handleRefresh={handleRefresh}
-        isRefreshing={isRefreshing}
-      />
+      ) : (
+        <DesktopPipelineView
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          filters={filters}
+          refreshTrigger={refreshTrigger}
+          searchTerm={searchTerm}
+          handleRefresh={handleRefresh}
+          isRefreshing={isRefreshing}
+        />
+      )}
     </div>
   );
 };
