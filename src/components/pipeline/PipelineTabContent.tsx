@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
-import { LeadStatus } from '@/components/common/StatusBadge';
 import { PipelineType } from '@/types/lead';
 
 interface PipelineTabContentProps {

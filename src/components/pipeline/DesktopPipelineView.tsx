@@ -2,7 +2,9 @@
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
-import { PlusCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { PlusCircle, Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { useKanbanData } from '@/hooks/useKanbanData';
@@ -62,16 +64,11 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const navigate = useNavigate();
   
-  console.log("DesktopPipelineView - activeTab:", activeTab);
-  console.log("DesktopPipelineView - Initial columns:", columns);
-  
   // Load column data with the hook
   const {
     loadedColumns,
     isLoading
   } = useKanbanData(columns, 0, activeTab as PipelineType);
-  
-  console.log("DesktopPipelineView - loadedColumns:", loadedColumns);
   
   // Filter the columns by pipeline type
   const filteredColumns = loadedColumns.filter(column => 
@@ -83,8 +80,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     ...item,
     columnStatus: column.status
   })));
-  
-  console.log("DesktopPipelineView - allLeads:", allLeads.length);
   
   // Calculate lead count by status for the tabs
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
@@ -100,8 +95,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     ? allLeads 
     : allLeads.filter(lead => lead.columnStatus === activeStatus);
   
-  console.log("DesktopPipelineView - displayedLeads:", displayedLeads.length);
-  
   // Apply search term
   const searchFilteredLeads = searchTerm 
     ? displayedLeads.filter(item => 
@@ -111,8 +104,8 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     : displayedLeads;
   
   // Handle adding a new lead
-  const handleAddLead = (status: LeadStatus) => {
-    navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
+  const handleAddLead = () => {
+    navigate(`/leads/new?pipeline=${activeTab}&status=${activeStatus === 'all' ? 'New' : activeStatus}`);
   };
   
   // Handle clicking on a lead
@@ -128,6 +121,59 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   
   return (
     <div className="flex flex-col h-[calc(100vh-170px)]">
+      {/* Pipeline Header Block - New design as per the image */}
+      <div className="flex flex-col gap-4 mb-6">
+        {/* Header row with title and action buttons */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-zinc-900">Pipeline</h1>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="rounded-md h-10 w-10 bg-white" 
+              onClick={handleAddLead}
+            >
+              <PlusCircle className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant={activeFiltersCount > 0 ? "default" : "outline"} 
+              size="sm" 
+              onClick={toggleFilters} 
+              className="h-10 px-4 rounded-md relative bg-white text-black border border-zinc-200"
+            >
+              <SlidersHorizontal className="h-4 w-4 mr-2" />
+              Filtres
+              {activeFiltersCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-zinc-900 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Search bar with refresh button */}
+        <div className="relative w-full bg-gray-100 rounded-md flex items-center">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Rechercher un lead..."
+            className="pl-9 pr-12 bg-gray-100 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
         <TabsList className="bg-gray-100 p-1 rounded-xl w-80">
           <TabsTrigger 
@@ -185,7 +231,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
                 <div className="text-center">
                   <p className="text-sm text-zinc-900 font-medium">Aucun lead trouvé</p>
                   <button 
-                    onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
+                    onClick={handleAddLead} 
                     className="mt-2 text-zinc-900 hover:text-zinc-700 text-sm flex items-center justify-center mx-auto"
                   >
                     <PlusCircle className="h-4 w-4 mr-1" />
@@ -218,7 +264,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
       
       <div className="fixed bottom-6 right-6 z-50 hidden md:block">
         <button 
-          onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
+          onClick={handleAddLead} 
           className="text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-colors bg-zinc-900 hover:bg-zinc-800"
         >
           <PlusCircle className="h-6 w-6" />
