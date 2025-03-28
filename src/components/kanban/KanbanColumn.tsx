@@ -58,6 +58,20 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
     }
   };
   
+  const columnTitle = {
+    'New': 'Nouveaux',
+    'Contacted': 'Contactés',
+    'Qualified': 'Qualifiés',
+    'Proposal': 'Propositions',
+    'Visit': 'Visites en cours',
+    'Offer': 'Offre en cours',
+    'Offre': 'Offre en cours',
+    'Deposit': 'Dépôt reçu',
+    'Signed': 'Signature finale',
+    'Gagné': 'Conclus',
+    'Perdu': 'Perdu'
+  }[status] || title;
+  
   return (
     <div className={cn(
       'flex flex-col min-w-[280px] border-r border-border last:border-r-0', 
@@ -65,7 +79,7 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
       className
     )}>
       <div className="flex items-center justify-between p-3 md:p-4 border-b border-border">
-        <h3 className="font-medium text-sm md:text-base">{title}</h3>
+        <h3 className="font-medium text-sm md:text-base">{columnTitle}</h3>
         <div className="flex items-center gap-1">
           <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-xs font-medium text-primary">
             {items.length}

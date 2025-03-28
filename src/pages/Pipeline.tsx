@@ -29,6 +29,10 @@ const Pipeline = () => {
     getAllColumns
   } = usePipelineState();
 
+  console.log("Pipeline page - isMobile:", isMobile);
+  console.log("Pipeline page - activeTab:", activeTab);
+  console.log("Pipeline page - filters:", filters);
+
   return (
     <div className="p-3 md:p-6 bg-white min-h-screen">
       <PipelineHeader 

@@ -3,11 +3,12 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Home, Key, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import MobileColumnList from './mobile/MobileColumnList';
 import { FilterOptions } from './PipelineFilters';
 import { PipelineType } from '@/types/lead';
 import { useKanbanData } from '@/hooks/useKanbanData';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import KanbanBoard from '@/components/kanban/KanbanBoard';
+import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 
 interface DesktopPipelineViewProps {
   activeTab: string;
@@ -55,6 +56,9 @@ const DesktopPipelineView = ({
   console.log('DesktopPipelineView - activeTab:', activeTab);
   console.log('DesktopPipelineView - filters:', filters);
 
+  // Apply filters to columns
+  const filteredColumns = applyFiltersToColumns(loadedColumns, filters);
+
   return (
     <div className="space-y-4 h-full flex flex-col">
       <div className="flex items-center justify-between">
@@ -90,12 +94,13 @@ const DesktopPipelineView = ({
           <p className="text-sm text-muted-foreground">Chargement des leads...</p>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto mt-3 pb-20 -mx-3 px-3 bg-gray-50">
-          <MobileColumnList
-            columns={loadedColumns}
-            activeTab={activeTab as PipelineType}
-            searchTerm={searchTerm}
+        <div className="flex-1 overflow-hidden mt-3">
+          <KanbanBoard 
+            columns={filteredColumns}
             filters={filters}
+            refreshTrigger={refreshTrigger}
+            pipelineType={activeTab as PipelineType}
+            className="h-full"
           />
         </div>
       )}

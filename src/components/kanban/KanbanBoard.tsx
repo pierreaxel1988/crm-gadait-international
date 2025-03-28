@@ -30,33 +30,21 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
   console.log(`Nombre de colonnes: ${columns.length}`);
   console.log('Colonnes initiales:', columns.map(c => `${c.title} (${c.status})`).join(', '));
   
-  const { loadedColumns, isLoading, setLoadedColumns } = useKanbanData(columns, refreshTrigger, pipelineType);
-  
-  console.log('Colonnes après chargement:', loadedColumns.map(c => 
-    `${c.title} (${c.status}): ${c.items.length} leads`).join(', ')
-  );
-  
-  const { handleDrop } = useKanbanDragDrop(setLoadedColumns);
-  
-  // Apply filters to the columns
-  const filteredColumns = applyFiltersToColumns(loadedColumns, filters);
-  
-  console.log('Colonnes après filtrage:', filteredColumns.map(c => 
-    `${c.title} (${c.status}): ${c.items.length} leads`).join(', ')
-  );
+  // Note: We don't need to call useKanbanData here since the columns are already passed with data
+  const { handleDrop } = useKanbanDragDrop(() => {});
   
   return (
-    <div className={cn('luxury-card p-0 overflow-hidden', className)}>
+    <div className={cn('luxury-card p-0 overflow-hidden h-full', className)}>
       <div className={cn(
-        "flex overflow-x-auto",
-        isMobile ? "h-[calc(100vh-130px)] pb-16" : "h-[calc(100vh-170px)]"
+        "flex overflow-x-auto h-full",
+        isMobile ? "pb-16" : ""
       )}>
-        {isLoading ? (
+        {columns.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-8">
-            <p className="text-muted-foreground">Chargement des données...</p>
+            <p className="text-muted-foreground">Aucune donnée disponible</p>
           </div>
         ) : (
-          filteredColumns.map((column) => (
+          columns.map((column) => (
             <KanbanColumn
               key={column.status}
               title={column.title}

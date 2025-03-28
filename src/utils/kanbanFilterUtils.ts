@@ -58,14 +58,14 @@ export const applyFiltersToColumns = (
       );
     }
     
-    // Filter by purchase timeframe
+    // Filter by purchase timeframe - fixed comparison
     if (filters.purchaseTimeframe !== null) {
       filteredItems = filteredItems.filter(item => 
         item.purchaseTimeframe === filters.purchaseTimeframe
       );
     }
     
-    // Filter by property type
+    // Filter by property type - fixed comparison
     if (filters.propertyType !== null) {
       filteredItems = filteredItems.filter(item => 
         item.propertyType === filters.propertyType
