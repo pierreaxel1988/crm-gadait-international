@@ -6,6 +6,7 @@ import { LeadTag } from '@/components/common/TagBadge';
 import TagBadge from '@/components/common/TagBadge';
 import { PurchaseTimeframe, PropertyType } from '@/types/lead';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
+import { Button } from '@/components/ui/button';
 
 interface ActiveFiltersListProps {
   filters: FilterOptions;
@@ -105,12 +106,14 @@ const ActiveFiltersList = ({
       )}
       
       {hasActiveFilters && (
-        <button 
+        <Button 
+          variant="ghost" 
+          size="sm" 
           className="text-xs text-muted-foreground hover:text-foreground"
           onClick={onClearFilters}
         >
           Tout effacer
-        </button>
+        </Button>
       )}
     </div>
   );

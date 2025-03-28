@@ -3,7 +3,7 @@ import React from 'react';
 import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Search, SlidersHorizontal } from 'lucide-react';
+import { PlusCircle, Search, SlidersHorizontal, X } from 'lucide-react';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { useNavigate } from 'react-router-dom';
 
@@ -49,7 +49,23 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
       <div className="flex items-center justify-between mb-4">
         <h1 className="tracking-tight text-xl font-medium text-zinc-900">Pipeline</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" className="h-10 w-10" onClick={() => navigate('/import-lead')}>
+          {activeFilters > 0 && (
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-10 w-10" 
+              onClick={onClearFilters}
+              title="Effacer tous les filtres"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          )}
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-10 w-10" 
+            onClick={() => navigate('/import-lead')}
+          >
             <PlusCircle className="h-5 w-5" />
           </Button>
           <Button 
