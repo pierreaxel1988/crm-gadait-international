@@ -13,18 +13,17 @@ export const applyFiltersToColumns = (
 ) => {
   if (!filters) return columns;
 
+  // Debug logging to check what filters are being applied
+  console.log("Applying filters:", JSON.stringify(filters, null, 2));
+
   return columns.map(column => {
     let filteredItems = column.items;
     
     // Filter by status if status filter is applied
     if (filters.status !== null) {
-      // Only keep items in columns that match the selected status
-      if (column.status !== filters.status) {
-        return {
-          ...column,
-          items: [] // Empty the column if it doesn't match the selected status
-        };
-      }
+      // This logic was incorrectly emptying columns that don't match the filter
+      // Instead, we need to filter the items in all columns and only keep items that match the status
+      filteredItems = filteredItems.filter(item => item.status === filters.status);
     }
     
     // Filter by tags if any are selected

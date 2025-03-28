@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PipelineType } from '@/types/lead';
 import { useKanbanData } from '@/hooks/useKanbanData';
 import LeadListItem from './LeadListItem';
+import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
@@ -53,9 +54,21 @@ const MobileColumnList = ({
     isLoading
   } = useKanbanData(columns, 0, activeTab);
   
-  const filteredColumns = loadedColumns.filter(column => 
-    !column.pipelineType || column.pipelineType === activeTab
-  );
+  // Apply filters to the loaded columns
+  const filteredColumns = filters 
+    ? applyFiltersToColumns(loadedColumns.filter(column => 
+        !column.pipelineType || column.pipelineType === activeTab
+      ), filters)
+    : loadedColumns.filter(column => 
+        !column.pipelineType || column.pipelineType === activeTab
+      );
+
+  // Check if we need to reset activeStatus when filters change
+  useEffect(() => {
+    if (filters?.status !== null) {
+      setActiveStatus(filters.status);
+    }
+  }, [filters]);
 
   const allLeads = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
@@ -71,6 +84,14 @@ const MobileColumnList = ({
   const displayedLeads = activeStatus === 'all' 
     ? allLeads 
     : allLeads.filter(lead => lead.columnStatus === activeStatus);
+
+  // Apply search filter if provided
+  const filteredLeads = searchTerm
+    ? displayedLeads.filter(lead => 
+        lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead.desiredLocation?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : displayedLeads;
 
   const handleAddLead = (status: LeadStatus) => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
@@ -117,7 +138,7 @@ const MobileColumnList = ({
           </div>
           
           <div className="space-y-px">
-            {displayedLeads.length === 0 ? (
+            {filteredLeads.length === 0 ? (
               <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
                 <div className="text-center">
                   <p className="text-sm text-zinc-900 font-medium">Aucun lead trouvé</p>
@@ -132,7 +153,7 @@ const MobileColumnList = ({
               </div>
             ) : (
               <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
-                {displayedLeads.map(lead => (
+                {filteredLeads.map(lead => (
                   <LeadListItem 
                     key={lead.id}
                     id={lead.id}

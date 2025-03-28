@@ -45,6 +45,9 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
     'Perdu': 'Perdu'
   };
 
+  // Add logging to debug selected status
+  console.log("Current selected status:", status);
+
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">

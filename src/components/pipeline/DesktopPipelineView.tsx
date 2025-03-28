@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { useKanbanData } from '@/hooks/useKanbanData';
 import { PipelineType } from '@/types/lead';
 import LeadListItem from './mobile/LeadListItem';
 import { useNavigate } from 'react-router-dom';
+import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 
 interface DesktopPipelineViewProps {
   activeTab: string;
@@ -68,9 +69,19 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     isLoading
   } = useKanbanData(columns, 0, activeTab as PipelineType);
   
-  const filteredColumns = loadedColumns.filter(column => 
-    !column.pipelineType || column.pipelineType === activeTab
-  );
+  const filteredColumns = filters 
+    ? applyFiltersToColumns(loadedColumns.filter(column => 
+        !column.pipelineType || column.pipelineType === activeTab
+      ), filters)
+    : loadedColumns.filter(column => 
+        !column.pipelineType || column.pipelineType === activeTab
+      );
+
+  useEffect(() => {
+    if (filters?.status !== null) {
+      setActiveStatus(filters.status);
+    }
+  }, [filters]);
   
   const allLeads = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
