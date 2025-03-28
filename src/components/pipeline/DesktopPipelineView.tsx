@@ -2,17 +2,13 @@
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
-import { Search, RefreshCcw, SlidersHorizontal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { PlusCircle } from 'lucide-react';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { useKanbanData } from '@/hooks/useKanbanData';
 import { PipelineType } from '@/types/lead';
-import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import LeadListItem from './mobile/LeadListItem';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle } from 'lucide-react';
 
 interface DesktopPipelineViewProps {
   activeTab: string;
@@ -148,41 +144,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
           </TabsTrigger>
         </TabsList>
       </Tabs>
-      
-      <div className="grid grid-cols-[1fr_auto] gap-4 mb-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            type="search" 
-            placeholder="Rechercher un lead..." 
-            className="pl-9 pr-16 bg-gray-50 border border-gray-200" 
-            value={searchTerm} 
-            onChange={e => setSearchTerm(e.target.value)} 
-          />
-          
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleRefresh} disabled={isRefreshing}>
-              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span className="sr-only">Refresh</span>
-            </Button>
-          </div>
-        </div>
-        
-        <Button 
-          variant={activeFiltersCount > 0 ? "default" : "outline"} 
-          size="sm" 
-          onClick={toggleFilters} 
-          className="h-10 relative font-normal text-sm"
-        >
-          <SlidersHorizontal className="h-4 w-4 mr-2" />
-          Filtres
-          {activeFiltersCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-white text-primary rounded-full h-5 w-5 flex items-center justify-center text-xs">
-              {activeFiltersCount}
-            </span>
-          )}
-        </Button>
-      </div>
       
       <div className="overflow-x-auto pb-3">
         <Tabs 

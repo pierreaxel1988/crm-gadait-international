@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
-import PipelineHeader from '@/components/pipeline/PipelineHeader';
 import MobilePipelineView from '@/components/pipeline/MobilePipelineView';
 import DesktopPipelineView from '@/components/pipeline/DesktopPipelineView';
 
@@ -40,23 +39,6 @@ const Pipeline = () => {
 
   return (
     <div className="p-3 md:p-6 bg-white min-h-screen">
-      {/* Only render PipelineHeader for desktop view */}
-      {!isMobile && (
-        <PipelineHeader 
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          onToggleFilters={toggleFilters}
-          filtersOpen={filtersOpen}
-          activeFilters={activeFiltersCount}
-          isFilterActive={isFilterActive}
-          filters={filters}
-          onFilterChange={setFilters}
-          onClearFilters={handleClearFilters}
-          teamMembers={teamMembers}
-          handleRefresh={handleRefresh}
-        />
-      )}
-
       {isMobile ? (
         <MobilePipelineView
           activeTab={activeTab}
