@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -11,6 +12,7 @@ import { PipelineType } from '@/types/lead';
 import LeadListItem from './mobile/LeadListItem';
 import { useNavigate } from 'react-router-dom';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
+import PipelineHeader from './PipelineHeader';
 
 interface DesktopPipelineViewProps {
   activeTab: string;
@@ -121,55 +123,21 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   
   return (
     <div className="flex flex-col h-[calc(100vh-170px)]">
-      <div className="flex flex-col gap-4 mb-6">
-        <div className="flex items-center justify-between">
-          <h1 className="tracking-tight text-base font-medium">Pipeline</h1>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="rounded-md h-10 w-10 bg-white" 
-              onClick={handleAddLead}
-            >
-              <PlusCircle className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant={activeFiltersCount > 0 ? "default" : "outline"} 
-              size="sm" 
-              onClick={toggleFilters} 
-              className="h-10 px-4 rounded-md relative bg-white text-black border border-zinc-200"
-            >
-              <SlidersHorizontal className="h-4 w-4 mr-2" />
-              Filtres
-              {activeFiltersCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-zinc-900 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
-                  {activeFiltersCount}
-                </span>
-              )}
-            </Button>
-          </div>
-        </div>
-
-        <div className="relative w-full bg-gray-100 rounded-md flex items-center">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Rechercher un lead..."
-            className="pl-9 pr-12 bg-gray-100 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      {/* Use PipelineHeader component for consistent UI */}
+      <PipelineHeader
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onToggleFilters={toggleFilters}
+        filtersOpen={filtersOpen}
+        activeFilters={activeFiltersCount}
+        isFilterActive={isFilterActive}
+        filters={filters}
+        onFilterChange={onFilterChange}
+        onClearFilters={onClearFilters}
+        teamMembers={teamMembers}
+        handleRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
         <TabsList className="bg-gray-100 p-1 rounded-xl w-80">

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FilterOptions } from '../PipelineFilters';
 import { useNavigate } from 'react-router-dom';
+import ActiveFiltersList from '../filters/ActiveFiltersList';
 
 interface MobilePipelineHeaderProps {
   searchTerm: string;
@@ -37,6 +38,12 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
   teamMembers
 }) => {
   const navigate = useNavigate();
+  
+  // Helper function to get team member name by ID
+  const getTeamMemberName = (id: string): string => {
+    const member = teamMembers.find(member => member.id === id);
+    return member ? member.name : 'Unknown';
+  };
   
   return (
     <div className="space-y-3">
@@ -97,6 +104,17 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
           </Button>
         </div>
       </div>
+      
+      {/* Display active filters */}
+      {activeFiltersCount > 0 && (
+        <ActiveFiltersList
+          filters={filters}
+          onFilterChange={onFilterChange}
+          onClearFilters={onClearFilters}
+          getTeamMemberName={getTeamMemberName}
+          isFilterActive={isFilterActive}
+        />
+      )}
     </div>
   );
 };

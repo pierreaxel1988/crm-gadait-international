@@ -3,9 +3,10 @@ import React from 'react';
 import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Search, SlidersHorizontal, X } from 'lucide-react';
+import { PlusCircle, Search, SlidersHorizontal, X, RefreshCcw } from 'lucide-react';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { useNavigate } from 'react-router-dom';
+import ActiveFiltersList from './filters/ActiveFiltersList';
 
 interface PipelineHeaderProps {
   searchTerm: string;
@@ -19,6 +20,7 @@ interface PipelineHeaderProps {
   onClearFilters: () => void;
   teamMembers: { id: string; name: string }[];
   handleRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 const PipelineHeader: React.FC<PipelineHeaderProps> = ({
@@ -32,11 +34,18 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   onFilterChange,
   onClearFilters,
   teamMembers,
-  handleRefresh
+  handleRefresh,
+  isRefreshing = false
 }) => {
   const navigate = useNavigate();
 
-  // Fonction pour appliquer les filtres
+  // Get team member name by ID
+  const getTeamMemberName = (id: string): string => {
+    const member = teamMembers.find(member => member.id === id);
+    return member ? member.name : 'Unknown';
+  };
+
+  // Function to apply filters
   const handleApplyFilters = () => {
     if (handleRefresh) {
       handleRefresh();
@@ -68,6 +77,17 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
           >
             <PlusCircle className="h-5 w-5" />
           </Button>
+          {handleRefresh && (
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-10 w-10" 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCcw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          )}
           <Button 
             variant={activeFilters > 0 ? "default" : "outline"} 
             size="sm" 
@@ -94,7 +114,29 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+        {handleRefresh && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
+        )}
       </div>
+
+      {/* Display active filters */}
+      {activeFilters > 0 && (
+        <ActiveFiltersList
+          filters={filters}
+          onFilterChange={onFilterChange}
+          onClearFilters={onClearFilters}
+          getTeamMemberName={getTeamMemberName}
+          isFilterActive={isFilterActive}
+        />
+      )}
 
       {/* Filters panel - only shown when filtersOpen is true */}
       {filtersOpen && (
