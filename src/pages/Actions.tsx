@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ActionsHeader from '@/components/actions/ActionsHeader';
@@ -8,6 +7,8 @@ import { LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import { toast } from '@/hooks/use-toast';
 import { ActionStatus, ActionItem } from '@/types/actionHistory';
+import Navbar from '@/components/layout/Navbar';
+import SubNavigation from '@/components/layout/SubNavigation';
 
 const ActionsPage = () => {
   const isMobile = useIsMobile();
@@ -274,28 +275,32 @@ const ActionsPage = () => {
   };
 
   return (
-    <div className="p-3 md:p-6 bg-white min-h-screen">
-      <ActionsHeader
-        isAdmin={isAdmin}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        typeFilter={typeFilter}
-        setTypeFilter={setTypeFilter}
-        agentFilter={agentFilter}
-        setAgentFilter={setAgentFilter}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        teamMembers={teamMembers}
-        handleRefresh={handleRefresh}
-      />
-      
-      <ActionsList
-        actions={filteredActions}
-        isLoading={isLoading}
-        onMarkComplete={handleMarkComplete}
-        isMobile={isMobile}
-      />
-    </div>
+    <>
+      <Navbar />
+      <SubNavigation />
+      <div className="p-3 md:p-6 bg-white min-h-screen">
+        <ActionsHeader
+          isAdmin={isAdmin}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          typeFilter={typeFilter}
+          setTypeFilter={setTypeFilter}
+          agentFilter={agentFilter}
+          setAgentFilter={setAgentFilter}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          teamMembers={teamMembers}
+          handleRefresh={handleRefresh}
+        />
+        
+        <ActionsList
+          actions={filteredActions}
+          isLoading={isLoading}
+          onMarkComplete={handleMarkComplete}
+          isMobile={isMobile}
+        />
+      </div>
+    </>
   );
 };
 
