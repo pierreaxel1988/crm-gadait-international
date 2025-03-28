@@ -1,11 +1,7 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { PlusCircle, Clock, User } from 'lucide-react';
-import { format, isToday, isTomorrow, isYesterday } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { isSameDay } from 'date-fns';
 import { Event } from '@/contexts/CalendarContext';
-import { Separator } from '@/components/ui/separator';
 
 interface CalendarEventsListProps {
   events: Event[];
@@ -14,95 +10,40 @@ interface CalendarEventsListProps {
 }
 
 const CalendarEventsList = ({ events, selectedDate, openAddEventDialog }: CalendarEventsListProps) => {
-  // If no date is selected, show message
-  if (!selectedDate) {
-    return (
-      <div className="flex flex-col items-center justify-center h-48 space-y-4">
-        <p className="text-loro-navy/60 font-futuraLight">Sélectionnez une date pour voir les événements</p>
-        <Button onClick={openAddEventDialog} variant="outline" className="border-loro-navy/20">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Ajouter un événement
-        </Button>
-      </div>
-    );
-  }
-
-  // Filter events for the selected date
-  const eventsForSelectedDate = events.filter(
-    (event) => format(event.date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
-  );
-
-  // If no events for the selected date, show message
-  if (eventsForSelectedDate.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-48 space-y-4">
-        <p className="text-loro-navy/60 font-futuraLight">Aucun événement pour cette date</p>
-        <Button onClick={openAddEventDialog} variant="outline" className="border-loro-navy/20">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Ajouter un événement
-        </Button>
-      </div>
-    );
-  }
-
-  // Sort events by time
-  const sortedEvents = [...eventsForSelectedDate].sort((a, b) => {
-    const timeA = a.time.split(':').map(Number);
-    const timeB = b.time.split(':').map(Number);
-    
-    // Compare hours first
-    if (timeA[0] !== timeB[0]) {
-      return timeA[0] - timeB[0];
-    }
-    
-    // If hours are the same, compare minutes
-    return timeA[1] - timeB[1];
-  });
+  const eventsForSelectedDate = selectedDate
+    ? events.filter((event) => isSameDay(event.date, selectedDate))
+    : [];
 
   return (
-    <div className="space-y-4">
-      {sortedEvents.map((event) => (
-        <div
-          key={event.id}
-          className="p-4 rounded-lg border border-loro-pearl overflow-hidden relative animate-fade-in"
-          style={{ borderLeftWidth: '4px', borderLeftColor: event.color }}
-        >
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="font-futura text-lg text-loro-navy">{event.title}</h3>
-            <div
-              className="h-3 w-3 rounded-full"
-              style={{ backgroundColor: event.color }}
-            />
-          </div>
-          
-          <div className="flex items-center text-sm text-loro-navy/70 mb-2">
-            <Clock className="h-4 w-4 mr-2" />
-            {event.time}
-          </div>
-
-          {event.assignedToName && (
-            <div className="flex items-center text-sm text-loro-navy/70 mb-2">
-              <User className="h-4 w-4 mr-2" />
-              {event.assignedToName}
+    <>
+      {eventsForSelectedDate.length > 0 ? (
+        <div className="space-y-4">
+          {eventsForSelectedDate.map((event) => (
+            <div 
+              key={event.id} 
+              className="p-4 rounded-lg border transition-all hover:shadow-luxury-hover"
+              style={{ backgroundColor: `${event.color}30` /* 30% opacity */ }}
+            >
+              <h3 className="font-futura text-lg font-medium">{event.title}</h3>
+              <p className="text-loro-navy font-futura mt-1">{event.description}</p>
             </div>
-          )}
-          
-          {event.description && (
-            <>
-              <Separator className="my-2" />
-              <p className="text-sm text-loro-navy/80 mt-2">{event.description}</p>
-            </>
-          )}
+          ))}
         </div>
-      ))}
-      
-      <div className="flex justify-center pt-4">
-        <Button onClick={openAddEventDialog} variant="outline" className="border-loro-navy/20">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Ajouter un événement
-        </Button>
-      </div>
-    </div>
+      ) : (
+        <div className="text-center py-10">
+          <p className="text-loro-navy font-futura font-italic">
+            Aucun événement prévu pour cette date.
+          </p>
+          <button 
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-futura font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground mt-4"
+            onClick={openAddEventDialog}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+            Ajouter un événement
+          </button>
+        </div>
+      )}
+    </>
   );
 };
 
