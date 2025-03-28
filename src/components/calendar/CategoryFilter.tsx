@@ -1,10 +1,8 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Filter } from 'lucide-react';
-import { eventCategories } from '@/contexts/CalendarContext';
-import { useCalendar } from '@/contexts/CalendarContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { eventCategories, useCalendar } from '@/contexts/CalendarContext';
+import { Check } from 'lucide-react';
 import { TaskType } from '@/components/kanban/KanbanCard';
 
 const CategoryFilter = () => {
@@ -12,30 +10,30 @@ const CategoryFilter = () => {
 
   return (
     <Card className="bg-white shadow-luxury">
-      <CardContent className="p-4">
-        <div className="flex items-center mb-2 gap-2">
-          <Filter className="h-4 w-4 text-loro-navy" />
-          <span className="font-futura text-sm">Filtrer par type d'action</span>
-        </div>
+      <CardHeader className="pb-2">
+        <CardTitle className="font-times text-2xl text-loro-terracotta">Catégories</CardTitle>
+        <CardDescription className="font-times text-chocolate-dark">
+          Filtrer les événements par catégorie
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         <div className="flex flex-wrap gap-2">
-          {eventCategories.map(category => (
-            <Badge
-              key={category.value}
-              variant="outline"
-              className={`cursor-pointer border-2 transition-colors font-futura ${
-                activeFilters.includes(category.value) 
-                  ? 'bg-opacity-30'
-                  : 'bg-white opacity-60'
-              }`}
-              style={{
-                backgroundColor: activeFilters.includes(category.value) ? `${category.color}70` : '',
-                borderColor: category.color
-              }}
-              onClick={() => toggleFilter(category.value)}
-            >
-              {category.name}
-            </Badge>
-          ))}
+          {eventCategories.map((category) => {
+            const isActive = activeFilters.includes(category.value);
+            return (
+              <button
+                key={category.value}
+                onClick={() => toggleFilter(category.value)}
+                className={`flex items-center gap-2 rounded-full py-1 px-3 text-sm font-medium transition-all ${
+                  isActive ? 'ring-2 ring-loro-terracotta ring-offset-1' : 'opacity-70 hover:opacity-100'
+                }`}
+                style={{ backgroundColor: `${category.color}80` }} // 50% opacity
+              >
+                {category.name}
+                {isActive && <Check className="h-3 w-3" />}
+              </button>
+            );
+          })}
         </div>
       </CardContent>
     </Card>
