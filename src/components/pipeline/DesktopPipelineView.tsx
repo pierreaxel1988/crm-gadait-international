@@ -50,8 +50,13 @@ const DesktopPipelineView = ({
     activeTab as PipelineType
   );
 
+  // Console logging for debugging
+  console.log('DesktopPipelineView - loadedColumns:', loadedColumns);
+  console.log('DesktopPipelineView - activeTab:', activeTab);
+  console.log('DesktopPipelineView - filters:', filters);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full flex flex-col">
       <div className="flex items-center justify-between">
         <Tabs defaultValue="purchase" value={activeTab} onValueChange={setActiveTab} className="w-full md:w-[400px]">
           <TabsList className="w-full bg-gray-100 p-0.5 rounded-xl h-11">
