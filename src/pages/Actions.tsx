@@ -18,14 +18,12 @@ const ActionsPage = () => {
   const [teamMembers, setTeamMembers] = useState<{ id: string; name: string }[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   
-  // Filters state
   const [statusFilter, setStatusFilter] = useState<ActionStatus | 'all'>('all');
   const [typeFilter, setTypeFilter] = useState<TaskType | 'all'>('all');
   const [agentFilter, setAgentFilter] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Load team members
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
@@ -38,11 +36,9 @@ const ActionsPage = () => {
         if (data) {
           setTeamMembers(data.map(member => ({ id: member.id, name: member.name })));
           
-          // Check if current user is admin
           const { data: userData, error: userError } = await supabase.auth.getUser();
           if (!userError && userData && userData.user) {
             const currentUserEmail = userData.user.email;
-            // Get the team member with current user's email
             const { data: teamMemberData, error: teamMemberError } = await supabase
               .from('team_members')
               .select('is_admin')
@@ -62,16 +58,13 @@ const ActionsPage = () => {
     fetchTeamMembers();
   }, []);
 
-  // Fetch all actions
   useEffect(() => {
     const fetchActions = async () => {
       setIsLoading(true);
       try {
-        // Get current user info
         const { data: userData } = await supabase.auth.getUser();
         const currentUserEmail = userData?.user?.email;
         
-        // Get the current user's team member id
         const { data: teamMemberData } = await supabase
           .from('team_members')
           .select('id, is_admin')
@@ -81,12 +74,10 @@ const ActionsPage = () => {
         const isUserAdmin = teamMemberData?.is_admin || false;
         const currentUserId = teamMemberData?.id;
         
-        // Fetch leads with their action history
         let query = supabase
           .from('leads')
           .select('id, name, action_history, assigned_to, status');
         
-        // Non-admin users can only see their assigned leads
         if (!isUserAdmin && currentUserId) {
           query = query.eq('assigned_to', currentUserId);
         }
@@ -95,7 +86,6 @@ const ActionsPage = () => {
         
         if (error) throw error;
         
-        // Fetch team members for assigned_to mapping
         const { data: members } = await supabase
           .from('team_members')
           .select('id, name');
@@ -103,7 +93,6 @@ const ActionsPage = () => {
         const memberMap = new Map();
         members?.forEach(member => memberMap.set(member.id, member.name));
         
-        // Extract actions from leads
         let allActions: ActionItem[] = [];
         
         leads?.forEach((lead: any) => {
@@ -111,7 +100,6 @@ const ActionsPage = () => {
           
           if (Array.isArray(leadActions)) {
             leadActions.forEach((action: any) => {
-              // Determine action status
               let status: ActionStatus = 'todo';
               
               if (action.completedDate) {
@@ -144,9 +132,7 @@ const ActionsPage = () => {
           }
         });
         
-        // Sort actions: overdue first, then todo by scheduled date, then done
         allActions.sort((a, b) => {
-          // First by status: overdue, todo, done
           if (a.status !== b.status) {
             if (a.status === 'overdue') return -1;
             if (b.status === 'overdue') return 1;
@@ -154,7 +140,6 @@ const ActionsPage = () => {
             if (b.status === 'todo') return 1;
           }
           
-          // Then by scheduled date for todo and overdue
           if ((a.status === 'todo' || a.status === 'overdue') && 
               (b.status === 'todo' || b.status === 'overdue')) {
             const aDate = a.scheduledDate ? new Date(a.scheduledDate) : new Date(0);
@@ -162,11 +147,10 @@ const ActionsPage = () => {
             return aDate.getTime() - bDate.getTime();
           }
           
-          // Then by completed date for done
           if (a.status === 'done' && b.status === 'done') {
             const aDate = a.completedDate ? new Date(a.completedDate) : new Date(0);
             const bDate = b.completedDate ? new Date(b.completedDate) : new Date(0);
-            return bDate.getTime() - aDate.getTime(); // Most recent first
+            return bDate.getTime() - aDate.getTime();
           }
           
           return 0;
@@ -190,26 +174,21 @@ const ActionsPage = () => {
     fetchActions();
   }, [refreshTrigger]);
 
-  // Apply filters
   useEffect(() => {
     let filtered = [...actions];
     
-    // Apply status filter
     if (statusFilter !== 'all') {
       filtered = filtered.filter(action => action.status === statusFilter);
     }
     
-    // Apply type filter
     if (typeFilter !== 'all') {
       filtered = filtered.filter(action => action.actionType === typeFilter);
     }
     
-    // Apply agent filter (admin only)
     if (isAdmin && agentFilter) {
       filtered = filtered.filter(action => action.assignedToId === agentFilter);
     }
     
-    // Apply search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(action => 
@@ -227,7 +206,6 @@ const ActionsPage = () => {
 
   const handleMarkComplete = async (actionId: string, leadId: string) => {
     try {
-      // Get the lead first
       const { data: lead, error: leadError } = await supabase
         .from('leads')
         .select('action_history')
@@ -241,10 +219,8 @@ const ActionsPage = () => {
         const actionIndex = actionHistory.findIndex((a: any) => a.id === actionId);
         
         if (actionIndex !== -1) {
-          // Update the action
           actionHistory[actionIndex].completedDate = new Date().toISOString();
           
-          // Update the lead
           const { error: updateError } = await supabase
             .from('leads')
             .update({ 
@@ -255,8 +231,9 @@ const ActionsPage = () => {
           
           if (updateError) throw updateError;
           
-          // Refresh the list
           handleRefresh();
+          
+          window.dispatchEvent(new CustomEvent('action-completed'));
           
           toast({
             title: "Action complétée",

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import CalendarView from '@/components/calendar/CalendarView';
@@ -20,8 +20,22 @@ const CalendarPageContent = () => {
     setIsAddEventOpen, 
     newEvent, 
     setNewEvent, 
-    handleAddEvent 
+    handleAddEvent,
+    refreshEvents
   } = useCalendar();
+
+  // Listen for action-completed events from the Actions page
+  useEffect(() => {
+    const handleActionCompleted = () => {
+      refreshEvents();
+    };
+
+    window.addEventListener('action-completed', handleActionCompleted);
+    
+    return () => {
+      window.removeEventListener('action-completed', handleActionCompleted);
+    };
+  }, [refreshEvents]);
 
   const colors = eventCategories.map(cat => ({ name: cat.name, value: cat.color }));
 
