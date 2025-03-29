@@ -29,6 +29,23 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
     const category = eventCategories.find(cat => cat.value === type);
     return category?.color || '#F5F5F5';
   };
+  
+  // Get text color for each task type
+  const getTextColorForTaskType = (type: TaskType): string => {
+    switch (type) {
+      case 'Call': return '#C55F3E';
+      case 'Visites': return '#9B51E0';
+      case 'Compromis': return '#E8B64B';
+      case 'Acte de vente': return '#4CAF50';
+      case 'Contrat de Location': return '#3D8FD1';
+      case 'Propositions': return '#9C27B0';
+      case 'Follow up': return '#E91E63';
+      case 'Estimation': return '#009688';
+      case 'Prospection': return '#F44336';
+      case 'Admin': return '#607D8B';
+      default: return '#607D8B';
+    }
+  };
 
   return (
     <div>
@@ -49,10 +66,13 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
             key={type}
             variant="outline"
             size="sm"
-            className={`text-xs ${typeFilter === type ? 'ring-2 ring-loro-terracotta ring-offset-1' : ''}`}
+            className={`text-xs max-w-fit ${typeFilter === type ? 'ring-2 ring-offset-1' : ''}`}
             onClick={() => setTypeFilter(type)}
             style={{
-              backgroundColor: typeFilter === type ? getColorForTaskType(type) : 'transparent'
+              backgroundColor: typeFilter === type ? getColorForTaskType(type) : 'transparent',
+              borderColor: typeFilter === type ? getTextColorForTaskType(type) + '20' : undefined,
+              color: typeFilter === type ? getTextColorForTaskType(type) : undefined,
+              ...(typeFilter === type ? { ringColor: getTextColorForTaskType(type) } : {})
             }}
           >
             {type}

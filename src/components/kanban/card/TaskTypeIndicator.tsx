@@ -45,55 +45,55 @@ const TaskTypeIndicator = ({ taskType }: TaskTypeIndicatorProps) => {
     switch (type) {
       case 'Call':
         return {
-          bg: '#FEEFE6',
+          bg: '#FFF5F1',
           text: '#C55F3E',
           icon: '#C55F3E'
         };
       case 'Visites':
         return {
-          bg: '#F8EBFE',
+          bg: '#F4F3FF',
           text: '#9B51E0',
           icon: '#9B51E0'
         };
       case 'Compromis':
         return {
-          bg: '#FEF6E6',
+          bg: '#EEF5FF',
           text: '#E8B64B',
           icon: '#E8B64B'
         };
       case 'Acte de vente':
         return {
-          bg: '#EEFEE6',
+          bg: '#F7FFF2',
           text: '#4CAF50',
           icon: '#4CAF50'
         };
       case 'Contrat de Location':
         return {
-          bg: '#E6F4FE',
+          bg: '#FFFBEC',
           text: '#3D8FD1',
           icon: '#3D8FD1'
         };
       case 'Propositions':
         return {
-          bg: '#F9E6FE',
+          bg: '#FFF2F5',
           text: '#9C27B0',
           icon: '#9C27B0'
         };
       case 'Follow up':
         return {
-          bg: '#FFE6F1',
+          bg: '#F0FFFE',
           text: '#E91E63',
           icon: '#E91E63'
         };
       case 'Estimation':
         return {
-          bg: '#E6FEFA',
+          bg: '#F8F3FF',
           text: '#009688',
           icon: '#009688'
         };
       case 'Prospection':
         return {
-          bg: '#FEE6E6',
+          bg: '#FFF5F1',
           text: '#F44336',
           icon: '#F44336'
         };
@@ -116,7 +116,7 @@ const TaskTypeIndicator = ({ taskType }: TaskTypeIndicatorProps) => {
   
   return (
     <div 
-      className="flex items-center gap-1.5 rounded-full px-3 py-1 transition-all duration-200 shadow-sm border"
+      className="flex items-center gap-1.5 rounded-full px-3 py-1 transition-all duration-200 shadow-sm border max-w-fit"
       style={{ 
         backgroundColor: colorConfig.bg,
         borderColor: `${colorConfig.text}20`,
