@@ -25,6 +25,36 @@ export function useIsMobile() {
   return !!isMobile
 }
 
+// For backwards compatibility, we'll provide useMediaQuery as an alias for useIsMobile
+export const useMediaQuery = (query: string): boolean => {
+  const [matches, setMatches] = React.useState<boolean>(false)
+
+  React.useEffect(() => {
+    // Default to mobile check if query is for max-width
+    if (query === "(max-width: 768px)") {
+      const checkMobile = () => {
+        setMatches(window.innerWidth < MOBILE_BREAKPOINT)
+      }
+      
+      checkMobile()
+      window.addEventListener("resize", checkMobile)
+      return () => window.removeEventListener("resize", checkMobile)
+    } else {
+      // Use actual media query for other cases
+      const media = window.matchMedia(query)
+      if (media.matches !== matches) {
+        setMatches(media.matches)
+      }
+      
+      const listener = () => setMatches(media.matches)
+      media.addEventListener("change", listener)
+      return () => media.removeEventListener("change", listener)
+    }
+  }, [matches, query])
+
+  return matches
+}
+
 // Bonus: Add a hook for detecting touch-based devices
 export function useTouchDevice() {
   const [isTouch, setIsTouch] = React.useState(false)

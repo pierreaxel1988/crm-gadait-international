@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { Event, eventCategories, useCalendar } from '@/contexts/CalendarContext';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { useMediaQuery } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AllActionsDialogProps {
   isOpen: boolean;
@@ -30,9 +29,8 @@ const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedAssignee, setSelectedAssignee] = useState<string>('all');
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
-  // Fetch team members on dialog open
   useEffect(() => {
     if (isOpen) {
       fetchTeamMembers();
@@ -55,17 +53,13 @@ const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
     }
   };
 
-  // Filter events based on action property and completion status
   const actionEvents = useMemo(() => {
-    // First filter to get only action events
     let filtered = events.filter(event => event.actionId);
     
-    // Then apply category filter if not 'all'
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(event => event.category === selectedCategory);
     }
     
-    // Then apply assignee filter if not 'all'
     if (selectedAssignee !== 'all') {
       filtered = filtered.filter(event => event.assignedToId === selectedAssignee);
     }
@@ -73,15 +67,12 @@ const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
     return filtered;
   }, [events, selectedCategory, selectedAssignee]);
   
-  // Get today's date at midnight for comparisons
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Tomorrow at midnight
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
   
-  // Filter by tab selection
   const filteredEvents = useMemo(() => {
     return activeTab === 'all' 
       ? actionEvents 
@@ -104,7 +95,6 @@ const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
             });
   }, [actionEvents, activeTab]);
 
-  // Sort events by date
   const sortedEvents = useMemo(() => {
     return [...filteredEvents].sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [filteredEvents]);
@@ -150,7 +140,6 @@ const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
     return category?.color || '#D3D3D3';
   };
 
-  // Mobile card view for each event
   const EventCard = ({ event }: { event: Event }) => (
     <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-3">
       <div className="flex items-start justify-between mb-2">
@@ -200,9 +189,7 @@ const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
     </div>
   );
 
-  // Conditional render based on device
   const renderContent = () => {
-    // Common filter section
     const filterSection = (
       <div className="flex flex-col sm:flex-row gap-2 mb-4">
         <div className="flex-1 space-y-1">
@@ -251,7 +238,6 @@ const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
       </div>
     );
 
-    // Tab navigation
     const tabNavigation = (
       <Tabs 
         defaultValue="all" 
@@ -371,7 +357,6 @@ const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
       </Tabs>
     );
 
-    // Mobile view uses Sheet instead of Dialog
     if (isMobile) {
       return (
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -396,7 +381,6 @@ const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
       );
     }
     
-    // Desktop view uses Dialog
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col p-6 gap-5">
