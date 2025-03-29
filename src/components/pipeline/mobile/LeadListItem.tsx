@@ -17,6 +17,7 @@ interface LeadListItemProps {
   taskType?: string;
   createdAt?: string;
   nextFollowUpDate?: string;
+  isActionCompleted?: boolean;
   onClick: (id: string) => void;
 }
 
@@ -30,6 +31,7 @@ const LeadListItem = ({
   taskType,
   createdAt,
   nextFollowUpDate,
+  isActionCompleted,
   onClick
 }: LeadListItemProps) => {
   
@@ -83,7 +85,15 @@ const LeadListItem = ({
     }
   };
 
-  const getActionStatusStyle = (followUpDate?: string) => {
+  const getActionStatusStyle = (followUpDate?: string, isCompleted?: boolean) => {
+    if (isCompleted) {
+      return {
+        taskClassName: "bg-gray-100 text-gray-600 rounded-full px-2 py-0.5",
+        iconClassName: "text-gray-500",
+        containerClassName: "border-gray-200 bg-gray-50/50"
+      };
+    }
+    
     if (!followUpDate) return {};
     
     const followUpDateTime = new Date(followUpDate);
@@ -116,7 +126,7 @@ const LeadListItem = ({
       .join(' ');
   };
   
-  const actionStyle = getActionStatusStyle(nextFollowUpDate);
+  const actionStyle = getActionStatusStyle(nextFollowUpDate, isActionCompleted);
   
   return (
     <div 

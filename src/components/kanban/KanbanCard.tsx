@@ -46,6 +46,9 @@ export interface KanbanItem {
   url?: string;
   createdAt?: string;
   importedAt?: string;
+  nextFollowUpDate?: string;
+  completedActionDate?: string;
+  isActionCompleted?: boolean;
 }
 
 interface KanbanCardProps {
@@ -65,6 +68,33 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     pipelineType: item.pipelineType,
     providedPipelineType: pipelineType
   });
+
+  // Determine if the card should have an overdue or to-do styling
+  const getCardStatusClass = () => {
+    if (item.isActionCompleted) {
+      return '';
+    }
+    
+    if (item.nextFollowUpDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const followUpDate = new Date(item.nextFollowUpDate);
+      followUpDate.setHours(0, 0, 0, 0);
+      
+      if (followUpDate < today) {
+        // Overdue tasks - light pink background
+        return 'border-rose-200 bg-[#FFDEE2]/20';
+      } else if (followUpDate.getTime() === today.getTime()) {
+        // Today's tasks - light amber background
+        return 'border-amber-200 bg-amber-50/40';
+      } else {
+        // Future tasks - light green background
+        return 'border-green-200 bg-[#F2FCE2]/20';
+      }
+    }
+    
+    return '';
+  };
 
   const handleCardClick = () => {
     navigate(`/leads/${item.id}`);
@@ -101,7 +131,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     <Card 
       className={cn(
         'border shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden',
-        'bg-white',
+        getCardStatusClass(),
         draggable && 'cursor-grab active:cursor-grabbing',
         className
       )}
@@ -146,7 +176,12 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
           />
           
           {/* Type de tâche */}
-          <TaskTypeIndicator taskType={item.taskType} phoneNumber={item.phone} />
+          <TaskTypeIndicator 
+            taskType={item.taskType} 
+            phoneNumber={item.phone}
+            dueDate={item.nextFollowUpDate}
+            isCompleted={item.isActionCompleted}
+          />
         </div>
       </CardContent>
     </Card>

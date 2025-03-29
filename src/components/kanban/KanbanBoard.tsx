@@ -48,9 +48,27 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
     columns,
     pipelineType
   ]);
+
+  // Apply task status color to the board background
+  const getBoardBackground = () => {
+    // Check if there are leads with tasks that are overdue
+    const hasOverdueTasks = memoizedColumns.some(col => 
+      col.items.some(item => 
+        item.nextFollowUpDate && 
+        !item.isActionCompleted && 
+        new Date(item.nextFollowUpDate) < new Date() && 
+        new Date(item.nextFollowUpDate).setHours(0,0,0,0) < new Date().setHours(0,0,0,0)
+      )
+    );
+
+    if (hasOverdueTasks) {
+      return "bg-[#FFDEE2]/10"; // Very light red background for boards with overdue tasks
+    }
+    return ""; // Default background
+  };
   
   return (
-    <div className={cn('overflow-hidden h-full', className)}>
+    <div className={cn('overflow-hidden h-full', getBoardBackground(), className)}>
       <div className={cn(
         "flex overflow-x-auto h-full",
         isMobile ? "pb-16" : ""
