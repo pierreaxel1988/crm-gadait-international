@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import CustomButton from '@/components/ui/CustomButton';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
+
 interface LeadDetailHeaderProps {
   name: string;
   createdAt?: string;
@@ -18,6 +20,7 @@ interface LeadDetailHeaderProps {
   hasChanges: boolean;
   tags?: LeadTag[];
 }
+
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   name,
   createdAt,
@@ -45,8 +48,22 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
     if (isNaN(budgetNumber)) return budget;
     return budgetNumber.toLocaleString('fr-FR');
   };
+
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (phone) {
+      // Format phone number for WhatsApp (remove spaces and any non-digit characters except +)
+      const cleanedPhone = phone.replace(/[^\d+]/g, '');
+      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
+    }
+  };
+  
   const formattedBudget = formatBudget(budget);
-  return <div className="flex items-center justify-between p-3 bg-zinc-100">
+  
+  return (
+    <div className="flex items-center justify-between p-3 bg-zinc-100">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2">
           <ArrowLeft className="h-5 w-5" />
@@ -64,14 +81,27 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {phone && <a href={`tel:${phone}`} className="p-2 rounded-full bg-green-100 text-green-600">
-            <Phone className="h-4 w-4" />
-          </a>}
+        {phone && (
+          <>
+            <a href={`tel:${phone}`} className="p-2 rounded-full bg-green-100 text-green-600">
+              <Phone className="h-4 w-4" />
+            </a>
+            <button 
+              onClick={handleWhatsAppClick}
+              className="p-2 rounded-full bg-emerald-100 text-emerald-600"
+              aria-label="Contacter via WhatsApp"
+            >
+              <MessageSquare className="h-4 w-4" />
+            </button>
+          </>
+        )}
         {email && <a href={`mailto:${email}`} className="p-2 rounded-full bg-blue-100 text-blue-600">
             <Mail className="h-4 w-4" />
           </a>}
         {tags && tags.length > 0 && <TagBadge tag={tags[0]} />}
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default LeadDetailHeader;

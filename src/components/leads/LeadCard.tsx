@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Mail, MapPin, Phone, User } from 'lucide-react';
+import { Mail, MapPin, Phone, MessageSquare, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import StatusBadge, { LeadStatus } from '@/components/common/StatusBadge';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
@@ -78,6 +78,16 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
       onContact();
     }
   };
+  
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (lead.phone) {
+      // Format phone number for WhatsApp (remove spaces and any non-digit characters except +)
+      const cleanedPhone = lead.phone.replace(/[^\d+]/g, '');
+      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
+    }
+  };
 
   return (
     <div 
@@ -92,9 +102,18 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
             <span>{lead.email}</span>
           </div>
           {lead.phone && (
-            <div className="flex items-center text-sm text-muted-foreground mt-1">
-              <Phone className="h-3.5 w-3.5 mr-1" />
-              <span>{lead.phone}</span>
+            <div className="flex items-center text-sm text-muted-foreground mt-1 gap-2">
+              <div className="flex items-center">
+                <Phone className="h-3.5 w-3.5 mr-1" />
+                <span>{lead.phone}</span>
+              </div>
+              <button 
+                onClick={handleWhatsAppClick}
+                className="p-1 rounded-full bg-emerald-100/50 text-emerald-600 hover:bg-emerald-100"
+                aria-label="Contacter via WhatsApp"
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+              </button>
             </div>
           )}
           {lead.location && (

@@ -4,7 +4,7 @@ import { ActionItem } from '@/types/actionHistory';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Calendar } from 'lucide-react';
+import { Check, Calendar, Phone, Mail, MessageSquare } from 'lucide-react';
 import TaskTypeIndicator from '@/components/kanban/card/TaskTypeIndicator';
 import { format, isToday, isYesterday, isTomorrow, isThisWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -58,6 +58,32 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
     }
   };
   
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (action.phoneNumber) {
+      // Format phone number for WhatsApp (remove spaces and any non-digit characters except +)
+      const cleanedPhone = action.phoneNumber.replace(/[^\d+]/g, '');
+      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
+    }
+  };
+  
+  const handlePhoneClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (action.phoneNumber) {
+      window.location.href = `tel:${action.phoneNumber}`;
+    }
+  };
+  
+  const handleEmailClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (action.email) {
+      window.location.href = `mailto:${action.email}`;
+    }
+  };
+  
   return (
     <Card 
       className={`p-4 transition-all cursor-pointer ${
@@ -98,26 +124,64 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
           {formatDate(action.status === 'done' ? action.completedDate : action.scheduledDate)}
         </div>
         
-        {action.status !== 'done' && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className={getButtonClasses(action.status)}
-            onClick={(e) => {
-              e.stopPropagation();
-              onMarkComplete(action.id, action.leadId);
-            }}
-          >
-            <Check className="h-4 w-4 mr-1" /> 
-            Complété
-          </Button>
-        )}
-        
-        {action.status === 'done' && (
-          <span className="text-xs py-1 px-2 bg-green-100 text-green-700 rounded-full flex items-center">
-            <Check className="h-3 w-3 mr-1" /> Terminé
-          </span>
-        )}
+        <div className="flex items-center gap-1">
+          {action.phoneNumber && (
+            <>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0 rounded-full text-green-600 hover:text-green-700 hover:bg-green-50"
+                onClick={handleWhatsAppClick}
+                title="Contacter par WhatsApp"
+              >
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0 rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                onClick={handlePhoneClick}
+                title="Appeler"
+              >
+                <Phone className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+          
+          {action.email && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0 rounded-full text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+              onClick={handleEmailClick}
+              title="Envoyer un email"
+            >
+              <Mail className="h-4 w-4" />
+            </Button>
+          )}
+          
+          {action.status !== 'done' && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className={getButtonClasses(action.status)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onMarkComplete(action.id, action.leadId);
+              }}
+            >
+              <Check className="h-4 w-4 mr-1" /> 
+              Complété
+            </Button>
+          )}
+          
+          {action.status === 'done' && (
+            <span className="text-xs py-1 px-2 bg-green-100 text-green-700 rounded-full flex items-center">
+              <Check className="h-3 w-3 mr-1" /> Terminé
+            </span>
+          )}
+        </div>
       </div>
     </Card>
   );
