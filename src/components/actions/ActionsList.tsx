@@ -2,14 +2,14 @@
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { format, isToday, isYesterday, isTomorrow, isThisWeek, isAfter } from 'date-fns';
+import { format, isToday, isYesterday, isTomorrow, isThisWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Check, X, Calendar } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Check, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ActionItem } from '@/types/actionHistory';
 import TaskTypeIndicator from '@/components/kanban/card/TaskTypeIndicator';
 import { useNavigate } from 'react-router-dom';
+import ActionCard from './ActionCard';
 
 interface ActionsListProps {
   actions: ActionItem[];
@@ -88,68 +88,12 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
     return (
       <div className="space-y-4">
         {actions.map(action => (
-          <Card 
-            key={action.id} 
-            className={`p-4 transition-all cursor-pointer ${
-              action.status === 'overdue' 
-                ? 'border-red-300 bg-[#FFDEE2]/30' 
-                : action.status === 'done' 
-                  ? 'bg-gray-50/80 border-gray-200' 
-                  : 'bg-[#F2FCE2]/40 border-green-100'
-            }`}
-            onClick={(e) => handleCardClick(action.leadId, e)}
-          >
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <div className={`font-medium ${action.status === 'done' ? 'text-gray-600' : ''}`}>{action.leadName}</div>
-                <div className="text-sm text-muted-foreground mb-1">{action.assignedToName}</div>
-                <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />
-              </div>
-              <div>
-                {getStatusBadge(action.status)}
-              </div>
-            </div>
-            
-            {action.notes && (
-              <div className={`text-sm mt-2 p-2 rounded ${
-                action.status === 'done' 
-                  ? 'bg-white/80 text-gray-600' 
-                  : action.status === 'overdue'
-                    ? 'bg-[#FFF0F2] text-rose-800'
-                    : 'bg-[#F7FEF1] text-green-800'
-              }`}>
-                {action.notes}
-              </div>
-            )}
-            
-            <div className="flex justify-between items-center mt-3">
-              <div className="flex items-center text-sm text-gray-500">
-                <Calendar className="h-3.5 w-3.5 mr-1" />
-                {formatDate(action.status === 'done' ? action.completedDate : action.scheduledDate)}
-              </div>
-              
-              {action.status !== 'done' && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className={getButtonClasses(action.status)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMarkComplete(action.id, action.leadId);
-                  }}
-                >
-                  <Check className="h-4 w-4 mr-1" /> 
-                  Complété
-                </Button>
-              )}
-              
-              {action.status === 'done' && (
-                <span className="text-xs py-1 px-2 bg-green-100 text-green-700 rounded-full flex items-center">
-                  <Check className="h-3 w-3 mr-1" /> Terminé
-                </span>
-              )}
-            </div>
-          </Card>
+          <ActionCard 
+            key={action.id}
+            action={action}
+            onMarkComplete={onMarkComplete}
+            onCardClick={handleCardClick}
+          />
         ))}
       </div>
     );
