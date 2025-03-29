@@ -8,7 +8,6 @@ import { Currency } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 interface LeadListItemProps {
   id: string;
@@ -142,27 +141,9 @@ const LeadListItem = ({
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (phone) {
+      // Format phone number for WhatsApp (remove spaces and any non-digit characters except +)
       const cleanedPhone = phone.replace(/[^\d+]/g, '');
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
-    }
-  };
-
-  const getBadgeStyle = (type: string) => {
-    switch (type) {
-      case 'status':
-        return "bg-loro-200/30 border border-loro-300/40 text-loro-700";
-      case 'location':
-        return "bg-loro-100/30 border border-loro-200/40 text-loro-700";
-      case 'budget':
-        return "bg-loro-50/40 border border-loro-200/30 text-loro-600";
-      case 'Call':
-        return "bg-loro-300/20 border border-loro-400/20 text-loro-500";
-      case 'Follow up':
-        return "bg-loro-400/20 border border-loro-500/20 text-loro-600";
-      case 'Visites':
-        return "bg-loro-200/30 border border-loro-300/30 text-loro-700";
-      default:
-        return "bg-loro-100/20 border border-loro-200/30 text-loro-800";
     }
   };
   
@@ -246,44 +227,44 @@ const LeadListItem = ({
             {formatDate(createdAt)}
           </span>
         </div>
-        <div className="flex flex-wrap items-center text-sm text-zinc-700 mt-1 gap-2">
-          <div className={`inline-flex items-center rounded-full text-xs font-medium shadow-sm h-6 px-3 ${getBadgeStyle('status')}`}>
+        <div className="flex flex-wrap items-center text-sm text-zinc-700 mt-1 gap-1">
+          <span className="inline-flex items-center bg-zinc-100 text-zinc-900 text-xs px-2 py-0.5 rounded-full">
             {columnStatus}
-          </div>
+          </span>
           
           {taskType && (
-            <div 
-              className={`flex items-center rounded-full text-xs font-medium shadow-sm h-6 px-3 ${nextFollowUpDate ? actionStyle.taskClassName : getBadgeStyle(taskType)}`}
+            <span 
+              className={`flex items-center ${nextFollowUpDate ? actionStyle.taskClassName : 'bg-zinc-100 text-zinc-700 rounded-full px-2 py-0.5'}`}
               onClick={taskType === 'Call' && phone ? handlePhoneCall : undefined}
               style={taskType === 'Call' && phone ? { cursor: 'pointer' } : undefined}
             >
               {taskType === 'Call' ? 
-                <Phone className={`h-3 w-3 mr-1.5 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-500'}`} /> : 
+                <Phone className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
                taskType === 'Follow up' ? 
-                <Clock className={`h-3 w-3 mr-1.5 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-600'}`} /> : 
+                <Clock className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
                taskType === 'Visites' ? 
-                <Calendar className={`h-3 w-3 mr-1.5 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-loro-700'}`} /> : 
+                <Calendar className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
                 null
               }
-              <span className="truncate">
+              <span className={`truncate text-xs ${nextFollowUpDate ? '' : 'text-zinc-900'}`}>
                 {taskType}
               </span>
-            </div>
+            </span>
           )}
           
           {desiredLocation && (
-            <div className={`flex items-center rounded-full text-xs font-medium shadow-sm h-6 px-3 ${getBadgeStyle('location')}`}>
-              <MapPin className="h-3 w-3 mr-1.5 text-loro-600" />
-              <span className="truncate">
+            <span className="flex items-center bg-zinc-100 text-zinc-700 rounded-full px-2 py-0.5">
+              <MapPin className="h-3 w-3 mr-1 text-zinc-600" />
+              <span className="truncate text-xs text-zinc-900">
                 {desiredLocation}
               </span>
-            </div>
+            </span>
           )}
           
           {budget && (
-            <div className={`truncate text-xs font-medium rounded-full shadow-sm h-6 px-3 ${getBadgeStyle('budget')}`}>
+            <span className="truncate text-xs font-medium bg-zinc-100 text-zinc-900 rounded-full px-2 py-0.5">
               {formatBudget(budget, currency)}
-            </div>
+            </span>
           )}
         </div>
       </div>
