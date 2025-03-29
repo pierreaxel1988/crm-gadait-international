@@ -6,6 +6,7 @@ import KanbanCard, { KanbanItem } from './KanbanCard';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
+import { isPast, isToday } from 'date-fns';
 
 interface KanbanColumnProps {
   title: string;
@@ -58,6 +59,27 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
     }
   };
   
+  // Calculer combien de tâches sont en retard ou prévues pour aujourd'hui
+  const calculateTaskCounts = () => {
+    let overdueTasks = 0;
+    let todayTasks = 0;
+    
+    items.forEach(item => {
+      if (item.nextFollowUpDate) {
+        const followUpDate = new Date(item.nextFollowUpDate);
+        if (isPast(followUpDate) && !isToday(followUpDate)) {
+          overdueTasks++;
+        } else if (isToday(followUpDate)) {
+          todayTasks++;
+        }
+      }
+    });
+    
+    return { overdueTasks, todayTasks };
+  };
+  
+  const { overdueTasks, todayTasks } = calculateTaskCounts();
+  
   const columnTitle = {
     'New': 'Nouveaux',
     'Contacted': 'Contactés',
@@ -84,6 +106,16 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
           <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-xs font-medium text-primary">
             {items.length}
           </span>
+          {overdueTasks > 0 && (
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-100 text-xs font-medium text-red-600">
+              {overdueTasks}
+            </span>
+          )}
+          {todayTasks > 0 && (
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 text-xs font-medium text-amber-600">
+              {todayTasks}
+            </span>
+          )}
           <button 
             onClick={handleAddLead}
             className="text-primary hover:text-primary/80"

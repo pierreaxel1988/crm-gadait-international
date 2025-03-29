@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { useKanbanDragDrop } from '@/hooks/useKanbanDragDrop';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { isPast, isToday } from 'date-fns';
 
 interface KanbanBoardProps {
   columns: {
@@ -35,15 +36,35 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
   
   const { handleDrop } = useKanbanDragDrop(() => {});
   
-  // Memoize columns to prevent unnecessary re-renders
+  // Memoize columns to prevent unnecessary re-renders and compute task status
   const memoizedColumns = useMemo(() => {
     console.log("Memoizing columns:", columns);
-    // Ensure all columns have an items array even if it's empty
-    return columns.map(col => ({
-      ...col,
-      items: col.items || [],
-      pipelineType: col.pipelineType || pipelineType
-    }));
+    // Ensure all columns have an items array even if it's empty and add computed properties
+    return columns.map(col => {
+      // Ajouter des propriétés calculées pour chaque élément
+      const itemsWithStatus = (col.items || []).map(item => {
+        let isTaskOverdue = false;
+        let isTaskToday = false;
+        
+        if (item.nextFollowUpDate) {
+          const followUpDate = new Date(item.nextFollowUpDate);
+          isTaskOverdue = isPast(followUpDate) && !isToday(followUpDate);
+          isTaskToday = isToday(followUpDate);
+        }
+        
+        return {
+          ...item,
+          isTaskOverdue,
+          isTaskToday
+        };
+      });
+      
+      return {
+        ...col,
+        items: itemsWithStatus,
+        pipelineType: col.pipelineType || pipelineType
+      };
+    });
   }, [
     columns,
     pipelineType

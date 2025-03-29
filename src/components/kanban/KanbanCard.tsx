@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import { Card, CardContent } from "@/components/ui/card";
+import { isPast, isToday } from 'date-fns';
 
 // Import sub-components
 import ContactInfo from './card/ContactInfo';
@@ -46,6 +47,7 @@ export interface KanbanItem {
   url?: string;
   createdAt?: string;
   importedAt?: string;
+  nextFollowUpDate?: string;
 }
 
 interface KanbanCardProps {
@@ -96,6 +98,23 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
       window.open(item.url, '_blank');
     }
   };
+  
+  // Déterminer si la tâche est en retard
+  const isOverdue = () => {
+    if (!item.nextFollowUpDate) return false;
+    const followUpDateTime = new Date(item.nextFollowUpDate);
+    return isPast(followUpDateTime) && !isToday(followUpDateTime);
+  };
+
+  // Déterminer la couleur de la bordure en fonction du statut de la tâche
+  const getCardBorderClass = () => {
+    if (isOverdue()) {
+      return 'border-red-300';
+    } else if (item.nextFollowUpDate && isToday(new Date(item.nextFollowUpDate))) {
+      return 'border-amber-300';
+    }
+    return '';
+  };
 
   return (
     <Card 
@@ -103,6 +122,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
         'border shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden',
         'bg-white',
         draggable && 'cursor-grab active:cursor-grabbing',
+        getCardBorderClass(),
         className
       )}
       onClick={handleCardClick}
@@ -145,8 +165,13 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
             onAssignClick={handleAssignClick} 
           />
           
-          {/* Type de tâche */}
-          <TaskTypeIndicator taskType={item.taskType} phoneNumber={item.phone} />
+          {/* Type de tâche avec indication de statut */}
+          <TaskTypeIndicator 
+            taskType={item.taskType} 
+            phoneNumber={item.phone}
+            nextFollowUpDate={item.nextFollowUpDate}
+            isOverdue={isOverdue()}
+          />
         </div>
       </CardContent>
     </Card>

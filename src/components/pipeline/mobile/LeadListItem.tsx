@@ -17,6 +17,7 @@ interface LeadListItemProps {
   taskType?: string;
   createdAt?: string;
   nextFollowUpDate?: string;
+  phone?: string;
   onClick: (id: string) => void;
 }
 
@@ -30,6 +31,7 @@ const LeadListItem = ({
   taskType,
   createdAt,
   nextFollowUpDate,
+  phone,
   onClick
 }: LeadListItemProps) => {
   
@@ -118,6 +120,13 @@ const LeadListItem = ({
   
   const actionStyle = getActionStatusStyle(nextFollowUpDate);
   
+  const handlePhoneCall = (e: React.MouseEvent) => {
+    if (taskType === 'Call' && phone) {
+      e.stopPropagation();
+      window.location.href = `tel:${phone}`;
+    }
+  };
+  
   return (
     <div 
       className={`py-3 px-4 flex items-center hover:bg-slate-50 transition-colors cursor-pointer ${nextFollowUpDate ? actionStyle.containerClassName : ''}`} 
@@ -143,7 +152,11 @@ const LeadListItem = ({
           </span>
           
           {taskType && (
-            <span className={`flex items-center ${nextFollowUpDate ? actionStyle.taskClassName : 'bg-zinc-100 text-zinc-700 rounded-full px-2 py-0.5'}`}>
+            <span 
+              className={`flex items-center ${nextFollowUpDate ? actionStyle.taskClassName : 'bg-zinc-100 text-zinc-700 rounded-full px-2 py-0.5'}`}
+              onClick={taskType === 'Call' && phone ? handlePhoneCall : undefined}
+              style={taskType === 'Call' && phone ? { cursor: 'pointer' } : undefined}
+            >
               {taskType === 'Call' ? 
                 <Phone className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
                taskType === 'Follow up' ? 
