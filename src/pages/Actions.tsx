@@ -76,7 +76,7 @@ const ActionsPage = () => {
         
         let query = supabase
           .from('leads')
-          .select('id, name, action_history, assigned_to, status');
+          .select('id, name, action_history, assigned_to, status, phone');
         
         if (!isUserAdmin && currentUserId) {
           query = query.eq('assigned_to', currentUserId);
@@ -126,7 +126,8 @@ const ActionsPage = () => {
                 notes: action.notes,
                 assignedToId: lead.assigned_to,
                 assignedToName: memberMap.get(lead.assigned_to) || 'Non assigné',
-                status
+                status,
+                phoneNumber: lead.phone
               });
             });
           }

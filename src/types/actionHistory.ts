@@ -17,11 +17,12 @@ export interface ActionItem {
   leadId: string;
   leadName: string;
   actionType: TaskType;
-  createdAt: string;
+  createdAt?: string;
   scheduledDate?: string;
   completedDate?: string;
   notes?: string;
   assignedToId?: string;
   assignedToName: string;
   status: ActionStatus;
+  phoneNumber?: string;
 }

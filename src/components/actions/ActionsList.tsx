@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ActionItem } from '@/types/actionHistory';
 import TaskTypeIndicator from '@/components/kanban/card/TaskTypeIndicator';
+import { useNavigate } from 'react-router-dom';
 
 interface ActionsListProps {
   actions: ActionItem[];
@@ -18,6 +18,13 @@ interface ActionsListProps {
 }
 
 const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkComplete, isMobile }) => {
+  const navigate = useNavigate();
+  
+  const handleCardClick = (leadId: string, e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    navigate(`/leads/${leadId}`);
+  };
+  
   if (isLoading) {
     return (
       <div className="text-center py-10">
@@ -65,7 +72,6 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
     }
   };
 
-  // Fonction pour obtenir les classes du bouton en fonction du statut
   const getButtonClasses = (status: string) => {
     switch (status) {
       case 'overdue':
@@ -73,30 +79,30 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
       case 'todo':
         return "h-8 border-green-300 text-green-700 hover:bg-[#F2FCE2]/50 hover:text-green-800";
       default:
-        return "h-8"; // Style par défaut
+        return "h-8";
     }
   };
 
-  // Mobile view
   if (isMobile) {
     return (
       <div className="space-y-4">
         {actions.map(action => (
           <Card 
             key={action.id} 
-            className={`p-4 transition-all ${
+            className={`p-4 transition-all cursor-pointer ${
               action.status === 'overdue' 
                 ? 'border-red-300 bg-[#FFDEE2]/30' 
                 : action.status === 'done' 
                   ? 'bg-gray-50/80 border-gray-200' 
                   : 'bg-[#F2FCE2]/40 border-green-100'
             }`}
+            onClick={(e) => handleCardClick(action.leadId, e)}
           >
             <div className="flex justify-between items-start mb-2">
               <div>
                 <div className={`font-medium ${action.status === 'done' ? 'text-gray-600' : ''}`}>{action.leadName}</div>
                 <div className="text-sm text-muted-foreground mb-1">{action.assignedToName}</div>
-                <TaskTypeIndicator taskType={action.actionType} />
+                <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />
               </div>
               <div>
                 {getStatusBadge(action.status)}
@@ -126,7 +132,10 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
                   variant="outline" 
                   size="sm" 
                   className={getButtonClasses(action.status)}
-                  onClick={() => onMarkComplete(action.id, action.leadId)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMarkComplete(action.id, action.leadId);
+                  }}
                 >
                   <Check className="h-4 w-4 mr-1" /> Complété
                 </Button>
@@ -144,7 +153,6 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
     );
   }
 
-  // Desktop view
   return (
     <Table>
       <TableHeader>
@@ -160,16 +168,20 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
       </TableHeader>
       <TableBody>
         {actions.map(action => (
-          <TableRow key={action.id} className={
-            action.status === 'overdue' 
-              ? 'bg-[#FFDEE2]/20' 
-              : action.status === 'done'
-                ? 'bg-gray-50/80 text-gray-600' 
-                : 'bg-[#F2FCE2]/20'
-          }>
+          <TableRow 
+            key={action.id} 
+            className={`cursor-pointer ${
+              action.status === 'overdue' 
+                ? 'bg-[#FFDEE2]/20' 
+                : action.status === 'done'
+                  ? 'bg-gray-50/80 text-gray-600' 
+                  : 'bg-[#F2FCE2]/20'
+            }`}
+            onClick={(e) => handleCardClick(action.leadId, e)}
+          >
             <TableCell>{action.leadName}</TableCell>
             <TableCell>
-              <TaskTypeIndicator taskType={action.actionType} />
+              <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />
             </TableCell>
             <TableCell>{getStatusBadge(action.status)}</TableCell>
             <TableCell>
@@ -191,7 +203,10 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
                   variant="outline" 
                   size="sm" 
                   className={getButtonClasses(action.status)}
-                  onClick={() => onMarkComplete(action.id, action.leadId)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMarkComplete(action.id, action.leadId);
+                  }}
                 >
                   <Check className="h-4 w-4 mr-1" />
                   Compléter
