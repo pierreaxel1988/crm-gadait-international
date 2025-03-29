@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 export type LeadStatus =
@@ -50,15 +51,16 @@ const StatusBadge = ({ status, className }: StatusBadgeProps) => {
   };
 
   return (
-    <span
+    <Badge
+      weight="normal"
       className={cn(
-        'luxury-badge',
+        'luxury-badge font-futuraLight',
         getStatusStyles(status),
         className
       )}
     >
       {status}
-    </span>
+    </Badge>
   );
 };
 
