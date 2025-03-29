@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ActionsHeader from '@/components/actions/ActionsHeader';
@@ -76,7 +77,7 @@ const ActionsPage = () => {
         
         let query = supabase
           .from('leads')
-          .select('id, name, action_history, assigned_to, status, phone');
+          .select('id, name, action_history, assigned_to, status, phone, email');
         
         if (!isUserAdmin && currentUserId) {
           query = query.eq('assigned_to', currentUserId);
@@ -127,7 +128,8 @@ const ActionsPage = () => {
                 assignedToId: lead.assigned_to,
                 assignedToName: memberMap.get(lead.assigned_to) || 'Non assigné',
                 status,
-                phoneNumber: lead.phone
+                phoneNumber: lead.phone,
+                email: lead.email
               });
             });
           }

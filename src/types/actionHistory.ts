@@ -25,4 +25,5 @@ export interface ActionItem {
   assignedToName: string;
   status: ActionStatus;
   phoneNumber?: string;
+  email?: string;
 }
