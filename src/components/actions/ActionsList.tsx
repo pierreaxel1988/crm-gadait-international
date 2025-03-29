@@ -70,10 +70,19 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
     return (
       <div className="space-y-4">
         {actions.map(action => (
-          <Card key={action.id} className={`p-4 ${action.status === 'overdue' ? 'border-red-400' : ''}`}>
+          <Card 
+            key={action.id} 
+            className={`p-4 transition-all ${
+              action.status === 'overdue' 
+                ? 'border-red-400 bg-red-50/50' 
+                : action.status === 'done' 
+                  ? 'bg-gray-50/80 border-gray-200' 
+                  : 'bg-white'
+            }`}
+          >
             <div className="flex justify-between items-start mb-2">
               <div>
-                <div className="font-medium">{action.leadName}</div>
+                <div className={`font-medium ${action.status === 'done' ? 'text-gray-600' : ''}`}>{action.leadName}</div>
                 <div className="text-sm text-muted-foreground mb-1">{action.assignedToName}</div>
                 <TaskTypeIndicator taskType={action.actionType} />
               </div>
@@ -83,7 +92,11 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
             </div>
             
             {action.notes && (
-              <div className="text-sm mt-2 bg-muted/50 p-2 rounded">
+              <div className={`text-sm mt-2 p-2 rounded ${
+                action.status === 'done' 
+                  ? 'bg-white/80 text-gray-600' 
+                  : 'bg-muted/50'
+              }`}>
                 {action.notes}
               </div>
             )}
@@ -91,7 +104,7 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
             <div className="flex justify-between items-center mt-3">
               <div className="flex items-center text-sm text-gray-500">
                 <Calendar className="h-3.5 w-3.5 mr-1" />
-                {formatDate(action.scheduledDate)}
+                {formatDate(action.status === 'done' ? action.completedDate : action.scheduledDate)}
               </div>
               
               {action.status !== 'done' && (
@@ -103,6 +116,12 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
                 >
                   <Check className="h-4 w-4 mr-1" /> Complété
                 </Button>
+              )}
+              
+              {action.status === 'done' && (
+                <span className="text-xs py-1 px-2 bg-green-100 text-green-700 rounded-full flex items-center">
+                  <Check className="h-3 w-3 mr-1" /> Terminé
+                </span>
               )}
             </div>
           </Card>
@@ -127,15 +146,31 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
       </TableHeader>
       <TableBody>
         {actions.map(action => (
-          <TableRow key={action.id} className={action.status === 'overdue' ? 'bg-red-50' : ''}>
+          <TableRow key={action.id} className={
+            action.status === 'overdue' 
+              ? 'bg-red-50/70' 
+              : action.status === 'done'
+                ? 'bg-gray-50/80 text-gray-600' 
+                : ''
+          }>
             <TableCell>{action.leadName}</TableCell>
             <TableCell>
               <TaskTypeIndicator taskType={action.actionType} />
             </TableCell>
             <TableCell>{getStatusBadge(action.status)}</TableCell>
-            <TableCell>{formatDate(action.scheduledDate)}</TableCell>
+            <TableCell>
+              {action.status === 'done' 
+                ? <div className="flex items-center">
+                    <Check className="h-3.5 w-3.5 mr-1.5 text-green-600" />
+                    <span>{formatDate(action.completedDate)}</span>
+                  </div>
+                : formatDate(action.scheduledDate)
+              }
+            </TableCell>
             <TableCell>{action.assignedToName}</TableCell>
-            <TableCell className="max-w-xs truncate">{action.notes || '-'}</TableCell>
+            <TableCell className={`max-w-xs truncate ${action.status === 'done' ? 'text-gray-500' : ''}`}>
+              {action.notes || '-'}
+            </TableCell>
             <TableCell>
               {action.status !== 'done' ? (
                 <Button 
@@ -147,8 +182,8 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
                   Compléter
                 </Button>
               ) : (
-                <div className="text-sm text-gray-500">
-                  Terminé le {formatDate(action.completedDate)}
+                <div className="flex items-center text-sm text-green-600">
+                  <Check className="h-4 w-4 mr-1" /> Terminé
                 </div>
               )}
             </TableCell>

@@ -48,12 +48,22 @@ const CalendarEventsList = ({
           {eventsForSelectedDate.map((event) => (
             <div 
               key={event.id} 
-              className={`p-3 rounded-lg border transition-all hover:shadow-luxury-hover ${event.isCompleted ? 'bg-gray-50 opacity-70' : ''}`}
-              style={{ backgroundColor: event.isCompleted ? '#f9f9f9' : `${event.color}30` /* 30% opacity */ }}
+              className={`p-3 rounded-lg border transition-all ${
+                event.isCompleted 
+                  ? 'bg-gray-50/80 border-gray-200 opacity-80' 
+                  : `bg-white hover:shadow-luxury-hover`
+              }`}
+              style={{ 
+                backgroundColor: event.isCompleted 
+                  ? '#F1F0FB' // Soft gray from pastel color palette
+                  : `${event.color}10` // 10% opacity of event color
+              }}
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-futura text-sm font-medium">{event.title}</h3>
+                  <h3 className={`font-futura text-sm font-medium ${event.isCompleted ? 'text-gray-600' : ''}`}>
+                    {event.title}
+                  </h3>
                   {event.leadName && (
                     <div className="text-xs italic text-gray-600 mt-1">Lead: {event.leadName}</div>
                   )}
@@ -82,7 +92,11 @@ const CalendarEventsList = ({
                 </div>
               </div>
               {event.description && (
-                <p className="text-loro-navy font-futura text-xs mt-1">{event.description}</p>
+                <p className={`font-futura text-xs mt-1 ${
+                  event.isCompleted ? 'text-gray-500' : 'text-loro-navy'
+                }`}>
+                  {event.description}
+                </p>
               )}
               {event.assignedToName && (
                 <div className="flex items-center mt-2 text-xs text-gray-600">

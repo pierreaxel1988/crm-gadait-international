@@ -145,7 +145,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               <div 
                 key={action.id} 
                 className={cn(
-                  "border rounded-md p-2 bg-gray-50 transition-all duration-200 animate-[fade-in_0.3s_ease-out]",
+                  "border rounded-md p-2 bg-[#F1F0FB] transition-all duration-200 animate-[fade-in_0.3s_ease-out]",
+                  "opacity-80"
                 )}
               >
                 <div className="flex justify-between items-start mb-1">
@@ -163,7 +164,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   </div>
                 </div>
                 {action.notes && (
-                  <div className="text-xs bg-white p-1.5 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out]">
+                  <div className="text-xs bg-white p-1.5 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out] border border-gray-100">
                     {action.notes}
                   </div>
                 )}

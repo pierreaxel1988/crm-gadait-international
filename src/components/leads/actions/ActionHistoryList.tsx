@@ -88,7 +88,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                   className={cn(
                     "relative overflow-hidden transition-all duration-300 rounded-lg border shadow-sm",
                     action.completedDate 
-                      ? "border-loro-pearl/30 bg-loro-pearl/5" 
+                      ? "border-loro-pearl/30 bg-[#F1F0FB]" // Soft gray for completed actions
                       : "border-loro-pearl/30 bg-white"
                   )}
                 >
@@ -115,11 +115,15 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                             {getActionTypeIcon(action.actionType as TaskType)}
                           </div>
                           <div>
-                            <span className={`text-loro-navy/80 font-futura ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                            <span className={`${action.completedDate ? 'text-gray-600' : 'text-loro-navy/80'} font-futura ${isMobile ? 'text-xs' : 'text-sm'}`}>
                               {action.actionType}
                             </span>
                             <div className="flex items-center gap-1 text-xs text-loro-navy/50 mt-0.5 font-futuraLight">
-                              <Clock className="h-3 w-3 text-loro-navy/40" />
+                              {action.completedDate ? (
+                                <Check className="h-3 w-3 text-green-500" />
+                              ) : (
+                                <Clock className="h-3 w-3 text-loro-navy/40" />
+                              )}
                               <span>
                                 {format(new Date(action.completedDate || action.scheduledDate), 'HH:mm', { locale: fr })}
                               </span>
@@ -128,7 +132,11 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                         </div>
                         
                         {action.notes && (
-                          <p className={`${isMobile ? 'text-xs mt-1.5 p-2' : 'text-sm mt-2 p-2.5'} bg-white rounded-md font-futuraLight text-loro-navy/70 border border-loro-pearl/20`}>
+                          <p className={`${isMobile ? 'text-xs mt-1.5 p-2' : 'text-sm mt-2 p-2.5'} ${
+                            action.completedDate 
+                              ? 'bg-white rounded-md font-futuraLight text-gray-500 border border-loro-pearl/20' 
+                              : 'bg-white rounded-md font-futuraLight text-loro-navy/70 border border-loro-pearl/20'
+                          }`}>
                             {action.notes}
                           </p>
                         )}
