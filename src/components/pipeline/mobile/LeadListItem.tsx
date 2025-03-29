@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Clock, Phone, Calendar, MapPin, Mail, MessageSquare } from 'lucide-react';
 import { Avatar } from "@/components/ui/avatar";
@@ -8,6 +7,8 @@ import { Currency } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface LeadListItemProps {
   id: string;
@@ -96,20 +97,23 @@ const LeadListItem = ({
     
     if (isPast(followUpDateTime) && !isToday(followUpDateTime)) {
       return {
-        taskClassName: "bg-red-100 text-red-800 rounded-full px-2 py-0.5",
-        iconClassName: "text-red-600",
+        bg: "bg-red-100",
+        text: "text-red-800",
+        icon: "text-red-600",
         containerClassName: "border-red-200 bg-red-50/50"
       };
     } else if (isToday(followUpDateTime)) {
       return {
-        taskClassName: "bg-amber-100 text-amber-800 rounded-full px-2 py-0.5",
-        iconClassName: "text-amber-600",
+        bg: "bg-amber-100",
+        text: "text-amber-800",
+        icon: "text-amber-600",
         containerClassName: "border-amber-200 bg-amber-50/50"
       };
     } else {
       return {
-        taskClassName: "bg-green-100 text-green-800 rounded-full px-2 py-0.5",
-        iconClassName: "text-green-600",
+        bg: "bg-green-100",
+        text: "text-green-800",
+        icon: "text-green-600",
         containerClassName: "border-green-200 bg-green-50/50"
       };
     }
@@ -227,44 +231,53 @@ const LeadListItem = ({
             {formatDate(createdAt)}
           </span>
         </div>
-        <div className="flex flex-wrap items-center text-sm text-zinc-700 mt-1 gap-1">
-          <span className="inline-flex items-center bg-zinc-100 text-zinc-900 text-xs px-2 py-0.5 rounded-full">
+        <div className="flex flex-wrap items-center text-sm text-zinc-700 mt-1 gap-1.5">
+          <Badge
+            variant="outline"
+            className="px-2 py-0.5 h-5 text-xs font-medium bg-zinc-100 text-zinc-900 border-none"
+          >
             {columnStatus}
-          </span>
+          </Badge>
           
           {taskType && (
-            <span 
-              className={`flex items-center ${nextFollowUpDate ? actionStyle.taskClassName : 'bg-zinc-100 text-zinc-700 rounded-full px-2 py-0.5'}`}
+            <Badge
+              variant="outline"
+              className={cn(
+                "flex items-center gap-1 px-2 py-0.5 h-5 text-xs font-medium border-none",
+                nextFollowUpDate ? `${actionStyle.bg} ${actionStyle.text}` : "bg-zinc-100 text-zinc-900",
+                taskType === 'Call' && phone ? "cursor-pointer" : ""
+              )}
               onClick={taskType === 'Call' && phone ? handlePhoneCall : undefined}
-              style={taskType === 'Call' && phone ? { cursor: 'pointer' } : undefined}
             >
               {taskType === 'Call' ? 
-                <Phone className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
+                <Phone className={`h-3 w-3 ${nextFollowUpDate ? actionStyle.icon : 'text-zinc-600'}`} /> : 
                taskType === 'Follow up' ? 
-                <Clock className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
+                <Clock className={`h-3 w-3 ${nextFollowUpDate ? actionStyle.icon : 'text-zinc-600'}`} /> : 
                taskType === 'Visites' ? 
-                <Calendar className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
+                <Calendar className={`h-3 w-3 ${nextFollowUpDate ? actionStyle.icon : 'text-zinc-600'}`} /> : 
                 null
               }
-              <span className={`truncate text-xs ${nextFollowUpDate ? '' : 'text-zinc-900'}`}>
-                {taskType}
-              </span>
-            </span>
+              {taskType}
+            </Badge>
           )}
           
           {desiredLocation && (
-            <span className="flex items-center bg-zinc-100 text-zinc-700 rounded-full px-2 py-0.5">
-              <MapPin className="h-3 w-3 mr-1 text-zinc-600" />
-              <span className="truncate text-xs text-zinc-900">
-                {desiredLocation}
-              </span>
-            </span>
+            <Badge
+              variant="outline"
+              className="flex items-center gap-1 px-2 py-0.5 h-5 text-xs font-medium bg-zinc-100 text-zinc-900 border-none"
+            >
+              <MapPin className="h-3 w-3 text-zinc-600" />
+              {desiredLocation}
+            </Badge>
           )}
           
           {budget && (
-            <span className="truncate text-xs font-medium bg-zinc-100 text-zinc-900 rounded-full px-2 py-0.5">
+            <Badge
+              variant="outline"
+              className="px-2 py-0.5 h-5 text-xs font-medium bg-zinc-100 text-zinc-900 border-none"
+            >
               {formatBudget(budget, currency)}
-            </span>
+            </Badge>
           )}
         </div>
       </div>
