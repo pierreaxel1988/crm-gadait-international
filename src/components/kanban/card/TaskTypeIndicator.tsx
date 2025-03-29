@@ -45,9 +45,9 @@ const TaskTypeIndicator = ({ taskType }: TaskTypeIndicatorProps) => {
     switch (type) {
       case 'Call':
         return {
-          bg: '#FFF5F1',
-          text: '#C55F3E',
-          icon: '#C55F3E'
+          bg: '#E7F7E4',  // WhatsApp-style light green background
+          text: '#25D366', // WhatsApp brand green
+          icon: '#25D366'  // WhatsApp brand green
         };
       case 'Visites':
         return {

@@ -26,6 +26,7 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
 
   // Helper function to get color for a task type
   const getColorForTaskType = (type: TaskType): string => {
+    if (type === 'Call') return '#E7F7E4'; // WhatsApp-style light green
     const category = eventCategories.find(cat => cat.value === type);
     return category?.color || '#F5F5F5';
   };
@@ -33,7 +34,7 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
   // Get text color for each task type
   const getTextColorForTaskType = (type: TaskType): string => {
     switch (type) {
-      case 'Call': return '#C55F3E';
+      case 'Call': return '#25D366'; // WhatsApp brand green
       case 'Visites': return '#9B51E0';
       case 'Compromis': return '#E8B64B';
       case 'Acte de vente': return '#4CAF50';

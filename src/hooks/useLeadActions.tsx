@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -67,7 +66,6 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
   const markActionComplete = async (actionId: string) => {
     if (lead && lead.id) {
       try {
-        // Find the action in history
         const actionHistory = [...(lead.actionHistory || [])];
         const actionIndex = actionHistory.findIndex(action => action.id === actionId);
         
@@ -75,13 +73,11 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           const now = new Date();
           const currentDate = now.toISOString();
           
-          // Update the action to completed
           actionHistory[actionIndex] = {
             ...actionHistory[actionIndex],
             completedDate: currentDate
           };
           
-          // Update the lead with the modified action history and last contacted date
           const updatedLead = await updateLead({
             ...lead,
             lastContactedAt: currentDate,
@@ -110,7 +106,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
 
   const getActionTypeIcon = (type: TaskType) => {
     switch (type) {
-      case 'Call': return <span className="text-green-800 px-1 py-0.5 rounded text-xs font-medium">Appel</span>;
+      case 'Call': return <span className="text-[#25D366] px-1 py-0.5 rounded text-xs font-medium">Appel</span>;
       case 'Visites': return <span className="text-purple-800 px-1 py-0.5 rounded text-xs font-medium">Visite</span>;
       case 'Compromis': return <span className="text-amber-800 px-1 py-0.5 rounded text-xs font-medium">Compromis</span>;
       case 'Acte de vente': return <span className="text-red-800 px-1 py-0.5 rounded text-xs font-medium">Acte de vente</span>;

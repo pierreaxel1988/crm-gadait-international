@@ -23,7 +23,7 @@ export type Event = {
 };
 
 export const eventCategories = [
-  { name: 'Call', color: '#FFF5F1', value: 'Call' as TaskType },
+  { name: 'Call', color: '#E7F7E4', value: 'Call' as TaskType },
   { name: 'Visites', color: '#F4F3FF', value: 'Visites' as TaskType },
   { name: 'Compromis', color: '#EEF5FF', value: 'Compromis' as TaskType },
   { name: 'Acte de vente', color: '#F7FFF2', value: 'Acte de vente' as TaskType },

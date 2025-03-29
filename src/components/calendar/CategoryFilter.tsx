@@ -13,7 +13,7 @@ const CategoryFilter = () => {
   // Get text color for each category
   const getTextColorForCategory = (categoryValue: string): string => {
     switch (categoryValue) {
-      case 'Call': return '#C55F3E';
+      case 'Call': return '#25D366'; // WhatsApp brand green
       case 'Visites': return '#9B51E0';
       case 'Compromis': return '#E8B64B';
       case 'Acte de vente': return '#4CAF50';
@@ -40,6 +40,7 @@ const CategoryFilter = () => {
           {eventCategories.map(category => {
             const isActive = activeFilters.includes(category.value);
             const textColor = getTextColorForCategory(category.value);
+            const bgColor = category.value === 'Call' ? '#E7F7E4' : category.color;
             return (
               <button
                 key={category.value}
@@ -47,7 +48,7 @@ const CategoryFilter = () => {
                 className={`flex items-center gap-2 rounded-full py-1 px-3 text-sm font-normal transition-all max-w-fit
                   ${isActive ? 'ring-2 ring-offset-1' : 'opacity-70 hover:opacity-100'}`}
                 style={{ 
-                  backgroundColor: category.color,
+                  backgroundColor: bgColor,
                   color: textColor,
                   borderColor: isActive ? `${textColor}30` : 'transparent',
                   border: '1px solid',

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Plus, CalendarIcon, Clock, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -23,6 +22,11 @@ const CurrentAction: React.FC<CurrentActionProps> = ({
   onAddAction
 }) => {
   const isMobile = useIsMobile();
+
+  const getActionTypeBg = (type: TaskType): string => {
+    if (type === 'Call') return '#E7F7E4';
+    return 'bg-loro-pearl/30';
+  };
 
   if (!taskType) {
     return (
@@ -56,7 +60,9 @@ const CurrentAction: React.FC<CurrentActionProps> = ({
         <div className={`${isMobile ? 'p-3' : 'p-4'}`}>
           <div className="space-y-4 w-full">
             <div className={`flex items-center gap-3 ${isMobile ? 'p-2.5' : 'p-3'} rounded-lg border border-loro-pearl/50 bg-loro-pearl/10`}>
-              <div className="p-2 rounded-md bg-loro-pearl/30">
+              <div className="p-2 rounded-md" style={{ 
+                backgroundColor: taskType === 'Call' ? '#E7F7E4' : 'rgba(224, 224, 224, 0.3)' 
+              }}>
                 {getActionTypeIcon(taskType)}
               </div>
               <span className={`text-loro-navy font-futura ${isMobile ? 'text-base' : 'text-lg'} tracking-wide`}>{taskType}</span>
