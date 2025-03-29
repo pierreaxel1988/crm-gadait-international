@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { isSameDay, startOfWeek, endOfWeek, addDays } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
@@ -129,7 +130,7 @@ const CalendarView = ({
   return <Card className="bg-white shadow-luxury">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="font-times text-loro-terracotta text-base font-normal">Calendrier</CardTitle>
+          <CardTitle className="font-futuraLight text-loro-terracotta text-base font-normal">Calendrier</CardTitle>
           <Tabs defaultValue={view} onValueChange={v => setView(v as 'month' | 'week')}>
             <TabsList className="bg-loro-sand/20">
               <TabsTrigger value="month" className="data-[state=active]:bg-loro-terracotta data-[state=active]:text-white">
