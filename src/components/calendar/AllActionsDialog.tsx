@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { Event, eventCategories, useCalendar } from '@/contexts/CalendarContext';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -362,7 +363,7 @@ const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
           <SheetContent side="bottom" className="h-[90vh] pt-8 px-2 flex flex-col">
             <SheetHeader className="px-2">
-              <SheetTitle className="font-futuraLight text-loro-terracotta text-lg">
+              <SheetTitle className="font-futuraLight text-loro-terracotta text-lg tracking-wide">
                 Toutes les Actions
               </SheetTitle>
               <SheetDescription className="font-times text-chocolate-dark text-sm">
@@ -385,7 +386,7 @@ const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col p-6 gap-5">
           <DialogHeader>
-            <DialogTitle className="font-futuraLight text-loro-terracotta text-xl">
+            <DialogTitle className="font-futuraLight text-loro-terracotta text-xl tracking-wide">
               Toutes les Actions
             </DialogTitle>
             <DialogDescription className="font-times text-chocolate-dark">
