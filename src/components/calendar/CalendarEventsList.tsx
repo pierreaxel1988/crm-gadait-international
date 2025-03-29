@@ -18,11 +18,28 @@ const CalendarEventsList = ({
   openAddEventDialog,
   onMarkComplete
 }: CalendarEventsListProps) => {
+  // Filter events for the selected date
   const eventsForSelectedDate = selectedDate
-    ? events.filter((event) => isSameDay(event.date, selectedDate))
+    ? events.filter((event) => {
+        const isSameDayResult = isSameDay(event.date, selectedDate);
+        if (!isSameDayResult) {
+          // For debugging: Only log some of the mismatches to avoid console spam
+          if (Math.random() < 0.2) {
+            console.log(
+              `Event date mismatch - Event: ${event.title}, ` +
+              `Event date: ${event.date.toISOString()}, ` +
+              `Selected date: ${selectedDate.toISOString()}`
+            );
+          }
+        }
+        return isSameDayResult;
+      })
     : [];
 
   console.log(`Displaying ${eventsForSelectedDate.length} events for selected date:`, selectedDate);
+  if (eventsForSelectedDate.length > 0) {
+    console.log("Events for this date:", eventsForSelectedDate);
+  }
   
   return (
     <>
@@ -31,7 +48,7 @@ const CalendarEventsList = ({
           {eventsForSelectedDate.map((event) => (
             <div 
               key={event.id} 
-              className={`p-2 rounded-lg border transition-all hover:shadow-luxury-hover ${event.isCompleted ? 'bg-gray-50 opacity-70' : ''}`}
+              className={`p-3 rounded-lg border transition-all hover:shadow-luxury-hover ${event.isCompleted ? 'bg-gray-50 opacity-70' : ''}`}
               style={{ backgroundColor: event.isCompleted ? '#f9f9f9' : `${event.color}30` /* 30% opacity */ }}
             >
               <div className="flex justify-between items-start">

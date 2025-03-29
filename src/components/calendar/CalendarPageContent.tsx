@@ -24,25 +24,24 @@ const CalendarPageContent = () => {
     refreshEvents
   } = useCalendar();
 
-  // Listen for action-completed events from the Actions page
+  // Force refresh of events when component mounts
   useEffect(() => {
-    console.log("Setting up action-completed listener in CalendarPageContent");
-    
-    const handleActionCompleted = () => {
-      console.log("Action completed event received, refreshing events");
-      refreshEvents();
-    };
-
-    // Initial fetch to ensure we have the latest data
+    console.log("CalendarPageContent mounted - forcing refresh of events");
     refreshEvents();
     
-    window.addEventListener('action-completed', handleActionCompleted);
+    // Log events after a small delay to see what we have
+    const timer = setTimeout(() => {
+      console.log(`Current events count in CalendarPageContent: ${events.length}`);
+      if (events.length === 0) {
+        console.warn("No events loaded - forcing another refresh");
+        refreshEvents();
+      } else {
+        console.log("Sample events:", events.slice(0, 3));
+      }
+    }, 1000);
     
-    return () => {
-      console.log("Removing action-completed listener");
-      window.removeEventListener('action-completed', handleActionCompleted);
-    };
-  }, [refreshEvents]);
+    return () => clearTimeout(timer);
+  }, []);
 
   const colors = eventCategories.map(cat => ({ name: cat.name, value: cat.color }));
 

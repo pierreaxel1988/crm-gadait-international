@@ -1,10 +1,10 @@
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionItem, ActionStatus } from '@/types/actionHistory';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 export type Event = {
   id: string;
@@ -72,6 +72,7 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     time: '09:00',
   });
   const [memberMap, setMemberMap] = useState<Map<string, string>>(new Map());
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const { toast } = useToast();
 
@@ -98,12 +99,17 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     fetchTeamMembers();
   }, []);
 
-  const fetchLeadActions = async () => {
+  const fetchLeadActions = useCallback(async () => {
     try {
       console.log("Fetching lead actions for calendar...");
       
       const { data: userData } = await supabase.auth.getUser();
       const currentUserEmail = userData?.user?.email;
+      
+      console.log("Current user email:", currentUserEmail);
+      if (!currentUserEmail) {
+        console.warn("No user email found - you might need to log in");
+      }
       
       const { data: teamMemberData, error: teamMemberError } = await supabase
         .from('team_members')
@@ -138,6 +144,19 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       
       console.log(`Fetched ${leads?.length || 0} leads with action history`);
       
+      // For debugging - log the full action history for the first few leads
+      if (leads && leads.length > 0) {
+        leads.slice(0, 3).forEach((lead: any) => {
+          console.log(`Lead ${lead.name} (ID: ${lead.id}) actions:`, 
+            lead.action_history?.map((a: any) => ({
+              id: a.id,
+              type: a.actionType,
+              scheduledDate: a.scheduledDate
+            }))
+          );
+        });
+      }
+      
       let actionEvents: Event[] = [];
       
       leads?.forEach((lead: any) => {
@@ -164,9 +183,12 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 const timeMatch = action.scheduledDate.match(/T(\d{2}:\d{2})/) || [];
                 const time = timeMatch[1] || '09:00';
                 
+                // Create a more descriptive title
+                const actionTitle = `${action.actionType}${lead.name ? ` - ${lead.name}` : ''}`;
+                
                 actionEvents.push({
                   id: `action-${action.id}`,
-                  title: `${action.actionType} - ${lead.name}`,
+                  title: actionTitle,
                   description: action.notes || '',
                   date: actionDate,
                   time: time,
@@ -190,6 +212,11 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       });
       
       console.log(`Converted ${actionEvents.length} actions to calendar events`);
+      if (actionEvents.length > 0) {
+        console.log("Sample of events:", actionEvents.slice(0, 3));
+      } else {
+        console.warn("No action events were generated from leads data");
+      }
       
       setEvents([...initialEvents, ...actionEvents]);
     } catch (error) {
@@ -200,12 +227,31 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         description: "Impossible de charger les actions depuis la base de données."
       });
     }
-  };
+  }, [memberMap, toast]);
 
+  // Initial fetch of lead actions
   useEffect(() => {
     console.log("Initial fetch of lead actions");
     refreshEvents();
-  }, []);
+    setIsInitialLoad(false);
+  }, [memberMap]);
+
+  // Setup action-completed event listener once
+  useEffect(() => {
+    console.log("Setting up action-completed listener in CalendarContext");
+    
+    const handleActionCompleted = () => {
+      console.log("Action completed event received, refreshing events");
+      refreshEvents();
+    };
+    
+    window.addEventListener('action-completed', handleActionCompleted);
+    
+    return () => {
+      console.log("Removing action-completed listener");
+      window.removeEventListener('action-completed', handleActionCompleted);
+    };
+  }, [refreshEvents]);
 
   const refreshEvents = async () => {
     console.log("Refreshing events...");
