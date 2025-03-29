@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ListFilter, ClipboardList } from 'lucide-react';
+import { PlusCircle, ListFilter } from 'lucide-react';
 import CalendarView from '@/components/calendar/CalendarView';
 import DayDetail from '@/components/calendar/DayDetail';
 import AddEventDialog from '@/components/calendar/AddEventDialog';
@@ -25,7 +25,8 @@ const CalendarPageContent = () => {
     refreshEvents
   } = useCalendar();
   
-  const [isAllActionsOpen, setIsAllActionsOpen] = useState(false);
+  // Removing the state for AllActionsDialog since we're removing the button
+  // const [isAllActionsOpen, setIsAllActionsOpen] = useState(false);
 
   // Force refresh of events when component mounts
   useEffect(() => {
@@ -55,14 +56,7 @@ const CalendarPageContent = () => {
           <div className="flex flex-col space-y-4">
             <CategoryFilter />
             
-            <Button 
-              className="w-full shadow-sm hover:shadow transition-all bg-loro-pearl hover:bg-loro-pearl/80 text-chocolate-dark"
-              variant="outline"
-              onClick={() => setIsAllActionsOpen(true)}
-            >
-              <ClipboardList className="mr-2 h-4 w-4" />
-              Voir toutes les actions
-            </Button>
+            {/* Removed the "Voir toutes les actions" button */}
           </div>
 
           <CalendarView 
@@ -104,10 +98,7 @@ const CalendarPageContent = () => {
         categories={eventCategories}
       />
       
-      <AllActionsDialog
-        isOpen={isAllActionsOpen}
-        onOpenChange={setIsAllActionsOpen}
-      />
+      {/* Removed the AllActionsDialog component since the button was removed */}
     </div>
   );
 };
