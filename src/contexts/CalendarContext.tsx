@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -17,6 +18,8 @@ export type Event = {
   leadName?: string;
   actionId?: string; // To track if this event is from an action
   isCompleted?: boolean;
+  assignedToId?: string;
+  assignedToName?: string;
 };
 
 export const eventCategories = [
@@ -68,8 +71,32 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     category: 'Call',
     time: '09:00',
   });
+  const [memberMap, setMemberMap] = useState<Map<string, string>>(new Map());
 
   const { toast } = useToast();
+
+  // Fetch team members once to map IDs to names
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('id, name');
+        
+        if (error) throw error;
+        
+        const newMemberMap = new Map();
+        data?.forEach(member => newMemberMap.set(member.id, member.name));
+        setMemberMap(newMemberMap);
+        
+        console.log("Loaded team members map with", newMemberMap.size, "members");
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+      }
+    };
+    
+    fetchTeamMembers();
+  }, []);
 
   const fetchLeadActions = async () => {
     try {
@@ -111,18 +138,6 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       
       console.log(`Fetched ${leads?.length || 0} leads with action history`);
       
-      const { data: members, error: membersError } = await supabase
-        .from('team_members')
-        .select('id, name');
-      
-      if (membersError) {
-        console.error('Error fetching team members:', membersError);
-        throw membersError;
-      }
-      
-      const memberMap = new Map();
-      members?.forEach(member => memberMap.set(member.id, member.name));
-      
       let actionEvents: Event[] = [];
       
       leads?.forEach((lead: any) => {
@@ -134,20 +149,39 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           leadActions.forEach((action: any) => {
             if (action.scheduledDate) {
               const category = eventCategories.find(cat => cat.value === action.actionType);
+              const assignedToName = memberMap.get(lead.assigned_to) || 'Non assigné';
               
-              actionEvents.push({
-                id: `action-${action.id}`,
-                title: `${action.actionType} - ${lead.name}`,
-                description: action.notes || '',
-                date: new Date(action.scheduledDate),
-                time: action.scheduledDate ? format(new Date(action.scheduledDate), 'HH:mm') : undefined,
-                color: category?.color || '#D3D3D3',
-                category: action.actionType as TaskType,
-                leadId: lead.id,
-                leadName: lead.name,
-                actionId: action.id,
-                isCompleted: !!action.completedDate
-              });
+              try {
+                // Parse the scheduledDate to ensure it's a valid date
+                const actionDate = new Date(action.scheduledDate);
+                
+                if (isNaN(actionDate.getTime())) {
+                  console.error(`Invalid date for action ${action.id}: ${action.scheduledDate}`);
+                  return;
+                }
+                
+                // Extract time if available
+                const timeMatch = action.scheduledDate.match(/T(\d{2}:\d{2})/) || [];
+                const time = timeMatch[1] || '09:00';
+                
+                actionEvents.push({
+                  id: `action-${action.id}`,
+                  title: `${action.actionType} - ${lead.name}`,
+                  description: action.notes || '',
+                  date: actionDate,
+                  time: time,
+                  color: category?.color || '#D3D3D3',
+                  category: action.actionType as TaskType,
+                  leadId: lead.id,
+                  leadName: lead.name,
+                  actionId: action.id,
+                  isCompleted: !!action.completedDate,
+                  assignedToId: lead.assigned_to,
+                  assignedToName: assignedToName
+                });
+              } catch (err) {
+                console.error(`Error processing action date: ${err}`);
+              }
             }
           });
         } else {

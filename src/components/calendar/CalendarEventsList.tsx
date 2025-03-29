@@ -2,7 +2,7 @@
 import React from 'react';
 import { isSameDay } from 'date-fns';
 import { Event } from '@/contexts/CalendarContext';
-import { Check } from 'lucide-react';
+import { Check, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface CalendarEventsListProps {
@@ -66,6 +66,12 @@ const CalendarEventsList = ({
               </div>
               {event.description && (
                 <p className="text-loro-navy font-futura text-xs mt-1">{event.description}</p>
+              )}
+              {event.assignedToName && (
+                <div className="flex items-center mt-2 text-xs text-gray-600">
+                  <User className="h-3 w-3 mr-1" /> 
+                  <span>Assigné à: {event.assignedToName}</span>
+                </div>
               )}
             </div>
           ))}

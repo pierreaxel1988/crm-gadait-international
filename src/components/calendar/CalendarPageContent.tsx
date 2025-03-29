@@ -33,10 +33,10 @@ const CalendarPageContent = () => {
       refreshEvents();
     };
 
-    window.addEventListener('action-completed', handleActionCompleted);
-    
     // Initial fetch to ensure we have the latest data
     refreshEvents();
+    
+    window.addEventListener('action-completed', handleActionCompleted);
     
     return () => {
       console.log("Removing action-completed listener");
