@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -37,11 +36,11 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'overdue':
-        return <Badge variant="destructive">En retard</Badge>;
+        return <Badge variant="destructive" className="font-futuraLight">En retard</Badge>;
       case 'todo':
-        return <Badge variant="outline">À faire</Badge>;
+        return <Badge variant="outline" className="font-futuraLight">À faire</Badge>;
       case 'done':
-        return <Badge variant="default">Terminé</Badge>;
+        return <Badge variant="default" className="font-futuraLight">Terminé</Badge>;
       default:
         return null;
     }
