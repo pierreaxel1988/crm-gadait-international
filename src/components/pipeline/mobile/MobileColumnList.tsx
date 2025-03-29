@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -54,7 +53,6 @@ const MobileColumnList = ({
     isLoading
   } = useKanbanData(columns, 0, activeTab);
   
-  // Apply filters to the loaded columns
   const filteredColumns = filters 
     ? applyFiltersToColumns(loadedColumns.filter(column => 
         !column.pipelineType || column.pipelineType === activeTab
@@ -63,7 +61,6 @@ const MobileColumnList = ({
         !column.pipelineType || column.pipelineType === activeTab
       );
 
-  // Check if we need to reset activeStatus when filters change
   useEffect(() => {
     if (filters?.status !== null) {
       setActiveStatus(filters.status);
@@ -85,7 +82,6 @@ const MobileColumnList = ({
     ? allLeads 
     : allLeads.filter(lead => lead.columnStatus === activeStatus);
 
-  // Apply search filter if provided
   const filteredLeads = searchTerm
     ? displayedLeads.filter(lead => 
         lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -165,6 +161,8 @@ const MobileColumnList = ({
                     taskType={lead.taskType}
                     createdAt={lead.createdAt}
                     nextFollowUpDate={lead.nextFollowUpDate}
+                    phone={lead.phone}
+                    email={lead.email}
                     onClick={handleLeadClick}
                   />
                 ))}

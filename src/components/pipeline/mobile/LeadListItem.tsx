@@ -1,11 +1,13 @@
 
 import React from 'react';
-import { Clock, Phone, Calendar, MapPin } from 'lucide-react';
+import { Clock, Phone, Calendar, MapPin, Mail, MessageSquare } from 'lucide-react';
 import { Avatar } from "@/components/ui/avatar";
 import { format, isPast, isFuture, isToday } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Currency } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
 
 interface LeadListItemProps {
   id: string;
@@ -18,6 +20,7 @@ interface LeadListItemProps {
   createdAt?: string;
   nextFollowUpDate?: string;
   phone?: string;
+  email?: string;
   onClick: (id: string) => void;
 }
 
@@ -32,6 +35,7 @@ const LeadListItem = ({
   createdAt,
   nextFollowUpDate,
   phone,
+  email,
   onClick
 }: LeadListItemProps) => {
   
@@ -121,9 +125,25 @@ const LeadListItem = ({
   const actionStyle = getActionStatusStyle(nextFollowUpDate);
   
   const handlePhoneCall = (e: React.MouseEvent) => {
-    if (taskType === 'Call' && phone) {
-      e.stopPropagation();
+    e.stopPropagation();
+    if (phone) {
       window.location.href = `tel:${phone}`;
+    }
+  };
+  
+  const handleEmailClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (email) {
+      window.location.href = `mailto:${email}`;
+    }
+  };
+  
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (phone) {
+      // Format phone number for WhatsApp (remove spaces and any non-digit characters except +)
+      const cleanedPhone = phone.replace(/[^\d+]/g, '');
+      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
   
@@ -141,7 +161,68 @@ const LeadListItem = ({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline">
-          <h3 className="font-medium text-base truncate text-zinc-900">{formatName(name)}</h3>
+          <div className="flex items-center">
+            <h3 className="font-medium text-base truncate text-zinc-900 mr-2">{formatName(name)}</h3>
+            
+            <TooltipProvider>
+              <div className="flex items-center">
+                {email && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 rounded-full hover:bg-gray-100 p-0.5"
+                        onClick={handleEmailClick}
+                      >
+                        <Mail className="h-4 w-4 text-amber-600" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Envoyer un email</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                
+                {phone && (
+                  <>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 rounded-full hover:bg-gray-100 p-0.5"
+                          onClick={handlePhoneCall}
+                        >
+                          <Phone className="h-4 w-4 text-blue-600" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Appeler</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 rounded-full hover:bg-gray-100 p-0.5"
+                          onClick={handleWhatsAppClick}
+                        >
+                          <MessageSquare className="h-4 w-4 text-green-600" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>WhatsApp</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </>
+                )}
+              </div>
+            </TooltipProvider>
+          </div>
+          
           <span className="text-xs text-zinc-500 ml-2 whitespace-nowrap">
             {formatDate(createdAt)}
           </span>
