@@ -40,54 +40,80 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
     navigate(`/leads/${lead.id}?${searchParams.toString()}`, { replace: true });
   };
   
+  const handleBackToActionsList = () => {
+    // Navigate back to the actions list page
+    navigate('/actions');
+  };
+  
+  // Check if we're on the actions tab
+  const searchParams = new URLSearchParams(location.search);
+  const currentTab = searchParams.get('tab');
+  const isActionsTab = currentTab === 'actions';
+  
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex justify-center items-center transition-all animate-[slide-in_0.3s_ease-out] z-50">
       <div className="flex gap-3 w-full justify-between items-center">
         <div className="flex items-center">
-          {autoSaveEnabled ? (
-            <div className="flex items-center" title={isSaving ? "Enregistrement en cours" : hasChanges ? "Modifications en attente" : "Tout est enregistré"}>
-              {isSaving ? (
-                <div className="w-5 h-5 text-amber-500 animate-pulse">
-                  <Clock className="h-5 w-5" />
-                </div>
-              ) : hasChanges ? (
-                <div className="w-5 h-5 text-amber-500">
-                  <Clock className="h-5 w-5" />
-                </div>
-              ) : (
-                <div className="w-5 h-5 text-green-500">
-                  <Check className="h-5 w-5" />
-                </div>
-              )}
-            </div>
-          ) : (
+          {isActionsTab ? (
             <Button 
-              onClick={onManualSave} 
-              size="sm" 
               variant="outline" 
-              className="h-8 px-2 text-xs transition-all duration-200 active:scale-95 font-futura"
-              disabled={isSaving || !hasChanges}
+              size="sm" 
+              className="h-8 px-3 transition-all duration-200 active:scale-95 font-futura border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20 flex items-center gap-1"
+              onClick={handleBackToActionsList}
             >
-              {isSaving ? (
-                <Clock className="h-4 w-4 text-amber-500 animate-pulse" />
-              ) : hasChanges ? (
-                <Save className="h-4 w-4" />
-              ) : (
-                <Check className="h-4 w-4 text-green-500" />
-              )}
+              <ArrowLeft className="h-4 w-4" />
+              Actions
             </Button>
+          ) : (
+            <>
+              {autoSaveEnabled ? (
+                <div className="flex items-center" title={isSaving ? "Enregistrement en cours" : hasChanges ? "Modifications en attente" : "Tout est enregistré"}>
+                  {isSaving ? (
+                    <div className="w-5 h-5 text-amber-500 animate-pulse">
+                      <Clock className="h-5 w-5" />
+                    </div>
+                  ) : hasChanges ? (
+                    <div className="w-5 h-5 text-amber-500">
+                      <Clock className="h-5 w-5" />
+                    </div>
+                  ) : (
+                    <div className="w-5 h-5 text-green-500">
+                      <Check className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Button 
+                  onClick={onManualSave} 
+                  size="sm" 
+                  variant="outline" 
+                  className="h-8 px-2 text-xs transition-all duration-200 active:scale-95 font-futura"
+                  disabled={isSaving || !hasChanges}
+                >
+                  {isSaving ? (
+                    <Clock className="h-4 w-4 text-amber-500 animate-pulse" />
+                  ) : hasChanges ? (
+                    <Save className="h-4 w-4" />
+                  ) : (
+                    <Check className="h-4 w-4 text-green-500" />
+                  )}
+                </Button>
+              )}
+            </>
           )}
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide flex items-center gap-2 border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20"
-            onClick={handleActionsClick}
-          >
-            <History className="h-4 w-4 text-loro-navy" />
-            Actions
-          </Button>
+          {!isActionsTab && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide flex items-center gap-2 border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20"
+              onClick={handleActionsClick}
+            >
+              <History className="h-4 w-4 text-loro-navy" />
+              Actions
+            </Button>
+          )}
           <Button 
             onClick={onAddAction} 
             className="bg-chocolate-dark hover:bg-chocolate-light transition-all duration-200 active:scale-95 font-futura tracking-wide"
