@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Mail, Phone, PlusCircle } from 'lucide-react';
+import { Mail, Phone, PlusCircle, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
@@ -8,6 +8,7 @@ import { TaskType } from '@/components/kanban/KanbanCard';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { addActionToLead } from '@/services/leadActions';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ContactInfoProps {
   email: string;
@@ -39,6 +40,16 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
     e.stopPropagation(); // Prevent card click when clicking on phone
     if (phone) {
       window.location.href = `tel:${phone}`;
+    }
+  };
+
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (phone) {
+      // Format phone number for WhatsApp (remove spaces and any non-digit characters except +)
+      const cleanedPhone = phone.replace(/[^\d+]/g, '');
+      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
 
@@ -99,41 +110,79 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-2 mb-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 rounded-full hover:bg-gray-100"
-          onClick={handleEmailClick}
-          title={`Envoyer un email à ${email}`}
-        >
-          <Mail className="h-4 w-4 text-gray-600" />
-        </Button>
-        
-        {phone && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full hover:bg-gray-100"
-            onClick={handlePhoneClick}
-            title={`Appeler ${phone}`}
-          >
-            <Phone className="h-4 w-4 text-gray-600" />
-          </Button>
-        )}
-        
-        {leadId && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full hover:bg-gray-100"
-            onClick={handleAddAction}
-            title="Ajouter une action"
-          >
-            <PlusCircle className="h-4 w-4 text-gray-600" />
-          </Button>
-        )}
-      </div>
+      <TooltipProvider>
+        <div className="flex items-center gap-2 mb-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full hover:bg-gray-100"
+                onClick={handleEmailClick}
+              >
+                <Mail className="h-4 w-4 text-amber-600" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Envoyer un email à {email}</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          {phone && (
+            <>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full hover:bg-gray-100"
+                    onClick={handlePhoneClick}
+                  >
+                    <Phone className="h-4 w-4 text-blue-600" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Appeler {phone}</p>
+                </TooltipContent>
+              </Tooltip>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full hover:bg-gray-100"
+                    onClick={handleWhatsAppClick}
+                  >
+                    <MessageSquare className="h-4 w-4 text-green-600" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Contacter via WhatsApp</p>
+                </TooltipContent>
+              </Tooltip>
+            </>
+          )}
+          
+          {leadId && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full hover:bg-gray-100"
+                  onClick={handleAddAction}
+                >
+                  <PlusCircle className="h-4 w-4 text-gray-600" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ajouter une action</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      </TooltipProvider>
 
       {isActionDialogOpen && (
         <ActionDialog
