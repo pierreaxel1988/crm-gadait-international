@@ -17,64 +17,116 @@ const TaskTypeIndicator = ({ taskType }: TaskTypeIndicatorProps) => {
   const getTaskTypeIcon = (type: TaskType) => {
     switch (type) {
       case 'Call':
-        return <Phone className="h-4 w-4 text-green-500" />;
+        return <Phone className="h-4 w-4" />;
       case 'Visites':
-        return <Home className="h-4 w-4 text-purple-500" />;
+        return <Home className="h-4 w-4" />;
       case 'Compromis':
-        return <FileCheck className="h-4 w-4 text-amber-500" />;
+        return <FileCheck className="h-4 w-4" />;
       case 'Acte de vente':
-        return <FileSignature className="h-4 w-4 text-red-500" />;
+        return <FileSignature className="h-4 w-4" />;
       case 'Contrat de Location':
-        return <FileSignature className="h-4 w-4 text-blue-500" />;
+        return <FileSignature className="h-4 w-4" />;
       case 'Propositions':
-        return <MessageSquare className="h-4 w-4 text-indigo-500" />;
+        return <MessageSquare className="h-4 w-4" />;
       case 'Follow up':
-        return <Calendar className="h-4 w-4 text-pink-500" />;
+        return <Calendar className="h-4 w-4" />;
       case 'Estimation':
-        return <Calculator className="h-4 w-4 text-teal-500" />;
+        return <Calculator className="h-4 w-4" />;
       case 'Prospection':
-        return <Search className="h-4 w-4 text-orange-500" />;
+        return <Search className="h-4 w-4" />;
       case 'Admin':
-        return <AreaChart className="h-4 w-4 text-gray-500" />;
+        return <AreaChart className="h-4 w-4" />;
       default:
         return null;
     }
   };
   
-  const getTaskTypeBackground = (type: TaskType) => {
+  const getTaskTypeColor = (type: TaskType) => {
     switch (type) {
       case 'Call':
-        return '#FFF5F1';
+        return {
+          bg: '#FEEFE6',
+          text: '#C55F3E',
+          icon: '#C55F3E'
+        };
       case 'Visites':
-        return '#F4F3FF';
+        return {
+          bg: '#F8EBFE',
+          text: '#9B51E0',
+          icon: '#9B51E0'
+        };
       case 'Compromis':
-        return '#EEF5FF';
+        return {
+          bg: '#FEF6E6',
+          text: '#E8B64B',
+          icon: '#E8B64B'
+        };
       case 'Acte de vente':
-        return '#F7FFF2';
+        return {
+          bg: '#EEFEE6',
+          text: '#4CAF50',
+          icon: '#4CAF50'
+        };
       case 'Contrat de Location':
-        return '#FFFBEC';
+        return {
+          bg: '#E6F4FE',
+          text: '#3D8FD1',
+          icon: '#3D8FD1'
+        };
       case 'Propositions':
-        return '#FFF2F5';
+        return {
+          bg: '#F9E6FE',
+          text: '#9C27B0',
+          icon: '#9C27B0'
+        };
       case 'Follow up':
-        return '#F0FFFE';
+        return {
+          bg: '#FFE6F1',
+          text: '#E91E63',
+          icon: '#E91E63'
+        };
       case 'Estimation':
-        return '#F8F3FF';
+        return {
+          bg: '#E6FEFA',
+          text: '#009688',
+          icon: '#009688'
+        };
       case 'Prospection':
-        return '#FFF5F1';
+        return {
+          bg: '#FEE6E6',
+          text: '#F44336',
+          icon: '#F44336'
+        };
       case 'Admin':
-        return '#F5F5F5';
+        return {
+          bg: '#F5F5F5',
+          text: '#607D8B',
+          icon: '#607D8B'
+        };
       default:
-        return '#F5F5F5';
+        return {
+          bg: '#F5F5F5',
+          text: '#607D8B',
+          icon: '#607D8B'
+        };
     }
   };
   
+  const colorConfig = getTaskTypeColor(taskType);
+  
   return (
     <div 
-      className="flex items-center gap-1 rounded-full px-2 py-0.5"
-      style={{ backgroundColor: getTaskTypeBackground(taskType) }}
+      className="flex items-center gap-1.5 rounded-full px-3 py-1 transition-all duration-200 shadow-sm border"
+      style={{ 
+        backgroundColor: colorConfig.bg,
+        borderColor: `${colorConfig.text}20`,
+        color: colorConfig.text
+      }}
     >
-      {getTaskTypeIcon(taskType)}
-      <span className="text-xs font-futura uppercase tracking-wide">{taskType}</span>
+      <div className="flex items-center justify-center" style={{ color: colorConfig.icon }}>
+        {getTaskTypeIcon(taskType)}
+      </div>
+      <span className="text-xs font-futura uppercase tracking-wide whitespace-nowrap">{taskType}</span>
     </div>
   );
 };
