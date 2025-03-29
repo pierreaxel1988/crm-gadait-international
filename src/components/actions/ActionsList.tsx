@@ -74,10 +74,10 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
             key={action.id} 
             className={`p-4 transition-all ${
               action.status === 'overdue' 
-                ? 'border-red-400 bg-red-50/50' 
+                ? 'border-red-300 bg-[#FFDEE2]/30' 
                 : action.status === 'done' 
                   ? 'bg-gray-50/80 border-gray-200' 
-                  : 'bg-white'
+                  : 'bg-[#F2FCE2]/40 border-green-100'
             }`}
           >
             <div className="flex justify-between items-start mb-2">
@@ -95,7 +95,9 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
               <div className={`text-sm mt-2 p-2 rounded ${
                 action.status === 'done' 
                   ? 'bg-white/80 text-gray-600' 
-                  : 'bg-muted/50'
+                  : action.status === 'overdue'
+                    ? 'bg-[#FFF0F2] text-rose-800'
+                    : 'bg-[#F7FEF1] text-green-800'
               }`}>
                 {action.notes}
               </div>
@@ -148,10 +150,10 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
         {actions.map(action => (
           <TableRow key={action.id} className={
             action.status === 'overdue' 
-              ? 'bg-red-50/70' 
+              ? 'bg-[#FFDEE2]/20' 
               : action.status === 'done'
                 ? 'bg-gray-50/80 text-gray-600' 
-                : ''
+                : 'bg-[#F2FCE2]/20'
           }>
             <TableCell>{action.leadName}</TableCell>
             <TableCell>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
-import { format } from 'date-fns';
+import { format, isPast } from 'date-fns';
 import { Check, Clock, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getLead } from '@/services/leadService';
@@ -78,6 +78,15 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
   const pendingActions = sortedActions.filter(action => !action.completedDate);
   const completedActions = sortedActions.filter(action => action.completedDate);
+  
+  // Check if a date is in the past
+  const isDatePast = (dateString: string): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const date = new Date(dateString);
+    date.setHours(0, 0, 0, 0);
+    return date < today;
+  };
 
   if (isLoading) {
     return (
@@ -99,41 +108,58 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         </div>
       ) : (
         <div className="space-y-2">
-          {pendingActions.map((action) => (
-            <div 
-              key={action.id} 
-              className="border rounded-md p-2 bg-white shadow-sm hover:shadow-md transition-all duration-200 animate-[fade-in_0.3s_ease-out]"
-            >
-              <div className="flex justify-between items-start mb-1">
-                <div className="flex items-center gap-1.5">
-                  <div className="h-6 w-6 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
-                    <Calendar className="h-3 w-3" />
-                  </div>
-                  <div>
-                    <h4 className="font-futura text-sm">{action.actionType}</h4>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock className="h-2.5 w-2.5 mr-1" />
-                      {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
+          {pendingActions.map((action) => {
+            // Determine if action is overdue
+            const isOverdue = isDatePast(action.scheduledDate);
+            
+            return (
+              <div 
+                key={action.id} 
+                className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${
+                  isOverdue 
+                    ? 'bg-[#FFDEE2]/30 border-pink-200'
+                    : 'bg-[#F2FCE2]/40 border-green-100'
+                }`}
+              >
+                <div className="flex justify-between items-start mb-1">
+                  <div className="flex items-center gap-1.5">
+                    <div className={`h-6 w-6 rounded-full flex items-center justify-center ${
+                      isOverdue
+                        ? 'bg-rose-100 text-rose-600'
+                        : 'bg-green-100 text-green-600'
+                    }`}>
+                      <Calendar className="h-3 w-3" />
+                    </div>
+                    <div>
+                      <h4 className="font-futura text-sm">{action.actionType}</h4>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Clock className="h-2.5 w-2.5 mr-1" />
+                        {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
+                      </div>
                     </div>
                   </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95"
+                    onClick={() => onMarkComplete(action)}
+                  >
+                    <Check className="h-3 w-3 mr-1" /> 
+                    <span className="text-xs font-futura">Terminer</span>
+                  </Button>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95"
-                  onClick={() => onMarkComplete(action)}
-                >
-                  <Check className="h-3 w-3 mr-1" /> 
-                  <span className="text-xs font-futura">Terminer</span>
-                </Button>
+                {action.notes && (
+                  <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${
+                    isOverdue
+                      ? 'bg-[#FFF0F2] text-rose-800 border border-pink-100'
+                      : 'bg-[#F7FEF1] text-green-800 border border-green-100'
+                  }`}>
+                    {action.notes}
+                  </div>
+                )}
               </div>
-              {action.notes && (
-                <div className="text-xs bg-gray-50 p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out]">
-                  {action.notes}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
       

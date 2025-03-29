@@ -41,71 +41,98 @@ const CalendarEventsList = ({
     console.log("Events for this date:", eventsForSelectedDate);
   }
   
+  // Determine if date is in the past
+  const isDatePast = (date: Date): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const compareDate = new Date(date);
+    compareDate.setHours(0, 0, 0, 0);
+    return compareDate < today;
+  };
+  
   return (
     <>
       {eventsForSelectedDate.length > 0 ? (
         <div className="space-y-3">
-          {eventsForSelectedDate.map((event) => (
-            <div 
-              key={event.id} 
-              className={`p-3 rounded-lg border transition-all ${
-                event.isCompleted 
-                  ? 'bg-gray-50/80 border-gray-200 opacity-80' 
-                  : `bg-white hover:shadow-luxury-hover`
-              }`}
-              style={{ 
-                backgroundColor: event.isCompleted 
-                  ? '#F1F0FB' // Soft gray from pastel color palette
-                  : `${event.color}10` // 10% opacity of event color
-              }}
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className={`font-futura text-sm font-medium ${event.isCompleted ? 'text-gray-600' : ''}`}>
-                    {event.title}
-                  </h3>
-                  {event.leadName && (
-                    <div className="text-xs italic text-gray-600 mt-1">Lead: {event.leadName}</div>
-                  )}
+          {eventsForSelectedDate.map((event) => {
+            // Determine if event is overdue (past date and not completed)
+            const isOverdue = isDatePast(event.date) && !event.isCompleted;
+            
+            return (
+              <div 
+                key={event.id} 
+                className={`p-3 rounded-lg border transition-all ${
+                  event.isCompleted 
+                    ? 'bg-gray-50/80 border-gray-200 opacity-80' 
+                    : isOverdue
+                      ? 'bg-[#FFDEE2]/30 border-pink-200 hover:shadow-luxury-hover'
+                      : 'bg-[#F2FCE2]/40 border-green-100 hover:shadow-luxury-hover'
+                }`}
+                style={{ 
+                  backgroundColor: event.isCompleted 
+                    ? '#F1F0FB' // Soft gray for completed events
+                    : isOverdue 
+                      ? 'rgba(255, 222, 226, 0.3)' // Soft pink for overdue
+                      : 'rgba(242, 252, 226, 0.4)', // Soft green for upcoming
+                  borderColor: event.isCompleted
+                    ? '#e2e2e2'
+                    : isOverdue
+                      ? '#f9c6ce'
+                      : '#d1e7c5'
+                }}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className={`font-futura text-sm font-medium ${event.isCompleted ? 'text-gray-600' : ''}`}>
+                      {event.title}
+                    </h3>
+                    {event.leadName && (
+                      <div className="text-xs italic text-gray-600 mt-1">Lead: {event.leadName}</div>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {event.time && (
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-white">
+                        {event.time}
+                      </span>
+                    )}
+                    {event.actionId && !event.isCompleted && (
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-7 px-2 text-xs text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
+                        onClick={() => onMarkComplete(event.id)}
+                      >
+                        <Check className="h-3 w-3 mr-1" /> Terminer
+                      </Button>
+                    )}
+                    {event.isCompleted && (
+                      <span className="text-xs py-0.5 px-2 bg-green-100 text-green-700 rounded-md flex items-center">
+                        <Check className="h-3 w-3 mr-1" /> Terminé
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  {event.time && (
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-white">
-                      {event.time}
-                    </span>
-                  )}
-                  {event.actionId && !event.isCompleted && (
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="h-7 px-2 text-xs text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
-                      onClick={() => onMarkComplete(event.id)}
-                    >
-                      <Check className="h-3 w-3 mr-1" /> Terminer
-                    </Button>
-                  )}
-                  {event.isCompleted && (
-                    <span className="text-xs py-0.5 px-2 bg-green-100 text-green-700 rounded-md flex items-center">
-                      <Check className="h-3 w-3 mr-1" /> Terminé
-                    </span>
-                  )}
-                </div>
+                {event.description && (
+                  <p className={`font-futura text-xs mt-1 p-2 rounded ${
+                    event.isCompleted 
+                      ? 'text-gray-500 bg-white/80' 
+                      : isOverdue
+                        ? 'text-rose-800 bg-[#FFF0F2]'
+                        : 'text-green-800 bg-[#F7FEF1]'
+                  }`}>
+                    {event.description}
+                  </p>
+                )}
+                {event.assignedToName && (
+                  <div className="flex items-center mt-2 text-xs text-gray-600">
+                    <User className="h-3 w-3 mr-1" /> 
+                    <span>Assigné à: {event.assignedToName}</span>
+                  </div>
+                )}
               </div>
-              {event.description && (
-                <p className={`font-futura text-xs mt-1 ${
-                  event.isCompleted ? 'text-gray-500' : 'text-loro-navy'
-                }`}>
-                  {event.description}
-                </p>
-              )}
-              {event.assignedToName && (
-                <div className="flex items-center mt-2 text-xs text-gray-600">
-                  <User className="h-3 w-3 mr-1" /> 
-                  <span>Assigné à: {event.assignedToName}</span>
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="text-center py-8 border rounded-md bg-gray-50 animate-[fade-in_0.3s_ease-out]">
