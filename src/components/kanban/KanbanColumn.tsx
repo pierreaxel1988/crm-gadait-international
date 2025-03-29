@@ -34,30 +34,6 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
     console.log('Aucun lead dans cette colonne');
   }
   
-  // Check if there are overdue tasks in this column
-  const hasOverdueTasks = items.some(item => 
-    item.nextFollowUpDate && 
-    !item.isActionCompleted && 
-    new Date(item.nextFollowUpDate) < new Date() &&
-    new Date(item.nextFollowUpDate).setHours(0,0,0,0) < new Date().setHours(0,0,0,0)
-  );
-  
-  // Get column background color based on task status
-  const getColumnBackground = () => {
-    if (hasOverdueTasks) {
-      return "bg-[#FFDEE2]/5"; // Very light pink background for columns with overdue tasks
-    }
-    return "";
-  };
-  
-  // Get column border color based on task status
-  const getColumnBorderColor = () => {
-    if (hasOverdueTasks) {
-      return "border-rose-200";
-    }
-    return "border-border";
-  };
-  
   const handleAddLead = () => {
     // Pass the pipeline type and status as URL parameters so the new lead form can pre-select them
     navigate(`/leads/new?pipeline=${pipelineType}&status=${status}`);
@@ -98,23 +74,14 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
   
   return (
     <div className={cn(
-      'flex flex-col min-w-[280px] border-r',
-      getColumnBorderColor(),
-      getColumnBackground(),
-      'last:border-r-0', 
+      'flex flex-col min-w-[280px] border-r border-border last:border-r-0', 
       isMobile && 'min-w-[250px]',
       className
     )}>
-      <div className={cn(
-        "flex items-center justify-between p-3 md:p-4 border-b",
-        getColumnBorderColor()
-      )}>
+      <div className="flex items-center justify-between p-3 md:p-4 border-b border-border">
         <h3 className="font-medium text-sm md:text-base">{columnTitle}</h3>
         <div className="flex items-center gap-1">
-          <span className={cn(
-            "inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-xs font-medium text-primary",
-            hasOverdueTasks && "bg-rose-100 text-rose-700"
-          )}>
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-xs font-medium text-primary">
             {items.length}
           </span>
           <button 
@@ -128,10 +95,7 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
       </div>
       
       <div 
-        className={cn(
-          "flex-1 p-2 md:p-3 overflow-y-auto space-y-2 md:space-y-3",
-          getColumnBackground()
-        )}
+        className="flex-1 p-2 md:p-3 overflow-y-auto space-y-2 md:space-y-3"
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
@@ -152,10 +116,7 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
       </div>
       
       {!isMobile && (
-        <div className={cn(
-          "p-3 border-t",
-          getColumnBorderColor()
-        )}>
+        <div className="p-3 border-t border-border">
           <button 
             className="w-full rounded-md border border-dashed border-border p-2 text-sm text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors"
             onClick={handleAddLead}
