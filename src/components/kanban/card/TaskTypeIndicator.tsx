@@ -51,56 +51,56 @@ const TaskTypeIndicator = ({ taskType }: TaskTypeIndicatorProps) => {
         };
       case 'Visites':
         return {
-          bg: '#F4F3FF',
-          text: '#9B51E0',
+          bg: '#F4F3FF',  // Light purple background
+          text: '#9B51E0', // Purple
           icon: '#9B51E0'
         };
       case 'Compromis':
         return {
-          bg: '#EEF5FF',
-          text: '#E8B64B',
+          bg: '#FFF8E6',  // Light gold background
+          text: '#E8B64B', // Gold
           icon: '#E8B64B'
         };
       case 'Acte de vente':
         return {
-          bg: '#F7FFF2',
-          text: '#4CAF50',
+          bg: '#E8F5E9',  // Light green background
+          text: '#4CAF50', // Green
           icon: '#4CAF50'
         };
       case 'Contrat de Location':
         return {
-          bg: '#FFFBEC',
-          text: '#3D8FD1',
+          bg: '#E3F2FD',  // Light blue background
+          text: '#3D8FD1', // Blue
           icon: '#3D8FD1'
         };
       case 'Propositions':
         return {
-          bg: '#FFF2F5',
-          text: '#9C27B0',
+          bg: '#F3E5F5',  // Light magenta background
+          text: '#9C27B0', // Magenta
           icon: '#9C27B0'
         };
       case 'Follow up':
         return {
-          bg: '#F0FFFE',
-          text: '#E91E63',
+          bg: '#FCE4EC',  // Light pink background
+          text: '#E91E63', // Pink
           icon: '#E91E63'
         };
       case 'Estimation':
         return {
-          bg: '#F8F3FF',
-          text: '#009688',
+          bg: '#E0F2F1',  // Light teal background
+          text: '#009688', // Teal
           icon: '#009688'
         };
       case 'Prospection':
         return {
-          bg: '#FFF5F1',
-          text: '#F44336',
+          bg: '#FFEBEE',  // Light red background
+          text: '#F44336', // Red
           icon: '#F44336'
         };
       case 'Admin':
         return {
-          bg: '#F5F5F5',
-          text: '#607D8B',
+          bg: '#ECEFF1',  // Light blue-grey background
+          text: '#607D8B', // Blue Grey
           icon: '#607D8B'
         };
       default:

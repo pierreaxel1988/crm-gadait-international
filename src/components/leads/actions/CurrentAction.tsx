@@ -24,8 +24,19 @@ const CurrentAction: React.FC<CurrentActionProps> = ({
   const isMobile = useIsMobile();
 
   const getActionTypeBg = (type: TaskType): string => {
-    if (type === 'Call') return '#E7F7E4';
-    return 'bg-loro-pearl/30';
+    switch (type) {
+      case 'Call': return '#E7F7E4';
+      case 'Visites': return '#F4F3FF';
+      case 'Compromis': return '#FFF8E6';
+      case 'Acte de vente': return '#E8F5E9';
+      case 'Contrat de Location': return '#E3F2FD';
+      case 'Propositions': return '#F3E5F5';
+      case 'Follow up': return '#FCE4EC';
+      case 'Estimation': return '#E0F2F1';
+      case 'Prospection': return '#FFEBEE';
+      case 'Admin': return '#ECEFF1';
+      default: return 'bg-loro-pearl/30';
+    }
   };
 
   if (!taskType) {
@@ -60,9 +71,7 @@ const CurrentAction: React.FC<CurrentActionProps> = ({
         <div className={`${isMobile ? 'p-3' : 'p-4'}`}>
           <div className="space-y-4 w-full">
             <div className={`flex items-center gap-3 ${isMobile ? 'p-2.5' : 'p-3'} rounded-lg border border-loro-pearl/50 bg-loro-pearl/10`}>
-              <div className="p-2 rounded-md" style={{ 
-                backgroundColor: taskType === 'Call' ? '#E7F7E4' : 'rgba(224, 224, 224, 0.3)' 
-              }}>
+              <div className="p-2 rounded-md" style={{ backgroundColor: getActionTypeBg(taskType) }}>
                 {getActionTypeIcon(taskType)}
               </div>
               <span className={`text-loro-navy font-futura ${isMobile ? 'text-base' : 'text-lg'} tracking-wide`}>{taskType}</span>

@@ -14,15 +14,15 @@ const CategoryFilter = () => {
   const getTextColorForCategory = (categoryValue: string): string => {
     switch (categoryValue) {
       case 'Call': return '#25D366'; // WhatsApp brand green
-      case 'Visites': return '#9B51E0';
-      case 'Compromis': return '#E8B64B';
-      case 'Acte de vente': return '#4CAF50';
-      case 'Contrat de Location': return '#3D8FD1';
-      case 'Propositions': return '#9C27B0';
-      case 'Follow up': return '#E91E63';
-      case 'Estimation': return '#009688';
-      case 'Prospection': return '#F44336';
-      case 'Admin': return '#607D8B';
+      case 'Visites': return '#9B51E0'; // Purple
+      case 'Compromis': return '#E8B64B'; // Gold
+      case 'Acte de vente': return '#4CAF50'; // Green
+      case 'Contrat de Location': return '#3D8FD1'; // Blue
+      case 'Propositions': return '#9C27B0'; // Magenta
+      case 'Follow up': return '#E91E63'; // Pink
+      case 'Estimation': return '#009688'; // Teal
+      case 'Prospection': return '#F44336'; // Red
+      case 'Admin': return '#607D8B'; // Blue Grey
       default: return '#607D8B';
     }
   };
@@ -40,7 +40,6 @@ const CategoryFilter = () => {
           {eventCategories.map(category => {
             const isActive = activeFilters.includes(category.value);
             const textColor = getTextColorForCategory(category.value);
-            const bgColor = category.value === 'Call' ? '#E7F7E4' : category.color;
             return (
               <button
                 key={category.value}
@@ -48,7 +47,7 @@ const CategoryFilter = () => {
                 className={`flex items-center gap-2 rounded-full py-1 px-3 text-sm font-normal transition-all max-w-fit
                   ${isActive ? 'ring-2 ring-offset-1' : 'opacity-70 hover:opacity-100'}`}
                 style={{ 
-                  backgroundColor: bgColor,
+                  backgroundColor: category.color,
                   color: textColor,
                   borderColor: isActive ? `${textColor}30` : 'transparent',
                   border: '1px solid',

@@ -26,7 +26,6 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
 
   // Helper function to get color for a task type
   const getColorForTaskType = (type: TaskType): string => {
-    if (type === 'Call') return '#E7F7E4'; // WhatsApp-style light green
     const category = eventCategories.find(cat => cat.value === type);
     return category?.color || '#F5F5F5';
   };
@@ -35,15 +34,15 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
   const getTextColorForTaskType = (type: TaskType): string => {
     switch (type) {
       case 'Call': return '#25D366'; // WhatsApp brand green
-      case 'Visites': return '#9B51E0';
-      case 'Compromis': return '#E8B64B';
-      case 'Acte de vente': return '#4CAF50';
-      case 'Contrat de Location': return '#3D8FD1';
-      case 'Propositions': return '#9C27B0';
-      case 'Follow up': return '#E91E63';
-      case 'Estimation': return '#009688';
-      case 'Prospection': return '#F44336';
-      case 'Admin': return '#607D8B';
+      case 'Visites': return '#9B51E0'; // Purple
+      case 'Compromis': return '#E8B64B'; // Gold
+      case 'Acte de vente': return '#4CAF50'; // Green
+      case 'Contrat de Location': return '#3D8FD1'; // Blue
+      case 'Propositions': return '#9C27B0'; // Magenta
+      case 'Follow up': return '#E91E63'; // Pink
+      case 'Estimation': return '#009688'; // Teal
+      case 'Prospection': return '#F44336'; // Red
+      case 'Admin': return '#607D8B'; // Blue Grey
       default: return '#607D8B';
     }
   };
