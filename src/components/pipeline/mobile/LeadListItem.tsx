@@ -148,19 +148,19 @@ const LeadListItem = ({
   const getBadgeStyle = (type: string) => {
     switch (type) {
       case 'status':
-        return "bg-loro-200/30 border border-loro-300/40 text-loro-700 shadow-sm";
+        return "bg-loro-200/30 border border-loro-300/40 text-loro-700";
       case 'location':
-        return "bg-loro-100/30 border border-loro-200/40 text-loro-700 shadow-sm";
+        return "bg-loro-100/30 border border-loro-200/40 text-loro-700";
       case 'budget':
-        return "bg-loro-50/40 border border-loro-200/30 text-loro-600 shadow-sm";
+        return "bg-loro-50/40 border border-loro-200/30 text-loro-600";
       case 'Call':
-        return "bg-loro-300/20 border border-loro-400/20 text-loro-500 shadow-sm";
+        return "bg-loro-300/20 border border-loro-400/20 text-loro-500";
       case 'Follow up':
-        return "bg-loro-400/20 border border-loro-500/20 text-loro-600 shadow-sm";
+        return "bg-loro-400/20 border border-loro-500/20 text-loro-600";
       case 'Visites':
-        return "bg-loro-200/30 border border-loro-300/30 text-loro-700 shadow-sm";
+        return "bg-loro-200/30 border border-loro-300/30 text-loro-700";
       default:
-        return "bg-loro-100/20 border border-loro-200/30 text-loro-800 shadow-sm";
+        return "bg-loro-100/20 border border-loro-200/30 text-loro-800";
     }
   };
   
@@ -245,13 +245,13 @@ const LeadListItem = ({
           </span>
         </div>
         <div className="flex flex-wrap items-center text-sm text-zinc-700 mt-1 gap-1.5">
-          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium tracking-wide ${getBadgeStyle('status')}`}>
+          <span className={`inline-flex items-center rounded-full text-xs font-medium tracking-wide shadow-sm px-2.5 py-1 ${getBadgeStyle('status')}`}>
             {columnStatus}
           </span>
           
           {taskType && (
             <span 
-              className={`flex items-center px-2.5 py-1 rounded-full text-xs font-medium tracking-wide ${nextFollowUpDate ? actionStyle.taskClassName : getBadgeStyle(taskType)}`}
+              className={`flex items-center rounded-full text-xs font-medium tracking-wide shadow-sm px-2.5 py-1 ${nextFollowUpDate ? actionStyle.taskClassName : getBadgeStyle(taskType)}`}
               onClick={taskType === 'Call' && phone ? handlePhoneCall : undefined}
               style={taskType === 'Call' && phone ? { cursor: 'pointer' } : undefined}
             >
@@ -270,7 +270,7 @@ const LeadListItem = ({
           )}
           
           {desiredLocation && (
-            <span className={`flex items-center rounded-full px-2.5 py-1 text-xs font-medium tracking-wide ${getBadgeStyle('location')}`}>
+            <span className={`flex items-center rounded-full text-xs font-medium tracking-wide shadow-sm px-2.5 py-1 ${getBadgeStyle('location')}`}>
               <MapPin className="h-3 w-3 mr-1.5 text-loro-600" />
               <span className="truncate">
                 {desiredLocation}
@@ -279,7 +279,7 @@ const LeadListItem = ({
           )}
           
           {budget && (
-            <span className={`truncate text-xs font-medium rounded-full px-2.5 py-1 tracking-wide ${getBadgeStyle('budget')}`}>
+            <span className={`truncate text-xs font-medium rounded-full tracking-wide shadow-sm px-2.5 py-1 ${getBadgeStyle('budget')}`}>
               {formatBudget(budget, currency)}
             </span>
           )}
