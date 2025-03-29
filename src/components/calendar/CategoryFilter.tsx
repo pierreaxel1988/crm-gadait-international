@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { eventCategories, useCalendar } from '@/contexts/CalendarContext';
@@ -10,7 +11,7 @@ const CategoryFilter = () => {
   } = useCalendar();
   return <Card className="bg-white shadow-luxury">
       <CardHeader className="pb-2">
-        <CardTitle className="font-times text-loro-terracotta text-base">Catégories</CardTitle>
+        <CardTitle className="font-futuraLight text-loro-terracotta text-base">Catégories</CardTitle>
         <CardDescription className="font-times text-chocolate-dark">
           Filtrer les événements par catégorie
         </CardDescription>
