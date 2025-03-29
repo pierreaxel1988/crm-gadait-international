@@ -39,8 +39,8 @@ const SubNavigation = () => {
   if (isMobile) {
     return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
         <div className="overflow-x-auto py-2">
-          <div className="flex px-4 space-x-4 min-w-min">
-            {navigationItems.map(item => <Link key={item.name} to={item.path} className={cn("flex items-center justify-center whitespace-nowrap rounded-md p-3 min-w-[50px]", location.pathname === item.path ? "text-loro-terracotta bg-loro-white" : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70")}>
+          <div className="flex justify-between px-2 w-full">
+            {navigationItems.map(item => <Link key={item.name} to={item.path} className={cn("flex items-center justify-center whitespace-nowrap rounded-md p-2 flex-1 mx-1", location.pathname === item.path ? "text-loro-terracotta bg-loro-white" : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70")}>
                 {item.icon && <item.icon className="h-5 w-5" />}
               </Link>)}
           </div>
