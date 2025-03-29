@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -25,12 +24,12 @@ const DayDetail = ({
   return <Card className="bg-white shadow-luxury h-full">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="font-futuraLight text-loro-terracotta text-base">
+          <CardTitle className="font-futuraLight text-loro-terracotta text-base font-normal">
             {selectedDate ? format(selectedDate, 'EEEE d MMMM yyyy', {
-              locale: fr
-            }).charAt(0).toUpperCase() + format(selectedDate, 'EEEE d MMMM yyyy', {
-              locale: fr
-            }).slice(1) : 'Sélectionner une date'}
+            locale: fr
+          }).charAt(0).toUpperCase() + format(selectedDate, 'EEEE d MMMM yyyy', {
+            locale: fr
+          }).slice(1) : 'Sélectionner une date'}
           </CardTitle>
           <CalendarIcon className="h-5 w-5 text-loro-terracotta" />
         </div>
