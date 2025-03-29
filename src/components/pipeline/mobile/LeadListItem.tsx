@@ -172,7 +172,7 @@ const LeadListItem = ({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 rounded-full hover:bg-gray-100 p-0.5"
+                        className="h-6 w-6 rounded-full hover:bg-amber-100 transition-colors p-0.5 hover:scale-110"
                         onClick={handleEmailClick}
                       >
                         <Mail className="h-4 w-4 text-amber-600" />
@@ -191,7 +191,7 @@ const LeadListItem = ({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 rounded-full hover:bg-gray-100 p-0.5"
+                          className="h-6 w-6 rounded-full hover:bg-blue-100 transition-colors p-0.5 hover:scale-110"
                           onClick={handlePhoneCall}
                         >
                           <Phone className="h-4 w-4 text-blue-600" />
@@ -207,7 +207,7 @@ const LeadListItem = ({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 rounded-full hover:bg-gray-100 p-0.5"
+                          className="h-6 w-6 rounded-full hover:bg-green-100 transition-colors p-0.5 hover:scale-110"
                           onClick={handleWhatsAppClick}
                         >
                           <MessageSquare className="h-4 w-4 text-green-600" />

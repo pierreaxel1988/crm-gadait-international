@@ -117,7 +117,7 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-full hover:bg-gray-100"
+                className="h-8 w-8 rounded-full hover:bg-amber-100 transition-colors hover:scale-110"
                 onClick={handleEmailClick}
               >
                 <Mail className="h-4 w-4 text-amber-600" />
@@ -135,7 +135,7 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full hover:bg-gray-100"
+                    className="h-8 w-8 rounded-full hover:bg-blue-100 transition-colors hover:scale-110"
                     onClick={handlePhoneClick}
                   >
                     <Phone className="h-4 w-4 text-blue-600" />
@@ -151,7 +151,7 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full hover:bg-gray-100"
+                    className="h-8 w-8 rounded-full hover:bg-green-100 transition-colors hover:scale-110"
                     onClick={handleWhatsAppClick}
                   >
                     <MessageSquare className="h-4 w-4 text-green-600" />
@@ -170,7 +170,7 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full hover:bg-gray-100"
+                  className="h-8 w-8 rounded-full hover:bg-gray-100 transition-colors hover:scale-110"
                   onClick={handleAddAction}
                 >
                   <PlusCircle className="h-4 w-4 text-gray-600" />
