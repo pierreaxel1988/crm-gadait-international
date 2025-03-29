@@ -1,132 +1,123 @@
 
 import React from 'react';
-import { 
-  Phone, Home, FileCheck, FileSignature, 
-  MessageSquare, Calendar, Calculator, 
-  Search, AreaChart 
-} from 'lucide-react';
-import { TaskType } from '../KanbanCard';
+import { Phone } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 interface TaskTypeIndicatorProps {
   taskType?: TaskType;
+  className?: string;
+  phoneNumber?: string;
 }
 
-const TaskTypeIndicator = ({ taskType }: TaskTypeIndicatorProps) => {
+const TaskTypeIndicator = ({ taskType, className, phoneNumber }: TaskTypeIndicatorProps) => {
   if (!taskType) return null;
-  
-  const getTaskTypeIcon = (type: TaskType) => {
-    switch (type) {
-      case 'Call':
-        return <Phone className="h-4 w-4" />;
-      case 'Visites':
-        return <Home className="h-4 w-4" />;
-      case 'Compromis':
-        return <FileCheck className="h-4 w-4" />;
-      case 'Acte de vente':
-        return <FileSignature className="h-4 w-4" />;
-      case 'Contrat de Location':
-        return <FileSignature className="h-4 w-4" />;
-      case 'Propositions':
-        return <MessageSquare className="h-4 w-4" />;
-      case 'Follow up':
-        return <Calendar className="h-4 w-4" />;
-      case 'Estimation':
-        return <Calculator className="h-4 w-4" />;
-      case 'Prospection':
-        return <Search className="h-4 w-4" />;
-      case 'Admin':
-        return <AreaChart className="h-4 w-4" />;
-      default:
-        return null;
+
+  const handlePhoneClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (taskType === 'Call' && phoneNumber) {
+      window.location.href = `tel:${phoneNumber}`;
     }
   };
   
-  const getTaskTypeColor = (type: TaskType) => {
-    switch (type) {
+  const getTaskStyles = (): { color: string; text: string; classes: string, icon?: React.ReactNode, isClickable: boolean } => {
+    let isClickable = false;
+    
+    switch (taskType) {
       case 'Call':
+        isClickable = !!phoneNumber;
         return {
-          bg: '#E7F7E4',  // WhatsApp-style light green background
-          text: '#25D366', // WhatsApp brand green
-          icon: '#25D366'  // WhatsApp brand green
+          color: 'text-green-800 bg-green-50 border-green-200 hover:bg-green-100',
+          text: 'Appel',
+          classes: 'text-[#25D366]',
+          icon: <Phone className="h-3 w-3" />,
+          isClickable
         };
       case 'Visites':
         return {
-          bg: '#F4F3FF',  // Light purple background
-          text: '#9B51E0', // Purple
-          icon: '#9B51E0'
+          color: 'text-purple-800 bg-purple-50 border-purple-200',
+          text: 'Visite',
+          classes: '',
+          isClickable: false
         };
       case 'Compromis':
         return {
-          bg: '#FFF8E6',  // Light gold background
-          text: '#E8B64B', // Gold
-          icon: '#E8B64B'
+          color: 'text-amber-800 bg-amber-50 border-amber-200',
+          text: 'Compromis',
+          classes: '',
+          isClickable: false
         };
       case 'Acte de vente':
         return {
-          bg: '#E8F5E9',  // Light green background
-          text: '#4CAF50', // Green
-          icon: '#4CAF50'
+          color: 'text-red-800 bg-red-50 border-red-200',
+          text: 'Acte',
+          classes: '',
+          isClickable: false
         };
       case 'Contrat de Location':
         return {
-          bg: '#E3F2FD',  // Light blue background
-          text: '#3D8FD1', // Blue
-          icon: '#3D8FD1'
+          color: 'text-blue-800 bg-blue-50 border-blue-200',
+          text: 'Location',
+          classes: '',
+          isClickable: false
         };
       case 'Propositions':
         return {
-          bg: '#F3E5F5',  // Light magenta background
-          text: '#9C27B0', // Magenta
-          icon: '#9C27B0'
+          color: 'text-indigo-800 bg-indigo-50 border-indigo-200',
+          text: 'Proposition',
+          classes: '',
+          isClickable: false
         };
       case 'Follow up':
         return {
-          bg: '#FCE4EC',  // Light pink background
-          text: '#E91E63', // Pink
-          icon: '#E91E63'
+          color: 'text-pink-800 bg-pink-50 border-pink-200',
+          text: 'Follow-up',
+          classes: '',
+          isClickable: false
         };
       case 'Estimation':
         return {
-          bg: '#E0F2F1',  // Light teal background
-          text: '#009688', // Teal
-          icon: '#009688'
+          color: 'text-teal-800 bg-teal-50 border-teal-200',
+          text: 'Estimation',
+          classes: '',
+          isClickable: false
         };
       case 'Prospection':
         return {
-          bg: '#FFEBEE',  // Light red background
-          text: '#F44336', // Red
-          icon: '#F44336'
+          color: 'text-orange-800 bg-orange-50 border-orange-200',
+          text: 'Prospection',
+          classes: '',
+          isClickable: false
         };
       case 'Admin':
-        return {
-          bg: '#ECEFF1',  // Light blue-grey background
-          text: '#607D8B', // Blue Grey
-          icon: '#607D8B'
-        };
       default:
         return {
-          bg: '#F5F5F5',
-          text: '#607D8B',
-          icon: '#607D8B'
+          color: 'text-gray-800 bg-gray-50 border-gray-200',
+          text: taskType,
+          classes: '',
+          isClickable: false
         };
     }
   };
-  
-  const colorConfig = getTaskTypeColor(taskType);
-  
+
+  const { color, text, classes, icon, isClickable } = getTaskStyles();
+
   return (
-    <div 
-      className="flex items-center gap-1.5 rounded-full px-3 py-1 transition-all duration-200 shadow-sm border max-w-fit"
-      style={{ 
-        backgroundColor: colorConfig.bg,
-        borderColor: `${colorConfig.text}20`,
-        color: colorConfig.text
-      }}
+    <div
+      className={cn(
+        "flex items-center gap-1.5 rounded-full px-3 py-1 transition-all duration-200 shadow-sm border max-w-fit",
+        color,
+        isClickable && "cursor-pointer hover:shadow-md",
+        className
+      )}
+      onClick={isClickable ? handlePhoneClick : undefined}
+      title={isClickable ? "Cliquer pour appeler" : undefined}
     >
-      <div className="flex items-center justify-center" style={{ color: colorConfig.icon }}>
-        {getTaskTypeIcon(taskType)}
-      </div>
-      <span className="text-xs font-futura uppercase tracking-wide whitespace-nowrap">{taskType}</span>
+      {icon}
+      <span className={cn("text-xs font-medium whitespace-nowrap", classes)}>
+        {text}
+      </span>
+      {isClickable && <Phone className="h-3 w-3 ml-1" />}
     </div>
   );
 };

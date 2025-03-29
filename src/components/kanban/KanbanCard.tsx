@@ -146,7 +146,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
           />
           
           {/* Type de tâche */}
-          <TaskTypeIndicator taskType={item.taskType} />
+          <TaskTypeIndicator taskType={item.taskType} phoneNumber={item.phone} />
         </div>
       </CardContent>
     </Card>
