@@ -65,6 +65,18 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
     }
   };
 
+  // Fonction pour obtenir les classes du bouton en fonction du statut
+  const getButtonClasses = (status: string) => {
+    switch (status) {
+      case 'overdue':
+        return "h-8 border-rose-300 text-rose-700 hover:bg-[#FFDEE2]/50 hover:text-rose-800";
+      case 'todo':
+        return "h-8 border-green-300 text-green-700 hover:bg-[#F2FCE2]/50 hover:text-green-800";
+      default:
+        return "h-8"; // Style par défaut
+    }
+  };
+
   // Mobile view
   if (isMobile) {
     return (
@@ -113,7 +125,7 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="h-8" 
+                  className={getButtonClasses(action.status)}
                   onClick={() => onMarkComplete(action.id, action.leadId)}
                 >
                   <Check className="h-4 w-4 mr-1" /> Complété
@@ -178,6 +190,7 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
                 <Button 
                   variant="outline" 
                   size="sm" 
+                  className={getButtonClasses(action.status)}
                   onClick={() => onMarkComplete(action.id, action.leadId)}
                 >
                   <Check className="h-4 w-4 mr-1" />
