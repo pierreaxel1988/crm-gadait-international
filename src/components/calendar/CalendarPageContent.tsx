@@ -1,10 +1,11 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, ListFilter } from 'lucide-react';
 import CalendarView from '@/components/calendar/CalendarView';
 import DayDetail from '@/components/calendar/DayDetail';
 import AddEventDialog from '@/components/calendar/AddEventDialog';
+import AllActionsDialog from '@/components/calendar/AllActionsDialog';
 import CategoryFilter from '@/components/calendar/CategoryFilter';
 import { eventCategories, useCalendar } from '@/contexts/CalendarContext';
 
@@ -23,6 +24,8 @@ const CalendarPageContent = () => {
     handleAddEvent,
     refreshEvents
   } = useCalendar();
+  
+  const [isAllActionsOpen, setIsAllActionsOpen] = useState(false);
 
   // Force refresh of events when component mounts
   useEffect(() => {
@@ -49,7 +52,18 @@ const CalendarPageContent = () => {
     <div className="container py-10 max-w-6xl mx-auto animate-fade-in">
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-1/2 lg:w-2/5 space-y-6">
-          <CategoryFilter />
+          <div className="flex flex-col space-y-4">
+            <CategoryFilter />
+            
+            <Button 
+              className="w-full"
+              variant="outline"
+              onClick={() => setIsAllActionsOpen(true)}
+            >
+              <ListFilter className="mr-2 h-4 w-4" />
+              Voir toutes les actions
+            </Button>
+          </div>
 
           <CalendarView 
             selectedDate={selectedDate}
@@ -88,6 +102,11 @@ const CalendarPageContent = () => {
         onAddEvent={handleAddEvent}
         colors={colors}
         categories={eventCategories}
+      />
+      
+      <AllActionsDialog
+        isOpen={isAllActionsOpen}
+        onOpenChange={setIsAllActionsOpen}
       />
     </div>
   );

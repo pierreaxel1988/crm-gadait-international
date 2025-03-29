@@ -76,27 +76,10 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const { toast } = useToast();
 
-  // Fetch team members once to map IDs to names
-  useEffect(() => {
-    const fetchTeamMembers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id, name');
-        
-        if (error) throw error;
-        
-        const newMemberMap = new Map();
-        data?.forEach(member => newMemberMap.set(member.id, member.name));
-        setMemberMap(newMemberMap);
-        
-        console.log("Loaded team members map with", newMemberMap.size, "members");
-      } catch (error) {
-        console.error('Error fetching team members:', error);
-      }
-    };
-    
-    fetchTeamMembers();
+  // Define refreshEvents function before using it
+  const refreshEvents = useCallback(async () => {
+    console.log("Refreshing events...");
+    await fetchLeadActions();
   }, []);
 
   const fetchLeadActions = useCallback(async () => {
@@ -229,12 +212,35 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [memberMap, toast]);
 
+  // Fetch team members once to map IDs to names
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('id, name');
+        
+        if (error) throw error;
+        
+        const newMemberMap = new Map();
+        data?.forEach(member => newMemberMap.set(member.id, member.name));
+        setMemberMap(newMemberMap);
+        
+        console.log("Loaded team members map with", newMemberMap.size, "members");
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+      }
+    };
+    
+    fetchTeamMembers();
+  }, []);
+
   // Initial fetch of lead actions
   useEffect(() => {
     console.log("Initial fetch of lead actions");
     refreshEvents();
     setIsInitialLoad(false);
-  }, [memberMap]);
+  }, [memberMap, refreshEvents]);
 
   // Setup action-completed event listener once
   useEffect(() => {
@@ -252,11 +258,6 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       window.removeEventListener('action-completed', handleActionCompleted);
     };
   }, [refreshEvents]);
-
-  const refreshEvents = async () => {
-    console.log("Refreshing events...");
-    await fetchLeadActions();
-  };
 
   const markEventComplete = async (eventId: string) => {
     if (eventId.startsWith('action-')) {
