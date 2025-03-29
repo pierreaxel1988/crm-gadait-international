@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,7 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
   
   const handleCardClick = (leadId: string, e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return;
-    navigate(`/leads/${leadId}`);
+    navigate(`/leads/${leadId}?tab=actions`);
   };
   
   if (isLoading) {
@@ -137,7 +138,8 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
                     onMarkComplete(action.id, action.leadId);
                   }}
                 >
-                  <Check className="h-4 w-4 mr-1" /> Complété
+                  <Check className="h-4 w-4 mr-1" /> 
+                  Complété
                 </Button>
               )}
               
