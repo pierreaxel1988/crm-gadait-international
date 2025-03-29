@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ListFilter } from 'lucide-react';
+import { PlusCircle, ListFilter, ClipboardList } from 'lucide-react';
 import CalendarView from '@/components/calendar/CalendarView';
 import DayDetail from '@/components/calendar/DayDetail';
 import AddEventDialog from '@/components/calendar/AddEventDialog';
@@ -56,11 +56,11 @@ const CalendarPageContent = () => {
             <CategoryFilter />
             
             <Button 
-              className="w-full"
+              className="w-full shadow-sm hover:shadow transition-all bg-loro-pearl hover:bg-loro-pearl/80 text-chocolate-dark"
               variant="outline"
               onClick={() => setIsAllActionsOpen(true)}
             >
-              <ListFilter className="mr-2 h-4 w-4" />
+              <ClipboardList className="mr-2 h-4 w-4" />
               Voir toutes les actions
             </Button>
           </div>
@@ -75,7 +75,7 @@ const CalendarPageContent = () => {
           />
           
           <Button 
-            className="w-full" 
+            className="w-full shadow-sm" 
             onClick={() => setIsAddEventOpen(true)}
           >
             <PlusCircle className="mr-2 h-4 w-4" />
