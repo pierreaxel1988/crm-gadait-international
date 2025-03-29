@@ -146,6 +146,26 @@ const LeadListItem = ({
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
+
+  // New function to get color styles for different badge types
+  const getBadgeStyle = (type: string) => {
+    switch (type) {
+      case 'status':
+        return "bg-purple-100 border border-purple-200 text-purple-800 shadow-sm";
+      case 'location':
+        return "bg-blue-50 border border-blue-200 text-blue-700 shadow-sm";
+      case 'budget':
+        return "bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-sm";
+      case 'Call':
+        return "bg-green-50 border border-green-200 text-green-800 shadow-sm";
+      case 'Follow up':
+        return "bg-pink-50 border border-pink-200 text-pink-800 shadow-sm";
+      case 'Visites':
+        return "bg-indigo-50 border border-indigo-200 text-indigo-800 shadow-sm";
+      default:
+        return "bg-zinc-100 border border-zinc-200 text-zinc-800 shadow-sm";
+    }
+  };
   
   return (
     <div 
@@ -228,41 +248,41 @@ const LeadListItem = ({
           </span>
         </div>
         <div className="flex flex-wrap items-center text-sm text-zinc-700 mt-1 gap-1">
-          <span className="inline-flex items-center bg-zinc-100 text-zinc-900 text-xs px-2 py-0.5 rounded-full">
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${getBadgeStyle('status')}`}>
             {columnStatus}
           </span>
           
           {taskType && (
             <span 
-              className={`flex items-center ${nextFollowUpDate ? actionStyle.taskClassName : 'bg-zinc-100 text-zinc-700 rounded-full px-2 py-0.5'}`}
+              className={`flex items-center px-2 py-0.5 rounded-full text-xs ${nextFollowUpDate ? actionStyle.taskClassName : getBadgeStyle(taskType)}`}
               onClick={taskType === 'Call' && phone ? handlePhoneCall : undefined}
               style={taskType === 'Call' && phone ? { cursor: 'pointer' } : undefined}
             >
               {taskType === 'Call' ? 
-                <Phone className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
+                <Phone className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-green-600'}`} /> : 
                taskType === 'Follow up' ? 
-                <Clock className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
+                <Clock className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-pink-600'}`} /> : 
                taskType === 'Visites' ? 
-                <Calendar className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-zinc-600'}`} /> : 
+                <Calendar className={`h-3 w-3 mr-1 ${nextFollowUpDate ? actionStyle.iconClassName : 'text-indigo-600'}`} /> : 
                 null
               }
-              <span className={`truncate text-xs ${nextFollowUpDate ? '' : 'text-zinc-900'}`}>
+              <span className="truncate">
                 {taskType}
               </span>
             </span>
           )}
           
           {desiredLocation && (
-            <span className="flex items-center bg-zinc-100 text-zinc-700 rounded-full px-2 py-0.5">
-              <MapPin className="h-3 w-3 mr-1 text-zinc-600" />
-              <span className="truncate text-xs text-zinc-900">
+            <span className={`flex items-center rounded-full px-2 py-0.5 text-xs ${getBadgeStyle('location')}`}>
+              <MapPin className="h-3 w-3 mr-1 text-blue-600" />
+              <span className="truncate">
                 {desiredLocation}
               </span>
             </span>
           )}
           
           {budget && (
-            <span className="truncate text-xs font-medium bg-zinc-100 text-zinc-900 rounded-full px-2 py-0.5">
+            <span className={`truncate text-xs font-medium rounded-full px-2 py-0.5 ${getBadgeStyle('budget')}`}>
               {formatBudget(budget, currency)}
             </span>
           )}
