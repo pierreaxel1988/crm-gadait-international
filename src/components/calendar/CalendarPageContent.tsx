@@ -26,13 +26,20 @@ const CalendarPageContent = () => {
 
   // Listen for action-completed events from the Actions page
   useEffect(() => {
+    console.log("Setting up action-completed listener in CalendarPageContent");
+    
     const handleActionCompleted = () => {
+      console.log("Action completed event received, refreshing events");
       refreshEvents();
     };
 
     window.addEventListener('action-completed', handleActionCompleted);
     
+    // Initial fetch to ensure we have the latest data
+    refreshEvents();
+    
     return () => {
+      console.log("Removing action-completed listener");
       window.removeEventListener('action-completed', handleActionCompleted);
     };
   }, [refreshEvents]);

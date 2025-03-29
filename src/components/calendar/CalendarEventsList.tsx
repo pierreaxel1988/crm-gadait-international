@@ -22,6 +22,8 @@ const CalendarEventsList = ({
     ? events.filter((event) => isSameDay(event.date, selectedDate))
     : [];
 
+  console.log(`Displaying ${eventsForSelectedDate.length} events for selected date:`, selectedDate);
+  
   return (
     <>
       {eventsForSelectedDate.length > 0 ? (

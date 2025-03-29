@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -33,48 +32,7 @@ export const eventCategories = [
   { name: 'Admin', color: '#D3D3D3', value: 'Admin' as TaskType },
 ];
 
-export const initialEvents: Event[] = [
-  {
-    id: '1',
-    title: 'Visite propriété',
-    description: 'Visite du bien avec la famille Martin',
-    date: new Date(new Date().setDate(new Date().getDate() + 2)),
-    color: '#E5DEFF',
-    category: 'Visites',
-  },
-  {
-    id: '2',
-    title: 'Signature contrat',
-    description: 'Signature du compromis pour la villa des Lilas',
-    date: new Date(new Date().setDate(new Date().getDate() + 5)),
-    color: '#D3E4FD',
-    category: 'Compromis',
-  },
-  {
-    id: '3',
-    title: 'Rendez-vous banque',
-    description: 'Discussion financement avec Crédit Immobilier',
-    date: new Date(),
-    color: '#FDD3D3',
-    category: 'Prospection',
-  },
-  {
-    id: '4',
-    title: 'Tournage vidéo',
-    description: 'Tournage du bien rue Victor Hugo',
-    date: new Date(new Date().setDate(new Date().getDate() + 1)),
-    color: '#FFD6E0',
-    category: 'Propositions',
-  },
-  {
-    id: '5',
-    title: 'Déjeuner équipe',
-    description: 'Restaurant Le Bistrot',
-    date: new Date(new Date().setDate(new Date().getDate() + 4)),
-    color: '#D3D3D3',
-    category: 'Admin',
-  },
-];
+export const initialEvents: Event[] = [];
 
 export type CalendarContextType = {
   selectedDate: Date | undefined;
@@ -113,55 +71,68 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const { toast } = useToast();
 
-  // Fetch lead actions and convert them to events
   const fetchLeadActions = async () => {
     try {
-      // Get current user info
+      console.log("Fetching lead actions for calendar...");
+      
       const { data: userData } = await supabase.auth.getUser();
       const currentUserEmail = userData?.user?.email;
       
-      // Get the current user's team member id
-      const { data: teamMemberData } = await supabase
+      const { data: teamMemberData, error: teamMemberError } = await supabase
         .from('team_members')
         .select('id, is_admin')
         .eq('email', currentUserEmail)
         .single();
       
+      if (teamMemberError) {
+        console.error('Error fetching team member:', teamMemberError);
+        throw teamMemberError;
+      }
+      
       const isUserAdmin = teamMemberData?.is_admin || false;
       const currentUserId = teamMemberData?.id;
       
-      // Fetch leads with their action history
+      console.log("Current user info:", { isUserAdmin, currentUserId });
+      
       let query = supabase
         .from('leads')
         .select('id, name, action_history, assigned_to');
       
-      // Non-admin users can only see their assigned leads
       if (!isUserAdmin && currentUserId) {
         query = query.eq('assigned_to', currentUserId);
       }
       
       const { data: leads, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching leads:', error);
+        throw error;
+      }
       
-      // Fetch team members for assigned_to mapping
-      const { data: members } = await supabase
+      console.log(`Fetched ${leads?.length || 0} leads with action history`);
+      
+      const { data: members, error: membersError } = await supabase
         .from('team_members')
         .select('id, name');
+      
+      if (membersError) {
+        console.error('Error fetching team members:', membersError);
+        throw membersError;
+      }
       
       const memberMap = new Map();
       members?.forEach(member => memberMap.set(member.id, member.name));
       
-      // Extract actions from leads and convert to events
       let actionEvents: Event[] = [];
       
       leads?.forEach((lead: any) => {
         const leadActions = lead.action_history || [];
         
-        if (Array.isArray(leadActions)) {
+        if (Array.isArray(leadActions) && leadActions.length > 0) {
+          console.log(`Processing ${leadActions.length} actions for lead: ${lead.name}`);
+          
           leadActions.forEach((action: any) => {
             if (action.scheduledDate) {
-              // Find the category color
               const category = eventCategories.find(cat => cat.value === action.actionType);
               
               actionEvents.push({
@@ -169,7 +140,7 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 title: `${action.actionType} - ${lead.name}`,
                 description: action.notes || '',
                 date: new Date(action.scheduledDate),
-                time: format(new Date(action.scheduledDate), 'HH:mm'),
+                time: action.scheduledDate ? format(new Date(action.scheduledDate), 'HH:mm') : undefined,
                 color: category?.color || '#D3D3D3',
                 category: action.actionType as TaskType,
                 leadId: lead.id,
@@ -179,10 +150,13 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               });
             }
           });
+        } else {
+          console.log(`No actions found for lead: ${lead.name}`);
         }
       });
       
-      // Combine initial events with action events
+      console.log(`Converted ${actionEvents.length} actions to calendar events`);
+      
       setEvents([...initialEvents, ...actionEvents]);
     } catch (error) {
       console.error('Error fetching lead actions:', error);
@@ -194,44 +168,47 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  // Initial fetch
   useEffect(() => {
+    console.log("Initial fetch of lead actions");
     refreshEvents();
   }, []);
 
   const refreshEvents = async () => {
+    console.log("Refreshing events...");
     await fetchLeadActions();
   };
 
-  // Mark an event as complete when it's from an action
   const markEventComplete = async (eventId: string) => {
-    // Check if it's an action event
     if (eventId.startsWith('action-')) {
       const actionId = eventId.replace('action-', '');
       
       try {
-        // Find the event to get the leadId
-        const event = events.find(e => e.id === eventId);
-        if (!event || !event.leadId) return;
+        console.log(`Marking action ${actionId} as complete`);
         
-        // Get the lead
+        const event = events.find(e => e.id === eventId);
+        if (!event || !event.leadId) {
+          console.error("Cannot find event or leadId is missing");
+          return;
+        }
+        
         const { data: lead, error: leadError } = await supabase
           .from('leads')
           .select('action_history')
           .eq('id', event.leadId)
           .single();
         
-        if (leadError) throw leadError;
+        if (leadError) {
+          console.error('Error fetching lead:', leadError);
+          throw leadError;
+        }
         
         if (lead && lead.action_history) {
           const actionHistory = lead.action_history as any[];
           const actionIndex = actionHistory.findIndex((a: any) => a.id === actionId);
           
           if (actionIndex !== -1) {
-            // Update the action
             actionHistory[actionIndex].completedDate = new Date().toISOString();
             
-            // Update the lead
             const { error: updateError } = await supabase
               .from('leads')
               .update({ 
@@ -240,9 +217,11 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               })
               .eq('id', event.leadId);
             
-            if (updateError) throw updateError;
+            if (updateError) {
+              console.error('Error updating lead:', updateError);
+              throw updateError;
+            }
             
-            // Update the events list
             setEvents(prev => 
               prev.map(e => 
                 e.id === eventId 
@@ -251,10 +230,14 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               )
             );
             
+            window.dispatchEvent(new CustomEvent('action-completed'));
+            
             toast({
               title: "Action complétée",
               description: "L'action a été marquée comme complétée."
             });
+          } else {
+            console.error(`Action ${actionId} not found in lead's action history`);
           }
         }
       } catch (error) {
