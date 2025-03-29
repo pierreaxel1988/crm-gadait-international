@@ -23,16 +23,16 @@ export type Event = {
 };
 
 export const eventCategories = [
-  { name: 'Call', color: '#FDE1D3', value: 'Call' as TaskType },
-  { name: 'Visites', color: '#E5DEFF', value: 'Visites' as TaskType },
-  { name: 'Compromis', color: '#D3E4FD', value: 'Compromis' as TaskType },
-  { name: 'Acte de vente', color: '#F2FCE2', value: 'Acte de vente' as TaskType },
-  { name: 'Contrat de Location', color: '#FEF7CD', value: 'Contrat de Location' as TaskType },
-  { name: 'Propositions', color: '#FFD6E0', value: 'Propositions' as TaskType },
-  { name: 'Follow up', color: '#D3FDFC', value: 'Follow up' as TaskType },
-  { name: 'Estimation', color: '#E8D3FD', value: 'Estimation' as TaskType },
-  { name: 'Prospection', color: '#FDD3D3', value: 'Prospection' as TaskType },
-  { name: 'Admin', color: '#D3D3D3', value: 'Admin' as TaskType },
+  { name: 'Call', color: '#FFF5F1', value: 'Call' as TaskType },
+  { name: 'Visites', color: '#F4F3FF', value: 'Visites' as TaskType },
+  { name: 'Compromis', color: '#EEF5FF', value: 'Compromis' as TaskType },
+  { name: 'Acte de vente', color: '#F7FFF2', value: 'Acte de vente' as TaskType },
+  { name: 'Contrat de Location', color: '#FFFBEC', value: 'Contrat de Location' as TaskType },
+  { name: 'Propositions', color: '#FFF2F5', value: 'Propositions' as TaskType },
+  { name: 'Follow up', color: '#F0FFFE', value: 'Follow up' as TaskType },
+  { name: 'Estimation', color: '#F8F3FF', value: 'Estimation' as TaskType },
+  { name: 'Prospection', color: '#FFF5F1', value: 'Prospection' as TaskType },
+  { name: 'Admin', color: '#F5F5F5', value: 'Admin' as TaskType },
 ];
 
 export const initialEvents: Event[] = [];

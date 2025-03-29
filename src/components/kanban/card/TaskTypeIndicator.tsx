@@ -41,8 +41,38 @@ const TaskTypeIndicator = ({ taskType }: TaskTypeIndicatorProps) => {
     }
   };
   
+  const getTaskTypeBackground = (type: TaskType) => {
+    switch (type) {
+      case 'Call':
+        return '#FFF5F1';
+      case 'Visites':
+        return '#F4F3FF';
+      case 'Compromis':
+        return '#EEF5FF';
+      case 'Acte de vente':
+        return '#F7FFF2';
+      case 'Contrat de Location':
+        return '#FFFBEC';
+      case 'Propositions':
+        return '#FFF2F5';
+      case 'Follow up':
+        return '#F0FFFE';
+      case 'Estimation':
+        return '#F8F3FF';
+      case 'Prospection':
+        return '#FFF5F1';
+      case 'Admin':
+        return '#F5F5F5';
+      default:
+        return '#F5F5F5';
+    }
+  };
+  
   return (
-    <div className="flex items-center gap-1 bg-accent/50 rounded-full px-2 py-0.5">
+    <div 
+      className="flex items-center gap-1 rounded-full px-2 py-0.5"
+      style={{ backgroundColor: getTaskTypeBackground(taskType) }}
+    >
       {getTaskTypeIcon(taskType)}
       <span className="text-xs font-futura uppercase tracking-wide">{taskType}</span>
     </div>

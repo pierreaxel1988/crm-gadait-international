@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tag } from 'lucide-react';
 import { TaskType } from '@/components/kanban/KanbanCard';
+import { eventCategories } from '@/contexts/CalendarContext';
 
 interface TypeFilterButtonsProps {
   typeFilter: TaskType | 'all';
@@ -23,6 +24,12 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
     'Admin'
   ];
 
+  // Helper function to get color for a task type
+  const getColorForTaskType = (type: TaskType): string => {
+    const category = eventCategories.find(cat => cat.value === type);
+    return category?.color || '#F5F5F5';
+  };
+
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -40,10 +47,13 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
         {taskTypes.map(type => (
           <Button
             key={type}
-            variant={typeFilter === type ? "default" : "outline"}
+            variant="outline"
             size="sm"
-            className="text-xs"
+            className={`text-xs ${typeFilter === type ? 'ring-2 ring-loro-terracotta ring-offset-1' : ''}`}
             onClick={() => setTypeFilter(type)}
+            style={{
+              backgroundColor: typeFilter === type ? getColorForTaskType(type) : 'transparent'
+            }}
           >
             {type}
           </Button>

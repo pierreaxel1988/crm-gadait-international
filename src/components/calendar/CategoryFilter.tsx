@@ -26,11 +26,9 @@ const CategoryFilter = () => {
               <button
                 key={category.value}
                 onClick={() => toggleFilter(category.value)}
-                className={`flex items-center gap-2 rounded-full py-1 px-3 text-sm font-medium transition-all 
+                className={`flex items-center gap-2 rounded-full py-1 px-3 text-sm font-normal transition-all
                   ${isActive ? 'ring-2 ring-loro-terracotta ring-offset-1' : 'opacity-70 hover:opacity-100'}`}
-                style={{
-                  backgroundColor: `${category.color}80` // 50% opacity
-                }}
+                style={{ backgroundColor: category.color }}
               >
                 {category.name}
                 {isActive && <Check className="h-3 w-3" />}
