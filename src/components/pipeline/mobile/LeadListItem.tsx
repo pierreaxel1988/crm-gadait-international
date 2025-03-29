@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Clock, Phone, Calendar, MapPin, Mail, MessageSquare } from 'lucide-react';
 import { Avatar } from "@/components/ui/avatar";
@@ -7,6 +8,7 @@ import { Currency } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface LeadListItemProps {
   id: string;
@@ -244,14 +246,14 @@ const LeadListItem = ({
             {formatDate(createdAt)}
           </span>
         </div>
-        <div className="flex flex-wrap items-center text-sm text-zinc-700 mt-1 gap-1.5">
-          <span className={`inline-flex items-center rounded-full text-xs font-medium tracking-wide shadow-sm px-2.5 py-1 ${getBadgeStyle('status')}`}>
+        <div className="flex flex-wrap items-center text-sm text-zinc-700 mt-1 gap-2">
+          <div className={`inline-flex items-center rounded-full text-xs font-medium shadow-sm h-6 px-3 ${getBadgeStyle('status')}`}>
             {columnStatus}
-          </span>
+          </div>
           
           {taskType && (
-            <span 
-              className={`flex items-center rounded-full text-xs font-medium tracking-wide shadow-sm px-2.5 py-1 ${nextFollowUpDate ? actionStyle.taskClassName : getBadgeStyle(taskType)}`}
+            <div 
+              className={`flex items-center rounded-full text-xs font-medium shadow-sm h-6 px-3 ${nextFollowUpDate ? actionStyle.taskClassName : getBadgeStyle(taskType)}`}
               onClick={taskType === 'Call' && phone ? handlePhoneCall : undefined}
               style={taskType === 'Call' && phone ? { cursor: 'pointer' } : undefined}
             >
@@ -266,22 +268,22 @@ const LeadListItem = ({
               <span className="truncate">
                 {taskType}
               </span>
-            </span>
+            </div>
           )}
           
           {desiredLocation && (
-            <span className={`flex items-center rounded-full text-xs font-medium tracking-wide shadow-sm px-2.5 py-1 ${getBadgeStyle('location')}`}>
+            <div className={`flex items-center rounded-full text-xs font-medium shadow-sm h-6 px-3 ${getBadgeStyle('location')}`}>
               <MapPin className="h-3 w-3 mr-1.5 text-loro-600" />
               <span className="truncate">
                 {desiredLocation}
               </span>
-            </span>
+            </div>
           )}
           
           {budget && (
-            <span className={`truncate text-xs font-medium rounded-full tracking-wide shadow-sm px-2.5 py-1 ${getBadgeStyle('budget')}`}>
+            <div className={`truncate text-xs font-medium rounded-full shadow-sm h-6 px-3 ${getBadgeStyle('budget')}`}>
               {formatBudget(budget, currency)}
-            </span>
+            </div>
           )}
         </div>
       </div>
