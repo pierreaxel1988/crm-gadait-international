@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -79,7 +78,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const pendingActions = sortedActions.filter(action => !action.completedDate);
   const completedActions = sortedActions.filter(action => action.completedDate);
   
-  // Check if a date is in the past
   const isDatePast = (dateString: string): boolean => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -109,25 +107,35 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       ) : (
         <div className="space-y-2">
           {pendingActions.map((action) => {
-            // Determine if action is overdue
             const isOverdue = isDatePast(action.scheduledDate);
+            const isCallAction = action.actionType === 'Call';
+            
+            const bgColorClass = isOverdue && isCallAction 
+              ? 'bg-[#F8E2E8]/30' 
+              : isOverdue 
+                ? 'bg-[#FFDEE2]/30' 
+                : 'bg-[#F2FCE2]/40 border-green-100';
+            
+            const iconBgClass = isOverdue && isCallAction
+              ? 'bg-[#F8E2E8] text-[#D05A76]'
+              : isOverdue
+                ? 'bg-rose-100 text-rose-600'
+                : 'bg-green-100 text-green-600';
+                
+            const notesBgClass = isOverdue && isCallAction
+              ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
+              : isOverdue
+                ? 'bg-[#FFF0F2] text-rose-800 border border-pink-100'
+                : 'bg-[#F7FEF1] text-green-800 border border-green-100';
             
             return (
               <div 
                 key={action.id} 
-                className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${
-                  isOverdue 
-                    ? 'bg-[#FFDEE2]/30' // Soft pink background without border
-                    : 'bg-[#F2FCE2]/40 border-green-100'
-                }`}
+                className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${bgColorClass}`}
               >
                 <div className="flex justify-between items-start mb-1">
                   <div className="flex items-center gap-1.5">
-                    <div className={`h-6 w-6 rounded-full flex items-center justify-center ${
-                      isOverdue
-                        ? 'bg-rose-100 text-rose-600'
-                        : 'bg-green-100 text-green-600'
-                    }`}>
+                    <div className={`h-6 w-6 rounded-full flex items-center justify-center ${iconBgClass}`}>
                       <Calendar className="h-3 w-3" />
                     </div>
                     <div>
@@ -149,11 +157,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   </Button>
                 </div>
                 {action.notes && (
-                  <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${
-                    isOverdue
-                      ? 'bg-[#FFF0F2] text-rose-800 border border-pink-100'
-                      : 'bg-[#F7FEF1] text-green-800 border border-green-100'
-                  }`}>
+                  <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${notesBgClass}`}>
                     {action.notes}
                   </div>
                 )}

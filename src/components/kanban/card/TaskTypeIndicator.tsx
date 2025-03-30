@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Phone, Calendar, FileText, ClipboardCheck, Home, Building, Send, Clock, FileSearch, Users } from 'lucide-react';
+import { Phone, Calendar, FileText, ClipboardCheck, Building, Send, Clock, FileSearch, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TaskType } from '@/components/kanban/KanbanCard';
 
@@ -30,12 +29,12 @@ const TaskTypeIndicator = ({ taskType, className, phoneNumber, nextFollowUpDate,
         isClickable = !!phoneNumber;
         return {
           color: isOverdue 
-            ? 'text-rose-800 bg-[#FFDEE2] border-pink-200 hover:bg-pink-100' 
+            ? 'text-[#D05A76] bg-[#F8E2E8] border-pink-200 hover:bg-pink-100' 
             : nextFollowUpDate 
               ? 'text-amber-800 bg-amber-50 border-amber-200 hover:bg-amber-100'
               : 'text-green-800 bg-green-50 border-green-200 hover:bg-green-100',
           text: 'Appel',
-          classes: isOverdue ? 'text-rose-600' : nextFollowUpDate ? 'text-amber-600' : 'text-[#25D366]',
+          classes: isOverdue ? 'text-[#D05A76]' : nextFollowUpDate ? 'text-amber-600' : 'text-[#25D366]',
           icon: <Phone className="h-3 w-3" />,
           isClickable
         };

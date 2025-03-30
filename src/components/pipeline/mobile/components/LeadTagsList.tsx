@@ -5,6 +5,7 @@ import { getStatusColors } from '../utils/leadFormatUtils';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { formatBudget } from '../utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
+import { isPast, isToday } from 'date-fns';
 
 interface LeadTagsListProps {
   columnStatus: LeadStatus;
@@ -25,6 +26,46 @@ const LeadTagsList: React.FC<LeadTagsListProps> = ({
 }) => {
   const statusColors = getStatusColors(columnStatus);
   
+  const isOverdue = () => {
+    if (!nextFollowUpDate) return false;
+    const followUpDateTime = new Date(nextFollowUpDate);
+    return isPast(followUpDateTime) && !isToday(followUpDateTime);
+  };
+  
+  const getTaskTypeStyle = () => {
+    const isTaskOverdue = isOverdue();
+    
+    if (taskType === 'Call' && isTaskOverdue) {
+      // Elegant pink tone for overdue Call tasks
+      return {
+        bg: 'bg-[#F8E2E8]',
+        text: 'text-[#D05A76]'
+      };
+    } else if (taskType === 'Call') {
+      return {
+        bg: 'bg-[#EBD5CE]',
+        text: 'text-[#96493D]'
+      };
+    } else if (taskType === 'Follow up') {
+      return {
+        bg: 'bg-[#F3E9D6]',
+        text: 'text-[#B58C59]'
+      };
+    } else if (nextFollowUpDate) {
+      return {
+        bg: 'bg-[#DCE4E3]',
+        text: 'text-[#4C5C59]'
+      };
+    } else {
+      return {
+        bg: 'bg-[#F5F3EE]',
+        text: 'text-[#7A6C5D]'
+      };
+    }
+  };
+  
+  const taskStyle = taskType ? getTaskTypeStyle() : { bg: 'bg-[#F5F3EE]', text: 'text-[#7A6C5D]' };
+  
   return (
     <div className="flex flex-wrap items-center text-sm mt-1 gap-1.5 rounded-sm mx-0 px-0 py-[4px] bg-black/0">
       <LeadTag 
@@ -37,18 +78,8 @@ const LeadTagsList: React.FC<LeadTagsListProps> = ({
       {taskType && (
         <LeadTag 
           label={taskType} 
-          bgColor={nextFollowUpDate ? 
-            taskType === 'Call' ? 'bg-[#EBD5CE]' : 
-            taskType === 'Follow up' ? 'bg-[#F3E9D6]' : 
-            'bg-[#DCE4E3]' 
-            : 'bg-[#F5F3EE]'
-          } 
-          textColor={nextFollowUpDate ? 
-            taskType === 'Call' ? 'text-[#96493D]' : 
-            taskType === 'Follow up' ? 'text-[#B58C59]' : 
-            'text-[#4C5C59]' 
-            : 'text-[#7A6C5D]'
-          } 
+          bgColor={taskStyle.bg} 
+          textColor={taskStyle.text} 
           className="font-futuraLight" 
         />
       )}
