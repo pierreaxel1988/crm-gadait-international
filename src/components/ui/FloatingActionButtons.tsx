@@ -46,6 +46,15 @@ const FloatingActionButtons = ({
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
+  
+  // WhatsApp handler
+  const handleWhatsApp = () => {
+    if (phoneNumber) {
+      const cleanedPhone = phoneNumber.replace(/[^\d+]/g, '');
+      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
+    }
+    setIsExpanded(false);
+  };
 
   if (isMobile) {
     return (
@@ -61,11 +70,38 @@ const FloatingActionButtons = ({
                   Appeler
                 </span>
                 <button
-                  className="h-12 w-12 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center shadow-md"
+                  className="h-12 w-12 rounded-full bg-loro-100 text-chocolate-dark border border-white hover:bg-loro-200 flex items-center justify-center shadow-md"
                   onClick={handleCall}
                   title="Appeler"
                 >
                   <Phone className="h-5 w-5" />
+                </button>
+              </div>
+            )}
+            
+            {(phoneNumber) && (
+              <div className="flex items-center gap-3 animate-fade-in">
+                <span className="bg-white/90 px-3 py-1 rounded-full text-sm shadow-sm">
+                  WhatsApp
+                </span>
+                <button
+                  className="h-12 w-12 rounded-full bg-loro-100 text-chocolate-dark border border-white hover:bg-loro-200 flex items-center justify-center shadow-md"
+                  onClick={handleWhatsApp}
+                  title="WhatsApp"
+                >
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-5 w-5" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  >
+                    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+                    <path d="M9 10a.5.5 0 0 1 1 0c0 1.97 1.53 3.5 3.5 3.5a.5.5 0 0 1 0 1c-2.47 0-4.5-2.02-4.5-4.5" />
+                  </svg>
                 </button>
               </div>
             )}
@@ -76,7 +112,7 @@ const FloatingActionButtons = ({
                   Envoyer un email
                 </span>
                 <button
-                  className="h-12 w-12 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center shadow-md"
+                  className="h-12 w-12 rounded-full bg-loro-100 text-chocolate-dark border border-white hover:bg-loro-200 flex items-center justify-center shadow-md"
                   onClick={handleMail}
                   title="Envoyer un email"
                 >
@@ -90,7 +126,7 @@ const FloatingActionButtons = ({
                 Ajouter une action
               </span>
               <button
-                className="h-12 w-12 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center shadow-md"
+                className="h-12 w-12 rounded-full bg-loro-100 text-chocolate-dark border border-white hover:bg-loro-200 flex items-center justify-center shadow-md"
                 onClick={() => {
                   onAddAction();
                   setIsExpanded(false);
@@ -137,18 +173,42 @@ const FloatingActionButtons = ({
       </button>
       
       {(phoneNumber || onCall) && (
-        <button
-          className="h-12 w-12 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center shadow-md"
-          onClick={handleCall}
-          title="Appeler"
-        >
-          <Phone className="h-5 w-5" />
-        </button>
+        <>
+          <button
+            className="h-12 w-12 rounded-full bg-loro-100 text-chocolate-dark border border-white hover:bg-loro-200 flex items-center justify-center shadow-md"
+            onClick={handleCall}
+            title="Appeler"
+          >
+            <Phone className="h-5 w-5" />
+          </button>
+          
+          {phoneNumber && (
+            <button
+              className="h-12 w-12 rounded-full bg-loro-100 text-chocolate-dark border border-white hover:bg-loro-200 flex items-center justify-center shadow-md"
+              onClick={handleWhatsApp}
+              title="WhatsApp"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="h-5 w-5" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+                <path d="M9 10a.5.5 0 0 1 1 0c0 1.97 1.53 3.5 3.5 3.5a.5.5 0 0 1 0 1c-2.47 0-4.5-2.02-4.5-4.5" />
+              </svg>
+            </button>
+          )}
+        </>
       )}
       
       {(email || onMail) && (
         <button
-          className="h-12 w-12 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center shadow-md"
+          className="h-12 w-12 rounded-full bg-loro-100 text-chocolate-dark border border-white hover:bg-loro-200 flex items-center justify-center shadow-md"
           onClick={handleMail}
           title="Envoyer un email"
         >
