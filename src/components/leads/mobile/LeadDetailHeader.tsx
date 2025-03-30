@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import CustomButton from '@/components/ui/CustomButton';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
+
 interface LeadDetailHeaderProps {
   name: string;
   createdAt?: string;
@@ -19,6 +19,7 @@ interface LeadDetailHeaderProps {
   hasChanges: boolean;
   tags?: LeadTag[];
 }
+
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   name,
   createdAt,
@@ -33,32 +34,36 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   hasChanges,
   tags
 }) => {
-  // Format the budget number with thousand separators
   const formatBudget = (budget?: string) => {
     if (!budget) return '';
 
-    // Remove any existing non-numeric characters
     const numericValue = budget.replace(/[^\d]/g, '');
     if (!numericValue) return '';
 
-    // Convert to number and format with locale
     const budgetNumber = parseInt(numericValue, 10);
     if (isNaN(budgetNumber)) return budget;
     return budgetNumber.toLocaleString('fr-FR');
   };
+
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (phone) {
-      // Format phone number for WhatsApp (remove spaces and any non-digit characters except +)
       const cleanedPhone = phone.replace(/[^\d+]/g, '');
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
+
   const formattedBudget = formatBudget(budget);
+
   return <div className="flex items-center justify-between p-3 bg-loro-sand">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onBackClick} 
+          className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200"
+        >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="truncate">
@@ -98,4 +103,5 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       </div>
     </div>;
 };
+
 export default LeadDetailHeader;
