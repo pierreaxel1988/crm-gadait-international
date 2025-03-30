@@ -27,7 +27,7 @@ const LeadContactActions: React.FC<LeadContactActionsProps> = ({
               <TooltipTrigger asChild>
                 <button 
                   onClick={handlePhoneCall} 
-                  className="h-7 w-7 flex items-center justify-center rounded-full bg-loro-sand/20 border border-white" 
+                  className="h-7 w-7 flex items-center justify-center rounded-full bg-loro-sand/20 border border-white transition-transform hover:scale-110 duration-200" 
                   aria-label="Appeler"
                 >
                   <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
@@ -44,7 +44,7 @@ const LeadContactActions: React.FC<LeadContactActionsProps> = ({
               <TooltipTrigger asChild>
                 <button 
                   onClick={handleWhatsAppClick} 
-                  className="h-7 w-7 flex items-center justify-center rounded-full bg-loro-sand/20 border border-white" 
+                  className="h-7 w-7 flex items-center justify-center rounded-full bg-loro-sand/20 border border-white transition-transform hover:scale-110 duration-200" 
                   aria-label="WhatsApp"
                 >
                   <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
@@ -76,7 +76,7 @@ const LeadContactActions: React.FC<LeadContactActionsProps> = ({
             <TooltipTrigger asChild>
               <button 
                 onClick={handleEmailClick} 
-                className="h-7 w-7 flex items-center justify-center rounded-full bg-loro-sand/20 border border-white" 
+                className="h-7 w-7 flex items-center justify-center rounded-full bg-loro-sand/20 border border-white transition-transform hover:scale-110 duration-200" 
                 aria-label="Email"
               >
                 <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
