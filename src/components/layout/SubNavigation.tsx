@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { MessageSquare, PieChart, Calendar, ListTodo, File, ClipboardList } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 const SubNavigation = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -38,7 +36,7 @@ const SubNavigation = () => {
   // Mobile navigation with horizontal scrolling - icons only
   if (isMobile) {
     return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
-        <div className="overflow-x-auto py-2">
+        <div className="overflow-x-auto py-2 bg-loro-50">
           <div className="flex justify-between px-2 w-full">
             {navigationItems.map(item => <Link key={item.name} to={item.path} className={cn("flex items-center justify-center whitespace-nowrap rounded-md p-2 flex-1 mx-1", location.pathname === item.path ? "text-loro-terracotta bg-loro-white" : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70")}>
                 {item.icon && <item.icon className="h-5 w-5" />}
@@ -63,5 +61,4 @@ const SubNavigation = () => {
       </div>
     </div>;
 };
-
 export default SubNavigation;
