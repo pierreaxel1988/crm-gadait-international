@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Clock, Phone, Calendar, MapPin, Mail, MessageSquare } from 'lucide-react';
 import { Avatar } from "@/components/ui/avatar";
@@ -154,11 +153,70 @@ const LeadListItem = ({
         </Avatar>
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-baseline">
-          <h3 className="font-medium text-base truncate text-zinc-900">{formatName(name)}</h3>
-          <span className="text-xs text-zinc-500 ml-2 whitespace-nowrap">
-            {formatDate(createdAt)}
-          </span>
+        <div className="flex justify-between items-start">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-medium text-base text-zinc-900">{formatName(name)}</h3>
+              
+              <div className="flex items-center gap-1.5 ml-1">
+                <TooltipProvider>
+                  {phone && (
+                    <>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button 
+                            onClick={handlePhoneCall}
+                            className="p-1 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                            aria-label="Appeler"
+                          >
+                            <Phone className="h-3.5 w-3.5" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Appeler</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button 
+                            onClick={handleWhatsAppClick}
+                            className="p-1 rounded-full bg-teal-50 text-teal-600 hover:bg-teal-100 transition-colors"
+                            aria-label="WhatsApp"
+                          >
+                            <MessageSquare className="h-3.5 w-3.5" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>WhatsApp</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </>
+                  )}
+                  
+                  {email && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button 
+                          onClick={handleEmailClick}
+                          className="p-1 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+                          aria-label="Email"
+                        >
+                          <Mail className="h-3.5 w-3.5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Email</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </TooltipProvider>
+              </div>
+            </div>
+            <div className="text-xs text-zinc-500 whitespace-nowrap">
+              {formatDate(createdAt)}
+            </div>
+          </div>
         </div>
         
         <div className="flex flex-wrap items-center text-sm text-zinc-700 mt-1 gap-1.5">
@@ -178,8 +236,6 @@ const LeadListItem = ({
                       : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                   : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200'
               }`}
-              onClick={taskType === 'Call' && phone ? handlePhoneCall : undefined}
-              style={taskType === 'Call' && phone ? { cursor: 'pointer' } : undefined}
             >
               {taskType === 'Call' ? (
                 <Phone className={`h-3 w-3 ${nextFollowUpDate ? 'text-rose-600' : 'text-zinc-600'}`} />
@@ -205,60 +261,6 @@ const LeadListItem = ({
             </Badge>
           )}
         </div>
-        
-        {(phone || email) && (
-          <div className="flex mt-1.5 gap-2">
-            <TooltipProvider>
-              {phone && (
-                <>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button 
-                        onClick={handlePhoneCall}
-                        className="p-1.5 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                      >
-                        <Phone className="h-3.5 w-3.5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Appeler</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button 
-                        onClick={handleWhatsAppClick}
-                        className="p-1.5 rounded-full bg-teal-50 text-teal-600 hover:bg-teal-100 transition-colors"
-                      >
-                        <MessageSquare className="h-3.5 w-3.5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>WhatsApp</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </>
-              )}
-              
-              {email && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      onClick={handleEmailClick}
-                      className="p-1.5 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
-                    >
-                      <Mail className="h-3.5 w-3.5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Email</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </TooltipProvider>
-          </div>
-        )}
       </div>
     </div>
   );
