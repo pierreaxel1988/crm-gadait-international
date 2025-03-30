@@ -114,7 +114,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     } else if (item.nextFollowUpDate && isToday(new Date(item.nextFollowUpDate))) {
       return 'border-amber-300';
     } else if (item.nextFollowUpDate) {
-      return 'bg-[#EBF7E3]/80'; // Updated to #EBF7E3 with 80% opacity for upcoming tasks
+      return 'bg-[#e3f7ed]/80'; // Updated to #e3f7ed with 80% opacity for upcoming tasks
     }
     return '';
   };

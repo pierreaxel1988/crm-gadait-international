@@ -71,9 +71,9 @@ export function getActionStatusStyle(nextFollowUpDate?: string): {
       iconClassName: 'text-amber-500'
     };
   } else {
-    // Future task - Updated to the requested color with 80% opacity
+    // Future task - Updated to the requested color #e3f7ed with 80% opacity
     return {
-      containerClassName: 'bg-[#EBF7E3]/80',
+      containerClassName: 'bg-[#e3f7ed]/80',
       badgeClassName: 'bg-gray-100 text-gray-800',
       iconClassName: 'text-gray-500'
     };
