@@ -29,9 +29,11 @@ const TaskTypeIndicator = ({ taskType, className, phoneNumber, nextFollowUpDate,
       case 'Call':
         isClickable = !!phoneNumber;
         return {
-          color: 'text-amber-800 bg-amber-50 border-amber-200 hover:bg-amber-100',
+          color: isOverdue 
+            ? 'text-[#D05A76] bg-[#F8E2E8] border-pink-200 hover:bg-pink-100' 
+            : 'text-[#96493D] bg-[#EBD5CE] border-amber-200 hover:bg-amber-100',
           text: 'Appel',
-          classes: 'text-[#25D366]',
+          classes: isOverdue ? 'text-[#D05A76]' : 'text-[#96493D]',
           icon: <Phone className="h-3 w-3" />,
           isClickable
         };
@@ -111,34 +113,25 @@ const TaskTypeIndicator = ({ taskType, className, phoneNumber, nextFollowUpDate,
     }
   };
 
-  // Get standard task styling first
+  // Get task styling based on type and overdue status
   const { color, text, classes, icon, isClickable } = getTaskStyles();
-
-  // Special case for overdue Call task - use the elegant pink colors
-  const finalColor = isOverdue && taskType === 'Call' 
-    ? 'text-[#D05A76] bg-[#F8E2E8] border-pink-200 hover:bg-pink-100' 
-    : color;
-
-  const finalClasses = isOverdue && taskType === 'Call'
-    ? 'text-[#D05A76]'
-    : classes;
 
   return (
     <div
       className={cn(
         "flex items-center gap-1.5 rounded-full px-3 py-1 transition-all duration-200 shadow-sm border max-w-fit",
-        finalColor,
+        color,
         isClickable && "cursor-pointer hover:shadow-md",
         className
       )}
       onClick={isClickable ? handlePhoneClick : undefined}
       title={isClickable ? "Cliquer pour appeler" : undefined}
     >
-      {icon && <span className={cn("", finalClasses)}>{icon}</span>}
-      <span className={cn("text-xs font-medium whitespace-nowrap", finalClasses)}>
+      {icon && <span className={cn("", classes)}>{icon}</span>}
+      <span className={cn("text-xs font-medium whitespace-nowrap", classes)}>
         {text}
       </span>
-      {isClickable && <Phone className={cn("h-3 w-3 ml-1", finalClasses)} />}
+      {isClickable && <Phone className={cn("h-3 w-3 ml-1", classes)} />}
     </div>
   );
 };
