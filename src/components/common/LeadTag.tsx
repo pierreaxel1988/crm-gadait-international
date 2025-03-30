@@ -19,8 +19,8 @@ export interface LeadTagProps {
  */
 const LeadTag = ({ 
   label, 
-  bgColor = 'bg-[#F5F3EE]', 
-  textColor = 'text-[#7A6C5D]', 
+  bgColor = 'bg-loro-50', 
+  textColor = 'text-loro-700', 
   className 
 }: LeadTagProps) => {
   // Check if the colors are hex values or Tailwind classes
@@ -45,7 +45,7 @@ const LeadTag = ({
   return (
     <span 
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-futuraLight",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-futuraLight transition-transform hover:scale-105 duration-200",
         bgClassName,
         textClassName,
         className

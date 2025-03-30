@@ -11,27 +11,27 @@ interface TagBadgeProps {
 }
 
 const TagBadge = ({ tag, className }: TagBadgeProps) => {
-  // Determine the style based on the tag
+  // Determine the style based on the tag using loro color palette
   const getTagStyle = () => {
     switch (tag) {
       case 'Vip':
-        return 'bg-purple-100 text-purple-800 hover:bg-purple-100';
+        return 'bg-loro-300 text-loro-900 hover:bg-loro-300';
       case 'Hot':
-        return 'bg-red-100 text-red-800 hover:bg-red-100';
+        return 'bg-[#EBD5CE] text-loro-terracotta hover:bg-[#EBD5CE]';
       case 'Serious':
-        return 'bg-green-100 text-green-800 hover:bg-green-100';
+        return 'bg-loro-200 text-loro-700 hover:bg-loro-200';
       case 'Cold':
-        return 'bg-blue-100 text-blue-800 hover:bg-blue-100';
+        return 'bg-loro-50 text-loro-800 hover:bg-loro-50';
       case 'No response':
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+        return 'bg-loro-100 text-loro-700 hover:bg-loro-100';
       case 'No phone':
-        return 'bg-amber-100 text-amber-800 hover:bg-amber-100';
+        return 'bg-loro-sand text-loro-hazel hover:bg-loro-sand';
       case 'Fake':
-        return 'bg-pink-100 text-pink-800 hover:bg-pink-100';
+        return 'bg-loro-pearl text-loro-navy hover:bg-loro-pearl';
       case 'Imported':
-        return 'bg-teal-100 text-teal-800 hover:bg-teal-100';
+        return 'bg-loro-white text-loro-500 hover:bg-loro-white';
       default:
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
+        return 'bg-loro-100 text-loro-800 hover:bg-loro-100';
     }
   };
 
@@ -39,7 +39,7 @@ const TagBadge = ({ tag, className }: TagBadgeProps) => {
     <Badge 
       variant="outline" 
       className={cn(
-        'px-2 py-1 text-xs font-medium rounded-full border-none', 
+        'px-2 py-1 text-xs font-medium rounded-full border-none transition-transform hover:scale-105 duration-200', 
         getTagStyle(),
         className
       )}
