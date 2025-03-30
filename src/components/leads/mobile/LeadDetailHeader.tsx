@@ -65,7 +65,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           <p className="text-xs text-zinc-400">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
-          <p className="text-xs flex items-center gap-1 text-zinc-800">
+          <p className="text-xs flex items-center gap-1 text-loro-navy py-[2px]">
             {formattedBudget && `${formattedBudget} ${currency || ''}`}
             {formattedBudget && desiredLocation && ' • '}
             {desiredLocation}
