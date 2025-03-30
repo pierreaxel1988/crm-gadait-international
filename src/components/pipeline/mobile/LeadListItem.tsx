@@ -6,8 +6,8 @@ import { format, isPast, isFuture, isToday } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Currency } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
-import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import LeadTag from '@/components/common/LeadTag';
 
 interface LeadListItemProps {
   id: string;
@@ -141,9 +141,37 @@ const LeadListItem = ({
     }
   };
 
+  // Get background and text colors based on status
+  const getStatusColors = (status: LeadStatus) => {
+    switch(status) {
+      case 'New':
+        return { bg: 'bg-[#F5F3EE]', text: 'text-[#7A6C5D]' };
+      case 'Contacted':
+        return { bg: 'bg-[#DCE4E3]', text: 'text-[#4C5C59]' };
+      case 'Qualified':
+        return { bg: 'bg-[#EBD5CE]', text: 'text-[#96493D]' };
+      case 'Proposal':
+      case 'Offer':
+      case 'Offre':
+      case 'Negotiation':
+        return { bg: 'bg-[#F3E9D6]', text: 'text-[#B58C59]' };
+      case 'Won':
+      case 'Gagné':
+      case 'Signed':
+        return { bg: 'bg-[#DCE4E3]', text: 'text-[#4C5C59]' };
+      case 'Lost':
+      case 'Perdu':
+        return { bg: 'bg-[#EFEAE4]', text: 'text-[#3F3C3B]' };
+      default:
+        return { bg: 'bg-[#F5F3EE]', text: 'text-[#7A6C5D]' };
+    }
+  };
+
+  const statusColors = getStatusColors(columnStatus);
+
   return (
     <div 
-      className={`py-3 px-4 flex items-center hover:bg-slate-50 transition-colors cursor-pointer ${nextFollowUpDate ? actionStyle.containerClassName : ''}`} 
+      className={`py-3 px-4 flex hover:bg-slate-50 transition-colors cursor-pointer ${nextFollowUpDate ? actionStyle.containerClassName : ''}`} 
       onClick={() => onClick(id)}
     >
       <div className="mr-3">
@@ -156,110 +184,117 @@ const LeadListItem = ({
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-futuraLight text-base text-zinc-700">{formatName(name)}</h3>
-              
-              <div className="flex items-center gap-1.5 ml-1">
-                <TooltipProvider>
-                  {phone && (
-                    <>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button 
-                            onClick={handlePhoneCall}
-                            className="p-1 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                            aria-label="Appeler"
-                          >
-                            <Phone className="h-3.5 w-3.5" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Appeler</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button 
-                            onClick={handleWhatsAppClick}
-                            className="p-1 rounded-full bg-teal-50 text-teal-600 hover:bg-teal-100 transition-colors"
-                            aria-label="WhatsApp"
-                          >
-                            <MessageSquare className="h-3.5 w-3.5" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>WhatsApp</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </>
-                  )}
-                  
-                  {email && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button 
-                          onClick={handleEmailClick}
-                          className="p-1 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
-                          aria-label="Email"
-                        >
-                          <Mail className="h-3.5 w-3.5" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Email</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </TooltipProvider>
-              </div>
-            </div>
+            <h3 className="font-futuraLight text-base text-zinc-700">{formatName(name)}</h3>
             <div className="text-xs text-zinc-500 whitespace-nowrap font-futuraLight">
               {formatDate(createdAt)}
             </div>
           </div>
+          
+          <div className="flex items-center gap-1.5">
+            <TooltipProvider>
+              {phone && (
+                <>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button 
+                        onClick={handlePhoneCall}
+                        className="p-1 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                        aria-label="Appeler"
+                      >
+                        <Phone className="h-3.5 w-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Appeler</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button 
+                        onClick={handleWhatsAppClick}
+                        className="p-1 rounded-full bg-teal-50 text-teal-600 hover:bg-teal-100 transition-colors"
+                        aria-label="WhatsApp"
+                      >
+                        <MessageSquare className="h-3.5 w-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>WhatsApp</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </>
+              )}
+              
+              {email && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button 
+                      onClick={handleEmailClick}
+                      className="p-1 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+                      aria-label="Email"
+                    >
+                      <Mail className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Email</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </TooltipProvider>
+          </div>
         </div>
         
-        <div className="flex flex-wrap items-center text-sm text-zinc-700 mt-1 gap-1.5">
-          <Badge variant="outline" className="h-5 px-2 py-0.5 text-xs bg-zinc-100 text-zinc-700 font-futuraLight">
-            {columnStatus}
-          </Badge>
+        <div className="flex flex-wrap items-center text-sm text-zinc-500 mt-1 gap-1.5">
+          <LeadTag 
+            label={columnStatus} 
+            bgColor={statusColors.bg} 
+            textColor={statusColors.text}
+            className="font-futuraLight" 
+          />
           
           {taskType && (
-            <Badge 
-              variant="outline" 
-              className={`h-5 px-2 py-0.5 text-xs flex items-center gap-1 font-futuraLight ${
+            <LeadTag
+              label={taskType}
+              bgColor={
                 nextFollowUpDate 
                   ? taskType === 'Call' 
-                    ? 'bg-rose-100 text-rose-800 hover:bg-rose-200' 
+                    ? 'bg-[#EBD5CE]' 
                     : taskType === 'Follow up' 
-                      ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' 
-                      : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                  : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
-              }`}
-            >
-              {taskType === 'Call' ? (
-                <Phone className={`h-3 w-3 ${nextFollowUpDate ? 'text-rose-600' : 'text-zinc-600'}`} />
-              ) : taskType === 'Follow up' ? (
-                <Clock className={`h-3 w-3 ${nextFollowUpDate ? 'text-amber-600' : 'text-zinc-600'}`} />
-              ) : taskType === 'Visites' ? (
-                <Calendar className={`h-3 w-3 ${nextFollowUpDate ? 'text-blue-600' : 'text-zinc-600'}`} />
-              ) : null}
-              <span>{taskType}</span>
-            </Badge>
+                      ? 'bg-[#F3E9D6]' 
+                      : 'bg-[#DCE4E3]'
+                  : 'bg-[#F5F3EE]'
+              }
+              textColor={
+                nextFollowUpDate 
+                  ? taskType === 'Call' 
+                    ? 'text-[#96493D]' 
+                    : taskType === 'Follow up' 
+                      ? 'text-[#B58C59]' 
+                      : 'text-[#4C5C59]'
+                  : 'text-[#7A6C5D]'
+              }
+              className="font-futuraLight"
+            />
           )}
           
           {desiredLocation && (
-            <Badge variant="outline" className="h-5 px-2 py-0.5 text-xs flex items-center gap-1 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-futuraLight">
-              <MapPin className="h-3 w-3 text-zinc-600" />
-              <span>{desiredLocation}</span>
-            </Badge>
+            <LeadTag
+              label={desiredLocation}
+              bgColor="bg-[#F5F3EE]"
+              textColor="text-[#7A6C5D]"
+              className="font-futuraLight"
+            />
           )}
           
           {budget && (
-            <Badge variant="outline" className="h-5 px-2 py-0.5 text-xs bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-futuraLight min-w-[100px] text-center">
-              {formatBudget(budget, currency)}
-            </Badge>
+            <LeadTag
+              label={formatBudget(budget, currency)}
+              bgColor="bg-[#F5F3EE]"
+              textColor="text-[#7A6C5D]"
+              className="font-futuraLight min-w-[100px] text-center"
+            />
           )}
         </div>
       </div>
