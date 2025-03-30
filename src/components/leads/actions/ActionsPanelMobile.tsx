@@ -110,23 +110,25 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             const isOverdue = isDatePast(action.scheduledDate);
             const isCallAction = action.actionType === 'Call';
             
-            const bgColorClass = isOverdue && isCallAction 
-              ? 'bg-[#F8E2E8]/30' 
-              : isOverdue 
-                ? 'bg-[#FFDEE2]/30' 
-                : 'bg-[#F2FCE2]/40 border-green-100';
+            const bgColorClass = isOverdue 
+              ? isCallAction
+                ? 'bg-[#F8E2E8]/30' 
+                : 'bg-[#FFDEE2]/30' 
+              : 'bg-[#F2FCE2]/40 border-green-100';
             
-            const iconBgClass = isOverdue && isCallAction
-              ? 'bg-[#F8E2E8] text-[#D05A76]'
+            const iconBgClass = isCallAction
+              ? isOverdue
+                ? 'bg-[#F8E2E8] text-[#D05A76]'
+                : 'bg-[#EBD5CE] text-[#96493D]'
               : isOverdue
                 ? 'bg-rose-100 text-rose-600'
                 : 'bg-green-100 text-green-600';
                 
-            const notesBgClass = isOverdue && isCallAction
-              ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
-              : isOverdue
-                ? 'bg-[#FFF0F2] text-rose-800 border border-pink-100'
-                : 'bg-[#F7FEF1] text-green-800 border border-green-100';
+            const notesBgClass = isOverdue 
+              ? isCallAction
+                ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
+                : 'bg-[#FFF0F2] text-rose-800 border border-pink-100'
+              : 'bg-[#F7FEF1] text-green-800 border border-green-100';
             
             return (
               <div 
