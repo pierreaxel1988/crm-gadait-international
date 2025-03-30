@@ -113,6 +113,8 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
       return 'bg-[#FFDEE2]/30'; // Soft pink background instead of border
     } else if (item.nextFollowUpDate && isToday(new Date(item.nextFollowUpDate))) {
       return 'border-amber-300';
+    } else if (item.nextFollowUpDate) {
+      return 'bg-[#F2FCE2]/40'; // Light green background for upcoming tasks
     }
     return '';
   };
