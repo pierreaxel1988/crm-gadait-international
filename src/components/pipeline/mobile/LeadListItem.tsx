@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Clock, Phone, Calendar, MapPin, Mail, MessageSquare } from 'lucide-react';
 import { Avatar } from "@/components/ui/avatar";
@@ -8,7 +7,6 @@ import { Currency } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import LeadTag from '@/components/common/LeadTag';
-
 interface LeadListItemProps {
   id: string;
   name: string;
@@ -23,7 +21,6 @@ interface LeadListItemProps {
   email?: string;
   onClick: (id: string) => void;
 }
-
 const LeadListItem = ({
   id,
   name,
@@ -52,7 +49,6 @@ const LeadListItem = ({
       return dateString;
     }
   };
-
   const formatBudget = (budgetStr?: string, currency?: string) => {
     if (!budgetStr) return '';
     if (budgetStr.includes(',') || budgetStr.includes(' ') || budgetStr.includes('$') || budgetStr.includes('€')) {
@@ -68,7 +64,6 @@ const LeadListItem = ({
       return `${currencySymbol}${formattedNumber}`;
     }
   };
-
   const getCurrencySymbol = (currency?: string): string => {
     switch (currency) {
       case 'EUR':
@@ -87,7 +82,6 @@ const LeadListItem = ({
         return '€';
     }
   };
-
   const getActionStatusStyle = (followUpDate?: string) => {
     if (!followUpDate) return {};
     const followUpDateTime = new Date(followUpDate);
@@ -111,28 +105,23 @@ const LeadListItem = ({
       };
     }
   };
-
   const formatName = (name: string): string => {
     if (!name) return '';
     return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
   };
-
   const actionStyle = getActionStatusStyle(nextFollowUpDate);
-
   const handlePhoneCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (phone) {
       window.location.href = `tel:${phone}`;
     }
   };
-
   const handleEmailClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (email) {
       window.location.href = `mailto:${email}`;
     }
   };
-
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (phone) {
@@ -143,37 +132,52 @@ const LeadListItem = ({
 
   // Get background and text colors based on status
   const getStatusColors = (status: LeadStatus) => {
-    switch(status) {
+    switch (status) {
       case 'New':
-        return { bg: 'bg-[#F5F3EE]', text: 'text-[#7A6C5D]' };
+        return {
+          bg: 'bg-[#F5F3EE]',
+          text: 'text-[#7A6C5D]'
+        };
       case 'Contacted':
-        return { bg: 'bg-[#DCE4E3]', text: 'text-[#4C5C59]' };
+        return {
+          bg: 'bg-[#DCE4E3]',
+          text: 'text-[#4C5C59]'
+        };
       case 'Qualified':
-        return { bg: 'bg-[#EBD5CE]', text: 'text-[#96493D]' };
+        return {
+          bg: 'bg-[#EBD5CE]',
+          text: 'text-[#96493D]'
+        };
       case 'Proposal':
       case 'Offer':
       case 'Offre':
       case 'Negotiation':
-        return { bg: 'bg-[#F3E9D6]', text: 'text-[#B58C59]' };
+        return {
+          bg: 'bg-[#F3E9D6]',
+          text: 'text-[#B58C59]'
+        };
       case 'Won':
       case 'Gagné':
       case 'Signed':
-        return { bg: 'bg-[#DCE4E3]', text: 'text-[#4C5C59]' };
+        return {
+          bg: 'bg-[#DCE4E3]',
+          text: 'text-[#4C5C59]'
+        };
       case 'Lost':
       case 'Perdu':
-        return { bg: 'bg-[#EFEAE4]', text: 'text-[#3F3C3B]' };
+        return {
+          bg: 'bg-[#EFEAE4]',
+          text: 'text-[#3F3C3B]'
+        };
       default:
-        return { bg: 'bg-[#F5F3EE]', text: 'text-[#7A6C5D]' };
+        return {
+          bg: 'bg-[#F5F3EE]',
+          text: 'text-[#7A6C5D]'
+        };
     }
   };
-
   const statusColors = getStatusColors(columnStatus);
-
-  return (
-    <div 
-      className={`py-3 px-4 flex hover:bg-slate-50 transition-colors cursor-pointer ${nextFollowUpDate ? actionStyle.containerClassName : ''}`} 
-      onClick={() => onClick(id)}
-    >
+  return <div className={`py-3 px-4 flex hover:bg-slate-50 transition-colors cursor-pointer ${nextFollowUpDate ? actionStyle.containerClassName : ''}`} onClick={() => onClick(id)}>
       <div className="mr-3">
         <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
           <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium">
@@ -192,15 +196,10 @@ const LeadListItem = ({
           
           <div className="flex items-center gap-1.5">
             <TooltipProvider>
-              {phone && (
-                <>
+              {phone && <>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button 
-                        onClick={handlePhoneCall}
-                        className="p-1 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                        aria-label="Appeler"
-                      >
+                      <button onClick={handlePhoneCall} className="p-1 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors" aria-label="Appeler">
                         <Phone className="h-3.5 w-3.5" />
                       </button>
                     </TooltipTrigger>
@@ -211,11 +210,7 @@ const LeadListItem = ({
                   
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button 
-                        onClick={handleWhatsAppClick}
-                        className="p-1 rounded-full bg-teal-50 text-teal-600 hover:bg-teal-100 transition-colors"
-                        aria-label="WhatsApp"
-                      >
+                      <button onClick={handleWhatsAppClick} className="p-1 rounded-full bg-teal-50 text-teal-600 hover:bg-teal-100 transition-colors" aria-label="WhatsApp">
                         <MessageSquare className="h-3.5 w-3.5" />
                       </button>
                     </TooltipTrigger>
@@ -223,83 +218,32 @@ const LeadListItem = ({
                       <p>WhatsApp</p>
                     </TooltipContent>
                   </Tooltip>
-                </>
-              )}
+                </>}
               
-              {email && (
-                <Tooltip>
+              {email && <Tooltip>
                   <TooltipTrigger asChild>
-                    <button 
-                      onClick={handleEmailClick}
-                      className="p-1 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
-                      aria-label="Email"
-                    >
+                    <button onClick={handleEmailClick} className="p-1 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors" aria-label="Email">
                       <Mail className="h-3.5 w-3.5" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Email</p>
                   </TooltipContent>
-                </Tooltip>
-              )}
+                </Tooltip>}
             </TooltipProvider>
           </div>
         </div>
         
-        <div className="flex flex-wrap items-center text-sm text-zinc-500 mt-1 gap-1.5">
-          <LeadTag 
-            label={columnStatus} 
-            bgColor={statusColors.bg} 
-            textColor={statusColors.text}
-            className="font-futuraLight" 
-          />
+        <div className="flex flex-wrap items-center text-sm text-zinc-600 mt-1 gap-1.5 rounded-sm mx-0 px-0 py-[4px] bg-black/0-font-normal\n">
+          <LeadTag label={columnStatus} bgColor={statusColors.bg} textColor={statusColors.text} className="font-futuraLight" />
           
-          {taskType && (
-            <LeadTag
-              label={taskType}
-              bgColor={
-                nextFollowUpDate 
-                  ? taskType === 'Call' 
-                    ? 'bg-[#EBD5CE]' 
-                    : taskType === 'Follow up' 
-                      ? 'bg-[#F3E9D6]' 
-                      : 'bg-[#DCE4E3]'
-                  : 'bg-[#F5F3EE]'
-              }
-              textColor={
-                nextFollowUpDate 
-                  ? taskType === 'Call' 
-                    ? 'text-[#96493D]' 
-                    : taskType === 'Follow up' 
-                      ? 'text-[#B58C59]' 
-                      : 'text-[#4C5C59]'
-                  : 'text-[#7A6C5D]'
-              }
-              className="font-futuraLight"
-            />
-          )}
+          {taskType && <LeadTag label={taskType} bgColor={nextFollowUpDate ? taskType === 'Call' ? 'bg-[#EBD5CE]' : taskType === 'Follow up' ? 'bg-[#F3E9D6]' : 'bg-[#DCE4E3]' : 'bg-[#F5F3EE]'} textColor={nextFollowUpDate ? taskType === 'Call' ? 'text-[#96493D]' : taskType === 'Follow up' ? 'text-[#B58C59]' : 'text-[#4C5C59]' : 'text-[#7A6C5D]'} className="font-futuraLight" />}
           
-          {desiredLocation && (
-            <LeadTag
-              label={desiredLocation}
-              bgColor="bg-[#F5F3EE]"
-              textColor="text-[#7A6C5D]"
-              className="font-futuraLight"
-            />
-          )}
+          {desiredLocation && <LeadTag label={desiredLocation} bgColor="bg-[#F5F3EE]" textColor="text-[#7A6C5D]" className="font-futuraLight" />}
           
-          {budget && (
-            <LeadTag
-              label={formatBudget(budget, currency)}
-              bgColor="bg-[#F5F3EE]"
-              textColor="text-[#7A6C5D]"
-              className="font-futuraLight min-w-[100px] text-center"
-            />
-          )}
+          {budget && <LeadTag label={formatBudget(budget, currency)} bgColor="bg-[#F5F3EE]" textColor="text-[#7A6C5D]" className="font-futuraLight min-w-[100px] text-center" />}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default LeadListItem;
