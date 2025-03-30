@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Clock, Phone, Calendar, MapPin, Mail, MessageSquare } from 'lucide-react';
 import { Avatar } from "@/components/ui/avatar";
@@ -156,7 +157,7 @@ const LeadListItem = ({
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-base text-zinc-900">{formatName(name)}</h3>
+              <h3 className="font-futuraLight text-base text-zinc-700">{formatName(name)}</h3>
               
               <div className="flex items-center gap-1.5 ml-1">
                 <TooltipProvider>
@@ -213,28 +214,28 @@ const LeadListItem = ({
                 </TooltipProvider>
               </div>
             </div>
-            <div className="text-xs text-zinc-500 whitespace-nowrap">
+            <div className="text-xs text-zinc-500 whitespace-nowrap font-futuraLight">
               {formatDate(createdAt)}
             </div>
           </div>
         </div>
         
         <div className="flex flex-wrap items-center text-sm text-zinc-700 mt-1 gap-1.5">
-          <Badge variant="outline" className="h-5 px-2 py-0.5 text-xs bg-zinc-100 text-zinc-900">
+          <Badge variant="outline" className="h-5 px-2 py-0.5 text-xs bg-zinc-100 text-zinc-700 font-futuraLight">
             {columnStatus}
           </Badge>
           
           {taskType && (
             <Badge 
               variant="outline" 
-              className={`h-5 px-2 py-0.5 text-xs flex items-center gap-1 ${
+              className={`h-5 px-2 py-0.5 text-xs flex items-center gap-1 font-futuraLight ${
                 nextFollowUpDate 
                   ? taskType === 'Call' 
                     ? 'bg-rose-100 text-rose-800 hover:bg-rose-200' 
                     : taskType === 'Follow up' 
                       ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' 
                       : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                  : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200'
+                  : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
               }`}
             >
               {taskType === 'Call' ? (
@@ -249,14 +250,14 @@ const LeadListItem = ({
           )}
           
           {desiredLocation && (
-            <Badge variant="outline" className="h-5 px-2 py-0.5 text-xs flex items-center gap-1 bg-zinc-100 text-zinc-900 hover:bg-zinc-200">
+            <Badge variant="outline" className="h-5 px-2 py-0.5 text-xs flex items-center gap-1 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-futuraLight">
               <MapPin className="h-3 w-3 text-zinc-600" />
               <span>{desiredLocation}</span>
             </Badge>
           )}
           
           {budget && (
-            <Badge variant="outline" className="h-5 px-2 py-0.5 text-xs font-medium bg-zinc-100 text-zinc-900 hover:bg-zinc-200">
+            <Badge variant="outline" className="h-5 px-2 py-0.5 text-xs bg-zinc-100 text-zinc-700 hover:bg-zinc-200 font-futuraLight min-w-[100px] text-center">
               {formatBudget(budget, currency)}
             </Badge>
           )}
