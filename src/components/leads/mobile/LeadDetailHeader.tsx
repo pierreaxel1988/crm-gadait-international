@@ -57,7 +57,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   const formattedBudget = formatBudget(budget);
   return <div className="flex items-center justify-between p-3 bg-loro-sand">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2">
+        <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="truncate">
