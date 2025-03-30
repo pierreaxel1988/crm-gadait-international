@@ -31,9 +31,9 @@ const TaskTypeIndicator = ({ taskType, className, phoneNumber, nextFollowUpDate,
         return {
           color: isOverdue 
             ? 'text-[#D05A76] bg-[#F8E2E8] border-pink-200 hover:bg-pink-100' 
-            : 'text-[#96493D] bg-[#EBD5CE] border-amber-200 hover:bg-amber-100',
+            : 'text-[#D05A76] bg-[#EBD5CE] border-amber-200 hover:bg-amber-100',
           text: 'Appel',
-          classes: isOverdue ? 'text-[#D05A76]' : 'text-[#96493D]',
+          classes: 'text-[#D05A76]',
           icon: <Phone className="h-3 w-3" />,
           isClickable
         };

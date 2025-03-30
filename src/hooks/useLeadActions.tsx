@@ -106,7 +106,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
 
   const getActionTypeIcon = (type: TaskType) => {
     switch (type) {
-      case 'Call': return <span className="text-[#25D366] px-1 py-0.5 rounded text-xs font-medium">Appel</span>;
+      case 'Call': return <span className="text-[#D05A76] px-1 py-0.5 rounded text-xs font-medium">Appel</span>;
       case 'Visites': return <span className="text-purple-800 px-1 py-0.5 rounded text-xs font-medium">Visite</span>;
       case 'Compromis': return <span className="text-amber-800 px-1 py-0.5 rounded text-xs font-medium">Compromis</span>;
       case 'Acte de vente': return <span className="text-red-800 px-1 py-0.5 rounded text-xs font-medium">Acte de vente</span>;

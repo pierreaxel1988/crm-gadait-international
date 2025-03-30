@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -58,7 +57,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
   const getActionTypeIcon = (actionType: string) => {
     switch (actionType) {
-      case 'Call': return <span className="bg-[#EBD5CE] text-[#96493D] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
+      case 'Call': return <span className="bg-[#EBD5CE] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
       case 'Visites': return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs font-futura">Visite</span>;
       case 'Compromis': return <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-futura">Compromis</span>;
       case 'Acte de vente': return <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs font-futura">Acte de vente</span>;
@@ -120,7 +119,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             const iconBgClass = isCallAction
               ? isOverdue
                 ? 'bg-[#F8E2E8] text-[#D05A76]'
-                : 'bg-[#EBD5CE] text-[#96493D]'
+                : 'bg-[#EBD5CE] text-[#D05A76]'
               : isOverdue
                 ? 'bg-rose-100 text-rose-600'
                 : 'bg-green-100 text-green-600';

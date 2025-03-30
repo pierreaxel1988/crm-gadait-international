@@ -34,10 +34,10 @@ const LeadTagsList: React.FC<LeadTagsListProps> = ({
   
   const getTaskTypeStyle = () => {
     if (taskType === 'Call') {
-      // Use the terracotta color for Call tag regardless of status
+      // Always use pink text for Call tags regardless of status
       return {
         bg: 'bg-[#EBD5CE]', // Terracotta/pink background
-        text: isOverdue() ? 'text-[#D05A76]' : 'text-[#96493D]' // Pink text when overdue, otherwise terracotta
+        text: 'text-[#D05A76]' // Pink text always for Call tasks
       };
     } else if (taskType === 'Follow up') {
       return {
