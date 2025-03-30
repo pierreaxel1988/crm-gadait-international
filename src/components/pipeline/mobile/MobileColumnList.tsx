@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -94,7 +95,8 @@ const MobileColumnList = ({
   };
 
   const handleLeadClick = (leadId: string) => {
-    navigate(`/leads/${leadId}`);
+    // Navigate to lead detail page with criteria tab preselected
+    navigate(`/leads/${leadId}?tab=criteria`);
   };
 
   return (

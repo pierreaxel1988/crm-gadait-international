@@ -7,7 +7,7 @@ interface LeadDetailTabsProps {
   defaultTab?: string;
 }
 
-const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({ defaultTab = "notes" }) => {
+const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({ defaultTab = "criteria" }) => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const navigate = useNavigate();

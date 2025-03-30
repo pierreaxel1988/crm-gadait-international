@@ -60,7 +60,7 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
   }, [lead.assignedTo]);
 
   const handleCardClick = () => {
-    navigate(`/leads/${lead.id}`);
+    navigate(`/leads/${lead.id}?tab=criteria`);
   };
 
   const handleViewClick = (e: React.MouseEvent) => {
@@ -68,7 +68,7 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
     if (onView) {
       onView();
     } else {
-      navigate(`/leads/${lead.id}`);
+      navigate(`/leads/${lead.id}?tab=criteria`);
     }
   };
 

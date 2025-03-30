@@ -69,7 +69,8 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
   });
 
   const handleCardClick = () => {
-    navigate(`/leads/${item.id}`);
+    // Navigate to lead detail page with criteria tab preselected
+    navigate(`/leads/${item.id}?tab=criteria`);
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {

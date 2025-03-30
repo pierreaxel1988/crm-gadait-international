@@ -28,9 +28,9 @@ const LeadDetailMobile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get active tab from URL query params or default to notes
+  // Get active tab from URL query params or default to criteria
   const searchParams = new URLSearchParams(location.search);
-  const activeTab = searchParams.get('tab') || 'notes';
+  const activeTab = searchParams.get('tab') || 'criteria';
   
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
   

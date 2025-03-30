@@ -1,156 +1,142 @@
 
-import { format, isPast, isFuture, isToday } from 'date-fns';
+import { format, isToday, isYesterday, isThisWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Currency } from '@/types/lead';
 
-/**
- * Format a date string for display in the lead list
- */
-export const formatDate = (dateString?: string): string => {
+export function formatDate(dateString?: string): string {
   if (!dateString) return '';
-  try {
-    const date = new Date(dateString);
-    if (new Date().toDateString() === date.toDateString()) {
-      return format(date, 'HH:mm');
-    }
-    return format(date, 'd MMM', {
-      locale: fr
-    });
-  } catch (error) {
-    return dateString;
-  }
-};
-
-/**
- * Format budget with appropriate currency symbol
- */
-export const formatBudget = (budgetStr?: string, currency?: string): string => {
-  if (!budgetStr) return '';
-  if (budgetStr.includes(',') || budgetStr.includes(' ') || budgetStr.includes('$') || budgetStr.includes('€')) {
-    return budgetStr;
-  }
-  const numValue = parseInt(budgetStr.replace(/[^\d]/g, ''));
-  if (isNaN(numValue)) return budgetStr;
-  const currencySymbol = getCurrencySymbol(currency);
-  const formattedNumber = new Intl.NumberFormat('fr-FR').format(numValue);
-  if (currency === 'EUR') {
-    return `${formattedNumber} ${currencySymbol}`;
+  
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+  
+  if (isToday(date)) {
+    return "Aujourd'hui";
+  } else if (isYesterday(date)) {
+    return 'Hier';
+  } else if (isThisWeek(date)) {
+    return format(date, 'EEEE', { locale: fr });
   } else {
-    return `${currencySymbol}${formattedNumber}`;
+    return format(date, 'dd/MM/yyyy', { locale: fr });
   }
-};
+}
 
-/**
- * Get currency symbol from currency code
- */
-export const getCurrencySymbol = (currency?: string): string => {
-  switch (currency) {
-    case 'EUR':
-      return '€';
-    case 'USD':
-      return '$';
-    case 'GBP':
-      return '£';
-    case 'CHF':
-      return 'CHF';
-    case 'AED':
-      return 'AED';
-    case 'MUR':
-      return 'Rs';
-    default:
-      return '€';
-  }
-};
-
-/**
- * Format name with proper capitalization
- */
-export const formatName = (name: string): string => {
+export function formatName(name?: string): string {
   if (!name) return '';
-  return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
-};
+  
+  // Split name into words
+  const words = name.trim().split(/\s+/);
+  
+  if (words.length === 0) return '';
+  
+  // Capitalize each word
+  return words.map(word => {
+    if (word.length === 0) return '';
+    return word[0].toUpperCase() + word.slice(1).toLowerCase();
+  }).join(' ');
+}
 
-/**
- * Get styling for action status based on follow-up date
- */
-export const getActionStatusStyle = (followUpDate?: string) => {
-  if (!followUpDate) return {};
-  const followUpDateTime = new Date(followUpDate);
-  if (isPast(followUpDateTime) && !isToday(followUpDateTime)) {
+export function getActionStatusStyle(nextFollowUpDate?: string): { 
+  containerClassName: string; 
+  badgeClassName?: string;
+  iconClassName?: string;
+} {
+  if (!nextFollowUpDate) {
+    return { containerClassName: '' };
+  }
+
+  const followUpDate = new Date(nextFollowUpDate);
+  const today = new Date();
+  
+  // Reset hours, minutes, seconds for date comparison
+  today.setHours(0, 0, 0, 0);
+  
+  // Set hours, minutes, seconds to end of day for followUpDate
+  // to consider the entire day
+  const followUpDateClone = new Date(followUpDate);
+  followUpDateClone.setHours(0, 0, 0, 0);
+  
+  if (followUpDateClone.getTime() < today.getTime()) {
+    // Overdue
     return {
-      taskClassName: "bg-red-100 text-red-800 rounded-full px-2 py-0.5",
-      iconClassName: "text-red-600",
-      containerClassName: "border-red-200 bg-red-50/50"
+      containerClassName: 'border-l-4 border-red-500',
+      badgeClassName: 'bg-red-100 text-red-800',
+      iconClassName: 'text-red-500'
     };
-  } else if (isToday(followUpDateTime)) {
+  } else if (isToday(followUpDate)) {
+    // Due today
     return {
-      taskClassName: "bg-amber-100 text-amber-800 rounded-full px-2 py-0.5",
-      iconClassName: "text-amber-600",
-      containerClassName: "border-amber-200 bg-amber-50/50"
+      containerClassName: 'border-l-4 border-amber-400',
+      badgeClassName: 'bg-amber-100 text-amber-800',
+      iconClassName: 'text-amber-500'
     };
   } else {
+    // Future task
     return {
-      taskClassName: "bg-green-100 text-green-800 rounded-full px-2 py-0.5",
-      iconClassName: "text-green-600",
-      containerClassName: "border-green-200 bg-green-50/50"
+      containerClassName: '',
+      badgeClassName: 'bg-gray-100 text-gray-800',
+      iconClassName: 'text-gray-500'
     };
   }
-};
+}
 
-/**
- * Get background and text colors based on lead status
- */
-export const getStatusColors = (status: LeadStatus) => {
+export function getStatusColors(status: LeadStatus): {
+  bg: string;
+  text: string;
+} {
   switch (status) {
     case 'New':
-      return {
-        bg: 'bg-[#F5F3EE]',
-        text: 'text-[#7A6C5D]'
-      };
+      return { bg: 'bg-blue-100', text: 'text-blue-800' };
     case 'Contacted':
-      return {
-        bg: 'bg-[#DCE4E3]',
-        text: 'text-[#4C5C59]'
-      };
+      return { bg: 'bg-indigo-100', text: 'text-indigo-800' };
     case 'Qualified':
-      return {
-        bg: 'bg-[#EBD5CE]',
-        text: 'text-[#96493D]'
-      };
+      return { bg: 'bg-violet-100', text: 'text-violet-800' };
     case 'Proposal':
-      return {
-        bg: 'bg-[#F3E9D6]',
-        text: 'text-[#B58C59]'
-      };
+      return { bg: 'bg-pink-100', text: 'text-pink-800' };
+    case 'Visit':
+      return { bg: 'bg-cyan-100', text: 'text-cyan-800' };
     case 'Offer':
     case 'Offre':
-      return {
-        bg: 'bg-[#F3E9D6]',
-        text: 'text-[#B58C59]'
-      };
-    case 'Negotiation':
-      return {
-        bg: 'bg-[#F3E9D6]',
-        text: 'text-[#B58C59]'
-      };
-    case 'Won':
-    case 'Gagné':
+      return { bg: 'bg-teal-100', text: 'text-teal-800' };
+    case 'Deposit':
+      return { bg: 'bg-emerald-100', text: 'text-emerald-800' };
     case 'Signed':
-      return {
-        bg: 'bg-[#DCE4E3]',
-        text: 'text-[#4C5C59]'
-      };
-    case 'Lost':
+      return { bg: 'bg-green-100', text: 'text-green-800' };
+    case 'Gagné':
+      return { bg: 'bg-green-100', text: 'text-green-800' };
     case 'Perdu':
-      return {
-        bg: 'bg-[#EFEAE4]',
-        text: 'text-[#3F3C3B]'
-      };
+      return { bg: 'bg-red-100', text: 'text-red-800' };
     default:
-      return {
-        bg: 'bg-[#F5F3EE]',
-        text: 'text-[#7A6C5D]'
-      };
+      return { bg: 'bg-gray-100', text: 'text-gray-800' };
   }
-};
+}
+
+export function formatBudget(budget?: string, currency: Currency = 'EUR'): string {
+  if (!budget) return '';
+
+  const numericBudget = parseFloat(budget);
+  if (isNaN(numericBudget)) return budget;
+
+  let formattedNumber: string;
+  
+  // If the number is in thousands, display as K
+  if (numericBudget >= 1000000) {
+    formattedNumber = (numericBudget / 1000000).toFixed(1) + 'M';
+  } else if (numericBudget >= 1000) {
+    formattedNumber = (numericBudget / 1000).toFixed(0) + 'K';
+  } else {
+    formattedNumber = numericBudget.toString();
+  }
+
+  // Add currency symbol
+  switch (currency) {
+    case 'EUR':
+      return formattedNumber + ' €';
+    case 'USD':
+      return '$' + formattedNumber;
+    case 'GBP':
+      return '£' + formattedNumber;
+    default:
+      return formattedNumber + ' ' + currency;
+  }
+}
