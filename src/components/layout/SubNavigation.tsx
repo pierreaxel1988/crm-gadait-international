@@ -1,12 +1,15 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { MessageSquare, PieChart, Calendar, ListTodo, File, ClipboardList } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 const SubNavigation = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
+  
   const navigationItems = [{
     name: 'Pipeline',
     path: '/pipeline',
@@ -38,7 +41,7 @@ const SubNavigation = () => {
     return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
         <div className="overflow-x-auto py-2 bg-loro-50">
           <div className="flex justify-between px-2 w-full">
-            {navigationItems.map(item => <Link key={item.name} to={item.path} className={cn("flex items-center justify-center whitespace-nowrap rounded-md p-2 flex-1 mx-1", location.pathname === item.path ? "text-loro-terracotta bg-loro-white" : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70")}>
+            {navigationItems.map(item => <Link key={item.name} to={item.path} className={cn("flex items-center justify-center whitespace-nowrap rounded-md p-2 flex-1 mx-1 transition-transform hover:scale-110 duration-200", location.pathname === item.path ? "text-loro-terracotta bg-loro-white" : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70")}>
                 {item.icon && <item.icon className="h-5 w-5" />}
               </Link>)}
           </div>
@@ -52,7 +55,7 @@ const SubNavigation = () => {
         <NavigationMenu className="justify-start mx-auto">
           <NavigationMenuList className="space-x-4">
             {navigationItems.map(item => <NavigationMenuItem key={item.name}>
-                <Link to={item.path} className={cn("inline-flex h-12 w-12 items-center justify-center rounded-md", "hover:text-loro-terracotta focus:text-loro-terracotta focus:outline-none", location.pathname === item.path ? "text-loro-terracotta bg-loro-white/80 border-b-2 border-loro-terracotta" : "text-loro-navy")}>
+                <Link to={item.path} className={cn("inline-flex h-12 w-12 items-center justify-center rounded-md transition-transform hover:scale-110 duration-200", "hover:text-loro-terracotta focus:text-loro-terracotta focus:outline-none", location.pathname === item.path ? "text-loro-terracotta bg-loro-white/80 border-b-2 border-loro-terracotta" : "text-loro-navy")}>
                   <item.icon className="h-6 w-6" />
                 </Link>
               </NavigationMenuItem>)}
@@ -61,4 +64,5 @@ const SubNavigation = () => {
       </div>
     </div>;
 };
+
 export default SubNavigation;
