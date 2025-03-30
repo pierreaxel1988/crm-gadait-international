@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -114,7 +113,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     } else if (item.nextFollowUpDate && isToday(new Date(item.nextFollowUpDate))) {
       return 'border-amber-300';
     } else if (item.nextFollowUpDate) {
-      return 'bg-[#E2F7CB]/60'; // WhatsApp light green for upcoming tasks
+      return 'bg-[#EBF7E3]/70'; // Softer, more elegant green background for upcoming tasks
     }
     return '';
   };

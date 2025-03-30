@@ -1,4 +1,3 @@
-
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -71,9 +70,9 @@ export function getActionStatusStyle(nextFollowUpDate?: string): {
       iconClassName: 'text-amber-500'
     };
   } else {
-    // Future task - Update to a light WhatsApp green background
+    // Future task - Update to a softer, more elegant green background
     return {
-      containerClassName: 'bg-[#E2F7CB]/60',
+      containerClassName: 'bg-[#EBF7E3]/70',
       badgeClassName: 'bg-gray-100 text-gray-800',
       iconClassName: 'text-gray-500'
     };
