@@ -218,6 +218,8 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
                     taskType={lead.taskType}
                     createdAt={lead.createdAt}
                     nextFollowUpDate={lead.nextFollowUpDate}
+                    phone={lead.phone}
+                    email={lead.email}
                     onClick={handleLeadClick}
                   />
                 ))}
