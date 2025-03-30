@@ -71,9 +71,9 @@ export function getActionStatusStyle(nextFollowUpDate?: string): {
       iconClassName: 'text-amber-500'
     };
   } else {
-    // Future task - Add a light green background
+    // Future task - Update to a light WhatsApp green background
     return {
-      containerClassName: 'bg-[#F2FCE2]/40',
+      containerClassName: 'bg-[#E2F7CB]/60',
       badgeClassName: 'bg-gray-100 text-gray-800',
       iconClassName: 'text-gray-500'
     };

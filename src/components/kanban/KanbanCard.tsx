@@ -110,11 +110,11 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
   // Déterminer la couleur de la bordure en fonction du statut de la tâche
   const getCardBorderClass = () => {
     if (isOverdue()) {
-      return 'bg-[#FFDEE2]/30'; // Soft pink background instead of border
+      return 'bg-[#FFDEE2]/30'; // Soft pink background for overdue tasks
     } else if (item.nextFollowUpDate && isToday(new Date(item.nextFollowUpDate))) {
       return 'border-amber-300';
     } else if (item.nextFollowUpDate) {
-      return 'bg-[#F2FCE2]/40'; // Light green background for upcoming tasks
+      return 'bg-[#E2F7CB]/60'; // WhatsApp light green for upcoming tasks
     }
     return '';
   };
