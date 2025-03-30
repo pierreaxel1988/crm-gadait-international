@@ -1,16 +1,15 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-
 export type LeadTag = 'Vip' | 'Hot' | 'Serious' | 'Cold' | 'No response' | 'No phone' | 'Fake' | 'Imported';
-
 interface TagBadgeProps {
   tag: LeadTag;
   className?: string;
 }
-
-const TagBadge = ({ tag, className }: TagBadgeProps) => {
+const TagBadge = ({
+  tag,
+  className
+}: TagBadgeProps) => {
   // Determine the style based on the tag
   const getTagStyle = () => {
     switch (tag) {
@@ -34,19 +33,8 @@ const TagBadge = ({ tag, className }: TagBadgeProps) => {
         return 'bg-gray-100 text-gray-800 hover:bg-gray-100';
     }
   };
-
-  return (
-    <Badge 
-      variant="outline" 
-      className={cn(
-        'px-2 py-1 text-xs font-medium rounded-full border-none', 
-        getTagStyle(),
-        className
-      )}
-    >
+  return <Badge variant="outline" className="bg-loro-terracotta rounded-lg">
       {tag}
-    </Badge>
-  );
+    </Badge>;
 };
-
 export default TagBadge;
