@@ -9,6 +9,7 @@ import { PipelineType } from '@/types/lead';
 import { useKanbanData } from '@/hooks/useKanbanData';
 import LeadListItem from './LeadListItem';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
+import { sortLeadsByPriority } from './utils/leadSortUtils';
 
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
@@ -47,6 +48,7 @@ const MobileColumnList = ({
   filters
 }: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
+  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
   const navigate = useNavigate();
   
   const {
@@ -83,12 +85,16 @@ const MobileColumnList = ({
     ? allLeads 
     : allLeads.filter(lead => lead.columnStatus === activeStatus);
 
-  const filteredLeads = searchTerm
+  // Apply search filter
+  const searchFilteredLeads = searchTerm
     ? displayedLeads.filter(lead => 
         lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lead.desiredLocation?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : displayedLeads;
+    
+  // Apply smart sorting based on priority
+  const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
 
   const handleAddLead = (status: LeadStatus) => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
@@ -97,6 +103,10 @@ const MobileColumnList = ({
   const handleLeadClick = (leadId: string) => {
     // Navigate to lead detail page with criteria tab preselected
     navigate(`/leads/${leadId}?tab=criteria`);
+  };
+  
+  const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest') => {
+    setSortBy(value);
   };
 
   return (
@@ -134,9 +144,39 @@ const MobileColumnList = ({
               </TabsList>
             </Tabs>
           </div>
+
+          <div className="flex items-center justify-between bg-gray-50 rounded-lg p-2 mb-2">
+            <span className="text-sm font-medium text-gray-700">Trier par:</span>
+            <div className="flex space-x-2">
+              <button 
+                onClick={() => handleChangeSortBy('priority')}
+                className={`px-2 py-1 text-xs rounded-md ${sortBy === 'priority' 
+                  ? 'bg-zinc-900 text-white' 
+                  : 'bg-gray-100 text-gray-600'}`}
+              >
+                Priorité
+              </button>
+              <button 
+                onClick={() => handleChangeSortBy('newest')}
+                className={`px-2 py-1 text-xs rounded-md ${sortBy === 'newest' 
+                  ? 'bg-zinc-900 text-white' 
+                  : 'bg-gray-100 text-gray-600'}`}
+              >
+                Plus récent
+              </button>
+              <button 
+                onClick={() => handleChangeSortBy('oldest')}
+                className={`px-2 py-1 text-xs rounded-md ${sortBy === 'oldest' 
+                  ? 'bg-zinc-900 text-white' 
+                  : 'bg-gray-100 text-gray-600'}`}
+              >
+                Plus ancien
+              </button>
+            </div>
+          </div>
           
           <div className="space-y-px">
-            {filteredLeads.length === 0 ? (
+            {sortedLeads.length === 0 ? (
               <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
                 <div className="text-center">
                   <p className="text-sm text-zinc-900 font-medium">Aucun lead trouvé</p>
@@ -151,7 +191,7 @@ const MobileColumnList = ({
               </div>
             ) : (
               <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
-                {filteredLeads.map(lead => (
+                {sortedLeads.map(lead => (
                   <LeadListItem 
                     key={lead.id}
                     id={lead.id}

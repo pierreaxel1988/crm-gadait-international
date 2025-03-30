@@ -7,6 +7,7 @@ import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { useKanbanDragDrop } from '@/hooks/useKanbanDragDrop';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { isPast, isToday } from 'date-fns';
+import { sortLeadsByPriority } from '@/components/pipeline/mobile/utils/leadSortUtils';
 
 interface KanbanBoardProps {
   columns: {
@@ -59,9 +60,12 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
         };
       });
       
+      // Sort items within each column by priority
+      const sortedItems = sortLeadsByPriority(itemsWithStatus, 'priority');
+      
       return {
         ...col,
-        items: itemsWithStatus,
+        items: sortedItems,
         pipelineType: col.pipelineType || pipelineType
       };
     });

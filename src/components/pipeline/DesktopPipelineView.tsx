@@ -13,6 +13,7 @@ import LeadListItem from './mobile/LeadListItem';
 import { useNavigate } from 'react-router-dom';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import PipelineHeader from './PipelineHeader';
+import { sortLeadsByPriority } from './mobile/utils/leadSortUtils';
 
 interface DesktopPipelineViewProps {
   activeTab: string;
@@ -64,6 +65,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   teamMembers
 }) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
+  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
   const navigate = useNavigate();
   
   const {
@@ -107,6 +109,9 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         item.desiredLocation?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : displayedLeads;
+    
+  // Apply smart sorting
+  const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
   
   const handleAddLead = () => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${activeStatus === 'all' ? 'New' : activeStatus}`);
@@ -184,14 +189,44 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         </Tabs>
       </div>
       
-      <div className="relative flex-1 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden mt-4">
+      <div className="flex items-center justify-between bg-gray-50 rounded-lg p-2 mb-4">
+        <span className="text-sm font-medium text-gray-700">Trier par:</span>
+        <div className="flex space-x-2">
+          <button 
+            onClick={() => setSortBy('priority')}
+            className={`px-3 py-1 rounded-md ${sortBy === 'priority' 
+              ? 'bg-zinc-900 text-white' 
+              : 'bg-gray-100 text-gray-600'}`}
+          >
+            Priorité
+          </button>
+          <button 
+            onClick={() => setSortBy('newest')}
+            className={`px-3 py-1 rounded-md ${sortBy === 'newest' 
+              ? 'bg-zinc-900 text-white' 
+              : 'bg-gray-100 text-gray-600'}`}
+          >
+            Plus récent
+          </button>
+          <button 
+            onClick={() => setSortBy('oldest')}
+            className={`px-3 py-1 rounded-md ${sortBy === 'oldest' 
+              ? 'bg-zinc-900 text-white' 
+              : 'bg-gray-100 text-gray-600'}`}
+          >
+            Plus ancien
+          </button>
+        </div>
+      </div>
+      
+      <div className="relative flex-1 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-sm text-muted-foreground">Chargement des leads...</p>
           </div>
         ) : (
           <div className="h-full overflow-y-auto p-4">
-            {searchFilteredLeads.length === 0 ? (
+            {sortedLeads.length === 0 ? (
               <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
                 <div className="text-center">
                   <p className="text-sm text-zinc-900 font-medium">Aucun lead trouvé</p>
@@ -206,7 +241,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
               </div>
             ) : (
               <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
-                {searchFilteredLeads.map(lead => (
+                {sortedLeads.map(lead => (
                   <LeadListItem 
                     key={lead.id}
                     id={lead.id}
