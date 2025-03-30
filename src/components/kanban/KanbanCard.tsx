@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -113,7 +114,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     } else if (item.nextFollowUpDate && isToday(new Date(item.nextFollowUpDate))) {
       return 'border-amber-300';
     } else if (item.nextFollowUpDate) {
-      return 'bg-[#EBF7E3]/70'; // Softer, more elegant green background for upcoming tasks
+      return 'bg-[#EBF7E3]/80'; // Updated to #EBF7E3 with 80% opacity for upcoming tasks
     }
     return '';
   };
