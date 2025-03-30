@@ -83,21 +83,29 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       <div className="flex items-center gap-2">
         {phone && (
           <>
-            <a href={`tel:${phone}`} className="p-2 rounded-full bg-green-100 text-green-600">
+            <a 
+              href={`tel:${phone}`} 
+              className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+            >
               <Phone className="h-4 w-4" />
             </a>
             <button 
               onClick={handleWhatsAppClick}
-              className="p-2 rounded-full bg-emerald-100 text-emerald-600"
+              className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
               aria-label="Contacter via WhatsApp"
             >
               <MessageSquare className="h-4 w-4" />
             </button>
           </>
         )}
-        {email && <a href={`mailto:${email}`} className="p-2 rounded-full bg-blue-100 text-blue-600">
+        {email && 
+          <a 
+            href={`mailto:${email}`} 
+            className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+          >
             <Mail className="h-4 w-4" />
-          </a>}
+          </a>
+        }
         {tags && tags.length > 0 && <TagBadge tag={tags[0]} />}
       </div>
     </div>

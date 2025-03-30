@@ -130,7 +130,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-8 w-8 p-0 rounded-full text-green-600 hover:text-green-700 hover:bg-green-50"
+                className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
                 onClick={handleWhatsAppClick}
                 title="Contacter par WhatsApp"
               >
@@ -140,7 +140,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-8 w-8 p-0 rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
                 onClick={handlePhoneClick}
                 title="Appeler"
               >
@@ -153,7 +153,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8 w-8 p-0 rounded-full text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+              className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
               onClick={handleEmailClick}
               title="Envoyer un email"
             >

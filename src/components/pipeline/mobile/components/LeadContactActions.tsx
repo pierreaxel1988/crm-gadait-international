@@ -27,7 +27,7 @@ const LeadContactActions: React.FC<LeadContactActionsProps> = ({
               <TooltipTrigger asChild>
                 <button 
                   onClick={handlePhoneCall} 
-                  className="p-1 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors" 
+                  className="h-7 w-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors" 
                   aria-label="Appeler"
                 >
                   <Phone className="h-3.5 w-3.5" />
@@ -42,7 +42,7 @@ const LeadContactActions: React.FC<LeadContactActionsProps> = ({
               <TooltipTrigger asChild>
                 <button 
                   onClick={handleWhatsAppClick} 
-                  className="p-1 rounded-full bg-teal-50 text-teal-600 hover:bg-teal-100 transition-colors" 
+                  className="h-7 w-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors" 
                   aria-label="WhatsApp"
                 >
                   <MessageSquare className="h-3.5 w-3.5" />
@@ -60,7 +60,7 @@ const LeadContactActions: React.FC<LeadContactActionsProps> = ({
             <TooltipTrigger asChild>
               <button 
                 onClick={handleEmailClick} 
-                className="p-1 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors" 
+                className="h-7 w-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors" 
                 aria-label="Email"
               >
                 <Mail className="h-3.5 w-3.5" />

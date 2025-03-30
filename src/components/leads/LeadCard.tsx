@@ -109,7 +109,7 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
               </div>
               <button 
                 onClick={handleWhatsAppClick}
-                className="p-1 rounded-full bg-emerald-100/50 text-emerald-600 hover:bg-emerald-100"
+                className="h-7 w-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                 aria-label="Contacter via WhatsApp"
               >
                 <MessageSquare className="h-3.5 w-3.5" />
