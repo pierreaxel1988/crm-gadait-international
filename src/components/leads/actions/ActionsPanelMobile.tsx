@@ -117,7 +117,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 key={action.id} 
                 className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${
                   isOverdue 
-                    ? 'bg-[#FFDEE2]/30 border-pink-200'
+                    ? 'bg-[#FFDEE2]/30' // Soft pink background without border
                     : 'bg-[#F2FCE2]/40 border-green-100'
                 }`}
               >

@@ -57,9 +57,9 @@ export function getActionStatusStyle(nextFollowUpDate?: string): {
   followUpDateClone.setHours(0, 0, 0, 0);
   
   if (followUpDateClone.getTime() < today.getTime()) {
-    // Overdue
+    // Overdue - Changed to soft pink background with no border
     return {
-      containerClassName: 'border-l-4 border-red-500',
+      containerClassName: 'bg-[#FFDEE2]/30',
       badgeClassName: 'bg-red-100 text-red-800',
       iconClassName: 'text-red-500'
     };

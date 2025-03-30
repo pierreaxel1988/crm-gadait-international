@@ -110,7 +110,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
   // Déterminer la couleur de la bordure en fonction du statut de la tâche
   const getCardBorderClass = () => {
     if (isOverdue()) {
-      return 'border-red-300';
+      return 'bg-[#FFDEE2]/30'; // Soft pink background instead of border
     } else if (item.nextFollowUpDate && isToday(new Date(item.nextFollowUpDate))) {
       return 'border-amber-300';
     }
