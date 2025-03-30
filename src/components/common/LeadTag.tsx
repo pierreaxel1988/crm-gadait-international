@@ -23,6 +23,42 @@ const LeadTag = ({
   textColor = 'text-loro-700', 
   className 
 }: LeadTagProps) => {
+  // Format numeric values in the label with proper thousand separators
+  const formattedLabel = React.useMemo(() => {
+    // Check if label is a budget value by detecting currency symbols or K/M suffix
+    const budgetRegex = /^(\D*)(\d+(?:[,.]\d+)?)(\s*[KkMm€$£]*|\s*EUR|\s*USD|\s*GBP)?$/;
+    const match = label.match(budgetRegex);
+    
+    if (match) {
+      const prefix = match[1] || '';
+      let value = match[2] || '';
+      const suffix = match[3] || '';
+      
+      // If we have a numeric value, format it with thousand separators
+      if (value) {
+        // Replace commas with dots for standard parsing
+        const numericValue = parseFloat(value.replace(',', '.'));
+        
+        if (!isNaN(numericValue)) {
+          // If the value is in K or M format, convert it
+          if (suffix.toUpperCase().includes('K')) {
+            const fullValue = numericValue * 1000;
+            return prefix + fullValue.toLocaleString('fr-FR') + (suffix.replace(/[KkMm]/g, '') || '');
+          } else if (suffix.toUpperCase().includes('M')) {
+            const fullValue = numericValue * 1000000;
+            return prefix + fullValue.toLocaleString('fr-FR') + (suffix.replace(/[KkMm]/g, '') || '');
+          } else {
+            // Normal formatting with thousand separators
+            return prefix + numericValue.toLocaleString('fr-FR') + suffix;
+          }
+        }
+      }
+    }
+    
+    // Return original label if not a budget value
+    return label;
+  }, [label]);
+  
   // Check if the colors are hex values or Tailwind classes
   const getBgStyle = () => {
     if (bgColor.startsWith('#') || bgColor.startsWith('rgb')) {
@@ -55,7 +91,7 @@ const LeadTag = ({
         ...getTextStyle()
       }}
     >
-      {label}
+      {formattedLabel}
     </span>
   );
 };

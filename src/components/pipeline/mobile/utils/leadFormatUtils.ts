@@ -1,4 +1,3 @@
-
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -117,17 +116,9 @@ export function formatBudget(budget?: string, currency: Currency = 'EUR'): strin
   const numericBudget = parseFloat(budget);
   if (isNaN(numericBudget)) return budget;
 
-  let formattedNumber: string;
+  // Always display the full number with thousand separators
+  const formattedNumber = numericBudget.toLocaleString('fr-FR');
   
-  // If the number is in thousands, display as K
-  if (numericBudget >= 1000000) {
-    formattedNumber = (numericBudget / 1000000).toFixed(1) + 'M';
-  } else if (numericBudget >= 1000) {
-    formattedNumber = (numericBudget / 1000).toFixed(0) + 'K';
-  } else {
-    formattedNumber = numericBudget.toString();
-  }
-
   // Add currency symbol
   switch (currency) {
     case 'EUR':
