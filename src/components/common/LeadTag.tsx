@@ -81,7 +81,7 @@ const LeadTag = ({
   return (
     <span 
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-futuraLight transition-transform hover:scale-105 duration-200",
+        "inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-futuraLight transition-transform hover:scale-105 duration-200",
         bgClassName,
         textClassName,
         className
