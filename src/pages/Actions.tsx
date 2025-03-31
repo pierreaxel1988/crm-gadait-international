@@ -3,32 +3,46 @@ import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { Button } from '@/components/ui/button';
-import { Check, Filter, Plus, RotateCcw } from 'lucide-react';
-import { InputGroup, InputLeftElement } from '@chakra-ui/react';
+import { RotateCcw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import ActionsList from '@/components/actions/ActionsList';
 import { useBreakpoint } from '@/hooks/use-mobile';
 import { useActionsData } from '@/hooks/useActionsData';
+import { ActionStatus, TaskType } from '@/types/actionHistory';
+import StatusFilterButtons from '@/components/actions/filters/StatusFilterButtons';
+import TypeFilterButtons from '@/components/actions/filters/TypeFilterButtons';
+import AgentFilterButtons from '@/components/actions/filters/AgentFilterButtons';
 
 const Actions = () => {
   const { isMobile } = useBreakpoint();
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [statusFilter, setStatusFilter] = useState<ActionStatus | 'all'>('all');
+  const [typeFilter, setTypeFilter] = useState<TaskType | 'all'>('all');
+  const [agentFilter, setAgentFilter] = useState('all');
   
   const { actions, isLoading, markActionComplete } = useActionsData(refreshTrigger);
   
-  // Filter actions based on search term
+  // Filter actions based on search term and filters
   const filteredActions = actions.filter(action => {
-    if (!searchTerm) return true;
-    
-    const searchLower = searchTerm.toLowerCase();
-    
-    return (
-      action.leadName.toLowerCase().includes(searchLower) ||
-      action.notes?.toLowerCase().includes(searchLower) ||
-      action.assignedToName.toLowerCase().includes(searchLower)
+    // Filter by search term
+    const matchesSearch = !searchTerm ? true : (
+      action.leadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      action.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      action.assignedToName.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    
+    // Filter by status
+    const matchesStatus = statusFilter === 'all' ? true : action.status === statusFilter;
+    
+    // Filter by type
+    const matchesType = typeFilter === 'all' ? true : action.actionType === typeFilter;
+    
+    // Filter by agent
+    const matchesAgent = agentFilter === 'all' ? true : action.assignedToId === agentFilter;
+    
+    return matchesSearch && matchesStatus && matchesType && matchesAgent;
   });
   
   const handleRefresh = () => {
@@ -67,6 +81,23 @@ const Actions = () => {
                 </Button>
               </div>
             </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-4 mb-6">
+            <StatusFilterButtons 
+              value={statusFilter} 
+              onChange={(value) => setStatusFilter(value as ActionStatus | 'all')}
+            />
+            
+            <TypeFilterButtons 
+              value={typeFilter}
+              onChange={(value) => setTypeFilter(value as TaskType | 'all')}
+            />
+            
+            <AgentFilterButtons
+              value={agentFilter}
+              onChange={setAgentFilter}
+            />
           </div>
           
           <ActionsList 

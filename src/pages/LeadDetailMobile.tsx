@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -86,12 +87,13 @@ const LeadDetailMobile = () => {
     return <NotFoundState show={!lead && !!id} id={id} />;
   }
   
-  if (!lead) return null;
+  if (!lead || !id) return null;
   
   return (
     <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
-      <div className="fixed top-0 left-0 right-0 bg-white z-40 shadow-sm border-b">
+      <div className="fixed top-0 left-0 right-0 bg-white z-40 shadow-sm">
         <LeadDetailHeader
+          id={id}
           name={lead.name}
           createdAt={lead.createdAt}
           phone={lead.phone}
@@ -106,6 +108,7 @@ const LeadDetailMobile = () => {
           isSaving={isSaving}
           hasChanges={hasChanges}
           tags={lead.tags}
+          taskType={lead.taskType}
         />
         
         <LeadDetailTabs defaultTab={activeTab} />
