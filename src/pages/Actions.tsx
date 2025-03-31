@@ -10,9 +10,11 @@ import SubNavigation from '@/components/layout/SubNavigation';
 import StatusFilterButtons from '@/components/actions/filters/StatusFilterButtons';
 import TypeFilterButtons from '@/components/actions/filters/TypeFilterButtons';
 import AgentFilterButtons from '@/components/actions/filters/AgentFilterButtons';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Actions = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [filteredStatus, setFilteredStatus] = useState<string | null>(null);
   const [filteredType, setFilteredType] = useState<string | null>(null);
   const [filteredAgentId, setFilteredAgentId] = useState<string | null>(null);
@@ -27,39 +29,54 @@ const Actions = () => {
     navigate(`/leads/${leadId}?actionId=${actionId}`);
   };
 
+  const handleMarkComplete = async (actionId: string, leadId: string) => {
+    // L'implémentation serait ici
+    await refreshData();
+  };
+
   return (
     <>
       <Navbar />
       <SubNavigation />
       <div className="p-4 md:p-6 max-w-6xl mx-auto">
-        <ActionsHeader />
+        <ActionsHeader 
+          isAdmin={false}
+          statusFilter={filteredStatus || ''}
+          setStatusFilter={(value) => setFilteredStatus(value)}
+          typeFilter={filteredType || ''}
+          setTypeFilter={(value) => setFilteredType(value)}
+          agentFilter={filteredAgentId || ''}
+          setAgentFilter={(value) => setFilteredAgentId(value)}
+          isLoading={isLoading}
+          actionsCount={actionsData.length}
+          teamMembers={teamMembers}
+          onRefresh={refreshData}
+          isRefreshing={false}
+        />
         
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
             <h3 className="text-sm font-medium mb-2">Filtrer par statut</h3>
-            {/* @ts-ignore - Ignoring type errors for now */}
             <StatusFilterButtons 
-              value={filteredStatus}
-              onChange={setFilteredStatus}
+              selectedValue={filteredStatus || ''}
+              onValueChange={(value) => setFilteredStatus(value === '' ? null : value)}
             />
           </div>
           
           <div>
             <h3 className="text-sm font-medium mb-2">Filtrer par type</h3>
-            {/* @ts-ignore - Ignoring type errors for now */}
             <TypeFilterButtons
-              value={filteredType}
-              onChange={setFilteredType}
+              selectedValue={filteredType || ''}
+              onValueChange={(value) => setFilteredType(value === '' ? null : value)}
             />
           </div>
           
           <div>
             <h3 className="text-sm font-medium mb-2">Filtrer par agent</h3>
-            {/* @ts-ignore - Ignoring type errors for now */}
             <AgentFilterButtons
               teamMembers={teamMembers}
-              value={filteredAgentId}
-              onChange={setFilteredAgentId}
+              selectedValue={filteredAgentId || ''}
+              onValueChange={(value) => setFilteredAgentId(value === '' ? null : value)}
             />
           </div>
         </div>
@@ -69,11 +86,11 @@ const Actions = () => {
             <Loader2 className="h-8 w-8 animate-spin text-chocolate-dark" />
           </div>
         ) : (
-          // @ts-ignore - Ignoring type errors for now
           <ActionsList 
-            actionsData={actionsData} 
-            onActionClick={handleActionClick}
-            onStatusChange={refreshData}
+            actions={actionsData}
+            isLoading={isLoading} 
+            onMarkComplete={handleMarkComplete}
+            isMobile={isMobile}
           />
         )}
       </div>

@@ -86,7 +86,7 @@ export const useActionsData = (filteredStatus: string | null = null, filteredTyp
           for (const action of lead.action_history) {
             // S'assurer que action est un objet et pas une chaîne
             if (typeof action === 'object' && action !== null) {
-              // Fix TS errors by ensuring we're accessing properties safely
+              // Fixed TS errors by type checking and adding safe access
               const actionId = action.id as string || '';
               const actionType = action.actionType as string || '';
               const scheduledDate = action.scheduledDate as string || '';

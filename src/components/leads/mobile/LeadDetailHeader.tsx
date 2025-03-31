@@ -7,6 +7,12 @@ import { formatBudget, getActionStatusStyle } from '@/components/pipeline/mobile
 import { Currency } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { TaskType } from '@/components/kanban/KanbanCard';
+import TagList from '@/components/kanban/card/TagList';
+import ContactInfo from '@/components/kanban/card/ContactInfo';
+import PropertyInfo from '@/components/kanban/card/PropertyInfo';
+import TaskTypeIndicator from '@/components/kanban/card/TaskTypeIndicator';
+import AssignedUser from '@/components/kanban/card/AssignedUser';
+import { isPast, isToday } from 'date-fns';
 
 interface LeadDetailHeaderProps {
   name: string;
@@ -26,9 +32,17 @@ interface LeadDetailHeaderProps {
   status?: LeadStatus;
   nextFollowUpDate?: string;
   taskType?: TaskType;
+  propertyType?: string;
+  bedrooms?: number[];
+  assignedTo?: string;
+  url?: string;
+  views?: string[];
+  amenities?: string[];
+  id: string;
 }
 
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
+  id,
   name,
   createdAt,
   phone,
@@ -39,47 +53,53 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   onBackClick,
   status,
   nextFollowUpDate,
-  taskType
+  taskType,
+  tags = [],
+  propertyType,
+  bedrooms,
+  assignedTo,
+  url,
+  views,
+  amenities
 }) => {
-  const handlePhoneClick = (e: React.MouseEvent) => {
+  // Fonctions de gestion des événements
+  const handleAssignClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Navigation vers la page d'édition du lead pour assigner un commercial
+    // Implementation serait ici
+  };
+  
+  const handleLinkClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (phone) {
-      window.location.href = `tel:${phone}`;
+    if (url) {
+      window.open(url, '_blank');
     }
   };
   
-  const handleEmailClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (email) {
-      window.location.href = `mailto:${email}`;
-    }
+  // Fonctions pour déterminer le style en fonction du statut de la tâche
+  const isOverdue = () => {
+    if (!nextFollowUpDate) return false;
+    const followUpDate = new Date(nextFollowUpDate);
+    return isPast(followUpDate) && !isToday(followUpDate);
   };
-  
-  const handleWhatsAppClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (phone) {
-      const cleanedPhone = phone.replace(/[^\d+]/g, '');
-      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
-    }
-  };
-  
-  const formattedDate = createdAt 
-    ? format(new Date(createdAt), 'dd/MM/yyyy')
-    : '';
-  
-  const formattedBudget = budget && currency 
-    ? formatBudget(budget, currency) 
-    : '';
 
-  const actionStyle = nextFollowUpDate ? getActionStatusStyle(nextFollowUpDate) : { containerClassName: '' };
+  // Déterminer la couleur de fond en fonction du statut de la tâche
+  const getCardBorderClass = () => {
+    if (isOverdue()) {
+      return 'bg-[#FFDEE2]/30'; // Soft pink background for overdue tasks
+    } else if (nextFollowUpDate && isToday(new Date(nextFollowUpDate))) {
+      return 'bg-amber-50'; // Light amber background
+    } else if (nextFollowUpDate) {
+      return 'bg-[#e3f7ed]/80'; // Light green background with 80% opacity
+    }
+    return '';
+  };
   
   return (
-    <div className={`flex flex-col p-3 bg-white ${actionStyle.containerClassName}`}>
-      {/* Header with back button and name */}
-      <div className="flex items-start">
+    <div className={`flex flex-col p-3 ${getCardBorderClass()}`}>
+      {/* Header avec bouton back et actions */}
+      <div className="flex items-start justify-between">
         <div className="flex items-center">
           <Button
             variant="outline"
@@ -89,85 +109,48 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          
-          <div className="flex flex-col">
-            <div className="flex items-center">
-              <h1 className="text-lg font-medium text-gray-800">{name}</h1>
-            </div>
-            
-            <p className="text-sm text-gray-500">{formattedDate}</p>
-          </div>
-        </div>
-        
-        <div className="flex ml-auto gap-2">
-          {phone && (
-            <button 
-              onClick={handlePhoneClick}
-              className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center"
-              aria-label="Appeler"
-            >
-              <Phone className="h-5 w-5 text-gray-700" />
-            </button>
-          )}
-          
-          {phone && (
-            <button 
-              onClick={handleWhatsAppClick}
-              className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center"
-              aria-label="WhatsApp"
-            >
-              <img 
-                src="https://img.icons8.com/?size=100&id=16712&format=png&color=000000" 
-                alt="WhatsApp" 
-                className="h-5 w-5" 
-              />
-            </button>
-          )}
-          
-          {email && (
-            <button 
-              onClick={handleEmailClick}
-              className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center"
-              aria-label="Email"
-            >
-              <Mail className="h-5 w-5 text-gray-700" />
-            </button>
-          )}
         </div>
       </div>
       
-      {/* Tags row */}
-      <div className="flex flex-wrap gap-2 mt-3">
-        {/* Status */}
-        {status && (
-          <div className={`px-4 py-1.5 rounded-full text-sm font-medium bg-lime-100 text-lime-800`}>
-            {status}
-          </div>
-        )}
-        
-        {/* Task Type */}
-        {taskType === 'Call' && (
-          <div className="px-4 py-1.5 rounded-full text-sm font-medium bg-pink-100 text-pink-800">
-            Call
-          </div>
-        )}
-        
-        {/* Location */}
-        {desiredLocation && (
-          <div className="px-4 py-1.5 rounded-full text-sm font-medium border text-gray-800">
-            {desiredLocation}
-          </div>
-        )}
+      {/* En-tête avec nom et tags */}
+      <div className="flex justify-between items-start mb-3 mt-2">
+        <h3 className="font-medium text-lg text-gray-900">{name}</h3>
+        <TagList tags={tags.map(tag => ({ name: tag }))} />
       </div>
       
-      {/* Budget */}
-      {formattedBudget && (
-        <div className="mt-2">
-          <div className="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-800 inline-block">
-            {formattedBudget}
-          </div>
-        </div>
-      )}
+      {/* Informations de contact principales */}
+      <ContactInfo 
+        email={email} 
+        phone={phone} 
+        leadId={id} 
+      />
+      
+      {/* Informations sur la propriété */}
+      <PropertyInfo 
+        propertyType={propertyType}
+        budget={budget}
+        desiredLocation={desiredLocation}
+        country={undefined}
+        bedrooms={bedrooms && bedrooms.length > 0 ? bedrooms[0] : undefined}
+        url={url}
+        onLinkClick={handleLinkClick}
+      />
+      
+      {/* Commercial assigné et type de tâche */}
+      <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
+        <AssignedUser 
+          assignedToId={assignedTo} 
+          onAssignClick={handleAssignClick} 
+        />
+        
+        {/* Type de tâche avec indication de statut */}
+        <TaskTypeIndicator 
+          taskType={taskType} 
+          phoneNumber={phone}
+          nextFollowUpDate={nextFollowUpDate}
+          isOverdue={isOverdue()}
+        />
+      </div>
     </div>
   );
 };
