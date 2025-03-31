@@ -19,11 +19,11 @@ const SubNavigation = () => {
     path: '/actions',
     icon: ClipboardList
   }, {
-    name: 'Calendar',
+    name: 'Calendrier',
     path: '/calendar',
     icon: Calendar
   }, {
-    name: 'Reports',
+    name: 'Rapports',
     path: '/reports',
     icon: PieChart
   }, {
@@ -31,7 +31,7 @@ const SubNavigation = () => {
     path: '/chat-gadait',
     icon: MessageSquare
   }, {
-    name: 'Properties',
+    name: 'Propriétés',
     path: '/properties',
     icon: File
   }];
