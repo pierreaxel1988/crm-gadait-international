@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,6 +19,7 @@ const Auth = () => {
   const {
     signInWithGoogle
   } = useAuth();
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -57,6 +59,7 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
   const handleGoogleAuth = async () => {
     try {
       await signInWithGoogle();
@@ -68,6 +71,7 @@ const Auth = () => {
       });
     }
   };
+
   const createAdminAccount = async () => {
     const adminEmail = "christelle@gadait-international.com";
     const adminPassword = "@Christelle2025";
@@ -116,6 +120,7 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
   return <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80 px-4">
       <div className="mb-8">
         <div className="flex items-center justify-center">
@@ -128,7 +133,7 @@ const Auth = () => {
           <CardTitle className="font-futuraLight text-loro-hazel font-medium text-xl">
             {isSignUp ? 'Créer un compte' : 'Connexion'}
           </CardTitle>
-          <CardDescription className="font-times text-chocolate-light">
+          <CardDescription className="font-futura text-chocolate-light">
             {isSignUp ? 'Créez votre compte pour accéder à toutes les fonctionnalités' : 'Connectez-vous pour accéder à votre espace personnel'}
           </CardDescription>
         </CardHeader>
@@ -179,4 +184,5 @@ const Auth = () => {
       </Card>
     </div>;
 };
+
 export default Auth;
