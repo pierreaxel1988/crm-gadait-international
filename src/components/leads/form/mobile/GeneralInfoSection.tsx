@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import { User, Mail, Phone, Flag, BarChart, MapPin, Clipboard } from 'lucide-react';
@@ -35,25 +36,25 @@ const MobileGeneralInfoSection = ({
   };
 
   useEffect(() => {
-    if (formData.taxResidence && !formData.nationality) {
-      const derivedNationality = deriveNationalityFromCountry(formData.taxResidence);
+    if (lead.taxResidence && !lead.nationality) {
+      const derivedNationality = deriveNationalityFromCountry(lead.taxResidence);
       if (derivedNationality) {
         onDataChange({
           nationality: derivedNationality
         });
       }
     }
-  }, [formData.taxResidence]);
+  }, [lead.taxResidence, lead.nationality, onDataChange]);
 
   useEffect(() => {
-    if (formData.phone) {
+    if (lead.phone) {
       const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
-      const foundCode = countryCodes.find(code => formData.phone?.startsWith(code));
+      const foundCode = countryCodes.find(code => lead.phone?.startsWith(code));
       if (foundCode) {
         setPhoneCountryCode(foundCode);
       }
     }
-  }, [formData.phone]);
+  }, [lead.phone]);
 
   const countryCodeMapping: Record<string, string> = {
     '+33': 'France',
@@ -81,7 +82,7 @@ const MobileGeneralInfoSection = ({
   const handlePhoneCodeChange = (code: string) => {
     setPhoneCountryCode(code);
 
-    let phoneNumber = formData.phone || '';
+    let phoneNumber = lead.phone || '';
     const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
 
     for (const existingCode of countryCodes) {
@@ -112,16 +113,16 @@ const MobileGeneralInfoSection = ({
   };
 
   const getPhoneValueWithoutCode = () => {
-    if (!formData.phone) return '';
+    if (!lead.phone) return '';
 
     const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
-    let phoneNumber = formData.phone;
+    let phoneNumber = lead.phone;
     for (const code of countryCodes) {
       if (phoneNumber.startsWith(code)) {
         return phoneNumber.substring(code.length).trim();
       }
     }
-    return formData.phone;
+    return lead.phone;
   };
 
   const parseContactInfo = () => {
@@ -461,7 +462,7 @@ Language : Spanish" value={contactText} onChange={e => setContactText(e.target.v
           </div>
         </div>}
 
-      <FormInput label="Civilité" name="salutation" type="select" value={formData.salutation || ''} onChange={handleInputChange} icon={User} options={[{
+      <FormInput label="Civilité" name="salutation" type="select" value={lead.salutation || ''} onChange={handleInputChange} icon={User} options={[{
       value: 'M.',
       label: 'M.'
     }, {
@@ -469,28 +470,28 @@ Language : Spanish" value={contactText} onChange={e => setContactText(e.target.v
       label: 'Mme'
     }]} placeholder="Sélectionner..." className="mb-3" />
 
-      <FormInput label="Nom" name="name" value={formData.name || ''} onChange={handleInputChange} required icon={User} placeholder="Nom complet" />
+      <FormInput label="Nom" name="name" value={lead.name || ''} onChange={handleInputChange} required icon={User} placeholder="Nom complet" />
 
-      <FormInput label="Email" name="email" type="email" value={formData.email || ''} onChange={handleInputChange} icon={Mail} placeholder="Adresse email" />
+      <FormInput label="Email" name="email" type="email" value={lead.email || ''} onChange={handleInputChange} icon={Mail} placeholder="Adresse email" />
 
       <FormInput label="Téléphone" name="phone" type="tel-with-code" value={getPhoneValueWithoutCode()} onChange={handlePhoneChange} icon={Phone} placeholder="Numéro de téléphone" countryCode={phoneCountryCode} onCountryCodeChange={handlePhoneCodeChange} searchable={true} />
 
       <div className="mb-3">
-        <FormInput label="Nationalité" name="nationality" type="select" value={formData.nationality || ''} onChange={handleInputChange} icon={Flag} options={COUNTRIES.map(country => ({
+        <FormInput label="Nationalité" name="nationality" type="select" value={lead.nationality || ''} onChange={handleInputChange} icon={Flag} options={COUNTRIES.map(country => ({
         value: country,
         label: `${getCountryFlag(country)} ${country}`
       }))} placeholder="Sélectionner..." className="mb-0" searchable={true} />
       </div>
 
       <div className="mb-3">
-        <FormInput label="Pays de résidence" name="taxResidence" type="select" value={formData.taxResidence || ''} onChange={handleInputChange} icon={MapPin} options={COUNTRIES.map(country => ({
+        <FormInput label="Pays de résidence" name="taxResidence" type="select" value={lead.taxResidence || ''} onChange={handleInputChange} icon={MapPin} options={COUNTRIES.map(country => ({
         value: country,
         label: `${getCountryFlag(country)} ${country}`
       }))} placeholder="Sélectionner..." className="mb-0" searchable={true} />
       </div>
 
       <div className="mb-3">
-        <FormInput label="Source" name="source" type="select" value={formData.source || ''} onChange={handleInputChange} icon={BarChart} options={availableSources.map(source => ({
+        <FormInput label="Source" name="source" type="select" value={lead.source || ''} onChange={handleInputChange} icon={BarChart} options={availableSources.map(source => ({
         value: source,
         label: source
       }))} placeholder="Sélectionner..." className="mb-0" searchable={true} />
