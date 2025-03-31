@@ -85,6 +85,7 @@ export const useKanbanData = (
         
         // Log the fetched leads to help diagnose issues
         console.log("Fetched leads from Supabase:", supabaseLeads?.length);
+        console.log("First few leads:", supabaseLeads?.slice(0, 3));
         
         // If no leads found in Supabase, try to get data locally
         let allLeads = supabaseLeads || [];
