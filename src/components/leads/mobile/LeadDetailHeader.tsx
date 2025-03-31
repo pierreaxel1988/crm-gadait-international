@@ -3,10 +3,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
-import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
+import { formatBudget, getActionStatusStyle, getStatusColors } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
-import { getActionStatusStyle } from '@/components/pipeline/mobile/utils/leadFormatUtils';
+import TaskTypeIndicator from '@/components/kanban/card/TaskTypeIndicator';
 
 interface LeadDetailHeaderProps {
   name: string;
@@ -25,6 +25,7 @@ interface LeadDetailHeaderProps {
   tags?: string[];
   status?: string;
   nextFollowUpDate?: string;
+  taskType?: string;
 }
 
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
@@ -44,6 +45,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   tags,
   status,
   nextFollowUpDate,
+  taskType
 }) => {
   const handlePhoneClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -80,10 +82,12 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
     
   const actionStyle = nextFollowUpDate ? getActionStatusStyle(nextFollowUpDate) : { containerClassName: '' };
   
+  const statusConfig = status ? getStatusColors(status as LeadStatus) : { bg: 'bg-gray-200', text: 'text-gray-700' };
+  
   return (
-    <div className={`flex flex-col p-4 ${actionStyle.containerClassName}`}>
+    <div className={`flex flex-col p-2 ${actionStyle.containerClassName}`}>
       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="icon"
@@ -93,32 +97,32 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex flex-col">
-            <h1 className="text-xl font-medium text-gray-800">{name}</h1>
-            <p className="text-sm text-gray-600">{formattedDate}</p>
+            <h1 className="text-lg font-medium text-gray-800 font-futura">{name}</h1>
+            <p className="text-xs text-gray-600">{formattedDate}</p>
           </div>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           {phone && (
             <button 
               onClick={handlePhoneClick}
-              className="h-10 w-10 rounded-full bg-[#F5F5F0] flex items-center justify-center"
+              className="h-8 w-8 rounded-full bg-[#F5F5F0] flex items-center justify-center"
               aria-label="Appeler"
             >
-              <Phone className="h-5 w-5 text-gray-700" />
+              <Phone className="h-4 w-4 text-gray-700" />
             </button>
           )}
           
           {phone && (
             <button 
               onClick={handleWhatsAppClick}
-              className="h-10 w-10 rounded-full bg-[#F5F5F0] flex items-center justify-center"
+              className="h-8 w-8 rounded-full bg-[#F5F5F0] flex items-center justify-center"
               aria-label="WhatsApp"
             >
               <img 
                 src="/lovable-uploads/bf1a6b76-83f4-46cb-bb39-25f80e1c5289.png" 
                 alt="WhatsApp" 
-                className="h-5 w-5"
+                className="h-4 w-4"
               />
             </button>
           )}
@@ -126,36 +130,54 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           {email && (
             <button 
               onClick={handleEmailClick}
-              className="h-10 w-10 rounded-full bg-[#F5F5F0] flex items-center justify-center"
+              className="h-8 w-8 rounded-full bg-[#F5F5F0] flex items-center justify-center"
               aria-label="Email"
             >
-              <Mail className="h-5 w-5 text-gray-700" />
+              <Mail className="h-4 w-4 text-gray-700" />
             </button>
           )}
         </div>
       </div>
       
-      <div className="flex flex-wrap gap-2 mt-2">
+      <div className="flex flex-wrap gap-1 mt-1">
+        {/* Statut */}
         {status && (
-          <div className="px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm">
+          <div className={`px-2.5 py-0.5 rounded-full text-xs ${statusConfig.bg} ${statusConfig.text} font-futura`}>
             {status}
           </div>
         )}
         
-        {tags && tags.includes("Call") && (
-          <div className="px-4 py-2 bg-pink-100 text-pink-700 rounded-full text-sm">
-            Call
-          </div>
+        {/* Task Type Indicator à la façon de la carte pipeline */}
+        {taskType && (
+          <TaskTypeIndicator 
+            taskType={taskType} 
+            phoneNumber={phone}
+            nextFollowUpDate={nextFollowUpDate}
+            isOverdue={nextFollowUpDate ? actionStyle.containerClassName.includes('red') : false}
+            className="text-xs"
+          />
         )}
         
+        {/* Tags spécifiques */}
+        {tags && tags.map((tag) => (
+          <div 
+            key={tag} 
+            className="px-2.5 py-0.5 bg-[#EBD5CE] text-[#D05A76] rounded-full text-xs font-futura"
+          >
+            {tag}
+          </div>
+        ))}
+        
+        {/* Localisation */}
         {desiredLocation && (
-          <div className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm">
+          <div className="px-2.5 py-0.5 bg-[#F5F3EE] text-[#7A6C5D] rounded-full text-xs font-futura">
             {desiredLocation}
           </div>
         )}
         
+        {/* Budget */}
         {formattedBudget && (
-          <div className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm">
+          <div className="px-2.5 py-0.5 bg-[#F5F3EE] text-[#7A6C5D] rounded-full text-xs font-futura">
             {formattedBudget}
           </div>
         )}

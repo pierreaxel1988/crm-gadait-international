@@ -112,6 +112,7 @@ const LeadDetailMobile = () => {
           tags={lead.tags}
           status={lead.status}
           nextFollowUpDate={nextAction?.scheduledDate}
+          taskType={lead.taskType}
         />
         
         <LeadDetailTabs defaultTab={activeTab} />

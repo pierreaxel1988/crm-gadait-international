@@ -11,6 +11,34 @@ import StatusFilterButtons from '@/components/actions/filters/StatusFilterButton
 import TypeFilterButtons from '@/components/actions/filters/TypeFilterButtons';
 import AgentFilterButtons from '@/components/actions/filters/AgentFilterButtons';
 
+// Define types to match the components' expected props
+interface StatusFilterButtonsProps {
+  value: string | null;
+  onChange: (value: string | null) => void;
+}
+
+interface TypeFilterButtonsProps {
+  value: string | null;
+  onChange: (value: string | null) => void;
+}
+
+interface AgentFilterButtonsProps {
+  teamMembers: { id: string; name: string; email: string }[];
+  value: string | null;
+  onChange: (value: string | null) => void;
+}
+
+interface ActionsListProps {
+  actionsData: any[];
+  onActionClick?: (actionId: string, leadId: string) => void;
+  onStatusChange?: () => Promise<void>;
+}
+
+interface ActionsHeaderProps {
+  // Add minimum props required to avoid TypeScript errors
+  title?: string;
+}
+
 const Actions = () => {
   const navigate = useNavigate();
   const [filteredStatus, setFilteredStatus] = useState<string | null>(null);
@@ -32,31 +60,31 @@ const Actions = () => {
       <Navbar />
       <SubNavigation />
       <div className="p-4 md:p-6 max-w-6xl mx-auto">
-        <ActionsHeader />
+        <ActionsHeader title="Actions" />
         
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
             <h3 className="text-sm font-medium mb-2">Filtrer par statut</h3>
             <StatusFilterButtons 
-              selectedStatus={filteredStatus}
-              setSelectedStatus={setFilteredStatus}
+              value={filteredStatus}
+              onChange={setFilteredStatus}
             />
           </div>
           
           <div>
             <h3 className="text-sm font-medium mb-2">Filtrer par type</h3>
             <TypeFilterButtons
-              selectedType={filteredType}
-              setSelectedType={setFilteredType}
+              value={filteredType}
+              onChange={setFilteredType}
             />
           </div>
           
           <div>
             <h3 className="text-sm font-medium mb-2">Filtrer par agent</h3>
             <AgentFilterButtons
-              agents={teamMembers}
-              selectedAgentId={filteredAgentId}
-              setSelectedAgentId={setFilteredAgentId}
+              teamMembers={teamMembers}
+              value={filteredAgentId}
+              onChange={setFilteredAgentId}
             />
           </div>
         </div>
@@ -67,7 +95,7 @@ const Actions = () => {
           </div>
         ) : (
           <ActionsList 
-            actions={actionsData} 
+            actionsData={actionsData} 
             onActionClick={handleActionClick}
             onStatusChange={refreshData}
           />

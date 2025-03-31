@@ -1,8 +1,23 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ActionData } from '@/types/actionHistory';
 import { toast } from '@/hooks/use-toast';
+
+// Définir l'interface ActionData ici puisqu'il y a une erreur d'import
+interface ActionData {
+  id: string;
+  leadId: string;
+  leadName: string;
+  leadEmail?: string;
+  leadPhone?: string;
+  actionType: string;
+  scheduledDate: string;
+  completedDate?: string | null;
+  notes?: string;
+  assignedToId?: string;
+  assignedToName?: string;
+  createdAt: string;
+}
 
 export const useActionsData = (filteredStatus: string | null = null, filteredType: string | null = null, filteredAgentId: string | null = null) => {
   const [actionsData, setActionsData] = useState<ActionData[]>([]);
@@ -64,39 +79,40 @@ export const useActionsData = (filteredStatus: string | null = null, filteredTyp
       }
 
       // Process the data to create a list of actions
-      const processedActions = data.flatMap(lead => {
-        const leadActions = [];
-        
+      const processedActions: ActionData[] = [];
+      
+      for (const lead of data) {
         if (lead.action_history && Array.isArray(lead.action_history)) {
           for (const action of lead.action_history) {
-            // Create an action with lead information
-            const actionData: ActionData = {
-              id: action.id,
-              leadId: lead.id,
-              leadName: lead.name,
-              leadEmail: lead.email,
-              leadPhone: lead.phone,
-              actionType: action.actionType,
-              scheduledDate: action.scheduledDate,
-              completedDate: action.completedDate,
-              notes: action.notes,
-              assignedToId: lead.assigned_to,
-              createdAt: action.createdAt || lead.created_at,
-              assignedToName: ''
-            };
+            // S'assurer que action est un objet et pas une chaîne
+            if (typeof action === 'object' && action !== null) {
+              // Create an action with lead information
+              const actionData: ActionData = {
+                id: action.id as string,
+                leadId: lead.id,
+                leadName: lead.name,
+                leadEmail: lead.email,
+                leadPhone: lead.phone,
+                actionType: action.actionType as string,
+                scheduledDate: action.scheduledDate as string,
+                completedDate: action.completedDate as string | null,
+                notes: action.notes as string | undefined,
+                assignedToId: lead.assigned_to,
+                createdAt: action.createdAt as string || lead.created_at,
+                assignedToName: ''
+              };
 
-            // Add the team member name if available
-            const teamMember = teamMembers.find(tm => tm.id === lead.assigned_to);
-            if (teamMember) {
-              actionData.assignedToName = teamMember.name;
+              // Add the team member name if available
+              const teamMember = teamMembers.find(tm => tm.id === lead.assigned_to);
+              if (teamMember) {
+                actionData.assignedToName = teamMember.name;
+              }
+
+              processedActions.push(actionData);
             }
-
-            leadActions.push(actionData);
           }
         }
-        
-        return leadActions;
-      });
+      }
 
       // Apply filters if needed
       let filteredActions = processedActions;
