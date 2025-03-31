@@ -75,29 +75,37 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        {phone && <>
-            <a href={`tel:${phone}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Appeler">
+      <div className="flex flex-col items-end gap-2">
+        <div className="flex items-center gap-2">
+          {phone && <>
+              <a href={`tel:${phone}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Appeler">
+                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                  <Phone className="h-4 w-4" />
+                </div>
+              </a>
+              <button onClick={handleWhatsAppClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Contacter via WhatsApp">
+                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                  <img 
+                    src="/lovable-uploads/bf1a6b76-83f4-46cb-bb39-25f80e1c5289.png" 
+                    alt="WhatsApp"
+                    className="h-4 w-4"
+                  />
+                </div>
+              </button>
+            </>}
+          {email && <a href={`mailto:${email}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Envoyer un email">
               <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-                <Phone className="h-4 w-4" />
+                <Mail className="h-4 w-4" />
               </div>
-            </a>
-            <button onClick={handleWhatsAppClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Contacter via WhatsApp">
-              <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-                <img 
-                  src="/lovable-uploads/bf1a6b76-83f4-46cb-bb39-25f80e1c5289.png" 
-                  alt="WhatsApp"
-                  className="h-4 w-4"
-                />
-              </div>
-            </button>
-          </>}
-        {email && <a href={`mailto:${email}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Envoyer un email">
-            <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-              <Mail className="h-4 w-4" />
-            </div>
-          </a>}
-        {tags && tags.length > 0 && <TagBadge tag={tags[0]} />}
+            </a>}
+        </div>
+        {tags && tags.length > 0 && (
+          <div className="flex flex-wrap justify-end gap-1 max-w-[150px]">
+            {tags.map((tag, index) => (
+              <TagBadge key={`${tag}-${index}`} tag={tag} className="text-xs py-0.5" />
+            ))}
+          </div>
+        )}
       </div>
     </div>;
 };
