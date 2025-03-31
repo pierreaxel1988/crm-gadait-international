@@ -6,25 +6,24 @@ import { toast } from '@/hooks/use-toast';
 import { COUNTRIES } from '@/utils/countries';
 import { deriveNationalityFromCountry, countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
 import FormInput from '../FormInput';
+
 interface MobileGeneralInfoSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
   countries?: Country[];
   sources?: LeadSource[];
 }
+
 const MobileGeneralInfoSection = ({
   lead,
   onDataChange,
   countries = COUNTRIES,
   sources = []
 }: MobileGeneralInfoSectionProps) => {
-  // State pour gérer le code pays
   const [phoneCountryCode, setPhoneCountryCode] = useState('+33');
+  const [showContactPaste, setShowContactPaste] = useState(false);
+  const [contactText, setContactText] = useState('');
 
-  // Create a reference to the form data
-  const formData = lead;
-
-  // Create a handler function that wraps onDataChange
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const {
       name,
@@ -35,7 +34,6 @@ const MobileGeneralInfoSection = ({
     });
   };
 
-  // Auto-set nationality when country changes
   useEffect(() => {
     if (formData.taxResidence && !formData.nationality) {
       const derivedNationality = deriveNationalityFromCountry(formData.taxResidence);
@@ -47,10 +45,8 @@ const MobileGeneralInfoSection = ({
     }
   }, [formData.taxResidence]);
 
-  // Fonction pour extraire le code pays du numéro de téléphone existant
   useEffect(() => {
     if (formData.phone) {
-      // Rechercher un code pays au début du numéro
       const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
       const foundCode = countryCodes.find(code => formData.phone?.startsWith(code));
       if (foundCode) {
@@ -59,7 +55,6 @@ const MobileGeneralInfoSection = ({
     }
   }, [formData.phone]);
 
-  // Mapping des codes pays vers les pays
   const countryCodeMapping: Record<string, string> = {
     '+33': 'France',
     '+44': 'United Kingdom',
@@ -83,15 +78,12 @@ const MobileGeneralInfoSection = ({
     '+20': 'Egypt'
   };
 
-  // Gérer le changement de code pays
   const handlePhoneCodeChange = (code: string) => {
     setPhoneCountryCode(code);
 
-    // Extraire le numéro de téléphone sans code pays
     let phoneNumber = formData.phone || '';
     const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
 
-    // Supprimer tout code pays existant
     for (const existingCode of countryCodes) {
       if (phoneNumber.startsWith(existingCode)) {
         phoneNumber = phoneNumber.substring(existingCode.length).trim();
@@ -99,37 +91,29 @@ const MobileGeneralInfoSection = ({
       }
     }
 
-    // Mettre à jour le numéro avec le nouveau code pays
     const formattedPhone = phoneNumber ? `${code} ${phoneNumber}` : "";
 
-    // Créer un objet pour les mises à jour
     const updates: Partial<LeadDetailed> = {
       phone: formattedPhone
     };
 
-    // Si un pays correspond au code pays, mettre à jour le pays de résidence et la nationalité
     if (countryCodeMapping[code]) {
       const country = countryCodeMapping[code];
 
-      // Toujours mettre à jour le pays de résidence
       updates.taxResidence = country;
 
-      // Dériver la nationalité du pays
       const nationality = deriveNationalityFromCountry(country);
       if (nationality) {
         updates.nationality = nationality;
       }
     }
 
-    // Appliquer toutes les mises à jour
     onDataChange(updates);
   };
 
-  // Adapter la valeur du téléphone pour l'affichage dans le champ
   const getPhoneValueWithoutCode = () => {
     if (!formData.phone) return '';
 
-    // Rechercher et supprimer le code pays du numéro de téléphone
     const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
     let phoneNumber = formData.phone;
     for (const code of countryCodes) {
@@ -140,11 +124,6 @@ const MobileGeneralInfoSection = ({
     return formData.phone;
   };
 
-  // State to handle the contact info textarea for quick paste
-  const [showContactPaste, setShowContactPaste] = useState(false);
-  const [contactText, setContactText] = useState('');
-
-  // Function to parse pasted contact information
   const parseContactInfo = () => {
     if (!contactText.trim()) {
       toast({
@@ -155,48 +134,70 @@ const MobileGeneralInfoSection = ({
       return;
     }
 
-    // Split by new lines
     const lines = contactText.split('\n').filter(line => line.trim().length > 0);
 
-    // Extract data based on position and patterns
     let name = '';
     let email = '';
     let phone = '';
-    lines.forEach(line => {
-      const trimmedLine = line.trim();
+    let language = '';
 
-      // Check if line contains an email (has @ symbol)
-      if (trimmedLine.includes('@')) {
-        email = trimmedLine;
+    const nameMatch = contactText.match(/Name\s*:?\s*([^\r\n]+)/i);
+    const emailMatch = contactText.match(/e-?mail\s*:?\s*([^\r\n]+)/i);
+    const phoneMatch = contactText.match(/Phone\s*:?\s*([^\r\n]+)/i) || 
+                      contactText.match(/Tel(?:ephone)?\s*:?\s*([^\r\n]+)/i);
+    const languageMatch = contactText.match(/Language\s*:?\s*([^\r\n]+)/i);
+
+    if (nameMatch && nameMatch[1]) {
+      name = nameMatch[1].trim();
+    }
+    
+    if (emailMatch && emailMatch[1]) {
+      email = emailMatch[1].trim();
+    }
+    
+    if (phoneMatch && phoneMatch[1]) {
+      phone = phoneMatch[1].trim();
+      
+      const codeMatch = phone.match(/^\+\d+/);
+      if (codeMatch && codeMatch[0]) {
+        setPhoneCountryCode(codeMatch[0]);
       }
-      // Check if line contains phone number (has digits and possibly +)
-      else if (/[\d\+]/.test(trimmedLine) && (trimmedLine.includes('+') || trimmedLine.includes(' '))) {
-        phone = trimmedLine;
+    }
 
-        // Tenter d'extraire un code pays s'il existe
-        const codeMatch = phone.match(/^\+\d+/);
-        if (codeMatch && codeMatch[0]) {
-          setPhoneCountryCode(codeMatch[0]);
+    if (languageMatch && languageMatch[1]) {
+      language = languageMatch[1].trim();
+    }
+    
+    if (!name && !email && !phone) {
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+
+        if (trimmedLine.includes('@')) {
+          email = trimmedLine;
         }
-      }
-      // If not email or phone, consider it as name
-      else if (!name) {
-        name = trimmedLine;
-      }
-    });
+        else if (/[\d\+]/.test(trimmedLine) && (trimmedLine.includes('+') || trimmedLine.includes(' '))) {
+          phone = trimmedLine;
 
-    // Create updates to the form data
+          const codeMatch = phone.match(/^\+\d+/);
+          if (codeMatch && codeMatch[0]) {
+            setPhoneCountryCode(codeMatch[0]);
+          }
+        }
+        else if (!name) {
+          name = trimmedLine;
+        }
+      });
+    }
+
     const updates: Partial<LeadDetailed> = {};
     if (name) updates.name = name;
     if (email) updates.email = email;
     if (phone) updates.phone = phone;
 
-    // Apply updates if any
     if (Object.keys(updates).length > 0) {
       onDataChange(updates);
     }
 
-    // Hide the paste area and show a success toast
     setShowContactPaste(false);
     setContactText('');
     toast({
@@ -205,11 +206,9 @@ const MobileGeneralInfoSection = ({
     });
   };
 
-  // Gérer les changements spécifiques au champ téléphone
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const phoneNumber = e.target.value;
 
-    // Si le champ est vide, effacer complètement le numéro de téléphone
     if (!phoneNumber) {
       onDataChange({
         phone: ''
@@ -217,25 +216,20 @@ const MobileGeneralInfoSection = ({
       return;
     }
 
-    // Sinon, ajouter le code pays actuel au numéro
     const formattedPhone = `${phoneCountryCode} ${phoneNumber}`;
     onDataChange({
       phone: formattedPhone
     });
   };
 
-  // Prepare the available sources list
   const availableSources: LeadSource[] = sources.length > 0 ? sources : ["Site web", "Réseaux sociaux", "Portails immobiliers", "Network", "Repeaters", "Recommandations", "Apporteur d'affaire", "Idealista", "Le Figaro", "Properstar", "Property Cloud", "L'express Property"];
 
-  // Function to get country flag emoji
   const getCountryFlag = (country: string): string => {
-    // Use emoji country flags
     const countryToFlag = (countryCode: string) => {
       const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
       return String.fromCodePoint(...codePoints);
     };
 
-    // Map country names to ISO 3166-1 alpha-2 codes
     const countryNameToCode: Record<string, string> = {
       'Afghanistan': 'AF',
       'Albania': 'AL',
@@ -436,6 +430,7 @@ const MobileGeneralInfoSection = ({
     const code = countryNameToCode[country];
     return code ? countryToFlag(code) : '🌍';
   };
+
   return <div className="space-y-5 py-4 my-[10px]">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800">Détails de contact</h3>
@@ -452,7 +447,13 @@ const MobileGeneralInfoSection = ({
           <textarea className="w-full p-2 text-sm border rounded-md h-24 font-futura" placeholder="Exemple:
 Fatiha Mohamed
 +34 644 15 78 61
-fmohamed01@cuatrocaminos.net" value={contactText} onChange={e => setContactText(e.target.value)} />
+fmohamed01@cuatrocaminos.net
+
+ou format:
+Name : Elite Property Find
+e-mail : info@elitepropertyfind.com
+Phone : 661592992
+Language : Spanish" value={contactText} onChange={e => setContactText(e.target.value)} />
           <div className="flex justify-end">
             <Button type="button" size="sm" onClick={parseContactInfo} className="text-xs font-futura uppercase tracking-wide">
               Extraire
@@ -496,4 +497,5 @@ fmohamed01@cuatrocaminos.net" value={contactText} onChange={e => setContactText(
       </div>
     </div>;
 };
+
 export default MobileGeneralInfoSection;
