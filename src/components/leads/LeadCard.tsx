@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Mail, MapPin, Phone, MessageSquare, User } from 'lucide-react';
+import { Mail, MapPin, Phone, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import StatusBadge, { LeadStatus } from '@/components/common/StatusBadge';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
@@ -112,7 +112,11 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
                 className="h-7 w-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                 aria-label="Contacter via WhatsApp"
               >
-                <MessageSquare className="h-3.5 w-3.5" />
+                <img 
+                  src="/lovable-uploads/bf1a6b76-83f4-46cb-bb39-25f80e1c5289.png" 
+                  alt="WhatsApp"
+                  className="h-3.5 w-3.5"
+                />
               </button>
             </div>
           )}
