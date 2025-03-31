@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Sheet } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,6 +6,7 @@ import MobileColumnList from './mobile/MobileColumnList';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { PipelineType } from '@/types/lead';
+import { Filter, ListFilter, PlusCircle, RotateCcw, Search, X } from 'lucide-react';
 
 interface MobilePipelineViewProps {
   activeTab: string;
