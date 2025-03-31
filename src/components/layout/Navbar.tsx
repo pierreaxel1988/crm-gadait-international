@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Bell, LogOut, Menu, Moon, Search, Shield, Sun, User, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -30,7 +30,6 @@ const Navbar = ({
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
   const {
     user,
     signOut
@@ -88,7 +87,6 @@ const Navbar = ({
     try {
       await signOut();
       toast.success('Successfully signed out');
-      navigate('/auth');
     } catch (error) {
       toast.error('Error signing out');
     }
@@ -184,11 +182,7 @@ const Navbar = ({
                 </span>
               </button>
               
-              <button 
-                onClick={handleSignOut} 
-                className="rounded-md p-1 md:p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200 ml-1" 
-                title="Sign out"
-              >
+              <button onClick={handleSignOut} className="rounded-md p-1 md:p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200 ml-1" title="Sign out">
                 <LogOut size={isMobile ? 18 : 20} />
               </button>
             </div>
