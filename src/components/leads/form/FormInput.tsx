@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { ChevronDown, Search } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
+import { getCountryFromCode, countryCodeMapping } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 
 interface FormInputProps {
   label: string;
@@ -94,6 +95,39 @@ const FormInput: React.FC<FormInputProps> = ({
     }
   }, [showOptions, searchable]);
 
+  useEffect(() => {
+    if (selectedCountryCode) {
+      const country = getCountryFromCode(selectedCountryCode);
+      
+      if (country && onCountryCodeChange) {
+        onCountryCodeChange(selectedCountryCode);
+      }
+    }
+  }, [selectedCountryCode, onCountryCodeChange]);
+
+  const handleCountryCodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    
+    if (input.startsWith('+')) {
+      const matchedCode = Object.keys(countryCodeMapping).find(code => 
+        code.startsWith(input)
+      );
+      
+      if (matchedCode) {
+        setSelectedCountryCode(matchedCode);
+        setShowCountryDropdown(false);
+        
+        if (onCountryCodeChange) {
+          onCountryCodeChange(matchedCode);
+        }
+      } else {
+        setSelectedCountryCode(input);
+      }
+    } else {
+      setSelectedCountryCode(input);
+    }
+  };
+
   const handleCountryCodeChange = (code: string) => {
     setSelectedCountryCode(code);
     setShowCountryDropdown(false);
@@ -177,6 +211,42 @@ const FormInput: React.FC<FormInputProps> = ({
     }
     
     return phoneNumber;
+  };
+
+  const renderCountryDropdown = () => {
+    return (
+      <div className="absolute z-10 mt-1 w-56 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md">
+        <div className="sticky top-0 bg-background border-b border-input p-2">
+          <input 
+            type="text"
+            className="w-full px-2 py-1 text-sm border rounded"
+            placeholder="Rechercher un pays ou code..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            autoFocus
+          />
+        </div>
+        
+        {filteredCountryCodes.map(country => (
+          <div 
+            key={country.code} 
+            className="px-3 py-2 text-sm hover:bg-accent cursor-pointer flex items-center justify-between font-futura"
+            onClick={() => handleCountryCodeChange(country.code)}
+          >
+            <div className="flex items-center">
+              <span className="mr-2">{country.country}</span>
+            </div>
+            <span className="text-muted-foreground">{country.code}</span>
+          </div>
+        ))}
+        
+        {filteredCountryCodes.length === 0 && (
+          <div className="px-3 py-2 text-sm text-muted-foreground font-futura">
+            Aucun pays ne correspond à votre recherche
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -299,41 +369,18 @@ const FormInput: React.FC<FormInputProps> = ({
                     onClick={() => setShowCountryDropdown(prev => !prev)}
                     style={{ minWidth: `${getCodeButtonWidth()}px` }}
                   >
-                    <span className="text-sm truncate font-medium">{selectedCountryCode}</span>
-                    <ChevronDown className="h-4 w-4 ml-1" />
+                    <input
+                      type="text"
+                      className="bg-transparent border-none outline-none p-0 w-full text-sm"
+                      value={selectedCountryCode}
+                      onChange={handleCountryCodeInputChange}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder="+xx"
+                    />
+                    <ChevronDown className="h-4 w-4 ml-1 flex-shrink-0" />
                   </div>
                   
-                  {showCountryDropdown && (
-                    <div className="absolute z-10 mt-1 w-56 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md">
-                      <div className="sticky top-0 bg-background border-b border-input p-2">
-                        <input 
-                          type="text"
-                          className="w-full px-2 py-1 text-sm border rounded"
-                          placeholder="Rechercher un pays..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          autoFocus
-                        />
-                      </div>
-                      
-                      {filteredCountryCodes.map(country => (
-                        <div 
-                          key={country.code} 
-                          className="px-3 py-2 text-sm hover:bg-accent cursor-pointer flex items-center font-futura"
-                          onClick={() => handleCountryCodeChange(country.code)}
-                        >
-                          <span className="mr-2">{country.country}</span>
-                          <span className="text-muted-foreground">{country.code}</span>
-                        </div>
-                      ))}
-                      
-                      {filteredCountryCodes.length === 0 && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground font-futura">
-                          Aucun pays ne correspond à votre recherche
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  {showCountryDropdown && renderCountryDropdown()}
                 </div>
                 <Input
                   id={name}
@@ -347,6 +394,12 @@ const FormInput: React.FC<FormInputProps> = ({
                   className="rounded-l-none h-9 font-futura"
                 />
               </div>
+              
+              {selectedCountryCode && getCountryFromCode(selectedCountryCode) && (
+                <div className="text-xs text-muted-foreground mt-1 font-futura italic">
+                  Pays détecté: {getCountryFromCode(selectedCountryCode)}
+                </div>
+              )}
             </div>
           ) : (
             <div className="relative">

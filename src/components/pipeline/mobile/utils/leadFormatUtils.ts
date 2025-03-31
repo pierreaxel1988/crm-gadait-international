@@ -4,6 +4,45 @@ import { fr } from 'date-fns/locale';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Currency } from '@/types/lead';
 
+// Mapping entre codes pays et noms de pays
+export const countryCodeMapping: Record<string, string> = {
+  '+33': 'France',
+  '+44': 'United Kingdom',
+  '+1': 'United States',
+  '+34': 'Spain',
+  '+39': 'Italy',
+  '+41': 'Switzerland',
+  '+32': 'Belgium',
+  '+49': 'Germany',
+  '+31': 'Netherlands',
+  '+7': 'Russia',
+  '+971': 'United Arab Emirates',
+  '+966': 'Saudi Arabia',
+  '+965': 'Kuwait',
+  '+974': 'Qatar',
+  '+973': 'Bahrain',
+  '+230': 'Mauritius',
+  '+212': 'Morocco',
+  '+216': 'Tunisia',
+  '+213': 'Algeria',
+  '+20': 'Egypt'
+};
+
+// Fonction pour obtenir le pays à partir du code pays
+export function getCountryFromCode(code: string): string | undefined {
+  return countryCodeMapping[code];
+}
+
+// Fonction pour obtenir le code pays à partir du pays
+export function getCodeFromCountry(country: string): string | undefined {
+  for (const [code, countryName] of Object.entries(countryCodeMapping)) {
+    if (countryName === country) {
+      return code;
+    }
+  }
+  return undefined;
+}
+
 export function formatDate(dateString?: string): string {
   if (!dateString) return '';
   
