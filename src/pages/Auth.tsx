@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +18,6 @@ const Auth = () => {
   const {
     signInWithGoogle
   } = useAuth();
-
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -59,7 +57,6 @@ const Auth = () => {
       setLoading(false);
     }
   };
-
   const handleGoogleAuth = async () => {
     try {
       await signInWithGoogle();
@@ -71,7 +68,6 @@ const Auth = () => {
       });
     }
   };
-
   const createAdminAccount = async () => {
     const adminEmail = "christelle@gadait-international.com";
     const adminPassword = "@Christelle2025";
@@ -120,7 +116,6 @@ const Auth = () => {
       setLoading(false);
     }
   };
-
   return <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80 px-4">
       <div className="mb-8">
         <div className="flex items-center justify-center">
@@ -171,9 +166,7 @@ const Auth = () => {
           
           {/* Admin account creation button - only shown in development for ease of use */}
           {import.meta.env.DEV && <div className="mt-4">
-              <Button onClick={createAdminAccount} variant="outline" className="w-full text-sm" disabled={loading}>
-                Créer compte admin (Christelle)
-              </Button>
+              <Button onClick={createAdminAccount} variant="outline" className="w-full text-sm" disabled={loading}>Créer compte admin </Button>
             </div>}
         </CardContent>
         <CardFooter className="text-center block">
@@ -184,5 +177,4 @@ const Auth = () => {
       </Card>
     </div>;
 };
-
 export default Auth;
