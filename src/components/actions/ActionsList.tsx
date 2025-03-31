@@ -36,8 +36,14 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
 
   if (actions.length === 0) {
     return (
-      <div className="text-center py-10">
-        <p>Aucune action trouvée.</p>
+      <div className="text-center py-10 bg-loro-pearl/5 rounded-lg border border-loro-pearl/20 p-6">
+        <div className="mx-auto h-12 w-12 rounded-full bg-loro-pearl/30 flex items-center justify-center mb-3">
+          <Calendar className="h-6 w-6 text-loro-navy/60" />
+        </div>
+        <p className="text-loro-navy font-futura text-lg tracking-wide">Aucune action trouvée</p>
+        <p className="text-sm text-loro-navy/60 font-futuraLight mt-2">
+          Ajoutez des actions à vos leads pour les voir apparaître ici
+        </p>
       </div>
     );
   }
@@ -100,73 +106,75 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Lead</TableHead>
-          <TableHead>Type</TableHead>
-          <TableHead>Statut</TableHead>
-          <TableHead>Programmé pour</TableHead>
-          <TableHead>Agent</TableHead>
-          <TableHead>Notes</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {actions.map(action => (
-          <TableRow 
-            key={action.id} 
-            className={`cursor-pointer ${
-              action.status === 'overdue' 
-                ? 'bg-[#FFDEE2]/20' 
-                : action.status === 'done'
-                  ? 'bg-gray-50/80 text-gray-600' 
-                  : 'bg-[#F2FCE2]/20'
-            }`}
-            onClick={(e) => handleCardClick(action.leadId, e)}
-          >
-            <TableCell>{action.leadName}</TableCell>
-            <TableCell>
-              <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />
-            </TableCell>
-            <TableCell>{getStatusBadge(action.status)}</TableCell>
-            <TableCell>
-              {action.status === 'done' 
-                ? <div className="flex items-center">
-                    <Check className="h-3.5 w-3.5 mr-1.5 text-green-600" />
-                    <span>{formatDate(action.completedDate)}</span>
-                  </div>
-                : formatDate(action.scheduledDate)
-              }
-            </TableCell>
-            <TableCell>{action.assignedToName}</TableCell>
-            <TableCell className={`max-w-xs truncate ${action.status === 'done' ? 'text-gray-500' : ''}`}>
-              {action.notes || '-'}
-            </TableCell>
-            <TableCell>
-              {action.status !== 'done' ? (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className={getButtonClasses(action.status)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMarkComplete(action.id, action.leadId);
-                  }}
-                >
-                  <Check className="h-4 w-4 mr-1" />
-                  Compléter
-                </Button>
-              ) : (
-                <div className="flex items-center text-sm text-green-600">
-                  <Check className="h-4 w-4 mr-1" /> Terminé
-                </div>
-              )}
-            </TableCell>
+    <div className="rounded-lg border border-gray-200 overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Lead</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Statut</TableHead>
+            <TableHead>Programmé pour</TableHead>
+            <TableHead>Agent</TableHead>
+            <TableHead>Notes</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {actions.map(action => (
+            <TableRow 
+              key={action.id} 
+              className={`cursor-pointer ${
+                action.status === 'overdue' 
+                  ? 'bg-[#FFDEE2]/20' 
+                  : action.status === 'done'
+                    ? 'bg-gray-50/80 text-gray-600' 
+                    : 'bg-[#F2FCE2]/20'
+              }`}
+              onClick={(e) => handleCardClick(action.leadId, e)}
+            >
+              <TableCell>{action.leadName}</TableCell>
+              <TableCell>
+                <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />
+              </TableCell>
+              <TableCell>{getStatusBadge(action.status)}</TableCell>
+              <TableCell>
+                {action.status === 'done' 
+                  ? <div className="flex items-center">
+                      <Check className="h-3.5 w-3.5 mr-1.5 text-green-600" />
+                      <span>{formatDate(action.completedDate)}</span>
+                    </div>
+                  : formatDate(action.scheduledDate)
+                }
+              </TableCell>
+              <TableCell>{action.assignedToName}</TableCell>
+              <TableCell className={`max-w-xs truncate ${action.status === 'done' ? 'text-gray-500' : ''}`}>
+                {action.notes || '-'}
+              </TableCell>
+              <TableCell>
+                {action.status !== 'done' ? (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={getButtonClasses(action.status)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMarkComplete(action.id, action.leadId);
+                    }}
+                  >
+                    <Check className="h-4 w-4 mr-1" />
+                    Compléter
+                  </Button>
+                ) : (
+                  <div className="flex items-center text-sm text-green-600">
+                    <Check className="h-4 w-4 mr-1" /> Terminé
+                  </div>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 

@@ -63,6 +63,7 @@ const ActionsPage = () => {
     const fetchActions = async () => {
       setIsLoading(true);
       try {
+        console.log("Fetching actions...");
         const { data: userData } = await supabase.auth.getUser();
         const currentUserEmail = userData?.user?.email;
         
@@ -75,17 +76,27 @@ const ActionsPage = () => {
         const isUserAdmin = teamMemberData?.is_admin || false;
         const currentUserId = teamMemberData?.id;
         
+        console.log("User admin status:", isUserAdmin);
+        console.log("User ID:", currentUserId);
+        
         let query = supabase
           .from('leads')
-          .select('id, name, action_history, assigned_to, status, phone, email');
+          .select('id, name, action_history, assigned_to, status, phone, email')
+          .order('created_at', { ascending: false });
         
+        // If not admin, only show leads assigned to the current user
         if (!isUserAdmin && currentUserId) {
           query = query.eq('assigned_to', currentUserId);
         }
         
         const { data: leads, error } = await query;
         
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching leads:", error);
+          throw error;
+        }
+        
+        console.log("Fetched leads:", leads?.length);
         
         const { data: members } = await supabase
           .from('team_members')
@@ -97,10 +108,18 @@ const ActionsPage = () => {
         let allActions: ActionItem[] = [];
         
         leads?.forEach((lead: any) => {
+          console.log(`Processing lead ${lead.id} (${lead.name}), action history:`, lead.action_history);
+          
           const leadActions = lead.action_history || [];
           
-          if (Array.isArray(leadActions)) {
+          if (Array.isArray(leadActions) && leadActions.length > 0) {
             leadActions.forEach((action: any) => {
+              // Skip if the action doesn't have required fields
+              if (!action || !action.id || !action.actionType) {
+                console.log("Skipping invalid action:", action);
+                return;
+              }
+              
               let status: ActionStatus = 'todo';
               
               if (action.completedDate) {
@@ -116,6 +135,7 @@ const ActionsPage = () => {
                 }
               }
               
+              // Add the action to our list
               allActions.push({
                 id: action.id,
                 leadId: lead.id,
@@ -132,9 +152,14 @@ const ActionsPage = () => {
                 email: lead.email
               });
             });
+          } else {
+            console.log(`No actions found for lead ${lead.id} (${lead.name})`);
           }
         });
         
+        console.log(`Total actions found: ${allActions.length}`);
+        
+        // Sort actions by priority (overdue first, then todo by date, then done)
         allActions.sort((a, b) => {
           if (a.status !== b.status) {
             if (a.status === 'overdue') return -1;
@@ -200,8 +225,9 @@ const ActionsPage = () => {
       );
     }
     
+    console.log(`Filtered actions: ${filtered.length}`);
     setFilteredActions(filtered);
-  }, [actions, statusFilter, typeFilter, agentFilter, searchTerm]);
+  }, [actions, statusFilter, typeFilter, agentFilter, searchTerm, isAdmin]);
 
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -209,19 +235,24 @@ const ActionsPage = () => {
 
   const handleMarkComplete = async (actionId: string, leadId: string) => {
     try {
+      console.log(`Marking action ${actionId} as complete for lead ${leadId}`);
       const { data: lead, error: leadError } = await supabase
         .from('leads')
         .select('action_history')
         .eq('id', leadId)
         .single();
       
-      if (leadError) throw leadError;
+      if (leadError) {
+        console.error("Error fetching lead:", leadError);
+        throw leadError;
+      }
       
       if (lead && lead.action_history) {
         const actionHistory = lead.action_history as any[];
         const actionIndex = actionHistory.findIndex((a: any) => a.id === actionId);
         
         if (actionIndex !== -1) {
+          console.log(`Found action at index ${actionIndex}:`, actionHistory[actionIndex]);
           actionHistory[actionIndex].completedDate = new Date().toISOString();
           
           const { error: updateError } = await supabase
@@ -232,8 +263,12 @@ const ActionsPage = () => {
             })
             .eq('id', leadId);
           
-          if (updateError) throw updateError;
+          if (updateError) {
+            console.error("Error updating action:", updateError);
+            throw updateError;
+          }
           
+          console.log("Action marked as complete successfully");
           handleRefresh();
           
           window.dispatchEvent(new CustomEvent('action-completed'));
@@ -242,6 +277,8 @@ const ActionsPage = () => {
             title: "Action complétée",
             description: "L'action a été marquée comme complétée."
           });
+        } else {
+          console.error(`Action ${actionId} not found in history`);
         }
       }
     } catch (error) {

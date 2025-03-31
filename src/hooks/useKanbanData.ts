@@ -24,6 +24,7 @@ export interface ExtendedKanbanItem extends KanbanItem {
   pipeline_type?: PipelineType; // Add database field name for compatibility
   currency?: Currency; // Ensure currency is included in the type
   nextFollowUpDate?: string; // Add nextFollowUpDate for action status
+  actionHistory?: Json; // Include actionHistory
 }
 
 interface KanbanColumn {
@@ -66,10 +67,10 @@ export const useKanbanData = (
           return;
         }
         
-        // Direct query to get all leads
+        // Direct query to get all leads with action_history
         const { data: supabaseLeads, error: leadsError } = await supabase
           .from('leads')
-          .select('*')
+          .select('*, action_history')
           .order('created_at', { ascending: false });
           
         if (leadsError) {
@@ -179,7 +180,8 @@ export const useKanbanData = (
             createdAt: lead.created_at,
             importedAt: lead.imported_at,
             external_id: lead.external_id,
-            currency: lead.currency as Currency // Make sure to include the currency
+            currency: lead.currency as Currency, // Make sure to include the currency
+            actionHistory: lead.action_history // Include the action_history
           };
         });
         
