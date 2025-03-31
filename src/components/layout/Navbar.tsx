@@ -4,9 +4,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { User, LogOut } from 'lucide-react';
+import { AdminBadge } from '@/components/ui/admin-badge';
 
 const Navbar = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleAuth = () => {
@@ -28,6 +29,12 @@ const Navbar = () => {
           </Link>
           
           <div className="flex items-center gap-4">
+            {user && (
+              <div className="text-sm mr-2 hidden md:block">
+                {user.email}
+                {isAdmin && <AdminBadge />}
+              </div>
+            )}
             <Button 
               variant="outline" 
               size="sm" 

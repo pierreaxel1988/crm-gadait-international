@@ -18,6 +18,7 @@ import MobileLeadImport from './pages/MobileLeadImport';
 import ActionsPage from './pages/Actions';
 import Calendar from './pages/Calendar';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import Admin from './pages/Admin';
 
 function App() {
   return (
@@ -30,10 +31,11 @@ function App() {
           <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
           <Route path="/leads/:id" element={<ProtectedRoute><LeadDetail /></ProtectedRoute>} />
           <Route path="/leads/new" element={<ProtectedRoute><LeadNew /></ProtectedRoute>} />
-          <Route path="/leads/import" element={<ProtectedRoute><LeadImport /></ProtectedRoute>} />
-          <Route path="/import-lead" element={<ProtectedRoute><MobileLeadImport /></ProtectedRoute>} />
+          <Route path="/leads/import" element={<ProtectedRoute requireAdmin={true}><LeadImport /></ProtectedRoute>} />
+          <Route path="/import-lead" element={<ProtectedRoute requireAdmin={true}><MobileLeadImport /></ProtectedRoute>} />
           <Route path="/actions" element={<ProtectedRoute><ActionsPage /></ProtectedRoute>} />
           <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><Admin /></ProtectedRoute>} />
         </Routes>
         <Toaster />
       </Router>
