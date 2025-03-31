@@ -14,82 +14,6 @@ interface FloatingActionButtonsProps {
   className?: string;
 }
 
-// WhatsApp button component
-const WhatsAppButton = ({ phoneNumber, onClick }: { phoneNumber?: string, onClick: () => void }) => (
-  <div className="flex items-center gap-3 animate-fade-in">
-    <span className="bg-white/90 px-3 py-1 rounded-full text-sm shadow-sm">
-      WhatsApp
-    </span>
-    <button
-      className="h-12 w-12 rounded-full border border-white flex items-center justify-center shadow-md"
-      onClick={onClick}
-      title="WhatsApp"
-    >
-      <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-        <img 
-          src="/lovable-uploads/bf1a6b76-83f4-46cb-bb39-25f80e1c5289.png" 
-          alt="WhatsApp"
-          className="h-5 w-5"
-        />
-      </div>
-    </button>
-  </div>
-);
-
-// Call button component
-const CallButton = ({ onClick }: { onClick: () => void }) => (
-  <div className="flex items-center gap-3 animate-fade-in">
-    <span className="bg-white/90 px-3 py-1 rounded-full text-sm shadow-sm">
-      Appeler
-    </span>
-    <button
-      className="h-12 w-12 rounded-full border border-white flex items-center justify-center shadow-md"
-      onClick={onClick}
-      title="Appeler"
-    >
-      <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-        <Phone className="h-5 w-5" />
-      </div>
-    </button>
-  </div>
-);
-
-// Email button component
-const EmailButton = ({ onClick }: { onClick: () => void }) => (
-  <div className="flex items-center gap-3 animate-fade-in">
-    <span className="bg-white/90 px-3 py-1 rounded-full text-sm shadow-sm">
-      Envoyer un email
-    </span>
-    <button
-      className="h-12 w-12 rounded-full border border-white flex items-center justify-center shadow-md"
-      onClick={onClick}
-      title="Envoyer un email"
-    >
-      <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-        <Mail className="h-5 w-5" />
-      </div>
-    </button>
-  </div>
-);
-
-// Add action button component
-const AddActionButton = ({ onClick }: { onClick: () => void }) => (
-  <div className="flex items-center gap-3 animate-fade-in">
-    <span className="bg-white/90 px-3 py-1 rounded-full text-sm shadow-sm">
-      Ajouter une action
-    </span>
-    <button
-      className="h-12 w-12 rounded-full border border-white flex items-center justify-center shadow-md"
-      onClick={onClick}
-      title="Ajouter une action"
-    >
-      <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-        <Plus className="h-5 w-5" />
-      </div>
-    </button>
-  </div>
-);
-
 const FloatingActionButtons = ({
   onAddAction,
   onCall,
@@ -131,11 +55,6 @@ const FloatingActionButtons = ({
     setIsExpanded(false);
   };
 
-  const handleAddActionClick = () => {
-    onAddAction();
-    setIsExpanded(false);
-  };
-
   if (isMobile) {
     return (
       <div className={cn(
@@ -144,13 +63,86 @@ const FloatingActionButtons = ({
       )}>
         {isExpanded && (
           <>
-            {(phoneNumber || onCall) && <CallButton onClick={handleCall} />}
+            {(phoneNumber || onCall) && (
+              <div className="flex items-center gap-3 animate-fade-in">
+                <span className="bg-white/90 px-3 py-1 rounded-full text-sm shadow-sm">
+                  Appeler
+                </span>
+                <button
+                  className="h-12 w-12 rounded-full border border-white flex items-center justify-center shadow-md"
+                  onClick={handleCall}
+                  title="Appeler"
+                >
+                  <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                    <Phone className="h-5 w-5" />
+                  </div>
+                </button>
+              </div>
+            )}
             
-            {phoneNumber && <WhatsAppButton phoneNumber={phoneNumber} onClick={handleWhatsApp} />}
+            {(phoneNumber) && (
+              <div className="flex items-center gap-3 animate-fade-in">
+                <span className="bg-white/90 px-3 py-1 rounded-full text-sm shadow-sm">
+                  WhatsApp
+                </span>
+                <button
+                  className="h-12 w-12 rounded-full border border-white flex items-center justify-center shadow-md"
+                  onClick={handleWhatsApp}
+                  title="WhatsApp"
+                >
+                  <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className="h-5 w-5" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                    >
+                      <path d="M17.472 10.382a4.527 4.527 0 0 0-3.852-3.853c-1.097-.248-2.215-.124-3.215.35-1 .473-1.801 1.274-2.275 2.275a4.527 4.527 0 0 0 .349 4.37l-.436 1.458A9 9 0 0 1 3 21l1.089-.326a9 9 0 1 1 4.39-13.356c2.023-1.342 4.729-1.252 6.651.671 1.923 1.923 2.013 4.629.671 6.651a9 9 0 1 1-13.356 4.39L2.12 20.118A9 9 0 0 1 17.472 10.382z" />
+                      <path d="M14.5 14.5c-1 1-2.5 1-3.5 0s-1-2.5 0-3.5 2.5-1 3.5 0 1 2.5 0 3.5z" />
+                    </svg>
+                  </div>
+                </button>
+              </div>
+            )}
             
-            {(email || onMail) && <EmailButton onClick={handleMail} />}
+            {(email || onMail) && (
+              <div className="flex items-center gap-3 animate-fade-in">
+                <span className="bg-white/90 px-3 py-1 rounded-full text-sm shadow-sm">
+                  Envoyer un email
+                </span>
+                <button
+                  className="h-12 w-12 rounded-full border border-white flex items-center justify-center shadow-md"
+                  onClick={handleMail}
+                  title="Envoyer un email"
+                >
+                  <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                    <Mail className="h-5 w-5" />
+                  </div>
+                </button>
+              </div>
+            )}
             
-            <AddActionButton onClick={handleAddActionClick} />
+            <div className="flex items-center gap-3 animate-fade-in">
+              <span className="bg-white/90 px-3 py-1 rounded-full text-sm shadow-sm">
+                Ajouter une action
+              </span>
+              <button
+                className="h-12 w-12 rounded-full border border-white flex items-center justify-center shadow-md"
+                onClick={() => {
+                  onAddAction();
+                  setIsExpanded(false);
+                }}
+                title="Ajouter une action"
+              >
+                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                  <Plus className="h-5 w-5" />
+                </div>
+              </button>
+            </div>
           </>
         )}
         
@@ -206,11 +198,19 @@ const FloatingActionButtons = ({
               title="WhatsApp"
             >
               <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-                <img 
-                  src="/lovable-uploads/bf1a6b76-83f4-46cb-bb39-25f80e1c5289.png" 
-                  alt="WhatsApp"
-                  className="h-5 w-5"
-                />
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className="h-5 w-5" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M17.472 10.382a4.527 4.527 0 0 0-3.852-3.853c-1.097-.248-2.215-.124-3.215.35-1 .473-1.801 1.274-2.275 2.275a4.527 4.527 0 0 0 .349 4.37l-.436 1.458A9 9 0 0 1 3 21l1.089-.326a9 9 0 1 1 4.39-13.356c2.023-1.342 4.729-1.252 6.651.671 1.923 1.923 2.013 4.629.671 6.651a9 9 0 1 1-13.356 4.39L2.12 20.118A9 9 0 0 1 17.472 10.382z" />
+                  <path d="M14.5 14.5c-1 1-2.5 1-3.5 0s-1-2.5 0-3.5 2.5-1 3.5 0 1 2.5 0 3.5z" />
+                </svg>
               </div>
             </button>
           )}
