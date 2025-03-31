@@ -100,6 +100,7 @@ const LeadDetailMobile = () => {
           currency={lead.currency}
           desiredLocation={lead.desiredLocation}
           country={lead.country}
+          purchaseTimeframe={lead.purchaseTimeframe}
           onBackClick={handleBackClick}
           onSave={handleSaveWithIndicator}
           isSaving={isSaving}

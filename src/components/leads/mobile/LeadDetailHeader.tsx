@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import CustomButton from '@/components/ui/CustomButton';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
+import { Currency } from '@/types/lead';
 
 interface LeadDetailHeaderProps {
   name: string;
@@ -13,9 +14,10 @@ interface LeadDetailHeaderProps {
   phone?: string;
   email?: string;
   budget?: string;
-  currency?: string;
+  currency?: Currency;
   desiredLocation?: string;
   country?: string;
+  purchaseTimeframe?: string;
   onBackClick: () => void;
   onSave: () => void;
   isSaving: boolean;
@@ -32,6 +34,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   currency,
   desiredLocation,
   country,
+  purchaseTimeframe,
   onBackClick,
   onSave,
   isSaving,
@@ -64,9 +67,11 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           </p>
           <p className="text-xs flex items-center gap-1 text-zinc-800">
             {budget && formatBudget(budget, currency)}
-            {(budget && (desiredLocation || country)) && ' • '}
+            {(budget && (desiredLocation || country || purchaseTimeframe)) && ' • '}
             {desiredLocation}
             {(!desiredLocation && country) ? country : (desiredLocation && country) ? ` (${country})` : ''}
+            {(desiredLocation || country) && purchaseTimeframe && ' • '}
+            {purchaseTimeframe}
           </p>
         </div>
       </div>
