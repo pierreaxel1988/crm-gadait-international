@@ -88,7 +88,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
                   <img 
                     src="/lovable-uploads/bf1a6b76-83f4-46cb-bb39-25f80e1c5289.png" 
                     alt="WhatsApp"
-                    className="h-4 w-4"
+                    className="h-5 w-5"
                   />
                 </div>
               </button>
