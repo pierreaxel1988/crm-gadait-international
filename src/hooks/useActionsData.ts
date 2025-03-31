@@ -1,18 +1,19 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionItem, ActionStatus } from '@/types/actionHistory';
 import { isPast, isToday } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useActionsData = (refreshTrigger: number = 0) => {
   const [actions, setActions] = useState<ActionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { user, isAdmin } = useAuth();
 
   useEffect(() => {
     console.log("useActionsData useEffect triggered", { refreshTrigger });
     fetchActions();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, isAdmin, user]);
 
   const fetchActions = async () => {
     setIsLoading(true);
@@ -21,7 +22,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       // Get team members for assignment information
       const { data: teamMembers, error: teamError } = await supabase
         .from('team_members')
-        .select('id, name');
+        .select('id, name, email');
         
       if (teamError) {
         console.error('Error fetching team members:', teamError);
@@ -30,11 +31,29 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       
       console.log("Team members:", teamMembers);
 
+      // Find current team member
+      let currentTeamMemberId: string | undefined = undefined;
+      
+      if (!isAdmin && user) {
+        const currentTeamMember = teamMembers?.find(member => member.email === user.email);
+        if (currentTeamMember) {
+          currentTeamMemberId = currentTeamMember.id;
+          console.log("Current team member ID:", currentTeamMemberId);
+        }
+      }
+
       // Get all leads with action history
       console.log("Fetching leads with action history...");
-      const { data: leads, error: leadsError } = await supabase
+      let query = supabase
         .from('leads')
         .select('id, name, phone, email, action_history, assigned_to, status');
+      
+      // Filter by assigned_to for non-admin users
+      if (!isAdmin && currentTeamMemberId) {
+        query = query.eq('assigned_to', currentTeamMemberId);
+      }
+
+      const { data: leads, error: leadsError } = await query;
 
       if (leadsError) {
         console.error('Error fetching leads:', leadsError);

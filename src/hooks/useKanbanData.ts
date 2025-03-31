@@ -7,6 +7,7 @@ import { getLeads } from '@/services/leadCore';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import { PropertyType, PurchaseTimeframe, PipelineType, Currency } from '@/types/lead';
 import type { Json } from '@/integrations/supabase/types';
+import { useAuth } from '@/hooks/useAuth';
 
 // Extend KanbanItem with the additional properties needed for filtering
 export interface ExtendedKanbanItem extends KanbanItem {
@@ -41,12 +42,14 @@ export const useKanbanData = (
 ) => {
   const [loadedColumns, setLoadedColumns] = useState<KanbanColumn[]>(columns);
   const [isLoading, setIsLoading] = useState(true);
+  const { user, isAdmin } = useAuth();
 
   useEffect(() => {
     console.log("useKanbanData useEffect triggered");
     console.log("Initial columns:", columns);
     console.log("Pipeline type:", pipelineType);
     console.log("Refresh trigger:", refreshTrigger);
+    console.log("Is admin user:", isAdmin);
     
     const fetchLeads = async () => {
       try {
@@ -67,11 +70,30 @@ export const useKanbanData = (
           return;
         }
         
-        // Direct query to get all leads with action_history
-        const { data: supabaseLeads, error: leadsError } = await supabase
+        // Direct query to get leads with action_history
+        // For non-admins, only fetch leads assigned to them
+        let query = supabase
           .from('leads')
           .select('*, action_history')
           .order('created_at', { ascending: false });
+        
+        // Filter by assigned_to for non-admin users
+        if (!isAdmin && user) {
+          // Find the team member record for the current user
+          const currentTeamMember = teamMembers?.find(member => member.email === user.email);
+          
+          if (currentTeamMember) {
+            console.log("Filtering leads for team member:", currentTeamMember.id);
+            query = query.eq('assigned_to', currentTeamMember.id);
+          } else {
+            console.log("Current user is not a team member, showing no leads");
+            setLoadedColumns(columns.map(col => ({ ...col, items: [] })));
+            setIsLoading(false);
+            return;
+          }
+        }
+        
+        const { data: supabaseLeads, error: leadsError } = await query;
           
         if (leadsError) {
           console.error('Error fetching leads:', leadsError);
@@ -225,7 +247,8 @@ export const useKanbanData = (
     };
 
     fetchLeads();
-  }, [refreshTrigger, columns, pipelineType]);
+  }, [refreshTrigger, columns, pipelineType, isAdmin, user]);
 
   return { loadedColumns, setLoadedColumns, isLoading };
 };
+
