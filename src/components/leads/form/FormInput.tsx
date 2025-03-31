@@ -73,11 +73,22 @@ const FormInput: React.FC<FormInputProps> = ({
   const selectRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
+  const countryDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+      if (
+        selectRef.current && 
+        !selectRef.current.contains(event.target as Node)
+      ) {
         setShowOptions(false);
+      }
+      
+      if (
+        countryDropdownRef.current && 
+        !countryDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowCountryDropdown(false);
       }
     };
 
@@ -107,24 +118,16 @@ const FormInput: React.FC<FormInputProps> = ({
 
   const handleCountryCodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
+    setSelectedCountryCode(input);
     
     if (input.startsWith('+')) {
-      const matchedCode = Object.keys(countryCodeMapping).find(code => 
-        code.startsWith(input)
-      );
+      const country = getCountryFromCode(input);
       
-      if (matchedCode) {
-        setSelectedCountryCode(matchedCode);
-        setShowCountryDropdown(false);
-        
+      if (country) {
         if (onCountryCodeChange) {
-          onCountryCodeChange(matchedCode);
+          onCountryCodeChange(input);
         }
-      } else {
-        setSelectedCountryCode(input);
       }
-    } else {
-      setSelectedCountryCode(input);
     }
   };
 
@@ -167,9 +170,14 @@ const FormInput: React.FC<FormInputProps> = ({
 
   const filteredCountryCodes = React.useMemo(() => {
     if (!searchQuery) return countryCodes;
-    return countryCodes.filter(country => 
-      country.country.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    
+    return countryCodes.filter(country => {
+      const countryNameMatches = country.country.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const codeMatches = country.code.includes(searchQuery);
+      
+      return countryNameMatches || codeMatches;
+    });
   }, [searchQuery]);
 
   const filteredOptions = React.useMemo(() => {
@@ -215,7 +223,10 @@ const FormInput: React.FC<FormInputProps> = ({
 
   const renderCountryDropdown = () => {
     return (
-      <div className="absolute z-10 mt-1 w-56 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md">
+      <div 
+        ref={countryDropdownRef} 
+        className="absolute z-10 mt-1 w-56 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md"
+      >
         <div className="sticky top-0 bg-background border-b border-input p-2">
           <input 
             type="text"
@@ -224,6 +235,7 @@ const FormInput: React.FC<FormInputProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             autoFocus
+            onClick={(e) => e.stopPropagation()}
           />
         </div>
         

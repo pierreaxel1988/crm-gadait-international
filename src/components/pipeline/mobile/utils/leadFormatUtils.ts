@@ -30,7 +30,24 @@ export const countryCodeMapping: Record<string, string> = {
 
 // Fonction pour obtenir le pays à partir du code pays
 export function getCountryFromCode(code: string): string | undefined {
-  return countryCodeMapping[code];
+  // Vérifier d'abord une correspondance exacte
+  if (countryCodeMapping[code]) {
+    return countryCodeMapping[code];
+  }
+  
+  // Si pas de correspondance exacte et que le code commence par +, rechercher un préfixe correspondant
+  if (code.startsWith('+')) {
+    // Trier les codes par longueur décroissante pour trouver le préfixe le plus spécifique d'abord
+    const sortedCodes = Object.keys(countryCodeMapping).sort((a, b) => b.length - a.length);
+    
+    for (const prefix of sortedCodes) {
+      if (code.startsWith(prefix)) {
+        return countryCodeMapping[prefix];
+      }
+    }
+  }
+  
+  return undefined;
 }
 
 // Fonction pour obtenir le code pays à partir du pays
