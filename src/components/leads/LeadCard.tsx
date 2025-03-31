@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Mail, MapPin, Phone, User, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
