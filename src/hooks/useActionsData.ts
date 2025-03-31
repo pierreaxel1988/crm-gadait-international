@@ -1,200 +1,169 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { ActionHistory } from '@/types/actionHistory';
 import { supabase } from '@/integrations/supabase/client';
-import { ActionItem, ActionStatus } from '@/types/actionHistory';
-import { isPast, isToday } from 'date-fns';
-import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
-export const useActionsData = (refreshTrigger: number = 0) => {
-  const [actions, setActions] = useState<ActionItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export const useActionsData = (refreshTrigger = 0, filters: any = {}) => {
+  const [actions, setActions] = useState<ActionHistory[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user, isAdmin } = useAuth();
 
-  useEffect(() => {
-    console.log("useActionsData useEffect triggered", { refreshTrigger });
-    fetchActions();
-  }, [refreshTrigger]);
-
-  const fetchActions = async () => {
-    setIsLoading(true);
+  // Function to update the status of an action to completed
+  const markActionComplete = async (actionId: string) => {
     try {
-      console.log("Fetching team members...");
-      // Get team members for assignment information
-      const { data: teamMembers, error: teamError } = await supabase
-        .from('team_members')
-        .select('id, name');
-        
-      if (teamError) {
-        console.error('Error fetching team members:', teamError);
-        throw teamError;
-      }
+      const { error } = await supabase
+        .from('action_history')
+        .update({ completed: true })
+        .eq('id', actionId);
       
-      console.log("Team members:", teamMembers);
-
-      // Get all leads with action history
-      console.log("Fetching leads with action history...");
-      const { data: leads, error: leadsError } = await supabase
-        .from('leads')
-        .select('id, name, phone, email, action_history, assigned_to, status');
-
-      if (leadsError) {
-        console.error('Error fetching leads:', leadsError);
-        throw leadsError;
-      }
-
-      console.log(`Fetched ${leads?.length || 0} leads`);
-      
-      // Extract all actions from leads
-      const allActions: ActionItem[] = [];
-      
-      leads?.forEach(lead => {
-        if (!lead.action_history || !Array.isArray(lead.action_history)) return;
-        
-        lead.action_history.forEach((action: any) => {
-          if (!action || !action.id) return;
-          
-          // Determine action status
-          let status: ActionStatus;
-          if (action.completedDate) {
-            status = 'done';
-          } else if (action.scheduledDate) {
-            const scheduledDate = new Date(action.scheduledDate);
-            if (isPast(scheduledDate) && !isToday(scheduledDate)) {
-              status = 'overdue';
-            } else {
-              status = 'todo';
-            }
-          } else {
-            status = 'todo';
-          }
-          
-          // Find assigned team member name
-          const assignedTeamMember = teamMembers?.find(tm => tm.id === lead.assigned_to);
-          
-          allActions.push({
-            id: action.id,
-            leadId: lead.id,
-            leadName: lead.name || 'Lead sans nom',
-            actionType: action.actionType,
-            createdAt: action.createdAt,
-            scheduledDate: action.scheduledDate,
-            completedDate: action.completedDate,
-            notes: action.notes,
-            assignedToId: lead.assigned_to,
-            assignedToName: assignedTeamMember?.name || 'Non assigné',
-            status,
-            phoneNumber: lead.phone,
-            email: lead.email
-          });
-        });
-      });
-      
-      console.log(`Extracted ${allActions.length} actions`);
-
-      // Sort actions by status (overdue first, then todo, then done)
-      // and then by scheduled date
-      const sortedActions = allActions.sort((a, b) => {
-        // Priority: 1. overdue, 2. todo, 3. done
-        const statusPriority = { 'overdue': 0, 'todo': 1, 'done': 2 };
-        if (statusPriority[a.status] !== statusPriority[b.status]) {
-          return statusPriority[a.status] - statusPriority[b.status];
-        }
-        
-        // Secondary sort by date
-        const dateA = a.status === 'done' 
-          ? (a.completedDate ? new Date(a.completedDate) : new Date())
-          : (a.scheduledDate ? new Date(a.scheduledDate) : new Date());
-          
-        const dateB = b.status === 'done'
-          ? (b.completedDate ? new Date(b.completedDate) : new Date())
-          : (b.scheduledDate ? new Date(b.scheduledDate) : new Date());
-          
-        return dateA.getTime() - dateB.getTime();
-      });
-
-      setActions(sortedActions);
-    } catch (error) {
-      console.error('Error fetching actions:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de charger les actions."
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const markActionComplete = async (actionId: string, leadId: string) => {
-    try {
-      // First get the lead to update its action history
-      const { data: lead, error: leadError } = await supabase
-        .from('leads')
-        .select('action_history')
-        .eq('id', leadId)
-        .single();
-        
-      if (leadError) {
-        console.error('Error fetching lead for action completion:', leadError);
-        throw leadError;
-      }
-      
-      if (!lead || !lead.action_history) {
-        throw new Error('Lead or action history not found');
-      }
-      
-      // Update the action in the action history
-      const updatedActionHistory = lead.action_history.map((action: any) => {
-        if (action.id === actionId) {
-          return {
-            ...action,
-            completedDate: new Date().toISOString()
-          };
-        }
-        return action;
-      });
-      
-      // Update the lead with the new action history
-      const { error: updateError } = await supabase
-        .from('leads')
-        .update({ action_history: updatedActionHistory })
-        .eq('id', leadId);
-        
-      if (updateError) {
-        console.error('Error updating action:', updateError);
-        throw updateError;
-      }
+      if (error) throw error;
       
       // Update the local state
       setActions(prevActions => 
         prevActions.map(action => 
-          action.id === actionId
-            ? { ...action, status: 'done', completedDate: new Date().toISOString() }
+          action.id === actionId 
+            ? { ...action, completed: true } 
             : action
         )
       );
       
-      toast({
-        title: "Action complétée",
-        description: "L'action a été marquée comme terminée."
-      });
-      
-      // Refetch to ensure we have the latest data
-      fetchActions();
-      
+      return true;
     } catch (error) {
-      console.error('Error marking action as complete:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de marquer l'action comme terminée."
-      });
+      console.error('Error marking action complete:', error);
+      return false;
     }
   };
 
-  return { 
-    actions, 
-    isLoading, 
-    refreshActions: fetchActions,
-    markActionComplete
-  };
+  // Function to fetch actions data from Supabase
+  const fetchActions = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      let query = supabase
+        .from('action_history')
+        .select(`
+          *,
+          lead:lead_id (
+            id,
+            name,
+            email,
+            phone,
+            status,
+            tags,
+            currency,
+            budget,
+            budgetMin,
+            desiredLocation,
+            propertyType,
+            assignedTo,
+            source
+          ),
+          assigned_users:action_assigned_users (
+            user_id,
+            user:user_id (
+              id,
+              email,
+              full_name
+            )
+          )
+        `)
+        .order('scheduledDate', { ascending: true });
+      
+      // Apply filters if provided
+      if (filters) {
+        // Filter by type
+        if (filters.type && filters.type.length > 0) {
+          query = query.in('type', filters.type);
+        }
+        
+        // Filter by status
+        if (filters.status === 'completed') {
+          query = query.eq('completed', true);
+        } else if (filters.status === 'pending') {
+          query = query.eq('completed', false);
+        }
+        
+        // Filter by date range
+        if (filters.dateRange?.from) {
+          query = query.gte('scheduledDate', filters.dateRange.from);
+        }
+        if (filters.dateRange?.to) {
+          query = query.lte('scheduledDate', filters.dateRange.to);
+        }
+        
+        // Filter by agent (assigned user)
+        if (filters.agent && filters.agent.length > 0) {
+          query = query.in('assignedTo', filters.agent);
+        }
+        
+        // Filter by lead status
+        if (filters.leadStatus && filters.leadStatus.length > 0) {
+          // This is a bit tricky as we need to filter on the nested lead object
+          // We might need to handle this post-fetch
+        }
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      // Process the data to include the assigned users information
+      let processedActions = data?.map(action => {
+        // Extract assigned users information
+        const assignedUsers = action.assigned_users?.map((au: any) => ({
+          id: au.user?.id,
+          email: au.user?.email,
+          fullName: au.user?.full_name
+        })) || [];
+
+        // Return the action with assigned users
+        return {
+          ...action,
+          assignedUsers,
+          // Remove the raw assigned_users data to clean up the object
+          assigned_users: undefined
+        };
+      }) || [];
+
+      // If not admin, filter actions to only show those assigned to the current user
+      if (!isAdmin && user) {
+        processedActions = processedActions.filter(action => {
+          if (!action.assignedTo) return false;
+          
+          // Check if assignedTo is an array
+          if (Array.isArray(action.assignedTo)) {
+            return action.assignedTo.some(id => id === user.id);
+          }
+          
+          // If it's a string, check direct equality
+          return action.assignedTo === user.id;
+        });
+      }
+
+      // Apply post-fetch filter for lead status if needed
+      if (filters.leadStatus && filters.leadStatus.length > 0) {
+        processedActions = processedActions.filter(action => 
+          action.lead && filters.leadStatus.includes(action.lead.status)
+        );
+      }
+
+      setActions(processedActions);
+    } catch (err) {
+      console.error('Error fetching actions:', err);
+      setError('Failed to fetch actions');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filters, user, isAdmin]);
+
+  useEffect(() => {
+    fetchActions();
+  }, [fetchActions, refreshTrigger]);
+
+  return { actions, isLoading, error, markActionComplete, refreshActions: fetchActions };
 };
