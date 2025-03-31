@@ -17,8 +17,6 @@ import LeadImport from './pages/LeadImport';
 import MobileLeadImport from './pages/MobileLeadImport';
 import ActionsPage from './pages/Actions';
 import Calendar from './pages/Calendar';
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import Admin from './pages/Admin';
 
 function App() {
   return (
@@ -26,16 +24,15 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/pipeline" />} />
+          <Route path="/pipeline" element={<Pipeline />} />
+          <Route path="/leads" element={<LeadsPage />} />
+          <Route path="/leads/:id" element={<LeadDetail />} />
+          <Route path="/leads/new" element={<LeadNew />} />
+          <Route path="/leads/import" element={<LeadImport />} />
+          <Route path="/import-lead" element={<MobileLeadImport />} />
+          <Route path="/actions" element={<ActionsPage />} />
+          <Route path="/calendar" element={<Calendar />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/pipeline" element={<ProtectedRoute><Pipeline /></ProtectedRoute>} />
-          <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
-          <Route path="/leads/:id" element={<ProtectedRoute><LeadDetail /></ProtectedRoute>} />
-          <Route path="/leads/new" element={<ProtectedRoute><LeadNew /></ProtectedRoute>} />
-          <Route path="/leads/import" element={<ProtectedRoute requireAdmin={true}><LeadImport /></ProtectedRoute>} />
-          <Route path="/import-lead" element={<ProtectedRoute requireAdmin={true}><MobileLeadImport /></ProtectedRoute>} />
-          <Route path="/actions" element={<ProtectedRoute><ActionsPage /></ProtectedRoute>} />
-          <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
-          <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><Admin /></ProtectedRoute>} />
         </Routes>
         <Toaster />
       </Router>
