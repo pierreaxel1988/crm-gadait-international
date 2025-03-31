@@ -4,7 +4,6 @@ import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { Button } from '@/components/ui/button';
 import { Check, Filter, Plus, RotateCcw } from 'lucide-react';
-import { InputGroup, InputLeftElement } from '@chakra-ui/react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import ActionsList from '@/components/actions/ActionsList';

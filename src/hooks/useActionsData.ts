@@ -143,15 +143,17 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       }
       
       // Update the action in the action history
-      const updatedActionHistory = lead.action_history.map((action: any) => {
-        if (action.id === actionId) {
-          return {
-            ...action,
-            completedDate: new Date().toISOString()
-          };
-        }
-        return action;
-      });
+      const updatedActionHistory = Array.isArray(lead.action_history) 
+        ? lead.action_history.map((action: any) => {
+            if (action.id === actionId) {
+              return {
+                ...action,
+                completedDate: new Date().toISOString()
+              };
+            }
+            return action;
+          })
+        : [];
       
       // Update the lead with the new action history
       const { error: updateError } = await supabase
