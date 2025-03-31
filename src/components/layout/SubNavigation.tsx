@@ -49,18 +49,29 @@ const SubNavigation = () => {
       </div>;
   }
 
-  // Desktop navigation - updated to match mobile styling
+  // Desktop navigation - centered with better spacing and consistent styling with mobile
   return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
       <div className="bg-loro-50 py-2">
-        <NavigationMenu className="justify-start mx-auto px-2">
-          <NavigationMenuList className="space-x-2">
-            {navigationItems.map(item => <NavigationMenuItem key={item.name}>
-                <Link to={item.path} className={cn("flex items-center justify-center h-10 w-10 rounded-md transition-transform hover:scale-110 duration-200", location.pathname === item.path ? "text-loro-terracotta bg-loro-white" : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70")}>
-                  <item.icon className="h-5 w-5" />
-                </Link>
-              </NavigationMenuItem>)}
-          </NavigationMenuList>
-        </NavigationMenu>
+        <div className="max-w-screen-xl mx-auto px-4">
+          <NavigationMenu className="mx-auto flex justify-center w-full">
+            <NavigationMenuList className="flex space-x-4 md:space-x-6 lg:space-x-8">
+              {navigationItems.map(item => <NavigationMenuItem key={item.name}>
+                  <Link 
+                    to={item.path} 
+                    className={cn(
+                      "flex items-center justify-center rounded-md transition-transform hover:scale-110 duration-200 px-3 py-2",
+                      location.pathname === item.path 
+                        ? "text-loro-terracotta bg-loro-white" 
+                        : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70"
+                    )}
+                  >
+                    {item.icon && <item.icon className="h-5 w-5 mr-2" />}
+                    <span className="font-medium text-sm">{item.name}</span>
+                  </Link>
+                </NavigationMenuItem>)}
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
       </div>
     </div>;
 };

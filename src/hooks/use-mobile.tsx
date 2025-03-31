@@ -55,6 +55,15 @@ export const useMediaQuery = (query: string): boolean => {
   return matches
 }
 
+// Additional breakpoints for more granular responsive design
+export function useBreakpoint() {
+  const isMobile = useIsMobile()
+  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)")
+  const isDesktop = useMediaQuery("(min-width: 1024px)")
+  
+  return { isMobile, isTablet, isDesktop }
+}
+
 // Bonus: Add a hook for detecting touch-based devices
 export function useTouchDevice() {
   const [isTouch, setIsTouch] = React.useState(false)
