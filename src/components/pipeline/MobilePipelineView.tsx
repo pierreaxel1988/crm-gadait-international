@@ -53,7 +53,7 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   };
   
   return (
-    <div className="flex flex-col h-[calc(100vh-80px)]">
+    <div className="flex flex-col min-h-screen">
       <MobilePipelineHeader 
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -69,23 +69,25 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3">
-        <TabsList className="w-full bg-gray-100 p-0.5 rounded-xl h-11">
-          <TabsTrigger 
-            value="purchase" 
-            className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-          >
-            Achat
-          </TabsTrigger>
-          <TabsTrigger 
-            value="rental" 
-            className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-          >
-            Location
-          </TabsTrigger>
-        </TabsList>
+        <div className="bg-white rounded-lg overflow-hidden">
+          <TabsList className="w-full grid grid-cols-2 h-12">
+            <TabsTrigger 
+              value="purchase" 
+              className="rounded-none text-base font-normal data-[state=active]:border-b-2 data-[state=active]:border-black"
+            >
+              Achat
+            </TabsTrigger>
+            <TabsTrigger 
+              value="rental" 
+              className="rounded-none text-base font-normal data-[state=active]:border-b-2 data-[state=active]:border-black"
+            >
+              Location
+            </TabsTrigger>
+          </TabsList>
+        </div>
       </Tabs>
 
-      <div className="flex-1 overflow-y-auto mt-3 pb-20 -mx-3 px-3 bg-gray-50">
+      <div className="flex-1 overflow-y-auto mt-2 pb-20">
         <MobileColumnList
           columns={columns}
           activeTab={activeTab as PipelineType}
@@ -108,6 +110,13 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
           />
         </Sheet>
       )}
+      
+      {/* Floating action button */}
+      <div className="fixed bottom-24 right-6 z-50">
+        <button className="bg-black text-white rounded-full h-14 w-14 flex items-center justify-center shadow-lg">
+          <PlusCircle className="h-7 w-7" />
+        </button>
+      </div>
     </div>
   );
 };

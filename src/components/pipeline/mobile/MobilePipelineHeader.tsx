@@ -42,40 +42,30 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
   // Helper function to get team member name by ID
   const getTeamMemberName = (id: string): string => {
     const member = teamMembers.find(member => member.id === id);
-    return member ? member.name : 'Unknown';
+    return member ? member.name : 'Non assigné';
   };
   
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h1 className="tracking-tight text-base font-medium">Pipeline</h1>
+        <h1 className="text-2xl font-medium">Pipeline</h1>
         <div className="flex items-center gap-2">
-          {activeFiltersCount > 0 && (
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="h-9 w-9" 
-              onClick={onClearFilters}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-          <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => navigate('/import-lead')}>
-            <PlusCircle className="h-4 w-4" />
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-10 w-10 rounded-md p-0 flex items-center justify-center border border-gray-300" 
+            onClick={() => navigate('/import-lead')}
+          >
+            <PlusCircle className="h-5 w-5" />
           </Button>
           <Button 
             variant={activeFiltersCount > 0 ? "default" : "outline"} 
             size="sm" 
             onClick={toggleFilters} 
-            className="h-9 relative font-normal text-sm"
+            className="h-10 px-4 flex items-center rounded-md border border-gray-300 bg-white text-black"
           >
-            <SlidersHorizontal className="h-4 w-4 mr-1" />
+            <SlidersHorizontal className="h-4 w-4 mr-2" />
             Filtres
-            {activeFiltersCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-white text-primary rounded-full h-5 w-5 flex items-center justify-center text-xs">
-                {activeFiltersCount}
-              </span>
-            )}
           </Button>
         </div>
       </div>
@@ -86,23 +76,28 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
         <Input 
           type="search" 
           placeholder="Rechercher un lead..." 
-          className="pl-9 pr-16 bg-gray-100 border-0" 
+          className="pl-9 pr-10 py-2 bg-gray-100 border-0 rounded-md" 
           value={searchTerm} 
           onChange={e => setSearchTerm(e.target.value)} 
         />
         
-        <div className="absolute right-2 top-1/2 -translate-y-1/2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-7 w-7" 
-            onClick={handleRefresh} 
-            disabled={isRefreshing}
-          >
-            <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span className="sr-only">Refresh</span>
-          </Button>
-        </div>
+        {isRefreshing ? (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            <RefreshCcw className="h-4 w-4 animate-spin" />
+          </div>
+        ) : (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-7 w-7" 
+              onClick={handleRefresh}
+            >
+              <RefreshCcw className="h-4 w-4" />
+              <span className="sr-only">Actualiser</span>
+            </Button>
+          </div>
+        )}
       </div>
       
       {/* Display active filters */}

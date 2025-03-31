@@ -39,7 +39,7 @@ const Pipeline = () => {
     <>
       <Navbar />
       <SubNavigation />
-      <div className="p-3 md:p-6 bg-white min-h-screen">
+      <div className="p-4 pt-2 md:p-6 bg-white min-h-screen">
         {isMobile ? (
           <MobilePipelineView
             activeTab={activeTab}
