@@ -3,10 +3,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
-import CustomButton from '@/components/ui/CustomButton';
-import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
+import { LeadStatus } from '@/components/common/StatusBadge';
+import { getActionStatusStyle } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 
 interface LeadDetailHeaderProps {
   name: string;
@@ -22,8 +22,9 @@ interface LeadDetailHeaderProps {
   onSave: () => void;
   isSaving: boolean;
   hasChanges: boolean;
-  tags?: LeadTag[];
+  tags?: string[];
   status?: string;
+  nextFollowUpDate?: string;
 }
 
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
@@ -42,6 +43,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   hasChanges,
   tags,
   status,
+  nextFollowUpDate,
 }) => {
   const handlePhoneClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -75,15 +77,22 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   const formattedBudget = budget && currency 
     ? formatBudget(budget, currency) 
     : '';
+    
+  const actionStyle = nextFollowUpDate ? getActionStatusStyle(nextFollowUpDate) : { containerClassName: '' };
   
   return (
-    <div className="flex flex-col bg-loro-sand p-4">
-      <div className="flex items-center justify-between">
+    <div className={`flex flex-col p-4 ${actionStyle.containerClassName}`}>
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-full bg-[#F5F5F0] flex items-center justify-center text-3xl font-medium text-gray-700">
-            {name ? name.charAt(0).toUpperCase() : 'J'}
-          </div>
-          <div>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 rounded-full border-gray-300"
+            onClick={onBackClick}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex flex-col">
             <h1 className="text-xl font-medium text-gray-800">{name}</h1>
             <p className="text-sm text-gray-600">{formattedDate}</p>
           </div>
@@ -107,7 +116,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
               aria-label="WhatsApp"
             >
               <img 
-                src="https://img.icons8.com/?size=100&id=16712&format=png&color=000000" 
+                src="/lovable-uploads/bf1a6b76-83f4-46cb-bb39-25f80e1c5289.png" 
                 alt="WhatsApp" 
                 className="h-5 w-5"
               />
@@ -126,14 +135,14 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
         </div>
       </div>
       
-      <div className="flex flex-wrap gap-2 mt-4">
+      <div className="flex flex-wrap gap-2 mt-2">
         {status && (
           <div className="px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm">
             {status}
           </div>
         )}
         
-        {tags && tags.includes('Call') && (
+        {tags && tags.includes("Call") && (
           <div className="px-4 py-2 bg-pink-100 text-pink-700 rounded-full text-sm">
             Call
           </div>
