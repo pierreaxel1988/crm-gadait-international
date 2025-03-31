@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -127,7 +126,7 @@ const Auth = () => {
       
       <Card className="w-full max-w-md shadow-luxury">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-times text-loro-hazel">
+          <CardTitle className="text-3xl font-futuraLight text-loro-hazel">
             {isSignUp ? 'Créer un compte' : 'Connexion'}
           </CardTitle>
           <CardDescription className="font-times text-chocolate-light">
