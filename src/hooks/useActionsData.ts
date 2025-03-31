@@ -1,169 +1,200 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { ActionItem, ActionStatus } from '@/types/actionHistory';
+import { isPast, isToday } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 
-// Définir l'interface ActionData ici puisqu'il y a une erreur d'import
-interface ActionData {
-  id: string;
-  leadId: string;
-  leadName: string;
-  leadEmail?: string;
-  leadPhone?: string;
-  actionType: string;
-  scheduledDate: string;
-  completedDate?: string | null;
-  notes?: string;
-  assignedToId?: string;
-  assignedToName?: string;
-  createdAt: string;
-}
-
-export const useActionsData = (filteredStatus: string | null = null, filteredType: string | null = null, filteredAgentId: string | null = null) => {
-  const [actionsData, setActionsData] = useState<ActionData[]>([]);
+export const useActionsData = (refreshTrigger: number = 0) => {
+  const [actions, setActions] = useState<ActionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [teamMembers, setTeamMembers] = useState<{id: string, name: string, email: string}[]>([]);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    console.log("useActionsData useEffect triggered", { refreshTrigger });
+    fetchActions();
+  }, [refreshTrigger]);
+
+  const fetchActions = async () => {
     setIsLoading(true);
     try {
-      // Fetch team members for better display
-      const { data: teamData, error: teamError } = await supabase
+      console.log("Fetching team members...");
+      // Get team members for assignment information
+      const { data: teamMembers, error: teamError } = await supabase
         .from('team_members')
-        .select('id, name, email');
-      
+        .select('id, name');
+        
       if (teamError) {
         console.error('Error fetching team members:', teamError);
-        toast({
-          variant: "destructive",
-          title: "Error fetching team members",
-          description: teamError.message
-        });
-        return;
+        throw teamError;
       }
+      
+      console.log("Team members:", teamMembers);
 
-      if (teamData) {
-        setTeamMembers(teamData);
-      }
-
-      // Build the query for leads with their action history
-      let query = supabase
+      // Get all leads with action history
+      console.log("Fetching leads with action history...");
+      const { data: leads, error: leadsError } = await supabase
         .from('leads')
-        .select(`
-          id, 
-          name,
-          email,
-          phone,
-          created_at,
-          assigned_to,
-          action_history
-        `);
+        .select('id, name, phone, email, action_history, assigned_to, status');
 
-      const { data, error } = await query;
-      
-      if (error) {
-        console.error('Error fetching leads with actions:', error);
-        toast({
-          variant: "destructive",
-          title: "Error fetching data",
-          description: error.message
-        });
-        setIsLoading(false);
-        return;
+      if (leadsError) {
+        console.error('Error fetching leads:', leadsError);
+        throw leadsError;
       }
 
-      if (!data || data.length === 0) {
-        setActionsData([]);
-        setIsLoading(false);
-        return;
-      }
-
-      // Process the data to create a list of actions
-      const processedActions: ActionData[] = [];
+      console.log(`Fetched ${leads?.length || 0} leads`);
       
-      for (const lead of data) {
-        if (lead.action_history && Array.isArray(lead.action_history)) {
-          for (const action of lead.action_history) {
-            // S'assurer que action est un objet et pas une chaîne
-            if (typeof action === 'object' && action !== null) {
-              // Fixed TS errors by type checking and adding safe access
-              const actionId = action.id as string || '';
-              const actionType = action.actionType as string || '';
-              const scheduledDate = action.scheduledDate as string || '';
-              const completedDate = action.completedDate as string | null;
-              const notes = action.notes as string | undefined;
-              const createdAt = action.createdAt as string || lead.created_at;
-              
-              // Create an action with lead information
-              const actionData: ActionData = {
-                id: actionId,
-                leadId: lead.id,
-                leadName: lead.name,
-                leadEmail: lead.email,
-                leadPhone: lead.phone,
-                actionType: actionType,
-                scheduledDate: scheduledDate,
-                completedDate: completedDate,
-                notes: notes,
-                assignedToId: lead.assigned_to,
-                createdAt: createdAt,
-                assignedToName: ''
-              };
-
-              // Add the team member name if available
-              const teamMember = teamMembers.find(tm => tm.id === lead.assigned_to);
-              if (teamMember) {
-                actionData.assignedToName = teamMember.name;
-              }
-
-              processedActions.push(actionData);
+      // Extract all actions from leads
+      const allActions: ActionItem[] = [];
+      
+      leads?.forEach(lead => {
+        if (!lead.action_history || !Array.isArray(lead.action_history)) return;
+        
+        lead.action_history.forEach((action: any) => {
+          if (!action || !action.id) return;
+          
+          // Determine action status
+          let status: ActionStatus;
+          if (action.completedDate) {
+            status = 'done';
+          } else if (action.scheduledDate) {
+            const scheduledDate = new Date(action.scheduledDate);
+            if (isPast(scheduledDate) && !isToday(scheduledDate)) {
+              status = 'overdue';
+            } else {
+              status = 'todo';
             }
+          } else {
+            status = 'todo';
           }
-        }
-      }
+          
+          // Find assigned team member name
+          const assignedTeamMember = teamMembers?.find(tm => tm.id === lead.assigned_to);
+          
+          allActions.push({
+            id: action.id,
+            leadId: lead.id,
+            leadName: lead.name || 'Lead sans nom',
+            actionType: action.actionType,
+            createdAt: action.createdAt,
+            scheduledDate: action.scheduledDate,
+            completedDate: action.completedDate,
+            notes: action.notes,
+            assignedToId: lead.assigned_to,
+            assignedToName: assignedTeamMember?.name || 'Non assigné',
+            status,
+            phoneNumber: lead.phone,
+            email: lead.email
+          });
+        });
+      });
+      
+      console.log(`Extracted ${allActions.length} actions`);
 
-      // Apply filters if needed
-      let filteredActions = processedActions;
-      
-      if (filteredStatus) {
-        if (filteredStatus === 'completed') {
-          filteredActions = filteredActions.filter(action => action.completedDate !== null);
-        } else if (filteredStatus === 'pending') {
-          filteredActions = filteredActions.filter(action => action.completedDate === null);
+      // Sort actions by status (overdue first, then todo, then done)
+      // and then by scheduled date
+      const sortedActions = allActions.sort((a, b) => {
+        // Priority: 1. overdue, 2. todo, 3. done
+        const statusPriority = { 'overdue': 0, 'todo': 1, 'done': 2 };
+        if (statusPriority[a.status] !== statusPriority[b.status]) {
+          return statusPriority[a.status] - statusPriority[b.status];
         }
-      }
-      
-      if (filteredType) {
-        filteredActions = filteredActions.filter(action => action.actionType === filteredType);
-      }
-      
-      if (filteredAgentId) {
-        filteredActions = filteredActions.filter(action => action.assignedToId === filteredAgentId);
-      }
-
-      // Sort actions by scheduledDate (most recent first)
-      filteredActions.sort((a, b) => {
-        if (!a.scheduledDate) return 1;
-        if (!b.scheduledDate) return -1;
-        return new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime();
+        
+        // Secondary sort by date
+        const dateA = a.status === 'done' 
+          ? (a.completedDate ? new Date(a.completedDate) : new Date())
+          : (a.scheduledDate ? new Date(a.scheduledDate) : new Date());
+          
+        const dateB = b.status === 'done'
+          ? (b.completedDate ? new Date(b.completedDate) : new Date())
+          : (b.scheduledDate ? new Date(b.scheduledDate) : new Date());
+          
+        return dateA.getTime() - dateB.getTime();
       });
 
-      setActionsData(filteredActions);
-    } catch (err) {
-      console.error('Unexpected error in useActionsData:', err);
+      setActions(sortedActions);
+    } catch (error) {
+      console.error('Error fetching actions:', error);
       toast({
         variant: "destructive",
-        title: "Error fetching actions",
-        description: "An unexpected error occurred."
+        title: "Erreur",
+        description: "Impossible de charger les actions."
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [filteredStatus, filteredType, filteredAgentId]);
+  const markActionComplete = async (actionId: string, leadId: string) => {
+    try {
+      // First get the lead to update its action history
+      const { data: lead, error: leadError } = await supabase
+        .from('leads')
+        .select('action_history')
+        .eq('id', leadId)
+        .single();
+        
+      if (leadError) {
+        console.error('Error fetching lead for action completion:', leadError);
+        throw leadError;
+      }
+      
+      if (!lead || !lead.action_history) {
+        throw new Error('Lead or action history not found');
+      }
+      
+      // Update the action in the action history
+      const updatedActionHistory = lead.action_history.map((action: any) => {
+        if (action.id === actionId) {
+          return {
+            ...action,
+            completedDate: new Date().toISOString()
+          };
+        }
+        return action;
+      });
+      
+      // Update the lead with the new action history
+      const { error: updateError } = await supabase
+        .from('leads')
+        .update({ action_history: updatedActionHistory })
+        .eq('id', leadId);
+        
+      if (updateError) {
+        console.error('Error updating action:', updateError);
+        throw updateError;
+      }
+      
+      // Update the local state
+      setActions(prevActions => 
+        prevActions.map(action => 
+          action.id === actionId
+            ? { ...action, status: 'done', completedDate: new Date().toISOString() }
+            : action
+        )
+      );
+      
+      toast({
+        title: "Action complétée",
+        description: "L'action a été marquée comme terminée."
+      });
+      
+      // Refetch to ensure we have the latest data
+      fetchActions();
+      
+    } catch (error) {
+      console.error('Error marking action as complete:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de marquer l'action comme terminée."
+      });
+    }
+  };
 
-  return { actionsData, isLoading, teamMembers, refreshData: fetchData };
+  return { 
+    actions, 
+    isLoading, 
+    refreshActions: fetchActions,
+    markActionComplete
+  };
 };

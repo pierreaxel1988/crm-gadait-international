@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -22,8 +21,6 @@ import StatusSection from '@/components/leads/form/mobile/StatusSection';
 import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSection';
 import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
 import NotesSection from '@/components/leads/form/mobile/NotesSection';
-import { LeadStatus } from '@/components/common/StatusBadge';
-import { TaskType } from '@/components/kanban/KanbanCard';
 
 const LeadDetailMobile = () => {
   const { id } = useParams<{ id: string }>();
@@ -91,9 +88,6 @@ const LeadDetailMobile = () => {
   
   if (!lead) return null;
   
-  // Find the first incomplete action with a scheduled date
-  const nextAction = lead.actionHistory?.find(action => !action.completedDate && action.scheduledDate);
-  
   return (
     <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
       <div className="fixed top-0 left-0 right-0 bg-white z-40 shadow-sm border-b">
@@ -112,9 +106,6 @@ const LeadDetailMobile = () => {
           isSaving={isSaving}
           hasChanges={hasChanges}
           tags={lead.tags}
-          status={lead.status as LeadStatus}
-          nextFollowUpDate={nextAction?.scheduledDate}
-          taskType={lead.taskType as TaskType}
         />
         
         <LeadDetailTabs defaultTab={activeTab} />

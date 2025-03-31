@@ -1,131 +1,129 @@
 
 import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription, DrawerClose } from '@/components/ui/drawer';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import { LeadDetailed } from '@/types/lead';
-import { TaskType } from '@/components/kanban/KanbanCard';
-import { ActionHistory } from '@/types/actionHistory';
-import { format, isPast, isToday } from 'date-fns';
-import { Calendar, Check, Clock, Plus, Save } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Save, Check, Clock, X, History, ArrowLeft } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { format } from 'date-fns';
 
 interface LeadDetailActionBarProps {
-  lead: LeadDetailed;
   autoSaveEnabled: boolean;
   onAddAction: () => void;
+  lead: LeadDetailed;
+  getActionTypeIcon: any;
   onMarkComplete: (actionId: string) => void;
-  getActionTypeIcon: (type: TaskType) => JSX.Element | null;
-  hasChanges: boolean;
-  isSaving: boolean;
-  onManualSave: () => void;
+  hasChanges?: boolean;
+  isSaving?: boolean;
+  onManualSave?: () => void;
 }
 
-const LeadDetailActionBar = ({
-  lead,
+const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   autoSaveEnabled,
   onAddAction,
-  onMarkComplete,
+  lead,
   getActionTypeIcon,
-  hasChanges,
-  isSaving,
+  onMarkComplete,
+  hasChanges = false,
+  isSaving = false,
   onManualSave
-}: LeadDetailActionBarProps) => {
-  // Find the next action that is not completed
-  const nextAction = lead.actionHistory?.find(action => !action.completedDate && action.scheduledDate);
+}) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   
-  const handleMarkComplete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (nextAction && nextAction.id) {
-      onMarkComplete(nextAction.id);
-    }
+  const handleActionsClick = () => {
+    // Navigate to Actions tab by updating URL search parameters
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('tab', 'actions');
+    navigate(`/leads/${lead.id}?${searchParams.toString()}`, { replace: true });
   };
   
-  const isActionOverdue = (action: ActionHistory) => {
-    if (!action.scheduledDate) return false;
-    
-    const scheduledDate = new Date(action.scheduledDate);
-    return isPast(scheduledDate) && !isToday(scheduledDate);
+  const handleBackToActionsList = () => {
+    // Navigate back to the actions list page
+    navigate('/actions');
   };
   
-  const isActionToday = (action: ActionHistory) => {
-    if (!action.scheduledDate) return false;
-    
-    const scheduledDate = new Date(action.scheduledDate);
-    return isToday(scheduledDate);
-  };
-  
-  const getActionStatusStyle = () => {
-    if (!nextAction || !nextAction.scheduledDate) {
-      return '';
-    }
-    
-    if (isActionOverdue(nextAction)) {
-      return 'border-red-500 bg-red-50';
-    } else if (isActionToday(nextAction)) {
-      return 'border-amber-500 bg-amber-50';
-    } else {
-      return 'border-emerald-500 bg-emerald-50';
-    }
-  };
-  
-  const actionStatusStyle = nextAction ? getActionStatusStyle() : '';
-  
-  const formattedDate = nextAction?.scheduledDate 
-    ? format(new Date(nextAction.scheduledDate), 'dd/MM/yyyy HH:mm')
-    : '';
+  // Check if we're on the actions tab
+  const searchParams = new URLSearchParams(location.search);
+  const currentTab = searchParams.get('tab');
+  const isActionsTab = currentTab === 'actions';
   
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-3 flex justify-between items-center">
-      {nextAction ? (
-        <div 
-          className={`flex-1 p-2 rounded-lg ${actionStatusStyle} flex justify-between items-center`}
-          onClick={handleMarkComplete}
-        >
-          <div className="flex items-center gap-2">
-            <div>
-              {getActionTypeIcon(nextAction.actionType as TaskType)}
-              <div className="flex items-center text-xs text-gray-600 mt-1">
-                <Clock className="h-3 w-3 mr-1" />
-                {formattedDate}
-              </div>
-            </div>
-          </div>
-          
-          <button 
-            className="bg-green-100 p-1.5 rounded-md flex items-center justify-center"
-            onClick={handleMarkComplete}
-            aria-label="Marquer comme terminé"
-          >
-            <Check className="h-4 w-4 text-green-800" />
-          </button>
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex justify-center items-center transition-all animate-[slide-in_0.3s_ease-out] z-50">
+      <div className="flex gap-3 w-full justify-between items-center">
+        <div className="flex items-center">
+          {isActionsTab ? (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="h-8 px-3 transition-all duration-200 active:scale-95 font-futura border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20 flex items-center gap-1"
+              onClick={handleBackToActionsList}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Actions
+            </Button>
+          ) : (
+            <>
+              {autoSaveEnabled ? (
+                <div className="flex items-center" title={isSaving ? "Enregistrement en cours" : hasChanges ? "Modifications en attente" : "Tout est enregistré"}>
+                  {isSaving ? (
+                    <div className="w-5 h-5 text-amber-500 animate-pulse">
+                      <Clock className="h-5 w-5" />
+                    </div>
+                  ) : hasChanges ? (
+                    <div className="w-5 h-5 text-amber-500">
+                      <Clock className="h-5 w-5" />
+                    </div>
+                  ) : (
+                    <div className="w-5 h-5 text-green-500">
+                      <Check className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Button 
+                  onClick={onManualSave} 
+                  size="sm" 
+                  variant="outline" 
+                  className="h-8 px-2 text-xs transition-all duration-200 active:scale-95 font-futura"
+                  disabled={isSaving || !hasChanges}
+                >
+                  {isSaving ? (
+                    <Clock className="h-4 w-4 text-amber-500 animate-pulse" />
+                  ) : hasChanges ? (
+                    <Save className="h-4 w-4" />
+                  ) : (
+                    <Check className="h-4 w-4 text-green-500" />
+                  )}
+                </Button>
+              )}
+            </>
+          )}
         </div>
-      ) : (
-        <div className="flex-1">
-          <button 
-            className="w-full p-2 rounded-lg border border-gray-200 text-gray-600 flex items-center justify-center gap-2"
-            onClick={onAddAction}
+        <div className="flex gap-2">
+          {!isActionsTab && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide flex items-center gap-2 border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20"
+              onClick={handleActionsClick}
+            >
+              <History className="h-4 w-4 text-loro-navy" />
+              Actions
+            </Button>
+          )}
+          <Button 
+            onClick={onAddAction} 
+            className="bg-chocolate-dark hover:bg-chocolate-light transition-all duration-200 active:scale-95 font-futura tracking-wide"
+            size="sm"
+            type="button"
+            aria-label="Ajouter une nouvelle action"
           >
-            <Calendar className="h-4 w-4" />
-            <span>Ajouter une action</span>
-          </button>
+            Nouvelle action
+          </Button>
         </div>
-      )}
-      
-      <div className="ml-2 flex items-center">
-        {hasChanges && (
-          <button
-            className={`p-2 rounded-lg ${isSaving ? 'bg-gray-200' : 'bg-chocolate-dark text-white'} flex items-center justify-center`}
-            onClick={onManualSave}
-            disabled={isSaving}
-          >
-            <Save className="h-5 w-5" />
-          </button>
-        )}
-        
-        <button
-          className="ml-2 p-2 rounded-lg bg-loro-hazel text-white flex items-center justify-center"
-          onClick={onAddAction}
-        >
-          <Plus className="h-5 w-5" />
-        </button>
       </div>
     </div>
   );

@@ -1,19 +1,11 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
-import { formatBudget, getActionStatusStyle } from '@/components/pipeline/mobile/utils/leadFormatUtils';
+import CustomButton from '@/components/ui/CustomButton';
+import TagBadge, { LeadTag } from '@/components/common/TagBadge';
+import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
-import { LeadStatus } from '@/components/common/StatusBadge';
-import { TaskType } from '@/components/kanban/KanbanCard';
-import TagList from '@/components/kanban/card/TagList';
-import ContactInfo from '@/components/kanban/card/ContactInfo';
-import PropertyInfo from '@/components/kanban/card/PropertyInfo';
-import TaskTypeIndicator from '@/components/kanban/card/TaskTypeIndicator';
-import AssignedUser from '@/components/kanban/card/AssignedUser';
-import { isPast, isToday } from 'date-fns';
-
 interface LeadDetailHeaderProps {
   name: string;
   createdAt?: string;
@@ -28,21 +20,9 @@ interface LeadDetailHeaderProps {
   onSave: () => void;
   isSaving: boolean;
   hasChanges: boolean;
-  tags?: string[];
-  status?: LeadStatus;
-  nextFollowUpDate?: string;
-  taskType?: TaskType;
-  propertyType?: string;
-  bedrooms?: number[];
-  assignedTo?: string;
-  url?: string;
-  views?: string[];
-  amenities?: string[];
-  id: string;
+  tags?: LeadTag[];
 }
-
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
-  id,
   name,
   createdAt,
   phone,
@@ -50,109 +30,66 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   budget,
   currency,
   desiredLocation,
+  country,
+  purchaseTimeframe,
   onBackClick,
-  status,
-  nextFollowUpDate,
-  taskType,
-  tags = [],
-  propertyType,
-  bedrooms,
-  assignedTo,
-  url,
-  views,
-  amenities
+  onSave,
+  isSaving,
+  hasChanges,
+  tags
 }) => {
-  // Fonctions de gestion des événements
-  const handleAssignClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // Navigation vers la page d'édition du lead pour assigner un commercial
-    // Implementation serait ici
-  };
-  
-  const handleLinkClick = (e: React.MouseEvent) => {
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (url) {
-      window.open(url, '_blank');
+    if (phone) {
+      const cleanedPhone = phone.replace(/[^\d+]/g, '');
+      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
-  
-  // Fonctions pour déterminer le style en fonction du statut de la tâche
-  const isOverdue = () => {
-    if (!nextFollowUpDate) return false;
-    const followUpDate = new Date(nextFollowUpDate);
-    return isPast(followUpDate) && !isToday(followUpDate);
-  };
-
-  // Déterminer la couleur de fond en fonction du statut de la tâche
-  const getCardBorderClass = () => {
-    if (isOverdue()) {
-      return 'bg-[#FFDEE2]/30'; // Soft pink background for overdue tasks
-    } else if (nextFollowUpDate && isToday(new Date(nextFollowUpDate))) {
-      return 'bg-amber-50'; // Light amber background
-    } else if (nextFollowUpDate) {
-      return 'bg-[#e3f7ed]/80'; // Light green background with 80% opacity
-    }
-    return '';
-  };
-  
-  return (
-    <div className={`flex flex-col p-3 ${getCardBorderClass()}`}>
-      {/* Header avec bouton back et actions */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 rounded-full border-gray-200 mr-3 bg-white"
-            onClick={onBackClick}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+  return <div className="flex items-center justify-between p-3 bg-loro-sand">
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="truncate">
+          <h1 className="text-lg font-futura leading-tight truncate">{name}</h1>
+          <p className="text-xs text-loro-terracotta">
+            {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
+          </p>
+          <p className="text-xs flex items-center gap-1 text-zinc-800">
+            {budget && formatBudget(budget, currency)}
+            {budget && (desiredLocation || country || purchaseTimeframe) && ' • '}
+            {desiredLocation}
+            {!desiredLocation && country ? country : desiredLocation && country ? ` (${country})` : ''}
+            {(desiredLocation || country) && purchaseTimeframe && ' • '}
+            {purchaseTimeframe}
+          </p>
         </div>
       </div>
-      
-      {/* En-tête avec nom et tags */}
-      <div className="flex justify-between items-start mb-3 mt-2">
-        <h3 className="font-medium text-lg text-gray-900">{name}</h3>
-        <TagList tags={tags.map(tag => ({ name: tag }))} />
+      <div className="flex flex-col items-end gap-2">
+        <div className="flex items-center gap-2">
+          {phone && <>
+              <a href={`tel:${phone}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Appeler">
+                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                  <Phone className="h-4 w-4" />
+                </div>
+              </a>
+              <button onClick={handleWhatsAppClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Contacter via WhatsApp">
+                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                  <img alt="WhatsApp" className="h-5 w-5" src="https://img.icons8.com/?size=100&id=16712&format=png&color=000000" />
+                </div>
+              </button>
+            </>}
+          {email && <a href={`mailto:${email}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Envoyer un email">
+              <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                <Mail className="h-4 w-4" />
+              </div>
+            </a>}
+        </div>
+        {tags && tags.length > 0 && <div className="flex flex-wrap justify-end gap-1 max-w-[150px]">
+            {tags.map((tag, index) => <TagBadge key={`${tag}-${index}`} tag={tag} className="text-xs py-0.5" />)}
+          </div>}
       </div>
-      
-      {/* Informations de contact principales */}
-      <ContactInfo 
-        email={email} 
-        phone={phone} 
-        leadId={id} 
-      />
-      
-      {/* Informations sur la propriété */}
-      <PropertyInfo 
-        propertyType={propertyType}
-        budget={budget}
-        desiredLocation={desiredLocation}
-        country={undefined}
-        bedrooms={bedrooms && bedrooms.length > 0 ? bedrooms[0] : undefined}
-        url={url}
-        onLinkClick={handleLinkClick}
-      />
-      
-      {/* Commercial assigné et type de tâche */}
-      <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-        <AssignedUser 
-          assignedToId={assignedTo} 
-          onAssignClick={handleAssignClick} 
-        />
-        
-        {/* Type de tâche avec indication de statut */}
-        <TaskTypeIndicator 
-          taskType={taskType} 
-          phoneNumber={phone}
-          nextFollowUpDate={nextFollowUpDate}
-          isOverdue={isOverdue()}
-        />
-      </div>
-    </div>
-  );
+    </div>;
 };
-
 export default LeadDetailHeader;

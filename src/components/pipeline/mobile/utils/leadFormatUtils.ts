@@ -1,5 +1,5 @@
 
-import { format, isToday, isYesterday, isThisWeek, isPast } from 'date-fns';
+import { format, isToday, isYesterday, isThisWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Currency } from '@/types/lead';
