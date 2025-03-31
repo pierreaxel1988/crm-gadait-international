@@ -22,6 +22,8 @@ import StatusSection from '@/components/leads/form/mobile/StatusSection';
 import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSection';
 import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
 import NotesSection from '@/components/leads/form/mobile/NotesSection';
+import { LeadStatus } from '@/components/common/StatusBadge';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 const LeadDetailMobile = () => {
   const { id } = useParams<{ id: string }>();
@@ -110,9 +112,9 @@ const LeadDetailMobile = () => {
           isSaving={isSaving}
           hasChanges={hasChanges}
           tags={lead.tags}
-          status={lead.status}
+          status={lead.status as LeadStatus}
           nextFollowUpDate={nextAction?.scheduledDate}
-          taskType={lead.taskType}
+          taskType={lead.taskType as TaskType}
         />
         
         <LeadDetailTabs defaultTab={activeTab} />

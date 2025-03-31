@@ -86,19 +86,27 @@ export const useActionsData = (filteredStatus: string | null = null, filteredTyp
           for (const action of lead.action_history) {
             // S'assurer que action est un objet et pas une chaîne
             if (typeof action === 'object' && action !== null) {
+              // Fix TS errors by ensuring we're accessing properties safely
+              const actionId = action.id as string || '';
+              const actionType = action.actionType as string || '';
+              const scheduledDate = action.scheduledDate as string || '';
+              const completedDate = action.completedDate as string | null;
+              const notes = action.notes as string | undefined;
+              const createdAt = action.createdAt as string || lead.created_at;
+              
               // Create an action with lead information
               const actionData: ActionData = {
-                id: action.id as string,
+                id: actionId,
                 leadId: lead.id,
                 leadName: lead.name,
                 leadEmail: lead.email,
                 leadPhone: lead.phone,
-                actionType: action.actionType as string,
-                scheduledDate: action.scheduledDate as string,
-                completedDate: action.completedDate as string | null,
-                notes: action.notes as string | undefined,
+                actionType: actionType,
+                scheduledDate: scheduledDate,
+                completedDate: completedDate,
+                notes: notes,
                 assignedToId: lead.assigned_to,
-                createdAt: action.createdAt as string || lead.created_at,
+                createdAt: createdAt,
                 assignedToName: ''
               };
 

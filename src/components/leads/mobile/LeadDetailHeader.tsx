@@ -3,10 +3,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
-import { formatBudget, getActionStatusStyle, getStatusColors } from '@/components/pipeline/mobile/utils/leadFormatUtils';
+import { formatBudget, getActionStatusStyle } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
-import TaskTypeIndicator from '@/components/kanban/card/TaskTypeIndicator';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 interface LeadDetailHeaderProps {
   name: string;
@@ -23,9 +23,9 @@ interface LeadDetailHeaderProps {
   isSaving: boolean;
   hasChanges: boolean;
   tags?: string[];
-  status?: string;
+  status?: LeadStatus;
   nextFollowUpDate?: string;
-  taskType?: string;
+  taskType?: TaskType;
 }
 
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
@@ -36,13 +36,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   budget,
   currency,
   desiredLocation,
-  country,
-  purchaseTimeframe,
   onBackClick,
-  onSave,
-  isSaving,
-  hasChanges,
-  tags,
   status,
   nextFollowUpDate,
   taskType
@@ -79,50 +73,53 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   const formattedBudget = budget && currency 
     ? formatBudget(budget, currency) 
     : '';
-    
+
   const actionStyle = nextFollowUpDate ? getActionStatusStyle(nextFollowUpDate) : { containerClassName: '' };
   
-  const statusConfig = status ? getStatusColors(status as LeadStatus) : { bg: 'bg-gray-200', text: 'text-gray-700' };
-  
   return (
-    <div className={`flex flex-col p-2 ${actionStyle.containerClassName}`}>
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
+    <div className={`flex flex-col p-3 bg-white ${actionStyle.containerClassName}`}>
+      {/* Header with back button and name */}
+      <div className="flex items-start">
+        <div className="flex items-center">
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-full border-gray-300"
+            className="h-10 w-10 rounded-full border-gray-200 mr-3 bg-white"
             onClick={onBackClick}
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5" />
           </Button>
+          
           <div className="flex flex-col">
-            <h1 className="text-lg font-medium text-gray-800 font-futura">{name}</h1>
-            <p className="text-xs text-gray-600">{formattedDate}</p>
+            <div className="flex items-center">
+              <h1 className="text-lg font-medium text-gray-800">{name}</h1>
+            </div>
+            
+            <p className="text-sm text-gray-500">{formattedDate}</p>
           </div>
         </div>
         
-        <div className="flex gap-1">
+        <div className="flex ml-auto gap-2">
           {phone && (
             <button 
               onClick={handlePhoneClick}
-              className="h-8 w-8 rounded-full bg-[#F5F5F0] flex items-center justify-center"
+              className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center"
               aria-label="Appeler"
             >
-              <Phone className="h-4 w-4 text-gray-700" />
+              <Phone className="h-5 w-5 text-gray-700" />
             </button>
           )}
           
           {phone && (
             <button 
               onClick={handleWhatsAppClick}
-              className="h-8 w-8 rounded-full bg-[#F5F5F0] flex items-center justify-center"
+              className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center"
               aria-label="WhatsApp"
             >
               <img 
-                src="/lovable-uploads/bf1a6b76-83f4-46cb-bb39-25f80e1c5289.png" 
+                src="https://img.icons8.com/?size=100&id=16712&format=png&color=000000" 
                 alt="WhatsApp" 
-                className="h-4 w-4"
+                className="h-5 w-5" 
               />
             </button>
           )}
@@ -130,58 +127,47 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           {email && (
             <button 
               onClick={handleEmailClick}
-              className="h-8 w-8 rounded-full bg-[#F5F5F0] flex items-center justify-center"
+              className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center"
               aria-label="Email"
             >
-              <Mail className="h-4 w-4 text-gray-700" />
+              <Mail className="h-5 w-5 text-gray-700" />
             </button>
           )}
         </div>
       </div>
       
-      <div className="flex flex-wrap gap-1 mt-1">
-        {/* Statut */}
+      {/* Tags row */}
+      <div className="flex flex-wrap gap-2 mt-3">
+        {/* Status */}
         {status && (
-          <div className={`px-2.5 py-0.5 rounded-full text-xs ${statusConfig.bg} ${statusConfig.text} font-futura`}>
+          <div className={`px-4 py-1.5 rounded-full text-sm font-medium bg-lime-100 text-lime-800`}>
             {status}
           </div>
         )}
         
-        {/* Task Type Indicator à la façon de la carte pipeline */}
-        {taskType && (
-          <TaskTypeIndicator 
-            taskType={taskType} 
-            phoneNumber={phone}
-            nextFollowUpDate={nextFollowUpDate}
-            isOverdue={nextFollowUpDate ? actionStyle.containerClassName.includes('red') : false}
-            className="text-xs"
-          />
+        {/* Task Type */}
+        {taskType === 'Call' && (
+          <div className="px-4 py-1.5 rounded-full text-sm font-medium bg-pink-100 text-pink-800">
+            Call
+          </div>
         )}
         
-        {/* Tags spécifiques */}
-        {tags && tags.map((tag) => (
-          <div 
-            key={tag} 
-            className="px-2.5 py-0.5 bg-[#EBD5CE] text-[#D05A76] rounded-full text-xs font-futura"
-          >
-            {tag}
-          </div>
-        ))}
-        
-        {/* Localisation */}
+        {/* Location */}
         {desiredLocation && (
-          <div className="px-2.5 py-0.5 bg-[#F5F3EE] text-[#7A6C5D] rounded-full text-xs font-futura">
+          <div className="px-4 py-1.5 rounded-full text-sm font-medium border text-gray-800">
             {desiredLocation}
           </div>
         )}
-        
-        {/* Budget */}
-        {formattedBudget && (
-          <div className="px-2.5 py-0.5 bg-[#F5F3EE] text-[#7A6C5D] rounded-full text-xs font-futura">
+      </div>
+      
+      {/* Budget */}
+      {formattedBudget && (
+        <div className="mt-2">
+          <div className="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-800 inline-block">
             {formattedBudget}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
