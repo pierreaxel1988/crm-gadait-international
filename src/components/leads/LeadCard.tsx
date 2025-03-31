@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { Mail, MapPin, Phone, User } from 'lucide-react';
+import { Mail, MapPin, Phone, User, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import StatusBadge, { LeadStatus } from '@/components/common/StatusBadge';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
@@ -98,13 +97,13 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
         <div>
           <h3 className="font-medium text-foreground">{lead.name}</h3>
           <div className="flex items-center text-sm text-muted-foreground mt-1">
-            <Mail className="h-3.5 w-3.5 mr-1" />
+            <Mail className="h-3.5 w-3.5 mr-1" strokeWidth={2.5} />
             <span>{lead.email}</span>
           </div>
           {lead.phone && (
             <div className="flex items-center text-sm text-muted-foreground mt-1 gap-2">
               <div className="flex items-center">
-                <Phone className="h-3.5 w-3.5 mr-1" />
+                <Phone className="h-3.5 w-3.5 mr-1" strokeWidth={2.5} />
                 <span>{lead.phone}</span>
               </div>
               <button 
@@ -112,17 +111,13 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
                 className="h-7 w-7 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                 aria-label="Contacter via WhatsApp"
               >
-                <img 
-                  src="/lovable-uploads/bf1a6b76-83f4-46cb-bb39-25f80e1c5289.png" 
-                  alt="WhatsApp"
-                  className="h-3.5 w-3.5"
-                />
+                <MessageCircle className="h-3.5 w-3.5" strokeWidth={2.5} />
               </button>
             </div>
           )}
           {lead.location && (
             <div className="flex items-center text-sm text-muted-foreground mt-1">
-              <MapPin className="h-3.5 w-3.5 mr-1" />
+              <MapPin className="h-3.5 w-3.5 mr-1" strokeWidth={2.5} />
               <span>{lead.location}</span>
             </div>
           )}
@@ -139,7 +134,7 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
       <div className="mt-4 pt-4 border-t border-border">
         <div className="flex justify-between items-center">
           <div className="flex items-center text-sm text-muted-foreground">
-            <User className="h-3.5 w-3.5 mr-1" />
+            <User className="h-3.5 w-3.5 mr-1" strokeWidth={2.5} />
             <span>
               {assignedToName}
             </span>
