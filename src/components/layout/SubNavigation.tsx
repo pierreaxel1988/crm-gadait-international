@@ -49,14 +49,14 @@ const SubNavigation = () => {
       </div>;
   }
 
-  // Desktop navigation - icons only
-  return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-loro-white shadow-sm">
-      <div className="content-container">
-        <NavigationMenu className="justify-start mx-auto">
-          <NavigationMenuList className="space-x-4">
+  // Desktop navigation - updated to match mobile styling
+  return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
+      <div className="bg-loro-50 py-2">
+        <NavigationMenu className="justify-start mx-auto px-2">
+          <NavigationMenuList className="space-x-2">
             {navigationItems.map(item => <NavigationMenuItem key={item.name}>
-                <Link to={item.path} className={cn("inline-flex h-12 w-12 items-center justify-center rounded-md transition-transform hover:scale-110 duration-200", "hover:text-loro-terracotta focus:text-loro-terracotta focus:outline-none", location.pathname === item.path ? "text-loro-terracotta bg-loro-white/80 border-b-2 border-loro-terracotta" : "text-loro-navy")}>
-                  <item.icon className="h-6 w-6" />
+                <Link to={item.path} className={cn("flex items-center justify-center h-10 w-10 rounded-md transition-transform hover:scale-110 duration-200", location.pathname === item.path ? "text-loro-terracotta bg-loro-white" : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70")}>
+                  <item.icon className="h-5 w-5" />
                 </Link>
               </NavigationMenuItem>)}
           </NavigationMenuList>
