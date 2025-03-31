@@ -112,7 +112,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     if (isOverdue()) {
       return 'bg-[#FFDEE2]/30'; // Soft pink background for overdue tasks
     } else if (item.nextFollowUpDate && isToday(new Date(item.nextFollowUpDate))) {
-      return 'border-amber-300';
+      return 'bg-amber-50'; // Changed from border-amber-300 to a light amber background
     } else if (item.nextFollowUpDate) {
       return 'bg-[#e3f7ed]/80'; // Updated to #e3f7ed with 80% opacity for upcoming tasks
     }

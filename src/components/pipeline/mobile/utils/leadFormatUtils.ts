@@ -120,9 +120,9 @@ export function getActionStatusStyle(nextFollowUpDate?: string): {
       iconClassName: 'text-red-500'
     };
   } else if (isToday(followUpDate)) {
-    // Due today
+    // Due today - Removed yellow border, using slight background tint instead
     return {
-      containerClassName: 'border-l-4 border-amber-400',
+      containerClassName: 'bg-amber-50',
       badgeClassName: 'bg-amber-100 text-amber-800',
       iconClassName: 'text-amber-500'
     };
