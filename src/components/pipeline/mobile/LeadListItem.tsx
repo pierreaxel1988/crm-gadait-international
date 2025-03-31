@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Currency } from '@/types/lead';
