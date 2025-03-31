@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
@@ -6,6 +7,7 @@ import CustomButton from '@/components/ui/CustomButton';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
+
 interface LeadDetailHeaderProps {
   name: string;
   createdAt?: string;
@@ -21,7 +23,9 @@ interface LeadDetailHeaderProps {
   isSaving: boolean;
   hasChanges: boolean;
   tags?: LeadTag[];
+  status?: string;
 }
+
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   name,
   createdAt,
@@ -36,8 +40,25 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   onSave,
   isSaving,
   hasChanges,
-  tags
+  tags,
+  status,
 }) => {
+  const handlePhoneClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (phone) {
+      window.location.href = `tel:${phone}`;
+    }
+  };
+  
+  const handleEmailClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (email) {
+      window.location.href = `mailto:${email}`;
+    }
+  };
+  
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -46,50 +67,92 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
-  return <div className="flex items-center justify-between p-3 bg-loro-sand">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200">
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="truncate">
-          <h1 className="text-lg font-futura leading-tight truncate">{name}</h1>
-          <p className="text-xs text-loro-terracotta">
-            {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
-          </p>
-          <p className="text-xs flex items-center gap-1 text-zinc-800">
-            {budget && formatBudget(budget, currency)}
-            {budget && (desiredLocation || country || purchaseTimeframe) && ' • '}
+  
+  const formattedDate = createdAt 
+    ? format(new Date(createdAt), 'dd/MM/yyyy')
+    : '';
+  
+  const formattedBudget = budget && currency 
+    ? formatBudget(budget, currency) 
+    : '';
+  
+  return (
+    <div className="flex flex-col bg-loro-sand p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="h-16 w-16 rounded-full bg-[#F5F5F0] flex items-center justify-center text-3xl font-medium text-gray-700">
+            {name ? name.charAt(0).toUpperCase() : 'J'}
+          </div>
+          <div>
+            <h1 className="text-xl font-medium text-gray-800">{name}</h1>
+            <p className="text-sm text-gray-600">{formattedDate}</p>
+          </div>
+        </div>
+        
+        <div className="flex gap-2">
+          {phone && (
+            <button 
+              onClick={handlePhoneClick}
+              className="h-10 w-10 rounded-full bg-[#F5F5F0] flex items-center justify-center"
+              aria-label="Appeler"
+            >
+              <Phone className="h-5 w-5 text-gray-700" />
+            </button>
+          )}
+          
+          {phone && (
+            <button 
+              onClick={handleWhatsAppClick}
+              className="h-10 w-10 rounded-full bg-[#F5F5F0] flex items-center justify-center"
+              aria-label="WhatsApp"
+            >
+              <img 
+                src="https://img.icons8.com/?size=100&id=16712&format=png&color=000000" 
+                alt="WhatsApp" 
+                className="h-5 w-5"
+              />
+            </button>
+          )}
+          
+          {email && (
+            <button 
+              onClick={handleEmailClick}
+              className="h-10 w-10 rounded-full bg-[#F5F5F0] flex items-center justify-center"
+              aria-label="Email"
+            >
+              <Mail className="h-5 w-5 text-gray-700" />
+            </button>
+          )}
+        </div>
+      </div>
+      
+      <div className="flex flex-wrap gap-2 mt-4">
+        {status && (
+          <div className="px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm">
+            {status}
+          </div>
+        )}
+        
+        {tags && tags.includes('Call') && (
+          <div className="px-4 py-2 bg-pink-100 text-pink-700 rounded-full text-sm">
+            Call
+          </div>
+        )}
+        
+        {desiredLocation && (
+          <div className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm">
             {desiredLocation}
-            {!desiredLocation && country ? country : desiredLocation && country ? ` (${country})` : ''}
-            {(desiredLocation || country) && purchaseTimeframe && ' • '}
-            {purchaseTimeframe}
-          </p>
-        </div>
+          </div>
+        )}
+        
+        {formattedBudget && (
+          <div className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm">
+            {formattedBudget}
+          </div>
+        )}
       </div>
-      <div className="flex flex-col items-end gap-2">
-        <div className="flex items-center gap-2">
-          {phone && <>
-              <a href={`tel:${phone}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Appeler">
-                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-                  <Phone className="h-4 w-4" />
-                </div>
-              </a>
-              <button onClick={handleWhatsAppClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Contacter via WhatsApp">
-                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-                  <img alt="WhatsApp" className="h-5 w-5" src="https://img.icons8.com/?size=100&id=16712&format=png&color=000000" />
-                </div>
-              </button>
-            </>}
-          {email && <a href={`mailto:${email}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Envoyer un email">
-              <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-                <Mail className="h-4 w-4" />
-              </div>
-            </a>}
-        </div>
-        {tags && tags.length > 0 && <div className="flex flex-wrap justify-end gap-1 max-w-[150px]">
-            {tags.map((tag, index) => <TagBadge key={`${tag}-${index}`} tag={tag} className="text-xs py-0.5" />)}
-          </div>}
-      </div>
-    </div>;
+    </div>
+  );
 };
+
 export default LeadDetailHeader;

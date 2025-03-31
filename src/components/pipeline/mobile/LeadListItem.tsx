@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Currency } from '@/types/lead';
@@ -61,7 +62,7 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
 
   return (
     <div 
-      className={`py-3 px-4 flex hover:bg-slate-50 transition-colors cursor-pointer ${nextFollowUpDate ? actionStyle.containerClassName : ''}`}
+      className={`py-3 px-4 flex hover:bg-slate-50 transition-colors cursor-pointer ${actionStyle.containerClassName}`}
       onClick={() => onClick(id)}
     >
       <LeadAvatar name={name} />
