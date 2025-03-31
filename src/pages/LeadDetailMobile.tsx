@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -28,13 +27,11 @@ const LeadDetailMobile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get active tab from URL query params or default to criteria
   const searchParams = new URLSearchParams(location.search);
   const activeTab = searchParams.get('tab') || 'criteria';
   
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
   
-  // Use our custom hook
   const {
     lead,
     setLead,
@@ -48,7 +45,6 @@ const LeadDetailMobile = () => {
     fetchLead
   } = useLeadDetail(id);
 
-  // Use lead actions hook
   const {
     isActionDialogOpen,
     setIsActionDialogOpen,
@@ -76,14 +72,12 @@ const LeadDetailMobile = () => {
     }
   };
 
-  // Show brief save indicator instead of toast
   const handleSaveWithIndicator = async () => {
     await handleSave();
     setShowSaveIndicator(true);
     setTimeout(() => setShowSaveIndicator(false), 2000);
   };
 
-  // Show loading or error states
   if (isLoading) {
     return <LoadingState isLoading={isLoading} />;
   }
@@ -105,6 +99,7 @@ const LeadDetailMobile = () => {
           budget={lead.budget}
           currency={lead.currency}
           desiredLocation={lead.desiredLocation}
+          country={lead.country}
           onBackClick={handleBackClick}
           onSave={handleSaveWithIndicator}
           isSaving={isSaving}
@@ -115,7 +110,6 @@ const LeadDetailMobile = () => {
         <LeadDetailTabs defaultTab={activeTab} />
       </div>
       
-      {/* Improved ScrollArea with better scroll behavior and bottom padding for the fixed action bar */}
       <ScrollArea className="flex-1 pb-24 mt-24 overflow-y-auto">
         <Tabs value={activeTab} className="w-full">
           <div className="px-4 pt-2 pb-32">
@@ -158,7 +152,6 @@ const LeadDetailMobile = () => {
         onManualSave={handleSaveWithIndicator}
       />
 
-      {/* Save indicator */}
       {showSaveIndicator && (
         <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
           <CheckCircle className="h-5 w-5" />

@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import CustomButton from '@/components/ui/CustomButton';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
+import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 
 interface LeadDetailHeaderProps {
   name: string;
@@ -13,6 +15,7 @@ interface LeadDetailHeaderProps {
   budget?: string;
   currency?: string;
   desiredLocation?: string;
+  country?: string;
   onBackClick: () => void;
   onSave: () => void;
   isSaving: boolean;
@@ -28,23 +31,13 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   budget,
   currency,
   desiredLocation,
+  country,
   onBackClick,
   onSave,
   isSaving,
   hasChanges,
   tags
 }) => {
-  const formatBudget = (budget?: string) => {
-    if (!budget) return '';
-
-    const numericValue = budget.replace(/[^\d]/g, '');
-    if (!numericValue) return '';
-
-    const budgetNumber = parseInt(numericValue, 10);
-    if (isNaN(budgetNumber)) return budget;
-    return budgetNumber.toLocaleString('fr-FR');
-  };
-
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -53,8 +46,6 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
-
-  const formattedBudget = formatBudget(budget);
 
   return <div className="flex items-center justify-between p-3 bg-loro-sand">
       <div className="flex items-center gap-2">
@@ -72,9 +63,10 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
           <p className="text-xs flex items-center gap-1 text-zinc-800">
-            {formattedBudget && `${formattedBudget} ${currency || ''}`}
-            {formattedBudget && desiredLocation && ' • '}
+            {budget && formatBudget(budget, currency)}
+            {(budget && (desiredLocation || country)) && ' • '}
             {desiredLocation}
+            {(!desiredLocation && country) ? country : (desiredLocation && country) ? ` (${country})` : ''}
           </p>
         </div>
       </div>
