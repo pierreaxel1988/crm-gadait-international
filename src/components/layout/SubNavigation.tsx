@@ -4,11 +4,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { MessageSquare, PieChart, Calendar, ListTodo, File, ClipboardList } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useBreakpoint } from '@/hooks/use-mobile';
 
 const SubNavigation = () => {
   const location = useLocation();
-  const isMobile = useIsMobile();
+  const { isMobile, isTablet, isDesktop } = useBreakpoint();
   
   const navigationItems = [{
     name: 'Pipeline',
@@ -49,24 +49,28 @@ const SubNavigation = () => {
       </div>;
   }
 
-  // Desktop navigation - centered with better spacing and consistent styling with mobile
+  // Desktop and tablet navigation with text and better responsive behavior
   return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
       <div className="bg-loro-50 py-2">
         <div className="max-w-screen-xl mx-auto px-4">
           <NavigationMenu className="mx-auto flex justify-center w-full">
-            <NavigationMenuList className="flex space-x-4 md:space-x-6 lg:space-x-8">
+            <NavigationMenuList className={cn(
+              "flex",
+              isTablet ? "space-x-3" : "space-x-4 md:space-x-6 lg:space-x-8"
+            )}>
               {navigationItems.map(item => <NavigationMenuItem key={item.name}>
                   <Link 
                     to={item.path} 
                     className={cn(
-                      "flex items-center justify-center rounded-md transition-transform hover:scale-110 duration-200 px-3 py-2",
+                      "flex items-center justify-center rounded-md transition-transform hover:scale-110 duration-200",
+                      isTablet ? "px-2 py-2" : "px-3 py-2",
                       location.pathname === item.path 
                         ? "text-loro-terracotta bg-loro-white" 
                         : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70"
                     )}
                   >
                     {item.icon && <item.icon className="h-5 w-5 mr-2" />}
-                    <span className="font-medium text-sm">{item.name}</span>
+                    <span className={cn("font-medium", isTablet ? "text-xs" : "text-sm")}>{item.name}</span>
                   </Link>
                 </NavigationMenuItem>)}
             </NavigationMenuList>

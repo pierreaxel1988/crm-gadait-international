@@ -66,10 +66,11 @@ export const useKanbanData = (
           return;
         }
         
-        // Get leads from Supabase
+        // Direct query to get all leads
         const { data: supabaseLeads, error: leadsError } = await supabase
           .from('leads')
-          .select('*');
+          .select('*')
+          .order('created_at', { ascending: false });
           
         if (leadsError) {
           console.error('Error fetching leads:', leadsError);
@@ -81,11 +82,11 @@ export const useKanbanData = (
           return;
         }
         
-        // Use Supabase leads or get data locally
-        let allLeads = supabaseLeads || [];
-        console.log("Fetched leads from Supabase:", allLeads.length);
+        // Log the fetched leads to help diagnose issues
+        console.log("Fetched leads from Supabase:", supabaseLeads?.length);
         
         // If no leads found in Supabase, try to get data locally
+        let allLeads = supabaseLeads || [];
         if (!allLeads || allLeads.length === 0) {
           console.log("No leads in Supabase, trying local data");
           const localLeads = await getLeads();
@@ -151,7 +152,7 @@ export const useKanbanData = (
         const mappedLeads = allLeads.map(lead => {
           const assignedTeamMember = teamMembers?.find(tm => tm.id === lead.assigned_to);
           
-          // Use lead's pipeline_type or default
+          // Ensure pipeline_type has a default value
           const leadPipelineType = lead.pipeline_type || 'purchase';
           
           return {
@@ -183,7 +184,6 @@ export const useKanbanData = (
         });
         
         console.log(`Mapped leads: ${mappedLeads.length}`);
-        console.log(`Requested pipeline type: ${pipelineType}`);
         
         // Filter leads by pipeline type first
         const filteredByPipelineType = mappedLeads.filter(lead => {

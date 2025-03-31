@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import PipelineHeader from './PipelineHeader';
 import { sortLeadsByPriority } from './mobile/utils/leadSortUtils';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface DesktopPipelineViewProps {
   activeTab: string;
