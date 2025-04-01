@@ -1,14 +1,11 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import CustomButton from '@/components/ui/CustomButton';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
-import { Avatar } from '@/components/ui/avatar';
-
 interface LeadDetailHeaderProps {
   name: string;
   createdAt?: string;
@@ -25,7 +22,6 @@ interface LeadDetailHeaderProps {
   hasChanges: boolean;
   tags?: LeadTag[];
 }
-
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   name,
   createdAt,
@@ -50,143 +46,50 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
-
-  // Format name to get first letter for avatar
-  const getFirstLetter = () => {
-    if (!name) return '';
-    return name.charAt(0).toUpperCase();
-  };
-
-  // Format date as DD/MM/YYYY
-  const formattedDate = createdAt 
-    ? format(new Date(createdAt), 'dd/MM/yyyy')
-    : '';
-    
-  // Check if tags include specific values
-  const hasDepositTag = tags?.includes('Vip');
-  const hasCallTag = tags?.includes('Hot');
-
-  return (
-    <div className="flex items-center p-4 bg-white border-b border-gray-100 shadow-sm">
-      <div className="flex items-center gap-4">
-        <Avatar className="h-16 w-16 bg-[#f7f7f7] text-gray-700 text-2xl font-futura">
-          <div className="flex items-center justify-center h-full w-full">
-            {getFirstLetter()}
-          </div>
-        </Avatar>
-        
-        <div className="flex flex-col">
-          <h1 className="text-lg font-futura font-medium">{name}</h1>
-          {createdAt && (
-            <p className="text-sm text-gray-500">{formattedDate}</p>
-          )}
-          
-          <div className="flex flex-wrap gap-2 mt-2">
-            {hasDepositTag && (
-              <span className="px-3 py-1 bg-[#307251] text-white rounded-full text-xs font-medium whitespace-nowrap">
-                Deposit
-              </span>
-            )}
-            
-            {hasCallTag && (
-              <span className="px-3 py-1 bg-[#CC6E7E] text-white rounded-full text-xs font-medium whitespace-nowrap">
-                Call
-              </span>
-            )}
-            
-            {desiredLocation && (
-              <span className="px-3 py-1 bg-[#f5f2ec] border border-[#d8c9b9] text-[#8B6F4E] rounded-full text-xs font-medium whitespace-nowrap">
-                {desiredLocation}{country ? `, ${country}` : ''}
-              </span>
-            )}
-          </div>
+  return <div className="flex items-center justify-between p-3 bg-loro-sand">
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="truncate">
+          <h1 className="text-lg font-futura leading-tight truncate">{name}</h1>
+          <p className="text-xs text-loro-terracotta">
+            {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
+          </p>
+          <p className="text-xs flex items-center gap-1 text-zinc-800">
+            {budget && formatBudget(budget, currency)}
+            {budget && (desiredLocation || country || purchaseTimeframe) && ' • '}
+            {desiredLocation}
+            {!desiredLocation && country ? country : desiredLocation && country ? ` (${country})` : ''}
+            {(desiredLocation || country) && purchaseTimeframe && ' • '}
+            {purchaseTimeframe}
+          </p>
         </div>
       </div>
-      
-      {/* Budget Badge */}
-      {budget && (
-        <div className="ml-auto mr-4 hidden sm:block">
-          <span className="px-3 py-1 bg-[#f5f2ec] border border-[#d8c9b9] text-[#8B6F4E] rounded-full text-xs font-medium whitespace-nowrap">
-            {formatBudget(budget, currency)}
-          </span>
+      <div className="flex flex-col items-end gap-2">
+        <div className="flex items-center gap-2">
+          {phone && <>
+              <a href={`tel:${phone}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Appeler">
+                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                  <Phone className="h-4 w-4" />
+                </div>
+              </a>
+              <button onClick={handleWhatsAppClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Contacter via WhatsApp">
+                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                  <img alt="WhatsApp" className="h-5 w-5" src="https://img.icons8.com/?size=100&id=16712&format=png&color=000000" />
+                </div>
+              </button>
+            </>}
+          {email && <a href={`mailto:${email}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Envoyer un email">
+              <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                <Mail className="h-4 w-4" />
+              </div>
+            </a>}
         </div>
-      )}
-      
-      {/* Contact Actions */}
-      <div className="ml-auto flex gap-2">
-        <TooltipProvider>
-          {phone && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <a 
-                  href={`tel:${phone}`} 
-                  className="h-10 w-10 rounded-full bg-[#f5f5f5] flex items-center justify-center hover:bg-gray-200 transition-colors"
-                >
-                  <Phone size={18} className="text-gray-700" />
-                </a>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Appeler</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-          
-          {phone && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleWhatsAppClick}
-                  className="h-10 w-10 rounded-full bg-[#f5f5f5] flex items-center justify-center hover:bg-gray-200 transition-colors"
-                >
-                  <img 
-                    src="/public/lovable-uploads/3e074daa-5c5c-4dc5-a56b-e0878acbdb26.png" 
-                    alt="WhatsApp" 
-                    className="h-[18px] w-[18px]" 
-                  />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>WhatsApp</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-          
-          {email && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <a 
-                  href={`mailto:${email}`} 
-                  className="h-10 w-10 rounded-full bg-[#f5f5f5] flex items-center justify-center hover:bg-gray-200 transition-colors"
-                >
-                  <Mail size={18} className="text-gray-700" />
-                </a>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Email</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </TooltipProvider>
+        {tags && tags.length > 0 && <div className="flex flex-wrap justify-end gap-1 max-w-[150px]">
+            {tags.map((tag, index) => <TagBadge key={`${tag}-${index}`} tag={tag} className="text-xs py-0.5" />)}
+          </div>}
       </div>
-      
-      {/* Mobile Budget Badge */}
-      {budget && (
-        <div className="w-full mt-2 sm:hidden">
-          <span className="px-3 py-1 bg-[#f5f2ec] border border-[#d8c9b9] text-[#8B6F4E] rounded-full text-xs font-medium whitespace-nowrap">
-            {formatBudget(budget, currency)}
-          </span>
-        </div>
-      )}
-      
-      {/* Back button - hidden but kept for functionality */}
-      <button 
-        onClick={onBackClick} 
-        className="hidden"
-      >
-        <ArrowLeft className="h-5 w-5" />
-      </button>
-    </div>
-  );
+    </div>;
 };
-
 export default LeadDetailHeader;

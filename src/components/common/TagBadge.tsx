@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
-export type LeadTag = 'Vip' | 'Hot' | 'Serious' | 'Cold' | 'No response' | 'No phone' | 'Fake' | 'Imported' | 'High Priority' | 'French Market' | 'Deposit' | 'Call';
+export type LeadTag = 'Vip' | 'Hot' | 'Serious' | 'Cold' | 'No response' | 'No phone' | 'Fake' | 'Imported';
 
 interface TagBadgeProps {
   tag: LeadTag;
@@ -30,14 +30,6 @@ const TagBadge = ({ tag, className }: TagBadgeProps) => {
         return 'bg-loro-pearl text-loro-navy hover:bg-loro-pearl border-loro-navy border-opacity-20';
       case 'Imported':
         return 'bg-loro-white text-loro-500 hover:bg-loro-white border-loro-500 border-opacity-20';
-      case 'High Priority':
-        return 'bg-[#FFE2E5] text-red-700 hover:bg-[#FFE2E5] border-red-700 border-opacity-20';
-      case 'French Market':
-        return 'bg-[#E5F1FF] text-blue-700 hover:bg-[#E5F1FF] border-blue-700 border-opacity-20';
-      case 'Deposit':
-        return 'bg-[#307251] text-white hover:bg-[#307251] border-white border-opacity-20';
-      case 'Call':
-        return 'bg-[#CC6E7E] text-white hover:bg-[#CC6E7E] border-white border-opacity-20';
       default:
         return 'bg-loro-100 text-loro-800 hover:bg-loro-100 border-loro-800 border-opacity-20';
     }
