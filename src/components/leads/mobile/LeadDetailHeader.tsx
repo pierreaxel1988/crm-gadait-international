@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
@@ -56,7 +57,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           <p className="text-xs text-loro-terracotta">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
-          <p className="text-xs flex items-center gap-1 text-zinc-800">
+          <p className="text-xs flex items-center gap-1 text-muted-foreground">
             {budget && formatBudget(budget, currency)}
             {budget && (desiredLocation || country || purchaseTimeframe) && ' • '}
             {desiredLocation}
