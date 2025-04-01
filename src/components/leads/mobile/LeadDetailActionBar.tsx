@@ -1,13 +1,15 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription, DrawerClose } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import { LeadDetailed } from '@/types/lead';
-import { Save, Check, Clock, X, History, ArrowLeft } from 'lucide-react';
+import { Save, Check, Clock, X, History, ArrowLeft, CalendarClock } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, isPast, isToday } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { ActionHistory } from '@/types/actionHistory';
 
 interface LeadDetailActionBarProps {
   autoSaveEnabled: boolean;
@@ -32,12 +34,35 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [nextAction, setNextAction] = useState<ActionHistory | null>(null);
+  
+  useEffect(() => {
+    if (lead?.actionHistory?.length) {
+      // Find all pending actions (not completed)
+      const pendingActions = lead.actionHistory.filter(action => !action.completedDate);
+      
+      // Sort by scheduled date (ascending)
+      const sortedActions = pendingActions.sort((a, b) => 
+        new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime()
+      );
+      
+      // Set the next action (closest in time)
+      setNextAction(sortedActions.length > 0 ? sortedActions[0] : null);
+    } else {
+      setNextAction(null);
+    }
+  }, [lead?.actionHistory]);
   
   const handleActionsClick = () => {
     // Navigate to Actions tab by updating URL search parameters
     const searchParams = new URLSearchParams(location.search);
     searchParams.set('tab', 'actions');
     navigate(`/leads/${lead.id}?${searchParams.toString()}`, { replace: true });
+  };
+  
+  const handleActionClick = () => {
+    // Navigate to the actions tab and focus on this action
+    handleActionsClick();
   };
   
   const handleBackToActionsList = () => {
@@ -50,82 +75,136 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   const currentTab = searchParams.get('tab');
   const isActionsTab = currentTab === 'actions';
   
+  // Format action date
+  const formatActionDate = (dateString: string) => {
+    const date = new Date(dateString);
+    
+    if (isToday(date)) {
+      return `Aujourd'hui à ${format(date, 'HH:mm', { locale: fr })}`;
+    }
+    
+    return format(date, 'dd/MM/yyyy à HH:mm', { locale: fr });
+  };
+  
+  // Check if action is overdue
+  const isActionOverdue = (dateString: string) => {
+    return isPast(new Date(dateString)) && !isToday(new Date(dateString));
+  };
+  
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex justify-center items-center transition-all animate-[slide-in_0.3s_ease-out] z-50">
-      <div className="flex gap-3 w-full justify-between items-center">
-        <div className="flex items-center">
-          {isActionsTab ? (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="h-8 px-3 transition-all duration-200 active:scale-95 font-futura border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20 flex items-center gap-1"
-              onClick={handleBackToActionsList}
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Actions
-            </Button>
-          ) : (
-            <>
-              {autoSaveEnabled ? (
-                <div className="flex items-center" title={isSaving ? "Enregistrement en cours" : hasChanges ? "Modifications en attente" : "Tout est enregistré"}>
-                  {isSaving ? (
-                    <div className="w-5 h-5 text-amber-500 animate-pulse">
-                      <Clock className="h-5 w-5" />
-                    </div>
-                  ) : hasChanges ? (
-                    <div className="w-5 h-5 text-amber-500">
-                      <Clock className="h-5 w-5" />
-                    </div>
-                  ) : (
-                    <div className="w-5 h-5 text-green-500">
-                      <Check className="h-5 w-5" />
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Button 
-                  onClick={onManualSave} 
-                  size="sm" 
-                  variant="outline" 
-                  className="h-8 px-2 text-xs transition-all duration-200 active:scale-95 font-futura"
-                  disabled={isSaving || !hasChanges}
-                >
-                  {isSaving ? (
-                    <Clock className="h-4 w-4 text-amber-500 animate-pulse" />
-                  ) : hasChanges ? (
-                    <Save className="h-4 w-4" />
-                  ) : (
-                    <Check className="h-4 w-4 text-green-500" />
-                  )}
-                </Button>
-              )}
-            </>
-          )}
-        </div>
-        <div className="flex gap-2">
-          {!isActionsTab && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide flex items-center gap-2 border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20"
-              onClick={handleActionsClick}
-            >
-              <History className="h-4 w-4 text-loro-navy" />
-              Actions
-            </Button>
-          )}
+    <>
+      {nextAction && (
+        <div 
+          className={`fixed bottom-16 left-0 right-0 p-2 px-3 flex items-center gap-2 justify-between animate-[fade-in_0.3s_ease-out] shadow-sm z-40 
+          ${isActionOverdue(nextAction.scheduledDate) 
+            ? 'bg-rose-50 text-rose-800 border-t border-rose-200' 
+            : 'bg-loro-pearl/80 text-loro-navy border-t border-loro-pearl'}`}
+          onClick={handleActionClick}
+        >
+          <div className="flex items-center gap-2">
+            <div className={`p-1 rounded-md ${isActionOverdue(nextAction.scheduledDate) ? 'bg-rose-100' : 'bg-loro-sand/50'}`}>
+              <CalendarClock className={`h-4 w-4 ${isActionOverdue(nextAction.scheduledDate) ? 'text-rose-600' : 'text-loro-navy'}`} />
+            </div>
+            <div className="text-xs">
+              <span className="font-medium">Action prévue:</span> {nextAction.actionType} 
+              <span className="block opacity-80">
+                {formatActionDate(nextAction.scheduledDate)}
+              </span>
+            </div>
+          </div>
           <Button 
-            onClick={onAddAction} 
-            className="bg-chocolate-dark hover:bg-chocolate-light transition-all duration-200 active:scale-95 font-futura tracking-wide"
-            size="sm"
-            type="button"
-            aria-label="Ajouter une nouvelle action"
+            variant="ghost" 
+            size="sm" 
+            className={`h-7 px-2 text-xs border transition-all active:scale-95
+            ${isActionOverdue(nextAction.scheduledDate) 
+              ? 'border-rose-300 text-rose-700 hover:bg-rose-100' 
+              : 'border-loro-navy/30 text-loro-navy hover:bg-loro-pearl'}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMarkComplete(nextAction.id);
+            }}
           >
-            Nouvelle action
+            <Check className="h-3 w-3 mr-1" /> Terminer
           </Button>
         </div>
+      )}
+      
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex justify-center items-center transition-all animate-[slide-in_0.3s_ease-out] z-50">
+        <div className="flex gap-3 w-full justify-between items-center">
+          <div className="flex items-center">
+            {isActionsTab ? (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-8 px-3 transition-all duration-200 active:scale-95 font-futura border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20 flex items-center gap-1"
+                onClick={handleBackToActionsList}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Actions
+              </Button>
+            ) : (
+              <>
+                {autoSaveEnabled ? (
+                  <div className="flex items-center" title={isSaving ? "Enregistrement en cours" : hasChanges ? "Modifications en attente" : "Tout est enregistré"}>
+                    {isSaving ? (
+                      <div className="w-5 h-5 text-amber-500 animate-pulse">
+                        <Clock className="h-5 w-5" />
+                      </div>
+                    ) : hasChanges ? (
+                      <div className="w-5 h-5 text-amber-500">
+                        <Clock className="h-5 w-5" />
+                      </div>
+                    ) : (
+                      <div className="w-5 h-5 text-green-500">
+                        <Check className="h-5 w-5" />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Button 
+                    onClick={onManualSave} 
+                    size="sm" 
+                    variant="outline" 
+                    className="h-8 px-2 text-xs transition-all duration-200 active:scale-95 font-futura"
+                    disabled={isSaving || !hasChanges}
+                  >
+                    {isSaving ? (
+                      <Clock className="h-4 w-4 text-amber-500 animate-pulse" />
+                    ) : hasChanges ? (
+                      <Save className="h-4 w-4" />
+                    ) : (
+                      <Check className="h-4 w-4 text-green-500" />
+                    )}
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+          <div className="flex gap-2">
+            {!isActionsTab && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide flex items-center gap-2 border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20"
+                onClick={handleActionsClick}
+              >
+                <History className="h-4 w-4 text-loro-navy" />
+                Actions
+              </Button>
+            )}
+            <Button 
+              onClick={onAddAction} 
+              className="bg-chocolate-dark hover:bg-chocolate-light transition-all duration-200 active:scale-95 font-futura tracking-wide"
+              size="sm"
+              type="button"
+              aria-label="Ajouter une nouvelle action"
+            >
+              Nouvelle action
+            </Button>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
