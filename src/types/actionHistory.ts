@@ -25,7 +25,7 @@ export interface ActionItem {
   createdAt?: string;
   scheduledDate?: string;
   scheduledTime?: string;
-  completedDate?: string;
+  completedAt?: string;
   notes?: string;
   assignedToId?: string;
   assignedToName: string;

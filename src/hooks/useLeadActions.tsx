@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -75,7 +76,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           
           actionHistory[actionIndex] = {
             ...actionHistory[actionIndex],
-            completedDate: currentDate
+            completedAt: currentDate
           };
           
           const updatedLead = await updateLead({

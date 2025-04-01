@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionItem, ActionStatus } from '@/types/actionHistory';
 import { isPast, isToday } from 'date-fns';
@@ -64,7 +64,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
           
           // Determine action status
           let status: ActionStatus;
-          if (action.completedDate) {
+          if (action.completedAt) {
             status = 'done';
           } else if (action.scheduledDate) {
             const scheduledDate = new Date(action.scheduledDate);
@@ -87,7 +87,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
             actionType: action.actionType,
             createdAt: action.createdAt,
             scheduledDate: action.scheduledDate,
-            completedDate: action.completedDate,
+            completedAt: action.completedAt,
             notes: action.notes,
             assignedToId: lead.assigned_to,
             assignedToName: assignedTeamMember?.name || 'Non assigné',
@@ -111,11 +111,11 @@ export const useActionsData = (refreshTrigger: number = 0) => {
         
         // Secondary sort by date
         const dateA = a.status === 'done' 
-          ? (a.completedDate ? new Date(a.completedDate) : new Date())
+          ? (a.completedAt ? new Date(a.completedAt) : new Date())
           : (a.scheduledDate ? new Date(a.scheduledDate) : new Date());
           
         const dateB = b.status === 'done'
-          ? (b.completedDate ? new Date(b.completedDate) : new Date())
+          ? (b.completedAt ? new Date(b.completedAt) : new Date())
           : (b.scheduledDate ? new Date(b.scheduledDate) : new Date());
           
         return dateA.getTime() - dateB.getTime();
@@ -160,15 +160,20 @@ export const useActionsData = (refreshTrigger: number = 0) => {
         throw new Error('Lead or action history not found');
       }
       
+      // Make sure action_history is an array
+      const actionHistory = Array.isArray(lead.action_history)
+        ? lead.action_history
+        : [];
+      
       // Update the action in the action history
-      const updatedActionHistory = lead.action_history.map((action: any) => {
-        if (action.id === actionId) {
+      const updatedActionHistory = actionHistory.map((item: any) => {
+        if (item.id === actionId) {
           return {
-            ...action,
-            completedDate: new Date().toISOString()
+            ...item,
+            completedAt: new Date().toISOString()
           };
         }
-        return action;
+        return item;
       });
       
       // Update the lead with the new action history
@@ -184,10 +189,10 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       
       // Update the local state
       setActions(prevActions => 
-        prevActions.map(action => 
-          action.id === actionId
-            ? { ...action, status: 'done', completedDate: new Date().toISOString() }
-            : action
+        prevActions.map(item => 
+          item.id === actionId
+            ? { ...item, status: 'done', completedAt: new Date().toISOString() }
+            : item
         )
       );
       

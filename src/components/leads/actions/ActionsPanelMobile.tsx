@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -75,8 +76,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     return new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime();
   });
 
-  const pendingActions = sortedActions.filter(action => !action.completedDate);
-  const completedActions = sortedActions.filter(action => action.completedDate);
+  const pendingActions = sortedActions.filter(action => !action.completedAt);
+  const completedActions = sortedActions.filter(action => action.completedAt);
   
   const isDatePast = (dateString: string): boolean => {
     const today = new Date();
@@ -190,7 +191,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                       <h4 className="font-futura text-sm text-gray-700">{action.actionType}</h4>
                       <div className="flex items-center text-xs text-gray-500">
                         <Check className="h-2.5 w-2.5 mr-1 text-green-500" />
-                        {action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}
+                        {action.completedAt && format(new Date(action.completedAt), 'dd/MM/yyyy HH:mm')}
                       </div>
                     </div>
                   </div>

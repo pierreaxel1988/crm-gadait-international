@@ -9,10 +9,13 @@ import { Search } from 'lucide-react';
 import ActionsList from '@/components/actions/ActionsList';
 import { useBreakpoint } from '@/hooks/use-mobile';
 import { useActionsData } from '@/hooks/useActionsData';
-import { ActionStatus, TaskType } from '@/types/actionHistory';
+import { ActionStatus } from '@/types/actionHistory';
 import StatusFilterButtons from '@/components/actions/filters/StatusFilterButtons';
 import TypeFilterButtons from '@/components/actions/filters/TypeFilterButtons';
 import AgentFilterButtons from '@/components/actions/filters/AgentFilterButtons';
+
+// Import TaskType directly from KanbanCard to fix the import error
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 const Actions = () => {
   const { isMobile } = useBreakpoint();
@@ -85,18 +88,18 @@ const Actions = () => {
           
           <div className="flex flex-wrap gap-4 mb-6">
             <StatusFilterButtons 
-              status={statusFilter} 
-              onStatusChange={(value) => setStatusFilter(value as ActionStatus | 'all')}
+              value={statusFilter} 
+              onChange={(value) => setStatusFilter(value as ActionStatus | 'all')}
             />
             
             <TypeFilterButtons 
-              type={typeFilter}
-              onTypeChange={(value) => setTypeFilter(value as TaskType | 'all')}
+              value={typeFilter}
+              onChange={(value) => setTypeFilter(value as TaskType | 'all')}
             />
             
             <AgentFilterButtons
-              agent={agentFilter}
-              onAgentChange={setAgentFilter}
+              value={agentFilter}
+              onChange={setAgentFilter}
             />
           </div>
           
