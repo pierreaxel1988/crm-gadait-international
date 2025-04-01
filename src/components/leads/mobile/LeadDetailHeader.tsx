@@ -1,12 +1,11 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import CustomButton from '@/components/ui/CustomButton';
+import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
-
 interface LeadDetailHeaderProps {
   name: string;
   createdAt?: string;
@@ -21,9 +20,8 @@ interface LeadDetailHeaderProps {
   onSave: () => void;
   isSaving: boolean;
   hasChanges: boolean;
-  tags?: string[];
+  tags?: LeadTag[];
 }
-
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   name,
   createdAt,
@@ -58,7 +56,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           <p className="text-xs text-loro-terracotta">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
-          <p className="text-xs flex items-center gap-1 text-muted-foreground">
+          <p className="text-xs flex items-center gap-1 text-zinc-800">
             {budget && formatBudget(budget, currency)}
             {budget && (desiredLocation || country || purchaseTimeframe) && ' • '}
             {desiredLocation}
@@ -89,14 +87,9 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
             </a>}
         </div>
         {tags && tags.length > 0 && <div className="flex flex-wrap justify-end gap-1 max-w-[150px]">
-            {tags.map((tag, index) => (
-              <span key={`${tag}-${index}`} className="px-2 py-0.5 text-xs bg-loro-100 text-loro-800 rounded-full border border-loro-800 border-opacity-20">
-                {tag}
-              </span>
-            ))}
+            {tags.map((tag, index) => <TagBadge key={`${tag}-${index}`} tag={tag} className="text-xs py-0.5" />)}
           </div>}
       </div>
     </div>;
 };
-
 export default LeadDetailHeader;

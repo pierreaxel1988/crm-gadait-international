@@ -143,11 +143,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       }
       
       // Update the action in the action history
-      const actionHistory = Array.isArray(lead.action_history) 
-        ? lead.action_history 
-        : [];
-        
-      const updatedActionHistory = actionHistory.map((action: any) => {
+      const updatedActionHistory = lead.action_history.map((action: any) => {
         if (action.id === actionId) {
           return {
             ...action,
