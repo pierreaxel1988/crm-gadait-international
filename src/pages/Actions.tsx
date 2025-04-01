@@ -3,10 +3,8 @@ import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { Button } from '@/components/ui/button';
-import { Check, Filter, Plus, RotateCcw } from 'lucide-react';
-import { InputGroup, InputLeftElement } from '@chakra-ui/react';
+import { Filter, Plus, RotateCcw, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
 import ActionsList from '@/components/actions/ActionsList';
 import { useBreakpoint } from '@/hooks/use-mobile';
 import { useActionsData } from '@/hooks/useActionsData';
@@ -26,7 +24,7 @@ const Actions = () => {
     
     return (
       action.leadName.toLowerCase().includes(searchLower) ||
-      action.notes?.toLowerCase().includes(searchLower) ||
+      (action.notes && action.notes.toLowerCase().includes(searchLower)) ||
       action.assignedToName.toLowerCase().includes(searchLower)
     );
   });

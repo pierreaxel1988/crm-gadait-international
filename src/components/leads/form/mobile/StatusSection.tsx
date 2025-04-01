@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { LeadDetailed, LeadTag } from '@/types/lead';
+import { LeadDetailed } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
@@ -43,9 +43,9 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
     "Perdu"      // Perdu
   ];
   
-  const leadTags: LeadTag[] = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];
+  const leadTags: string[] = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake", "Imported"];
 
-  const handleTagToggle = (tag: LeadTag) => {
+  const handleTagToggle = (tag: string) => {
     const currentTags = lead.tags || [];
     const updatedTags = currentTags.includes(tag)
       ? currentTags.filter(t => t !== tag)
