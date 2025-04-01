@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
@@ -47,16 +48,16 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
     }
   };
   return <div className="flex items-center justify-between p-3 bg-loro-sand">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200">
+      <div className="flex items-center gap-2 flex-1">
+        <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200 flex-shrink-0">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="truncate">
-          <h1 className="text-lg font-futura leading-tight truncate">{name}</h1>
+          <h1 className="text-lg font-futura leading-tight truncate max-w-[180px] sm:max-w-[300px] md:max-w-[500px]">{name}</h1>
           <p className="text-xs text-loro-terracotta">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
-          <p className="text-xs flex items-center gap-1 text-zinc-800">
+          <p className="text-xs flex items-center gap-1 text-zinc-800 truncate max-w-[180px] sm:max-w-[300px] md:max-w-[400px]">
             {budget && formatBudget(budget, currency)}
             {budget && (desiredLocation || country || purchaseTimeframe) && ' • '}
             {desiredLocation}
@@ -66,7 +67,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           </p>
         </div>
       </div>
-      <div className="flex flex-col items-end gap-2">
+      <div className="flex flex-col items-end gap-2 flex-shrink-0">
         <div className="flex items-center gap-2">
           {phone && <>
               <a href={`tel:${phone}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Appeler">

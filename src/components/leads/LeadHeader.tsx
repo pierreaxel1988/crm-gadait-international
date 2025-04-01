@@ -5,7 +5,6 @@ import { LeadDetailed } from '@/types/lead';
 import CustomButton from '@/components/ui/CustomButton';
 import { formatBudget } from '@/services/utils/leadMappers';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { getStatusColors } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 import LeadTag from '@/components/common/LeadTag';
 
 interface LeadHeaderProps {
@@ -67,7 +66,7 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
   };
 
   return (
-    <div className={`flex flex-col gap-${compact || isMobile ? '2' : '3'} sticky top-0 z-10 bg-white ${compact ? 'pb-2 pt-2 px-2' : 'pb-3 pt-3 px-3'} border-b border-gray-100 shadow-sm`}>
+    <div className={`flex flex-col gap-${compact || isMobile ? '2' : '3'} sticky top-0 z-40 bg-white ${compact ? 'pb-2 pt-2 px-2' : 'pb-3 pt-3 px-3'} border-b border-gray-100 shadow-sm`}>
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <CustomButton 
@@ -77,8 +76,8 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
           >
             <ArrowLeft className={`${compact || isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'}`} />
           </CustomButton>
-          <h1 className={`${compact || isMobile ? 'text-lg' : 'text-2xl md:text-3xl'} font-futura truncate max-w-[200px] sm:max-w-xs`}>
-            {lead ? `${lead.name}` : 'Nouveau Lead'}
+          <h1 className={`${compact || isMobile ? 'text-lg' : 'text-2xl md:text-3xl'} font-futura truncate max-w-[200px] sm:max-w-xs md:max-w-lg`}>
+            {lead ? lead.name : 'Nouveau Lead'}
           </h1>
         </div>
         <div className="flex items-center gap-1.5">
