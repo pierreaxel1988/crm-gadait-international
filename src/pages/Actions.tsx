@@ -1,69 +1,34 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { Button } from '@/components/ui/button';
-import { RotateCcw } from 'lucide-react';
+import { Check, Filter, Plus, RotateCcw } from 'lucide-react';
+import { InputGroup, InputLeftElement } from '@chakra-ui/react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import ActionsList from '@/components/actions/ActionsList';
 import { useBreakpoint } from '@/hooks/use-mobile';
 import { useActionsData } from '@/hooks/useActionsData';
-import { ActionStatus } from '@/types/actionHistory';
-import StatusFilterButtons from '@/components/actions/filters/StatusFilterButtons';
-import TypeFilterButtons from '@/components/actions/filters/TypeFilterButtons';
-import AgentFilterButtons from '@/components/actions/filters/AgentFilterButtons';
-import { supabase } from '@/integrations/supabase/client';
-
-// Import TaskType directly from KanbanCard to fix the import error
-import { TaskType } from '@/components/kanban/KanbanCard';
 
 const Actions = () => {
   const { isMobile } = useBreakpoint();
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [statusFilter, setStatusFilter] = useState<ActionStatus | 'all'>('all');
-  const [typeFilter, setTypeFilter] = useState<TaskType | 'all'>('all');
-  const [agentFilter, setAgentFilter] = useState('all');
-  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string }[]>([]);
   
   const { actions, isLoading, markActionComplete } = useActionsData(refreshTrigger);
   
-  // Fetch team members for the filter
-  useEffect(() => {
-    const fetchTeamMembers = async () => {
-      const { data, error } = await supabase
-        .from('team_members')
-        .select('id, name')
-        .order('name');
-        
-      if (!error && data) {
-        setTeamMembers(data);
-      }
-    };
-    
-    fetchTeamMembers();
-  }, []);
-  
-  // Filter actions based on search term and filters
+  // Filter actions based on search term
   const filteredActions = actions.filter(action => {
-    // Filter by search term
-    const matchesSearch = !searchTerm ? true : (
-      action.leadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      action.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      action.assignedToName.toLowerCase().includes(searchTerm.toLowerCase())
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    
+    return (
+      action.leadName.toLowerCase().includes(searchLower) ||
+      action.notes?.toLowerCase().includes(searchLower) ||
+      action.assignedToName.toLowerCase().includes(searchLower)
     );
-    
-    // Filter by status
-    const matchesStatus = statusFilter === 'all' ? true : action.status === statusFilter;
-    
-    // Filter by type
-    const matchesType = typeFilter === 'all' ? true : action.actionType === typeFilter;
-    
-    // Filter by agent
-    const matchesAgent = agentFilter === 'all' ? true : action.assignedToId === agentFilter;
-    
-    return matchesSearch && matchesStatus && matchesType && matchesAgent;
   });
   
   const handleRefresh = () => {
@@ -102,24 +67,6 @@ const Actions = () => {
                 </Button>
               </div>
             </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-4 mb-6">
-            <StatusFilterButtons 
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-            />
-            
-            <TypeFilterButtons 
-              typeFilter={typeFilter}
-              setTypeFilter={setTypeFilter}
-            />
-            
-            <AgentFilterButtons
-              agentFilter={agentFilter}
-              setAgentFilter={setAgentFilter}
-              teamMembers={teamMembers}
-            />
           </div>
           
           <ActionsList 

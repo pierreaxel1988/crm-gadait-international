@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
 
 interface AgentFilterButtonsProps {
-  agentFilter: string;
-  setAgentFilter: (agentId: string) => void;
+  agentFilter: string | null;
+  setAgentFilter: (agentId: string | null) => void;
   teamMembers: { id: string; name: string }[];
 }
 
@@ -21,10 +21,10 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
       </h4>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <Button
-          variant={agentFilter === 'all' ? "default" : "outline"}
+          variant={agentFilter === null ? "default" : "outline"}
           size="sm"
           className="text-xs"
-          onClick={() => setAgentFilter('all')}
+          onClick={() => setAgentFilter(null)}
         >
           Tous
         </Button>

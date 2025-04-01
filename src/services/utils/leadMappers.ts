@@ -1,4 +1,3 @@
-
 import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -177,7 +176,7 @@ export const createEmptyAction = (): ActionHistory => {
     actionType: 'Call' as TaskType,
     createdAt: new Date().toISOString(),
     scheduledDate: new Date().toISOString(),
-    completedAt: undefined,
+    completedDate: undefined,
     notes: '',
   };
 };

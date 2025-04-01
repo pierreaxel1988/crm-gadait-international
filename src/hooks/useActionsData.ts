@@ -1,15 +1,13 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionItem, ActionStatus } from '@/types/actionHistory';
 import { isPast, isToday } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
 
 export const useActionsData = (refreshTrigger: number = 0) => {
   const [actions, setActions] = useState<ActionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAdmin, teamMemberId } = useAuth();
 
   useEffect(() => {
     console.log("useActionsData useEffect triggered", { refreshTrigger });
@@ -32,19 +30,11 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       
       console.log("Team members:", teamMembers);
 
-      // Get leads with action history, filtered by assigned_to for non-admins
+      // Get all leads with action history
       console.log("Fetching leads with action history...");
-      let query = supabase
+      const { data: leads, error: leadsError } = await supabase
         .from('leads')
         .select('id, name, phone, email, action_history, assigned_to, status');
-
-      // If not admin and we have a team member ID, filter by assigned_to
-      if (!isAdmin && teamMemberId) {
-        console.log(`Filtering leads for team member: ${teamMemberId}`);
-        query = query.eq('assigned_to', teamMemberId);
-      }
-
-      const { data: leads, error: leadsError } = await query;
 
       if (leadsError) {
         console.error('Error fetching leads:', leadsError);
@@ -64,7 +54,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
           
           // Determine action status
           let status: ActionStatus;
-          if (action.completedAt) {
+          if (action.completedDate) {
             status = 'done';
           } else if (action.scheduledDate) {
             const scheduledDate = new Date(action.scheduledDate);
@@ -87,7 +77,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
             actionType: action.actionType,
             createdAt: action.createdAt,
             scheduledDate: action.scheduledDate,
-            completedAt: action.completedAt,
+            completedDate: action.completedDate,
             notes: action.notes,
             assignedToId: lead.assigned_to,
             assignedToName: assignedTeamMember?.name || 'Non assigné',
@@ -111,11 +101,11 @@ export const useActionsData = (refreshTrigger: number = 0) => {
         
         // Secondary sort by date
         const dateA = a.status === 'done' 
-          ? (a.completedAt ? new Date(a.completedAt) : new Date())
+          ? (a.completedDate ? new Date(a.completedDate) : new Date())
           : (a.scheduledDate ? new Date(a.scheduledDate) : new Date());
           
         const dateB = b.status === 'done'
-          ? (b.completedAt ? new Date(b.completedAt) : new Date())
+          ? (b.completedDate ? new Date(b.completedDate) : new Date())
           : (b.scheduledDate ? new Date(b.scheduledDate) : new Date());
           
         return dateA.getTime() - dateB.getTime();
@@ -134,16 +124,8 @@ export const useActionsData = (refreshTrigger: number = 0) => {
     }
   };
 
-  const markActionComplete = async (actionId: string) => {
+  const markActionComplete = async (actionId: string, leadId: string) => {
     try {
-      // Get the lead associated with this action
-      const action = actions.find(a => a.id === actionId);
-      if (!action) {
-        throw new Error('Action not found');
-      }
-      
-      const leadId = action.leadId;
-      
       // First get the lead to update its action history
       const { data: lead, error: leadError } = await supabase
         .from('leads')
@@ -160,20 +142,15 @@ export const useActionsData = (refreshTrigger: number = 0) => {
         throw new Error('Lead or action history not found');
       }
       
-      // Make sure action_history is an array
-      const actionHistory = Array.isArray(lead.action_history)
-        ? lead.action_history
-        : [];
-      
       // Update the action in the action history
-      const updatedActionHistory = actionHistory.map((item: any) => {
-        if (item.id === actionId) {
+      const updatedActionHistory = lead.action_history.map((action: any) => {
+        if (action.id === actionId) {
           return {
-            ...item,
-            completedAt: new Date().toISOString()
+            ...action,
+            completedDate: new Date().toISOString()
           };
         }
-        return item;
+        return action;
       });
       
       // Update the lead with the new action history
@@ -189,10 +166,10 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       
       // Update the local state
       setActions(prevActions => 
-        prevActions.map(item => 
-          item.id === actionId
-            ? { ...item, status: 'done', completedAt: new Date().toISOString() }
-            : item
+        prevActions.map(action => 
+          action.id === actionId
+            ? { ...action, status: 'done', completedDate: new Date().toISOString() }
+            : action
         )
       );
       

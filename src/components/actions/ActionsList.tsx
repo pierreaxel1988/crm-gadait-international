@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -140,7 +141,7 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
                 {action.status === 'done' 
                   ? <div className="flex items-center">
                       <Check className="h-3.5 w-3.5 mr-1.5 text-green-600" />
-                      <span>{formatDate(action.completedAt)}</span>
+                      <span>{formatDate(action.completedDate)}</span>
                     </div>
                   : formatDate(action.scheduledDate)
                 }

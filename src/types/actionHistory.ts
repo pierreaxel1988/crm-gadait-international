@@ -1,21 +1,16 @@
 
-// Import the TaskType from the KanbanCard component to avoid duplication
 import { TaskType } from '@/components/kanban/KanbanCard';
-
-export type { TaskType };
-
-export type ActionStatus = 'todo' | 'overdue' | 'done';
 
 export interface ActionHistory {
   id: string;
-  actionType: TaskType;
+  actionType: string;
   createdAt: string;
-  completedAt?: string;
-  scheduledDate?: string;
-  scheduledTime?: string;
+  scheduledDate: string;
+  completedDate?: string;
   notes?: string;
-  priorityLevel?: 'low' | 'medium' | 'high';
 }
+
+export type ActionStatus = 'todo' | 'overdue' | 'done';
 
 export interface ActionItem {
   id: string;
@@ -24,8 +19,7 @@ export interface ActionItem {
   actionType: TaskType;
   createdAt?: string;
   scheduledDate?: string;
-  scheduledTime?: string;
-  completedAt?: string;
+  completedDate?: string;
   notes?: string;
   assignedToId?: string;
   assignedToName: string;

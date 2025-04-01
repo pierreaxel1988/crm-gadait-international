@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ActionItem } from '@/types/actionHistory';
 import { Card } from '@/components/ui/card';
@@ -61,6 +62,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
     e.stopPropagation();
     
     if (action.phoneNumber) {
+      // Format phone number for WhatsApp (remove spaces and any non-digit characters except +)
       const cleanedPhone = action.phoneNumber.replace(/[^\d+]/g, '');
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
@@ -119,7 +121,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
       <div className="flex justify-between items-center mt-3">
         <div className="flex items-center text-sm text-gray-500">
           <Calendar className="h-3.5 w-3.5 mr-1" />
-          {formatDate(action.status === 'done' ? action.completedAt : action.scheduledDate)}
+          {formatDate(action.status === 'done' ? action.completedDate : action.scheduledDate)}
         </div>
         
         <div className="flex items-center gap-1">

@@ -39,11 +39,9 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
 
   // Group actions by completion date (for completed) or scheduled date (for pending)
   const groupedActions = actionHistory.reduce((groups, action) => {
-    const date = action.completedAt 
-      ? new Date(action.completedAt).toDateString() 
-      : action.scheduledDate 
-        ? new Date(action.scheduledDate).toDateString()
-        : new Date().toDateString();
+    const date = action.completedDate 
+      ? new Date(action.completedDate).toDateString() 
+      : new Date(action.scheduledDate).toDateString();
     
     if (!groups[date]) {
       groups[date] = [];
@@ -69,8 +67,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
   };
   
   // Check if a date is in the past
-  const isDatePast = (dateString: string | undefined): boolean => {
-    if (!dateString) return false;
+  const isDatePast = (dateString: string): boolean => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const date = new Date(dateString);
@@ -96,14 +93,14 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
             <div className={`space-y-2 pl-${isMobile ? '3' : '4'} border-l border-loro-pearl/20`}>
               {groupedActions[dateString].map((action) => {
                 // Determine if action is overdue (past date and not completed)
-                const isOverdue = action.scheduledDate ? isDatePast(action.scheduledDate) && !action.completedAt : false;
+                const isOverdue = isDatePast(action.scheduledDate) && !action.completedDate;
                 
                 return (
                   <Card 
                     key={action.id} 
                     className={cn(
                       "relative overflow-hidden transition-all duration-300 rounded-lg border shadow-sm",
-                      action.completedAt 
+                      action.completedDate 
                         ? "border-loro-pearl/30 bg-[#F1F0FB]" // Soft gray for completed actions
                         : isOverdue
                           ? "border-pink-200 bg-[#FFDEE2]/30" // Soft pink for overdue
@@ -114,7 +111,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                     <div 
                       className={cn(
                         "absolute -left-[10px] top-1/2 transform -translate-y-1/2 h-4 w-4 rounded-full border-2 border-white",
-                        action.completedAt 
+                        action.completedDate 
                           ? "bg-green-500" 
                           : isOverdue
                             ? "bg-red-400"
@@ -128,7 +125,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                           <div className="flex items-center gap-2.5">
                             <div className={cn(
                               `${isMobile ? 'p-1.5' : 'p-1.5'} rounded-md`,
-                              action.completedAt 
+                              action.completedDate 
                                 ? "bg-green-50" 
                                 : isOverdue
                                   ? "bg-rose-50"
@@ -138,7 +135,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                             </div>
                             <div>
                               <span className={`${
-                                action.completedAt 
+                                action.completedDate 
                                   ? 'text-gray-600' 
                                   : isOverdue
                                     ? 'text-rose-800'
@@ -147,13 +144,13 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                                 {action.actionType}
                               </span>
                               <div className="flex items-center gap-1 text-xs text-loro-navy/50 mt-0.5 font-futuraLight">
-                                {action.completedAt ? (
+                                {action.completedDate ? (
                                   <Check className="h-3 w-3 text-green-500" />
                                 ) : (
                                   <Clock className={`h-3 w-3 ${isOverdue ? 'text-red-400' : 'text-loro-navy/40'}`} />
                                 )}
                                 <span>
-                                  {format(new Date(action.completedAt || action.scheduledDate || new Date()), 'HH:mm', { locale: fr })}
+                                  {format(new Date(action.completedDate || action.scheduledDate), 'HH:mm', { locale: fr })}
                                 </span>
                               </div>
                             </div>
@@ -161,7 +158,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                           
                           {action.notes && (
                             <p className={`${isMobile ? 'text-xs mt-1.5 p-2' : 'text-sm mt-2 p-2.5'} ${
-                              action.completedAt 
+                              action.completedDate 
                                 ? 'bg-white rounded-md font-futuraLight text-gray-500 border border-loro-pearl/20' 
                                 : isOverdue
                                   ? 'bg-[#FFF0F2] rounded-md font-futuraLight text-rose-800 border border-pink-100'
@@ -172,7 +169,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                           )}
                         </div>
                         
-                        {!action.completedAt && (
+                        {!action.completedDate && (
                           <Button
                             variant="outline"
                             size="sm"
