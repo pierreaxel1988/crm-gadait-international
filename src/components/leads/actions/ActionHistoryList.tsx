@@ -41,7 +41,9 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
   const groupedActions = actionHistory.reduce((groups, action) => {
     const date = action.completedAt 
       ? new Date(action.completedAt).toDateString() 
-      : new Date(action.scheduledDate).toDateString();
+      : action.scheduledDate 
+        ? new Date(action.scheduledDate).toDateString()
+        : new Date().toDateString();
     
     if (!groups[date]) {
       groups[date] = [];
@@ -67,7 +69,8 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
   };
   
   // Check if a date is in the past
-  const isDatePast = (dateString: string): boolean => {
+  const isDatePast = (dateString: string | undefined): boolean => {
+    if (!dateString) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const date = new Date(dateString);
@@ -93,7 +96,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
             <div className={`space-y-2 pl-${isMobile ? '3' : '4'} border-l border-loro-pearl/20`}>
               {groupedActions[dateString].map((action) => {
                 // Determine if action is overdue (past date and not completed)
-                const isOverdue = isDatePast(action.scheduledDate) && !action.completedAt;
+                const isOverdue = action.scheduledDate ? isDatePast(action.scheduledDate) && !action.completedAt : false;
                 
                 return (
                   <Card 
@@ -150,7 +153,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                                   <Clock className={`h-3 w-3 ${isOverdue ? 'text-red-400' : 'text-loro-navy/40'}`} />
                                 )}
                                 <span>
-                                  {format(new Date(action.completedAt || action.scheduledDate), 'HH:mm', { locale: fr })}
+                                  {format(new Date(action.completedAt || action.scheduledDate || new Date()), 'HH:mm', { locale: fr })}
                                 </span>
                               </div>
                             </div>

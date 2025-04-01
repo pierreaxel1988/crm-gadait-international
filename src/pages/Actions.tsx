@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { ActionStatus } from '@/types/actionHistory';
 import StatusFilterButtons from '@/components/actions/filters/StatusFilterButtons';
 import TypeFilterButtons from '@/components/actions/filters/TypeFilterButtons';
 import AgentFilterButtons from '@/components/actions/filters/AgentFilterButtons';
+import { supabase } from '@/integrations/supabase/client';
 
 // Import TaskType directly from KanbanCard to fix the import error
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -24,8 +25,25 @@ const Actions = () => {
   const [statusFilter, setStatusFilter] = useState<ActionStatus | 'all'>('all');
   const [typeFilter, setTypeFilter] = useState<TaskType | 'all'>('all');
   const [agentFilter, setAgentFilter] = useState('all');
+  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string }[]>([]);
   
   const { actions, isLoading, markActionComplete } = useActionsData(refreshTrigger);
+  
+  // Fetch team members for the filter
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('id, name')
+        .order('name');
+        
+      if (!error && data) {
+        setTeamMembers(data);
+      }
+    };
+    
+    fetchTeamMembers();
+  }, []);
   
   // Filter actions based on search term and filters
   const filteredActions = actions.filter(action => {
@@ -88,18 +106,19 @@ const Actions = () => {
           
           <div className="flex flex-wrap gap-4 mb-6">
             <StatusFilterButtons 
-              value={statusFilter} 
-              onChange={(value) => setStatusFilter(value as ActionStatus | 'all')}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
             />
             
             <TypeFilterButtons 
-              value={typeFilter}
-              onChange={(value) => setTypeFilter(value as TaskType | 'all')}
+              typeFilter={typeFilter}
+              setTypeFilter={setTypeFilter}
             />
             
             <AgentFilterButtons
-              value={agentFilter}
-              onChange={setAgentFilter}
+              agentFilter={agentFilter}
+              setAgentFilter={setAgentFilter}
+              teamMembers={teamMembers}
             />
           </div>
           
