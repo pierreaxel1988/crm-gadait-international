@@ -91,7 +91,7 @@ const LeadDetailMobile = () => {
   
   return (
     <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
-      <div className="fixed top-0 left-0 right-0 z-40">
+      <div className="fixed top-0 left-0 right-0 bg-white z-40 shadow-sm border-b">
         <LeadDetailHeader
           name={lead.name}
           createdAt={lead.createdAt}
@@ -112,7 +112,7 @@ const LeadDetailMobile = () => {
         <LeadDetailTabs defaultTab={activeTab} />
       </div>
       
-      <ScrollArea className="flex-1 mt-[130px] overflow-y-auto">
+      <ScrollArea className="flex-1 mt-32 overflow-y-auto">
         <Tabs value={activeTab} className="w-full">
           <div className="px-4 pt-2 pb-32">
             <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out]">
