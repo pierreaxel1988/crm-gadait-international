@@ -3,9 +3,10 @@ import React from 'react';
 import { ArrowLeft, Plus, Trash2, MapPin, Euro, Save, Loader2 } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
 import CustomButton from '@/components/ui/CustomButton';
-import TagBadge from '@/components/common/TagBadge';
 import { formatBudget } from '@/services/utils/leadMappers';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { getStatusColors } from '@/components/pipeline/mobile/utils/leadFormatUtils';
+import LeadTag from '@/components/common/LeadTag';
 
 interface LeadHeaderProps {
   lead?: LeadDetailed;
@@ -35,6 +36,34 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
     if (!lead) return null;
     
     return formatBudget(lead.budgetMin, lead.budget, lead.currency);
+  };
+
+  // Get status colors for the lead
+  const getStatusColors = (status: string) => {
+    switch (status) {
+      case 'New':
+        return { bg: 'bg-[#DCE4E3]', text: 'text-[#4C5C59]' };
+      case 'Contacted':
+        return { bg: 'bg-[#F3E9D6]', text: 'text-[#B58C59]' };
+      case 'Qualified':
+        return { bg: 'bg-[#F5F3EE]', text: 'text-[#7A6C5D]' };
+      case 'Proposal':
+        return { bg: 'bg-[#F5F3EE]', text: 'text-[#7A6C5D]' };
+      case 'Visit':
+        return { bg: 'bg-[#EBD5CE]', text: 'text-[#D05A76]' };
+      case 'Offer':
+      case 'Offre':
+        return { bg: 'bg-[#F3E9D6]', text: 'text-[#B58C59]' };
+      case 'Deposit':
+        return { bg: 'bg-[#F5F3EE]', text: 'text-[#7A6C5D]' };
+      case 'Signed':
+      case 'Gagné':
+        return { bg: 'bg-[#F2FCE2]', text: 'text-green-700' };
+      case 'Perdu':
+        return { bg: 'bg-red-100', text: 'text-red-700' };
+      default:
+        return { bg: 'bg-[#F5F3EE]', text: 'text-[#7A6C5D]' };
+    }
   };
 
   return (
@@ -90,25 +119,41 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
       </div>
       
       {!compact && lead && (
-        <div className="flex flex-wrap gap-1.5 mt-1">
-          {lead.tags && lead.tags.length > 0 && (
-            lead.tags.map((tag) => (
-              <TagBadge key={tag} tag={tag} />
-            ))
+        <div className="flex flex-wrap items-center text-sm gap-1.5 rounded-sm mx-0 px-0 py-[4px] bg-black/0">
+          {lead.status && (
+            <LeadTag 
+              label={lead.status} 
+              bgColor={getStatusColors(lead.status).bg} 
+              textColor={getStatusColors(lead.status).text} 
+              className="font-futuraLight" 
+            />
           )}
           
-          {getBudgetDisplay() && (
-            <div className={`flex items-center gap-1 rounded-full ${isMobile ? 'px-2 py-0.5 text-[10px]' : 'px-3 py-1 text-xs'} font-medium bg-emerald-100 text-emerald-800`}>
-              <Euro className={`${isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'}`} />
-              <span>{getBudgetDisplay()}</span>
-            </div>
+          {lead.taskType && (
+            <LeadTag 
+              label={lead.taskType} 
+              bgColor={lead.taskType === 'Call' ? 'bg-[#EBD5CE]' : 'bg-[#F3E9D6]'} 
+              textColor={lead.taskType === 'Call' ? 'text-[#D05A76]' : 'text-[#B58C59]'} 
+              className="font-futuraLight" 
+            />
           )}
           
           {lead.desiredLocation && (
-            <div className={`flex items-center gap-1 rounded-full ${isMobile ? 'px-2 py-0.5 text-[10px]' : 'px-3 py-1 text-xs'} font-medium bg-blue-100 text-blue-800`}>
-              <MapPin className={`${isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'}`} />
-              <span>{lead.desiredLocation}</span>
-            </div>
+            <LeadTag 
+              label={lead.desiredLocation} 
+              bgColor="bg-[#F5F3EE]" 
+              textColor="text-[#7A6C5D]" 
+              className="font-futuraLight" 
+            />
+          )}
+          
+          {lead.budget && (
+            <LeadTag 
+              label={getBudgetDisplay() || ''} 
+              bgColor="bg-[#F5F3EE]" 
+              textColor="text-[#7A6C5D]" 
+              className="font-futuraLight min-w-[100px] text-center" 
+            />
           )}
         </div>
       )}
