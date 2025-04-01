@@ -47,9 +47,13 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       const allActions: ActionItem[] = [];
       
       leads?.forEach(lead => {
-        if (!lead.action_history || !Array.isArray(lead.action_history)) return;
+        // Check if action_history exists and is an array
+        if (!lead.action_history || typeof lead.action_history !== 'object') return;
         
-        lead.action_history.forEach((action: any) => {
+        // Safely cast action_history to an array if it's an array
+        const actionHistory = Array.isArray(lead.action_history) ? lead.action_history : [];
+        
+        actionHistory.forEach((action: any) => {
           if (!action || !action.id) return;
           
           // Determine action status
@@ -140,6 +144,11 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       
       if (!lead || !lead.action_history) {
         throw new Error('Lead or action history not found');
+      }
+      
+      // Ensure action_history is an array before trying to map over it
+      if (!Array.isArray(lead.action_history)) {
+        throw new Error('Action history is not an array');
       }
       
       // Update the action in the action history

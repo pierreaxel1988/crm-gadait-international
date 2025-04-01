@@ -61,6 +61,10 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   const formattedDate = createdAt 
     ? format(new Date(createdAt), 'dd/MM/yyyy')
     : '';
+    
+  // Check if tags include specific values
+  const hasDepositTag = tags?.includes('Vip');
+  const hasCallTag = tags?.includes('Hot');
 
   return (
     <div className="flex items-center p-4 bg-white border-b border-gray-100 shadow-sm">
@@ -78,13 +82,13 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           )}
           
           <div className="flex flex-wrap gap-2 mt-2">
-            {tags && tags.includes('Deposit') && (
+            {hasDepositTag && (
               <span className="px-3 py-1 bg-[#307251] text-white rounded-full text-xs font-medium whitespace-nowrap">
                 Deposit
               </span>
             )}
             
-            {tags && tags.includes('Call') && (
+            {hasCallTag && (
               <span className="px-3 py-1 bg-[#CC6E7E] text-white rounded-full text-xs font-medium whitespace-nowrap">
                 Call
               </span>
