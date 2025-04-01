@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
@@ -7,6 +6,7 @@ import CustomButton from '@/components/ui/CustomButton';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
+
 interface LeadDetailHeaderProps {
   name: string;
   createdAt?: string;
@@ -23,6 +23,7 @@ interface LeadDetailHeaderProps {
   hasChanges: boolean;
   tags?: LeadTag[];
 }
+
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   name,
   createdAt,
@@ -47,6 +48,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
+
   return <div className="flex items-center justify-between p-3 bg-loro-sand">
       <div className="flex items-center gap-2 flex-1">
         <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200 flex-shrink-0">
@@ -59,17 +61,17 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           </p>
           <div className="flex flex-wrap gap-2 mt-1 max-w-[250px] sm:max-w-[350px] md:max-w-[450px]">
             {budget && (
-              <span className="text-xs bg-[#F5F3EE] px-2 py-1 rounded-md border border-zinc-200">
+              <span className="text-xs bg-[#F5F3EE] px-2 py-1 rounded-xl border border-zinc-200">
                 {formatBudget(budget, currency)}
               </span>
             )}
             {desiredLocation && (
-              <span className="text-xs bg-[#EBD5CE] px-2 py-1 rounded-md">
+              <span className="text-xs bg-[#EBD5CE] px-2 py-1 rounded-xl">
                 {desiredLocation}
               </span>
             )}
             {country && (
-              <span className="text-xs bg-[#F3E9D6] px-2 py-1 rounded-md border border-zinc-200">
+              <span className="text-xs bg-[#F3E9D6] px-2 py-1 rounded-xl border border-zinc-200">
                 {country}
               </span>
             )}
@@ -102,4 +104,5 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       </div>
     </div>;
 };
+
 export default LeadDetailHeader;
