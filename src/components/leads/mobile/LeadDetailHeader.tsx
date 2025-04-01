@@ -57,14 +57,23 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           <p className="text-xs text-loro-terracotta">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
-          <p className="text-xs flex items-center gap-1 text-zinc-800 truncate max-w-[180px] sm:max-w-[300px] md:max-w-[400px]">
-            {budget && formatBudget(budget, currency)}
-            {budget && (desiredLocation || country || purchaseTimeframe) && ' • '}
-            {desiredLocation}
-            {!desiredLocation && country ? country : desiredLocation && country ? ` (${country})` : ''}
-            {(desiredLocation || country) && purchaseTimeframe && ' • '}
-            {purchaseTimeframe}
-          </p>
+          <div className="flex flex-wrap gap-2 mt-1 max-w-[250px] sm:max-w-[350px] md:max-w-[450px]">
+            {budget && (
+              <span className="text-xs bg-[#F5F3EE] px-2 py-1 rounded-md border border-zinc-200">
+                {formatBudget(budget, currency)}
+              </span>
+            )}
+            {desiredLocation && (
+              <span className="text-xs bg-[#EBD5CE] px-2 py-1 rounded-md">
+                {desiredLocation}
+              </span>
+            )}
+            {country && (
+              <span className="text-xs bg-[#F3E9D6] px-2 py-1 rounded-md border border-zinc-200">
+                {country}
+              </span>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex flex-col items-end gap-2 flex-shrink-0">
