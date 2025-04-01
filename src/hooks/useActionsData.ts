@@ -142,6 +142,11 @@ export const useActionsData = (refreshTrigger: number = 0) => {
         throw new Error('Lead or action history not found');
       }
       
+      // Ensure action_history is an array before trying to map it
+      if (!Array.isArray(lead.action_history)) {
+        throw new Error('Action history is not an array');
+      }
+      
       // Update the action in the action history
       const updatedActionHistory = lead.action_history.map((action: any) => {
         if (action.id === actionId) {
