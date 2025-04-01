@@ -85,18 +85,18 @@ const Actions = () => {
           
           <div className="flex flex-wrap gap-4 mb-6">
             <StatusFilterButtons 
-              value={statusFilter} 
-              onChange={(value) => setStatusFilter(value as ActionStatus | 'all')}
+              status={statusFilter} 
+              onStatusChange={(value) => setStatusFilter(value as ActionStatus | 'all')}
             />
             
             <TypeFilterButtons 
-              value={typeFilter}
-              onChange={(value) => setTypeFilter(value as TaskType | 'all')}
+              type={typeFilter}
+              onTypeChange={(value) => setTypeFilter(value as TaskType | 'all')}
             />
             
             <AgentFilterButtons
-              value={agentFilter}
-              onChange={setAgentFilter}
+              agent={agentFilter}
+              onAgentChange={setAgentFilter}
             />
           </div>
           

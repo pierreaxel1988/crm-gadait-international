@@ -10,6 +10,8 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   isAdmin: boolean;
+  teamMemberId: string | null;
+  userEmail: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,6 +21,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [teamMemberId, setTeamMemberId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     // Get initial session
@@ -28,16 +32,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(data.session);
         setUser(data.session?.user ?? null);
         
-        // Check if user has admin role or is Pierre Axel Gadait
         if (data.session?.user) {
           const userRole = data.session.user.user_metadata?.role;
-          const userEmail = data.session.user.email;
+          const email = data.session.user.email;
+          setUserEmail(email);
+          
           setIsAdmin(
             userRole === 'admin' || 
-            userEmail === 'pierre@gadait-international.com' ||
-            userEmail === 'christelle@gadait-international.com' ||
-            userEmail === 'admin@gadait-international.com'
+            email === 'pierre@gadait-international.com' ||
+            email === 'christelle@gadait-international.com' ||
+            email === 'admin@gadait-international.com'
           );
+          
+          // Fetch the team member ID based on email
+          if (email) {
+            const { data: teamMemberData } = await supabase
+              .from('team_members')
+              .select('id')
+              .eq('email', email)
+              .single();
+              
+            if (teamMemberData) {
+              setTeamMemberId(teamMemberData.id);
+            }
+          }
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
@@ -50,22 +68,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Check if user has admin role or is Pierre Axel Gadait on auth change
         if (session?.user) {
           const userRole = session.user.user_metadata?.role;
-          const userEmail = session.user.email;
+          const email = session.user.email;
+          setUserEmail(email);
+          
           setIsAdmin(
             userRole === 'admin' || 
-            userEmail === 'pierre@gadait-international.com' ||
-            userEmail === 'christelle@gadait-international.com' ||
-            userEmail === 'admin@gadait-international.com'
+            email === 'pierre@gadait-international.com' ||
+            email === 'christelle@gadait-international.com' ||
+            email === 'admin@gadait-international.com'
           );
+          
+          // Fetch the team member ID based on email
+          if (email) {
+            const { data: teamMemberData } = await supabase
+              .from('team_members')
+              .select('id')
+              .eq('email', email)
+              .single();
+              
+            if (teamMemberData) {
+              setTeamMemberId(teamMemberData.id);
+            }
+          }
         } else {
           setIsAdmin(false);
+          setTeamMemberId(null);
         }
         
         setLoading(false);
@@ -101,7 +134,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signOut, signInWithGoogle, isAdmin }}>
+    <AuthContext.Provider value={{ 
+      session, 
+      user, 
+      loading, 
+      signOut, 
+      signInWithGoogle, 
+      isAdmin,
+      teamMemberId,
+      userEmail
+    }}>
       {children}
     </AuthContext.Provider>
   );

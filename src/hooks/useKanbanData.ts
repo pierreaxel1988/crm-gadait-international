@@ -7,6 +7,7 @@ import { getLeads } from '@/services/leadCore';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import { PropertyType, PurchaseTimeframe, PipelineType, Currency } from '@/types/lead';
 import type { Json } from '@/integrations/supabase/types';
+import { useAuth } from '@/hooks/useAuth';
 
 // Extend KanbanItem with the additional properties needed for filtering
 export interface ExtendedKanbanItem extends KanbanItem {
@@ -41,12 +42,15 @@ export const useKanbanData = (
 ) => {
   const [loadedColumns, setLoadedColumns] = useState<KanbanColumn[]>(columns);
   const [isLoading, setIsLoading] = useState(true);
+  const { isAdmin, teamMemberId } = useAuth();
 
   useEffect(() => {
     console.log("useKanbanData useEffect triggered");
     console.log("Initial columns:", columns);
     console.log("Pipeline type:", pipelineType);
     console.log("Refresh trigger:", refreshTrigger);
+    console.log("Is admin:", isAdmin);
+    console.log("Team member ID:", teamMemberId);
     
     const fetchLeads = async () => {
       try {
@@ -67,11 +71,19 @@ export const useKanbanData = (
           return;
         }
         
-        // Direct query to get all leads with action_history
-        const { data: supabaseLeads, error: leadsError } = await supabase
+        // Direct query to get leads with action_history
+        let query = supabase
           .from('leads')
           .select('*, action_history')
           .order('created_at', { ascending: false });
+        
+        // Filter by assigned_to for non-admin users
+        if (!isAdmin && teamMemberId) {
+          console.log(`Filtering leads for team member: ${teamMemberId}`);
+          query = query.eq('assigned_to', teamMemberId);
+        }
+        
+        const { data: supabaseLeads, error: leadsError } = await query;
           
         if (leadsError) {
           console.error('Error fetching leads:', leadsError);
@@ -92,11 +104,21 @@ export const useKanbanData = (
         if (!allLeads || allLeads.length === 0) {
           console.log("No leads in Supabase, trying local data");
           const localLeads = await getLeads();
+          
+          // If we have local leads and we're not an admin, filter by team member ID
           if (localLeads && localLeads.length > 0) {
             console.log("Found local leads:", localLeads.length);
             
+            if (!isAdmin && teamMemberId) {
+              console.log(`Filtering local leads for team member: ${teamMemberId}`);
+              allLeads = localLeads.filter(lead => lead.assignedTo === teamMemberId);
+              console.log("Filtered local leads:", allLeads.length);
+            } else {
+              allLeads = localLeads;
+            }
+            
             // Make sure the returned data from getLeads() is compatible with our expected structure
-            allLeads = localLeads.map(lead => ({
+            allLeads = allLeads.map(lead => ({
               // Required fields with defaults to satisfy TypeScript
               id: lead.id,
               name: lead.name,
@@ -225,7 +247,7 @@ export const useKanbanData = (
     };
 
     fetchLeads();
-  }, [refreshTrigger, columns, pipelineType]);
+  }, [refreshTrigger, columns, pipelineType, isAdmin, teamMemberId]);
 
   return { loadedColumns, setLoadedColumns, isLoading };
 };

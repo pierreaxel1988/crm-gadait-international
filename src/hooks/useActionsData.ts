@@ -4,10 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { ActionItem, ActionStatus } from '@/types/actionHistory';
 import { isPast, isToday } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useActionsData = (refreshTrigger: number = 0) => {
   const [actions, setActions] = useState<ActionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { isAdmin, teamMemberId } = useAuth();
 
   useEffect(() => {
     console.log("useActionsData useEffect triggered", { refreshTrigger });
@@ -30,11 +32,19 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       
       console.log("Team members:", teamMembers);
 
-      // Get all leads with action history
+      // Get leads with action history, filtered by assigned_to for non-admins
       console.log("Fetching leads with action history...");
-      const { data: leads, error: leadsError } = await supabase
+      let query = supabase
         .from('leads')
         .select('id, name, phone, email, action_history, assigned_to, status');
+
+      // If not admin and we have a team member ID, filter by assigned_to
+      if (!isAdmin && teamMemberId) {
+        console.log(`Filtering leads for team member: ${teamMemberId}`);
+        query = query.eq('assigned_to', teamMemberId);
+      }
+
+      const { data: leads, error: leadsError } = await query;
 
       if (leadsError) {
         console.error('Error fetching leads:', leadsError);
@@ -124,8 +134,16 @@ export const useActionsData = (refreshTrigger: number = 0) => {
     }
   };
 
-  const markActionComplete = async (actionId: string, leadId: string) => {
+  const markActionComplete = async (actionId: string) => {
     try {
+      // Get the lead associated with this action
+      const action = actions.find(a => a.id === actionId);
+      if (!action) {
+        throw new Error('Action not found');
+      }
+      
+      const leadId = action.leadId;
+      
       // First get the lead to update its action history
       const { data: lead, error: leadError } = await supabase
         .from('leads')
