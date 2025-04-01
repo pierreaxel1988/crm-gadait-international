@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
@@ -49,7 +50,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
     }
   };
 
-  return <div className="flex items-center justify-between p-3 bg-loro-sand">
+  return <div className="flex items-center justify-between p-3 bg-loro-sand w-full">
       <div className="flex items-center gap-2 flex-1">
         <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200 flex-shrink-0">
           <ArrowLeft className="h-5 w-5" />
