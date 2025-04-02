@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -25,6 +26,28 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const [lead, setLead] = useState<LeadDetailed | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>(initialActionHistory || []);
+  const [headerHeight, setHeaderHeight] = useState<number>(0);
+  const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
+
+  useEffect(() => {
+    const measureHeader = () => {
+      const headerElement = document.querySelector('.bg-loro-sand');
+      if (headerElement) {
+        const height = headerElement.getBoundingClientRect().height;
+        setHeaderHeight(height);
+        setIsHeaderMeasured(true);
+      }
+    };
+    
+    measureHeader();
+    window.addEventListener('resize', measureHeader);
+    const timeoutId = setTimeout(measureHeader, 300);
+    
+    return () => {
+      window.removeEventListener('resize', measureHeader);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   useEffect(() => {
     if (initialActionHistory) {
@@ -126,6 +149,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     return date < today;
   };
 
+  const dynamicTopMargin = isHeaderMeasured 
+    ? `${Math.max(headerHeight + 8, 32)}px` 
+    : 'calc(32px + 4rem)';
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-4">
@@ -135,7 +162,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   }
 
   return (
-    <div className="space-y-3 pt-4 mt-2">
+    <div 
+      className="space-y-3 pt-4"
+      style={{ marginTop: dynamicTopMargin }}
+    >
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Actions en attente</h3>
       </div>

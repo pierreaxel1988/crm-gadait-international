@@ -1,114 +1,123 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadTag } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Activity } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
-import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
-import { format } from 'date-fns';
-import { Input } from '@/components/ui/input';
-import { LeadStatus } from '@/components/common/StatusBadge';
-import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { deleteLead } from '@/services/leadUpdater';
-import { useNavigate } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
 
 interface StatusSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
 
-const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const navigate = useNavigate();
+const LEAD_STATUSES = [
+  "New", "Contacted", "Qualified", "Proposal", "Visit", 
+  "Offer", "Offre", "Deposit", "Signed", "Gagné", "Perdu"
+];
+
+const LEAD_TAGS = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];
+
+const StatusSection: React.FC<StatusSectionProps> = ({
+  lead,
+  onDataChange
+}) => {
+  const [headerHeight, setHeaderHeight] = useState<number>(0);
+  const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
+  
+  useEffect(() => {
+    const measureHeader = () => {
+      const headerElement = document.querySelector('.bg-loro-sand');
+      if (headerElement) {
+        const height = headerElement.getBoundingClientRect().height;
+        setHeaderHeight(height);
+        setIsHeaderMeasured(true);
+      }
+    };
+    
+    measureHeader();
+    window.addEventListener('resize', measureHeader);
+    const timeoutId = setTimeout(measureHeader, 300);
+    
+    return () => {
+      window.removeEventListener('resize', measureHeader);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   const handleInputChange = (field: keyof LeadDetailed, value: any) => {
-    onDataChange({ [field]: value } as Partial<LeadDetailed>);
+    onDataChange({
+      [field]: value
+    } as Partial<LeadDetailed>);
   };
-  
-  const leadStatuses: LeadStatus[] = [
-    "New",       // Nouveaux
-    "Contacted", // Contactés
-    "Qualified", // Qualifiés
-    "Proposal",  // Propositions
-    "Visit",     // Visites en cours
-    "Offer",     // Offre en cours (English)
-    "Offre",     // Offre en cours (French)
-    "Deposit",   // Dépôt reçu
-    "Signed",    // Signature finale
-    "Gagné",     // Conclus
-    "Perdu"      // Perdu
-  ];
-  
-  const leadTags: LeadTag[] = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];
 
-  const handleTagToggle = (tag: LeadTag) => {
-    const currentTags = lead.tags || [];
-    const updatedTags = currentTags.includes(tag)
-      ? currentTags.filter(t => t !== tag)
-      : [...currentTags, tag];
+  const handleTagToggle = (tag: string) => {
+    const updatedTags = lead.tags?.includes(tag as LeadTag)
+      ? lead.tags.filter(t => t !== tag)
+      : [...(lead.tags || []), tag as LeadTag];
     
     handleInputChange('tags', updatedTags);
   };
 
-  const formattedLastContact = lead.lastContactedAt 
-    ? format(new Date(lead.lastContactedAt), 'dd/MM/yyyy HH:mm')
-    : '';
-    
-  const formattedNextFollowUp = lead.nextFollowUpDate 
-    ? format(new Date(lead.nextFollowUpDate), 'dd/MM/yyyy HH:mm')
-    : '';
-    
-  const handleDeleteLead = async () => {
-    if (!lead.id) return;
-    
-    try {
-      setIsDeleting(true);
-      const success = await deleteLead(lead.id);
-      
-      if (success) {
-        toast({
-          title: "Lead supprimé",
-          description: "Le lead a été supprimé avec succès."
-        });
-        navigate('/pipeline');
-      } else {
-        throw new Error("Échec de la suppression");
-      }
-    } catch (error) {
-      console.error("Error deleting lead:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de supprimer ce lead."
-      });
-    } finally {
-      setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
-    }
-  };
+  const dynamicTopMargin = isHeaderMeasured 
+    ? `${Math.max(headerHeight + 8, 32)}px` 
+    : 'calc(32px + 4rem)';
 
   return (
-    <div className="space-y-5 pt-4 mt-2">
-      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Statut & Suivi</h2>
+    <div 
+      className="space-y-5 pt-4" 
+      style={{ marginTop: dynamicTopMargin }}
+    >
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Statut et Suivi</h2>
       
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="status" className="text-sm text-gray-700">Statut du lead</Label>
-          <Select
-            value={lead.status || "New"}
-            onValueChange={(value) => handleInputChange('status', value)}
+          <Label htmlFor="status" className="text-sm">Statut du lead</Label>
+          <div className="flex">
+            <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 border border-r-0 rounded-l-md bg-white">
+              <Activity className="h-4 w-4 text-gray-500" />
+            </div>
+            <Select 
+              value={lead.status || ''} 
+              onValueChange={value => handleInputChange('status', value)}
+            >
+              <SelectTrigger id="status" className="w-full rounded-l-none font-futura">
+                <SelectValue placeholder="Sélectionner un statut" />
+              </SelectTrigger>
+              <SelectContent>
+                {LEAD_STATUSES.map(status => (
+                  <SelectItem key={status} value={status} className="font-futura">
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm">Tags</Label>
+          <MultiSelectButtons
+            options={LEAD_TAGS}
+            selectedValues={lead.tags || []}
+            onToggle={handleTagToggle}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="assignedTo" className="text-sm">Responsable du suivi</Label>
+          <Select 
+            value={lead.assignedTo || ''} 
+            onValueChange={value => handleInputChange('assignedTo', value)}
           >
-            <SelectTrigger id="status" className="w-full font-futura h-9">
-              <SelectValue placeholder="Sélectionner un statut" />
+            <SelectTrigger id="assignedTo" className="w-full font-futura">
+              <SelectValue placeholder="Sélectionner un membre de l'équipe" />
             </SelectTrigger>
             <SelectContent>
-              {leadStatuses.map((status) => (
-                <SelectItem key={status} value={status} className="font-futura">
-                  {status}
+              {['Anne', 'Marie', 'Pierre', 'Jean', 'Sophie'].map(member => (
+                <SelectItem key={member} value={member} className="font-futura">
+                  {member}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -116,78 +125,38 @@ const StatusSection: React.FC<StatusSectionProps> = ({ lead, onDataChange }) => 
         </div>
         
         <div className="space-y-2">
-          <Label className="text-sm text-gray-700">Tags</Label>
-          <MultiSelectButtons
-            options={leadTags}
-            selectedValues={lead.tags || []}
-            onToggle={handleTagToggle}
-          />
+          <Label className="text-sm">Dernière interaction</Label>
+          <div className="p-3 bg-gray-50 rounded-md border text-sm text-gray-700">
+            {lead.lastContactedAt 
+              ? new Date(lead.lastContactedAt).toLocaleDateString('fr-FR', { 
+                  day: '2-digit', 
+                  month: '2-digit', 
+                  year: 'numeric', 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })
+              : 'Aucune interaction enregistrée'}
+          </div>
         </div>
         
         <div className="space-y-2">
-          <Label className="text-sm text-gray-700">Responsable du suivi</Label>
-          <TeamMemberSelect
-            value={lead.assignedTo}
-            onChange={(value) => handleInputChange('assignedTo', value)}
-            label="Attribuer à"
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="lastContactedAt" className="text-sm text-gray-700">Date du dernier contact</Label>
-          <Input
-            id="lastContactedAt"
-            value={formattedLastContact}
-            className="w-full font-futura bg-gray-50 h-9 text-sm"
-            readOnly
-          />
-          <p className="text-xs text-muted-foreground">Mise à jour automatique lors d'une action</p>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="nextFollowUpDate" className="text-sm text-gray-700">Prochain suivi prévu</Label>
-          <Input
-            id="nextFollowUpDate"
-            value={formattedNextFollowUp}
-            className="w-full font-futura bg-gray-50 h-9 text-sm"
-            readOnly
-          />
-          <p className="text-xs text-muted-foreground">Programmé automatiquement lors de la création d'une action</p>
-        </div>
-        
-        <div className="pt-4 mt-6 border-t border-gray-200">
-          <Button 
-            variant="destructive" 
-            size="sm" 
-            className="w-full"
-            onClick={() => setIsDeleteDialogOpen(true)}
+          <Label className="text-sm">Objectif client</Label>
+          <RadioGroup 
+            value={lead.propertyUse || ''} 
+            onValueChange={value => handleInputChange('propertyUse', value)}
+            className="flex flex-col space-y-1.5"
           >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Supprimer ce lead
-          </Button>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="Résidence principale" id="residence" />
+              <Label htmlFor="residence" className="font-futura">Résidence principale</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="Investissement locatif" id="investment" />
+              <Label htmlFor="investment" className="font-futura">Investissement locatif</Label>
+            </div>
+          </RadioGroup>
         </div>
       </div>
-      
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer le lead</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer ce lead ? Cette action est irréversible.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteLead}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? "Suppression..." : "Supprimer"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
