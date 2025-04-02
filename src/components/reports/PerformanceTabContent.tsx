@@ -1,53 +1,71 @@
 
-import React from 'react';
-import { BarChart3, PieChart } from 'lucide-react';
+import React, { useState } from 'react';
+import { BarChart3, PieChart, TrendingUp, Calendar, Euro } from 'lucide-react';
 import DashboardCard from '@/components/dashboard/DashboardCard';
 import ConversionRateCard from '@/components/reports/ConversionRateCard';
 import SalesPerformanceChart from '@/components/reports/SalesPerformanceChart';
 import LeadSourceDistribution from '@/components/reports/LeadSourceDistribution';
 import TopAgentsTable from '@/components/reports/TopAgentsTable';
+import { useIsMobile } from '@/hooks/use-mobile';
+
+interface PerformanceTabContentProps {
+  period: string;
+}
 
 // Données mockées pour le graphique des ventes
 const salesData = [
-  { name: 'Jan', total: 250000 },
-  { name: 'Feb', total: 420000 },
-  { name: 'Mar', total: 380000 },
-  { name: 'Apr', total: 520000 },
-  { name: 'May', total: 350000 },
-  { name: 'Jun', total: 620000 },
-  { name: 'Jul', total: 780000 },
+  { name: 'Jan', total: 1250000 },
+  { name: 'Feb', total: 2420000 },
+  { name: 'Mar', total: 1980000 },
+  { name: 'Apr', total: 2520000 },
+  { name: 'May', total: 1950000 },
+  { name: 'Jun', total: 3620000 },
+  { name: 'Jul', total: 4780000 },
 ];
 
-const PerformanceTabContent: React.FC = () => {
+const PerformanceTabContent: React.FC<PerformanceTabContentProps> = ({ period }) => {
+  const isMobile = useIsMobile();
+  const [timeRange, setTimeRange] = useState<'month' | 'quarter' | 'year'>('month');
+  
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <ConversionRateCard 
-          title="Taux de conversion" 
-          value={28} 
-          change={12} 
-          period="vs dernier mois"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <ConversionRateCard 
           title="Valeur moyenne" 
-          value="€1.2M" 
-          change={-5} 
-          period="vs dernier mois"
+          value="€2.4M" 
+          change={8} 
+          period="vs période précédente"
+          icon={<Euro className="h-5 w-5" />}
         />
         <ConversionRateCard 
-          title="Temps moyen de conversion" 
+          title="Prix moyen/m²" 
+          value="€12,500" 
+          change={3} 
+          period="vs période précédente"
+          icon={<Euro className="h-5 w-5" />}
+        />
+        <ConversionRateCard 
+          title="Temps de vente" 
           value="45 jours" 
           change={-8} 
-          period="vs dernier mois"
+          period="vs période précédente"
           inverse
+          icon={<Calendar className="h-5 w-5" />}
+        />
+        <ConversionRateCard 
+          title="Croissance" 
+          value="12.5%" 
+          change={5} 
+          period="vs période précédente"
+          icon={<TrendingUp className="h-5 w-5" />}
         />
       </div>
       
       <DashboardCard 
         title="Performance des ventes" 
-        subtitle="Montant total des ventes par mois" 
+        subtitle="Montant total des ventes (en millions €)" 
         icon={<BarChart3 className="h-5 w-5" />}
-        className="h-[400px] lg:h-[500px]"
+        className={`${isMobile ? 'h-[400px]' : 'h-[500px]'}`}
       >
         <div className="h-full w-full pt-2">
           <SalesPerformanceChart data={salesData} />

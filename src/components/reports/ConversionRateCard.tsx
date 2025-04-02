@@ -10,6 +10,7 @@ interface ConversionRateCardProps {
   change: number;
   period: string;
   inverse?: boolean;
+  icon?: React.ReactNode;
 }
 
 const ConversionRateCard = ({ 
@@ -17,16 +18,20 @@ const ConversionRateCard = ({
   value, 
   change, 
   period,
-  inverse = false
+  inverse = false,
+  icon
 }: ConversionRateCardProps) => {
   const isPositive = change > 0;
   const showPositive = inverse ? !isPositive : isPositive;
   
   return (
-    <Card>
-      <CardContent className="p-6">
+    <Card className="border-opacity-40 hover:shadow-md transition-all">
+      <CardContent className="p-5">
         <div className="flex flex-col">
-          <span className="text-sm font-medium text-muted-foreground">{title}</span>
+          <div className="flex items-center gap-2 mb-2">
+            {icon && <div className="text-loro-navy opacity-80">{icon}</div>}
+            <span className="text-sm font-medium text-muted-foreground">{title}</span>
+          </div>
           <span className="text-2xl font-semibold mt-1">{value}</span>
           
           <div className="flex items-center mt-3">
