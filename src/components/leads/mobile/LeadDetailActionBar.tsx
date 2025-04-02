@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription, DrawerClose } from '@/components/ui/drawer';
@@ -27,6 +26,7 @@ interface LeadDetailActionBarProps {
   actionSuggestions?: ActionSuggestion[];
   onAcceptSuggestion?: (suggestion: ActionSuggestion) => void;
   onRejectSuggestion?: (suggestion: ActionSuggestion) => void;
+  onDeleteAction?: (actionId: string) => void;
 }
 
 const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
@@ -40,7 +40,8 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   onManualSave,
   actionSuggestions = [],
   onAcceptSuggestion,
-  onRejectSuggestion
+  onRejectSuggestion,
+  onDeleteAction
 }) => {
   const navigate = useNavigate();
   const location = useLocation();

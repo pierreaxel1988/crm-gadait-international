@@ -198,6 +198,7 @@ const LeadDetailMobile = () => {
         lead={lead}
         getActionTypeIcon={getActionTypeIcon}
         onMarkComplete={markActionComplete}
+        onDeleteAction={handleDeleteAction}
         hasChanges={hasChanges}
         isSaving={isSaving}
         onManualSave={handleSaveWithIndicator}

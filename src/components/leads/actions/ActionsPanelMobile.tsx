@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -57,29 +56,32 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     }
   };
 
-  const deleteAction = async (actionId: string) => {
-    if (!lead) return;
+  const handleDeleteAction = async (actionId: string) => {
+    if (!lead && !leadId) return;
     
     try {
-      const updatedActionHistory = actionHistory.filter(action => action.id !== actionId);
+      setActionHistory((currentActions) => 
+        currentActions.filter(action => action.id !== actionId)
+      );
       
-      // Update local state immediately for better UX
-      setActionHistory(updatedActionHistory);
+      const currentLead = lead || await getLead(leadId);
       
-      // Update the lead in the database
-      const updatedLead = await updateLead({
-        ...lead,
-        actionHistory: updatedActionHistory
-      });
-      
-      if (updatedLead) {
-        toast({
-          title: "Action supprimée",
-          description: "L'action a été supprimée avec succès"
+      if (currentLead) {
+        const updatedActionHistory = (currentLead.actionHistory || [])
+          .filter(action => action.id !== actionId);
+        
+        const updatedLead = await updateLead({
+          ...currentLead,
+          actionHistory: updatedActionHistory
         });
         
-        // Update the lead state with the response
-        setLead(updatedLead);
+        if (updatedLead) {
+          setLead(updatedLead);
+          toast({
+            title: "Action supprimée",
+            description: "L'action a été supprimée avec succès"
+          });
+        }
       }
     } catch (error) {
       console.error("Error deleting action:", error);
@@ -89,10 +91,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         description: "Impossible de supprimer l'action"
       });
       
-      // Revert the local state if there was an error
-      if (lead) {
-        setActionHistory(lead.actionHistory || []);
-      }
+      fetchLeadData();
     }
   };
 
@@ -208,7 +207,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   variant="ghost" 
                   size="sm" 
                   className="absolute bottom-1 right-1 h-6 w-6 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
-                  onClick={() => deleteAction(action.id)}
+                  onClick={() => handleDeleteAction(action.id)}
                   title="Supprimer cette action"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -254,7 +253,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   variant="ghost" 
                   size="sm" 
                   className="absolute bottom-1 right-1 h-6 w-6 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
-                  onClick={() => deleteAction(action.id)}
+                  onClick={() => handleDeleteAction(action.id)}
                   title="Supprimer cette action"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
