@@ -20,7 +20,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { deleteLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
-import LeadContactActions from '@/components/pipeline/mobile/components/LeadContactActions';
 
 interface StatusSectionProps {
   lead: LeadDetailed;
@@ -109,30 +108,6 @@ const StatusSection: React.FC<StatusSectionProps> = ({
     }
   };
 
-  const handlePhoneCall = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (startCall) {
-      startCall();
-    } else if (lead.phone) {
-      window.location.href = `tel:${lead.phone}`;
-    }
-  };
-
-  const handleWhatsAppClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (lead.phone) {
-      const cleanedPhone = lead.phone.replace(/[^\d+]/g, '');
-      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
-    }
-  };
-
-  const handleEmailClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (lead.email) {
-      window.location.href = `mailto:${lead.email}`;
-    }
-  };
-
   const dynamicTopMargin = isHeaderMeasured 
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
@@ -169,31 +144,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
           </div>
         </div>
 
-        {/* Contact Actions */}
-        <div className="space-y-2 pt-2">
-          <Label className="text-sm">Actions rapides</Label>
-          <div className="flex items-center justify-between">
-            <LeadContactActions 
-              phone={lead.phone}
-              email={lead.email}
-              handlePhoneCall={handlePhoneCall}
-              handleWhatsAppClick={handleWhatsAppClick}
-              handleEmailClick={handleEmailClick}
-            />
-            
-            {callStatus === 'calling' && (
-              <Button 
-                variant="destructive" 
-                size="sm" 
-                onClick={() => endCall('completed')} 
-                className="ml-auto animate-pulse"
-              >
-                <Phone className="h-4 w-4 mr-2" />
-                {formatDuration(callDuration)}
-              </Button>
-            )}
-          </div>
-        </div>
+        {/* Removed "Actions rapides" section */}
         
         <div className="space-y-2">
           <Label className="text-sm">Tags</Label>
