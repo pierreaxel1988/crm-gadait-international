@@ -10,11 +10,6 @@ interface ReportsHeaderProps {
 }
 
 const ReportsHeader: React.FC<ReportsHeaderProps> = ({ period, setPeriod }) => {
-  const handleExport = () => {
-    console.log('Exporting reports data...');
-    // Implementation for exporting functionality would go here
-  };
-
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
@@ -26,7 +21,7 @@ const ReportsHeader: React.FC<ReportsHeaderProps> = ({ period, setPeriod }) => {
         <Select value={period} onValueChange={setPeriod}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <div className="flex items-center gap-2">
-              <CalendarRange className="h-4 w-4 cursor-pointer" />
+              <CalendarRange className="h-4 w-4" />
               <SelectValue placeholder="Période" />
             </div>
           </SelectTrigger>
@@ -38,12 +33,8 @@ const ReportsHeader: React.FC<ReportsHeaderProps> = ({ period, setPeriod }) => {
           </SelectContent>
         </Select>
         
-        <Button 
-          variant="outline" 
-          className="w-full sm:w-auto px-3 py-2 flex items-center gap-2"
-          onClick={handleExport}
-        >
-          <Download className="h-4 w-4 cursor-pointer" />
+        <Button variant="outline" className="w-full sm:w-auto px-3 py-2 flex items-center gap-2">
+          <Download className="h-4 w-4" />
           <span>Exporter</span>
         </Button>
       </div>

@@ -17,7 +17,6 @@ import LeadImport from './pages/LeadImport';
 import MobileLeadImport from './pages/MobileLeadImport';
 import ActionsPage from './pages/Actions';
 import Calendar from './pages/Calendar';
-import Reports from './pages/Reports';
 
 function App() {
   return (
@@ -33,7 +32,6 @@ function App() {
           <Route path="/import-lead" element={<MobileLeadImport />} />
           <Route path="/actions" element={<ActionsPage />} />
           <Route path="/calendar" element={<Calendar />} />
-          <Route path="/reports" element={<Reports />} />
           <Route path="/auth" element={<Auth />} />
         </Routes>
         <Toaster />

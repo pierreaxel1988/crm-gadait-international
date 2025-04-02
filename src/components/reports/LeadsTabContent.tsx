@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Filter, Users, BarChart, Table as TableIcon, PieChart, Target } from 'lucide-react';
+import { Filter, Users, BarChart, Table as TableIcon, PieChart } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import DashboardCard from '@/components/dashboard/DashboardCard';
@@ -11,45 +11,31 @@ import LeadsAgentsTable from '@/components/reports/LeadsAgentsTable';
 import LeadsByPortalChart from '@/components/reports/LeadsByPortalChart';
 import { Period } from '@/components/reports/PeriodSelector';
 
-interface LeadsTabContentProps {
-  period: string;
-}
-
-const LeadsTabContent: React.FC<LeadsTabContentProps> = ({ period }) => {
+const LeadsTabContent: React.FC = () => {
   const [leadsPeriod, setLeadsPeriod] = useState<'semaine' | 'mois' | 'annee'>('mois');
   const [displayMode, setDisplayMode] = useState<'chart' | 'table'>('chart');
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>({ type: 'mois' });
+  const [period, setPeriod] = useState<Period>({ type: 'mois' });
   
   return (
     <div className="grid grid-cols-1 gap-6 h-full min-h-[calc(100vh-250px)]">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <ConversionRateCard 
           title="Nouveaux leads" 
           value={124} 
           change={8} 
-          period="vs période précédente"
-          icon={<Users className="h-5 w-5" />}
+          period="vs dernier mois"
         />
         <ConversionRateCard 
-          title="Taux qualification" 
+          title="Taux de qualification" 
           value="62%" 
           change={4} 
-          period="vs période précédente"
-          icon={<Target className="h-5 w-5" />}
+          period="vs dernier mois"
         />
         <ConversionRateCard 
           title="Coût par lead" 
-          value="€173" 
+          value="€45" 
           change={-12} 
-          period="vs période précédente"
-          inverse
-          icon={<Filter className="h-5 w-5" />}
-        />
-        <ConversionRateCard 
-          title="Temps qualification" 
-          value="48h" 
-          change={-8} 
-          period="vs période précédente"
+          period="vs dernier mois"
           inverse
         />
       </div>
@@ -60,7 +46,7 @@ const LeadsTabContent: React.FC<LeadsTabContentProps> = ({ period }) => {
           subtitle="Distribution par source d'acquisition" 
           icon={<Filter className="h-5 w-5" />}
         >
-          <div className="h-[360px] flex items-center justify-center">
+          <div className="h-[400px] flex items-center justify-center">
             <LeadSourceDistribution isLeadSources />
           </div>
         </DashboardCard>
@@ -70,8 +56,8 @@ const LeadsTabContent: React.FC<LeadsTabContentProps> = ({ period }) => {
           subtitle="Distribution des leads par portail" 
           icon={<PieChart className="h-5 w-5" />}
         >
-          <div className="h-[360px] flex items-center justify-center">
-            <LeadsByPortalChart period={selectedPeriod} />
+          <div className="h-[400px] flex items-center justify-center">
+            <LeadsByPortalChart period={period} />
           </div>
         </DashboardCard>
       </div>
@@ -120,7 +106,7 @@ const LeadsTabContent: React.FC<LeadsTabContentProps> = ({ period }) => {
         }
         className="flex-1 flex flex-col"
       >
-        <div className="flex-1 w-full h-full min-h-[400px]">
+        <div className="flex-1 w-full h-full min-h-[500px]">
           {displayMode === 'chart' ? (
             <LeadsPerAgentChart period={leadsPeriod} />
           ) : (
