@@ -126,7 +126,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
                       {getActionTypeIcon(action.actionType as any)}
                     </div>
                     <div className="text-xs text-loro-navy">
-                      <span className="block">{formatActionDate(action.scheduledDate)}</span>
+                      <span className="block text-[10px]">{formatActionDate(action.scheduledDate)}</span>
                     </div>
                   </div>
                   <Button
