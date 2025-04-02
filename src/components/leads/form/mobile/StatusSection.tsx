@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadTag } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Activity, Trash2 } from 'lucide-react';
+import { Activity, Trash2, Phone } from 'lucide-react';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { deleteLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
+import LeadContactActions from '@/components/pipeline/mobile/components/LeadContactActions';
 
 interface StatusSectionProps {
   lead: LeadDetailed;
@@ -39,6 +41,10 @@ const StatusSection: React.FC<StatusSectionProps> = ({
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isCallDialogOpen, setIsCallDialogOpen] = useState(false);
+  const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'completed' | 'failed'>('idle');
+  const [callDuration, setCallDuration] = useState(0);
+  const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -93,6 +99,94 @@ const StatusSection: React.FC<StatusSectionProps> = ({
     }
   };
 
+  const startCall = () => {
+    if (!lead.phone) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Ce lead n'a pas de numéro de téléphone enregistré."
+      });
+      return;
+    }
+
+    setIsCallDialogOpen(true);
+    setCallStatus('calling');
+    
+    // Start timer to track call duration
+    const timer = setInterval(() => {
+      setCallDuration(prev => prev + 1);
+    }, 1000);
+    
+    setCallTimer(timer);
+    
+    // Initiate the actual call
+    window.location.href = `tel:${lead.phone}`;
+  };
+
+  const endCall = (status: 'completed' | 'failed') => {
+    if (callTimer) {
+      clearInterval(callTimer);
+    }
+    
+    setCallStatus(status);
+    
+    // Log the call in the lead's action history
+    if (status === 'completed' && callDuration > 0) {
+      const callAction = {
+        actionType: 'Call' as any,
+        notes: `Appel de ${formatDuration(callDuration)}`,
+        createdAt: new Date().toISOString(),
+      };
+      
+      const updatedActionHistory = [...(lead.actionHistory || []), {
+        id: crypto.randomUUID(),
+        ...callAction
+      }];
+      
+      onDataChange({
+        actionHistory: updatedActionHistory,
+        lastContactedAt: new Date().toISOString()
+      });
+      
+      toast({
+        title: "Appel enregistré",
+        description: `Un appel de ${formatDuration(callDuration)} a été enregistré.`
+      });
+    }
+    
+    setTimeout(() => {
+      setIsCallDialogOpen(false);
+      setCallDuration(0);
+      setCallStatus('idle');
+    }, 1500);
+  };
+
+  const formatDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  const handlePhoneCall = (e: React.MouseEvent) => {
+    e.preventDefault();
+    startCall();
+  };
+
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (lead.phone) {
+      const cleanedPhone = lead.phone.replace(/[^\d+]/g, '');
+      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
+    }
+  };
+
+  const handleEmailClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (lead.email) {
+      window.location.href = `mailto:${lead.email}`;
+    }
+  };
+
   const dynamicTopMargin = isHeaderMeasured 
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
@@ -126,6 +220,32 @@ const StatusSection: React.FC<StatusSectionProps> = ({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+        </div>
+
+        {/* Contact Actions */}
+        <div className="space-y-2 pt-2">
+          <Label className="text-sm">Actions rapides</Label>
+          <div className="flex items-center justify-between">
+            <LeadContactActions 
+              phone={lead.phone}
+              email={lead.email}
+              handlePhoneCall={handlePhoneCall}
+              handleWhatsAppClick={handleWhatsAppClick}
+              handleEmailClick={handleEmailClick}
+            />
+            
+            {callStatus === 'calling' && (
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={() => endCall('completed')} 
+                className="ml-auto animate-pulse"
+              >
+                <Phone className="h-4 w-4 mr-2" />
+                {formatDuration(callDuration)}
+              </Button>
+            )}
           </div>
         </div>
         
@@ -187,6 +307,56 @@ const StatusSection: React.FC<StatusSectionProps> = ({
             <AlertDialogAction onClick={handleDeleteLead} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Supprimer
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isCallDialogOpen} onOpenChange={setIsCallDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {callStatus === 'calling' ? 'Appel en cours...' : 
+               callStatus === 'completed' ? 'Appel terminé' : 
+               callStatus === 'failed' ? 'Appel échoué' : 'Appel'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {callStatus === 'calling' ? (
+                <div className="text-center py-4">
+                  <div className="flex justify-center mb-4">
+                    <div className="animate-pulse bg-green-100 rounded-full p-4">
+                      <Phone className="h-8 w-8 text-green-600" />
+                    </div>
+                  </div>
+                  <p>En appel avec {lead.name}</p>
+                  <p className="text-2xl font-semibold mt-2">{formatDuration(callDuration)}</p>
+                </div>
+              ) : callStatus === 'completed' ? (
+                <p>L'appel a été enregistré avec succès.</p>
+              ) : callStatus === 'failed' ? (
+                <p>L'appel n'a pas pu être effectué.</p>
+              ) : (
+                <p>Voulez-vous appeler {lead.name} au {lead.phone}?</p>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            {callStatus === 'calling' ? (
+              <>
+                <AlertDialogCancel onClick={() => endCall('failed')}>Annuler</AlertDialogCancel>
+                <AlertDialogAction onClick={() => endCall('completed')} className="bg-green-600 hover:bg-green-700">
+                  Terminer l'appel
+                </AlertDialogAction>
+              </>
+            ) : callStatus === 'completed' || callStatus === 'failed' ? (
+              <AlertDialogAction onClick={() => setIsCallDialogOpen(false)}>OK</AlertDialogAction>
+            ) : (
+              <>
+                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogAction onClick={startCall} className="bg-green-600 hover:bg-green-700">
+                  Appeler
+                </AlertDialogAction>
+              </>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
