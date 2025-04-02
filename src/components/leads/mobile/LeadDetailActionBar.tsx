@@ -1,16 +1,19 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription, DrawerClose } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import { LeadDetailed } from '@/types/lead';
-import { Save, Check, Clock, X, History, ArrowLeft, CalendarClock, Lightbulb } from 'lucide-react';
+import { Save, Check, Clock, X, History, ArrowLeft, CalendarClock, Lightbulb, Trash2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format, isPast, isToday } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ActionHistory } from '@/types/actionHistory';
 import { ActionSuggestion } from '@/services/noteAnalysisService';
 import ActionSuggestions from '@/components/leads/actions/ActionSuggestions';
+import { updateLead } from '@/services/leadUpdater';
+import { toast } from '@/hooks/use-toast';
 
 interface LeadDetailActionBarProps {
   autoSaveEnabled: boolean;
@@ -83,6 +86,38 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
     navigate('/actions');
   };
 
+  const handleDeleteAction = async (actionId: string) => {
+    try {
+      if (!lead) return;
+      
+      // Filter out the action to be deleted
+      const updatedActionHistory = lead.actionHistory.filter(action => action.id !== actionId);
+      
+      // Create updated lead object
+      const updatedLead = {
+        ...lead,
+        actionHistory: updatedActionHistory
+      };
+      
+      // Update lead in database
+      const result = await updateLead(updatedLead);
+      
+      if (result) {
+        toast({
+          title: "Action supprimée",
+          description: "L'action a été supprimée avec succès"
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting action:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer l'action"
+      });
+    }
+  };
+
   const searchParams = new URLSearchParams(location.search);
   const currentTab = searchParams.get('tab');
   const isActionsTab = currentTab === 'actions';
@@ -119,7 +154,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               {futureActions.map(action => (
                 <div 
                   key={action.id}
-                  className="flex items-center justify-between py-1 border-b border-dashed border-loro-sand/30 last:border-b-0"
+                  className="flex items-center justify-between py-1 border-b border-dashed border-loro-sand/30 last:border-b-0 relative"
                 >
                   <div className="flex items-center gap-2">
                     <div className="p-1 rounded-md bg-loro-sand/50">
@@ -129,17 +164,31 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
                       <span className="block text-[10px]">{formatActionDate(action.scheduledDate)}</span>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2 text-xs border border-loro-navy/30 text-loro-navy hover:bg-loro-pearl"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onMarkComplete(action.id);
-                    }}
-                  >
-                    <Check className="h-3 w-3 mr-1" /> Terminer
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteAction(action.id);
+                      }}
+                      title="Supprimer cette action"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs border border-loro-navy/30 text-loro-navy hover:bg-loro-pearl"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMarkComplete(action.id);
+                      }}
+                    >
+                      <Check className="h-3 w-3 mr-1" /> Terminer
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -191,13 +240,27 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               </span>
             </div>
           </div>
-          <Button variant="ghost" size="sm" className={`h-7 px-2 text-xs border transition-all active:scale-95
-            ${isActionOverdue(nextAction.scheduledDate) ? 'border-rose-300 text-rose-700 hover:bg-rose-100' : 'border-loro-navy/30 text-loro-navy hover:bg-loro-pearl'}`} onClick={e => {
-        e.stopPropagation();
-        onMarkComplete(nextAction.id);
-      }}>
-            <Check className="h-3 w-3 mr-1" /> Terminer
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button 
+              variant="ghost"
+              size="sm"
+              className={`h-6 w-6 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent`}
+              onClick={e => {
+                e.stopPropagation();
+                handleDeleteAction(nextAction.id);
+              }}
+              title="Supprimer cette action"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="ghost" size="sm" className={`h-7 px-2 text-xs border transition-all active:scale-95
+              ${isActionOverdue(nextAction.scheduledDate) ? 'border-rose-300 text-rose-700 hover:bg-rose-100' : 'border-loro-navy/30 text-loro-navy hover:bg-loro-pearl'}`} onClick={e => {
+              e.stopPropagation();
+              onMarkComplete(nextAction.id);
+            }}>
+              <Check className="h-3 w-3 mr-1" /> Terminer
+            </Button>
+          </div>
         </div>}
       
       {showSuggestionsBadge && !isActionsTab && (

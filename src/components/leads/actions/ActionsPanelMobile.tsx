@@ -1,12 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
 import { format, isPast } from 'date-fns';
-import { Check, Clock, Calendar } from 'lucide-react';
+import { Check, Clock, Calendar, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
 import { toast } from '@/hooks/use-toast';
+import { updateLead } from '@/services/leadUpdater';
 
 interface ActionsPanelMobileProps {
   leadId: string;
@@ -52,6 +54,45 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const deleteAction = async (actionId: string) => {
+    if (!lead) return;
+    
+    try {
+      const updatedActionHistory = actionHistory.filter(action => action.id !== actionId);
+      
+      // Update local state immediately for better UX
+      setActionHistory(updatedActionHistory);
+      
+      // Update the lead in the database
+      const updatedLead = await updateLead({
+        ...lead,
+        actionHistory: updatedActionHistory
+      });
+      
+      if (updatedLead) {
+        toast({
+          title: "Action supprimée",
+          description: "L'action a été supprimée avec succès"
+        });
+        
+        // Update the lead state with the response
+        setLead(updatedLead);
+      }
+    } catch (error) {
+      console.error("Error deleting action:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer l'action"
+      });
+      
+      // Revert the local state if there was an error
+      if (lead) {
+        setActionHistory(lead.actionHistory || []);
+      }
     }
   };
 
@@ -133,7 +174,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             return (
               <div 
                 key={action.id} 
-                className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${bgColorClass}`}
+                className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${bgColorClass} relative`}
               >
                 <div className="flex justify-between items-start mb-1">
                   <div className="flex items-center gap-1.5">
@@ -163,6 +204,15 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     {action.notes}
                   </div>
                 )}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="absolute bottom-1 right-1 h-6 w-6 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
+                  onClick={() => deleteAction(action.id)}
+                  title="Supprimer cette action"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
               </div>
             );
           })}
@@ -178,7 +228,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 key={action.id} 
                 className={cn(
                   "border rounded-md p-2 bg-[#F1F0FB] transition-all duration-200 animate-[fade-in_0.3s_ease-out]",
-                  "opacity-80"
+                  "opacity-80 relative"
                 )}
               >
                 <div className="flex justify-between items-start mb-1">
@@ -200,6 +250,15 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     {action.notes}
                   </div>
                 )}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="absolute bottom-1 right-1 h-6 w-6 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
+                  onClick={() => deleteAction(action.id)}
+                  title="Supprimer cette action"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
               </div>
             ))}
           </div>

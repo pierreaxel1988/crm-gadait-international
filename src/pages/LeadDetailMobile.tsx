@@ -10,6 +10,7 @@ import ActionsPanelMobile from '@/components/leads/actions/ActionsPanelMobile';
 import ActionSuggestions from '@/components/leads/actions/ActionSuggestions';
 import { CheckCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { updateLead } from '@/services/leadService';
 
 // Import our new components
 import LeadDetailHeader from '@/components/leads/mobile/LeadDetailHeader';
@@ -74,6 +75,41 @@ const LeadDetailMobile = () => {
   const handleMarkComplete = (action: ActionHistory) => {
     if (action && action.id) {
       markActionComplete(action.id);
+    }
+  };
+
+  const handleDeleteAction = async (actionId: string) => {
+    if (!lead) return;
+    
+    try {
+      // Filter out the action to be deleted
+      const updatedActionHistory = lead.actionHistory.filter(action => action.id !== actionId);
+      
+      // Create updated lead object with the filtered actions
+      const updatedLead = {
+        ...lead,
+        actionHistory: updatedActionHistory
+      };
+      
+      // Update lead in database
+      const result = await updateLead(updatedLead);
+      
+      if (result) {
+        // Update local state
+        setLead(result);
+        
+        toast({
+          title: "Action supprimée",
+          description: "L'action a été supprimée avec succès"
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting action:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer l'action"
+      });
     }
   };
 
