@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription, DrawerClose } from '@/components/ui/drawer';
@@ -53,7 +52,6 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
       
       setNextAction(sortedActions.length > 0 ? sortedActions[0] : null);
       
-      // Get future actions (excluding the next action)
       if (sortedActions.length > 1) {
         setFutureActions(sortedActions.slice(1, 3)); // Show max 2 future actions
       } else {
@@ -109,10 +107,12 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
       {futureActions.length > 0 && (
         <div className="fixed bottom-32 left-0 right-0 px-3">
           <div className="bg-loro-pearl/80 rounded-md border border-loro-sand shadow-sm animate-[fade-in_0.3s_ease-out]">
-            <div className="p-2 border-b border-loro-sand/30">
-              <div className="flex items-center gap-1.5">
-                <CalendarClock className="h-3.5 w-3.5 text-loro-navy/70" />
-                <span className="text-xs font-medium text-loro-navy/80">Prochaines actions planifiées</span>
+            <div className="flex items-center gap-2 p-2">
+              <div className="p-1 rounded-md bg-loro-sand/50">
+                <CalendarClock className="h-4 w-4 text-loro-navy" />
+              </div>
+              <div className="text-xs text-loro-navy">
+                <span className="font-medium text-xs">Prochaines actions planifiées</span>
               </div>
             </div>
             <div className="p-2 space-y-2">
@@ -186,7 +186,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
             </div>
             <div className="text-xs">
               <span className="font-medium text-xs">Action prévue:</span> {nextAction.actionType} 
-              <span className="block opacity-80 text-small">
+              <span className="block opacity-80 text-[10px]">
                 {formatActionDate(nextAction.scheduledDate)}
               </span>
             </div>
