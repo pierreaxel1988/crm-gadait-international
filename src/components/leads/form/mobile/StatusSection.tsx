@@ -25,6 +25,13 @@ import LeadContactActions from '@/components/pipeline/mobile/components/LeadCont
 interface StatusSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
+  startCall?: () => void;
+  isCallDialogOpen?: boolean;
+  setIsCallDialogOpen?: (isOpen: boolean) => void;
+  callStatus?: 'idle' | 'calling' | 'completed' | 'failed';
+  callDuration?: number;
+  endCall?: (status: 'completed' | 'failed') => void;
+  formatDuration?: (seconds: number) => string;
 }
 
 const LEAD_STATUSES = [
@@ -36,15 +43,18 @@ const LEAD_TAGS = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "
 
 const StatusSection: React.FC<StatusSectionProps> = ({
   lead,
-  onDataChange
+  onDataChange,
+  startCall,
+  isCallDialogOpen = false,
+  setIsCallDialogOpen = () => {},
+  callStatus = 'idle',
+  callDuration = 0,
+  endCall = () => {},
+  formatDuration = (seconds) => `${Math.floor(seconds / 60)}:${seconds % 60 < 10 ? '0' : ''}${seconds % 60}`
 }) => {
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isCallDialogOpen, setIsCallDialogOpen] = useState(false);
-  const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'completed' | 'failed'>('idle');
-  const [callDuration, setCallDuration] = useState(0);
-  const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -99,77 +109,13 @@ const StatusSection: React.FC<StatusSectionProps> = ({
     }
   };
 
-  const startCall = () => {
-    if (!lead.phone) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Ce lead n'a pas de numéro de téléphone enregistré."
-      });
-      return;
-    }
-
-    setIsCallDialogOpen(true);
-    setCallStatus('calling');
-    
-    // Start timer to track call duration
-    const timer = setInterval(() => {
-      setCallDuration(prev => prev + 1);
-    }, 1000);
-    
-    setCallTimer(timer);
-    
-    // Initiate the actual call
-    window.location.href = `tel:${lead.phone}`;
-  };
-
-  const endCall = (status: 'completed' | 'failed') => {
-    if (callTimer) {
-      clearInterval(callTimer);
-    }
-    
-    setCallStatus(status);
-    
-    // Log the call in the lead's action history
-    if (status === 'completed' && callDuration > 0) {
-      const callAction = {
-        actionType: 'Call' as any,
-        notes: `Appel de ${formatDuration(callDuration)}`,
-        createdAt: new Date().toISOString(),
-      };
-      
-      const updatedActionHistory = [...(lead.actionHistory || []), {
-        id: crypto.randomUUID(),
-        ...callAction
-      }];
-      
-      onDataChange({
-        actionHistory: updatedActionHistory,
-        lastContactedAt: new Date().toISOString()
-      });
-      
-      toast({
-        title: "Appel enregistré",
-        description: `Un appel de ${formatDuration(callDuration)} a été enregistré.`
-      });
-    }
-    
-    setTimeout(() => {
-      setIsCallDialogOpen(false);
-      setCallDuration(0);
-      setCallStatus('idle');
-    }, 1500);
-  };
-
-  const formatDuration = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-
   const handlePhoneCall = (e: React.MouseEvent) => {
     e.preventDefault();
-    startCall();
+    if (startCall) {
+      startCall();
+    } else if (lead.phone) {
+      window.location.href = `tel:${lead.phone}`;
+    }
   };
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {

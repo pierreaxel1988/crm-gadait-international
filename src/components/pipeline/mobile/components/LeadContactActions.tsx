@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { Phone, Mail } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 interface LeadContactActionsProps {
   phone?: string;
   email?: string;
@@ -8,6 +10,7 @@ interface LeadContactActionsProps {
   handleWhatsAppClick: (e: React.MouseEvent) => void;
   handleEmailClick: (e: React.MouseEvent) => void;
 }
+
 const LeadContactActions: React.FC<LeadContactActionsProps> = ({
   phone,
   email,
@@ -60,4 +63,5 @@ const LeadContactActions: React.FC<LeadContactActionsProps> = ({
       </TooltipProvider>
     </div>;
 };
+
 export default LeadContactActions;

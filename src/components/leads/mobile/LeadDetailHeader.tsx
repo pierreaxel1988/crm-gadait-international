@@ -23,6 +23,9 @@ interface LeadDetailHeaderProps {
   isSaving: boolean;
   hasChanges: boolean;
   tags?: LeadTag[];
+  onPhoneCall?: (e: React.MouseEvent) => void;
+  onWhatsAppClick?: (e: React.MouseEvent) => void;
+  onEmailClick?: (e: React.MouseEvent) => void;
 }
 
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
@@ -39,14 +42,39 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   onSave,
   isSaving,
   hasChanges,
-  tags
+  tags,
+  onPhoneCall,
+  onWhatsAppClick,
+  onEmailClick
 }) => {
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (phone) {
+    if (onWhatsAppClick) {
+      onWhatsAppClick(e);
+    } else if (phone) {
       const cleanedPhone = phone.replace(/[^\d+]/g, '');
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
+    }
+  };
+
+  const handlePhoneClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onPhoneCall) {
+      onPhoneCall(e);
+    } else if (phone) {
+      window.location.href = `tel:${phone}`;
+    }
+  };
+
+  const handleEmailClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onEmailClick) {
+      onEmailClick(e);
+    } else if (email) {
+      window.location.href = `mailto:${email}`;
     }
   };
 
@@ -82,7 +110,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       <div className="flex flex-col items-end gap-2 flex-shrink-0">
         <div className="flex items-center gap-2">
           {phone && <>
-              <a href={`tel:${phone}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Appeler">
+              <a href="#" onClick={handlePhoneClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Appeler">
                 <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
                   <Phone className="h-4 w-4" />
                 </div>
@@ -93,7 +121,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
                 </div>
               </button>
             </>}
-          {email && <a href={`mailto:${email}`} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Envoyer un email">
+          {email && <a href="#" onClick={handleEmailClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Envoyer un email">
               <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
                 <Mail className="h-4 w-4" />
               </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -33,6 +34,10 @@ const LeadDetailMobile = () => {
   const activeTab = searchParams.get('tab') || 'criteria';
   
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
+  const [isCallDialogOpen, setIsCallDialogOpen] = useState(false);
+  const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'completed' | 'failed'>('idle');
+  const [callDuration, setCallDuration] = useState(0);
+  const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
   
   const {
     lead,
@@ -118,6 +123,95 @@ const LeadDetailMobile = () => {
     setTimeout(() => setShowSaveIndicator(false), 2000);
   };
 
+  // Call functionality
+  const startCall = () => {
+    if (!lead || !lead.phone) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Ce lead n'a pas de numéro de téléphone enregistré."
+      });
+      return;
+    }
+
+    setIsCallDialogOpen(true);
+    setCallStatus('calling');
+    
+    // Start timer to track call duration
+    const timer = setInterval(() => {
+      setCallDuration(prev => prev + 1);
+    }, 1000);
+    
+    setCallTimer(timer);
+    
+    // Initiate the actual call
+    window.location.href = `tel:${lead.phone}`;
+  };
+
+  const endCall = (status: 'completed' | 'failed') => {
+    if (callTimer) {
+      clearInterval(callTimer);
+    }
+    
+    setCallStatus(status);
+    
+    // Log the call in the lead's action history
+    if (status === 'completed' && callDuration > 0 && lead) {
+      const callAction = {
+        actionType: 'Call' as any,
+        notes: `Appel de ${formatDuration(callDuration)}`,
+        createdAt: new Date().toISOString(),
+        scheduledDate: new Date().toISOString(),
+        completedDate: new Date().toISOString(),
+        id: crypto.randomUUID()
+      };
+      
+      const updatedActionHistory = [...(lead.actionHistory || []), callAction];
+      
+      handleDataChange({
+        actionHistory: updatedActionHistory,
+        lastContactedAt: new Date().toISOString()
+      });
+      
+      toast({
+        title: "Appel enregistré",
+        description: `Un appel de ${formatDuration(callDuration)} a été enregistré.`
+      });
+    }
+    
+    setTimeout(() => {
+      setIsCallDialogOpen(false);
+      setCallDuration(0);
+      setCallStatus('idle');
+    }, 1500);
+  };
+
+  const formatDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  const handlePhoneCall = (e: React.MouseEvent) => {
+    e.preventDefault();
+    startCall();
+  };
+
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (lead?.phone) {
+      const cleanedPhone = lead.phone.replace(/[^\d+]/g, '');
+      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
+    }
+  };
+
+  const handleEmailClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (lead?.email) {
+      window.location.href = `mailto:${lead.email}`;
+    }
+  };
+
   if (isLoading) {
     return <LoadingState isLoading={isLoading} />;
   }
@@ -146,6 +240,9 @@ const LeadDetailMobile = () => {
           isSaving={isSaving}
           hasChanges={hasChanges}
           tags={lead.tags}
+          onPhoneCall={handlePhoneCall}
+          onWhatsAppClick={handleWhatsAppClick}
+          onEmailClick={handleEmailClick}
         />
         
         <div className="bg-white">
@@ -165,7 +262,17 @@ const LeadDetailMobile = () => {
             </TabsContent>
             
             <TabsContent value="status" className="mt-0 animate-[fade-in_0.2s_ease-out]">
-              <StatusSection lead={lead} onDataChange={handleDataChange} />
+              <StatusSection 
+                lead={lead} 
+                onDataChange={handleDataChange} 
+                startCall={startCall}
+                isCallDialogOpen={isCallDialogOpen}
+                setIsCallDialogOpen={setIsCallDialogOpen}
+                callStatus={callStatus}
+                callDuration={callDuration}
+                endCall={endCall}
+                formatDuration={formatDuration}
+              />
             </TabsContent>
             
             <TabsContent value="notes" className="mt-0 animate-[fade-in_0.2s_ease-out]">
