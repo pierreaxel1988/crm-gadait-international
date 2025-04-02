@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -20,7 +20,8 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
   notifications,
   setNotifications
 }) => {
-  const [showNotifications, setShowNotifications] = React.useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
@@ -55,10 +56,24 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
     }
   };
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const unreadCount = notifications.filter(notification => !notification.read).length;
   
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button 
         onClick={toggleNotifications} 
         className="relative rounded-md p-1 md:p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200" 
