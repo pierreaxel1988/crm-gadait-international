@@ -1,7 +1,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Calendar, Clock, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { useActionsData } from '@/hooks/useActionsData';
+import { ActionItem } from '@/types/actionHistory';
+import { format, isPast, isToday } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 
 interface Notification {
   id: string;
@@ -9,6 +14,9 @@ interface Notification {
   message: string;
   read: boolean;
   timestamp: Date;
+  actionId?: string;
+  leadId?: string;
+  type: 'action' | 'system';
 }
 
 interface NotificationsDropdownProps {
@@ -22,6 +30,71 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { actions, markActionComplete } = useActionsData();
+  const navigate = useNavigate();
+  
+  // Convert actions to notifications on component mount and when actions change
+  useEffect(() => {
+    if (actions && actions.length > 0) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Filter for relevant actions to create notifications:
+      // 1. Overdue actions
+      // 2. Actions scheduled for today
+      const relevantActions = actions.filter(action => {
+        if (action.status === 'done') return false;
+        
+        const scheduledDate = action.scheduledDate ? new Date(action.scheduledDate) : null;
+        if (!scheduledDate) return false;
+        
+        const isActionToday = isToday(scheduledDate);
+        const isActionOverdue = isPast(scheduledDate) && !isToday(scheduledDate);
+        
+        return isActionToday || isActionOverdue;
+      });
+      
+      // Convert actions to notifications
+      const actionNotifications: Notification[] = relevantActions.map(action => {
+        const scheduledDate = new Date(action.scheduledDate || new Date());
+        const isOverdue = isPast(scheduledDate) && !isToday(scheduledDate);
+        
+        let title = '';
+        let message = '';
+        
+        if (isOverdue) {
+          title = `Action en retard : ${action.actionType}`;
+          message = `${action.leadName} - Prévue le ${format(scheduledDate, 'dd/MM/yyyy', { locale: fr })}`;
+        } else {
+          title = `Action aujourd'hui : ${action.actionType}`;
+          message = `${action.leadName} - ${format(scheduledDate, 'HH:mm', { locale: fr })}`;
+        }
+        
+        return {
+          id: `action-${action.id}`,
+          title,
+          message,
+          read: false,
+          timestamp: scheduledDate,
+          actionId: action.id,
+          leadId: action.leadId,
+          type: 'action'
+        };
+      });
+      
+      // Filter out existing notifications with the same actionId
+      const existingActionIds = notifications
+        .filter(n => n.type === 'action')
+        .map(n => n.actionId);
+        
+      const newActionNotifications = actionNotifications
+        .filter(n => !existingActionIds.includes(n.actionId));
+      
+      if (newActionNotifications.length > 0) {
+        setNotifications(prev => [...newActionNotifications, ...prev]);
+      }
+    }
+  }, [actions, setNotifications]);
   
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
@@ -41,18 +114,47 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
       ...notification,
       read: true
     })));
-    toast.success('All notifications marked as read');
+    toast.success('Toutes les notifications ont été marquées comme lues');
+  };
+  
+  const handleNotificationClick = (notification: Notification) => {
+    // Mark notification as read
+    markAsRead(notification.id);
+    
+    // If it's an action notification, navigate to the lead detail page
+    if (notification.type === 'action' && notification.leadId) {
+      setShowNotifications(false);
+      navigate(`/leads/${notification.leadId}`);
+    }
+  };
+  
+  const handleActionComplete = async (notification: Notification, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    if (notification.type === 'action' && notification.actionId) {
+      try {
+        await markActionComplete(notification.actionId, notification.leadId || '');
+        
+        // Remove this notification
+        setNotifications(prev => prev.filter(n => n.id !== notification.id));
+        
+        toast.success('Action marquée comme terminée');
+      } catch (error) {
+        console.error("Error completing action from notification:", error);
+        toast.error("Impossible de marquer l'action comme terminée");
+      }
+    }
   };
 
   const formatTime = (date: Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
     if (diffInMinutes < 60) {
-      return `${diffInMinutes} min ago`;
+      return `${diffInMinutes} min`;
     } else if (diffInMinutes < 24 * 60) {
-      return `${Math.floor(diffInMinutes / 60)} hr ago`;
+      return `${Math.floor(diffInMinutes / 60)} h`;
     } else {
-      return `${Math.floor(diffInMinutes / (60 * 24))} days ago`;
+      return `${Math.floor(diffInMinutes / (60 * 24))} jours`;
     }
   };
 
@@ -96,7 +198,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                 onClick={markAllAsRead} 
                 className="text-xs text-loro-hazel hover:underline"
               >
-                Mark all as read
+                Tout marquer comme lu
               </button>
             )}
           </div>
@@ -107,23 +209,33 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                 <div 
                   key={notification.id} 
                   className={`p-4 border-b border-loro-pearl cursor-pointer hover:bg-gray-50 ${notification.read ? "bg-white" : "bg-loro-pearl/10"}`}
-                  onClick={() => markAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex justify-between items-start">
                     <h4 className="text-sm font-medium text-loro-navy">{notification.title}</h4>
                     <span className="text-xs text-gray-500">{formatTime(notification.timestamp)}</span>
                   </div>
                   <p className="text-xs text-gray-600 mt-1">{notification.message}</p>
+                  
+                  {notification.type === 'action' && (
+                    <button 
+                      onClick={(e) => handleActionComplete(notification, e)}
+                      className="mt-2 flex items-center text-xs text-loro-hazel hover:text-loro-navy"
+                    >
+                      <CheckCheck size={12} className="mr-1" />
+                      Marquer comme terminée
+                    </button>
+                  )}
                 </div>
               ))
             ) : (
-              <p className="p-4 text-center text-gray-500 text-sm">No notifications</p>
+              <p className="p-4 text-center text-gray-500 text-sm">Aucune notification</p>
             )}
           </div>
           
           <div className="p-2 border-t border-loro-pearl bg-gray-50">
             <button className="w-full text-center text-xs text-loro-hazel hover:underline py-1">
-              View all notifications
+              Voir toutes les notifications
             </button>
           </div>
         </div>

@@ -20,6 +20,9 @@ interface Notification {
   message: string;
   read: boolean;
   timestamp: Date;
+  actionId?: string;
+  leadId?: string;
+  type: 'action' | 'system';
 }
 
 const Navbar: React.FC<NavbarProps> = ({
@@ -28,33 +31,21 @@ const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
+  // Only add system notifications at initial load
   useEffect(() => {
-    // Fetch sample notifications
-    const sampleNotifications: Notification[] = [
+    // Add a few system notifications for things like platform updates
+    const systemNotifications: Notification[] = [
       {
-        id: '1',
-        title: 'New Lead',
-        message: 'You have received a new lead from the website',
+        id: 'system-1',
+        title: 'Bienvenue sur Loro CRM',
+        message: 'Découvrez les nouvelles fonctionnalités de la plateforme',
         read: false,
-        timestamp: new Date(Date.now() - 30 * 60000)
-      }, 
-      {
-        id: '2',
-        title: 'Meeting Reminder',
-        message: 'Client meeting in 1 hour',
-        read: false,
-        timestamp: new Date(Date.now() - 120 * 60000)
-      }, 
-      {
-        id: '3',
-        title: 'Task Completed',
-        message: 'Document processing completed successfully',
-        read: true,
-        timestamp: new Date(Date.now() - 24 * 60 * 60000)
+        timestamp: new Date(Date.now() - 30 * 60000),
+        type: 'system'
       }
     ];
     
-    setNotifications(sampleNotifications);
+    setNotifications(systemNotifications);
   }, []);
 
   return (
