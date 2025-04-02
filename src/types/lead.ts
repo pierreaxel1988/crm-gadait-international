@@ -101,6 +101,7 @@ export interface LeadDetailed {
   nationality?: string;
   taskType?: TaskType;
   notes?: string;
+  internal_notes?: string; // Add the internal_notes property here
   nextFollowUpDate?: string;
   country?: Country;
   url?: string;
