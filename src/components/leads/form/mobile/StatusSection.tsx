@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadTag } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Activity, Trash2 } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { Button } from '@/components/ui/button';
@@ -162,24 +160,6 @@ const StatusSection: React.FC<StatusSectionProps> = ({
                 })
               : 'Aucune interaction enregistrée'}
           </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm">Objectif client</Label>
-          <RadioGroup 
-            value={lead.propertyUse || ''} 
-            onValueChange={value => handleInputChange('propertyUse', value)}
-            className="flex flex-col space-y-1.5"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="Résidence principale" id="residence" />
-              <Label htmlFor="residence" className="font-futura">Résidence principale</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="Investissement locatif" id="investment" />
-              <Label htmlFor="investment" className="font-futura">Investissement locatif</Label>
-            </div>
-          </RadioGroup>
         </div>
         
         <div className="pt-4 border-t mt-6">
