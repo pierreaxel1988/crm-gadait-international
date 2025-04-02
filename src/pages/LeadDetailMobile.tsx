@@ -38,6 +38,7 @@ const LeadDetailMobile = () => {
   const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'completed' | 'failed'>('idle');
   const [callDuration, setCallDuration] = useState(0);
   const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
+  const [callType, setCallType] = useState<'phone' | 'whatsapp'>('phone');
   
   const {
     lead,
@@ -124,7 +125,7 @@ const LeadDetailMobile = () => {
   };
 
   // Call functionality
-  const startCall = () => {
+  const startCall = (type: 'phone' | 'whatsapp' = 'phone') => {
     if (!lead || !lead.phone) {
       toast({
         variant: "destructive",
@@ -134,6 +135,7 @@ const LeadDetailMobile = () => {
       return;
     }
 
+    setCallType(type);
     setIsCallDialogOpen(true);
     setCallStatus('calling');
     
@@ -144,8 +146,13 @@ const LeadDetailMobile = () => {
     
     setCallTimer(timer);
     
-    // Initiate the actual call
-    window.location.href = `tel:${lead.phone}`;
+    // Initiate the actual call based on type
+    if (type === 'phone') {
+      window.location.href = `tel:${lead.phone}`;
+    } else {
+      const cleanedPhone = lead.phone.replace(/[^\d+]/g, '');
+      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
+    }
   };
 
   const endCall = (status: 'completed' | 'failed') => {
@@ -159,7 +166,7 @@ const LeadDetailMobile = () => {
     if (status === 'completed' && callDuration > 0 && lead) {
       const callAction = {
         actionType: 'Call' as any,
-        notes: `Appel de ${formatDuration(callDuration)}`,
+        notes: `${callType === 'whatsapp' ? 'WhatsApp' : 'Appel'} de ${formatDuration(callDuration)}`,
         createdAt: new Date().toISOString(),
         scheduledDate: new Date().toISOString(),
         completedDate: new Date().toISOString(),
@@ -174,8 +181,8 @@ const LeadDetailMobile = () => {
       });
       
       toast({
-        title: "Appel enregistré",
-        description: `Un appel de ${formatDuration(callDuration)} a été enregistré.`
+        title: callType === 'whatsapp' ? "WhatsApp enregistré" : "Appel enregistré",
+        description: `Un ${callType === 'whatsapp' ? 'appel WhatsApp' : 'appel'} de ${formatDuration(callDuration)} a été enregistré.`
       });
     }
     
@@ -194,15 +201,12 @@ const LeadDetailMobile = () => {
 
   const handlePhoneCall = (e: React.MouseEvent) => {
     e.preventDefault();
-    startCall();
+    startCall('phone');
   };
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (lead?.phone) {
-      const cleanedPhone = lead.phone.replace(/[^\d+]/g, '');
-      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
-    }
+    startCall('whatsapp');
   };
 
   const handleEmailClick = (e: React.MouseEvent) => {
@@ -321,7 +325,7 @@ const LeadDetailMobile = () => {
 
       <ActionDialog
         isOpen={isActionDialogOpen}
-        onClose={() => setIsActionDialogOpen(false)}
+        onClose={() => setIsCallDialogOpen(false)}
         selectedAction={selectedAction}
         setSelectedAction={setSelectedAction}
         actionDate={actionDate}

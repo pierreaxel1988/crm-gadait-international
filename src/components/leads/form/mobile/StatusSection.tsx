@@ -232,7 +232,56 @@ const StatusSection: React.FC<StatusSectionProps> = ({
               ) : callStatus === 'failed' ? (
                 <p>L'appel n'a pas pu être effectué.</p>
               ) : (
-                <p>Voulez-vous appeler {lead.name} au {lead.phone}?</p>
+                <div>
+                  <p>Comment souhaitez-vous contacter {lead.name}?</p>
+                  <div className="flex justify-center gap-4 mt-4">
+                    <div className="text-center">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="h-16 w-16 rounded-full bg-green-50 hover:bg-green-100 border border-green-200 mb-2"
+                        onClick={() => {
+                          setIsCallDialogOpen(false);
+                          if (lead.phone) {
+                            window.location.href = `tel:${lead.phone}`;
+                          }
+                        }}
+                      >
+                        <Phone className="h-6 w-6 text-green-600" />
+                      </Button>
+                      <p className="text-sm">Téléphone</p>
+                    </div>
+                    <div className="text-center">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="h-16 w-16 rounded-full bg-green-50 hover:bg-green-100 border border-green-200 mb-2"
+                        onClick={() => {
+                          setIsCallDialogOpen(false);
+                          if (lead.phone) {
+                            const cleanedPhone = lead.phone.replace(/[^\d+]/g, '');
+                            window.open(`https://wa.me/${cleanedPhone}`, '_blank');
+                          }
+                        }}
+                      >
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          className="h-6 w-6 text-green-600" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round"
+                        >
+                          <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+                          <path d="M9 10a.5.5 0 0 1 1 0c0 1.97 1.53 3.5 3.5 3.5a.5.5 0 0 1 0 1c-2.47 0-4.5-2.02-4.5-4.5" />
+                        </svg>
+                      </Button>
+                      <p className="text-sm">WhatsApp</p>
+                    </div>
+                  </div>
+                </div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -247,12 +296,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
             ) : callStatus === 'completed' || callStatus === 'failed' ? (
               <AlertDialogAction onClick={() => setIsCallDialogOpen(false)}>OK</AlertDialogAction>
             ) : (
-              <>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onClick={startCall} className="bg-green-600 hover:bg-green-700">
-                  Appeler
-                </AlertDialogAction>
-              </>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
             )}
           </AlertDialogFooter>
         </AlertDialogContent>
