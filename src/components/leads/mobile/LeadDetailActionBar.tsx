@@ -5,11 +5,13 @@ import { Drawer, DrawerTrigger, DrawerContent, DrawerTitle, DrawerDescription, D
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ActionsPanel from '@/components/leads/actions/ActionsPanel';
 import { LeadDetailed } from '@/types/lead';
-import { Save, Check, Clock, X, History, ArrowLeft, CalendarClock } from 'lucide-react';
+import { Save, Check, Clock, X, History, ArrowLeft, CalendarClock, Lightbulb } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format, isPast, isToday } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ActionHistory } from '@/types/actionHistory';
+import { ActionSuggestion } from '@/services/noteAnalysisService';
+import ActionSuggestions from '@/components/leads/actions/ActionSuggestions';
 
 interface LeadDetailActionBarProps {
   autoSaveEnabled: boolean;
@@ -20,6 +22,9 @@ interface LeadDetailActionBarProps {
   hasChanges?: boolean;
   isSaving?: boolean;
   onManualSave?: () => void;
+  actionSuggestions?: ActionSuggestion[];
+  onAcceptSuggestion?: (suggestion: ActionSuggestion) => void;
+  onRejectSuggestion?: (suggestion: ActionSuggestion) => void;
 }
 
 const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
@@ -30,11 +35,15 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   onMarkComplete,
   hasChanges = false,
   isSaving = false,
-  onManualSave
+  onManualSave,
+  actionSuggestions = [],
+  onAcceptSuggestion,
+  onRejectSuggestion
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [nextAction, setNextAction] = useState<ActionHistory | null>(null);
+  const [showSuggestionsBadge, setShowSuggestionsBadge] = useState<boolean>(false);
 
   useEffect(() => {
     if (lead?.actionHistory?.length) {
@@ -45,6 +54,10 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
       setNextAction(null);
     }
   }, [lead?.actionHistory]);
+
+  useEffect(() => {
+    setShowSuggestionsBadge(actionSuggestions && actionSuggestions.length > 0);
+  }, [actionSuggestions]);
 
   const handleActionsClick = () => {
     const searchParams = new URLSearchParams(location.search);
@@ -105,6 +118,30 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
           </Button>
         </div>}
       
+      {showSuggestionsBadge && !isActionsTab && (
+        <div className="fixed bottom-16 left-0 right-0 bg-amber-50 p-2 px-3 border-t border-amber-200 flex items-center gap-2 justify-between animate-[fade-in_0.3s_ease-out] shadow-sm z-40" onClick={handleActionClick}>
+          <div className="flex items-center gap-2">
+            <div className="p-1 rounded-md bg-amber-100">
+              <Lightbulb className="h-4 w-4 text-amber-600" />
+            </div>
+            <div className="text-xs text-amber-800">
+              <span className="font-medium text-xs">Actions suggérées disponibles</span>
+              <span className="block opacity-80 text-small">
+                Basées sur les notes du client
+              </span>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs border border-amber-300 text-amber-700 hover:bg-amber-100 transition-all active:scale-95"
+            onClick={handleActionClick}
+          >
+            Voir
+          </Button>
+        </div>
+      )}
+      
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex justify-center items-center transition-all animate-[slide-in_0.3s_ease-out] z-50">
         <div className="flex gap-3 w-full justify-between items-center">
           <div className="flex items-center">
@@ -129,6 +166,11 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
             {!isActionsTab && <Button variant="outline" size="sm" className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide flex items-center gap-2 border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20" onClick={handleActionsClick}>
                 <History className="h-4 w-4 text-loro-navy" />
                 Actions
+                {showSuggestionsBadge && (
+                  <div className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[10px] text-white ml-1">
+                    {actionSuggestions?.length || 0}
+                  </div>
+                )}
               </Button>}
             <Button onClick={onAddAction} className="bg-chocolate-dark hover:bg-chocolate-light transition-all duration-200 active:scale-95 font-futura tracking-wide" size="sm" type="button" aria-label="Ajouter une nouvelle action">
               Nouvelle action

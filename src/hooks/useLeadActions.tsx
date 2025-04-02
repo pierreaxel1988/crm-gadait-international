@@ -1,11 +1,12 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { addActionToLead } from '@/services/leadActions';
 import { updateLead } from '@/services/leadUpdater';
+import { analyzeNoteText, ActionSuggestion } from '@/services/noteAnalysisService';
 
 export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: LeadDetailed) => void) => {
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
@@ -13,6 +14,17 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
   const [actionDate, setActionDate] = useState<Date | undefined>(undefined);
   const [actionTime, setActionTime] = useState<string>('12:00');
   const [actionNotes, setActionNotes] = useState<string>('');
+  const [actionSuggestions, setActionSuggestions] = useState<ActionSuggestion[]>([]);
+  const [analyzedNotes, setAnalyzedNotes] = useState<string>('');
+
+  // Analyze notes for action suggestions whenever they change
+  useEffect(() => {
+    if (lead?.notes && lead.notes !== analyzedNotes) {
+      const suggestions = analyzeNoteText(lead.notes);
+      setActionSuggestions(suggestions);
+      setAnalyzedNotes(lead.notes);
+    }
+  }, [lead?.notes]);
 
   const handleAddAction = () => {
     setSelectedAction(null);
@@ -62,6 +74,49 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
         });
       }
     }
+  };
+
+  const acceptSuggestion = async (suggestion: ActionSuggestion) => {
+    if (lead && lead.id) {
+      try {
+        const scheduledDateTime = suggestion.scheduledDate.toISOString();
+        
+        const updatedLead = await addActionToLead(lead.id, {
+          actionType: suggestion.actionType,
+          scheduledDate: scheduledDateTime,
+          notes: suggestion.notes || `Action créée automatiquement à partir de: "${suggestion.matchedText}"`
+        });
+        
+        if (updatedLead) {
+          setLead(updatedLead);
+          // Remove the suggestion from the list
+          setActionSuggestions(prev => prev.filter(s => 
+            s.scheduledDate.getTime() !== suggestion.scheduledDate.getTime() || 
+            s.actionType !== suggestion.actionType
+          ));
+          
+          toast({
+            title: "Action ajoutée",
+            description: `${suggestion.actionType} a été ajouté à ${lead.name} pour le ${format(suggestion.scheduledDate, 'dd/MM/yyyy à HH:mm')}`
+          });
+        }
+      } catch (error) {
+        console.error("Error in acceptSuggestion:", error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible d'ajouter l'action suggérée."
+        });
+      }
+    }
+  };
+
+  const rejectSuggestion = (suggestion: ActionSuggestion) => {
+    // Simply remove from suggestions list
+    setActionSuggestions(prev => prev.filter(s => 
+      s.scheduledDate.getTime() !== suggestion.scheduledDate.getTime() || 
+      s.actionType !== suggestion.actionType
+    ));
   };
 
   const markActionComplete = async (actionId: string) => {
@@ -136,6 +191,9 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
     handleActionSelect,
     handleActionConfirm,
     markActionComplete,
-    getActionTypeIcon
+    getActionTypeIcon,
+    actionSuggestions,
+    acceptSuggestion,
+    rejectSuggestion
   };
 };

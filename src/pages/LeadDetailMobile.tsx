@@ -7,6 +7,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { useLeadActions } from '@/hooks/useLeadActions';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
 import ActionsPanelMobile from '@/components/leads/actions/ActionsPanelMobile';
+import ActionSuggestions from '@/components/leads/actions/ActionSuggestions';
 import { CheckCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -60,7 +61,10 @@ const LeadDetailMobile = () => {
     handleAddAction,
     handleActionConfirm,
     markActionComplete,
-    getActionTypeIcon
+    getActionTypeIcon,
+    actionSuggestions,
+    acceptSuggestion,
+    rejectSuggestion
   } = useLeadActions(lead, setLead);
 
   const handleBackClick = () => {
@@ -134,6 +138,13 @@ const LeadDetailMobile = () => {
             </TabsContent>
             
             <TabsContent value="actions" className="mt-0 animate-[fade-in_0.2s_ease-out]">
+              {actionSuggestions && actionSuggestions.length > 0 && (
+                <ActionSuggestions
+                  suggestions={actionSuggestions}
+                  onAccept={acceptSuggestion}
+                  onReject={rejectSuggestion}
+                />
+              )}
               <ActionsPanelMobile 
                 leadId={lead.id} 
                 onAddAction={fetchLead}
@@ -154,6 +165,9 @@ const LeadDetailMobile = () => {
         hasChanges={hasChanges}
         isSaving={isSaving}
         onManualSave={handleSaveWithIndicator}
+        actionSuggestions={actionSuggestions}
+        onAcceptSuggestion={acceptSuggestion}
+        onRejectSuggestion={rejectSuggestion}
       />
 
       {showSaveIndicator && (
