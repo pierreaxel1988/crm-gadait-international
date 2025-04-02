@@ -18,6 +18,8 @@ import MobileLeadImport from './pages/MobileLeadImport';
 import ActionsPage from './pages/Actions';
 import Calendar from './pages/Calendar';
 import Reports from './pages/Reports';
+import Admin from './pages/Admin';
+import ProtectedRoute from './components/layout/ProtectedRoute';
 
 function App() {
   return (
@@ -35,6 +37,11 @@ function App() {
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/admin" element={
+            <ProtectedRoute adminOnly>
+              <Admin />
+            </ProtectedRoute>
+          } />
         </Routes>
         <Toaster />
       </Router>
