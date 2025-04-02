@@ -37,7 +37,7 @@ const Navbar: React.FC<NavbarProps> = ({
     const systemNotifications: Notification[] = [
       {
         id: 'system-1',
-        title: 'Bienvenue sur Loro CRM',
+        title: 'Bienvenue sur le CRM Gadait International',
         message: 'Découvrez les nouvelles fonctionnalités de la plateforme',
         read: false,
         timestamp: new Date(Date.now() - 30 * 60000),

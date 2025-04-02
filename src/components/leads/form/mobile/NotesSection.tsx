@@ -68,8 +68,8 @@ const NotesSection: React.FC<NotesSectionProps> = ({
         <Label htmlFor="internal_notes" className="text-sm">Notes internes</Label>
         <Textarea
           id="internal_notes"
-          value={lead.notes || ''}
-          onChange={(e) => handleInputChange('notes', e.target.value)}
+          value={lead.internal_notes || ''}
+          onChange={(e) => handleInputChange('internal_notes', e.target.value)}
           placeholder="Notes internes (visibles uniquement par l'équipe)..."
           className="min-h-[150px] font-futura"
         />

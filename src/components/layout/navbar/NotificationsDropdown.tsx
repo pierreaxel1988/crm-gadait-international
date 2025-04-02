@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Calendar, Clock, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
@@ -33,15 +32,11 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
   const { actions, markActionComplete } = useActionsData();
   const navigate = useNavigate();
   
-  // Convert actions to notifications on component mount and when actions change
   useEffect(() => {
     if (actions && actions.length > 0) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
-      // Filter for relevant actions to create notifications:
-      // 1. Overdue actions
-      // 2. Actions scheduled for today
       const relevantActions = actions.filter(action => {
         if (action.status === 'done') return false;
         
@@ -54,7 +49,6 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
         return isActionToday || isActionOverdue;
       });
       
-      // Convert actions to notifications
       const actionNotifications: Notification[] = relevantActions.map(action => {
         const scheduledDate = new Date(action.scheduledDate || new Date());
         const isOverdue = isPast(scheduledDate) && !isToday(scheduledDate);
@@ -82,7 +76,6 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
         };
       });
       
-      // Filter out existing notifications with the same actionId
       const existingActionIds = notifications
         .filter(n => n.type === 'action')
         .map(n => n.actionId);
@@ -118,10 +111,8 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
   };
   
   const handleNotificationClick = (notification: Notification) => {
-    // Mark notification as read
     markAsRead(notification.id);
     
-    // If it's an action notification, navigate to the lead detail page
     if (notification.type === 'action' && notification.leadId) {
       setShowNotifications(false);
       navigate(`/leads/${notification.leadId}`);
@@ -135,7 +126,6 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
       try {
         await markActionComplete(notification.actionId, notification.leadId || '');
         
-        // Remove this notification
         setNotifications(prev => prev.filter(n => n.id !== notification.id));
         
         toast.success('Action marquée comme terminée');
@@ -158,7 +148,6 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
     }
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
