@@ -12,14 +12,55 @@ interface ActionSuggestionProps {
   onAccept: (suggestion: ActionSuggestion) => void;
   onReject: (suggestion: ActionSuggestion) => void;
   className?: string;
+  compact?: boolean;
 }
 
 const ActionSuggestionCard: React.FC<ActionSuggestionProps> = ({
   suggestion,
   onAccept,
   onReject,
-  className
+  className,
+  compact = false
 }) => {
+  if (compact) {
+    return (
+      <div className={`border rounded-md p-2 shadow-sm bg-amber-50/80 animate-[fade-in_0.4s_ease-out] ${className}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-700">
+              <Lightbulb className="h-3.5 w-3.5" />
+            </div>
+            <div>
+              <div className="text-xs font-medium text-amber-800">{suggestion.actionType}</div>
+              <div className="text-xs text-amber-700/80">
+                {format(suggestion.scheduledDate, 'EEEE d MMMM', { locale: fr })} à {format(suggestion.scheduledDate, 'HH:mm')}
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-1">
+            <Button 
+              size="sm"
+              variant="ghost" 
+              onClick={() => onAccept(suggestion)}
+              className="h-6 w-6 p-0 text-green-600"
+            >
+              <Check className="h-3.5 w-3.5" />
+            </Button>
+            <Button 
+              size="sm"
+              variant="ghost" 
+              onClick={() => onReject(suggestion)}
+              className="h-6 w-6 p-0 text-gray-500 hover:text-red-500"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className={`border rounded-md p-3 shadow-sm bg-loro-pearl/30 animate-[fade-in_0.4s_ease-out] ${className}`}>
       <div className="flex items-center gap-2 mb-2">

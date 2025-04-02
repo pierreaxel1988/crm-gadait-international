@@ -49,6 +49,9 @@ export const analyzeNoteText = (text: string): ActionSuggestion[] => {
             case 'soir':
               date.setHours(18, 0);
               break;
+            case 'fin de matinée':
+              date.setHours(11, 30);
+              break;
           }
         }
         
@@ -67,19 +70,47 @@ export const analyzeNoteText = (text: string): ActionSuggestion[] => {
         const date = new Date(year, month, day);
         return isValid(date) ? date : null;
       }
+    },
+    // Format: day of week (e.g., lundi prochain, mardi)
+    {
+      regex: /(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)(?:\s+(prochain|suivant))?/gi,
+      handler: (matches: RegExpExecArray) => {
+        const dayOfWeek = matches[1].toLowerCase();
+        const isNextWeek = matches[2] && (matches[2].toLowerCase() === 'prochain' || matches[2].toLowerCase() === 'suivant');
+        
+        const dayMap: {[key: string]: number} = {
+          'lundi': 1, 'mardi': 2, 'mercredi': 3, 'jeudi': 4, 
+          'vendredi': 5, 'samedi': 6, 'dimanche': 0
+        };
+        
+        const today = new Date();
+        const currentDay = today.getDay();
+        const targetDay = dayMap[dayOfWeek];
+        
+        let daysToAdd = targetDay - currentDay;
+        if (daysToAdd <= 0 || isNextWeek) {
+          daysToAdd += 7;
+        }
+        
+        const date = new Date(today);
+        date.setDate(today.getDate() + daysToAdd);
+        date.setHours(10, 0, 0, 0); // Default to morning
+        
+        return isValid(date) ? date : null;
+      }
     }
   ];
   
   // Action type patterns
   const actionTypePatterns = [
-    { regex: /appel(?:er|ez|le|s)?/i, actionType: 'Call' as TaskType, confidence: 90 },
+    { regex: /appel(?:er|ez|le|s)?|t[ée]l[ée]phon(?:er|ez|e)|contact(?:er|ez)/i, actionType: 'Call' as TaskType, confidence: 90 },
     { regex: /rappel(?:er|ez|le|s)?/i, actionType: 'Call' as TaskType, confidence: 90 },
-    { regex: /entretien/i, actionType: 'Call' as TaskType, confidence: 80 },
+    { regex: /entretien|r[ée]union/i, actionType: 'Call' as TaskType, confidence: 80 },
     { regex: /rendez-?vous|rdv/i, actionType: 'Call' as TaskType, confidence: 75 },
     { regex: /visit(?:e|er|ez)/i, actionType: 'Visites' as TaskType, confidence: 85 },
     { regex: /propos(?:er|ition)s?/i, actionType: 'Propositions' as TaskType, confidence: 80 },
     { regex: /estim(?:er|ation)/i, actionType: 'Estimation' as TaskType, confidence: 85 },
-    { regex: /suivi|follow(?:\s+|-)?up/i, actionType: 'Follow up' as TaskType, confidence: 85 }
+    { regex: /suivi|suivre|follow(?:\s+|-)?up/i, actionType: 'Follow up' as TaskType, confidence: 85 }
   ];
   
   // Extract dates and surrounding context

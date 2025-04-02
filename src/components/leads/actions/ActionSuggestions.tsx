@@ -8,14 +8,32 @@ interface ActionSuggestionsProps {
   suggestions: ActionSuggestion[];
   onAccept: (suggestion: ActionSuggestion) => void;
   onReject: (suggestion: ActionSuggestion) => void;
+  compact?: boolean;
 }
 
 const ActionSuggestions: React.FC<ActionSuggestionsProps> = ({
   suggestions,
   onAccept,
-  onReject
+  onReject,
+  compact = false
 }) => {
   if (!suggestions || suggestions.length === 0) return null;
+
+  if (compact) {
+    return (
+      <div className="space-y-3 mb-2">
+        {suggestions.map((suggestion, index) => (
+          <ActionSuggestionCard
+            key={`${suggestion.actionType}-${suggestion.scheduledDate.getTime()}-${index}`}
+            suggestion={suggestion}
+            onAccept={onAccept}
+            onReject={onReject}
+            compact={true}
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 mb-4 p-2">

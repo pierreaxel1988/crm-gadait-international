@@ -44,14 +44,24 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   const location = useLocation();
   const [nextAction, setNextAction] = useState<ActionHistory | null>(null);
   const [showSuggestionsBadge, setShowSuggestionsBadge] = useState<boolean>(false);
+  const [futureActions, setFutureActions] = useState<ActionHistory[]>([]);
 
   useEffect(() => {
     if (lead?.actionHistory?.length) {
       const pendingActions = lead.actionHistory.filter(action => !action.completedDate);
       const sortedActions = pendingActions.sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
+      
       setNextAction(sortedActions.length > 0 ? sortedActions[0] : null);
+      
+      // Get future actions (excluding the next action)
+      if (sortedActions.length > 1) {
+        setFutureActions(sortedActions.slice(1, 3)); // Show max 2 future actions
+      } else {
+        setFutureActions([]);
+      }
     } else {
       setNextAction(null);
+      setFutureActions([]);
     }
   }, [lead?.actionHistory]);
 
@@ -96,6 +106,78 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   };
 
   return <>
+      {futureActions.length > 0 && (
+        <div className="fixed bottom-32 left-0 right-0 px-3">
+          <div className="bg-loro-pearl/80 rounded-md border border-loro-sand shadow-sm animate-[fade-in_0.3s_ease-out]">
+            <div className="p-2 border-b border-loro-sand/30">
+              <div className="flex items-center gap-1.5">
+                <CalendarClock className="h-3.5 w-3.5 text-loro-navy/70" />
+                <span className="text-xs font-medium text-loro-navy/80">Prochaines actions planifiées</span>
+              </div>
+            </div>
+            <div className="p-2 space-y-2">
+              {futureActions.map(action => (
+                <div 
+                  key={action.id}
+                  className="flex items-center justify-between py-1 border-b border-dashed border-loro-sand/30 last:border-b-0"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="p-1 rounded-md bg-loro-sand/50">
+                      {getActionTypeIcon(action.actionType as any)}
+                    </div>
+                    <div className="text-xs text-loro-navy">
+                      <span className="block">{formatActionDate(action.scheduledDate)}</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs border border-loro-navy/30 text-loro-navy hover:bg-loro-pearl"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMarkComplete(action.id);
+                    }}
+                  >
+                    <Check className="h-3 w-3 mr-1" /> Terminer
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {actionSuggestions && actionSuggestions.length > 0 && onAcceptSuggestion && onRejectSuggestion && !isActionsTab && (
+        <div className="fixed bottom-32 left-0 right-0 px-3 z-40">
+          <div className="bg-amber-50/95 border border-amber-200 rounded-md shadow-sm animate-[fade-in_0.3s_ease-out]">
+            <div className="p-2 border-b border-amber-200">
+              <div className="flex items-center gap-1.5">
+                <Lightbulb className="h-3.5 w-3.5 text-amber-600" />
+                <span className="text-xs font-medium text-amber-800">Actions suggérées ({actionSuggestions.length})</span>
+              </div>
+            </div>
+            <div className="p-2">
+              <ActionSuggestions 
+                suggestions={actionSuggestions.slice(0, 2)} 
+                onAccept={onAcceptSuggestion}
+                onReject={onRejectSuggestion}
+                compact={true}
+              />
+              {actionSuggestions.length > 2 && (
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="text-xs text-amber-700 p-0 h-auto ml-1 mt-1"
+                  onClick={handleActionClick}
+                >
+                  Voir les {actionSuggestions.length - 2} autres suggestions...
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
       {nextAction && <div className={`fixed bottom-16 left-0 right-0 p-2 px-3 flex items-center gap-2 justify-between animate-[fade-in_0.3s_ease-out] shadow-sm z-40 
           ${isActionOverdue(nextAction.scheduledDate) ? 'bg-rose-50 text-rose-800 border-t border-rose-200' : 'bg-loro-pearl/80 text-loro-navy border-t border-loro-pearl'}`} onClick={handleActionClick}>
           <div className="flex items-center gap-2">
