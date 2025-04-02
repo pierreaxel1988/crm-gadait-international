@@ -9,6 +9,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { format, isPast, isToday } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ActionHistory } from '@/types/actionHistory';
+
 interface LeadDetailActionBarProps {
   autoSaveEnabled: boolean;
   onAddAction: () => void;
@@ -19,6 +20,7 @@ interface LeadDetailActionBarProps {
   isSaving?: boolean;
   onManualSave?: () => void;
 }
+
 const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   autoSaveEnabled,
   onAddAction,
@@ -32,43 +34,37 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const [nextAction, setNextAction] = useState<ActionHistory | null>(null);
+
   useEffect(() => {
     if (lead?.actionHistory?.length) {
-      // Find all pending actions (not completed)
       const pendingActions = lead.actionHistory.filter(action => !action.completedDate);
-
-      // Sort by scheduled date (ascending)
       const sortedActions = pendingActions.sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
-
-      // Set the next action (closest in time)
       setNextAction(sortedActions.length > 0 ? sortedActions[0] : null);
     } else {
       setNextAction(null);
     }
   }, [lead?.actionHistory]);
+
   const handleActionsClick = () => {
-    // Navigate to Actions tab by updating URL search parameters
     const searchParams = new URLSearchParams(location.search);
     searchParams.set('tab', 'actions');
     navigate(`/leads/${lead.id}?${searchParams.toString()}`, {
       replace: true
     });
   };
+
   const handleActionClick = () => {
-    // Navigate to the actions tab and focus on this action
     handleActionsClick();
   };
+
   const handleBackToActionsList = () => {
-    // Navigate back to the actions list page
     navigate('/actions');
   };
 
-  // Check if we're on the actions tab
   const searchParams = new URLSearchParams(location.search);
   const currentTab = searchParams.get('tab');
   const isActionsTab = currentTab === 'actions';
 
-  // Format action date
   const formatActionDate = (dateString: string) => {
     const date = new Date(dateString);
     if (isToday(date)) {
@@ -81,10 +77,10 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
     });
   };
 
-  // Check if action is overdue
   const isActionOverdue = (dateString: string) => {
     return isPast(new Date(dateString)) && !isToday(new Date(dateString));
   };
+
   return <>
       {nextAction && <div className={`fixed bottom-16 left-0 right-0 p-2 px-3 flex items-center gap-2 justify-between animate-[fade-in_0.3s_ease-out] shadow-sm z-40 
           ${isActionOverdue(nextAction.scheduledDate) ? 'bg-rose-50 text-rose-800 border-t border-rose-200' : 'bg-loro-pearl/80 text-loro-navy border-t border-loro-pearl'}`} onClick={handleActionClick}>
@@ -94,7 +90,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
             </div>
             <div className="text-xs">
               <span className="font-medium text-xs">Action prévue:</span> {nextAction.actionType} 
-              <span className="block opacity-80">
+              <span className="block opacity-80 text-small">
                 {formatActionDate(nextAction.scheduledDate)}
               </span>
             </div>
@@ -141,4 +137,5 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
       </div>
     </>;
 };
+
 export default LeadDetailActionBar;
