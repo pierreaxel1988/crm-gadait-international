@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -21,10 +20,28 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
   useEffect(() => {
     if (lead?.notes && lead.notes !== analyzedNotes) {
       const suggestions = analyzeNoteText(lead.notes);
-      setActionSuggestions(suggestions);
+      
+      // Filter out suggestions that already exist in actionHistory
+      const filteredSuggestions = suggestions.filter(suggestion => {
+        if (!lead.actionHistory || lead.actionHistory.length === 0) return true;
+        
+        // Check if a similar action already exists in the action history
+        // We consider an action similar if it has the same type and date (ignoring time)
+        return !lead.actionHistory.some(existingAction => {
+          const existingDate = new Date(existingAction.scheduledDate);
+          const suggestionDate = new Date(suggestion.scheduledDate);
+          
+          return existingAction.actionType === suggestion.actionType && 
+                 existingDate.getFullYear() === suggestionDate.getFullYear() &&
+                 existingDate.getMonth() === suggestionDate.getMonth() &&
+                 existingDate.getDate() === suggestionDate.getDate();
+        });
+      });
+      
+      setActionSuggestions(filteredSuggestions);
       setAnalyzedNotes(lead.notes);
     }
-  }, [lead?.notes]);
+  }, [lead?.notes, lead?.actionHistory]);
 
   const handleAddAction = () => {
     setSelectedAction(null);
@@ -47,6 +64,30 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           const dateTime = new Date(actionDate);
           dateTime.setHours(hours, minutes);
           scheduledDateTime = dateTime.toISOString();
+        }
+        
+        // Check for duplicates before adding
+        if (scheduledDateTime && lead.actionHistory) {
+          const isDuplicate = lead.actionHistory.some(action => {
+            const actionDate = new Date(action.scheduledDate);
+            const newDate = new Date(scheduledDateTime!);
+            return action.actionType === selectedAction && 
+                  actionDate.getFullYear() === newDate.getFullYear() &&
+                  actionDate.getMonth() === newDate.getMonth() &&
+                  actionDate.getDate() === newDate.getDate() &&
+                  actionDate.getHours() === newDate.getHours() &&
+                  actionDate.getMinutes() === newDate.getMinutes();
+          });
+          
+          if (isDuplicate) {
+            toast({
+              title: "Action similaire existe déjà",
+              description: "Une action similaire existe déjà pour cette date et heure.",
+              variant: "destructive"
+            });
+            setIsActionDialogOpen(false);
+            return;
+          }
         }
         
         const updatedLead = await addActionToLead(lead.id, {
@@ -80,6 +121,37 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
     if (lead && lead.id) {
       try {
         const scheduledDateTime = suggestion.scheduledDate.toISOString();
+        
+        // Check if a similar action already exists
+        if (lead.actionHistory) {
+          const isDuplicate = lead.actionHistory.some(action => {
+            const actionDate = new Date(action.scheduledDate);
+            const suggestionDate = new Date(scheduledDateTime);
+            return action.actionType === suggestion.actionType && 
+                  actionDate.getFullYear() === suggestionDate.getFullYear() &&
+                  actionDate.getMonth() === suggestionDate.getMonth() &&
+                  actionDate.getDate() === suggestionDate.getDate() &&
+                  actionDate.getHours() === suggestionDate.getHours() &&
+                  actionDate.getMinutes() === suggestionDate.getMinutes() &&
+                  !action.completedDate; // Only consider non-completed actions
+          });
+          
+          if (isDuplicate) {
+            toast({
+              title: "Action similaire existe déjà",
+              description: "Une action similaire existe déjà pour cette date et heure.",
+              variant: "destructive"
+            });
+            
+            // Remove the suggestion from the list
+            setActionSuggestions(prev => prev.filter(s => 
+              s.scheduledDate.getTime() !== suggestion.scheduledDate.getTime() || 
+              s.actionType !== suggestion.actionType
+            ));
+            
+            return;
+          }
+        }
         
         const updatedLead = await addActionToLead(lead.id, {
           actionType: suggestion.actionType,
