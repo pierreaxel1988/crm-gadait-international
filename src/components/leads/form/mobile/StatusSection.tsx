@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Activity } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
+import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 
 interface StatusSectionProps {
   lead: LeadDetailed;
@@ -107,21 +108,11 @@ const StatusSection: React.FC<StatusSectionProps> = ({
         
         <div className="space-y-2">
           <Label htmlFor="assignedTo" className="text-sm">Responsable du suivi</Label>
-          <Select 
-            value={lead.assignedTo || ''} 
-            onValueChange={value => handleInputChange('assignedTo', value)}
-          >
-            <SelectTrigger id="assignedTo" className="w-full font-futura">
-              <SelectValue placeholder="Sélectionner un membre de l'équipe" />
-            </SelectTrigger>
-            <SelectContent>
-              {['Anne', 'Marie', 'Pierre', 'Jean', 'Sophie'].map(member => (
-                <SelectItem key={member} value={member} className="font-futura">
-                  {member}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <TeamMemberSelect
+            value={lead.assignedTo}
+            onChange={(value) => handleInputChange('assignedTo', value)}
+            label=""
+          />
         </div>
         
         <div className="space-y-2">
