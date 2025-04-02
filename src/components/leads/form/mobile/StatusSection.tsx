@@ -3,10 +3,24 @@ import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadTag } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Activity } from 'lucide-react';
+import { Activity, Trash2 } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useNavigate } from 'react-router-dom';
+import { deleteLead } from '@/services/leadService';
+import { toast } from '@/hooks/use-toast';
 
 interface StatusSectionProps {
   lead: LeadDetailed;
@@ -26,6 +40,8 @@ const StatusSection: React.FC<StatusSectionProps> = ({
 }) => {
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const navigate = useNavigate();
   
   useEffect(() => {
     const measureHeader = () => {
@@ -59,6 +75,24 @@ const StatusSection: React.FC<StatusSectionProps> = ({
       : [...(lead.tags || []), tag as LeadTag];
     
     handleInputChange('tags', updatedTags);
+  };
+
+  const handleDeleteLead = async () => {
+    try {
+      await deleteLead(lead.id);
+      toast({
+        title: "Lead supprimé",
+        description: "Le lead a été supprimé avec succès."
+      });
+      navigate('/pipeline');
+    } catch (error) {
+      console.error("Error deleting lead:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer ce lead."
+      });
+    }
   };
 
   const dynamicTopMargin = isHeaderMeasured 
@@ -147,7 +181,35 @@ const StatusSection: React.FC<StatusSectionProps> = ({
             </div>
           </RadioGroup>
         </div>
+        
+        <div className="pt-4 border-t mt-6">
+          <Button 
+            variant="destructive"
+            size="sm"
+            onClick={() => setIsDeleteDialogOpen(true)}
+            className="w-full flex items-center justify-center"
+          >
+            <Trash2 className="h-4 w-4 mr-2" /> Supprimer ce lead
+          </Button>
+        </div>
       </div>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action ne peut pas être annulée. Cela supprimera définitivement le lead {lead.name} et toutes les données associées.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteLead} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
