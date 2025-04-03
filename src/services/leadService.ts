@@ -31,7 +31,8 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     });
     
     // Vérifier si l'utilisateur actuel est un commercial
-    const { data: { user } } = await supabase.auth.getSession();
+    const { data: sessionData } = await supabase.auth.getSession();
+    const user = sessionData?.session?.user;
     
     // Liste des emails commerciaux
     const commercialEmails = [

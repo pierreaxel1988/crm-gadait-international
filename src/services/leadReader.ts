@@ -10,7 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 export const getLeads = async (): Promise<LeadDetailed[]> => {
   try {
     // Get the current authenticated user
-    const { data: { user } } = await supabase.auth.getSession();
+    const { data: sessionData } = await supabase.auth.getSession();
+    const user = sessionData?.session?.user;
     
     // Get team members to check if the user is a commercial
     const { data: teamMembers, error: teamError } = await supabase
@@ -79,7 +80,8 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
 export const getLead = async (id: string): Promise<LeadDetailed | null> => {
   try {
     // Get the current authenticated user
-    const { data: { user } } = await supabase.auth.getSession();
+    const { data: sessionData } = await supabase.auth.getSession();
+    const user = sessionData?.session?.user;
     
     // Get team members to check if the user is a commercial
     const { data: teamMembers, error: teamError } = await supabase

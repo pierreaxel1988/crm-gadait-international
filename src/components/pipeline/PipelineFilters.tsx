@@ -15,6 +15,7 @@ import ActiveFiltersList from './filters/ActiveFiltersList';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import { PurchaseTimeframe, PropertyType } from '@/types/lead';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface FilterOptions {
   status: LeadStatus | null;
@@ -49,6 +50,8 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   isMobile = false,
   onApplyFilters
 }) => {
+  const { isCommercial } = useAuth();
+
   // Helper to get team member name by ID
   const getTeamMemberName = (id: string): string => {
     const member = assignedToOptions.find(member => member.id === id);
@@ -77,12 +80,14 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
         onTagsChange={tags => handleFilterChange('tags', tags)} 
       />
 
-      {/* Agent filter */}
-      <AgentFilter 
-        assignedTo={filters.assignedTo} 
-        onAssignedToChange={agent => handleFilterChange('assignedTo', agent)} 
-        assignedToOptions={assignedToOptions} 
-      />
+      {/* Agent filter - only show for admins */}
+      {!isCommercial && (
+        <AgentFilter 
+          assignedTo={filters.assignedTo} 
+          onAssignedToChange={agent => handleFilterChange('assignedTo', agent)} 
+          assignedToOptions={assignedToOptions} 
+        />
+      )}
 
       {/* Budget filter */}
       <BudgetFilter 
