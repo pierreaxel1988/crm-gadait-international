@@ -10,6 +10,7 @@ import {
 } from "./leadCore";
 import { addActionToLead } from "./leadActions";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt">): Promise<LeadDetailed | null> => {
   try {
@@ -28,6 +29,33 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       pipeline_type: leadData.pipeline_type,
       status: leadData.status
     });
+    
+    // Vérifier si l'utilisateur actuel est un commercial
+    const { data: { user } } = await supabase.auth.getSession();
+    
+    // Liste des emails commerciaux
+    const commercialEmails = [
+      'jade@gadait-international.com',
+      'ophelie@gadait-international.com',
+      'jeanmarc@gadait-international.com',
+      'jacques@gadait-international.com',
+      'sharon@gadait-international.com'
+    ];
+    
+    // Si c'est un commercial, s'assurer que le lead est assigné à lui-même
+    if (commercialEmails.includes(user?.email || '')) {
+      // Récupérer l'ID du commercial connecté depuis la table team_members
+      const { data: teamMember } = await supabase
+        .from('team_members')
+        .select('id, name')
+        .eq('email', user?.email)
+        .single();
+        
+      if (teamMember && teamMember.id) {
+        console.log(`Commercial user creating lead, auto-assigning to: ${teamMember.name} (${teamMember.id})`);
+        leadData.assignedTo = teamMember.id;
+      }
+    }
     
     // Si aucun agent n'est assigné, on ne fait pas d'assignation automatique
     // L'utilisateur doit explicitement choisir un agent

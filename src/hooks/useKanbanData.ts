@@ -7,6 +7,7 @@ import { getLeads } from '@/services/leadCore';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import { PropertyType, PurchaseTimeframe, PipelineType, Currency } from '@/types/lead';
 import type { Json } from '@/integrations/supabase/types';
+import { useAuth } from '@/hooks/useAuth';
 
 // Extend KanbanItem with the additional properties needed for filtering
 export interface ExtendedKanbanItem extends KanbanItem {
@@ -41,12 +42,14 @@ export const useKanbanData = (
 ) => {
   const [loadedColumns, setLoadedColumns] = useState<KanbanColumn[]>(columns);
   const [isLoading, setIsLoading] = useState(true);
+  const { isCommercial, user } = useAuth(); // Récupérer les infos d'authentification
 
   useEffect(() => {
     console.log("useKanbanData useEffect triggered");
     console.log("Initial columns:", columns);
     console.log("Pipeline type:", pipelineType);
     console.log("Refresh trigger:", refreshTrigger);
+    console.log("User is commercial:", isCommercial);
     
     const fetchLeads = async () => {
       try {
@@ -67,12 +70,27 @@ export const useKanbanData = (
           return;
         }
         
-        // Direct query to get all leads with action_history
-        const { data: supabaseLeads, error: leadsError } = await supabase
-          .from('leads')
-          .select('*, action_history')
-          .order('created_at', { ascending: false });
+        // Direct query to get leads with filters based on user role
+        let query = supabase.from('leads').select('*, action_history');
+        
+        // Si c'est un commercial, filtrer pour n'afficher que ses leads
+        if (isCommercial && user) {
+          // Trouver l'ID du team member correspondant à l'email de l'utilisateur
+          const currentTeamMember = teamMembers?.find(tm => tm.email === user.email);
           
+          if (currentTeamMember) {
+            console.log("Filtering leads for team member:", currentTeamMember.id, currentTeamMember.name);
+            query = query.eq('assigned_to', currentTeamMember.id);
+          } else {
+            console.warn("Commercial user not found in team_members table:", user.email);
+          }
+        }
+        
+        // Finaliser la requête
+        query = query.order('created_at', { ascending: false });
+        
+        const { data: supabaseLeads, error: leadsError } = await query;
+        
         if (leadsError) {
           console.error('Error fetching leads:', leadsError);
           toast({
@@ -91,7 +109,16 @@ export const useKanbanData = (
         let allLeads = supabaseLeads || [];
         if (!allLeads || allLeads.length === 0) {
           console.log("No leads in Supabase, trying local data");
-          const localLeads = await getLeads();
+          let localLeads = await getLeads();
+          
+          // Si c'est un commercial, filtrer les leads locaux aussi
+          if (isCommercial && user && localLeads) {
+            const currentTeamMember = teamMembers?.find(tm => tm.email === user.email);
+            if (currentTeamMember) {
+              localLeads = localLeads.filter(lead => lead.assignedTo === currentTeamMember.id);
+            }
+          }
+          
           if (localLeads && localLeads.length > 0) {
             console.log("Found local leads:", localLeads.length);
             
@@ -225,7 +252,7 @@ export const useKanbanData = (
     };
 
     fetchLeads();
-  }, [refreshTrigger, columns, pipelineType]);
+  }, [refreshTrigger, columns, pipelineType, isCommercial, user]);
 
   return { loadedColumns, setLoadedColumns, isLoading };
 };
