@@ -27,21 +27,63 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/pipeline" />} />
-          <Route path="/pipeline" element={<Pipeline />} />
-          <Route path="/leads" element={<LeadsPage />} />
-          <Route path="/leads/:id" element={<LeadDetail />} />
-          <Route path="/leads/new" element={<LeadNew />} />
-          <Route path="/leads/import" element={<LeadImport />} />
-          <Route path="/import-lead" element={<MobileLeadImport />} />
-          <Route path="/actions" element={<ActionsPage />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/auth" element={<Auth />} />
+          
+          {/* Routes accessibles à tous */}
+          <Route path="/pipeline" element={
+            <ProtectedRoute commercialAllowed={true}>
+              <Pipeline />
+            </ProtectedRoute>
+          } />
+          <Route path="/leads" element={
+            <ProtectedRoute commercialAllowed={true}>
+              <LeadsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/leads/:id" element={
+            <ProtectedRoute commercialAllowed={true}>
+              <LeadDetail />
+            </ProtectedRoute>
+          } />
+          <Route path="/leads/new" element={
+            <ProtectedRoute commercialAllowed={true}>
+              <LeadNew />
+            </ProtectedRoute>
+          } />
+          <Route path="/actions" element={
+            <ProtectedRoute commercialAllowed={true}>
+              <ActionsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/calendar" element={
+            <ProtectedRoute commercialAllowed={true}>
+              <Calendar />
+            </ProtectedRoute>
+          } />
+          
+          {/* Routes réservées aux administrateurs */}
+          <Route path="/leads/import" element={
+            <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+              <LeadImport />
+            </ProtectedRoute>
+          } />
+          <Route path="/import-lead" element={
+            <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+              <MobileLeadImport />
+            </ProtectedRoute>
+          } />
+          <Route path="/reports" element={
+            <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+              <Reports />
+            </ProtectedRoute>
+          } />
           <Route path="/admin" element={
-            <ProtectedRoute adminOnly>
+            <ProtectedRoute adminOnly={true} commercialAllowed={false}>
               <Admin />
             </ProtectedRoute>
           } />
+          
+          {/* Route d'authentification */}
+          <Route path="/auth" element={<Auth />} />
         </Routes>
         <Toaster />
       </Router>

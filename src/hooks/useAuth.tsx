@@ -10,6 +10,8 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   isAdmin: boolean;
+  isCommercial: boolean;
+  userRole: 'admin' | 'commercial' | 'guest';
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,6 +21,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isCommercial, setIsCommercial] = useState(false);
+  const [userRole, setUserRole] = useState<'admin' | 'commercial' | 'guest'>('guest');
 
   useEffect(() => {
     // Get initial session
@@ -28,16 +32,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(data.session);
         setUser(data.session?.user ?? null);
         
-        // Check if user has admin role or is Pierre Axel Gadait
+        // Check if user has admin role or is one of the admin users
         if (data.session?.user) {
-          const userRole = data.session.user.user_metadata?.role;
           const userEmail = data.session.user.email;
-          setIsAdmin(
-            userRole === 'admin' || 
-            userEmail === 'pierre@gadait-international.com' ||
-            userEmail === 'christelle@gadait-international.com' ||
-            userEmail === 'admin@gadait-international.com'
-          );
+          const adminEmails = [
+            'pierre@gadait-international.com',
+            'christelle@gadait-international.com',
+            'admin@gadait-international.com',
+            'chloe@gadait-international.com'
+          ];
+          
+          const commercialEmails = [
+            'jade@gadait-international.com',
+            'ophelie@gadait-international.com',
+            'jeanmarc@gadait-international.com',
+            'jacques@gadait-international.com',
+            'sharon@gadait-international.com'
+          ];
+          
+          const isUserAdmin = adminEmails.includes(userEmail || '');
+          const isUserCommercial = commercialEmails.includes(userEmail || '');
+          
+          setIsAdmin(isUserAdmin);
+          setIsCommercial(isUserCommercial);
+          
+          if (isUserAdmin) {
+            setUserRole('admin');
+          } else if (isUserCommercial) {
+            setUserRole('commercial');
+          } else {
+            setUserRole('guest');
+          }
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
@@ -54,18 +79,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Check if user has admin role or is Pierre Axel Gadait on auth change
+        // Check if user has admin role or is one of the admin users
         if (session?.user) {
-          const userRole = session.user.user_metadata?.role;
           const userEmail = session.user.email;
-          setIsAdmin(
-            userRole === 'admin' || 
-            userEmail === 'pierre@gadait-international.com' ||
-            userEmail === 'christelle@gadait-international.com' ||
-            userEmail === 'admin@gadait-international.com'
-          );
+          const adminEmails = [
+            'pierre@gadait-international.com',
+            'christelle@gadait-international.com',
+            'admin@gadait-international.com',
+            'chloe@gadait-international.com'
+          ];
+          
+          const commercialEmails = [
+            'jade@gadait-international.com',
+            'ophelie@gadait-international.com',
+            'jeanmarc@gadait-international.com',
+            'jacques@gadait-international.com',
+            'sharon@gadait-international.com'
+          ];
+          
+          const isUserAdmin = adminEmails.includes(userEmail || '');
+          const isUserCommercial = commercialEmails.includes(userEmail || '');
+          
+          setIsAdmin(isUserAdmin);
+          setIsCommercial(isUserCommercial);
+          
+          if (isUserAdmin) {
+            setUserRole('admin');
+          } else if (isUserCommercial) {
+            setUserRole('commercial');
+          } else {
+            setUserRole('guest');
+          }
         } else {
           setIsAdmin(false);
+          setIsCommercial(false);
+          setUserRole('guest');
         }
         
         setLoading(false);
@@ -101,7 +149,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signOut, signInWithGoogle, isAdmin }}>
+    <AuthContext.Provider value={{
+      session,
+      user,
+      loading,
+      signOut,
+      signInWithGoogle,
+      isAdmin,
+      isCommercial,
+      userRole
+    }}>
       {children}
     </AuthContext.Provider>
   );

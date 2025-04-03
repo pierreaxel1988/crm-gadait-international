@@ -7,6 +7,7 @@ import CustomButton from '@/components/ui/CustomButton';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LeadDetailHeaderProps {
   name: string;
@@ -47,6 +48,8 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   onWhatsAppClick,
   onEmailClick
 }) => {
+  const { isAdmin } = useAuth();
+  
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();

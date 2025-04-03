@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 const UserMenu: React.FC = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, userRole } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
