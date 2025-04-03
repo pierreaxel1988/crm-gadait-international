@@ -2,9 +2,25 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/hooks/useAuth';
 
 export const CommercialBadge = () => {
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  
+  // Extract the first name from the email
+  const getFirstName = () => {
+    if (!user?.email) return "COMMERCIAL";
+    
+    // Extract username from email (part before @)
+    const username = user.email.split('@')[0];
+    
+    // Get first name (usually before dots, underscores or hyphens)
+    const firstName = username.split(/[._-]/)[0];
+    
+    // Capitalize first letter
+    return firstName.charAt(0).toUpperCase() + firstName.slice(1);
+  };
   
   return (
     <Badge className={`
@@ -23,7 +39,7 @@ export const CommercialBadge = () => {
       duration-200
       font-futuraMd
     `}>
-      COMMERCIAL
+      {getFirstName()}
     </Badge>
   );
 };
