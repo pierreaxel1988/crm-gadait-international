@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -937,10 +938,11 @@ France"
           <div className="flex">
             <div className="relative flex-shrink-0">
               <div 
-                className="flex items-center justify-between w-20 h-10 px-3 border border-r-0 rounded-l-md bg-muted cursor-pointer font-futura"
+                className="inline-flex h-10 items-center justify-between px-3 border border-r-0 rounded-l-md bg-muted cursor-pointer font-futura"
                 onClick={() => setShowCountryDropdown(prev => !prev)}
+                style={{ minWidth: '80px' }}
               >
-                <span>{phoneCountryCode}</span>
+                <span className="text-sm">{phoneCountryCode}</span>
                 <Search className="h-4 w-4 ml-1 flex-shrink-0" />
               </div>
               
