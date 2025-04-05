@@ -24,6 +24,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
   const [showContactPaste, setShowContactPaste] = useState(false);
   const [contactText, setContactText] = useState('');
+  const [phoneCountryCode, setPhoneCountryCode] = useState('+33');
   
   useEffect(() => {
     const measureHeader = () => {
@@ -49,6 +50,16 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     onDataChange({
       [field]: value
     } as Partial<LeadDetailed>);
+  };
+
+  const updatePhoneCodeInUI = (code: string) => {
+    setPhoneCountryCode(code);
+    // Trouver le sélecteur de code pays dans le DOM et le mettre à jour
+    const phoneCodeSelect = document.querySelector('select[name="phoneCountryCode"]') as HTMLSelectElement;
+    if (phoneCodeSelect) {
+      phoneCodeSelect.value = code;
+      phoneCodeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    }
   };
 
   const parseContactInfo = () => {
@@ -176,14 +187,18 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     }
 
     // Traitement du numéro de téléphone pour extraire le code pays
-    let countryCode = '+33'; // Par défaut: France
+    let detectedCountryCode = '+33'; // Par défaut: France
+    let phoneNumberWithoutCode = '';
     
     if (phone) {
-      // Rechercher un code pays international au format +XX ou (+ XX)
-      const countryCodeMatch = phone.match(/\+(\d+)|\(\+\s*(\d+)\)/);
+      // Rechercher un code pays international au format +XX ou (+XX)
+      const countryCodeMatch = phone.match(/\(\+(\d+)\)|\+(\d+)/);
+      
       if (countryCodeMatch) {
         // Prendre le premier groupe non-undefined
         const codeDigits = countryCodeMatch[1] || countryCodeMatch[2];
+        console.log("Code pays détecté:", codeDigits);
+        
         if (codeDigits) {
           // Extraire les premiers chiffres pour le code pays (1, 2 ou 3 chiffres)
           let code = '';
@@ -237,15 +252,29 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             code = codeDigits.substring(0, Math.min(3, codeDigits.length));
           }
           
-          countryCode = '+' + code;
-          phoneCountryCode = countryCode;
+          detectedCountryCode = '+' + code;
+          
+          // Mettre à jour le sélecteur de code pays dans l'interface
+          updatePhoneCodeInUI(detectedCountryCode);
+          
+          // Extraire le numéro sans le code pays
+          if (phone.includes('(+')) {
+            // Format (+XX) XXXXX
+            phoneNumberWithoutCode = phone.replace(/\(\+\d+\)\s*/, '').trim();
+          } else if (phone.includes('+')) {
+            // Format +XX XXXXX
+            phoneNumberWithoutCode = phone.replace(/\+\d+\s*/, '').trim();
+          } else {
+            phoneNumberWithoutCode = phone;
+          }
         }
+      } else {
+        // Si aucun code pays n'est détecté, utiliser le numéro tel quel
+        phoneNumberWithoutCode = phone;
       }
 
-      // Nettoyer le numéro de téléphone pour enlever le code pays et les caractères spéciaux
-      phone = phone.replace(/\(\+\s*\d+\)|\+\d+/, '').trim();
-      // Enlever les parenthèses, tirets et espaces supplémentaires
-      phone = phone.replace(/[()]/g, '').trim();
+      // Nettoyer le numéro de téléphone (enlever les parenthèses, tirets et caractères spéciaux)
+      phoneNumberWithoutCode = phoneNumberWithoutCode.replace(/[()]/g, '').trim();
     }
 
     // Mapper les codes pays aux pays
@@ -278,32 +307,27 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     };
     
     // Si on a un code pays mais pas de pays détecté, utiliser le code pays pour déduire le pays
-    if (phoneCountryCode && !country && countryCodeMap[phoneCountryCode]) {
-      country = countryCodeMap[phoneCountryCode];
+    if (detectedCountryCode && !country && countryCodeMap[detectedCountryCode]) {
+      country = countryCodeMap[detectedCountryCode];
     }
 
     console.log("Informations extraites:", { 
       name, 
       email, 
-      phone, 
+      phoneNumberWithoutCode, 
       country, 
       language, 
-      phoneCountryCode 
+      detectedCountryCode 
     });
 
     // Mettre à jour les champs du lead
     if (name) handleInputChange('name', name);
     if (email) handleInputChange('email', email);
-    if (phone) handleInputChange('phone', phone);
-    if (phoneCountryCode) {
-      // Mettre à jour le champ de code pays dans l'interface (non stocké dans le lead)
-      const phoneInput = document.querySelector('input[id="phone"]') as HTMLInputElement;
-      const phoneCodeSelect = phoneInput?.previousElementSibling?.querySelector('select');
-      if (phoneCodeSelect) {
-        phoneCodeSelect.value = phoneCountryCode;
-        // Déclencher un événement de changement pour mettre à jour l'UI
-        phoneCodeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-      }
+    
+    // Mettre à jour le téléphone
+    if (phoneNumberWithoutCode) {
+      // Pour le numéro de téléphone, on laisse juste le numéro sans le code pays
+      handleInputChange('phone', phoneNumberWithoutCode);
     }
     
     if (country) {
@@ -415,9 +439,42 @@ France"
         <div className="space-y-2">
           <Label htmlFor="phone" className="text-sm">Téléphone</Label>
           <div className="flex">
-            <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 border border-r-0 rounded-l-md bg-white">
-              <Phone className="h-4 w-4 text-gray-500" />
-            </div>
+            <Select 
+              value={phoneCountryCode} 
+              onValueChange={(value) => setPhoneCountryCode(value)}
+              name="phoneCountryCode"
+            >
+              <SelectTrigger className="flex-shrink-0 w-20 rounded-r-none font-futura">
+                <SelectValue placeholder="+33" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="+33">+33</SelectItem>
+                <SelectItem value="+1">+1</SelectItem>
+                <SelectItem value="+44">+44</SelectItem>
+                <SelectItem value="+34">+34</SelectItem>
+                <SelectItem value="+39">+39</SelectItem>
+                <SelectItem value="+41">+41</SelectItem>
+                <SelectItem value="+32">+32</SelectItem>
+                <SelectItem value="+49">+49</SelectItem>
+                <SelectItem value="+31">+31</SelectItem>
+                <SelectItem value="+7">+7</SelectItem>
+                <SelectItem value="+971">+971</SelectItem>
+                <SelectItem value="+966">+966</SelectItem>
+                <SelectItem value="+965">+965</SelectItem>
+                <SelectItem value="+974">+974</SelectItem>
+                <SelectItem value="+973">+973</SelectItem>
+                <SelectItem value="+230">+230</SelectItem>
+                <SelectItem value="+212">+212</SelectItem>
+                <SelectItem value="+216">+216</SelectItem>
+                <SelectItem value="+213">+213</SelectItem>
+                <SelectItem value="+20">+20</SelectItem>
+                <SelectItem value="+351">+351</SelectItem>
+                <SelectItem value="+30">+30</SelectItem>
+                <SelectItem value="+385">+385</SelectItem>
+                <SelectItem value="+960">+960</SelectItem>
+                <SelectItem value="+248">+248</SelectItem>
+              </SelectContent>
+            </Select>
             <Input 
               id="phone" 
               value={lead.phone || ''}
@@ -427,6 +484,11 @@ France"
               type="tel"
             />
           </div>
+          {country && (
+            <p className="text-xs text-muted-foreground font-futura mt-1">
+              Pays détecté: {country}
+            </p>
+          )}
         </div>
         
         <div className="space-y-2">
@@ -494,3 +556,4 @@ France"
 };
 
 export default GeneralInfoSection;
+
