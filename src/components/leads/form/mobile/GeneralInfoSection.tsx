@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -234,6 +233,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             '49': '49',
             '51': '51',
             '52': '52',
+            '53': '53',
             '54': '54',
             '55': '55',
             '56': '56',
@@ -384,7 +384,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             '996': '996',
             '998': '998',
           };
-
+          
           let matchedCode = '';
           for (const [code, value] of Object.entries(commonCodes)) {
             if (codeDigits.startsWith(code) && code.length > matchedCode.length) {
@@ -850,6 +850,146 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
 
+  const getCountryFlagEmoji = (countryCode: string): string => {
+    const codeToCountry: Record<string, string> = {
+      '+1': 'US',
+      '+7': 'RU',
+      '+20': 'EG',
+      '+27': 'ZA',
+      '+30': 'GR',
+      '+31': 'NL',
+      '+32': 'BE',
+      '+33': 'FR',
+      '+34': 'ES',
+      '+36': 'HU',
+      '+39': 'IT',
+      '+41': 'CH',
+      '+43': 'AT',
+      '+44': 'GB',
+      '+45': 'DK',
+      '+46': 'SE',
+      '+47': 'NO',
+      '+48': 'PL',
+      '+49': 'DE',
+      '+51': 'PE',
+      '+52': 'MX',
+      '+53': 'CU',
+      '+54': 'AR',
+      '+55': 'BR',
+      '+56': 'CL',
+      '+57': 'CO',
+      '+58': 'VE',
+      '+60': 'MY',
+      '+61': 'AU',
+      '+62': 'ID',
+      '+63': 'PH',
+      '+64': 'NZ',
+      '+65': 'SG',
+      '+66': 'TH',
+      '+81': 'JP',
+      '+82': 'KR',
+      '+84': 'VN',
+      '+86': 'CN',
+      '+90': 'TR',
+      '+91': 'IN',
+      '+92': 'PK',
+      '+93': 'AF',
+      '+94': 'LK',
+      '+95': 'MM',
+      '+98': 'IR',
+      '+212': 'MA',
+      '+213': 'DZ',
+      '+216': 'TN',
+      '+218': 'LY',
+      '+230': 'MU',
+      '+234': 'NG',
+      '+248': 'SC',
+      '+249': 'SD',
+      '+254': 'KE',
+      '+255': 'TZ',
+      '+256': 'UG',
+      '+260': 'ZM',
+      '+262': 'RE',
+      '+263': 'ZW',
+      '+264': 'NA',
+      '+267': 'BW',
+      '+351': 'PT',
+      '+352': 'LU',
+      '+353': 'IE',
+      '+354': 'IS',
+      '+355': 'AL',
+      '+357': 'CY',
+      '+358': 'FI',
+      '+359': 'BG',
+      '+370': 'LT',
+      '+371': 'LV',
+      '+372': 'EE',
+      '+373': 'MD',
+      '+374': 'AM',
+      '+375': 'BY',
+      '+376': 'AD',
+      '+377': 'MC',
+      '+378': 'SM',
+      '+380': 'UA',
+      '+385': 'HR',
+      '+386': 'SI',
+      '+387': 'BA',
+      '+420': 'CZ',
+      '+421': 'SK',
+      '+423': 'LI',
+      '+503': 'SV',
+      '+504': 'HN',
+      '+505': 'NI',
+      '+506': 'CR',
+      '+507': 'PA',
+      '+591': 'BO',
+      '+593': 'EC',
+      '+595': 'PY',
+      '+598': 'UY',
+      '+852': 'HK',
+      '+855': 'KH',
+      '+856': 'LA',
+      '+880': 'BD',
+      '+886': 'TW',
+      '+960': 'MV',
+      '+961': 'LB',
+      '+962': 'JO',
+      '+963': 'SY',
+      '+964': 'IQ',
+      '+965': 'KW',
+      '+966': 'SA',
+      '+967': 'YE',
+      '+968': 'OM',
+      '+970': 'PS',
+      '+971': 'AE',
+      '+972': 'IL',
+      '+973': 'BH',
+      '+974': 'QA',
+      '+975': 'BT',
+      '+976': 'MN',
+      '+977': 'NP',
+      '+992': 'TJ',
+      '+993': 'TM',
+      '+994': 'AZ',
+      '+995': 'GE',
+      '+996': 'KG',
+      '+998': 'UZ'
+    };
+    
+    const country = codeToCountry[countryCode];
+    if (!country) return '🌍';
+    
+    return countryToFlag(country);
+  };
+  
+  const countryToFlag = (countryCode: string): string => {
+    const codePoints = countryCode
+      .toUpperCase()
+      .split('')
+      .map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+  };
+
   return (
     <div 
       className="space-y-5 pt-4" 
@@ -940,13 +1080,54 @@ France"
               <div 
                 className="inline-flex h-10 items-center justify-between px-3 border border-r-0 rounded-l-md bg-muted cursor-pointer font-futura"
                 onClick={() => setShowCountryDropdown(prev => !prev)}
-                style={{ minWidth: '80px' }}
+                style={{ minWidth: '56px' }}
               >
-                <span className="text-sm">{phoneCountryCode}</span>
-                <Search className="h-4 w-4 ml-1 flex-shrink-0" />
+                <span className="text-xl">{getCountryFlagEmoji(phoneCountryCode)}</span>
+                <span className="text-xs text-muted-foreground ml-1">{phoneCountryCode}</span>
               </div>
               
-              {showCountryDropdown && renderCountryDropdown()}
+              {showCountryDropdown && (
+                <div 
+                  ref={countryDropdownRef}
+                  className="absolute z-10 mt-1 w-56 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md left-0 top-full"
+                >
+                  <div className="sticky top-0 bg-background border-b border-input p-2">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <input 
+                        ref={searchInputRef}
+                        type="text"
+                        className="w-full px-2 py-1 pl-8 text-sm border rounded"
+                        placeholder="Rechercher un pays ou code..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        autoFocus
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  </div>
+                  
+                  {filteredCountryCodes.map(country => (
+                    <div 
+                      key={country.code} 
+                      className="px-3 py-2 text-sm hover:bg-accent cursor-pointer flex items-center justify-between font-futura"
+                      onClick={() => handleCountryCodeChange(country.code)}
+                    >
+                      <div className="flex items-center">
+                        <span className="mr-2 text-base">{getCountryFlagEmoji(country.code)}</span>
+                        <span>{country.country.replace(/^🇺🇸 |^🇫🇷 |^🇬🇧 |^🇪🇸 |^🇮🇹 |^🇩🇪 |^🇯🇵 |^🇨🇳 |^🇷🇺 |^🇮🇳 |^.{4} /, '')}</span>
+                      </div>
+                      <span className="text-muted-foreground">{country.code}</span>
+                    </div>
+                  ))}
+                  
+                  {filteredCountryCodes.length === 0 && (
+                    <div className="px-3 py-2 text-sm text-muted-foreground font-futura">
+                      Aucun pays ne correspond à votre recherche
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <Input 
               id="phone" 

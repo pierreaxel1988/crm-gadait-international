@@ -202,70 +202,144 @@ const GeneralInfoSection = ({
     '+998': 'Uzbekistan'
   };
 
-  const getCountryFlag = (country: string): string => {
-    const countryToFlag = (countryCode: string) => {
-      const codePoints = countryCode
-        .toUpperCase()
-        .split('')
-        .map(char => 127397 + char.charCodeAt(0));
-      return String.fromCodePoint(...codePoints);
+  const getCountryFlagEmoji = (countryCode: string): string => {
+    const codeToCountry: Record<string, string> = {
+      '+1': 'US',
+      '+7': 'RU',
+      '+20': 'EG',
+      '+27': 'ZA',
+      '+30': 'GR',
+      '+31': 'NL',
+      '+32': 'BE',
+      '+33': 'FR',
+      '+34': 'ES',
+      '+36': 'HU',
+      '+39': 'IT',
+      '+41': 'CH',
+      '+43': 'AT',
+      '+44': 'GB',
+      '+45': 'DK',
+      '+46': 'SE',
+      '+47': 'NO',
+      '+48': 'PL',
+      '+49': 'DE',
+      '+51': 'PE',
+      '+52': 'MX',
+      '+53': 'CU',
+      '+54': 'AR',
+      '+55': 'BR',
+      '+56': 'CL',
+      '+57': 'CO',
+      '+58': 'VE',
+      '+60': 'MY',
+      '+61': 'AU',
+      '+62': 'ID',
+      '+63': 'PH',
+      '+64': 'NZ',
+      '+65': 'SG',
+      '+66': 'TH',
+      '+81': 'JP',
+      '+82': 'KR',
+      '+84': 'VN',
+      '+86': 'CN',
+      '+90': 'TR',
+      '+91': 'IN',
+      '+92': 'PK',
+      '+93': 'AF',
+      '+94': 'LK',
+      '+95': 'MM',
+      '+98': 'IR',
+      '+212': 'MA',
+      '+213': 'DZ',
+      '+216': 'TN',
+      '+218': 'LY',
+      '+230': 'MU',
+      '+234': 'NG',
+      '+248': 'SC',
+      '+249': 'SD',
+      '+254': 'KE',
+      '+255': 'TZ',
+      '+256': 'UG',
+      '+260': 'ZM',
+      '+262': 'RE',
+      '+263': 'ZW',
+      '+264': 'NA',
+      '+267': 'BW',
+      '+351': 'PT',
+      '+352': 'LU',
+      '+353': 'IE',
+      '+354': 'IS',
+      '+355': 'AL',
+      '+357': 'CY',
+      '+358': 'FI',
+      '+359': 'BG',
+      '+370': 'LT',
+      '+371': 'LV',
+      '+372': 'EE',
+      '+373': 'MD',
+      '+374': 'AM',
+      '+375': 'BY',
+      '+376': 'AD',
+      '+377': 'MC',
+      '+378': 'SM',
+      '+380': 'UA',
+      '+385': 'HR',
+      '+386': 'SI',
+      '+387': 'BA',
+      '+420': 'CZ',
+      '+421': 'SK',
+      '+423': 'LI',
+      '+503': 'SV',
+      '+504': 'HN',
+      '+505': 'NI',
+      '+506': 'CR',
+      '+507': 'PA',
+      '+591': 'BO',
+      '+593': 'EC',
+      '+595': 'PY',
+      '+598': 'UY',
+      '+852': 'HK',
+      '+855': 'KH',
+      '+856': 'LA',
+      '+880': 'BD',
+      '+886': 'TW',
+      '+960': 'MV',
+      '+961': 'LB',
+      '+962': 'JO',
+      '+963': 'SY',
+      '+964': 'IQ',
+      '+965': 'KW',
+      '+966': 'SA',
+      '+967': 'YE',
+      '+968': 'OM',
+      '+970': 'PS',
+      '+971': 'AE',
+      '+972': 'IL',
+      '+973': 'BH',
+      '+974': 'QA',
+      '+975': 'BT',
+      '+976': 'MN',
+      '+977': 'NP',
+      '+992': 'TJ',
+      '+993': 'TM',
+      '+994': 'AZ',
+      '+995': 'GE',
+      '+996': 'KG',
+      '+998': 'UZ'
     };
     
-    const countryNameToCode: Record<string, string> = {
-      'Afghanistan': 'AF', 'Albania': 'AL', 'Algeria': 'DZ', 'Andorra': 'AD', 
-      'Angola': 'AO', 'Antigua and Barbuda': 'AG', 'Argentina': 'AR', 'Armenia': 'AM', 
-      'Australia': 'AU', 'Austria': 'AT', 'Azerbaijan': 'AZ', 'Bahamas': 'BS', 
-      'Bahrain': 'BH', 'Bangladesh': 'BD', 'Barbados': 'BB', 'Belarus': 'BY', 
-      'Belgium': 'BE', 'Belize': 'BZ', 'Benin': 'BJ', 'Bhutan': 'BT', 
-      'Bolivia': 'BO', 'Bosnia and Herzegovina': 'BA', 'Botswana': 'BW', 'Brazil': 'BR', 
-      'Brunei': 'BN', 'Bulgaria': 'BG', 'Burkina Faso': 'BF', 'Burundi': 'BI', 
-      'Cabo Verde': 'CV', 'Cambodia': 'KH', 'Cameroon': 'CM', 'Canada': 'CA', 
-      'Central African Republic': 'CF', 'Chad': 'TD', 'Chile': 'CL', 'China': 'CN', 
-      'Colombia': 'CO', 'Comoros': 'KM', 'Congo': 'CD', 'Costa Rica': 'CR', 
-      'Croatia': 'HR', 'Cuba': 'CU', 'Cyprus': 'CY', 'Czech Republic': 'CZ', 
-      'Denmark': 'DK', 'Djibouti': 'DJ', 'Dominica': 'DM', 'Dominican Republic': 'DO', 
-      'East Timor': 'TL', 'Ecuador': 'EC', 'Egypt': 'EG', 'El Salvador': 'SV', 
-      'Equatorial Guinea': 'GQ', 'Eritrea': 'ER', 'Estonia': 'EE', 'Eswatini': 'SZ', 
-      'Ethiopia': 'ET', 'Fiji': 'FJ', 'Finland': 'FI', 'France': 'FR', 
-      'Gabon': 'GA', 'Gambia': 'GM', 'Georgia': 'GE', 'Germany': 'DE', 
-      'Ghana': 'GH', 'Greece': 'GR', 'Grenada': 'GD', 'Guatemala': 'GT', 
-      'Guinea': 'GN', 'Guinea-Bissau': 'GW', 'Guyana': 'GY', 'Haiti': 'HT', 
-      'Honduras': 'HN', 'Hungary': 'HU', 'Iceland': 'IS', 'India': 'IN', 
-      'Indonesia': 'ID', 'Iran': 'IR', 'Iraq': 'IQ', 'Ireland': 'IE', 
-      'Israel': 'IL', 'Italy': 'IT', 'Ivory Coast': 'CI', 'Jamaica': 'JM', 
-      'Japan': 'JP', 'Jordan': 'JO', 'Kazakhstan': 'KZ', 'Kenya': 'KE', 
-      'Kiribati': 'KI', 'Korea, North': 'KP', 'Korea, South': 'KR', 'Kosovo': 'XK', 
-      'Kuwait': 'KW', 'Kyrgyzstan': 'KG', 'Laos': 'LA', 'Latvia': 'LV', 
-      'Lebanon': 'LB', 'Lesotho': 'LS', 'Liberia': 'LR', 'Libya': 'LY', 
-      'Liechtenstein': 'LI', 'Lithuania': 'LT', 'Luxembourg': 'LU', 'Madagascar': 'MG', 
-      'Malawi': 'MW', 'Malaysia': 'MY', 'Maldives': 'MV', 'Mali': 'ML', 
-      'Malta': 'MT', 'Marshall Islands': 'MH', 'Mauritania': 'MR', 'Mauritius': 'MU', 
-      'Mexico': 'MX', 'Micronesia': 'FM', 'Moldova': 'MD', 'Monaco': 'MC', 
-      'Mongolia': 'MN', 'Montenegro': 'ME', 'Morocco': 'MA', 'Mozambique': 'MZ', 
-      'Myanmar': 'MM', 'Namibia': 'NA', 'Nauru': 'NR', 'Nepal': 'NP', 
-      'Netherlands': 'NL', 'New Zealand': 'NZ', 'Nicaragua': 'NI', 'Niger': 'NE', 
-      'Nigeria': 'NG', 'North Macedonia': 'MK', 'Norway': 'NO', 'Oman': 'OM', 
-      'Pakistan': 'PK', 'Palau': 'PW', 'Panama': 'PA', 'Papua New Guinea': 'PG', 
-      'Paraguay': 'P', 'Peru': 'PE', 'Philippines': 'PH', 'Poland': 'PL', 
-      'Portugal': 'PT', 'Qatar': 'QA', 'Romania': 'RO', 'Russia': 'RU', 
-      'Rwanda': 'RW', 'Saint Kitts and Nevis': 'KN', 'Saint Lucia': 'LC', 
-      'Saint Vincent and the Grenadines': 'VC', 'Samoa': 'WS', 'San Marino': 'SM', 
-      'Sao Tome and Principe': 'ST', 'Saudi Arabia': 'SA', 'Senegal': 'SN', 
-      'Serbia': 'RS', 'Seychelles': 'SC', 'Sierra Leone': 'SL', 'Singapore': 'SG', 
-      'Slovakia': 'SK', 'Slovenia': 'SI', 'Solomon Islands': 'SB', 'Somalia': 'SO', 
-      'South Africa': 'ZA', 'South Sudan': 'SS', 'Spain': 'ES', 'Sri Lanka': 'LK', 
-      'Sudan': 'SD', 'Suriname': 'SR', 'Sweden': 'SE', 'Switzerland': 'CH', 
-      'Syria': 'SY', 'Taiwan': 'TW', 'Tajikistan': 'TJ', 'Tanzania': 'TZ', 
-      'Thailand': 'TH', 'Togo': 'TG', 'Tonga': 'TO', 'Trinidad and Tobago': 'TT', 
-      'Tunisia': 'TN', 'Turkey': 'TR', 'Turkmenistan': 'TM', 'Tuvalu': 'TV', 
-      'Uganda': 'UG', 'Ukraine': 'UA', 'United Arab Emirates': 'AE', 'United Kingdom': 'GB', 
-      'United States': 'US', 'Uruguay': 'UY', 'Uzbekistan': 'UZ', 'Vanuatu': 'VU', 
-      'Vatican City': 'VA', 'Venezuela': 'VE', 'Vietnam': 'VN', 'Yemen': 'YE', 
-      'Zambia': 'ZM', 'Zimbabwe': 'ZW'
-    };
+    const country = codeToCountry[countryCode];
+    if (!country) return '🌍';
+    
+    return countryToFlag(country);
+  };
 
-    const code = countryNameToCode[country];
-    return code ? countryToFlag(code) : '🌍';
+  const countryToFlag = (countryCode: string): string => {
+    const codePoints = countryCode
+      .toUpperCase()
+      .split('')
+      .map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
   };
 
   const handlePhoneCodeChange = (code: string) => {
@@ -728,6 +802,7 @@ France"
           icon={Phone}
           placeholder="Numéro"
           countryCode={phoneCountryCode}
+          countryCodeDisplay={getCountryFlagEmoji(phoneCountryCode)}
           onCountryCodeChange={handlePhoneCodeChange}
           searchable={true}
           className="mb-3"

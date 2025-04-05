@@ -1,268 +1,220 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { cn } from '@/lib/utils';
+import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { ChevronDown, Search } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
-import { getCountryFromCode, countryCodeMapping } from '@/components/pipeline/mobile/utils/leadFormatUtils';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
+import { Check, ChevronDown, Search, X } from 'lucide-react';
 
 interface FormInputProps {
   label: string;
   name: string;
-  type?: 'text' | 'email' | 'tel' | 'tel-with-code' | 'number' | 'date' | 'select' | 'textarea';
-  value: string | number | undefined;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  value?: string | number;
+  defaultValue?: string | number;
+  type?: string;
   placeholder?: string;
   required?: boolean;
-  icon?: React.ElementType;
-  options?: { value: string; label: string }[];
+  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   className?: string;
-  helpText?: string;
+  min?: string | number;
+  max?: string | number;
+  step?: string | number;
+  rows?: number;
   disabled?: boolean;
-  renderCustomField?: () => React.ReactNode;
+  options?: { value: string; label: string }[];
+  icon?: React.ElementType;
+  readOnly?: boolean;
   countryCode?: string;
+  countryCodeDisplay?: string;
   onCountryCodeChange?: (code: string) => void;
   searchable?: boolean;
+  error?: string;
+  info?: string;
 }
 
 const countryCodes = [
-  { code: '+93', country: '🇦🇫 Afghanistan' },
-  { code: '+355', country: '🇦🇱 Albania' },
-  { code: '+213', country: '🇩🇿 Algeria' },
-  { code: '+376', country: '🇦🇩 Andorra' },
-  { code: '+244', country: '🇦🇴 Angola' },
-  { code: '+1', country: '🇺🇸 USA/Canada' },
-  { code: '+54', country: '🇦🇷 Argentina' },
-  { code: '+374', country: '🇦🇲 Armenia' },
-  { code: '+61', country: '🇦🇺 Australia' },
-  { code: '+43', country: '🇦🇹 Austria' },
-  { code: '+994', country: '🇦🇿 Azerbaijan' },
-  { code: '+973', country: '🇧🇭 Bahrain' },
-  { code: '+880', country: '🇧🇩 Bangladesh' },
-  { code: '+375', country: '🇧🇾 Belarus' },
-  { code: '+32', country: '🇧🇪 Belgium' },
-  { code: '+501', country: '🇧🇿 Belize' },
-  { code: '+229', country: '🇧🇯 Benin' },
-  { code: '+975', country: '🇧🇹 Bhutan' },
-  { code: '+591', country: '🇧🇴 Bolivia' },
-  { code: '+387', country: '🇧🇦 Bosnia and Herzegovina' },
-  { code: '+267', country: '🇧🇼 Botswana' },
-  { code: '+55', country: '🇧🇷 Brazil' },
-  { code: '+673', country: '🇧🇳 Brunei' },
-  { code: '+359', country: '🇧🇬 Bulgaria' },
-  { code: '+226', country: '🇧🇫 Burkina Faso' },
-  { code: '+257', country: '🇧🇮 Burundi' },
-  { code: '+855', country: '🇰🇭 Cambodia' },
-  { code: '+237', country: '🇨🇲 Cameroon' },
-  { code: '+238', country: '🇨🇻 Cape Verde' },
-  { code: '+236', country: '🇨🇫 Central African Republic' },
-  { code: '+235', country: '🇹🇩 Chad' },
-  { code: '+56', country: '🇨🇱 Chile' },
-  { code: '+86', country: '🇨🇳 China' },
-  { code: '+57', country: '🇨🇴 Colombia' },
-  { code: '+269', country: '🇰🇲 Comoros' },
-  { code: '+242', country: '🇨🇬 Congo' },
-  { code: '+506', country: '🇨🇷 Costa Rica' },
-  { code: '+385', country: '🇭🇷 Croatia' },
-  { code: '+53', country: '🇨🇺 Cuba' },
-  { code: '+357', country: '🇨🇾 Cyprus' },
-  { code: '+420', country: '🇨🇿 Czech Republic' },
-  { code: '+45', country: '🇩🇰 Denmark' },
-  { code: '+253', country: '🇩🇯 Djibouti' },
-  { code: '+1809', country: '🇩🇴 Dominican Republic' },
-  { code: '+670', country: '🇹🇱 East Timor' },
-  { code: '+593', country: '🇪🇨 Ecuador' },
-  { code: '+20', country: '🇪🇬 Egypt' },
-  { code: '+503', country: '🇸🇻 El Salvador' },
-  { code: '+240', country: '🇬🇶 Equatorial Guinea' },
-  { code: '+291', country: '🇪🇷 Eritrea' },
-  { code: '+372', country: '🇪🇪 Estonia' },
-  { code: '+268', country: '🇸🇿 Eswatini' },
-  { code: '+251', country: '🇪🇹 Ethiopia' },
-  { code: '+679', country: '🇫🇯 Fiji' },
-  { code: '+358', country: '🇫🇮 Finland' },
-  { code: '+33', country: '🇫��� France' },
-  { code: '+262', country: '🇷🇪 Réunion' },
-  { code: '+241', country: '🇬🇦 Gabon' },
-  { code: '+220', country: '🇬🇲 Gambia' },
-  { code: '+995', country: '🇬🇪 Georgia' },
-  { code: '+49', country: '🇩🇪 Germany' },
-  { code: '+233', country: '🇬🇭 Ghana' },
-  { code: '+30', country: '🇬🇷 Greece' },
-  { code: '+299', country: '🇬🇱 Greenland' },
-  { code: '+502', country: '🇬🇹 Guatemala' },
-  { code: '+224', country: '🇬🇳 Guinea' },
-  { code: '+245', country: '🇬🇼 Guinea-Bissau' },
-  { code: '+592', country: '🇬🇾 Guyana' },
-  { code: '+509', country: '🇭🇹 Haiti' },
-  { code: '+504', country: '🇭🇳 Honduras' },
-  { code: '+852', country: '🇭🇰 Hong Kong' },
-  { code: '+36', country: '🇭🇺 Hungary' },
-  { code: '+354', country: '🇮🇸 Iceland' },
-  { code: '+91', country: '🇮🇳 India' },
-  { code: '+62', country: '🇮🇩 Indonesia' },
-  { code: '+98', country: '🇮🇷 Iran' },
-  { code: '+964', country: '🇮🇶 Iraq' },
-  { code: '+353', country: '🇮🇪 Ireland' },
-  { code: '+972', country: '🇮🇱 Israel' },
-  { code: '+39', country: '🇮🇹 Italy' },
-  { code: '+225', country: '🇨🇮 Ivory Coast' },
-  { code: '+1876', country: '🇯🇲 Jamaica' },
-  { code: '+81', country: '🇯🇵 Japan' },
-  { code: '+962', country: '🇯🇴 Jordan' },
-  { code: '+7', country: '🇰🇿 Kazakhstan/Russia' },
-  { code: '+254', country: '🇰🇪 Kenya' },
-  { code: '+686', country: '🇰🇮 Kiribati' },
-  { code: '+850', country: '🇰🇵 North Korea' },
-  { code: '+82', country: '🇰🇷 South Korea' },
-  { code: '+383', country: '🇽🇰 Kosovo' },
-  { code: '+965', country: '🇰🇼 Kuwait' },
-  { code: '+996', country: '🇰🇬 Kyrgyzstan' },
-  { code: '+856', country: '🇱🇦 Laos' },
-  { code: '+371', country: '🇱🇻 Latvia' },
-  { code: '+961', country: '🇱🇧 Lebanon' },
-  { code: '+266', country: '🇱🇸 Lesotho' },
-  { code: '+231', country: '🇱🇷 Liberia' },
-  { code: '+218', country: '🇱🇾 Libya' },
-  { code: '+423', country: '🇱🇮 Liechtenstein' },
-  { code: '+370', country: '🇱🇹 Lithuania' },
-  { code: '+352', country: '🇱🇺 Luxembourg' },
-  { code: '+261', country: '🇲🇬 Madagascar' },
-  { code: '+265', country: '🇲🇼 Malawi' },
-  { code: '+60', country: '🇲🇾 Malaysia' },
-  { code: '+960', country: '🇲🇻 Maldives' },
-  { code: '+223', country: '🇲🇱 Mali' },
-  { code: '+356', country: '🇲🇹 Malta' },
-  { code: '+692', country: '🇲🇭 Marshall Islands' },
-  { code: '+222', country: '🇲🇷 Mauritania' },
-  { code: '+230', country: '🇲🇺 Mauritius' },
-  { code: '+52', country: '🇲🇽 Mexico' },
-  { code: '+691', country: '🇫🇲 Micronesia' },
-  { code: '+373', country: '🇲🇩 Moldova' },
-  { code: '+377', country: '🇲🇨 Monaco' },
-  { code: '+976', country: '🇲🇳 Mongolia' },
-  { code: '+382', country: '🇲🇪 Montenegro' },
-  { code: '+212', country: '🇲🇦 Morocco' },
-  { code: '+258', country: '🇲🇿 Mozambique' },
-  { code: '+95', country: '🇲🇲 Myanmar' },
-  { code: '+264', country: '🇳🇦 Namibia' },
-  { code: '+674', country: '🇳🇷 Nauru' },
-  { code: '+977', country: '🇳🇵 Nepal' },
-  { code: '+31', country: '🇳🇱 Netherlands' },
-  { code: '+64', country: '🇳🇿 New Zealand' },
-  { code: '+505', country: '🇳🇮 Nicaragua' },
-  { code: '+227', country: '🇳🇪 Niger' },
-  { code: '+234', country: '🇳🇬 Nigeria' },
-  { code: '+389', country: '🇲🇰 North Macedonia' },
-  { code: '+47', country: '🇳🇴 Norway' },
-  { code: '+968', country: '🇴🇲 Oman' },
-  { code: '+92', country: '🇵🇰 Pakistan' },
-  { code: '+680', country: '🇵🇼 Palau' },
-  { code: '+507', country: '🇵🇦 Panama' },
-  { code: '+675', country: '🇵🇬 Papua New Guinea' },
-  { code: '+595', country: '🇵🇾 Paraguay' },
-  { code: '+51', country: '🇵🇪 Peru' },
-  { code: '+63', country: '🇵🇭 Philippines' },
-  { code: '+48', country: '🇵🇱 Poland' },
-  { code: '+351', country: '🇵🇹 Portugal' },
-  { code: '+974', country: '🇶🇦 Qatar' },
-  { code: '+40', country: '🇷🇴 Romania' },
-  { code: '+250', country: '🇷🇼 Rwanda' },
-  { code: '+1869', country: '🇰🇳 Saint Kitts and Nevis' },
-  { code: '+1758', country: '🇱🇨 Saint Lucia' },
-  { code: '+1784', country: '🇻🇨 Saint Vincent and the Grenadines' },
-  { code: '+685', country: '🇼🇸 Samoa' },
-  { code: '+378', country: '🇸🇲 San Marino' },
-  { code: '+239', country: '🇸🇹 Sao Tome and Principe' },
-  { code: '+966', country: '🇸🇦 Saudi Arabia' },
-  { code: '+221', country: '🇸🇳 Senegal' },
-  { code: '+381', country: '🇷🇸 Serbia' },
-  { code: '+248', country: '🇸🇨 Seychelles' },
-  { code: '+232', country: '🇸🇱 Sierra Leone' },
-  { code: '+65', country: '🇸🇬 Singapore' },
-  { code: '+421', country: '🇸🇰 Slovakia' },
-  { code: '+386', country: '🇸🇮 Slovenia' },
-  { code: '+677', country: '🇸🇧 Solomon Islands' },
-  { code: '+252', country: '🇸🇴 Somalia' },
-  { code: '+27', country: '🇿🇦 South Africa' },
-  { code: '+211', country: '🇸🇸 South Sudan' },
-  { code: '+34', country: '🇪🇸 Spain' },
-  { code: '+94', country: '🇱🇰 Sri Lanka' },
-  { code: '+249', country: '🇸🇩 Sudan' },
-  { code: '+597', country: '🇸🇷 Suriname' },
-  { code: '+46', country: '🇸🇪 Sweden' },
-  { code: '+41', country: '🇨🇭 Switzerland' },
-  { code: '+963', country: '🇸🇾 Syria' },
-  { code: '+886', country: '🇹🇼 Taiwan' },
-  { code: '+992', country: '🇹🇯 Tajikistan' },
-  { code: '+255', country: '🇹🇿 Tanzania' },
-  { code: '+66', country: '🇹🇭 Thailand' },
-  { code: '+228', country: '🇹🇬 Togo' },
-  { code: '+676', country: '🇹🇴 Tonga' },
-  { code: '+1868', country: '🇹🇹 Trinidad and Tobago' },
-  { code: '+216', country: '🇹🇳 Tunisia' },
-  { code: '+90', country: '🇹🇷 Turkey' },
-  { code: '+993', country: '🇹🇲 Turkmenistan' },
-  { code: '+688', country: '🇹🇻 Tuvalu' },
-  { code: '+256', country: '🇺🇬 Uganda' },
-  { code: '+380', country: '🇺🇦 Ukraine' },
-  { code: '+971', country: '🇦🇪 UAE' },
-  { code: '+44', country: '🇬🇧 UK' },
-  { code: '+598', country: '🇺🇾 Uruguay' },
-  { code: '+998', country: '🇺🇿 Uzbekistan' },
-  { code: '+678', country: '🇻🇺 Vanuatu' },
-  { code: '+379', country: '🇻🇦 Vatican City' },
-  { code: '+58', country: '🇻🇪 Venezuela' },
-  { code: '+84', country: '🇻🇳 Vietnam' },
-  { code: '+967', country: '🇾🇪 Yemen' },
-  { code: '+260', country: '🇿🇲 Zambia' },
-  { code: '+263', country: '🇿🇼 Zimbabwe' }
+  '+1', '+7', '+20', '+27', '+30', '+31', '+32', '+33', '+34', '+36', '+39',
+  '+40', '+41', '+43', '+44', '+45', '+46', '+47', '+48', '+49', '+51', '+52',
+  '+53', '+54', '+55', '+56', '+57', '+58', '+60', '+61', '+62', '+63', '+64',
+  '+65', '+66', '+81', '+82', '+84', '+86', '+90', '+91', '+92', '+93', '+94',
+  '+95', '+98', '+212', '+213', '+216', '+218', '+220', '+221', '+222', '+223',
+  '+224', '+225', '+226', '+227', '+228', '+229', '+230', '+231', '+232', '+233',
+  '+234', '+235', '+236', '+237', '+238', '+239', '+240', '+241', '+242', '+243',
+  '+244', '+245', '+246', '+247', '+248', '+249', '+250', '+251', '+252', '+253',
+  '+254', '+255', '+256', '+257', '+258', '+260', '+261', '+262', '+263', '+264',
+  '+265', '+266', '+267', '+268', '+269', '+290', '+291', '+297', '+298', '+299',
+  '+350', '+351', '+352', '+353', '+354', '+355', '+356', '+357', '+358', '+359',
+  '+370', '+371', '+372', '+373', '+374', '+375', '+376', '+377', '+378', '+379',
+  '+380', '+381', '+382', '+383', '+385', '+386', '+387', '+389', '+420', '+421',
+  '+423', '+500', '+501', '+502', '+503', '+504', '+505', '+506', '+507', '+508',
+  '+509', '+590', '+591', '+592', '+593', '+594', '+595', '+596', '+597', '+598',
+  '+599', '+670', '+672', '+673', '+674', '+675', '+676', '+677', '+678', '+679',
+  '+680', '+681', '+682', '+683', '+685', '+686', '+687', '+688', '+689', '+690',
+  '+691', '+692', '+850', '+852', '+853', '+855', '+856', '+880', '+886', '+960',
+  '+961', '+962', '+963', '+964', '+965', '+966', '+967', '+968', '+970', '+971',
+  '+972', '+973', '+974', '+975', '+976', '+977', '+992', '+993', '+994', '+995',
+  '+996', '+998'
 ];
+
+const countryNames: Record<string, string> = {
+  '+1': 'United States',
+  '+7': 'Russia',
+  '+20': 'Egypt',
+  '+27': 'South Africa',
+  '+30': 'Greece',
+  '+31': 'Netherlands',
+  '+32': 'Belgium',
+  '+33': 'France',
+  '+34': 'Spain',
+  '+36': 'Hungary',
+  '+39': 'Italy',
+  '+40': 'Romania',
+  '+41': 'Switzerland',
+  '+43': 'Austria',
+  '+44': 'United Kingdom',
+  '+45': 'Denmark',
+  '+46': 'Sweden',
+  '+47': 'Norway',
+  '+48': 'Poland',
+  '+49': 'Germany',
+  '+51': 'Peru',
+  '+52': 'Mexico',
+  '+53': 'Cuba',
+  '+54': 'Argentina',
+  '+55': 'Brazil',
+  '+56': 'Chile',
+  '+57': 'Colombia',
+  '+58': 'Venezuela',
+  '+60': 'Malaysia',
+  '+61': 'Australia',
+  '+62': 'Indonesia',
+  '+63': 'Philippines',
+  '+64': 'New Zealand',
+  '+65': 'Singapore',
+  '+66': 'Thailand',
+  '+81': 'Japan',
+  '+82': 'South Korea',
+  '+84': 'Vietnam',
+  '+86': 'China',
+  '+90': 'Turkey',
+  '+91': 'India',
+  '+92': 'Pakistan',
+  '+93': 'Afghanistan',
+  '+94': 'Sri Lanka',
+  '+95': 'Myanmar',
+  '+98': 'Iran',
+  '+212': 'Morocco',
+  '+213': 'Algeria',
+  '+216': 'Tunisia',
+  '+218': 'Libya',
+  '+230': 'Mauritius',
+  '+234': 'Nigeria',
+  '+248': 'Seychelles',
+  '+249': 'Sudan',
+  '+254': 'Kenya',
+  '+255': 'Tanzania',
+  '+256': 'Uganda',
+  '+260': 'Zambia',
+  '+262': 'Réunion',
+  '+263': 'Zimbabwe',
+  '+264': 'Namibia',
+  '+267': 'Botswana',
+  '+351': 'Portugal',
+  '+352': 'Luxembourg',
+  '+353': 'Ireland',
+  '+354': 'Iceland',
+  '+355': 'Albania',
+  '+357': 'Cyprus',
+  '+358': 'Finland',
+  '+359': 'Bulgaria',
+  '+370': 'Lithuania',
+  '+371': 'Latvia',
+  '+372': 'Estonia',
+  '+373': 'Moldova',
+  '+374': 'Armenia',
+  '+375': 'Belarus',
+  '+376': 'Andorra',
+  '+377': 'Monaco',
+  '+378': 'San Marino',
+  '+380': 'Ukraine',
+  '+385': 'Croatia',
+  '+386': 'Slovenia',
+  '+387': 'Bosnia and Herzegovina',
+  '+420': 'Czech Republic',
+  '+421': 'Slovakia',
+  '+423': 'Liechtenstein',
+  '+503': 'El Salvador',
+  '+504': 'Honduras',
+  '+505': 'Nicaragua',
+  '+506': 'Costa Rica',
+  '+507': 'Panama',
+  '+591': 'Bolivia',
+  '+593': 'Ecuador',
+  '+595': 'Paraguay',
+  '+598': 'Uruguay',
+  '+852': 'Hong Kong',
+  '+855': 'Cambodia',
+  '+856': 'Laos',
+  '+880': 'Bangladesh',
+  '+886': 'Taiwan',
+  '+960': 'Maldives',
+  '+961': 'Lebanon',
+  '+962': 'Jordan',
+  '+963': 'Syria',
+  '+964': 'Iraq',
+  '+965': 'Kuwait',
+  '+966': 'Saudi Arabia',
+  '+967': 'Yemen',
+  '+968': 'Oman',
+  '+970': 'Palestine',
+  '+971': 'United Arab Emirates',
+  '+972': 'Israel',
+  '+973': 'Bahrain',
+  '+974': 'Qatar',
+  '+975': 'Bhutan',
+  '+976': 'Mongolia',
+  '+977': 'Nepal',
+  '+992': 'Tajikistan',
+  '+993': 'Turkmenistan',
+  '+994': 'Azerbaijan',
+  '+995': 'Georgia',
+  '+996': 'Kyrgyzstan',
+  '+998': 'Uzbekistan'
+};
 
 const FormInput: React.FC<FormInputProps> = ({
   label,
   name,
+  value = '',
+  defaultValue,
   type = 'text',
-  value,
-  onChange,
   placeholder,
   required = false,
-  icon: Icon,
-  options = [],
-  className,
-  helpText,
+  onChange,
+  onBlur,
+  className = '',
+  min,
+  max,
+  step,
+  rows = 3,
   disabled = false,
-  renderCustomField,
-  countryCode = '+33',
+  options = [],
+  icon: Icon,
+  readOnly = false,
+  countryCode,
+  countryCodeDisplay,
   onCountryCodeChange,
-  searchable = false
+  searchable = false,
+  error,
+  info
 }) => {
-  const [selectedCountryCode, setSelectedCountryCode] = useState(countryCode);
-  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showOptions, setShowOptions] = useState(false);
-  const selectRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const isMobile = useIsMobile();
-  const countryDropdownRef = useRef<HTMLDivElement>(null);
-  const searchCountryInputRef = useRef<HTMLInputElement>(null);
-  const phoneInputRef = useRef<HTMLInputElement>(null);
-  const [phoneInputValue, setPhoneInputValue] = useState('');
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        selectRef.current && 
-        !selectRef.current.contains(event.target as Node)
-      ) {
-        setShowOptions(false);
-      }
-      
-      if (
-        countryDropdownRef.current && 
-        !countryDropdownRef.current.contains(event.target as Node)
-      ) {
-        setShowCountryDropdown(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsCountryDropdownOpen(false);
       }
     };
 
@@ -272,459 +224,378 @@ const FormInput: React.FC<FormInputProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (showOptions && searchable && searchInputRef.current) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
-    }
-  }, [showOptions, searchable]);
-
-  useEffect(() => {
-    if (selectedCountryCode) {
-      const country = getCountryFromCode(selectedCountryCode);
-      
-      if (country && onCountryCodeChange) {
-        onCountryCodeChange(selectedCountryCode);
-      }
-    }
-  }, [selectedCountryCode, onCountryCodeChange]);
-
-  useEffect(() => {
-    if (showCountryDropdown && searchCountryInputRef.current) {
-      setTimeout(() => {
-        searchCountryInputRef.current?.focus();
-      }, 100);
-    }
-  }, [showCountryDropdown]);
-
-  useEffect(() => {
-    if (type === 'tel-with-code') {
-      setPhoneInputValue(getPhoneValueWithoutCode());
-    }
-  }, [value, type]);
-
-  const handleCountryCodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
-    setSelectedCountryCode(input);
-    
-    if (input.startsWith('+')) {
-      const country = getCountryFromCode(input);
-      
-      if (country) {
-        if (onCountryCodeChange) {
-          onCountryCodeChange(input);
-        }
-      }
-    }
-  };
-
-  const handlePhoneInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    setPhoneInputValue(inputValue);
-    
-    const syntheticEvent = {
-      target: {
-        name,
-        value: inputValue
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    
-    onChange(syntheticEvent);
-  };
-
-  const handlePhonePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    if (type !== 'tel-with-code') return;
-    
+  const toggleCountryDropdown = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    
-    const pastedText = e.clipboardData.getData('text');
-    
-    if (!pastedText) return;
-    
-    const phoneRegex = /(?:(?:\+|00)(\d{1,4}))?[\s\-.(]*(\d[\d\s\-.()]{5,})/;
-    const match = pastedText.match(phoneRegex);
-    
-    if (match) {
-      const detectedCode = match[1] ? `+${match[1]}` : null;
-      let phoneNumber = match[2] ? match[2].trim() : pastedText.trim();
-      
-      phoneNumber = phoneNumber.replace(/[-\s().]/g, '');
-      
-      if (detectedCode) {
-        setSelectedCountryCode(detectedCode);
-        if (onCountryCodeChange) {
-          onCountryCodeChange(detectedCode);
-        }
-        
-        setPhoneInputValue(phoneNumber);
-        
-        const syntheticEvent = {
-          target: {
-            name,
-            value: phoneNumber
-          }
-        } as React.ChangeEvent<HTMLInputElement>;
-        
-        onChange(syntheticEvent);
-      } else {
-        const commonPrefixes = ['+1', '+7', '+33', '+44', '+49', '+39', '+34', '+41', '+31', '+32'];
-        let matchedPrefix = null;
-        
-        for (const prefix of commonPrefixes) {
-          if (pastedText.startsWith(prefix)) {
-            matchedPrefix = prefix;
-            phoneNumber = pastedText.substring(prefix.length).trim().replace(/[-\s().]/g, '');
-            break;
-          }
-        }
-        
-        if (matchedPrefix) {
-          setSelectedCountryCode(matchedPrefix);
-          if (onCountryCodeChange) {
-            onCountryCodeChange(matchedPrefix);
-          }
-        }
-        
-        setPhoneInputValue(phoneNumber);
-        
-        const syntheticEvent = {
-          target: {
-            name,
-            value: phoneNumber
-          }
-        } as React.ChangeEvent<HTMLInputElement>;
-        
-        onChange(syntheticEvent);
-      }
-    } else {
-      const cleanedNumber = pastedText.replace(/[-\s().]/g, '');
-      
-      setPhoneInputValue(cleanedNumber);
-      
-      const syntheticEvent = {
-        target: {
-          name,
-          value: cleanedNumber
-        }
-      } as React.ChangeEvent<HTMLInputElement>;
-      
-      onChange(syntheticEvent);
+    if (!disabled && !readOnly) {
+      setIsCountryDropdownOpen(!isCountryDropdownOpen);
     }
-    
-    setTimeout(() => {
-      phoneInputRef.current?.focus();
-    }, 100);
   };
 
   const handleCountryCodeChange = (code: string) => {
-    setSelectedCountryCode(code);
-    setShowCountryDropdown(false);
-    setSearchQuery("");
-    
     if (onCountryCodeChange) {
       onCountryCodeChange(code);
     }
-    
-    setTimeout(() => {
-      if (phoneInputRef.current) {
-        phoneInputRef.current.focus();
-      }
-    }, 100);
+    setIsCountryDropdownOpen(false);
+    setSearchTerm('');
   };
 
-  const getCodeButtonWidth = () => {
-    const baseWidth = 24;
-    return selectedCountryCode.length > 3 ? 
-      baseWidth + (selectedCountryCode.length - 3) * 6 : 
-      baseWidth;
-  };
-
-  const selectedCountry = countryCodes.find(country => country.code === selectedCountryCode);
-
-  const filteredCountryCodes = React.useMemo(() => {
-    if (!searchQuery) return countryCodes;
-    
-    return countryCodes.filter(country => {
-      const countryNameMatches = country.country.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const codeMatches = country.code.includes(searchQuery);
-      
-      const normalizedCountry = country.country.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-      const normalizedQuery = searchQuery.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-      const normalizedMatches = normalizedCountry.includes(normalizedQuery);
-      
-      return countryNameMatches || codeMatches || normalizedMatches;
-    });
-  }, [searchQuery]);
-
-  const filteredOptions = React.useMemo(() => {
-    if (!searchQuery || !searchable || !options) return options;
-    
-    return options.filter(option => {
-      const label = option.label.toLowerCase();
-      const query = searchQuery.toLowerCase();
-      const normalizedLabel = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      const normalizedQuery = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      
-      return normalizedLabel.includes(normalizedQuery);
-    });
-  }, [options, searchQuery, searchable]);
-
-  const handleOptionSelect = (optionValue: string) => {
-    const syntheticEvent = {
-      target: {
-        name,
-        value: optionValue
-      }
-    } as React.ChangeEvent<HTMLSelectElement>;
-    
-    onChange(syntheticEvent);
-    setShowOptions(false);
-    setSearchQuery("");
-  };
-
-  const getPhoneValueWithoutCode = () => {
-    if (!value) return '';
-    
-    const allCountryCodes = countryCodes.map(country => country.code);
-    
-    let phoneNumber = String(value);
-    for (const code of allCountryCodes) {
-      if (phoneNumber.startsWith(code)) {
-        return phoneNumber.substring(code.length).trim();
-      }
-    }
-    
-    return phoneNumber;
-  };
-
-  const renderCountryDropdown = () => {
+  const renderSelectInput = () => {
     return (
-      <div 
-        ref={countryDropdownRef} 
-        className="absolute z-10 mt-1 w-56 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md"
-      >
-        <div className="sticky top-0 bg-background border-b border-input p-2">
-          <div className="relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input 
-              ref={searchCountryInputRef}
-              type="text"
-              className="w-full px-2 py-1 pl-8 text-sm border rounded"
-              placeholder="Rechercher un pays ou code..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoFocus
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-        </div>
-        
-        {filteredCountryCodes.map(country => (
-          <div 
-            key={country.code} 
-            className="px-3 py-2 text-sm hover:bg-accent cursor-pointer flex items-center justify-between font-futura"
-            onClick={() => handleCountryCodeChange(country.code)}
-          >
-            <div className="flex items-center">
-              <span className="mr-2">{country.country}</span>
-            </div>
-            <span className="text-muted-foreground">{country.code}</span>
-          </div>
-        ))}
-        
-        {filteredCountryCodes.length === 0 && (
-          <div className="px-3 py-2 text-sm text-muted-foreground font-futura">
-            Aucun pays ne correspond à votre recherche
-          </div>
+      <select
+        id={name}
+        name={name}
+        value={value}
+        defaultValue={defaultValue}
+        onChange={onChange}
+        onBlur={onBlur}
+        disabled={disabled}
+        readOnly={readOnly}
+        className={cn(
+          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          Icon && "pl-10",
+          error && "border-red-500",
         )}
+        required={required}
+      >
+        <option value="" disabled>{placeholder}</option>
+        {options?.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    );
+  };
+
+  const renderPhoneWithCodeInput = () => {
+    return (
+      <div className="relative">
+        <div className="flex">
+          <div className="relative">
+            <button
+              type="button"
+              className="flex items-center h-10 px-3 border border-input border-r-0 rounded-l-md bg-muted focus:outline-none hover:bg-accent transition-colors"
+              onClick={toggleCountryDropdown}
+              disabled={disabled || readOnly}
+            >
+              {countryCodeDisplay ? (
+                <div className="flex items-center">
+                  <span className="text-lg mr-1">{countryCodeDisplay}</span> 
+                  <span className="text-xs text-muted-foreground">{countryCode}</span>
+                </div>
+              ) : (
+                <span>{countryCode}</span>
+              )}
+              <ChevronDown
+                className={cn(
+                  "ml-1 h-4 w-4 transition-transform duration-200",
+                  isCountryDropdownOpen ? "transform rotate-180" : ""
+                )}
+              />
+            </button>
+            
+            {isCountryDropdownOpen && (
+              <div
+                className="absolute left-0 z-50 mt-1 w-72 max-h-60 overflow-auto bg-background border rounded-md shadow-lg"
+                ref={dropdownRef}
+              >
+                {searchable && (
+                  <div className="sticky top-0 p-2 bg-background border-b">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        placeholder="Rechercher..."
+                        className="pl-8 h-8"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        autoFocus
+                      />
+                      {searchTerm && (
+                        <button
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSearchTerm('');
+                          }}
+                        >
+                          <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <div className="p-1">
+                  {countryCodes
+                    .filter(code => {
+                      if (!searchTerm) return true;
+                      const codeStr = code.toString();
+                      const normalizedSearchTerm = searchTerm.toLowerCase();
+                      
+                      return (
+                        codeStr.toLowerCase().includes(normalizedSearchTerm) ||
+                        countryNames[codeStr]?.toLowerCase().includes(normalizedSearchTerm)
+                      );
+                    })
+                    .map((code) => (
+                      <button
+                        key={code}
+                        className="flex items-center justify-between w-full px-4 py-2 text-left hover:bg-accent rounded-sm text-sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleCountryCodeChange(code);
+                        }}
+                      >
+                        <div className="flex items-center">
+                          {getPhoneCountryFlag(code.toString())}
+                          <span className="ml-2">{countryNames[code] || code}</span>
+                        </div>
+                        <span className="text-muted-foreground">{code}</span>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <Input
+            type="tel"
+            name={name}
+            value={value}
+            defaultValue={defaultValue}
+            onChange={onChange}
+            onBlur={onBlur}
+            placeholder={placeholder || "Numéro de téléphone"}
+            disabled={disabled}
+            readOnly={readOnly}
+            className={cn("rounded-l-none", error && "border-red-500")}
+            required={required}
+          />
+        </div>
       </div>
     );
   };
 
+  // Fonction pour obtenir le drapeau d'un pays à partir du code téléphonique
+  const getPhoneCountryFlag = (countryCode: string): JSX.Element => {
+    // Mapping entre codes et deux-lettres de pays
+    const codeToCountry: Record<string, string> = {
+      '+1': 'US',
+      '+7': 'RU',
+      '+20': 'EG',
+      '+27': 'ZA',
+      '+30': 'GR',
+      '+31': 'NL',
+      '+32': 'BE',
+      '+33': 'FR',
+      '+34': 'ES',
+      '+36': 'HU',
+      '+39': 'IT',
+      '+41': 'CH',
+      '+43': 'AT',
+      '+44': 'GB',
+      '+45': 'DK',
+      '+46': 'SE',
+      '+47': 'NO',
+      '+48': 'PL',
+      '+49': 'DE',
+      '+51': 'PE',
+      '+52': 'MX',
+      '+53': 'CU',
+      '+54': 'AR',
+      '+55': 'BR',
+      '+56': 'CL',
+      '+57': 'CO',
+      '+58': 'VE',
+      '+60': 'MY',
+      '+61': 'AU',
+      '+62': 'ID',
+      '+63': 'PH',
+      '+64': 'NZ',
+      '+65': 'SG',
+      '+66': 'TH',
+      '+81': 'JP',
+      '+82': 'KR',
+      '+84': 'VN',
+      '+86': 'CN',
+      '+90': 'TR',
+      '+91': 'IN',
+      '+92': 'PK',
+      '+93': 'AF',
+      '+94': 'LK',
+      '+95': 'MM',
+      '+98': 'IR',
+      '+212': 'MA',
+      '+213': 'DZ',
+      '+216': 'TN',
+      '+218': 'LY',
+      '+230': 'MU',
+      '+234': 'NG',
+      '+248': 'SC',
+      '+249': 'SD',
+      '+254': 'KE',
+      '+255': 'TZ',
+      '+256': 'UG',
+      '+260': 'ZM',
+      '+262': 'RE',
+      '+263': 'ZW',
+      '+264': 'NA',
+      '+267': 'BW',
+      '+351': 'PT',
+      '+352': 'LU',
+      '+353': 'IE',
+      '+354': 'IS',
+      '+355': 'AL',
+      '+357': 'CY',
+      '+358': 'FI',
+      '+359': 'BG',
+      '+370': 'LT',
+      '+371': 'LV',
+      '+372': 'EE',
+      '+373': 'MD',
+      '+374': 'AM',
+      '+375': 'BY',
+      '+376': 'AD',
+      '+377': 'MC',
+      '+378': 'SM',
+      '+380': 'UA',
+      '+385': 'HR',
+      '+386': 'SI',
+      '+387': 'BA',
+      '+420': 'CZ',
+      '+421': 'SK',
+      '+423': 'LI',
+      '+503': 'SV',
+      '+504': 'HN',
+      '+505': 'NI',
+      '+506': 'CR',
+      '+507': 'PA',
+      '+591': 'BO',
+      '+593': 'EC',
+      '+595': 'PY',
+      '+598': 'UY',
+      '+852': 'HK',
+      '+855': 'KH',
+      '+856': 'LA',
+      '+880': 'BD',
+      '+886': 'TW',
+      '+960': 'MV',
+      '+961': 'LB',
+      '+962': 'JO',
+      '+963': 'SY',
+      '+964': 'IQ',
+      '+965': 'KW',
+      '+966': 'SA',
+      '+967': 'YE',
+      '+968': 'OM',
+      '+970': 'PS',
+      '+971': 'AE',
+      '+972': 'IL',
+      '+973': 'BH',
+      '+974': 'QA',
+      '+975': 'BT',
+      '+976': 'MN',
+      '+977': 'NP',
+      '+992': 'TJ',
+      '+993': 'TM',
+      '+994': 'AZ',
+      '+995': 'GE',
+      '+996': 'KG',
+      '+998': 'UZ'
+    };
+    
+    const countryToFlag = (countryCode: string): string => {
+      const codePoints = countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt(0));
+      return String.fromCodePoint(...codePoints);
+    };
+    
+    const country = codeToCountry[countryCode];
+    const flag = country ? countryToFlag(country) : '🌍';
+    
+    return (
+      <span className="text-lg">{flag}</span>
+    );
+  };
+
+  
   return (
-    <div className={cn("mb-4", className)}>
-      <label className="block text-sm font-medium mb-1" htmlFor={name}>
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
+    <div className={cn("space-y-2", className)}>
+      <div className="flex items-center justify-between">
+        <label 
+          htmlFor={name} 
+          className={cn(
+            "block text-sm font-medium",
+            required && "after:content-['*'] after:ml-0.5 after:text-red-500"
+          )}
+        >
+          {label}
+        </label>
+        {info && (
+          <span className="text-xs text-muted-foreground">{info}</span>
+        )}
+      </div>
       
-      {renderCustomField ? (
-        renderCustomField()
-      ) : type === 'select' ? (
-        <div className="relative" ref={selectRef}>
-          {Icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-10">
-              <Icon className="h-4 w-4" />
-            </div>
-          )}
-          <div
-            className={cn(
-              "flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-chocolate-dark focus-visible:border-chocolate-dark disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer select-none",
-              Icon && "pl-9"
-            )}
-            onClick={() => setShowOptions(!showOptions)}
-          >
-            <div className="flex-1 flex items-center">
-              {value ? (
-                options.find(opt => opt.value === value)?.label || value
-              ) : (
-                <span className="text-muted-foreground">{placeholder || 'Sélectionner...'}</span>
-              )}
-            </div>
-            <div className="flex items-center">
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </div>
+      <div className="relative">
+        {Icon && type !== 'tel-with-code' && (
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           </div>
-          
-          {showOptions && (
-            <div className="absolute z-50 w-full mt-1 rounded-md border border-input bg-background shadow-md max-h-60 overflow-auto">
-              {searchable && (
-                <div className="sticky top-0 p-2 bg-background border-b border-input">
-                  <div className="relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <input
-                      ref={searchInputRef}
-                      type="text"
-                      className="w-full p-2 pl-8 text-sm border rounded-md"
-                      placeholder="Rechercher..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                </div>
-              )}
-              <div className="py-1">
-                <div 
-                  className="px-3 py-2 text-sm hover:bg-accent cursor-pointer font-futura text-muted-foreground"
-                  onClick={() => handleOptionSelect('')}
-                >
-                  {placeholder || 'Sélectionner...'}
-                </div>
-                {filteredOptions.map((option) => (
-                  <div 
-                    key={option.value} 
-                    className={cn(
-                      "px-3 py-2 text-sm hover:bg-accent cursor-pointer font-futura",
-                      value === option.value ? "bg-accent font-medium" : ""
-                    )}
-                    onClick={() => handleOptionSelect(option.value)}
-                  >
-                    {option.label}
-                  </div>
-                ))}
-                {filteredOptions.length === 0 && (
-                  <div className="px-3 py-2 text-sm text-muted-foreground font-futura">
-                    Aucun résultat trouvé
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      ) : type === 'textarea' ? (
-        <div className="relative">
-          {Icon && (
-            <div className="absolute left-3 top-3 text-muted-foreground">
-              <Icon className="h-4 w-4" />
-            </div>
-          )}
-          <textarea
+        )}
+        
+        {type === 'textarea' && (
+          <Textarea
             id={name}
             name={name}
-            value={value || ''}
-            onChange={onChange as React.ChangeEventHandler<HTMLTextAreaElement>}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
             placeholder={placeholder}
-            required={required}
+            rows={rows}
             disabled={disabled}
+            readOnly={readOnly}
             className={cn(
-              "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-chocolate-dark focus-visible:border-chocolate-dark disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-200 font-futura",
-              Icon && "pl-9"
+              "resize-none",
+              Icon && "pl-10",
+              error && "border-red-500",
             )}
+            required={required}
           />
-        </div>
-      ) : type === 'tel-with-code' ? (
-        <div className="relative flex">
-          <div 
-            className="inline-flex h-9 rounded-l-md border border-r-0 border-input bg-background px-3 items-center text-sm cursor-pointer"
-            onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-            style={{ minWidth: '84px' }}
-          >
-            <span className="mr-1 whitespace-nowrap">{selectedCountryCode}</span>
-            <ChevronDown className="h-4 w-4" />
-          </div>
-          
-          <input
-            ref={phoneInputRef}
-            type="tel"
-            id={name}
-            name={name}
-            value={phoneInputValue}
-            onChange={handlePhoneInputChange}
-            onPaste={handlePhonePaste}
-            placeholder={placeholder || "Numéro de téléphone"}
-            disabled={disabled}
-            className="flex h-9 w-full rounded-none rounded-r-md border border-input bg-background px-3 py-1.5 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-chocolate-dark focus-visible:border-chocolate-dark disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-200 font-futura"
-          />
-          
-          {showCountryDropdown && (
-            <div 
-              ref={countryDropdownRef} 
-              className="absolute z-10 top-full left-0 w-60 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md"
-            >
-              <div className="sticky top-0 bg-background border-b border-input p-2">
-                <div className="relative">
-                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input 
-                    ref={searchCountryInputRef}
-                    type="text"
-                    className="w-full px-2 py-1 pl-8 text-sm border rounded"
-                    placeholder="Rechercher un pays ou code..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    autoFocus
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              </div>
-              <div className="py-1">
-                {filteredCountryCodes.map((country) => (
-                  <div
-                    key={country.code}
-                    className="px-2 py-1.5 text-sm hover:bg-gray-100 cursor-pointer flex items-center"
-                    onClick={() => handleCountryCodeChange(country.code)}
-                  >
-                    <span className="ml-2">{country.code}</span>
-                    <span className="ml-2 text-gray-600">{country.country}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="relative">
-          {Icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              <Icon className="h-4 w-4" />
-            </div>
-          )}
+        )}
+        
+        {type === 'tel-with-code' && renderPhoneWithCodeInput()}
+        
+        {type === 'select' && renderSelectInput()}
+        
+        {type !== 'textarea' && type !== 'tel-with-code' && type !== 'select' && (
           <Input
             id={name}
-            name={name}
             type={type}
-            value={value ?? ''}
+            name={name}
+            value={value}
+            defaultValue={defaultValue}
             onChange={onChange}
+            onBlur={onBlur}
             placeholder={placeholder}
-            required={required}
+            min={min}
+            max={max}
+            step={step}
             disabled={disabled}
-            className={cn(Icon && "pl-9", "h-9 font-futura")}
+            readOnly={readOnly}
+            className={cn(
+              Icon && "pl-10",
+              error && "border-red-500",
+            )}
+            required={required}
           />
-        </div>
-      )}
+        )}
+      </div>
       
-      {helpText && <p className="mt-1 text-xs text-gray-500">{helpText}</p>}
+      {error && (
+        <p className="text-sm text-red-500">{error}</p>
+      )}
     </div>
   );
 };
