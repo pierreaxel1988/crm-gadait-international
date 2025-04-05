@@ -226,9 +226,39 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           } else if (codeDigits.startsWith('41')) {
             // Code pays +41 pour Suisse
             code = '41';
+          } else if (codeDigits.startsWith('353')) {
+            // Code pays +353 pour Irlande
+            code = '353';
           } else if (codeDigits.startsWith('971')) {
             // Code pays +971 pour UAE
             code = '971';
+          } else if (codeDigits.startsWith('966')) {
+            // Code pays +966 pour Saudi Arabia
+            code = '966';
+          } else if (codeDigits.startsWith('965')) {
+            // Code pays +965 pour Kuwait
+            code = '965';
+          } else if (codeDigits.startsWith('974')) {
+            // Code pays +974 pour Qatar
+            code = '974';
+          } else if (codeDigits.startsWith('973')) {
+            // Code pays +973 pour Bahrain
+            code = '973';
+          } else if (codeDigits.startsWith('230')) {
+            // Code pays +230 pour Mauritius
+            code = '230';
+          } else if (codeDigits.startsWith('212')) {
+            // Code pays +212 pour Maroc
+            code = '212';
+          } else if (codeDigits.startsWith('216')) {
+            // Code pays +216 pour Tunisie
+            code = '216';
+          } else if (codeDigits.startsWith('213')) {
+            // Code pays +213 pour Algérie
+            code = '213';
+          } else if (codeDigits.startsWith('20')) {
+            // Code pays +20 pour Égypte
+            code = '20';
           } else if (codeDigits.startsWith('351')) {
             // Code pays +351 pour Portugal
             code = '351';
@@ -238,9 +268,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           } else if (codeDigits.startsWith('385')) {
             // Code pays +385 pour Croatie
             code = '385';
-          } else if (codeDigits.startsWith('230')) {
-            // Code pays +230 pour Mauritius
-            code = '230';
           } else if (codeDigits.startsWith('960')) {
             // Code pays +960 pour Maldives
             code = '960';
@@ -289,6 +316,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       '+32': 'Belgium',
       '+31': 'Netherlands',
       '+7': 'Russia',
+      '+353': 'Ireland',
       '+971': 'United Arab Emirates',
       '+966': 'Saudi Arabia',
       '+965': 'Kuwait',
@@ -460,6 +488,7 @@ France"
                 <SelectItem value="+49">+49</SelectItem>
                 <SelectItem value="+31">+31</SelectItem>
                 <SelectItem value="+7">+7</SelectItem>
+                <SelectItem value="+353">+353</SelectItem>
                 <SelectItem value="+971">+971</SelectItem>
                 <SelectItem value="+966">+966</SelectItem>
                 <SelectItem value="+965">+965</SelectItem>

@@ -36,6 +36,7 @@ const countryCodes = [
   { code: '+49', country: '🇩🇪 Germany' },
   { code: '+31', country: '🇳🇱 Netherlands' },
   { code: '+7', country: '🇷🇺 Russia' },
+  { code: '+353', country: '🇮🇪 Ireland' },
   { code: '+971', country: '🇦🇪 UAE' },
   { code: '+966', country: '🇸🇦 Saudi Arabia' },
   { code: '+965', country: '🇰🇼 Kuwait' },
