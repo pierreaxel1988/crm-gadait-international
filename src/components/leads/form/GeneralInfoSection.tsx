@@ -622,7 +622,7 @@ const GeneralInfoSection = ({
       return;
     }
     
-    const cleanedNumber = phoneNumber.replace(/[-\s().]/g, '');
+    const cleanedNumber = phoneNumber.replace(/[^0-9]/g, '');
     
     const formattedPhone = `${phoneCountryCode} ${cleanedNumber}`;
     const syntheticEvent = {
@@ -726,10 +726,11 @@ France"
           value={getPhoneValueWithoutCode()}
           onChange={handlePhoneChange}
           icon={Phone}
-          placeholder="Numéro de téléphone"
+          placeholder="Numéro"
           countryCode={phoneCountryCode}
           onCountryCodeChange={handlePhoneCodeChange}
           searchable={true}
+          className="mb-3"
         />
 
         <div className="mb-3">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -82,7 +81,7 @@ const countryCodes = [
   { code: '+251', country: '🇪🇹 Ethiopia' },
   { code: '+679', country: '🇫🇯 Fiji' },
   { code: '+358', country: '🇫🇮 Finland' },
-  { code: '+33', country: '🇫🇷 France' },
+  { code: '+33', country: '🇫��� France' },
   { code: '+262', country: '🇷🇪 Réunion' },
   { code: '+241', country: '🇬🇦 Gabon' },
   { code: '+220', country: '🇬🇲 Gambia' },
@@ -299,7 +298,6 @@ const FormInput: React.FC<FormInputProps> = ({
     }
   }, [showCountryDropdown]);
 
-  // Update phoneInputValue when value changes externally
   useEffect(() => {
     if (type === 'tel-with-code') {
       setPhoneInputValue(getPhoneValueWithoutCode());
@@ -344,8 +342,6 @@ const FormInput: React.FC<FormInputProps> = ({
     
     if (!pastedText) return;
     
-    // Advanced regex to detect international phone formats
-    // Looks for patterns like +XX XXX XXX XXX, (XX) XXX XXX XXX, etc.
     const phoneRegex = /(?:(?:\+|00)(\d{1,4}))?[\s\-.(]*(\d[\d\s\-.()]{5,})/;
     const match = pastedText.match(phoneRegex);
     
@@ -353,7 +349,6 @@ const FormInput: React.FC<FormInputProps> = ({
       const detectedCode = match[1] ? `+${match[1]}` : null;
       let phoneNumber = match[2] ? match[2].trim() : pastedText.trim();
       
-      // Clean the phone number by removing common separators
       phoneNumber = phoneNumber.replace(/[-\s().]/g, '');
       
       if (detectedCode) {
@@ -373,7 +368,6 @@ const FormInput: React.FC<FormInputProps> = ({
         
         onChange(syntheticEvent);
       } else {
-        // No country code detected - check if the number starts with common country codes
         const commonPrefixes = ['+1', '+7', '+33', '+44', '+49', '+39', '+34', '+41', '+31', '+32'];
         let matchedPrefix = null;
         
@@ -404,7 +398,6 @@ const FormInput: React.FC<FormInputProps> = ({
         onChange(syntheticEvent);
       }
     } else {
-      // No recognized format - just clean the input
       const cleanedNumber = pastedText.replace(/[-\s().]/g, '');
       
       setPhoneInputValue(cleanedNumber);
@@ -419,7 +412,6 @@ const FormInput: React.FC<FormInputProps> = ({
       onChange(syntheticEvent);
     }
     
-    // Focus the input after processing
     setTimeout(() => {
       phoneInputRef.current?.focus();
     }, 100);
@@ -552,178 +544,187 @@ const FormInput: React.FC<FormInputProps> = ({
   };
 
   return (
-    <div className={cn('space-y-2', className)}>
-      <div className="flex items-center justify-between">
-        <label htmlFor={name} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-futura text-gray-700">
-          {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </label>
-      </div>
+    <div className={cn("mb-4", className)}>
+      <label className="block text-sm font-medium mb-1" htmlFor={name}>
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
       
       {renderCustomField ? (
         renderCustomField()
-      ) : (
-        <>
-          {type === 'select' ? (
-            <div className="relative" ref={selectRef}>
-              {Icon && (
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-10">
-                  <Icon className="h-4 w-4" />
-                </div>
-              )}
-              <div
-                className={cn(
-                  "flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-chocolate-dark focus-visible:border-chocolate-dark disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer select-none",
-                  Icon && "pl-9"
-                )}
-                onClick={() => setShowOptions(!showOptions)}
-              >
-                <div className="flex-1 flex items-center">
-                  {value ? (
-                    options.find(opt => opt.value === value)?.label || value
-                  ) : (
-                    <span className="text-muted-foreground">{placeholder || 'Sélectionner...'}</span>
-                  )}
-                </div>
-                <div className="flex items-center">
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </div>
-              
-              {showOptions && (
-                <div className="absolute z-50 w-full mt-1 rounded-md border border-input bg-background shadow-md max-h-60 overflow-auto">
-                  {searchable && (
-                    <div className="sticky top-0 p-2 bg-background border-b border-input">
-                      <div className="relative">
-                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <input
-                          ref={searchInputRef}
-                          type="text"
-                          className="w-full p-2 pl-8 text-sm border rounded-md"
-                          placeholder="Rechercher..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </div>
-                    </div>
-                  )}
-                  <div className="py-1">
-                    <div 
-                      className="px-3 py-2 text-sm hover:bg-accent cursor-pointer font-futura text-muted-foreground"
-                      onClick={() => handleOptionSelect('')}
-                    >
-                      {placeholder || 'Sélectionner...'}
-                    </div>
-                    {filteredOptions.map((option) => (
-                      <div 
-                        key={option.value} 
-                        className={cn(
-                          "px-3 py-2 text-sm hover:bg-accent cursor-pointer font-futura",
-                          value === option.value ? "bg-accent font-medium" : ""
-                        )}
-                        onClick={() => handleOptionSelect(option.value)}
-                      >
-                        {option.label}
-                      </div>
-                    ))}
-                    {filteredOptions.length === 0 && (
-                      <div className="px-3 py-2 text-sm text-muted-foreground font-futura">
-                        Aucun résultat trouvé
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : type === 'textarea' ? (
-            <div className="relative">
-              {Icon && (
-                <div className="absolute left-3 top-3 text-muted-foreground">
-                  <Icon className="h-4 w-4" />
-                </div>
-              )}
-              <textarea
-                id={name}
-                name={name}
-                value={value || ''}
-                onChange={onChange as React.ChangeEventHandler<HTMLTextAreaElement>}
-                placeholder={placeholder}
-                required={required}
-                disabled={disabled}
-                className={cn(
-                  "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-chocolate-dark focus-visible:border-chocolate-dark disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-200 font-futura",
-                  Icon && "pl-9"
-                )}
-              />
-            </div>
-          ) : type === 'tel-with-code' ? (
-            <div className="relative">
-              {Icon && (
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  <Icon className="h-4 w-4" />
-                </div>
-              )}
-              <div className="flex">
-                <div className="relative flex-shrink-0">
-                  <div 
-                    className="flex items-center justify-between h-9 px-3 border border-r-0 border-input rounded-l-md bg-muted cursor-pointer font-futura"
-                    onClick={() => setShowCountryDropdown(prev => !prev)}
-                    style={{ minWidth: `${getCodeButtonWidth()}px` }}
-                  >
-                    <input
-                      type="text"
-                      className="bg-transparent border-none outline-none p-0 w-full text-sm"
-                      value={selectedCountryCode}
-                      onChange={handleCountryCodeInputChange}
-                      onClick={(e) => e.stopPropagation()}
-                      placeholder="+xx"
-                    />
-                    <ChevronDown className="h-4 w-4 ml-1 flex-shrink-0" />
-                  </div>
-                  
-                  {showCountryDropdown && renderCountryDropdown()}
-                </div>
-                <Input
-                  ref={phoneInputRef}
-                  id={name}
-                  name={name}
-                  type="tel"
-                  value={phoneInputValue}
-                  onChange={handlePhoneInputChange}
-                  onPaste={handlePhonePaste}
-                  placeholder={placeholder}
-                  className="w-full rounded-l-none font-futura"
-                  disabled={disabled}
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="relative">
-              {Icon && (
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  <Icon className="h-4 w-4" />
-                </div>
-              )}
-              <Input
-                id={name}
-                name={name}
-                type={type}
-                value={value ?? ''}
-                onChange={onChange}
-                placeholder={placeholder}
-                required={required}
-                disabled={disabled}
-                className={cn(Icon && "pl-9", "h-9 font-futura")}
-              />
+      ) : type === 'select' ? (
+        <div className="relative" ref={selectRef}>
+          {Icon && (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-10">
+              <Icon className="h-4 w-4" />
             </div>
           )}
-        </>
+          <div
+            className={cn(
+              "flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-chocolate-dark focus-visible:border-chocolate-dark disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer select-none",
+              Icon && "pl-9"
+            )}
+            onClick={() => setShowOptions(!showOptions)}
+          >
+            <div className="flex-1 flex items-center">
+              {value ? (
+                options.find(opt => opt.value === value)?.label || value
+              ) : (
+                <span className="text-muted-foreground">{placeholder || 'Sélectionner...'}</span>
+              )}
+            </div>
+            <div className="flex items-center">
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </div>
+          
+          {showOptions && (
+            <div className="absolute z-50 w-full mt-1 rounded-md border border-input bg-background shadow-md max-h-60 overflow-auto">
+              {searchable && (
+                <div className="sticky top-0 p-2 bg-background border-b border-input">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      className="w-full p-2 pl-8 text-sm border rounded-md"
+                      placeholder="Rechercher..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                </div>
+              )}
+              <div className="py-1">
+                <div 
+                  className="px-3 py-2 text-sm hover:bg-accent cursor-pointer font-futura text-muted-foreground"
+                  onClick={() => handleOptionSelect('')}
+                >
+                  {placeholder || 'Sélectionner...'}
+                </div>
+                {filteredOptions.map((option) => (
+                  <div 
+                    key={option.value} 
+                    className={cn(
+                      "px-3 py-2 text-sm hover:bg-accent cursor-pointer font-futura",
+                      value === option.value ? "bg-accent font-medium" : ""
+                    )}
+                    onClick={() => handleOptionSelect(option.value)}
+                  >
+                    {option.label}
+                  </div>
+                ))}
+                {filteredOptions.length === 0 && (
+                  <div className="px-3 py-2 text-sm text-muted-foreground font-futura">
+                    Aucun résultat trouvé
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : type === 'textarea' ? (
+        <div className="relative">
+          {Icon && (
+            <div className="absolute left-3 top-3 text-muted-foreground">
+              <Icon className="h-4 w-4" />
+            </div>
+          )}
+          <textarea
+            id={name}
+            name={name}
+            value={value || ''}
+            onChange={onChange as React.ChangeEventHandler<HTMLTextAreaElement>}
+            placeholder={placeholder}
+            required={required}
+            disabled={disabled}
+            className={cn(
+              "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-chocolate-dark focus-visible:border-chocolate-dark disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-200 font-futura",
+              Icon && "pl-9"
+            )}
+          />
+        </div>
+      ) : type === 'tel-with-code' ? (
+        <div className="relative flex">
+          <div 
+            className="inline-flex h-9 rounded-l-md border border-r-0 border-input bg-background px-3 items-center text-sm cursor-pointer"
+            onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+            style={{ minWidth: '84px' }}
+          >
+            <span className="mr-1 whitespace-nowrap">{selectedCountryCode}</span>
+            <ChevronDown className="h-4 w-4" />
+          </div>
+          
+          <input
+            ref={phoneInputRef}
+            type="tel"
+            id={name}
+            name={name}
+            value={phoneInputValue}
+            onChange={handlePhoneInputChange}
+            onPaste={handlePhonePaste}
+            placeholder={placeholder || "Numéro de téléphone"}
+            disabled={disabled}
+            className="flex h-9 w-full rounded-none rounded-r-md border border-input bg-background px-3 py-1.5 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-chocolate-dark focus-visible:border-chocolate-dark disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-200 font-futura"
+          />
+          
+          {showCountryDropdown && (
+            <div 
+              ref={countryDropdownRef} 
+              className="absolute z-10 top-full left-0 w-60 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md"
+            >
+              <div className="sticky top-0 bg-background border-b border-input p-2">
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input 
+                    ref={searchCountryInputRef}
+                    type="text"
+                    className="w-full px-2 py-1 pl-8 text-sm border rounded"
+                    placeholder="Rechercher un pays ou code..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    autoFocus
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              </div>
+              <div className="py-1">
+                {filteredCountryCodes.map((country) => (
+                  <div
+                    key={country.code}
+                    className="px-2 py-1.5 text-sm hover:bg-gray-100 cursor-pointer flex items-center"
+                    onClick={() => handleCountryCodeChange(country.code)}
+                  >
+                    <span className="ml-2">{country.code}</span>
+                    <span className="ml-2 text-gray-600">{country.country}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="relative">
+          {Icon && (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              <Icon className="h-4 w-4" />
+            </div>
+          )}
+          <Input
+            id={name}
+            name={name}
+            type={type}
+            value={value ?? ''}
+            onChange={onChange}
+            placeholder={placeholder}
+            required={required}
+            disabled={disabled}
+            className={cn(Icon && "pl-9", "h-9 font-futura")}
+          />
+        </div>
       )}
       
-      {helpText && (
-        <p className="text-xs text-muted-foreground">{helpText}</p>
-      )}
+      {helpText && <p className="mt-1 text-xs text-gray-500">{helpText}</p>}
     </div>
   );
 };
