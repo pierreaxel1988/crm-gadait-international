@@ -67,6 +67,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     let phone = '';
     let country = '';
     let language = '';
+    let phoneCountryCode = '';
 
     // Rechercher des patterns spécifiques
     const namePatterns = [
@@ -176,49 +177,135 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
 
     // Traitement du numéro de téléphone pour extraire le code pays
     let countryCode = '+33'; // Par défaut: France
+    
     if (phone) {
-      const codeMatch = phone.match(/\+(\d+)/);
-      if (codeMatch && codeMatch[1]) {
-        const code = codeMatch[1];
-        // Mapper les codes pays aux pays
-        const countryCodeMap: Record<string, string> = {
-          '1': 'United States',
-          '33': 'France',
-          '34': 'Spain',
-          '44': 'United Kingdom',
-          '49': 'Germany',
-          '39': 'Italy',
-          '41': 'Switzerland',
-          '32': 'Belgium',
-          '31': 'Netherlands',
-          '7': 'Russia',
-          '971': 'United Arab Emirates',
-          '966': 'Saudi Arabia',
-          '965': 'Kuwait',
-          '974': 'Qatar',
-          '973': 'Bahrain',
-          '230': 'Mauritius',
-          '212': 'Morocco',
-          '216': 'Tunisia',
-          '213': 'Algeria',
-          '20': 'Egypt'
-        };
-        
-        if (code in countryCodeMap) {
-          if (!country) {
-            country = countryCodeMap[code];
+      // Rechercher un code pays international au format +XX ou (+ XX)
+      const countryCodeMatch = phone.match(/\+(\d+)|\(\+\s*(\d+)\)/);
+      if (countryCodeMatch) {
+        // Prendre le premier groupe non-undefined
+        const codeDigits = countryCodeMatch[1] || countryCodeMatch[2];
+        if (codeDigits) {
+          // Extraire les premiers chiffres pour le code pays (1, 2 ou 3 chiffres)
+          let code = '';
+          if (codeDigits.startsWith('1')) {
+            // Code pays +1 pour USA/Canada
+            code = '1';
+          } else if (codeDigits.startsWith('7')) {
+            // Code pays +7 pour Russie
+            code = '7';
+          } else if (codeDigits.startsWith('33')) {
+            // Code pays +33 pour France
+            code = '33';
+          } else if (codeDigits.startsWith('44')) {
+            // Code pays +44 pour UK
+            code = '44';
+          } else if (codeDigits.startsWith('49')) {
+            // Code pays +49 pour Allemagne
+            code = '49';
+          } else if (codeDigits.startsWith('34')) {
+            // Code pays +34 pour Espagne
+            code = '34';
+          } else if (codeDigits.startsWith('39')) {
+            // Code pays +39 pour Italie
+            code = '39';
+          } else if (codeDigits.startsWith('41')) {
+            // Code pays +41 pour Suisse
+            code = '41';
+          } else if (codeDigits.startsWith('971')) {
+            // Code pays +971 pour UAE
+            code = '971';
+          } else if (codeDigits.startsWith('351')) {
+            // Code pays +351 pour Portugal
+            code = '351';
+          } else if (codeDigits.startsWith('30')) {
+            // Code pays +30 pour Grèce
+            code = '30';
+          } else if (codeDigits.startsWith('385')) {
+            // Code pays +385 pour Croatie
+            code = '385';
+          } else if (codeDigits.startsWith('230')) {
+            // Code pays +230 pour Mauritius
+            code = '230';
+          } else if (codeDigits.startsWith('960')) {
+            // Code pays +960 pour Maldives
+            code = '960';
+          } else if (codeDigits.startsWith('248')) {
+            // Code pays +248 pour Seychelles
+            code = '248';
+          } else {
+            // Pour les autres codes, prendre les 1-3 premiers chiffres
+            code = codeDigits.substring(0, Math.min(3, codeDigits.length));
           }
+          
           countryCode = '+' + code;
+          phoneCountryCode = countryCode;
         }
       }
+
+      // Nettoyer le numéro de téléphone pour enlever le code pays et les caractères spéciaux
+      phone = phone.replace(/\(\+\s*\d+\)|\+\d+/, '').trim();
+      // Enlever les parenthèses, tirets et espaces supplémentaires
+      phone = phone.replace(/[()]/g, '').trim();
     }
 
-    console.log("Informations extraites:", { name, email, phone, country, language, countryCode });
+    // Mapper les codes pays aux pays
+    const countryCodeMap: Record<string, string> = {
+      '+1': 'United States',
+      '+33': 'France',
+      '+34': 'Spain',
+      '+44': 'United Kingdom',
+      '+49': 'Germany',
+      '+39': 'Italy',
+      '+41': 'Switzerland',
+      '+32': 'Belgium',
+      '+31': 'Netherlands',
+      '+7': 'Russia',
+      '+971': 'United Arab Emirates',
+      '+966': 'Saudi Arabia',
+      '+965': 'Kuwait',
+      '+974': 'Qatar',
+      '+973': 'Bahrain',
+      '+230': 'Mauritius',
+      '+212': 'Morocco',
+      '+216': 'Tunisia',
+      '+213': 'Algeria',
+      '+20': 'Egypt',
+      '+351': 'Portugal',
+      '+30': 'Greece',
+      '+385': 'Croatia',
+      '+960': 'Maldives',
+      '+248': 'Seychelles'
+    };
+    
+    // Si on a un code pays mais pas de pays détecté, utiliser le code pays pour déduire le pays
+    if (phoneCountryCode && !country && countryCodeMap[phoneCountryCode]) {
+      country = countryCodeMap[phoneCountryCode];
+    }
+
+    console.log("Informations extraites:", { 
+      name, 
+      email, 
+      phone, 
+      country, 
+      language, 
+      phoneCountryCode 
+    });
 
     // Mettre à jour les champs du lead
     if (name) handleInputChange('name', name);
     if (email) handleInputChange('email', email);
     if (phone) handleInputChange('phone', phone);
+    if (phoneCountryCode) {
+      // Mettre à jour le champ de code pays dans l'interface (non stocké dans le lead)
+      const phoneInput = document.querySelector('input[id="phone"]') as HTMLInputElement;
+      const phoneCodeSelect = phoneInput?.previousElementSibling?.querySelector('select');
+      if (phoneCodeSelect) {
+        phoneCodeSelect.value = phoneCountryCode;
+        // Déclencher un événement de changement pour mettre à jour l'UI
+        phoneCodeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+    
     if (country) {
       handleInputChange('taxResidence', country);
       
