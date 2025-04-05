@@ -74,7 +74,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       });
 
       // Vérifier si le lead est en statut "New" ou "Nouveau" et a un agent assigné
-      if ((result.status === "New" || result.status.toString() === "Nouveau") && result.assignedTo) {
+      if ((result.status === "New" || result.status === "Nouveau") && result.assignedTo) {
         // Ajouter une action de type "Call" pour qualifier le lead
         const qualificationAction = {
           actionType: "Call",

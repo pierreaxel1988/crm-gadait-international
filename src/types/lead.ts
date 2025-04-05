@@ -1,3 +1,4 @@
+
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -10,7 +11,12 @@ export type LeadSource =
   | "Le Figaro"
   | "Properstar"
   | "Property Cloud"
-  | "L'express Property";
+  | "L'express Property"
+  | "Annonce"
+  | "Email"
+  | "Téléphone"
+  | "Autre"
+  | "Recommendation";
 
 export type PropertyType = 
   | "Villa" 

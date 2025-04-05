@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,7 +35,12 @@ const LeadImportForm = () => {
     "Le Figaro",
     "Properstar",
     "Property Cloud",
-    "L'express Property"
+    "L'express Property",
+    "Annonce",
+    "Email",
+    "Téléphone",
+    "Autre",
+    "Recommendation"
   ];
 
   const [formData, setFormData] = useState({
