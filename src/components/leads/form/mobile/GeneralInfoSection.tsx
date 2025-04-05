@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -545,7 +544,26 @@ France"
               <SelectValue placeholder="Sélectionner une source" />
             </SelectTrigger>
             <SelectContent>
-              {['Site web', 'Recommandation', 'Annonce', 'Réseaux sociaux', 'Email', 'Téléphone', 'Autre'].map(source => (
+              {[
+                'Site web', 
+                'Réseaux sociaux', 
+                'Portails immobiliers', 
+                'Network', 
+                'Repeaters', 
+                'Recommandations',
+                'Apporteur d\'affaire',
+                'Idealista',
+                'Le Figaro',
+                'Properstar',
+                'Property Cloud',
+                'L\'express Property',
+                'James Edition',
+                'Annonce',
+                'Email',
+                'Téléphone',
+                'Autre',
+                'Recommendation'
+              ].map(source => (
                 <SelectItem key={source} value={source} className="font-futura">
                   {source}
                 </SelectItem>

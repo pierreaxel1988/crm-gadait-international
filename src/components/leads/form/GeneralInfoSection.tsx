@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
@@ -220,14 +219,12 @@ const GeneralInfoSection = ({
       return;
     }
 
-    // Variables pour stocker les informations extraites
     let name = '';
     let email = '';
     let phone = '';
     let country = '';
     let language = '';
 
-    // Rechercher des patterns spécifiques
     const namePatterns = [
       /[À|A] propos de\s+([^\n]+)/i,
       /Name\s*:?\s*([^\r\n]+)/i,
@@ -256,7 +253,6 @@ const GeneralInfoSection = ({
       /language\s*:?\s*([^\r\n]+)/i
     ];
 
-    // Extraire le nom
     for (const pattern of namePatterns) {
       const match = contactText.match(pattern);
       if (match && match[1]) {
@@ -265,22 +261,18 @@ const GeneralInfoSection = ({
       }
     }
 
-    // Extraire l'email
     for (const pattern of emailPatterns) {
       const match = contactText.match(pattern);
       if (match) {
-        // Si c'est un pattern avec capture, utiliser le groupe capturé
         if (match[1]) {
           email = match[1].trim();
         } else {
-          // Sinon, c'est probablement le pattern d'email lui-même
           email = match[0].trim();
         }
         break;
       }
     }
 
-    // Extraire le téléphone
     for (const pattern of phonePatterns) {
       const match = contactText.match(pattern);
       if (match) {
@@ -293,7 +285,6 @@ const GeneralInfoSection = ({
       }
     }
 
-    // Extraire le pays
     for (const pattern of countryPatterns) {
       const match = contactText.match(pattern);
       if (match && match[1]) {
@@ -302,7 +293,6 @@ const GeneralInfoSection = ({
       }
     }
 
-    // Extraire la langue
     for (const pattern of languagePatterns) {
       const match = contactText.match(pattern);
       if (match && match[1]) {
@@ -311,7 +301,6 @@ const GeneralInfoSection = ({
       }
     }
 
-    // Fallback - analyse ligne par ligne si les patterns spécifiques n'ont pas fonctionné
     if (!name || !email || !phone) {
       const lines = contactText.split('\n').filter(line => line.trim().length > 0);
       
@@ -333,13 +322,11 @@ const GeneralInfoSection = ({
       });
     }
 
-    // Traitement du numéro de téléphone pour extraire le code pays
     let countryCodeFound = false;
     if (phone) {
       const codeMatch = phone.match(/\+(\d+)/);
       if (codeMatch && codeMatch[1]) {
         const code = codeMatch[1];
-        // Mapper les codes pays aux pays
         const countryCodeMap: Record<string, string> = {
           '1': 'United States',
           '33': 'France',
@@ -375,7 +362,6 @@ const GeneralInfoSection = ({
 
     console.log("Informations extraites:", { name, email, phone, country, language, countryCode: phoneCountryCode });
 
-    // Mise à jour des champs avec des événements synthétiques
     if (name) {
       const nameEvent = {
         target: {
@@ -397,9 +383,7 @@ const GeneralInfoSection = ({
     }
 
     if (phone) {
-      // Si on a trouvé un code pays dans le numéro, on utilise le format avec code pays
       if (countryCodeFound) {
-        // Formater le téléphone correctement
         const phoneEvent = {
           target: {
             name: 'phone',
@@ -408,7 +392,6 @@ const GeneralInfoSection = ({
         } as React.ChangeEvent<HTMLInputElement>;
         handleInputChange(phoneEvent);
       } else {
-        // Sinon, on ajoute le code pays actuel
         const phoneEvent = {
           target: {
             name: 'phone',
@@ -428,7 +411,6 @@ const GeneralInfoSection = ({
       } as React.ChangeEvent<HTMLInputElement>;
       handleInputChange(countryEvent);
       
-      // Dériver automatiquement la nationalité à partir du pays
       const nationality = deriveNationalityFromCountry(country);
       if (nationality) {
         const nationalityEvent = {
