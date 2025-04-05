@@ -170,7 +170,15 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
 
   const getLocations = () => {
     if (!lead.country) return [];
-    const locations = LOCATIONS_BY_COUNTRY[lead.country as keyof typeof LOCATIONS_BY_COUNTRY];
+    
+    let countryKey = lead.country;
+    if (lead.country === "USA" && !LOCATIONS_BY_COUNTRY["USA"]) {
+      countryKey = "United States";
+    } else if (lead.country === "United States" && !LOCATIONS_BY_COUNTRY["United States"]) {
+      countryKey = "USA";
+    }
+    
+    const locations = LOCATIONS_BY_COUNTRY[countryKey as keyof typeof LOCATIONS_BY_COUNTRY];
     if (locations) {
       return locations.map(location => ({
         value: location,
