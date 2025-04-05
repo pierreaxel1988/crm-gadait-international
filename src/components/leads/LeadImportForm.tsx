@@ -36,6 +36,7 @@ const LeadImportForm = () => {
     "Properstar",
     "Property Cloud",
     "L'express Property",
+    "James Edition",
     "Annonce",
     "Email",
     "Téléphone",

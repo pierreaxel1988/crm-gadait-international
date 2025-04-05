@@ -12,6 +12,7 @@ export type LeadSource =
   | "Properstar"
   | "Property Cloud"
   | "L'express Property"
+  | "James Edition"
   | "Annonce"
   | "Email"
   | "Téléphone"
