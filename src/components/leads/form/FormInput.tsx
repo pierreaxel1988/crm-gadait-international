@@ -245,6 +245,7 @@ const FormInput: React.FC<FormInputProps> = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
   const countryDropdownRef = useRef<HTMLDivElement>(null);
+  const searchCountryInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -287,6 +288,14 @@ const FormInput: React.FC<FormInputProps> = ({
     }
   }, [selectedCountryCode, onCountryCodeChange]);
 
+  useEffect(() => {
+    if (showCountryDropdown && searchCountryInputRef.current) {
+      setTimeout(() => {
+        searchCountryInputRef.current?.focus();
+      }, 100);
+    }
+  }, [showCountryDropdown]);
+
   const handleCountryCodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
     setSelectedCountryCode(input);
@@ -305,6 +314,7 @@ const FormInput: React.FC<FormInputProps> = ({
   const handleCountryCodeChange = (code: string) => {
     setSelectedCountryCode(code);
     setShowCountryDropdown(false);
+    setSearchQuery("");
     
     if (onCountryCodeChange) {
       onCountryCodeChange(code);
@@ -403,15 +413,19 @@ const FormInput: React.FC<FormInputProps> = ({
         className="absolute z-10 mt-1 w-56 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md"
       >
         <div className="sticky top-0 bg-background border-b border-input p-2">
-          <input 
-            type="text"
-            className="w-full px-2 py-1 text-sm border rounded"
-            placeholder="Rechercher un pays ou code..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            autoFocus
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input 
+              ref={searchCountryInputRef}
+              type="text"
+              className="w-full px-2 py-1 pl-8 text-sm border rounded"
+              placeholder="Rechercher un pays ou code..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
         </div>
         
         {filteredCountryCodes.map(country => (
