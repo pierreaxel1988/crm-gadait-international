@@ -54,7 +54,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
 
   const updatePhoneCodeInUI = (code: string) => {
     setPhoneCountryCode(code);
-    // Trouver le sélecteur de code pays dans le DOM et le mettre à jour
     const phoneCodeSelect = document.querySelector('select[name="phoneCountryCode"]') as HTMLSelectElement;
     if (phoneCodeSelect) {
       phoneCodeSelect.value = code;
@@ -72,7 +71,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       return;
     }
 
-    // Variables pour stocker les informations extraites
     let name = '';
     let email = '';
     let phone = '';
@@ -80,7 +78,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     let language = '';
     let phoneCountryCode = '';
 
-    // Rechercher des patterns spécifiques
     const namePatterns = [
       /[À|A] propos de\s+([^\n]+)/i,
       /Name\s*:?\s*([^\r\n]+)/i,
@@ -109,7 +106,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       /language\s*:?\s*([^\r\n]+)/i
     ];
 
-    // Extraire le nom
     for (const pattern of namePatterns) {
       const match = contactText.match(pattern);
       if (match && match[1]) {
@@ -118,22 +114,18 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       }
     }
 
-    // Extraire l'email
     for (const pattern of emailPatterns) {
       const match = contactText.match(pattern);
       if (match) {
-        // Si c'est un pattern avec capture, utiliser le groupe capturé
         if (match[1]) {
           email = match[1].trim();
         } else {
-          // Sinon, c'est probablement le pattern d'email lui-même
           email = match[0].trim();
         }
         break;
       }
     }
 
-    // Extraire le téléphone
     for (const pattern of phonePatterns) {
       const match = contactText.match(pattern);
       if (match) {
@@ -146,7 +138,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       }
     }
 
-    // Extraire le pays
     for (const pattern of countryPatterns) {
       const match = contactText.match(pattern);
       if (match && match[1]) {
@@ -155,7 +146,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       }
     }
 
-    // Extraire la langue
     for (const pattern of languagePatterns) {
       const match = contactText.match(pattern);
       if (match && match[1]) {
@@ -164,7 +154,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       }
     }
 
-    // Fallback - analyse ligne par ligne si les patterns spécifiques n'ont pas fonctionné
     if (!name || !email || !phone) {
       const lines = contactText.split('\n').filter(line => line.trim().length > 0);
       
@@ -186,125 +175,88 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       });
     }
 
-    // Traitement du numéro de téléphone pour extraire le code pays
-    let detectedCountryCode = '+33'; // Par défaut: France
+    let detectedCountryCode = '+33';
     let phoneNumberWithoutCode = '';
     
     if (phone) {
-      // Rechercher un code pays international au format +XX ou (+XX)
       const countryCodeMatch = phone.match(/\(\+(\d+)\)|\+(\d+)/);
       
       if (countryCodeMatch) {
-        // Prendre le premier groupe non-undefined
         const codeDigits = countryCodeMatch[1] || countryCodeMatch[2];
-        console.log("Code pays détecté:", codeDigits);
         
         if (codeDigits) {
-          // Extraire les premiers chiffres pour le code pays (1, 2 ou 3 chiffres)
           let code = '';
           if (codeDigits.startsWith('1')) {
-            // Code pays +1 pour USA/Canada
             code = '1';
           } else if (codeDigits.startsWith('7')) {
-            // Code pays +7 pour Russie
             code = '7';
           } else if (codeDigits.startsWith('33')) {
-            // Code pays +33 pour France
             code = '33';
           } else if (codeDigits.startsWith('44')) {
-            // Code pays +44 pour UK
             code = '44';
           } else if (codeDigits.startsWith('49')) {
-            // Code pays +49 pour Allemagne
             code = '49';
           } else if (codeDigits.startsWith('34')) {
-            // Code pays +34 pour Espagne
             code = '34';
           } else if (codeDigits.startsWith('39')) {
-            // Code pays +39 pour Italie
             code = '39';
           } else if (codeDigits.startsWith('41')) {
-            // Code pays +41 pour Suisse
             code = '41';
           } else if (codeDigits.startsWith('353')) {
-            // Code pays +353 pour Irlande
             code = '353';
           } else if (codeDigits.startsWith('971')) {
-            // Code pays +971 pour UAE
             code = '971';
           } else if (codeDigits.startsWith('966')) {
-            // Code pays +966 pour Saudi Arabia
             code = '966';
           } else if (codeDigits.startsWith('965')) {
-            // Code pays +965 pour Kuwait
             code = '965';
           } else if (codeDigits.startsWith('974')) {
-            // Code pays +974 pour Qatar
             code = '974';
           } else if (codeDigits.startsWith('973')) {
-            // Code pays +973 pour Bahrain
             code = '973';
           } else if (codeDigits.startsWith('230')) {
-            // Code pays +230 pour Mauritius
             code = '230';
+          } else if (codeDigits.startsWith('262')) {
+            code = '262';
           } else if (codeDigits.startsWith('212')) {
-            // Code pays +212 pour Maroc
             code = '212';
           } else if (codeDigits.startsWith('216')) {
-            // Code pays +216 pour Tunisie
             code = '216';
           } else if (codeDigits.startsWith('213')) {
-            // Code pays +213 pour Algérie
             code = '213';
           } else if (codeDigits.startsWith('20')) {
-            // Code pays +20 pour Égypte
             code = '20';
           } else if (codeDigits.startsWith('351')) {
-            // Code pays +351 pour Portugal
             code = '351';
           } else if (codeDigits.startsWith('30')) {
-            // Code pays +30 pour Grèce
             code = '30';
           } else if (codeDigits.startsWith('385')) {
-            // Code pays +385 pour Croatie
             code = '385';
           } else if (codeDigits.startsWith('960')) {
-            // Code pays +960 pour Maldives
             code = '960';
           } else if (codeDigits.startsWith('248')) {
-            // Code pays +248 pour Seychelles
             code = '248';
-          } else {
-            // Pour les autres codes, prendre les 1-3 premiers chiffres
-            code = codeDigits.substring(0, Math.min(3, codeDigits.length));
           }
           
           detectedCountryCode = '+' + code;
           
-          // Mettre à jour le sélecteur de code pays dans l'interface
           updatePhoneCodeInUI(detectedCountryCode);
           
-          // Extraire le numéro sans le code pays
           if (phone.includes('(+')) {
-            // Format (+XX) XXXXX
             phoneNumberWithoutCode = phone.replace(/\(\+\d+\)\s*/, '').trim();
           } else if (phone.includes('+')) {
-            // Format +XX XXXXX
             phoneNumberWithoutCode = phone.replace(/\+\d+\s*/, '').trim();
           } else {
             phoneNumberWithoutCode = phone;
           }
         }
       } else {
-        // Si aucun code pays n'est détecté, utiliser le numéro tel quel
         phoneNumberWithoutCode = phone;
       }
 
-      // Nettoyer le numéro de téléphone (enlever les parenthèses, tirets et caractères spéciaux)
       phoneNumberWithoutCode = phoneNumberWithoutCode.replace(/[()]/g, '').trim();
     }
 
-    // Mapper les codes pays aux pays
     const countryCodeMap: Record<string, string> = {
       '+1': 'United States',
       '+33': 'France',
@@ -323,6 +275,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       '+974': 'Qatar',
       '+973': 'Bahrain',
       '+230': 'Mauritius',
+      '+262': 'Réunion',
       '+212': 'Morocco',
       '+216': 'Tunisia',
       '+213': 'Algeria',
@@ -334,7 +287,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       '+248': 'Seychelles'
     };
     
-    // Si on a un code pays mais pas de pays détecté, utiliser le code pays pour déduire le pays
     if (detectedCountryCode && !country && countryCodeMap[detectedCountryCode]) {
       country = countryCodeMap[detectedCountryCode];
     }
@@ -350,20 +302,16 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       detectedCountryCode 
     });
 
-    // Mettre à jour les champs du lead
     if (name) handleInputChange('name', name);
     if (email) handleInputChange('email', email);
     
-    // Mettre à jour le téléphone
     if (phoneNumberWithoutCode) {
-      // Pour le numéro de téléphone, on laisse juste le numéro sans le code pays
       handleInputChange('phone', phoneNumberWithoutCode);
     }
     
     if (country) {
       handleInputChange('taxResidence', country);
       
-      // Dériver automatiquement la nationalité à partir du pays
       const nationality = deriveNationalityFromCountry(country);
       if (nationality) {
         handleInputChange('nationality', nationality);
@@ -495,6 +443,7 @@ France"
                 <SelectItem value="+974">+974</SelectItem>
                 <SelectItem value="+973">+973</SelectItem>
                 <SelectItem value="+230">+230</SelectItem>
+                <SelectItem value="+262">+262</SelectItem>
                 <SelectItem value="+212">+212</SelectItem>
                 <SelectItem value="+216">+216</SelectItem>
                 <SelectItem value="+213">+213</SelectItem>

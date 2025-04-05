@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -43,6 +44,7 @@ const countryCodes = [
   { code: '+974', country: '🇶🇦 Qatar' },
   { code: '+973', country: '🇧🇭 Bahrain' },
   { code: '+230', country: '🇲🇺 Mauritius' },
+  { code: '+262', country: '🇷🇪 Réunion' },
   { code: '+212', country: '🇲🇦 Morocco' },
   { code: '+216', country: '🇹🇳 Tunisia' },
   { code: '+213', country: '🇩🇿 Algeria' },
