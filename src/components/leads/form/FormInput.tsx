@@ -38,13 +38,13 @@ const countryCodes = [
   { code: '+31', country: '🇳🇱 Netherlands' },
   { code: '+7', country: '🇷🇺 Russia' },
   { code: '+353', country: '🇮🇪 Ireland' },
+  { code: '+262', country: '🇷🇪 Réunion' },
   { code: '+971', country: '🇦🇪 UAE' },
   { code: '+966', country: '🇸🇦 Saudi Arabia' },
   { code: '+965', country: '🇰🇼 Kuwait' },
   { code: '+974', country: '🇶🇦 Qatar' },
   { code: '+973', country: '🇧🇭 Bahrain' },
   { code: '+230', country: '🇲🇺 Mauritius' },
-  { code: '+262', country: '🇷🇪 Réunion' },
   { code: '+212', country: '🇲🇦 Morocco' },
   { code: '+216', country: '🇹🇳 Tunisia' },
   { code: '+213', country: '🇩🇿 Algeria' },
@@ -212,7 +212,7 @@ const FormInput: React.FC<FormInputProps> = ({
   const getPhoneValueWithoutCode = () => {
     if (!value) return '';
     
-    const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
+    const countryCodes = ['+33', '+44', '+1', '+34', '+39', '+41', '+32', '+49', '+31', '+7', '+353', '+262', '+971', '+966', '+965', '+974', '+973', '+230', '+212', '+216', '+213', '+20'];
     
     let phoneNumber = value.toString();
     for (const code of countryCodes) {
