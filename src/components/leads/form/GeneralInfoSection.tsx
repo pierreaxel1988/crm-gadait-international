@@ -68,12 +68,10 @@ const GeneralInfoSection = ({
     '+974': 'Qatar',
     '+973': 'Bahrain',
     '+230': 'Mauritius',
-    '+262': 'Réunion',
     '+212': 'Morocco',
     '+216': 'Tunisia',
     '+213': 'Algeria',
-    '+20': 'Egypt',
-    '+353': 'Ireland'
+    '+20': 'Egypt'
   };
 
   const getCountryFlag = (country: string): string => {
@@ -346,12 +344,10 @@ const GeneralInfoSection = ({
           '974': 'Qatar',
           '973': 'Bahrain',
           '230': 'Mauritius',
-          '262': 'Réunion',
           '212': 'Morocco',
           '216': 'Tunisia',
           '213': 'Algeria',
-          '20': 'Egypt',
-          '353': 'Ireland'
+          '20': 'Egypt'
         };
         
         if (code in countryCodeMap) {
