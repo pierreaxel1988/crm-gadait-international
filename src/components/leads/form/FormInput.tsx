@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -247,6 +248,7 @@ const FormInput: React.FC<FormInputProps> = ({
   const countryDropdownRef = useRef<HTMLDivElement>(null);
   const searchCountryInputRef = useRef<HTMLInputElement>(null);
   const phoneInputRef = useRef<HTMLInputElement>(null);
+  const [phoneInputValue, setPhoneInputValue] = useState('');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -297,6 +299,13 @@ const FormInput: React.FC<FormInputProps> = ({
     }
   }, [showCountryDropdown]);
 
+  // Update phoneInputValue when value changes externally
+  useEffect(() => {
+    if (type === 'tel-with-code') {
+      setPhoneInputValue(getPhoneValueWithoutCode());
+    }
+  }, [value, type]);
+
   const handleCountryCodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
     setSelectedCountryCode(input);
@@ -312,6 +321,20 @@ const FormInput: React.FC<FormInputProps> = ({
     }
   };
 
+  const handlePhoneInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    setPhoneInputValue(inputValue);
+    
+    const syntheticEvent = {
+      target: {
+        name,
+        value: inputValue
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    onChange(syntheticEvent);
+  };
+
   const handlePhonePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     if (type !== 'tel-with-code') return;
     
@@ -321,12 +344,17 @@ const FormInput: React.FC<FormInputProps> = ({
     
     if (!pastedText) return;
     
-    const phoneRegex = /(?:\+(\d+))?[\s\-]?([0-9\s\-]+)/;
+    // Advanced regex to detect international phone formats
+    // Looks for patterns like +XX XXX XXX XXX, (XX) XXX XXX XXX, etc.
+    const phoneRegex = /(?:(?:\+|00)(\d{1,4}))?[\s\-.(]*(\d[\d\s\-.()]{5,})/;
     const match = pastedText.match(phoneRegex);
     
     if (match) {
       const detectedCode = match[1] ? `+${match[1]}` : null;
       let phoneNumber = match[2] ? match[2].trim() : pastedText.trim();
+      
+      // Clean the phone number by removing common separators
+      phoneNumber = phoneNumber.replace(/[-\s().]/g, '');
       
       if (detectedCode) {
         setSelectedCountryCode(detectedCode);
@@ -334,30 +362,52 @@ const FormInput: React.FC<FormInputProps> = ({
           onCountryCodeChange(detectedCode);
         }
         
-        const cleanedNumber = phoneNumber.replace(/[-\s()]/g, '');
+        setPhoneInputValue(phoneNumber);
         
         const syntheticEvent = {
           target: {
             name,
-            value: cleanedNumber
+            value: phoneNumber
           }
         } as React.ChangeEvent<HTMLInputElement>;
         
         onChange(syntheticEvent);
       } else {
-        const cleanedNumber = pastedText.replace(/[-\s()]/g, '');
+        // No country code detected - check if the number starts with common country codes
+        const commonPrefixes = ['+1', '+7', '+33', '+44', '+49', '+39', '+34', '+41', '+31', '+32'];
+        let matchedPrefix = null;
+        
+        for (const prefix of commonPrefixes) {
+          if (pastedText.startsWith(prefix)) {
+            matchedPrefix = prefix;
+            phoneNumber = pastedText.substring(prefix.length).trim().replace(/[-\s().]/g, '');
+            break;
+          }
+        }
+        
+        if (matchedPrefix) {
+          setSelectedCountryCode(matchedPrefix);
+          if (onCountryCodeChange) {
+            onCountryCodeChange(matchedPrefix);
+          }
+        }
+        
+        setPhoneInputValue(phoneNumber);
         
         const syntheticEvent = {
           target: {
             name,
-            value: cleanedNumber
+            value: phoneNumber
           }
         } as React.ChangeEvent<HTMLInputElement>;
         
         onChange(syntheticEvent);
       }
     } else {
-      const cleanedNumber = pastedText.replace(/[-\s()]/g, '');
+      // No recognized format - just clean the input
+      const cleanedNumber = pastedText.replace(/[-\s().]/g, '');
+      
+      setPhoneInputValue(cleanedNumber);
       
       const syntheticEvent = {
         target: {
@@ -368,6 +418,11 @@ const FormInput: React.FC<FormInputProps> = ({
       
       onChange(syntheticEvent);
     }
+    
+    // Focus the input after processing
+    setTimeout(() => {
+      phoneInputRef.current?.focus();
+    }, 100);
   };
 
   const handleCountryCodeChange = (code: string) => {
@@ -377,25 +432,6 @@ const FormInput: React.FC<FormInputProps> = ({
     
     if (onCountryCodeChange) {
       onCountryCodeChange(code);
-    }
-    
-    if (typeof value === 'string' && value) {
-      let cleanedNumber = value;
-      for (const codeObj of countryCodes) {
-        if (value.startsWith(codeObj.code)) {
-          cleanedNumber = value.substring(codeObj.code.length).trim();
-          break;
-        }
-      }
-      
-      const syntheticEvent = {
-        target: {
-          name,
-          value: cleanedNumber
-        }
-      } as React.ChangeEvent<HTMLInputElement>;
-      
-      onChange(syntheticEvent);
     }
     
     setTimeout(() => {
@@ -461,7 +497,7 @@ const FormInput: React.FC<FormInputProps> = ({
     
     const allCountryCodes = countryCodes.map(country => country.code);
     
-    let phoneNumber = value.toString();
+    let phoneNumber = String(value);
     for (const code of allCountryCodes) {
       if (phoneNumber.startsWith(code)) {
         return phoneNumber.substring(code.length).trim();
@@ -631,7 +667,7 @@ const FormInput: React.FC<FormInputProps> = ({
               <div className="flex">
                 <div className="relative flex-shrink-0">
                   <div 
-                    className="flex items-center justify-between w-24 h-9 px-3 border border-r-0 border-input rounded-l-md bg-muted cursor-pointer font-futura"
+                    className="flex items-center justify-between h-9 px-3 border border-r-0 border-input rounded-l-md bg-muted cursor-pointer font-futura"
                     onClick={() => setShowCountryDropdown(prev => !prev)}
                     style={{ minWidth: `${getCodeButtonWidth()}px` }}
                   >
@@ -649,25 +685,18 @@ const FormInput: React.FC<FormInputProps> = ({
                   {showCountryDropdown && renderCountryDropdown()}
                 </div>
                 <Input
+                  ref={phoneInputRef}
                   id={name}
                   name={name}
                   type="tel"
-                  value={getPhoneValueWithoutCode() ?? ''}
-                  onChange={onChange}
-                  placeholder={placeholder}
-                  required={required}
-                  disabled={disabled}
-                  className="rounded-l-none h-9 font-futura"
-                  ref={phoneInputRef}
+                  value={phoneInputValue}
+                  onChange={handlePhoneInputChange}
                   onPaste={handlePhonePaste}
+                  placeholder={placeholder}
+                  className="w-full rounded-l-none font-futura"
+                  disabled={disabled}
                 />
               </div>
-              
-              {selectedCountryCode && getCountryFromCode(selectedCountryCode) && (
-                <div className="text-xs text-muted-foreground mt-1 font-futura italic">
-                  Pays détecté: {getCountryFromCode(selectedCountryCode)}
-                </div>
-              )}
             </div>
           ) : (
             <div className="relative">
@@ -693,7 +722,7 @@ const FormInput: React.FC<FormInputProps> = ({
       )}
       
       {helpText && (
-        <p className="text-xs text-muted-foreground mt-1 font-futura">{helpText}</p>
+        <p className="text-xs text-muted-foreground">{helpText}</p>
       )}
     </div>
   );

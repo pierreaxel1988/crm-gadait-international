@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Clipboard, User, Mail, Phone } from 'lucide-react';
+import { Clipboard, User, Mail, Phone, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
@@ -25,6 +25,11 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   const [contactText, setContactText] = useState('');
   const [phoneCountryCode, setPhoneCountryCode] = useState('+33');
   const [detectedCountry, setDetectedCountry] = useState<string | null>(null);
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const countryDropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const phoneInputRef = useRef<HTMLInputElement>(null);
   
   useEffect(() => {
     const measureHeader = () => {
@@ -46,6 +51,30 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        countryDropdownRef.current && 
+        !countryDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowCountryDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (showCountryDropdown && searchInputRef.current) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    }
+  }, [showCountryDropdown]);
+
   const handleInputChange = (field: keyof LeadDetailed, value: any) => {
     onDataChange({
       [field]: value
@@ -54,11 +83,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
 
   const updatePhoneCodeInUI = (code: string) => {
     setPhoneCountryCode(code);
-    const phoneCodeSelect = document.querySelector('select[name="phoneCountryCode"]') as HTMLSelectElement;
-    if (phoneCodeSelect) {
-      phoneCodeSelect.value = code;
-      phoneCodeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-    }
   };
 
   const parseContactInfo = () => {
@@ -470,6 +494,357 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     });
   };
 
+  const handleCountryCodeChange = (code: string) => {
+    setPhoneCountryCode(code);
+    setShowCountryDropdown(false);
+    setSearchQuery('');
+    
+    if (lead.phone) {
+      let phoneNumber = lead.phone;
+      const countryCodes = [
+        '+1', '+7', '+20', '+27', '+30', '+31', '+32', '+33', '+34', '+36', '+39', 
+        '+40', '+41', '+43', '+44', '+45', '+46', '+47', '+48', '+49', '+51', '+52', 
+        '+53', '+54', '+55', '+56', '+57', '+58', '+60', '+61', '+62', '+63', '+64', 
+        '+65', '+66', '+81', '+82', '+84', '+86', '+90', '+91', '+92', '+93', '+94', 
+        '+95', '+98', '+212', '+213', '+216', '+218', '+230', '+234', '+248', '+249', 
+        '+254', '+255', '+256', '+260', '+262', '+263', '+264', '+267', '+351', '+352', 
+        '+353', '+354', '+355', '+357', '+358', '+359', '+370', '+371', '+372', '+373', 
+        '+374', '+375', '+376', '+377', '+378', '+380', '+385', '+386', '+387', '+420', 
+        '+421', '+423', '+503', '+504', '+505', '+506', '+507', '+591', '+593', '+595', 
+        '+598', '+852', '+855', '+856', '+880', '+886', '+960', '+961', '+962', '+963', 
+        '+964', '+965', '+966', '+967', '+968', '+970', '+971', '+972', '+973', '+974', 
+        '+975', '+976', '+977', '+992', '+993', '+994', '+995', '+996', '+998'
+      ];
+      
+      const sortedCodes = [...countryCodes].sort((a, b) => b.length - a.length);
+      
+      for (const existingCode of sortedCodes) {
+        if (phoneNumber.startsWith(existingCode)) {
+          phoneNumber = phoneNumber.substring(existingCode.length).trim();
+          break;
+        }
+      }
+      
+      phoneNumber = phoneNumber.replace(/[-\s().]/g, '');
+      
+      handleInputChange('phone', phoneNumber);
+    }
+    
+    setTimeout(() => {
+      if (phoneInputRef.current) {
+        phoneInputRef.current.focus();
+      }
+    }, 100);
+    
+    const countryCodeMapping: Record<string, string> = {
+      '+1': 'United States',
+      '+7': 'Russia',
+      '+20': 'Egypt',
+      '+27': 'South Africa',
+      '+30': 'Greece',
+      '+31': 'Netherlands',
+      '+32': 'Belgium',
+      '+33': 'France',
+      '+34': 'Spain',
+      '+36': 'Hungary',
+      '+39': 'Italy',
+      '+41': 'Switzerland',
+      '+44': 'United Kingdom',
+      '+49': 'Germany',
+      '+52': 'Mexico',
+      '+54': 'Argentina',
+      '+55': 'Brazil',
+      '+61': 'Australia',
+      '+66': 'Thailand',
+      '+81': 'Japan',
+      '+86': 'China',
+      '+91': 'India',
+      '+212': 'Morocco',
+      '+213': 'Algeria',
+      '+216': 'Tunisia',
+      '+230': 'Mauritius',
+      '+234': 'Nigeria',
+      '+351': 'Portugal',
+      '+353': 'Ireland',
+      '+380': 'Ukraine',
+      '+385': 'Croatia',
+      '+598': 'Uruguay',
+      '+852': 'Hong Kong',
+      '+880': 'Bangladesh',
+      '+960': 'Maldives',
+      '+965': 'Kuwait',
+      '+966': 'Saudi Arabia',
+      '+971': 'United Arab Emirates',
+      '+972': 'Israel',
+      '+973': 'Bahrain',
+      '+974': 'Qatar'
+    };
+    
+    if (countryCodeMapping[code] && !lead.taxResidence) {
+      const country = countryCodeMapping[code];
+      handleInputChange('taxResidence', country);
+      setDetectedCountry(country);
+      
+      if (!lead.nationality) {
+        const nationality = deriveNationalityFromCountry(country);
+        if (nationality) {
+          handleInputChange('nationality', nationality);
+        }
+      }
+    }
+  };
+
+  const handlePhonePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    
+    const pastedText = e.clipboardData.getData('text');
+    
+    if (!pastedText) return;
+    
+    const phoneRegex = /(?:(?:\+|00)(\d{1,4}))?[\s\-.(]*(\d[\d\s\-.()]{5,})/;
+    const match = pastedText.match(phoneRegex);
+    
+    if (match) {
+      const detectedCode = match[1] ? `+${match[1]}` : null;
+      let phoneNumber = match[2] ? match[2].trim() : pastedText.trim();
+      
+      phoneNumber = phoneNumber.replace(/[-\s().]/g, '');
+      
+      if (detectedCode) {
+        setPhoneCountryCode(detectedCode);
+        
+        handleInputChange('phone', phoneNumber);
+        
+        const countryCodeMapping: Record<string, string> = {
+          '+1': 'United States',
+          '+7': 'Russia',
+          '+20': 'Egypt',
+          '+27': 'South Africa',
+          '+30': 'Greece',
+          '+31': 'Netherlands',
+          '+32': 'Belgium',
+          '+33': 'France',
+          '+34': 'Spain',
+          '+36': 'Hungary',
+          '+39': 'Italy',
+          '+41': 'Switzerland',
+          '+44': 'United Kingdom',
+          '+49': 'Germany',
+          '+52': 'Mexico',
+          '+54': 'Argentina',
+          '+55': 'Brazil',
+          '+61': 'Australia',
+          '+66': 'Thailand',
+          '+81': 'Japan',
+          '+86': 'China',
+          '+91': 'India',
+          '+212': 'Morocco',
+          '+213': 'Algeria',
+          '+216': 'Tunisia',
+          '+230': 'Mauritius',
+          '+234': 'Nigeria',
+          '+351': 'Portugal',
+          '+353': 'Ireland',
+          '+380': 'Ukraine',
+          '+385': 'Croatia',
+          '+598': 'Uruguay',
+          '+852': 'Hong Kong',
+          '+880': 'Bangladesh',
+          '+960': 'Maldives',
+          '+965': 'Kuwait',
+          '+966': 'Saudi Arabia',
+          '+971': 'United Arab Emirates',
+          '+972': 'Israel',
+          '+973': 'Bahrain',
+          '+974': 'Qatar'
+        };
+        
+        if (countryCodeMapping[detectedCode] && !lead.taxResidence) {
+          const country = countryCodeMapping[detectedCode];
+          handleInputChange('taxResidence', country);
+          setDetectedCountry(country);
+          
+          if (!lead.nationality) {
+            const nationality = deriveNationalityFromCountry(country);
+            if (nationality) {
+              handleInputChange('nationality', nationality);
+            }
+          }
+        }
+      } else {
+        handleInputChange('phone', phoneNumber);
+      }
+    } else {
+      const cleanedNumber = pastedText.replace(/[-\s().]/g, '');
+      handleInputChange('phone', cleanedNumber);
+    }
+  };
+
+  const countryCodes = [
+    { code: '+1', country: '🇺🇸 USA/Canada' },
+    { code: '+7', country: '🇷🇺 Russia' },
+    { code: '+20', country: '🇪🇬 Egypt' },
+    { code: '+27', country: '🇿🇦 South Africa' },
+    { code: '+30', country: '🇬🇷 Greece' },
+    { code: '+31', country: '🇳🇱 Netherlands' },
+    { code: '+32', country: '🇧🇪 Belgium' },
+    { code: '+33', country: '🇫🇷 France' },
+    { code: '+34', country: '🇪🇸 Spain' },
+    { code: '+36', country: '🇭🇺 Hungary' },
+    { code: '+39', country: '🇮🇹 Italy' },
+    { code: '+41', country: '🇨🇭 Switzerland' },
+    { code: '+44', country: '🇬🇧 UK' },
+    { code: '+49', country: '🇩🇪 Germany' },
+    { code: '+52', country: '🇲🇽 Mexico' },
+    { code: '+54', country: '🇦🇷 Argentina' },
+    { code: '+55', country: '🇧🇷 Brazil' },
+    { code: '+61', country: '🇦🇺 Australia' },
+    { code: '+66', country: '🇹🇭 Thailand' },
+    { code: '+81', country: '🇯🇵 Japan' },
+    { code: '+86', country: '🇨🇳 China' },
+    { code: '+91', country: '🇮🇳 India' },
+    { code: '+212', country: '🇲🇦 Morocco' },
+    { code: '+213', country: '🇩🇿 Algeria' },
+    { code: '+216', country: '🇹🇳 Tunisia' },
+    { code: '+230', country: '🇲🇺 Mauritius' },
+    { code: '+234', country: '🇳🇬 Nigeria' },
+    { code: '+351', country: '🇵🇹 Portugal' },
+    { code: '+353', country: '🇮🇪 Ireland' },
+    { code: '+380', country: '🇺🇦 Ukraine' },
+    { code: '+385', country: '🇭🇷 Croatia' },
+    { code: '+598', country: '🇺🇾 Uruguay' },
+    { code: '+852', country: '🇭🇰 Hong Kong' },
+    { code: '+880', country: '🇧🇩 Bangladesh' },
+    { code: '+960', country: '🇲🇻 Maldives' },
+    { code: '+965', country: '🇰🇼 Kuwait' },
+    { code: '+966', country: '🇸🇦 Saudi Arabia' },
+    { code: '+971', country: '🇦🇪 UAE' },
+    { code: '+972', country: '🇮🇱 Israel' },
+    { code: '+973', country: '🇧🇭 Bahrain' },
+    { code: '+974', country: '🇶🇦 Qatar' },
+    { code: '+43', country: '🇦🇹 Austria' },
+    { code: '+45', country: '🇩🇰 Denmark' },
+    { code: '+46', country: '🇸🇪 Sweden' },
+    { code: '+47', country: '🇳🇴 Norway' },
+    { code: '+48', country: '🇵🇱 Poland' },
+    { code: '+58', country: '🇻🇪 Venezuela' },
+    { code: '+60', country: '🇲🇾 Malaysia' },
+    { code: '+62', country: '🇮🇩 Indonesia' },
+    { code: '+63', country: '🇵🇭 Philippines' },
+    { code: '+64', country: '🇳🇿 New Zealand' },
+    { code: '+65', country: '🇸🇬 Singapore' },
+    { code: '+82', country: '🇰🇷 South Korea' },
+    { code: '+84', country: '🇻🇳 Vietnam' },
+    { code: '+90', country: '🇹🇷 Turkey' },
+    { code: '+92', country: '🇵🇰 Pakistan' },
+    { code: '+94', country: '🇱🇰 Sri Lanka' },
+    { code: '+95', country: '🇲🇲 Myanmar' },
+    { code: '+98', country: '🇮🇷 Iran' },
+    { code: '+218', country: '🇱🇾 Libya' },
+    { code: '+248', country: '🇸🇨 Seychelles' },
+    { code: '+254', country: '🇰🇪 Kenya' },
+    { code: '+255', country: '🇹🇿 Tanzania' },
+    { code: '+256', country: '🇺🇬 Uganda' },
+    { code: '+260', country: '🇿🇲 Zambia' },
+    { code: '+262', country: '🇷🇪 Réunion' },
+    { code: '+263', country: '🇿🇼 Zimbabwe' },
+    { code: '+264', country: '🇳🇦 Namibia' },
+    { code: '+267', country: '🇧🇼 Botswana' },
+    { code: '+350', country: '🇬🇮 Gibraltar' },
+    { code: '+352', country: '🇱🇺 Luxembourg' },
+    { code: '+354', country: '🇮🇸 Iceland' },
+    { code: '+355', country: '🇦🇱 Albania' },
+    { code: '+356', country: '🇲🇹 Malta' },
+    { code: '+357', country: '🇨🇾 Cyprus' },
+    { code: '+358', country: '🇫🇮 Finland' },
+    { code: '+359', country: '🇧🇬 Bulgaria' },
+    { code: '+370', country: '🇱🇹 Lithuania' },
+    { code: '+371', country: '🇱🇻 Latvia' },
+    { code: '+372', country: '🇪🇪 Estonia' },
+    { code: '+373', country: '🇲🇩 Moldova' },
+    { code: '+374', country: '🇦🇲 Armenia' },
+    { code: '+375', country: '🇧🇾 Belarus' },
+    { code: '+376', country: '🇦🇩 Andorra' },
+    { code: '+377', country: '🇲🇨 Monaco' },
+    { code: '+378', country: '🇸🇲 San Marino' },
+    { code: '+386', country: '🇸🇮 Slovenia' },
+    { code: '+420', country: '🇨🇿 Czech Republic' },
+    { code: '+421', country: '🇸🇰 Slovakia' },
+    { code: '+961', country: '🇱🇧 Lebanon' },
+    { code: '+962', country: '🇯🇴 Jordan' },
+    { code: '+963', country: '🇸🇾 Syria' },
+    { code: '+964', country: '🇮🇶 Iraq' },
+    { code: '+967', country: '🇾🇪 Yemen' },
+    { code: '+968', country: '🇴🇲 Oman' },
+    { code: '+970', country: '🇵🇸 Palestine' },
+    { code: '+975', country: '🇧🇹 Bhutan' },
+    { code: '+976', country: '🇲🇳 Mongolia' },
+    { code: '+977', country: '🇳🇵 Nepal' },
+    { code: '+992', country: '🇹🇯 Tajikistan' },
+    { code: '+993', country: '🇹🇲 Turkmenistan' },
+    { code: '+994', country: '🇦🇿 Azerbaijan' },
+    { code: '+995', country: '🇬🇪 Georgia' },
+    { code: '+996', country: '🇰🇬 Kyrgyzstan' }
+  ];
+
+  const filteredCountryCodes = React.useMemo(() => {
+    if (!searchQuery) return countryCodes;
+    
+    return countryCodes.filter(country => {
+      const countryNameMatches = country.country.toLowerCase().includes(searchQuery.toLowerCase());
+      const codeMatches = country.code.includes(searchQuery);
+      const normalizedCountry = country.country.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const normalizedQuery = searchQuery.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const normalizedMatches = normalizedCountry.includes(normalizedQuery);
+      
+      return countryNameMatches || codeMatches || normalizedMatches;
+    });
+  }, [searchQuery]);
+
+  const renderCountryDropdown = () => {
+    return (
+      <div 
+        ref={countryDropdownRef}
+        className="absolute z-10 mt-1 w-56 max-h-60 overflow-auto rounded-md border border-input bg-background shadow-md left-0 top-full"
+      >
+        <div className="sticky top-0 bg-background border-b border-input p-2">
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input 
+              ref={searchInputRef}
+              type="text"
+              className="w-full px-2 py-1 pl-8 text-sm border rounded"
+              placeholder="Rechercher un pays ou code..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+        
+        {filteredCountryCodes.map(country => (
+          <div 
+            key={country.code} 
+            className="px-3 py-2 text-sm hover:bg-accent cursor-pointer flex items-center justify-between font-futura"
+            onClick={() => handleCountryCodeChange(country.code)}
+          >
+            <div className="flex items-center">
+              <span className="mr-2">{country.country}</span>
+            </div>
+            <span className="text-muted-foreground">{country.code}</span>
+          </div>
+        ))}
+        
+        {filteredCountryCodes.length === 0 && (
+          <div className="px-3 py-2 text-sm text-muted-foreground font-futura">
+            Aucun pays ne correspond à votre recherche
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const dynamicTopMargin = isHeaderMeasured 
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
@@ -560,51 +935,26 @@ France"
         <div className="space-y-2">
           <Label htmlFor="phone" className="text-sm">Téléphone</Label>
           <div className="flex">
-            <Select 
-              value={phoneCountryCode} 
-              onValueChange={(value) => setPhoneCountryCode(value)}
-              name="phoneCountryCode"
-            >
-              <SelectTrigger className="flex-shrink-0 w-20 rounded-r-none font-futura">
-                <SelectValue placeholder="+33" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="+33">+33</SelectItem>
-                <SelectItem value="+1">+1</SelectItem>
-                <SelectItem value="+44">+44</SelectItem>
-                <SelectItem value="+34">+34</SelectItem>
-                <SelectItem value="+39">+39</SelectItem>
-                <SelectItem value="+41">+41</SelectItem>
-                <SelectItem value="+32">+32</SelectItem>
-                <SelectItem value="+49">+49</SelectItem>
-                <SelectItem value="+31">+31</SelectItem>
-                <SelectItem value="+7">+7</SelectItem>
-                <SelectItem value="+353">+353</SelectItem>
-                <SelectItem value="+971">+971</SelectItem>
-                <SelectItem value="+966">+966</SelectItem>
-                <SelectItem value="+965">+965</SelectItem>
-                <SelectItem value="+974">+974</SelectItem>
-                <SelectItem value="+973">+973</SelectItem>
-                <SelectItem value="+230">+230</SelectItem>
-                <SelectItem value="+262">+262</SelectItem>
-                <SelectItem value="+212">+212</SelectItem>
-                <SelectItem value="+216">+216</SelectItem>
-                <SelectItem value="+213">+213</SelectItem>
-                <SelectItem value="+20">+20</SelectItem>
-                <SelectItem value="+351">+351</SelectItem>
-                <SelectItem value="+30">+30</SelectItem>
-                <SelectItem value="+385">+385</SelectItem>
-                <SelectItem value="+960">+960</SelectItem>
-                <SelectItem value="+248">+248</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="relative flex-shrink-0">
+              <div 
+                className="flex items-center justify-between w-20 h-10 px-3 border border-r-0 rounded-l-md bg-muted cursor-pointer font-futura"
+                onClick={() => setShowCountryDropdown(prev => !prev)}
+              >
+                <span>{phoneCountryCode}</span>
+                <Search className="h-4 w-4 ml-1 flex-shrink-0" />
+              </div>
+              
+              {showCountryDropdown && renderCountryDropdown()}
+            </div>
             <Input 
               id="phone" 
               value={lead.phone || ''}
               onChange={(e) => handleInputChange('phone', e.target.value)}
+              onPaste={handlePhonePaste}
               placeholder="Numéro de téléphone" 
               className="w-full rounded-l-none font-futura" 
               type="tel"
+              ref={phoneInputRef}
             />
           </div>
           {detectedCountry && (
