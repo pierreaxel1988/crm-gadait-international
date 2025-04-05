@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed, LeadStatus } from '@/types/lead';
-import { createLead } from '@/services/leadService';
+import { createLead, addActionToLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';

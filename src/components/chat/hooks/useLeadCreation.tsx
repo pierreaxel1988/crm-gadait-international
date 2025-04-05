@@ -6,6 +6,7 @@ import { createLead } from '@/services/leadCore';
 import { LeadDetailed } from '@/types/lead';
 import { ExtractedData } from '../types/chatTypes';
 import { supabase } from '@/integrations/supabase/client';
+import { addActionToLead } from '@/services/leadActions';
 
 export const useLeadCreation = () => {
   const [selectedPipeline, setSelectedPipeline] = useState<'purchase' | 'rental'>('purchase');
@@ -88,10 +89,25 @@ export const useLeadCreation = () => {
         description: `Le lead ${newLead.name} a été créé avec succès dans le pipeline ${selectedPipeline === 'purchase' ? 'achat' : 'location'}.`
       });
       
-      clearForm();
-      
-      // Navigate to the lead detail page
+      // Créer une action de qualification si le lead est créé avec succès
       if (createdLead && createdLead.id) {
+        // Ajouter une action de qualification
+        const qualificationAction = {
+          actionType: "Call",
+          scheduledDate: new Date().toISOString(),
+          notes: "Qualification du lead : appeler le client pour comprendre ses besoins précis suite à l'importation d'email."
+        };
+        
+        try {
+          await addActionToLead(createdLead.id, qualificationAction);
+          console.log("Qualification action created for imported lead");
+        } catch (actionError) {
+          console.error("Error creating qualification action for imported lead:", actionError);
+        }
+        
+        clearForm();
+        
+        // Navigate to the lead detail page
         setTimeout(() => {
           navigate(`/leads/${createdLead.id}`);
         }, 500);

@@ -72,6 +72,36 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
         title: "Lead créé avec succès",
         description: "Le nouveau lead a été ajouté à la base de données.",
       });
+
+      // Vérifier si le lead est en statut "New" ou "Nouveau" et a un agent assigné
+      if ((result.status === "New" || result.status === "Nouveau") && result.assignedTo) {
+        // Ajouter une action de type "Call" pour qualifier le lead
+        const qualificationAction = {
+          actionType: "Call",
+          scheduledDate: new Date().toISOString(),
+          notes: "Qualification du lead : appeler le client pour comprendre ses besoins précis."
+        };
+        
+        console.log("Creating qualification action for new lead:", qualificationAction);
+        
+        try {
+          const updatedLead = await addActionToLead(result.id, qualificationAction);
+          if (updatedLead) {
+            console.log("Qualification action created successfully");
+            toast({
+              title: "Action créée",
+              description: "Une action de qualification a été créée pour ce lead.",
+            });
+          }
+        } catch (actionError) {
+          console.error("Error creating qualification action:", actionError);
+          toast({
+            variant: "destructive",
+            title: "Attention",
+            description: "Le lead a été créé mais l'action de qualification n'a pas pu être ajoutée.",
+          });
+        }
+      }
     }
     
     return result;
