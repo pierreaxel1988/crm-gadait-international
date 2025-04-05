@@ -25,6 +25,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   const [showContactPaste, setShowContactPaste] = useState(false);
   const [contactText, setContactText] = useState('');
   const [phoneCountryCode, setPhoneCountryCode] = useState('+33');
+  const [detectedCountry, setDetectedCountry] = useState<string | null>(null);
   
   useEffect(() => {
     const measureHeader = () => {
@@ -311,6 +312,8 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       country = countryCodeMap[detectedCountryCode];
     }
 
+    setDetectedCountry(country);
+
     console.log("Informations extraites:", { 
       name, 
       email, 
@@ -484,9 +487,9 @@ France"
               type="tel"
             />
           </div>
-          {country && (
+          {detectedCountry && (
             <p className="text-xs text-muted-foreground font-futura mt-1">
-              Pays détecté: {country}
+              Pays détecté: {detectedCountry}
             </p>
           )}
         </div>
@@ -556,4 +559,3 @@ France"
 };
 
 export default GeneralInfoSection;
-

@@ -24,9 +24,11 @@ export const LOCATIONS_BY_COUNTRY: Record<string, string[]> = {
     'Bristol', 'York', 'Liverpool', 'Glasgow', 'Birmingham', 'Windsor', 'Cheltenham'
   ],
   'United States': [
-    'New York', 'Los Angeles', 'Miami', 'San Francisco', 'Chicago', 'Boston', 
-    'Washington D.C.', 'Seattle', 'San Diego', 'Las Vegas', 'Austin', 'Denver',
-    'Aspen', 'Beverly Hills', 'Malibu', 'Palm Beach', 'Hamptons', 'Telluride'
+    'New York', 'Los Angeles', 'Miami', 'Miami Beach', 'South Beach', 'Fort Lauderdale',
+    'Palm Beach', 'Naples', 'San Francisco', 'Chicago', 'Boston', 'Washington D.C.',
+    'Seattle', 'San Diego', 'Las Vegas', 'Austin', 'Denver', 'Aspen', 'Beverly Hills',
+    'Malibu', 'Palm Springs', 'Hamptons', 'Telluride', 'Key West', 'Orlando',
+    'Scottsdale', 'Santa Barbara', 'Napa Valley', 'Sonoma', 'Hawaii', 'Maui', 'Kauai'
   ],
   'Croatia': [
     'Dubrovnik', 'Split', 'Hvar', 'Zagreb', 'Rovinj', 'Zadar', 'Korčula',
