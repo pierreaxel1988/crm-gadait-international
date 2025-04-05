@@ -1,4 +1,3 @@
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -38,7 +37,6 @@ export type ViewType =
   | "Golf" 
   | "Autres";
 
-// Change Amenity type to a string for flexibility
 export type Amenity = string;
 
 export type PurchaseTimeframe = 
@@ -65,7 +63,6 @@ export type Currency =
   | "AED"
   | "MUR";
 
-// Import and re-export these types
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
