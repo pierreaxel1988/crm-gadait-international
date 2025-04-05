@@ -179,73 +179,203 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     let phoneNumberWithoutCode = '';
     
     if (phone) {
-      const countryCodeMatch = phone.match(/\(\+(\d+)\)|\+(\d+)/);
+      const countryCodeRegex = /(?:\(\+(\d+)\)|\+(\d+)(?:[\s\-]|$))/;
+      const countryCodeMatch = phone.match(countryCodeRegex);
       
       if (countryCodeMatch) {
         const codeDigits = countryCodeMatch[1] || countryCodeMatch[2];
         
         if (codeDigits) {
-          let code = '';
-          if (codeDigits.startsWith('1')) {
-            code = '1';
-          } else if (codeDigits.startsWith('7')) {
-            code = '7';
-          } else if (codeDigits.startsWith('33')) {
-            code = '33';
-          } else if (codeDigits.startsWith('44')) {
-            code = '44';
-          } else if (codeDigits.startsWith('49')) {
-            code = '49';
-          } else if (codeDigits.startsWith('34')) {
-            code = '34';
-          } else if (codeDigits.startsWith('39')) {
-            code = '39';
-          } else if (codeDigits.startsWith('41')) {
-            code = '41';
-          } else if (codeDigits.startsWith('353')) {
-            code = '353';
-          } else if (codeDigits.startsWith('971')) {
-            code = '971';
-          } else if (codeDigits.startsWith('966')) {
-            code = '966';
-          } else if (codeDigits.startsWith('965')) {
-            code = '965';
-          } else if (codeDigits.startsWith('974')) {
-            code = '974';
-          } else if (codeDigits.startsWith('973')) {
-            code = '973';
-          } else if (codeDigits.startsWith('230')) {
-            code = '230';
-          } else if (codeDigits.startsWith('262')) {
-            code = '262';
-          } else if (codeDigits.startsWith('212')) {
-            code = '212';
-          } else if (codeDigits.startsWith('216')) {
-            code = '216';
-          } else if (codeDigits.startsWith('213')) {
-            code = '213';
-          } else if (codeDigits.startsWith('20')) {
-            code = '20';
-          } else if (codeDigits.startsWith('351')) {
-            code = '351';
-          } else if (codeDigits.startsWith('30')) {
-            code = '30';
-          } else if (codeDigits.startsWith('385')) {
-            code = '385';
-          } else if (codeDigits.startsWith('960')) {
-            code = '960';
-          } else if (codeDigits.startsWith('248')) {
-            code = '248';
+          const commonCodes = {
+            '1': '1',
+            '7': '7',
+            '20': '20',
+            '27': '27',
+            '30': '30',
+            '31': '31',
+            '32': '32',
+            '33': '33',
+            '34': '34',
+            '36': '36',
+            '39': '39',
+            '40': '40',
+            '41': '41',
+            '43': '43',
+            '44': '44',
+            '45': '45',
+            '46': '46',
+            '47': '47',
+            '48': '48',
+            '49': '49',
+            '51': '51',
+            '52': '52',
+            '54': '54',
+            '55': '55',
+            '56': '56',
+            '57': '57',
+            '58': '58',
+            '60': '60',
+            '61': '61',
+            '62': '62',
+            '63': '63',
+            '64': '64',
+            '65': '65',
+            '66': '66',
+            '81': '81',
+            '82': '82',
+            '84': '84',
+            '86': '86',
+            '90': '90',
+            '91': '91',
+            '92': '92',
+            '93': '93',
+            '94': '94',
+            '95': '95',
+            '98': '98',
+            '212': '212',
+            '213': '213',
+            '216': '216',
+            '218': '218',
+            '220': '220',
+            '221': '221',
+            '222': '222',
+            '223': '223',
+            '224': '224',
+            '225': '225',
+            '230': '230',
+            '233': '233',
+            '234': '234',
+            '241': '241',
+            '242': '242',
+            '243': '243',
+            '248': '248',
+            '249': '249',
+            '251': '251',
+            '254': '254',
+            '255': '255',
+            '256': '256',
+            '260': '260',
+            '261': '261',
+            '262': '262',
+            '263': '263',
+            '264': '264',
+            '265': '265',
+            '266': '266',
+            '267': '267',
+            '268': '268',
+            '269': '269',
+            '297': '297',
+            '298': '298',
+            '299': '299',
+            '350': '350',
+            '351': '351',
+            '352': '352',
+            '353': '353',
+            '354': '354',
+            '356': '356',
+            '357': '357',
+            '358': '358',
+            '359': '359',
+            '370': '370',
+            '371': '371',
+            '372': '372',
+            '373': '373',
+            '374': '374',
+            '375': '375',
+            '376': '376',
+            '377': '377',
+            '378': '378',
+            '380': '380',
+            '381': '381',
+            '382': '382',
+            '383': '383',
+            '385': '385',
+            '386': '386',
+            '387': '387',
+            '389': '389',
+            '420': '420',
+            '421': '421',
+            '423': '423',
+            '500': '500',
+            '501': '501',
+            '502': '502',
+            '503': '503',
+            '504': '504',
+            '505': '505',
+            '506': '506',
+            '507': '507',
+            '509': '509',
+            '590': '590',
+            '591': '591',
+            '592': '592',
+            '593': '593',
+            '594': '594',
+            '595': '595',
+            '596': '596',
+            '597': '597',
+            '598': '598',
+            '599': '599',
+            '670': '670',
+            '673': '673',
+            '674': '674',
+            '675': '675',
+            '676': '676',
+            '677': '677',
+            '678': '678',
+            '679': '679',
+            '680': '680',
+            '685': '685',
+            '686': '686',
+            '691': '691',
+            '692': '692',
+            '850': '850',
+            '852': '852',
+            '853': '853',
+            '855': '855',
+            '856': '856',
+            '880': '880',
+            '886': '886',
+            '960': '960',
+            '961': '961',
+            '962': '962',
+            '963': '963',
+            '964': '964',
+            '965': '965',
+            '966': '966',
+            '967': '967',
+            '968': '968',
+            '970': '970',
+            '971': '971',
+            '972': '972',
+            '973': '973',
+            '974': '974',
+            '975': '975',
+            '976': '976',
+            '977': '977',
+            '992': '992',
+            '993': '993',
+            '994': '994',
+            '995': '995',
+            '996': '996',
+            '998': '998',
+          };
+
+          let matchedCode = '';
+          for (const [code, value] of Object.entries(commonCodes)) {
+            if (codeDigits.startsWith(code) && code.length > matchedCode.length) {
+              matchedCode = code;
+            }
           }
           
-          detectedCountryCode = '+' + code;
-          
-          updatePhoneCodeInUI(detectedCountryCode);
+          if (matchedCode) {
+            detectedCountryCode = '+' + matchedCode;
+            updatePhoneCodeInUI(detectedCountryCode);
+          }
           
           if (phone.includes('(+')) {
             phoneNumberWithoutCode = phone.replace(/\(\+\d+\)\s*/, '').trim();
           } else if (phone.includes('+')) {
-            phoneNumberWithoutCode = phone.replace(/\+\d+\s*/, '').trim();
+            phoneNumberWithoutCode = phone.replace(/\+\d+[\s\-]?/, '').trim();
           } else {
             phoneNumberWithoutCode = phone;
           }
@@ -284,7 +414,20 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       '+30': 'Greece',
       '+385': 'Croatia',
       '+960': 'Maldives',
-      '+248': 'Seychelles'
+      '+248': 'Seychelles',
+      '+27': 'South Africa',
+      '+91': 'India',
+      '+61': 'Australia',
+      '+64': 'New Zealand',
+      '+86': 'China',
+      '+81': 'Japan',
+      '+82': 'South Korea',
+      '+55': 'Brazil',
+      '+52': 'Mexico',
+      '+54': 'Argentina',
+      '+56': 'Chile',
+      '+57': 'Colombia',
+      '+58': 'Venezuela'
     };
     
     if (detectedCountryCode && !country && countryCodeMap[detectedCountryCode]) {

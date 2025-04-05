@@ -246,6 +246,7 @@ const FormInput: React.FC<FormInputProps> = ({
   const isMobile = useIsMobile();
   const countryDropdownRef = useRef<HTMLDivElement>(null);
   const searchCountryInputRef = useRef<HTMLInputElement>(null);
+  const phoneInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -311,6 +312,64 @@ const FormInput: React.FC<FormInputProps> = ({
     }
   };
 
+  const handlePhonePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    if (type !== 'tel-with-code') return;
+    
+    e.preventDefault();
+    
+    const pastedText = e.clipboardData.getData('text');
+    
+    if (!pastedText) return;
+    
+    const phoneRegex = /(?:\+(\d+))?[\s\-]?([0-9\s\-]+)/;
+    const match = pastedText.match(phoneRegex);
+    
+    if (match) {
+      const detectedCode = match[1] ? `+${match[1]}` : null;
+      let phoneNumber = match[2] ? match[2].trim() : pastedText.trim();
+      
+      if (detectedCode) {
+        setSelectedCountryCode(detectedCode);
+        if (onCountryCodeChange) {
+          onCountryCodeChange(detectedCode);
+        }
+        
+        const cleanedNumber = phoneNumber.replace(/[-\s()]/g, '');
+        
+        const syntheticEvent = {
+          target: {
+            name,
+            value: cleanedNumber
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        
+        onChange(syntheticEvent);
+      } else {
+        const cleanedNumber = pastedText.replace(/[-\s()]/g, '');
+        
+        const syntheticEvent = {
+          target: {
+            name,
+            value: cleanedNumber
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        
+        onChange(syntheticEvent);
+      }
+    } else {
+      const cleanedNumber = pastedText.replace(/[-\s()]/g, '');
+      
+      const syntheticEvent = {
+        target: {
+          name,
+          value: cleanedNumber
+        }
+      } as React.ChangeEvent<HTMLInputElement>;
+      
+      onChange(syntheticEvent);
+    }
+  };
+
   const handleCountryCodeChange = (code: string) => {
     setSelectedCountryCode(code);
     setShowCountryDropdown(false);
@@ -338,6 +397,12 @@ const FormInput: React.FC<FormInputProps> = ({
       
       onChange(syntheticEvent);
     }
+    
+    setTimeout(() => {
+      if (phoneInputRef.current) {
+        phoneInputRef.current.focus();
+      }
+    }, 100);
   };
 
   const getCodeButtonWidth = () => {
@@ -593,6 +658,8 @@ const FormInput: React.FC<FormInputProps> = ({
                   required={required}
                   disabled={disabled}
                   className="rounded-l-none h-9 font-futura"
+                  ref={phoneInputRef}
+                  onPaste={handlePhonePaste}
                 />
               </div>
               
