@@ -1,3 +1,4 @@
+
 import { LeadDetailed } from "@/types/lead";
 import { 
   createLead as createLeadCore,
@@ -72,8 +73,8 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
         description: "Le nouveau lead a été ajouté à la base de données.",
       });
 
-      // Vérifier si le lead est en statut "New" ou "Nouveau" et a un agent assigné
-      if ((result.status === "New" || result.status === "Nouveau") && result.assignedTo) {
+      // Vérifier si le lead est en statut "New" et a un agent assigné
+      if (result.status === "New" && result.assignedTo) {
         // Ajouter une action de type "Call" pour qualifier le lead
         const qualificationAction = {
           actionType: "Call",
