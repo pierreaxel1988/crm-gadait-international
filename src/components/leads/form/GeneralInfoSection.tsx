@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
@@ -8,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { COUNTRIES } from '@/utils/countries';
 import { deriveNationalityFromCountry, countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Textarea } from '@/components/ui/textarea';
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
@@ -218,61 +220,162 @@ const GeneralInfoSection = ({
       return;
     }
 
-    const lines = contactText.split('\n').filter(line => line.trim().length > 0);
-    
+    // Variables pour stocker les informations extraites
     let name = '';
     let email = '';
     let phone = '';
+    let country = '';
     let language = '';
 
-    const nameMatch = contactText.match(/Name\s*:?\s*([^\r\n]+)/i);
-    const emailMatch = contactText.match(/e-?mail\s*:?\s*([^\r\n]+)/i);
-    const phoneMatch = contactText.match(/Phone\s*:?\s*([^\r\n]+)/i) || 
-                      contactText.match(/Tel(?:ephone)?\s*:?\s*([^\r\n]+)/i);
-    const languageMatch = contactText.match(/Language\s*:?\s*([^\r\n]+)/i);
+    // Rechercher des patterns spécifiques
+    const namePatterns = [
+      /[À|A] propos de\s+([^\n]+)/i,
+      /Name\s*:?\s*([^\r\n]+)/i,
+      /Nom\s*:?\s*([^\r\n]+)/i
+    ];
+    
+    const emailPatterns = [
+      /e-?mail\s*:?\s*([^\r\n]+)/i,
+      /courriel\s*:?\s*([^\r\n]+)/i,
+      /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/
+    ];
+    
+    const phonePatterns = [
+      /t[ée]l[ée]phone\s*:?\s*([^\r\n]+)/i,
+      /phone\s*:?\s*([^\r\n]+)/i,
+      /\(?\+?[0-9][0-9()\-\s.]{7,}\d/
+    ];
+    
+    const countryPatterns = [
+      /pays\s*:?\s*([^\r\n]+)/i,
+      /country\s*:?\s*([^\r\n]+)/i
+    ];
+    
+    const languagePatterns = [
+      /langue\s*:?\s*([^\r\n]+)/i,
+      /language\s*:?\s*([^\r\n]+)/i
+    ];
 
-    if (nameMatch && nameMatch[1]) {
-      name = nameMatch[1].trim();
-    }
-    
-    if (emailMatch && emailMatch[1]) {
-      email = emailMatch[1].trim();
-    }
-    
-    if (phoneMatch && phoneMatch[1]) {
-      phone = phoneMatch[1].trim();
-      
-      const codeMatch = phone.match(/^\+\d+/);
-      if (codeMatch && codeMatch[0]) {
-        setPhoneCountryCode(codeMatch[0]);
+    // Extraire le nom
+    for (const pattern of namePatterns) {
+      const match = contactText.match(pattern);
+      if (match && match[1]) {
+        name = match[1].trim();
+        break;
       }
     }
 
-    if (languageMatch && languageMatch[1]) {
-      language = languageMatch[1].trim();
+    // Extraire l'email
+    for (const pattern of emailPatterns) {
+      const match = contactText.match(pattern);
+      if (match) {
+        // Si c'est un pattern avec capture, utiliser le groupe capturé
+        if (match[1]) {
+          email = match[1].trim();
+        } else {
+          // Sinon, c'est probablement le pattern d'email lui-même
+          email = match[0].trim();
+        }
+        break;
+      }
     }
-    
-    if (!name && !email && !phone) {
+
+    // Extraire le téléphone
+    for (const pattern of phonePatterns) {
+      const match = contactText.match(pattern);
+      if (match) {
+        if (match[1]) {
+          phone = match[1].trim();
+        } else {
+          phone = match[0].trim();
+        }
+        break;
+      }
+    }
+
+    // Extraire le pays
+    for (const pattern of countryPatterns) {
+      const match = contactText.match(pattern);
+      if (match && match[1]) {
+        country = match[1].trim();
+        break;
+      }
+    }
+
+    // Extraire la langue
+    for (const pattern of languagePatterns) {
+      const match = contactText.match(pattern);
+      if (match && match[1]) {
+        language = match[1].trim();
+        break;
+      }
+    }
+
+    // Fallback - analyse ligne par ligne si les patterns spécifiques n'ont pas fonctionné
+    if (!name || !email || !phone) {
+      const lines = contactText.split('\n').filter(line => line.trim().length > 0);
+      
       lines.forEach(line => {
         const trimmedLine = line.trim();
         
-        if (trimmedLine.includes('@')) {
+        if (!email && trimmedLine.includes('@')) {
           email = trimmedLine;
         } 
-        else if (/[\d\+]/.test(trimmedLine) && (trimmedLine.includes('+') || trimmedLine.includes(' '))) {
+        else if (!phone && /[\d\+]/.test(trimmedLine) && (trimmedLine.includes('+') || trimmedLine.includes(' '))) {
           phone = trimmedLine;
-          
-          const codeMatch = phone.match(/^\+\d+/);
-          if (codeMatch && codeMatch[0]) {
-            setPhoneCountryCode(codeMatch[0]);
-          }
         } 
-        else if (!name) {
+        else if (!name && !trimmedLine.toLowerCase().includes('phone') && 
+                !trimmedLine.toLowerCase().includes('mail') && 
+                !trimmedLine.toLowerCase().includes('pays') && 
+                !trimmedLine.toLowerCase().includes('langue')) {
           name = trimmedLine;
         }
       });
     }
 
+    // Traitement du numéro de téléphone pour extraire le code pays
+    let countryCodeFound = false;
+    if (phone) {
+      const codeMatch = phone.match(/\+(\d+)/);
+      if (codeMatch && codeMatch[1]) {
+        const code = codeMatch[1];
+        // Mapper les codes pays aux pays
+        const countryCodeMap: Record<string, string> = {
+          '1': 'United States',
+          '33': 'France',
+          '34': 'Spain',
+          '44': 'United Kingdom',
+          '49': 'Germany',
+          '39': 'Italy',
+          '41': 'Switzerland',
+          '32': 'Belgium',
+          '31': 'Netherlands',
+          '7': 'Russia',
+          '971': 'United Arab Emirates',
+          '966': 'Saudi Arabia',
+          '965': 'Kuwait',
+          '974': 'Qatar',
+          '973': 'Bahrain',
+          '230': 'Mauritius',
+          '212': 'Morocco',
+          '216': 'Tunisia',
+          '213': 'Algeria',
+          '20': 'Egypt'
+        };
+        
+        if (code in countryCodeMap) {
+          if (!country) {
+            country = countryCodeMap[code];
+          }
+          setPhoneCountryCode('+' + code);
+          countryCodeFound = true;
+        }
+      }
+    }
+
+    console.log("Informations extraites:", { name, email, phone, country, language, countryCode: phoneCountryCode });
+
+    // Mise à jour des champs avec des événements synthétiques
     if (name) {
       const nameEvent = {
         target: {
@@ -294,13 +397,48 @@ const GeneralInfoSection = ({
     }
 
     if (phone) {
-      const phoneEvent = {
+      // Si on a trouvé un code pays dans le numéro, on utilise le format avec code pays
+      if (countryCodeFound) {
+        // Formater le téléphone correctement
+        const phoneEvent = {
+          target: {
+            name: 'phone',
+            value: phone
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        handleInputChange(phoneEvent);
+      } else {
+        // Sinon, on ajoute le code pays actuel
+        const phoneEvent = {
+          target: {
+            name: 'phone',
+            value: `${phoneCountryCode} ${phone.replace(/^\+\d+\s*/, '')}`
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        handleInputChange(phoneEvent);
+      }
+    }
+
+    if (country) {
+      const countryEvent = {
         target: {
-          name: 'phone',
-          value: phone
+          name: 'taxResidence',
+          value: country
         }
       } as React.ChangeEvent<HTMLInputElement>;
-      handleInputChange(phoneEvent);
+      handleInputChange(countryEvent);
+      
+      // Dériver automatiquement la nationalité à partir du pays
+      const nationality = deriveNationalityFromCountry(country);
+      if (nationality) {
+        const nationalityEvent = {
+          target: {
+            name: 'nationality',
+            value: nationality
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        handleInputChange(nationalityEvent);
+      }
     }
 
     setShowContactPaste(false);
@@ -358,18 +496,18 @@ const GeneralInfoSection = ({
             <p className="text-xs text-muted-foreground font-futura">
               Collez les informations de contact (nom, téléphone, email) puis cliquez sur Extraire :
             </p>
-            <textarea 
+            <Textarea 
               className="w-full p-2 text-sm border rounded-md h-24 font-futura" 
               placeholder="Exemple:
-Fatiha Mohamed
-+34 644 15 78 61
-fmohamed01@cuatrocaminos.net
-
-ou format:
-Name : Elite Property Find
-e-mail : info@elitepropertyfind.com
-Phone : 661592992
-Language : Spanish"
+À propos de David
+Téléphone
+(+1) 4185093022
+E-mail
+laura.luna@yahoo.ca
+Langue
+français
+Pays
+France"
               value={contactText}
               onChange={(e) => setContactText(e.target.value)}
             />
