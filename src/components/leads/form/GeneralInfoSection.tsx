@@ -30,7 +30,9 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   sources
 }) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-y-auto pb-6">
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Information Générale</h2>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
           label="Titre"

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -12,14 +11,12 @@ import { CheckCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { updateLead } from '@/services/leadService';
 
-// Import our new components
 import LeadDetailHeader from '@/components/leads/mobile/LeadDetailHeader';
 import LeadDetailTabs from '@/components/leads/mobile/LeadDetailTabs';
 import LeadDetailActionBar from '@/components/leads/mobile/LeadDetailActionBar';
 import { LoadingState, NotFoundState } from '@/components/leads/mobile/LeadDetailErrorStates';
 import { useLeadDetail } from '@/hooks/useLeadDetail';
 
-// Import mobile section components
 import StatusSection from '@/components/leads/form/mobile/StatusSection';
 import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSection';
 import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
@@ -87,20 +84,16 @@ const LeadDetailMobile = () => {
     if (!lead) return;
     
     try {
-      // Filter out the action to be deleted
       const updatedActionHistory = lead.actionHistory.filter(action => action.id !== actionId);
       
-      // Create updated lead object with the filtered actions
       const updatedLead = {
         ...lead,
         actionHistory: updatedActionHistory
       };
       
-      // Update lead in database
       const result = await updateLead(updatedLead);
       
       if (result) {
-        // Update local state
         setLead(result);
         
         toast({
@@ -124,7 +117,6 @@ const LeadDetailMobile = () => {
     setTimeout(() => setShowSaveIndicator(false), 2000);
   };
 
-  // Call functionality
   const startCall = (type: 'phone' | 'whatsapp' = 'phone') => {
     if (!lead || !lead.phone) {
       toast({
@@ -139,14 +131,12 @@ const LeadDetailMobile = () => {
     setIsCallDialogOpen(true);
     setCallStatus('calling');
     
-    // Start timer to track call duration
     const timer = setInterval(() => {
       setCallDuration(prev => prev + 1);
     }, 1000);
     
     setCallTimer(timer);
     
-    // Initiate the actual call based on type
     if (type === 'phone') {
       window.location.href = `tel:${lead.phone}`;
     } else {
@@ -162,7 +152,6 @@ const LeadDetailMobile = () => {
     
     setCallStatus(status);
     
-    // Log the call in the lead's action history
     if (status === 'completed' && callDuration > 0 && lead) {
       const callAction = {
         actionType: 'Call' as any,
@@ -254,7 +243,7 @@ const LeadDetailMobile = () => {
         </div>
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto">
+      <ScrollArea className="flex-1 overflow-y-auto pt-4">
         <Tabs value={activeTab} className="w-full">
           <div className="px-4 pb-32">
             <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out]">

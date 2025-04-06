@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadSource, Country } from '@/types/lead';
 import FormInput from '../FormInput';
 
@@ -51,13 +51,45 @@ const MobileGeneralInfoSection: React.FC<MobileGeneralInfoSectionProps> = ({
   countries = [],
   sources = DEFAULT_SOURCES
 }) => {
+  const [headerHeight, setHeaderHeight] = useState<number>(0);
+  const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
+  
+  useEffect(() => {
+    const measureHeader = () => {
+      const headerElement = document.querySelector('.bg-loro-sand');
+      if (headerElement) {
+        const height = headerElement.getBoundingClientRect().height;
+        setHeaderHeight(height);
+        setIsHeaderMeasured(true);
+      }
+    };
+    
+    measureHeader();
+    window.addEventListener('resize', measureHeader);
+    const timeoutId = setTimeout(measureHeader, 300);
+    
+    return () => {
+      window.removeEventListener('resize', measureHeader);
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     onDataChange({ [name]: value });
   };
 
+  const dynamicTopMargin = isHeaderMeasured 
+    ? `${Math.max(headerHeight + 8, 32)}px` 
+    : 'calc(32px + 4rem)';
+
   return (
-    <div className="space-y-3">
+    <div 
+      className="space-y-3 pt-4" 
+      style={{ marginTop: dynamicTopMargin }}
+    >
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Information Générale</h2>
+      
       <FormInput
         label="Titre"
         name="salutation"
