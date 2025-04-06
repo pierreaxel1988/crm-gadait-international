@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
@@ -5,7 +6,6 @@ import FormInput from './FormInput';
 import { User, Mail, Phone, Flag, BarChart, MapPin, Clipboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { COUNTRIES } from '@/utils/countries';
 import { deriveNationalityFromCountry, countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Textarea } from '@/components/ui/textarea';
@@ -202,7 +202,7 @@ const GeneralInfoSection = ({
     '+998': 'Uzbekistan'
   };
 
-  const getCountryFlagEmoji = (countryCode: string): string => {
+  const getPhoneCountryFlag = (countryCode: string): string => {
     const codeToCountry: Record<string, string> = {
       '+1': 'US',
       '+7': 'RU',
@@ -759,7 +759,7 @@ France"
         )}
 
         <FormInput
-          label="Civilité"
+          label="Titre"
           name="salutation"
           type="select"
           value={formData.salutation || ''}
@@ -802,7 +802,7 @@ France"
           icon={Phone}
           placeholder="Numéro"
           countryCode={phoneCountryCode}
-          countryCodeDisplay={getCountryFlagEmoji(phoneCountryCode)}
+          countryCodeDisplay={getPhoneCountryFlag(phoneCountryCode)}
           onCountryCodeChange={handlePhoneCodeChange}
           searchable={true}
           className="mb-3"
@@ -816,9 +816,9 @@ France"
             value={formData.nationality || ''}
             onChange={handleInputChange}
             icon={Flag}
-            options={COUNTRIES.map(country => ({ 
+            options={countries.map(country => ({ 
               value: country, 
-              label: `${getCountryFlag(country)} ${country}` 
+              label: `${countryToFlag(country)} ${country}` 
             }))}
             placeholder="Sélectionner..."
             className="mb-0"
@@ -834,9 +834,9 @@ France"
             value={formData.taxResidence || ''}
             onChange={handleInputChange}
             icon={MapPin}
-            options={COUNTRIES.map(country => ({ 
+            options={countries.map(country => ({ 
               value: country, 
-              label: `${getCountryFlag(country)} ${country}` 
+              label: `${countryToFlag(country)} ${country}` 
             }))}
             placeholder="Sélectionner..."
             className="mb-0"

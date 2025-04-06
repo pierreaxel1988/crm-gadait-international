@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,6 +30,7 @@ interface FormInputProps {
   searchable?: boolean;
   error?: string;
   info?: string;
+  renderCustomField?: () => React.ReactNode;
 }
 
 const countryCodes = [
@@ -205,7 +207,8 @@ const FormInput: React.FC<FormInputProps> = ({
   onCountryCodeChange,
   searchable = false,
   error,
-  info
+  info,
+  renderCustomField
 }) => {
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -249,7 +252,6 @@ const FormInput: React.FC<FormInputProps> = ({
         onChange={onChange}
         onBlur={onBlur}
         disabled={disabled}
-        readOnly={readOnly}
         className={cn(
           "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
           Icon && "pl-10",
@@ -545,7 +547,9 @@ const FormInput: React.FC<FormInputProps> = ({
           </div>
         )}
         
-        {type === 'textarea' && (
+        {renderCustomField ? (
+          renderCustomField()
+        ) : type === 'textarea' ? (
           <Textarea
             id={name}
             name={name}
@@ -563,13 +567,11 @@ const FormInput: React.FC<FormInputProps> = ({
             )}
             required={required}
           />
-        )}
-        
-        {type === 'tel-with-code' && renderPhoneWithCodeInput()}
-        
-        {type === 'select' && renderSelectInput()}
-        
-        {type !== 'textarea' && type !== 'tel-with-code' && type !== 'select' && (
+        ) : type === 'tel-with-code' ? (
+          renderPhoneWithCodeInput()
+        ) : type === 'select' ? (
+          renderSelectInput()
+        ) : (
           <Input
             id={name}
             type={type}
