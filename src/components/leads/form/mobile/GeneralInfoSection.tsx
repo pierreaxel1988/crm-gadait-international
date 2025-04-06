@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadSource } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -6,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { COUNTRIES } from '@/utils/countries';
 import { deriveNationalityFromCountry, countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { countryToFlag } from '@/utils/countryUtils';
-import { Search } from 'lucide-react';
+import { countryToFlag, phoneCodeToFlag } from '@/utils/countryUtils';
+import { Search, ChevronDown, X } from 'lucide-react';
 
 const LANGUAGE_OPTIONS = [
   { value: "Français", label: "Français" },
@@ -29,6 +30,21 @@ const LEAD_SOURCES: LeadSource[] = [
   'James Edition', 'Annonce', 'Email', 'Téléphone', 'Autre', 'Recommendation'
 ];
 
+// Common country codes for phone numbers
+const COMMON_COUNTRY_CODES = [
+  { code: '+33', country: 'France', flag: '🇫🇷' },
+  { code: '+44', country: 'United Kingdom', flag: '🇬🇧' },
+  { code: '+1', country: 'United States', flag: '🇺🇸' },
+  { code: '+34', country: 'Spain', flag: '🇪🇸' },
+  { code: '+39', country: 'Italy', flag: '🇮🇹' },
+  { code: '+41', country: 'Switzerland', flag: '🇨🇭' },
+  { code: '+49', country: 'Germany', flag: '🇩🇪' },
+  { code: '+32', country: 'Belgium', flag: '🇧🇪' },
+  { code: '+31', country: 'Netherlands', flag: '🇳🇱' },
+  { code: '+351', country: 'Portugal', flag: '🇵🇹' },
+  { code: '+971', country: 'United Arab Emirates', flag: '🇦🇪' }
+];
+
 interface GeneralInfoSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
@@ -41,6 +57,14 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isCountryCodeOpen, setIsCountryCodeOpen] = useState(false);
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [isNationalitySearchOpen, setIsNationalitySearchOpen] = useState(false);
+  
+  // Refs for handling outside clicks
+  const countryCodeRef = React.useRef<HTMLDivElement>(null);
+  const countryDropdownRef = React.useRef<HTMLDivElement>(null);
+  const nationalitySearchRef = React.useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const measureHeader = () => {
@@ -61,6 +85,30 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     return () => {
       window.removeEventListener('resize', measureHeader);
       clearTimeout(timeoutId);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Close country code dropdown if clicked outside
+      if (countryCodeRef.current && !countryCodeRef.current.contains(event.target as Node)) {
+        setIsCountryCodeOpen(false);
+      }
+      
+      // Close country dropdown if clicked outside
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
+        setIsCountryDropdownOpen(false);
+      }
+      
+      // Close nationality search if clicked outside
+      if (nationalitySearchRef.current && !nationalitySearchRef.current.contains(event.target as Node)) {
+        setIsNationalitySearchOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -85,27 +133,10 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     handleInputChange('phone', e.target.value);
   };
 
-  const handleCountryCodeChange = (code: string) => {
+  const handleCountryCodeChange = (code: string, flag: string) => {
     handleInputChange('phoneCountryCode', code);
-    
-    const codeToCountry: Record<string, string> = {
-      '+1': '🇺🇸', '+33': '🇫🇷', '+44': '🇬🇧', '+34': '🇪🇸', '+39': '🇮🇹',
-      '+41': '🇨🇭', '+49': '🇩🇪', '+32': '🇧🇪', '+31': '🇳🇱', '+351': '🇵🇹',
-      '+30': '🇬🇷', '+46': '🇸🇪', '+47': '🇳🇴', '+45': '🇩🇰', '+358': '🇫🇮',
-      '+420': '🇨🇿', '+48': '🇵🇱', '+36': '🇭🇺', '+43': '🇦🇹', '+353': '🇮🇪',
-      '+352': '🇱🇺', '+377': '🇲🇨', '+7': '🇷🇺', '+380': '🇺🇦', '+40': '🇷🇴',
-      '+359': '🇧🇬', '+385': '🇭🇷', '+386': '🇸🇮', '+381': '🇷🇸', '+212': '🇲🇦',
-      '+213': '🇩🇿', '+216': '🇹🇳', '+20': '🇪🇬', '+27': '🇿🇦', '+234': '🇳🇬',
-      '+81': '🇯🇵', '+86': '🇨🇳', '+91': '🇮🇳', '+65': '🇸🇬', '+82': '🇰🇷',
-      '+971': '🇦🇪', '+966': '🇸🇦', '+974': '🇶🇦', '+961': '🇱🇧', '+972': '🇮🇱',
-      '+90': '🇹🇷', '+852': '🇭🇰', '+55': '🇧🇷', '+52': '🇲🇽', '+54': '🇦🇷',
-      '+56': '🇨🇱', '+57': '🇨🇴', '+58': '🇻🇪', '+51': '🇵🇪', '+61': '🇦🇺',
-      '+64': '🇳🇿', '+66': '🇹🇭', '+84': '🇻🇳', '+60': '🇲🇾', '+62': '🇮🇩',
-      '+63': '🇵🇭'
-    };
-    
-    const flagEmoji = codeToCountry[code] || '🌍';
-    handleInputChange('phoneCountryCodeDisplay', flagEmoji);
+    handleInputChange('phoneCountryCodeDisplay', flag);
+    setIsCountryCodeOpen(false);
   };
 
   const dynamicTopMargin = isHeaderMeasured 
@@ -119,6 +150,12 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
                countryMatchesSearch(nationalityName, searchQuery);
       })
     : COUNTRIES;
+
+  const handleNationalitySelect = (nationality: string) => {
+    handleInputChange('nationality', nationality);
+    setIsNationalitySearchOpen(false);
+    setSearchQuery('');
+  };
 
   return (
     <div 
@@ -170,31 +207,38 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           <div className="space-y-2">
             <Label htmlFor="phone" className="text-sm">Téléphone</Label>
             <div className="flex items-center">
-              <div className="relative">
-                <Select 
-                  value={lead.phoneCountryCode || '+33'} 
-                  onValueChange={handleCountryCodeChange}
+              <div className="relative" ref={countryCodeRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsCountryCodeOpen(!isCountryCodeOpen)}
+                  className="flex items-center h-10 px-3 border border-input border-r-0 rounded-l-md bg-background focus:outline-none hover:bg-accent transition-colors"
                 >
-                  <SelectTrigger className="w-[70px] font-futura border-r-0 rounded-r-none">
-                    <SelectValue>
-                      {lead.phoneCountryCodeDisplay || '🇫🇷'} {lead.phoneCountryCode || '+33'}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="+33" className="font-futura">🇫🇷 +33</SelectItem>
-                    <SelectItem value="+44" className="font-futura">🇬🇧 +44</SelectItem>
-                    <SelectItem value="+1" className="font-futura">🇺🇸 +1</SelectItem>
-                    <SelectItem value="+34" className="font-futura">🇪🇸 +34</SelectItem>
-                    <SelectItem value="+39" className="font-futura">🇮🇹 +39</SelectItem>
-                    <SelectItem value="+41" className="font-futura">🇨🇭 +41</SelectItem>
-                    <SelectItem value="+351" className="font-futura">🇵🇹 +351</SelectItem>
-                    <SelectItem value="+49" className="font-futura">🇩🇪 +49</SelectItem>
-                    <SelectItem value="+32" className="font-futura">🇧🇪 +32</SelectItem>
-                    <SelectItem value="+31" className="font-futura">🇳🇱 +31</SelectItem>
-                    <SelectItem value="+971" className="font-futura">🇦🇪 +971</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <span className="text-lg mr-1">{lead.phoneCountryCodeDisplay || '🇫🇷'}</span>
+                  <span className="text-xs text-muted-foreground">{lead.phoneCountryCode || '+33'}</span>
+                  <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${isCountryCodeOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {isCountryCodeOpen && (
+                  <div className="absolute z-50 mt-1 w-64 max-h-60 overflow-auto bg-background border rounded-md shadow-lg">
+                    <div className="p-1">
+                      {COMMON_COUNTRY_CODES.map(({ code, country, flag }) => (
+                        <button
+                          key={code}
+                          className="flex items-center justify-between w-full px-4 py-2 text-left hover:bg-accent rounded-sm text-sm"
+                          onClick={() => handleCountryCodeChange(code, flag)}
+                        >
+                          <div className="flex items-center">
+                            <span className="text-lg mr-2">{flag}</span>
+                            <span>{country}</span>
+                          </div>
+                          <span className="text-muted-foreground">{code}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
+              
               <Input 
                 id="phone" 
                 type="tel" 
@@ -206,72 +250,148 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             </div>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-2" ref={countryDropdownRef}>
             <Label htmlFor="taxResidence" className="text-sm">Pays de résidence</Label>
-            <Select 
-              value={lead.taxResidence || ''} 
-              onValueChange={handleTaxResidenceChange}
+            <div 
+              className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer"
+              onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
             >
-              <SelectTrigger id="taxResidence" className="w-full font-futura">
-                <SelectValue placeholder="Sélectionner un pays" />
-              </SelectTrigger>
-              <SelectContent searchable>
-                {COUNTRIES.map(country => (
-                  <SelectItem key={country} value={country} className="font-futura">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{countryToFlag(country)}</span>
-                      <span>{country}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
-            <div className="relative">
-              <div className="flex items-center border rounded-md mb-1">
-                <Search className="h-4 w-4 text-gray-400 ml-2" />
-                <input 
-                  type="text" 
-                  value={searchQuery} 
-                  onChange={(e) => setSearchQuery(e.target.value)} 
-                  placeholder="Rechercher une nationalité..." 
-                  className="w-full p-2 border-0 rounded-md font-futura focus:outline-none focus:ring-0"
-                />
-                {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery('')}
-                    className="p-2 text-gray-400 hover:text-gray-600"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
+              {lead.taxResidence ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{countryToFlag(lead.taxResidence)}</span>
+                  <span className="font-futura">{lead.taxResidence}</span>
+                </div>
+              ) : (
+                <span className="text-muted-foreground font-futura">Sélectionner un pays</span>
+              )}
+              <ChevronDown className={`h-4 w-4 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
             </div>
-            <div className="max-h-60 overflow-y-auto border rounded-md">
-              {filteredCountries.length > 0 ? (
-                filteredCountries.map(country => {
-                  const nationality = deriveNationalityFromCountry(country) || country;
-                  return (
-                    <div 
-                      key={`${country}-${nationality}`} 
-                      className={`p-2 cursor-pointer hover:bg-gray-100 flex items-center gap-2 ${lead.nationality === nationality ? 'bg-gray-100' : ''}`}
+            
+            {isCountryDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-full max-h-64 overflow-auto bg-background border rounded-md shadow-lg">
+                <div className="sticky top-0 p-2 bg-background border-b">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Rechercher un pays..."
+                      className="pl-8 h-8"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    {searchQuery && (
+                      <button
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSearchQuery('');
+                        }}
+                      >
+                        <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="p-1">
+                  {filteredCountries.map(country => (
+                    <div
+                      key={country}
+                      className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${lead.taxResidence === country ? 'bg-accent/50' : ''}`}
                       onClick={() => {
-                        handleInputChange('nationality', nationality);
+                        handleTaxResidenceChange(country);
+                        setIsCountryDropdownOpen(false);
                         setSearchQuery('');
                       }}
                     >
-                      <span className="text-lg">{countryToFlag(country)}</span>
-                      <span>{nationality}</span>
+                      <span className="text-lg mr-2">{countryToFlag(country)}</span>
+                      <span className="font-futura">{country}</span>
                     </div>
-                  );
-                })
+                  ))}
+                  
+                  {filteredCountries.length === 0 && (
+                    <div className="px-4 py-2 text-sm text-muted-foreground">
+                      Aucun résultat
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="space-y-2" ref={nationalitySearchRef}>
+            <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
+            <div 
+              className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer"
+              onClick={() => setIsNationalitySearchOpen(!isNationalitySearchOpen)}
+            >
+              {lead.nationality ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{countryToFlag(lead.nationality)}</span>
+                  <span className="font-futura">{lead.nationality}</span>
+                </div>
               ) : (
-                <div className="p-2 text-gray-500">Aucun résultat trouvé</div>
+                <div className="flex items-center gap-2">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground font-futura">Rechercher une nationalité...</span>
+                </div>
               )}
+              <ChevronDown className={`h-4 w-4 transition-transform ${isNationalitySearchOpen ? 'rotate-180' : ''}`} />
             </div>
+            
+            {isNationalitySearchOpen && (
+              <div className="absolute z-50 mt-1 w-full max-h-64 overflow-auto bg-background border rounded-md shadow-lg">
+                <div className="sticky top-0 p-2 bg-background border-b">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Rechercher une nationalité..."
+                      className="pl-8 h-8"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      autoFocus
+                    />
+                    {searchQuery && (
+                      <button
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSearchQuery('');
+                        }}
+                      >
+                        <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="p-1">
+                  {filteredCountries.map(country => {
+                    const nationality = deriveNationalityFromCountry(country) || country;
+                    // Use a unique key combining country and nationality
+                    return (
+                      <div
+                        key={`${country}-${nationality}`}
+                        className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${lead.nationality === nationality ? 'bg-accent/50' : ''}`}
+                        onClick={() => handleNationalitySelect(nationality)}
+                      >
+                        <span className="text-lg mr-2">{countryToFlag(country)}</span>
+                        <span className="font-futura">{nationality}</span>
+                      </div>
+                    );
+                  })}
+                  
+                  {filteredCountries.length === 0 && (
+                    <div className="px-4 py-2 text-sm text-muted-foreground">
+                      Aucun résultat
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="space-y-2">
