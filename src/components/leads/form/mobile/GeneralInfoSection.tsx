@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadSource } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -7,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { COUNTRIES } from '@/utils/countries';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { countryToFlag } from '@/utils/countryUtils';
 
 const LANGUAGE_OPTIONS = [
   { value: "Français", label: "Français" },
@@ -71,7 +71,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   const handleTaxResidenceChange = (value: string) => {
     handleInputChange('taxResidence', value);
     
-    // If nationality is empty, try to derive it from tax residence
     if (!lead.nationality) {
       const nationality = deriveNationalityFromCountry(value);
       if (nationality) {
@@ -87,7 +86,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   const handleCountryCodeChange = (code: string) => {
     handleInputChange('phoneCountryCode', code);
     
-    // Get flag emoji for the country code
     const codeToCountry: Record<string, string> = {
       '+1': '🇺🇸', '+33': '🇫🇷', '+44': '🇬🇧', '+34': '🇪🇸', '+39': '🇮🇹',
       '+41': '🇨🇭', '+49': '🇩🇪', '+32': '🇧🇪', '+31': '🇳🇱', '+351': '🇵🇹',
@@ -111,6 +109,20 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   const dynamicTopMargin = isHeaderMeasured 
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
+
+  const nationalityOptions = COUNTRIES.map(country => {
+    const nationality = deriveNationalityFromCountry(country) || country;
+    return {
+      value: nationality,
+      label: (
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{countryToFlag(country)}</span>
+          <span>{nationality}</span>
+        </div>
+      ),
+      country: country
+    };
+  });
 
   return (
     <div 
@@ -219,13 +231,37 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           
           <div className="space-y-2">
             <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
-            <Input 
-              id="nationality" 
+            <Select 
               value={lead.nationality || ''} 
-              onChange={(e) => handleInputChange('nationality', e.target.value)} 
-              placeholder="Nationalité" 
-              className="w-full font-futura"
-            />
+              onValueChange={(value) => handleInputChange('nationality', value)}
+            >
+              <SelectTrigger id="nationality" className="w-full font-futura">
+                <SelectValue placeholder="Sélectionner une nationalité">
+                  {lead.nationality && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">
+                        {countryToFlag(nationalityOptions.find(opt => opt.value === lead.nationality)?.country || lead.nationality)}
+                      </span>
+                      <span>{lead.nationality}</span>
+                    </div>
+                  )}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent searchable>
+                {nationalityOptions.map(option => (
+                  <SelectItem 
+                    key={option.value} 
+                    value={option.value} 
+                    className="font-futura"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{countryToFlag(option.country)}</span>
+                      <span>{option.value}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="space-y-2">
