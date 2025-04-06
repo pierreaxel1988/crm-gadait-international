@@ -82,6 +82,8 @@ export interface LeadDetailed {
   salutation?: 'M.' | 'Mme';  // New field for "Civilité"
   email?: string;
   phone?: string;
+  phoneCountryCode?: string;
+  phoneCountryCodeDisplay?: string;
   location?: string;
   status: LeadStatus;
   tags?: LeadTag[];
