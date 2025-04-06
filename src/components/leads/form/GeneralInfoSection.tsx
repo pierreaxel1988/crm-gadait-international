@@ -2,6 +2,7 @@
 import React from 'react';
 import { LeadDetailed, LeadSource, Country } from '@/types/lead';
 import FormInput from './FormInput';
+import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
@@ -29,6 +30,28 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   countries,
   sources
 }) => {
+  // Handle tax residence country change
+  const handleTaxResidenceChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    handleInputChange(e);
+    
+    // If nationality is empty, try to derive it from tax residence
+    if (!formData.nationality) {
+      const selectedCountry = e.target.value;
+      const nationality = deriveNationalityFromCountry(selectedCountry);
+      
+      if (nationality) {
+        const nationalityEvent = {
+          target: {
+            name: 'nationality',
+            value: nationality
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        
+        handleInputChange(nationalityEvent);
+      }
+    }
+  };
+
   return (
     <div className="space-y-4 overflow-y-auto pb-6">
       <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Information Générale</h2>
@@ -118,13 +141,25 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
+          label="Pays de résidence"
+          name="taxResidence"
+          type="select"
+          value={formData.taxResidence || ''}
+          onChange={handleTaxResidenceChange}
+          options={countries.map(country => ({ value: country, label: country }))}
+          placeholder="Sélectionner un pays"
+        />
+        
+        <FormInput
           label="Nationalité"
           name="nationality"
           value={formData.nationality || ''}
           onChange={handleInputChange}
           placeholder="Nationalité"
         />
-        
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
           label="Langue préférée"
           name="preferredLanguage"
@@ -134,15 +169,15 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           options={LANGUAGE_OPTIONS}
           placeholder="Sélectionner une langue"
         />
+        
+        <FormInput
+          label="Lien de l'annonce vu"
+          name="url"
+          value={formData.url || ''}
+          onChange={handleInputChange}
+          placeholder="URL de l'annonce immobilière"
+        />
       </div>
-
-      <FormInput
-        label="Lien de l'annonce vu"
-        name="url"
-        value={formData.url || ''}
-        onChange={handleInputChange}
-        placeholder="URL de l'annonce immobilière"
-      />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
