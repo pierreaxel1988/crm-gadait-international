@@ -79,6 +79,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
     financingMethod: lead?.financingMethod || undefined,
     propertyUse: lead?.propertyUse || undefined,
     nationality: lead?.nationality || '',
+    preferredLanguage: lead?.preferredLanguage || '',
     taskType: lead?.taskType || undefined,
     notes: lead?.notes || '',
     url: lead?.url || '',

@@ -32,6 +32,13 @@ export const useEmailDataExtraction = () => {
         propertyDetails = extractLefigaroPropertyDetails(emailContent);
       }
       
+      // Try to extract preferred language from email content
+      const languagePattern = /langue\s*:?\s*([^\r\n]+)/i;
+      const languageMatch = emailContent.match(languagePattern);
+      if (languageMatch && languageMatch[1]) {
+        propertyDetails.preferredLanguage = languageMatch[1].trim();
+      }
+      
       // Now proceed with the AI extraction, adding the property details we've extracted
       const { data, error } = await supabase.functions.invoke('chat-gadait', {
         body: { 
@@ -65,6 +72,11 @@ export const useEmailDataExtraction = () => {
         // Add nationality based on country if available
         if (jsonData.country && !jsonData.nationality) {
           jsonData.nationality = deriveNationalityFromCountry(jsonData.country);
+        }
+        
+        // Normalize language information
+        if (jsonData.language || jsonData.langue) {
+          jsonData.preferredLanguage = jsonData.language || jsonData.langue;
         }
         
         setExtractedData(jsonData);

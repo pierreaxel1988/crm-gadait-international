@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,6 +29,7 @@ interface FormInputProps {
   searchable?: boolean;
   error?: string;
   info?: string;
+  helpText?: string;
   renderCustomField?: () => React.ReactNode;
 }
 
@@ -208,6 +208,7 @@ const FormInput: React.FC<FormInputProps> = ({
   searchable = false,
   error,
   info,
+  helpText,
   renderCustomField
 }) => {
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
@@ -378,9 +379,7 @@ const FormInput: React.FC<FormInputProps> = ({
     );
   };
 
-  // Fonction pour obtenir le drapeau d'un pays à partir du code téléphonique
   const getPhoneCountryFlag = (countryCode: string): JSX.Element => {
-    // Mapping entre codes et deux-lettres de pays
     const codeToCountry: Record<string, string> = {
       '+1': 'US',
       '+7': 'RU',
@@ -522,7 +521,6 @@ const FormInput: React.FC<FormInputProps> = ({
     );
   };
 
-  
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center justify-between">
@@ -594,6 +592,10 @@ const FormInput: React.FC<FormInputProps> = ({
           />
         )}
       </div>
+      
+      {helpText && (
+        <p className="text-xs text-muted-foreground">{helpText}</p>
+      )}
       
       {error && (
         <p className="text-sm text-red-500">{error}</p>

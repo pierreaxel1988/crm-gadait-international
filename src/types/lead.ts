@@ -103,9 +103,10 @@ export interface LeadDetailed {
   financingMethod?: string;
   propertyUse?: string;
   nationality?: string;
+  preferredLanguage?: string; // New field for preferred language
   taskType?: TaskType;
   notes?: string;
-  internal_notes?: string; // Add the internal_notes property here
+  internal_notes?: string; 
   nextFollowUpDate?: string;
   country?: Country;
   url?: string;

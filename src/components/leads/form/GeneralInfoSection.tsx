@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, Country, LeadSource } from '@/types/lead';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
-import { User, Mail, Phone, Flag, BarChart, MapPin, Clipboard } from 'lucide-react';
+import { User, Mail, Phone, Flag, BarChart, MapPin, Clipboard, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { deriveNationalityFromCountry, countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
@@ -16,6 +15,20 @@ interface GeneralInfoSectionProps {
   countries: Country[];
   sources: LeadSource[];
 }
+
+const LANGUAGES = [
+  { value: 'Français', label: '🇫🇷 Français' },
+  { value: 'English', label: '🇬🇧 English' },
+  { value: 'Español', label: '🇪🇸 Español' },
+  { value: 'Deutsch', label: '🇩🇪 Deutsch' },
+  { value: 'Italiano', label: '🇮🇹 Italiano' },
+  { value: 'Nederlands', label: '🇳🇱 Nederlands' },
+  { value: 'Русский', label: '🇷🇺 Русский' },
+  { value: 'العربية', label: '🇸🇦 العربية' },
+  { value: '中文', label: '🇨🇳 中文' },
+  { value: '日本語', label: '🇯🇵 日本語' },
+  { value: '한국어', label: '🇰🇷 한국어' },
+];
 
 const GeneralInfoSection = ({ 
   formData, 
@@ -708,6 +721,40 @@ const GeneralInfoSection = ({
     handleInputChange(syntheticEvent);
   };
 
+  const deriveLanguageFromNationality = (nationality: string): string | undefined => {
+    const languageMap: Record<string, string> = {
+      'France': 'Français',
+      'United Kingdom': 'English',
+      'United States': 'English',
+      'Spain': 'Español',
+      'Germany': 'Deutsch',
+      'Italy': 'Italiano',
+      'Netherlands': 'Nederlands',
+      'Russia': 'Русский',
+      'Saudi Arabia': 'العربية',
+      'China': '中文',
+      'Japan': '日本語',
+      'South Korea': '한국어',
+    };
+    
+    return languageMap[nationality];
+  };
+
+  useEffect(() => {
+    if (formData.nationality && !formData.preferredLanguage) {
+      const derivedLanguage = deriveLanguageFromNationality(formData.nationality);
+      if (derivedLanguage) {
+        const syntheticEvent = {
+          target: {
+            name: 'preferredLanguage',
+            value: derivedLanguage
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        handleInputChange(syntheticEvent);
+      }
+    }
+  }, [formData.nationality]);
+
   return (
     <FormSection title="Informations Générales">
       <div className="space-y-5">
@@ -823,6 +870,22 @@ France"
             placeholder="Sélectionner..."
             className="mb-0"
             searchable={true}
+          />
+        </div>
+        
+        <div className="mb-3">
+          <FormInput
+            label="Langue de préférence"
+            name="preferredLanguage"
+            type="select"
+            value={formData.preferredLanguage || ''}
+            onChange={handleInputChange}
+            icon={Globe}
+            options={LANGUAGES}
+            placeholder="Sélectionner la langue préférée..."
+            className="mb-0"
+            searchable={true}
+            helpText="Langue dans laquelle le client préfère communiquer"
           />
         </div>
 

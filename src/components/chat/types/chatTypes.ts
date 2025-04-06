@@ -9,6 +9,7 @@ export interface Message {
 export interface ExtractedData {
   [key: string]: any;
   nationality?: string;
+  preferredLanguage?: string;
 }
 
 export interface TeamMember {
@@ -29,4 +30,5 @@ export interface PropertyDetails {
   description?: string;
   nationality?: string;
   propertyType?: string;
+  preferredLanguage?: string;
 }
