@@ -70,9 +70,49 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
         <FormInput
           label="Téléphone"
           name="phone"
+          type="tel-with-code"
           value={formData.phone || ''}
           onChange={handleInputChange}
           placeholder="Numéro de téléphone"
+          countryCode={formData.phoneCountryCode || '+33'}
+          countryCodeDisplay={formData.phoneCountryCodeDisplay || '🇫🇷'}
+          onCountryCodeChange={(code) => {
+            const e = {
+              target: {
+                name: 'phoneCountryCode',
+                value: code
+              }
+            } as React.ChangeEvent<HTMLInputElement>;
+            handleInputChange(e);
+            
+            // Get flag emoji for the country code
+            const codeToCountry: Record<string, string> = {
+              '+1': '🇺🇸', '+33': '🇫🇷', '+44': '🇬🇧', '+34': '🇪🇸', '+39': '🇮🇹',
+              '+41': '🇨🇭', '+49': '🇩🇪', '+32': '🇧🇪', '+31': '🇳🇱', '+351': '🇵🇹',
+              '+30': '🇬🇷', '+46': '🇸🇪', '+47': '🇳🇴', '+45': '🇩🇰', '+358': '🇫🇮',
+              '+420': '🇨🇿', '+48': '🇵🇱', '+36': '🇭🇺', '+43': '🇦🇹', '+353': '🇮🇪',
+              '+352': '🇱🇺', '+377': '🇲🇨', '+7': '🇷🇺', '+380': '🇺🇦', '+40': '🇷🇴',
+              '+359': '🇧🇬', '+385': '🇭🇷', '+386': '🇸🇮', '+381': '🇷🇸', '+212': '🇲🇦',
+              '+213': '🇩🇿', '+216': '🇹🇳', '+20': '🇪🇬', '+27': '🇿🇦', '+234': '🇳🇬',
+              '+81': '🇯🇵', '+86': '🇨🇳', '+91': '🇮🇳', '+65': '🇸🇬', '+82': '🇰🇷',
+              '+971': '🇦🇪', '+966': '🇸🇦', '+974': '🇶🇦', '+961': '🇱🇧', '+972': '🇮🇱',
+              '+90': '🇹🇷', '+852': '🇭🇰', '+55': '🇧🇷', '+52': '🇲🇽', '+54': '🇦🇷',
+              '+56': '🇨🇱', '+57': '🇨🇴', '+58': '🇻🇪', '+51': '🇵🇪', '+61': '🇦🇺',
+              '+64': '🇳🇿', '+66': '🇹🇭', '+84': '🇻🇳', '+60': '🇲🇾', '+62': '🇮🇩',
+              '+63': '🇵🇭'
+            };
+            
+            const flagEmoji = codeToCountry[code] || '🌍';
+            
+            const eFlag = {
+              target: {
+                name: 'phoneCountryCodeDisplay',
+                value: flagEmoji
+              }
+            } as React.ChangeEvent<HTMLInputElement>;
+            handleInputChange(eFlag);
+          }}
+          searchable
         />
       </div>
 
