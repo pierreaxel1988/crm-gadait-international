@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadSource } from '@/types/lead';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { COUNTRIES } from '@/utils/countries';
-import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
+import { deriveNationalityFromCountry, countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { countryToFlag } from '@/utils/countryUtils';
 import { Search } from 'lucide-react';
@@ -113,45 +112,13 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
 
-  const nationalityOptions = COUNTRIES.map(country => {
-    const nationality = deriveNationalityFromCountry(country) || country;
-    return {
-      value: nationality,
-      label: (
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{countryToFlag(country)}</span>
-          <span>{nationality}</span>
-        </div>
-      ),
-      country: country
-    };
-  });
-
-  // Filter countries based on search query
   const filteredCountries = searchQuery
     ? COUNTRIES.filter(country => {
         const nationalityName = deriveNationalityFromCountry(country) || country;
-        return (
-          country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          nationalityName.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        return countryMatchesSearch(country, searchQuery) || 
+               countryMatchesSearch(nationalityName, searchQuery);
       })
     : COUNTRIES;
-
-  // Map filtered countries to nationality options
-  const filteredNationalityOptions = filteredCountries.map(country => {
-    const nationality = deriveNationalityFromCountry(country) || country;
-    return {
-      value: nationality,
-      label: (
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{countryToFlag(country)}</span>
-          <span>{nationality}</span>
-        </div>
-      ),
-      country: country
-    };
-  });
 
   return (
     <div 
@@ -264,30 +231,43 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           <div className="space-y-2">
             <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
             <div className="relative">
-              <input 
-                type="text" 
-                value={searchQuery} 
-                onChange={(e) => setSearchQuery(e.target.value)} 
-                placeholder="Rechercher une nationalité..." 
-                className="w-full p-2 border rounded-md mb-1 font-futura"
-              />
-              <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
+              <div className="flex items-center border rounded-md mb-1">
+                <Search className="h-4 w-4 text-gray-400 ml-2" />
+                <input 
+                  type="text" 
+                  value={searchQuery} 
+                  onChange={(e) => setSearchQuery(e.target.value)} 
+                  placeholder="Rechercher une nationalité..." 
+                  className="w-full p-2 border-0 rounded-md font-futura focus:outline-none focus:ring-0"
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery('')}
+                    className="p-2 text-gray-400 hover:text-gray-600"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
             </div>
             <div className="max-h-60 overflow-y-auto border rounded-md">
-              {filteredNationalityOptions.length > 0 ? (
-                filteredNationalityOptions.map(option => (
-                  <div 
-                    key={option.value} 
-                    className={`p-2 cursor-pointer hover:bg-gray-100 flex items-center gap-2 ${lead.nationality === option.value ? 'bg-gray-100' : ''}`}
-                    onClick={() => {
-                      handleInputChange('nationality', option.value);
-                      setSearchQuery('');
-                    }}
-                  >
-                    <span className="text-lg">{countryToFlag(option.country)}</span>
-                    <span>{option.value}</span>
-                  </div>
-                ))
+              {filteredCountries.length > 0 ? (
+                filteredCountries.map(country => {
+                  const nationality = deriveNationalityFromCountry(country) || country;
+                  return (
+                    <div 
+                      key={`${country}-${nationality}`} 
+                      className={`p-2 cursor-pointer hover:bg-gray-100 flex items-center gap-2 ${lead.nationality === nationality ? 'bg-gray-100' : ''}`}
+                      onClick={() => {
+                        handleInputChange('nationality', nationality);
+                        setSearchQuery('');
+                      }}
+                    >
+                      <span className="text-lg">{countryToFlag(country)}</span>
+                      <span>{nationality}</span>
+                    </div>
+                  );
+                })
               ) : (
                 <div className="p-2 text-gray-500">Aucun résultat trouvé</div>
               )}
