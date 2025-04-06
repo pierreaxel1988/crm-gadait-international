@@ -5,11 +5,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import CustomTagInput from '@/components/leads/form/CustomTagInput';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
-import { COUNTRIES as ALL_COUNTRIES } from '@/utils/countries';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 import ActionButtons from '@/components/pipeline/filters/ActionButtons';
 
 const PROPERTY_TYPES: PropertyType[] = ['Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'];
@@ -231,83 +232,78 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     >
       <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Critères de Recherche</h2>
       
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="budget">
-          <AccordionTrigger className="py-3 text-sm font-futura">Budget</AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-4 py-2">
-              <div className="space-y-2">
-                <Label htmlFor="budgetMin" className="text-sm">Budget minimum</Label>
-                <Input id="budgetMin" value={lead.budgetMin || ''} onChange={e => handleInputChange('budgetMin', e.target.value)} placeholder="Budget minimum" className="w-full font-futura" type="text" />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="budget" className="text-sm">Budget maximum</Label>
-                <Input id="budget" value={lead.budget || ''} onChange={e => handleInputChange('budget', e.target.value)} placeholder="Budget maximum" className="w-full font-futura" type="text" />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="currency" className="text-sm">Devise</Label>
-                <Select value={lead.currency || 'EUR'} onValueChange={value => handleInputChange('currency', value)}>
-                  <SelectTrigger id="currency" className="w-full font-futura">
-                    <SelectValue placeholder="Sélectionner une devise" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CURRENCIES.map(currency => (
-                      <SelectItem key={currency} value={currency} className="font-futura">
-                        {currency}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+      <ScrollArea className="h-[calc(100vh-150px)]">
+        <Tabs defaultValue="budget" className="w-full">
+          <TabsList className="w-full grid grid-cols-4 mb-4">
+            <TabsTrigger value="budget" className="text-xs">Budget</TabsTrigger>
+            <TabsTrigger value="location" className="text-xs">Localisation</TabsTrigger>
+            <TabsTrigger value="property" className="text-xs">Bien</TabsTrigger>
+            <TabsTrigger value="purchase" className="text-xs">Achat</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="budget" className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="budgetMin" className="text-sm">Budget minimum</Label>
+              <Input id="budgetMin" value={lead.budgetMin || ''} onChange={e => handleInputChange('budgetMin', e.target.value)} placeholder="Budget minimum" className="w-full font-futura" type="text" />
             </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="location">
-          <AccordionTrigger className="py-3 text-sm font-futura">Localisation</AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-4 py-2">
-              <SmartSearchField 
-                label="Pays recherché" 
-                value={lead.country || ''} 
-                onChange={handleCountryChange} 
-                options={COUNTRIES} 
-                placeholder="Rechercher un pays" 
-              />
-              
-              <div className="space-y-2">
-                <Label htmlFor="desiredLocation" className="text-sm">Localisation souhaitée</Label>
-                <Select 
-                  value={lead.desiredLocation || 'none'} 
-                  onValueChange={value => handleInputChange('desiredLocation', value === 'none' ? undefined : value)} 
-                  disabled={!lead.country}
-                >
-                  <SelectTrigger id="desiredLocation" className="w-full font-futura">
-                    <SelectValue placeholder="Sélectionner une localisation" />
-                  </SelectTrigger>
-                  <SelectContent searchable={true}>
-                    <SelectItem value="none" className="font-futura">Aucune localisation</SelectItem>
-                    {getLocations().map(location => (
-                      <SelectItem key={location.value} value={location.value} className="font-futura">
-                        {location.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="budget" className="text-sm">Budget maximum</Label>
+              <Input id="budget" value={lead.budget || ''} onChange={e => handleInputChange('budget', e.target.value)} placeholder="Budget maximum" className="w-full font-futura" type="text" />
             </div>
-          </AccordionContent>
-        </AccordionItem>
+            
+            <div className="space-y-2">
+              <Label htmlFor="currency" className="text-sm">Devise</Label>
+              <Select value={lead.currency || 'EUR'} onValueChange={value => handleInputChange('currency', value)}>
+                <SelectTrigger id="currency" className="w-full font-futura">
+                  <SelectValue placeholder="Sélectionner une devise" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CURRENCIES.map(currency => (
+                    <SelectItem key={currency} value={currency} className="font-futura">
+                      {currency}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </TabsContent>
 
-        <AccordionItem value="property">
-          <AccordionTrigger className="py-3 text-sm font-futura">Caractéristiques du bien</AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-4 py-2">
-              <div className="space-y-2">
-                <Label className="text-sm">Type de bien</Label>
-                <MultiSelectButtons options={PROPERTY_TYPES} selectedValues={Array.isArray(lead.propertyTypes) ? lead.propertyTypes : []} onToggle={value => {
+          <TabsContent value="location" className="space-y-4 py-2">
+            <SmartSearchField 
+              label="Pays recherché" 
+              value={lead.country || ''} 
+              onChange={handleCountryChange} 
+              options={COUNTRIES} 
+              placeholder="Rechercher un pays" 
+            />
+            
+            <div className="space-y-2">
+              <Label htmlFor="desiredLocation" className="text-sm">Localisation souhaitée</Label>
+              <Select 
+                value={lead.desiredLocation || 'none'} 
+                onValueChange={value => handleInputChange('desiredLocation', value === 'none' ? undefined : value)} 
+                disabled={!lead.country}
+              >
+                <SelectTrigger id="desiredLocation" className="w-full font-futura">
+                  <SelectValue placeholder="Sélectionner une localisation" />
+                </SelectTrigger>
+                <SelectContent searchable={true}>
+                  <SelectItem value="none" className="font-futura">Aucune localisation</SelectItem>
+                  {getLocations().map(location => (
+                    <SelectItem key={location.value} value={location.value} className="font-futura">
+                      {location.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="property" className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label className="text-sm">Type de bien</Label>
+              <MultiSelectButtons options={PROPERTY_TYPES} selectedValues={Array.isArray(lead.propertyTypes) ? lead.propertyTypes : []} onToggle={value => {
                 const updatedTypes = Array.isArray(lead.propertyTypes) ? [...lead.propertyTypes] : [];
                 if (updatedTypes.includes(value as PropertyType)) {
                   handleInputChange('propertyTypes', updatedTypes.filter(t => t !== value));
@@ -315,21 +311,21 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                   handleInputChange('propertyTypes', [...updatedTypes, value as PropertyType]);
                 }
               }} />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="livingArea" className="text-sm">Surface habitable (m²)</Label>
-                <Input id="livingArea" value={lead.livingArea || ''} onChange={e => handleInputChange('livingArea', e.target.value)} placeholder="Surface en m²" className="w-full font-futura" type="text" />
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="text-sm">Nombre de chambres</Label>
-                <MultiSelectButtons options={bedroomOptions} selectedValues={getSelectedBedrooms()} onChange={handleBedroomToggle} specialOption="8+" />
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="text-sm">Vue souhaitée</Label>
-                <MultiSelectButtons options={VIEW_TYPES} selectedValues={lead.views || []} onToggle={value => {
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="livingArea" className="text-sm">Surface habitable (m²)</Label>
+              <Input id="livingArea" value={lead.livingArea || ''} onChange={e => handleInputChange('livingArea', e.target.value)} placeholder="Surface en m²" className="w-full font-futura" type="text" />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-sm">Nombre de chambres</Label>
+              <MultiSelectButtons options={bedroomOptions} selectedValues={getSelectedBedrooms()} onChange={handleBedroomToggle} specialOption="8+" />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-sm">Vue souhaitée</Label>
+              <MultiSelectButtons options={VIEW_TYPES} selectedValues={lead.views || []} onToggle={value => {
                 const updatedViews = lead.views ? [...lead.views] : [];
                 if (updatedViews.includes(value as ViewType)) {
                   handleInputChange('views', updatedViews.filter(v => v !== value));
@@ -337,59 +333,53 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                   handleInputChange('views', [...updatedViews, value as ViewType]);
                 }
               }} />
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="text-sm">Prestations souhaitées</Label>
-                <CustomTagInput tags={lead.amenities || []} onChange={newTags => handleInputChange('amenities', newTags)} placeholder="Ajouter une commodité..." predefinedOptions={AMENITIES} />
-              </div>
             </div>
-          </AccordionContent>
-        </AccordionItem>
+            
+            <div className="space-y-2">
+              <Label className="text-sm">Prestations souhaitées</Label>
+              <CustomTagInput tags={lead.amenities || []} onChange={newTags => handleInputChange('amenities', newTags)} placeholder="Ajouter une commodité..." predefinedOptions={AMENITIES} />
+            </div>
+          </TabsContent>
 
-        <AccordionItem value="purchase">
-          <AccordionTrigger className="py-3 text-sm font-futura">Conditions d'achat</AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-4 py-2">
-              <div className="space-y-2">
-                <Label className="text-sm">Date d'achat souhaitée</Label>
-                <RadioGroup value={lead.purchaseTimeframe || ''} onValueChange={value => handleInputChange('purchaseTimeframe', value)} className="flex flex-col space-y-2">
-                  {PURCHASE_TIMEFRAMES.map(timeframe => <div key={timeframe} className="flex items-center space-x-2">
-                      <RadioGroupItem value={timeframe} id={`timeframe-${timeframe}`} />
-                      <Label htmlFor={`timeframe-${timeframe}`} className="font-futura">
-                        {timeframe}
-                      </Label>
-                    </div>)}
-                </RadioGroup>
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="text-sm">Mode de financement</Label>
-                <RadioGroup value={lead.financingMethod || ''} onValueChange={value => handleInputChange('financingMethod', value)} className="flex flex-col space-y-2">
-                  {FINANCING_METHODS.map(method => <div key={method} className="flex items-center space-x-2">
-                      <RadioGroupItem value={method} id={`method-${method}`} />
-                      <Label htmlFor={`method-${method}`} className="font-futura">
-                        {method}
-                      </Label>
-                    </div>)}
-                </RadioGroup>
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="text-sm">Objectif</Label>
-                <RadioGroup value={lead.propertyUse || ''} onValueChange={value => handleInputChange('propertyUse', value)} className="flex flex-col space-y-2">
-                  {PROPERTY_USES.map(use => <div key={use} className="flex items-center space-x-2">
-                      <RadioGroupItem value={use} id={`use-${use}`} />
-                      <Label htmlFor={`use-${use}`} className="font-futura">
-                        {use}
-                      </Label>
-                    </div>)}
-                </RadioGroup>
-              </div>
+          <TabsContent value="purchase" className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label className="text-sm">Date d'achat souhaitée</Label>
+              <RadioGroup value={lead.purchaseTimeframe || ''} onValueChange={value => handleInputChange('purchaseTimeframe', value)} className="flex flex-col space-y-2">
+                {PURCHASE_TIMEFRAMES.map(timeframe => <div key={timeframe} className="flex items-center space-x-2">
+                    <RadioGroupItem value={timeframe} id={`timeframe-${timeframe}`} />
+                    <Label htmlFor={`timeframe-${timeframe}`} className="font-futura">
+                      {timeframe}
+                    </Label>
+                  </div>)}
+              </RadioGroup>
             </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+            
+            <div className="space-y-2">
+              <Label className="text-sm">Mode de financement</Label>
+              <RadioGroup value={lead.financingMethod || ''} onValueChange={value => handleInputChange('financingMethod', value)} className="flex flex-col space-y-2">
+                {FINANCING_METHODS.map(method => <div key={method} className="flex items-center space-x-2">
+                    <RadioGroupItem value={method} id={`method-${method}`} />
+                    <Label htmlFor={`method-${method}`} className="font-futura">
+                      {method}
+                    </Label>
+                  </div>)}
+              </RadioGroup>
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-sm">Objectif</Label>
+              <RadioGroup value={lead.propertyUse || ''} onValueChange={value => handleInputChange('propertyUse', value)} className="flex flex-col space-y-2">
+                {PROPERTY_USES.map(use => <div key={use} className="flex items-center space-x-2">
+                    <RadioGroupItem value={use} id={`use-${use}`} />
+                    <Label htmlFor={`use-${use}`} className="font-futura">
+                      {use}
+                    </Label>
+                  </div>)}
+              </RadioGroup>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </ScrollArea>
     </div>
   );
 };

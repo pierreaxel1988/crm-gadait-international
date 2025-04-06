@@ -82,6 +82,8 @@ export interface LeadDetailed {
   salutation?: 'M.' | 'Mme';  // New field for "Civilité"
   email?: string;
   phone?: string;
+  phoneCountryCode?: string;
+  phoneCountryCodeDisplay?: string;
   location?: string;
   status: LeadStatus;
   tags?: LeadTag[];
@@ -103,7 +105,7 @@ export interface LeadDetailed {
   financingMethod?: string;
   propertyUse?: string;
   nationality?: string;
-  preferredLanguage?: string; // New field for preferred language
+  preferredLanguage?: string;
   taskType?: TaskType;
   notes?: string;
   internal_notes?: string; 
@@ -112,10 +114,10 @@ export interface LeadDetailed {
   url?: string;
   pipelineType?: PipelineType;
   pipeline_type?: PipelineType;
+  taxResidence?: string;
   
   imported_at?: string;
   integration_source?: string;
-  taxResidence?: string;
   actionHistory?: any[];
   livingArea?: string;
   external_id?: string;

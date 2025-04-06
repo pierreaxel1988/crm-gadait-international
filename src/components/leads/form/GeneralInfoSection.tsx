@@ -2,6 +2,8 @@
 import React from 'react';
 import { LeadDetailed, LeadSource, Country } from '@/types/lead';
 import FormInput from './FormInput';
+import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
+import { countryToFlag } from '@/utils/countryUtils';
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
@@ -29,6 +31,55 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   countries,
   sources
 }) => {
+  // Handle tax residence country change
+  const handleTaxResidenceChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    handleInputChange(e);
+    
+    // If nationality is empty, try to derive it from tax residence
+    if (!formData.nationality) {
+      const selectedCountry = e.target.value;
+      const nationality = deriveNationalityFromCountry(selectedCountry);
+      
+      if (nationality) {
+        const nationalityEvent = {
+          target: {
+            name: 'nationality',
+            value: nationality
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        
+        handleInputChange(nationalityEvent);
+      }
+    }
+  };
+
+  // Prepare country options with flags
+  const countryOptions = countries.map(country => ({
+    value: country,
+    label: (
+      <div className="flex items-center gap-2">
+        <span className="text-lg">{countryToFlag(country)}</span>
+        <span>{country}</span>
+      </div>
+    ),
+    textLabel: country // For search functionality
+  }));
+
+  // Prepare nationality options with flags
+  const nationalityOptions = countries.map(country => {
+    const nationality = deriveNationalityFromCountry(country) || country;
+    return {
+      value: nationality,
+      label: (
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{countryToFlag(country)}</span>
+          <span>{nationality}</span>
+        </div>
+      ),
+      textLabel: nationality // For search functionality
+    };
+  });
+
   return (
     <div className="space-y-4 overflow-y-auto pb-6">
       <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Information Générale</h2>
@@ -113,18 +164,37 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             handleInputChange(eFlag);
           }}
           searchable
+          showFlagsInDropdown
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
-          label="Nationalité"
-          name="nationality"
-          value={formData.nationality || ''}
-          onChange={handleInputChange}
-          placeholder="Nationalité"
+          label="Pays de résidence"
+          name="taxResidence"
+          type="select"
+          value={formData.taxResidence || ''}
+          onChange={handleTaxResidenceChange}
+          options={countryOptions}
+          placeholder="Sélectionner un pays"
+          searchable
+          searchByLabel
         />
         
+        <FormInput
+          label="Nationalité"
+          name="nationality"
+          type="select"
+          value={formData.nationality || ''}
+          onChange={handleInputChange}
+          options={nationalityOptions}
+          placeholder="Sélectionner une nationalité"
+          searchable
+          searchByLabel
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
           label="Langue préférée"
           name="preferredLanguage"
@@ -134,15 +204,15 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           options={LANGUAGE_OPTIONS}
           placeholder="Sélectionner une langue"
         />
+        
+        <FormInput
+          label="Lien de l'annonce vu"
+          name="url"
+          value={formData.url || ''}
+          onChange={handleInputChange}
+          placeholder="URL de l'annonce immobilière"
+        />
       </div>
-
-      <FormInput
-        label="Lien de l'annonce vu"
-        name="url"
-        value={formData.url || ''}
-        onChange={handleInputChange}
-        placeholder="URL de l'annonce immobilière"
-      />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
