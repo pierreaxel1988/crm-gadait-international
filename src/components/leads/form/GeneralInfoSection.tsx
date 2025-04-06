@@ -148,14 +148,24 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           onChange={handleTaxResidenceChange}
           options={countries.map(country => ({ value: country, label: country }))}
           placeholder="Sélectionner un pays"
+          searchable
         />
         
         <FormInput
           label="Nationalité"
           name="nationality"
+          type="select"
           value={formData.nationality || ''}
           onChange={handleInputChange}
-          placeholder="Nationalité"
+          options={countries.map(country => {
+            const nationality = deriveNationalityFromCountry(country);
+            return { 
+              value: nationality || country, 
+              label: nationality || country 
+            };
+          })}
+          placeholder="Sélectionner une nationalité"
+          searchable
         />
       </div>
 
