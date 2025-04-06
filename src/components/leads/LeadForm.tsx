@@ -57,8 +57,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
     salutation: lead?.salutation || undefined,
     email: lead?.email || '',
     phone: lead?.phone || '',
-    phoneCountryCode: lead?.phoneCountryCode || '+33',
-    phoneCountryCodeDisplay: lead?.phoneCountryCodeDisplay || '🇫🇷',
     location: lead?.location || '',
     status: lead?.status || 'New',
     tags: lead?.tags || [],
@@ -85,8 +83,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
     taskType: lead?.taskType || undefined,
     notes: lead?.notes || '',
     url: lead?.url || '',
-    pipelineType: lead?.pipelineType || 'purchase',
-    taxResidence: lead?.taxResidence || '',
+    pipelineType: lead?.pipelineType || 'purchase'
   });
 
   useEffect(() => {

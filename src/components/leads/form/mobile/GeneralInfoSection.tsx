@@ -1,13 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
-import { LeadDetailed, LeadSource } from '@/types/lead';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { COUNTRIES } from '@/utils/countries';
-import { deriveNationalityFromCountry, countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { countryToFlag } from '@/utils/countryUtils';
-import { Search } from 'lucide-react';
+import { LeadDetailed, LeadSource, Country } from '@/types/lead';
+import FormInput from '../FormInput';
+
+interface MobileGeneralInfoSectionProps {
+  lead: LeadDetailed;
+  onDataChange: (data: Partial<LeadDetailed>) => void;
+  countries?: Country[];
+  sources?: LeadSource[];
+}
 
 const LANGUAGE_OPTIONS = [
   { value: "Français", label: "Français" },
@@ -22,25 +23,36 @@ const LANGUAGE_OPTIONS = [
   { value: "中文", label: "中文" }
 ];
 
-const LEAD_SOURCES: LeadSource[] = [
-  'Site web', 'Réseaux sociaux', 'Portails immobiliers', 'Network', 
-  'Repeaters', 'Recommandations', 'Apporteur d\'affaire', 'Idealista',
-  'Le Figaro', 'Properstar', 'Property Cloud', 'L\'express Property',
-  'James Edition', 'Annonce', 'Email', 'Téléphone', 'Autre', 'Recommendation'
+// Default source options for when no sources are provided
+const DEFAULT_SOURCES: LeadSource[] = [
+  "Site web", 
+  "Réseaux sociaux", 
+  "Portails immobiliers", 
+  "Network", 
+  "Repeaters", 
+  "Recommandations",
+  "Apporteur d'affaire",
+  "Idealista",
+  "Le Figaro",
+  "Properstar",
+  "Property Cloud",
+  "L'express Property",
+  "James Edition",
+  "Annonce",
+  "Email",
+  "Téléphone",
+  "Autre",
+  "Recommendation"
 ];
 
-interface GeneralInfoSectionProps {
-  lead: LeadDetailed;
-  onDataChange: (data: Partial<LeadDetailed>) => void;
-}
-
-const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
+const MobileGeneralInfoSection: React.FC<MobileGeneralInfoSectionProps> = ({
   lead,
-  onDataChange
+  onDataChange,
+  countries = [],
+  sources = DEFAULT_SOURCES
 }) => {
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   
   useEffect(() => {
     const measureHeader = () => {
@@ -53,9 +65,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     };
     
     measureHeader();
-    
     window.addEventListener('resize', measureHeader);
-    
     const timeoutId = setTimeout(measureHeader, 300);
     
     return () => {
@@ -64,279 +74,133 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     };
   }, []);
 
-  const handleInputChange = (field: keyof LeadDetailed, value: any) => {
-    onDataChange({
-      [field]: value
-    });
-  };
-
-  const handleTaxResidenceChange = (value: string) => {
-    handleInputChange('taxResidence', value);
-    
-    if (!lead.nationality) {
-      const nationality = deriveNationalityFromCountry(value);
-      if (nationality) {
-        handleInputChange('nationality', nationality);
-      }
-    }
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleInputChange('phone', e.target.value);
-  };
-
-  const handleCountryCodeChange = (code: string) => {
-    handleInputChange('phoneCountryCode', code);
-    
-    const codeToCountry: Record<string, string> = {
-      '+1': '🇺🇸', '+33': '🇫🇷', '+44': '🇬🇧', '+34': '🇪🇸', '+39': '🇮🇹',
-      '+41': '🇨🇭', '+49': '🇩🇪', '+32': '🇧🇪', '+31': '🇳🇱', '+351': '🇵🇹',
-      '+30': '🇬🇷', '+46': '🇸🇪', '+47': '🇳🇴', '+45': '🇩🇰', '+358': '🇫🇮',
-      '+420': '🇨🇿', '+48': '🇵🇱', '+36': '🇭🇺', '+43': '🇦🇹', '+353': '🇮🇪',
-      '+352': '🇱🇺', '+377': '🇲🇨', '+7': '🇷🇺', '+380': '🇺🇦', '+40': '🇷🇴',
-      '+359': '🇧🇬', '+385': '🇭🇷', '+386': '🇸🇮', '+381': '🇷🇸', '+212': '🇲🇦',
-      '+213': '🇩🇿', '+216': '🇹🇳', '+20': '🇪🇬', '+27': '🇿🇦', '+234': '🇳🇬',
-      '+81': '🇯🇵', '+86': '🇨🇳', '+91': '🇮🇳', '+65': '🇸🇬', '+82': '🇰🇷',
-      '+971': '🇦🇪', '+966': '🇸🇦', '+974': '🇶🇦', '+961': '🇱🇧', '+972': '🇮🇱',
-      '+90': '🇹🇷', '+852': '🇭🇰', '+55': '🇧🇷', '+52': '🇲🇽', '+54': '🇦🇷',
-      '+56': '🇨🇱', '+57': '🇨🇴', '+58': '🇻🇪', '+51': '🇵🇪', '+61': '🇦🇺',
-      '+64': '🇳🇿', '+66': '🇹🇭', '+84': '🇻🇳', '+60': '🇲🇾', '+62': '🇮🇩',
-      '+63': '🇵🇭'
-    };
-    
-    const flagEmoji = codeToCountry[code] || '🌍';
-    handleInputChange('phoneCountryCodeDisplay', flagEmoji);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    onDataChange({ [name]: value });
   };
 
   const dynamicTopMargin = isHeaderMeasured 
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
 
-  const filteredCountries = searchQuery
-    ? COUNTRIES.filter(country => {
-        const nationalityName = deriveNationalityFromCountry(country) || country;
-        return countryMatchesSearch(country, searchQuery) || 
-               countryMatchesSearch(nationalityName, searchQuery);
-      })
-    : COUNTRIES;
-
   return (
     <div 
-      className="space-y-5 pt-4" 
-      style={{ 
-        marginTop: dynamicTopMargin,
-      }}
+      className="space-y-3 pt-4" 
+      style={{ marginTop: dynamicTopMargin }}
     >
       <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Information Générale</h2>
       
-      <ScrollArea className="h-[calc(100vh-150px)]">
-        <div className="space-y-4 pb-20">
-          <div className="space-y-2">
-            <Label htmlFor="salutation" className="text-sm">Titre</Label>
-            <Select value={lead.salutation || ''} onValueChange={(value) => handleInputChange('salutation', value)}>
-              <SelectTrigger id="salutation" className="w-full font-futura">
-                <SelectValue placeholder="Sélectionner un titre" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="M." className="font-futura">Monsieur</SelectItem>
-                <SelectItem value="Mme" className="font-futura">Madame</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      <FormInput
+        label="Titre"
+        name="salutation"
+        type="select"
+        value={lead.salutation || ''}
+        onChange={handleInputChange}
+        options={[
+          { value: 'M.', label: 'Monsieur' },
+          { value: 'Mme', label: 'Madame' },
+        ]}
+        placeholder="Sélectionner un titre"
+      />
+      
+      <FormInput
+        label="Nom"
+        name="name"
+        required
+        value={lead.name}
+        onChange={handleInputChange}
+        placeholder="Nom complet"
+      />
+
+      <FormInput
+        label="Email"
+        name="email"
+        type="email"
+        value={lead.email || ''}
+        onChange={handleInputChange}
+        placeholder="Adresse email"
+      />
+      
+      <FormInput
+        label="Téléphone"
+        name="phone"
+        type="tel-with-code"
+        value={lead.phone || ''}
+        onChange={handleInputChange}
+        placeholder="Numéro de téléphone"
+        countryCode={lead.phoneCountryCode || '+33'}
+        countryCodeDisplay={lead.phoneCountryCodeDisplay || '🇫🇷'}
+        onCountryCodeChange={(code) => {
+          onDataChange({ phoneCountryCode: code });
           
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm">Nom</Label>
-            <Input 
-              id="name" 
-              value={lead.name || ''} 
-              onChange={(e) => handleInputChange('name', e.target.value)} 
-              placeholder="Nom complet" 
-              className="w-full font-futura"
-            />
-          </div>
+          // Get flag emoji for the country code
+          const codeToCountry: Record<string, string> = {
+            '+1': '🇺🇸', '+33': '🇫🇷', '+44': '🇬🇧', '+34': '🇪🇸', '+39': '🇮🇹',
+            '+41': '🇨🇭', '+49': '🇩🇪', '+32': '🇧🇪', '+31': '🇳🇱', '+351': '🇵🇹',
+            '+30': '🇬🇷', '+46': '🇸🇪', '+47': '🇳🇴', '+45': '🇩🇰', '+358': '🇫🇮',
+            '+420': '🇨🇿', '+48': '🇵🇱', '+36': '🇭🇺', '+43': '🇦🇹', '+353': '🇮🇪',
+            '+352': '🇱🇺', '+377': '🇲🇨', '+7': '🇷🇺', '+380': '🇺🇦', '+40': '🇷🇴',
+            '+359': '🇧🇬', '+385': '🇭🇷', '+386': '🇸🇮', '+381': '🇷🇸', '+212': '🇲🇦',
+            '+213': '🇩🇿', '+216': '🇹🇳', '+20': '🇪🇬', '+27': '🇿🇦', '+234': '🇳🇬',
+            '+81': '🇯🇵', '+86': '🇨🇳', '+91': '🇮🇳', '+65': '🇸🇬', '+82': '🇰🇷',
+            '+971': '🇦🇪', '+966': '🇸🇦', '+974': '🇶🇦', '+961': '🇱🇧', '+972': '🇮🇱',
+            '+90': '🇹🇷', '+852': '🇭🇰', '+55': '🇧🇷', '+52': '🇲🇽', '+54': '🇦🇷',
+            '+56': '🇨🇱', '+57': '🇨🇴', '+58': '🇻🇪', '+51': '🇵🇪', '+61': '🇦🇺',
+            '+64': '🇳🇿', '+66': '🇹🇭', '+84': '🇻🇳', '+60': '🇲🇾', '+62': '🇮🇩',
+            '+63': '🇵🇭'
+          };
           
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm">Email</Label>
-            <Input 
-              id="email" 
-              type="email" 
-              value={lead.email || ''} 
-              onChange={(e) => handleInputChange('email', e.target.value)} 
-              placeholder="Adresse email" 
-              className="w-full font-futura"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="phone" className="text-sm">Téléphone</Label>
-            <div className="flex items-center">
-              <div className="relative">
-                <Select 
-                  value={lead.phoneCountryCode || '+33'} 
-                  onValueChange={handleCountryCodeChange}
-                >
-                  <SelectTrigger className="w-[70px] font-futura border-r-0 rounded-r-none">
-                    <SelectValue>
-                      {lead.phoneCountryCodeDisplay || '🇫🇷'} {lead.phoneCountryCode || '+33'}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="+33" className="font-futura">🇫🇷 +33</SelectItem>
-                    <SelectItem value="+44" className="font-futura">🇬🇧 +44</SelectItem>
-                    <SelectItem value="+1" className="font-futura">🇺🇸 +1</SelectItem>
-                    <SelectItem value="+34" className="font-futura">🇪🇸 +34</SelectItem>
-                    <SelectItem value="+39" className="font-futura">🇮🇹 +39</SelectItem>
-                    <SelectItem value="+41" className="font-futura">🇨🇭 +41</SelectItem>
-                    <SelectItem value="+351" className="font-futura">🇵🇹 +351</SelectItem>
-                    <SelectItem value="+49" className="font-futura">🇩🇪 +49</SelectItem>
-                    <SelectItem value="+32" className="font-futura">🇧🇪 +32</SelectItem>
-                    <SelectItem value="+31" className="font-futura">🇳🇱 +31</SelectItem>
-                    <SelectItem value="+971" className="font-futura">🇦🇪 +971</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Input 
-                id="phone" 
-                type="tel" 
-                value={lead.phone || ''} 
-                onChange={handlePhoneChange} 
-                placeholder="Numéro de téléphone" 
-                className="flex-1 border-l-0 rounded-l-none"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="taxResidence" className="text-sm">Pays de résidence</Label>
-            <Select 
-              value={lead.taxResidence || ''} 
-              onValueChange={handleTaxResidenceChange}
-            >
-              <SelectTrigger id="taxResidence" className="w-full font-futura">
-                <SelectValue placeholder="Sélectionner un pays" />
-              </SelectTrigger>
-              <SelectContent searchable>
-                {COUNTRIES.map(country => (
-                  <SelectItem key={country} value={country} className="font-futura">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{countryToFlag(country)}</span>
-                      <span>{country}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
-            <div className="relative">
-              <div className="flex items-center border rounded-md mb-1">
-                <Search className="h-4 w-4 text-gray-400 ml-2" />
-                <input 
-                  type="text" 
-                  value={searchQuery} 
-                  onChange={(e) => setSearchQuery(e.target.value)} 
-                  placeholder="Rechercher une nationalité..." 
-                  className="w-full p-2 border-0 rounded-md font-futura focus:outline-none focus:ring-0"
-                />
-                {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery('')}
-                    className="p-2 text-gray-400 hover:text-gray-600"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className="max-h-60 overflow-y-auto border rounded-md">
-              {filteredCountries.length > 0 ? (
-                filteredCountries.map(country => {
-                  const nationality = deriveNationalityFromCountry(country) || country;
-                  return (
-                    <div 
-                      key={`${country}-${nationality}`} 
-                      className={`p-2 cursor-pointer hover:bg-gray-100 flex items-center gap-2 ${lead.nationality === nationality ? 'bg-gray-100' : ''}`}
-                      onClick={() => {
-                        handleInputChange('nationality', nationality);
-                        setSearchQuery('');
-                      }}
-                    >
-                      <span className="text-lg">{countryToFlag(country)}</span>
-                      <span>{nationality}</span>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="p-2 text-gray-500">Aucun résultat trouvé</div>
-              )}
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="preferredLanguage" className="text-sm">Langue préférée</Label>
-            <Select 
-              value={lead.preferredLanguage || ''} 
-              onValueChange={(value) => handleInputChange('preferredLanguage', value)}
-            >
-              <SelectTrigger id="preferredLanguage" className="w-full font-futura">
-                <SelectValue placeholder="Sélectionner une langue" />
-              </SelectTrigger>
-              <SelectContent>
-                {LANGUAGE_OPTIONS.map(option => (
-                  <SelectItem key={option.value} value={option.value} className="font-futura">
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="url" className="text-sm">Lien de l'annonce vu</Label>
-            <Input 
-              id="url" 
-              value={lead.url || ''} 
-              onChange={(e) => handleInputChange('url', e.target.value)} 
-              placeholder="URL de l'annonce immobilière" 
-              className="w-full font-futura"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="source" className="text-sm">Source</Label>
-            <Select 
-              value={lead.source || ''} 
-              onValueChange={(value) => handleInputChange('source', value as LeadSource)}
-            >
-              <SelectTrigger id="source" className="w-full font-futura">
-                <SelectValue placeholder="Sélectionner une source" />
-              </SelectTrigger>
-              <SelectContent>
-                {LEAD_SOURCES.map(source => (
-                  <SelectItem key={source} value={source} className="font-futura">
-                    {source}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="propertyReference" className="text-sm">Référence de propriété</Label>
-            <Input 
-              id="propertyReference" 
-              value={lead.propertyReference || ''} 
-              onChange={(e) => handleInputChange('propertyReference', e.target.value)} 
-              placeholder="Référence de propriété" 
-              className="w-full font-futura"
-            />
-          </div>
-        </div>
-      </ScrollArea>
+          const flagEmoji = codeToCountry[code] || '🌍';
+          onDataChange({ phoneCountryCodeDisplay: flagEmoji });
+        }}
+        searchable
+      />
+      
+      <FormInput
+        label="Nationalité"
+        name="nationality"
+        value={lead.nationality || ''}
+        onChange={handleInputChange}
+        placeholder="Nationalité"
+      />
+      
+      <FormInput
+        label="Langue préférée"
+        name="preferredLanguage"
+        type="select"
+        value={lead.preferredLanguage || ''}
+        onChange={handleInputChange}
+        options={LANGUAGE_OPTIONS}
+        placeholder="Sélectionner une langue"
+      />
+      
+      <FormInput
+        label="Lien de l'annonce vu"
+        name="url"
+        value={lead.url || ''}
+        onChange={handleInputChange}
+        placeholder="URL de l'annonce immobilière"
+      />
+      
+      <FormInput
+        label="Source"
+        name="source"
+        type="select"
+        value={lead.source || ''}
+        onChange={handleInputChange}
+        options={sources.map(source => ({ value: source, label: source }))}
+        placeholder="Sélectionner une source"
+      />
+      
+      <FormInput
+        label="Référence de propriété"
+        name="propertyReference"
+        value={lead.propertyReference || ''}
+        onChange={handleInputChange}
+        placeholder="Référence de propriété"
+      />
     </div>
   );
 };
 
-export default GeneralInfoSection;
+export default MobileGeneralInfoSection;
