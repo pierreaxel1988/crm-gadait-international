@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
+import { phoneCodeToFlag } from '@/utils/countryUtils';
 
 interface FormInputProps {
   label: string;
@@ -20,17 +21,19 @@ interface FormInputProps {
   step?: string | number;
   rows?: number;
   disabled?: boolean;
-  options?: { value: string; label: string }[];
+  options?: { value: string; label: string | React.ReactNode; textLabel?: string }[];
   icon?: React.ElementType;
   readOnly?: boolean;
   countryCode?: string;
   countryCodeDisplay?: string;
   onCountryCodeChange?: (code: string) => void;
   searchable?: boolean;
+  searchByLabel?: boolean;
   error?: string;
   info?: string;
   helpText?: string;
   renderCustomField?: () => React.ReactNode;
+  showFlagsInDropdown?: boolean;
 }
 
 const countryCodes = [
@@ -206,19 +209,26 @@ const FormInput: React.FC<FormInputProps> = ({
   countryCodeDisplay,
   onCountryCodeChange,
   searchable = false,
+  searchByLabel = false,
   error,
   info,
   helpText,
-  renderCustomField
+  renderCustomField,
+  showFlagsInDropdown = false
 }) => {
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [isSelectDropdownOpen, setIsSelectDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const selectDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsCountryDropdownOpen(false);
+      }
+      if (selectDropdownRef.current && !selectDropdownRef.current.contains(event.target as Node)) {
+        setIsSelectDropdownOpen(false);
       }
     };
 
@@ -235,6 +245,12 @@ const FormInput: React.FC<FormInputProps> = ({
     }
   };
 
+  const toggleSelectDropdown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!disabled && !readOnly) {
+      setIsSelectDropdownOpen(!isSelectDropdownOpen);
+    }
+  };
+
   const handleCountryCodeChange = (code: string) => {
     if (onCountryCodeChange) {
       onCountryCodeChange(code);
@@ -243,7 +259,126 @@ const FormInput: React.FC<FormInputProps> = ({
     setSearchTerm('');
   };
 
+  const handleSelectOptionClick = (optionValue: string) => {
+    if (onChange) {
+      const event = {
+        target: {
+          name,
+          value: optionValue
+        }
+      } as React.ChangeEvent<HTMLSelectElement>;
+      onChange(event);
+    }
+    setIsSelectDropdownOpen(false);
+    setSearchTerm('');
+  };
+
+  const filteredCountryCodes = searchTerm
+    ? countryCodes.filter(code => {
+        const countryName = countryNames[code] || '';
+        return (
+          code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          countryName.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      })
+    : countryCodes;
+
+  const filteredOptions = searchTerm && searchable
+    ? options.filter(option => {
+        const optionLabel = typeof option.label === 'string' 
+          ? option.label.toLowerCase() 
+          : option.textLabel ? option.textLabel.toLowerCase() : '';
+        const optionValue = option.value.toString().toLowerCase();
+        
+        return searchByLabel
+          ? optionLabel.includes(searchTerm.toLowerCase())
+          : optionValue.includes(searchTerm.toLowerCase()) || optionLabel.includes(searchTerm.toLowerCase());
+      })
+    : options;
+  
+  const selectedOption = options.find(option => option.value === value);
+
   const renderSelectInput = () => {
+    if (searchable) {
+      return (
+        <div className="relative">
+          <div 
+            ref={selectDropdownRef}
+            className={cn(
+              "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background cursor-pointer",
+              isSelectDropdownOpen && "ring-2 ring-ring ring-offset-2",
+              error && "border-red-500"
+            )}
+            onClick={toggleSelectDropdown}
+          >
+            <div className="flex justify-between items-center w-full">
+              <span className="truncate">
+                {selectedOption ? (selectedOption.label || selectedOption.value) : placeholder}
+              </span>
+              <ChevronDown className={cn(
+                "h-4 w-4 opacity-50 transition-transform",
+                isSelectDropdownOpen && "transform rotate-180"
+              )} />
+            </div>
+            
+            {isSelectDropdownOpen && (
+              <div className="absolute left-0 z-50 w-full mt-1 bg-background border rounded-md shadow-lg top-full">
+                {searchable && (
+                  <div className="sticky top-0 p-2 bg-background border-b">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        placeholder="Rechercher..."
+                        className="pl-8 h-8"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        autoFocus
+                      />
+                      {searchTerm && (
+                        <button
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSearchTerm('');
+                          }}
+                        >
+                          <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="max-h-60 overflow-auto p-1">
+                  {filteredOptions.map((option) => (
+                    <div
+                      key={option.value.toString()}
+                      className={cn(
+                        "flex items-center justify-between px-4 py-2 text-sm cursor-pointer hover:bg-accent rounded-sm",
+                        value === option.value && "bg-accent/50"
+                      )}
+                      onClick={() => handleSelectOptionClick(option.value.toString())}
+                    >
+                      {option.label}
+                      {value === option.value && <Check className="h-4 w-4" />}
+                    </div>
+                  ))}
+                  
+                  {filteredOptions.length === 0 && (
+                    <div className="px-4 py-2 text-sm text-muted-foreground">
+                      Aucun résultat
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <select
         id={name}
@@ -263,7 +398,7 @@ const FormInput: React.FC<FormInputProps> = ({
         <option value="" disabled>{placeholder}</option>
         {options?.map((option) => (
           <option key={option.value} value={option.value}>
-            {option.label}
+            {typeof option.label === 'string' ? option.label : option.textLabel || option.value}
           </option>
         ))}
       </select>
@@ -330,17 +465,7 @@ const FormInput: React.FC<FormInputProps> = ({
                   </div>
                 )}
                 <div className="p-1">
-                  {countryCodes
-                    .filter(code => {
-                      if (!searchTerm) return true;
-                      const codeStr = code.toString();
-                      const normalizedSearchTerm = searchTerm.toLowerCase();
-                      
-                      return (
-                        codeStr.toLowerCase().includes(normalizedSearchTerm) ||
-                        countryNames[codeStr]?.toLowerCase().includes(normalizedSearchTerm)
-                      );
-                    })
+                  {filteredCountryCodes
                     .map((code) => (
                       <button
                         key={code}
@@ -351,8 +476,8 @@ const FormInput: React.FC<FormInputProps> = ({
                         }}
                       >
                         <div className="flex items-center">
-                          {getPhoneCountryFlag(code.toString())}
-                          <span className="ml-2">{countryNames[code] || code}</span>
+                          {showFlagsInDropdown && <span className="text-lg mr-2">{phoneCodeToFlag(code)}</span>}
+                          <span>{countryNames[code] || code}</span>
                         </div>
                         <span className="text-muted-foreground">{code}</span>
                       </button>
@@ -376,148 +501,6 @@ const FormInput: React.FC<FormInputProps> = ({
           />
         </div>
       </div>
-    );
-  };
-
-  const getPhoneCountryFlag = (countryCode: string): JSX.Element => {
-    const codeToCountry: Record<string, string> = {
-      '+1': 'US',
-      '+7': 'RU',
-      '+20': 'EG',
-      '+27': 'ZA',
-      '+30': 'GR',
-      '+31': 'NL',
-      '+32': 'BE',
-      '+33': 'FR',
-      '+34': 'ES',
-      '+36': 'HU',
-      '+39': 'IT',
-      '+41': 'CH',
-      '+43': 'AT',
-      '+44': 'GB',
-      '+45': 'DK',
-      '+46': 'SE',
-      '+47': 'NO',
-      '+48': 'PL',
-      '+49': 'DE',
-      '+51': 'PE',
-      '+52': 'MX',
-      '+53': 'CU',
-      '+54': 'AR',
-      '+55': 'BR',
-      '+56': 'CL',
-      '+57': 'CO',
-      '+58': 'VE',
-      '+60': 'MY',
-      '+61': 'AU',
-      '+62': 'ID',
-      '+63': 'PH',
-      '+64': 'NZ',
-      '+65': 'SG',
-      '+66': 'TH',
-      '+81': 'JP',
-      '+82': 'KR',
-      '+84': 'VN',
-      '+86': 'CN',
-      '+90': 'TR',
-      '+91': 'IN',
-      '+92': 'PK',
-      '+93': 'AF',
-      '+94': 'LK',
-      '+95': 'MM',
-      '+98': 'IR',
-      '+212': 'MA',
-      '+213': 'DZ',
-      '+216': 'TN',
-      '+218': 'LY',
-      '+230': 'MU',
-      '+234': 'NG',
-      '+248': 'SC',
-      '+249': 'SD',
-      '+254': 'KE',
-      '+255': 'TZ',
-      '+256': 'UG',
-      '+260': 'ZM',
-      '+262': 'RE',
-      '+263': 'ZW',
-      '+264': 'NA',
-      '+267': 'BW',
-      '+351': 'PT',
-      '+352': 'LU',
-      '+353': 'IE',
-      '+354': 'IS',
-      '+355': 'AL',
-      '+357': 'CY',
-      '+358': 'FI',
-      '+359': 'BG',
-      '+370': 'LT',
-      '+371': 'LV',
-      '+372': 'EE',
-      '+373': 'MD',
-      '+374': 'AM',
-      '+375': 'BY',
-      '+376': 'AD',
-      '+377': 'MC',
-      '+378': 'SM',
-      '+380': 'UA',
-      '+385': 'HR',
-      '+386': 'SI',
-      '+387': 'BA',
-      '+420': 'CZ',
-      '+421': 'SK',
-      '+423': 'LI',
-      '+503': 'SV',
-      '+504': 'HN',
-      '+505': 'NI',
-      '+506': 'CR',
-      '+507': 'PA',
-      '+591': 'BO',
-      '+593': 'EC',
-      '+595': 'PY',
-      '+598': 'UY',
-      '+852': 'HK',
-      '+855': 'KH',
-      '+856': 'LA',
-      '+880': 'BD',
-      '+886': 'TW',
-      '+960': 'MV',
-      '+961': 'LB',
-      '+962': 'JO',
-      '+963': 'SY',
-      '+964': 'IQ',
-      '+965': 'KW',
-      '+966': 'SA',
-      '+967': 'YE',
-      '+968': 'OM',
-      '+970': 'PS',
-      '+971': 'AE',
-      '+972': 'IL',
-      '+973': 'BH',
-      '+974': 'QA',
-      '+975': 'BT',
-      '+976': 'MN',
-      '+977': 'NP',
-      '+992': 'TJ',
-      '+993': 'TM',
-      '+994': 'AZ',
-      '+995': 'GE',
-      '+996': 'KG',
-      '+998': 'UZ'
-    };
-    
-    const countryToFlag = (countryCode: string): string => {
-      const codePoints = countryCode
-        .toUpperCase()
-        .split('')
-        .map(char => 127397 + char.charCodeAt(0));
-      return String.fromCodePoint(...codePoints);
-    };
-    
-    const country = codeToCountry[countryCode];
-    const flag = country ? countryToFlag(country) : '🌍';
-    
-    return (
-      <span className="text-lg">{flag}</span>
     );
   };
 

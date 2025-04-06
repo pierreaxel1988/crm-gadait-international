@@ -3,6 +3,7 @@ import React from 'react';
 import { LeadDetailed, LeadSource, Country } from '@/types/lead';
 import FormInput from './FormInput';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
+import { countryToFlag } from '@/utils/countryUtils';
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
@@ -51,6 +52,33 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       }
     }
   };
+
+  // Prepare country options with flags
+  const countryOptions = countries.map(country => ({
+    value: country,
+    label: (
+      <div className="flex items-center gap-2">
+        <span className="text-lg">{countryToFlag(country)}</span>
+        <span>{country}</span>
+      </div>
+    ),
+    textLabel: country // For search functionality
+  }));
+
+  // Prepare nationality options with flags
+  const nationalityOptions = countries.map(country => {
+    const nationality = deriveNationalityFromCountry(country) || country;
+    return {
+      value: nationality,
+      label: (
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{countryToFlag(country)}</span>
+          <span>{nationality}</span>
+        </div>
+      ),
+      textLabel: nationality // For search functionality
+    };
+  });
 
   return (
     <div className="space-y-4 overflow-y-auto pb-6">
@@ -136,6 +164,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             handleInputChange(eFlag);
           }}
           searchable
+          showFlagsInDropdown
         />
       </div>
 
@@ -146,9 +175,10 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           type="select"
           value={formData.taxResidence || ''}
           onChange={handleTaxResidenceChange}
-          options={countries.map(country => ({ value: country, label: country }))}
+          options={countryOptions}
           placeholder="Sélectionner un pays"
           searchable
+          searchByLabel
         />
         
         <FormInput
@@ -157,15 +187,10 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           type="select"
           value={formData.nationality || ''}
           onChange={handleInputChange}
-          options={countries.map(country => {
-            const nationality = deriveNationalityFromCountry(country);
-            return { 
-              value: nationality || country, 
-              label: nationality || country 
-            };
-          })}
+          options={nationalityOptions}
           placeholder="Sélectionner une nationalité"
           searchable
+          searchByLabel
         />
       </div>
 
