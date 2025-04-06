@@ -4,10 +4,10 @@ import { LeadDetailed, LeadSource, Country } from '@/types/lead';
 import FormInput from '../FormInput';
 
 interface MobileGeneralInfoSectionProps {
-  formData: LeadDetailed;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  countries: Country[];
-  sources: LeadSource[];
+  lead: LeadDetailed;
+  onDataChange: (data: Partial<LeadDetailed>) => void;
+  countries?: Country[];
+  sources?: LeadSource[];
 }
 
 const LANGUAGE_OPTIONS = [
@@ -23,19 +23,46 @@ const LANGUAGE_OPTIONS = [
   { value: "中文", label: "中文" }
 ];
 
+// Default source options for when no sources are provided
+const DEFAULT_SOURCES: LeadSource[] = [
+  "Site web", 
+  "Réseaux sociaux", 
+  "Portails immobiliers", 
+  "Network", 
+  "Repeaters", 
+  "Recommandations",
+  "Apporteur d'affaire",
+  "Idealista",
+  "Le Figaro",
+  "Properstar",
+  "Property Cloud",
+  "L'express Property",
+  "James Edition",
+  "Annonce",
+  "Email",
+  "Téléphone",
+  "Autre",
+  "Recommendation"
+];
+
 const MobileGeneralInfoSection: React.FC<MobileGeneralInfoSectionProps> = ({
-  formData,
-  handleInputChange,
-  countries,
-  sources
+  lead,
+  onDataChange,
+  countries = [],
+  sources = DEFAULT_SOURCES
 }) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    onDataChange({ [name]: value });
+  };
+
   return (
     <div className="space-y-3">
       <FormInput
         label="Titre"
         name="salutation"
         type="select"
-        value={formData.salutation || ''}
+        value={lead.salutation || ''}
         onChange={handleInputChange}
         options={[
           { value: 'M.', label: 'Monsieur' },
@@ -48,7 +75,7 @@ const MobileGeneralInfoSection: React.FC<MobileGeneralInfoSectionProps> = ({
         label="Nom"
         name="name"
         required
-        value={formData.name}
+        value={lead.name}
         onChange={handleInputChange}
         placeholder="Nom complet"
       />
@@ -57,7 +84,7 @@ const MobileGeneralInfoSection: React.FC<MobileGeneralInfoSectionProps> = ({
         label="Email"
         name="email"
         type="email"
-        value={formData.email || ''}
+        value={lead.email || ''}
         onChange={handleInputChange}
         placeholder="Adresse email"
       />
@@ -65,7 +92,7 @@ const MobileGeneralInfoSection: React.FC<MobileGeneralInfoSectionProps> = ({
       <FormInput
         label="Téléphone"
         name="phone"
-        value={formData.phone || ''}
+        value={lead.phone || ''}
         onChange={handleInputChange}
         placeholder="Numéro de téléphone"
       />
@@ -73,7 +100,7 @@ const MobileGeneralInfoSection: React.FC<MobileGeneralInfoSectionProps> = ({
       <FormInput
         label="Nationalité"
         name="nationality"
-        value={formData.nationality || ''}
+        value={lead.nationality || ''}
         onChange={handleInputChange}
         placeholder="Nationalité"
       />
@@ -82,7 +109,7 @@ const MobileGeneralInfoSection: React.FC<MobileGeneralInfoSectionProps> = ({
         label="Langue préférée"
         name="preferredLanguage"
         type="select"
-        value={formData.preferredLanguage || ''}
+        value={lead.preferredLanguage || ''}
         onChange={handleInputChange}
         options={LANGUAGE_OPTIONS}
         placeholder="Sélectionner une langue"
@@ -91,7 +118,7 @@ const MobileGeneralInfoSection: React.FC<MobileGeneralInfoSectionProps> = ({
       <FormInput
         label="Lien de l'annonce vu"
         name="url"
-        value={formData.url || ''}
+        value={lead.url || ''}
         onChange={handleInputChange}
         placeholder="URL de l'annonce immobilière"
       />
@@ -100,7 +127,7 @@ const MobileGeneralInfoSection: React.FC<MobileGeneralInfoSectionProps> = ({
         label="Source"
         name="source"
         type="select"
-        value={formData.source || ''}
+        value={lead.source || ''}
         onChange={handleInputChange}
         options={sources.map(source => ({ value: source, label: source }))}
         placeholder="Sélectionner une source"
@@ -109,7 +136,7 @@ const MobileGeneralInfoSection: React.FC<MobileGeneralInfoSectionProps> = ({
       <FormInput
         label="Référence de propriété"
         name="propertyReference"
-        value={formData.propertyReference || ''}
+        value={lead.propertyReference || ''}
         onChange={handleInputChange}
         placeholder="Référence de propriété"
       />
