@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,8 +14,26 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { signInWithGoogle } = useAuth();
+
+  // Check for query parameters that might indicate a password reset or email confirmation
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const type = queryParams.get('type');
+    
+    // Handle email confirmation or password reset
+    if (type === 'recovery' || type === 'signup') {
+      setIsSignUp(true);
+      toast({
+        title: type === 'recovery' ? "Réinitialisation de mot de passe" : "Confirmation d'email",
+        description: type === 'recovery' 
+          ? "Veuillez définir votre nouveau mot de passe." 
+          : "Votre email a été confirmé. Vous pouvez maintenant vous connecter.",
+      });
+    }
+  }, [location, toast]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +84,39 @@ const Auth = () => {
         description: error.message || "Une erreur est survenue avec Google",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Email requis",
+        description: "Veuillez entrer votre adresse email pour réinitialiser votre mot de passe.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?type=recovery`,
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Email envoyé",
+        description: "Veuillez vérifier votre email pour les instructions de réinitialisation du mot de passe.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -165,6 +216,19 @@ const Auth = () => {
             >
               {loading ? 'Chargement...' : isSignUp ? 'Créer un compte' : 'Se connecter'}
             </Button>
+            
+            {!isSignUp && (
+              <div className="text-center mt-2">
+                <Button 
+                  variant="link" 
+                  onClick={handleResetPassword}
+                  className="text-loro-hazel hover:text-loro-hazel/90 text-sm"
+                  type="button"
+                >
+                  Mot de passe oublié ?
+                </Button>
+              </div>
+            )}
           </form>
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
