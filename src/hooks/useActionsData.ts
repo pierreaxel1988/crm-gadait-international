@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionItem, ActionStatus } from '@/types/actionHistory';
@@ -38,7 +37,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
 
       // Get all leads with action history
       console.log("Fetching leads with action history...");
-      let query = supabase.from('leads').select('id, name, phone, email, action_history, assigned_to, status');
+      let query = supabase.from('leads').select('id, name, phone, phoneCountryCode, email, action_history, assigned_to, status');
       
       // If user is commercial, only get their assigned leads
       if (isCommercial && currentTeamMember) {
@@ -95,6 +94,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
             assignedToName: assignedTeamMember?.name || 'Non assigné',
             status,
             phoneNumber: lead.phone,
+            phoneCountryCode: lead.phoneCountryCode,
             email: lead.email
           });
         });
