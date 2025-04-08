@@ -13,6 +13,7 @@ export interface Lead {
   name: string;
   email: string;
   phone?: string;
+  phoneCountryCode?: string;
   location?: string;
   status: LeadStatus;
   tags: LeadTag[];
@@ -84,7 +85,22 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
     
     if (lead.phone) {
       // Format phone number for WhatsApp (remove spaces and any non-digit characters except +)
-      const cleanedPhone = lead.phone.replace(/[^\d+]/g, '');
+      let phoneWithCode = lead.phone;
+      
+      // If we have a country code and the phone doesn't start with +, prepend the country code
+      if (lead.phoneCountryCode && !lead.phone.startsWith('+')) {
+        // Make sure the country code has a + prefix
+        const countryCode = lead.phoneCountryCode.startsWith('+') 
+          ? lead.phoneCountryCode 
+          : `+${lead.phoneCountryCode}`;
+          
+        // Remove leading zeros from the phone number when adding international code
+        const phoneWithoutLeadingZeros = lead.phone.replace(/^0+/, '');
+        phoneWithCode = `${countryCode}${phoneWithoutLeadingZeros}`;
+      }
+      
+      // Clean the phone number for WhatsApp (remove spaces and non-digits except +)
+      const cleanedPhone = phoneWithCode.replace(/[^\d+]/g, '');
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };

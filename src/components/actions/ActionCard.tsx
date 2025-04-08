@@ -62,8 +62,22 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
     e.stopPropagation();
     
     if (action.phoneNumber) {
-      // Format phone number for WhatsApp (remove spaces and any non-digit characters except +)
-      const cleanedPhone = action.phoneNumber.replace(/[^\d+]/g, '');
+      let phoneWithCode = action.phoneNumber;
+      
+      // If we have a country code and the phone doesn't start with +, prepend the country code
+      if (action.phoneCountryCode && !action.phoneNumber.startsWith('+')) {
+        // Make sure the country code has a + prefix
+        const countryCode = action.phoneCountryCode.startsWith('+') 
+          ? action.phoneCountryCode 
+          : `+${action.phoneCountryCode}`;
+          
+        // Remove leading zeros from the phone number when adding international code
+        const phoneWithoutLeadingZeros = action.phoneNumber.replace(/^0+/, '');
+        phoneWithCode = `${countryCode}${phoneWithoutLeadingZeros}`;
+      }
+      
+      // Clean the phone number for WhatsApp
+      const cleanedPhone = phoneWithCode.replace(/[^\d+]/g, '');
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };

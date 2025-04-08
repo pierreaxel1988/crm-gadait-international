@@ -10,12 +10,13 @@ interface FloatingActionButtonsProps {
   onCall?: () => void;
   onMail?: () => void;
   phoneNumber?: string;
+  phoneCountryCode?: string;
   email?: string;
   className?: string;
 }
 
 // WhatsApp button component
-const WhatsAppButton = ({ phoneNumber, onClick }: { phoneNumber?: string, onClick: () => void }) => (
+const WhatsAppButton = ({ phoneNumber, phoneCountryCode, onClick }: { phoneNumber?: string, phoneCountryCode?: string, onClick: () => void }) => (
   <div className="flex items-center gap-3 animate-fade-in">
     <span className="bg-white/90 px-3 py-1 rounded-full text-sm shadow-sm">
       WhatsApp
@@ -95,6 +96,7 @@ const FloatingActionButtons = ({
   onCall,
   onMail,
   phoneNumber,
+  phoneCountryCode,
   email,
   className
 }: FloatingActionButtonsProps) => {
@@ -125,7 +127,22 @@ const FloatingActionButtons = ({
   
   const handleWhatsApp = () => {
     if (phoneNumber) {
-      const cleanedPhone = phoneNumber.replace(/[^\d+]/g, '');
+      let phoneWithCode = phoneNumber;
+      
+      // If we have a country code and the phone doesn't start with +, prepend the country code
+      if (phoneCountryCode && !phoneNumber.startsWith('+')) {
+        // Make sure the country code has a + prefix
+        const countryCode = phoneCountryCode.startsWith('+') 
+          ? phoneCountryCode 
+          : `+${phoneCountryCode}`;
+          
+        // Remove leading zeros from the phone number when adding international code
+        const phoneWithoutLeadingZeros = phoneNumber.replace(/^0+/, '');
+        phoneWithCode = `${countryCode}${phoneWithoutLeadingZeros}`;
+      }
+      
+      // Clean the phone number for WhatsApp
+      const cleanedPhone = phoneWithCode.replace(/[^\d+]/g, '');
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
     setIsExpanded(false);
@@ -146,7 +163,7 @@ const FloatingActionButtons = ({
           <>
             {(phoneNumber || onCall) && <CallButton onClick={handleCall} />}
             
-            {phoneNumber && <WhatsAppButton phoneNumber={phoneNumber} onClick={handleWhatsApp} />}
+            {phoneNumber && <WhatsAppButton phoneNumber={phoneNumber} phoneCountryCode={phoneCountryCode} onClick={handleWhatsApp} />}
             
             {(email || onMail) && <EmailButton onClick={handleMail} />}
             

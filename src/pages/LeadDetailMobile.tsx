@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -140,7 +141,22 @@ const LeadDetailMobile = () => {
     if (type === 'phone') {
       window.location.href = `tel:${lead.phone}`;
     } else {
-      const cleanedPhone = lead.phone.replace(/[^\d+]/g, '');
+      let phoneWithCode = lead.phone;
+      
+      // If we have a country code and the phone doesn't start with +, prepend the country code
+      if (lead.phoneCountryCode && !lead.phone.startsWith('+')) {
+        // Make sure the country code has a + prefix
+        const countryCode = lead.phoneCountryCode.startsWith('+') 
+          ? lead.phoneCountryCode 
+          : `+${lead.phoneCountryCode}`;
+          
+        // Remove leading zeros from the phone number when adding international code
+        const phoneWithoutLeadingZeros = lead.phone.replace(/^0+/, '');
+        phoneWithCode = `${countryCode}${phoneWithoutLeadingZeros}`;
+      }
+      
+      // Clean the phone number for WhatsApp
+      const cleanedPhone = phoneWithCode.replace(/[^\d+]/g, '');
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
@@ -222,6 +238,7 @@ const LeadDetailMobile = () => {
           name={lead.name}
           createdAt={lead.createdAt}
           phone={lead.phone}
+          phoneCountryCode={lead.phoneCountryCode}
           email={lead.email}
           budget={lead.budget}
           currency={lead.currency}
