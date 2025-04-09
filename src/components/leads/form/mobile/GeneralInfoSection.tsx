@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadSource } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -30,7 +29,6 @@ const LEAD_SOURCES: LeadSource[] = [
   'James Edition', 'Annonce', 'Email', 'Téléphone', 'Autre', 'Recommendation'
 ];
 
-// Mapping of country names to their phone codes for all available countries
 const COUNTRY_TO_PHONE_CODE: Record<string, { code: string, flag: string }> = {
   'Afghanistan': { code: '+93', flag: '🇦🇫' },
   'Albania': { code: '+355', flag: '🇦🇱' },
@@ -252,18 +250,16 @@ const COUNTRY_TO_PHONE_CODE: Record<string, { code: string, flag: string }> = {
   'Australie': { code: '+61', flag: '🇦🇺' },
 };
 
-// Convert the object to an array for easier filtering
 const ALL_COUNTRY_CODES = Object.entries(COUNTRY_TO_PHONE_CODE).map(([country, data]) => ({
   country,
   code: data.code,
   flag: data.flag
 }));
 
-// Common country codes for phone numbers
 const COMMON_COUNTRY_CODES = [
   { country: 'France', code: '+33', flag: '🇫🇷' },
   { country: 'United Kingdom', code: '+44', flag: '🇬🇧' },
-  { country: 'United States', code: '+1', flag: '🇺🇸' },
+  { code: '+1', flag: '🇺🇸' },
   { country: 'Spain', code: '+34', flag: '🇪🇸' },
   { country: 'Italy', code: '+39', flag: '🇮🇹' },
   { country: 'Switzerland', code: '+41', flag: '🇨🇭' },
@@ -292,12 +288,10 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   const [isNationalitySearchOpen, setIsNationalitySearchOpen] = useState(false);
   const [showAllCountryCodes, setShowAllCountryCodes] = useState(false);
   
-  // Refs for handling outside clicks
   const countryCodeRef = React.useRef<HTMLDivElement>(null);
   const countryDropdownRef = React.useRef<HTMLDivElement>(null);
   const nationalitySearchRef = React.useRef<HTMLDivElement>(null);
   
-  // Normalize strings for search by removing accents and converting to lowercase
   const normalizeString = (text: string): string => {
     return text
       .toLowerCase()
@@ -329,19 +323,16 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Close country code dropdown if clicked outside
       if (countryCodeRef.current && !countryCodeRef.current.contains(event.target as Node)) {
         setIsCountryCodeOpen(false);
         setPhoneSearchQuery("");
         setShowAllCountryCodes(false);
       }
       
-      // Close country dropdown if clicked outside
       if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
         setIsCountryDropdownOpen(false);
       }
       
-      // Close nationality search if clicked outside
       if (nationalitySearchRef.current && !nationalitySearchRef.current.contains(event.target as Node)) {
         setIsNationalitySearchOpen(false);
       }
@@ -386,7 +377,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
 
-  // Filter countries for nationality/tax residence
   const filteredCountries = searchQuery
     ? COUNTRIES.filter(country => {
         const nationalityName = deriveNationalityFromCountry(country) || country;
@@ -395,7 +385,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
       })
     : COUNTRIES;
 
-  // Filter country codes for phone
   const filteredCountryCodes = phoneSearchQuery
     ? ALL_COUNTRY_CODES.filter(({ country, code }) => {
         const normalizedSearch = normalizeString(phoneSearchQuery);
@@ -467,7 +456,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
                   onClick={() => setIsCountryCodeOpen(!isCountryCodeOpen)}
                   className="flex items-center h-10 px-3 border border-input border-r-0 rounded-l-md bg-background focus:outline-none hover:bg-accent transition-colors"
                 >
-                  <span className="text-lg mr-1">{lead.phoneCountryCodeDisplay || '🇫🇷'}</span>
+                  <span className="mr-1">{phoneCodeToFlag(lead.phoneCountryCode || '+33')}</span>
                   <span className="text-xs text-muted-foreground">{lead.phoneCountryCode || '+33'}</span>
                   <ChevronDown className={`ml-1 h-4 w-4 transition-transform ${isCountryCodeOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -508,7 +497,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
                           onClick={() => handleCountryCodeChange(code, flag)}
                         >
                           <div className="flex items-center">
-                            <span className="text-lg mr-2">{flag}</span>
+                            <span className="mr-2">{flag}</span>
                             <span>{country}</span>
                           </div>
                           <span className="text-muted-foreground">{code}</span>
@@ -667,7 +656,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
                 <div className="p-1">
                   {filteredCountries.map(country => {
                     const nationality = deriveNationalityFromCountry(country) || country;
-                    // Use a unique key combining country and nationality
                     return (
                       <div
                         key={`${country}-${nationality}`}
