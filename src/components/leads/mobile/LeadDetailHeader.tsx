@@ -13,7 +13,6 @@ interface LeadDetailHeaderProps {
   name: string;
   createdAt?: string;
   phone?: string;
-  phoneCountryCode?: string;
   email?: string;
   budget?: string;
   currency?: Currency;
@@ -34,7 +33,6 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   name,
   createdAt,
   phone,
-  phoneCountryCode,
   email,
   budget,
   currency,
@@ -58,22 +56,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
     if (onWhatsAppClick) {
       onWhatsAppClick(e);
     } else if (phone) {
-      let phoneWithCode = phone;
-      
-      // If we have a country code and the phone doesn't start with +, prepend the country code
-      if (phoneCountryCode && !phone.startsWith('+')) {
-        // Make sure the country code has a + prefix
-        const countryCode = phoneCountryCode.startsWith('+') 
-          ? phoneCountryCode 
-          : `+${phoneCountryCode}`;
-          
-        // Remove leading zeros from the phone number when adding international code
-        const phoneWithoutLeadingZeros = phone.replace(/^0+/, '');
-        phoneWithCode = `${countryCode}${phoneWithoutLeadingZeros}`;
-      }
-      
-      // Clean the phone number for WhatsApp
-      const cleanedPhone = phoneWithCode.replace(/[^\d+]/g, '');
+      const cleanedPhone = phone.replace(/[^\d+]/g, '');
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
@@ -84,18 +67,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
     if (onPhoneCall) {
       onPhoneCall(e);
     } else if (phone) {
-      let formattedNumber = phone;
-      if (phoneCountryCode && !phone.startsWith('+')) {
-        // Make sure the country code has a + prefix
-        const countryCode = phoneCountryCode.startsWith('+') 
-          ? phoneCountryCode 
-          : `+${phoneCountryCode}`;
-          
-        // Remove leading zeros from the phone number when adding international code
-        const phoneWithoutLeadingZeros = phone.replace(/^0+/, '');
-        formattedNumber = `${countryCode}${phoneWithoutLeadingZeros}`;
-      }
-      window.location.href = `tel:${formattedNumber}`;
+      window.location.href = `tel:${phone}`;
     }
   };
 

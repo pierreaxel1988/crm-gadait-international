@@ -13,7 +13,6 @@ export interface Lead {
   name: string;
   email: string;
   phone?: string;
-  phoneCountryCode?: string;
   location?: string;
   status: LeadStatus;
   tags: LeadTag[];
@@ -85,42 +84,8 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
     
     if (lead.phone) {
       // Format phone number for WhatsApp (remove spaces and any non-digit characters except +)
-      let phoneWithCode = lead.phone;
-      
-      // If we have a country code and the phone doesn't start with +, prepend the country code
-      if (lead.phoneCountryCode && !lead.phone.startsWith('+')) {
-        // Make sure the country code has a + prefix
-        const countryCode = lead.phoneCountryCode.startsWith('+') 
-          ? lead.phoneCountryCode 
-          : `+${lead.phoneCountryCode}`;
-          
-        // Remove leading zeros from the phone number when adding international code
-        const phoneWithoutLeadingZeros = lead.phone.replace(/^0+/, '');
-        phoneWithCode = `${countryCode}${phoneWithoutLeadingZeros}`;
-      }
-      
-      // Clean the phone number for WhatsApp (remove spaces and non-digits except +)
-      const cleanedPhone = phoneWithCode.replace(/[^\d+]/g, '');
+      const cleanedPhone = lead.phone.replace(/[^\d+]/g, '');
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
-    }
-  };
-
-  const handlePhoneClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (lead.phone) {
-      let formattedNumber = lead.phone;
-      if (lead.phoneCountryCode && !lead.phone.startsWith('+')) {
-        // Make sure the country code has a + prefix
-        const countryCode = lead.phoneCountryCode.startsWith('+') 
-          ? lead.phoneCountryCode 
-          : `+${lead.phoneCountryCode}`;
-          
-        // Remove leading zeros from the phone number when adding international code
-        const phoneWithoutLeadingZeros = lead.phone.replace(/^0+/, '');
-        formattedNumber = `${countryCode}${phoneWithoutLeadingZeros}`;
-      }
-      window.location.href = `tel:${formattedNumber}`;
     }
   };
 
@@ -139,11 +104,7 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
           {lead.phone && (
             <div className="flex items-center text-sm text-muted-foreground mt-1 gap-2">
               <div className="flex items-center">
-                <Phone 
-                  className="h-3.5 w-3.5 mr-1 cursor-pointer hover:text-green-600" 
-                  onClick={handlePhoneClick}
-                  title="Appeler"
-                />
+                <Phone className="h-3.5 w-3.5 mr-1" />
                 <span>{lead.phone}</span>
               </div>
               <button 

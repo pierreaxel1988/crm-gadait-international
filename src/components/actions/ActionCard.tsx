@@ -62,22 +62,8 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
     e.stopPropagation();
     
     if (action.phoneNumber) {
-      let phoneWithCode = action.phoneNumber;
-      
-      // If we have a country code and the phone doesn't start with +, prepend the country code
-      if (action.phoneCountryCode && !action.phoneNumber.startsWith('+')) {
-        // Make sure the country code has a + prefix
-        const countryCode = action.phoneCountryCode.startsWith('+') 
-          ? action.phoneCountryCode 
-          : `+${action.phoneCountryCode}`;
-          
-        // Remove leading zeros from the phone number when adding international code
-        const phoneWithoutLeadingZeros = action.phoneNumber.replace(/^0+/, '');
-        phoneWithCode = `${countryCode}${phoneWithoutLeadingZeros}`;
-      }
-      
-      // Clean the phone number for WhatsApp
-      const cleanedPhone = phoneWithCode.replace(/[^\d+]/g, '');
+      // Format phone number for WhatsApp (remove spaces and any non-digit characters except +)
+      const cleanedPhone = action.phoneNumber.replace(/[^\d+]/g, '');
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
@@ -86,18 +72,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
     e.stopPropagation();
     
     if (action.phoneNumber) {
-      let formattedNumber = action.phoneNumber;
-      if (action.phoneCountryCode && !action.phoneNumber.startsWith('+')) {
-        // Make sure the country code has a + prefix
-        const countryCode = action.phoneCountryCode.startsWith('+') 
-          ? action.phoneCountryCode 
-          : `+${action.phoneCountryCode}`;
-          
-        // Remove leading zeros from the phone number when adding international code
-        const phoneWithoutLeadingZeros = action.phoneNumber.replace(/^0+/, '');
-        formattedNumber = `${countryCode}${phoneWithoutLeadingZeros}`;
-      }
-      window.location.href = `tel:${formattedNumber}`;
+      window.location.href = `tel:${action.phoneNumber}`;
     }
   };
   
@@ -124,11 +99,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
         <div>
           <div className={`font-medium ${action.status === 'done' ? 'text-gray-600' : ''}`}>{action.leadName}</div>
           <div className="text-sm text-muted-foreground mb-1">{action.assignedToName}</div>
-          <TaskTypeIndicator 
-            taskType={action.actionType} 
-            phoneNumber={action.phoneNumber} 
-            phoneCountryCode={action.phoneCountryCode}
-          />
+          <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />
         </div>
         <div>
           {getStatusBadge(action.status)}

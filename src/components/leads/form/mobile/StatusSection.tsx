@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadTag } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -143,6 +144,8 @@ const StatusSection: React.FC<StatusSectionProps> = ({
           </div>
         </div>
 
+        {/* Removed "Actions rapides" section */}
+        
         <div className="space-y-2">
           <Label className="text-sm">Tags</Label>
           <MultiSelectButtons
@@ -256,18 +259,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
                         onClick={() => {
                           setIsCallDialogOpen(false);
                           if (lead.phone) {
-                            let phoneWithCode = lead.phone;
-                            
-                            if (lead.phoneCountryCode && !lead.phone.startsWith('+')) {
-                              const countryCode = lead.phoneCountryCode.startsWith('+') 
-                                ? lead.phoneCountryCode 
-                                : `+${lead.phoneCountryCode}`;
-                                
-                              const phoneWithoutLeadingZeros = lead.phone.replace(/^0+/, '');
-                              phoneWithCode = `${countryCode}${phoneWithoutLeadingZeros}`;
-                            }
-                            
-                            const cleanedPhone = phoneWithCode.replace(/[^\d+]/g, '');
+                            const cleanedPhone = lead.phone.replace(/[^\d+]/g, '');
                             window.open(`https://wa.me/${cleanedPhone}`, '_blank');
                           }
                         }}

@@ -38,11 +38,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
 
       // Get all leads with action history
       console.log("Fetching leads with action history...");
-      
-      // Make sure to use the exact column names as they appear in the database
-      let query = supabase
-        .from('leads')
-        .select('id, name, phone, email, action_history, assigned_to, status, phoneCountryCode');
+      let query = supabase.from('leads').select('id, name, phone, email, action_history, assigned_to, status');
       
       // If user is commercial, only get their assigned leads
       if (isCommercial && currentTeamMember) {
@@ -57,58 +53,52 @@ export const useActionsData = (refreshTrigger: number = 0) => {
         throw leadsError;
       }
 
-      console.log(`Fetched ${leads?.length || 0} leads:`, leads);
+      console.log(`Fetched ${leads?.length || 0} leads`);
       
       // Extract all actions from leads
       const allActions: ActionItem[] = [];
       
-      if (leads) {
-        leads.forEach(lead => {
-          if (!lead || !lead.action_history || !Array.isArray(lead.action_history)) {
-            console.log("Skipping lead without action_history:", lead?.id);
-            return;
-          }
+      leads?.forEach(lead => {
+        if (!lead.action_history || !Array.isArray(lead.action_history)) return;
+        
+        lead.action_history.forEach((action: any) => {
+          if (!action || !action.id) return;
           
-          lead.action_history.forEach((action: any) => {
-            if (!action || !action.id) return;
-            
-            // Determine action status
-            let status: ActionStatus;
-            if (action.completedDate) {
-              status = 'done';
-            } else if (action.scheduledDate) {
-              const scheduledDate = new Date(action.scheduledDate);
-              if (isPast(scheduledDate) && !isToday(scheduledDate)) {
-                status = 'overdue';
-              } else {
-                status = 'todo';
-              }
+          // Determine action status
+          let status: ActionStatus;
+          if (action.completedDate) {
+            status = 'done';
+          } else if (action.scheduledDate) {
+            const scheduledDate = new Date(action.scheduledDate);
+            if (isPast(scheduledDate) && !isToday(scheduledDate)) {
+              status = 'overdue';
             } else {
               status = 'todo';
             }
-            
-            // Find assigned team member name
-            const assignedTeamMember = teamMembers?.find(tm => tm.id === lead.assigned_to);
-            
-            allActions.push({
-              id: action.id,
-              leadId: lead.id,
-              leadName: lead.name || 'Lead sans nom',
-              actionType: action.actionType,
-              createdAt: action.createdAt,
-              scheduledDate: action.scheduledDate,
-              completedDate: action.completedDate,
-              notes: action.notes,
-              assignedToId: lead.assigned_to,
-              assignedToName: assignedTeamMember?.name || 'Non assigné',
-              status,
-              phoneNumber: lead.phone,
-              phoneCountryCode: lead.phoneCountryCode,
-              email: lead.email
-            });
+          } else {
+            status = 'todo';
+          }
+          
+          // Find assigned team member name
+          const assignedTeamMember = teamMembers?.find(tm => tm.id === lead.assigned_to);
+          
+          allActions.push({
+            id: action.id,
+            leadId: lead.id,
+            leadName: lead.name || 'Lead sans nom',
+            actionType: action.actionType,
+            createdAt: action.createdAt,
+            scheduledDate: action.scheduledDate,
+            completedDate: action.completedDate,
+            notes: action.notes,
+            assignedToId: lead.assigned_to,
+            assignedToName: assignedTeamMember?.name || 'Non assigné',
+            status,
+            phoneNumber: lead.phone,
+            email: lead.email
           });
         });
-      }
+      });
       
       console.log(`Extracted ${allActions.length} actions`);
 

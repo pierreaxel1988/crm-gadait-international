@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LeadForm from '@/components/leads/LeadForm';
@@ -87,6 +88,7 @@ const LeadEdit = () => {
         });
         
         if (id) {
+          // Refresh lead data after update
           const refreshedLead = await getLead(id);
           if (refreshedLead) {
             console.log("Lead refreshed after update:", refreshedLead);
@@ -145,12 +147,6 @@ const LeadEdit = () => {
     navigate('/pipeline');
   };
 
-  const handlePhoneCall = () => {
-    if (lead && lead.phone) {
-      window.location.href = `tel:${lead.phone}`;
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="p-4 md:p-6 flex justify-center items-center h-[80vh]">
@@ -181,7 +177,6 @@ const LeadEdit = () => {
         onAddAction={handleAddAction} 
         onDelete={handleDelete}
         onSave={handleSaveClick}
-        onPhoneCall={handlePhoneCall}
         isSaving={isSaving}
         hasChanges={hasChanges}
       />

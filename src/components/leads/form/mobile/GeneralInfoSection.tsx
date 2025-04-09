@@ -354,7 +354,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   }, []);
 
   const handleInputChange = (field: keyof LeadDetailed, value: any) => {
-    console.log(`Changing field ${field} to value:`, value);
     onDataChange({
       [field]: value
     });
@@ -376,7 +375,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   };
 
   const handleCountryCodeChange = (code: string, flag: string) => {
-    console.log("Country code changing to:", code, flag);
     handleInputChange('phoneCountryCode', code);
     handleInputChange('phoneCountryCodeDisplay', flag);
     setIsCountryCodeOpen(false);

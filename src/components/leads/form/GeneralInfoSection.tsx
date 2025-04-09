@@ -128,8 +128,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           countryCode={formData.phoneCountryCode || '+33'}
           countryCodeDisplay={formData.phoneCountryCodeDisplay || '🇫🇷'}
           onCountryCodeChange={(code) => {
-            console.log("Country code changed to:", code);
-            
             const e = {
               target: {
                 name: 'phoneCountryCode',

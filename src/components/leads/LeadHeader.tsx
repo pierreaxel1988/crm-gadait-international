@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, Plus, Trash2, MapPin, Euro, Save, Loader2, Phone } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, MapPin, Euro, Save, Loader2 } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
 import CustomButton from '@/components/ui/CustomButton';
 import { formatBudget } from '@/services/utils/leadMappers';
@@ -13,7 +13,6 @@ interface LeadHeaderProps {
   onAddAction: () => void;
   onDelete: () => void;
   onSave?: () => void;
-  onPhoneCall?: () => void;
   isSaving?: boolean;
   hasChanges?: boolean;
   compact?: boolean;
@@ -25,7 +24,6 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
   onAddAction,
   onDelete,
   onSave,
-  onPhoneCall,
   isSaving = false,
   hasChanges = false,
   compact = false,
@@ -67,25 +65,6 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
     }
   };
 
-  const handlePhoneCall = () => {
-    if (onPhoneCall) {
-      onPhoneCall();
-    } else if (lead?.phone) {
-      let formattedNumber = lead.phone;
-      if (lead.phoneCountryCode && !lead.phone.startsWith('+')) {
-        // Make sure the country code has a + prefix
-        const countryCode = lead.phoneCountryCode.startsWith('+') 
-          ? lead.phoneCountryCode 
-          : `+${lead.phoneCountryCode}`;
-          
-        // Remove leading zeros from the phone number when adding international code
-        const phoneWithoutLeadingZeros = lead.phone.replace(/^0+/, '');
-        formattedNumber = `${countryCode}${phoneWithoutLeadingZeros}`;
-      }
-      window.location.href = `tel:${formattedNumber}`;
-    }
-  };
-
   return (
     <div className={`flex flex-col gap-${compact || isMobile ? '2' : '3'} sticky top-0 z-40 bg-white ${compact ? 'pb-2 pt-2 px-2' : 'pb-3 pt-3 px-3'} border-b border-gray-100 shadow-sm`}>
       <div className="flex justify-between items-center">
@@ -102,16 +81,6 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
           </h1>
         </div>
         <div className="flex items-center gap-1.5">
-          {lead?.phone && (
-            <CustomButton 
-              variant="outline" 
-              onClick={handlePhoneCall} 
-              className={`w-auto ${compact || isMobile ? 'p-1.5' : 'p-2'} rounded text-green-600 hover:bg-green-50 border-green-200`}
-              title="Appeler"
-            >
-              <Phone className={`${compact || isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'}`} />
-            </CustomButton>
-          )}
           {onSave && (
             <CustomButton 
               variant="chocolate" 
