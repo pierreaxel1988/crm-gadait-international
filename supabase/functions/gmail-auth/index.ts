@@ -7,7 +7,8 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const GOOGLE_CLIENT_ID = '87876889304-jgq4aon6dia70esiul86hogss2l11e4d.apps.googleusercontent.com';
 const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET')!;
-const REDIRECT_URI = 'https://success.gadait-international.com/oauth/callback';
+// Utilizing the redirectUri from the request instead of hardcoding it
+let REDIRECT_URI = 'https://success.gadait-international.com/oauth/callback';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -30,13 +31,17 @@ serve(async (req) => {
 
   try {
     const { action, code, state, redirectUri } = await req.json();
+    
+    // Log the request for debugging
+    console.log("Gmail auth request:", { action, redirectUri });
 
     // Step 1: Generate authorization URL
     if (action === 'authorize') {
       const state = generateState();
       
-      // Store the state in a secure table for verification later
-      // This step depends on your application's architecture
+      // Use the provided redirect URI or fallback to the default
+      const finalRedirectUri = redirectUri || 'https://success.gadait-international.com/leads';
+      console.log("Using redirect URI:", finalRedirectUri);
       
       // Gmail API scopes - modify as needed
       const scopes = [
@@ -55,9 +60,11 @@ serve(async (req) => {
         `&access_type=offline` +
         `&prompt=consent` +
         `&state=${encodeURIComponent(JSON.stringify({
-          redirectUri: redirectUri || '',
+          redirectUri: finalRedirectUri,
           state: state
         }))}`;
+      
+      console.log("Generated auth URL (partial):", authorizationUrl.substring(0, 100) + "...");
       
       return new Response(JSON.stringify({ authorizationUrl }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders },

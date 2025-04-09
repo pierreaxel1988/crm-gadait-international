@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -75,15 +76,26 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
 
   const connectGmail = async () => {
     try {
+      console.log('Starting Gmail connection process for lead:', leadId);
+      
+      // Build full redirect URL including the tab parameter
+      const currentUrl = window.location.href;
+      const redirectUri = currentUrl.includes('?') 
+        ? currentUrl 
+        : `${currentUrl}?tab=emails`;
+      
+      console.log('Using redirect URI:', redirectUri);
+      
       const {
         data,
         error
       } = await supabase.functions.invoke('gmail-auth', {
         body: {
-          redirectUri: window.location.origin + '/leads/' + leadId + '?tab=emails',
+          redirectUri: redirectUri,
           action: 'authorize'
         }
       });
+      
       if (error) {
         console.error('Error starting Gmail auth:', error);
         toast({
@@ -93,6 +105,8 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         });
         return;
       }
+      
+      console.log('Received authorization URL, redirecting user');
       window.location.href = data.authorizationUrl;
     } catch (error) {
       console.error('Error in connectGmail:', error);
@@ -202,6 +216,9 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         <Mail className="h-5 w-5" />
         <span className="font-medium">Connecter Gmail</span>
       </Button>
+      <p className="text-xs text-gray-400 mt-2 text-center">
+        En cas d'erreur 403, vérifiez la configuration OAuth dans Google Cloud Console
+      </p>
     </div>;
   }
 
