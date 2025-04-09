@@ -101,7 +101,11 @@ export function useLeadDetail(id: string | undefined) {
     
     // Ensure country code is present
     const countryCode = lead.phoneCountryCode || '+33';
-    const phoneNumber = lead.phone.startsWith('+') ? lead.phone : lead.phone.startsWith('0') ? lead.phone.substring(1) : lead.phone;
+    const phoneNumber = lead.phone.startsWith('+') 
+      ? lead.phone.substring(1) // Remove + if it exists
+      : lead.phone.startsWith('0') 
+        ? lead.phone.substring(1) // Remove leading 0 if it exists
+        : lead.phone;
     
     // Assemble the complete number with country code
     return `${countryCode}${phoneNumber}`;
