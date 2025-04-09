@@ -207,17 +207,17 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({ leadId }) => {
   // If not connected to Gmail, show connection prompt
   if (!isConnected) {
     return (
-      <div className="p-4 flex flex-col items-center justify-center space-y-4">
+      <div className="p-4 flex flex-col items-center justify-center space-y-4 pt-8">
         <div className="bg-loro-pearl/30 rounded-full p-4">
           <Mail className="h-8 w-8 text-loro-hazel" />
         </div>
         <h3 className="font-semibold text-lg">Connectez votre compte Gmail</h3>
-        <p className="text-gray-500 text-center text-sm">
+        <p className="text-gray-500 text-center text-sm mb-4">
           Connectez votre compte Gmail pour synchroniser les emails avec ce lead.
         </p>
         <Button
           onClick={connectGmail}
-          className="mt-4 flex items-center gap-2 bg-loro-dark hover:bg-loro-chocolate"
+          className="w-full max-w-xs flex items-center justify-center gap-2 bg-loro-dark hover:bg-loro-chocolate"
         >
           <Mail className="h-4 w-4" />
           Connecter Gmail
