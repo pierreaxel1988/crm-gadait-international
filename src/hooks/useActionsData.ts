@@ -38,7 +38,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
 
       // Get all leads with action history
       console.log("Fetching leads with action history...");
-      let query = supabase.from('leads').select('id, name, phone, email, action_history, assigned_to, status');
+      let query = supabase.from('leads').select('id, name, phone, email, action_history, assigned_to, status, phone_country_code');
       
       // If user is commercial, only get their assigned leads
       if (isCommercial && currentTeamMember) {
@@ -95,6 +95,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
             assignedToName: assignedTeamMember?.name || 'Non assigné',
             status,
             phoneNumber: lead.phone,
+            phoneCountryCode: lead.phone_country_code,
             email: lead.email
           });
         });
