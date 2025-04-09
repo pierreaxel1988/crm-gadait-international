@@ -1,1 +1,11 @@
+
 project_id = "hxqoqkfnhbpwzkjgukrc"
+
+[functions.gmail-auth]
+verify_jwt = true
+
+[functions.gmail-sync]
+verify_jwt = true
+
+[functions.oauth-callback]
+verify_jwt = false

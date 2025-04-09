@@ -21,6 +21,7 @@ import StatusSection from '@/components/leads/form/mobile/StatusSection';
 import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSection';
 import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
 import NotesSection from '@/components/leads/form/mobile/NotesSection';
+import EmailsTab from '@/components/leads/mobile/tabs/EmailsTab';
 
 const LeadDetailMobile = () => {
   const { id } = useParams<{ id: string }>();
@@ -286,6 +287,10 @@ const LeadDetailMobile = () => {
                 onMarkComplete={handleMarkComplete} 
                 actionHistory={lead.actionHistory || []}
               />
+            </TabsContent>
+            
+            <TabsContent value="emails" className="h-full pb-16">
+              <EmailsTab leadId={id || ''} />
             </TabsContent>
           </div>
         </Tabs>

@@ -95,16 +95,27 @@ export function useLeadDetail(id: string | undefined) {
     setHasChanges(true);
   };
 
-  // Fonction pour formater un numéro de téléphone pour les appels
+  // Format a phone number for calls
   const getFormattedPhoneForCall = () => {
     if (!lead?.phone) return '';
     
-    // S'assurer que le code pays est présent
+    // Ensure country code is present
     const countryCode = lead.phoneCountryCode || '+33';
     const phoneNumber = lead.phone.startsWith('+') ? lead.phone : lead.phone.startsWith('0') ? lead.phone.substring(1) : lead.phone;
     
-    // Assembler le numéro complet avec le code pays
+    // Assemble the complete number with country code
     return `${countryCode}${phoneNumber}`;
+  };
+  
+  // Format a phone number for WhatsApp
+  const getFormattedPhoneForWhatsApp = () => {
+    if (!lead?.phone) return '';
+    
+    // Get formatted phone for international format (same as call)
+    const fullPhone = getFormattedPhoneForCall();
+    
+    // Remove any non-digit characters for WhatsApp
+    return fullPhone.replace(/\D/g, '');
   };
 
   return {
@@ -118,6 +129,7 @@ export function useLeadDetail(id: string | undefined) {
     handleSave,
     handleDataChange,
     fetchLead,
-    getFormattedPhoneForCall
+    getFormattedPhoneForCall,
+    getFormattedPhoneForWhatsApp
   };
 }

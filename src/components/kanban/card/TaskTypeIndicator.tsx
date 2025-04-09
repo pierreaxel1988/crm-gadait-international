@@ -26,7 +26,7 @@ const TaskTypeIndicator = ({
   const handlePhoneClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (taskType === 'Call' && phoneNumber) {
-      // Utilisez le code pays s'il est disponible
+      // Use country code if available
       const formattedPhone = phoneNumber.startsWith('+') ? 
         phoneNumber : 
         `${phoneCountryCode}${phoneNumber.startsWith('0') ? phoneNumber.substring(1) : phoneNumber}`;

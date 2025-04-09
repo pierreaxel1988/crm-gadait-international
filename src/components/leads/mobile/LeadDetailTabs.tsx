@@ -25,7 +25,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({ defaultTab = "criteria"
 
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="w-full grid grid-cols-5 bg-transparent">
+      <TabsList className="w-full grid grid-cols-6 bg-transparent">
         <TabsTrigger 
           value="info"
           className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs"
@@ -55,6 +55,12 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({ defaultTab = "criteria"
           className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs"
         >
           Actions
+        </TabsTrigger>
+        <TabsTrigger 
+          value="emails"
+          className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs"
+        >
+          Emails
         </TabsTrigger>
       </TabsList>
     </Tabs>

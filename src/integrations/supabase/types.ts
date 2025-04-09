@@ -45,6 +45,69 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_emails: {
+        Row: {
+          body_html: string | null
+          body_text: string | null
+          created_at: string
+          date: string
+          gmail_message_id: string
+          id: string
+          is_sent: boolean
+          lead_id: string
+          recipient: string
+          sender: string
+          snippet: string | null
+          subject: string | null
+          user_id: string
+        }
+        Insert: {
+          body_html?: string | null
+          body_text?: string | null
+          created_at?: string
+          date: string
+          gmail_message_id: string
+          id?: string
+          is_sent: boolean
+          lead_id: string
+          recipient: string
+          sender: string
+          snippet?: string | null
+          subject?: string | null
+          user_id: string
+        }
+        Update: {
+          body_html?: string | null
+          body_text?: string | null
+          created_at?: string
+          date?: string
+          gmail_message_id?: string
+          id?: string
+          is_sent?: boolean
+          lead_id?: string
+          recipient?: string
+          sender?: string
+          snippet?: string | null
+          subject?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_emails_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_emails_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           action_history: Json | null
@@ -321,6 +384,50 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      user_email_connections: {
+        Row: {
+          access_token: string
+          created_at: string
+          email: string
+          id: string
+          provider: string
+          refresh_token: string
+          token_expiry: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          email: string
+          id?: string
+          provider?: string
+          refresh_token: string
+          token_expiry: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          email?: string
+          id?: string
+          provider?: string
+          refresh_token?: string
+          token_expiry?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_email_connections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
