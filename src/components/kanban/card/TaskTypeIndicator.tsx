@@ -8,11 +8,12 @@ interface TaskTypeIndicatorProps {
   taskType?: TaskType;
   className?: string;
   phoneNumber?: string;
+  phoneCountryCode?: string;
   nextFollowUpDate?: string;
   isOverdue?: boolean;
 }
 
-const TaskTypeIndicator = ({ taskType, className, phoneNumber, nextFollowUpDate, isOverdue }: TaskTypeIndicatorProps) => {
+const TaskTypeIndicator = ({ taskType, className, phoneNumber, phoneCountryCode, nextFollowUpDate, isOverdue }: TaskTypeIndicatorProps) => {
   if (!taskType) return null;
 
   const handlePhoneClick = (e: React.MouseEvent) => {
