@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,14 +36,12 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({ leadId }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { lead } = useLeadDetail(leadId);
 
-  // Check if user has connected Gmail
   useEffect(() => {
     async function checkEmailConnection() {
       if (!user) return;
       
       try {
         setIsLoading(true);
-        // Use raw query to bypass TypeScript errors with dynamic table access
         const { data, error } = await supabase
           .from('user_email_connections')
           .select('email, id')
@@ -76,7 +73,6 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({ leadId }) => {
 
   const connectGmail = async () => {
     try {
-      // Get the URL for the Gmail OAuth flow
       const { data, error } = await supabase.functions.invoke('gmail-auth', {
         body: { 
           redirectUri: window.location.origin + '/leads/' + leadId + '?tab=emails',
@@ -94,7 +90,6 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({ leadId }) => {
         return;
       }
       
-      // Redirect to Google's OAuth page
       window.location.href = data.authorizationUrl;
     } catch (error) {
       console.error('Error in connectGmail:', error);
@@ -112,7 +107,6 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({ leadId }) => {
     try {
       setIsRefreshing(true);
       
-      // Fetch emails related to this lead from our database using raw query
       const { data, error } = await supabase
         .from('lead_emails')
         .select('*')
@@ -177,8 +171,6 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({ leadId }) => {
   const sendNewEmail = () => {
     if (!lead) return;
     
-    // For now, just use mailto: link
-    // Later this can be replaced with a proper email composer in the app
     const mailtoLink = `mailto:${lead.email}?subject=RE: ${lead.name}`;
     window.open(mailtoLink, '_blank');
   };
@@ -194,7 +186,6 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({ leadId }) => {
     });
   };
 
-  // Display loading state
   if (isLoading) {
     return (
       <div className="p-4 flex flex-col items-center justify-center h-40">
@@ -204,7 +195,6 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({ leadId }) => {
     );
   }
 
-  // If not connected to Gmail, show connection prompt
   if (!isConnected) {
     return (
       <div className="p-4 flex flex-col items-center justify-center space-y-4 pt-8">
@@ -215,12 +205,12 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({ leadId }) => {
         <p className="text-gray-500 text-center text-sm mb-4">
           Connectez votre compte Gmail pour synchroniser les emails avec ce lead.
         </p>
-        <Button
+        <Button 
           onClick={connectGmail}
-          className="w-full max-w-xs flex items-center justify-center gap-2 bg-loro-dark hover:bg-loro-chocolate"
+          className="w-full max-w-xs flex items-center justify-center gap-2 bg-loro-hazel hover:bg-loro-500 text-white shadow-md py-6 rounded-md"
         >
-          <Mail className="h-4 w-4" />
-          Connecter Gmail
+          <Mail className="h-5 w-5" />
+          <span className="font-medium">Connecter Gmail</span>
         </Button>
       </div>
     );
