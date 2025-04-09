@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -199,7 +198,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       <p className="text-gray-500 text-center text-sm mb-4">
         Connectez votre compte Gmail pour synchroniser les emails avec ce lead.
       </p>
-      <Button onClick={connectGmail} className="w-full max-w-xs flex items-center justify-center gap-2 text-white shadow-md py-6 rounded-md bg-loro-hazel hover:bg-loro-hazel/90">
+      <Button onClick={connectGmail} className="w-full max-w-xs flex items-center justify-center gap-2 text-white shadow-md py-6 rounded-md bg-loro-terracotta hover:bg-loro-terracotta/90">
         <Mail className="h-5 w-5" />
         <span className="font-medium">Connecter Gmail</span>
       </Button>
