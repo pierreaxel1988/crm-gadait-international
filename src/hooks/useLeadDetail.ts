@@ -87,6 +87,8 @@ export function useLeadDetail(id: string | undefined) {
   const handleDataChange = (data: Partial<LeadDetailed>) => {
     if (!lead) return;
     
+    console.log("Data change triggered:", data);
+    
     setLead(prev => {
       if (!prev) return prev;
       return { ...prev, ...data };

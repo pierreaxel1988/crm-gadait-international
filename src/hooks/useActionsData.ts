@@ -38,6 +38,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
 
       // Get all leads with action history
       console.log("Fetching leads with action history...");
+      // Note: using phone_country_code column that exists in the database
       let query = supabase.from('leads').select('id, name, phone, email, action_history, assigned_to, status, phone_country_code');
       
       // If user is commercial, only get their assigned leads
