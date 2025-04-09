@@ -38,6 +38,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
 
       // Get all leads with action history
       console.log("Fetching leads with action history...");
+      
       // Make sure to use the exact column names as they appear in the database
       let query = supabase
         .from('leads')
@@ -63,7 +64,10 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       
       if (leads) {
         leads.forEach(lead => {
-          if (!lead.action_history || !Array.isArray(lead.action_history)) return;
+          if (!lead || !lead.action_history || !Array.isArray(lead.action_history)) {
+            console.log("Skipping lead without action_history:", lead?.id);
+            return;
+          }
           
           lead.action_history.forEach((action: any) => {
             if (!action || !action.id) return;

@@ -71,7 +71,18 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
     if (onPhoneCall) {
       onPhoneCall();
     } else if (lead?.phone) {
-      window.location.href = `tel:${lead.phone}`;
+      let formattedNumber = lead.phone;
+      if (lead.phoneCountryCode && !lead.phone.startsWith('+')) {
+        // Make sure the country code has a + prefix
+        const countryCode = lead.phoneCountryCode.startsWith('+') 
+          ? lead.phoneCountryCode 
+          : `+${lead.phoneCountryCode}`;
+          
+        // Remove leading zeros from the phone number when adding international code
+        const phoneWithoutLeadingZeros = lead.phone.replace(/^0+/, '');
+        formattedNumber = `${countryCode}${phoneWithoutLeadingZeros}`;
+      }
+      window.location.href = `tel:${formattedNumber}`;
     }
   };
 

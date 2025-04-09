@@ -86,7 +86,18 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
     e.stopPropagation();
     
     if (action.phoneNumber) {
-      window.location.href = `tel:${action.phoneNumber}`;
+      let formattedNumber = action.phoneNumber;
+      if (action.phoneCountryCode && !action.phoneNumber.startsWith('+')) {
+        // Make sure the country code has a + prefix
+        const countryCode = action.phoneCountryCode.startsWith('+') 
+          ? action.phoneCountryCode 
+          : `+${action.phoneCountryCode}`;
+          
+        // Remove leading zeros from the phone number when adding international code
+        const phoneWithoutLeadingZeros = action.phoneNumber.replace(/^0+/, '');
+        formattedNumber = `${countryCode}${phoneWithoutLeadingZeros}`;
+      }
+      window.location.href = `tel:${formattedNumber}`;
     }
   };
   
@@ -113,7 +124,11 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
         <div>
           <div className={`font-medium ${action.status === 'done' ? 'text-gray-600' : ''}`}>{action.leadName}</div>
           <div className="text-sm text-muted-foreground mb-1">{action.assignedToName}</div>
-          <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />
+          <TaskTypeIndicator 
+            taskType={action.actionType} 
+            phoneNumber={action.phoneNumber} 
+            phoneCountryCode={action.phoneCountryCode}
+          />
         </div>
         <div>
           {getStatusBadge(action.status)}

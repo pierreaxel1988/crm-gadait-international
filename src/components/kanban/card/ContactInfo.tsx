@@ -40,7 +40,18 @@ const ContactInfo = ({ email, phone, phoneCountryCode, leadId }: ContactInfoProp
   const handlePhoneClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click when clicking on phone
     if (phone) {
-      window.location.href = `tel:${phone}`;
+      let formattedNumber = phone;
+      if (phoneCountryCode && !phone.startsWith('+')) {
+        // Make sure the country code has a + prefix
+        const countryCode = phoneCountryCode.startsWith('+') 
+          ? phoneCountryCode 
+          : `+${phoneCountryCode}`;
+          
+        // Remove leading zeros from the phone number when adding international code
+        const phoneWithoutLeadingZeros = phone.replace(/^0+/, '');
+        formattedNumber = `${countryCode}${phoneWithoutLeadingZeros}`;
+      }
+      window.location.href = `tel:${formattedNumber}`;
     }
   };
 

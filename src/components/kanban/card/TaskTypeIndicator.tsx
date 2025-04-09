@@ -19,7 +19,19 @@ const TaskTypeIndicator = ({ taskType, className, phoneNumber, phoneCountryCode,
   const handlePhoneClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (taskType === 'Call' && phoneNumber) {
-      window.location.href = `tel:${phoneNumber}`;
+      // Format the phone number if needed with country code
+      let formattedNumber = phoneNumber;
+      if (phoneCountryCode && !phoneNumber.startsWith('+')) {
+        // Make sure the country code has a + prefix
+        const countryCode = phoneCountryCode.startsWith('+') 
+          ? phoneCountryCode 
+          : `+${phoneCountryCode}`;
+          
+        // Remove leading zeros from the phone number when adding international code
+        const phoneWithoutLeadingZeros = phoneNumber.replace(/^0+/, '');
+        formattedNumber = `${countryCode}${phoneWithoutLeadingZeros}`;
+      }
+      window.location.href = `tel:${formattedNumber}`;
     }
   };
   

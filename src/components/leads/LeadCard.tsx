@@ -105,6 +105,25 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
     }
   };
 
+  const handlePhoneClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (lead.phone) {
+      let formattedNumber = lead.phone;
+      if (lead.phoneCountryCode && !lead.phone.startsWith('+')) {
+        // Make sure the country code has a + prefix
+        const countryCode = lead.phoneCountryCode.startsWith('+') 
+          ? lead.phoneCountryCode 
+          : `+${lead.phoneCountryCode}`;
+          
+        // Remove leading zeros from the phone number when adding international code
+        const phoneWithoutLeadingZeros = lead.phone.replace(/^0+/, '');
+        formattedNumber = `${countryCode}${phoneWithoutLeadingZeros}`;
+      }
+      window.location.href = `tel:${formattedNumber}`;
+    }
+  };
+
   return (
     <div 
       className={cn('luxury-card p-5 scale-in cursor-pointer hover:shadow-md transition-shadow duration-200', className)}
@@ -120,7 +139,11 @@ const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
           {lead.phone && (
             <div className="flex items-center text-sm text-muted-foreground mt-1 gap-2">
               <div className="flex items-center">
-                <Phone className="h-3.5 w-3.5 mr-1" />
+                <Phone 
+                  className="h-3.5 w-3.5 mr-1 cursor-pointer hover:text-green-600" 
+                  onClick={handlePhoneClick}
+                  title="Appeler"
+                />
                 <span>{lead.phone}</span>
               </div>
               <button 

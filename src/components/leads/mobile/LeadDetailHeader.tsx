@@ -84,7 +84,18 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
     if (onPhoneCall) {
       onPhoneCall(e);
     } else if (phone) {
-      window.location.href = `tel:${phone}`;
+      let formattedNumber = phone;
+      if (phoneCountryCode && !phone.startsWith('+')) {
+        // Make sure the country code has a + prefix
+        const countryCode = phoneCountryCode.startsWith('+') 
+          ? phoneCountryCode 
+          : `+${phoneCountryCode}`;
+          
+        // Remove leading zeros from the phone number when adding international code
+        const phoneWithoutLeadingZeros = phone.replace(/^0+/, '');
+        formattedNumber = `${countryCode}${phoneWithoutLeadingZeros}`;
+      }
+      window.location.href = `tel:${formattedNumber}`;
     }
   };
 
