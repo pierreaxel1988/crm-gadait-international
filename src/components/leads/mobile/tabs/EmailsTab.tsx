@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -191,7 +192,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
 
   if (!isConnected) {
     return <div className="p-4 flex flex-col items-center justify-center space-y-4 pt-8">
-      <div className="bg-loro-pearl/30 rounded-full p-4 border-2 border-loro-hazel shadow-sm">
+      <div className="bg-loro-pearl/30 rounded-full p-4 border-2 border-loro-terracotta shadow-sm">
         <Mail className="h-8 w-8 text-loro-hazel" />
       </div>
       <h3 className="font-semibold text-lg">Connectez votre compte Gmail</h3>
