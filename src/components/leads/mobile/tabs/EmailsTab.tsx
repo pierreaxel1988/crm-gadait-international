@@ -193,7 +193,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
   if (!isConnected) {
     return <div className="p-4 flex flex-col items-center justify-center space-y-4 pt-8">
       <div className="bg-loro-pearl/30 rounded-full p-4 border-2 border-loro-terracotta shadow-sm">
-        <Mail className="h-8 w-8 text-loro-hazel" />
+        <Mail className="h-8 w-8 text-loro-terracotta" />
       </div>
       <h3 className="font-semibold text-lg">Connectez votre compte Gmail</h3>
       <p className="text-gray-500 text-center text-sm mb-4">
