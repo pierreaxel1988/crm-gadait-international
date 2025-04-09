@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 interface LeadContactActionsProps {
   phone?: string;
   email?: string;
+  phoneCountryCode?: string;
   handlePhoneCall: (e: React.MouseEvent) => void;
   handleWhatsAppClick: (e: React.MouseEvent) => void;
   handleEmailClick: (e: React.MouseEvent) => void;
@@ -14,6 +15,7 @@ interface LeadContactActionsProps {
 const LeadContactActions: React.FC<LeadContactActionsProps> = ({
   phone,
   email,
+  phoneCountryCode = '+33',
   handlePhoneCall,
   handleWhatsAppClick,
   handleEmailClick

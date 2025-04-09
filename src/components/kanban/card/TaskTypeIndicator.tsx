@@ -8,17 +8,30 @@ interface TaskTypeIndicatorProps {
   taskType?: TaskType;
   className?: string;
   phoneNumber?: string;
+  phoneCountryCode?: string;
   nextFollowUpDate?: string;
   isOverdue?: boolean;
 }
 
-const TaskTypeIndicator = ({ taskType, className, phoneNumber, nextFollowUpDate, isOverdue }: TaskTypeIndicatorProps) => {
+const TaskTypeIndicator = ({ 
+  taskType, 
+  className, 
+  phoneNumber, 
+  phoneCountryCode = '+33',
+  nextFollowUpDate, 
+  isOverdue 
+}: TaskTypeIndicatorProps) => {
   if (!taskType) return null;
 
   const handlePhoneClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (taskType === 'Call' && phoneNumber) {
-      window.location.href = `tel:${phoneNumber}`;
+      // Utilisez le code pays s'il est disponible
+      const formattedPhone = phoneNumber.startsWith('+') ? 
+        phoneNumber : 
+        `${phoneCountryCode}${phoneNumber.startsWith('0') ? phoneNumber.substring(1) : phoneNumber}`;
+      
+      window.location.href = `tel:${formattedPhone}`;
     }
   };
   

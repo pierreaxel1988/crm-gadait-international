@@ -25,6 +25,24 @@ const LANGUAGE_OPTIONS = [
   { value: "中文", label: "中文" }
 ];
 
+// Codes pays les plus courants
+const COMMON_COUNTRY_CODES = [
+  { code: '+33', country: 'France', flag: '🇫🇷' },
+  { code: '+1', country: 'United States/Canada', flag: '🇺🇸' },
+  { code: '+44', country: 'United Kingdom', flag: '🇬🇧' },
+  { code: '+34', country: 'Spain', flag: '🇪🇸' },
+  { code: '+39', country: 'Italy', flag: '🇮🇹' },
+  { code: '+49', country: 'Germany', flag: '🇩🇪' },
+  { code: '+41', country: 'Switzerland', flag: '🇨🇭' },
+  { code: '+32', country: 'Belgium', flag: '🇧🇪' },
+  { code: '+31', country: 'Netherlands', flag: '🇳🇱' },
+  { code: '+351', country: 'Portugal', flag: '🇵🇹' },
+  { code: '+212', country: 'Morocco', flag: '🇲🇦' },
+  { code: '+971', country: 'United Arab Emirates', flag: '🇦🇪' },
+  { code: '+230', country: 'Mauritius', flag: '🇲🇺' },
+  { code: '+248', country: 'Seychelles', flag: '🇸🇨' },
+];
+
 const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   formData,
   handleInputChange,
@@ -80,6 +98,48 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     };
   });
 
+  // Préparer les options de code pays avec drapeaux
+  const countryCodeOptions = COMMON_COUNTRY_CODES.map(({ code, country, flag }) => ({
+    value: code,
+    label: (
+      <div className="flex items-center gap-2">
+        <span className="text-lg">{flag}</span>
+        <span>{country}</span>
+        <span className="text-gray-500 ml-auto">{code}</span>
+      </div>
+    ),
+    textLabel: `${country} ${code}`
+  }));
+
+  // Définir l'affichage du code pays sélectionné
+  const getCountryCodeDisplay = (code: string) => {
+    const countryCode = COMMON_COUNTRY_CODES.find(cc => cc.code === code);
+    return countryCode ? countryCode.flag : '🌍';
+  };
+
+  // Gérer le changement de code pays
+  const handleCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const code = e.target.value;
+    
+    // Mettre à jour le code pays
+    const codeEvent = {
+      target: {
+        name: 'phoneCountryCode',
+        value: code
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    handleInputChange(codeEvent);
+    
+    // Mettre à jour l'affichage du code pays (drapeau)
+    const displayEvent = {
+      target: {
+        name: 'phoneCountryCodeDisplay',
+        value: getCountryCodeDisplay(code)
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    handleInputChange(displayEvent);
+  };
+
   return (
     <div className="space-y-4 overflow-y-auto pb-6">
       <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Information Générale</h2>
@@ -118,54 +178,28 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           placeholder="Adresse email"
         />
         
-        <FormInput
-          label="Téléphone"
-          name="phone"
-          type="tel-with-code"
-          value={formData.phone || ''}
-          onChange={handleInputChange}
-          placeholder="Numéro de téléphone"
-          countryCode={formData.phoneCountryCode || '+33'}
-          countryCodeDisplay={formData.phoneCountryCodeDisplay || '🇫🇷'}
-          onCountryCodeChange={(code) => {
-            const e = {
-              target: {
-                name: 'phoneCountryCode',
-                value: code
-              }
-            } as React.ChangeEvent<HTMLInputElement>;
-            handleInputChange(e);
-            
-            // Get flag emoji for the country code
-            const codeToCountry: Record<string, string> = {
-              '+1': '🇺🇸', '+33': '🇫🇷', '+44': '🇬🇧', '+34': '🇪🇸', '+39': '🇮🇹',
-              '+41': '🇨🇭', '+49': '🇩🇪', '+32': '🇧🇪', '+31': '🇳🇱', '+351': '🇵🇹',
-              '+30': '🇬🇷', '+46': '🇸🇪', '+47': '🇳🇴', '+45': '🇩🇰', '+358': '🇫🇮',
-              '+420': '🇨🇿', '+48': '🇵🇱', '+36': '🇭🇺', '+43': '🇦🇹', '+353': '🇮🇪',
-              '+352': '🇱🇺', '+377': '🇲🇨', '+7': '🇷🇺', '+380': '🇺🇦', '+40': '🇷🇴',
-              '+359': '🇧🇬', '+385': '🇭🇷', '+386': '🇸🇮', '+381': '🇷🇸', '+212': '🇲🇦',
-              '+213': '🇩🇿', '+216': '🇹🇳', '+20': '🇪🇬', '+27': '🇿🇦', '+234': '🇳🇬',
-              '+81': '🇯🇵', '+86': '🇨🇳', '+91': '🇮🇳', '+65': '🇸🇬', '+82': '🇰🇷',
-              '+971': '🇦🇪', '+966': '🇸🇦', '+974': '🇶🇦', '+961': '🇱🇧', '+972': '🇮🇱',
-              '+90': '🇹🇷', '+852': '🇭🇰', '+55': '🇧🇷', '+52': '🇲🇽', '+54': '🇦🇷',
-              '+56': '🇨🇱', '+57': '🇨🇴', '+58': '🇻🇪', '+51': '🇵🇪', '+61': '🇦🇺',
-              '+64': '🇳🇿', '+66': '🇹🇭', '+84': '🇻🇳', '+60': '🇲🇾', '+62': '🇮🇩',
-              '+63': '🇵🇭'
-            };
-            
-            const flagEmoji = codeToCountry[code] || '🌍';
-            
-            const eFlag = {
-              target: {
-                name: 'phoneCountryCodeDisplay',
-                value: flagEmoji
-              }
-            } as React.ChangeEvent<HTMLInputElement>;
-            handleInputChange(eFlag);
-          }}
-          searchable
-          showFlagsInDropdown
-        />
+        <div className="space-y-2">
+          <FormInput
+            label="Code pays"
+            name="phoneCountryCode"
+            type="select"
+            value={formData.phoneCountryCode || '+33'}
+            onChange={handleCountryCodeChange}
+            options={countryCodeOptions}
+            placeholder="Sélectionner un code pays"
+            searchable
+            searchByLabel
+          />
+          
+          <FormInput
+            label="Téléphone"
+            name="phone"
+            type="tel"
+            value={formData.phone || ''}
+            onChange={handleInputChange}
+            placeholder="Numéro de téléphone"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

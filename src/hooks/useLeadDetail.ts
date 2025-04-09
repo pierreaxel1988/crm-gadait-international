@@ -95,6 +95,18 @@ export function useLeadDetail(id: string | undefined) {
     setHasChanges(true);
   };
 
+  // Fonction pour formater un numéro de téléphone pour les appels
+  const getFormattedPhoneForCall = () => {
+    if (!lead?.phone) return '';
+    
+    // S'assurer que le code pays est présent
+    const countryCode = lead.phoneCountryCode || '+33';
+    const phoneNumber = lead.phone.startsWith('+') ? lead.phone : lead.phone.startsWith('0') ? lead.phone.substring(1) : lead.phone;
+    
+    // Assembler le numéro complet avec le code pays
+    return `${countryCode}${phoneNumber}`;
+  };
+
   return {
     lead,
     setLead,
@@ -105,6 +117,7 @@ export function useLeadDetail(id: string | undefined) {
     setAutoSaveEnabled,
     handleSave,
     handleDataChange,
-    fetchLead
+    fetchLead,
+    getFormattedPhoneForCall
   };
 }

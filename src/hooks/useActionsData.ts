@@ -36,7 +36,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       const currentTeamMember = isCommercial && user ? 
         teamMembers?.find(tm => tm.email === user.email) : null;
 
-      // Get all leads with action history
+      // Get all leads with action history - assurez-vous de ne pas sélectionner phoneCountryCode s'il n'existe pas
       console.log("Fetching leads with action history...");
       let query = supabase.from('leads').select('id, name, phone, email, action_history, assigned_to, status');
       
