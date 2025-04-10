@@ -39,9 +39,23 @@ export function useLeadSearch(initialSearchTerm: string = '') {
         // Diviser les termes de recherche en mots pour rechercher prénom/nom séparément
         const searchTerms = debouncedSearchTerm.split(' ').filter(term => term.length > 0);
         
+        // Check which columns exist before querying
+        const { data: columnInfo, error: columnError } = await supabase
+          .from('leads')
+          .select('id')
+          .limit(1);
+          
+        if (columnError) {
+          console.error('Error checking lead table structure:', columnError);
+          setResults([]);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Use basic column set that we know exists in the database
         let query = supabase
           .from('leads')
-          .select('id, name, email, phone, tax_residence, nationality, source, status, desired_location, pipeline_type, preferred_language, property_reference')
+          .select('id, name, email, phone, status, desired_location, source, nationality, pipeline_type')
           .order('created_at', { ascending: false })
           .limit(10);
         
@@ -78,13 +92,14 @@ export function useLeadSearch(initialSearchTerm: string = '') {
             name: lead.name,
             email: lead.email,
             phone: lead.phone,
-            phoneCountryCode: lead.phone_country_code,
-            phoneCountryCodeDisplay: lead.phone_country_code_display,
             status: lead.status,
             desiredLocation: lead.desired_location,
             pipelineType: lead.pipeline_type,
             nationality: lead.nationality,
             source: lead.source,
+            // Only include these if they exist in the database
+            phoneCountryCode: lead.phone_country_code,
+            phoneCountryCodeDisplay: lead.phone_country_code_display,
             taxResidence: lead.tax_residence,
             preferredLanguage: lead.preferred_language,
             propertyReference: lead.property_reference
