@@ -29,12 +29,35 @@ export function useLeadSearch(initialSearchTerm: string = '') {
       setIsLoading(true);
       
       try {
-        const { data, error } = await supabase
+        // Diviser les termes de recherche en mots pour rechercher prénom/nom séparément
+        const searchTerms = debouncedSearchTerm.split(' ').filter(term => term.length > 0);
+        
+        let query = supabase
           .from('leads')
           .select('id, name, email, phone, status, desired_location, pipeline_type')
-          .or(`name.ilike.%${debouncedSearchTerm}%, email.ilike.%${debouncedSearchTerm}%`)
           .order('created_at', { ascending: false })
           .limit(10);
+        
+        // Construction de la clause OR pour la recherche
+        let orConditions = [];
+        
+        // Toujours inclure la recherche par email
+        orConditions.push(`email.ilike.%${debouncedSearchTerm}%`);
+        
+        // Ajouter une condition pour le nom complet
+        orConditions.push(`name.ilike.%${debouncedSearchTerm}%`);
+        
+        // Si nous avons plusieurs termes, rechercher individuellement pour chaque partie du nom
+        if (searchTerms.length > 1) {
+          for (const term of searchTerms) {
+            if (term.length >= 2) {
+              orConditions.push(`name.ilike.%${term}%`);
+            }
+          }
+        }
+        
+        // Appliquer les conditions OR à la requête
+        const { data, error } = await query.or(orConditions.join(','));
 
         if (error) {
           console.error('Error searching leads:', error);
