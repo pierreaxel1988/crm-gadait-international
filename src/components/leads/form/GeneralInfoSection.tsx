@@ -1,9 +1,11 @@
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { FormInput } from './FormInput';
 import { LeadDetailed, LeadSource, Country } from '@/types/lead';
-import FormInput from './FormInput';
-import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 import { countryToFlag } from '@/utils/countryUtils';
+import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
+import { Search, ChevronDown, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 interface GeneralInfoSectionProps {
   formData: LeadDetailed;
@@ -25,39 +27,55 @@ const LANGUAGE_OPTIONS = [
   { value: "中文", label: "中文" }
 ];
 
-// Codes pays les plus courants
-const COMMON_COUNTRY_CODES = [
-  { code: '+33', country: 'France', flag: '🇫🇷' },
-  { code: '+1', country: 'United States/Canada', flag: '🇺🇸' },
-  { code: '+44', country: 'United Kingdom', flag: '🇬🇧' },
-  { code: '+34', country: 'Spain', flag: '🇪🇸' },
-  { code: '+39', country: 'Italy', flag: '🇮🇹' },
-  { code: '+49', country: 'Germany', flag: '🇩🇪' },
-  { code: '+41', country: 'Switzerland', flag: '🇨🇭' },
-  { code: '+32', country: 'Belgium', flag: '🇧🇪' },
-  { code: '+31', country: 'Netherlands', flag: '🇳🇱' },
-  { code: '+351', country: 'Portugal', flag: '🇵🇹' },
-  { code: '+212', country: 'Morocco', flag: '🇲🇦' },
-  { code: '+971', country: 'United Arab Emirates', flag: '🇦🇪' },
-  { code: '+230', country: 'Mauritius', flag: '🇲🇺' },
-  { code: '+248', country: 'Seychelles', flag: '🇸🇨' },
-];
-
 const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   formData,
   handleInputChange,
   countries,
   sources
 }) => {
-  // Handle tax residence country change
-  const handleTaxResidenceChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    handleInputChange(e);
-    
-    // If nationality is empty, try to derive it from tax residence
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [isNationalityDropdownOpen, setIsNationalityDropdownOpen] = useState(false);
+  const countryDropdownRef = useRef<HTMLDivElement>(null);
+  const nationalityDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
+        setIsCountryDropdownOpen(false);
+      }
+      if (nationalityDropdownRef.current && !nationalityDropdownRef.current.contains(event.target as Node)) {
+        setIsNationalityDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const filteredCountries = searchTerm
+    ? countries.filter(country => 
+        country.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        (deriveNationalityFromCountry(country) || '').toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : countries;
+
+  const handleTaxResidenceSelect = (country: string) => {
+    const event = {
+      target: {
+        name: 'taxResidence',
+        value: country
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    handleInputChange(event);
+    setIsCountryDropdownOpen(false);
+    setSearchTerm('');
+
+    // Auto-suggest nationality if not already set
     if (!formData.nationality) {
-      const selectedCountry = e.target.value;
-      const nationality = deriveNationalityFromCountry(selectedCountry);
-      
+      const nationality = deriveNationalityFromCountry(country);
       if (nationality) {
         const nationalityEvent = {
           target: {
@@ -65,85 +83,170 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
             value: nationality
           }
         } as React.ChangeEvent<HTMLInputElement>;
-        
         handleInputChange(nationalityEvent);
       }
     }
   };
 
-  // Prepare country options with flags
-  const countryOptions = countries.map(country => ({
-    value: country,
-    label: (
-      <div className="flex items-center gap-2">
-        <span className="text-lg">{countryToFlag(country)}</span>
-        <span>{country}</span>
-      </div>
-    ),
-    textLabel: country // For search functionality
-  }));
+  const handleNationalitySelect = (nationality: string) => {
+    const event = {
+      target: {
+        name: 'nationality',
+        value: nationality
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    handleInputChange(event);
+    setIsNationalityDropdownOpen(false);
+    setSearchTerm('');
+  };
 
-  // Prepare nationality options with flags
-  const nationalityOptions = countries.map(country => {
-    const nationality = deriveNationalityFromCountry(country) || country;
-    return {
-      value: nationality,
-      label: (
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{countryToFlag(country)}</span>
-          <span>{nationality}</span>
+  const renderCountrySelector = () => (
+    <div className="space-y-2" ref={countryDropdownRef}>
+      <label htmlFor="taxResidence" className="block text-sm font-medium">
+        Pays de résidence
+      </label>
+      <div 
+        className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer"
+        onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+      >
+        {formData.taxResidence ? (
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{countryToFlag(formData.taxResidence)}</span>
+            <span>{formData.taxResidence}</span>
+          </div>
+        ) : (
+          <span className="text-muted-foreground">Sélectionner un pays</span>
+        )}
+        <ChevronDown className={`h-4 w-4 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
+      </div>
+      
+      {isCountryDropdownOpen && (
+        <div className="absolute z-50 mt-1 w-full bg-background border rounded-md shadow-lg">
+          <div className="sticky top-0 p-2 bg-background border-b">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Rechercher un pays..."
+                className="pl-8 h-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                autoFocus
+              />
+              {searchTerm && (
+                <button
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchTerm('');
+                  }}
+                >
+                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                </button>
+              )}
+            </div>
+          </div>
+          
+          <div className="max-h-60 overflow-auto p-1">
+            {filteredCountries.map(country => (
+              <div
+                key={country}
+                className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${formData.taxResidence === country ? 'bg-accent/50' : ''}`}
+                onClick={() => handleTaxResidenceSelect(country)}
+              >
+                <span className="text-lg mr-2">{countryToFlag(country)}</span>
+                <span>{country}</span>
+              </div>
+            ))}
+            
+            {filteredCountries.length === 0 && (
+              <div className="px-4 py-2 text-sm text-muted-foreground">
+                Aucun résultat
+              </div>
+            )}
+          </div>
         </div>
-      ),
-      textLabel: nationality // For search functionality
-    };
-  });
+      )}
+    </div>
+  );
 
-  // Préparer les options de code pays avec drapeaux
-  const countryCodeOptions = COMMON_COUNTRY_CODES.map(({ code, country, flag }) => ({
-    value: code,
-    label: (
-      <div className="flex items-center gap-2">
-        <span className="text-lg">{flag}</span>
-        <span>{country}</span>
-        <span className="text-gray-500 ml-auto">{code}</span>
+  const renderNationalitySelector = () => (
+    <div className="space-y-2" ref={nationalityDropdownRef}>
+      <label htmlFor="nationality" className="block text-sm font-medium">
+        Nationalité
+      </label>
+      <div 
+        className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer"
+        onClick={() => setIsNationalityDropdownOpen(!isNationalityDropdownOpen)}
+      >
+        {formData.nationality ? (
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{countryToFlag(formData.nationality)}</span>
+            <span>{formData.nationality}</span>
+          </div>
+        ) : (
+          <span className="text-muted-foreground">Sélectionner une nationalité</span>
+        )}
+        <ChevronDown className={`h-4 w-4 transition-transform ${isNationalityDropdownOpen ? 'rotate-180' : ''}`} />
       </div>
-    ),
-    textLabel: `${country} ${code}`
-  }));
-
-  // Définir l'affichage du code pays sélectionné
-  const getCountryCodeDisplay = (code: string) => {
-    const countryCode = COMMON_COUNTRY_CODES.find(cc => cc.code === code);
-    return countryCode ? countryCode.flag : '🌍';
-  };
-
-  // Gérer le changement de code pays
-  const handleCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const code = e.target.value;
-    
-    // Mettre à jour le code pays
-    const codeEvent = {
-      target: {
-        name: 'phoneCountryCode',
-        value: code
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    handleInputChange(codeEvent);
-    
-    // Mettre à jour l'affichage du code pays (drapeau)
-    const displayEvent = {
-      target: {
-        name: 'phoneCountryCodeDisplay',
-        value: getCountryCodeDisplay(code)
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    handleInputChange(displayEvent);
-  };
+      
+      {isNationalityDropdownOpen && (
+        <div className="absolute z-50 mt-1 w-full bg-background border rounded-md shadow-lg">
+          <div className="sticky top-0 p-2 bg-background border-b">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Rechercher une nationalité..."
+                className="pl-8 h-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                autoFocus
+              />
+              {searchTerm && (
+                <button
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchTerm('');
+                  }}
+                >
+                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                </button>
+              )}
+            </div>
+          </div>
+          
+          <div className="max-h-60 overflow-auto p-1">
+            {filteredCountries.map(country => {
+              const nationality = deriveNationalityFromCountry(country) || country;
+              return (
+                <div
+                  key={`${country}-${nationality}`}
+                  className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${formData.nationality === nationality ? 'bg-accent/50' : ''}`}
+                  onClick={() => handleNationalitySelect(nationality)}
+                >
+                  <span className="text-lg mr-2">{countryToFlag(country)}</span>
+                  <span>{nationality}</span>
+                </div>
+              );
+            })}
+            
+            {filteredCountries.length === 0 && (
+              <div className="px-4 py-2 text-sm text-muted-foreground">
+                Aucun résultat
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
-    <div className="space-y-4 overflow-y-auto pb-6">
-      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Information Générale</h2>
-      
+    <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
           label="Titre"
@@ -152,8 +255,8 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           value={formData.salutation || ''}
           onChange={handleInputChange}
           options={[
-            { value: 'M.', label: 'Monsieur' },
-            { value: 'Mme', label: 'Madame' },
+            { value: "M.", label: "Monsieur" },
+            { value: "Mme", label: "Madame" }
           ]}
           placeholder="Sélectionner un titre"
         />
@@ -161,10 +264,10 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
         <FormInput
           label="Nom"
           name="name"
-          required
           value={formData.name}
           onChange={handleInputChange}
           placeholder="Nom complet"
+          required
         />
       </div>
 
@@ -178,54 +281,41 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           placeholder="Adresse email"
         />
         
-        <div className="space-y-2">
-          <FormInput
-            label="Code pays"
-            name="phoneCountryCode"
-            type="select"
-            value={formData.phoneCountryCode || '+33'}
-            onChange={handleCountryCodeChange}
-            options={countryCodeOptions}
-            placeholder="Sélectionner un code pays"
-            searchable
-            searchByLabel
-          />
-          
-          <FormInput
-            label="Téléphone"
-            name="phone"
-            type="tel"
-            value={formData.phone || ''}
-            onChange={handleInputChange}
-            placeholder="Numéro de téléphone"
-          />
-        </div>
+        <FormInput
+          label="Téléphone"
+          name="phone"
+          type="tel-with-code"
+          value={formData.phone || ''}
+          onChange={handleInputChange}
+          countryCode={formData.phoneCountryCode || '+33'}
+          countryCodeDisplay={formData.phoneCountryCodeDisplay || '🇫🇷'}
+          onCountryCodeChange={(code) => {
+            const event = {
+              target: {
+                name: 'phoneCountryCode',
+                value: code
+              }
+            } as React.ChangeEvent<HTMLInputElement>;
+            handleInputChange(event);
+            
+            const flag = code === '+33' ? '🇫🇷' : '';
+            if (flag) {
+              const displayEvent = {
+                target: {
+                  name: 'phoneCountryCodeDisplay',
+                  value: flag
+                }
+              } as React.ChangeEvent<HTMLInputElement>;
+              handleInputChange(displayEvent);
+            }
+          }}
+          placeholder="Numéro de téléphone"
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormInput
-          label="Pays de résidence"
-          name="taxResidence"
-          type="select"
-          value={formData.taxResidence || ''}
-          onChange={handleTaxResidenceChange}
-          options={countryOptions}
-          placeholder="Sélectionner un pays"
-          searchable
-          searchByLabel
-        />
-        
-        <FormInput
-          label="Nationalité"
-          name="nationality"
-          type="select"
-          value={formData.nationality || ''}
-          onChange={handleInputChange}
-          options={nationalityOptions}
-          placeholder="Sélectionner une nationalité"
-          searchable
-          searchByLabel
-        />
+        {renderCountrySelector()}
+        {renderNationalitySelector()}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -240,16 +330,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
         />
         
         <FormInput
-          label="Lien de l'annonce vu"
-          name="url"
-          value={formData.url || ''}
-          onChange={handleInputChange}
-          placeholder="URL de l'annonce immobilière"
-        />
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormInput
           label="Source"
           name="source"
           type="select"
@@ -257,6 +337,16 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           onChange={handleInputChange}
           options={sources.map(source => ({ value: source, label: source }))}
           placeholder="Sélectionner une source"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        <FormInput
+          label="Lien de l'annonce"
+          name="url"
+          value={formData.url || ''}
+          onChange={handleInputChange}
+          placeholder="URL de l'annonce immobilière"
         />
         
         <FormInput
