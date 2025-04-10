@@ -7,6 +7,7 @@ import { PlusCircle, Search, SlidersHorizontal, X, RefreshCcw } from 'lucide-rea
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { useNavigate } from 'react-router-dom';
 import ActiveFiltersList from './filters/ActiveFiltersList';
+import { useLeadSearch, SearchResult } from '@/hooks/useLeadSearch';
 
 interface PipelineHeaderProps {
   searchTerm: string;
@@ -38,6 +39,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   isRefreshing = false
 }) => {
   const navigate = useNavigate();
+  const { results, isLoading } = useLeadSearch(searchTerm);
 
   // Get team member name by ID
   const getTeamMemberName = (id: string): string => {
@@ -51,6 +53,11 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
       handleRefresh();
     }
     onToggleFilters();
+  };
+  
+  // Function to navigate to lead detail
+  const handleSelectLead = (leadId: string) => {
+    navigate(`/leads/${leadId}?tab=overview`);
   };
 
   return (
@@ -124,6 +131,41 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
           >
             <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
+        )}
+        
+        {/* Search results dropdown */}
+        {searchTerm.length > 1 && (
+          <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-[300px] overflow-y-auto">
+            {isLoading ? (
+              <div className="p-3 text-center text-sm text-muted-foreground">
+                Recherche en cours...
+              </div>
+            ) : results.length === 0 ? (
+              <div className="p-3 text-center text-sm text-muted-foreground">
+                Aucun résultat trouvé
+              </div>
+            ) : (
+              <ul className="py-1">
+                {results.map((lead: SearchResult) => (
+                  <li 
+                    key={lead.id} 
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleSelectLead(lead.id)}
+                  >
+                    <div className="font-medium">{lead.name}</div>
+                    <div className="flex text-xs text-muted-foreground gap-2 flex-wrap">
+                      {lead.status && (
+                        <span className="bg-gray-100 px-1 rounded text-xs">{lead.status}</span>
+                      )}
+                      {lead.desiredLocation && (
+                        <span className="text-xs truncate">{lead.desiredLocation}</span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         )}
       </div>
 
