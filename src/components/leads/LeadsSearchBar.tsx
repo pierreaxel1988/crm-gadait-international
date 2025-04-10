@@ -4,6 +4,7 @@ import { Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { useDebounce } from '@/hooks/useDebounce';
+import { countryToFlag } from '@/utils/countryUtils';
 
 interface LeadsSearchBarProps {
   searchTerm: string;
@@ -13,8 +14,15 @@ interface LeadsSearchBarProps {
     name: string;
     email?: string;
     phone?: string;
+    phoneCountryCode?: string;
+    phoneCountryCodeDisplay?: string;
     status?: string;
     desiredLocation?: string;
+    nationality?: string;
+    source?: string;
+    taxResidence?: string;
+    preferredLanguage?: string;
+    propertyReference?: string;
   }>;
   isLoading?: boolean;
 }
@@ -94,11 +102,25 @@ const LeadsSearchBar: React.FC<LeadsSearchBarProps> = ({
                   onClick={() => handleSelectLead(lead.id)}
                 >
                   <span className="font-medium">{lead.name}</span>
-                  <div className="flex text-xs text-muted-foreground space-x-2">
+                  <div className="flex flex-wrap text-xs text-muted-foreground gap-2 mt-1">
                     {lead.status && <span className="bg-gray-100 px-1 rounded">{lead.status}</span>}
                     {lead.desiredLocation && <span>{lead.desiredLocation}</span>}
                     {lead.email && <span className="truncate">{lead.email}</span>}
-                    {lead.phone && <span className="truncate">{lead.phone}</span>}
+                    {lead.phone && (
+                      <span className="truncate">
+                        {lead.phoneCountryCodeDisplay && <span className="mr-1">{lead.phoneCountryCodeDisplay}</span>}
+                        {lead.phone}
+                      </span>
+                    )}
+                    {lead.nationality && (
+                      <span className="truncate">
+                        {countryToFlag(lead.nationality)} {lead.nationality}
+                      </span>
+                    )}
+                    {lead.source && <span className="truncate">{lead.source}</span>}
+                    {lead.propertyReference && (
+                      <span className="truncate">Réf: {lead.propertyReference}</span>
+                    )}
                   </div>
                 </li>
               ))}
