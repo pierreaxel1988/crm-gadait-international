@@ -98,6 +98,7 @@ const LeadsSearchBar: React.FC<LeadsSearchBarProps> = ({
                     {lead.status && <span className="bg-gray-100 px-1 rounded">{lead.status}</span>}
                     {lead.desiredLocation && <span>{lead.desiredLocation}</span>}
                     {lead.email && <span className="truncate">{lead.email}</span>}
+                    {lead.phone && <span className="truncate">{lead.phone}</span>}
                   </div>
                 </li>
               ))}

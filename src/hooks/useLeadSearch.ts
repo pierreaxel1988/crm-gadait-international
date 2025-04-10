@@ -41,10 +41,13 @@ export function useLeadSearch(initialSearchTerm: string = '') {
         // Construction de la clause OR pour la recherche
         let orConditions = [];
         
-        // Toujours inclure la recherche par email
+        // Recherche par email
         orConditions.push(`email.ilike.%${debouncedSearchTerm}%`);
         
-        // Ajouter une condition pour le nom complet
+        // Recherche par téléphone
+        orConditions.push(`phone.ilike.%${debouncedSearchTerm}%`);
+        
+        // Recherche par nom complet
         orConditions.push(`name.ilike.%${debouncedSearchTerm}%`);
         
         // Si nous avons plusieurs termes, rechercher individuellement pour chaque partie du nom

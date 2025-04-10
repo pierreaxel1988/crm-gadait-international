@@ -137,6 +137,12 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
                       {lead.desiredLocation && (
                         <span className="text-xs truncate">{lead.desiredLocation}</span>
                       )}
+                      {lead.email && (
+                        <span className="text-xs truncate">{lead.email}</span>
+                      )}
+                      {lead.phone && (
+                        <span className="text-xs truncate">{lead.phone}</span>
+                      )}
                     </div>
                   </li>
                 ))}
