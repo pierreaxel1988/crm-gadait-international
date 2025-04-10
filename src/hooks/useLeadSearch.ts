@@ -41,7 +41,7 @@ export function useLeadSearch(initialSearchTerm: string = '') {
         
         let query = supabase
           .from('leads')
-          .select('id, name, email, phone, phoneCountryCode, phoneCountryCodeDisplay, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference')
+          .select('id, name, email, phone, tax_residence, nationality, source, status, desired_location, pipeline_type, preferred_language, property_reference')
           .order('created_at', { ascending: false })
           .limit(10);
         
@@ -72,14 +72,14 @@ export function useLeadSearch(initialSearchTerm: string = '') {
         if (error) {
           console.error('Error searching leads:', error);
           setResults([]);
-        } else {
+        } else if (data) {
           const formattedResults: SearchResult[] = data.map(lead => ({
             id: lead.id,
             name: lead.name,
             email: lead.email,
             phone: lead.phone,
-            phoneCountryCode: lead.phoneCountryCode,
-            phoneCountryCodeDisplay: lead.phoneCountryCodeDisplay,
+            phoneCountryCode: lead.phone_country_code,
+            phoneCountryCodeDisplay: lead.phone_country_code_display,
             status: lead.status,
             desiredLocation: lead.desired_location,
             pipelineType: lead.pipeline_type,

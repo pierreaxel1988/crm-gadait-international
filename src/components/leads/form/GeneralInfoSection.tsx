@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { FormInput } from './FormInput';
+import FormInput from './FormInput';
 import { LeadDetailed, LeadSource, Country } from '@/types/lead';
 import { countryToFlag } from '@/utils/countryUtils';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
