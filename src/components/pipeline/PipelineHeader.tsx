@@ -8,7 +8,6 @@ import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { useNavigate } from 'react-router-dom';
 import ActiveFiltersList from './filters/ActiveFiltersList';
 import { useLeadSearch, SearchResult } from '@/hooks/useLeadSearch';
-import { countryToFlag } from '@/utils/countryUtils';
 
 interface PipelineHeaderProps {
   searchTerm: string;
@@ -154,7 +153,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
                     onClick={() => handleSelectLead(lead.id)}
                   >
                     <div className="font-medium">{lead.name}</div>
-                    <div className="flex text-xs text-muted-foreground gap-2 flex-wrap mt-1">
+                    <div className="flex text-xs text-muted-foreground gap-2 flex-wrap">
                       {lead.status && (
                         <span className="bg-gray-100 px-1 rounded text-xs">{lead.status}</span>
                       )}
@@ -165,21 +164,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
                         <span className="text-xs truncate">{lead.email}</span>
                       )}
                       {lead.phone && (
-                        <span className="text-xs truncate">
-                          {lead.phoneCountryCodeDisplay && <span className="mr-1">{lead.phoneCountryCodeDisplay}</span>}
-                          {lead.phone}
-                        </span>
-                      )}
-                      {lead.nationality && (
-                        <span className="text-xs truncate">
-                          {countryToFlag(lead.nationality)} {lead.nationality}
-                        </span>
-                      )}
-                      {lead.source && (
-                        <span className="text-xs truncate">{lead.source}</span>
-                      )}
-                      {lead.propertyReference && (
-                        <span className="text-xs truncate">Réf: {lead.propertyReference}</span>
+                        <span className="text-xs truncate">{lead.phone}</span>
                       )}
                     </div>
                   </li>

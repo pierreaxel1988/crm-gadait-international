@@ -8,16 +8,9 @@ export interface SearchResult {
   name: string;
   email?: string;
   phone?: string;
-  phoneCountryCode?: string;
-  phoneCountryCodeDisplay?: string;
   status?: string;
   desiredLocation?: string;
   pipelineType?: string;
-  nationality?: string;
-  source?: string;
-  taxResidence?: string;
-  preferredLanguage?: string;
-  propertyReference?: string;
 }
 
 export function useLeadSearch(initialSearchTerm: string = '') {
@@ -41,7 +34,7 @@ export function useLeadSearch(initialSearchTerm: string = '') {
         
         let query = supabase
           .from('leads')
-          .select('id, name, email, phone, phone_country_code, phone_country_code_display, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference')
+          .select('id, name, email, phone, status, desired_location, pipeline_type')
           .order('created_at', { ascending: false })
           .limit(10);
         
@@ -78,16 +71,9 @@ export function useLeadSearch(initialSearchTerm: string = '') {
             name: lead.name,
             email: lead.email,
             phone: lead.phone,
-            phoneCountryCode: lead.phone_country_code,
-            phoneCountryCodeDisplay: lead.phone_country_code_display,
             status: lead.status,
             desiredLocation: lead.desired_location,
-            pipelineType: lead.pipeline_type,
-            nationality: lead.nationality,
-            source: lead.source,
-            taxResidence: lead.tax_residence,
-            preferredLanguage: lead.preferred_language,
-            propertyReference: lead.property_reference
+            pipelineType: lead.pipeline_type
           }));
           
           setResults(formattedResults);
