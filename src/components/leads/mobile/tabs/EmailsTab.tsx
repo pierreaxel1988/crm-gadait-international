@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,9 +98,9 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         return;
       }
       
-      // Build full redirect URL including the tab parameter
+      // Build full redirect URL including the tab parameter and lead ID
+      // Make sure we pass the exact current URL so we'll return to this lead's emails tab
       const currentUrl = window.location.href;
-      // Make sure we keep any existing query parameters
       const redirectUri = currentUrl.includes('?') 
         ? `${currentUrl}&tab=emails` 
         : `${currentUrl}?tab=emails`;
@@ -257,9 +258,10 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       <div className="bg-loro-pearl/30 rounded-lg p-4 text-sm">
         <p className="font-medium mb-2">Conseils de dépannage:</p>
         <ul className="list-disc pl-5 space-y-1 text-gray-600">
-          <li>Vérifiez que votre projet Google est correctement configuré</li>
-          <li>Assurez-vous que l'URL de redirection autorisée dans la console Google est: <code className="bg-gray-100 p-1 rounded text-xs">{REDIRECT_URI}</code></li>
-          <li>Essayez de vous reconnecter en cliquant sur le bouton ci-dessous</li>
+          <li>Vérifiez que votre projet Google est correctement configuré dans la <a href="https://console.cloud.google.com/apis/credentials" target="_blank" className="text-loro-chocolate underline">Console Google Cloud</a></li>
+          <li>Assurez-vous que l'URI de redirection autorisée dans la console Google est: <code className="bg-gray-100 p-1 rounded text-xs">{REDIRECT_URI}</code></li>
+          <li>Vérifiez que le client ID et le client secret sont corrects</li>
+          <li>Assurez-vous que l'API Gmail est activée dans la <a href="https://console.cloud.google.com/apis/library" target="_blank" className="text-loro-chocolate underline">bibliothèque d'API Google</a></li>
         </ul>
       </div>
       

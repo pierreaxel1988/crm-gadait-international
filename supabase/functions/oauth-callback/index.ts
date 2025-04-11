@@ -30,20 +30,36 @@ serve(async (req) => {
     // Check if there's an error parameter from Google
     if (error) {
       console.error("OAuth error from Google:", error);
+      const error_description = url.searchParams.get('error_description') || '';
+      
       return new Response(
         `<html>
           <head>
             <title>Error</title>
             <style>
               body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
-              .container { text-align: center; }
+              .container { text-align: center; max-width: 600px; }
               .error { color: #e74c3c; }
+              .details { margin-top: 20px; background: #f8f8f8; padding: 15px; border-radius: 5px; text-align: left; }
+              code { background: #eee; padding: 2px 5px; border-radius: 3px; font-size: 0.9em; }
             </style>
           </head>
           <body>
             <div class="container">
               <h1 class="error">Authentification échouée</h1>
               <p>Erreur: ${error}</p>
+              <p>${error_description}</p>
+              
+              <div class="details">
+                <h3>Vérifiez la configuration Google:</h3>
+                <ul style="text-align: left;">
+                  <li>Assurez-vous que votre projet est correctement configuré dans la <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Console Google Cloud</a></li>
+                  <li>Vérifiez que l'URI de redirection autorisée est: <code>${REDIRECT_URI}</code></li>
+                  <li>Vérifiez que l'API Gmail est activée</li>
+                  <li>Vérifiez le client ID et le client secret</li>
+                </ul>
+              </div>
+              
               <p><a href="https://success.gadait-international.com/leads">Retour à l'application</a></p>
             </div>
           </body>
@@ -111,6 +127,7 @@ serve(async (req) => {
     console.log("Token response received", { 
       hasError: !!tokenData.error,
       error: tokenData.error || null,
+      error_description: tokenData.error_description || null,
       hasAccessToken: !!tokenData.access_token
     });
     
@@ -121,8 +138,10 @@ serve(async (req) => {
             <title>Error</title>
             <style>
               body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
-              .container { text-align: center; }
+              .container { text-align: center; max-width: 600px; }
               .error { color: #e74c3c; }
+              .details { margin-top: 20px; background: #f8f8f8; padding: 15px; border-radius: 5px; text-align: left; }
+              code { background: #eee; padding: 2px 5px; border-radius: 3px; font-size: 0.9em; }
             </style>
           </head>
           <body>
@@ -130,6 +149,17 @@ serve(async (req) => {
               <h1 class="error">Authentification échouée</h1>
               <p>Erreur lors de l'échange du code: ${tokenData.error}</p>
               <p>Description: ${tokenData.error_description || 'Aucune description supplémentaire'}</p>
+              
+              <div class="details">
+                <h3>Vérifiez la configuration Google:</h3>
+                <ul style="text-align: left;">
+                  <li>Assurez-vous que votre projet est correctement configuré dans la <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Console Google Cloud</a></li>
+                  <li>Vérifiez que l'URI de redirection autorisée est: <code>${REDIRECT_URI}</code></li>
+                  <li>Vérifiez que l'API Gmail est activée</li>
+                  <li>Vérifiez le client ID et le client secret</li>
+                </ul>
+              </div>
+              
               <p><a href="https://success.gadait-international.com/leads">Retour à l'application</a></p>
             </div>
           </body>
