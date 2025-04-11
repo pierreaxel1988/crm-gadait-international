@@ -33,7 +33,13 @@ serve(async (req) => {
     const { action, code, state, redirectUri, userId } = await req.json();
     
     // Log the request for debugging
-    console.log("Gmail auth request:", { action, userId, hasRedirectUri: !!redirectUri });
+    console.log("Gmail auth request:", { 
+      action, 
+      userId, 
+      hasRedirectUri: !!redirectUri,
+      hasClientSecret: !!GOOGLE_CLIENT_SECRET,
+      googleClientId: GOOGLE_CLIENT_ID
+    });
 
     // Step 1: Generate authorization URL
     if (action === 'authorize') {
@@ -70,7 +76,7 @@ serve(async (req) => {
         `&prompt=consent` +
         `&state=${encodeURIComponent(JSON.stringify(stateObj))}`;
       
-      console.log("Generated auth URL (partial):", authorizationUrl.substring(0, 100) + "...");
+      console.log("Generated auth URL:", authorizationUrl);
       
       return new Response(JSON.stringify({ authorizationUrl }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
@@ -99,6 +105,7 @@ serve(async (req) => {
       const tokenData = await tokenResponse.json();
       
       if (tokenData.error) {
+        console.error(`Error exchanging code for tokens: ${tokenData.error}`, tokenData);
         throw new Error(`Error exchanging code for tokens: ${tokenData.error}`);
       }
       
@@ -124,6 +131,7 @@ serve(async (req) => {
         });
       
       if (storeError) {
+        console.error(`Error storing tokens: ${storeError.message}`, storeError);
         throw new Error(`Error storing tokens: ${storeError.message}`);
       }
       

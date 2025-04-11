@@ -42,6 +42,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [connectionAttemptCount, setConnectionAttemptCount] = useState(0);
 
   const {
     lead
@@ -78,7 +79,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       }
     }
     checkEmailConnection();
-  }, [user, leadId]);
+  }, [user, leadId, connectionAttemptCount]);
 
   const connectGmail = async () => {
     if (isConnecting) return;
@@ -98,12 +99,11 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         return;
       }
       
-      // Build full redirect URL including the tab parameter and lead ID
-      // Make sure we pass the exact current URL so we'll return to this lead's emails tab
-      const currentUrl = window.location.href;
-      const redirectUri = currentUrl.includes('?') 
-        ? `${currentUrl}&tab=emails` 
-        : `${currentUrl}?tab=emails`;
+      // Build the redirect URI with the current URL
+      // Make sure we include the exact path including lead ID and tab
+      const currentPath = window.location.pathname; // e.g., "/leads/e02afd17-f08d-43f2-b319-ceaefa04a060"
+      const baseUrl = window.location.origin; // e.g., "https://success.gadait-international.com"
+      const redirectUri = `${baseUrl}${currentPath}?tab=emails`;
       
       console.log('Using redirect URI:', redirectUri);
       console.log('User ID:', user.id);
@@ -135,7 +135,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         return;
       }
       
-      console.log('Received authorization URL, redirecting user');
+      console.log('Received authorization URL, redirecting user:', data.authorizationUrl.substring(0, 100) + '...');
       // Store current page in localStorage so we can return here
       localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
       window.location.href = data.authorizationUrl;
@@ -230,6 +230,13 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     });
   };
 
+  const retryConnection = () => {
+    // Incrémenter le compteur pour forcer un nouveau check
+    setConnectionAttemptCount(prev => prev + 1);
+    // Recharger la page
+    window.location.reload();
+  };
+
   if (isLoading) {
     return <div className="p-4 flex flex-col items-center justify-center h-40">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-loro-hazel"></div>
@@ -248,7 +255,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       </Alert>
       
       <Button 
-        onClick={() => window.location.reload()} 
+        onClick={retryConnection} 
         variant="outline" 
         className="w-full mt-4"
       >
@@ -259,9 +266,10 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         <p className="font-medium mb-2">Conseils de dépannage:</p>
         <ul className="list-disc pl-5 space-y-1 text-gray-600">
           <li>Vérifiez que votre projet Google est correctement configuré dans la <a href="https://console.cloud.google.com/apis/credentials" target="_blank" className="text-loro-chocolate underline">Console Google Cloud</a></li>
-          <li>Assurez-vous que l'URI de redirection autorisée dans la console Google est: <code className="bg-gray-100 p-1 rounded text-xs">{REDIRECT_URI}</code></li>
+          <li>Assurez-vous que l'URI de redirection autorisée dans la console Google est: <code className="bg-gray-100 p-1 rounded text-xs">https://success.gadait-international.com/oauth/callback</code></li>
           <li>Vérifiez que le client ID et le client secret sont corrects</li>
           <li>Assurez-vous que l'API Gmail est activée dans la <a href="https://console.cloud.google.com/apis/library" target="_blank" className="text-loro-chocolate underline">bibliothèque d'API Google</a></li>
+          <li>Assurez-vous que le type de compte est bien "Web application"</li>
         </ul>
       </div>
       
