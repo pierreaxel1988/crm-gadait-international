@@ -39,6 +39,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
   const [emails, setEmails] = useState<LeadEmail[]>([]);
   const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const {
     lead
@@ -75,8 +76,21 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
   }, [user, leadId]);
 
   const connectGmail = async () => {
+    if (isConnecting) return;
+    
     try {
+      setIsConnecting(true);
       console.log('Starting Gmail connection process for lead:', leadId);
+      
+      // Vérifions que l'utilisateur est connecté
+      if (!user) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Vous devez être connecté pour utiliser cette fonctionnalité."
+        });
+        return;
+      }
       
       // Build full redirect URL including the tab parameter
       const currentUrl = window.location.href;
@@ -85,6 +99,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         : `${currentUrl}?tab=emails`;
       
       console.log('Using redirect URI:', redirectUri);
+      console.log('User ID:', user.id);
       
       const {
         data,
@@ -92,7 +107,8 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       } = await supabase.functions.invoke('gmail-auth', {
         body: {
           redirectUri: redirectUri,
-          action: 'authorize'
+          action: 'authorize',
+          userId: user.id
         }
       });
       
@@ -115,6 +131,8 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         title: "Erreur",
         description: "Une erreur s'est produite lors de la connexion à Gmail."
       });
+    } finally {
+      setIsConnecting(false);
     }
   };
 
@@ -212,12 +230,25 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       <p className="text-gray-500 text-center text-sm mb-4">
         Connectez votre compte Gmail pour synchroniser les emails avec ce lead.
       </p>
-      <Button onClick={connectGmail} className="w-full max-w-xs flex items-center justify-center gap-2 text-white shadow-md py-6 rounded-md bg-loro-terracotta hover:bg-loro-terracotta/90">
-        <Mail className="h-5 w-5" />
-        <span className="font-medium">Connecter Gmail</span>
+      <Button 
+        onClick={connectGmail} 
+        disabled={isConnecting}
+        className="w-full max-w-xs flex items-center justify-center gap-2 text-white shadow-md py-6 rounded-md bg-loro-terracotta hover:bg-loro-terracotta/90"
+      >
+        {isConnecting ? (
+          <>
+            <RefreshCw className="h-5 w-5 animate-spin" />
+            <span className="font-medium">Connexion en cours...</span>
+          </>
+        ) : (
+          <>
+            <Mail className="h-5 w-5" />
+            <span className="font-medium">Connecter Gmail</span>
+          </>
+        )}
       </Button>
       <p className="text-xs text-gray-400 mt-2 text-center">
-        En cas d'erreur 403, vérifiez la configuration OAuth dans Google Cloud Console
+        Assurez-vous que le projet a bien été autorisé dans votre compte Google
       </p>
     </div>;
   }

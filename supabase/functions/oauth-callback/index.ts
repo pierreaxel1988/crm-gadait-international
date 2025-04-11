@@ -7,7 +7,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const GOOGLE_CLIENT_ID = '87876889304-jgq4aon6dia70esiul86hogss2l11e4d.apps.googleusercontent.com';
 const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET')!;
-const REDIRECT_URI = 'https://success.gadait-international.com/oauth/callback';
+const REDIRECT_URI = Deno.env.get('OAUTH_REDIRECT_URI') || 'https://success.gadait-international.com/oauth/callback';
 
 // Create a Supabase client with the admin key
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -18,6 +18,8 @@ serve(async (req) => {
     const url = new URL(req.url);
     const code = url.searchParams.get('code');
     const stateParam = url.searchParams.get('state');
+    
+    console.log("OAuth callback received with code and state", { codeExists: !!code, stateExists: !!stateParam });
     
     if (!code) {
       return new Response(
@@ -42,20 +44,18 @@ serve(async (req) => {
       );
     }
     
+    let stateObj;
     let redirectUri = 'https://success.gadait-international.com/leads';
     let userId = '';
     
     try {
       // Parse the state parameter
-      const stateObj = JSON.parse(decodeURIComponent(stateParam || '{}'));
-      redirectUri = stateObj.redirectUri || redirectUri;
-      
-      // Get user ID from the JWT
-      const authHeader = req.headers.get('Authorization');
-      if (authHeader) {
-        const token = authHeader.replace('Bearer ', '');
-        const { data } = await supabase.auth.getUser(token);
-        userId = data?.user?.id || '';
+      if (stateParam) {
+        stateObj = JSON.parse(decodeURIComponent(stateParam));
+        redirectUri = stateObj.redirectUri || redirectUri;
+        userId = stateObj.userId || '';
+        
+        console.log("Parsed state object:", { redirectUri, userId });
       }
     } catch (e) {
       console.error('Error parsing state:', e);
@@ -77,6 +77,7 @@ serve(async (req) => {
     });
     
     const tokenData = await tokenResponse.json();
+    console.log("Token response received", { hasError: !!tokenData.error });
     
     if (tokenData.error) {
       return new Response(
@@ -109,9 +110,11 @@ serve(async (req) => {
     });
     
     const userInfo = await userInfoResponse.json();
+    console.log("User info received:", { email: userInfo.email });
     
     // Get user ID if not available from token
     if (!userId) {
+      console.log("No userId in state, looking up by email");
       // Look up the user by email
       const { data: teamMember } = await supabase
         .from('team_members')
@@ -120,6 +123,7 @@ serve(async (req) => {
         .single();
       
       userId = teamMember?.id || '';
+      console.log("Found user ID:", userId);
     }
     
     if (!userId) {
@@ -155,6 +159,8 @@ serve(async (req) => {
         refresh_token: tokenData.refresh_token || '', // Store blank if not returned (happens for re-auth)
         token_expiry: new Date(Date.now() + (tokenData.expires_in || 3600) * 1000).toISOString(),
       });
+    
+    console.log("Storing tokens in database", { error: storeError?.message });
     
     if (storeError) {
       return new Response(
