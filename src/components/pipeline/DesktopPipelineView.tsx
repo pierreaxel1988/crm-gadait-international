@@ -15,6 +15,8 @@ import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import PipelineHeader from './PipelineHeader';
 import { sortLeadsByPriority } from './mobile/utils/leadSortUtils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useAuth } from '@/hooks/useAuth';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface DesktopPipelineViewProps {
   activeTab: string;
@@ -67,11 +69,14 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
 }) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
+  const [selectedCommercial, setSelectedCommercial] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   
   const {
     loadedColumns,
-    isLoading
+    isLoading,
+    teamMembers: allTeamMembers
   } = useKanbanData(columns, 0, activeTab as PipelineType);
   
   const filteredColumns = filters 
@@ -88,22 +93,23 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     }
   }, [filters]);
   
-  const allLeads = filteredColumns.flatMap(column => column.items.map(item => ({
+  // First get all leads by status
+  const leadsByStatus = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
     columnStatus: column.status
   })));
   
-  const leadCountByStatus = filteredColumns.reduce((acc, column) => {
-    acc[column.status] = column.items.length;
-    return acc;
-  }, {} as Record<string, number>);
+  // Then filter by commercial if selected
+  const leadsByCommercial = selectedCommercial 
+    ? leadsByStatus.filter(lead => lead.assignedToId === selectedCommercial)
+    : leadsByStatus;
   
-  const totalLeadCount = allLeads.length;
-  
+  // Then filter by active status if not 'all'
   const displayedLeads = activeStatus === 'all' 
-    ? allLeads 
-    : allLeads.filter(lead => lead.columnStatus === activeStatus);
+    ? leadsByCommercial 
+    : leadsByCommercial.filter(lead => lead.columnStatus === activeStatus);
   
+  // Apply search filter
   const searchFilteredLeads = searchTerm 
     ? displayedLeads.filter(item => 
         item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -113,6 +119,20 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     
   // Apply smart sorting
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
+  
+  // Calculate counts for each status after commercial filtering
+  const leadCountByStatus = filteredColumns.reduce((acc, column) => {
+    const countForStatus = selectedCommercial
+      ? column.items.filter(item => item.assignedToId === selectedCommercial).length
+      : column.items.length;
+    
+    acc[column.status] = countForStatus;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  const totalLeadCount = selectedCommercial
+    ? leadsByStatus.filter(lead => lead.assignedToId === selectedCommercial).length
+    : leadsByStatus.length;
   
   const handleAddLead = () => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${activeStatus === 'all' ? 'New' : activeStatus}`);
@@ -125,6 +145,10 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   const handleApplyFilters = () => {
     handleRefresh();
     toggleFilters();
+  };
+
+  const handleCommercialChange = (value: string) => {
+    setSelectedCommercial(value === "all" ? null : value);
   };
   
   return (
@@ -190,34 +214,54 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         </Tabs>
       </div>
       
-      <div className="flex items-center justify-between bg-gray-50 rounded-lg p-2 mb-4">
-        <span className="text-sm font-medium text-gray-700">Trier par:</span>
-        <div className="flex space-x-2">
-          <button 
-            onClick={() => setSortBy('priority')}
-            className={`px-3 py-1 rounded-md ${sortBy === 'priority' 
-              ? 'bg-zinc-900 text-white' 
-              : 'bg-gray-100 text-gray-600'}`}
-          >
-            Priorité
-          </button>
-          <button 
-            onClick={() => setSortBy('newest')}
-            className={`px-3 py-1 rounded-md ${sortBy === 'newest' 
-              ? 'bg-zinc-900 text-white' 
-              : 'bg-gray-100 text-gray-600'}`}
-          >
-            Plus récent
-          </button>
-          <button 
-            onClick={() => setSortBy('oldest')}
-            className={`px-3 py-1 rounded-md ${sortBy === 'oldest' 
-              ? 'bg-zinc-900 text-white' 
-              : 'bg-gray-100 text-gray-600'}`}
-          >
-            Plus ancien
-          </button>
+      <div className="flex flex-wrap gap-3 items-center justify-between bg-gray-50 rounded-lg p-3 mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700">Trier par:</span>
+          <div className="flex space-x-2">
+            <button 
+              onClick={() => setSortBy('priority')}
+              className={`px-3 py-1 rounded-md ${sortBy === 'priority' 
+                ? 'bg-zinc-900 text-white' 
+                : 'bg-gray-100 text-gray-600'}`}
+            >
+              Priorité
+            </button>
+            <button 
+              onClick={() => setSortBy('newest')}
+              className={`px-3 py-1 rounded-md ${sortBy === 'newest' 
+                ? 'bg-zinc-900 text-white' 
+                : 'bg-gray-100 text-gray-600'}`}
+            >
+              Plus récent
+            </button>
+            <button 
+              onClick={() => setSortBy('oldest')}
+              className={`px-3 py-1 rounded-md ${sortBy === 'oldest' 
+                ? 'bg-zinc-900 text-white' 
+                : 'bg-gray-100 text-gray-600'}`}
+            >
+              Plus ancien
+            </button>
+          </div>
         </div>
+        
+        {isAdmin && allTeamMembers && allTeamMembers.length > 0 && (
+          <div className="flex items-center">
+            <Select value={selectedCommercial || "all"} onValueChange={handleCommercialChange}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filtrer par commercial" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les commerciaux</SelectItem>
+                {allTeamMembers.map(member => (
+                  <SelectItem key={member.id} value={member.id}>
+                    {member.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
       
       <div className="relative flex-1 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">

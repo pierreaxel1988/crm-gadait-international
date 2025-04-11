@@ -35,6 +35,12 @@ interface KanbanColumn {
   pipelineType?: PipelineType;
 }
 
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export const useKanbanData = (
   columns: KanbanColumn[],
   refreshTrigger: number = 0,
@@ -42,6 +48,7 @@ export const useKanbanData = (
 ) => {
   const [loadedColumns, setLoadedColumns] = useState<KanbanColumn[]>(columns);
   const [isLoading, setIsLoading] = useState(true);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const { isCommercial, user } = useAuth(); // Récupérer les infos d'authentification
 
   useEffect(() => {
@@ -56,7 +63,7 @@ export const useKanbanData = (
         setIsLoading(true);
         
         // Fetch team members for assignment information
-        const { data: teamMembers, error: teamError } = await supabase
+        const { data: teamMembersData, error: teamError } = await supabase
           .from('team_members')
           .select('id, email, name');
           
@@ -70,13 +77,17 @@ export const useKanbanData = (
           return;
         }
         
+        if (teamMembersData) {
+          setTeamMembers(teamMembersData);
+        }
+        
         // Direct query to get leads with filters based on user role
         let query = supabase.from('leads').select('*, action_history');
         
         // Si c'est un commercial, filtrer pour n'afficher que ses leads
         if (isCommercial && user) {
           // Trouver l'ID du team member correspondant à l'email de l'utilisateur
-          const currentTeamMember = teamMembers?.find(tm => tm.email === user.email);
+          const currentTeamMember = teamMembersData?.find(tm => tm.email === user.email);
           
           if (currentTeamMember) {
             console.log("Filtering leads for team member:", currentTeamMember.id, currentTeamMember.name);
@@ -113,7 +124,7 @@ export const useKanbanData = (
           
           // Si c'est un commercial, filtrer les leads locaux aussi
           if (isCommercial && user && localLeads) {
-            const currentTeamMember = teamMembers?.find(tm => tm.email === user.email);
+            const currentTeamMember = teamMembersData?.find(tm => tm.email === user.email);
             if (currentTeamMember) {
               localLeads = localLeads.filter(lead => lead.assignedTo === currentTeamMember.id);
             }
@@ -179,7 +190,7 @@ export const useKanbanData = (
         
         // Map leads data to KanbanItem format
         const mappedLeads = allLeads.map(lead => {
-          const assignedTeamMember = teamMembers?.find(tm => tm.id === lead.assigned_to);
+          const assignedTeamMember = teamMembersData?.find(tm => tm.id === lead.assigned_to);
           
           // Ensure pipeline_type has a default value
           const leadPipelineType = lead.pipeline_type || 'purchase';
@@ -254,5 +265,5 @@ export const useKanbanData = (
     fetchLeads();
   }, [refreshTrigger, columns, pipelineType, isCommercial, user]);
 
-  return { loadedColumns, setLoadedColumns, isLoading };
+  return { loadedColumns, setLoadedColumns, isLoading, teamMembers };
 };

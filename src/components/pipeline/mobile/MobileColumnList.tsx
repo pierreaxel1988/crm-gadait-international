@@ -10,6 +10,8 @@ import { useKanbanData } from '@/hooks/useKanbanData';
 import LeadListItem from './LeadListItem';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import { sortLeadsByPriority } from './utils/leadSortUtils';
+import { useAuth } from '@/hooks/useAuth';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
@@ -49,11 +51,14 @@ const MobileColumnList = ({
 }: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
+  const [selectedCommercial, setSelectedCommercial] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { isCommercial, isAdmin } = useAuth();
   
   const {
     loadedColumns,
-    isLoading
+    isLoading,
+    teamMembers
   } = useKanbanData(columns, 0, activeTab);
   
   const filteredColumns = filters 
@@ -70,31 +75,48 @@ const MobileColumnList = ({
     }
   }, [filters]);
 
-  const allLeads = filteredColumns.flatMap(column => column.items.map(item => ({
-    ...item,
-    columnStatus: column.status
-  })));
+  // First, filter by status
+  const leadsByStatus = activeStatus === 'all' 
+    ? filteredColumns.flatMap(column => column.items.map(item => ({
+        ...item,
+        columnStatus: column.status
+      })))
+    : filteredColumns
+        .filter(column => column.status === activeStatus)
+        .flatMap(column => column.items.map(item => ({
+          ...item,
+          columnStatus: column.status
+        })));
   
-  const leadCountByStatus = filteredColumns.reduce((acc, column) => {
-    acc[column.status] = column.items.length;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  const totalLeadCount = allLeads.length;
-  const displayedLeads = activeStatus === 'all' 
-    ? allLeads 
-    : allLeads.filter(lead => lead.columnStatus === activeStatus);
+  // Then filter by commercial if one is selected
+  const leadsByCommercial = selectedCommercial 
+    ? leadsByStatus.filter(lead => lead.assignedToId === selectedCommercial)
+    : leadsByStatus;
 
   // Apply search filter
   const searchFilteredLeads = searchTerm
-    ? displayedLeads.filter(lead => 
+    ? leadsByCommercial.filter(lead => 
         lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lead.desiredLocation?.toLowerCase().includes(searchTerm.toLowerCase())
       )
-    : displayedLeads;
+    : leadsByCommercial;
     
   // Apply smart sorting based on priority
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
+
+  // Calculate counts for each status after commercial filtering
+  const leadCountByStatus = filteredColumns.reduce((acc, column) => {
+    const countForStatus = selectedCommercial
+      ? column.items.filter(item => item.assignedToId === selectedCommercial).length
+      : column.items.length;
+    
+    acc[column.status] = countForStatus;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  const totalLeadCount = selectedCommercial
+    ? leadsByStatus.filter(lead => lead.assignedToId === selectedCommercial).length
+    : leadsByStatus.length;
 
   const handleAddLead = (status: LeadStatus) => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
@@ -107,6 +129,10 @@ const MobileColumnList = ({
   
   const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest') => {
     setSortBy(value);
+  };
+
+  const handleCommercialChange = (value: string) => {
+    setSelectedCommercial(value === "all" ? null : value);
   };
 
   return (
@@ -145,34 +171,56 @@ const MobileColumnList = ({
             </Tabs>
           </div>
 
-          <div className="flex items-center justify-between bg-gray-50 rounded-lg p-2 mb-2">
-            <span className="text-sm font-medium text-gray-700">Trier par:</span>
-            <div className="flex space-x-2">
-              <button 
-                onClick={() => handleChangeSortBy('priority')}
-                className={`px-2 py-1 text-xs rounded-md ${sortBy === 'priority' 
-                  ? 'bg-zinc-900 text-white' 
-                  : 'bg-gray-100 text-gray-600'}`}
-              >
-                Priorité
-              </button>
-              <button 
-                onClick={() => handleChangeSortBy('newest')}
-                className={`px-2 py-1 text-xs rounded-md ${sortBy === 'newest' 
-                  ? 'bg-zinc-900 text-white' 
-                  : 'bg-gray-100 text-gray-600'}`}
-              >
-                Plus récent
-              </button>
-              <button 
-                onClick={() => handleChangeSortBy('oldest')}
-                className={`px-2 py-1 text-xs rounded-md ${sortBy === 'oldest' 
-                  ? 'bg-zinc-900 text-white' 
-                  : 'bg-gray-100 text-gray-600'}`}
-              >
-                Plus ancien
-              </button>
+          <div className="flex flex-col md:flex-row md:items-center gap-2 bg-gray-50 rounded-lg p-2 mb-2">
+            <div className="flex items-center justify-between md:w-auto">
+              <span className="text-sm font-medium text-gray-700">Trier par:</span>
+              <div className="flex space-x-2">
+                <button 
+                  onClick={() => handleChangeSortBy('priority')}
+                  className={`px-2 py-1 text-xs rounded-md ${sortBy === 'priority' 
+                    ? 'bg-zinc-900 text-white' 
+                    : 'bg-gray-100 text-gray-600'}`}
+                >
+                  Priorité
+                </button>
+                <button 
+                  onClick={() => handleChangeSortBy('newest')}
+                  className={`px-2 py-1 text-xs rounded-md ${sortBy === 'newest' 
+                    ? 'bg-zinc-900 text-white' 
+                    : 'bg-gray-100 text-gray-600'}`}
+                >
+                  Plus récent
+                </button>
+                <button 
+                  onClick={() => handleChangeSortBy('oldest')}
+                  className={`px-2 py-1 text-xs rounded-md ${sortBy === 'oldest' 
+                    ? 'bg-zinc-900 text-white' 
+                    : 'bg-gray-100 text-gray-600'}`}
+                >
+                  Plus ancien
+                </button>
+              </div>
             </div>
+            
+            {isAdmin && teamMembers && teamMembers.length > 0 && (
+              <div className="flex items-center mt-2 md:mt-0 md:ml-auto">
+                <div className="w-full">
+                  <Select value={selectedCommercial || "all"} onValueChange={handleCommercialChange}>
+                    <SelectTrigger className="w-full text-xs h-8 px-2">
+                      <SelectValue placeholder="Filtrer par commercial" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les commerciaux</SelectItem>
+                      {teamMembers.map(member => (
+                        <SelectItem key={member.id} value={member.id}>
+                          {member.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="space-y-px">
