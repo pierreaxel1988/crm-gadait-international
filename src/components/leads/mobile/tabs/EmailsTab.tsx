@@ -1,13 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Mail, ExternalLink, Clock, Send, RefreshCw } from 'lucide-react';
+import { Mail, ExternalLink, Clock, Send, RefreshCw, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useLeadDetail } from '@/hooks/useLeadDetail';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface EmailConnectionProps {
   leadId: string;
@@ -40,6 +40,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
   const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   const {
     lead
@@ -50,6 +51,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       if (!user) return;
       try {
         setIsLoading(true);
+        setConnectionError(null);
         const {
           data,
           error
@@ -57,6 +59,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         if (error) {
           console.error('Error checking email connection:', error);
           setIsConnected(false);
+          setConnectionError(`Erreur lors de la vérification de la connexion: ${error.message}`);
           return;
         }
         if (data) {
@@ -68,6 +71,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         }
       } catch (error) {
         console.error('Error in checkEmailConnection:', error);
+        setConnectionError(`Une erreur est survenue: ${(error as Error).message}`);
       } finally {
         setIsLoading(false);
       }
@@ -80,6 +84,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     
     try {
       setIsConnecting(true);
+      setConnectionError(null);
       console.log('Starting Gmail connection process for lead:', leadId);
       
       // Vérifions que l'utilisateur est connecté
@@ -94,8 +99,9 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       
       // Build full redirect URL including the tab parameter
       const currentUrl = window.location.href;
+      // Make sure we keep any existing query parameters
       const redirectUri = currentUrl.includes('?') 
-        ? currentUrl 
+        ? `${currentUrl}&tab=emails` 
         : `${currentUrl}?tab=emails`;
       
       console.log('Using redirect URI:', redirectUri);
@@ -114,6 +120,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       
       if (error) {
         console.error('Error starting Gmail auth:', error);
+        setConnectionError(`Erreur de démarrage de l'authentification: ${error.message}`);
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -122,10 +129,18 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         return;
       }
       
+      if (!data || !data.authorizationUrl) {
+        setConnectionError("La réponse du serveur ne contient pas d'URL d'autorisation.");
+        return;
+      }
+      
       console.log('Received authorization URL, redirecting user');
+      // Store current page in localStorage so we can return here
+      localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
       window.location.href = data.authorizationUrl;
     } catch (error) {
       console.error('Error in connectGmail:', error);
+      setConnectionError(`Erreur: ${(error as Error).message}`);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -221,6 +236,53 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     </div>;
   }
 
+  if (connectionError) {
+    return <div className="p-4 flex flex-col space-y-4">
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Erreur de connexion</AlertTitle>
+        <AlertDescription>
+          {connectionError}
+        </AlertDescription>
+      </Alert>
+      
+      <Button 
+        onClick={() => window.location.reload()} 
+        variant="outline" 
+        className="w-full mt-4"
+      >
+        <RefreshCw className="mr-2 h-4 w-4" /> Rafraîchir la page
+      </Button>
+      
+      <div className="bg-loro-pearl/30 rounded-lg p-4 text-sm">
+        <p className="font-medium mb-2">Conseils de dépannage:</p>
+        <ul className="list-disc pl-5 space-y-1 text-gray-600">
+          <li>Vérifiez que votre projet Google est correctement configuré</li>
+          <li>Assurez-vous que l'URL de redirection autorisée dans la console Google est: <code className="bg-gray-100 p-1 rounded text-xs">{REDIRECT_URI}</code></li>
+          <li>Essayez de vous reconnecter en cliquant sur le bouton ci-dessous</li>
+        </ul>
+      </div>
+      
+      <Button 
+        onClick={connectGmail} 
+        disabled={isConnecting}
+        className="w-full flex items-center justify-center gap-2 text-white shadow-md py-6 rounded-md bg-loro-terracotta hover:bg-loro-terracotta/90"
+      >
+        {isConnecting ? (
+          <>
+            <RefreshCw className="h-5 w-5 animate-spin" />
+            <span className="font-medium">Connexion en cours...</span>
+          </>
+        ) : (
+          <>
+            <Mail className="h-5 w-5" />
+            <span className="font-medium">Réessayer la connexion Gmail</span>
+          </>
+        )}
+      </Button>
+    </div>;
+  }
+
   if (!isConnected) {
     return <div className="p-4 flex flex-col items-center justify-center space-y-4 pt-8">
       <div className="bg-loro-pearl/30 rounded-full p-4 border-2 border-loro-terracotta shadow-sm">
@@ -301,5 +363,8 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     </ScrollArea>
   </div>;
 };
+
+// Define this value for troubleshooting information
+const REDIRECT_URI = 'https://success.gadait-international.com/oauth/callback';
 
 export default EmailsTab;

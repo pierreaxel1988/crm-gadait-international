@@ -18,8 +18,39 @@ serve(async (req) => {
     const url = new URL(req.url);
     const code = url.searchParams.get('code');
     const stateParam = url.searchParams.get('state');
+    const error = url.searchParams.get('error');
     
-    console.log("OAuth callback received with code and state", { codeExists: !!code, stateExists: !!stateParam });
+    console.log("OAuth callback received:", { 
+      codeExists: !!code, 
+      stateExists: !!stateParam,
+      error: error,
+      url: req.url
+    });
+    
+    // Check if there's an error parameter from Google
+    if (error) {
+      console.error("OAuth error from Google:", error);
+      return new Response(
+        `<html>
+          <head>
+            <title>Error</title>
+            <style>
+              body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+              .container { text-align: center; }
+              .error { color: #e74c3c; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1 class="error">Authentification échouée</h1>
+              <p>Erreur: ${error}</p>
+              <p><a href="https://success.gadait-international.com/leads">Retour à l'application</a></p>
+            </div>
+          </body>
+        </html>`,
+        { headers: { 'Content-Type': 'text/html' } }
+      );
+    }
     
     if (!code) {
       return new Response(
@@ -77,7 +108,11 @@ serve(async (req) => {
     });
     
     const tokenData = await tokenResponse.json();
-    console.log("Token response received", { hasError: !!tokenData.error });
+    console.log("Token response received", { 
+      hasError: !!tokenData.error,
+      error: tokenData.error || null,
+      hasAccessToken: !!tokenData.access_token
+    });
     
     if (tokenData.error) {
       return new Response(
@@ -94,6 +129,7 @@ serve(async (req) => {
             <div class="container">
               <h1 class="error">Authentification échouée</h1>
               <p>Erreur lors de l'échange du code: ${tokenData.error}</p>
+              <p>Description: ${tokenData.error_description || 'Aucune description supplémentaire'}</p>
               <p><a href="https://success.gadait-international.com/leads">Retour à l'application</a></p>
             </div>
           </body>
@@ -120,7 +156,7 @@ serve(async (req) => {
         .from('team_members')
         .select('id')
         .eq('email', userInfo.email)
-        .single();
+        .maybeSingle();
       
       userId = teamMember?.id || '';
       console.log("Found user ID:", userId);
@@ -160,7 +196,7 @@ serve(async (req) => {
         token_expiry: new Date(Date.now() + (tokenData.expires_in || 3600) * 1000).toISOString(),
       });
     
-    console.log("Storing tokens in database", { error: storeError?.message });
+    console.log("Storing tokens in database", { error: storeError?.message, userId });
     
     if (storeError) {
       return new Response(
