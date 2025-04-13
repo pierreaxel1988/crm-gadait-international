@@ -33,7 +33,7 @@ function renderHtmlResponse(options: {
     message,
     details,
     redirectUri,
-    redirectDelay = 1500, // Reduced delay for better UX
+    redirectDelay = 1000, // Reduced delay for better UX
     email,
     status = 200
   } = options;
@@ -41,12 +41,20 @@ function renderHtmlResponse(options: {
   const redirectScript = redirectUri ? `
     <script>
       // Store the URL we need to go back to
-      localStorage.setItem('oauthRedirectTarget', '${redirectUri}');
-      
-      // Set a timeout to redirect
-      setTimeout(function() {
-        window.location.href = "${redirectUri}";
-      }, ${redirectDelay});
+      try {
+        localStorage.setItem('oauthRedirectTarget', '${redirectUri}');
+        
+        // Log success message to help debugging
+        console.log("Redirect URI saved in localStorage:", '${redirectUri}');
+        
+        // Set a timeout to redirect
+        setTimeout(function() {
+          console.log("Redirecting to:", '${redirectUri}');
+          window.location.href = "${redirectUri}";
+        }, ${redirectDelay});
+      } catch (e) {
+        console.error("Error in redirect script:", e);
+      }
     </script>
   ` : '';
 
@@ -57,7 +65,7 @@ function renderHtmlResponse(options: {
     </div>
   ` : '';
 
-  const emailInfo = email ? `<p>Vous avez connecté votre compte Gmail: ${email}</p>` : '';
+  const emailInfo = email ? `<p>Vous avez connecté votre compte Gmail: <strong>${email}</strong></p>` : '';
 
   return new Response(
     `<html>
@@ -140,51 +148,61 @@ async function exchangeCodeForTokens(code: string) {
     redirect_uri: REDIRECT_URI
   });
   
-  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      code,
-      client_id: GOOGLE_CLIENT_ID,
-      client_secret: GOOGLE_CLIENT_SECRET,
-      redirect_uri: REDIRECT_URI,
-      grant_type: 'authorization_code',
-    }),
-  });
-  
-  const responseStatus = tokenResponse.status;
-  const responseStatusText = tokenResponse.statusText;
-  
-  // Try to parse the response as JSON
   try {
-    const tokenData = await tokenResponse.json();
-    
-    console.log("Token response received", { 
-      hasError: !!tokenData.error,
-      error: tokenData.error || null,
-      error_description: tokenData.error_description || null,
-      hasAccessToken: !!tokenData.access_token,
-      hasRefreshToken: !!tokenData.refresh_token,
-      expiresIn: tokenData.expires_in,
-      status: tokenResponse.status,
-      statusText: tokenResponse.statusText
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        code,
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        redirect_uri: REDIRECT_URI,
+        grant_type: 'authorization_code',
+      }),
     });
     
-    return { success: true, tokenData, responseStatus, responseStatusText };
-  } catch (parseError) {
-    // If parsing fails, get the raw text
-    const responseText = await tokenResponse.text();
-    console.error("Failed to parse token response as JSON:", parseError);
-    console.log("Raw response:", responseText);
+    const responseStatus = tokenResponse.status;
+    const responseStatusText = tokenResponse.statusText;
     
-    return { 
-      success: false, 
-      error: parseError, 
-      responseText, 
-      responseStatus, 
-      responseStatusText 
+    // Try to parse the response as JSON
+    try {
+      const tokenData = await tokenResponse.json();
+      
+      console.log("Token response received", { 
+        hasError: !!tokenData.error,
+        error: tokenData.error || null,
+        error_description: tokenData.error_description || null,
+        hasAccessToken: !!tokenData.access_token,
+        hasRefreshToken: !!tokenData.refresh_token,
+        expiresIn: tokenData.expires_in,
+        status: tokenResponse.status,
+        statusText: tokenResponse.statusText
+      });
+      
+      return { success: true, tokenData, responseStatus, responseStatusText };
+    } catch (parseError) {
+      // If parsing fails, get the raw text
+      const responseText = await tokenResponse.text();
+      console.error("Failed to parse token response as JSON:", parseError);
+      console.log("Raw response:", responseText);
+      
+      return { 
+        success: false, 
+        error: parseError, 
+        responseText, 
+        responseStatus, 
+        responseStatusText 
+      };
+    }
+  } catch (fetchError) {
+    console.error("Network error during token exchange:", fetchError);
+    return {
+      success: false,
+      error: fetchError,
+      responseStatus: 0,
+      responseStatusText: "Network Error"
     };
   }
 }
@@ -193,13 +211,23 @@ async function exchangeCodeForTokens(code: string) {
  * Get user information using access token
  */
 async function getUserInfo(accessToken: string) {
-  const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-    },
-  });
-  
-  return await userInfoResponse.json();
+  try {
+    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+    
+    if (!userInfoResponse.ok) {
+      console.error("Error fetching user info:", await userInfoResponse.text());
+      throw new Error(`Failed to fetch user info: ${userInfoResponse.status}`);
+    }
+    
+    return await userInfoResponse.json();
+  } catch (error) {
+    console.error("Error in getUserInfo:", error);
+    throw error;
+  }
 }
 
 /**
@@ -211,34 +239,49 @@ async function getUserId(userId: string, email: string) {
   }
   
   console.log("No userId in state, looking up by email");
-  // Look up the user by email
-  const { data: teamMember } = await supabase
-    .from('team_members')
-    .select('id')
-    .eq('email', email)
-    .maybeSingle();
-  
-  const foundUserId = teamMember?.id || '';
-  console.log("Found user ID:", foundUserId);
-  return foundUserId;
+  try {
+    // Look up the user by email
+    const { data: teamMember, error } = await supabase
+      .from('team_members')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+    
+    if (error) {
+      console.error("Error looking up user by email:", error);
+      throw error;
+    }
+    
+    const foundUserId = teamMember?.id || '';
+    console.log("Found user ID:", foundUserId);
+    return foundUserId;
+  } catch (error) {
+    console.error("Error in getUserId:", error);
+    throw error;
+  }
 }
 
 /**
  * Store OAuth tokens in the database
  */
 async function storeTokens(userId: string, email: string, tokenData: any) {
-  const { error: storeError } = await supabase
-    .from('user_email_connections')
-    .upsert({
-      user_id: userId,
-      email: email,
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token || '', // Store blank if not returned (happens for re-auth)
-      token_expiry: new Date(Date.now() + (tokenData.expires_in || 3600) * 1000).toISOString(),
-    });
-  
-  console.log("Storing tokens in database", { error: storeError?.message, userId });
-  return { success: !storeError, error: storeError };
+  try {
+    const { error: storeError } = await supabase
+      .from('user_email_connections')
+      .upsert({
+        user_id: userId,
+        email: email,
+        access_token: tokenData.access_token,
+        refresh_token: tokenData.refresh_token || '', // Store blank if not returned (happens for re-auth)
+        token_expiry: new Date(Date.now() + (tokenData.expires_in || 3600) * 1000).toISOString(),
+      });
+    
+    console.log("Storing tokens in database", { error: storeError?.message, userId });
+    return { success: !storeError, error: storeError };
+  } catch (error) {
+    console.error("Error in storeTokens:", error);
+    return { success: false, error };
+  }
 }
 
 serve(async (req) => {
@@ -322,7 +365,7 @@ serve(async (req) => {
       // Exchange code for tokens
       const tokenExchange = await exchangeCodeForTokens(code);
       
-      if (!tokenExchange.success || tokenExchange.tokenData.error) {
+      if (!tokenExchange.success || tokenExchange.tokenData?.error) {
         // Handle token exchange error
         const errorMessage = tokenExchange.tokenData?.error || 'Error exchanging code for tokens';
         const errorDescription = tokenExchange.tokenData?.error_description || '';
@@ -393,7 +436,7 @@ serve(async (req) => {
         message: "Vous avez connecté votre compte Gmail avec succès.",
         email: userInfo.email,
         redirectUri: redirectUri,
-        redirectDelay: 1500 // 1.5 seconds is enough for a good UX
+        redirectDelay: 1000 // 1 second is enough for a good UX
       });
     } catch (fetchError) {
       console.error('Error exchanging code for tokens:', fetchError);

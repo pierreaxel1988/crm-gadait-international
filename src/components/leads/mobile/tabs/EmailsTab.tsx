@@ -3,13 +3,28 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Mail, ExternalLink, Clock, Send, RefreshCw, AlertCircle, ChevronDown, Info } from 'lucide-react';
+import { 
+  Mail, 
+  ExternalLink, 
+  Clock, 
+  Send, 
+  RefreshCw, 
+  AlertCircle, 
+  ChevronDown, 
+  Info,
+  Search,
+  ArrowUp,
+  ArrowDown,
+  Edit
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useLeadDetail } from '@/hooks/useLeadDetail';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Input } from '@/components/ui/input';
+import EmailComposer from './EmailComposer';
 
 interface EmailConnectionProps {
   leadId: string;
@@ -28,17 +43,20 @@ interface LeadEmail {
   snippet: string | null;
   is_sent: boolean;
   gmail_message_id: string;
+  sender?: string;
+  recipient?: string;
+  body_text?: string;
+  body_html?: string;
 }
 
 const EmailsTab: React.FC<EmailConnectionProps> = ({
   leadId
 }) => {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [emails, setEmails] = useState<LeadEmail[]>([]);
+  const [filteredEmails, setFilteredEmails] = useState<LeadEmail[]>([]);
   const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -46,10 +64,11 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
   const [connectionAttemptCount, setConnectionAttemptCount] = useState(0);
   const [detailedErrorInfo, setDetailedErrorInfo] = useState<any>(null);
   const [googleAuthURL, setGoogleAuthURL] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [showComposer, setShowComposer] = useState(false);
 
-  const {
-    lead
-  } = useLeadDetail(leadId);
+  const { lead } = useLeadDetail(leadId);
 
   useEffect(() => {
     async function checkEmailConnection() {
@@ -59,10 +78,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         setConnectionError(null);
         setDetailedErrorInfo(null);
         
-        const {
-          data,
-          error
-        } = await supabase.from('user_email_connections').select('email, id').eq('user_id', user.id).maybeSingle();
+        const { data, error } = await supabase.from('user_email_connections').select('email, id').eq('user_id', user.id).maybeSingle();
         
         if (error) {
           console.error('Error checking email connection:', error);
@@ -88,6 +104,23 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     
     checkEmailConnection();
   }, [user, leadId, connectionAttemptCount]);
+
+  useEffect(() => {
+    if (!emails.length) return;
+    
+    const filtered = emails.filter(email => {
+      const searchIn = `${email.subject || ''} ${email.snippet || ''} ${email.sender || ''} ${email.recipient || ''}`.toLowerCase();
+      return searchTerm ? searchIn.includes(searchTerm.toLowerCase()) : true;
+    });
+    
+    const sorted = [...filtered].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+    
+    setFilteredEmails(sorted);
+  }, [emails, searchTerm, sortOrder]);
 
   const connectGmail = async () => {
     if (isConnecting) return;
@@ -120,10 +153,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       console.log('User ID:', user.id);
       
       try {
-        const {
-          data,
-          error
-        } = await supabase.functions.invoke('gmail-auth', {
+        const { data, error } = await supabase.functions.invoke('gmail-auth', {
           body: {
             action: 'authorize',
             userId: user.id,
@@ -202,12 +232,13 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     if (!user || !leadId) return;
     try {
       setIsRefreshing(true);
-      const {
-        data,
-        error
-      } = await supabase.from('lead_emails').select('*').eq('lead_id', leadId).eq('user_id', user.id).order('date', {
-        ascending: false
-      });
+      const { data, error } = await supabase
+        .from('lead_emails')
+        .select('*')
+        .eq('lead_id', leadId)
+        .eq('user_id', user.id)
+        .order('date', { ascending: false });
+        
       if (error) {
         console.error('Error fetching emails:', error);
         toast({
@@ -217,7 +248,9 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         });
         return;
       }
+      
       setEmails(data || []);
+      setFilteredEmails(data || []);
     } catch (error) {
       console.error('Error in fetchEmails:', error);
     } finally {
@@ -229,15 +262,13 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     if (!user || !leadId || !lead?.email) return;
     try {
       setIsRefreshing(true);
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('gmail-sync', {
+      const { data, error } = await supabase.functions.invoke('gmail-sync', {
         body: {
           leadId,
           leadEmail: lead.email
         }
       });
+      
       if (error) {
         console.error('Error syncing emails:', error);
         toast({
@@ -247,10 +278,12 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         });
         return;
       }
+      
       toast({
         title: "Synchronisation réussie",
         description: `${data.newEmails || 0} nouveaux emails trouvés.`
       });
+      
       fetchEmails();
     } catch (error) {
       console.error('Error in syncEmailsWithGmail:', error);
@@ -260,9 +293,12 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
   };
 
   const sendNewEmail = () => {
-    if (!lead) return;
-    const mailtoLink = `mailto:${lead.email}?subject=RE: ${lead.name}`;
-    window.open(mailtoLink, '_blank');
+    setShowComposer(true);
+  };
+
+  const handleEmailSent = () => {
+    setShowComposer(false);
+    fetchEmails();
   };
 
   const formatDate = (dateString: string) => {
@@ -274,6 +310,10 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
   const retryConnection = () => {
@@ -438,6 +478,19 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     </div>;
   }
 
+  if (showComposer) {
+    return (
+      <div className="h-full flex flex-col">
+        <EmailComposer 
+          leadId={leadId} 
+          leadEmail={lead?.email || null}
+          onCancel={() => setShowComposer(false)}
+          onSent={handleEmailSent}
+        />
+      </div>
+    );
+  }
+
   return <div className="flex flex-col h-full">
     <div className="p-2">
       <div className="mb-4 flex items-center justify-between">
@@ -451,38 +504,113 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
             Sync
           </Button>
           <Button size="sm" onClick={sendNewEmail} className="flex items-center gap-1.5 bg-loro-dark hover:bg-loro-chocolate">
-            <Send className="h-3.5 w-3.5" />
-            Email
+            <Edit className="h-3.5 w-3.5" />
+            Nouveau
           </Button>
         </div>
+      </div>
+      
+      <div className="flex items-center space-x-2 mb-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Rechercher..."
+            className="pl-8"
+          />
+        </div>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={toggleSortOrder}
+          className="h-10 w-10"
+        >
+          {sortOrder === 'desc' ? <ArrowDown className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />}
+        </Button>
       </div>
       
       <Separator className="my-3" />
     </div>
     
     <ScrollArea className="flex-1 px-2 pb-16">
-      {emails.length === 0 ? <div className="text-center py-6">
-          <p className="text-gray-500">Aucun email trouvé pour ce lead.</p>
-          <Button variant="outline" size="sm" onClick={syncEmailsWithGmail} className="mt-2">
-            Synchroniser avec Gmail
-          </Button>
-        </div> : <div className="space-y-3 pb-4">
-          {emails.map(email => <div key={email.id} className="border rounded-md p-3 bg-white shadow-sm">
+      {filteredEmails.length === 0 ? (
+        <div className="text-center py-6">
+          {emails.length === 0 ? (
+            <>
+              <p className="text-gray-500">Aucun email trouvé pour ce lead.</p>
+              <Button variant="outline" size="sm" onClick={syncEmailsWithGmail} className="mt-2">
+                Synchroniser avec Gmail
+              </Button>
+            </>
+          ) : (
+            <p className="text-gray-500">Aucun résultat pour "{searchTerm}"</p>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-3 pb-4">
+          {filteredEmails.map(email => (
+            <div key={email.id} className="border rounded-md p-3 bg-white shadow-sm">
               <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="font-medium text-sm">{email.is_sent ? 'Envoyé' : 'Reçu'}</h4>
+                  <div className="flex items-center gap-1">
+                    <h4 className={`font-medium text-sm ${email.is_sent ? 'text-loro-terracotta' : 'text-loro-chocolate'}`}>
+                      {email.is_sent ? 'Envoyé' : 'Reçu'}
+                    </h4>
+                    {email.is_sent && <Send className="h-3 w-3 text-loro-terracotta" />}
+                  </div>
                   <p className="text-xs text-gray-500 flex items-center gap-1">
                     <Clock className="h-3 w-3" /> {formatDate(email.date)}
                   </p>
                 </div>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => window.open(`https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`, '_blank')}>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6" 
+                  onClick={() => window.open(`https://mail.google.com/mail/u/0/#inbox/${email.gmail_message_id}`, '_blank')}
+                >
                   <ExternalLink className="h-4 w-4" />
                 </Button>
               </div>
-              <h3 className="font-medium text-sm mt-2">{email.subject || '(Sans objet)'}</h3>
-              <p className="text-xs text-gray-600 mt-1">{email.snippet || ''}</p>
-            </div>)}
-        </div>}
+              
+              <Accordion type="single" collapsible className="w-full mt-2">
+                <AccordionItem value="content" className="border-0">
+                  <AccordionTrigger className="py-1 hover:no-underline">
+                    <h3 className="font-medium text-sm text-left">{email.subject || '(Sans objet)'}</h3>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="border-t pt-2 mt-1">
+                      {email.is_sent ? (
+                        <div className="text-xs text-gray-600">
+                          <span className="font-medium">À:</span> {email.recipient || 'N/A'}
+                        </div>
+                      ) : (
+                        <div className="text-xs text-gray-600">
+                          <span className="font-medium">De:</span> {email.sender || 'N/A'}
+                        </div>
+                      )}
+                      
+                      <div className="mt-2 text-sm">
+                        {email.body_html ? (
+                          <div dangerouslySetInnerHTML={{ __html: email.body_html }} className="prose prose-sm max-w-none" />
+                        ) : email.body_text ? (
+                          <div className="whitespace-pre-wrap">{email.body_text}</div>
+                        ) : (
+                          <div>{email.snippet || ''}</div>
+                        )}
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+              
+              {!email.body_html && !email.body_text && (
+                <p className="text-xs text-gray-600 mt-1">{email.snippet || ''}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </ScrollArea>
   </div>;
 };
