@@ -34,11 +34,36 @@ serve(async (req) => {
       hasRedirectUri: !!redirectUri,
       hasClientSecret: !!GOOGLE_CLIENT_SECRET,
       googleClientId: GOOGLE_CLIENT_ID,
-      redirectUriEnv: REDIRECT_URI
+      redirectUriEnv: REDIRECT_URI,
+      requestHeaders: Object.fromEntries(req.headers.entries()),
+      requestUrl: req.url
     });
+
+    // Check for required environment variables
+    if (!GOOGLE_CLIENT_SECRET) {
+      console.error("Missing GOOGLE_CLIENT_SECRET environment variable");
+      return new Response(JSON.stringify({ 
+        error: 'Configuration error: Missing Google client secret',
+        details: 'The server is missing required configuration. Please contact your administrator.'
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
 
     // Step 1: Generate authorization URL
     if (action === 'authorize') {
+      if (!userId) {
+        console.error("Missing userId in authorize request");
+        return new Response(JSON.stringify({ 
+          error: 'Bad Request',
+          details: 'User ID is required for authorization'
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
       // Generate a random state for security
       const state = crypto.randomUUID();
       
@@ -53,7 +78,8 @@ serve(async (req) => {
         'https://www.googleapis.com/auth/gmail.send',
         'https://www.googleapis.com/auth/gmail.compose',
         'https://www.googleapis.com/auth/gmail.modify',
-        'https://www.googleapis.com/auth/userinfo.email'
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile'
       ];
       
       // Create a state object that includes redirect URI and user ID
@@ -84,6 +110,17 @@ serve(async (req) => {
     
     // Step 2: Exchange authorization code for tokens
     if (action === 'exchange') {
+      if (!code) {
+        console.error("Missing code in exchange request");
+        return new Response(JSON.stringify({ 
+          error: 'Bad Request',
+          details: 'Authorization code is required for token exchange'
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
       // Parse state object if provided
       let stateObj;
       if (typeof state === 'string') {

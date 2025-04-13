@@ -1,13 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Mail, ExternalLink, Clock, Send, RefreshCw, AlertCircle } from 'lucide-react';
+import { Mail, ExternalLink, Clock, Send, RefreshCw, AlertCircle, ChevronDown, Info } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useLeadDetail } from '@/hooks/useLeadDetail';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface EmailConnectionProps {
   leadId: string;
@@ -42,6 +44,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [connectionAttemptCount, setConnectionAttemptCount] = useState(0);
+  const [detailedErrorInfo, setDetailedErrorInfo] = useState<any>(null);
 
   const {
     lead
@@ -53,16 +56,20 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       try {
         setIsLoading(true);
         setConnectionError(null);
+        setDetailedErrorInfo(null);
+        
         const {
           data,
           error
         } = await supabase.from('user_email_connections').select('email, id').eq('user_id', user.id).maybeSingle();
+        
         if (error) {
           console.error('Error checking email connection:', error);
           setIsConnected(false);
           setConnectionError(`Erreur lors de la vérification de la connexion: ${error.message}`);
           return;
         }
+        
         if (data) {
           setIsConnected(true);
           setConnectedEmail((data as EmailConnection).email);
@@ -77,6 +84,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         setIsLoading(false);
       }
     }
+    
     checkEmailConnection();
   }, [user, leadId, connectionAttemptCount]);
 
@@ -86,6 +94,8 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     try {
       setIsConnecting(true);
       setConnectionError(null);
+      setDetailedErrorInfo(null);
+      
       console.log('Starting Gmail connection process for lead:', leadId);
       
       // Vérifions que l'utilisateur est connecté
@@ -107,40 +117,70 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       console.log('Using redirect URI:', redirectUri);
       console.log('User ID:', user.id);
       
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('gmail-auth', {
-        body: {
-          action: 'authorize',
-          userId: user.id,
-          redirectUri: redirectUri
+      try {
+        const {
+          data,
+          error
+        } = await supabase.functions.invoke('gmail-auth', {
+          body: {
+            action: 'authorize',
+            userId: user.id,
+            redirectUri: redirectUri
+          }
+        });
+        
+        if (error) {
+          console.error('Error starting Gmail auth:', error);
+          setConnectionError(`Erreur de démarrage de l'authentification: ${error.message}`);
+          setDetailedErrorInfo({
+            error: error,
+            context: "Invoking gmail-auth function"
+          });
+          
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de démarrer l'authentification Gmail."
+          });
+          return;
         }
-      });
-      
-      if (error) {
-        console.error('Error starting Gmail auth:', error);
-        setConnectionError(`Erreur de démarrage de l'authentification: ${error.message}`);
+        
+        if (!data || !data.authorizationUrl) {
+          const errorMsg = "La réponse du serveur ne contient pas d'URL d'autorisation.";
+          setConnectionError(errorMsg);
+          setDetailedErrorInfo({
+            error: errorMsg,
+            data: data
+          });
+          return;
+        }
+        
+        console.log('Received authorization URL, redirecting user:', data.authorizationUrl.substring(0, 100) + '...');
+        // Store current page in localStorage so we can return here
+        localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
+        window.location.href = data.authorizationUrl;
+      } catch (invokeError) {
+        console.error('Error invoking gmail-auth function:', invokeError);
+        setConnectionError(`Erreur d'invocation de la fonction: ${(invokeError as Error).message}`);
+        setDetailedErrorInfo({
+          error: invokeError,
+          context: "Try-catch block for function invocation"
+        });
+        
         toast({
           variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de démarrer l'authentification Gmail."
+          title: "Erreur technique",
+          description: "Une erreur s'est produite lors de la connexion à Gmail."
         });
-        return;
       }
-      
-      if (!data || !data.authorizationUrl) {
-        setConnectionError("La réponse du serveur ne contient pas d'URL d'autorisation.");
-        return;
-      }
-      
-      console.log('Received authorization URL, redirecting user:', data.authorizationUrl.substring(0, 100) + '...');
-      // Store current page in localStorage so we can return here
-      localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
-      window.location.href = data.authorizationUrl;
     } catch (error) {
       console.error('Error in connectGmail:', error);
       setConnectionError(`Erreur: ${(error as Error).message}`);
+      setDetailedErrorInfo({
+        error: error,
+        context: "Main try-catch block"
+      });
+      
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -236,6 +276,11 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     window.location.reload();
   };
 
+  // Fonction pour obtenir le statut actuel des serveurs Supabase Edge Functions
+  const checkSupabaseEdgeFunctionStatus = () => {
+    window.open('https://status.supabase.com', '_blank');
+  };
+
   if (isLoading) {
     return <div className="p-4 flex flex-col items-center justify-center h-40">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-loro-hazel"></div>
@@ -253,12 +298,37 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         </AlertDescription>
       </Alert>
       
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="details">
+          <AccordionTrigger className="text-sm font-medium">
+            <div className="flex items-center gap-1">
+              <Info className="h-3.5 w-3.5" />
+              Informations techniques
+            </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="bg-gray-100 p-2 rounded text-xs font-mono whitespace-pre-wrap">
+              {detailedErrorInfo ? JSON.stringify(detailedErrorInfo, null, 2) : "Aucune information détaillée disponible"}
+            </div>
+            <p className="text-xs mt-2 text-gray-500">Ces informations peuvent être utiles pour le support technique.</p>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      
       <Button 
         onClick={retryConnection} 
         variant="outline" 
         className="w-full mt-4"
       >
         <RefreshCw className="mr-2 h-4 w-4" /> Rafraîchir la page
+      </Button>
+      
+      <Button 
+        onClick={checkSupabaseEdgeFunctionStatus}
+        variant="outline"
+        className="w-full"
+      >
+        <Info className="mr-2 h-4 w-4" /> Vérifier le statut des serveurs
       </Button>
       
       <div className="bg-loro-pearl/30 rounded-lg p-4 text-sm">
@@ -268,7 +338,10 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
           <li>Assurez-vous que l'URI de redirection autorisée dans la console Google est: <code className="bg-gray-100 p-1 rounded text-xs">https://success.gadait-international.com/oauth/callback</code></li>
           <li>Vérifiez que le client ID et le client secret sont corrects</li>
           <li>Assurez-vous que l'API Gmail est activée dans la <a href="https://console.cloud.google.com/apis/library" target="_blank" className="text-loro-chocolate underline">bibliothèque d'API Google</a></li>
-          <li>Assurez-vous que le type de compte est bien "Web application"</li>
+          <li>Assurez-vous que l'accès est configuré pour une <strong>application Web</strong> et non mobile</li>
+          <li>Vérifiez que les cookies tiers sont autorisés dans votre navigateur</li>
+          <li>Essayez d'utiliser une fenêtre de navigation privée</li>
+          <li>Si le problème persiste, essayez de vous déconnecter de tous vos comptes Google et reconnectez-vous uniquement avec le compte que vous souhaitez utiliser</li>
         </ul>
       </div>
       
