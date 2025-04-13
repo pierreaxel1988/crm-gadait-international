@@ -18,11 +18,6 @@ const corsHeaders = {
 // Create a Supabase client with the admin key
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-// Generate a random state for OAuth security
-const generateState = () => {
-  return crypto.randomUUID();
-};
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -38,12 +33,14 @@ serve(async (req) => {
       userId, 
       hasRedirectUri: !!redirectUri,
       hasClientSecret: !!GOOGLE_CLIENT_SECRET,
-      googleClientId: GOOGLE_CLIENT_ID
+      googleClientId: GOOGLE_CLIENT_ID,
+      redirectUriEnv: REDIRECT_URI
     });
 
     // Step 1: Generate authorization URL
     if (action === 'authorize') {
-      const state = generateState();
+      // Generate a random state for security
+      const state = crypto.randomUUID();
       
       // Use the provided redirect URI or fallback to the default
       const finalRedirectUri = redirectUri || 'https://success.gadait-international.com/leads';
@@ -59,6 +56,7 @@ serve(async (req) => {
         'https://www.googleapis.com/auth/userinfo.email'
       ];
       
+      // Create a state object that includes redirect URI and user ID
       const stateObj = {
         redirectUri: finalRedirectUri,
         userId: userId,
@@ -67,6 +65,7 @@ serve(async (req) => {
       
       console.log("Creating state object:", stateObj);
       
+      // Build the authorization URL with all required parameters
       const authorizationUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
         `client_id=${GOOGLE_CLIENT_ID}` +
         `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
@@ -85,7 +84,20 @@ serve(async (req) => {
     
     // Step 2: Exchange authorization code for tokens
     if (action === 'exchange') {
-      // Verify the state matches what we expect
+      // Parse state object if provided
+      let stateObj;
+      if (typeof state === 'string') {
+        try {
+          stateObj = JSON.parse(state);
+        } catch (e) {
+          console.error('Error parsing state:', e);
+          stateObj = state; // Use as is if parsing fails
+        }
+      } else {
+        stateObj = state; // Use as is if not a string
+      }
+      
+      console.log("Exchanging code for tokens with state:", stateObj);
       
       // Exchange the code for tokens
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
@@ -119,11 +131,10 @@ serve(async (req) => {
       const userInfo = await userInfoResponse.json();
       
       // Store the tokens in your database
-      // This is just a simplified example
       const { error: storeError } = await supabase
         .from('user_email_connections')
         .upsert({
-          user_id: state.userId,
+          user_id: stateObj.userId,
           email: userInfo.email,
           access_token: tokenData.access_token,
           refresh_token: tokenData.refresh_token,
@@ -135,7 +146,7 @@ serve(async (req) => {
         throw new Error(`Error storing tokens: ${storeError.message}`);
       }
       
-      return new Response(JSON.stringify({ success: true, redirectUri: state.redirectUri }), {
+      return new Response(JSON.stringify({ success: true, redirectUri: stateObj.redirectUri }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }

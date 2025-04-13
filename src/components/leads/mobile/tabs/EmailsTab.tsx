@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -100,9 +99,9 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       }
       
       // Build the redirect URI with the current URL
-      // Make sure we include the exact path including lead ID and tab
-      const currentPath = window.location.pathname; // e.g., "/leads/e02afd17-f08d-43f2-b319-ceaefa04a060"
-      const baseUrl = window.location.origin; // e.g., "https://success.gadait-international.com"
+      const currentPath = window.location.pathname;
+      const baseUrl = window.location.origin;
+      // Ensure we maintain the tab parameter
       const redirectUri = `${baseUrl}${currentPath}?tab=emails`;
       
       console.log('Using redirect URI:', redirectUri);
@@ -113,9 +112,9 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         error
       } = await supabase.functions.invoke('gmail-auth', {
         body: {
-          redirectUri: redirectUri,
           action: 'authorize',
-          userId: user.id
+          userId: user.id,
+          redirectUri: redirectUri
         }
       });
       
@@ -320,7 +319,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         )}
       </Button>
       <p className="text-xs text-gray-400 mt-2 text-center">
-        Assurez-vous que le projet a bien été autorisé dans votre compte Google
+        Assurez-vous que les autorisations d'API ont été configurées dans Google Cloud Console
       </p>
     </div>;
   }
@@ -373,8 +372,5 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     </ScrollArea>
   </div>;
 };
-
-// Define this value for troubleshooting information
-const REDIRECT_URI = 'https://success.gadait-international.com/oauth/callback';
 
 export default EmailsTab;
