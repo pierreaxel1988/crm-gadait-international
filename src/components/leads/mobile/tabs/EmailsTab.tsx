@@ -45,6 +45,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [connectionAttemptCount, setConnectionAttemptCount] = useState(0);
   const [detailedErrorInfo, setDetailedErrorInfo] = useState<any>(null);
+  const [googleAuthURL, setGoogleAuthURL] = useState<string | null>(null);
 
   const {
     lead
@@ -95,6 +96,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       setIsConnecting(true);
       setConnectionError(null);
       setDetailedErrorInfo(null);
+      setGoogleAuthURL(null);
       
       console.log('Starting Gmail connection process for lead:', leadId);
       
@@ -155,10 +157,15 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
           return;
         }
         
-        console.log('Received authorization URL, redirecting user:', data.authorizationUrl.substring(0, 100) + '...');
+        console.log('Received authorization URL:', data.authorizationUrl.substring(0, 100) + '...');
+        // Store the URL for direct link option 
+        setGoogleAuthURL(data.authorizationUrl);
+        
         // Store current page in localStorage so we can return here
         localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
-        window.location.href = data.authorizationUrl;
+        
+        // Open in a new tab instead of redirecting
+        window.open(data.authorizationUrl, '_blank');
       } catch (invokeError) {
         console.error('Error invoking gmail-auth function:', invokeError);
         setConnectionError(`Erreur d'invocation de la fonction: ${(invokeError as Error).message}`);
@@ -315,6 +322,25 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         </AccordionItem>
       </Accordion>
       
+      {googleAuthURL && (
+        <Alert className="bg-blue-50 border-blue-200">
+          <Info className="h-4 w-4 text-blue-500" />
+          <AlertTitle className="text-blue-700">Lien direct disponible</AlertTitle>
+          <AlertDescription className="text-blue-600">
+            Vous pouvez essayer d'ouvrir le lien d'autorisation directement ci-dessous :
+            <div className="mt-2">
+              <Button 
+                onClick={() => window.open(googleAuthURL, '_blank')}
+                variant="outline" 
+                className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" /> Ouvrir le lien d'autorisation
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <Button 
         onClick={retryConnection} 
         variant="outline" 
@@ -338,10 +364,25 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
           <li>Assurez-vous que l'URI de redirection autorisée dans la console Google est: <code className="bg-gray-100 p-1 rounded text-xs">https://success.gadait-international.com/oauth/callback</code></li>
           <li>Vérifiez que le client ID et le client secret sont corrects</li>
           <li>Assurez-vous que l'API Gmail est activée dans la <a href="https://console.cloud.google.com/apis/library" target="_blank" className="text-loro-chocolate underline">bibliothèque d'API Google</a></li>
-          <li>Assurez-vous que l'accès est configuré pour une <strong>application Web</strong> et non mobile</li>
+          <li>Assurez-vous que l'application est de type <strong>Application Web</strong></li>
+          <li><strong>Important:</strong> Vérifiez que l'erreur 403 n'est pas due à des restrictions sur votre compte Google. Si vous utilisez Google Workspace, contactez votre administrateur</li>
+          <li>Assurez-vous que le compte Google utilisé a l'autorisation d'accéder à l'API Gmail</li>
           <li>Vérifiez que les cookies tiers sont autorisés dans votre navigateur</li>
           <li>Essayez d'utiliser une fenêtre de navigation privée</li>
           <li>Si le problème persiste, essayez de vous déconnecter de tous vos comptes Google et reconnectez-vous uniquement avec le compte que vous souhaitez utiliser</li>
+        </ul>
+      </div>
+      
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">
+        <p className="font-medium mb-2 text-amber-800">Note sur l'erreur 403:</p>
+        <p className="text-amber-700">
+          Une erreur 403 indique généralement un problème de permissions. Voici quelques vérifications supplémentaires:
+        </p>
+        <ul className="list-disc pl-5 space-y-1 text-amber-600 mt-2">
+          <li>Assurez-vous que l'API Gmail a été activée pour le projet</li>
+          <li>Vérifiez que le compte utilisé n'est pas soumis à des restrictions organisationnelles</li>
+          <li>Confirmez que tous les scopes nécessaires sont configurés dans le projet Google Cloud</li>
+          <li>Si vous utilisez un compte Gmail, assurez-vous qu'il n'est pas configuré avec une sécurité accrue qui bloque les connexions d'applications</li>
         </ul>
       </div>
       

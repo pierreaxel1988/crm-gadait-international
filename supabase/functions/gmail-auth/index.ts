@@ -72,14 +72,15 @@ serve(async (req) => {
       console.log("Using redirect URI:", finalRedirectUri);
       console.log("Using user ID:", userId);
       
-      // Gmail API scopes - modify as needed
+      // Gmail API scopes - IMPORTANT: Include all required scopes
       const scopes = [
         'https://www.googleapis.com/auth/gmail.readonly',
         'https://www.googleapis.com/auth/gmail.send',
         'https://www.googleapis.com/auth/gmail.compose',
         'https://www.googleapis.com/auth/gmail.modify',
         'https://www.googleapis.com/auth/userinfo.email',
-        'https://www.googleapis.com/auth/userinfo.profile'
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'openid'  // Added openid scope for better compatibility
       ];
       
       // Create a state object that includes redirect URI and user ID
@@ -99,6 +100,7 @@ serve(async (req) => {
         `&scope=${encodeURIComponent(scopes.join(' '))}` +
         `&access_type=offline` +
         `&prompt=consent` +
+        `&include_granted_scopes=true` + // Added parameter to include previously granted scopes
         `&state=${encodeURIComponent(JSON.stringify(stateObj))}`;
       
       console.log("Generated auth URL:", authorizationUrl);
