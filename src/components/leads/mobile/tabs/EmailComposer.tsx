@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Send, X, Paperclip, ChevronDown, Loader2 } from 'lucide-react';
+import { Send, X, Paperclip, ChevronDown, Loader2, File, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -27,6 +27,40 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
   const [showCc, setShowCc] = useState<boolean>(false);
   const [cc, setCc] = useState<string>('');
   const [bcc, setBcc] = useState<string>('');
+  const [attachments, setAttachments] = useState<File[]>([]);
+
+  const handleAttachmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      
+      // Check file size (limit to 5MB per file)
+      const oversizedFiles = newFiles.filter(file => file.size > 5 * 1024 * 1024);
+      if (oversizedFiles.length > 0) {
+        toast({
+          variant: "destructive",
+          title: "Fichier trop volumineux",
+          description: "Les pièces jointes doivent faire moins de 5MB chacune."
+        });
+        return;
+      }
+      
+      // Limit total number of attachments
+      if (attachments.length + newFiles.length > 5) {
+        toast({
+          variant: "destructive",
+          title: "Trop de pièces jointes",
+          description: "Vous ne pouvez pas joindre plus de 5 fichiers."
+        });
+        return;
+      }
+      
+      setAttachments(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSend = async () => {
     if (!leadEmail) {
@@ -59,6 +93,9 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
     try {
       setIsSending(true);
 
+      // Note: File attachments support would require additional implementation
+      // in the edge function to handle file uploads and Gmail API attachments
+      
       const { data, error } = await supabase.functions.invoke('gmail-send', {
         body: {
           to: leadEmail,
@@ -67,6 +104,8 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
           cc: cc || undefined,
           bcc: bcc || undefined,
           leadId
+          // For full attachment support, we would need to implement file encoding and transfer
+          // attachments: base64EncodedFiles
         }
       });
 
@@ -107,7 +146,7 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
         </Button>
       </div>
 
-      <div className="space-y-4 flex-1">
+      <div className="space-y-4 flex-1 overflow-auto">
         <div>
           <Label htmlFor="to">À</Label>
           <Input id="to" value={leadEmail || ''} disabled className="bg-gray-50" />
@@ -163,19 +202,53 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
             value={message} 
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Saisissez votre message ici..." 
-            className="min-h-[200px] h-full resize-none"
+            className="min-h-[200px] resize-none"
           />
         </div>
+
+        {/* Attachments UI */}
+        {attachments.length > 0 && (
+          <div className="space-y-2">
+            <Label>Pièces jointes</Label>
+            <div className="space-y-2">
+              {attachments.map((file, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
+                  <div className="flex items-center space-x-2">
+                    <File className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm truncate max-w-[200px]">{file.name}</span>
+                    <span className="text-xs text-gray-400">
+                      {(file.size / 1024).toFixed(0)} KB
+                    </span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0" 
+                    onClick={() => removeAttachment(index)}
+                  >
+                    <Trash2 className="h-4 w-4 text-gray-500" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-between items-center mt-4 pt-2 border-t">
-        <Button 
-          variant="outline" 
-          size="sm"
-          disabled={isSending}
-        >
-          <Paperclip className="h-4 w-4 mr-1" /> Pièce jointe
-        </Button>
+        <label className="cursor-pointer">
+          <input 
+            type="file" 
+            className="hidden" 
+            multiple 
+            onChange={handleAttachmentChange}
+            disabled={isSending}
+          />
+          <div className="flex items-center text-sm text-gray-700 hover:text-loro-chocolate">
+            <Paperclip className="h-4 w-4 mr-1" /> 
+            Pièce jointe
+          </div>
+        </label>
         <div className="flex gap-2">
           <Button 
             variant="outline" 

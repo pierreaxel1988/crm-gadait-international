@@ -21,6 +21,8 @@ interface EmailRequest {
   cc?: string;
   bcc?: string;
   leadId: string;
+  // Note: For full attachment support we would need additional parameters
+  // attachments?: Array<{name: string, content: string, encoding: string}>;
 }
 
 serve(async (req) => {
@@ -132,8 +134,12 @@ serve(async (req) => {
       emailContent += `Bcc: ${bcc}\r\n`;
     }
     
-    emailContent += `Subject: ${subject}\r\n\r\n`;
-    emailContent += message;
+    emailContent += `Subject: ${subject}\r\n`;
+    emailContent += `Content-Type: text/html; charset=UTF-8\r\n\r\n`;
+    emailContent += `<div>${message.replace(/\n/g, '<br>')}</div>`;
+
+    // For attachments, we would need to implement MIME encoding
+    // This would require additional code to handle multipart/mixed content
 
     // Encode the message in base64
     const encodedMessage = btoa(emailContent)
@@ -184,6 +190,7 @@ serve(async (req) => {
         recipient: to,
         subject: subject,
         body_text: message,
+        body_html: `<div>${message.replace(/\n/g, '<br>')}</div>`,
         date: new Date().toISOString(),
         is_sent: true,
       });
