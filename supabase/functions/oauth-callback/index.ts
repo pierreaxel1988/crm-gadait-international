@@ -25,6 +25,7 @@ serve(async (req) => {
       stateExists: !!stateParam,
       error: error,
       url: req.url,
+      requestHeaders: Object.fromEntries(req.headers.entries()),
       envCheck: {
         hasSupabaseUrl: !!SUPABASE_URL,
         hasSupabaseKey: !!SUPABASE_SERVICE_ROLE_KEY,
@@ -109,10 +110,35 @@ serve(async (req) => {
         redirectUri = stateObj.redirectUri || redirectUri;
         userId = stateObj.userId || '';
         
-        console.log("Parsed state object:", { redirectUri, userId });
+        console.log("Parsed state object:", { redirectUri, userId, fullStateObj: stateObj });
       }
     } catch (e) {
       console.error('Error parsing state:', e);
+      return new Response(
+        `<html>
+          <head>
+            <title>Error</title>
+            <style>
+              body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+              .container { text-align: center; }
+              .error { color: #e74c3c; }
+              .details { margin-top: 20px; background: #f8f8f8; padding: 15px; border-radius: 5px; text-align: left; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1 class="error">Erreur de traitement</h1>
+              <p>Impossible de traiter le paramètre state: ${e.message}</p>
+              <div class="details">
+                <h3>Informations techniques:</h3>
+                <p>State reçu: <code>${stateParam || 'aucun'}</code></p>
+              </div>
+              <p><a href="https://success.gadait-international.com/leads">Retour à l'application</a></p>
+            </div>
+          </body>
+        </html>`,
+        { headers: { 'Content-Type': 'text/html' } }
+      );
     }
     
     // Exchange the code for tokens
@@ -138,12 +164,54 @@ serve(async (req) => {
         }),
       });
       
-      const tokenData = await tokenResponse.json();
+      const responseStatus = tokenResponse.status;
+      const responseStatusText = tokenResponse.statusText;
+      let tokenData;
+      
+      try {
+        tokenData = await tokenResponse.json();
+      } catch (parseError) {
+        const responseText = await tokenResponse.text();
+        console.error("Failed to parse token response as JSON:", parseError);
+        console.log("Raw response:", responseText);
+        
+        return new Response(
+          `<html>
+            <head>
+              <title>Error</title>
+              <style>
+                body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+                .container { text-align: center; max-width: 600px; }
+                .error { color: #e74c3c; }
+                .details { margin-top: 20px; background: #f8f8f8; padding: 15px; border-radius: 5px; text-align: left; }
+                pre { white-space: pre-wrap; overflow-x: auto; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h1 class="error">Erreur de traitement de la réponse</h1>
+                <p>Impossible de traiter la réponse du serveur d'authentification.</p>
+                <div class="details">
+                  <h3>Informations techniques:</h3>
+                  <p>Status: ${responseStatus} ${responseStatusText}</p>
+                  <p>Réponse:</p>
+                  <pre>${responseText}</pre>
+                </div>
+                <p><a href="https://success.gadait-international.com/leads">Retour à l'application</a></p>
+              </div>
+            </body>
+          </html>`,
+          { headers: { 'Content-Type': 'text/html' } }
+        );
+      }
+      
       console.log("Token response received", { 
         hasError: !!tokenData.error,
         error: tokenData.error || null,
         error_description: tokenData.error_description || null,
         hasAccessToken: !!tokenData.access_token,
+        hasRefreshToken: !!tokenData.refresh_token,
+        expiresIn: tokenData.expires_in,
         status: tokenResponse.status,
         statusText: tokenResponse.statusText
       });
@@ -192,8 +260,34 @@ serve(async (req) => {
         },
       });
       
-      const userInfo = await userInfoResponse.json();
-      console.log("User info received:", { email: userInfo.email });
+      let userInfo;
+      try {
+        userInfo = await userInfoResponse.json();
+        console.log("User info received:", { email: userInfo.email });
+      } catch (parseError) {
+        console.error("Failed to parse user info response:", parseError);
+        
+        return new Response(
+          `<html>
+            <head>
+              <title>Error</title>
+              <style>
+                body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+                .container { text-align: center; }
+                .error { color: #e74c3c; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h1 class="error">Erreur de traitement</h1>
+                <p>Impossible de récupérer les informations de l'utilisateur.</p>
+                <p><a href="https://success.gadait-international.com/leads">Retour à l'application</a></p>
+              </div>
+            </body>
+          </html>`,
+          { headers: { 'Content-Type': 'text/html' } }
+        );
+      }
       
       // Get user ID if not available from token
       if (!userId) {
@@ -269,6 +363,8 @@ serve(async (req) => {
       }
       
       // Redirect back to the application
+      console.log("Authentication successful, redirecting to:", redirectUri);
+      
       return new Response(
         `<html>
           <head>
@@ -281,7 +377,7 @@ serve(async (req) => {
             <script>
               setTimeout(function() {
                 window.location.href = "${redirectUri}";
-              }, 3000);
+              }, 2000);
             </script>
           </head>
           <body>
