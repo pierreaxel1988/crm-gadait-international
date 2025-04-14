@@ -169,8 +169,14 @@ export const useGmailConnection = (leadId: string) => {
         // Mémorise l'URL actuelle pour pouvoir y revenir après l'authentification
         localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
         
-        // Redirige vers l'URL d'authentification Google
-        window.location.href = data.authorizationUrl;
+        // Ouvre l'URL dans un nouvel onglet plutôt que de rediriger
+        // cela permet à l'utilisateur de revenir facilement si besoin
+        window.open(data.authorizationUrl, '_blank', 'noopener,noreferrer');
+        
+        toast({
+          title: "Authentification en cours",
+          description: "Veuillez compléter l'authentification dans l'onglet qui vient de s'ouvrir."
+        });
       } catch (invokeError) {
         console.error('Erreur lors de l\'invocation de la fonction gmail-auth:', invokeError);
         setConnectionError(`Erreur d'invocation de la fonction: ${(invokeError as Error).message}`);
@@ -199,7 +205,10 @@ export const useGmailConnection = (leadId: string) => {
         description: "Une erreur s'est produite lors de la connexion à Gmail."
       });
     } finally {
-      setIsConnecting(false);
+      // Ne pas désactiver isConnecting immédiatement pour éviter les clics multiples
+      setTimeout(() => {
+        setIsConnecting(false);
+      }, 5000);
     }
   };
 

@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { Mail, RefreshCw, ExternalLink } from 'lucide-react';
+import { Mail, RefreshCw, ExternalLink, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/hooks/useAuth';
 
 interface EmailConnectionStateProps {
   isConnecting: boolean;
@@ -13,9 +14,16 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
   isConnecting,
   connectGmail,
 }) => {
+  const { user } = useAuth();
+  
   const handleConnectClick = () => {
-    console.log('Initiating Gmail connection...');
-    connectGmail();
+    console.log('Initiating Gmail connection...', {userId: user?.id});
+    if (user) {
+      connectGmail();
+    } else {
+      console.error('Erreur: Utilisateur non connecté');
+      alert('Vous devez être connecté pour utiliser cette fonctionnalité.');
+    }
   };
 
   return (
@@ -32,12 +40,23 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
         <AlertDescription className="text-sm text-blue-800">
           <p className="font-medium mb-2">Prérequis pour l'authentification Gmail:</p>
           <ol className="list-decimal pl-5 space-y-1">
-            <li>Assurez-vous que votre navigateur autorise les popups pour ce site</li>
-            <li>Connectez-vous avec un compte Google qui a accès à l'API Gmail</li>
-            <li>Si vous utilisez Google Workspace, vérifiez que votre administrateur a autorisé les API externes</li>
+            <li>Assurez-vous que votre navigateur <strong>autorise les popups</strong> pour ce site</li>
+            <li>Utilisez un compte Google avec un accès Gmail complet</li>
+            <li>Si vous êtes sur Google Workspace, vérifiez les autorisations d'API</li>
+            <li>Ne fermez pas la fenêtre popup Google qui s'ouvrira</li>
           </ol>
         </AlertDescription>
       </Alert>
+      
+      <div className="bg-green-50 border border-green-200 rounded-lg p-3 w-full">
+        <div className="flex items-start">
+          <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 mr-2 flex-shrink-0" />
+          <div>
+            <p className="font-medium text-green-800 text-sm">Configuration vérifiée</p>
+            <p className="text-xs text-green-700">Les paramètres Google Cloud sont correctement configurés.</p>
+          </div>
+        </div>
+      </div>
       
       <Button 
         onClick={handleConnectClick} 
@@ -59,17 +78,18 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       
       <div className="text-xs text-gray-500 mt-2 space-y-2 text-center max-w-md">
         <p>
-          Assurez-vous que les autorisations d'API ont été configurées dans Google Cloud Console.
+          Un nouvel onglet va s'ouvrir pour l'authentification Google.
+          Assurez-vous de terminer le processus dans la fenêtre qui s'ouvre.
         </p>
         <p>
-          En cas de problème, consultez le 
+          Si besoin, consultez la 
           <a 
             href="https://console.cloud.google.com/apis/credentials" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-loro-chocolate inline-flex items-center ml-1"
           >
-            Tableau de bord Google Cloud
+            Console Google Cloud
             <ExternalLink className="h-3 w-3 ml-0.5" />
           </a>
         </p>

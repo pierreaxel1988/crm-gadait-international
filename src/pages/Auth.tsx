@@ -1,27 +1,58 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { Loader2 } from 'lucide-react';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, user } = useAuth();
+
+  // Vérifier si l'utilisateur est déjà connecté
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        console.log('Session check on Auth page:', data.session?.user?.email);
+        
+        if (data.session) {
+          // Récupérer le paramètre de redirection s'il existe
+          const params = new URLSearchParams(location.search);
+          const redirectTo = params.get('redirectTo') || '/';
+          
+          console.log('Utilisateur déjà connecté, redirection vers:', redirectTo);
+          navigate(redirectTo);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification de session:', error);
+      } finally {
+        setCheckingSession(false);
+      }
+    };
+    
+    checkSession();
+  }, [navigate, location, user]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error } = isSignUp 
+      console.log(`Tentative de ${isSignUp ? 'création de compte' : 'connexion'} pour:`, email);
+      
+      const { error, data } = isSignUp 
         ? await supabase.auth.signUp({ 
             email, 
             password,
@@ -33,6 +64,8 @@ const Auth = () => {
 
       if (error) throw error;
       
+      console.log('Résultat auth:', data);
+      
       if (isSignUp) {
         toast({
           title: "Compte créé avec succès",
@@ -43,9 +76,14 @@ const Auth = () => {
           title: "Connexion réussie",
           description: "Bienvenue sur votre espace personnel",
         });
-        navigate('/');
+        
+        // Récupérer le paramètre de redirection s'il existe
+        const params = new URLSearchParams(location.search);
+        const redirectTo = params.get('redirectTo') || '/';
+        navigate(redirectTo);
       }
     } catch (error: any) {
+      console.error('Erreur auth:', error);
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue",
@@ -58,8 +96,10 @@ const Auth = () => {
 
   const handleGoogleAuth = async () => {
     try {
+      console.log('Démarrage authentification Google');
       await signInWithGoogle();
     } catch (error: any) {
+      console.error('Erreur Google Auth:', error);
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue avec Google",
@@ -68,53 +108,16 @@ const Auth = () => {
     }
   };
 
-  const createAdminAccount = async () => {
-    const adminEmail = "christelle@gadait-international.com";
-    const adminPassword = "@Christelle2025";
-    
-    try {
-      setLoading(true);
-      
-      // Try to sign up the admin user
-      const { data, error } = await supabase.auth.signUp({ 
-        email: adminEmail, 
-        password: adminPassword,
-        options: {
-          data: {
-            role: 'admin'
-          }
-        }
-      });
-      
-      if (error) {
-        // If the user already exists, try to update their password
-        if (error.message.includes("User already registered")) {
-          toast({
-            title: "Utilisateur existe déjà",
-            description: "L'utilisateur admin existe déjà. Essayez de vous connecter.",
-          });
-        } else {
-          throw error;
-        }
-      } else {
-        toast({
-          title: "Compte admin créé",
-          description: "Le compte admin a été créé avec succès. Veuillez vous connecter.",
-        });
-        // Pre-fill the form with admin credentials
-        setEmail(adminEmail);
-        setPassword(adminPassword);
-      }
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la création du compte admin",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80">
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-loro-hazel mb-4" />
+          <p className="text-loro-chocolate">Vérification de votre session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80 px-4">
@@ -193,12 +196,19 @@ const Auth = () => {
           {import.meta.env.DEV && (
             <div className="mt-4">
               <Button 
-                onClick={createAdminAccount}
+                onClick={() => {
+                  setEmail("christelle@gadait-international.com");
+                  setPassword("@Christelle2025");
+                  toast({
+                    title: "Compte admin prérempli",
+                    description: "Vous pouvez maintenant vous connecter avec le compte admin.",
+                  });
+                }}
                 variant="outline" 
                 className="w-full text-sm"
                 disabled={loading}
               >
-                Créer compte admin (Christelle)
+                Utiliser compte admin (Christelle)
               </Button>
             </div>
           )}
