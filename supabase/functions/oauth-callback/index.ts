@@ -33,14 +33,14 @@ function renderHtmlResponse(options: {
     message,
     details,
     redirectUri,
-    redirectDelay = 5000, // Increased delay to ensure page loads properly
+    redirectDelay = 800, // Reduced delay for faster redirection
     email,
     status = 200
   } = options;
 
   const appUrl = redirectUri || 'https://gadait-international.com';
   
-  // Create a safer redirect script that handles errors gracefully
+  // Direct automatic redirect script
   const redirectScript = redirectUri ? `
     <script>
       // Function to safely redirect
@@ -49,6 +49,9 @@ function renderHtmlResponse(options: {
           // Store success flag in localStorage
           localStorage.setItem('oauth_success', 'true');
           localStorage.setItem('oauth_email', '${email || ''}');
+          
+          // Remove any pending OAuth flags to prevent errors
+          localStorage.removeItem('oauth_pending');
           
           // Create the redirect URL with proper parameters
           let redirectUrl = "${redirectUri}";
@@ -65,29 +68,37 @@ function renderHtmlResponse(options: {
           
           console.log("Redirecting to:", redirectUrl);
           
-          // Remove any pending OAuth flags to prevent errors
-          localStorage.removeItem('oauth_pending');
-          
           // Use replace to avoid back button issues
           window.location.replace(redirectUrl);
+          
+          // Fallback - if replace doesn't work in 1 second, try regular redirect
+          setTimeout(() => {
+            if (window.location.href.includes('oauth/callback')) {
+              console.log("Fallback redirect");
+              window.location.href = redirectUrl;
+            }
+          }, 1000);
         } catch (e) {
           console.error("Error during redirect:", e);
-          // Fallback direct redirect without any parameters
+          // Emergency fallback
           window.location.href = "${appUrl}";
         }
       }
       
-      // Attempt redirect after delay
+      // Execute immediate redirect
+      document.addEventListener('DOMContentLoaded', safeRedirect);
+      
+      // Additional backup redirect
       setTimeout(safeRedirect, ${redirectDelay});
       
-      // Also provide a manual click option for users
+      // Try immediate redirect first
+      safeRedirect();
+      
+      // Provide a clickable link as final fallback
       function manualRedirect() {
         safeRedirect();
         return false; // Prevent default anchor behavior
       }
-      
-      // Try immediate redirect first, fallback to timeout
-      safeRedirect();
     </script>
   ` : '';
 
@@ -107,6 +118,7 @@ function renderHtmlResponse(options: {
         <title>${title}</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="refresh" content="${redirectDelay/1000};url=${redirectUri}" />
         <style>
           body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f9f9f9; padding: 20px; }
           .container { text-align: center; max-width: 600px; padding: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-radius: 8px; background: white; }
@@ -181,6 +193,21 @@ serve(async (req) => {
         userId = stateObj.userId || '';
         
         console.log("Parsed state object:", { redirectUri, userId });
+        
+        // Fix known issues with URL structure
+        if (redirectUri.includes('lovable.app') || redirectUri.includes('lovableproject.com')) {
+          // Ensure using https for lovable URLs
+          if (!redirectUri.startsWith('https://')) {
+            redirectUri = redirectUri.replace('http://', 'https://');
+          }
+          
+          // Add tab=emails parameter if not present
+          if (redirectUri.includes('/leads/') && !redirectUri.includes('tab=emails')) {
+            redirectUri = redirectUri.includes('?') 
+              ? `${redirectUri}&tab=emails` 
+              : `${redirectUri}?tab=emails`;
+          }
+        }
       } catch (e) {
         console.error('Error parsing state:', e);
         // Continue with default redirect URI
@@ -210,7 +237,7 @@ serve(async (req) => {
           </div>
         `,
         redirectUri: redirectUri, // Always redirect, even on error
-        redirectDelay: 7000,
+        redirectDelay: 3000,
         status: 400
       });
     }
@@ -222,7 +249,7 @@ serve(async (req) => {
         heading: "Authentification échouée",
         message: "Code d'autorisation manquant.",
         redirectUri: redirectUri, // Always redirect, even on error
-        redirectDelay: 7000,
+        redirectDelay: 3000,
         status: 400
       });
     }
@@ -256,7 +283,7 @@ serve(async (req) => {
           message: `Erreur lors de l'échange du code contre des tokens: ${tokenResponse.status}`,
           details: errorText,
           redirectUri: redirectUri, // Always redirect, even on error
-          redirectDelay: 10000,
+          redirectDelay: 3000,
           status: 500
         });
       }
@@ -273,7 +300,7 @@ serve(async (req) => {
           message: `Erreur: ${tokenData.error}`,
           details: tokenData.error_description || JSON.stringify(tokenData),
           redirectUri: redirectUri, // Always redirect, even on error
-          redirectDelay: 10000,
+          redirectDelay: 3000,
           status: 400
         });
       }
@@ -296,7 +323,7 @@ serve(async (req) => {
           message: "Impossible de récupérer les informations de l'utilisateur.",
           details: errorText,
           redirectUri: redirectUri, // Always redirect, even on error
-          redirectDelay: 10000,
+          redirectDelay: 3000,
           status: 500
         });
       }
@@ -339,14 +366,6 @@ serve(async (req) => {
       
       console.log("Authentication successful. Redirecting to:", redirectUri);
       
-      // Ensure the redirectUri has the necessary parameters
-      // Add tab=emails to the redirect URI if it's a lead page
-      if (redirectUri.includes('/leads/') && !redirectUri.includes('tab=emails')) {
-        redirectUri = redirectUri.includes('?') 
-          ? `${redirectUri}&tab=emails` 
-          : `${redirectUri}?tab=emails`;
-      }
-      
       return renderHtmlResponse({
         title: "Succès",
         className: "success",
@@ -354,7 +373,7 @@ serve(async (req) => {
         message: "Vous avez connecté votre compte Gmail avec succès.",
         email: userInfo.email,
         redirectUri: redirectUri,
-        redirectDelay: 1000 // Reduced delay for faster redirection
+        redirectDelay: 800 // Reduced delay for faster redirection
       });
     } catch (error) {
       console.error('Error processing OAuth callback:', error);
@@ -365,7 +384,7 @@ serve(async (req) => {
         heading: "Erreur lors de l'authentification",
         message: `Une erreur s'est produite: ${(error as Error).message}`,
         redirectUri: redirectUri, // Always redirect, even on error
-        redirectDelay: 10000,
+        redirectDelay: 3000,
         status: 500
       });
     }
@@ -380,7 +399,7 @@ serve(async (req) => {
       heading: "Erreur inattendue",
       message: `Une erreur inattendue s'est produite: ${(error as Error).message}`,
       redirectUri: redirectUri, // Always redirect, even on error
-      redirectDelay: 7000,
+      redirectDelay: 3000,
       status: 500
     });
   }

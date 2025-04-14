@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,33 +24,45 @@ export const useGmailConnection = (leadId: string) => {
   const [googleAuthURL, setGoogleAuthURL] = useState<string | null>(null);
   const [checkingConnection, setCheckingConnection] = useState(true);
 
-  // Check for OAuth success or error flags in localStorage or URL parameters
-  useEffect(() => {
-    // First check URL parameters
+  // Fonction pour détecter automatiquement le succès d'authentification
+  const detectAuthSuccess = () => {
+    // Vérifier les paramètres d'URL
     const params = new URLSearchParams(location.search);
     const oauthSuccess = params.has('oauth_success');
     
-    // Then check localStorage
+    // Vérifier localStorage
     const storedSuccess = localStorage.getItem('oauth_success') === 'true';
-    const storedError = localStorage.getItem('oauth_connection_error') === 'true';
+    const connectedEmail = localStorage.getItem('oauth_email');
     
     if (oauthSuccess || storedSuccess) {
       console.log('Détection de succès OAuth:', { 
         fromURL: oauthSuccess, 
-        fromLocalStorage: storedSuccess 
+        fromLocalStorage: storedSuccess,
+        connectedEmail
       });
       
+      // Nettoyer localStorage
       if (storedSuccess) {
-        // Clean up localStorage
         localStorage.removeItem('oauth_success');
+        localStorage.removeItem('oauth_email');
       }
       
-      // If we're on the emails tab, we can clean up the URL
+      // Mettre à jour l'état de connexion immédiatement
+      setIsConnected(true);
+      setConnectionError(null);
+      setDetailedErrorInfo(null);
+      
+      // Si nous avons l'email connecté, le définir directement
+      if (connectedEmail) {
+        setConnectedEmail(connectedEmail);
+      }
+      
+      // Si nous sommes sur l'onglet emails, nettoyer l'URL
       if (location.search.includes('tab=emails') && oauthSuccess) {
         const cleanParams = new URLSearchParams(location.search);
         cleanParams.delete('oauth_success');
         
-        // Keep the tab=emails parameter
+        // Conserver le paramètre tab=emails
         if (location.search.includes('tab=emails')) {
           cleanParams.set('tab', 'emails');
         }
@@ -59,23 +72,35 @@ export const useGmailConnection = (leadId: string) => {
         navigate(newUrl, { replace: true });
       }
       
-      // Mark connection as successful immediately
-      setIsConnected(true);
-      setConnectionError(null);
-      setDetailedErrorInfo(null);
-      setIsLoading(false);
-      setCheckingConnection(false);
-      
-      // Still fetch connection details to get the email
+      // Augmenter le compteur de tentatives pour forcer une vérification
       setConnectionAttemptCount(prev => prev + 1);
       
+      // Afficher un toast de confirmation
       toast({
         title: "Connexion réussie",
         description: "Votre compte Gmail a été connecté avec succès."
       });
+      
+      return true;
     }
     
-    // Handle error case
+    return false;
+  };
+
+  // Vérifier les paramètres d'URL et localStorage pour le succès/échec d'OAuth
+  useEffect(() => {
+    // Vérifier le succès d'authentification
+    const isAuthenticated = detectAuthSuccess();
+    
+    if (isAuthenticated) {
+      setIsLoading(false);
+      setCheckingConnection(false);
+      return;
+    }
+    
+    // Vérifier pour les erreurs
+    const storedError = localStorage.getItem('oauth_connection_error') === 'true';
+    
     if (storedError) {
       console.log('Détection d\'erreur OAuth dans localStorage');
       localStorage.removeItem('oauth_connection_error');
@@ -94,19 +119,19 @@ export const useGmailConnection = (leadId: string) => {
     }
   }, [location.search]);
 
-  // Check OAuth redirect target in localStorage
+  // Vérifier la cible de redirection OAuth dans localStorage
   useEffect(() => {
     const redirectTarget = localStorage.getItem('oauthRedirectTarget');
     if (redirectTarget) {
       console.log('Detected OAuth redirect with target:', redirectTarget);
       
-      // Clean up localStorage
+      // Nettoyer localStorage
       localStorage.removeItem('oauthRedirectTarget');
       
-      // Force connection check
+      // Forcer la vérification de connexion
       setConnectionAttemptCount(prev => prev + 1);
       
-      // Mark connection as successful for immediate UI update
+      // Marquer la connexion comme réussie pour une mise à jour immédiate de l'interface
       setIsConnected(true);
       setConnectionError(null);
       setDetailedErrorInfo(null);
@@ -115,7 +140,7 @@ export const useGmailConnection = (leadId: string) => {
     }
   }, []);
 
-  // Check Gmail connection status
+  // Vérifier le statut de connexion Gmail
   useEffect(() => {
     async function checkEmailConnection() {
       if (!user) {
@@ -137,7 +162,7 @@ export const useGmailConnection = (leadId: string) => {
         
         console.log("Vérification de la connexion Gmail pour l'utilisateur:", user.id);
         
-        // Check if user already has a Gmail connection
+        // Vérifier si l'utilisateur a déjà une connexion Gmail
         const { data, error } = await supabase
           .from('user_email_connections')
           .select('email, id')
@@ -155,9 +180,20 @@ export const useGmailConnection = (leadId: string) => {
           console.log("Connexion Gmail trouvée:", data.email);
           setIsConnected(true);
           setConnectedEmail((data as EmailConnection).email);
+          
+          // Vérifier si nous avons un succès d'authentification pour mettre à jour l'interface
+          detectAuthSuccess();
         } else {
           console.log("Aucune connexion Gmail trouvée");
           setIsConnected(false);
+          
+          // Vérifier à nouveau si l'authentification a réussi
+          const isAuthenticated = detectAuthSuccess();
+          if (isAuthenticated) {
+            // Si l'authentification a réussi mais qu'aucune connexion n'a été trouvée,
+            // c'est probablement un problème de synchronisation, forçons un rechargement
+            window.location.reload();
+          }
         }
       } catch (error) {
         console.error('Erreur dans checkEmailConnection:', error);
@@ -171,7 +207,7 @@ export const useGmailConnection = (leadId: string) => {
     checkEmailConnection();
   }, [user, leadId, connectionAttemptCount]);
 
-  // Function to start Gmail connection
+  // Fonction pour démarrer la connexion Gmail
   const connectGmail = async () => {
     if (isConnecting) return;
     
@@ -193,7 +229,7 @@ export const useGmailConnection = (leadId: string) => {
         return;
       }
       
-      // Build redirect URI
+      // Construire l'URI de redirection
       const currentPath = window.location.pathname;
       const baseUrl = window.location.origin;
       const redirectUri = `${baseUrl}${currentPath}?tab=emails`;
@@ -202,7 +238,7 @@ export const useGmailConnection = (leadId: string) => {
       console.log('ID utilisateur:', user.id);
       
       try {
-        // Call Supabase Edge function to get auth URL
+        // Appeler la fonction Edge Supabase pour obtenir l'URL d'authentification
         const { data, error } = await supabase.functions.invoke('gmail-auth', {
           body: {
             action: 'authorize',
@@ -241,30 +277,41 @@ export const useGmailConnection = (leadId: string) => {
         console.log('URL d\'autorisation reçue:', data.authorizationUrl.substring(0, 100) + '...');
         setGoogleAuthURL(data.authorizationUrl);
         
-        // Save current URL for redirect back after auth
+        // Enregistrer l'URL actuelle pour la redirection après l'authentification
         localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
         localStorage.setItem('oauthRedirectTarget', redirectUri);
         
-        // Set a flag to detect Cloudflare errors
+        // Définir un indicateur pour détecter les erreurs Cloudflare
         localStorage.setItem('oauth_pending', 'true');
         
-        // Set a timeout to check if the authentication was successful
+        // Définir un délai pour vérifier si l'authentification a réussi
         setTimeout(() => {
           const isPending = localStorage.getItem('oauth_pending');
           const isSuccess = localStorage.getItem('oauth_success');
           
           if (isPending === 'true' && isSuccess !== 'true') {
-            // If still pending after 30 seconds, assume there was an error
+            // Si toujours en attente après 30 secondes, supposer qu'il y a eu une erreur
             localStorage.removeItem('oauth_pending');
             localStorage.setItem('oauth_connection_error', 'true');
             
-            // Force reload to show the error
+            // Forcer le rechargement pour afficher l'erreur
             window.location.reload();
           }
         }, 30000);
         
-        // Open auth URL in new tab
-        window.open(data.authorizationUrl, '_blank', 'noopener,noreferrer');
+        // Ouvrir l'URL d'authentification dans un nouvel onglet
+        const authWindow = window.open(data.authorizationUrl, '_blank', 'noopener,noreferrer');
+        
+        // Vérifier si la fenêtre s'est bien ouverte
+        if (!authWindow) {
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible d'ouvrir la fenêtre d'authentification. Veuillez vérifier que les popups sont autorisés."
+          });
+          console.error("La fenêtre d'authentification n'a pas pu être ouverte");
+          return;
+        }
         
         toast({
           title: "Authentification en cours",
@@ -298,24 +345,24 @@ export const useGmailConnection = (leadId: string) => {
         description: "Une erreur s'est produite lors de la connexion à Gmail."
       });
     } finally {
-      // Don't disable connecting state immediately to prevent multiple clicks
+      // Ne pas désactiver l'état de connexion immédiatement pour éviter les clics multiples
       setTimeout(() => {
         setIsConnecting(false);
-        // Clean up pending flag if it still exists
+        // Nettoyer l'indicateur en attente s'il existe toujours
         localStorage.removeItem('oauth_pending');
       }, 5000);
     }
   };
 
-  // Function to retry connection
+  // Fonction pour réessayer la connexion
   const retryConnection = () => {
     setConnectionAttemptCount(prev => prev + 1);
-    // Clean up pending flag if it still exists
+    // Nettoyer les indicateurs si ils existent toujours
     localStorage.removeItem('oauth_pending');
     localStorage.removeItem('oauth_connection_error');
   };
 
-  // Function to check Supabase Edge function status
+  // Fonction pour vérifier l'état de la fonction Edge Supabase
   const checkSupabaseEdgeFunctionStatus = () => {
     window.open('https://status.supabase.com', '_blank');
   };

@@ -18,21 +18,26 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
 }) => {
   const { user } = useAuth();
   
-  // Check if there was an OAuth redirect error stored in localStorage
+  // Vérifier s'il y a eu une erreur de connexion OAuth stockée dans localStorage
   const [hadConnectionError, setHadConnectionError] = React.useState<boolean>(
     localStorage.getItem('oauth_connection_error') === 'true'
   );
   
-  // Check if we were redirected from the callback page
+  // Vérifier si nous avons été redirigés depuis la page de callback
   const [redirectedFromCallback, setRedirectedFromCallback] = React.useState<boolean>(false);
   
   React.useEffect(() => {
-    // Check if we came from the callback page
+    // Vérifier si nous venons de la page de callback
     const referrer = document.referrer;
-    if (referrer && referrer.includes('oauth/callback')) {
+    if (referrer && (
+      referrer.includes('oauth/callback') || 
+      referrer.includes('accounts.google.com') ||
+      localStorage.getItem('oauth_pending') === 'true' ||
+      localStorage.getItem('oauthRedirectTarget')
+    )) {
       setRedirectedFromCallback(true);
       
-      // If we were redirected from the callback page, automatically retry connection
+      // Si nous avons été redirigés depuis la page de callback, réessayer automatiquement la connexion
       if (onRetryConnection) {
         const timer = setTimeout(() => {
           onRetryConnection();
@@ -41,18 +46,22 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       }
     }
     
-    // Clear the error flag after reading it
+    // Nettoyer l'indicateur d'erreur après l'avoir lu
     if (hadConnectionError) {
       localStorage.removeItem('oauth_connection_error');
     }
+    
+    // Nettoyer les autres indicateurs OAuth qui pourraient exister
+    localStorage.removeItem('oauth_pending');
   }, [hadConnectionError, onRetryConnection]);
   
   const handleConnectClick = () => {
     console.log('Initiating Gmail connection...', {userId: user?.id});
     if (user) {
-      // Reset any previous error state
+      // Réinitialiser tout état d'erreur précédent
       localStorage.removeItem('oauth_connection_error');
       localStorage.removeItem('oauth_pending');
+      localStorage.removeItem('oauth_success');
       connectGmail();
     } else {
       console.error('Erreur: Utilisateur non connecté');
@@ -62,9 +71,10 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
 
   const handleRetryConnection = () => {
     if (onRetryConnection) {
-      // Reset any previous error state
+      // Réinitialiser tout état d'erreur précédent
       localStorage.removeItem('oauth_connection_error');
       localStorage.removeItem('oauth_pending');
+      localStorage.removeItem('oauth_success');
       onRetryConnection();
     }
   };

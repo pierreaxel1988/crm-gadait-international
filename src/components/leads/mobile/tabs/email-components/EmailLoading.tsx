@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Loader2, Mail, RefreshCw } from 'lucide-react';
+import { Loader2, Mail, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface EmailLoadingProps {
   onManualRefresh?: () => void;
@@ -10,6 +11,27 @@ interface EmailLoadingProps {
 const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
   const [showAutoRefreshHelp, setShowAutoRefreshHelp] = React.useState(false);
   const [showRedirectHelp, setShowRedirectHelp] = React.useState(false);
+  const [hasDetectedRedirect, setHasDetectedRedirect] = React.useState(false);
+  
+  // Vérifier si on vient d'une redirection OAuth
+  React.useEffect(() => {
+    // Vérifier dans l'historique de navigation
+    const referrer = document.referrer;
+    if (referrer && (
+      referrer.includes('oauth/callback') || 
+      referrer.includes('accounts.google.com') ||
+      localStorage.getItem('oauth_success') === 'true'
+    )) {
+      setHasDetectedRedirect(true);
+      // Auto-refresh après une redirection
+      if (onManualRefresh) {
+        const timer = setTimeout(() => {
+          onManualRefresh();
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [onManualRefresh]);
   
   // Afficher un message d'aide supplémentaire si le chargement prend plus de temps
   React.useEffect(() => {
@@ -36,6 +58,16 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
       <p className="text-sm text-gray-500">Chargement des emails...</p>
       <p className="text-xs text-gray-400 mt-1">Veuillez patienter</p>
       
+      {hasDetectedRedirect && (
+        <Alert className="mt-4 bg-blue-50 border-blue-200">
+          <AlertCircle className="h-4 w-4 text-blue-500" />
+          <AlertDescription className="text-blue-700">
+            <p className="font-medium mb-1">Redirection détectée</p>
+            <p>Vous avez été redirigé depuis la page d'authentification Google. Nous essayons de finaliser la connexion...</p>
+          </AlertDescription>
+        </Alert>
+      )}
+      
       {onManualRefresh && (
         <Button 
           onClick={onManualRefresh}
@@ -54,10 +86,10 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
         </div>
       )}
       
-      {showRedirectHelp && (
+      {showRedirectHelp && !hasDetectedRedirect && (
         <div className="text-xs text-blue-600 mt-4 text-center max-w-xs bg-blue-50 p-3 rounded-md border border-blue-200">
-          <p className="font-medium mb-1">Problème de redirection détecté</p>
-          <p>Si vous avez été redirigé vers une page "oauth/callback" après l'authentification, utilisez le bouton ci-dessus pour rafraîchir et terminer la connexion.</p>
+          <p className="font-medium mb-1">Problème potentiel de redirection</p>
+          <p>Si vous avez été redirigé depuis Google après l'authentification, utilisez le bouton ci-dessus pour rafraîchir et terminer la connexion.</p>
         </div>
       )}
       

@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info, RefreshCw, AlertCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
 
 interface EmailsTabProps {
   leadId: string;
@@ -25,9 +26,11 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
   const [forceReload, setForceReload] = useState(0);
   const [showRefreshAlert, setShowRefreshAlert] = useState(false);
   const [cloudflareError, setCloudflareError] = useState(false);
+  const [redirectCounter, setRedirectCounter] = useState(0);
 
-  // Check for oauth_success parameter in URL
+  // Observer la présence de paramètres dans l'URL ou localStorage
   useEffect(() => {
+    // Vérifier le paramètre oauth_success dans l'URL
     const params = new URLSearchParams(location.search);
     if (params.has('oauth_success')) {
       console.log("Paramètre oauth_success détecté dans l'URL, forçage du rechargement");
@@ -43,7 +46,7 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
     }
   }, [location.search]);
 
-  // Also check localStorage for OAuth success flag
+  // Vérifier localStorage pour le drapeau de succès ou d'erreur OAuth
   useEffect(() => {
     const oauthSuccess = localStorage.getItem('oauth_success') === 'true';
     const oauthError = localStorage.getItem('oauth_connection_error') === 'true';
@@ -53,6 +56,12 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
       localStorage.removeItem('oauth_success');
       setForceReload(prev => prev + 1);
       setShowRefreshAlert(true);
+      
+      // Show confirmation toast
+      toast({
+        title: "Authentification réussie",
+        description: "Votre compte Gmail a été connecté avec succès."
+      });
     }
     
     if (oauthError) {
@@ -61,6 +70,27 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
       setCloudflareError(true);
     }
   }, []);
+
+  // Vérifier si nous avons été redirigés depuis la page de callback
+  useEffect(() => {
+    const referrer = document.referrer;
+    if (referrer && (
+      referrer.includes('oauth/callback') || 
+      referrer.includes('accounts.google.com')
+    )) {
+      console.log("Redirection détectée depuis:", referrer);
+      setRedirectCounter(prev => prev + 1);
+      
+      // Force reload after authentication redirect
+      if (redirectCounter === 0) {
+        const timer = setTimeout(() => {
+          setForceReload(prev => prev + 1);
+          setShowRefreshAlert(true);
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [redirectCounter]);
 
   const {
     isConnected,
@@ -92,7 +122,7 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
     toggleSortOrder
   } = useEmailData(leadId, lead?.email, isConnected);
 
-  // For debugging
+  // Pour le débogage
   useEffect(() => {
     console.log("État de connexion Gmail:", { 
       isConnected, 
@@ -101,21 +131,29 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
       connectedEmail,
       hasConnectionError: !!connectionError,
       forceReloadCounter: forceReload,
-      cloudflareError
+      cloudflareError,
+      redirectCounter
     });
-  }, [isConnected, isLoading, checkingConnection, connectedEmail, connectionError, forceReload, cloudflareError]);
+  }, [isConnected, isLoading, checkingConnection, connectedEmail, connectionError, forceReload, cloudflareError, redirectCounter]);
 
-  // Force connection check when forceReload changes
+  // Forcer la vérification de connexion lorsque forceReload change
   useEffect(() => {
     if (forceReload > 0) {
       retryConnection();
     }
-  }, [forceReload]);
+  }, [forceReload, retryConnection]);
 
   const handleManualRefresh = () => {
     setForceReload(prev => prev + 1);
     setShowRefreshAlert(false);
     setCloudflareError(false);
+    
+    // Efface tous les indicateurs OAuth
+    localStorage.removeItem('oauth_pending');
+    localStorage.removeItem('oauth_success');
+    localStorage.removeItem('oauth_connection_error');
+    
+    // Force un rechargement complet de la page
     window.location.reload();
   };
 
