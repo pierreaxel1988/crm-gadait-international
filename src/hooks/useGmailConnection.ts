@@ -24,6 +24,41 @@ export const useGmailConnection = (leadId: string) => {
   const [googleAuthURL, setGoogleAuthURL] = useState<string | null>(null);
   const [checkingConnection, setCheckingConnection] = useState(true);
 
+  // Vérifie la présence de oauth_success dans l'URL pour détecter un retour de redirection OAuth
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.has('oauth_success')) {
+      console.log('Détection de paramètre OAuth success dans URL:', location.search);
+      handleOAuthReturn();
+    }
+  }, [location.search]);
+
+  // Gère le retour de redirection OAuth
+  const handleOAuthReturn = () => {
+    // Nettoie l'URL des paramètres de requête
+    if (window.history && window.history.replaceState) {
+      const cleanUrl = window.location.href.split('?')[0];
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+      
+    console.log('Retour OAuth détecté, mise à jour de l\'état de connexion');
+    
+    // Force l'état de connexion à vrai
+    setIsConnected(true);
+    setConnectionError(null);
+    setDetailedErrorInfo(null);
+    setIsLoading(false);
+    setCheckingConnection(false);
+    
+    // Force un rechargement des données de connexion
+    setConnectionAttemptCount(prev => prev + 1);
+    
+    toast({
+      title: "Connexion réussie",
+      description: "Votre compte Gmail a été connecté avec succès."
+    });
+  };
+
   // Vérifie si l'utilisateur revient d'une redirection OAuth
   useEffect(() => {
     const redirectTarget = localStorage.getItem('oauthRedirectTarget');
@@ -47,6 +82,8 @@ export const useGmailConnection = (leadId: string) => {
       
       // Force isConnected à true immédiatement après redirection OAuth réussie
       setIsConnected(true);
+      setCheckingConnection(false);
+      setIsLoading(false);
       
       // Assurez-vous que l'utilisateur est sur l'onglet emails
       const currentPath = window.location.pathname;

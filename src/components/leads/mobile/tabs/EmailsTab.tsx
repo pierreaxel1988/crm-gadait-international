@@ -26,6 +26,7 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.has('oauth_success')) {
+      console.log("Paramètre oauth_success détecté dans l'URL, forçage du rechargement");
       setForceReload(prev => prev + 1);
     }
   }, [location.search]);
@@ -67,9 +68,17 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
       isLoading, 
       checkingConnection, 
       connectedEmail,
-      hasConnectionError: !!connectionError
+      hasConnectionError: !!connectionError,
+      forceReloadCounter: forceReload
     });
-  }, [isConnected, isLoading, checkingConnection, connectedEmail, connectionError]);
+  }, [isConnected, isLoading, checkingConnection, connectedEmail, connectionError, forceReload]);
+
+  // Force une vérification de la connexion quand forceReload change
+  useEffect(() => {
+    if (forceReload > 0) {
+      retryConnection();
+    }
+  }, [forceReload]);
 
   if (isLoading || checkingConnection) {
     return <EmailLoading />;
@@ -94,6 +103,7 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
       <EmailConnectionState
         isConnecting={isConnecting}
         connectGmail={connectGmail}
+        onRetryConnection={retryConnection}
       />
     );
   }

@@ -8,11 +8,13 @@ import { useAuth } from '@/hooks/useAuth';
 interface EmailConnectionStateProps {
   isConnecting: boolean;
   connectGmail: () => void;
+  onRetryConnection?: () => void;
 }
 
 const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
   isConnecting,
   connectGmail,
+  onRetryConnection
 }) => {
   const { user } = useAuth();
   
@@ -23,6 +25,12 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
     } else {
       console.error('Erreur: Utilisateur non connecté');
       alert('Vous devez être connecté pour utiliser cette fonctionnalité.');
+    }
+  };
+
+  const handleRetryConnection = () => {
+    if (onRetryConnection) {
+      onRetryConnection();
     }
   };
 
@@ -75,6 +83,16 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
           </>
         )}
       </Button>
+      
+      {onRetryConnection && (
+        <Button 
+          onClick={handleRetryConnection}
+          variant="outline"
+          className="mt-2 text-sm"
+        >
+          Vous avez déjà connecté votre compte ? Cliquez ici pour actualiser
+        </Button>
+      )}
       
       <div className="text-xs text-gray-500 mt-2 space-y-2 text-center max-w-md">
         <p>

@@ -49,7 +49,9 @@ function renderHtmlResponse(options: {
         // Set a timeout to redirect
         setTimeout(function() {
           console.log("Redirecting to:", '${redirectUri}');
-          window.location.replace("${redirectUri}");
+          // Add oauth_success parameter to the redirect URI to trigger state update
+          const redirectUrl = "${redirectUri}" + (new URL("${redirectUri}").search ? "&" : "?") + "oauth_success=true";
+          window.location.replace(redirectUrl);
         }, ${redirectDelay});
       } catch (e) {
         console.error("Error in redirect script:", e);
@@ -418,6 +420,13 @@ serve(async (req) => {
           redirectUri = redirectUri.includes('?') 
             ? `${redirectUri}&tab=emails` 
             : `${redirectUri}?tab=emails`;
+        }
+        
+        // Add oauth_success to the redirect URI
+        if (redirectUri.includes('/leads/')) {
+          redirectUri = redirectUri.includes('?') 
+            ? `${redirectUri}&tab=emails&oauth_success=true` 
+            : `${redirectUri}?tab=emails&oauth_success=true`;
         }
         
         return renderHtmlResponse({
