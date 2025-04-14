@@ -33,7 +33,7 @@ function renderHtmlResponse(options: {
     message,
     details,
     redirectUri,
-    redirectDelay = 500, // Reduced delay for better UX
+    redirectDelay = 100, // Reduced delay for better UX
     email,
     status = 200
   } = options;
@@ -50,7 +50,7 @@ function renderHtmlResponse(options: {
         // Set a timeout to redirect
         setTimeout(function() {
           console.log("Redirecting to:", '${redirectUri}');
-          window.location.href = "${redirectUri}";
+          window.location.replace("${redirectUri}");
         }, ${redirectDelay});
       } catch (e) {
         console.error("Error in redirect script:", e);
@@ -359,6 +359,9 @@ serve(async (req) => {
         status: 400
       });
     }
+
+    console.log("Parsed state object:", stateObj);
+    console.log("Using redirect URI:", redirectUri);
     
     // Exchange the code for tokens
     try {
@@ -430,13 +433,13 @@ serve(async (req) => {
       console.log("Authentication successful, redirecting to:", redirectUri);
       
       return renderHtmlResponse({
-        title: "Success",
+        title: "Succès",
         className: "success",
         heading: "Authentification réussie!",
         message: "Vous avez connecté votre compte Gmail avec succès.",
         email: userInfo.email,
         redirectUri: redirectUri,
-        redirectDelay: 500 // 0.5 seconde est suffisant pour une bonne UX
+        redirectDelay: 100 // Réduire à 100ms pour une redirection plus rapide
       });
     } catch (fetchError) {
       console.error('Error exchanging code for tokens:', fetchError);
@@ -467,3 +470,4 @@ serve(async (req) => {
     });
   }
 });
+

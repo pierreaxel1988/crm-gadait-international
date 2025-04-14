@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -71,20 +70,20 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
 
   const { lead } = useLeadDetail(leadId);
 
-  // Vérifiez les paramètres d'URL au chargement pour détecter si nous revenons d'une authentification OAuth
   useEffect(() => {
-    // Vérifier si nous avons un redirectTarget dans localStorage, ce qui indiquerait
-    // que nous revenons d'une authentification OAuth réussie
     const redirectTarget = localStorage.getItem('oauthRedirectTarget');
     if (redirectTarget) {
       console.log('Detected OAuth redirect with target:', redirectTarget);
-      // Supprimer le redirectTarget du localStorage
+      
+      if (window.history && window.history.replaceState) {
+        const cleanUrl = window.location.href.split('?')[0];
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+      
       localStorage.removeItem('oauthRedirectTarget');
       
-      // Forcer une nouvelle vérification de connexion
       setConnectionAttemptCount(prev => prev + 1);
       
-      // Afficher une notification positive
       toast({
         title: "Connection réussie",
         description: "Votre compte Gmail a été connecté avec succès."
@@ -165,7 +164,6 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       
       console.log('Démarrage du processus de connexion Gmail pour le lead:', leadId);
       
-      // Vérifions que l'utilisateur est connecté
       if (!user) {
         toast({
           variant: "destructive",
@@ -175,10 +173,8 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         return;
       }
       
-      // Build the redirect URI with the current URL
       const currentPath = window.location.pathname;
       const baseUrl = window.location.origin;
-      // Ensure we maintain the tab parameter
       const redirectUri = `${baseUrl}${currentPath}?tab=emails`;
       
       console.log('Utilisation de la URI de redirection:', redirectUri);
@@ -220,14 +216,11 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         }
         
         console.log('URL d\'autorisation reçue:', data.authorizationUrl.substring(0, 100) + '...');
-        // Store the URL for direct link option 
         setGoogleAuthURL(data.authorizationUrl);
         
-        // Store current page in localStorage so we can return here
         localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
         
-        // Open in a new tab instead of redirecting
-        window.open(data.authorizationUrl, '_blank');
+        window.location.href = data.authorizationUrl;
       } catch (invokeError) {
         console.error('Erreur lors de l\'invocation de la fonction gmail-auth:', invokeError);
         setConnectionError(`Erreur d'invocation de la fonction: ${(invokeError as Error).message}`);
@@ -336,7 +329,6 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
 
   const handleEmailSent = () => {
     setShowComposer(false);
-    // Rafraîchir les emails après l'envoi pour voir le nouvel email
     setTimeout(() => {
       fetchEmails();
     }, 500);
@@ -358,11 +350,9 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
   };
 
   const retryConnection = () => {
-    // Incrémenter le compteur pour forcer un nouveau check
     setConnectionAttemptCount(prev => prev + 1);
   };
 
-  // Fonction pour obtenir le statut actuel des serveurs Supabase Edge Functions
   const checkSupabaseEdgeFunctionStatus = () => {
     window.open('https://status.supabase.com', '_blank');
   };
