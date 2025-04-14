@@ -11,6 +11,9 @@ const EmailLoading: React.FC = () => {
       <Loader2 className="h-8 w-8 text-loro-terracotta animate-spin mb-2" />
       <p className="text-sm text-gray-500">Chargement des emails...</p>
       <p className="text-xs text-gray-400 mt-1">Veuillez patienter</p>
+      <p className="text-xs text-gray-400 mt-4 text-center max-w-xs">
+        Si le chargement persiste, essayez de rafraîchir la page ou de vérifier votre connexion Gmail
+      </p>
     </div>
   );
 };

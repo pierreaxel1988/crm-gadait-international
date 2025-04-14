@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLeadDetail } from '@/hooks/useLeadDetail';
 import { useGmailConnection } from '@/hooks/useGmailConnection';
 import { useEmailData } from '@/hooks/useEmailData';
@@ -9,6 +9,7 @@ import EmailConnectionError from './email-components/EmailConnectionError';
 import EmailList from './email-components/EmailList';
 import EmailComposer from './EmailComposer';
 import { Edit, RefreshCw } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 interface EmailsTabProps {
   leadId: string;
@@ -18,6 +19,16 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
   leadId
 }) => {
   const { lead } = useLeadDetail(leadId);
+  const location = useLocation();
+  const [forceReload, setForceReload] = useState(0);
+
+  // Force un rafraîchissement si on détecte un paramètre 'oauth_success' dans l'URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.has('oauth_success')) {
+      setForceReload(prev => prev + 1);
+    }
+  }, [location.search]);
 
   const {
     isConnected,
@@ -48,6 +59,17 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
     formatDate,
     toggleSortOrder
   } = useEmailData(leadId, lead?.email, isConnected);
+
+  // Pour débogage
+  useEffect(() => {
+    console.log("État de connexion Gmail:", { 
+      isConnected, 
+      isLoading, 
+      checkingConnection, 
+      connectedEmail,
+      hasConnectionError: !!connectionError
+    });
+  }, [isConnected, isLoading, checkingConnection, connectedEmail, connectionError]);
 
   if (isLoading || checkingConnection) {
     return <EmailLoading />;

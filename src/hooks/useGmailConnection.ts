@@ -45,6 +45,9 @@ export const useGmailConnection = (leadId: string) => {
         description: "Votre compte Gmail a été connecté avec succès."
       });
       
+      // Force isConnected à true immédiatement après redirection OAuth réussie
+      setIsConnected(true);
+      
       // Assurez-vous que l'utilisateur est sur l'onglet emails
       const currentPath = window.location.pathname;
       if (currentPath.includes('/leads/') && !location.search.includes('tab=emails')) {
@@ -102,8 +105,14 @@ export const useGmailConnection = (leadId: string) => {
       }
     }
     
-    checkEmailConnection();
-  }, [user, leadId, connectionAttemptCount]);
+    // Vérifier si nous avons déjà une connexion établie lors d'une redirection réussie
+    if (!isConnected || !connectedEmail) {
+      checkEmailConnection();
+    } else {
+      setIsLoading(false);
+      setCheckingConnection(false);
+    }
+  }, [user, leadId, connectionAttemptCount, isConnected, connectedEmail]);
 
   // Fonction pour démarrer la connexion Gmail
   const connectGmail = async () => {
