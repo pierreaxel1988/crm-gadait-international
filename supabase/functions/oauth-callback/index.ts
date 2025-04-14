@@ -112,6 +112,19 @@ function renderHtmlResponse(options: {
           @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
           .btn { display: inline-block; background: #3498db; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 15px; }
           .btn:hover { background: #2980b9; }
+          
+          /* Add dark mode support */
+          @media (prefers-color-scheme: dark) {
+            body { background-color: #1a1a1a; color: #e0e0e0; }
+            .container { background: #2a2a2a; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+            .details { background: #333; }
+            code { background: #444; color: #e0e0e0; }
+            pre { background: #333; color: #e0e0e0; }
+            .success { color: #4ecca3; }
+            .error { color: #e57373; }
+            .btn { background: #2980b9; }
+            .btn:hover { background: #3498db; }
+          }
         </style>
         ${redirectScript}
       </head>
@@ -151,6 +164,23 @@ serve(async (req) => {
       url: req.url
     });
     
+    // Extract state parameter to get the redirect URI regardless of error
+    let redirectUri = 'https://gadait-international.com/leads';
+    let userId = '';
+    
+    if (stateParam) {
+      try {
+        const stateObj = JSON.parse(decodeURIComponent(stateParam));
+        redirectUri = stateObj.redirectUri || redirectUri;
+        userId = stateObj.userId || '';
+        
+        console.log("Parsed state object:", { redirectUri, userId });
+      } catch (e) {
+        console.error('Error parsing state:', e);
+        // Continue with default redirect URI
+      }
+    }
+    
     // Check if there's an error parameter from Google
     if (error) {
       console.error("OAuth error from Google:", error);
@@ -173,6 +203,8 @@ serve(async (req) => {
             </ul>
           </div>
         `,
+        redirectUri: redirectUri, // Always redirect, even on error
+        redirectDelay: 7000,
         status: 400
       });
     }
@@ -183,37 +215,10 @@ serve(async (req) => {
         className: "error",
         heading: "Authentification échouée",
         message: "Code d'autorisation manquant.",
+        redirectUri: redirectUri, // Always redirect, even on error
+        redirectDelay: 7000,
         status: 400
       });
-    }
-    
-    // Parse the state parameter
-    let redirectUri = '';
-    let userId = '';
-    let stateObj = null;
-    
-    if (stateParam) {
-      try {
-        stateObj = JSON.parse(decodeURIComponent(stateParam));
-        redirectUri = stateObj.redirectUri || '';
-        userId = stateObj.userId || '';
-        
-        console.log("Parsed state object:", { redirectUri, userId });
-      } catch (e) {
-        console.error('Error parsing state:', e);
-        return renderHtmlResponse({
-          title: "Error",
-          className: "error",
-          heading: "Authentification échouée",
-          message: "Format du paramètre state invalide.",
-          details: `Erreur: ${(e as Error).message}`,
-          status: 400
-        });
-      }
-    }
-    
-    if (!redirectUri) {
-      redirectUri = 'https://gadait-international.com/leads';
     }
     
     // If code exists, proceed with token exchange
@@ -244,7 +249,7 @@ serve(async (req) => {
           heading: "Échec d'authentification",
           message: `Erreur lors de l'échange du code contre des tokens: ${tokenResponse.status}`,
           details: errorText,
-          redirectUri: redirectUri,
+          redirectUri: redirectUri, // Always redirect, even on error
           redirectDelay: 10000,
           status: 500
         });
@@ -261,7 +266,7 @@ serve(async (req) => {
           heading: "Échec d'authentification",
           message: `Erreur: ${tokenData.error}`,
           details: tokenData.error_description || JSON.stringify(tokenData),
-          redirectUri: redirectUri,
+          redirectUri: redirectUri, // Always redirect, even on error
           redirectDelay: 10000,
           status: 400
         });
@@ -284,7 +289,7 @@ serve(async (req) => {
           heading: "Échec d'authentification",
           message: "Impossible de récupérer les informations de l'utilisateur.",
           details: errorText,
-          redirectUri: redirectUri,
+          redirectUri: redirectUri, // Always redirect, even on error
           redirectDelay: 10000,
           status: 500
         });
@@ -353,21 +358,23 @@ serve(async (req) => {
         className: "error",
         heading: "Erreur lors de l'authentification",
         message: `Une erreur s'est produite: ${(error as Error).message}`,
-        redirectUri: redirectUri,
+        redirectUri: redirectUri, // Always redirect, even on error
         redirectDelay: 10000,
         status: 500
       });
     }
   } catch (error) {
     console.error('Unexpected error in oauth-callback:', error);
+    // In case of a catastrophic error, still try to redirect the user to the application
+    const redirectUri = 'https://gadait-international.com/leads';
     
     return renderHtmlResponse({
-      title: "Erreur",
+      title: "Erreur inattendue",
       className: "error",
       heading: "Erreur inattendue",
       message: `Une erreur inattendue s'est produite: ${(error as Error).message}`,
-      redirectUri: 'https://gadait-international.com/leads',
-      redirectDelay: 10000,
+      redirectUri: redirectUri, // Always redirect, even on error
+      redirectDelay: 7000,
       status: 500
     });
   }

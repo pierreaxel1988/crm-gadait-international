@@ -8,6 +8,17 @@ interface EmailLoadingProps {
 }
 
 const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
+  const [showAutoRefreshHelp, setShowAutoRefreshHelp] = React.useState(false);
+  
+  // Afficher un message d'aide supplémentaire si le chargement prend plus de 5 secondes
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowAutoRefreshHelp(true);
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
   return (
     <div className="p-8 flex flex-col items-center justify-center h-60">
       <div className="bg-loro-pearl/30 rounded-full p-3 mb-4">
@@ -26,6 +37,13 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
           <RefreshCw className="h-4 w-4" />
           <span>Rafraîchir manuellement</span>
         </Button>
+      )}
+      
+      {showAutoRefreshHelp && (
+        <div className="text-xs text-amber-600 mt-4 text-center max-w-xs bg-amber-50 p-3 rounded-md border border-amber-200">
+          <p className="font-medium mb-1">Le chargement prend plus de temps que prévu</p>
+          <p>Si vous venez de vous connecter à Gmail, nous vous recommandons de rafraîchir la page.</p>
+        </div>
       )}
       
       <p className="text-xs text-gray-400 mt-4 text-center max-w-xs">

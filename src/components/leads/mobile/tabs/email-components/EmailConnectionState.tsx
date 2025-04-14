@@ -18,9 +18,23 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
 }) => {
   const { user } = useAuth();
   
+  // Check if there was an OAuth redirect error stored in localStorage
+  const [hadConnectionError, setHadConnectionError] = React.useState<boolean>(
+    localStorage.getItem('oauth_connection_error') === 'true'
+  );
+  
+  React.useEffect(() => {
+    // Clear the error flag after reading it
+    if (hadConnectionError) {
+      localStorage.removeItem('oauth_connection_error');
+    }
+  }, [hadConnectionError]);
+  
   const handleConnectClick = () => {
     console.log('Initiating Gmail connection...', {userId: user?.id});
     if (user) {
+      // Reset any previous error state
+      localStorage.removeItem('oauth_connection_error');
       connectGmail();
     } else {
       console.error('Erreur: Utilisateur non connecté');
@@ -30,6 +44,8 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
 
   const handleRetryConnection = () => {
     if (onRetryConnection) {
+      // Reset any previous error state
+      localStorage.removeItem('oauth_connection_error');
       onRetryConnection();
     }
   };
@@ -43,6 +59,16 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       <p className="text-gray-500 text-center text-sm mb-4">
         Connectez votre compte Gmail pour synchroniser les emails avec ce lead.
       </p>
+      
+      {hadConnectionError && (
+        <Alert className="bg-red-50 border-red-200 mb-2">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-sm text-red-800 font-medium">
+            Une erreur s'est produite lors de la dernière tentative de connexion. 
+            Veuillez réessayer ou vérifier les paramètres de votre compte Google.
+          </AlertDescription>
+        </Alert>
+      )}
       
       <Alert className="bg-blue-50 border-blue-200 mb-2">
         <AlertDescription className="text-sm text-blue-800">

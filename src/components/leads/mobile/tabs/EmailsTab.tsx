@@ -9,7 +9,7 @@ import EmailConnectionError from './email-components/EmailConnectionError';
 import EmailList from './email-components/EmailList';
 import EmailComposer from './EmailComposer';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info, RefreshCw } from 'lucide-react';
+import { Info, RefreshCw, AlertCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -24,6 +24,7 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
   const location = useLocation();
   const [forceReload, setForceReload] = useState(0);
   const [showRefreshAlert, setShowRefreshAlert] = useState(false);
+  const [cloudflareError, setCloudflareError] = useState(false);
 
   // Check for oauth_success parameter in URL
   useEffect(() => {
@@ -45,10 +46,19 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
   // Also check localStorage for OAuth success flag
   useEffect(() => {
     const oauthSuccess = localStorage.getItem('oauth_success') === 'true';
+    const oauthError = localStorage.getItem('oauth_connection_error') === 'true';
+    
     if (oauthSuccess) {
       console.log("Succès OAuth détecté dans localStorage");
       localStorage.removeItem('oauth_success');
       setForceReload(prev => prev + 1);
+      setShowRefreshAlert(true);
+    }
+    
+    if (oauthError) {
+      console.log("Erreur OAuth détectée dans localStorage");
+      localStorage.removeItem('oauth_connection_error');
+      setCloudflareError(true);
     }
   }, []);
 
@@ -90,9 +100,10 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
       checkingConnection, 
       connectedEmail,
       hasConnectionError: !!connectionError,
-      forceReloadCounter: forceReload
+      forceReloadCounter: forceReload,
+      cloudflareError
     });
-  }, [isConnected, isLoading, checkingConnection, connectedEmail, connectionError, forceReload]);
+  }, [isConnected, isLoading, checkingConnection, connectedEmail, connectionError, forceReload, cloudflareError]);
 
   // Force connection check when forceReload changes
   useEffect(() => {
@@ -104,12 +115,14 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
   const handleManualRefresh = () => {
     setForceReload(prev => prev + 1);
     setShowRefreshAlert(false);
+    setCloudflareError(false);
+    window.location.reload();
   };
 
   if (isLoading || checkingConnection) {
     return (
       <div>
-        <EmailLoading />
+        <EmailLoading onManualRefresh={handleManualRefresh} />
         {showRefreshAlert && (
           <Alert className="mt-4 bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-500" />
@@ -125,6 +138,33 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
             </AlertDescription>
           </Alert>
         )}
+      </div>
+    );
+  }
+
+  if (cloudflareError) {
+    return (
+      <div className="p-4">
+        <Alert className="mb-4 bg-red-50 border-red-200">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-700">
+            <p className="font-medium mb-2">Erreur détectée lors de l'authentification</p>
+            <p className="text-sm mb-2">Une erreur Cloudflare (1101) s'est produite lors de la tentative de connexion à Gmail. Cette erreur est souvent temporaire.</p>
+            <Button 
+              onClick={handleManualRefresh} 
+              variant="outline" 
+              className="mt-2 w-full border-red-300 bg-red-50 hover:bg-red-100 flex items-center justify-center gap-2"
+            >
+              <RefreshCw className="h-4 w-4" /> Réessayer maintenant
+            </Button>
+          </AlertDescription>
+        </Alert>
+        
+        <EmailConnectionState
+          isConnecting={isConnecting}
+          connectGmail={connectGmail}
+          onRetryConnection={retryConnection}
+        />
       </div>
     );
   }
