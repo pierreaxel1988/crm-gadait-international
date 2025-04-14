@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AlertCircle, Info, ExternalLink, RefreshCw, Mail } from 'lucide-react';
+import { AlertCircle, Info, ExternalLink, RefreshCw, Mail, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -24,6 +24,15 @@ const EmailConnectionError: React.FC<EmailConnectionErrorProps> = ({
   connectGmail,
   isConnecting,
 }) => {
+  // Check if the error includes specific known patterns
+  const isConnectionRefused = connectionError?.includes('refused to connect') || 
+                             detailedErrorInfo?.error?.message?.includes('refused to connect') ||
+                             JSON.stringify(detailedErrorInfo)?.includes('refused to connect');
+  
+  const isAccessDenied = connectionError?.includes('access_denied') || 
+                        detailedErrorInfo?.error?.includes('access_denied') ||
+                        JSON.stringify(detailedErrorInfo)?.includes('access_denied');
+
   return (
     <div className="p-4 flex flex-col space-y-4">
       <Alert variant="destructive">
@@ -33,6 +42,42 @@ const EmailConnectionError: React.FC<EmailConnectionErrorProps> = ({
           {connectionError}
         </AlertDescription>
       </Alert>
+      
+      {isConnectionRefused && (
+        <Alert className="bg-amber-50 border-amber-200">
+          <Shield className="h-4 w-4 text-amber-600" />
+          <AlertTitle className="text-amber-800">Google a refusé la connexion</AlertTitle>
+          <AlertDescription className="text-amber-700">
+            <p className="mb-2">Cette erreur se produit généralement pour l'une des raisons suivantes :</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Les cookies tiers sont bloqués dans votre navigateur</li>
+              <li>Un bloqueur de publicités ou une extension de confidentialité interfère avec la connexion</li>
+              <li>Des restrictions de sécurité sur votre réseau empêchent la connexion</li>
+              <li>Les paramètres de sécurité de votre compte Google sont trop restrictifs</li>
+            </ul>
+            <div className="mt-3">
+              <p className="font-medium">Conseils pour résoudre ce problème :</p>
+              <ul className="list-disc pl-5 space-y-1 mt-1">
+                <li>Essayez d'utiliser un navigateur différent</li>
+                <li>Désactivez temporairement les extensions de votre navigateur</li>
+                <li>Essayez de vous connecter depuis un autre réseau</li>
+                <li>Vérifiez les paramètres de sécurité de votre compte Google</li>
+              </ul>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {isAccessDenied && (
+        <Alert className="bg-amber-50 border-amber-200">
+          <Shield className="h-4 w-4 text-amber-600" />
+          <AlertTitle className="text-amber-800">Accès refusé par Google</AlertTitle>
+          <AlertDescription className="text-amber-700">
+            <p className="mb-2">Vous avez refusé de donner l'accès à votre compte Gmail. Pour utiliser cette fonctionnalité, vous devez autoriser l'application à accéder à vos emails.</p>
+            <p>Si vous avez changé d'avis, veuillez cliquer sur le bouton "Réessayer la connexion Gmail" ci-dessous.</p>
+          </AlertDescription>
+        </Alert>
+      )}
       
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="details">
