@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface EmailConnection {
   email: string;
@@ -11,6 +12,8 @@ interface EmailConnection {
 
 export const useGmailConnection = (leadId: string) => {
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
@@ -41,6 +44,12 @@ export const useGmailConnection = (leadId: string) => {
         title: "Connection réussie",
         description: "Votre compte Gmail a été connecté avec succès."
       });
+      
+      // Assurez-vous que l'utilisateur est sur l'onglet emails
+      const currentPath = window.location.pathname;
+      if (currentPath.includes('/leads/') && !location.search.includes('tab=emails')) {
+        navigate(`${currentPath}?tab=emails`, { replace: true });
+      }
     }
   }, []);
 
@@ -168,6 +177,7 @@ export const useGmailConnection = (leadId: string) => {
         
         // Mémorise l'URL actuelle pour pouvoir y revenir après l'authentification
         localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
+        localStorage.setItem('oauthRedirectTarget', redirectUri);
         
         // Ouvre l'URL dans un nouvel onglet plutôt que de rediriger
         // cela permet à l'utilisateur de revenir facilement si besoin

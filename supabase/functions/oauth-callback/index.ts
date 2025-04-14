@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1";
 
@@ -344,130 +343,137 @@ serve(async (req) => {
     }
     
     // Parse the state parameter
-    const { valid, stateObj, redirectUri, userId, error: stateError } = parseState(stateParam);
+    let redirectUri = '';
+    let userId = '';
+    let stateObj = null;
     
-    if (!valid) {
-      return renderHtmlResponse({
-        title: "Error",
-        className: "error",
-        heading: "Erreur de traitement",
-        message: stateError || "Paramètre state invalide",
-        details: `
-          <h3>Informations techniques:</h3>
-          <p>State reçu: <code>${stateParam || 'aucun'}</code></p>
-        `,
-        status: 400
-      });
+    if (stateParam) {
+      try {
+        stateObj = JSON.parse(decodeURIComponent(stateParam));
+        redirectUri = stateObj.redirectUri || 'https://success.gadait-international.com/leads';
+        userId = stateObj.userId || '';
+        
+        console.log("Parsed state object:", { redirectUri, userId, fullStateObj: stateObj });
+      } catch (e) {
+        console.error('Error parsing state:', e);
+      }
     }
-
-    console.log("Parsed state object:", stateObj);
-    console.log("Using redirect URI:", redirectUri);
     
-    // Exchange the code for tokens
-    try {
-      // Exchange code for tokens
-      const tokenExchange = await exchangeCodeForTokens(code);
-      
-      if (!tokenExchange.success || tokenExchange.tokenData?.error) {
-        // Handle token exchange error
-        const errorMessage = tokenExchange.tokenData?.error || 'Error exchanging code for tokens';
-        const errorDescription = tokenExchange.tokenData?.error_description || '';
+    // If code exists, proceed with token exchange
+    if (code) {
+      try {
+        // Exchange code for tokens
+        console.log("Exchanging code for tokens...");
+        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            code,
+            client_id: GOOGLE_CLIENT_ID,
+            client_secret: GOOGLE_CLIENT_SECRET,
+            redirect_uri: REDIRECT_URI,
+            grant_type: 'authorization_code',
+          }),
+        });
+        
+        const tokenData = await tokenResponse.json();
+        
+        if (tokenData.error) {
+          console.error(`Error exchanging code for tokens: ${tokenData.error}`, tokenData);
+          throw new Error(`Error exchanging code for tokens: ${tokenData.error}`);
+        }
+        
+        // Get user info to determine the Gmail address
+        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
+          headers: {
+            'Authorization': `Bearer ${tokenData.access_token}`,
+          },
+        });
+        
+        const userInfo = await userInfoResponse.json();
+        console.log("Retrieved user info:", userInfo.email);
+        
+        // Store the tokens in the database
+        const { error: storeError } = await supabase
+          .from('user_email_connections')
+          .upsert({
+            user_id: userId,
+            email: userInfo.email,
+            access_token: tokenData.access_token,
+            refresh_token: tokenData.refresh_token || '',
+            token_expiry: new Date(Date.now() + (tokenData.expires_in || 3600) * 1000).toISOString(),
+          });
+        
+        if (storeError) {
+          console.error(`Error storing tokens: ${storeError.message}`, storeError);
+          throw new Error(`Error storing tokens: ${storeError.message}`);
+        }
+        
+        console.log("Tokens stored successfully. Redirecting to:", redirectUri);
+        
+        // Add tab=emails to the redirect URI if it's not already there and it's a lead page
+        if (redirectUri.includes('/leads/') && !redirectUri.includes('tab=emails')) {
+          redirectUri = redirectUri.includes('?') 
+            ? `${redirectUri}&tab=emails` 
+            : `${redirectUri}?tab=emails`;
+        }
         
         return renderHtmlResponse({
-          title: "Error",
-          className: "error",
-          heading: "Authentification échouée",
-          message: `Erreur lors de l'échange du code: ${errorMessage}`,
-          details: `
-            <p>Description: ${errorDescription || 'Aucune description supplémentaire'}</p>
-            <p>Status: ${tokenExchange.responseStatus} ${tokenExchange.responseStatusText}</p>
-            <div class="details">
-              <h3>Vérifiez la configuration Google:</h3>
-              <ul style="text-align: left;">
-                <li>Assurez-vous que votre projet est correctement configuré dans la <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Console Google Cloud</a></li>
-                <li>Vérifiez que l'URI de redirection autorisée est: <code>${REDIRECT_URI}</code></li>
-                <li>Vérifiez que l'API Gmail est activée</li>
-                <li>Vérifiez le client ID et le client secret</li>
-              </ul>
-            </div>
-          `,
-          redirectUri: 'https://success.gadait-international.com/leads',
-          redirectDelay: 5000,
-          status: 400
-        });
-      }
-      
-      // Get user info
-      const userInfo = await getUserInfo(tokenExchange.tokenData.access_token);
-      console.log("User info received:", { email: userInfo.email });
-      
-      // Determine user ID
-      const finalUserId = await getUserId(userId, userInfo.email);
-      
-      if (!finalUserId) {
-        return renderHtmlResponse({
-          title: "Error",
-          className: "error",
-          heading: "Utilisateur non trouvé",
-          message: "Impossible de trouver l'utilisateur correspondant à cette connexion.",
-          redirectUri: 'https://success.gadait-international.com/leads',
-          status: 404
-        });
-      }
-      
-      // Store tokens
-      const storageResult = await storeTokens(finalUserId, userInfo.email, tokenExchange.tokenData);
-      
-      if (!storageResult.success) {
-        return renderHtmlResponse({
-          title: "Error",
-          className: "error",
-          heading: "Erreur de stockage",
-          message: `Impossible de stocker les informations d'authentification: ${storageResult.error?.message}`,
+          title: "Succès",
+          className: "success",
+          heading: "Authentification réussie!",
+          message: "Vous avez connecté votre compte Gmail avec succès.",
+          email: userInfo.email,
           redirectUri: redirectUri,
+          redirectDelay: 100
+        });
+      } catch (error) {
+        console.error('Error processing OAuth callback:', error);
+        return renderHtmlResponse({
+          title: "Erreur",
+          className: "error",
+          heading: "Erreur lors de l'authentification",
+          message: `Une erreur s'est produite: ${(error as Error).message}`,
+          redirectUri: redirectUri,
+          redirectDelay: 3000,
           status: 500
         });
       }
-      
-      // Success!
-      console.log("Authentication successful, redirecting to:", redirectUri);
-      
+    } else if (error) {
+      // Handle OAuth error
       return renderHtmlResponse({
-        title: "Succès",
-        className: "success",
-        heading: "Authentification réussie!",
-        message: "Vous avez connecté votre compte Gmail avec succès.",
-        email: userInfo.email,
-        redirectUri: redirectUri,
-        redirectDelay: 100 // Réduire à 100ms pour une redirection plus rapide
-      });
-    } catch (fetchError) {
-      console.error('Error exchanging code for tokens:', fetchError);
-      return renderHtmlResponse({
-        title: "Error",
+        title: "Erreur",
         className: "error",
-        heading: "Erreur technique",
-        message: `Une erreur s'est produite lors de l'échange du code d'autorisation: ${(fetchError as Error).message}`,
-        details: `
-          <h3>Détails techniques:</h3>
-          <pre>${JSON.stringify(fetchError, null, 2)}</pre>
-        `,
-        redirectUri: 'https://success.gadait-international.com/leads',
-        redirectDelay: 5000,
-        status: 500
+        heading: "Authentification échouée",
+        message: `Erreur: ${error}`,
+        redirectUri: redirectUri,
+        redirectDelay: 3000,
+        status: 400
+      });
+    } else {
+      // No code or error provided
+      return renderHtmlResponse({
+        title: "Erreur",
+        className: "error",
+        heading: "Requête invalide",
+        message: "Paramètres d'authentification manquants.",
+        redirectUri: redirectUri,
+        redirectDelay: 3000,
+        status: 400
       });
     }
   } catch (error) {
-    console.error('Error in oauth-callback function:', error);
+    console.error('Unexpected error in oauth-callback:', error);
     return renderHtmlResponse({
-      title: "Error",
+      title: "Erreur",
       className: "error",
-      heading: "Erreur",
-      message: `Une erreur s'est produite lors de l'authentification: ${(error as Error).message}`,
+      heading: "Erreur inattendue",
+      message: `Une erreur inattendue s'est produite: ${(error as Error).message}`,
       redirectUri: 'https://success.gadait-international.com/leads',
-      redirectDelay: 5000,
+      redirectDelay: 3000,
       status: 500
     });
   }
 });
-
