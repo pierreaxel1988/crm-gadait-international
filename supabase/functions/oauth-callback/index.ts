@@ -65,6 +65,9 @@ function renderHtmlResponse(options: {
           
           console.log("Redirecting to:", redirectUrl);
           
+          // Remove any pending OAuth flags to prevent errors
+          localStorage.removeItem('oauth_pending');
+          
           // Use replace to avoid back button issues
           window.location.replace(redirectUrl);
         } catch (e) {
@@ -82,6 +85,9 @@ function renderHtmlResponse(options: {
         safeRedirect();
         return false; // Prevent default anchor behavior
       }
+      
+      // Try immediate redirect first, fallback to timeout
+      safeRedirect();
     </script>
   ` : '';
 
@@ -348,7 +354,7 @@ serve(async (req) => {
         message: "Vous avez connecté votre compte Gmail avec succès.",
         email: userInfo.email,
         redirectUri: redirectUri,
-        redirectDelay: 3000
+        redirectDelay: 1000 // Reduced delay for faster redirection
       });
     } catch (error) {
       console.error('Error processing OAuth callback:', error);

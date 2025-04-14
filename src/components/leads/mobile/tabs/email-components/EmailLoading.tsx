@@ -9,14 +9,22 @@ interface EmailLoadingProps {
 
 const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
   const [showAutoRefreshHelp, setShowAutoRefreshHelp] = React.useState(false);
+  const [showRedirectHelp, setShowRedirectHelp] = React.useState(false);
   
-  // Afficher un message d'aide supplémentaire si le chargement prend plus de 5 secondes
+  // Afficher un message d'aide supplémentaire si le chargement prend plus de temps
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setShowAutoRefreshHelp(true);
     }, 5000);
     
-    return () => clearTimeout(timer);
+    const redirectTimer = setTimeout(() => {
+      setShowRedirectHelp(true);
+    }, 10000);
+    
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(redirectTimer);
+    };
   }, []);
   
   return (
@@ -43,6 +51,13 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
         <div className="text-xs text-amber-600 mt-4 text-center max-w-xs bg-amber-50 p-3 rounded-md border border-amber-200">
           <p className="font-medium mb-1">Le chargement prend plus de temps que prévu</p>
           <p>Si vous venez de vous connecter à Gmail, nous vous recommandons de rafraîchir la page.</p>
+        </div>
+      )}
+      
+      {showRedirectHelp && (
+        <div className="text-xs text-blue-600 mt-4 text-center max-w-xs bg-blue-50 p-3 rounded-md border border-blue-200">
+          <p className="font-medium mb-1">Problème de redirection détecté</p>
+          <p>Si vous avez été redirigé vers une page "oauth/callback" après l'authentification, utilisez le bouton ci-dessus pour rafraîchir et terminer la connexion.</p>
         </div>
       )}
       

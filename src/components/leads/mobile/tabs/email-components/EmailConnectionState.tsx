@@ -23,18 +23,36 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
     localStorage.getItem('oauth_connection_error') === 'true'
   );
   
+  // Check if we were redirected from the callback page
+  const [redirectedFromCallback, setRedirectedFromCallback] = React.useState<boolean>(false);
+  
   React.useEffect(() => {
+    // Check if we came from the callback page
+    const referrer = document.referrer;
+    if (referrer && referrer.includes('oauth/callback')) {
+      setRedirectedFromCallback(true);
+      
+      // If we were redirected from the callback page, automatically retry connection
+      if (onRetryConnection) {
+        const timer = setTimeout(() => {
+          onRetryConnection();
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+    }
+    
     // Clear the error flag after reading it
     if (hadConnectionError) {
       localStorage.removeItem('oauth_connection_error');
     }
-  }, [hadConnectionError]);
+  }, [hadConnectionError, onRetryConnection]);
   
   const handleConnectClick = () => {
     console.log('Initiating Gmail connection...', {userId: user?.id});
     if (user) {
       // Reset any previous error state
       localStorage.removeItem('oauth_connection_error');
+      localStorage.removeItem('oauth_pending');
       connectGmail();
     } else {
       console.error('Erreur: Utilisateur non connecté');
@@ -46,6 +64,7 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
     if (onRetryConnection) {
       // Reset any previous error state
       localStorage.removeItem('oauth_connection_error');
+      localStorage.removeItem('oauth_pending');
       onRetryConnection();
     }
   };
@@ -66,6 +85,16 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
           <AlertDescription className="text-sm text-red-800 font-medium">
             Une erreur s'est produite lors de la dernière tentative de connexion. 
             Veuillez réessayer ou vérifier les paramètres de votre compte Google.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {redirectedFromCallback && (
+        <Alert className="bg-amber-50 border-amber-200 mb-2">
+          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-sm text-amber-800 font-medium">
+            Vous avez été redirigé depuis la page d'authentification, mais le processus n'est pas complet.
+            Veuillez utiliser le bouton ci-dessous pour finaliser la connexion.
           </AlertDescription>
         </Alert>
       )}
