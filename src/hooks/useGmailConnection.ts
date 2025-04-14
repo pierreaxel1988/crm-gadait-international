@@ -21,18 +21,20 @@ export const useGmailConnection = (leadId: string) => {
   const [googleAuthURL, setGoogleAuthURL] = useState<string | null>(null);
   const [checkingConnection, setCheckingConnection] = useState(true);
 
+  // Vérifie si l'utilisateur revient d'une redirection OAuth
   useEffect(() => {
     const redirectTarget = localStorage.getItem('oauthRedirectTarget');
     if (redirectTarget) {
       console.log('Detected OAuth redirect with target:', redirectTarget);
       
+      // Nettoie l'URL des paramètres de requête
       if (window.history && window.history.replaceState) {
         const cleanUrl = window.location.href.split('?')[0];
         window.history.replaceState({}, document.title, cleanUrl);
       }
       
+      // Supprime les données de redirection et incrémente le compteur de tentatives
       localStorage.removeItem('oauthRedirectTarget');
-      
       setConnectionAttemptCount(prev => prev + 1);
       
       toast({
@@ -42,9 +44,16 @@ export const useGmailConnection = (leadId: string) => {
     }
   }, []);
 
+  // Vérifie l'état de la connexion Gmail à chaque fois que l'utilisateur change ou que le compteur de tentatives change
   useEffect(() => {
     async function checkEmailConnection() {
-      if (!user) return;
+      if (!user) {
+        console.log("Aucun utilisateur connecté, impossible de vérifier la connexion Gmail");
+        setIsLoading(false);
+        setCheckingConnection(false);
+        return;
+      }
+      
       try {
         setCheckingConnection(true);
         setIsLoading(true);
@@ -53,6 +62,7 @@ export const useGmailConnection = (leadId: string) => {
         
         console.log("Vérification de la connexion Gmail pour l'utilisateur:", user.id);
         
+        // Vérifie si l'utilisateur a déjà une connexion Gmail enregistrée
         const { data, error } = await supabase
           .from('user_email_connections')
           .select('email, id')
@@ -86,6 +96,7 @@ export const useGmailConnection = (leadId: string) => {
     checkEmailConnection();
   }, [user, leadId, connectionAttemptCount]);
 
+  // Fonction pour démarrer la connexion Gmail
   const connectGmail = async () => {
     if (isConnecting) return;
     
@@ -98,6 +109,7 @@ export const useGmailConnection = (leadId: string) => {
       console.log('Démarrage du processus de connexion Gmail pour le lead:', leadId);
       
       if (!user) {
+        console.error("Erreur: Aucun utilisateur connecté");
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -106,6 +118,7 @@ export const useGmailConnection = (leadId: string) => {
         return;
       }
       
+      // Construit l'URL de redirection
       const currentPath = window.location.pathname;
       const baseUrl = window.location.origin;
       const redirectUri = `${baseUrl}${currentPath}?tab=emails`;
@@ -114,6 +127,7 @@ export const useGmailConnection = (leadId: string) => {
       console.log('ID utilisateur:', user.id);
       
       try {
+        // Appelle la fonction Edge Supabase pour obtenir l'URL d'authentification
         const { data, error } = await supabase.functions.invoke('gmail-auth', {
           body: {
             action: 'authorize',
@@ -140,6 +154,7 @@ export const useGmailConnection = (leadId: string) => {
         
         if (!data || !data.authorizationUrl) {
           const errorMsg = "La réponse du serveur ne contient pas d'URL d'autorisation.";
+          console.error(errorMsg, data);
           setConnectionError(errorMsg);
           setDetailedErrorInfo({
             error: errorMsg,
@@ -151,8 +166,10 @@ export const useGmailConnection = (leadId: string) => {
         console.log('URL d\'autorisation reçue:', data.authorizationUrl.substring(0, 100) + '...');
         setGoogleAuthURL(data.authorizationUrl);
         
+        // Mémorise l'URL actuelle pour pouvoir y revenir après l'authentification
         localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
         
+        // Redirige vers l'URL d'authentification Google
         window.location.href = data.authorizationUrl;
       } catch (invokeError) {
         console.error('Erreur lors de l\'invocation de la fonction gmail-auth:', invokeError);
@@ -186,10 +203,12 @@ export const useGmailConnection = (leadId: string) => {
     }
   };
 
+  // Fonction pour réessayer la connexion
   const retryConnection = () => {
     setConnectionAttemptCount(prev => prev + 1);
   };
 
+  // Fonction pour vérifier l'état des fonctions Supabase
   const checkSupabaseEdgeFunctionStatus = () => {
     window.open('https://status.supabase.com', '_blank');
   };

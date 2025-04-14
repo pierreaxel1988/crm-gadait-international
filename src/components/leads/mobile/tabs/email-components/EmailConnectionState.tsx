@@ -13,6 +13,11 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
   isConnecting,
   connectGmail,
 }) => {
+  const handleConnectClick = () => {
+    console.log('Initiating Gmail connection...');
+    connectGmail();
+  };
+
   return (
     <div className="p-4 flex flex-col items-center justify-center space-y-4 pt-8">
       <div className="bg-loro-pearl/30 rounded-full p-4 border-2 border-loro-terracotta shadow-sm">
@@ -35,7 +40,7 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       </Alert>
       
       <Button 
-        onClick={connectGmail} 
+        onClick={handleConnectClick} 
         disabled={isConnecting}
         className="w-full max-w-xs flex items-center justify-center gap-2 text-white shadow-md py-6 rounded-md bg-loro-terracotta hover:bg-loro-terracotta/90"
       >

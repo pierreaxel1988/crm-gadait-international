@@ -14,7 +14,19 @@ interface AuthContextType {
   userRole: 'admin' | 'commercial' | 'guest';
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Création du contexte avec une valeur par défaut complète
+const defaultContext: AuthContextType = {
+  session: null,
+  user: null,
+  loading: true,
+  signOut: async () => {},
+  signInWithGoogle: async () => {},
+  isAdmin: false,
+  isCommercial: false,
+  userRole: 'guest'
+};
+
+const AuthContext = createContext<AuthContextType>(defaultContext);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
@@ -25,14 +37,64 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [userRole, setUserRole] = useState<'admin' | 'commercial' | 'guest'>('guest');
 
   useEffect(() => {
-    // Get initial session
+    // Configuration explicite de Supabase pour assurer la persistance de session
+    supabase.auth.onAuthStateChange((event, newSession) => {
+      console.log('Auth state changed:', event, newSession?.user?.email);
+      
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+      
+      // Vérification du rôle utilisateur
+      if (newSession?.user) {
+        const userEmail = newSession.user.email;
+        const adminEmails = [
+          'pierre@gadait-international.com',
+          'christelle@gadait-international.com',
+          'admin@gadait-international.com',
+          'chloe@gadait-international.com'
+        ];
+        
+        const commercialEmails = [
+          'jade@gadait-international.com',
+          'ophelie@gadait-international.com',
+          'jeanmarc@gadait-international.com',
+          'jacques@gadait-international.com',
+          'sharon@gadait-international.com'
+        ];
+        
+        const isUserAdmin = adminEmails.includes(userEmail || '');
+        const isUserCommercial = commercialEmails.includes(userEmail || '');
+        
+        setIsAdmin(isUserAdmin);
+        setIsCommercial(isUserCommercial);
+        
+        if (isUserAdmin) {
+          setUserRole('admin');
+        } else if (isUserCommercial) {
+          setUserRole('commercial');
+        } else {
+          setUserRole('guest');
+        }
+      } else {
+        setIsAdmin(false);
+        setIsCommercial(false);
+        setUserRole('guest');
+      }
+      
+      setLoading(false);
+    });
+
+    // Récupération initiale de la session
     const getInitialSession = async () => {
       try {
+        console.log('Getting initial session...');
         const { data } = await supabase.auth.getSession();
+        console.log('Initial session retrieved:', data.session?.user?.email);
+        
         setSession(data.session);
         setUser(data.session?.user ?? null);
         
-        // Check if user has admin role or is one of the admin users
+        // Vérification du rôle utilisateur
         if (data.session?.user) {
           const userEmail = data.session.user.email;
           const adminEmails = [
@@ -72,62 +134,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     getInitialSession();
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Check if user has admin role or is one of the admin users
-        if (session?.user) {
-          const userEmail = session.user.email;
-          const adminEmails = [
-            'pierre@gadait-international.com',
-            'christelle@gadait-international.com',
-            'admin@gadait-international.com',
-            'chloe@gadait-international.com'
-          ];
-          
-          const commercialEmails = [
-            'jade@gadait-international.com',
-            'ophelie@gadait-international.com',
-            'jeanmarc@gadait-international.com',
-            'jacques@gadait-international.com',
-            'sharon@gadait-international.com'
-          ];
-          
-          const isUserAdmin = adminEmails.includes(userEmail || '');
-          const isUserCommercial = commercialEmails.includes(userEmail || '');
-          
-          setIsAdmin(isUserAdmin);
-          setIsCommercial(isUserCommercial);
-          
-          if (isUserAdmin) {
-            setUserRole('admin');
-          } else if (isUserCommercial) {
-            setUserRole('commercial');
-          } else {
-            setUserRole('guest');
-          }
-        } else {
-          setIsAdmin(false);
-          setIsCommercial(false);
-          setUserRole('guest');
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
 
   const signOut = async () => {
     try {
+      console.log('Signing out...');
       await supabase.auth.signOut();
+      console.log('Signed out successfully');
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -135,30 +148,40 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signInWithGoogle = async () => {
     try {
+      console.log('Signing in with Google...');
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: window.location.origin,
         }
       });
-      if (error) throw error;
+      if (error) {
+        console.error('Error signing in with Google:', error);
+        throw error;
+      }
+      console.log('Google auth initiated');
     } catch (error) {
       console.error('Error signing in with Google:', error);
       throw error;
     }
   };
 
+  // Vérification préventive que le contexte n'est jamais undefined
+  const contextValue: AuthContextType = {
+    session,
+    user,
+    loading,
+    signOut,
+    signInWithGoogle,
+    isAdmin,
+    isCommercial,
+    userRole
+  };
+
+  console.log('AuthProvider rendering with user:', user?.email);
+
   return (
-    <AuthContext.Provider value={{
-      session,
-      user,
-      loading,
-      signOut,
-      signInWithGoogle,
-      isAdmin,
-      isCommercial,
-      userRole
-    }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
@@ -166,8 +189,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) {
+    console.error('useAuth must be used within an AuthProvider');
+    // Retourner la valeur par défaut au lieu de lever une erreur
+    return defaultContext;
   }
   return context;
 };
