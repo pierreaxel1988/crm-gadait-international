@@ -40,33 +40,6 @@ export const useGmailConnection = (leadId: string) => {
         description: "Votre compte Gmail a été connecté avec succès."
       });
     }
-
-    // Check for error parameters in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const errorParam = urlParams.get('error');
-    if (errorParam) {
-      console.error('Detected OAuth error in URL:', errorParam);
-      const errorDescription = urlParams.get('error_description') || 'Accès refusé';
-      
-      setConnectionError(`Erreur d'authentification: ${errorDescription}`);
-      setDetailedErrorInfo({
-        error: errorParam,
-        error_description: errorDescription,
-        from_url_params: true
-      });
-      
-      // Clean up the URL
-      if (window.history && window.history.replaceState) {
-        const cleanUrl = window.location.href.split('?')[0];
-        window.history.replaceState({}, document.title, cleanUrl);
-      }
-      
-      toast({
-        variant: "destructive",
-        title: "Échec de connexion",
-        description: errorDescription
-      });
-    }
   }, []);
 
   useEffect(() => {
@@ -180,24 +153,10 @@ export const useGmailConnection = (leadId: string) => {
         
         localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
         
-        // Store a marker in localStorage to detect when we'll come back
-        localStorage.setItem('gmail_auth_starting', 'true');
-        
         window.location.href = data.authorizationUrl;
       } catch (invokeError) {
         console.error('Erreur lors de l\'invocation de la fonction gmail-auth:', invokeError);
-        
-        // Check if the error might be related to connection issues
-        const errorMessage = (invokeError as Error).message || '';
-        if (errorMessage.includes('refused to connect') || 
-            errorMessage.includes('Failed to fetch') ||
-            errorMessage.includes('NetworkError')) {
-          
-          setConnectionError(`Erreur de connexion: Google a refusé la connexion. Vérifiez que les cookies tiers sont autorisés dans votre navigateur.`);
-        } else {
-          setConnectionError(`Erreur d'invocation de la fonction: ${(invokeError as Error).message}`);
-        }
-        
+        setConnectionError(`Erreur d'invocation de la fonction: ${(invokeError as Error).message}`);
         setDetailedErrorInfo({
           error: invokeError,
           context: "Try-catch block for function invocation"
@@ -224,22 +183,10 @@ export const useGmailConnection = (leadId: string) => {
       });
     } finally {
       setIsConnecting(false);
-      // If we get here without redirecting, clear the starting flag
-      localStorage.removeItem('gmail_auth_starting');
     }
   };
 
   const retryConnection = () => {
-    // Check if previous connection attempt is still in progress
-    const authInProgress = localStorage.getItem('gmail_auth_starting');
-    if (authInProgress) {
-      localStorage.removeItem('gmail_auth_starting');
-      toast({
-        title: "Attention",
-        description: "Une tentative de connexion précédente a été réinitialisée."
-      });
-    }
-    
     setConnectionAttemptCount(prev => prev + 1);
   };
 

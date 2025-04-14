@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Mail, RefreshCw, Shield, CheckCircle } from 'lucide-react';
+import { Mail, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface EmailConnectionStateProps {
@@ -21,19 +21,6 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       <p className="text-gray-500 text-center text-sm mb-4">
         Connectez votre compte Gmail pour synchroniser les emails avec ce lead.
       </p>
-      
-      <div className="w-full max-w-md bg-blue-50 rounded-lg p-4 border border-blue-100 mb-4">
-        <h4 className="font-medium text-blue-700 flex items-center mb-2">
-          <CheckCircle className="h-4 w-4 mr-2" />
-          Prérequis
-        </h4>
-        <ul className="list-disc pl-5 text-sm text-blue-600 space-y-1">
-          <li>Vérifiez que les cookies tiers sont autorisés dans votre navigateur</li>
-          <li>Assurez-vous que votre bloqueur de publicités n'interfère pas avec Google</li>
-          <li>Un compte Google avec accès à Gmail est nécessaire</li>
-        </ul>
-      </div>
-      
       <Button 
         onClick={connectGmail} 
         disabled={isConnecting}
@@ -51,16 +38,9 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
           </>
         )}
       </Button>
-      
-      <div className="text-xs text-gray-400 mt-2 text-center max-w-md">
-        <p className="mb-1">
-          Assurez-vous que les autorisations d'API ont été configurées dans Google Cloud Console
-        </p>
-        <p className="flex items-center justify-center text-amber-600">
-          <Shield className="h-3 w-3 mr-1" />
-          <span>Les cookies tiers doivent être activés pour cette fonctionnalité</span>
-        </p>
-      </div>
+      <p className="text-xs text-gray-400 mt-2 text-center">
+        Assurez-vous que les autorisations d'API ont été configurées dans Google Cloud Console
+      </p>
     </div>
   );
 };
