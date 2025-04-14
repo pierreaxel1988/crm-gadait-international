@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Mail, RefreshCw, ExternalLink, CheckCircle } from 'lucide-react';
+import { Mail, RefreshCw, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
@@ -66,6 +66,13 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
         </div>
       </div>
       
+      <Alert className="bg-amber-50 border-amber-200">
+        <AlertCircle className="h-4 w-4 text-amber-600" />
+        <AlertDescription className="text-sm text-amber-800">
+          Si vous avez déjà autorisé l'application mais que vous êtes redirigé ici, cliquez sur "Rafraîchir la connexion" ci-dessous.
+        </AlertDescription>
+      </Alert>
+      
       <Button 
         onClick={handleConnectClick} 
         disabled={isConnecting}
@@ -88,9 +95,10 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
         <Button 
           onClick={handleRetryConnection}
           variant="outline"
-          className="mt-2 text-sm"
+          className="w-full max-w-xs flex items-center justify-center gap-2"
         >
-          Vous avez déjà connecté votre compte ? Cliquez ici pour actualiser
+          <RefreshCw className="h-4 w-4" />
+          <span>Rafraîchir la connexion</span>
         </Button>
       )}
       

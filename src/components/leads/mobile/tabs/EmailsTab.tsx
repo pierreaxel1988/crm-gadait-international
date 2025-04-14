@@ -8,8 +8,10 @@ import EmailConnectionState from './email-components/EmailConnectionState';
 import EmailConnectionError from './email-components/EmailConnectionError';
 import EmailList from './email-components/EmailList';
 import EmailComposer from './EmailComposer';
-import { Edit, RefreshCw } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Info, RefreshCw } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface EmailsTabProps {
   leadId: string;
@@ -21,15 +23,34 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
   const { lead } = useLeadDetail(leadId);
   const location = useLocation();
   const [forceReload, setForceReload] = useState(0);
+  const [showRefreshAlert, setShowRefreshAlert] = useState(false);
 
-  // Force un rafraîchissement si on détecte un paramètre 'oauth_success' dans l'URL
+  // Check for oauth_success parameter in URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.has('oauth_success')) {
       console.log("Paramètre oauth_success détecté dans l'URL, forçage du rechargement");
       setForceReload(prev => prev + 1);
+      setShowRefreshAlert(true);
+      
+      // Auto-hide refresh alert after 15 seconds
+      const timer = setTimeout(() => {
+        setShowRefreshAlert(false);
+      }, 15000);
+      
+      return () => clearTimeout(timer);
     }
   }, [location.search]);
+
+  // Also check localStorage for OAuth success flag
+  useEffect(() => {
+    const oauthSuccess = localStorage.getItem('oauth_success') === 'true';
+    if (oauthSuccess) {
+      console.log("Succès OAuth détecté dans localStorage");
+      localStorage.removeItem('oauth_success');
+      setForceReload(prev => prev + 1);
+    }
+  }, []);
 
   const {
     isConnected,
@@ -61,7 +82,7 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
     toggleSortOrder
   } = useEmailData(leadId, lead?.email, isConnected);
 
-  // Pour débogage
+  // For debugging
   useEffect(() => {
     console.log("État de connexion Gmail:", { 
       isConnected, 
@@ -73,15 +94,39 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
     });
   }, [isConnected, isLoading, checkingConnection, connectedEmail, connectionError, forceReload]);
 
-  // Force une vérification de la connexion quand forceReload change
+  // Force connection check when forceReload changes
   useEffect(() => {
     if (forceReload > 0) {
       retryConnection();
     }
   }, [forceReload]);
 
+  const handleManualRefresh = () => {
+    setForceReload(prev => prev + 1);
+    setShowRefreshAlert(false);
+  };
+
   if (isLoading || checkingConnection) {
-    return <EmailLoading />;
+    return (
+      <div>
+        <EmailLoading />
+        {showRefreshAlert && (
+          <Alert className="mt-4 bg-blue-50 border-blue-200">
+            <Info className="h-4 w-4 text-blue-500" />
+            <AlertDescription className="text-blue-700">
+              Connexion réussie ! Si les emails ne s'affichent pas automatiquement, veuillez rafraîchir.
+              <Button 
+                onClick={handleManualRefresh} 
+                variant="outline" 
+                className="mt-2 w-full border-blue-300 bg-blue-50 hover:bg-blue-100 flex items-center justify-center gap-2"
+              >
+                <RefreshCw className="h-4 w-4" /> Rafraîchir maintenant
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+    );
   }
 
   if (connectionError) {
@@ -122,19 +167,37 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
   }
 
   return (
-    <EmailList
-      emails={emails}
-      filteredEmails={filteredEmails}
-      connectedEmail={connectedEmail}
-      isRefreshing={isRefreshing}
-      searchTerm={searchTerm}
-      sortOrder={sortOrder}
-      syncEmailsWithGmail={syncEmailsWithGmail}
-      sendNewEmail={sendNewEmail}
-      setSearchTerm={setSearchTerm}
-      toggleSortOrder={toggleSortOrder}
-      formatDate={formatDate}
-    />
+    <>
+      {showRefreshAlert && (
+        <Alert className="mb-4 bg-blue-50 border-blue-200">
+          <Info className="h-4 w-4 text-blue-500" />
+          <AlertDescription className="text-blue-700">
+            Connexion réussie ! Si les emails ne s'affichent pas correctement, veuillez rafraîchir.
+            <Button 
+              onClick={handleManualRefresh} 
+              variant="outline" 
+              className="mt-2 w-full border-blue-300 bg-blue-50 hover:bg-blue-100 flex items-center justify-center gap-2"
+            >
+              <RefreshCw className="h-4 w-4" /> Rafraîchir maintenant
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      <EmailList
+        emails={emails}
+        filteredEmails={filteredEmails}
+        connectedEmail={connectedEmail}
+        isRefreshing={isRefreshing}
+        searchTerm={searchTerm}
+        sortOrder={sortOrder}
+        syncEmailsWithGmail={syncEmailsWithGmail}
+        sendNewEmail={sendNewEmail}
+        setSearchTerm={setSearchTerm}
+        toggleSortOrder={toggleSortOrder}
+        formatDate={formatDate}
+      />
+    </>
   );
 };
 
