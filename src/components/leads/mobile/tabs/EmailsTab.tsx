@@ -67,38 +67,70 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [showComposer, setShowComposer] = useState(false);
+  const [checkingConnection, setCheckingConnection] = useState(true);
 
   const { lead } = useLeadDetail(leadId);
+
+  // Vérifiez les paramètres d'URL au chargement pour détecter si nous revenons d'une authentification OAuth
+  useEffect(() => {
+    // Vérifier si nous avons un redirectTarget dans localStorage, ce qui indiquerait
+    // que nous revenons d'une authentification OAuth réussie
+    const redirectTarget = localStorage.getItem('oauthRedirectTarget');
+    if (redirectTarget) {
+      console.log('Detected OAuth redirect with target:', redirectTarget);
+      // Supprimer le redirectTarget du localStorage
+      localStorage.removeItem('oauthRedirectTarget');
+      
+      // Forcer une nouvelle vérification de connexion
+      setConnectionAttemptCount(prev => prev + 1);
+      
+      // Afficher une notification positive
+      toast({
+        title: "Connection réussie",
+        description: "Votre compte Gmail a été connecté avec succès."
+      });
+    }
+  }, []);
 
   useEffect(() => {
     async function checkEmailConnection() {
       if (!user) return;
       try {
+        setCheckingConnection(true);
         setIsLoading(true);
         setConnectionError(null);
         setDetailedErrorInfo(null);
         
-        const { data, error } = await supabase.from('user_email_connections').select('email, id').eq('user_id', user.id).maybeSingle();
+        console.log("Vérification de la connexion Gmail pour l'utilisateur:", user.id);
+        
+        const { data, error } = await supabase
+          .from('user_email_connections')
+          .select('email, id')
+          .eq('user_id', user.id)
+          .maybeSingle();
         
         if (error) {
-          console.error('Error checking email connection:', error);
+          console.error('Erreur lors de la vérification de la connexion:', error);
           setIsConnected(false);
           setConnectionError(`Erreur lors de la vérification de la connexion: ${error.message}`);
           return;
         }
         
         if (data) {
+          console.log("Connexion Gmail trouvée:", data.email);
           setIsConnected(true);
           setConnectedEmail((data as EmailConnection).email);
           fetchEmails();
         } else {
+          console.log("Aucune connexion Gmail trouvée");
           setIsConnected(false);
         }
       } catch (error) {
-        console.error('Error in checkEmailConnection:', error);
+        console.error('Erreur dans checkEmailConnection:', error);
         setConnectionError(`Une erreur est survenue: ${(error as Error).message}`);
       } finally {
         setIsLoading(false);
+        setCheckingConnection(false);
       }
     }
     
@@ -131,7 +163,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       setDetailedErrorInfo(null);
       setGoogleAuthURL(null);
       
-      console.log('Starting Gmail connection process for lead:', leadId);
+      console.log('Démarrage du processus de connexion Gmail pour le lead:', leadId);
       
       // Vérifions que l'utilisateur est connecté
       if (!user) {
@@ -149,8 +181,8 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       // Ensure we maintain the tab parameter
       const redirectUri = `${baseUrl}${currentPath}?tab=emails`;
       
-      console.log('Using redirect URI:', redirectUri);
-      console.log('User ID:', user.id);
+      console.log('Utilisation de la URI de redirection:', redirectUri);
+      console.log('ID utilisateur:', user.id);
       
       try {
         const { data, error } = await supabase.functions.invoke('gmail-auth', {
@@ -162,7 +194,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         });
         
         if (error) {
-          console.error('Error starting Gmail auth:', error);
+          console.error('Erreur lors du démarrage de l\'authentification Gmail:', error);
           setConnectionError(`Erreur de démarrage de l'authentification: ${error.message}`);
           setDetailedErrorInfo({
             error: error,
@@ -187,7 +219,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
           return;
         }
         
-        console.log('Received authorization URL:', data.authorizationUrl.substring(0, 100) + '...');
+        console.log('URL d\'autorisation reçue:', data.authorizationUrl.substring(0, 100) + '...');
         // Store the URL for direct link option 
         setGoogleAuthURL(data.authorizationUrl);
         
@@ -197,7 +229,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         // Open in a new tab instead of redirecting
         window.open(data.authorizationUrl, '_blank');
       } catch (invokeError) {
-        console.error('Error invoking gmail-auth function:', invokeError);
+        console.error('Erreur lors de l\'invocation de la fonction gmail-auth:', invokeError);
         setConnectionError(`Erreur d'invocation de la fonction: ${(invokeError as Error).message}`);
         setDetailedErrorInfo({
           error: invokeError,
@@ -211,7 +243,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         });
       }
     } catch (error) {
-      console.error('Error in connectGmail:', error);
+      console.error('Erreur dans connectGmail:', error);
       setConnectionError(`Erreur: ${(error as Error).message}`);
       setDetailedErrorInfo({
         error: error,
@@ -240,7 +272,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         .order('date', { ascending: false });
         
       if (error) {
-        console.error('Error fetching emails:', error);
+        console.error('Erreur lors de la récupération des emails:', error);
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -249,10 +281,11 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         return;
       }
       
+      console.log(`${data?.length || 0} emails récupérés pour le lead ${leadId}`);
       setEmails(data || []);
       setFilteredEmails(data || []);
     } catch (error) {
-      console.error('Error in fetchEmails:', error);
+      console.error('Erreur dans fetchEmails:', error);
     } finally {
       setIsRefreshing(false);
     }
@@ -262,6 +295,9 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     if (!user || !leadId || !lead?.email) return;
     try {
       setIsRefreshing(true);
+      
+      console.log(`Synchronisation des emails pour le lead ${leadId} avec l'adresse ${lead.email}`);
+      
       const { data, error } = await supabase.functions.invoke('gmail-sync', {
         body: {
           leadId,
@@ -270,7 +306,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       });
       
       if (error) {
-        console.error('Error syncing emails:', error);
+        console.error('Erreur lors de la synchronisation des emails:', error);
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -279,6 +315,8 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         return;
       }
       
+      console.log('Résultat de la synchronisation:', data);
+      
       toast({
         title: "Synchronisation réussie",
         description: `${data.newEmails || 0} nouveaux emails trouvés.`
@@ -286,7 +324,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
       
       fetchEmails();
     } catch (error) {
-      console.error('Error in syncEmailsWithGmail:', error);
+      console.error('Erreur dans syncEmailsWithGmail:', error);
     } finally {
       setIsRefreshing(false);
     }
@@ -298,7 +336,10 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
 
   const handleEmailSent = () => {
     setShowComposer(false);
-    fetchEmails();
+    // Rafraîchir les emails après l'envoi pour voir le nouvel email
+    setTimeout(() => {
+      fetchEmails();
+    }, 500);
   };
 
   const formatDate = (dateString: string) => {
@@ -319,8 +360,6 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
   const retryConnection = () => {
     // Incrémenter le compteur pour forcer un nouveau check
     setConnectionAttemptCount(prev => prev + 1);
-    // Recharger la page
-    window.location.reload();
   };
 
   // Fonction pour obtenir le statut actuel des serveurs Supabase Edge Functions
@@ -328,7 +367,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
     window.open('https://status.supabase.com', '_blank');
   };
 
-  if (isLoading) {
+  if (isLoading || checkingConnection) {
     return <div className="p-4 flex flex-col items-center justify-center h-40">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-loro-hazel"></div>
       <p className="mt-2 text-sm text-gray-500">Chargement...</p>
@@ -386,7 +425,7 @@ const EmailsTab: React.FC<EmailConnectionProps> = ({
         variant="outline" 
         className="w-full mt-4"
       >
-        <RefreshCw className="mr-2 h-4 w-4" /> Rafraîchir la page
+        <RefreshCw className="mr-2 h-4 w-4" /> Rafraîchir la connexion
       </Button>
       
       <Button 

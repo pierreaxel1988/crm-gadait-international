@@ -33,7 +33,7 @@ function renderHtmlResponse(options: {
     message,
     details,
     redirectUri,
-    redirectDelay = 1000, // Reduced delay for better UX
+    redirectDelay = 500, // Reduced delay for better UX
     email,
     status = 200
   } = options;
@@ -436,7 +436,7 @@ serve(async (req) => {
         message: "Vous avez connecté votre compte Gmail avec succès.",
         email: userInfo.email,
         redirectUri: redirectUri,
-        redirectDelay: 1000 // 1 second is enough for a good UX
+        redirectDelay: 500 // 0.5 seconde est suffisant pour une bonne UX
       });
     } catch (fetchError) {
       console.error('Error exchanging code for tokens:', fetchError);
