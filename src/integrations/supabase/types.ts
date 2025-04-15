@@ -134,6 +134,8 @@ export type Database = {
           next_follow_up_date: string | null
           notes: string | null
           phone: string | null
+          phone_country_code: string | null
+          phone_country_code_display: string | null
           pipeline_type: string | null
           property_reference: string | null
           property_type: string | null
@@ -175,6 +177,8 @@ export type Database = {
           next_follow_up_date?: string | null
           notes?: string | null
           phone?: string | null
+          phone_country_code?: string | null
+          phone_country_code_display?: string | null
           pipeline_type?: string | null
           property_reference?: string | null
           property_type?: string | null
@@ -216,6 +220,8 @@ export type Database = {
           next_follow_up_date?: string | null
           notes?: string | null
           phone?: string | null
+          phone_country_code?: string | null
+          phone_country_code_display?: string | null
           pipeline_type?: string | null
           property_reference?: string | null
           property_type?: string | null

@@ -8,6 +8,7 @@ import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
 import { useAuth } from '@/hooks/useAuth';
+
 interface LeadDetailHeaderProps {
   name: string;
   createdAt?: string;
@@ -27,6 +28,7 @@ interface LeadDetailHeaderProps {
   onWhatsAppClick?: (e: React.MouseEvent) => void;
   onEmailClick?: (e: React.MouseEvent) => void;
 }
+
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   name,
   createdAt,
@@ -49,6 +51,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   const {
     isAdmin
   } = useAuth();
+
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -59,6 +62,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
+
   const handlePhoneClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -68,6 +72,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       window.location.href = `tel:${phone}`;
     }
   };
+
   const handleEmailClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -77,6 +82,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       window.location.href = `mailto:${email}`;
     }
   };
+
   return <div className="flex items-center justify-between p-3 w-full bg-loro-50">
       <div className="flex items-center gap-2 flex-1">
         <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200 flex-shrink-0">
@@ -129,4 +135,5 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
       </div>
     </div>;
 };
+
 export default LeadDetailHeader;
