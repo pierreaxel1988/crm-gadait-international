@@ -174,7 +174,10 @@ export const useKanbanData = (
               tax_residence: lead.taxResidence || null,
               task_type: lead.taskType || null,
               url: lead.url || null,
-              views: lead.views || []
+              views: lead.views || [],
+              // Add missing fields to fix the type error
+              phone_country_code: lead.phoneCountryCode || null,
+              phone_country_code_display: lead.phoneCountryCodeDisplay || null
             }));
           }
         }
