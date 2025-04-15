@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
@@ -30,22 +31,76 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
   };
   return <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
       <TabsList className="w-full grid grid-cols-6 bg-loro-50 border-t border-b border-loro-200/50 shadow-sm">
-        <TabsTrigger value="info" className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs">
+        <TabsTrigger 
+          value="info" 
+          className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          data-[state=active]:bg-transparent 
+          data-[state=active]:text-chocolate-dark 
+          data-[state=active]:font-medium
+          data-[state=active]:border-b-2
+          data-[state=active]:border-chocolate-dark
+          data-[state=active]:shadow-none"
+        >
           Général
         </TabsTrigger>
-        <TabsTrigger value="criteria" className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs">
+        <TabsTrigger 
+          value="criteria" 
+          className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          data-[state=active]:bg-transparent 
+          data-[state=active]:text-chocolate-dark 
+          data-[state=active]:font-medium
+          data-[state=active]:border-b-2
+          data-[state=active]:border-chocolate-dark
+          data-[state=active]:shadow-none"
+        >
           Critères
         </TabsTrigger>
-        <TabsTrigger value="status" className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs">
+        <TabsTrigger 
+          value="status" 
+          className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          data-[state=active]:bg-transparent 
+          data-[state=active]:text-chocolate-dark 
+          data-[state=active]:font-medium
+          data-[state=active]:border-b-2
+          data-[state=active]:border-chocolate-dark
+          data-[state=active]:shadow-none"
+        >
           Statut
         </TabsTrigger>
-        <TabsTrigger value="notes" className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs">
+        <TabsTrigger 
+          value="notes" 
+          className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          data-[state=active]:bg-transparent 
+          data-[state=active]:text-chocolate-dark 
+          data-[state=active]:font-medium
+          data-[state=active]:border-b-2
+          data-[state=active]:border-chocolate-dark
+          data-[state=active]:shadow-none"
+        >
           Notes
         </TabsTrigger>
-        <TabsTrigger value="actions" className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs">
+        <TabsTrigger 
+          value="actions" 
+          className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          data-[state=active]:bg-transparent 
+          data-[state=active]:text-chocolate-dark 
+          data-[state=active]:font-medium
+          data-[state=active]:border-b-2
+          data-[state=active]:border-chocolate-dark
+          data-[state=active]:shadow-none"
+        >
           Actions
         </TabsTrigger>
-        <TabsTrigger value="emails" className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs">
+        <TabsTrigger 
+          value="emails" 
+          className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          data-[state=active]:bg-transparent 
+          data-[state=active]:text-chocolate-dark 
+          data-[state=active]:font-medium
+          data-[state=active]:border-b-2
+          data-[state=active]:border-chocolate-dark
+          data-[state=active]:shadow-none"
+        >
           Emails
         </TabsTrigger>
       </TabsList>
