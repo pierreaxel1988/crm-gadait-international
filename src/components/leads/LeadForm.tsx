@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -96,7 +95,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
     }
   }, [adminAssignedAgent]);
 
-  // Effet pour synchroniser les changements de lead vers formData
   useEffect(() => {
     if (lead) {
       setFormData(prev => ({
@@ -106,7 +104,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
     }
   }, [lead]);
 
-  // Effet pour notifier le parent des changements
   useEffect(() => {
     if (onChange) {
       onChange(formData);
@@ -130,7 +127,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    // Log pour debugging
     console.log(`Field changed: ${name} = ${value}`);
     
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -139,7 +135,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    // Log pour debugging
     console.log(`Number field changed: ${name} = ${value}`);
     
     setFormData(prev => ({ ...prev, [name]: value ? parseInt(value) : undefined }));
@@ -152,7 +147,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
         ? currentValues.filter(item => item !== value)
         : [...currentValues, value];
         
-      // Log pour debugging
       console.log(`Multi-select field changed: ${name} = ${JSON.stringify(newValues)}`);
       
       return { ...prev, [name]: newValues };
@@ -162,6 +156,21 @@ const LeadForm: React.FC<LeadFormProps> = ({
   const handleExtractUrl = (url: string) => {
     setPropertyUrl(url);
     extractPropertyData();
+  };
+
+  const handleCountryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+    console.log(`Country field changed: ${name} = ${value}`);
+    
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (!formData.nationality) {
+      const nationality = deriveNationalityFromCountry(value);
+      if (nationality) {
+        setFormData(prev => ({ ...prev, nationality }));
+      }
+    }
   };
 
   const detectSourceFromUrl = (url: string): LeadSource | undefined => {
@@ -366,6 +375,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
             onExtractUrl={handleExtractUrl}
             extractLoading={isLoading}
             countries={COUNTRIES}
+            handleCountryChange={handleCountryChange}
           />
         </TabsContent>
 

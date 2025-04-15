@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, MauritiusRegion } from '@/types/lead';
 import FormSection from './FormSection';
@@ -9,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
-import MultiSelectButtons from '../MultiSelectButtons';
+import MultiSelectButtons from '../../leads/form/MultiSelectButtons';
 
 interface SearchCriteriaSectionProps {
   formData: LeadDetailed;
@@ -47,8 +48,8 @@ const SearchCriteriaSection = ({
   handleCountryChange
 }: SearchCriteriaSectionProps) => {
   // Handle nationality auto-completion when country changes
-  const handleCountryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    handleInputChange(e);
+  const handleCountryChangeWithNationality = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    handleCountryChange(e);
     
     // If nationality is empty, try to derive it from country
     if (!formData.nationality) {
@@ -91,7 +92,7 @@ const SearchCriteriaSection = ({
                 onExtractUrl={onExtractUrl}
                 extractLoading={extractLoading}
                 countries={countries}
-                handleCountryChange={handleCountryChange}
+                handleCountryChange={handleCountryChangeWithNationality}
               />
               {formData.country === 'Mauritius' && (
                 <div className="space-y-2">

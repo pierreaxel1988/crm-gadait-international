@@ -303,7 +303,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
               <div className="space-y-2">
                 <Label className="text-sm">Régions souhaitées</Label>
                 <MultiSelectButtons 
-                  options={MAURITIUS_REGIONS} 
+                  options={['North', 'South', 'West', 'East'] as MauritiusRegion[]} 
                   selectedValues={lead.regions || []} 
                   onToggle={region => {
                     const updatedRegions = lead.regions ? [...lead.regions] : [];
