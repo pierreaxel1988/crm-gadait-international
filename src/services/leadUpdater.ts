@@ -22,6 +22,11 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
       supabaseLeadData.phone_country_code_display = leadData.phoneCountryCodeDisplay;
     }
     
+    // Add pipeline_type field to ensure consistency
+    if (leadData.pipelineType) {
+      supabaseLeadData.pipeline_type = leadData.pipelineType;
+    }
+    
     // Special handling for multiple bedroom selections
     const isMultipleBedroomsSelected = Array.isArray(leadData.bedrooms) && leadData.bedrooms.length > 1;
     

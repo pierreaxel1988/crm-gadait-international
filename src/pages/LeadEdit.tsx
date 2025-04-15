@@ -170,7 +170,7 @@ const LeadEdit = () => {
   }
   
   return (
-    <div className="p-3 md:p-6 space-y-4 pb-24 md:pb-6">
+    <div className="p-3 md:p-6 space-y-1 pb-24 md:pb-6">
       <LeadHeader 
         lead={lead} 
         onBack={handleBackClick} 
@@ -187,13 +187,13 @@ const LeadEdit = () => {
         className="w-full"
       >
         <TabsList className={cn(
-          "w-full bg-background border-b flex sticky z-10",
+          "w-full bg-background border-b flex sticky z-10 mt-0",
           isMobile ? "overflow-x-auto no-scrollbar top-[60px] px-0" : "top-[105px]"
         )}>
           <TabsTrigger 
             value="general" 
             className={cn(
-              "py-2 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
+              "py-1.5 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
               isMobile ? "px-2 text-xs" : "px-3 text-sm"
             )}
           >
@@ -202,7 +202,7 @@ const LeadEdit = () => {
           <TabsTrigger 
             value="criteria" 
             className={cn(
-              "py-2 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
+              "py-1.5 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
               isMobile ? "px-2 text-xs" : "px-3 text-sm"
             )}
           >
@@ -211,7 +211,7 @@ const LeadEdit = () => {
           <TabsTrigger 
             value="status" 
             className={cn(
-              "py-2 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
+              "py-1.5 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
               isMobile ? "px-2 text-xs" : "px-3 text-sm"
             )}
           >
@@ -220,7 +220,7 @@ const LeadEdit = () => {
           <TabsTrigger 
             value="actions" 
             className={cn(
-              "py-2 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
+              "py-1.5 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
               isMobile ? "px-2 text-xs" : "px-3 text-sm"
             )}
           >
@@ -228,7 +228,7 @@ const LeadEdit = () => {
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="general" className="mt-3 md:mt-4 pb-16">
+        <TabsContent value="general" className="mt-1 md:mt-2 pb-16">
           <LeadForm 
             lead={lead} 
             onSubmit={handleSubmit}
@@ -240,7 +240,7 @@ const LeadEdit = () => {
           />
         </TabsContent>
         
-        <TabsContent value="criteria" className="mt-3 md:mt-4 pb-16">
+        <TabsContent value="criteria" className="mt-1 md:mt-2 pb-16">
           <LeadForm 
             lead={lead} 
             onSubmit={handleSubmit}
@@ -252,7 +252,7 @@ const LeadEdit = () => {
           />
         </TabsContent>
         
-        <TabsContent value="status" className="mt-3 md:mt-4 pb-16">
+        <TabsContent value="status" className="mt-1 md:mt-2 pb-16">
           <LeadForm 
             lead={lead} 
             onSubmit={handleSubmit}
@@ -264,7 +264,7 @@ const LeadEdit = () => {
           />
         </TabsContent>
         
-        <TabsContent value="actions" className="mt-3 md:mt-4 pb-16">
+        <TabsContent value="actions" className="mt-1 md:mt-2 pb-16">
           {lead && (
             <ActionsPanel 
               lead={lead}

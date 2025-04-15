@@ -96,6 +96,17 @@ const LeadForm: React.FC<LeadFormProps> = ({
     }
   }, [adminAssignedAgent]);
 
+  // Effet pour synchroniser les changements de lead vers formData
+  useEffect(() => {
+    if (lead) {
+      setFormData(prev => ({
+        ...prev,
+        ...lead
+      }));
+    }
+  }, [lead]);
+
+  // Effet pour notifier le parent des changements
   useEffect(() => {
     if (onChange) {
       onChange(formData);
@@ -118,11 +129,19 @@ const LeadForm: React.FC<LeadFormProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
+    // Log pour debugging
+    console.log(`Field changed: ${name} = ${value}`);
+    
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
+    // Log pour debugging
+    console.log(`Number field changed: ${name} = ${value}`);
+    
     setFormData(prev => ({ ...prev, [name]: value ? parseInt(value) : undefined }));
   };
 
@@ -132,6 +151,10 @@ const LeadForm: React.FC<LeadFormProps> = ({
       const newValues = currentValues.includes(value)
         ? currentValues.filter(item => item !== value)
         : [...currentValues, value];
+        
+      // Log pour debugging
+      console.log(`Multi-select field changed: ${name} = ${JSON.stringify(newValues)}`);
+      
       return { ...prev, [name]: newValues };
     });
   };
@@ -311,15 +334,15 @@ const LeadForm: React.FC<LeadFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <Tabs defaultValue={activeTab} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <Tabs defaultValue={activeTab} className="space-y-2">
         <TabsList className="grid grid-cols-3 w-full max-w-md mb-4 hidden">
           <TabsTrigger value="general">Général</TabsTrigger>
           <TabsTrigger value="criteria">Critères</TabsTrigger>
           <TabsTrigger value="status">Statut</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="general" className="space-y-6">
+        <TabsContent value="general" className="space-y-4">
           <GeneralInfoSection 
             formData={formData} 
             handleInputChange={handleInputChange} 
@@ -328,7 +351,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
           />
         </TabsContent>
 
-        <TabsContent value="criteria" className="space-y-6">
+        <TabsContent value="criteria" className="space-y-4">
           <SearchCriteriaSection 
             formData={formData}
             handleInputChange={handleInputChange}
@@ -346,7 +369,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
           />
         </TabsContent>
 
-        <TabsContent value="status" className="space-y-6">
+        <TabsContent value="status" className="space-y-4">
           <StatusSection 
             formData={formData} 
             handleInputChange={handleInputChange}
@@ -355,7 +378,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
       </Tabs>
 
       {!hideSubmitButton && (
-        <div className="flex justify-end space-x-3 pt-3">
+        <div className="flex justify-end space-x-3 pt-2">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
             Annuler
           </Button>

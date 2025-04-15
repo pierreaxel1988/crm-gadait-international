@@ -50,6 +50,9 @@ export function useLeadDetail(id: string | undefined) {
           title: "Lead mis à jour",
           description: "Les modifications ont été enregistrées avec succès."
         });
+        
+        // Mettre à jour le lead avec les données retournées par l'API pour assurer la cohérence
+        setLead(updatedLead);
         setHasChanges(false);
       }
     } catch (error) {
@@ -91,7 +94,8 @@ export function useLeadDetail(id: string | undefined) {
     
     setLead(prev => {
       if (!prev) return prev;
-      return { ...prev, ...data };
+      const updated = { ...prev, ...data };
+      return updated;
     });
     
     setHasChanges(true);
