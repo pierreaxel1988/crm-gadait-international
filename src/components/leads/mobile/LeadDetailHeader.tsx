@@ -1,19 +1,21 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Phone, Mail } from 'lucide-react';
-import { format } from 'date-fns';
-import CustomButton from '@/components/ui/CustomButton';
-import TagBadge, { LeadTag } from '@/components/common/TagBadge';
-import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
-import { Currency } from '@/types/lead';
-import { useAuth } from '@/hooks/useAuth';
+import { ChevronLeft, Save, Phone, Mail, MessageCircle, Clock } from 'lucide-react';
+import { convertBudgetToDisplay } from '@/utils/budgetUtils';
+import { getCountryLocalTime, getCountryLocalTimeWithDetails } from '@/utils/timeUtils';
+import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 interface LeadDetailHeaderProps {
   name: string;
-  createdAt?: string;
+  createdAt: string;
   phone?: string;
   email?: string;
   budget?: string;
-  currency?: Currency;
+  currency?: string;
   desiredLocation?: string;
   country?: string;
   purchaseTimeframe?: string;
@@ -21,11 +23,12 @@ interface LeadDetailHeaderProps {
   onSave: () => void;
   isSaving: boolean;
   hasChanges: boolean;
-  tags?: LeadTag[];
+  tags?: string[];
   onPhoneCall?: (e: React.MouseEvent) => void;
   onWhatsAppClick?: (e: React.MouseEvent) => void;
   onEmailClick?: (e: React.MouseEvent) => void;
 }
+
 const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   name,
   createdAt,
@@ -40,92 +43,180 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   onSave,
   isSaving,
   hasChanges,
-  tags,
+  tags = [],
   onPhoneCall,
   onWhatsAppClick,
   onEmailClick
 }) => {
-  const {
-    isAdmin
-  } = useAuth();
-  const handleWhatsAppClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onWhatsAppClick) {
-      onWhatsAppClick(e);
-    } else if (phone) {
-      const cleanedPhone = phone.replace(/[^\d+]/g, '');
-      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
-    }
-  };
-  const handlePhoneClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onPhoneCall) {
-      onPhoneCall(e);
-    } else if (phone) {
-      window.location.href = `tel:${phone}`;
-    }
-  };
-  const handleEmailClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onEmailClick) {
-      onEmailClick(e);
-    } else if (email) {
-      window.location.href = `mailto:${email}`;
-    }
-  };
-  return <div className="flex items-center justify-between p-3 w-full bg-loro-50">
-      <div className="flex items-center gap-2 flex-1">
-        <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200 flex-shrink-0">
-          <ArrowLeft className="h-5 w-5" />
+  const [elapsedTime, setElapsedTime] = useState('');
+  const [localTime, setLocalTime] = useState({ time: '', date: '', timezone: '' });
+  const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const updateTime = () => {
+      try {
+        if (createdAt) {
+          const date = new Date(createdAt);
+          setElapsedTime(formatDistanceToNow(date, { addSuffix: true, locale: fr }));
+        }
+        
+        if (country) {
+          const details = getCountryLocalTimeWithDetails(country);
+          setLocalTime(details);
+        }
+      } catch (error) {
+        console.error("Error updating times:", error);
+      }
+    };
+    
+    // Initial update
+    updateTime();
+    
+    // Update every minute
+    intervalRef.current = setInterval(updateTime, 60000);
+    
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [createdAt, country]);
+
+  const formattedBudget = budget ? convertBudgetToDisplay(budget, currency) : '';
+
+  return (
+    <div className="p-4 bg-loro-sand">
+      <div className="flex justify-between items-start mb-2">
+        <button 
+          onClick={onBackClick}
+          className="text-chocolate-dark hover:text-chocolate-light"
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onSave}
+          disabled={isSaving || !hasChanges}
+          className={cn(
+            "relative h-8 border-gray-300 hover:border-gray-400 hover:bg-gray-100",
+            hasChanges && !isSaving && "border-chocolate-dark text-chocolate-dark hover:bg-chocolate-light/10 hover:border-chocolate-dark"
+          )}
+        >
+          {isSaving ? (
+            <>
+              <span className="opacity-0">Sauvegarder</span>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-4 w-4 border-2 border-chocolate-dark border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4 mr-1" />
+              <span>Sauvegarder</span>
+            </>
+          )}
         </Button>
-        <div className="truncate">
-          <h1 className="text-lg font-futura leading-tight truncate max-w-[180px] sm:max-w-[300px] md:max-w-[500px]">{name}</h1>
-          <p className="text-xs text-loro-terracotta">
-            {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
-          </p>
-          <div className="flex flex-wrap gap-2 mt-1 max-w-[250px] sm:max-w-[350px] md:max-w-[450px]">
-            {budget && <span className="text-xs bg-[#F5F3EE] px-2 py-1 rounded-xl border border-zinc-200">
-                {formatBudget(budget, currency)}
-              </span>}
-            {desiredLocation && <span className="text-xs bg-[#EBD5CE] px-2 py-1 rounded-xl">
-                {desiredLocation}
-              </span>}
-            {country && <span className="text-xs bg-[#F3E9D6] px-2 py-1 rounded-xl border border-zinc-200">
-                {country}
-              </span>}
+      </div>
+      
+      <div className="mt-2">
+        <h1 className="text-xl font-bold font-futura text-gray-900 line-clamp-2 mt-1">{name}</h1>
+        
+        <div className="flex justify-between items-center mt-1">
+          <div className="flex items-center text-xs text-muted-foreground">
+            <span>Créé {elapsedTime}</span>
+          </div>
+          
+          {country && localTime.time && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center space-x-1 text-xs bg-black/5 px-2 py-1 rounded-full">
+                    <Clock className="h-3 w-3" />
+                    <span>{localTime.time}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <div className="text-xs space-y-1">
+                    <p>{country}</p>
+                    <p>{localTime.date}</p>
+                    <p>{localTime.timezone}</p>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+        
+        <div className="flex flex-wrap gap-1 mt-2">
+          {tags.map(tag => (
+            <span 
+              key={tag} 
+              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+        
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex flex-col">
+            {budget && (
+              <span className="text-sm font-medium">
+                {formattedBudget}
+              </span>
+            )}
+            {desiredLocation && (
+              <span className="text-sm text-muted-foreground mt-0.5">
+                {desiredLocation}{country ? `, ${country}` : ''}
+              </span>
+            )}
+            {purchaseTimeframe && (
+              <span className="text-xs text-muted-foreground mt-0.5">
+                {purchaseTimeframe}
+              </span>
+            )}
+          </div>
+          
+          <div className="flex gap-2">
+            {phone && (
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-8 w-8 rounded-full border-gray-300 bg-white"
+                onClick={onPhoneCall}
+              >
+                <Phone className="h-4 w-4 text-green-600" />
+              </Button>
+            )}
+            
+            {phone && (
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-8 w-8 rounded-full border-gray-300 bg-white"
+                onClick={onWhatsAppClick}
+              >
+                <MessageCircle className="h-4 w-4 text-green-600" />
+              </Button>
+            )}
+            
+            {email && (
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-8 w-8 rounded-full border-gray-300 bg-white"
+                onClick={onEmailClick}
+              >
+                <Mail className="h-4 w-4 text-blue-500" />
+              </Button>
+            )}
           </div>
         </div>
       </div>
-      <div className="flex flex-col items-end gap-2 flex-shrink-0">
-        <div className="flex items-center gap-2">
-          {phone && <>
-              <a href="#" onClick={handlePhoneClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Appeler">
-                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-                  <Phone className="h-4 w-4" />
-                </div>
-              </a>
-              <button onClick={handleWhatsAppClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Contacter via WhatsApp">
-                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
-                    <path d="M9 10a.5.5 0 0 1 1 0c0 1.97 1.53 3.5 3.5 3.5a.5.5 0 0 1 0 1c-2.47 0-4.5-2.02-4.5-4.5" />
-                  </svg>
-                </div>
-              </button>
-            </>}
-          {email && <a href="#" onClick={handleEmailClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Envoyer un email">
-              <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
-                <Mail className="h-4 w-4" />
-              </div>
-            </a>}
-        </div>
-        {tags && tags.length > 0 && <div className="flex flex-wrap justify-end gap-1 max-w-[150px]">
-            {tags.map((tag, index) => <TagBadge key={`${tag}-${index}`} tag={tag} className="text-xs py-0.5" />)}
-          </div>}
-      </div>
-    </div>;
+    </div>
+  );
 };
+
 export default LeadDetailHeader;
