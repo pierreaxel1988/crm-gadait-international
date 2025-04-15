@@ -33,11 +33,6 @@ const LeadDetailMobile = () => {
   const activeTab = searchParams.get('tab') || 'criteria';
   
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
-  const [isCallDialogOpen, setIsCallDialogOpen] = useState(false);
-  const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'completed' | 'failed'>('idle');
-  const [callDuration, setCallDuration] = useState(0);
-  const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
-  const [callType, setCallType] = useState<'phone' | 'whatsapp'>('phone');
   
   const {
     lead,
@@ -49,7 +44,10 @@ const LeadDetailMobile = () => {
     setAutoSaveEnabled,
     handleSave,
     handleDataChange,
-    fetchLead
+    fetchLead,
+    startCallTracking,
+    endCallTracking,
+    formatDuration
   } = useLeadDetail(id);
 
   const {
@@ -119,91 +117,26 @@ const LeadDetailMobile = () => {
     setTimeout(() => setShowSaveIndicator(false), 2000);
   };
 
-  const startCall = (type: 'phone' | 'whatsapp' = 'phone') => {
-    if (!lead || !lead.phone) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Ce lead n'a pas de numéro de téléphone enregistré."
-      });
-      return;
-    }
-
-    setCallType(type);
-    setIsCallDialogOpen(true);
-    setCallStatus('calling');
-    
-    const timer = setInterval(() => {
-      setCallDuration(prev => prev + 1);
-    }, 1000);
-    
-    setCallTimer(timer);
-    
-    if (type === 'phone') {
-      window.location.href = `tel:${lead.phone}`;
-    } else {
-      const cleanedPhone = lead.phone.replace(/[^\d+]/g, '');
-      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
-    }
-  };
-
-  const endCall = (status: 'completed' | 'failed') => {
-    if (callTimer) {
-      clearInterval(callTimer);
-    }
-    
-    setCallStatus(status);
-    
-    if (status === 'completed' && callDuration > 0 && lead) {
-      const callAction = {
-        actionType: 'Call' as any,
-        notes: `${callType === 'whatsapp' ? 'WhatsApp' : 'Appel'} de ${formatDuration(callDuration)}`,
-        createdAt: new Date().toISOString(),
-        scheduledDate: new Date().toISOString(),
-        completedDate: new Date().toISOString(),
-        id: crypto.randomUUID()
-      };
-      
-      const updatedActionHistory = [...(lead.actionHistory || []), callAction];
-      
-      handleDataChange({
-        actionHistory: updatedActionHistory,
-        lastContactedAt: new Date().toISOString()
-      });
-      
-      toast({
-        title: callType === 'whatsapp' ? "WhatsApp enregistré" : "Appel enregistré",
-        description: `Un ${callType === 'whatsapp' ? 'appel WhatsApp' : 'appel'} de ${formatDuration(callDuration)} a été enregistré.`
-      });
-    }
-    
-    setTimeout(() => {
-      setIsCallDialogOpen(false);
-      setCallDuration(0);
-      setCallStatus('idle');
-    }, 1500);
-  };
-
-  const formatDuration = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-
   const handlePhoneCall = (e: React.MouseEvent) => {
     e.preventDefault();
-    startCall('phone');
+    startCallTracking('phone');
   };
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    startCall('whatsapp');
+    startCallTracking('whatsapp');
   };
 
   const handleEmailClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (lead?.email) {
       window.location.href = `mailto:${lead.email}`;
+    }
+  };
+
+  const handleCallComplete = (duration: number) => {
+    if (lead) {
+      endCallTracking(duration);
     }
   };
 
@@ -260,13 +193,6 @@ const LeadDetailMobile = () => {
               <StatusSection 
                 lead={lead} 
                 onDataChange={handleDataChange} 
-                startCall={startCall}
-                isCallDialogOpen={isCallDialogOpen}
-                setIsCallDialogOpen={setIsCallDialogOpen}
-                callStatus={callStatus}
-                callDuration={callDuration}
-                endCall={endCall}
-                formatDuration={formatDuration}
               />
             </TabsContent>
             
@@ -320,7 +246,7 @@ const LeadDetailMobile = () => {
 
       <ActionDialog
         isOpen={isActionDialogOpen}
-        onClose={() => setIsCallDialogOpen(false)}
+        onClose={() => setIsActionDialogOpen(false)}
         selectedAction={selectedAction}
         setSelectedAction={setSelectedAction}
         actionDate={actionDate}

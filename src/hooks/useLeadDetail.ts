@@ -12,6 +12,9 @@ export function useLeadDetail(id: string | undefined) {
   const [hasChanges, setHasChanges] = useState(false);
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
+  const [isCallTracking, setIsCallTracking] = useState(false);
+  const [callStartTime, setCallStartTime] = useState<Date | null>(null);
+  const [callType, setCallType] = useState<'phone' | 'whatsapp'>('phone');
 
   const fetchLead = useCallback(async () => {
     if (id) {
@@ -155,6 +158,49 @@ export function useLeadDetail(id: string | undefined) {
     return fullPhone.replace(/\D/g, '');
   };
 
+  // Start tracking a call
+  const startCallTracking = (type: 'phone' | 'whatsapp' = 'phone') => {
+    setIsCallTracking(true);
+    setCallStartTime(new Date());
+    setCallType(type);
+  };
+
+  // End call tracking and record the action
+  const endCallTracking = (callDuration: number) => {
+    if (!lead || !isCallTracking) return;
+    
+    // Create a new action for the call
+    const callAction: ActionHistory = {
+      id: crypto.randomUUID(),
+      actionType: 'Call',
+      notes: `${callType === 'whatsapp' ? 'WhatsApp' : 'Appel'} de ${formatDuration(callDuration)}`,
+      createdAt: callStartTime?.toISOString() || new Date().toISOString(),
+      scheduledDate: callStartTime?.toISOString() || new Date().toISOString(),
+      completedDate: new Date().toISOString()
+    };
+    
+    // Update the lead with the new action
+    handleDataChange({
+      actionHistory: [...(lead.actionHistory || []), callAction],
+      lastContactedAt: new Date().toISOString()
+    });
+    
+    // Reset call tracking state
+    setIsCallTracking(false);
+    setCallStartTime(null);
+    
+    toast({
+      title: callType === 'whatsapp' ? "WhatsApp enregistré" : "Appel enregistré",
+      description: `Un ${callType === 'whatsapp' ? 'appel WhatsApp' : 'appel'} de ${formatDuration(callDuration)} a été enregistré.`
+    });
+  };
+  
+  const formatDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
   return {
     lead,
     setLead,
@@ -167,6 +213,9 @@ export function useLeadDetail(id: string | undefined) {
     handleDataChange,
     fetchLead,
     getFormattedPhoneForCall,
-    getFormattedPhoneForWhatsApp
+    getFormattedPhoneForWhatsApp,
+    startCallTracking,
+    endCallTracking,
+    formatDuration
   };
 }
