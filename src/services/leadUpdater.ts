@@ -13,6 +13,15 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     const supabaseLeadData = mapToSupabaseFormat(leadData);
     console.log("Preparing lead data for update:", supabaseLeadData);
     
+    // Make sure country code is included in the update
+    if (leadData.phoneCountryCode) {
+      supabaseLeadData.phone_country_code = leadData.phoneCountryCode;
+    }
+    
+    if (leadData.phoneCountryCodeDisplay) {
+      supabaseLeadData.phone_country_code_display = leadData.phoneCountryCodeDisplay;
+    }
+    
     // Special handling for multiple bedroom selections
     const isMultipleBedroomsSelected = Array.isArray(leadData.bedrooms) && leadData.bedrooms.length > 1;
     

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadSource } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -366,8 +367,12 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
   };
 
   const handleCountryCodeChange = (code: string, flag: string) => {
-    handleInputChange('phoneCountryCode', code);
-    handleInputChange('phoneCountryCodeDisplay', flag);
+    // Update both the code and display flag
+    onDataChange({
+      phoneCountryCode: code,
+      phoneCountryCodeDisplay: flag
+    });
+    
     setIsCountryCodeOpen(false);
     setPhoneSearchQuery("");
     setShowAllCountryCodes(false);
