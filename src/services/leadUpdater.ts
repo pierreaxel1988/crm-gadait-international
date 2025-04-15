@@ -13,7 +13,7 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     const supabaseLeadData = mapToSupabaseFormat(leadData);
     console.log("Preparing lead data for update:", supabaseLeadData);
     
-    // Make sure country code is included in the update
+    // Make sure phone-related fields are explicitly included in the update
     if (leadData.phoneCountryCode) {
       supabaseLeadData.phone_country_code = leadData.phoneCountryCode;
     }
@@ -26,6 +26,13 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     if (leadData.pipelineType) {
       supabaseLeadData.pipeline_type = leadData.pipelineType;
     }
+    
+    // Debug log for phone-related fields
+    console.log("Phone-related fields:", {
+      phoneCountryCode: leadData.phoneCountryCode,
+      phoneCountryCodeDisplay: leadData.phoneCountryCodeDisplay,
+      phone: leadData.phone
+    });
     
     // Special handling for multiple bedroom selections
     const isMultipleBedroomsSelected = Array.isArray(leadData.bedrooms) && leadData.bedrooms.length > 1;

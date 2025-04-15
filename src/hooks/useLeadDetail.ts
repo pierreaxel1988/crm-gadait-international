@@ -44,7 +44,13 @@ export function useLeadDetail(id: string | undefined) {
       setIsSaving(true);
       console.log("Saving lead data:", lead);
       
-      const updatedLead = await updateLead(lead);
+      // Make sure we're sending phoneCountryCode explicitly
+      const updatedLead = await updateLead({
+        ...lead,
+        phoneCountryCode: lead.phoneCountryCode,
+        phoneCountryCodeDisplay: lead.phoneCountryCodeDisplay
+      });
+      
       if (updatedLead) {
         toast({
           title: "Lead mis à jour",
@@ -95,6 +101,17 @@ export function useLeadDetail(id: string | undefined) {
     setLead(prev => {
       if (!prev) return prev;
       const updated = { ...prev, ...data };
+      
+      // Log phone-related changes to debug
+      if (data.phoneCountryCode || data.phoneCountryCodeDisplay) {
+        console.log("Phone country code change detected:", {
+          prevCode: prev.phoneCountryCode,
+          newCode: data.phoneCountryCode || prev.phoneCountryCode,
+          prevDisplay: prev.phoneCountryCodeDisplay,
+          newDisplay: data.phoneCountryCodeDisplay || prev.phoneCountryCodeDisplay
+        });
+      }
+      
       return updated;
     });
     
