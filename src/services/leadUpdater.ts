@@ -23,11 +23,19 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
       supabaseLeadData.pipeline_type = leadData.pipelineType;
     }
     
+    // Ensure preferred_language is included in the update
+    supabaseLeadData.preferred_language = leadData.preferredLanguage ?? null;
+    
     // Debug log for phone-related fields
     console.log("Phone-related fields:", {
       phoneCountryCode: leadData.phoneCountryCode,
       phoneCountryCodeDisplay: leadData.phoneCountryCodeDisplay,
       phone: leadData.phone
+    });
+
+    // Debug log for language field
+    console.log("Language field:", {
+      preferredLanguage: leadData.preferredLanguage
     });
     
     // Special handling for multiple bedroom selections

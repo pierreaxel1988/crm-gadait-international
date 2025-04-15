@@ -44,11 +44,12 @@ export function useLeadDetail(id: string | undefined) {
       setIsSaving(true);
       console.log("Saving lead data:", lead);
       
-      // Make sure we're sending all required phone-related fields explicitly
+      // Make sure we're sending all required fields explicitly
       const updatedLead = await updateLead({
         ...lead,
         phoneCountryCode: lead.phoneCountryCode || '+33',
-        phoneCountryCodeDisplay: lead.phoneCountryCodeDisplay || '🇫🇷'
+        phoneCountryCodeDisplay: lead.phoneCountryCodeDisplay || '🇫🇷',
+        preferredLanguage: lead.preferredLanguage // Ensure preferred language is sent
       });
       
       if (updatedLead) {
@@ -102,7 +103,7 @@ export function useLeadDetail(id: string | undefined) {
       if (!prev) return prev;
       const updated = { ...prev, ...data };
       
-      // Log phone-related changes to debug
+      // Log fields changes for debugging
       if (data.phoneCountryCode || data.phoneCountryCodeDisplay || data.phone) {
         console.log("Phone data change detected:", {
           prevCode: prev.phoneCountryCode,
@@ -111,6 +112,13 @@ export function useLeadDetail(id: string | undefined) {
           newDisplay: data.phoneCountryCodeDisplay || prev.phoneCountryCodeDisplay,
           prevPhone: prev.phone,
           newPhone: data.phone || prev.phone
+        });
+      }
+      
+      if (data.preferredLanguage) {
+        console.log("Language change detected:", {
+          prevLanguage: prev.preferredLanguage,
+          newLanguage: data.preferredLanguage
         });
       }
       
