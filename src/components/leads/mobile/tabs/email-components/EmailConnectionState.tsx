@@ -25,6 +25,7 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
   
   // Vérifier si nous avons été redirigés depuis la page de callback
   const [redirectedFromCallback, setRedirectedFromCallback] = React.useState<boolean>(false);
+  const [showRedirectHelp, setShowRedirectHelp] = React.useState<boolean>(false);
   
   React.useEffect(() => {
     // Vérifier si nous venons de la page de callback
@@ -39,12 +40,18 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       
       // Si nous avons été redirigés depuis la page de callback, réessayer automatiquement la connexion
       if (onRetryConnection) {
+        console.log("Redirection détectée depuis Oauth, tentative de reconnexion automatique");
         const timer = setTimeout(() => {
           onRetryConnection();
         }, 1000);
         return () => clearTimeout(timer);
       }
     }
+    
+    // Après 10 secondes, montrer l'aide de redirection si nécessaire
+    const redirectHelpTimer = setTimeout(() => {
+      setShowRedirectHelp(true);
+    }, 10000);
     
     // Nettoyer l'indicateur d'erreur après l'avoir lu
     if (hadConnectionError) {
@@ -53,6 +60,8 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
     
     // Nettoyer les autres indicateurs OAuth qui pourraient exister
     localStorage.removeItem('oauth_pending');
+    
+    return () => clearTimeout(redirectHelpTimer);
   }, [hadConnectionError, onRetryConnection]);
   
   const handleConnectClick = () => {
@@ -62,6 +71,18 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       localStorage.removeItem('oauth_connection_error');
       localStorage.removeItem('oauth_pending');
       localStorage.removeItem('oauth_success');
+      
+      // Ajouter un marqueur pour détecter si nous sommes en attente d'authentification
+      localStorage.setItem('oauth_pending', 'true');
+      
+      // Ajouter un timeout pour détecter les problèmes de redirection
+      setTimeout(() => {
+        if (localStorage.getItem('oauth_pending') === 'true') {
+          // Si le processus est toujours en attente après 30 secondes, afficher une aide
+          setShowRedirectHelp(true);
+        }
+      }, 30000);
+      
       connectGmail();
     } else {
       console.error('Erreur: Utilisateur non connecté');
@@ -75,7 +96,19 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       localStorage.removeItem('oauth_connection_error');
       localStorage.removeItem('oauth_pending');
       localStorage.removeItem('oauth_success');
-      onRetryConnection();
+      
+      // Si nous avons eu un problème de redirection, essayer une méthode alternative
+      if (redirectedFromCallback || showRedirectHelp) {
+        try {
+          // Forcer un rechargement complet de la page
+          window.location.reload();
+        } catch (e) {
+          console.error("Erreur lors du rechargement:", e);
+          onRetryConnection();
+        }
+      } else {
+        onRetryConnection();
+      }
     }
   };
 
@@ -105,6 +138,20 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
           <AlertDescription className="text-sm text-amber-800 font-medium">
             Vous avez été redirigé depuis la page d'authentification, mais le processus n'est pas complet.
             Veuillez utiliser le bouton ci-dessous pour finaliser la connexion.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {showRedirectHelp && (
+        <Alert className="bg-blue-50 border-blue-200 mb-2">
+          <AlertCircle className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-sm text-blue-800 font-medium">
+            Problème de redirection possible. Si vous avez déjà autorisé l'application mais que vous êtes revenu sur cette page :
+            <ol className="list-decimal pl-5 mt-2 space-y-1">
+              <li>Essayez de rafraîchir la page avec le bouton ci-dessous</li>
+              <li>Vérifiez que les popups ne sont pas bloqués par votre navigateur</li>
+              <li>Si le problème persiste, essayez dans une fenêtre de navigation privée</li>
+            </ol>
           </AlertDescription>
         </Alert>
       )}

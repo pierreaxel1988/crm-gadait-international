@@ -3,6 +3,7 @@ import React from 'react';
 import { Loader2, Mail, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from '@/hooks/use-toast';
 
 interface EmailLoadingProps {
   onManualRefresh?: () => void;
@@ -12,26 +13,50 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
   const [showAutoRefreshHelp, setShowAutoRefreshHelp] = React.useState(false);
   const [showRedirectHelp, setShowRedirectHelp] = React.useState(false);
   const [hasDetectedRedirect, setHasDetectedRedirect] = React.useState(false);
+  const [hasRefreshed, setHasRefreshed] = React.useState(false);
   
   // Vérifier si on vient d'une redirection OAuth
   React.useEffect(() => {
-    // Vérifier dans l'historique de navigation
+    // Vérifier différentes sources d'information pour détecter une redirection OAuth
     const referrer = document.referrer;
-    if (referrer && (
-      referrer.includes('oauth/callback') || 
-      referrer.includes('accounts.google.com') ||
-      localStorage.getItem('oauth_success') === 'true'
-    )) {
+    const oauthSuccess = localStorage.getItem('oauth_success') === 'true';
+    const params = new URLSearchParams(window.location.search);
+    const urlSuccess = params.has('oauth_success');
+    
+    // Si une des sources indique une redirection OAuth
+    if ((referrer && (
+        referrer.includes('oauth/callback') || 
+        referrer.includes('accounts.google.com')
+      )) || 
+      oauthSuccess || 
+      urlSuccess
+    ) {
+      console.log("Redirection OAuth détectée:", {
+        fromReferrer: referrer,
+        fromLocalStorage: oauthSuccess,
+        fromURL: urlSuccess
+      });
+      
       setHasDetectedRedirect(true);
+      
+      // Notifier l'utilisateur de la redirection détectée
+      toast({
+        title: "Redirection détectée",
+        description: "Nous finalisons la connexion à Gmail..."
+      });
+      
       // Auto-refresh après une redirection
-      if (onManualRefresh) {
+      if (onManualRefresh && !hasRefreshed) {
+        setHasRefreshed(true);
+        
         const timer = setTimeout(() => {
           onManualRefresh();
         }, 1500);
+        
         return () => clearTimeout(timer);
       }
     }
-  }, [onManualRefresh]);
+  }, [onManualRefresh, hasRefreshed]);
   
   // Afficher un message d'aide supplémentaire si le chargement prend plus de temps
   React.useEffect(() => {
@@ -48,6 +73,22 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
       clearTimeout(redirectTimer);
     };
   }, []);
+  
+  const handleManualRefreshClick = () => {
+    if (onManualRefresh) {
+      setHasRefreshed(true);
+      onManualRefresh();
+      
+      // Nettoyer les indicateurs OAuth
+      localStorage.removeItem('oauth_pending');
+      localStorage.removeItem('oauth_success');
+      
+      toast({
+        title: "Rafraîchissement",
+        description: "Vérification de la connexion Gmail..."
+      });
+    }
+  };
   
   return (
     <div className="p-8 flex flex-col items-center justify-center h-60">
@@ -70,7 +111,7 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
       
       {onManualRefresh && (
         <Button 
-          onClick={onManualRefresh}
+          onClick={handleManualRefreshClick}
           variant="outline"
           className="mt-6 flex items-center gap-2"
         >
@@ -83,6 +124,16 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
         <div className="text-xs text-amber-600 mt-4 text-center max-w-xs bg-amber-50 p-3 rounded-md border border-amber-200">
           <p className="font-medium mb-1">Le chargement prend plus de temps que prévu</p>
           <p>Si vous venez de vous connecter à Gmail, nous vous recommandons de rafraîchir la page.</p>
+          {onManualRefresh && (
+            <Button 
+              onClick={handleManualRefreshClick}
+              variant="outline" 
+              size="sm"
+              className="mt-2 border-amber-300 bg-amber-50 hover:bg-amber-100 w-full"
+            >
+              <RefreshCw className="h-3 w-3 mr-1" /> Rafraîchir maintenant
+            </Button>
+          )}
         </div>
       )}
       
@@ -90,12 +141,24 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
         <div className="text-xs text-blue-600 mt-4 text-center max-w-xs bg-blue-50 p-3 rounded-md border border-blue-200">
           <p className="font-medium mb-1">Problème potentiel de redirection</p>
           <p>Si vous avez été redirigé depuis Google après l'authentification, utilisez le bouton ci-dessus pour rafraîchir et terminer la connexion.</p>
+          {onManualRefresh && (
+            <Button 
+              onClick={handleManualRefreshClick}
+              variant="outline" 
+              size="sm"
+              className="mt-2 border-blue-300 bg-blue-50 hover:bg-blue-100 w-full"
+            >
+              <RefreshCw className="h-3 w-3 mr-1" /> Forcer le rafraîchissement
+            </Button>
+          )}
         </div>
       )}
       
-      <p className="text-xs text-gray-400 mt-4 text-center max-w-xs">
-        Si le chargement persiste, essayez de rafraîchir la page ou de vérifier votre connexion Gmail
-      </p>
+      {!hasDetectedRedirect && !showRedirectHelp && (
+        <p className="text-xs text-gray-400 mt-4 text-center max-w-xs">
+          Si le chargement persiste, essayez de rafraîchir la page ou de vérifier votre connexion Gmail
+        </p>
+      )}
     </div>
   );
 };
