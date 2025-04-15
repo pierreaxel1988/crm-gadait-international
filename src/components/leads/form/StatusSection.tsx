@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { CalendarClock, CalendarDays, Activity } from 'lucide-react';
-import { LeadDetailed, LeadSource } from '@/types/lead';
+import { CalendarClock, CalendarDays, Activity, Home } from 'lucide-react';
+import { LeadDetailed, LeadSource, PipelineType } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import FormSection from './FormSection';
@@ -9,6 +9,7 @@ import FormInput from './FormInput';
 import MultiSelectButtons from './MultiSelectButtons';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { format } from 'date-fns';
+import RadioSelectButtons from './RadioSelectButtons';
 
 interface StatusSectionProps {
   formData: LeadDetailed;
@@ -58,8 +59,39 @@ const StatusSection = ({
     ? format(new Date(formData.nextFollowUpDate), 'dd/MM/yyyy HH:mm')
     : '';
 
+  // Handle pipeline type change
+  const handlePipelineTypeChange = (value: PipelineType) => {
+    const syntheticEvent = {
+      target: {
+        name: 'pipelineType',
+        value: value
+      }
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(syntheticEvent);
+  };
+
   return (
     <FormSection title="Statut et Suivi">
+      <FormInput
+        label="Type de pipeline"
+        name="pipelineType"
+        value={formData.pipelineType || 'purchase'}
+        onChange={() => {}}
+        icon={Home}
+        renderCustomField={() => (
+          <RadioSelectButtons
+            options={['purchase', 'rental'] as PipelineType[]}
+            selectedValue={formData.pipelineType || 'purchase'}
+            onSelect={handlePipelineTypeChange}
+            labelMapping={{
+              purchase: 'Achat',
+              rental: 'Location'
+            }}
+          />
+        )}
+      />
+
       <FormInput
         label="Statut du lead"
         name="status"

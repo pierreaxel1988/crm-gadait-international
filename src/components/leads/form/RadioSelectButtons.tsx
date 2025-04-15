@@ -9,24 +9,28 @@ interface RadioSelectButtonsProps<T extends string> {
   options: T[];
   selectedValue: T | undefined;
   onSelect: (value: T) => void;
+  labelMapping?: Record<string, string>;
 }
 
 const RadioSelectButtons = <T extends string>({ 
   options, 
   selectedValue, 
-  onSelect 
+  onSelect,
+  labelMapping = {} 
 }: RadioSelectButtonsProps<T>) => {
   const isMobile = useIsMobile();
   const isSelected = (option: T) => option === selectedValue;
   
   const renderOption = (option: T, isSelected: boolean) => {
+    const displayLabel = labelMapping[option] || option;
+    
     return (
       <span className="flex items-center gap-1">
         {isSelected && <Check className="h-3 w-3" />}
         <span className={cn(
           "text-sm font-futura",
           isMobile && "text-xs"
-        )}>{option}</span>
+        )}>{displayLabel}</span>
       </span>
     );
   };

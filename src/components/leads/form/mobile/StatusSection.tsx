@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
-import { LeadDetailed, LeadTag } from '@/types/lead';
+import { LeadDetailed, LeadTag, PipelineType } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Activity, Trash2, Phone } from 'lucide-react';
+import { Activity, Trash2, Phone, Home } from 'lucide-react';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { Button } from '@/components/ui/button';
@@ -20,6 +19,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { deleteLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface StatusSectionProps {
   lead: LeadDetailed;
@@ -121,6 +121,29 @@ const StatusSection: React.FC<StatusSectionProps> = ({
       
       <div className="space-y-4">
         <div className="space-y-2">
+          <Label className="text-sm">Type de pipeline</Label>
+          <div className="flex items-center space-x-2 p-3 bg-white border rounded-md">
+            <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 mr-2">
+              <Home className="h-4 w-4 text-gray-500" />
+            </div>
+            <RadioGroup 
+              value={lead.pipelineType || 'purchase'} 
+              onValueChange={(value) => handleInputChange('pipelineType', value as PipelineType)}
+              className="flex space-x-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="purchase" id="purchase" />
+                <Label htmlFor="purchase" className="text-sm font-futura cursor-pointer">Achat</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="rental" id="rental" />
+                <Label htmlFor="rental" className="text-sm font-futura cursor-pointer">Location</Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="status" className="text-sm">Statut du lead</Label>
           <div className="flex">
             <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 border border-r-0 rounded-l-md bg-white">
@@ -143,8 +166,6 @@ const StatusSection: React.FC<StatusSectionProps> = ({
             </Select>
           </div>
         </div>
-
-        {/* Removed "Actions rapides" section */}
         
         <div className="space-y-2">
           <Label className="text-sm">Tags</Label>
