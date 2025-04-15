@@ -171,8 +171,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       </div>
 
       {pendingActions.length === 0 ? (
-        <div className="text-center py-5 border rounded-md bg-[#e37fed]/10 animate-[fade-in_0.3s_ease-out]">
-          <p className="text-[#e37fed] text-xs font-futura">Aucune action en attente</p>
+        <div className="text-center py-5 border rounded-md bg-[#e3f7ed]/10 animate-[fade-in_0.3s_ease-out]">
+          <p className="text-[#0da062] text-xs font-futura">Aucune action en attente</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -181,18 +181,18 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             const isCallAction = action.actionType === 'Call';
             
             const bgColorClass = isOverdue 
-              ? 'bg-[#e37fed]/20' 
-              : 'bg-[#e37fed]/10';
+              ? 'bg-[#e3f7ed]/20' 
+              : 'bg-[#e3f7ed]/10';
               
-            // Define iconBgClass based on new purple theme
+            // Define iconBgClass based on new mint green theme
             const iconBgClass = isOverdue
-              ? 'bg-[#e37fed]/30 text-[#e37fed]'
-              : 'bg-[#e37fed]/20 text-[#e37fed]';
+              ? 'bg-[#e3f7ed]/30 text-[#0da062]'
+              : 'bg-[#e3f7ed]/20 text-[#0da062]';
                 
-            // Define notesBgClass based on new purple theme
+            // Define notesBgClass based on new mint green theme
             const notesBgClass = isOverdue
-              ? 'bg-[#e37fed]/15 text-[#e37fed] border border-[#e37fed]/20'
-              : 'bg-[#e37fed]/10 text-[#e37fed]/90 border border-[#e37fed]/15';
+              ? 'bg-[#e3f7ed]/15 text-[#0da062] border border-[#e3f7ed]/20'
+              : 'bg-[#e3f7ed]/10 text-[#0da062]/90 border border-[#e3f7ed]/15';
             
             return (
               <div 
