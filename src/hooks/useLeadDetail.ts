@@ -44,11 +44,11 @@ export function useLeadDetail(id: string | undefined) {
       setIsSaving(true);
       console.log("Saving lead data:", lead);
       
-      // Make sure we're sending phoneCountryCode explicitly
+      // Make sure we're sending all required phone-related fields explicitly
       const updatedLead = await updateLead({
         ...lead,
-        phoneCountryCode: lead.phoneCountryCode,
-        phoneCountryCodeDisplay: lead.phoneCountryCodeDisplay
+        phoneCountryCode: lead.phoneCountryCode || '+33',
+        phoneCountryCodeDisplay: lead.phoneCountryCodeDisplay || '🇫🇷'
       });
       
       if (updatedLead) {
@@ -103,12 +103,14 @@ export function useLeadDetail(id: string | undefined) {
       const updated = { ...prev, ...data };
       
       // Log phone-related changes to debug
-      if (data.phoneCountryCode || data.phoneCountryCodeDisplay) {
-        console.log("Phone country code change detected:", {
+      if (data.phoneCountryCode || data.phoneCountryCodeDisplay || data.phone) {
+        console.log("Phone data change detected:", {
           prevCode: prev.phoneCountryCode,
           newCode: data.phoneCountryCode || prev.phoneCountryCode,
           prevDisplay: prev.phoneCountryCodeDisplay,
-          newDisplay: data.phoneCountryCodeDisplay || prev.phoneCountryCodeDisplay
+          newDisplay: data.phoneCountryCodeDisplay || prev.phoneCountryCodeDisplay,
+          prevPhone: prev.phone,
+          newPhone: data.phone || prev.phone
         });
       }
       

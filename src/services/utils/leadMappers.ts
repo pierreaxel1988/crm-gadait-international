@@ -1,3 +1,4 @@
+
 import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -48,6 +49,8 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     salutation: lead.salutation,
     email: lead.email || '',
     phone: lead.phone || '',
+    phoneCountryCode: lead.phone_country_code || '+33',
+    phoneCountryCodeDisplay: lead.phone_country_code_display || '🇫🇷',
     location: lead.location || '',
     status: lead.status || 'New',
     tags: lead.tags || [],

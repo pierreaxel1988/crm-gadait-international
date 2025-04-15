@@ -13,14 +13,10 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     const supabaseLeadData = mapToSupabaseFormat(leadData);
     console.log("Preparing lead data for update:", supabaseLeadData);
     
-    // Make sure phone-related fields are explicitly included in the update
-    if (leadData.phoneCountryCode) {
-      supabaseLeadData.phone_country_code = leadData.phoneCountryCode;
-    }
-    
-    if (leadData.phoneCountryCodeDisplay) {
-      supabaseLeadData.phone_country_code_display = leadData.phoneCountryCodeDisplay;
-    }
+    // Ensure phone-related fields are always explicitly included in the update
+    // Use nullish coalescing to avoid setting undefined values
+    supabaseLeadData.phone_country_code = leadData.phoneCountryCode ?? null;
+    supabaseLeadData.phone_country_code_display = leadData.phoneCountryCodeDisplay ?? null;
     
     // Add pipeline_type field to ensure consistency
     if (leadData.pipelineType) {
