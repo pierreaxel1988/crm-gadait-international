@@ -27,6 +27,7 @@ export interface ExtendedKanbanItem extends KanbanItem {
   actionHistory?: Json; // Include actionHistory
   phoneCountryCode?: string | null; // Add phone country code
   phoneCountryCodeDisplay?: string | null; // Add phone country code display
+  preferredLanguage?: string | null; // Add preferred language
 }
 
 interface KanbanColumn {
@@ -178,7 +179,8 @@ export const useKanbanData = (
               views: lead.views || [],
               // Add missing fields to fix the type error
               phone_country_code: lead.phoneCountryCode || null,
-              phone_country_code_display: lead.phoneCountryCodeDisplay || null
+              phone_country_code_display: lead.phoneCountryCodeDisplay || null,
+              preferred_language: lead.preferredLanguage || null
             }));
           }
         }
@@ -226,7 +228,8 @@ export const useKanbanData = (
             currency: lead.currency as Currency, // Make sure to include the currency
             actionHistory: lead.action_history, // Include the action_history
             phoneCountryCode: lead.phone_country_code, // Use snake_case property from the database
-            phoneCountryCodeDisplay: lead.phone_country_code_display // Use snake_case property from the database
+            phoneCountryCodeDisplay: lead.phone_country_code_display, // Use snake_case property from the database
+            preferredLanguage: lead.preferred_language // Add preferred_language to mapped leads
           };
         });
         
