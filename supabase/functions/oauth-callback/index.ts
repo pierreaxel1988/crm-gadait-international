@@ -33,7 +33,7 @@ function renderHtmlResponse(options: {
     message,
     details,
     redirectUri,
-    redirectDelay = 0, // Instantaneous redirection
+    redirectDelay = 100, // Very quick redirection
     email,
     status = 200
   } = options;
@@ -43,70 +43,41 @@ function renderHtmlResponse(options: {
   // Script to handle redirection with improved reliability
   const redirectScript = redirectUri ? `
     <script>
-      // Store data in localStorage immediately
-      if ('${email}') {
-        localStorage.setItem('oauth_email', '${email}');
-      }
-      localStorage.setItem('oauth_success', 'true');
-      localStorage.removeItem('oauth_pending');
-      localStorage.removeItem('oauth_connection_error');
-      
-      // Fonction forcant l'ouverture via window.location.href
-      function forceNavigateTo(url) {
-        console.log("Forcing navigation to:", url);
-        window.location.href = url;
-      }
-      
-      // Fonction forcant l'ouverture via window.open
-      function forceOpenUrl(url) {
-        console.log("Force opening URL:", url);
-        const win = window.open(url, "_self");
-        if (!win) {
-          console.error("Couldn't open window, trying direct navigation");
-          forceNavigateTo(url);
-        }
-      }
-      
-      // Fonction principale de redirection avec plusieurs méthodes
-      function executeRedirect() {
+      // Function to safely redirect with multiple fallbacks
+      function safeRedirect() {
         try {
           console.log("Starting redirect process...");
           
-          // Préparer l'URL de redirection
+          // Store success flag in localStorage
+          localStorage.setItem('oauth_success', 'true');
+          localStorage.removeItem('oauth_pending');
+          localStorage.removeItem('oauth_connection_error');
+          
+          if ('${email}') {
+            localStorage.setItem('oauth_email', '${email}');
+          }
+          
+          // Clean the redirectUrl
           let redirectUrl = "${redirectUri}";
           redirectUrl = decodeURIComponent(redirectUrl);
           
-          // S'assurer d'utiliser HTTPS
+          // Ensure we're using https
           redirectUrl = redirectUrl.replace('http://', 'https://');
           
-          // Ajouter oauth_success s'il n'existe pas déjà
+          // Fix URL parameters if needed
           if (!redirectUrl.includes('oauth_success=')) {
             redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + "oauth_success=true";
           }
           
-          // Ajouter tab=emails pour les pages lead si ce n'est pas déjà là
+          // Add tab=emails parameter for leads pages if not already present
           if (redirectUrl.includes('/leads/') && !redirectUrl.includes('tab=emails')) {
             redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + "tab=emails";
           }
           
-          console.log("Final redirect URL:", redirectUrl);
+          console.log("Redirecting to:", redirectUrl);
           
-          // Essayer différentes méthodes de redirection
-          setTimeout(() => {
-            try {
-              forceNavigateTo(redirectUrl);
-            } catch (e) {
-              console.error("Error in primary redirect method:", e);
-              forceOpenUrl(redirectUrl);
-            }
-          }, 100);
-          
-          // Méthode de secours en cas d'échec des autres méthodes
-          setTimeout(() => {
-            if (document.getElementById('manualRedirectMessage')) {
-              document.getElementById('manualRedirectMessage').style.display = 'block';
-            }
-          }, 3000);
+          // Force direct navigation - most reliable approach
+          window.location.href = redirectUrl;
         } catch (e) {
           console.error("Redirect error:", e);
           // Fallback to basic redirect
@@ -114,26 +85,22 @@ function renderHtmlResponse(options: {
         }
       }
       
-      // Executer immédiatement
-      executeRedirect();
+      // Multiple triggers to ensure redirection happens
+      document.addEventListener('DOMContentLoaded', safeRedirect);
+      setTimeout(safeRedirect, ${redirectDelay});
       
-      // Backup execution après un court délai
-      setTimeout(executeRedirect, 500);
+      // Try immediate redirect
+      safeRedirect();
     </script>
   ` : '';
 
-  // Manual redirection buttons with both options
+  // Fallback link for manual redirection
   const manualRedirectButton = redirectUri ? `
-    <div id="manualRedirectMessage" style="display:none; margin-top: 20px; text-align: center;">
-      <p class="alert">La redirection automatique a échoué. Veuillez utiliser un des boutons ci-dessous:</p>
-      <div class="button-container">
-        <a href="${redirectUri}" class="redirect-button primary">
-          Retourner à l'application
-        </a>
-        <a href="${redirectUri.replace(/https?:\/\/[^\/]+/, window.location.origin)}" class="redirect-button secondary">
-          Redirection alternative
-        </a>
-      </div>
+    <div style="margin-top: 20px; text-align: center;">
+      <p>Si vous n'êtes pas redirigé automatiquement :</p>
+      <a href="${redirectUri}" style="display: inline-block; background: #3498db; color: white; padding: 15px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; margin-top: 10px;">
+        Cliquez ici pour revenir à l'application
+      </a>
     </div>
   ` : '';
 
@@ -153,100 +120,17 @@ function renderHtmlResponse(options: {
         <title>${title}</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="refresh" content="0;url=${redirectUri}" />
+        <meta http-equiv="refresh" content="${redirectDelay/1000};url=${redirectUri}" />
         <style>
-          body { 
-            font-family: Arial, sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            background-color: #f9f9f9; 
-            padding: 20px; 
-          }
-          .container { 
-            text-align: center; 
-            max-width: 600px; 
-            padding: 2rem; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
-            border-radius: 8px; 
-            background: white; 
-          }
+          body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f9f9f9; padding: 20px; }
+          .container { text-align: center; max-width: 600px; padding: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-radius: 8px; background: white; }
           .${className} { color: ${className === 'success' ? '#2ecc71' : '#e74c3c'}; }
-          .details { 
-            margin-top: 20px; 
-            background: #f8f8f8; 
-            padding: 15px; 
-            border-radius: 5px; 
-            text-align: left; 
-          }
-          code { 
-            background: #eee; 
-            padding: 2px 5px; 
-            border-radius: 3px; 
-            font-size: 0.9em; 
-          }
-          pre { 
-            white-space: pre-wrap; 
-            overflow-x: auto; 
-            font-size: 12px; 
-            background: #f0f0f0; 
-            padding: 10px; 
-            border-radius: 4px; 
-          }
-          .loader { 
-            border: 4px solid #f3f3f3; 
-            border-radius: 50%; 
-            border-top: 4px solid ${className === 'success' ? '#2ecc71' : '#e74c3c'}; 
-            width: 30px; 
-            height: 30px; 
-            animation: spin 1s linear infinite; 
-            margin: 20px auto; 
-          }
-          @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
-          }
-          .alert {
-            color: #e74c3c;
-            font-weight: bold;
-            background: #ffeeee;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 15px 0;
-          }
-          .button-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-          }
-          .redirect-button {
-            display: inline-block;
-            padding: 12px 20px;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 16px;
-            transition: all 0.3s ease;
-          }
-          .primary {
-            background: #2ecc71;
-            color: white;
-            border: 2px solid #27ae60;
-          }
-          .primary:hover {
-            background: #27ae60;
-          }
-          .secondary {
-            background: #3498db;
-            color: white;
-            border: 2px solid #2980b9;
-          }
-          .secondary:hover {
-            background: #2980b9;
-          }
+          .details { margin-top: 20px; background: #f8f8f8; padding: 15px; border-radius: 5px; text-align: left; }
+          code { background: #eee; padding: 2px 5px; border-radius: 3px; font-size: 0.9em; }
+          pre { white-space: pre-wrap; overflow-x: auto; font-size: 12px; background: #f0f0f0; padding: 10px; border-radius: 4px; }
+          .loader { border: 4px solid #f3f3f3; border-radius: 50%; border-top: 4px solid ${className === 'success' ? '#2ecc71' : '#e74c3c'}; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+          
           /* Add dark mode support */
           @media (prefers-color-scheme: dark) {
             body { background-color: #1a1a1a; color: #e0e0e0; }
@@ -256,7 +140,6 @@ function renderHtmlResponse(options: {
             pre { background: #333; color: #e0e0e0; }
             .success { color: #4ecca3; }
             .error { color: #e57373; }
-            .alert { background: #3a2222; color: #ff7b7b; }
           }
         </style>
         ${redirectScript}
@@ -269,7 +152,6 @@ function renderHtmlResponse(options: {
           ${redirectUri ? `
             <div class="loader"></div>
             <p>Redirection automatique vers l'application en cours...</p>
-            <p id="redirectCountdown" style="font-size: 0.9em; color: #888;">Redirection en cours...</p>
           ` : ''}
           ${manualRedirectButton}
           ${detailsSection}
@@ -481,7 +363,7 @@ serve(async (req) => {
         message: "Vous avez connecté votre compte Gmail avec succès.",
         email: userInfo.email,
         redirectUri: redirectUri,
-        redirectDelay: 0 // Immediate redirection for better UX
+        redirectDelay: 100 // Very quick redirection for better UX
       });
     } catch (error) {
       console.error('Error processing OAuth callback:', error);
