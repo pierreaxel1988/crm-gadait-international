@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadTag, PipelineType } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -21,6 +22,19 @@ import { deleteLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
+// Define specific status sets for different pipeline types
+const PURCHASE_STATUSES = [
+  "New", "Contacted", "Qualified", "Proposal", "Visit", 
+  "Offer", "Offre", "Deposit", "Signed", "Gagné", "Perdu"
+];
+
+const RENTAL_STATUSES = [
+  "New", "Contacted", "Qualified", "Visit", 
+  "Offre", "Deposit", "Signed", "Gagné", "Perdu"
+];
+
+const LEAD_TAGS = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];
+
 interface StatusSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
@@ -32,13 +46,6 @@ interface StatusSectionProps {
   endCall?: (status: 'completed' | 'failed') => void;
   formatDuration?: (seconds: number) => string;
 }
-
-const LEAD_STATUSES = [
-  "New", "Contacted", "Qualified", "Proposal", "Visit", 
-  "Offer", "Offre", "Deposit", "Signed", "Gagné", "Perdu"
-];
-
-const LEAD_TAGS = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];
 
 const StatusSection: React.FC<StatusSectionProps> = ({
   lead,
@@ -90,6 +97,27 @@ const StatusSection: React.FC<StatusSectionProps> = ({
     handleInputChange('tags', updatedTags);
   };
 
+  const handlePipelineTypeChange = (value: PipelineType) => {
+    if (value === lead.pipelineType) return; // No change needed
+    
+    // Apply the pipeline type change
+    handleInputChange('pipelineType', value);
+    
+    // Check if we need to adjust the status based on pipeline type
+    const currentStatus = lead.status;
+    const targetStatusList = value === 'purchase' ? PURCHASE_STATUSES : RENTAL_STATUSES;
+    
+    // If current status is not valid in the new pipeline type, reset to "New"
+    if (!targetStatusList.includes(currentStatus)) {
+      handleInputChange('status', 'New');
+      
+      toast({
+        title: "Statut réinitialisé",
+        description: `Le statut a été réinitialisé à "New" car "${currentStatus}" n'est pas valide pour un dossier de ${value === 'purchase' ? 'achat' : 'location'}.`
+      });
+    }
+  };
+
   const handleDeleteLead = async () => {
     try {
       await deleteLead(lead.id);
@@ -107,6 +135,11 @@ const StatusSection: React.FC<StatusSectionProps> = ({
       });
     }
   };
+
+  // Determine which status list to use based on pipeline type
+  const availableStatuses = lead.pipelineType === 'rental' 
+    ? RENTAL_STATUSES 
+    : PURCHASE_STATUSES;
 
   const dynamicTopMargin = isHeaderMeasured 
     ? `${Math.max(headerHeight + 8, 32)}px` 
@@ -128,7 +161,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
             </div>
             <RadioGroup 
               value={lead.pipelineType || 'purchase'} 
-              onValueChange={(value) => handleInputChange('pipelineType', value as PipelineType)}
+              onValueChange={(value) => handlePipelineTypeChange(value as PipelineType)}
               className="flex space-x-4"
             >
               <div className="flex items-center space-x-2">
@@ -157,7 +190,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
                 <SelectValue placeholder="Sélectionner un statut" />
               </SelectTrigger>
               <SelectContent>
-                {LEAD_STATUSES.map(status => (
+                {availableStatuses.map(status => (
                   <SelectItem key={status} value={status} className="font-futura">
                     {status}
                   </SelectItem>

@@ -10,6 +10,7 @@ import MultiSelectButtons from './MultiSelectButtons';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { format } from 'date-fns';
 import RadioSelectButtons from './RadioSelectButtons';
+import { toast } from '@/hooks/use-toast';
 
 interface StatusSectionProps {
   formData: LeadDetailed;
@@ -20,14 +21,22 @@ interface StatusSectionProps {
   sources?: LeadSource[];
 }
 
+// Define specific status sets for different pipeline types
+const PURCHASE_STATUSES: LeadStatus[] = [
+  "New", "Contacted", "Qualified", "Proposal", "Visit", 
+  "Offer", "Offre", "Deposit", "Signed", "Gagné", "Perdu"
+];
+
+const RENTAL_STATUSES: LeadStatus[] = [
+  "New", "Contacted", "Qualified", "Visit", 
+  "Offre", "Deposit", "Signed", "Gagné", "Perdu"
+];
+
 const StatusSection = ({
   formData,
   handleInputChange,
   handleTagToggle,
-  leadStatuses = [
-    "New", "Contacted", "Qualified", "Proposal", "Visit", 
-    "Offer", "Offre", "Deposit", "Signed", "Gagné", "Perdu"
-  ] as LeadStatus[],
+  leadStatuses = PURCHASE_STATUSES,
   leadTags = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"] as LeadTag[],
   sources
 }: StatusSectionProps) => {
@@ -59,17 +68,47 @@ const StatusSection = ({
     ? format(new Date(formData.nextFollowUpDate), 'dd/MM/yyyy HH:mm')
     : '';
 
-  // Handle pipeline type change
+  // Handle pipeline type change with appropriate validations and transformations
   const handlePipelineTypeChange = (value: PipelineType) => {
-    const syntheticEvent = {
+    if (value === formData.pipelineType) return; // No change needed
+    
+    // Create a pipeline change event
+    const pipelineEvent = {
       target: {
         name: 'pipelineType',
         value: value
       }
     } as unknown as React.ChangeEvent<HTMLInputElement>;
     
-    handleInputChange(syntheticEvent);
+    // Apply the pipeline type change
+    handleInputChange(pipelineEvent);
+    
+    // Check if we need to adjust the status based on pipeline type
+    const currentStatus = formData.status;
+    const targetStatusList = value === 'purchase' ? PURCHASE_STATUSES : RENTAL_STATUSES;
+    
+    // If current status is not valid in the new pipeline type, reset to "New"
+    if (!targetStatusList.includes(currentStatus)) {
+      const statusEvent = {
+        target: {
+          name: 'status',
+          value: 'New'
+        }
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+      
+      handleInputChange(statusEvent);
+      
+      toast({
+        title: "Statut réinitialisé",
+        description: `Le statut a été réinitialisé à "New" car "${currentStatus}" n'est pas valide pour un dossier de ${value === 'purchase' ? 'achat' : 'location'}.`
+      });
+    }
   };
+
+  // Determine which status list to use based on pipeline type
+  const availableStatuses = formData.pipelineType === 'rental' 
+    ? RENTAL_STATUSES 
+    : PURCHASE_STATUSES;
 
   return (
     <FormSection title="Statut et Suivi">
@@ -100,7 +139,7 @@ const StatusSection = ({
         onChange={handleInputChange}
         required
         icon={Activity}
-        options={leadStatuses.map(status => ({ value: status, label: status }))}
+        options={availableStatuses.map(status => ({ value: status, label: status }))}
       />
 
       <FormInput
