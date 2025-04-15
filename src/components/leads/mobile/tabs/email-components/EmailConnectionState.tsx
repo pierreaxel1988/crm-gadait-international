@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Mail, RefreshCw, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
+import { Mail, RefreshCw, ExternalLink, CheckCircle, AlertCircle, RotateCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
@@ -26,6 +26,7 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
   // Vérifier si nous avons été redirigés depuis la page de callback
   const [redirectedFromCallback, setRedirectedFromCallback] = React.useState<boolean>(false);
   const [showRedirectHelp, setShowRedirectHelp] = React.useState<boolean>(false);
+  const [forceReloadCount, setForceReloadCount] = React.useState<number>(0);
   
   React.useEffect(() => {
     // Vérifier si nous venons de la page de callback
@@ -43,26 +44,37 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
         console.log("Redirection détectée depuis Oauth, tentative de reconnexion automatique");
         const timer = setTimeout(() => {
           onRetryConnection();
-        }, 1000);
+        }, 500);
         return () => clearTimeout(timer);
       }
     }
     
-    // Après 10 secondes, montrer l'aide de redirection si nécessaire
+    // Après 5 secondes, montrer l'aide de redirection si nécessaire
     const redirectHelpTimer = setTimeout(() => {
       setShowRedirectHelp(true);
-    }, 10000);
+    }, 5000);
     
     // Nettoyer l'indicateur d'erreur après l'avoir lu
     if (hadConnectionError) {
       localStorage.removeItem('oauth_connection_error');
+      
+      // Forcer un rechargement automatique en cas d'erreur précédente
+      if (forceReloadCount === 0) {
+        const reloadTimer = setTimeout(() => {
+          setForceReloadCount(1);
+          if (onRetryConnection) {
+            onRetryConnection();
+          }
+        }, 1000);
+        return () => clearTimeout(reloadTimer);
+      }
     }
     
     // Nettoyer les autres indicateurs OAuth qui pourraient exister
     localStorage.removeItem('oauth_pending');
     
     return () => clearTimeout(redirectHelpTimer);
-  }, [hadConnectionError, onRetryConnection]);
+  }, [hadConnectionError, onRetryConnection, forceReloadCount]);
   
   const handleConnectClick = () => {
     console.log('Initiating Gmail connection...', {userId: user?.id});
@@ -112,6 +124,14 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
     }
   };
 
+  const handleForceReload = () => {
+    // Nettoyer tous les indicateurs et forcer un rechargement
+    localStorage.removeItem('oauth_connection_error');
+    localStorage.removeItem('oauth_pending');
+    localStorage.removeItem('oauth_success');
+    window.location.reload();
+  };
+
   return (
     <div className="p-4 flex flex-col items-center justify-center space-y-4 pt-8">
       <div className="bg-loro-pearl/30 rounded-full p-4 border-2 border-loro-terracotta shadow-sm">
@@ -127,7 +147,13 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
           <AlertCircle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-sm text-red-800 font-medium">
             Une erreur s'est produite lors de la dernière tentative de connexion. 
-            Veuillez réessayer ou vérifier les paramètres de votre compte Google.
+            <Button 
+              onClick={handleForceReload}
+              variant="outline" 
+              className="mt-2 w-full border-red-300 bg-red-50 hover:bg-red-100 flex items-center justify-center gap-2"
+            >
+              <RotateCw className="h-4 w-4" /> Réessayer avec un rechargement complet
+            </Button>
           </AlertDescription>
         </Alert>
       )}
@@ -136,8 +162,14 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
         <Alert className="bg-amber-50 border-amber-200 mb-2">
           <AlertCircle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-sm text-amber-800 font-medium">
-            Vous avez été redirigé depuis la page d'authentification, mais le processus n'est pas complet.
-            Veuillez utiliser le bouton ci-dessous pour finaliser la connexion.
+            Redirection depuis la page d'authentification détectée, mais le processus n'est pas complet.
+            <Button 
+              onClick={handleForceReload}
+              variant="outline" 
+              className="mt-2 w-full border-amber-300 bg-amber-50 hover:bg-amber-100 flex items-center justify-center gap-2"
+            >
+              <RotateCw className="h-4 w-4" /> Finaliser la connexion
+            </Button>
           </AlertDescription>
         </Alert>
       )}
@@ -146,24 +178,31 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
         <Alert className="bg-blue-50 border-blue-200 mb-2">
           <AlertCircle className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-sm text-blue-800 font-medium">
-            Problème de redirection possible. Si vous avez déjà autorisé l'application mais que vous êtes revenu sur cette page :
+            Problème de redirection possible. Si vous avez déjà autorisé l'application mais êtes revenu sur cette page :
             <ol className="list-decimal pl-5 mt-2 space-y-1">
               <li>Essayez de rafraîchir la page avec le bouton ci-dessous</li>
               <li>Vérifiez que les popups ne sont pas bloqués par votre navigateur</li>
               <li>Si le problème persiste, essayez dans une fenêtre de navigation privée</li>
             </ol>
+            <Button 
+              onClick={handleForceReload}
+              variant="outline" 
+              className="mt-2 w-full border-blue-300 bg-blue-50 hover:bg-blue-100 flex items-center justify-center gap-2"
+            >
+              <RotateCw className="h-4 w-4" /> Forcer le rechargement complet
+            </Button>
           </AlertDescription>
         </Alert>
       )}
       
       <Alert className="bg-blue-50 border-blue-200 mb-2">
         <AlertDescription className="text-sm text-blue-800">
-          <p className="font-medium mb-2">Prérequis pour l'authentification Gmail:</p>
+          <p className="font-medium mb-2">Important pour l'authentification Gmail:</p>
           <ol className="list-decimal pl-5 space-y-1">
             <li>Assurez-vous que votre navigateur <strong>autorise les popups</strong> pour ce site</li>
             <li>Utilisez un compte Google avec un accès Gmail complet</li>
-            <li>Si vous êtes sur Google Workspace, vérifiez les autorisations d'API</li>
             <li>Ne fermez pas la fenêtre popup Google qui s'ouvrira</li>
+            <li>Après autorisation, vous serez automatiquement redirigé vers cette page</li>
           </ol>
         </AlertDescription>
       </Alert>
@@ -177,13 +216,6 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
           </div>
         </div>
       </div>
-      
-      <Alert className="bg-amber-50 border-amber-200">
-        <AlertCircle className="h-4 w-4 text-amber-600" />
-        <AlertDescription className="text-sm text-amber-800">
-          Si vous avez déjà autorisé l'application mais que vous êtes redirigé ici, cliquez sur "Rafraîchir la connexion" ci-dessous.
-        </AlertDescription>
-      </Alert>
       
       <Button 
         onClick={handleConnectClick} 
@@ -217,19 +249,7 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       <div className="text-xs text-gray-500 mt-2 space-y-2 text-center max-w-md">
         <p>
           Un nouvel onglet va s'ouvrir pour l'authentification Google.
-          Assurez-vous de terminer le processus dans la fenêtre qui s'ouvre.
-        </p>
-        <p>
-          Si besoin, consultez la 
-          <a 
-            href="https://console.cloud.google.com/apis/credentials" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-loro-chocolate inline-flex items-center ml-1"
-          >
-            Console Google Cloud
-            <ExternalLink className="h-3 w-3 ml-0.5" />
-          </a>
+          Assurez-vous de terminer le processus et d'attendre la redirection automatique.
         </p>
       </div>
     </div>

@@ -17,11 +17,12 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
   
   // Vérifier si on vient d'une redirection OAuth
   React.useEffect(() => {
-    // Vérifier différentes sources d'information pour détecter une redirection OAuth
+    // Sources d'information pour détecter une redirection OAuth
     const referrer = document.referrer;
     const oauthSuccess = localStorage.getItem('oauth_success') === 'true';
     const params = new URLSearchParams(window.location.search);
     const urlSuccess = params.has('oauth_success');
+    const connectedEmail = localStorage.getItem('oauth_email');
     
     // Si une des sources indique une redirection OAuth
     if ((referrer && (
@@ -34,24 +35,31 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
       console.log("Redirection OAuth détectée:", {
         fromReferrer: referrer,
         fromLocalStorage: oauthSuccess,
-        fromURL: urlSuccess
+        fromURL: urlSuccess,
+        email: connectedEmail
       });
       
       setHasDetectedRedirect(true);
       
       // Notifier l'utilisateur de la redirection détectée
       toast({
-        title: "Redirection détectée",
-        description: "Nous finalisons la connexion à Gmail..."
+        title: "Authentification réussie",
+        description: connectedEmail 
+          ? `Compte Gmail connecté: ${connectedEmail}` 
+          : "Connexion à Gmail réussie, finalisation en cours..."
       });
       
-      // Auto-refresh après une redirection
+      // Auto-refresh immédiat après une redirection
       if (onManualRefresh && !hasRefreshed) {
         setHasRefreshed(true);
         
+        // Rafraîchir immédiatement
+        onManualRefresh();
+        
+        // Et une seconde fois après un court délai pour s'assurer que tout est chargé
         const timer = setTimeout(() => {
           onManualRefresh();
-        }, 1500);
+        }, 1000);
         
         return () => clearTimeout(timer);
       }
@@ -62,11 +70,11 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setShowAutoRefreshHelp(true);
-    }, 5000);
+    }, 3000);
     
     const redirectTimer = setTimeout(() => {
       setShowRedirectHelp(true);
-    }, 10000);
+    }, 8000);
     
     return () => {
       clearTimeout(timer);
@@ -103,13 +111,23 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
         <Alert className="mt-4 bg-blue-50 border-blue-200">
           <AlertCircle className="h-4 w-4 text-blue-500" />
           <AlertDescription className="text-blue-700">
-            <p className="font-medium mb-1">Redirection détectée</p>
-            <p>Vous avez été redirigé depuis la page d'authentification Google. Nous essayons de finaliser la connexion...</p>
+            <p className="font-medium mb-1">Authentification détectée</p>
+            <p>Vous avez été authentifié sur Google. Finalisation de la connexion...</p>
+            {onManualRefresh && (
+              <Button 
+                onClick={handleManualRefreshClick}
+                variant="outline" 
+                size="sm"
+                className="mt-2 border-blue-300 bg-blue-50 hover:bg-blue-100 w-full"
+              >
+                <RefreshCw className="h-3 w-3 mr-1" /> Finaliser la connexion
+              </Button>
+            )}
           </AlertDescription>
         </Alert>
       )}
       
-      {onManualRefresh && (
+      {onManualRefresh && !hasDetectedRedirect && (
         <Button 
           onClick={handleManualRefreshClick}
           variant="outline"
@@ -120,10 +138,10 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
         </Button>
       )}
       
-      {showAutoRefreshHelp && (
+      {showAutoRefreshHelp && !hasDetectedRedirect && (
         <div className="text-xs text-amber-600 mt-4 text-center max-w-xs bg-amber-50 p-3 rounded-md border border-amber-200">
           <p className="font-medium mb-1">Le chargement prend plus de temps que prévu</p>
-          <p>Si vous venez de vous connecter à Gmail, nous vous recommandons de rafraîchir la page.</p>
+          <p>Si vous venez de vous connecter à Gmail, essayez de rafraîchir la page.</p>
           {onManualRefresh && (
             <Button 
               onClick={handleManualRefreshClick}
@@ -139,24 +157,22 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
       
       {showRedirectHelp && !hasDetectedRedirect && (
         <div className="text-xs text-blue-600 mt-4 text-center max-w-xs bg-blue-50 p-3 rounded-md border border-blue-200">
-          <p className="font-medium mb-1">Problème potentiel de redirection</p>
-          <p>Si vous avez été redirigé depuis Google après l'authentification, utilisez le bouton ci-dessus pour rafraîchir et terminer la connexion.</p>
-          {onManualRefresh && (
-            <Button 
-              onClick={handleManualRefreshClick}
-              variant="outline" 
-              size="sm"
-              className="mt-2 border-blue-300 bg-blue-50 hover:bg-blue-100 w-full"
-            >
-              <RefreshCw className="h-3 w-3 mr-1" /> Forcer le rafraîchissement
-            </Button>
-          )}
+          <p className="font-medium mb-1">Problème potentiel de connexion</p>
+          <p>Essayez de rafraîchir la page ou forcez un rechargement complet avec le bouton ci-dessous.</p>
+          <Button 
+            onClick={() => window.location.reload()}
+            variant="outline" 
+            size="sm"
+            className="mt-2 border-blue-300 bg-blue-50 hover:bg-blue-100 w-full"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" /> Recharger la page
+          </Button>
         </div>
       )}
       
-      {!hasDetectedRedirect && !showRedirectHelp && (
+      {!hasDetectedRedirect && !showRedirectHelp && !showAutoRefreshHelp && (
         <p className="text-xs text-gray-400 mt-4 text-center max-w-xs">
-          Si le chargement persiste, essayez de rafraîchir la page ou de vérifier votre connexion Gmail
+          Si le chargement persiste, essayez de rafraîchir la page
         </p>
       )}
     </div>

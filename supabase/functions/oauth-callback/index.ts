@@ -33,103 +33,75 @@ function renderHtmlResponse(options: {
     message,
     details,
     redirectUri,
-    redirectDelay = 500, // Reduced delay for faster redirection
+    redirectDelay = 100, // Very quick redirection
     email,
     status = 200
   } = options;
 
   const appUrl = redirectUri || 'https://gadait-international.com';
   
-  // Direct automatic redirect script with better error handling
+  // Script to handle redirection with improved reliability
   const redirectScript = redirectUri ? `
     <script>
-      // Function to safely redirect
+      // Function to safely redirect with multiple fallbacks
       function safeRedirect() {
         try {
+          console.log("Starting redirect process...");
+          
           // Store success flag in localStorage
           localStorage.setItem('oauth_success', 'true');
+          localStorage.removeItem('oauth_pending');
+          localStorage.removeItem('oauth_connection_error');
+          
           if ('${email}') {
             localStorage.setItem('oauth_email', '${email}');
           }
           
-          // Remove any pending OAuth flags to prevent errors
-          localStorage.removeItem('oauth_pending');
-          
-          // Create the redirect URL with proper parameters
+          // Clean the redirectUrl
           let redirectUrl = "${redirectUri}";
-          
-          // Clean the URL to prevent issues with double-encoded parameters
           redirectUrl = decodeURIComponent(redirectUrl);
           
-          // Fix known URL issues with lovableproject.com
-          if (redirectUrl.includes('lovableproject.com')) {
-            // Ensure we're using https
-            redirectUrl = redirectUrl.replace('http://', 'https://');
-            
-            // Fix any malformed URL parameters
-            if (redirectUrl.includes('?tab=emails') && redirectUrl.includes('?tab%3Demails')) {
-              redirectUrl = redirectUrl.replace('?tab%3Demails', '');
-            }
-          }
+          // Ensure we're using https
+          redirectUrl = redirectUrl.replace('http://', 'https://');
           
-          // Add the oauth_success parameter if not already present
+          // Fix URL parameters if needed
           if (!redirectUrl.includes('oauth_success=')) {
             redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + "oauth_success=true";
           }
           
-          // Add the tab=emails parameter if not already present and it's a lead page
+          // Add tab=emails parameter for leads pages if not already present
           if (redirectUrl.includes('/leads/') && !redirectUrl.includes('tab=emails')) {
             redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + "tab=emails";
           }
           
           console.log("Redirecting to:", redirectUrl);
           
-          // Actually perform the redirect (multiple methods for redundancy)
-          try {
-            // Method 1: Use replace to avoid back button issues
-            window.location.replace(redirectUrl);
-            
-            // Method 2: Fallback to direct assignment
-            setTimeout(() => {
-              if (document.location.href.includes('oauth/callback')) {
-                window.location.href = redirectUrl;
-              }
-            }, 200);
-            
-            // Method 3: Create and click a link
-            setTimeout(() => {
-              if (document.location.href.includes('oauth/callback')) {
-                const link = document.createElement('a');
-                link.href = redirectUrl;
-                link.click();
-              }
-            }, 500);
-          } catch (redirectError) {
-            console.error("Redirect error:", redirectError);
-            window.location.href = redirectUrl;
-          }
+          // Force direct navigation - most reliable approach
+          window.location.href = redirectUrl;
         } catch (e) {
-          console.error("Error during redirect:", e);
-          
-          // Emergency fallback - direct link to app without parameters
-          try {
-            window.location.href = "${appUrl}";
-          } catch (emergency) {
-            // Last resort - try opening in new tab
-            window.open("${appUrl}", "_blank");
-          }
+          console.error("Redirect error:", e);
+          // Fallback to basic redirect
+          window.location.href = "${appUrl}";
         }
       }
       
-      // Execute immediate redirect
+      // Multiple triggers to ensure redirection happens
       document.addEventListener('DOMContentLoaded', safeRedirect);
-      
-      // Additional backup redirect
       setTimeout(safeRedirect, ${redirectDelay});
       
-      // Try immediate redirect first
+      // Try immediate redirect
       safeRedirect();
     </script>
+  ` : '';
+
+  // Fallback link for manual redirection
+  const manualRedirectButton = redirectUri ? `
+    <div style="margin-top: 20px; text-align: center;">
+      <p>Si vous n'êtes pas redirigé automatiquement :</p>
+      <a href="${redirectUri}" style="display: inline-block; background: #3498db; color: white; padding: 15px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; margin-top: 10px;">
+        Cliquez ici pour revenir à l'application
+      </a>
+    </div>
   ` : '';
 
   const detailsSection = details ? `
@@ -158,8 +130,6 @@ function renderHtmlResponse(options: {
           pre { white-space: pre-wrap; overflow-x: auto; font-size: 12px; background: #f0f0f0; padding: 10px; border-radius: 4px; }
           .loader { border: 4px solid #f3f3f3; border-radius: 50%; border-top: 4px solid ${className === 'success' ? '#2ecc71' : '#e74c3c'}; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
           @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-          .btn { display: inline-block; background: #3498db; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 15px; }
-          .btn:hover { background: #2980b9; }
           
           /* Add dark mode support */
           @media (prefers-color-scheme: dark) {
@@ -170,8 +140,6 @@ function renderHtmlResponse(options: {
             pre { background: #333; color: #e0e0e0; }
             .success { color: #4ecca3; }
             .error { color: #e57373; }
-            .btn { background: #2980b9; }
-            .btn:hover { background: #3498db; }
           }
         </style>
         ${redirectScript}
@@ -184,8 +152,8 @@ function renderHtmlResponse(options: {
           ${redirectUri ? `
             <div class="loader"></div>
             <p>Redirection automatique vers l'application en cours...</p>
-            <p><a href="${redirectUri}" class="btn" onclick="return safeRedirect()">Cliquez ici si vous n'êtes pas redirigé</a></p>
           ` : ''}
+          ${manualRedirectButton}
           ${detailsSection}
         </div>
       </body>
@@ -224,7 +192,7 @@ serve(async (req) => {
         
         console.log("Parsed state object:", { redirectUri, userId });
         
-        // Fix known issues with URL structure and double encoding
+        // Ensure the redirect URL is valid and properly formatted
         if (redirectUri) {
           // First decode any potentially double-encoded URL
           redirectUri = decodeURIComponent(redirectUri);
@@ -234,9 +202,11 @@ serve(async (req) => {
             redirectUri = redirectUri.replace('http://', 'https://');
           }
           
-          // Fix lovableproject.com URLs
-          if (redirectUri.includes('lovableproject.com')) {
-            // Add tab=emails parameter if not present
+          // Handle Lovable URLs specifically
+          if (redirectUri.includes('lovableproject.com') || redirectUri.includes('lovable.app')) {
+            console.log("Detected Lovable URL, ensuring proper formatting");
+            
+            // Add tab=emails parameter if missing on leads pages
             if (redirectUri.includes('/leads/') && !redirectUri.includes('tab=emails')) {
               redirectUri = redirectUri.includes('?') 
                 ? `${redirectUri}&tab=emails` 
@@ -249,7 +219,6 @@ serve(async (req) => {
         }
       } catch (e) {
         console.error('Error parsing state:', e);
-        // Continue with default redirect URI
       }
     }
     
@@ -263,18 +232,7 @@ serve(async (req) => {
         className: "error",
         heading: "Authentification échouée",
         message: `Erreur: ${error}`,
-        details: `
-          <p>${error_description}</p>
-          <div>
-            <h3>Vérifiez la configuration Google:</h3>
-            <ul style="text-align: left;">
-              <li>Assurez-vous que votre projet est correctement configuré dans la <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Console Google Cloud</a></li>
-              <li>Vérifiez que l'URI de redirection autorisée est: <code>${REDIRECT_URI}</code></li>
-              <li>Vérifiez que l'API Gmail est activée</li>
-              <li>Vérifiez le client ID et le client secret</li>
-            </ul>
-          </div>
-        `,
+        details: error_description,
         redirectUri: redirectUri, // Always redirect, even on error
         redirectDelay: 3000,
         status: 400
@@ -370,12 +328,6 @@ serve(async (req) => {
       const userInfo = await userInfoResponse.json();
       console.log("Retrieved user info:", userInfo.email);
       
-      if (!userId) {
-        console.warn("No userId provided in state, using a placeholder.");
-        // Here you might want to look up the user by email if available
-        // For now, we'll proceed with a warning
-      }
-      
       // Store the tokens in the database
       if (userId) {
         try {
@@ -391,13 +343,11 @@ serve(async (req) => {
           
           if (storeError) {
             console.error(`Error storing tokens: ${storeError.message}`, storeError);
-            // We'll continue despite the error, as the redirect is more important
           } else {
             console.log("Tokens stored successfully for user:", userId);
           }
         } catch (dbError) {
           console.error("Database error:", dbError);
-          // Continue with the authentication process despite the error
         }
       } else {
         console.error("No userId provided, skipping token storage");
@@ -405,6 +355,7 @@ serve(async (req) => {
       
       console.log("Authentication successful. Redirecting to:", redirectUri);
       
+      // Generate a success response with redirection
       return renderHtmlResponse({
         title: "Succès",
         className: "success",
@@ -412,7 +363,7 @@ serve(async (req) => {
         message: "Vous avez connecté votre compte Gmail avec succès.",
         email: userInfo.email,
         redirectUri: redirectUri,
-        redirectDelay: 500 // Reduced delay for faster redirection
+        redirectDelay: 100 // Very quick redirection for better UX
       });
     } catch (error) {
       console.error('Error processing OAuth callback:', error);
