@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -182,6 +183,16 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             const bgColorClass = isOverdue 
               ? 'bg-[#e37fed]/20' 
               : 'bg-[#e37fed]/10';
+              
+            // Define iconBgClass based on new purple theme
+            const iconBgClass = isOverdue
+              ? 'bg-[#e37fed]/30 text-[#e37fed]'
+              : 'bg-[#e37fed]/20 text-[#e37fed]';
+                
+            // Define notesBgClass based on new purple theme
+            const notesBgClass = isOverdue
+              ? 'bg-[#e37fed]/15 text-[#e37fed] border border-[#e37fed]/20'
+              : 'bg-[#e37fed]/10 text-[#e37fed]/90 border border-[#e37fed]/15';
             
             return (
               <div 
