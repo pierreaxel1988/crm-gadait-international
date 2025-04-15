@@ -137,6 +137,7 @@ export type Database = {
           phone_country_code: string | null
           phone_country_code_display: string | null
           pipeline_type: string | null
+          preferred_language: string | null
           property_reference: string | null
           property_type: string | null
           property_types: string[] | null
@@ -180,6 +181,7 @@ export type Database = {
           phone_country_code?: string | null
           phone_country_code_display?: string | null
           pipeline_type?: string | null
+          preferred_language?: string | null
           property_reference?: string | null
           property_type?: string | null
           property_types?: string[] | null
@@ -223,6 +225,7 @@ export type Database = {
           phone_country_code?: string | null
           phone_country_code_display?: string | null
           pipeline_type?: string | null
+          preferred_language?: string | null
           property_reference?: string | null
           property_type?: string | null
           property_types?: string[] | null

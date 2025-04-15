@@ -1,4 +1,3 @@
-
 import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -73,7 +72,7 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     propertyUse: lead.property_use,
     nationality: lead.nationality,
     taxResidence: lead.tax_residence,
-    preferredLanguage: lead.preferred_language, // Make sure this field is properly mapped
+    preferredLanguage: lead.preferred_language,
     taskType: lead.task_type,
     notes: lead.notes || '',
     nextFollowUpDate: lead.next_follow_up_date,
@@ -124,6 +123,8 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     salutation: lead.salutation,
     email: lead.email,
     phone: lead.phone,
+    phone_country_code: lead.phoneCountryCode,
+    phone_country_code_display: lead.phoneCountryCodeDisplay,
     location: lead.location,
     status: lead.status,
     tags: lead.tags || [],
@@ -153,7 +154,7 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     pipeline_type: lead.pipelineType || lead.pipeline_type,
     integration_source: lead.integration_source,
     tax_residence: lead.taxResidence,
-    preferred_language: lead.preferredLanguage, // Make sure to include this in the mapping
+    preferred_language: lead.preferredLanguage,
     living_area: lead.livingArea,
     external_id: lead.external_id,
     action_history: actionHistoryForDb
