@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadSource } from '@/types/lead';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,8 +8,7 @@ import { COUNTRIES } from '@/utils/countries';
 import { deriveNationalityFromCountry, countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { countryToFlag, phoneCodeToFlag } from '@/utils/countryUtils';
-import { Search, ChevronDown, X, Clock } from 'lucide-react';
-import { getCountryLocalTime } from '@/utils/timeUtils';
+import { Search, ChevronDown, X } from 'lucide-react';
 
 const LANGUAGE_OPTIONS = [
   { value: "Français", label: "Français" },
@@ -345,36 +345,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     };
   }, []);
 
-  const [localTime, setLocalTime] = useState<string>('');
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Update local time immediately when country changes and setup interval
-  useEffect(() => {
-    // Clear previous interval if it exists
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    
-    // Function to update time
-    const updateTime = () => {
-      const time = getCountryLocalTime(lead.taxResidence);
-      setLocalTime(time);
-    };
-    
-    // Initial update
-    updateTime();
-    
-    // Setup interval to update every minute
-    intervalRef.current = setInterval(updateTime, 60000);
-    
-    // Cleanup interval on unmount
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [lead.taxResidence]);
-
   const handleInputChange = (field: keyof LeadDetailed, value: any) => {
     onDataChange({
       [field]: value
@@ -390,10 +360,6 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
         handleInputChange('nationality', nationality);
       }
     }
-    
-    // Update local time immediately when country changes
-    const time = getCountryLocalTime(value);
-    setLocalTime(time);
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -574,17 +540,212 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
           </div>
           
           <div className="space-y-2" ref={countryDropdownRef}>
-            <div className="flex justify-between items-center">
-              <Label htmlFor="taxResidence" className="text-sm">Pays de résidence</Label>
-              {localTime && lead.taxResidence && (
-                <div className="flex items-center space-x-1 text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span>{localTime}</span>
-                </div>
-              )}
-            </div>
+            <Label htmlFor="taxResidence" className="text-sm">Pays de résidence</Label>
             <div 
               className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer"
               onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
             >
-              {lead
+              {lead.taxResidence ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{countryToFlag(lead.taxResidence)}</span>
+                  <span className="font-futura">{lead.taxResidence}</span>
+                </div>
+              ) : (
+                <span className="text-muted-foreground font-futura">Sélectionner un pays</span>
+              )}
+              <ChevronDown className={`h-4 w-4 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
+            </div>
+            
+            {isCountryDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-full max-h-64 overflow-auto bg-background border rounded-md shadow-lg">
+                <div className="sticky top-0 p-2 bg-background border-b">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Rechercher un pays..."
+                      className="pl-8 h-8"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      autoFocus
+                    />
+                    {searchQuery && (
+                      <button
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSearchQuery('');
+                        }}
+                      >
+                        <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="p-1">
+                  {filteredCountries.map(country => (
+                    <div
+                      key={country}
+                      className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${lead.taxResidence === country ? 'bg-accent/50' : ''}`}
+                      onClick={() => {
+                        handleTaxResidenceChange(country);
+                        setIsCountryDropdownOpen(false);
+                        setSearchQuery('');
+                      }}
+                    >
+                      <span className="text-lg mr-2">{countryToFlag(country)}</span>
+                      <span className="font-futura">{country}</span>
+                    </div>
+                  ))}
+                  
+                  {filteredCountries.length === 0 && (
+                    <div className="px-4 py-2 text-sm text-muted-foreground">
+                      Aucun résultat
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="space-y-2" ref={nationalitySearchRef}>
+            <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
+            <div 
+              className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer"
+              onClick={() => setIsNationalitySearchOpen(!isNationalitySearchOpen)}
+            >
+              {lead.nationality ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{countryToFlag(lead.nationality)}</span>
+                  <span className="font-futura">{lead.nationality}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground font-futura">Rechercher une nationalité...</span>
+                </div>
+              )}
+              <ChevronDown className={`h-4 w-4 transition-transform ${isNationalitySearchOpen ? 'rotate-180' : ''}`} />
+            </div>
+            
+            {isNationalitySearchOpen && (
+              <div className="absolute z-50 mt-1 w-full max-h-64 overflow-auto bg-background border rounded-md shadow-lg">
+                <div className="sticky top-0 p-2 bg-background border-b">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Rechercher une nationalité..."
+                      className="pl-8 h-8"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      autoFocus
+                    />
+                    {searchQuery && (
+                      <button
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSearchQuery('');
+                        }}
+                      >
+                        <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="p-1">
+                  {filteredCountries.map(country => {
+                    const nationality = deriveNationalityFromCountry(country) || country;
+                    return (
+                      <div
+                        key={`${country}-${nationality}`}
+                        className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${lead.nationality === nationality ? 'bg-accent/50' : ''}`}
+                        onClick={() => handleNationalitySelect(nationality)}
+                      >
+                        <span className="text-lg mr-2">{countryToFlag(country)}</span>
+                        <span className="font-futura">{nationality}</span>
+                      </div>
+                    );
+                  })}
+                  
+                  {filteredCountries.length === 0 && (
+                    <div className="px-4 py-2 text-sm text-muted-foreground">
+                      Aucun résultat
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="preferredLanguage" className="text-sm">Langue préférée</Label>
+            <Select 
+              value={lead.preferredLanguage || ''} 
+              onValueChange={(value) => handleInputChange('preferredLanguage', value)}
+            >
+              <SelectTrigger id="preferredLanguage" className="w-full font-futura">
+                <SelectValue placeholder="Sélectionner une langue" />
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGE_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value} className="font-futura">
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="url" className="text-sm">Lien de l'annonce vu</Label>
+            <Input 
+              id="url" 
+              value={lead.url || ''} 
+              onChange={(e) => handleInputChange('url', e.target.value)} 
+              placeholder="URL de l'annonce immobilière" 
+              className="w-full font-futura"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="source" className="text-sm">Source</Label>
+            <Select 
+              value={lead.source || ''} 
+              onValueChange={(value) => handleInputChange('source', value as LeadSource)}
+            >
+              <SelectTrigger id="source" className="w-full font-futura">
+                <SelectValue placeholder="Sélectionner une source" />
+              </SelectTrigger>
+              <SelectContent>
+                {LEAD_SOURCES.map(source => (
+                  <SelectItem key={source} value={source} className="font-futura">
+                    {source}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="propertyReference" className="text-sm">Référence de propriété</Label>
+            <Input 
+              id="propertyReference" 
+              value={lead.propertyReference || ''} 
+              onChange={(e) => handleInputChange('propertyReference', e.target.value)} 
+              placeholder="Référence de propriété" 
+              className="w-full font-futura"
+            />
+          </div>
+        </div>
+      </ScrollArea>
+    </div>
+  );
+};
+
+export default GeneralInfoSection;
