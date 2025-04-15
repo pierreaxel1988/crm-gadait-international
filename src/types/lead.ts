@@ -1,4 +1,3 @@
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -70,6 +69,8 @@ export type Currency =
   | "AED"
   | "MUR";
 
+export type MauritiusRegion = 'North' | 'South' | 'West' | 'East';
+
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
@@ -115,6 +116,7 @@ export interface LeadDetailed {
   pipelineType?: PipelineType;
   pipeline_type?: PipelineType;
   taxResidence?: string;
+  regions?: MauritiusRegion[];
   
   imported_at?: string;
   integration_source?: string;

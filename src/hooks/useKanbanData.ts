@@ -28,6 +28,7 @@ export interface ExtendedKanbanItem extends KanbanItem {
   phoneCountryCode?: string | null; // Add phone country code
   phoneCountryCodeDisplay?: string | null; // Add phone country code display
   preferredLanguage?: string | null; // Add preferred language
+  regions?: MauritiusRegion[];
 }
 
 interface KanbanColumn {
@@ -180,7 +181,8 @@ export const useKanbanData = (
               // Add missing fields to fix the type error
               phone_country_code: lead.phoneCountryCode || null,
               phone_country_code_display: lead.phoneCountryCodeDisplay || null,
-              preferred_language: lead.preferredLanguage || null
+              preferred_language: lead.preferredLanguage || null,
+              regions: lead.regions || []
             }));
           }
         }

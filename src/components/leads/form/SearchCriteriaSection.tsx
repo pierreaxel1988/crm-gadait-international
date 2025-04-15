@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country } from '@/types/lead';
+import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, MauritiusRegion } from '@/types/lead';
 import FormSection from './FormSection';
 import PropertyDetailsSection from './sections/PropertyDetailsSection';
 import PurchaseDetailsSection from './sections/PurchaseDetailsSection';
@@ -9,6 +8,8 @@ import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalit
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
+import MultiSelectButtons from '../MultiSelectButtons';
 
 interface SearchCriteriaSectionProps {
   formData: LeadDetailed;
@@ -24,7 +25,10 @@ interface SearchCriteriaSectionProps {
   onExtractUrl?: (url: string) => void;
   extractLoading?: boolean;
   countries: Country[];
+  handleCountryChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
 }
+
+const MAURITIUS_REGIONS: MauritiusRegion[] = ['North', 'South', 'West', 'East'];
 
 const SearchCriteriaSection = ({
   formData,
@@ -39,7 +43,8 @@ const SearchCriteriaSection = ({
   propertyUses,
   onExtractUrl,
   extractLoading = false,
-  countries
+  countries,
+  handleCountryChange
 }: SearchCriteriaSectionProps) => {
   // Handle nationality auto-completion when country changes
   const handleCountryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -88,6 +93,23 @@ const SearchCriteriaSection = ({
                 countries={countries}
                 handleCountryChange={handleCountryChange}
               />
+              {formData.country === 'Mauritius' && (
+                <div className="space-y-2">
+                  <Label className="text-sm">Régions souhaitées</Label>
+                  <MultiSelectButtons 
+                    options={MAURITIUS_REGIONS} 
+                    selectedValues={formData.regions || []} 
+                    onToggle={region => {
+                      const updatedRegions = formData.regions ? [...formData.regions] : [];
+                      if (updatedRegions.includes(region as MauritiusRegion)) {
+                        handleMultiSelectToggle('regions', region as MauritiusRegion);
+                      } else {
+                        handleMultiSelectToggle('regions', region as MauritiusRegion);
+                      }
+                    }} 
+                  />
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="purchase" className="space-y-6 py-2">

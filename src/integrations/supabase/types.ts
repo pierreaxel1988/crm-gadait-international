@@ -144,6 +144,7 @@ export type Database = {
           property_use: string | null
           purchase_timeframe: string | null
           raw_data: Json | null
+          regions: string[] | null
           salutation: string | null
           source: string | null
           status: string
@@ -188,6 +189,7 @@ export type Database = {
           property_use?: string | null
           purchase_timeframe?: string | null
           raw_data?: Json | null
+          regions?: string[] | null
           salutation?: string | null
           source?: string | null
           status: string
@@ -232,6 +234,7 @@ export type Database = {
           property_use?: string | null
           purchase_timeframe?: string | null
           raw_data?: Json | null
+          regions?: string[] | null
           salutation?: string | null
           source?: string | null
           status?: string

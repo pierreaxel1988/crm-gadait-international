@@ -84,7 +84,8 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     integration_source: lead.integration_source,
     actionHistory: actionHistory,
     livingArea: lead.living_area,
-    external_id: lead.external_id
+    external_id: lead.external_id,
+    regions: lead.regions || []
   };
 };
 
@@ -157,7 +158,8 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     preferred_language: lead.preferredLanguage,
     living_area: lead.livingArea,
     external_id: lead.external_id,
-    action_history: actionHistoryForDb
+    action_history: actionHistoryForDb,
+    regions: lead.regions || []
   };
 };
 

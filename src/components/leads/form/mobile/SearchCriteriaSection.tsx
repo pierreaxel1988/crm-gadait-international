@@ -298,6 +298,24 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                 </SelectContent>
               </Select>
             </div>
+
+            {lead.country === 'Mauritius' && (
+              <div className="space-y-2">
+                <Label className="text-sm">Régions souhaitées</Label>
+                <MultiSelectButtons 
+                  options={MAURITIUS_REGIONS} 
+                  selectedValues={lead.regions || []} 
+                  onToggle={region => {
+                    const updatedRegions = lead.regions ? [...lead.regions] : [];
+                    if (updatedRegions.includes(region as MauritiusRegion)) {
+                      handleInputChange('regions', updatedRegions.filter(r => r !== region));
+                    } else {
+                      handleInputChange('regions', [...updatedRegions, region as MauritiusRegion]);
+                    }
+                  }} 
+                />
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="property" className="space-y-4 py-2">
