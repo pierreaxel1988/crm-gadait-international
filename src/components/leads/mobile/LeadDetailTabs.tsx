@@ -1,9 +1,11 @@
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+
 interface LeadDetailTabsProps {
   defaultTab?: string;
 }
+
 const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
   defaultTab = "criteria"
 }) => {
@@ -27,7 +29,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
     });
   };
   return <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="w-full grid grid-cols-6 bg-loro-50">
+      <TabsList className="w-full grid grid-cols-6 bg-loro-50 border-t border-b border-loro-200/50 shadow-sm">
         <TabsTrigger value="info" className="py-2 px-1 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none text-xs">
           Général
         </TabsTrigger>
@@ -49,4 +51,5 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
       </TabsList>
     </Tabs>;
 };
+
 export default LeadDetailTabs;
