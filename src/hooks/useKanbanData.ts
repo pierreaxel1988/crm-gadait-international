@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -26,6 +25,8 @@ export interface ExtendedKanbanItem extends KanbanItem {
   currency?: Currency; // Ensure currency is included in the type
   nextFollowUpDate?: string; // Add nextFollowUpDate for action status
   actionHistory?: Json; // Include actionHistory
+  phoneCountryCode?: string | null; // Add phone country code
+  phoneCountryCodeDisplay?: string | null; // Add phone country code display
 }
 
 interface KanbanColumn {
@@ -223,7 +224,9 @@ export const useKanbanData = (
             importedAt: lead.imported_at,
             external_id: lead.external_id,
             currency: lead.currency as Currency, // Make sure to include the currency
-            actionHistory: lead.action_history // Include the action_history
+            actionHistory: lead.action_history, // Include the action_history
+            phoneCountryCode: lead.phoneCountryCode,
+            phoneCountryCodeDisplay: lead.phoneCountryCodeDisplay
           };
         });
         
