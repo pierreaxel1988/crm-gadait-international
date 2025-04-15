@@ -96,12 +96,12 @@ const SearchBar: React.FC = () => {
             emptyMessage="Aucun résultat trouvé"
             loadingMessage="Recherche en cours..."
             autoFocus={true}
-            minChars={2}
-            onBlur={() => setTimeout(() => {
+            minChars={1}
+            onBlur={() => {
               if (searchTerm === '') {
                 setIsSearchOpen(false);
               }
-            }, 200)}
+            }}
           />
         </div>
       ) : (

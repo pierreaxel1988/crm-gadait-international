@@ -23,6 +23,7 @@ interface SmartSearchProps {
   searchIcon?: boolean;
   clearButton?: boolean;
   autoFocus?: boolean;
+  onBlur?: () => void;
 }
 
 const SmartSearch: React.FC<SmartSearchProps> = ({
@@ -40,7 +41,8 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
   inputClassName,
   searchIcon = true,
   clearButton = true,
-  autoFocus = false
+  autoFocus = false,
+  onBlur
 }) => {
   const [inputValue, setInputValue] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
@@ -80,6 +82,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
         !inputRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
+        if (onBlur) onBlur();
       }
     };
     
@@ -87,7 +90,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [onBlur]);
 
   // Navigation au clavier dans les résultats
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -120,6 +123,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
     else if (e.key === 'Escape') {
       e.preventDefault();
       setIsOpen(false);
+      if (onBlur) onBlur();
     }
   };
 
@@ -144,6 +148,14 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
     setIsOpen(false);
   };
 
+  const handleInputBlur = () => {
+    if (onBlur) {
+      setTimeout(() => {
+        onBlur();
+      }, 200);
+    }
+  };
+
   return (
     <div className={cn("relative w-full", className)}>
       <div className="relative">
@@ -157,6 +169,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => inputValue.length >= minChars && setIsOpen(true)}
+          onBlur={handleInputBlur}
           placeholder={placeholder}
           className={cn(
             searchIcon && "pl-9",

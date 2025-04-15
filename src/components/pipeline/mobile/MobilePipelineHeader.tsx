@@ -119,7 +119,9 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
           inputClassName="pl-9 pr-16 bg-gray-100 border-0"
           emptyMessage="Aucun résultat trouvé"
           loadingMessage="Recherche en cours..."
-          minChars={2}
+          minChars={1}
+          searchIcon={true}
+          clearButton={true}
         />
         
         <Button 

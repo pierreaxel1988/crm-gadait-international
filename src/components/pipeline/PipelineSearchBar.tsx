@@ -57,7 +57,9 @@ const PipelineSearchBar: React.FC<PipelineSearchBarProps> = ({
       inputClassName="pl-9 pr-12 bg-gray-100 border-0"
       emptyMessage="Aucun résultat trouvé"
       loadingMessage="Recherche en cours..."
-      minChars={2}
+      minChars={1}
+      searchIcon={true}
+      clearButton={true}
     />
   );
 };

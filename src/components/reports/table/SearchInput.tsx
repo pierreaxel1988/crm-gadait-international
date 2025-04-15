@@ -18,6 +18,7 @@ const SearchInput = ({ searchTerm, onSearchChange, onClearSearch }: SearchInputP
       inputClassName="border border-gray-200 rounded-md font-futura pl-10"
       minChars={1}
       clearButton={true}
+      searchIcon={true}
     />
   );
 };

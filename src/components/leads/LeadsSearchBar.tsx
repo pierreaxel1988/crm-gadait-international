@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLeadSearch } from '@/hooks/useLeadSearch';
 import SmartSearch from '@/components/common/SmartSearch';
@@ -60,7 +60,7 @@ const LeadsSearchBar: React.FC<LeadsSearchBarProps> = ({
       inputClassName="luxury-input w-full"
       emptyMessage="Aucun lead trouvé"
       loadingMessage="Recherche en cours..."
-      minChars={2}
+      minChars={1}
       searchIcon={true}
       clearButton={true}
     />
