@@ -4,6 +4,7 @@ import { Mail, RefreshCw, ExternalLink, CheckCircle, AlertCircle, RotateCw } fro
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
 
 interface EmailConnectionStateProps {
   isConnecting: boolean;
@@ -96,9 +97,18 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       }, 30000);
       
       connectGmail();
+      
+      toast({
+        title: "Connexion à Gmail",
+        description: "Une nouvelle fenêtre va s'ouvrir pour l'authentification Google."
+      });
     } else {
       console.error('Erreur: Utilisateur non connecté');
-      alert('Vous devez être connecté pour utiliser cette fonctionnalité.');
+      toast({
+        variant: "destructive",
+        title: "Erreur de connexion",
+        description: "Vous devez être connecté pour utiliser cette fonctionnalité."
+      });
     }
   };
 
@@ -121,6 +131,11 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       } else {
         onRetryConnection();
       }
+      
+      toast({
+        title: "Rafraîchissement",
+        description: "Tentative de vérification de la connexion Gmail..."
+      });
     }
   };
 
@@ -129,7 +144,15 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
     localStorage.removeItem('oauth_connection_error');
     localStorage.removeItem('oauth_pending');
     localStorage.removeItem('oauth_success');
-    window.location.reload();
+    
+    toast({
+      title: "Rechargement en cours",
+      description: "La page va être rechargée complètement..."
+    });
+    
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
   return (
@@ -184,13 +207,23 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
               <li>Vérifiez que les popups ne sont pas bloqués par votre navigateur</li>
               <li>Si le problème persiste, essayez dans une fenêtre de navigation privée</li>
             </ol>
-            <Button 
-              onClick={handleForceReload}
-              variant="outline" 
-              className="mt-2 w-full border-blue-300 bg-blue-50 hover:bg-blue-100 flex items-center justify-center gap-2"
-            >
-              <RotateCw className="h-4 w-4" /> Forcer le rechargement complet
-            </Button>
+            <div className="grid grid-cols-1 gap-2 mt-2">
+              <Button 
+                onClick={handleForceReload}
+                variant="outline" 
+                className="w-full border-blue-300 bg-blue-50 hover:bg-blue-100 flex items-center justify-center gap-2"
+              >
+                <RotateCw className="h-4 w-4" /> Forcer le rechargement complet
+              </Button>
+              <Button 
+                onClick={handleConnectClick}
+                variant="outline" 
+                className="w-full border-blue-300 bg-blue-50 hover:bg-blue-100 flex items-center justify-center gap-2"
+                disabled={isConnecting}
+              >
+                <Mail className="h-4 w-4" /> Réessayer la connexion
+              </Button>
+            </div>
           </AlertDescription>
         </Alert>
       )}

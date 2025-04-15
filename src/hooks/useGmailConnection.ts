@@ -25,6 +25,7 @@ export const useGmailConnection = (leadId: string) => {
   const [checkingConnection, setCheckingConnection] = useState(true);
   const [directRedirectAttempts, setDirectRedirectAttempts] = useState(0);
   const [windowObjectReady, setWindowObjectReady] = useState(false);
+  const [authFlowStage, setAuthFlowStage] = useState<'idle' | 'initiating' | 'waiting' | 'completed' | 'error'>('idle');
 
   // S'assurer que window est défini (important pour empêcher les erreurs SSR)
   useEffect(() => {
@@ -64,6 +65,7 @@ export const useGmailConnection = (leadId: string) => {
       setIsConnected(true);
       setConnectionError(null);
       setDetailedErrorInfo(null);
+      setAuthFlowStage('completed');
       
       // Si nous sommes sur l'onglet emails, nettoyer l'URL
       if (location.search.includes('tab=emails') && oauthSuccess) {
@@ -120,6 +122,7 @@ export const useGmailConnection = (leadId: string) => {
         error: "La page de callback a rencontré une erreur (probablement une interruption de session)",
         helpMessage: "Ceci est généralement une erreur temporaire. Veuillez réessayer."
       });
+      setAuthFlowStage('error');
       
       toast({
         variant: "destructive",
@@ -137,18 +140,43 @@ export const useGmailConnection = (leadId: string) => {
     if (redirectTarget) {
       console.log('Detected OAuth redirect with target:', redirectTarget);
       
-      // Nettoyer localStorage
-      localStorage.removeItem('oauthRedirectTarget');
+      // Si la cible de redirection est cette page, c'est parfait!
+      const currentPath = window.location.pathname;
+      const targetIsCurrentPage = redirectTarget.includes(currentPath);
       
-      // Forcer la vérification de connexion
-      setConnectionAttemptCount(prev => prev + 1);
-      
-      // Marquer la connexion comme réussie pour une mise à jour immédiate de l'interface
-      setIsConnected(true);
-      setConnectionError(null);
-      setDetailedErrorInfo(null);
-      setIsLoading(false);
-      setCheckingConnection(false);
+      if (targetIsCurrentPage) {
+        console.log('OAuth redirect target matches current page, cleaning up');
+        // Nettoyer localStorage
+        localStorage.removeItem('oauthRedirectTarget');
+        
+        // Définir comme réussi pour permettre l'auto-détection
+        localStorage.setItem('oauth_success', 'true');
+        
+        // Forcer la vérification de connexion
+        setConnectionAttemptCount(prev => prev + 1);
+        
+        // Marquer la connexion comme réussie pour une mise à jour immédiate de l'interface
+        setIsConnected(true);
+        setConnectionError(null);
+        setDetailedErrorInfo(null);
+        setIsLoading(false);
+        setCheckingConnection(false);
+        setAuthFlowStage('completed');
+      } else {
+        // Si nous sommes sur une autre page, redirectionner vers la cible
+        console.log('OAuth redirect target differs from current page, redirecting');
+        
+        // Afficher un toast de préparation
+        toast({
+          title: "Redirection en cours",
+          description: "Vous êtes redirigé vers la page cible après authentification..."
+        });
+        
+        // Petite pause avant redirection
+        setTimeout(() => {
+          window.location.href = redirectTarget;
+        }, 500);
+      }
     }
   }, [windowObjectReady]);
 
@@ -165,15 +193,33 @@ export const useGmailConnection = (leadId: string) => {
       // Limiter à une seule tentative
       setDirectRedirectAttempts(prev => prev + 1);
       
-      // Réinitialiser les drapeaux
-      localStorage.removeItem('oauth_pending');
-      
-      console.log("Tentative de récupération d'une redirection OAuth échouée");
-      
       // Si nous sommes sur l'onglet emails, essayer de recharger
       if (location.pathname.includes('/leads/') && location.search.includes('tab=emails')) {
         // Forcer immédiatement une vérification
         setConnectionAttemptCount(prev => prev + 1);
+      } else if (hasRedirectTarget) {
+        // Si nous sommes sur une autre page mais qu'il existe une cible de redirection
+        try {
+          // Essayer de rediriger automatiquement vers la cible
+          const redirectTarget = localStorage.getItem('oauthRedirectTarget');
+          
+          if (redirectTarget) {
+            // Nettoyer l'état en attente
+            localStorage.removeItem('oauth_pending');
+            
+            toast({
+              title: "Redirection automatique",
+              description: "Vous êtes redirigé vers la page cible après authentification Gmail."
+            });
+            
+            // Petite pause avant redirection
+            setTimeout(() => {
+              window.location.href = redirectTarget;
+            }, 500);
+          }
+        } catch (e) {
+          console.error("Erreur lors de la redirection automatique:", e);
+        }
       }
     }
   }, [directRedirectAttempts, location.pathname, location.search, windowObjectReady]);
@@ -213,6 +259,7 @@ export const useGmailConnection = (leadId: string) => {
           console.error('Erreur lors de la vérification de la connexion:', error);
           setIsConnected(false);
           setConnectionError(`Erreur lors de la vérification de la connexion: ${error.message}`);
+          setAuthFlowStage('error');
           return;
         }
         
@@ -220,6 +267,7 @@ export const useGmailConnection = (leadId: string) => {
           console.log("Connexion Gmail trouvée:", data.email);
           setIsConnected(true);
           setConnectedEmail((data as EmailConnection).email);
+          setAuthFlowStage('completed');
           
           // Vérifier si nous avons un succès d'authentification pour mettre à jour l'interface
           detectAuthSuccess();
@@ -230,6 +278,7 @@ export const useGmailConnection = (leadId: string) => {
         } else {
           console.log("Aucune connexion Gmail trouvée");
           setIsConnected(false);
+          setAuthFlowStage('idle');
           
           // Vérifier à nouveau si l'authentification a réussi
           const isAuthenticated = detectAuthSuccess();
@@ -242,6 +291,7 @@ export const useGmailConnection = (leadId: string) => {
       } catch (error) {
         console.error('Erreur dans checkEmailConnection:', error);
         setConnectionError(`Une erreur est survenue: ${(error as Error).message}`);
+        setAuthFlowStage('error');
       } finally {
         setIsLoading(false);
         setCheckingConnection(false);
@@ -260,6 +310,7 @@ export const useGmailConnection = (leadId: string) => {
       setConnectionError(null);
       setDetailedErrorInfo(null);
       setGoogleAuthURL(null);
+      setAuthFlowStage('initiating');
       
       console.log('Démarrage du processus de connexion Gmail pour le lead:', leadId);
       
@@ -270,6 +321,7 @@ export const useGmailConnection = (leadId: string) => {
           title: "Erreur",
           description: "Vous devez être connecté pour utiliser cette fonctionnalité."
         });
+        setAuthFlowStage('error');
         return;
       }
       
@@ -298,6 +350,7 @@ export const useGmailConnection = (leadId: string) => {
             error: error,
             context: "Invoking gmail-auth function"
           });
+          setAuthFlowStage('error');
           
           toast({
             variant: "destructive",
@@ -315,11 +368,13 @@ export const useGmailConnection = (leadId: string) => {
             error: errorMsg,
             data: data
           });
+          setAuthFlowStage('error');
           return;
         }
         
         console.log('URL d\'autorisation reçue:', data.authorizationUrl.substring(0, 100) + '...');
         setGoogleAuthURL(data.authorizationUrl);
+        setAuthFlowStage('waiting');
         
         // Enregistrer l'URL actuelle pour la redirection après l'authentification
         localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
@@ -338,15 +393,48 @@ export const useGmailConnection = (leadId: string) => {
             localStorage.removeItem('oauth_pending');
             localStorage.setItem('oauth_connection_error', 'true');
             
+            // Notification à l'utilisateur
+            toast({
+              variant: "destructive",
+              title: "Erreur d'authentification",
+              description: "La redirection après authentification a échoué. Veuillez réessayer."
+            });
+            
+            // Mettre à jour l'état
+            setAuthFlowStage('error');
+            setConnectionError("Erreur de redirection après authentification");
+            
             // Forcer le rechargement pour afficher l'erreur
-            window.location.reload();
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
           }
         }, 30000);
         
+        // Fonction pour gérer l'ouverture de la fenêtre d'authentification
+        const openAuthWindow = (url: string): Window | null => {
+          try {
+            const width = 600;
+            const height = 700;
+            const left = (window.screen.width / 2) - (width / 2);
+            const top = (window.screen.height / 2) - (height / 2);
+            
+            // Ouvrir dans une fenêtre popup (meilleur contrôle et UX)
+            return window.open(
+              url, 
+              'GmailAuthPopup', 
+              `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`
+            );
+          } catch (e) {
+            console.error("Erreur lors de l'ouverture de la fenêtre:", e);
+            return null;
+          }
+        };
+        
         // Ouvrir l'URL d'authentification
         try {
-          // Essayer d'ouvrir dans un nouvel onglet d'abord
-          const authWindow = window.open(data.authorizationUrl, '_blank');
+          // Essayer d'ouvrir dans une fenêtre popup d'abord
+          const authWindow = openAuthWindow(data.authorizationUrl);
           
           // Vérifier si la fenêtre s'est bien ouverte
           if (!authWindow) {
@@ -357,8 +445,26 @@ export const useGmailConnection = (leadId: string) => {
           } else {
             toast({
               title: "Authentification en cours",
-              description: "Veuillez compléter l'authentification dans l'onglet qui vient de s'ouvrir."
+              description: "Veuillez compléter l'authentification dans la fenêtre qui vient de s'ouvrir."
             });
+            
+            // Ajout d'une vérification de focus
+            setTimeout(() => {
+              try {
+                if (authWindow && !authWindow.closed) {
+                  // Essayer de ramener la fenêtre au premier plan
+                  authWindow.focus();
+                  
+                  // Notifier à nouveau l'utilisateur
+                  toast({
+                    title: "Authentification requise",
+                    description: "Veuillez terminer le processus d'authentification dans la fenêtre ouverte."
+                  });
+                }
+              } catch (e) {
+                console.log("Erreur lors de la vérification de la fenêtre:", e);
+              }
+            }, 3000);
           }
           
           // Définir un intervalle pour vérifier si l'onglet d'authentification est fermé
@@ -378,6 +484,7 @@ export const useGmailConnection = (leadId: string) => {
                 setIsConnected(true);
                 setConnectionError(null);
                 setDetailedErrorInfo(null);
+                setAuthFlowStage('completed');
                 
                 // Afficher un toast de confirmation
                 toast({
@@ -385,12 +492,12 @@ export const useGmailConnection = (leadId: string) => {
                   description: "Votre compte Gmail a été connecté avec succès."
                 });
               } else {
-                // Vérifier une dernière fois la connexion
+                // Si la fenêtre est fermée et pas de succès, vérifier une fois de plus
                 setConnectionAttemptCount(prev => prev + 1);
+                
+                // Nettoyer les indicateurs
+                localStorage.removeItem('oauth_pending');
               }
-              
-              // Nettoyage
-              localStorage.removeItem('oauth_pending');
             }
           }, 1000);
           
@@ -410,6 +517,7 @@ export const useGmailConnection = (leadId: string) => {
           error: invokeError,
           context: "Try-catch block for function invocation"
         });
+        setAuthFlowStage('error');
         
         toast({
           variant: "destructive",
@@ -424,6 +532,7 @@ export const useGmailConnection = (leadId: string) => {
         error: error,
         context: "Main try-catch block"
       });
+      setAuthFlowStage('error');
       
       toast({
         variant: "destructive",
@@ -435,7 +544,9 @@ export const useGmailConnection = (leadId: string) => {
       setTimeout(() => {
         setIsConnecting(false);
         // Nettoyer l'indicateur en attente s'il existe toujours
-        localStorage.removeItem('oauth_pending');
+        if (authFlowStage !== 'completed') {
+          localStorage.removeItem('oauth_pending');
+        }
       }, 3000);
     }
   }, [isConnecting, leadId, user, windowObjectReady]);
@@ -472,6 +583,7 @@ export const useGmailConnection = (leadId: string) => {
     detailedErrorInfo,
     googleAuthURL,
     checkingConnection,
+    authFlowStage,
     connectGmail,
     retryConnection,
     checkSupabaseEdgeFunctionStatus

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Loader2, Mail, RefreshCw, AlertCircle } from 'lucide-react';
+import { Loader2, Mail, RefreshCw, AlertCircle, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
   const [showRedirectHelp, setShowRedirectHelp] = React.useState(false);
   const [hasDetectedRedirect, setHasDetectedRedirect] = React.useState(false);
   const [hasRefreshed, setHasRefreshed] = React.useState(false);
+  const [redirectErrorCount, setRedirectErrorCount] = React.useState(0);
   
   // Vérifier si on vient d'une redirection OAuth
   React.useEffect(() => {
@@ -53,6 +54,9 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
       if (onManualRefresh && !hasRefreshed) {
         setHasRefreshed(true);
         
+        // Nettoyer les indicateurs OAuth
+        localStorage.removeItem('oauth_pending');
+        
         // Rafraîchir immédiatement
         onManualRefresh();
         
@@ -61,10 +65,50 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
           onManualRefresh();
         }, 1000);
         
-        return () => clearTimeout(timer);
+        // Et une troisième fois après un délai plus long si nécessaire
+        const secondTimer = setTimeout(() => {
+          onManualRefresh();
+        }, 3000);
+        
+        return () => {
+          clearTimeout(timer);
+          clearTimeout(secondTimer);
+        };
       }
     }
   }, [onManualRefresh, hasRefreshed]);
+  
+  // Vérifier si un problème existe après 30 secondes
+  React.useEffect(() => {
+    // Vérifier si un indicateur de redirection était présent mais jamais résolu
+    const pendingOAuth = localStorage.getItem('oauth_pending') === 'true';
+    
+    if (pendingOAuth) {
+      const errorTimer = setTimeout(() => {
+        setRedirectErrorCount(prev => prev + 1);
+        setShowRedirectHelp(true);
+      }, 5000);
+      
+      return () => clearTimeout(errorTimer);
+    }
+  }, []);
+  
+  // Traiter les erreurs de redirection
+  React.useEffect(() => {
+    if (redirectErrorCount > 0) {
+      // Si le problème persiste, proposer une solution manuelle
+      const redirectTarget = localStorage.getItem('oauthRedirectTarget');
+      
+      if (redirectTarget) {
+        console.log("Cible de redirection trouvée mais non résolue:", redirectTarget);
+        
+        // Proposer une redirection manuelle si nécessaire
+        setTimeout(() => {
+          setShowRedirectHelp(true);
+        }, 1000);
+      }
+    }
+  }, [redirectErrorCount]);
   
   // Afficher un message d'aide supplémentaire si le chargement prend plus de temps
   React.useEffect(() => {
@@ -98,14 +142,71 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
     }
   };
   
+  const handleForceReload = () => {
+    // Forcer un rechargement complet de la page
+    window.location.reload();
+  };
+  
+  // Pour les cas où nous avons détecté un problème de redirection
+  const handleForceRedirect = () => {
+    const redirectTarget = localStorage.getItem('oauthRedirectTarget');
+    
+    if (redirectTarget) {
+      toast({
+        title: "Redirection en cours",
+        description: "Tentative de redirection vers la page cible..."
+      });
+      
+      try {
+        // Tentative de redirection directe
+        window.location.href = redirectTarget;
+      } catch (e) {
+        console.error("Erreur lors de la redirection:", e);
+        // Fallback: forcer un rechargement
+        window.location.reload();
+      }
+    } else {
+      // Si pas de cible, simplement recharger
+      window.location.reload();
+    }
+  };
+  
   return (
-    <div className="p-8 flex flex-col items-center justify-center h-60">
+    <div className="p-8 flex flex-col items-center justify-center h-auto min-h-60">
       <div className="bg-loro-pearl/30 rounded-full p-3 mb-4">
         <Mail className="h-6 w-6 text-loro-terracotta/70" />
       </div>
       <Loader2 className="h-8 w-8 text-loro-terracotta animate-spin mb-2" />
       <p className="text-sm text-gray-500">Chargement des emails...</p>
       <p className="text-xs text-gray-400 mt-1">Veuillez patienter</p>
+      
+      {redirectErrorCount > 0 && (
+        <Alert className="mt-4 bg-amber-50 border-amber-200">
+          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-700">
+            <p className="font-medium mb-1">Problème de redirection détecté</p>
+            <p className="text-sm mb-2">La redirection automatique après authentification n'a pas abouti. Essayez ces options:</p>
+            <div className="space-y-2">
+              <Button 
+                onClick={handleForceRedirect}
+                variant="outline" 
+                size="sm"
+                className="w-full border-amber-300 bg-amber-50 hover:bg-amber-100 flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="h-3 w-3 mr-1" /> Redirection manuelle
+              </Button>
+              <Button 
+                onClick={handleForceReload}
+                variant="outline" 
+                size="sm"
+                className="w-full border-amber-300 bg-amber-50 hover:bg-amber-100 flex items-center justify-center gap-2"
+              >
+                <RefreshCw className="h-3 w-3 mr-1" /> Recharger la page
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
       
       {hasDetectedRedirect && (
         <Alert className="mt-4 bg-blue-50 border-blue-200">
@@ -160,7 +261,7 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
           <p className="font-medium mb-1">Problème potentiel de connexion</p>
           <p>Essayez de rafraîchir la page ou forcez un rechargement complet avec le bouton ci-dessous.</p>
           <Button 
-            onClick={() => window.location.reload()}
+            onClick={handleForceReload}
             variant="outline" 
             size="sm"
             className="mt-2 border-blue-300 bg-blue-50 hover:bg-blue-100 w-full"
