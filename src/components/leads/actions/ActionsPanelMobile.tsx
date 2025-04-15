@@ -171,8 +171,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       </div>
 
       {pendingActions.length === 0 ? (
-        <div className="text-center py-5 border rounded-md bg-[#e3f7ed]/10 animate-[fade-in_0.3s_ease-out]">
-          <p className="text-[#0da062] text-xs font-futura">Aucune action en attente</p>
+        <div className="text-center py-5 border rounded-md bg-gray-50 animate-[fade-in_0.3s_ease-out]">
+          <p className="text-muted-foreground text-xs font-futura">Aucune action en attente</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -181,18 +181,24 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             const isCallAction = action.actionType === 'Call';
             
             const bgColorClass = isOverdue 
-              ? 'bg-[#e3f7ed]/20' 
-              : 'bg-[#e3f7ed]/10';
-              
-            // Define iconBgClass based on new mint green theme
-            const iconBgClass = isOverdue
-              ? 'bg-[#e3f7ed]/30 text-[#0da062]'
-              : 'bg-[#e3f7ed]/20 text-[#0da062]';
+              ? isCallAction
+                ? 'bg-[#F8E2E8]/30' 
+                : 'bg-[#FFDEE2]/30' 
+              : 'bg-[#F2FCE2]/40 border-green-100';
+            
+            const iconBgClass = isCallAction
+              ? isOverdue
+                ? 'bg-[#F8E2E8] text-[#D05A76]'
+                : 'bg-[#EBD5CE] text-[#D05A76]'
+              : isOverdue
+                ? 'bg-rose-100 text-rose-600'
+                : 'bg-green-100 text-green-600';
                 
-            // Define notesBgClass based on new mint green theme
-            const notesBgClass = isOverdue
-              ? 'bg-[#e3f7ed]/15 text-[#0da062] border border-[#e3f7ed]/20'
-              : 'bg-[#e3f7ed]/10 text-[#0da062]/90 border border-[#e3f7ed]/15';
+            const notesBgClass = isOverdue 
+              ? isCallAction
+                ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
+                : 'bg-[#FFF0F2] text-rose-800 border border-pink-100'
+              : 'bg-[#F7FEF1] text-green-800 border border-green-100';
             
             return (
               <div 
