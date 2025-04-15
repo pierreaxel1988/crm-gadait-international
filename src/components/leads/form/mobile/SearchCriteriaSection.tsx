@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import ActionButtons from '@/components/pipeline/filters/ActionButtons';
+import { MauritiusRegion } from '@/types/lead';
 
 const PROPERTY_TYPES: PropertyType[] = ['Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'];
 const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
@@ -21,6 +22,8 @@ const FINANCING_METHODS: FinancingMethod[] = ['Cash', 'Prêt bancaire'];
 const PROPERTY_USES: PropertyUse[] = ['Investissement locatif', 'Résidence principale'];
 const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'CHF', 'AED', 'MUR'];
 const COUNTRIES = ['Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 'Portugal', 'Seychelles', 'Spain', 'Switzerland', 'UAE', 'UK', 'USA', 'Autre'];
+
+const MAURITIUS_REGIONS: MauritiusRegion[] = ['North', 'South', 'West', 'East'];
 
 const countryMatchesSearch = (country: string, searchTerm: string): boolean => {
   if (!searchTerm) return true;
@@ -303,7 +306,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
               <div className="space-y-2">
                 <Label className="text-sm">Régions souhaitées</Label>
                 <MultiSelectButtons 
-                  options={['North', 'South', 'West', 'East'] as MauritiusRegion[]} 
+                  options={MAURITIUS_REGIONS} 
                   selectedValues={lead.regions || []} 
                   onToggle={region => {
                     const updatedRegions = lead.regions ? [...lead.regions] : [];

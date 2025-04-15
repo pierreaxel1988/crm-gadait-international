@@ -10,6 +10,7 @@ import { usePropertyExtraction } from '../chat/hooks/usePropertyExtraction';
 import { toast } from '@/hooks/use-toast';
 import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
 import { COUNTRIES } from '@/utils/countries';
+import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 
 interface LeadFormProps {
   lead?: LeadDetailed;
@@ -159,16 +160,21 @@ const LeadForm: React.FC<LeadFormProps> = ({
   };
 
   const handleCountryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    
-    console.log(`Country field changed: ${name} = ${value}`);
-    
-    setFormData(prev => ({ ...prev, [name]: value }));
+    handleInputChange(e);
     
     if (!formData.nationality) {
-      const nationality = deriveNationalityFromCountry(value);
+      const selectedCountry = e.target.value;
+      const nationality = deriveNationalityFromCountry(selectedCountry);
+      
       if (nationality) {
-        setFormData(prev => ({ ...prev, nationality }));
+        const nationalityEvent = {
+          target: {
+            name: 'nationality',
+            value: nationality
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        
+        handleInputChange(nationalityEvent);
       }
     }
   };

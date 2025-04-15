@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { Search, SlidersHorizontal, RefreshCcw, PlusCircle, X } from 'lucide-react';
+import { SlidersHorizontal, RefreshCcw, PlusCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { FilterOptions } from '../PipelineFilters';
 import { useNavigate } from 'react-router-dom';
 import ActiveFiltersList from '../filters/ActiveFiltersList';
+import SmartSearch from '@/components/common/SmartSearch';
 import { useLeadSearch, SearchResult } from '@/hooks/useLeadSearch';
 
 interface MobilePipelineHeaderProps {
@@ -47,9 +47,29 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
     return member ? member.name : 'Unknown';
   };
   
-  const handleSelectLead = (leadId: string) => {
-    navigate(`/leads/${leadId}?tab=overview`);
+  const handleSelectLead = (lead: SearchResult) => {
+    navigate(`/leads/${lead.id}?tab=overview`);
   };
+
+  const renderLeadItem = (lead: SearchResult) => (
+    <div className="flex flex-col">
+      <div className="font-medium">{lead.name}</div>
+      <div className="flex text-xs text-muted-foreground gap-2 flex-wrap">
+        {lead.status && (
+          <span className="bg-gray-100 px-1 rounded text-xs">{lead.status}</span>
+        )}
+        {lead.desiredLocation && (
+          <span className="text-xs truncate">{lead.desiredLocation}</span>
+        )}
+        {lead.email && (
+          <span className="text-xs truncate">{lead.email}</span>
+        )}
+        {lead.phone && (
+          <span className="text-xs truncate">{lead.phone}</span>
+        )}
+      </div>
+    </div>
+  );
   
   return (
     <div className="space-y-3">
@@ -86,70 +106,32 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
         </div>
       </div>
       
-      {/* Search input with results dropdown */}
+      {/* Search input with smart search integration */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input 
-          type="search" 
+        <SmartSearch
           placeholder="Rechercher un lead..." 
-          className="pl-9 pr-16 bg-gray-100 border-0" 
-          value={searchTerm} 
-          onChange={e => setSearchTerm(e.target.value)} 
+          value={searchTerm}
+          onChange={setSearchTerm}
+          onSelect={handleSelectLead}
+          results={results}
+          isLoading={isLoading}
+          renderItem={renderLeadItem}
+          inputClassName="pl-9 pr-16 bg-gray-100 border-0"
+          emptyMessage="Aucun résultat trouvé"
+          loadingMessage="Recherche en cours..."
+          minChars={2}
         />
         
-        <div className="absolute right-2 top-1/2 -translate-y-1/2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-7 w-7" 
-            onClick={handleRefresh} 
-            disabled={isRefreshing}
-          >
-            <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span className="sr-only">Refresh</span>
-          </Button>
-        </div>
-        
-        {/* Search results dropdown */}
-        {searchTerm.length > 1 && (
-          <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-[300px] overflow-y-auto">
-            {isLoading ? (
-              <div className="p-3 text-center text-sm text-muted-foreground">
-                Recherche en cours...
-              </div>
-            ) : results.length === 0 ? (
-              <div className="p-3 text-center text-sm text-muted-foreground">
-                Aucun résultat trouvé
-              </div>
-            ) : (
-              <ul className="py-1">
-                {results.map((lead: SearchResult) => (
-                  <li 
-                    key={lead.id} 
-                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleSelectLead(lead.id)}
-                  >
-                    <div className="font-medium">{lead.name}</div>
-                    <div className="flex text-xs text-muted-foreground gap-2 flex-wrap">
-                      {lead.status && (
-                        <span className="bg-gray-100 px-1 rounded text-xs">{lead.status}</span>
-                      )}
-                      {lead.desiredLocation && (
-                        <span className="text-xs truncate">{lead.desiredLocation}</span>
-                      )}
-                      {lead.email && (
-                        <span className="text-xs truncate">{lead.email}</span>
-                      )}
-                      {lead.phone && (
-                        <span className="text-xs truncate">{lead.phone}</span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7" 
+          onClick={handleRefresh} 
+          disabled={isRefreshing}
+        >
+          <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <span className="sr-only">Refresh</span>
+        </Button>
       </div>
       
       {/* Display active filters */}
