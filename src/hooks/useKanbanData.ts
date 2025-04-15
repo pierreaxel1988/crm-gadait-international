@@ -225,8 +225,8 @@ export const useKanbanData = (
             external_id: lead.external_id,
             currency: lead.currency as Currency, // Make sure to include the currency
             actionHistory: lead.action_history, // Include the action_history
-            phoneCountryCode: lead.phoneCountryCode,
-            phoneCountryCodeDisplay: lead.phoneCountryCodeDisplay
+            phoneCountryCode: lead.phone_country_code, // Use snake_case property from the database
+            phoneCountryCodeDisplay: lead.phone_country_code_display // Use snake_case property from the database
           };
         });
         
