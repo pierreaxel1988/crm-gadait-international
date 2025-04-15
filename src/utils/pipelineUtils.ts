@@ -1,4 +1,7 @@
+
 import { LeadStatus, PipelineType } from '@/types/lead';
+import { addActionToLead } from '@/services/leadActions';
+import { toast } from '@/hooks/use-toast';
 
 // Define specific status sets for different pipeline types
 export const PURCHASE_STATUSES: LeadStatus[] = [
@@ -61,4 +64,57 @@ export const getPipelineTypeFrench = (pipelineType: PipelineType): string => {
   };
   
   return mapping[pipelineType] || 'Achat';
+};
+
+/**
+ * Handles the transition between pipeline types
+ * Creates a requalification action when lead changes pipeline type
+ */
+export const handlePipelineTypeTransition = async (
+  leadId: string,
+  currentStatus: LeadStatus,
+  currentPipelineType: PipelineType, 
+  targetPipelineType: PipelineType,
+  handleStatusChange: (newStatus: LeadStatus) => void
+): Promise<void> => {
+  // Skip if no change in pipeline type
+  if (currentPipelineType === targetPipelineType) return;
+  
+  // Check if status needs adjustment
+  const shouldChangeStatus = !isStatusValidForPipeline(currentStatus, targetPipelineType);
+  const newStatus = shouldChangeStatus ? "New" : currentStatus;
+  
+  // Update status if needed
+  if (shouldChangeStatus) {
+    handleStatusChange(newStatus);
+    
+    toast({
+      title: "Statut réinitialisé",
+      description: `Le statut a été réinitialisé à "New" car "${currentStatus}" n'est pas valide pour un dossier de ${getPipelineTypeFrench(targetPipelineType).toLowerCase()}.`
+    });
+  }
+  
+  // Create a requalification action for the lead
+  try {
+    const fromType = getPipelineTypeFrench(currentPipelineType);
+    const toType = getPipelineTypeFrench(targetPipelineType);
+    
+    await addActionToLead(leadId, {
+      actionType: "Call",
+      scheduledDate: new Date().toISOString(),
+      notes: `À requalifier : Le lead est passé d'un pipeline ${fromType} à ${toType}. Veuillez requalifier le lead selon ses nouveaux besoins.`
+    });
+    
+    toast({
+      title: "Action de requalification créée",
+      description: `Une action "Appel" a été ajoutée pour requalifier le lead suite au changement de pipeline.`
+    });
+  } catch (error) {
+    console.error("Erreur lors de la création de l'action de requalification:", error);
+    toast({
+      variant: "destructive",
+      title: "Erreur",
+      description: "Impossible de créer l'action de requalification."
+    });
+  }
 };
