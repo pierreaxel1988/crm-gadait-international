@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { LeadDetailed } from '@/types/lead';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface AIMessage {
   id: string;
@@ -33,6 +34,10 @@ Lead Info:
 - Status: ${leadData.status || 'Non renseigné'}
 - Notes: ${leadData.notes || 'Aucune note'}
     ` : '';
+
+    // Récupérer l'utilisateur courant (si connecté)
+    const authData = await supabase.auth.getSession();
+    const userId = authData.data.session?.user?.id;
 
     // Use the chat-gadait edge function to process the request
     const { data, error } = await supabase.functions.invoke('chat-gadait', {
@@ -70,6 +75,9 @@ Lead Info:
     saveMessageToHistory(userMessage);
     saveMessageToHistory(assistantMessage);
 
+    // Sauvegarder l'échange dans la table lead_ai_history
+    await saveAIExchangeToDatabase(leadId, message, data.response, userId);
+
     return assistantMessage;
   } catch (error) {
     console.error('Error in AI assistant service:', error);
@@ -102,5 +110,32 @@ function saveMessageToHistory(message: AIMessage): void {
     localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
   } catch (error) {
     console.error('Error saving message to history:', error);
+  }
+}
+
+// Nouvelle fonction pour sauvegarder les échanges dans la base de données
+async function saveAIExchangeToDatabase(
+  leadId: string,
+  prompt: string,
+  response: string,
+  userId?: string
+): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('lead_ai_history')
+      .insert({
+        lead_id: leadId,
+        user_id: userId || null,
+        prompt,
+        response,
+      });
+
+    if (error) {
+      console.error('Error saving AI exchange to database:', error);
+    } else {
+      console.log('AI exchange saved to database successfully');
+    }
+  } catch (error) {
+    console.error('Error in saveAIExchangeToDatabase:', error);
   }
 }

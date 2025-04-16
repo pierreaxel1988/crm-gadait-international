@@ -45,6 +45,33 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_ai_history: {
+        Row: {
+          created_at: string
+          id: string
+          lead_id: string
+          prompt: string
+          response: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lead_id: string
+          prompt: string
+          response: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lead_id?: string
+          prompt?: string
+          response?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       lead_emails: {
         Row: {
           body_html: string | null

@@ -4,7 +4,7 @@ import { LeadDetailed } from '@/types/lead';
 import { AIMessage, sendAIMessage, getConversationHistory } from '@/services/aiAssistantService';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { SendHorizontal, Bot, Loader2, User, Magic } from 'lucide-react';
+import { SendHorizontal, Bot, Loader2, User, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -111,7 +111,7 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
     <div className={cn("flex flex-col border rounded-lg shadow-sm bg-white overflow-hidden", className)}>
       <div className="bg-loro-navy/10 p-3 border-b flex items-center justify-between">
         <div className="flex items-center">
-          <Magic className="h-5 w-5 text-loro-hazel mr-2" />
+          <Sparkles className="h-5 w-5 text-loro-hazel mr-2" />
           <h3 className="font-futura text-sm text-loro-navy">Assistant Gadait IA</h3>
         </div>
       </div>
