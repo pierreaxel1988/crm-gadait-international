@@ -16,32 +16,91 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, lead } = await req.json();
+    const { message, type, content, propertyDetails, initialData, url } = await req.json();
     
-    // Format the system message with lead information for context
-    const systemPrompt = `Tu es GADAIT Assistant, l'assistant IA de GADAIT International, une société de luxe immobilier.
+    let systemPrompt = "You are Chat Gadait, an AI assistant for a luxury real estate CRM. Be concise and helpful.";
+    let userMessage = message;
     
-    Voici les informations du client que tu dois utiliser pour personnaliser tes réponses:
-    - Nom: ${lead.nom || "Client"}
-    - Budget: ${lead.budget_min || ""} à ${lead.budget_max || ""} ${lead.devise || "EUR"}
-    - Type de bien recherché: ${lead.type_bien || "Non spécifié"}
-    - Vue souhaitée: ${lead.vue_souhaitee || "Non spécifié"}
-    - Nombre de chambres: ${lead.nb_chambres || "Non spécifié"}
-    - Localisation: ${lead.localisation || "Non spécifié"}
-    - Notes générales: ${lead.notes_generales || "Aucune note"}
-    - Agent en charge: ${lead.agent || "Non assigné"}
-    - Langue préférée: ${lead.langue || "français"}
-    
-    Sois concis, professionnel et chaleureux. Personnalise toujours tes réponses en fonction des informations du client.
-    
-    Pour les messages WhatsApp ou emails, structure bien ton message avec:
-    1. Une salutation personnalisée
-    2. Le corps du message pertinent et concis
-    3. Une signature professionnelle au nom de GADAIT International ou de l'agent en charge
+    // Handle different types of requests
+    if (type === 'email-extract') {
+      systemPrompt = `You are Chat Gadait, an AI assistant for a luxury real estate CRM.
+      Extract the following information from the email content:
+      - Name: Full name of the sender or the potential client mentioned in the email
+      - Email address: The email address of the sender or the potential client
+      - Phone number: Any phone number mentioned in the email
+      - Property reference: If any property reference code is mentioned (like REF123, etc.)
+      - Source/portal: The website or platform mentioned (Le Figaro, Idealista, Property Cloud, etc.)
+      - Budget or price mentioned: Any budget range or specific price mentioned
+      - Currency: The currency mentioned (EUR, USD, GBP, CHF)
+      - Desired location: Any location preferences mentioned (city, area, neighborhood)
+      - Property type preferences: Type of property they're looking for (Villa, Apartment, Penthouse, etc.)
+      - Country: The country mentioned (if any)
+      - Any specific requirements or amenities mentioned: Like pool, garden, ocean view, etc.
+      
+      Return ONLY a valid JSON object with these fields, no additional text. If information is not available, use empty strings or null values.
+      Be sure the response can be parsed with JSON.parse().
+      
+      If a field has already been extracted and provided in propertyDetails, use that value instead of trying to extract it again.`;
+      
+      // If we have property details already extracted, include them in the prompt
+      if (propertyDetails && Object.keys(propertyDetails).length > 0) {
+        systemPrompt += `\n\nSome fields have already been extracted from the email:\n`;
+        Object.entries(propertyDetails).forEach(([key, value]) => {
+          if (value) {
+            systemPrompt += `- ${key}: ${value}\n`;
+          }
+        });
+        systemPrompt += `\nFocus on extracting other fields.`;
+      }
+      
+      userMessage = content;
+    } 
+    else if (type === 'property-extract' || type === 'extract-property') {
+      systemPrompt = `You are Chat Gadait, an AI assistant for a luxury real estate CRM. 
+      Extract the following information from this property listing URL:
+      - Property reference: The unique identifier for this property
+      - Price: The listed price
+      - Currency: The currency of the price (EUR, USD, GBP, CHF)
+      - Location: Specific location of the property (city, area, etc.)
+      - Country: The country where the property is located
+      - Size or area: In m² if available
+      - Number of bedrooms: If specified
+      - Number of bathrooms: If specified
+      - Property type: Villa, Apartment, Land, etc.
+      - Key features and amenities: Pool, garden, sea view, etc.
+      - Description: A brief description of the property if available
+      
+      Return the information in a structured JSON format without any additional text.`;
+      
+      // If we have initial data already extracted from the URL, include it in the prompt
+      if (initialData && Object.keys(initialData).length > 0) {
+        systemPrompt += `\n\nSome information has already been extracted from the URL structure:\n`;
+        Object.entries(initialData).forEach(([key, value]) => {
+          if (value) {
+            systemPrompt += `- ${key}: ${value}\n`;
+          }
+        });
+        systemPrompt += `\nConfirm or enhance this information from the actual page content.`;
+      }
+      
+      userMessage = content || url || "No URL provided";
+    }
+    else if (type === 'email-draft') {
+      systemPrompt = `You are Chat Gadait, an AI assistant for a luxury real estate CRM. 
+      Draft a professional, warm email response to the client based on the context provided.
+      The tone should be luxurious but approachable, professional but friendly.
+      Keep it concise but comprehensive.`;
+      userMessage = content;
+    }
+    else if (type === 'follow-up') {
+      systemPrompt = `You are Chat Gadait, an AI assistant for a luxury real estate CRM. 
+      Based on the lead information and interaction history provided, suggest appropriate follow-up actions and timing.
+      Focus on maintaining engagement while respecting the client's timeline and preferences.
+      Provide specific, actionable suggestions.`;
+      userMessage = content;
+    }
 
-    Si on te demande un résumé du client, sois précis et concis.`;
-    
-    console.log("Sending request to OpenAI");
+    console.log("Sending request to OpenAI with type:", type);
     
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -53,7 +112,7 @@ serve(async (req) => {
         model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
+          { role: 'user', content: userMessage }
         ],
         temperature: 0.7,
       }),
@@ -69,7 +128,7 @@ serve(async (req) => {
     const aiResponse = data.choices[0].message.content;
     console.log("Received response from OpenAI");
 
-    return new Response(JSON.stringify({ result: aiResponse }), {
+    return new Response(JSON.stringify({ response: aiResponse, data: aiResponse }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

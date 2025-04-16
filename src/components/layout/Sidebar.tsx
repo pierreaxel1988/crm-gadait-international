@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { X, Upload, MessageSquare, ListTodo, Calendar, PieChart, File, Settings, LayoutDashboard, Users, Code, Shield, ClipboardList } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -21,7 +21,7 @@ interface NavigationItem {
   color?: string;
 }
 
-const Sidebar = ({ isOpen, isCollapsed, onClose, onToggleCollapse }: SidebarProps) => {
+const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
   const isMobile = useIsMobile();
 
   const navigationItems: NavigationItem[] = [

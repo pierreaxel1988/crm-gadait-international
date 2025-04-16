@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     // Configuration explicite de Supabase pour assurer la persistance de session
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+    supabase.auth.onAuthStateChange((event, newSession) => {
       console.log('Auth state changed:', event, newSession?.user?.email);
       
       setSession(newSession);
@@ -134,10 +134,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     getInitialSession();
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
 
   const signOut = async () => {

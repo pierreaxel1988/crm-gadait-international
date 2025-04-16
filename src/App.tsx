@@ -1,105 +1,93 @@
 
-import { Route, Routes } from 'react-router-dom';
-import Sidebar from './components/layout/Sidebar';
-import { useAuth } from './hooks/useAuth';
+import React from 'react';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate
+} from 'react-router-dom';
+import { AuthProvider } from './hooks/useAuth';
+import { Toaster } from '@/components/ui/toaster';
+import Auth from './pages/Auth';
 import Pipeline from './pages/Pipeline';
+import LeadsPage from './pages/Leads';
+import LeadDetail from './pages/LeadDetailMobile';
+import LeadNew from './pages/LeadNew';
+import LeadImport from './pages/LeadImport';
+import MobileLeadImport from './pages/MobileLeadImport';
+import ActionsPage from './pages/Actions';
 import Calendar from './pages/Calendar';
 import Reports from './pages/Reports';
-import Leads from './pages/Leads';
-import LeadNew from './pages/LeadNew';
-import MobileLeadImport from './pages/MobileLeadImport';
-import LeadImport from './pages/LeadImport';
-import LeadEdit from './pages/LeadEdit';
-import LeadDetailMobile from './pages/LeadDetailMobile';
-import Auth from './pages/Auth';
-import Index from './pages/Index';
-import Actions from './pages/Actions';
-import ChatGadaitPage from './pages/ChatGadaitPage';
 import Admin from './pages/Admin';
-import ApiGuide from './pages/ApiGuide';
-import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/layout/ProtectedRoute';
-import { Toaster } from './components/ui/toaster';
-import { useIsMobile } from './hooks/use-mobile';
-import ChatGadaitButton from './components/chat/ChatGadaitButton';
-
-import './App.css';
-import { useState, useEffect } from 'react';
 
 function App() {
-  const { user, loading } = useAuth();
-  const isMobile = useIsMobile();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [appReady, setAppReady] = useState(false);
-
-  // Add effect to handle initialization
-  useEffect(() => {
-    if (!loading) {
-      // Give a small delay to ensure everything is loaded properly
-      const timer = setTimeout(() => {
-        setAppReady(true);
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [loading]);
-
-  const handleToggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleToggleCollapse = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
-
-  // Return early while auth is initializing
-  if (loading || !appReady) {
-    return (
-      <div className="bg-slate-50 flex justify-center items-center h-screen">
-        <div className="animate-pulse font-extralight text-2xl text-loro-navy">GADAIT</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="app">
-      {user ? (
-        <div className="flex h-screen bg-slate-50">
-          {!isMobile && (
-            <Sidebar 
-              isOpen={sidebarOpen} 
-              isCollapsed={sidebarCollapsed} 
-              onClose={handleToggleSidebar} 
-              onToggleCollapse={handleToggleCollapse}
-            />
-          )}
-          <div className="flex-1 overflow-auto">
-            <Routes>
-              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-              <Route path="/pipeline" element={<ProtectedRoute><Pipeline /></ProtectedRoute>} />
-              <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
-              <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-              <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
-              <Route path="/leads/new" element={<ProtectedRoute><LeadNew /></ProtectedRoute>} />
-              <Route path="/leads/import" element={<ProtectedRoute>{isMobile ? <MobileLeadImport /> : <LeadImport />}</ProtectedRoute>} />
-              <Route path="/leads/:id" element={<ProtectedRoute>{isMobile ? <LeadDetailMobile /> : <LeadEdit />}</ProtectedRoute>} />
-              <Route path="/actions" element={<ProtectedRoute><Actions /></ProtectedRoute>} />
-              <Route path="/chat-gadait" element={<ProtectedRoute><ChatGadaitPage /></ProtectedRoute>} />
-              <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
-              <Route path="/api" element={<ProtectedRoute><ApiGuide /></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            {user && <ChatGadaitButton />}
-          </div>
-        </div>
-      ) : (
+    <AuthProvider>
+      <Router>
         <Routes>
-          <Route path="*" element={<Auth />} />
+          <Route path="/" element={<Navigate to="/pipeline" />} />
+          
+          {/* Routes accessibles à tous */}
+          <Route path="/pipeline" element={
+            <ProtectedRoute commercialAllowed={true}>
+              <Pipeline />
+            </ProtectedRoute>
+          } />
+          <Route path="/leads" element={
+            <ProtectedRoute commercialAllowed={true}>
+              <LeadsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/leads/:id" element={
+            <ProtectedRoute commercialAllowed={true}>
+              <LeadDetail />
+            </ProtectedRoute>
+          } />
+          <Route path="/leads/new" element={
+            <ProtectedRoute commercialAllowed={true}>
+              <LeadNew />
+            </ProtectedRoute>
+          } />
+          <Route path="/actions" element={
+            <ProtectedRoute commercialAllowed={true}>
+              <ActionsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/calendar" element={
+            <ProtectedRoute commercialAllowed={true}>
+              <Calendar />
+            </ProtectedRoute>
+          } />
+          
+          {/* Routes réservées aux administrateurs */}
+          <Route path="/leads/import" element={
+            <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+              <LeadImport />
+            </ProtectedRoute>
+          } />
+          <Route path="/import-lead" element={
+            <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+              <MobileLeadImport />
+            </ProtectedRoute>
+          } />
+          <Route path="/reports" element={
+            <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+              <Reports />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin" element={
+            <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+              <Admin />
+            </ProtectedRoute>
+          } />
+          
+          {/* Route d'authentification */}
+          <Route path="/auth" element={<Auth />} />
         </Routes>
-      )}
-      <Toaster />
-    </div>
+        <Toaster />
+      </Router>
+    </AuthProvider>
   );
 }
 
