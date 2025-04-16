@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -166,10 +167,19 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       className="space-y-3 pt-4"
       style={{ marginTop: dynamicTopMargin }}
     >
-      {/* Assistant IA */}
-      {lead && (
+      {/* Assistant IA - placé en premier, avant les actions en attente */}
+      {leadId && (
         <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
-          <LeadAIAssistant lead={lead} />
+          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Assistant IA</h3>
+          <div className="mt-3">
+            {lead ? (
+              <LeadAIAssistant lead={lead} />
+            ) : (
+              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50">
+                <div className="animate-spin h-5 w-5 border-3 border-chocolate-dark rounded-full border-t-transparent"></div>
+              </div>
+            )}
+          </div>
         </div>
       )}
       

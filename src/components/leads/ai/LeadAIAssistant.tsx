@@ -39,7 +39,7 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
     
     setIsLoading(true);
     try {
-      // Add user message immediately to the UI
+      // Send message to AI assistant
       const newMessage = await sendAIMessage(lead.id, message, lead);
       
       // Update conversation state from localStorage to ensure consistency
