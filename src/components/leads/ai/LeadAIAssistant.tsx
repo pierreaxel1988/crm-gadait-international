@@ -21,11 +21,14 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Prédéfinir les actions rapides
+  // Enrichir les actions rapides pour un agent immobilier de luxe
   const quickActions = [
-    'Relance WhatsApp',
-    'Sélection personnalisée',
-    'Syn'
+    'Relance WhatsApp professionnelle',
+    'Sélection personnalisée haut de gamme',
+    'Synthèse pour le client',
+    'Proposition de visite',
+    'Négociation discrète',
+    'Email de suivi exclusif'
   ];
 
   // Load conversation history
@@ -116,14 +119,14 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
         </div>
       </div>
       
-      {/* Quick Actions */}
+      {/* Quick Actions améliorées */}
       <div className="p-3 border-b flex gap-2 overflow-x-auto">
         {quickActions.map((action) => (
           <Button 
             key={action} 
             variant="outline" 
             size="sm" 
-            className="text-xs"
+            className="text-xs whitespace-nowrap flex-shrink-0 border-loro-sand hover:bg-loro-sand/10 hover:text-loro-navy"
             onClick={() => handleQuickAction(action)}
           >
             {action}
@@ -137,7 +140,7 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
             <div className="flex items-center justify-center h-40 text-center text-muted-foreground">
               <div>
                 <Bot className="h-8 w-8 mx-auto mb-2 text-loro-navy/40" />
-                <p className="text-sm">Posez une question ou générez un message intelligent en fonction du profil client</p>
+                <p className="text-sm">Posez une question ou générez un message adapté au marché du luxe en fonction du profil client</p>
               </div>
             </div>
           ) : (
@@ -186,7 +189,7 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
             value={message}
             onChange={handleTextareaChange}
             onKeyDown={handleKeyDown}
-            placeholder="Écris ici ta demande (ex. : Relance WhatsApp en anglais)..."
+            placeholder="Demandez à l'assistant de générer un message personnalisé pour ce client..."
             className="flex-1 resize-none min-h-[40px] py-2 px-3 border-loro-sand/60 focus-visible:ring-loro-hazel"
             disabled={isLoading}
           />
