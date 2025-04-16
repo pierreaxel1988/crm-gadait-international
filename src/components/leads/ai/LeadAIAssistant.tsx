@@ -4,7 +4,7 @@ import { LeadDetailed } from '@/types/lead';
 import { AIMessage, sendAIMessage, getConversationHistory } from '@/services/aiAssistantService';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { SendHorizontal, Bot, Loader2, User } from 'lucide-react';
+import { SendHorizontal, Bot, Loader2, User, Magic } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,13 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
   const [conversation, setConversation] = useState<AIMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Prédéfinir les actions rapides
+  const quickActions = [
+    'Relance WhatsApp',
+    'Sélection personnalisée',
+    'Syn'
+  ];
 
   // Load conversation history
   useEffect(() => {
@@ -63,6 +70,11 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
     }
   };
 
+  const handleQuickAction = (action: string) => {
+    setMessage(action);
+    textareaRef.current?.focus();
+  };
+
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -97,9 +109,26 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
 
   return (
     <div className={cn("flex flex-col border rounded-lg shadow-sm bg-white overflow-hidden", className)}>
-      <div className="bg-loro-navy/10 p-3 border-b flex items-center">
-        <Bot className="h-5 w-5 text-loro-navy mr-2" />
-        <h3 className="font-futura text-sm text-loro-navy">Assistant IA</h3>
+      <div className="bg-loro-navy/10 p-3 border-b flex items-center justify-between">
+        <div className="flex items-center">
+          <Magic className="h-5 w-5 text-loro-hazel mr-2" />
+          <h3 className="font-futura text-sm text-loro-navy">Assistant Gadait IA</h3>
+        </div>
+      </div>
+      
+      {/* Quick Actions */}
+      <div className="p-3 border-b flex gap-2 overflow-x-auto">
+        {quickActions.map((action) => (
+          <Button 
+            key={action} 
+            variant="outline" 
+            size="sm" 
+            className="text-xs"
+            onClick={() => handleQuickAction(action)}
+          >
+            {action}
+          </Button>
+        ))}
       </div>
       
       <ScrollArea className="flex-1 p-3 h-[300px] md:h-[400px]">
@@ -108,7 +137,7 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
             <div className="flex items-center justify-center h-40 text-center text-muted-foreground">
               <div>
                 <Bot className="h-8 w-8 mx-auto mb-2 text-loro-navy/40" />
-                <p className="text-sm">Posez une question à l'assistant IA pour obtenir de l'aide avec ce lead.</p>
+                <p className="text-sm">Posez une question ou générez un message intelligent en fonction du profil client</p>
               </div>
             </div>
           ) : (
@@ -157,7 +186,7 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
             value={message}
             onChange={handleTextareaChange}
             onKeyDown={handleKeyDown}
-            placeholder="Posez une question à l'assistant..."
+            placeholder="Écris ici ta demande (ex. : Relance WhatsApp en anglais)..."
             className="flex-1 resize-none min-h-[40px] py-2 px-3 border-loro-sand/60 focus-visible:ring-loro-hazel"
             disabled={isLoading}
           />
