@@ -22,7 +22,6 @@ const GadaitAI: React.FC<GadaitAIProps> = ({ lead }) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    // Load chat history from localStorage
     const savedMessages = localStorage.getItem(`chat-history-${lead.id}`);
     return savedMessages ? JSON.parse(savedMessages) : [];
   });
@@ -30,12 +29,10 @@ const GadaitAI: React.FC<GadaitAIProps> = ({ lead }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Save messages to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem(`chat-history-${lead.id}`, JSON.stringify(messages));
   }, [messages, lead.id]);
 
-  // Scroll to bottom whenever messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -56,7 +53,6 @@ const GadaitAI: React.FC<GadaitAIProps> = ({ lead }) => {
     setIsLoading(true);
 
     try {
-      // Prepare the payload with the lead data
       const payload = {
         prompt: input,
         lead: {
@@ -75,8 +71,7 @@ const GadaitAI: React.FC<GadaitAIProps> = ({ lead }) => {
         }
       };
 
-      // Call the Supabase function
-      const response = await fetch('https://hxqoqkfnhbpwzkjgukrc.functions.supabase.co/chat-gadait', {
+      const response = await fetch('https://hxqoqkfnhbpwzkjgukrc.functions.supabase.co/gpt-assistant', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -89,7 +84,7 @@ const GadaitAI: React.FC<GadaitAIProps> = ({ lead }) => {
       }
 
       const data = await response.json();
-      const aiResponse = data.response || 'Je suis désolé, je n\'ai pas pu traiter votre demande.';
+      const aiResponse = data.result || 'Je suis désolé, je n\'ai pas pu traiter votre demande.';
 
       const aiMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -108,7 +103,6 @@ const GadaitAI: React.FC<GadaitAIProps> = ({ lead }) => {
       });
     } finally {
       setIsLoading(false);
-      // Focus on the input field after response
       inputRef.current?.focus();
     }
   };
@@ -195,3 +189,4 @@ const GadaitAI: React.FC<GadaitAIProps> = ({ lead }) => {
 };
 
 export default GadaitAI;
+
