@@ -9,6 +9,7 @@ import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
 import { toast } from '@/hooks/use-toast';
 import { updateLead } from '@/services/leadUpdater';
+import GadaitAI from './GadaitAI';
 
 interface ActionsPanelMobileProps {
   leadId: string;
@@ -166,6 +167,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       className="space-y-3 pt-4"
       style={{ marginTop: dynamicTopMargin }}
     >
+      {lead && <GadaitAI lead={lead} />}
+
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Actions en attente</h3>
       </div>
@@ -193,7 +196,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               : isOverdue
                 ? 'bg-rose-100 text-rose-600'
                 : 'bg-green-100 text-green-600';
-                
+            
             const notesBgClass = isOverdue 
               ? isCallAction
                 ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
