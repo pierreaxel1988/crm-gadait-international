@@ -8,7 +8,7 @@ import { LeadDetailed } from '@/types/lead';
 interface ChatGadaitButtonProps {
   leadData?: LeadDetailed;
   className?: string;
-  variant?: 'ghost' | 'outline' | 'chocolate' | 'secondary';
+  variant?: 'outline' | 'secondary' | 'ghost';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   showText?: boolean;
 }

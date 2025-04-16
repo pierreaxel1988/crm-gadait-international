@@ -31,7 +31,6 @@ Lead Info:
 - Purchase Timeframe: ${leadData.purchaseTimeframe || 'Non renseigné'}
 - Country: ${leadData.country || 'Non renseigné'}
 - Status: ${leadData.status || 'Non renseigné'}
-- Pipeline: ${leadData.pipeline || 'Non renseigné'}
 - Notes: ${leadData.notes || 'Aucune note'}
     ` : '';
 
