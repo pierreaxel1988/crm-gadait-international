@@ -1,12 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
-import { Check, Clock, Calendar, Trash2 } from 'lucide-react';
-import { format, isPast } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
+import { format, isPast } from 'date-fns';
+import { Check, Clock, Calendar, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { toast } from '@/hooks/use-toast';
 import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
+import { toast } from '@/hooks/use-toast';
 import { updateLead } from '@/services/leadUpdater';
 
 interface ActionsPanelMobileProps {
@@ -152,21 +153,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
 
-  // Nouveaux styles pour différencier les actions d'appel
-  const getCallActionStyles = (action: ActionHistory) => {
-    const isCallAction = action.actionType === 'Call';
-    const hasCallDuration = action.notes?.includes('min');
-
-    return {
-      iconClass: hasCallDuration 
-        ? 'bg-green-100 text-green-600' 
-        : 'bg-[#EBD5CE] text-[#D05A76]',
-      notesBgClass: hasCallDuration 
-        ? 'bg-green-50 text-green-800 border-green-200' 
-        : 'bg-[#FDF4F6] text-[#D05A76] border-pink-100'
-    };
-  };
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-4">
@@ -213,9 +199,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
                 : 'bg-[#FFF0F2] text-rose-800 border border-pink-100'
               : 'bg-[#F7FEF1] text-green-800 border border-green-100';
-
-            const { iconClass, notesBgClass } = getCallActionStyles(action);
-        
+            
             return (
               <div 
                 key={action.id} 
