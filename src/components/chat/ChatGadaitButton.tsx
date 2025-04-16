@@ -1,29 +1,38 @@
-
 import React, { useState } from 'react';
-import { MessageSquare } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import ChatGadait from '@/components/chat/ChatGadait';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const ChatGadaitButton: React.FC = () => {
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const getLeadIdFromUrl = () => {
+    const pathParts = location.pathname.split('/');
+    if (pathParts.includes('leads') && pathParts.length > 2) {
+      return pathParts[pathParts.length - 1];
+    }
+    return null;
+  };
+  
+  const handleClick = () => {
+    const leadId = getLeadIdFromUrl();
+    
+    if (leadId) {
+      navigate(`/leads/${leadId}?tab=actions`);
+    } else {
+      navigate('/pipeline');
+    }
+  };
 
   return (
-    <>
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        onClick={() => setIsChatOpen(true)}
-        className="text-loro-navy hover:text-loro-hazel transition-colors duration-200 font-futura"
-        title="Chat Gadait"
-      >
-        <MessageSquare size={20} />
-      </Button>
-      
-      <ChatGadait 
-        isOpen={isChatOpen} 
-        onClose={() => setIsChatOpen(false)} 
-      />
-    </>
+    <Button 
+      onClick={handleClick}
+      className="fixed bottom-20 right-6 z-50 rounded-full h-12 w-12 p-0 bg-loro-navy hover:bg-chocolate-dark shadow-lg"
+      title="Assistant IA GADAIT"
+    >
+      <Bot size={24} className="text-white" />
+    </Button>
   );
 };
 

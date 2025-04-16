@@ -67,7 +67,7 @@ const GadaitAI: React.FC<GadaitAIProps> = ({ lead }) => {
           budget_max: lead.budget?.toString() || '',
           devise: lead.currency || 'EUR',
           type_bien: lead.propertyType || '',
-          vue_souhaitee: lead.views?.[0] || '', // Fixed: Changed from lead.view to lead.views?.[0]
+          vue_souhaitee: lead.views?.[0] || '', 
           nb_chambres: lead.bedrooms?.toString() || '',
           localisation: lead.desiredLocation || '',
           notes_generales: lead.notes || '',
@@ -121,7 +121,7 @@ const GadaitAI: React.FC<GadaitAIProps> = ({ lead }) => {
   };
 
   return (
-    <div className="bg-white rounded-md mb-4 overflow-hidden">
+    <div className="bg-white rounded-md mb-4 overflow-hidden shadow-sm border border-loro-sand/30">
       <div className="flex items-center gap-2 p-2 mb-2 bg-loro-navy text-white">
         <Bot size={18} />
         <h3 className="text-sm font-semibold">Assistant IA GADAIT</h3>
