@@ -67,7 +67,7 @@ const GadaitAI: React.FC<GadaitAIProps> = ({ lead }) => {
           budget_max: lead.budget?.toString() || '',
           devise: lead.currency || 'EUR',
           type_bien: lead.propertyType || '',
-          vue_souhaitee: lead.view || '',
+          vue_souhaitee: lead.views?.[0] || '', // Fixed: Changed from lead.view to lead.views?.[0]
           nb_chambres: lead.bedrooms?.toString() || '',
           localisation: lead.desiredLocation || '',
           notes_generales: lead.notes || '',
