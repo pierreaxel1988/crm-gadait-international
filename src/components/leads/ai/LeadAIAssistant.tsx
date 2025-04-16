@@ -21,7 +21,7 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Enrichir les actions rapides pour un agent immobilier de luxe
+  // Actions rapides pour un agent immobilier de luxe
   const quickActions = [
     'Relance WhatsApp professionnelle',
     'Sélection personnalisée haut de gamme',
@@ -49,6 +49,17 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
     
     setIsLoading(true);
     try {
+      // Ajouter temporairement le message utilisateur à la conversation pour UX immédiate
+      const userMessageTemp: AIMessage = {
+        id: 'temp-' + crypto.randomUUID(),
+        leadId: lead.id,
+        role: 'user',
+        content: message,
+        timestamp: new Date().toISOString()
+      };
+      
+      setConversation(prev => [...prev, userMessageTemp]);
+      
       // Send message to AI assistant
       const newMessage = await sendAIMessage(lead.id, message, lead);
       
@@ -75,7 +86,19 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
 
   const handleQuickAction = (action: string) => {
     setMessage(action);
-    textareaRef.current?.focus();
+    // Trigger send message automatically for quick actions
+    setTimeout(() => {
+      if (textareaRef.current) {
+        // Reset height to auto to get the correct scrollHeight
+        textareaRef.current.style.height = 'auto';
+        
+        // Set the height to the scrollHeight
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+        
+        // Focus the textarea
+        textareaRef.current.focus();
+      }
+    }, 50);
   };
 
   const formatDate = (dateString: string) => {
@@ -111,7 +134,7 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
   };
 
   return (
-    <div className={cn("flex flex-col border rounded-lg shadow-sm bg-white overflow-hidden", className)}>
+    <div className={cn("flex flex-col border rounded-lg shadow-sm bg-white overflow-hidden h-[400px] md:h-[500px]", className)}>
       <div className="bg-loro-navy/10 p-3 border-b flex items-center justify-between">
         <div className="flex items-center">
           <Sparkles className="h-5 w-5 text-loro-hazel mr-2" />
@@ -134,7 +157,7 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
         ))}
       </div>
       
-      <ScrollArea className="flex-1 p-3 h-[300px] md:h-[400px]">
+      <ScrollArea className="flex-1 p-3 overflow-y-auto">
         <div className="space-y-4">
           {conversation.length === 0 ? (
             <div className="flex items-center justify-center h-40 text-center text-muted-foreground">

@@ -1,7 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { LeadDetailed } from '@/types/lead';
-import { useAuth } from '@/hooks/useAuth';
 
 export interface AIMessage {
   id: string;
@@ -113,7 +112,7 @@ function saveMessageToHistory(message: AIMessage): void {
   }
 }
 
-// Nouvelle fonction pour sauvegarder les échanges dans la base de données
+// Fonction pour sauvegarder les échanges dans la base de données
 async function saveAIExchangeToDatabase(
   leadId: string,
   prompt: string,

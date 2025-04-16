@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -170,7 +169,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       {/* Assistant IA - placé en premier, avant les actions en attente */}
       {leadId && (
         <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Assistant IA</h3>
+          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">ASSISTANT IA</h3>
           <div className="mt-3">
             {lead ? (
               <LeadAIAssistant lead={lead} />
@@ -184,7 +183,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       )}
       
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Actions en attente</h3>
+        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">ACTIONS EN ATTENTE</h3>
       </div>
 
       {pendingActions.length === 0 ? (
@@ -267,7 +266,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {completedActions.length > 0 && (
         <>
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3">Historique des actions</h3>
+          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3">HISTORIQUE DES ACTIONS</h3>
           <div className="space-y-2">
             {completedActions.map((action) => (
               <div 
