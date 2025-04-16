@@ -189,4 +189,3 @@ const GadaitAI: React.FC<GadaitAIProps> = ({ lead }) => {
 };
 
 export default GadaitAI;
-

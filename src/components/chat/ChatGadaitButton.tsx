@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 const ChatGadaitButton: React.FC = () => {
   const navigate = useNavigate();
@@ -21,7 +23,11 @@ const ChatGadaitButton: React.FC = () => {
     if (leadId) {
       navigate(`/leads/${leadId}?tab=actions`);
     } else {
-      navigate('/pipeline');
+      toast({
+        title: "Assistant IA",
+        description: "Sélectionnez d'abord un lead pour utiliser l'assistant IA",
+      });
+      navigate('/leads');
     }
   };
 

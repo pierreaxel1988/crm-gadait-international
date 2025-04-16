@@ -24,10 +24,21 @@ import { useIsMobile } from './hooks/use-mobile';
 import ChatGadaitButton from './components/chat/ChatGadaitButton';
 
 import './App.css';
+import { useState } from 'react';
 
 function App() {
   const { user, loading } = useAuth();
-  const mobile = useIsMobile();
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const handleToggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleToggleCollapse = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
 
   // Return early while auth is initializing
   if (loading) {
@@ -42,12 +53,12 @@ function App() {
     <div className="app">
       {user ? (
         <div className="flex h-screen bg-slate-50">
-          {!mobile && (
+          {!isMobile && (
             <Sidebar 
-              isOpen={true} 
-              isCollapsed={false} 
-              onClose={() => {}} 
-              onToggleCollapse={() => {}}
+              isOpen={sidebarOpen} 
+              isCollapsed={sidebarCollapsed} 
+              onClose={handleToggleSidebar} 
+              onToggleCollapse={handleToggleCollapse}
             />
           )}
           <div className="flex-1 overflow-auto">
@@ -58,8 +69,8 @@ function App() {
               <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
               <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
               <Route path="/leads/new" element={<ProtectedRoute><LeadNew /></ProtectedRoute>} />
-              <Route path="/leads/import" element={<ProtectedRoute>{mobile ? <MobileLeadImport /> : <LeadImport />}</ProtectedRoute>} />
-              <Route path="/leads/:id" element={<ProtectedRoute>{mobile ? <LeadDetailMobile /> : <LeadEdit />}</ProtectedRoute>} />
+              <Route path="/leads/import" element={<ProtectedRoute>{isMobile ? <MobileLeadImport /> : <LeadImport />}</ProtectedRoute>} />
+              <Route path="/leads/:id" element={<ProtectedRoute>{isMobile ? <LeadDetailMobile /> : <LeadEdit />}</ProtectedRoute>} />
               <Route path="/actions" element={<ProtectedRoute><Actions /></ProtectedRoute>} />
               <Route path="/chat-gadait" element={<ProtectedRoute><ChatGadaitPage /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />

@@ -69,7 +69,7 @@ serve(async (req) => {
     const aiResponse = data.choices[0].message.content;
     console.log("Received response from OpenAI");
 
-    return new Response(JSON.stringify({ response: aiResponse }), {
+    return new Response(JSON.stringify({ result: aiResponse }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
