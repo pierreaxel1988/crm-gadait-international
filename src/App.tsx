@@ -20,6 +20,7 @@ import Calendar from './pages/Calendar';
 import Reports from './pages/Reports';
 import Admin from './pages/Admin';
 import ProtectedRoute from './components/layout/ProtectedRoute';
+import LeadEdit from './pages/LeadEdit';
 
 function App() {
   return (

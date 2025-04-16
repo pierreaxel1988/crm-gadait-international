@@ -9,6 +9,7 @@ import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
 import { toast } from '@/hooks/use-toast';
 import { updateLead } from '@/services/leadUpdater';
+import { LeadAIAssistant } from '@/components/leads/ai/LeadAIAssistant';
 
 interface ActionsPanelMobileProps {
   leadId: string;
@@ -166,6 +167,13 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       className="space-y-3 pt-4"
       style={{ marginTop: dynamicTopMargin }}
     >
+      {/* Assistant IA */}
+      {lead && (
+        <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
+          <LeadAIAssistant lead={lead} />
+        </div>
+      )}
+      
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Actions en attente</h3>
       </div>
