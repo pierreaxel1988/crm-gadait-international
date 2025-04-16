@@ -24,13 +24,26 @@ import { useIsMobile } from './hooks/use-mobile';
 import ChatGadaitButton from './components/chat/ChatGadaitButton';
 
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function App() {
   const { user, loading } = useAuth();
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [appReady, setAppReady] = useState(false);
+
+  // Add effect to handle initialization
+  useEffect(() => {
+    if (!loading) {
+      // Give a small delay to ensure everything is loaded properly
+      const timer = setTimeout(() => {
+        setAppReady(true);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
 
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -41,7 +54,7 @@ function App() {
   };
 
   // Return early while auth is initializing
-  if (loading) {
+  if (loading || !appReady) {
     return (
       <div className="bg-slate-50 flex justify-center items-center h-screen">
         <div className="animate-pulse font-extralight text-2xl text-loro-navy">GADAIT</div>
