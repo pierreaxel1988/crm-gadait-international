@@ -1,6 +1,14 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { LeadDetailed } from '@/types/lead';
+import { 
+  AIMessage, 
+  saveMessageToHistory, 
+  getConversationHistory, 
+  saveAIExchangeToDatabase 
+} from '@/types/aiMessage';
+
+export { AIMessage, saveMessageToHistory, getConversationHistory };
 
 export async function sendAIMessage(leadId: string, message: string, leadData?: LeadDetailed): Promise<AIMessage> {
   try {
