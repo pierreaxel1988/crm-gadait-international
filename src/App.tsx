@@ -20,17 +20,17 @@ import ApiGuide from './pages/ApiGuide';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import { Toaster } from './components/ui/toaster';
-import { isMobile } from './hooks/use-mobile';
+import { useIsMobile } from './hooks/use-mobile';
 import ChatGadaitButton from './components/chat/ChatGadaitButton';
 
 import './App.css';
 
 function App() {
-  const { authInitialized, isLoggedIn } = useAuth();
-  const mobile = isMobile();
+  const { user, loading } = useAuth();
+  const mobile = useIsMobile();
 
   // Return early while auth is initializing
-  if (!authInitialized) {
+  if (loading) {
     return (
       <div className="bg-slate-50 flex justify-center items-center h-screen">
         <div className="animate-pulse font-extralight text-2xl text-loro-navy">GADAIT</div>
@@ -40,9 +40,16 @@ function App() {
 
   return (
     <div className="app">
-      {isLoggedIn ? (
+      {user ? (
         <div className="flex h-screen bg-slate-50">
-          {!mobile && <Sidebar />}
+          {!mobile && (
+            <Sidebar 
+              isOpen={true} 
+              isCollapsed={false} 
+              onClose={() => {}} 
+              onToggleCollapse={() => {}}
+            />
+          )}
           <div className="flex-1 overflow-auto">
             <Routes>
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
@@ -59,7 +66,7 @@ function App() {
               <Route path="/api" element={<ProtectedRoute><ApiGuide /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-            {isLoggedIn && <ChatGadaitButton />}
+            {user && <ChatGadaitButton />}
           </div>
         </div>
       ) : (
