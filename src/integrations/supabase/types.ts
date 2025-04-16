@@ -45,6 +45,47 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_ai_conversations: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          lead_id: string
+          role: string
+          sequence_order: number
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          lead_id: string
+          role: string
+          sequence_order: number
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+          role?: string
+          sequence_order?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_ai_conversations_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_ai_history: {
         Row: {
           created_at: string

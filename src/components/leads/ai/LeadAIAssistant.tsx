@@ -1,7 +1,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
-import { AIMessage, sendAIMessage, getConversationHistory } from '@/services/aiAssistantService';
+import { 
+  AIMessage, 
+  sendAIMessage, 
+  getConversationHistory,
+  getConversationHistoryFromDB
+} from '@/services/aiAssistantService';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { SendHorizontal, Bot, Loader2, User, Sparkles } from 'lucide-react';
@@ -17,6 +22,7 @@ interface LeadAIAssistantProps {
 export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [conversation, setConversation] = useState<AIMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -31,11 +37,32 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
     'Email de suivi exclusif'
   ];
 
-  // Load conversation history
+  // Load conversation history - first try from DB, then fallback to localStorage
   useEffect(() => {
     if (lead?.id) {
-      const history = getConversationHistory(lead.id);
-      setConversation(history);
+      const loadHistory = async () => {
+        try {
+          // First try to get history from DB
+          const dbHistory = await getConversationHistoryFromDB(lead.id);
+          
+          if (dbHistory && dbHistory.length > 0) {
+            setConversation(dbHistory);
+          } else {
+            // Fallback to localStorage if DB is empty
+            const localHistory = getConversationHistory(lead.id);
+            setConversation(localHistory);
+          }
+        } catch (error) {
+          console.error('Error loading conversation history:', error);
+          // Fallback to localStorage
+          const localHistory = getConversationHistory(lead.id);
+          setConversation(localHistory);
+        } finally {
+          setIsInitialLoading(false);
+        }
+      };
+      
+      loadHistory();
     }
   }, [lead?.id]);
 
@@ -63,8 +90,8 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
       // Send message to AI assistant
       const newMessage = await sendAIMessage(lead.id, message, lead);
       
-      // Update conversation state from localStorage to ensure consistency
-      const updatedHistory = getConversationHistory(lead.id);
+      // Fetch updated conversation from DB
+      const updatedHistory = await getConversationHistoryFromDB(lead.id);
       setConversation(updatedHistory);
       
       // Clear input
@@ -159,7 +186,11 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
       
       <ScrollArea className="flex-1 p-3 overflow-y-auto">
         <div className="space-y-4">
-          {conversation.length === 0 ? (
+          {isInitialLoading ? (
+            <div className="flex items-center justify-center h-40">
+              <Loader2 className="h-8 w-8 animate-spin text-loro-hazel/70" />
+            </div>
+          ) : conversation.length === 0 ? (
             <div className="flex items-center justify-center h-40 text-center text-muted-foreground">
               <div>
                 <Bot className="h-8 w-8 mx-auto mb-2 text-loro-navy/40" />

@@ -1,14 +1,18 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { LeadDetailed } from '@/types/lead';
+import type { 
+  AIMessage
+} from '@/types/aiMessage';
 import { 
-  AIMessage, 
   saveMessageToHistory, 
   getConversationHistory, 
-  saveAIExchangeToDatabase 
+  saveAIExchangeToDatabase,
+  getConversationHistoryFromDB
 } from '@/types/aiMessage';
 
-export { AIMessage, saveMessageToHistory, getConversationHistory };
+export { saveMessageToHistory, getConversationHistory, getConversationHistoryFromDB };
+export type { AIMessage };
 
 export async function sendAIMessage(leadId: string, message: string, leadData?: LeadDetailed): Promise<AIMessage> {
   try {
@@ -64,7 +68,7 @@ Profil Client Gadait:
       timestamp: new Date().toISOString()
     };
 
-    // Sauvegarde de l'historique
+    // Sauvegarde de l'historique local (pour la compatibilité)
     saveMessageToHistory(userMessage);
     saveMessageToHistory(assistantMessage);
 
