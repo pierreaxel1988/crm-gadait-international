@@ -2,43 +2,29 @@
 import { supabase } from '@/integrations/supabase/client';
 import { LeadDetailed } from '@/types/lead';
 
-export interface AIMessage {
-  id: string;
-  leadId: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: string;
-}
-
-export interface AIConversation {
-  leadId: string;
-  messages: AIMessage[];
-}
-
 export async function sendAIMessage(leadId: string, message: string, leadData?: LeadDetailed): Promise<AIMessage> {
   try {
     console.log('Sending message to AI for lead:', leadId);
     
-    // Format lead data to provide context to the AI
+    // Format contextuel détaillé pour l'assistant
     const leadContext = leadData ? `
-Lead Info:
-- Name: ${leadData.name}
+Profil Client Gadait:
+- Nom: ${leadData.name}
 - Email: ${leadData.email || 'Non renseigné'}
-- Phone: ${leadData.phone || 'Non renseigné'}
+- Téléphone: ${leadData.phone || 'Non renseigné'}
 - Budget: ${leadData.budget || 'Non renseigné'} ${leadData.currency || 'EUR'}
-- Desired Location: ${leadData.desiredLocation || 'Non renseigné'}
-- Property Type: ${leadData.propertyTypes?.join(', ') || 'Non renseigné'}
-- Purchase Timeframe: ${leadData.purchaseTimeframe || 'Non renseigné'}
-- Country: ${leadData.country || 'Non renseigné'}
-- Status: ${leadData.status || 'Non renseigné'}
+- Localisation recherchée: ${leadData.desiredLocation || 'Non renseigné'}
+- Types de propriété: ${leadData.propertyTypes?.join(', ') || 'Non renseigné'}
+- Délai d'achat: ${leadData.purchaseTimeframe || 'Non renseigné'}
+- Pays: ${leadData.country || 'Non renseigné'}
+- Statut: ${leadData.status || 'Non renseigné'}
 - Notes: ${leadData.notes || 'Aucune note'}
     ` : '';
 
-    // Récupérer l'utilisateur courant (si connecté)
     const authData = await supabase.auth.getSession();
     const userId = authData.data.session?.user?.id;
 
-    // Use the chat-gadait edge function to process the request
+    // Appel de la fonction edge chat-gadait
     const { data, error } = await supabase.functions.invoke('chat-gadait', {
       body: {
         message,
@@ -49,11 +35,11 @@ Lead Info:
     });
 
     if (error) {
-      console.error('Error calling AI assistant:', error);
-      throw new Error(`Erreur lors de la communication avec l'assistant IA: ${error.message}`);
+      console.error('Erreur assistant IA:', error);
+      throw new Error(`Impossible de communiquer avec l'assistant: ${error.message}`);
     }
 
-    // Create message objects
+    // Création des messages utilisateur et assistant
     const userMessage: AIMessage = {
       id: crypto.randomUUID(),
       leadId,
@@ -70,71 +56,16 @@ Lead Info:
       timestamp: new Date().toISOString()
     };
 
-    // Save conversation to localStorage for persistence
+    // Sauvegarde de l'historique
     saveMessageToHistory(userMessage);
     saveMessageToHistory(assistantMessage);
 
-    // Sauvegarder l'échange dans la table lead_ai_history
+    // Sauvegarde dans la base de données
     await saveAIExchangeToDatabase(leadId, message, data.response, userId);
 
     return assistantMessage;
   } catch (error) {
-    console.error('Error in AI assistant service:', error);
+    console.error('Erreur du service assistant IA:', error);
     throw error;
-  }
-}
-
-export function getConversationHistory(leadId: string): AIMessage[] {
-  try {
-    const storageKey = `ai_conversation_${leadId}`;
-    const storedData = localStorage.getItem(storageKey);
-    
-    if (storedData) {
-      return JSON.parse(storedData);
-    }
-    
-    return [];
-  } catch (error) {
-    console.error('Error retrieving conversation history:', error);
-    return [];
-  }
-}
-
-function saveMessageToHistory(message: AIMessage): void {
-  try {
-    const storageKey = `ai_conversation_${message.leadId}`;
-    const existingMessages = getConversationHistory(message.leadId);
-    
-    const updatedMessages = [...existingMessages, message];
-    localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
-  } catch (error) {
-    console.error('Error saving message to history:', error);
-  }
-}
-
-// Fonction pour sauvegarder les échanges dans la base de données
-async function saveAIExchangeToDatabase(
-  leadId: string,
-  prompt: string,
-  response: string,
-  userId?: string
-): Promise<void> {
-  try {
-    const { error } = await supabase
-      .from('lead_ai_history')
-      .insert({
-        lead_id: leadId,
-        user_id: userId || null,
-        prompt,
-        response,
-      });
-
-    if (error) {
-      console.error('Error saving AI exchange to database:', error);
-    } else {
-      console.log('AI exchange saved to database successfully');
-    }
-  } catch (error) {
-    console.error('Error in saveAIExchangeToDatabase:', error);
   }
 }
