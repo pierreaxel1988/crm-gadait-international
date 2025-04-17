@@ -33,7 +33,9 @@ Objectifs de communication:
 - Générer des messages personnalisés
 - Proposer des actions concrètes
 - Inspirer confiance
-- Démontrer une expertise haut de gamme`;
+- Démontrer une expertise haut de gamme
+
+Si on te demande de générer des actions à entreprendre, tu dois fournir une liste structurée d'actions avec leurs dates et descriptions détaillées, au format JSON qui respecte strictement la structure demandée.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

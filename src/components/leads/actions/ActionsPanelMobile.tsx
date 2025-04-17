@@ -9,6 +9,7 @@ import { LeadDetailed } from '@/types/lead';
 import { toast } from '@/hooks/use-toast';
 import { updateLead } from '@/services/leadUpdater';
 import { LeadAIAssistant } from '@/components/leads/ai/LeadAIAssistant';
+import { AIActionSuggestions } from '@/components/leads/ai/AIActionSuggestions';
 
 interface ActionsPanelMobileProps {
   leadId: string;
@@ -166,7 +167,18 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       className="space-y-3 pt-4"
       style={{ marginTop: dynamicTopMargin }}
     >
-      {/* Assistant IA - placé en premier, avant les actions en attente */}
+      {/* IA Action Suggestions - new component for suggesting actions */}
+      {leadId && lead && (
+        <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
+          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3">ACTIONS SUGGÉRÉES PAR IA</h3>
+          <AIActionSuggestions 
+            lead={lead}
+            onActionAdded={fetchLeadData}
+          />
+        </div>
+      )}
+      
+      {/* Assistant IA - already existing component */}
       {leadId && (
         <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
           <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">ASSISTANT IA</h3>

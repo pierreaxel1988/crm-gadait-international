@@ -31,6 +31,11 @@ Profil Client Gadait:
 - Pays: ${leadData.country || 'Non renseigné'}
 - Statut: ${leadData.status || 'Non renseigné'}
 - Notes: ${leadData.notes || 'Aucune note'}
+- Actions précédentes: ${leadData.actionHistory?.length ? 
+      leadData.actionHistory.slice(0, 3).map(a => 
+        `${a.actionType} (${a.completedDate ? 'complété' : 'en attente'})${a.notes ? ': ' + a.notes : ''}`
+      ).join('; ') 
+      : 'Aucune action précédente'}
     ` : '';
 
     const authData = await supabase.auth.getSession();
