@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Lightbulb, Loader2, RefreshCw } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
@@ -46,6 +47,32 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
     } catch (err) {
       console.error('Error loading action suggestions:', err);
       setError('Impossible de charger les suggestions d\'actions');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleImplementSuggestion = async (suggestion: AISuggestedAction) => {
+    try {
+      setIsLoading(true);
+      const success = await implementSuggestedAction(lead.id, suggestion);
+      
+      if (success) {
+        setSuggestions(current => current.filter(s => s.id !== suggestion.id));
+        onActionAdded();
+        
+        toast({
+          title: "Action ajoutée",
+          description: `${suggestion.actionType} a été ajouté avec succès`
+        });
+      }
+    } catch (error) {
+      console.error('Error implementing suggestion:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'ajouter l'action suggérée"
+      });
     } finally {
       setIsLoading(false);
     }
