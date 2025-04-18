@@ -231,6 +231,24 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
 
+  const quickPrompts = [
+    {
+      id: 'follow-up',
+      label: 'Relance WhatsApp',
+      prompt: `Génère une relance WhatsApp professionnelle pour ${lead?.name || 'ce client'} en tenant compte de son budget de ${lead?.budget || ''} ${lead?.currency || 'EUR'} et sa recherche à ${lead?.desiredLocation || ''}. Le message doit être cordial et adapté à son profil.`
+    },
+    {
+      id: 'selection',
+      label: 'Mail sélection personnalisée',
+      prompt: `Rédige un email professionnel pour présenter une sélection de biens à ${lead?.name || 'ce client'}. Utilise ces critères: Budget ${lead?.budget || ''} ${lead?.currency || 'EUR'}, Localisation: ${lead?.desiredLocation || ''}, Type de bien: ${lead?.propertyTypes?.join(', ') || ''}.`
+    },
+    {
+      id: 'general-follow',
+      label: 'Follow-up général',
+      prompt: `Crée un message de suivi pour ${lead?.name || 'ce client'} qui fait référence à son projet ${lead?.propertyTypes?.join(', ') || 'immobilier'} à ${lead?.desiredLocation || ''}. Le message doit être personnalisé et professionnel.`
+    }
+  ];
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-4">
@@ -257,13 +275,26 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         </div>
       )}
       
-      {/* Assistant IA - avec nouveau prompt */}
+      {/* Assistant IA - avec prompts rapides */}
       {leadId && (
         <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
           <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">
             ASSISTANT IA
           </h3>
           <div className="mt-3 space-y-4">
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {quickPrompts.map((quickPrompt) => (
+                <Button
+                  key={quickPrompt.id}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPrompt(quickPrompt.prompt)}
+                  className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10"
+                >
+                  {quickPrompt.label}
+                </Button>
+              ))}
+            </div>
             <div className="space-y-2">
               <Textarea
                 value={prompt}
