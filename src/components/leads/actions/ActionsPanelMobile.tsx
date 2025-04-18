@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
 import { format, isPast } from 'date-fns';
-import { Check, Clock, Calendar, Trash2 } from 'lucide-react';
+import { Check, Clock, Calendar, Trash2, Phone, MessageCircle, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
@@ -31,6 +30,30 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>(initialActionHistory || []);
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
+
+  const quickActions = [
+    { 
+      label: "Appel", 
+      icon: Phone, 
+      action: () => {
+        toast({ title: "Appel", description: "Fonctionnalité d'appel à implémenter" });
+      }
+    },
+    { 
+      label: "WhatsApp", 
+      icon: MessageCircle, 
+      action: () => {
+        toast({ title: "WhatsApp", description: "Envoyer un message WhatsApp" });
+      }
+    },
+    { 
+      label: "Email", 
+      icon: Home, 
+      action: () => {
+        toast({ title: "Email", description: "Envoyer un email" });
+      }
+    }
+  ];
 
   useEffect(() => {
     const measureHeader = () => {
@@ -174,6 +197,20 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       className="space-y-3 pt-4"
       style={{ marginTop: dynamicTopMargin }}
     >
+      <div className="grid grid-cols-3 gap-2 mb-6">
+        {quickActions.map((action, index) => (
+          <Button
+            key={index}
+            variant="outline"
+            className="flex flex-col h-[80px] justify-center items-center space-y-2"
+            onClick={action.action}
+          >
+            <action.icon className="h-6 w-6" />
+            <span className="text-xs">{action.label}</span>
+          </Button>
+        ))}
+      </div>
+
       {leadId && lead && (
         <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
           <AssistantIA 
@@ -184,7 +221,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         </div>
       )}
       
-      {/* AI Action Suggestions */}
       {leadId && lead && (
         <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
           <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3">
