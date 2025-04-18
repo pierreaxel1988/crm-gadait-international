@@ -34,12 +34,17 @@ export async function generateLeadActionSuggestions(
       ]
     `;
 
+    console.log('Sending AI action suggestion prompt for lead:', lead.id);
+    
     // Send the prompt to the AI assistant
     const response = await sendAIMessage(lead.id, prompt, lead);
     
     if (!response || !response.content) {
+      console.error('No response content from AI');
       return null;
     }
+
+    console.log('Raw AI response:', response.content);
 
     // Extract the JSON array from the response
     const jsonMatch = response.content.match(/\[[\s\S]*\]/);
@@ -48,20 +53,51 @@ export async function generateLeadActionSuggestions(
       return null;
     }
 
-    // Parse the JSON string into an array of action suggestions
-    const suggestions = JSON.parse(jsonMatch[0]) as Array<{
-      actionType: TaskType;
-      scheduledDate: string;
-      notes: string;
-    }>;
+    const jsonContent = jsonMatch[0];
+    console.log('Extracted JSON:', jsonContent);
 
-    // Convert to proper AISuggestedAction format
-    return suggestions.map(suggestion => ({
-      id: `suggestion-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      actionType: suggestion.actionType,
-      scheduledDate: new Date(suggestion.scheduledDate),
-      notes: suggestion.notes
-    }));
+    // Parse the JSON string into an array of action suggestions
+    try {
+      const suggestions = JSON.parse(jsonContent) as Array<{
+        actionType: TaskType;
+        scheduledDate: string;
+        notes: string;
+      }>;
+
+      if (!Array.isArray(suggestions)) {
+        console.error('Parsed content is not an array:', suggestions);
+        return null;
+      }
+
+      console.log('Parsed suggestions:', suggestions);
+
+      // Validate the required fields in each suggestion
+      const validSuggestions = suggestions.filter(suggestion => 
+        suggestion.actionType && 
+        suggestion.scheduledDate && 
+        suggestion.notes &&
+        typeof suggestion.actionType === 'string' &&
+        typeof suggestion.scheduledDate === 'string' &&
+        typeof suggestion.notes === 'string'
+      );
+
+      if (validSuggestions.length === 0) {
+        console.error('No valid suggestions found in response');
+        return null;
+      }
+
+      // Convert to proper AISuggestedAction format
+      return validSuggestions.map(suggestion => ({
+        id: `suggestion-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        actionType: suggestion.actionType as TaskType,
+        scheduledDate: new Date(suggestion.scheduledDate),
+        notes: suggestion.notes
+      }));
+    } catch (parseError) {
+      console.error('Error parsing JSON from AI response:', parseError);
+      console.error('JSON content that failed to parse:', jsonContent);
+      return null;
+    }
   } catch (error) {
     console.error('Error generating action suggestions:', error);
     return null;
@@ -70,6 +106,8 @@ export async function generateLeadActionSuggestions(
 
 export async function implementSuggestedAction(leadId: string, suggestion: AISuggestedAction): Promise<boolean> {
   try {
+    console.log('Implementing suggested action:', suggestion);
+    
     // Add the suggested action to the lead
     await addActionToLead(leadId, {
       actionType: suggestion.actionType,

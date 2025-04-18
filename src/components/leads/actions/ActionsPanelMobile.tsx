@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -63,10 +64,15 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     
     try {
       setIsLoading(true);
+      console.log('Fetching lead data for ActionsPanelMobile:', leadId);
       const fetchedLead = await getLead(leadId);
+      
       if (fetchedLead) {
+        console.log('Lead data fetched successfully');
         setLead(fetchedLead);
         setActionHistory(fetchedLead.actionHistory || []);
+      } else {
+        console.error('No lead data returned');
       }
     } catch (error) {
       console.error("Error fetching lead data:", error);

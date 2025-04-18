@@ -16,6 +16,17 @@ serve(async (req) => {
 
   try {
     const { message, leadContext, type } = await req.json();
+    console.log('Received request for chat-gadait:');
+    console.log('Message:', message.substring(0, 100) + (message.length > 100 ? '...' : ''));
+    console.log('Type:', type);
+    console.log('Lead context length:', leadContext ? leadContext.length : 0);
+
+    // Check if it's a structured data request (e.g., JSON format for actions)
+    const isStructuredDataRequest = message.includes('Format de réponse:') && 
+                                   (message.includes('JSON') || message.includes('tableau'));
+
+    const model = isStructuredDataRequest ? 'gpt-4o-mini' : 'gpt-4o-mini';
+    const temperature = isStructuredDataRequest ? 0.2 : 0.7;
 
     const systemPrompt = `Tu es Chat Gadait, un assistant IA spécialisé dans l'immobilier de luxe international.
 
@@ -35,7 +46,11 @@ Objectifs de communication:
 - Inspirer confiance
 - Démontrer une expertise haut de gamme
 
-Si on te demande de générer des actions à entreprendre, tu dois fournir une liste structurée d'actions avec leurs dates et descriptions détaillées, au format JSON qui respecte strictement la structure demandée.`;
+${isStructuredDataRequest ? 'IMPORTANT: Pour les demandes de génération de structures de données comme des actions ou des tâches, tu dois fournir une réponse exactement dans le format demandé, sans aucun texte avant ou après. Assure-toi que le format JSON est parfaitement valide et respecte la structure demandée.' : ''}`;
+
+    console.log('Using model:', model);
+    console.log('Using temperature:', temperature);
+    console.log('Is structured data request:', isStructuredDataRequest);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -44,16 +59,24 @@ Si on te demande de générer des actions à entreprendre, tu dois fournir une l
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: model,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
         ],
-        temperature: 0.7,
+        temperature: temperature,
       }),
     });
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('OpenAI API error:', errorData);
+      throw new Error(`OpenAI API returned an error: ${errorData.error?.message || 'Unknown error'}`);
+    }
+
     const data = await response.json();
+    console.log('OpenAI response received, content length:', data.choices[0].message.content.length);
+    
     const aiResponse = data.choices[0].message.content;
 
     return new Response(JSON.stringify({ response: aiResponse }), {
