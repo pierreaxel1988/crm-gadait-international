@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Lightbulb, Loader2 } from 'lucide-react';
+import { Lightbulb, Loader2, RefreshCw } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
 import { AISuggestedAction, generateLeadActionSuggestions, implementSuggestedAction } from '@/services/aiActionSuggestionService';
 import { ActionSuggestionCard } from './ActionSuggestionCard';
 import { toast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 interface AIActionSuggestionsProps {
   lead: LeadDetailed;
@@ -45,6 +46,7 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
         setLastLoadTime(now);
       } else {
         console.log('No suggestions were returned from the AI');
+        setSuggestions([]);
       }
     } catch (err) {
       console.error('Error loading action suggestions:', err);
@@ -102,7 +104,7 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
     return (
       <div className="border rounded-md p-4 bg-loro-hazel/5 flex flex-col items-center justify-center">
         <Loader2 className="h-5 w-5 text-loro-hazel animate-spin mb-2" />
-        <p className="text-sm text-muted-foreground">Génération de suggestions...</p>
+        <p className="text-sm text-muted-foreground">Génération de suggestions en cours...</p>
       </div>
     );
   }
@@ -111,12 +113,15 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
     return (
       <div className="border rounded-md p-4 bg-red-50 text-center">
         <p className="text-sm text-red-600">{error}</p>
-        <button 
+        <Button 
           onClick={handleManualRefresh}
-          className="mt-2 text-xs text-loro-hazel hover:underline"
+          variant="outline"
+          size="sm"
+          className="mt-2 text-xs"
         >
+          <RefreshCw className="h-3 w-3 mr-1" />
           Réessayer
-        </button>
+        </Button>
       </div>
     );
   }
@@ -126,12 +131,15 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
       <div className="border rounded-md p-4 bg-loro-hazel/5 text-center animate-[fade-in_0.3s_ease-out]">
         <Lightbulb className="h-5 w-5 text-loro-hazel/60 mx-auto mb-2" />
         <p className="text-sm text-muted-foreground">Aucune suggestion d'action pour le moment</p>
-        <button 
+        <Button 
           onClick={handleManualRefresh}
-          className="mt-2 text-xs text-loro-hazel hover:underline"
+          variant="outline" 
+          size="sm"
+          className="mt-2 text-xs border-loro-hazel text-loro-hazel hover:bg-loro-hazel/10"
         >
+          <RefreshCw className="h-3 w-3 mr-1" />
           Générer des suggestions
-        </button>
+        </Button>
       </div>
     );
   }
@@ -143,12 +151,15 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
           <Lightbulb className="h-4 w-4 text-loro-hazel" />
           <h3 className="text-sm font-medium">Actions suggérées par GADAIT AI ({suggestions.length})</h3>
         </div>
-        <button 
+        <Button 
           onClick={handleManualRefresh}
-          className="text-xs text-loro-hazel hover:underline"
+          variant="ghost"
+          size="sm"
+          className="text-xs text-loro-hazel hover:text-loro-hazel/80 hover:bg-transparent"
         >
+          <RefreshCw className="h-3 w-3 mr-1" />
           Actualiser
-        </button>
+        </Button>
       </div>
       
       <div className="space-y-2">

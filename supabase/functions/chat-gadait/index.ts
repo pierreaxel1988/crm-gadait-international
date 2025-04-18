@@ -25,9 +25,15 @@ serve(async (req) => {
     const isStructuredDataRequest = message.includes('Format de réponse:') && 
                                    (message.includes('JSON') || message.includes('tableau'));
 
-    const model = isStructuredDataRequest ? 'gpt-4o-mini' : 'gpt-4o-mini';
-    const temperature = isStructuredDataRequest ? 0.2 : 0.7;
+    // Use GPT-4o Mini for both types of requests but with different temperature settings
+    const model = 'gpt-4o-mini';
+    const temperature = isStructuredDataRequest ? 0.1 : 0.7; // Lower temperature for structured data
 
+    console.log('Using model:', model);
+    console.log('Using temperature:', temperature);
+    console.log('Is structured data request:', isStructuredDataRequest);
+
+    // Create a more detailed system message for the AI
     const systemPrompt = `Tu es Chat Gadait, un assistant IA spécialisé dans l'immobilier de luxe international.
 
 Contexte client:
@@ -46,11 +52,7 @@ Objectifs de communication:
 - Inspirer confiance
 - Démontrer une expertise haut de gamme
 
-${isStructuredDataRequest ? 'IMPORTANT: Pour les demandes de génération de structures de données comme des actions ou des tâches, tu dois fournir une réponse exactement dans le format demandé, sans aucun texte avant ou après. Assure-toi que le format JSON est parfaitement valide et respecte la structure demandée.' : ''}`;
-
-    console.log('Using model:', model);
-    console.log('Using temperature:', temperature);
-    console.log('Is structured data request:', isStructuredDataRequest);
+${isStructuredDataRequest ? 'TRÈS IMPORTANT: Pour les demandes de génération de structures de données comme des actions ou des tâches, tu dois fournir UNIQUEMENT une réponse exactement dans le format JSON demandé, sans aucun texte avant ou après. Assure-toi que le format JSON est parfaitement valide et respecte la structure demandée.' : ''}`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -77,7 +79,26 @@ ${isStructuredDataRequest ? 'IMPORTANT: Pour les demandes de génération de str
     const data = await response.json();
     console.log('OpenAI response received, content length:', data.choices[0].message.content.length);
     
-    const aiResponse = data.choices[0].message.content;
+    // Clean up JSON response for structured data requests
+    let aiResponse = data.choices[0].message.content;
+    if (isStructuredDataRequest) {
+      // Try to extract just the JSON array if there's any text around it
+      const jsonMatch = aiResponse.match(/\[\s*\{[\s\S]*\}\s*\]/);
+      if (jsonMatch) {
+        aiResponse = jsonMatch[0];
+        console.log('Extracted JSON array from response');
+      }
+      
+      // Validate the JSON
+      try {
+        JSON.parse(aiResponse);
+        console.log('JSON validation successful');
+      } catch (e) {
+        console.error('JSON validation failed:', e);
+        console.log('Invalid JSON response:', aiResponse);
+        throw new Error('The AI response is not valid JSON');
+      }
+    }
 
     return new Response(JSON.stringify({ response: aiResponse }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -46,19 +46,9 @@ export async function generateLeadActionSuggestions(
 
     console.log('Raw AI response:', response.content);
 
-    // Extract the JSON array from the response
-    const jsonMatch = response.content.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) {
-      console.error('No valid JSON array found in the AI response');
-      return null;
-    }
-
-    const jsonContent = jsonMatch[0];
-    console.log('Extracted JSON:', jsonContent);
-
-    // Parse the JSON string into an array of action suggestions
+    // Try to parse the response directly first
     try {
-      const suggestions = JSON.parse(jsonContent) as Array<{
+      const suggestions = JSON.parse(response.content) as Array<{
         actionType: TaskType;
         scheduledDate: string;
         notes: string;
@@ -94,9 +84,55 @@ export async function generateLeadActionSuggestions(
         notes: suggestion.notes
       }));
     } catch (parseError) {
-      console.error('Error parsing JSON from AI response:', parseError);
-      console.error('JSON content that failed to parse:', jsonContent);
-      return null;
+      // If direct parsing fails, try to extract JSON array from the response
+      console.error('Direct parsing failed:', parseError);
+      
+      const jsonMatch = response.content.match(/\[\s*\{[\s\S]*\}\s*\]/);
+      if (!jsonMatch) {
+        console.error('No valid JSON array found in the AI response');
+        return null;
+      }
+
+      const jsonContent = jsonMatch[0];
+      console.log('Extracted JSON:', jsonContent);
+
+      try {
+        const suggestions = JSON.parse(jsonContent) as Array<{
+          actionType: TaskType;
+          scheduledDate: string;
+          notes: string;
+        }>;
+
+        if (!Array.isArray(suggestions)) {
+          console.error('Parsed content is not an array:', suggestions);
+          return null;
+        }
+
+        // Validate and convert as before
+        const validSuggestions = suggestions.filter(suggestion => 
+          suggestion.actionType && 
+          suggestion.scheduledDate && 
+          suggestion.notes &&
+          typeof suggestion.actionType === 'string' &&
+          typeof suggestion.scheduledDate === 'string' &&
+          typeof suggestion.notes === 'string'
+        );
+
+        if (validSuggestions.length === 0) {
+          console.error('No valid suggestions found in extracted JSON');
+          return null;
+        }
+
+        return validSuggestions.map(suggestion => ({
+          id: `suggestion-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          actionType: suggestion.actionType as TaskType,
+          scheduledDate: new Date(suggestion.scheduledDate),
+          notes: suggestion.notes
+        }));
+      } catch (secondParseError) {
+        console.error('Error parsing extracted JSON:', secondParseError);
+        return null;
+      }
     }
   } catch (error) {
     console.error('Error generating action suggestions:', error);

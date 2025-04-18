@@ -173,7 +173,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       className="space-y-3 pt-4"
       style={{ marginTop: dynamicTopMargin }}
     >
-      {/* IA Action Suggestions - new component for suggesting actions */}
+      {/* IA Action Suggestions - composant pour les suggestions d'actions */}
       {leadId && lead && (
         <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
           <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3">ACTIONS SUGGÉRÉES PAR IA</h3>
@@ -184,7 +184,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         </div>
       )}
       
-      {/* Assistant IA - already existing component */}
+      {/* Assistant IA - composant existant */}
       {leadId && (
         <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
           <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">ASSISTANT IA</h3>
@@ -329,6 +329,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       )}
     </div>
   );
-};
+}
 
 export default ActionsPanelMobile;

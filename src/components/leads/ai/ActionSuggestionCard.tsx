@@ -1,91 +1,68 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { CalendarIcon, CheckIcon, XIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Calendar, Check, Loader2, Wand2 } from 'lucide-react';
+import { AISuggestedAction } from '@/services/aiActionSuggestionService';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { AISuggestedAction } from '@/services/aiActionSuggestionService';
 
 interface ActionSuggestionCardProps {
   suggestion: AISuggestedAction;
-  onImplement: (suggestion: AISuggestedAction) => Promise<void>;
+  onImplement: (suggestion: AISuggestedAction) => void;
   onDismiss: (suggestion: AISuggestedAction) => void;
 }
 
-export function ActionSuggestionCard({ 
-  suggestion, 
-  onImplement, 
-  onDismiss 
-}: ActionSuggestionCardProps) {
-  const [isImplementing, setIsImplementing] = useState(false);
-
-  const handleImplement = async () => {
-    setIsImplementing(true);
-    try {
-      await onImplement(suggestion);
-    } finally {
-      setIsImplementing(false);
+export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: ActionSuggestionCardProps) {
+  const getActionTypeIcon = (type: string) => {
+    switch (type) {
+      case 'Call': return <span className="bg-[#F8E2E8] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
+      case 'Visites': return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs font-futura">Visite</span>;
+      case 'Compromis': return <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-futura">Compromis</span>;
+      case 'Acte de vente': return <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs font-futura">Acte de vente</span>;
+      case 'Contrat de Location': return <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-futura">Contrat Location</span>;
+      case 'Propositions': return <span className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full text-xs font-futura">Proposition</span>;
+      case 'Follow up': return <span className="bg-pink-100 text-pink-800 px-2 py-0.5 rounded-full text-xs font-futura">Follow-up</span>;
+      case 'Estimation': return <span className="bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full text-xs font-futura">Estimation</span>;
+      case 'Prospection': return <span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-xs font-futura">Prospection</span>;
+      case 'Admin': return <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs font-futura">Admin</span>;
+      default: return null;
     }
   };
 
+  const formattedDate = format(suggestion.scheduledDate, 'dd/MM/yyyy à HH:mm', { locale: fr });
+
   return (
-    <div className="border rounded-md p-3 bg-loro-hazel/10 shadow-sm mb-3 animate-[fade-in_0.4s_ease-out]">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="h-8 w-8 rounded-full bg-loro-hazel/20 flex items-center justify-center text-loro-hazel">
-          <Wand2 className="h-4 w-4" />
+    <div className="border border-loro-hazel/30 bg-loro-hazel/5 rounded-md p-3 animate-[fade-in_0.3s_ease-out]">
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex items-center gap-2">
+          {getActionTypeIcon(suggestion.actionType)}
         </div>
-        <div>
-          <h4 className="font-futura text-sm">Suggestion d'action</h4>
-          <div className="text-xs text-muted-foreground">
-            GADAIT AI a analysé le profil client
-          </div>
+        <div className="flex items-center text-xs text-gray-500">
+          <CalendarIcon className="h-3 w-3 mr-1" />
+          {formattedDate}
         </div>
       </div>
       
-      <div className="bg-white border rounded-md p-2 mb-3">
-        <div className="flex items-start gap-2">
-          <Calendar className="h-4 w-4 text-loro-navy mt-0.5" />
-          <div>
-            <div className="text-sm font-medium">{suggestion.actionType}</div>
-            <div className="text-xs text-muted-foreground">
-              {format(suggestion.scheduledDate, 'EEEE d MMMM yyyy', { locale: fr })} à {format(suggestion.scheduledDate, 'HH:mm')}
-            </div>
-          </div>
-        </div>
-      </div>
+      <p className="text-sm mb-3">{suggestion.notes}</p>
       
-      <div className="text-xs bg-loro-hazel/5 border border-loro-hazel/20 rounded p-2 mb-3">
-        {suggestion.notes}
-      </div>
-      
-      <div className="flex justify-between gap-2">
-        <Button 
-          variant="ghost" 
-          size="sm" 
+      <div className="flex justify-end gap-2 mt-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-xs border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
           onClick={() => onDismiss(suggestion)}
-          className="text-muted-foreground flex-1"
         >
-          Ne pas utiliser
+          <XIcon className="h-3 w-3 mr-1" />
+          Ignorer
         </Button>
-        
-        <Button 
-          onClick={handleImplement} 
-          variant="default"
-          size="sm" 
-          disabled={isImplementing}
-          className="bg-loro-hazel hover:bg-loro-hazel/80 text-white flex-1"
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-xs border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
+          onClick={() => onImplement(suggestion)}
         >
-          {isImplementing ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" /> 
-              Ajout en cours...
-            </>
-          ) : (
-            <>
-              <Check className="h-4 w-4 mr-2" /> 
-              Appliquer
-            </>
-          )}
+          <CheckIcon className="h-3 w-3 mr-1" />
+          Appliquer
         </Button>
       </div>
     </div>
