@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -70,7 +71,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       const fetchedLead = await getLead(leadId);
       
       if (fetchedLead) {
-        console.log('Lead data fetched successfully');
+        console.log('Lead data fetched successfully', fetchedLead);
         setLead(fetchedLead);
         setActionHistory(fetchedLead.actionHistory || []);
       } else {
@@ -148,9 +149,13 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
           Budget min: ${lead.budgetMin}
           Budget max: ${lead.budget}
           Devise: ${lead.currency}
-          Type de bien: ${lead.propertyTypes?.join(', ')}
-          Vue souhaitée: ${lead.views?.join(', ')}
-          Nombre de chambres: ${lead.bedrooms?.join(', ')}
+          Type de bien: ${lead.propertyTypes ? lead.propertyTypes.join(', ') : ''}
+          Vue souhaitée: ${lead.views ? lead.views.join(', ') : ''}
+          Nombre de chambres: ${
+            Array.isArray(lead.bedrooms) 
+              ? lead.bedrooms.join(', ') 
+              : lead.bedrooms || ''
+          }
           Localisation: ${lead.desiredLocation}
           Notes: ${lead.notes}
           Agent: ${lead.assignedTo}
@@ -231,23 +236,24 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
 
-  const quickPrompts = [
+  // Maintenant, nous créons les prompts seulement si lead est disponible
+  const quickPrompts = lead ? [
     {
       id: 'follow-up',
       label: 'Relance WhatsApp',
-      prompt: `Génère une relance WhatsApp professionnelle pour ${lead?.name || 'ce client'} en tenant compte de son budget de ${lead?.budget || ''} ${lead?.currency || 'EUR'} et sa recherche à ${lead?.desiredLocation || ''}. Le message doit être cordial et adapté à son profil.`
+      prompt: `Génère une relance WhatsApp professionnelle pour ${lead.name || 'ce client'} en tenant compte de son budget de ${lead.budget || ''} ${lead.currency || 'EUR'} et sa recherche à ${lead.desiredLocation || ''}. Le message doit être cordial et adapté à son profil.`
     },
     {
       id: 'selection',
       label: 'Mail sélection personnalisée',
-      prompt: `Rédige un email professionnel pour présenter une sélection de biens à ${lead?.name || 'ce client'}. Utilise ces critères: Budget ${lead?.budget || ''} ${lead?.currency || 'EUR'}, Localisation: ${lead?.desiredLocation || ''}, Type de bien: ${lead?.propertyTypes?.join(', ') || ''}.`
+      prompt: `Rédige un email professionnel pour présenter une sélection de biens à ${lead.name || 'ce client'}. Utilise ces critères: Budget ${lead.budget || ''} ${lead.currency || 'EUR'}, Localisation: ${lead.desiredLocation || ''}, Type de bien: ${lead.propertyTypes ? lead.propertyTypes.join(', ') : ''}.`
     },
     {
       id: 'general-follow',
       label: 'Follow-up général',
-      prompt: `Crée un message de suivi pour ${lead?.name || 'ce client'} qui fait référence à son projet ${lead?.propertyTypes?.join(', ') || 'immobilier'} à ${lead?.desiredLocation || ''}. Le message doit être personnalisé et professionnel.`
+      prompt: `Crée un message de suivi pour ${lead.name || 'ce client'} qui fait référence à son projet ${lead.propertyTypes ? lead.propertyTypes.join(', ') : 'immobilier'} à ${lead.desiredLocation || ''}. Le message doit être personnalisé et professionnel.`
     }
-  ];
+  ] : [];
 
   if (isLoading) {
     return (
@@ -282,44 +288,53 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             ASSISTANT IA
           </h3>
           <div className="mt-3 space-y-4">
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {quickPrompts.map((quickPrompt) => (
-                <Button
-                  key={quickPrompt.id}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPrompt(quickPrompt.prompt)}
-                  className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10"
-                >
-                  {quickPrompt.label}
-                </Button>
-              ))}
-            </div>
-            <div className="space-y-2">
-              <Textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Ex. Propose une relance WhatsApp ou un résumé du client..."
-                className="w-full min-h-[80px] text-sm"
-              />
-              <Button
-                onClick={handleSendToGPT}
-                disabled={isAiLoading || !prompt}
-                className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white"
-              >
-                {isAiLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full" />
-                    Envoi en cours...
-                  </div>
-                ) : (
-                  <>
-                    <PlaneTakeoff className="h-4 w-4 mr-2" />
-                    Envoyer à l'IA
-                  </>
-                )}
-              </Button>
-            </div>
+            {lead ? (
+              <>
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {quickPrompts.map((quickPrompt) => (
+                    <Button
+                      key={quickPrompt.id}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPrompt(quickPrompt.prompt)}
+                      className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10"
+                    >
+                      {quickPrompt.label}
+                    </Button>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder="Ex. Propose une relance WhatsApp ou un résumé du client..."
+                    className="w-full min-h-[80px] text-sm"
+                  />
+                  <Button
+                    onClick={handleSendToGPT}
+                    disabled={isAiLoading || !prompt}
+                    className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white"
+                  >
+                    {isAiLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full" />
+                        Envoi en cours...
+                      </div>
+                    ) : (
+                      <>
+                        <PlaneTakeoff className="h-4 w-4 mr-2" />
+                        Envoyer à l'IA
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="border rounded-md p-4 bg-red-100 text-center">
+                <p className="text-red-600 font-medium mb-1">Erreur</p>
+                <p className="text-sm">Veuillez entrer un message et attendre que les données du lead soient chargées.</p>
+              </div>
+            )}
             {lead ? (
               <LeadAIAssistant lead={lead} />
             ) : (
