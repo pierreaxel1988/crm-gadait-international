@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -6,7 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { LeadDetailed } from '@/types/lead';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, User, Home } from 'lucide-react';
+import { Bot, MessageCircle, User, Home } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface AssistantIAProps {
