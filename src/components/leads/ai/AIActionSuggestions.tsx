@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Lightbulb, Loader2, RefreshCw } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
@@ -52,39 +51,27 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
     }
   };
 
-  const handleImplementSuggestion = async (suggestion: AISuggestedAction) => {
-    try {
-      setIsLoading(true);
-      const success = await implementSuggestedAction(lead.id, suggestion);
+  const handleDismissSuggestion = (suggestion: AISuggestedAction) => {
+    setSuggestions(current => {
+      const updatedSuggestions = current.filter(s => s.id !== suggestion.id);
       
-      if (success) {
-        setSuggestions(current => current.filter(s => s.id !== suggestion.id));
-        onActionAdded();
-        
-        toast({
-          title: "Action ajoutée",
-          description: `${suggestion.actionType} a été ajouté avec succès`
-        });
-      }
-    } catch (error) {
-      console.error('Error implementing suggestion:', error);
       toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'ajouter l'action suggérée"
+        title: "Suggestion ignorée",
+        description: `L'action "${suggestion.actionType}" a été retirée des suggestions`
       });
-    } finally {
-      setIsLoading(false);
-    }
+      
+      return updatedSuggestions;
+    });
   };
 
-  const handleDismissSuggestion = (suggestion: AISuggestedAction) => {
-    setSuggestions(current => current.filter(s => s.id !== suggestion.id));
+  const handleManualRefresh = () => {
+    setLastLoadTime(0);
+    loadSuggestions();
   };
 
   if (isLoading) {
     return (
-      <div className="border rounded-lg p-4 bg-loro-pearl/20 flex flex-col items-center justify-center animate-[fade-in_0.3s_ease-out] space-y-2.5">
+      <div className="border rounded-lg p-4 bg-loro-pearl/20 flex flex-col items-center justify-center animate-[fade-in_0.3s_ease-out] space-y-3">
         <Loader2 className="h-6 w-6 text-loro-navy animate-spin" />
         <p className="text-sm text-loro-navy/80 font-medium">Génération des suggestions...</p>
       </div>
@@ -96,11 +83,11 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
       <div className="border rounded-lg p-4 bg-red-50 animate-[fade-in_0.3s_ease-out] space-y-3">
         <p className="text-sm text-red-600 text-center font-medium">{error}</p>
         <div className="flex justify-center">
-          <Button 
-            onClick={loadSuggestions}
-            variant="outline"
+          <Button
+            onClick={handleManualRefresh}
+            variant="destructive"
             size="sm"
-            className="text-sm border-red-200 text-red-600 hover:bg-red-50 h-9 px-4"
+            className="text-sm h-9 px-4"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Réessayer
