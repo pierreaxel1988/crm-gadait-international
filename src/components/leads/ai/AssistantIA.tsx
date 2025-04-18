@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -5,7 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { LeadDetailed } from '@/types/lead';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bot, MessageCircle, User, Home } from 'lucide-react';
+import { Bot, MessageCircle, User, Home, Lightbulb, ChevronRight, Copy, Check } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface AssistantIAProps {
@@ -14,11 +15,20 @@ interface AssistantIAProps {
   refresh?: () => void;
 }
 
+interface ActionSuggestion {
+  type: string;
+  description: string;
+  messageTexte: string;
+}
+
 const AssistantIA: React.FC<AssistantIAProps> = ({ leadId, lead, refresh }) => {
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [aiResponse, setAIResponse] = useState<string | null>(null);
   const [history, setHistory] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<ActionSuggestion[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [isCopied, setIsCopied] = useState<string | null>(null);
 
   const quickActions = [
     {
@@ -108,8 +118,61 @@ const AssistantIA: React.FC<AssistantIAProps> = ({ leadId, lead, refresh }) => {
     }
   };
 
+  const fetchActionSuggestions = async () => {
+    if (!lead) return;
+    
+    setSuggestionsLoading(true);
+    try {
+      const response = await fetch("https://hxqoqkfnhbpwzkjgukrc.functions.supabase.co/lead-action-suggestions", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ lead })
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la génération des suggestions");
+      }
+
+      const data = await response.json();
+      if (data.actions && Array.isArray(data.actions)) {
+        setSuggestions(data.actions);
+      } else {
+        console.warn("Format de réponse inattendu pour les suggestions d'actions:", data);
+        setSuggestions([]);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la génération des suggestions:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de générer des suggestions d'actions"
+      });
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setIsCopied(id);
+    
+    toast({
+      title: "Texte copié",
+      description: "Le message a été copié dans le presse-papier"
+    });
+    
+    setTimeout(() => {
+      setIsCopied(null);
+    }, 2000);
+  };
+
   useEffect(() => {
-    if (leadId) fetchHistory();
+    if (leadId) {
+      fetchHistory();
+      fetchActionSuggestions();
+    }
   }, [leadId]);
 
   return (
@@ -117,6 +180,62 @@ const AssistantIA: React.FC<AssistantIAProps> = ({ leadId, lead, refresh }) => {
       <div className="flex items-center gap-2 pb-2">
         <h3 className="text-xl font-futura">ACTIONS IA (mobile)</h3>
       </div>
+
+      {suggestions.length > 0 && (
+        <div className="mb-4 space-y-3 animate-[fade-in_0.4s_ease-out]">
+          <h4 className="font-futura text-sm uppercase tracking-wider text-gray-700 border-b pb-1">Suggestions d'actions</h4>
+          
+          {suggestions.map((suggestion, i) => (
+            <div key={i} className="bg-loro-pearl/30 border rounded-lg p-3 space-y-2">
+              <div className="flex items-start gap-2">
+                <div className="h-7 w-7 rounded-full bg-loro-sand flex items-center justify-center shrink-0 mt-0.5">
+                  <Lightbulb className="h-4 w-4 text-loro-navy" />
+                </div>
+                <div className="space-y-1 flex-1">
+                  <h5 className="font-medium text-sm">{suggestion.type}</h5>
+                  <p className="text-xs text-gray-600">{suggestion.description}</p>
+                  
+                  <div className="bg-white rounded-md p-2 text-xs mt-2 border relative">
+                    <p className="whitespace-pre-wrap">{suggestion.messageTexte}</p>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="absolute top-1 right-1 h-6 w-6 p-0"
+                      onClick={() => copyToClipboard(suggestion.messageTexte, `suggestion-${i}`)}
+                    >
+                      {isCopied === `suggestion-${i}` ? (
+                        <Check className="h-3.5 w-3.5 text-green-500" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5 text-gray-400" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full border-loro-navy text-loro-navy hover:bg-loro-pearl/20"
+            onClick={fetchActionSuggestions}
+            disabled={suggestionsLoading}
+          >
+            {suggestionsLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin h-4 w-4 border-2 border-loro-navy/20 border-t-loro-navy rounded-full" />
+                Génération en cours...
+              </div>
+            ) : (
+              <>
+                <Lightbulb className="mr-2 h-4 w-4" />
+                Générer nouvelles suggestions
+              </>
+            )}
+          </Button>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-3">
         {quickActions.map((action, i) => (

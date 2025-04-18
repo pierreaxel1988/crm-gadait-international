@@ -1,16 +1,17 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
 import { format, isPast } from 'date-fns';
-import { Check, Clock, Calendar, Trash2, PlaneTakeoff } from 'lucide-react';
+import { Check, Clock, Calendar, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
 import { toast } from '@/hooks/use-toast';
 import { updateLead } from '@/services/leadUpdater';
 import { AIActionSuggestions } from '@/components/leads/ai/AIActionSuggestions';
-import { Textarea } from '@/components/ui/textarea';
 import AssistantIA from '@/components/leads/ai/AssistantIA';
+import LeadActionSuggestions from '@/components/leads/ai/LeadActionSuggestions';
 
 interface ActionsPanelMobileProps {
   leadId: string;
@@ -30,8 +31,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>(initialActionHistory || []);
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
-  const [prompt, setPrompt] = useState("");
-  const [isAiLoading, setIsAiLoading] = useState(false);
 
   useEffect(() => {
     const measureHeader = () => {
@@ -189,12 +188,9 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       {leadId && lead && (
         <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
           <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3">
-            ACTIONS SUGGÉRÉES PAR IA
+            SUGGESTIONS D'ACTIONS IA
           </h3>
-          <AIActionSuggestions 
-            lead={lead}
-            onActionAdded={fetchLeadData}
-          />
+          <LeadActionSuggestions lead={lead} />
         </div>
       )}
       
