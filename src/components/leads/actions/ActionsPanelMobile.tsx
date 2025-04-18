@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -60,7 +59,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       setActionHistory(initialActionHistory);
     }
     
-    // Toujours charger les données du lead, même si actionHistory est fourni
     fetchLeadData();
   }, [leadId, initialActionHistory]);
 
@@ -149,7 +147,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
     setIsAiLoading(true);
     try {
-      // Formatage correct des données du lead pour l'envoi à l'API
       const bedroomsDisplay = Array.isArray(lead.bedrooms) 
         ? lead.bedrooms.join(', ') 
         : typeof lead.bedrooms === 'number'
@@ -195,10 +192,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         description: "L'assistant traite votre demande"
       });
 
-      // Clear the prompt after successful send
       setPrompt("");
       
-      // Refresh the lead data to get any new suggestions
       fetchLeadData();
 
     } catch (error) {
@@ -248,7 +243,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
 
-  // Création de prompts seulement si lead est disponible et a été chargé
   const quickPrompts = lead ? [
     {
       id: 'follow-up',
@@ -276,15 +270,12 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   }
 
   return (
-    <div 
-      className="space-y-3 pt-4"
-      style={{ marginTop: dynamicTopMargin }}
-    >
+    <div className="space-y-4 px-4">
       {/* AI Action Suggestions */}
       {leadId && lead && (
-        <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3">
-            ACTIONS SUGGÉRÉES PAR IA
+        <div className="mb-4">
+          <h3 className="text-xs font-medium text-muted-foreground uppercase mb-2.5">
+            Actions suggérées par IA
           </h3>
           <AIActionSuggestions 
             lead={lead}
@@ -295,14 +286,14 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {/* Assistant IA - avec prompts rapides */}
       {leadId && (
-        <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">
-            ASSISTANT IA
+        <div className="mb-4">
+          <h3 className="text-xs font-medium text-muted-foreground uppercase mb-2.5">
+            Assistant IA
           </h3>
-          <div className="mt-3 space-y-4">
+          <div className="mt-2 space-y-3">
             {lead ? (
               <>
-                <div className="flex gap-2 overflow-x-auto pb-2">
+                <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-2">
                   {quickPrompts.map((quickPrompt) => (
                     <Button
                       key={quickPrompt.id}
@@ -371,91 +362,95 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         </div>
       )}
       
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">ACTIONS EN ATTENTE</h3>
-      </div>
+      <div>
+        <h3 className="text-xs font-medium text-muted-foreground uppercase mb-2.5">
+          Actions en attente
+        </h3>
 
-      {pendingActions.length === 0 ? (
-        <div className="text-center py-5 border rounded-md bg-gray-50 animate-[fade-in_0.3s_ease-out]">
-          <p className="text-muted-foreground text-xs font-futura">Aucune action en attente</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {pendingActions.map((action) => {
-            const isOverdue = isDatePast(action.scheduledDate);
-            const isCallAction = action.actionType === 'Call';
-            
-            const bgColorClass = isOverdue 
-              ? isCallAction
-                ? 'bg-[#F8E2E8]/30' 
-                : 'bg-[#FFDEE2]/30' 
-              : 'bg-[#F2FCE2]/40 border-green-100';
-            
-            const iconBgClass = isCallAction
-              ? isOverdue
-                ? 'bg-[#F8E2E8] text-[#D05A76]'
-                : 'bg-[#EBD5CE] text-[#D05A76]'
-              : isOverdue
-                ? 'bg-rose-100 text-rose-600'
-                : 'bg-green-100 text-green-600';
-                
-            const notesBgClass = isOverdue 
-              ? isCallAction
-                ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
-                : 'bg-[#FFF0F2] text-rose-800 border border-pink-100'
-              : 'bg-[#F7FEF1] text-green-800 border border-green-100';
-            
-            return (
-              <div 
-                key={action.id} 
-                className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${bgColorClass} relative`}
-              >
-                <div className="flex justify-between items-start mb-1">
-                  <div className="flex items-center gap-1.5">
-                    <div className={`h-6 w-6 rounded-full flex items-center justify-center ${iconBgClass}`}>
-                      <Calendar className="h-3 w-3" />
-                    </div>
-                    <div>
-                      <h4 className="font-futura text-sm">{action.actionType}</h4>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <Clock className="h-2.5 w-2.5 mr-1" />
-                        {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
+        {pendingActions.length === 0 ? (
+          <div className="text-center py-4 border rounded-md bg-gray-50">
+            <p className="text-muted-foreground text-xs">Aucune action en attente</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {pendingActions.map((action) => {
+              const isOverdue = isDatePast(action.scheduledDate);
+              const isCallAction = action.actionType === 'Call';
+              
+              const bgColorClass = isOverdue 
+                ? isCallAction
+                  ? 'bg-[#F8E2E8]/30' 
+                  : 'bg-[#FFDEE2]/30' 
+                : 'bg-[#F2FCE2]/40 border-green-100';
+              
+              const iconBgClass = isCallAction
+                ? isOverdue
+                  ? 'bg-[#F8E2E8] text-[#D05A76]'
+                  : 'bg-[#EBD5CE] text-[#D05A76]'
+                : isOverdue
+                  ? 'bg-rose-100 text-rose-600'
+                  : 'bg-green-100 text-green-600';
+                  
+              const notesBgClass = isOverdue 
+                ? isCallAction
+                  ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
+                  : 'bg-[#FFF0F2] text-rose-800 border border-pink-100'
+                : 'bg-[#F7FEF1] text-green-800 border border-green-100';
+              
+              return (
+                <div 
+                  key={action.id} 
+                  className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${bgColorClass} relative`}
+                >
+                  <div className="flex justify-between items-start mb-1">
+                    <div className="flex items-center gap-1.5">
+                      <div className={`h-6 w-6 rounded-full flex items-center justify-center ${iconBgClass}`}>
+                        <Calendar className="h-3 w-3" />
+                      </div>
+                      <div>
+                        <h4 className="font-futura text-sm">{action.actionType}</h4>
+                        <div className="flex items-center text-xs text-gray-500">
+                          <Clock className="h-2.5 w-2.5 mr-1" />
+                          {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
+                        </div>
                       </div>
                     </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95"
+                      onClick={() => onMarkComplete(action)}
+                    >
+                      <Check className="h-3 w-3 mr-1" /> 
+                      <span className="text-xs font-futura">Terminer</span>
+                    </Button>
                   </div>
+                  {action.notes && (
+                    <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${notesBgClass}`}>
+                      {action.notes}
+                    </div>
+                  )}
                   <Button 
-                    variant="outline" 
+                    variant="ghost" 
                     size="sm" 
-                    className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95"
-                    onClick={() => onMarkComplete(action)}
+                    className="absolute bottom-1 right-1 h-6 w-6 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
+                    onClick={() => handleDeleteAction(action.id)}
+                    title="Supprimer cette action"
                   >
-                    <Check className="h-3 w-3 mr-1" /> 
-                    <span className="text-xs font-futura">Terminer</span>
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
-                {action.notes && (
-                  <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${notesBgClass}`}>
-                    {action.notes}
-                  </div>
-                )}
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="absolute bottom-1 right-1 h-6 w-6 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
-                  onClick={() => handleDeleteAction(action.id)}
-                  title="Supprimer cette action"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
       
       {completedActions.length > 0 && (
-        <>
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3">HISTORIQUE DES ACTIONS</h3>
+        <div>
+          <h3 className="text-xs font-medium text-muted-foreground uppercase mb-2.5">
+            Historique des actions
+          </h3>
           <div className="space-y-2">
             {completedActions.map((action) => (
               <div 
@@ -496,7 +491,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
