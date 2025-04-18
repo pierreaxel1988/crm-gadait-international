@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
 import { format, isPast } from 'date-fns';
-import { Check, Clock, Calendar, Trash2, PlaneTakeoff } from 'lucide-react';
+import { Check, Clock, Calendar, Trash2, PlaneTakeoff, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
@@ -209,8 +208,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     }
   };
 
-  const getActionTypeIcon = (actionType: string) => {
-    switch (actionType) {
+  const getActionTypeIcon = (type: string) => {
+    switch (type) {
       case 'Call': return <span className="bg-[#EBD5CE] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
       case 'Visites': return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs font-futura">Visite</span>;
       case 'Compromis': return <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-futura">Compromis</span>;
@@ -225,24 +224,12 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     }
   };
 
-  const sortedActions = [...actionHistory].sort((a, b) => {
+  const sortedActions = [...(actionHistory || [])].sort((a, b) => {
     return new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime();
   });
 
   const pendingActions = sortedActions.filter(action => !action.completedDate);
   const completedActions = sortedActions.filter(action => action.completedDate);
-  
-  const isDatePast = (dateString: string): boolean => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const date = new Date(dateString);
-    date.setHours(0, 0, 0, 0);
-    return date < today;
-  };
-
-  const dynamicTopMargin = isHeaderMeasured 
-    ? `${Math.max(headerHeight + 8, 32)}px` 
-    : 'calc(32px + 4rem)';
 
   const quickPrompts = lead ? [
     {
@@ -262,21 +249,13 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     }
   ] : [];
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center p-4">
-        <div className="animate-spin h-5 w-5 border-3 border-chocolate-dark rounded-full border-t-transparent"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-4 px-2 max-w-full overflow-x-hidden">
+    <div className="space-y-6">
       {/* AI Action Suggestions */}
       {leadId && lead && (
-        <div className="mb-4">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase mb-2.5">
-            Actions suggérées par IA
+        <div>
+          <h3 className="text-xs font-futura text-loro-navy/60 uppercase tracking-wide mb-3">
+            Suggestions d'actions
           </h3>
           <AIActionSuggestions 
             lead={lead}
@@ -287,159 +266,174 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {/* Assistant IA - avec prompts rapides */}
       {leadId && (
-        <div className="mb-4">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase mb-2.5">
+        <div className="bg-white rounded-xl border border-loro-pearl/20 overflow-hidden">
+          <h3 className="text-xs font-futura text-loro-navy/60 uppercase tracking-wide p-3 border-b border-loro-pearl/20 bg-loro-pearl/5">
             Assistant IA
           </h3>
-          <div className="mt-2 space-y-3">
+          
+          <div className="p-3 space-y-3">
             {lead ? (
               <>
-                <div className="flex gap-2 overflow-x-auto -mx-2 px-2 pb-2 no-scrollbar">
+                <div className="flex gap-2 overflow-x-auto -mx-3 px-3 pb-2 no-scrollbar">
                   {quickPrompts.map((quickPrompt) => (
                     <Button
                       key={quickPrompt.id}
                       variant="outline"
                       size="sm"
                       onClick={() => setPrompt(quickPrompt.prompt)}
-                      className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10 shrink-0"
+                      className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10 shrink-0 font-futuraLight"
                     >
                       {quickPrompt.label}
                     </Button>
                   ))}
                 </div>
+                
                 <div className="space-y-2">
                   <Textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     placeholder="Ex. Propose une relance WhatsApp ou un résumé du client..."
-                    className="w-full min-h-[80px] text-sm"
+                    className="w-full min-h-[80px] text-sm font-futuraLight"
                   />
                   <Button
                     onClick={handleSendToGPT}
                     disabled={isAiLoading || !prompt}
-                    className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white"
+                    className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white font-futura"
                   >
                     {isAiLoading ? (
                       <div className="flex items-center gap-2">
                         <div className="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full" />
-                        Envoi en cours...
+                        <span>Envoi en cours...</span>
                       </div>
                     ) : (
                       <>
                         <PlaneTakeoff className="h-4 w-4 mr-2" />
-                        Envoyer à l'IA
+                        <span>Envoyer à l'IA</span>
                       </>
                     )}
                   </Button>
                 </div>
               </>
             ) : (
-              <div className="border rounded-md p-4 bg-red-100 text-center">
-                <p className="text-red-600 font-medium mb-1">Erreur</p>
-                <p className="text-sm">{loadError || "Impossible de charger les données du lead. Veuillez rafraîchir la page."}</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={fetchLeadData}
-                  className="mt-2 text-xs"
-                >
-                  Réessayer
-                </Button>
-              </div>
-            )}
-            
-            {lead ? (
-              <LeadAIAssistant lead={lead} />
-            ) : loadError ? (
-              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50">
-                <p className="text-sm text-muted-foreground">Assistant IA non disponible</p>
-              </div>
-            ) : (
-              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50">
-                <div className="animate-spin h-5 w-5 border-3 border-chocolate-dark rounded-full border-t-transparent" />
+              <div className="text-center py-4">
+                <p className="text-sm text-loro-navy/60 font-futuraLight">
+                  Assistant IA non disponible
+                </p>
               </div>
             )}
           </div>
+          
+          {lead && <LeadAIAssistant lead={lead} />}
         </div>
       )}
       
+      {/* Actions en attente */}
       <div>
-        <h3 className="text-xs font-medium text-muted-foreground uppercase mb-2.5">
-          Actions en attente
-        </h3>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-xs font-futura text-loro-navy/60 uppercase tracking-wide">
+            Actions en attente ({pendingActions.length})
+          </h3>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onAddAction}
+            className="h-8 px-3 text-xs font-futura border-loro-sand hover:bg-loro-sand/10"
+          >
+            <Plus className="h-4 w-4 mr-1.5" />
+            Nouvelle action
+          </Button>
+        </div>
 
         {pendingActions.length === 0 ? (
-          <div className="text-center py-4 border rounded-md bg-gray-50">
-            <p className="text-muted-foreground text-xs">Aucune action en attente</p>
+          <div className="text-center py-6 px-4 bg-loro-pearl/5 rounded-xl border border-loro-pearl/20">
+            <Calendar className="h-6 w-6 text-loro-navy/40 mx-auto mb-2" />
+            <p className="text-sm text-loro-navy/60 font-futuraLight">
+              Aucune action en attente
+            </p>
           </div>
         ) : (
           <div className="space-y-2">
             {pendingActions.map((action) => {
-              const isOverdue = isDatePast(action.scheduledDate);
+              const isOverdue = isPast(new Date(action.scheduledDate));
               const isCallAction = action.actionType === 'Call';
               
               return (
                 <div 
                   key={action.id} 
-                  className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] relative w-full ${
+                  className={cn(
+                    "rounded-xl border p-3 animate-[fade-in_0.3s_ease-out] relative w-full",
                     isOverdue 
                       ? isCallAction 
-                        ? 'bg-[#F8E2E8]/30' 
-                        : 'bg-[#FFDEE2]/30' 
+                        ? 'bg-[#FDF4F6]/50 border-pink-200' 
+                        : 'bg-[#FFDEE2]/30 border-pink-200' 
                       : 'bg-[#F2FCE2]/40 border-green-100'
-                  }`}
+                  )}
                 >
-                  <div className="flex justify-between items-start mb-1">
-                    <div className="flex items-center gap-1.5 max-w-[70%]">
-                      <div className={`h-6 w-6 rounded-full flex items-center justify-center shrink-0 ${
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="flex items-start gap-2 min-w-0 flex-1">
+                      <div className={cn(
+                        "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
                         isCallAction
                           ? isOverdue
-                            ? 'bg-[#F8E2E8] text-[#D05A76]'
+                            ? 'bg-[#FDF4F6] text-[#D05A76]'
                             : 'bg-[#EBD5CE] text-[#D05A76]'
                           : isOverdue
                             ? 'bg-rose-100 text-rose-600'
                             : 'bg-green-100 text-green-600'
-                      }`}>
-                        <Calendar className="h-3 w-3" />
+                      )}>
+                        <Calendar className="h-4 w-4" />
                       </div>
-                      <div className="min-w-0">
-                        <h4 className="font-futura text-sm truncate">{action.actionType}</h4>
-                        <div className="flex items-center text-xs text-gray-500 truncate">
-                          <Clock className="h-2.5 w-2.5 mr-1 shrink-0" />
-                          <span className="truncate">{format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}</span>
+                      
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          {getActionTypeIcon(action.actionType)}
+                          <span className="text-xs text-gray-500 font-futuraLight">
+                            <Clock className="h-3 w-3 inline-block mr-1" />
+                            {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
+                          </span>
                         </div>
+                        
+                        {action.notes && (
+                          <p className={cn(
+                            "text-xs p-2 rounded-lg mt-2 break-words w-full font-futuraLight",
+                            isOverdue 
+                              ? isCallAction
+                                ? 'bg-white text-[#D05A76] border border-pink-100'
+                                : 'bg-white text-rose-800 border border-pink-100'
+                              : 'bg-white text-green-800 border border-green-100'
+                          )}>
+                            {action.notes}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95 shrink-0"
-                      onClick={() => onMarkComplete(action)}
-                    >
-                      <Check className="h-3 w-3 mr-1" /> 
-                      <span className="text-xs font-futura">Terminer</span>
-                    </Button>
-                  </div>
-                  {action.notes && (
-                    <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] break-words w-full ${
-                      isOverdue 
-                        ? isCallAction
-                          ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
-                          : 'bg-[#FFF0F2] text-rose-800 border border-pink-100'
-                        : 'bg-[#F7FEF1] text-green-800 border border-green-100'
-                    }`}>
-                      {action.notes}
+                    
+                    <div className="flex flex-col gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className={cn(
+                          "h-8 px-3 font-futura text-xs whitespace-nowrap",
+                          isOverdue
+                            ? "border-rose-300 text-rose-600 hover:bg-rose-50"
+                            : "border-green-300 text-green-600 hover:bg-green-50"
+                        )}
+                        onClick={() => onMarkComplete(action)}
+                      >
+                        <Check className="h-3.5 w-3.5 mr-1.5" />
+                        Terminer
+                      </Button>
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
+                        onClick={() => handleDeleteAction(action.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  )}
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="absolute bottom-1 right-1 h-6 w-6 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
-                    onClick={() => handleDeleteAction(action.id)}
-                    title="Supprimer cette action"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  </div>
                 </div>
               );
             })}
@@ -447,48 +441,51 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         )}
       </div>
       
+      {/* Actions terminées */}
       {completedActions.length > 0 && (
         <div>
-          <h3 className="text-xs font-medium text-muted-foreground uppercase mb-2.5">
-            Historique des actions
+          <h3 className="text-xs font-futura text-loro-navy/60 uppercase tracking-wide mb-3">
+            Actions terminées ({completedActions.length})
           </h3>
+          
           <div className="space-y-2">
             {completedActions.map((action) => (
               <div 
                 key={action.id} 
-                className={cn(
-                  "border rounded-md p-2 bg-[#F1F0FB] transition-all duration-200 animate-[fade-in_0.3s_ease-out] w-full",
-                  "opacity-80 relative"
-                )}
+                className="rounded-xl border border-gray-200 p-3 bg-[#F1F0FB]/50 relative w-full animate-[fade-in_0.3s_ease-out]"
               >
-                <div className="flex justify-between items-start mb-1">
-                  <div className="flex items-center gap-1.5 max-w-[80%]">
-                    <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0">
-                      <Check className="h-3 w-3" />
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex items-start gap-2 min-w-0 flex-1">
+                    <div className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center text-green-600 shrink-0">
+                      <Check className="h-4 w-4" />
                     </div>
-                    <div className="min-w-0">
-                      <h4 className="font-futura text-sm text-gray-700 truncate">{action.actionType}</h4>
-                      <div className="flex items-center text-xs text-gray-500 truncate">
-                        <Check className="h-2.5 w-2.5 mr-1 text-green-500 shrink-0" />
-                        <span className="truncate">{action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}</span>
+                    
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        {getActionTypeIcon(action.actionType)}
+                        <span className="text-xs text-gray-500 font-futuraLight">
+                          <Check className="h-3 w-3 inline-block mr-1 text-green-500" />
+                          {action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}
+                        </span>
                       </div>
+                      
+                      {action.notes && (
+                        <p className="text-xs p-2 rounded-lg mt-2 bg-white text-gray-600 break-words w-full font-futuraLight border border-gray-100">
+                          {action.notes}
+                        </p>
+                      )}
                     </div>
                   </div>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent shrink-0"
+                    onClick={() => handleDeleteAction(action.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                {action.notes && (
-                  <div className="text-xs bg-white p-1.5 rounded-md mt-1.5 text-gray-600 break-words w-full animate-[fade-in_0.2s_ease-out] border border-gray-100">
-                    {action.notes}
-                  </div>
-                )}
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="absolute bottom-1 right-1 h-6 w-6 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
-                  onClick={() => handleDeleteAction(action.id)}
-                  title="Supprimer cette action"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
               </div>
             ))}
           </div>
@@ -496,6 +493,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       )}
     </div>
   );
-}
+};
 
 export default ActionsPanelMobile;
