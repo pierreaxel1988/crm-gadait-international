@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -210,16 +211,16 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
   const getActionTypeIcon = (actionType: string) => {
     switch (actionType) {
-      case 'Call': return <span className="bg-[#EBD5CE] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
-      case 'Visites': return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs font-futura">Visite</span>;
-      case 'Compromis': return <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-futura">Compromis</span>;
-      case 'Acte de vente': return <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs font-futura">Acte de vente</span>;
-      case 'Contrat de Location': return <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-futura">Contrat Location</span>;
-      case 'Propositions': return <span className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full text-xs font-futura">Proposition</span>;
-      case 'Follow up': return <span className="bg-pink-100 text-pink-800 px-2 py-0.5 rounded-full text-xs font-futura">Follow-up</span>;
-      case 'Estimation': return <span className="bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full text-xs font-futura">Estimation</span>;
-      case 'Prospection': return <span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-xs font-futura">Prospection</span>;
-      case 'Admin': return <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs font-futura">Admin</span>;
+      case 'Call': return <span className="bg-[#EBD5CE] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura whitespace-nowrap overflow-hidden text-ellipsis">Appel</span>;
+      case 'Visites': return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs font-futura whitespace-nowrap overflow-hidden text-ellipsis">Visite</span>;
+      case 'Compromis': return <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-futura whitespace-nowrap overflow-hidden text-ellipsis">Compromis</span>;
+      case 'Acte de vente': return <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs font-futura whitespace-nowrap overflow-hidden text-ellipsis">Acte de vente</span>;
+      case 'Contrat de Location': return <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-futura whitespace-nowrap overflow-hidden text-ellipsis">Location</span>;
+      case 'Propositions': return <span className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full text-xs font-futura whitespace-nowrap overflow-hidden text-ellipsis">Proposition</span>;
+      case 'Follow up': return <span className="bg-pink-100 text-pink-800 px-2 py-0.5 rounded-full text-xs font-futura whitespace-nowrap overflow-hidden text-ellipsis">Follow-up</span>;
+      case 'Estimation': return <span className="bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full text-xs font-futura whitespace-nowrap overflow-hidden text-ellipsis">Estimation</span>;
+      case 'Prospection': return <span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-xs font-futura whitespace-nowrap overflow-hidden text-ellipsis">Prospection</span>;
+      case 'Admin': return <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs font-futura whitespace-nowrap overflow-hidden text-ellipsis">Admin</span>;
       default: return null;
     }
   };
@@ -270,10 +271,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   }
 
   return (
-    <div className="space-y-2.5 pt-2">
+    <div className="space-y-2.5 pt-2 px-4 box-border max-w-full overflow-hidden">
       {leadId && lead && (
-        <div className="mb-4 animate-[fade-in_0.4s_ease-out]">
-          <div className="flex items-center justify-between mb-2">
+        <div className="mb-4 animate-[fade-in_0.4s_ease-out] w-full box-border">
+          <div className="flex items-center justify-between mb-2 w-full">
             <h3 className="text-xs font-futura uppercase tracking-wider text-loro-navy/90">
               Suggestions IA
             </h3>
@@ -286,16 +287,16 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       )}
       
       {leadId && (
-        <div className="mb-4 animate-[fade-in_0.4s_ease-out]">
-          <div className="flex items-center justify-between mb-2">
+        <div className="mb-4 animate-[fade-in_0.4s_ease-out] w-full box-border">
+          <div className="flex items-center justify-between mb-2 w-full">
             <h3 className="text-xs font-futura uppercase tracking-wider text-loro-navy/90">
               Assistant IA
             </h3>
           </div>
           
           {lead ? (
-            <div className="space-y-2.5">
-              <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-4 px-4">
+            <div className="space-y-2.5 w-full">
+              <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-4 px-4 w-full box-border">
                 {quickPrompts.map((quickPrompt) => (
                   <Button
                     key={quickPrompt.id}
@@ -309,17 +310,17 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 ))}
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-2 w-full box-border">
                 <Textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Ex. Propose une relance WhatsApp..."
-                  className="w-full min-h-[80px] text-sm resize-none"
+                  className="w-full min-h-[80px] text-sm resize-none box-border"
                 />
                 <Button
                   onClick={handleSendToGPT}
                   disabled={isAiLoading || !prompt}
-                  className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white h-9"
+                  className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white h-9 box-border"
                 >
                   {isAiLoading ? (
                     <div className="flex items-center gap-2">
@@ -336,7 +337,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               </div>
             </div>
           ) : loadError ? (
-            <div className="rounded-lg p-3 bg-red-50/50 text-center">
+            <div className="rounded-lg p-3 bg-red-50/50 text-center w-full box-border">
               <p className="text-red-600 text-xs">{loadError}</p>
               <Button
                 variant="outline"
@@ -349,22 +350,22 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             </div>
           ) : null}
           
-          {lead && <LeadAIAssistant lead={lead} className="mt-3" />}
+          {lead && <LeadAIAssistant lead={lead} className="mt-3 w-full max-w-full box-border" />}
         </div>
       )}
       
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2 w-full">
         <h3 className="text-xs font-futura uppercase tracking-wider text-loro-navy/90">
           Actions en attente
         </h3>
       </div>
 
       {pendingActions.length === 0 ? (
-        <div className="text-center py-4 rounded-lg bg-gray-50/80 animate-[fade-in_0.3s_ease-out]">
+        <div className="text-center py-4 rounded-lg bg-gray-50/80 animate-[fade-in_0.3s_ease-out] w-full box-border">
           <p className="text-muted-foreground text-[11px] font-futura">Aucune action en attente</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 w-full box-border">
           {pendingActions.map((action) => {
             const isOverdue = isDatePast(action.scheduledDate);
             const isCallAction = action.actionType === 'Call';
@@ -373,7 +374,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               <div 
                 key={action.id} 
                 className={cn(
-                  "border rounded-lg p-2.5 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] relative",
+                  "border rounded-lg p-2.5 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] relative w-full box-border",
                   isOverdue 
                     ? isCallAction
                       ? 'bg-[#F8E2E8]/30 border-pink-100' 
@@ -381,19 +382,19 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     : 'bg-[#F2FCE2]/40 border-green-100'
                 )}
               >
-                <div className="flex justify-between items-start mb-1.5">
-                  <div className="flex items-center gap-1.5">
+                <div className="flex justify-between items-start mb-1.5 w-full">
+                  <div className="flex items-center gap-1.5 max-w-[60%]">
                     {getActionTypeIcon(action.actionType)}
-                    <div className="flex items-center text-[10px] text-gray-500">
-                      <Clock className="h-2.5 w-2.5 mr-1" />
-                      {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
+                    <div className="flex items-center text-[10px] text-gray-500 truncate">
+                      <Clock className="h-2.5 w-2.5 mr-1 flex-shrink-0" />
+                      <span className="truncate">{format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="h-7 w-7 p-0 rounded-full border-green-500 text-green-600 hover:bg-green-50 active:scale-95 transition-all duration-200"
+                      className="h-7 w-7 p-0 rounded-full border-green-500 text-green-600 hover:bg-green-50 active:scale-95 transition-all duration-200 flex-shrink-0"
                       onClick={() => onMarkComplete(action)}
                     >
                       <Check className="h-3.5 w-3.5" />
@@ -402,7 +403,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="h-7 w-7 p-0 rounded-full text-gray-400 hover:text-rose-500 hover:bg-transparent"
+                      className="h-7 w-7 p-0 rounded-full text-gray-400 hover:text-rose-500 hover:bg-transparent flex-shrink-0"
                       onClick={() => handleDeleteAction(action.id)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -413,7 +414,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 
                 {action.notes && (
                   <div className={cn(
-                    "text-[11px] p-2 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out]",
+                    "text-[11px] p-2 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] w-full box-border overflow-hidden break-words",
                     isOverdue 
                       ? isCallAction
                         ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100' 
@@ -434,24 +435,24 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
           <h3 className="text-xs font-futura uppercase tracking-wider text-loro-navy/90 mt-4 mb-2">
             Historique
           </h3>
-          <div className="space-y-2">
+          <div className="space-y-2 w-full box-border">
             {completedActions.map((action) => (
               <div 
                 key={action.id} 
-                className="border rounded-lg p-2.5 bg-[#F1F0FB]/50 opacity-80 relative animate-[fade-in_0.3s_ease-out]"
+                className="border rounded-lg p-2.5 bg-[#F1F0FB]/50 opacity-80 relative animate-[fade-in_0.3s_ease-out] w-full box-border"
               >
-                <div className="flex justify-between items-start mb-1.5">
-                  <div className="flex items-center gap-1.5">
+                <div className="flex justify-between items-start mb-1.5 w-full">
+                  <div className="flex items-center gap-1.5 max-w-[60%]">
                     {getActionTypeIcon(action.actionType)}
-                    <div className="flex items-center text-[10px] text-gray-500">
-                      <Check className="h-2.5 w-2.5 mr-1 text-green-500" />
-                      {action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}
+                    <div className="flex items-center text-[10px] text-gray-500 truncate">
+                      <Check className="h-2.5 w-2.5 mr-1 text-green-500 flex-shrink-0" />
+                      <span className="truncate">{action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}</span>
                     </div>
                   </div>
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="h-7 w-7 p-0 rounded-full text-gray-400 hover:text-rose-500 hover:bg-transparent"
+                    className="h-7 w-7 p-0 rounded-full text-gray-400 hover:text-rose-500 hover:bg-transparent flex-shrink-0"
                     onClick={() => handleDeleteAction(action.id)}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -460,7 +461,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 </div>
                 
                 {action.notes && (
-                  <div className="text-[11px] bg-white p-2 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out] border border-gray-100">
+                  <div className="text-[11px] bg-white p-2 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out] border border-gray-100 w-full box-border overflow-hidden break-words">
                     {action.notes}
                   </div>
                 )}

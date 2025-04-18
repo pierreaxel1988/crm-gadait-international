@@ -34,18 +34,18 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
   const formattedDate = format(suggestion.scheduledDate, 'dd/MM/yyyy à HH:mm', { locale: fr });
 
   return (
-    <div className="border border-loro-navy/5 bg-loro-pearl/10 rounded-lg p-2.5 animate-[fade-in_0.3s_ease-out] relative group touch-manipulation">
-      <div className="flex items-start justify-between gap-2 mb-1">
-        <div className="flex items-center gap-1.5">
+    <div className="border border-loro-navy/5 bg-loro-pearl/10 rounded-lg p-2.5 animate-[fade-in_0.3s_ease-out] relative group touch-manipulation w-full box-border overflow-hidden">
+      <div className="flex items-start justify-between gap-2 mb-1 w-full box-border">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           {getActionTypeIcon(suggestion.actionType)}
         </div>
-        <div className="flex items-center text-[10px] text-gray-500 bg-white/60 px-1.5 py-0.5 rounded-full">
-          <CalendarIcon className="h-2.5 w-2.5 mr-1" />
-          {formattedDate}
+        <div className="flex items-center text-[10px] text-gray-500 bg-white/60 px-1.5 py-0.5 rounded-full truncate flex-shrink-0">
+          <CalendarIcon className="h-2.5 w-2.5 mr-1 flex-shrink-0" />
+          <span className="truncate">{formattedDate}</span>
         </div>
       </div>
       
-      <p className="text-[11px] leading-[1.4] text-loro-navy/90 mb-2">
+      <p className="text-[11px] leading-[1.4] text-loro-navy/90 mb-2 w-full break-words overflow-hidden">
         {suggestion.notes}
       </p>
       
@@ -53,7 +53,7 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 px-2 text-[11px] text-rose-600 hover:bg-rose-50 hover:text-rose-700 active:scale-95 transition-all duration-200"
+          className="h-7 px-2 text-[11px] text-rose-600 hover:bg-rose-50 hover:text-rose-700 active:scale-95 transition-all duration-200 min-w-0 flex-shrink-0"
           onClick={() => onDismiss(suggestion)}
         >
           <XIcon className="h-3 w-3 mr-1" />
@@ -62,7 +62,7 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
         <Button
           variant="outline"
           size="sm"
-          className="h-7 px-2 text-[11px] border-loro-navy text-loro-navy hover:bg-loro-pearl/40 active:scale-95 transition-all duration-200"
+          className="h-7 px-2 text-[11px] border-loro-navy text-loro-navy hover:bg-loro-pearl/40 active:scale-95 transition-all duration-200 min-w-0 flex-shrink-0"
           onClick={() => onImplement(suggestion)}
         >
           <CheckIcon className="h-3 w-3 mr-1" />
