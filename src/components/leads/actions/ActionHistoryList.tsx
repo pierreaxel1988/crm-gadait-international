@@ -77,7 +77,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
 
   return (
     <ScrollArea className="h-[calc(100vh-280px)]">
-      <div className="space-y-5 pr-3">
+      <div className="space-y-5 pr-2">
         {sortedDates.map((dateString) => (
           <div key={dateString} className="animate-[fade-in_0.4s_ease-out]">
             <div className="flex items-center gap-2 mb-2.5 sticky top-0 bg-white py-1">
@@ -163,7 +163,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                                 : isOverdue
                                   ? 'bg-[#FFF0F2] rounded-md font-futuraLight text-rose-800 border border-pink-100'
                                   : 'bg-[#F7FEF1] rounded-md font-futuraLight text-green-800 border border-green-100'
-                            }`}>
+                            } break-words`}>
                               {action.notes}
                             </p>
                           )}
@@ -174,7 +174,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                             variant="outline"
                             size="sm"
                             onClick={() => onMarkComplete(action.id)}
-                            className={`${isMobile ? 'text-[10px] px-2 py-0.5 h-6' : 'text-xs px-2.5 py-1 h-7'} flex items-center gap-1 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 rounded-full font-futura`}
+                            className={`${isMobile ? 'text-[10px] px-2 py-0.5 h-6' : 'text-xs px-2.5 py-1 h-7'} flex items-center gap-1 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 rounded-full font-futura shrink-0`}
                           >
                             <Check className={`${isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'}`} /> Terminer
                           </Button>

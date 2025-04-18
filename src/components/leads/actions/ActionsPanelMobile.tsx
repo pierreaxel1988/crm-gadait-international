@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -270,7 +271,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   }
 
   return (
-    <div className="space-y-4 px-4">
+    <div className="space-y-4 px-2 max-w-full">
       {/* AI Action Suggestions */}
       {leadId && lead && (
         <div className="mb-4">
@@ -293,7 +294,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
           <div className="mt-2 space-y-3">
             {lead ? (
               <>
-                <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-2">
+                <div className="flex gap-2 overflow-x-auto -mx-2 px-2 pb-2">
                   {quickPrompts.map((quickPrompt) => (
                     <Button
                       key={quickPrompt.id}
@@ -420,7 +421,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     </Button>
                   </div>
                   {action.notes && (
-                    <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${
+                    <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] break-words ${
                       isOverdue 
                         ? isCallAction
                           ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
@@ -475,7 +476,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   </div>
                 </div>
                 {action.notes && (
-                  <div className="text-xs bg-white p-1.5 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out] border border-gray-100">
+                  <div className="text-xs bg-white p-1.5 rounded-md mt-1.5 text-gray-600 break-words animate-[fade-in_0.2s_ease-out] border border-gray-100">
                     {action.notes}
                   </div>
                 )}

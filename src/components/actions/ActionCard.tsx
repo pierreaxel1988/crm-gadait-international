@@ -107,7 +107,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
       </div>
       
       {action.notes && (
-        <div className={`text-sm mt-2 p-2 rounded ${
+        <div className={`text-sm mt-2 p-2 rounded break-words ${
           action.status === 'done' 
             ? 'bg-white/80 text-gray-600' 
             : action.status === 'overdue'
