@@ -178,9 +178,9 @@ const LeadDetailMobile = () => {
         </div>
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto pt-28">
+      <ScrollArea className="flex-1 overflow-y-auto pt-24">
         <Tabs value={activeTab} className="w-full h-full">
-          <div className="px-4 pb-32 h-full">
+          <div className="px-3 pb-32 h-full">
             <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
