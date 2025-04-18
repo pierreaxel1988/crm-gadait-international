@@ -29,8 +29,10 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
       replace: true
     });
   };
-  return <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="w-full grid grid-cols-6 bg-loro-50 border-t border-b border-loro-200/50 shadow-sm p-0">
+
+  return (
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+      <TabsList className="w-full grid grid-cols-6 bg-loro-50 border-t border-b border-loro-200/50 shadow-sm p-0 gap-0">
         <TabsTrigger 
           value="info" 
           className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
@@ -104,8 +106,8 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           Emails
         </TabsTrigger>
       </TabsList>
-    </Tabs>;
+    </Tabs>
+  );
 };
 
 export default LeadDetailTabs;
-
