@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
 import { format, isPast } from 'date-fns';
-import { Check, Clock, Calendar, Trash2, PlaneTakeoff, Plus } from 'lucide-react';
+import { Check, Clock, Calendar, Trash2, PlaneTakeoff, Plus, MessageSquare, Phone, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
@@ -231,243 +231,186 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   }] : [];
 
   return (
-    <div className="space-y-4 pb-4">
+    <div className="flex flex-col h-full bg-white">
       {leadId && lead && (
-        <div>
-          <h3 className="text-xs font-futura text-loro-navy/60 uppercase tracking-wide mb-3">
-            Suggestions d'actions
-          </h3>
-          <AIActionSuggestions lead={lead} onActionAdded={fetchLeadData} />
-        </div>
-      )}
-
-      {leadId && (
-        <div className="bg-white rounded-xl border border-loro-pearl/20 overflow-hidden">
-          <h3 className="text-xs font-futura text-loro-navy/60 uppercase tracking-wide p-3 border-b border-loro-pearl/20 bg-loro-pearl/5">
-            Assistant IA
-          </h3>
+        <div className="sticky top-0 z-10 bg-white border-b border-loro-pearl/20">
+          <div className="p-3">
+            <h3 className="text-sm font-futura text-loro-navy mb-2">
+              Assistant IA
+            </h3>
+            <AIActionSuggestions lead={lead} onActionAdded={fetchLeadData} />
+          </div>
           
-          <div className="p-3 space-y-3">
-            {lead ? (
-              <>
-                <ScrollArea className="max-h-[100px] overflow-x-auto w-full">
-                  <div className="flex gap-2 pb-2">
-                    {quickPrompts.map(quickPrompt => (
-                      <Button 
-                        key={quickPrompt.id} 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => setPrompt(quickPrompt.prompt)} 
-                        className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10 shrink-0 font-futuraLight"
-                      >
-                        {quickPrompt.label}
-                      </Button>
-                    ))}
-                  </div>
-                </ScrollArea>
-                
-                <div className="space-y-2">
-                  <Textarea 
-                    value={prompt} 
-                    onChange={e => setPrompt(e.target.value)} 
-                    placeholder="Ex. Propose une relance WhatsApp ou un résumé du client..." 
-                    className="w-full min-h-[80px] text-sm font-futuraLight" 
-                  />
-                  <Button 
-                    onClick={handleSendToGPT} 
-                    disabled={isAiLoading || !prompt} 
-                    className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white font-futura"
-                  >
-                    {isAiLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full" />
-                        <span>Envoi en cours...</span>
-                      </div>
-                    ) : (
-                      <>
-                        <PlaneTakeoff className="h-4 w-4 mr-2" />
-                        <span>Envoyer à l'IA</span>
-                      </>
-                    )}
-                  </Button>
+          <div className="p-3 border-t border-loro-pearl/20">
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-loro-pearl/20 flex items-center justify-center">
+                  <MessageSquare className="h-4 w-4 text-loro-navy/60" />
                 </div>
-              </>
-            ) : (
-              <div className="text-center py-4">
-                <p className="text-sm text-loro-navy/60 font-futuraLight">
-                  Assistant IA non disponible
-                </p>
+                <div>
+                  <h3 className="text-sm font-futura text-loro-navy">Actions en attente</h3>
+                  <p className="text-xs text-loro-navy/60">{pendingActions.length} actions</p>
+                </div>
               </div>
-            )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onAddAction}
+                className="h-8 px-3 text-xs font-futura border-loro-sand hover:bg-loro-sand/10"
+              >
+                <Plus className="h-4 w-4 mr-1.5" />
+                Nouvelle
+              </Button>
+            </div>
           </div>
-          
-          {lead && <LeadAIAssistant lead={lead} />}
         </div>
       )}
 
-      <div>
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-xs font-futura text-loro-navy/60 uppercase tracking-wide">
-            Actions en attente ({pendingActions.length})
-          </h3>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={onAddAction} 
-            className="h-8 px-3 text-xs font-futura border-loro-sand hover:bg-loro-sand/10"
-          >
-            <Plus className="h-4 w-4 mr-1.5" />
-            Nouvelle action
-          </Button>
-        </div>
-
-        {pendingActions.length === 0 ? (
-          <div className="text-center py-6 px-4 bg-loro-pearl/5 rounded-xl border border-loro-pearl/20">
-            <Calendar className="h-6 w-6 text-loro-navy/40 mx-auto mb-2" />
-            <p className="text-sm text-loro-navy/60 font-futuraLight">
-              Aucune action en attente
-            </p>
-          </div>
-        ) : (
-          <ScrollArea className="max-h-[300px] pr-2">
-            <div className="space-y-2 pb-1">
-              {pendingActions.map(action => {
-                const isOverdue = isPast(new Date(action.scheduledDate));
-                const isCallAction = action.actionType === 'Call';
-                return (
-                  <div 
-                    key={action.id} 
-                    className={cn(
-                      "rounded-xl border p-3 animate-[fade-in_0.3s_ease-out] relative w-full", 
-                      isOverdue 
-                        ? isCallAction 
-                          ? 'bg-[#FDF4F6]/50 border-pink-200' 
-                          : 'bg-[#FFDEE2]/30 border-pink-200' 
-                        : 'bg-[#F2FCE2]/40 border-green-100'
+      <ScrollArea className="flex-1 px-3 py-2">
+        <div className="space-y-3">
+          {pendingActions.map(action => {
+            const isOverdue = isPast(new Date(action.scheduledDate));
+            const isCallAction = action.actionType === 'Call';
+            
+            return (
+              <div 
+                key={action.id}
+                className={cn(
+                  "rounded-lg border p-3 animate-[fade-in_0.3s_ease-out]",
+                  isOverdue 
+                    ? isCallAction 
+                      ? 'bg-[#FDF4F6]/50 border-pink-200' 
+                      : 'bg-[#FFDEE2]/30 border-pink-200' 
+                    : 'bg-[#F2FCE2]/40 border-green-100'
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={cn(
+                    "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
+                    isCallAction 
+                      ? isOverdue 
+                        ? 'bg-[#FDF4F6] text-[#D05A76]' 
+                        : 'bg-[#EBD5CE] text-[#D05A76]' 
+                      : isOverdue 
+                        ? 'bg-rose-100 text-rose-600' 
+                        : 'bg-green-100 text-green-600'
+                  )}>
+                    {action.actionType === 'Call' ? (
+                      <Phone className="h-5 w-5" />
+                    ) : (
+                      <Calendar className="h-5 w-5" />
                     )}
-                  >
-                    <div className="flex justify-between items-start gap-3">
-                      <div className="flex items-start gap-2 min-w-0 flex-1">
-                        <div className={cn(
-                          "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
-                          isCallAction 
-                            ? isOverdue 
-                              ? 'bg-[#FDF4F6] text-[#D05A76]' 
-                              : 'bg-[#EBD5CE] text-[#D05A76]' 
-                            : isOverdue 
-                              ? 'bg-rose-100 text-rose-600' 
-                              : 'bg-green-100 text-green-600'
-                        )}>
-                          <Calendar className="h-4 w-4" />
-                        </div>
-                        
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5">
-                            {getActionTypeIcon(action.actionType)}
-                            <span className="text-xs text-gray-500 font-futuraLight">
-                              <Clock className="h-3 w-3 inline-block mr-1" />
-                              {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
-                            </span>
-                          </div>
-                          
-                          {action.notes && (
-                            <p className={cn(
-                              "text-xs p-2 rounded-lg mt-2 break-words w-full font-futuraLight overflow-auto", 
-                              isOverdue 
-                                ? isCallAction 
-                                  ? 'bg-white text-[#D05A76] border border-pink-100' 
-                                  : 'bg-white text-rose-800 border border-pink-100' 
-                                : 'bg-white text-green-800 border border-green-100'
-                            )}>
-                              {action.notes}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-col gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className={cn(
-                            "h-8 px-3 font-futura text-xs whitespace-nowrap", 
-                            isOverdue 
-                              ? "border-rose-300 text-rose-600 hover:bg-rose-50" 
-                              : "border-green-300 text-green-600 hover:bg-green-50"
-                          )} 
-                          onClick={() => onMarkComplete(action)}
-                        >
-                          <Check className="h-3.5 w-3.5 mr-1.5" />
-                          Terminer
-                        </Button>
-                        
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-8 w-8 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent" 
-                          onClick={() => handleDeleteAction(action.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
                   </div>
-                );
-              })}
-            </div>
-          </ScrollArea>
-        )}
-      </div>
-
-      {completedActions.length > 0 && (
-        <div>
-          <h3 className="text-xs font-futura text-loro-navy/60 uppercase tracking-wide mb-3">
-            Actions terminées ({completedActions.length})
-          </h3>
-          
-          <ScrollArea className="max-h-[300px] pr-2">
-            <div className="space-y-2 pb-1">
-              {completedActions.map(action => (
-                <div 
-                  key={action.id} 
-                  className="rounded-xl border border-gray-200 p-3 bg-[#F1F0FB]/50 relative w-full animate-[fade-in_0.3s_ease-out]"
-                >
-                  <div className="flex justify-between items-start gap-3">
-                    <div className="flex items-start gap-2 min-w-0 flex-1">
-                      <div className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center text-green-600 shrink-0">
-                        <Check className="h-4 w-4" />
-                      </div>
-                      
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          {getActionTypeIcon(action.actionType)}
-                          <span className="text-xs text-gray-500 font-futuraLight">
-                            <Check className="h-3 w-3 inline-block mr-1 text-green-500" />
-                            {action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}
-                          </span>
-                        </div>
-                        
-                        {action.notes && (
-                          <p className="text-xs p-2 rounded-lg mt-2 bg-white text-gray-600 break-words w-full font-futuraLight overflow-auto border border-gray-100">
-                            {action.notes}
-                          </p>
-                        )}
-                      </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium text-loro-navy truncate">
+                        {action.actionType}
+                      </span>
+                      <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                        <Clock className="h-3 w-3 inline-block mr-1" />
+                        {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
+                      </span>
                     </div>
                     
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-8 w-8 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent shrink-0" 
-                      onClick={() => handleDeleteAction(action.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {action.notes && (
+                      <p className={cn(
+                        "text-sm p-2 rounded-lg mt-2 break-words",
+                        isOverdue 
+                          ? 'bg-white/80 text-rose-800 border border-rose-100' 
+                          : 'bg-white/80 text-green-800 border border-green-100'
+                      )}>
+                        {action.notes}
+                      </p>
+                    )}
+                    
+                    <div className="flex justify-end items-center gap-2 mt-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteAction(action.id)}
+                        className="h-8 w-8 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                      
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onMarkComplete(action)}
+                        className={cn(
+                          "h-8 font-futura text-xs",
+                          isOverdue 
+                            ? "border-rose-300 text-rose-600 hover:bg-rose-50" 
+                            : "border-green-300 text-green-600 hover:bg-green-50"
+                        )}
+                      >
+                        <Check className="h-3.5 w-3.5 mr-1.5" />
+                        Terminer
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {completedActions.length > 0 && (
+          <div className="mt-6">
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                <Check className="h-4 w-4 text-gray-600" />
+              </div>
+              <div>
+                <h3 className="text-sm font-futura text-gray-600">Actions terminées</h3>
+                <p className="text-xs text-gray-500">{completedActions.length} actions</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              {completedActions.map(action => (
+                <div 
+                  key={action.id}
+                  className="rounded-lg border border-gray-200 p-3 bg-gray-50"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                      {action.actionType === 'Call' ? (
+                        <Phone className="h-5 w-5 text-gray-600" />
+                      ) : (
+                        <Calendar className="h-5 w-5 text-gray-600" />
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-600 truncate">
+                          {action.actionType}
+                        </span>
+                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                          <Check className="h-3 w-3 inline-block mr-1 text-green-500" />
+                          {format(new Date(action.completedDate || ''), 'dd/MM/yyyy HH:mm')}
+                        </span>
+                      </div>
+                      
+                      {action.notes && (
+                        <p className="text-sm p-2 rounded-lg mt-2 bg-white text-gray-600 break-words border border-gray-100">
+                          {action.notes}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-          </ScrollArea>
+          </div>
+        )}
+      </ScrollArea>
+
+      {lead && (
+        <div className="sticky bottom-0 border-t border-loro-pearl/20 bg-white p-3">
+          <LeadAIAssistant lead={lead} />
         </div>
       )}
     </div>
