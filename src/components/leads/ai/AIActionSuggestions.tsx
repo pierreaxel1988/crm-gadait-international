@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Lightbulb, Loader2, RefreshCw } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
@@ -142,13 +143,13 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
   }
 
   return (
-    <div className="space-y-3 animate-[fade-in_0.3s_ease-out]">
+    <div className="space-y-4 animate-[fade-in_0.4s_ease-out]">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-md bg-loro-pearl">
-            <Lightbulb className="h-3.5 w-3.5 text-loro-navy" />
+            <Lightbulb className="h-4 w-4 text-loro-navy" />
           </div>
-          <span className="text-xs text-loro-navy font-medium">
+          <span className="text-xs font-medium text-loro-navy">
             {suggestions.length} suggestion{suggestions.length > 1 ? 's' : ''}
           </span>
         </div>
@@ -158,21 +159,63 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
           size="sm"
           className="h-7 px-2 text-xs text-loro-navy hover:bg-loro-pearl/20"
         >
-          <RefreshCw className="h-3 w-3 mr-1" />
+          <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
           Actualiser
         </Button>
       </div>
-      
-      <div className="space-y-2">
-        {suggestions.map((suggestion) => (
-          <ActionSuggestionCard
-            key={suggestion.id}
-            suggestion={suggestion}
-            onImplement={handleImplementSuggestion}
-            onDismiss={handleDismissSuggestion}
-          />
-        ))}
-      </div>
+
+      {isLoading && (
+        <div className="rounded-md p-4 bg-loro-pearl/20 flex flex-col items-center justify-center space-y-2">
+          <Loader2 className="h-5 w-5 text-loro-navy animate-spin" />
+          <p className="text-xs text-loro-navy/80">Génération des suggestions...</p>
+        </div>
+      )}
+
+      {!isLoading && error && (
+        <div className="rounded-md p-4 bg-red-50 space-y-3">
+          <p className="text-sm text-red-600 text-center">{error}</p>
+          <div className="flex justify-center">
+            <Button 
+              onClick={handleManualRefresh}
+              variant="outline"
+              size="sm"
+              className="text-xs border-red-200 text-red-600 hover:bg-red-50"
+            >
+              <RefreshCw className="h-3 w-3 mr-1.5" />
+              Réessayer
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {!isLoading && !error && (!suggestions || suggestions.length === 0) && (
+        <div className="rounded-md p-4 bg-loro-pearl/20 text-center space-y-3">
+          <Lightbulb className="h-5 w-5 text-loro-navy/60 mx-auto" />
+          <p className="text-xs text-loro-navy/80">Aucune suggestion pour le moment</p>
+          <Button 
+            onClick={handleManualRefresh}
+            variant="outline" 
+            size="sm"
+            className="text-xs w-full border-loro-navy text-loro-navy hover:bg-loro-pearl/20"
+          >
+            <RefreshCw className="h-3 w-3 mr-1.5" />
+            Générer des suggestions
+          </Button>
+        </div>
+      )}
+
+      {!isLoading && suggestions && suggestions.length > 0 && (
+        <div className="space-y-2.5">
+          {suggestions.map((suggestion) => (
+            <ActionSuggestionCard
+              key={suggestion.id}
+              suggestion={suggestion}
+              onImplement={handleImplementSuggestion}
+              onDismiss={handleDismissSuggestion}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
