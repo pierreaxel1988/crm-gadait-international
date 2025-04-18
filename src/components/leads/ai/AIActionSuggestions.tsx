@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Lightbulb, Loader2, RefreshCw } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
-import { AISuggestedAction, generateLeadActionSuggestions } from '@/services/aiActionSuggestionService';
+import { AISuggestedAction, generateLeadActionSuggestions, implementSuggestedAction } from '@/services/aiActionSuggestionService';
 import { ActionSuggestionCard } from './ActionSuggestionCard';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
