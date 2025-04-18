@@ -11,14 +11,12 @@ import { updateLead } from '@/services/leadUpdater';
 import { LeadAIAssistant } from '@/components/leads/ai/LeadAIAssistant';
 import { AIActionSuggestions } from '@/components/leads/ai/AIActionSuggestions';
 import { Textarea } from '@/components/ui/textarea';
-
 interface ActionsPanelMobileProps {
   leadId: string;
   onMarkComplete: (action: ActionHistory) => void;
   onAddAction: () => void;
   actionHistory?: ActionHistory[];
 }
-
 const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   leadId,
   onMarkComplete,
@@ -33,7 +31,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
-
   useEffect(() => {
     const measureHeader = () => {
       const headerElement = document.querySelector('.bg-loro-sand');
@@ -43,38 +40,31 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         setIsHeaderMeasured(true);
       }
     };
-    
     measureHeader();
     window.addEventListener('resize', measureHeader);
     const timeoutId = setTimeout(measureHeader, 300);
-    
     return () => {
       window.removeEventListener('resize', measureHeader);
       clearTimeout(timeoutId);
     };
   }, []);
-
   useEffect(() => {
     if (initialActionHistory) {
       setActionHistory(initialActionHistory);
     }
-    
     fetchLeadData();
   }, [leadId, initialActionHistory]);
-
   const fetchLeadData = async () => {
     if (!leadId) {
       setLoadError("ID de lead manquant");
       setIsLoading(false);
       return;
     }
-    
     try {
       setIsLoading(true);
       setLoadError(null);
       console.log('Fetching lead data for ActionsPanelMobile:', leadId);
       const fetchedLead = await getLead(leadId);
-      
       if (fetchedLead) {
         console.log('Lead data fetched successfully', fetchedLead);
         setLead(fetchedLead);
@@ -95,26 +85,17 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       setIsLoading(false);
     }
   };
-
   const handleDeleteAction = async (actionId: string) => {
     if (!lead && !leadId) return;
-    
     try {
-      setActionHistory((currentActions) => 
-        currentActions.filter(action => action.id !== actionId)
-      );
-      
-      const currentLead = lead || await getLead(leadId);
-      
+      setActionHistory(currentActions => currentActions.filter(action => action.id !== actionId));
+      const currentLead = lead || (await getLead(leadId));
       if (currentLead) {
-        const updatedActionHistory = (currentLead.actionHistory || [])
-          .filter(action => action.id !== actionId);
-        
+        const updatedActionHistory = (currentLead.actionHistory || []).filter(action => action.id !== actionId);
         const updatedLead = await updateLead({
           ...currentLead,
           actionHistory: updatedActionHistory
         });
-        
         if (updatedLead) {
           setLead(updatedLead);
           toast({
@@ -130,11 +111,9 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         title: "Erreur",
         description: "Impossible de supprimer l'action"
       });
-      
       fetchLeadData();
     }
   };
-
   const handleSendToGPT = async () => {
     if (!prompt || !lead) {
       toast({
@@ -144,15 +123,9 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       });
       return;
     }
-
     setIsAiLoading(true);
     try {
-      const bedroomsDisplay = Array.isArray(lead.bedrooms) 
-        ? lead.bedrooms.join(', ') 
-        : typeof lead.bedrooms === 'number'
-          ? lead.bedrooms.toString()
-          : 'Non spécifié';
-      
+      const bedroomsDisplay = Array.isArray(lead.bedrooms) ? lead.bedrooms.join(', ') : typeof lead.bedrooms === 'number' ? lead.bedrooms.toString() : 'Non spécifié';
       const body = {
         message: prompt,
         leadContext: `
@@ -171,31 +144,24 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         `,
         type: "action_suggestion"
       };
-
       const response = await fetch("https://hxqoqkfnhbpwzkjgukrc.functions.supabase.co/chat-gadait", {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
+        headers: {
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(body)
       });
-
       if (!response.ok) {
         throw new Error('Erreur lors de la communication avec l\'assistant');
       }
-
       const data = await response.json();
       console.log("Réponse IA :", data.response);
-      
       toast({
         title: "Message envoyé",
         description: "L'assistant traite votre demande"
       });
-
       setPrompt("");
-      
       fetchLeadData();
-
     } catch (error) {
       console.error("Erreur lors de l'envoi à l'IA:", error);
       toast({
@@ -207,125 +173,94 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       setIsAiLoading(false);
     }
   };
-
   const getActionTypeIcon = (type: string) => {
     switch (type) {
-      case 'Call': return <span className="bg-[#EBD5CE] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
-      case 'Visites': return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs font-futura">Visite</span>;
-      case 'Compromis': return <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-futura">Compromis</span>;
-      case 'Acte de vente': return <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs font-futura">Acte de vente</span>;
-      case 'Contrat de Location': return <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-futura">Contrat Location</span>;
-      case 'Propositions': return <span className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full text-xs font-futura">Proposition</span>;
-      case 'Follow up': return <span className="bg-pink-100 text-pink-800 px-2 py-0.5 rounded-full text-xs font-futura">Follow-up</span>;
-      case 'Estimation': return <span className="bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full text-xs font-futura">Estimation</span>;
-      case 'Prospection': return <span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-xs font-futura">Prospection</span>;
-      case 'Admin': return <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs font-futura">Admin</span>;
-      default: return null;
+      case 'Call':
+        return <span className="bg-[#EBD5CE] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
+      case 'Visites':
+        return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs font-futura">Visite</span>;
+      case 'Compromis':
+        return <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-futura">Compromis</span>;
+      case 'Acte de vente':
+        return <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs font-futura">Acte de vente</span>;
+      case 'Contrat de Location':
+        return <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-futura">Contrat Location</span>;
+      case 'Propositions':
+        return <span className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full text-xs font-futura">Proposition</span>;
+      case 'Follow up':
+        return <span className="bg-pink-100 text-pink-800 px-2 py-0.5 rounded-full text-xs font-futura">Follow-up</span>;
+      case 'Estimation':
+        return <span className="bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full text-xs font-futura">Estimation</span>;
+      case 'Prospection':
+        return <span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-xs font-futura">Prospection</span>;
+      case 'Admin':
+        return <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs font-futura">Admin</span>;
+      default:
+        return null;
     }
   };
-
   const sortedActions = [...(actionHistory || [])].sort((a, b) => {
     return new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime();
   });
-
   const pendingActions = sortedActions.filter(action => !action.completedDate);
   const completedActions = sortedActions.filter(action => action.completedDate);
-
-  const quickPrompts = lead ? [
-    {
-      id: 'follow-up',
-      label: 'Relance WhatsApp',
-      prompt: `Génère une relance WhatsApp professionnelle pour ${lead.name || 'ce client'} en tenant compte de son budget de ${lead.budget || ''} ${lead.currency || 'EUR'} et sa recherche à ${lead.desiredLocation || ''}. Le message doit être cordial et adapté à son profil.`
-    },
-    {
-      id: 'selection',
-      label: 'Mail sélection personnalisée',
-      prompt: `Rédige un email professionnel pour présenter une sélection de biens à ${lead.name || 'ce client'}. Utilise ces critères: Budget ${lead.budget || ''} ${lead.currency || 'EUR'}, Localisation: ${lead.desiredLocation || ''}, Type de bien: ${lead.propertyTypes ? lead.propertyTypes.join(', ') : ''}.`
-    },
-    {
-      id: 'general-follow',
-      label: 'Follow-up général',
-      prompt: `Crée un message de suivi pour ${lead.name || 'ce client'} qui fait référence à son projet ${lead.propertyTypes ? lead.propertyTypes.join(', ') : 'immobilier'} à ${lead.desiredLocation || ''}. Le message doit être personnalisé et professionnel.`
-    }
-  ] : [];
-
-  return (
-    <div className="space-y-6">
+  const quickPrompts = lead ? [{
+    id: 'follow-up',
+    label: 'Relance WhatsApp',
+    prompt: `Génère une relance WhatsApp professionnelle pour ${lead.name || 'ce client'} en tenant compte de son budget de ${lead.budget || ''} ${lead.currency || 'EUR'} et sa recherche à ${lead.desiredLocation || ''}. Le message doit être cordial et adapté à son profil.`
+  }, {
+    id: 'selection',
+    label: 'Mail sélection personnalisée',
+    prompt: `Rédige un email professionnel pour présenter une sélection de biens à ${lead.name || 'ce client'}. Utilise ces critères: Budget ${lead.budget || ''} ${lead.currency || 'EUR'}, Localisation: ${lead.desiredLocation || ''}, Type de bien: ${lead.propertyTypes ? lead.propertyTypes.join(', ') : ''}.`
+  }, {
+    id: 'general-follow',
+    label: 'Follow-up général',
+    prompt: `Crée un message de suivi pour ${lead.name || 'ce client'} qui fait référence à son projet ${lead.propertyTypes ? lead.propertyTypes.join(', ') : 'immobilier'} à ${lead.desiredLocation || ''}. Le message doit être personnalisé et professionnel.`
+  }] : [];
+  return <div className="space-y-2">
       {/* AI Action Suggestions */}
-      {leadId && lead && (
-        <div>
+      {leadId && lead && <div>
           <h3 className="text-xs font-futura text-loro-navy/60 uppercase tracking-wide mb-3">
             Suggestions d'actions
           </h3>
-          <AIActionSuggestions 
-            lead={lead}
-            onActionAdded={fetchLeadData}
-          />
-        </div>
-      )}
+          <AIActionSuggestions lead={lead} onActionAdded={fetchLeadData} />
+        </div>}
       
       {/* Assistant IA - avec prompts rapides */}
-      {leadId && (
-        <div className="bg-white rounded-xl border border-loro-pearl/20 overflow-hidden">
+      {leadId && <div className="bg-white rounded-xl border border-loro-pearl/20 overflow-hidden">
           <h3 className="text-xs font-futura text-loro-navy/60 uppercase tracking-wide p-3 border-b border-loro-pearl/20 bg-loro-pearl/5">
             Assistant IA
           </h3>
           
           <div className="p-3 space-y-3">
-            {lead ? (
-              <>
+            {lead ? <>
                 <div className="flex gap-2 overflow-x-auto -mx-3 px-3 pb-2 no-scrollbar">
-                  {quickPrompts.map((quickPrompt) => (
-                    <Button
-                      key={quickPrompt.id}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPrompt(quickPrompt.prompt)}
-                      className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10 shrink-0 font-futuraLight"
-                    >
+                  {quickPrompts.map(quickPrompt => <Button key={quickPrompt.id} variant="outline" size="sm" onClick={() => setPrompt(quickPrompt.prompt)} className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10 shrink-0 font-futuraLight">
                       {quickPrompt.label}
-                    </Button>
-                  ))}
+                    </Button>)}
                 </div>
                 
                 <div className="space-y-2">
-                  <Textarea
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Ex. Propose une relance WhatsApp ou un résumé du client..."
-                    className="w-full min-h-[80px] text-sm font-futuraLight"
-                  />
-                  <Button
-                    onClick={handleSendToGPT}
-                    disabled={isAiLoading || !prompt}
-                    className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white font-futura"
-                  >
-                    {isAiLoading ? (
-                      <div className="flex items-center gap-2">
+                  <Textarea value={prompt} onChange={e => setPrompt(e.target.value)} placeholder="Ex. Propose une relance WhatsApp ou un résumé du client..." className="w-full min-h-[80px] text-sm font-futuraLight" />
+                  <Button onClick={handleSendToGPT} disabled={isAiLoading || !prompt} className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white font-futura">
+                    {isAiLoading ? <div className="flex items-center gap-2">
                         <div className="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full" />
                         <span>Envoi en cours...</span>
-                      </div>
-                    ) : (
-                      <>
+                      </div> : <>
                         <PlaneTakeoff className="h-4 w-4 mr-2" />
                         <span>Envoyer à l'IA</span>
-                      </>
-                    )}
+                      </>}
                   </Button>
                 </div>
-              </>
-            ) : (
-              <div className="text-center py-4">
+              </> : <div className="text-center py-4">
                 <p className="text-sm text-loro-navy/60 font-futuraLight">
                   Assistant IA non disponible
                 </p>
-              </div>
-            )}
+              </div>}
           </div>
           
           {lead && <LeadAIAssistant lead={lead} />}
-        </div>
-      )}
+        </div>}
       
       {/* Actions en attente */}
       <div>
@@ -333,54 +268,25 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
           <h3 className="text-xs font-futura text-loro-navy/60 uppercase tracking-wide">
             Actions en attente ({pendingActions.length})
           </h3>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onAddAction}
-            className="h-8 px-3 text-xs font-futura border-loro-sand hover:bg-loro-sand/10"
-          >
+          <Button variant="outline" size="sm" onClick={onAddAction} className="h-8 px-3 text-xs font-futura border-loro-sand hover:bg-loro-sand/10">
             <Plus className="h-4 w-4 mr-1.5" />
             Nouvelle action
           </Button>
         </div>
 
-        {pendingActions.length === 0 ? (
-          <div className="text-center py-6 px-4 bg-loro-pearl/5 rounded-xl border border-loro-pearl/20">
+        {pendingActions.length === 0 ? <div className="text-center py-6 px-4 bg-loro-pearl/5 rounded-xl border border-loro-pearl/20">
             <Calendar className="h-6 w-6 text-loro-navy/40 mx-auto mb-2" />
             <p className="text-sm text-loro-navy/60 font-futuraLight">
               Aucune action en attente
             </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {pendingActions.map((action) => {
-              const isOverdue = isPast(new Date(action.scheduledDate));
-              const isCallAction = action.actionType === 'Call';
-              
-              return (
-                <div 
-                  key={action.id} 
-                  className={cn(
-                    "rounded-xl border p-3 animate-[fade-in_0.3s_ease-out] relative w-full",
-                    isOverdue 
-                      ? isCallAction 
-                        ? 'bg-[#FDF4F6]/50 border-pink-200' 
-                        : 'bg-[#FFDEE2]/30 border-pink-200' 
-                      : 'bg-[#F2FCE2]/40 border-green-100'
-                  )}
-                >
+          </div> : <div className="space-y-2">
+            {pendingActions.map(action => {
+          const isOverdue = isPast(new Date(action.scheduledDate));
+          const isCallAction = action.actionType === 'Call';
+          return <div key={action.id} className={cn("rounded-xl border p-3 animate-[fade-in_0.3s_ease-out] relative w-full", isOverdue ? isCallAction ? 'bg-[#FDF4F6]/50 border-pink-200' : 'bg-[#FFDEE2]/30 border-pink-200' : 'bg-[#F2FCE2]/40 border-green-100')}>
                   <div className="flex justify-between items-start gap-3">
                     <div className="flex items-start gap-2 min-w-0 flex-1">
-                      <div className={cn(
-                        "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
-                        isCallAction
-                          ? isOverdue
-                            ? 'bg-[#FDF4F6] text-[#D05A76]'
-                            : 'bg-[#EBD5CE] text-[#D05A76]'
-                          : isOverdue
-                            ? 'bg-rose-100 text-rose-600'
-                            : 'bg-green-100 text-green-600'
-                      )}>
+                      <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0", isCallAction ? isOverdue ? 'bg-[#FDF4F6] text-[#D05A76]' : 'bg-[#EBD5CE] text-[#D05A76]' : isOverdue ? 'bg-rose-100 text-rose-600' : 'bg-green-100 text-green-600')}>
                         <Calendar className="h-4 w-4" />
                       </div>
                       
@@ -393,67 +299,36 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                           </span>
                         </div>
                         
-                        {action.notes && (
-                          <p className={cn(
-                            "text-xs p-2 rounded-lg mt-2 break-words w-full font-futuraLight",
-                            isOverdue 
-                              ? isCallAction
-                                ? 'bg-white text-[#D05A76] border border-pink-100'
-                                : 'bg-white text-rose-800 border border-pink-100'
-                              : 'bg-white text-green-800 border border-green-100'
-                          )}>
+                        {action.notes && <p className={cn("text-xs p-2 rounded-lg mt-2 break-words w-full font-futuraLight", isOverdue ? isCallAction ? 'bg-white text-[#D05A76] border border-pink-100' : 'bg-white text-rose-800 border border-pink-100' : 'bg-white text-green-800 border border-green-100')}>
                             {action.notes}
-                          </p>
-                        )}
+                          </p>}
                       </div>
                     </div>
                     
                     <div className="flex flex-col gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className={cn(
-                          "h-8 px-3 font-futura text-xs whitespace-nowrap",
-                          isOverdue
-                            ? "border-rose-300 text-rose-600 hover:bg-rose-50"
-                            : "border-green-300 text-green-600 hover:bg-green-50"
-                        )}
-                        onClick={() => onMarkComplete(action)}
-                      >
+                      <Button variant="outline" size="sm" className={cn("h-8 px-3 font-futura text-xs whitespace-nowrap", isOverdue ? "border-rose-300 text-rose-600 hover:bg-rose-50" : "border-green-300 text-green-600 hover:bg-green-50")} onClick={() => onMarkComplete(action)}>
                         <Check className="h-3.5 w-3.5 mr-1.5" />
                         Terminer
                       </Button>
                       
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 w-8 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
-                        onClick={() => handleDeleteAction(action.id)}
-                      >
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent" onClick={() => handleDeleteAction(action.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                </div>;
+        })}
+          </div>}
       </div>
       
       {/* Actions terminées */}
-      {completedActions.length > 0 && (
-        <div>
+      {completedActions.length > 0 && <div>
           <h3 className="text-xs font-futura text-loro-navy/60 uppercase tracking-wide mb-3">
             Actions terminées ({completedActions.length})
           </h3>
           
           <div className="space-y-2">
-            {completedActions.map((action) => (
-              <div 
-                key={action.id} 
-                className="rounded-xl border border-gray-200 p-3 bg-[#F1F0FB]/50 relative w-full animate-[fade-in_0.3s_ease-out]"
-              >
+            {completedActions.map(action => <div key={action.id} className="rounded-xl border border-gray-200 p-3 bg-[#F1F0FB]/50 relative w-full animate-[fade-in_0.3s_ease-out]">
                 <div className="flex justify-between items-start gap-3">
                   <div className="flex items-start gap-2 min-w-0 flex-1">
                     <div className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center text-green-600 shrink-0">
@@ -469,30 +344,19 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                         </span>
                       </div>
                       
-                      {action.notes && (
-                        <p className="text-xs p-2 rounded-lg mt-2 bg-white text-gray-600 break-words w-full font-futuraLight border border-gray-100">
+                      {action.notes && <p className="text-xs p-2 rounded-lg mt-2 bg-white text-gray-600 break-words w-full font-futuraLight border border-gray-100">
                           {action.notes}
-                        </p>
-                      )}
+                        </p>}
                     </div>
                   </div>
                   
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-8 w-8 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent shrink-0"
-                    onClick={() => handleDeleteAction(action.id)}
-                  >
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent shrink-0" onClick={() => handleDeleteAction(action.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
-
 export default ActionsPanelMobile;
