@@ -27,7 +27,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   actionHistory: initialActionHistory
 }) => {
   const [lead, setLead] = useState<LeadDetailed | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>(initialActionHistory || []);
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
@@ -57,16 +58,22 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   useEffect(() => {
     if (initialActionHistory) {
       setActionHistory(initialActionHistory);
-    } else {
-      fetchLeadData();
     }
+    
+    // Toujours charger les données du lead, même si actionHistory est fourni
+    fetchLeadData();
   }, [leadId, initialActionHistory]);
 
   const fetchLeadData = async () => {
-    if (!leadId) return;
+    if (!leadId) {
+      setLoadError("ID de lead manquant");
+      setIsLoading(false);
+      return;
+    }
     
     try {
       setIsLoading(true);
+      setLoadError(null);
       console.log('Fetching lead data for ActionsPanelMobile:', leadId);
       const fetchedLead = await getLead(leadId);
       
@@ -76,9 +83,11 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         setActionHistory(fetchedLead.actionHistory || []);
       } else {
         console.error('No lead data returned');
+        setLoadError("Données du lead non disponibles");
       }
     } catch (error) {
       console.error("Error fetching lead data:", error);
+      setLoadError("Erreur lors du chargement des données");
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -140,25 +149,28 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
     setIsAiLoading(true);
     try {
+      // Formatage correct des données du lead pour l'envoi à l'API
+      const bedroomsDisplay = Array.isArray(lead.bedrooms) 
+        ? lead.bedrooms.join(', ') 
+        : typeof lead.bedrooms === 'number'
+          ? lead.bedrooms.toString()
+          : 'Non spécifié';
+      
       const body = {
         message: prompt,
         leadContext: `
           Lead ID: ${lead.id}
-          Nom: ${lead.name}
-          Langue: ${lead.preferredLanguage}
-          Budget min: ${lead.budgetMin}
-          Budget max: ${lead.budget}
-          Devise: ${lead.currency}
-          Type de bien: ${lead.propertyTypes ? lead.propertyTypes.join(', ') : ''}
-          Vue souhaitée: ${lead.views ? lead.views.join(', ') : ''}
-          Nombre de chambres: ${
-            Array.isArray(lead.bedrooms) 
-              ? lead.bedrooms.join(', ') 
-              : lead.bedrooms || ''
-          }
-          Localisation: ${lead.desiredLocation}
-          Notes: ${lead.notes}
-          Agent: ${lead.assignedTo}
+          Nom: ${lead.name || 'Non spécifié'}
+          Langue: ${lead.preferredLanguage || 'Non spécifiée'}
+          Budget min: ${lead.budgetMin || 'Non spécifié'} 
+          Budget max: ${lead.budget || 'Non spécifié'}
+          Devise: ${lead.currency || 'EUR'}
+          Type de bien: ${lead.propertyTypes ? lead.propertyTypes.join(', ') : 'Non spécifié'}
+          Vue souhaitée: ${lead.views ? lead.views.join(', ') : 'Non spécifiée'}
+          Nombre de chambres: ${bedroomsDisplay}
+          Localisation: ${lead.desiredLocation || 'Non spécifiée'}
+          Notes: ${lead.notes || 'Aucune note'}
+          Agent: ${lead.assignedTo || 'Non assigné'}
         `,
         type: "action_suggestion"
       };
@@ -236,7 +248,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
 
-  // Maintenant, nous créons les prompts seulement si lead est disponible
+  // Création de prompts seulement si lead est disponible et a été chargé
   const quickPrompts = lead ? [
     {
       id: 'follow-up',
@@ -332,11 +344,24 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             ) : (
               <div className="border rounded-md p-4 bg-red-100 text-center">
                 <p className="text-red-600 font-medium mb-1">Erreur</p>
-                <p className="text-sm">Veuillez entrer un message et attendre que les données du lead soient chargées.</p>
+                <p className="text-sm">{loadError || "Impossible de charger les données du lead. Veuillez rafraîchir la page."}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchLeadData}
+                  className="mt-2 text-xs"
+                >
+                  Réessayer
+                </Button>
               </div>
             )}
+            
             {lead ? (
               <LeadAIAssistant lead={lead} />
+            ) : loadError ? (
+              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50">
+                <p className="text-sm text-muted-foreground">Assistant IA non disponible</p>
+              </div>
             ) : (
               <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50">
                 <div className="animate-spin h-5 w-5 border-3 border-chocolate-dark rounded-full border-t-transparent" />
