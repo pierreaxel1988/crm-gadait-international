@@ -377,34 +377,28 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               const isOverdue = isDatePast(action.scheduledDate);
               const isCallAction = action.actionType === 'Call';
               
-              const bgColorClass = isOverdue 
-                ? isCallAction
-                  ? 'bg-[#F8E2E8]/30' 
-                  : 'bg-[#FFDEE2]/30' 
-                : 'bg-[#F2FCE2]/40 border-green-100';
-              
-              const iconBgClass = isCallAction
-                ? isOverdue
-                  ? 'bg-[#F8E2E8] text-[#D05A76]'
-                  : 'bg-[#EBD5CE] text-[#D05A76]'
-                : isOverdue
-                  ? 'bg-rose-100 text-rose-600'
-                  : 'bg-green-100 text-green-600';
-                  
-              const notesBgClass = isOverdue 
-                ? isCallAction
-                  ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
-                  : 'bg-[#FFF0F2] text-rose-800 border border-pink-100'
-                : 'bg-[#F7FEF1] text-green-800 border border-green-100';
-              
               return (
                 <div 
                   key={action.id} 
-                  className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${bgColorClass} relative`}
+                  className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] relative ${
+                    isOverdue 
+                      ? isCallAction 
+                        ? 'bg-[#F8E2E8]/30' 
+                        : 'bg-[#FFDEE2]/30' 
+                      : 'bg-[#F2FCE2]/40 border-green-100'
+                  }`}
                 >
                   <div className="flex justify-between items-start mb-1">
                     <div className="flex items-center gap-1.5">
-                      <div className={`h-6 w-6 rounded-full flex items-center justify-center ${iconBgClass}`}>
+                      <div className={`h-6 w-6 rounded-full flex items-center justify-center ${
+                        isCallAction
+                          ? isOverdue
+                            ? 'bg-[#F8E2E8] text-[#D05A76]'
+                            : 'bg-[#EBD5CE] text-[#D05A76]'
+                          : isOverdue
+                            ? 'bg-rose-100 text-rose-600'
+                            : 'bg-green-100 text-green-600'
+                      }`}>
                         <Calendar className="h-3 w-3" />
                       </div>
                       <div>
@@ -426,7 +420,13 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     </Button>
                   </div>
                   {action.notes && (
-                    <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${notesBgClass}`}>
+                    <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${
+                      isOverdue 
+                        ? isCallAction
+                          ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
+                          : 'bg-[#FFF0F2] text-rose-800 border border-pink-100'
+                        : 'bg-[#F7FEF1] text-green-800 border border-green-100'
+                    }`}>
                       {action.notes}
                     </div>
                   )}
