@@ -271,10 +271,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   }
 
   return (
-    <div className="space-y-2.5 pt-2 px-4 box-border max-w-full overflow-hidden">
+    <div className="pb-24">
       {leadId && lead && (
-        <div className="mb-4 animate-[fade-in_0.4s_ease-out] w-full box-border">
-          <div className="flex items-center justify-between mb-2 w-full">
+        <div className="mb-4 animate-[fade-in_0.4s_ease-out]">
+          <div className="flex items-center justify-between mb-2">
             <h3 className="text-xs font-futura uppercase tracking-wider text-loro-navy/90">
               Suggestions IA
             </h3>
@@ -287,16 +287,16 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       )}
       
       {leadId && (
-        <div className="mb-4 animate-[fade-in_0.4s_ease-out] w-full box-border">
-          <div className="flex items-center justify-between mb-2 w-full">
+        <div className="mb-4 animate-[fade-in_0.4s_ease-out]">
+          <div className="flex items-center justify-between mb-2">
             <h3 className="text-xs font-futura uppercase tracking-wider text-loro-navy/90">
               Assistant IA
             </h3>
           </div>
           
           {lead ? (
-            <div className="space-y-2.5 w-full">
-              <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-4 px-4 w-full box-border">
+            <div className="space-y-2.5">
+              <div className="flex gap-1.5 overflow-x-auto pb-2 w-full">
                 {quickPrompts.map((quickPrompt) => (
                   <Button
                     key={quickPrompt.id}
@@ -310,17 +310,17 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 ))}
               </div>
               
-              <div className="space-y-2 w-full box-border">
+              <div className="space-y-2">
                 <Textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Ex. Propose une relance WhatsApp..."
-                  className="w-full min-h-[80px] text-sm resize-none box-border"
+                  className="w-full min-h-[80px] text-sm resize-none"
                 />
                 <Button
                   onClick={handleSendToGPT}
                   disabled={isAiLoading || !prompt}
-                  className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white h-9 box-border"
+                  className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white h-9"
                 >
                   {isAiLoading ? (
                     <div className="flex items-center gap-2">
@@ -337,7 +337,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               </div>
             </div>
           ) : loadError ? (
-            <div className="rounded-lg p-3 bg-red-50/50 text-center w-full box-border">
+            <div className="rounded-lg p-3 bg-red-50/50 text-center">
               <p className="text-red-600 text-xs">{loadError}</p>
               <Button
                 variant="outline"
@@ -350,22 +350,22 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             </div>
           ) : null}
           
-          {lead && <LeadAIAssistant lead={lead} className="mt-3 w-full max-w-full box-border" />}
+          {lead && <LeadAIAssistant lead={lead} className="mt-3" />}
         </div>
       )}
       
-      <div className="flex items-center justify-between mb-2 w-full">
+      <div className="flex items-center justify-between mb-2">
         <h3 className="text-xs font-futura uppercase tracking-wider text-loro-navy/90">
           Actions en attente
         </h3>
       </div>
 
       {pendingActions.length === 0 ? (
-        <div className="text-center py-4 rounded-lg bg-gray-50/80 animate-[fade-in_0.3s_ease-out] w-full box-border">
+        <div className="text-center py-4 rounded-lg bg-gray-50/80 animate-[fade-in_0.3s_ease-out]">
           <p className="text-muted-foreground text-[11px] font-futura">Aucune action en attente</p>
         </div>
       ) : (
-        <div className="space-y-2 w-full box-border">
+        <div className="space-y-2">
           {pendingActions.map((action) => {
             const isOverdue = isDatePast(action.scheduledDate);
             const isCallAction = action.actionType === 'Call';
@@ -374,7 +374,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               <div 
                 key={action.id} 
                 className={cn(
-                  "border rounded-lg p-2.5 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] relative w-full box-border",
+                  "border rounded-lg p-2.5 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] relative",
                   isOverdue 
                     ? isCallAction
                       ? 'bg-[#F8E2E8]/30 border-pink-100' 
@@ -382,7 +382,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     : 'bg-[#F2FCE2]/40 border-green-100'
                 )}
               >
-                <div className="flex justify-between items-start mb-1.5 w-full">
+                <div className="flex justify-between items-start mb-1.5">
                   <div className="flex items-center gap-1.5 max-w-[60%]">
                     {getActionTypeIcon(action.actionType)}
                     <div className="flex items-center text-[10px] text-gray-500 truncate">
@@ -394,7 +394,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="h-7 w-7 p-0 rounded-full border-green-500 text-green-600 hover:bg-green-50 active:scale-95 transition-all duration-200 flex-shrink-0"
+                      className="h-7 w-7 p-0 rounded-full border-green-500 text-green-600 hover:bg-green-50 active:scale-95 transition-all duration-200"
                       onClick={() => onMarkComplete(action)}
                     >
                       <Check className="h-3.5 w-3.5" />
@@ -403,7 +403,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="h-7 w-7 p-0 rounded-full text-gray-400 hover:text-rose-500 hover:bg-transparent flex-shrink-0"
+                      className="h-7 w-7 p-0 rounded-full text-gray-400 hover:text-rose-500 hover:bg-transparent"
                       onClick={() => handleDeleteAction(action.id)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -414,7 +414,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 
                 {action.notes && (
                   <div className={cn(
-                    "text-[11px] p-2 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] w-full box-border overflow-hidden break-words",
+                    "text-[11px] p-2 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] break-words",
                     isOverdue 
                       ? isCallAction
                         ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100' 
@@ -435,13 +435,13 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
           <h3 className="text-xs font-futura uppercase tracking-wider text-loro-navy/90 mt-4 mb-2">
             Historique
           </h3>
-          <div className="space-y-2 w-full box-border">
+          <div className="space-y-2">
             {completedActions.map((action) => (
               <div 
                 key={action.id} 
-                className="border rounded-lg p-2.5 bg-[#F1F0FB]/50 opacity-80 relative animate-[fade-in_0.3s_ease-out] w-full box-border"
+                className="border rounded-lg p-2.5 bg-[#F1F0FB]/50 opacity-80 relative animate-[fade-in_0.3s_ease-out]"
               >
-                <div className="flex justify-between items-start mb-1.5 w-full">
+                <div className="flex justify-between items-start mb-1.5">
                   <div className="flex items-center gap-1.5 max-w-[60%]">
                     {getActionTypeIcon(action.actionType)}
                     <div className="flex items-center text-[10px] text-gray-500 truncate">
@@ -452,7 +452,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="h-7 w-7 p-0 rounded-full text-gray-400 hover:text-rose-500 hover:bg-transparent flex-shrink-0"
+                    className="h-7 w-7 p-0 rounded-full text-gray-400 hover:text-rose-500 hover:bg-transparent"
                     onClick={() => handleDeleteAction(action.id)}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -461,7 +461,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 </div>
                 
                 {action.notes && (
-                  <div className="text-[11px] bg-white p-2 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out] border border-gray-100 w-full box-border overflow-hidden break-words">
+                  <div className="text-[11px] bg-white p-2 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out] border border-gray-100 break-words">
                     {action.notes}
                   </div>
                 )}

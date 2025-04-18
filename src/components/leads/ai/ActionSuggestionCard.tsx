@@ -34,8 +34,8 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
   const formattedDate = format(suggestion.scheduledDate, 'dd/MM/yyyy à HH:mm', { locale: fr });
 
   return (
-    <div className="border border-loro-navy/5 bg-loro-pearl/10 rounded-lg p-2.5 animate-[fade-in_0.3s_ease-out] relative group touch-manipulation w-full box-border overflow-hidden">
-      <div className="flex items-start justify-between gap-2 mb-1 w-full box-border">
+    <div className="border border-loro-navy/5 bg-loro-pearl/10 rounded-lg p-2.5 animate-[fade-in_0.3s_ease-out] relative w-full box-border">
+      <div className="flex items-start justify-between gap-2 mb-1 w-full">
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {getActionTypeIcon(suggestion.actionType)}
         </div>
