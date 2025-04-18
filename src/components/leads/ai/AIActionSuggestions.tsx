@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Lightbulb, Loader2, RefreshCw } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
@@ -36,12 +35,15 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
     setError(null);
     
     try {
+      console.log('Generating action suggestions for lead:', lead.id);
       const actionSuggestions = await generateLeadActionSuggestions(lead);
+      console.log('Received action suggestions:', actionSuggestions);
       
       if (actionSuggestions && actionSuggestions.length > 0) {
         setSuggestions(actionSuggestions);
         setLastLoadTime(now);
       } else {
+        console.log('No suggestions were returned from the AI');
         setSuggestions([]);
       }
     } catch (err) {
@@ -53,12 +55,17 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
   };
 
   const handleImplementSuggestion = async (suggestion: AISuggestedAction) => {
+    if (!lead?.id) return;
+    
     try {
       setIsLoading(true);
       const success = await implementSuggestedAction(lead.id, suggestion);
       
       if (success) {
-        setSuggestions(current => current.filter(s => s.id !== suggestion.id));
+        setSuggestions(current => 
+          current.filter(s => s.id !== suggestion.id)
+        );
+        
         onActionAdded();
         
         toast({
@@ -79,44 +86,36 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
   };
 
   const handleDismissSuggestion = (suggestion: AISuggestedAction) => {
-    setSuggestions(current => {
-      const updatedSuggestions = current.filter(s => s.id !== suggestion.id);
-      
-      toast({
-        title: "Suggestion ignorée",
-        description: `L'action "${suggestion.actionType}" a été retirée des suggestions`
-      });
-      
-      return updatedSuggestions;
-    });
+    setSuggestions(current => 
+      current.filter(s => s.id !== suggestion.id)
+    );
   };
 
   const handleManualRefresh = () => {
-    setLastLoadTime(0);
     loadSuggestions();
   };
 
   if (isLoading) {
     return (
-      <div className="border rounded-lg p-4 bg-loro-pearl/20 flex flex-col items-center justify-center animate-[fade-in_0.3s_ease-out] space-y-3">
-        <Loader2 className="h-6 w-6 text-loro-navy animate-spin" />
-        <p className="text-sm text-loro-navy/80 font-medium">Génération des suggestions...</p>
+      <div className="border rounded-md p-3 bg-loro-pearl/20 flex flex-col items-center justify-center animate-[fade-in_0.3s_ease-out]">
+        <Loader2 className="h-5 w-5 text-loro-navy animate-spin mb-2" />
+        <p className="text-xs text-loro-navy/80">Génération des suggestions...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="border rounded-lg p-4 bg-red-50 animate-[fade-in_0.3s_ease-out] space-y-3">
-        <p className="text-sm text-red-600 text-center font-medium">{error}</p>
+      <div className="border rounded-md p-3 bg-red-50 animate-[fade-in_0.3s_ease-out]">
+        <p className="text-sm text-red-600 text-center mb-2">{error}</p>
         <div className="flex justify-center">
-          <Button
+          <Button 
             onClick={handleManualRefresh}
-            variant="destructive"
+            variant="outline"
             size="sm"
-            className="text-sm h-9 px-4"
+            className="text-xs border-red-200 text-red-600 hover:bg-red-50"
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-3 w-3 mr-1" />
             Réessayer
           </Button>
         </div>
@@ -126,16 +125,16 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
 
   if (!suggestions || suggestions.length === 0) {
     return (
-      <div className="border rounded-lg p-4 bg-loro-pearl/20 text-center animate-[fade-in_0.3s_ease-out] space-y-3">
-        <Lightbulb className="h-6 w-6 text-loro-navy/60 mx-auto" />
-        <p className="text-sm text-loro-navy/80 font-medium">Aucune suggestion pour le moment</p>
+      <div className="border rounded-md p-3 bg-loro-pearl/20 text-center animate-[fade-in_0.3s_ease-out]">
+        <Lightbulb className="h-5 w-5 text-loro-navy/60 mx-auto mb-2" />
+        <p className="text-xs text-loro-navy/80 mb-2">Aucune suggestion pour le moment</p>
         <Button 
-          onClick={loadSuggestions}
+          onClick={handleManualRefresh}
           variant="outline" 
           size="sm"
-          className="text-sm border-loro-navy text-loro-navy hover:bg-loro-pearl/20 h-9 px-4 w-full"
+          className="text-xs border-loro-navy text-loro-navy hover:bg-loro-pearl/20 w-full"
         >
-          <RefreshCw className="h-4 w-4 mr-2" />
+          <RefreshCw className="h-3 w-3 mr-1" />
           Générer des suggestions
         </Button>
       </div>
@@ -143,28 +142,28 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
   }
 
   return (
-    <div className="space-y-4 animate-[fade-in_0.4s_ease-out]">
+    <div className="space-y-3 animate-[fade-in_0.3s_ease-out]">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-md bg-loro-pearl">
-            <Lightbulb className="h-5 w-5 text-loro-navy" />
+        <div className="flex items-center gap-1.5">
+          <div className="p-1.5 rounded-md bg-loro-pearl">
+            <Lightbulb className="h-3.5 w-3.5 text-loro-navy" />
           </div>
-          <span className="text-sm font-semibold text-loro-navy">
+          <span className="text-xs text-loro-navy font-medium">
             {suggestions.length} suggestion{suggestions.length > 1 ? 's' : ''}
           </span>
         </div>
         <Button 
-          onClick={loadSuggestions}
+          onClick={handleManualRefresh}
           variant="ghost"
           size="sm"
-          className="h-9 px-3 text-sm text-loro-navy hover:bg-loro-pearl/20"
+          className="h-7 px-2 text-xs text-loro-navy hover:bg-loro-pearl/20"
         >
-          <RefreshCw className="h-4 w-4 mr-2" />
+          <RefreshCw className="h-3 w-3 mr-1" />
           Actualiser
         </Button>
       </div>
-
-      <div className="space-y-3">
+      
+      <div className="space-y-2">
         {suggestions.map((suggestion) => (
           <ActionSuggestionCard
             key={suggestion.id}
