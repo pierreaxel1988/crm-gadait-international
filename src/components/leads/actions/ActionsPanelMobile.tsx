@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
 import { format, isPast } from 'date-fns';
-import { Check, Clock, Calendar, Trash2, Phone, MessageCircle, Home } from 'lucide-react';
+import { Check, Clock, Calendar, Trash2, PlaneTakeoff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
 import { toast } from '@/hooks/use-toast';
 import { updateLead } from '@/services/leadUpdater';
+import { LeadAIAssistant } from '@/components/leads/ai/LeadAIAssistant';
 import { AIActionSuggestions } from '@/components/leads/ai/AIActionSuggestions';
-import AssistantIA from '@/components/leads/ai/AssistantIA';
-import LeadActionSuggestions from '@/components/leads/ai/LeadActionSuggestions';
+import { Textarea } from '@/components/ui/textarea';
 
 interface ActionsPanelMobileProps {
   leadId: string;
@@ -30,30 +30,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>(initialActionHistory || []);
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
-
-  const quickActions = [
-    { 
-      label: "Appel", 
-      icon: Phone, 
-      action: () => {
-        toast({ title: "Appel", description: "Fonctionnalité d'appel à implémenter" });
-      }
-    },
-    { 
-      label: "WhatsApp", 
-      icon: MessageCircle, 
-      action: () => {
-        toast({ title: "WhatsApp", description: "Envoyer un message WhatsApp" });
-      }
-    },
-    { 
-      label: "Email", 
-      icon: Home, 
-      action: () => {
-        toast({ title: "Email", description: "Envoyer un email" });
-      }
-    }
-  ];
+  const [prompt, setPrompt] = useState("");
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   useEffect(() => {
     const measureHeader = () => {
@@ -149,6 +127,75 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     }
   };
 
+  const handleSendToGPT = async () => {
+    if (!prompt || !lead) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Veuillez entrer un message et attendre que les données du lead soient chargées."
+      });
+      return;
+    }
+
+    setIsAiLoading(true);
+    try {
+      const body = {
+        message: prompt,
+        leadContext: `
+          Lead ID: ${lead.id}
+          Nom: ${lead.name}
+          Langue: ${lead.preferredLanguage}
+          Budget min: ${lead.budgetMin}
+          Budget max: ${lead.budget}
+          Devise: ${lead.currency}
+          Type de bien: ${lead.propertyTypes?.join(', ')}
+          Vue souhaitée: ${lead.views?.join(', ')}
+          Nombre de chambres: ${lead.bedrooms?.join(', ')}
+          Localisation: ${lead.desiredLocation}
+          Notes: ${lead.notes}
+          Agent: ${lead.assignedTo}
+        `,
+        type: "action_suggestion"
+      };
+
+      const response = await fetch("https://hxqoqkfnhbpwzkjgukrc.functions.supabase.co/chat-gadait", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la communication avec l\'assistant');
+      }
+
+      const data = await response.json();
+      console.log("Réponse IA :", data.response);
+      
+      toast({
+        title: "Message envoyé",
+        description: "L'assistant traite votre demande"
+      });
+
+      // Clear the prompt after successful send
+      setPrompt("");
+      
+      // Refresh the lead data to get any new suggestions
+      fetchLeadData();
+
+    } catch (error) {
+      console.error("Erreur lors de l'envoi à l'IA:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de communiquer avec l'assistant IA"
+      });
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
   const getActionTypeIcon = (actionType: string) => {
     switch (actionType) {
       case 'Call': return <span className="bg-[#EBD5CE] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
@@ -197,36 +244,59 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       className="space-y-3 pt-4"
       style={{ marginTop: dynamicTopMargin }}
     >
-      <div className="grid grid-cols-3 gap-2 mb-6">
-        {quickActions.map((action, index) => (
-          <Button
-            key={index}
-            variant="outline"
-            className="flex flex-col h-[80px] justify-center items-center space-y-2"
-            onClick={action.action}
-          >
-            <action.icon className="h-6 w-6" />
-            <span className="text-xs">{action.label}</span>
-          </Button>
-        ))}
-      </div>
-
+      {/* AI Action Suggestions */}
       {leadId && lead && (
         <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
-          <AssistantIA 
+          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3">
+            ACTIONS SUGGÉRÉES PAR IA
+          </h3>
+          <AIActionSuggestions 
             lead={lead}
-            leadId={leadId}
-            refresh={fetchLeadData}
+            onActionAdded={fetchLeadData}
           />
         </div>
       )}
       
-      {leadId && lead && (
+      {/* Assistant IA - avec nouveau prompt */}
+      {leadId && (
         <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3">
-            SUGGESTIONS D'ACTIONS IA
+          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">
+            ASSISTANT IA
           </h3>
-          <LeadActionSuggestions lead={lead} />
+          <div className="mt-3 space-y-4">
+            <div className="space-y-2">
+              <Textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Ex. Propose une relance WhatsApp ou un résumé du client..."
+                className="w-full min-h-[80px] text-sm"
+              />
+              <Button
+                onClick={handleSendToGPT}
+                disabled={isAiLoading || !prompt}
+                className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white"
+              >
+                {isAiLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full" />
+                    Envoi en cours...
+                  </div>
+                ) : (
+                  <>
+                    <PlaneTakeoff className="h-4 w-4 mr-2" />
+                    Envoyer à l'IA
+                  </>
+                )}
+              </Button>
+            </div>
+            {lead ? (
+              <LeadAIAssistant lead={lead} />
+            ) : (
+              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50">
+                <div className="animate-spin h-5 w-5 border-3 border-chocolate-dark rounded-full border-t-transparent" />
+              </div>
+            )}
+          </div>
         </div>
       )}
       
