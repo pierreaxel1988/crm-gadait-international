@@ -6,7 +6,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { LeadDetailed } from '@/types/lead';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bot, Home, User, WhatsApp } from 'lucide-react';
+import { MessageCircle, User, Home } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface AssistantIAProps {
@@ -24,7 +24,7 @@ const AssistantIA: React.FC<AssistantIAProps> = ({ leadId, lead, refresh }) => {
   const quickActions = [
     {
       label: "Relance WhatsApp",
-      icon: WhatsApp,
+      icon: MessageCircle,
       prompt: "Rédige une relance WhatsApp en anglais pour ce client, élégante et professionnelle."
     },
     {
