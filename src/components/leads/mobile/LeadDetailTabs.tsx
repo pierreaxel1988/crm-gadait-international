@@ -1,65 +1,110 @@
 
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClipboardList, Info, Search, Hash, StickyNote } from 'lucide-react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
 interface LeadDetailTabsProps {
   defaultTab?: string;
 }
 
-const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({ defaultTab = 'info' }) => {
-  const navigate = useNavigate();
+const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
+  defaultTab = "criteria"
+}) => {
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
   const location = useLocation();
-  const currentTab = new URLSearchParams(location.search).get('tab') || defaultTab;
+  const navigate = useNavigate();
 
+  // Extract the active tab from the URL query params or use default
+  const searchParams = new URLSearchParams(location.search);
+  const activeTab = searchParams.get('tab') || defaultTab;
   const handleTabChange = (value: string) => {
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('tab', value);
-    navigate(`${location.pathname}?${searchParams.toString()}`);
+    // Update URL with the new tab without refreshing the page
+    const newSearchParams = new URLSearchParams(location.search);
+    newSearchParams.set('tab', value);
+    navigate(`/leads/${id}?${newSearchParams.toString()}`, {
+      replace: true
+    });
   };
-
-  return (
-    <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="w-full h-12 grid grid-cols-5 bg-loro-50/50 rounded-none border-y border-loro-sand/20">
+  return <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+      <TabsList className="w-full grid grid-cols-6 bg-loro-50 border-t border-b border-loro-200/50 shadow-sm">
         <TabsTrigger 
           value="info" 
-          className="data-[state=active]:bg-white rounded-none border-r border-loro-sand/20 flex flex-col items-center pt-1.5"
+          className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          data-[state=active]:bg-transparent 
+          data-[state=active]:text-chocolate-dark 
+          data-[state=active]:font-medium
+          data-[state=active]:border-b-2
+          data-[state=active]:border-chocolate-dark
+          data-[state=active]:shadow-none"
         >
-          <Info className="h-4 w-4" />
-          <span className="text-[10px] mt-0.5">Général</span>
+          Général
         </TabsTrigger>
         <TabsTrigger 
           value="criteria" 
-          className="data-[state=active]:bg-white rounded-none border-r border-loro-sand/20 flex flex-col items-center pt-1.5"
+          className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          data-[state=active]:bg-transparent 
+          data-[state=active]:text-chocolate-dark 
+          data-[state=active]:font-medium
+          data-[state=active]:border-b-2
+          data-[state=active]:border-chocolate-dark
+          data-[state=active]:shadow-none"
         >
-          <Search className="h-4 w-4" />
-          <span className="text-[10px] mt-0.5">Critères</span>
+          Critères
         </TabsTrigger>
         <TabsTrigger 
           value="status" 
-          className="data-[state=active]:bg-white rounded-none border-r border-loro-sand/20 flex flex-col items-center pt-1.5"
+          className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          data-[state=active]:bg-transparent 
+          data-[state=active]:text-chocolate-dark 
+          data-[state=active]:font-medium
+          data-[state=active]:border-b-2
+          data-[state=active]:border-chocolate-dark
+          data-[state=active]:shadow-none"
         >
-          <Hash className="h-4 w-4" />
-          <span className="text-[10px] mt-0.5">Statut</span>
+          Statut
         </TabsTrigger>
         <TabsTrigger 
           value="notes" 
-          className="data-[state=active]:bg-white rounded-none border-r border-loro-sand/20 flex flex-col items-center pt-1.5"
+          className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          data-[state=active]:bg-transparent 
+          data-[state=active]:text-chocolate-dark 
+          data-[state=active]:font-medium
+          data-[state=active]:border-b-2
+          data-[state=active]:border-chocolate-dark
+          data-[state=active]:shadow-none"
         >
-          <StickyNote className="h-4 w-4" />
-          <span className="text-[10px] mt-0.5">Notes</span>
+          Notes
         </TabsTrigger>
         <TabsTrigger 
           value="actions" 
-          className="data-[state=active]:bg-white rounded-none flex flex-col items-center pt-1.5"
+          className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          data-[state=active]:bg-transparent 
+          data-[state=active]:text-chocolate-dark 
+          data-[state=active]:font-medium
+          data-[state=active]:border-b-2
+          data-[state=active]:border-chocolate-dark
+          data-[state=active]:shadow-none"
         >
-          <ClipboardList className="h-4 w-4" />
-          <span className="text-[10px] mt-0.5">Actions</span>
+          Actions
+        </TabsTrigger>
+        <TabsTrigger 
+          value="emails" 
+          className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          data-[state=active]:bg-transparent 
+          data-[state=active]:text-chocolate-dark 
+          data-[state=active]:font-medium
+          data-[state=active]:border-b-2
+          data-[state=active]:border-chocolate-dark
+          data-[state=active]:shadow-none"
+        >
+          Emails
         </TabsTrigger>
       </TabsList>
-    </Tabs>
-  );
+    </Tabs>;
 };
 
 export default LeadDetailTabs;
