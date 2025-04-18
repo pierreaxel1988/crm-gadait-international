@@ -139,6 +139,12 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
     setIsAiLoading(true);
     try {
+      const bedroomsValue = Array.isArray(lead.bedrooms) 
+        ? lead.bedrooms.join(', ') 
+        : lead.bedrooms !== undefined 
+          ? lead.bedrooms.toString() 
+          : '';
+      
       const body = {
         message: prompt,
         leadContext: `
@@ -150,7 +156,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
           Devise: ${lead.currency}
           Type de bien: ${lead.propertyTypes?.join(', ')}
           Vue souhaitée: ${lead.views?.join(', ')}
-          Nombre de chambres: ${lead.bedrooms?.join(', ')}
+          Nombre de chambres: ${bedroomsValue}
           Localisation: ${lead.desiredLocation}
           Notes: ${lead.notes}
           Agent: ${lead.assignedTo}
@@ -178,10 +184,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         description: "L'assistant traite votre demande"
       });
 
-      // Clear the prompt after successful send
       setPrompt("");
       
-      // Refresh the lead data to get any new suggestions
       fetchLeadData();
 
     } catch (error) {
