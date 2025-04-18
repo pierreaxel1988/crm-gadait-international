@@ -96,7 +96,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
       onClick={(e) => onCardClick(action.leadId, e)}
     >
       <div className="flex justify-between items-start mb-2">
-        <div className="max-w-[75%]">
+        <div className="max-w-[70%]">
           <div className={`font-medium truncate ${action.status === 'done' ? 'text-gray-600' : ''}`}>{action.leadName}</div>
           <div className="text-sm text-muted-foreground mb-1 truncate">{action.assignedToName}</div>
           <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />

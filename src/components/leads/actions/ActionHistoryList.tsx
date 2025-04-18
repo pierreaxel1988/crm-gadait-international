@@ -163,7 +163,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                                 : isOverdue
                                   ? 'bg-[#FFF0F2] rounded-md font-futuraLight text-rose-800 border border-pink-100'
                                   : 'bg-[#F7FEF1] rounded-md font-futuraLight text-green-800 border border-green-100'
-                            } break-words`}>
+                            } break-words w-full`}>
                               {action.notes}
                             </p>
                           )}

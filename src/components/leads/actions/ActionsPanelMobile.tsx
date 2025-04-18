@@ -421,7 +421,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     </Button>
                   </div>
                   {action.notes && (
-                    <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] break-words ${
+                    <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] break-words w-full ${
                       isOverdue 
                         ? isCallAction
                           ? 'bg-[#FDF4F6] text-[#D05A76] border border-pink-100'
@@ -476,7 +476,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   </div>
                 </div>
                 {action.notes && (
-                  <div className="text-xs bg-white p-1.5 rounded-md mt-1.5 text-gray-600 break-words animate-[fade-in_0.2s_ease-out] border border-gray-100">
+                  <div className="text-xs bg-white p-1.5 rounded-md mt-1.5 text-gray-600 break-words w-full animate-[fade-in_0.2s_ease-out] border border-gray-100">
                     {action.notes}
                   </div>
                 )}
