@@ -98,25 +98,25 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
 
   if (isLoading) {
     return (
-      <div className="border rounded-lg p-6 bg-loro-pearl/20 flex flex-col items-center justify-center animate-[fade-in_0.3s_ease-out] space-y-4 mx-2 my-3">
-        <Loader2 className="h-8 w-8 text-loro-navy animate-spin" />
-        <p className="text-base text-loro-navy/80 font-medium text-center">Génération des suggestions...</p>
+      <div className="border rounded-lg p-4 bg-loro-pearl/20 flex flex-col items-center justify-center animate-[fade-in_0.3s_ease-out] space-y-3">
+        <Loader2 className="h-6 w-6 text-loro-navy animate-spin" />
+        <p className="text-sm text-loro-navy/80 font-medium">Génération des suggestions...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="border rounded-lg p-6 bg-red-50 animate-[fade-in_0.3s_ease-out] space-y-4 mx-2 my-3">
-        <p className="text-base text-red-600 text-center font-medium">{error}</p>
+      <div className="border rounded-lg p-4 bg-red-50 animate-[fade-in_0.3s_ease-out] space-y-3">
+        <p className="text-sm text-red-600 text-center font-medium">{error}</p>
         <div className="flex justify-center">
           <Button
             onClick={handleManualRefresh}
             variant="destructive"
-            size="lg"
-            className="w-full max-w-xs h-12 text-base font-medium"
+            size="sm"
+            className="text-sm h-9 px-4"
           >
-            <RefreshCw className="h-5 w-5 mr-2" />
+            <RefreshCw className="h-4 w-4 mr-2" />
             Réessayer
           </Button>
         </div>
@@ -126,16 +126,16 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
 
   if (!suggestions || suggestions.length === 0) {
     return (
-      <div className="border rounded-lg p-6 bg-loro-pearl/20 text-center animate-[fade-in_0.3s_ease-out] space-y-4 mx-2 my-3">
-        <Lightbulb className="h-8 w-8 text-loro-navy/60 mx-auto" />
-        <p className="text-base text-loro-navy/80 font-medium">Aucune suggestion pour le moment</p>
+      <div className="border rounded-lg p-4 bg-loro-pearl/20 text-center animate-[fade-in_0.3s_ease-out] space-y-3">
+        <Lightbulb className="h-6 w-6 text-loro-navy/60 mx-auto" />
+        <p className="text-sm text-loro-navy/80 font-medium">Aucune suggestion pour le moment</p>
         <Button 
           onClick={loadSuggestions}
           variant="outline" 
-          size="lg"
-          className="w-full h-12 text-base border-loro-navy text-loro-navy hover:bg-loro-pearl/20"
+          size="sm"
+          className="text-sm border-loro-navy text-loro-navy hover:bg-loro-pearl/20 h-9 px-4 w-full"
         >
-          <RefreshCw className="h-5 w-5 mr-2" />
+          <RefreshCw className="h-4 w-4 mr-2" />
           Générer des suggestions
         </Button>
       </div>
@@ -143,28 +143,28 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
   }
 
   return (
-    <div className="space-y-5 animate-[fade-in_0.4s_ease-out] p-3">
-      <div className="flex items-center justify-between bg-loro-pearl/10 p-3 rounded-lg">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-md bg-loro-pearl">
-            <Lightbulb className="h-6 w-6 text-loro-navy" />
+    <div className="space-y-4 animate-[fade-in_0.4s_ease-out]">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-md bg-loro-pearl">
+            <Lightbulb className="h-5 w-5 text-loro-navy" />
           </div>
-          <span className="text-base font-semibold text-loro-navy">
+          <span className="text-sm font-semibold text-loro-navy">
             {suggestions.length} suggestion{suggestions.length > 1 ? 's' : ''}
           </span>
         </div>
         <Button 
-          onClick={handleManualRefresh}
+          onClick={loadSuggestions}
           variant="ghost"
-          size="lg"
-          className="h-11 px-4 text-base text-loro-navy hover:bg-loro-pearl/20"
+          size="sm"
+          className="h-9 px-3 text-sm text-loro-navy hover:bg-loro-pearl/20"
         >
-          <RefreshCw className="h-5 w-5 mr-2" />
+          <RefreshCw className="h-4 w-4 mr-2" />
           Actualiser
         </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {suggestions.map((suggestion) => (
           <ActionSuggestionCard
             key={suggestion.id}

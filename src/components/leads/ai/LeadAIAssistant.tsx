@@ -19,28 +19,6 @@ interface LeadAIAssistantProps {
   className?: string;
 }
 
-// Helper pour formatter le contenu des messages avec la prise en charge des liens et des listes
-const formatMessageContent = (content: string) => {
-  if (!content) return '';
-  
-  // Convertir les URLs en liens cliquables
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  let formattedContent = content.replace(urlRegex, (url) => {
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-loro-hazel hover:underline">${url}</a>`;
-  });
-  
-  // Convertir les listes à puces (* ou -)
-  formattedContent = formattedContent.replace(/^[*-]\s+(.+)$/gm, '<li class="ml-4 list-disc">$1</li>');
-  
-  // Convertir les listes numérotées (1. 2. etc)
-  formattedContent = formattedContent.replace(/^\d+\.\s+(.+)$/gm, '<li class="ml-4 list-decimal">$1</li>');
-  
-  // Remplacer les sauts de ligne par des <br />
-  formattedContent = formattedContent.replace(/\n/g, '<br />');
-  
-  return formattedContent;
-};
-
 export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -192,7 +170,7 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
       </div>
       
       {/* Quick Actions améliorées */}
-      <div className="p-3 border-b flex gap-2 overflow-x-auto scrollbar-hide">
+      <div className="p-3 border-b flex gap-2 overflow-x-auto">
         {quickActions.map((action) => (
           <Button 
             key={action} 
@@ -243,13 +221,10 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
                 <div className={cn(
                   "rounded-lg px-3 py-2 text-sm",
                   msg.role === 'user' 
-                    ? "bg-loro-navy/10 text-loro-navy order-1 rounded-tr-none shadow-sm" 
-                    : "bg-loro-hazel/20 text-loro-night order-2 rounded-tl-none shadow-sm"
+                    ? "bg-loro-navy/10 text-loro-navy order-1 rounded-tr-none" 
+                    : "bg-loro-hazel/20 text-loro-night order-2 rounded-tl-none"
                 )}>
-                  <div 
-                    className="whitespace-pre-wrap prose-sm max-w-none leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content) }}
-                  />
+                  <div className="whitespace-pre-wrap">{msg.content}</div>
                   <div className="text-[10px] text-muted-foreground mt-1 text-right">
                     {formatDate(msg.timestamp)}
                   </div>
