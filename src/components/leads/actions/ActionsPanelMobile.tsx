@@ -271,7 +271,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   }
 
   return (
-    <div className="space-y-4 px-2 max-w-full">
+    <div className="space-y-4 px-2 max-w-full overflow-x-hidden">
       {/* AI Action Suggestions */}
       {leadId && lead && (
         <div className="mb-4">
@@ -294,14 +294,14 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
           <div className="mt-2 space-y-3">
             {lead ? (
               <>
-                <div className="flex gap-2 overflow-x-auto -mx-2 px-2 pb-2">
+                <div className="flex gap-2 overflow-x-auto -mx-2 px-2 pb-2 no-scrollbar">
                   {quickPrompts.map((quickPrompt) => (
                     <Button
                       key={quickPrompt.id}
                       variant="outline"
                       size="sm"
                       onClick={() => setPrompt(quickPrompt.prompt)}
-                      className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10"
+                      className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10 shrink-0"
                     >
                       {quickPrompt.label}
                     </Button>
@@ -381,7 +381,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               return (
                 <div 
                   key={action.id} 
-                  className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] relative ${
+                  className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] relative w-full ${
                     isOverdue 
                       ? isCallAction 
                         ? 'bg-[#F8E2E8]/30' 
@@ -390,8 +390,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   }`}
                 >
                   <div className="flex justify-between items-start mb-1">
-                    <div className="flex items-center gap-1.5">
-                      <div className={`h-6 w-6 rounded-full flex items-center justify-center ${
+                    <div className="flex items-center gap-1.5 max-w-[70%]">
+                      <div className={`h-6 w-6 rounded-full flex items-center justify-center shrink-0 ${
                         isCallAction
                           ? isOverdue
                             ? 'bg-[#F8E2E8] text-[#D05A76]'
@@ -402,18 +402,18 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                       }`}>
                         <Calendar className="h-3 w-3" />
                       </div>
-                      <div>
-                        <h4 className="font-futura text-sm">{action.actionType}</h4>
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Clock className="h-2.5 w-2.5 mr-1" />
-                          {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
+                      <div className="min-w-0">
+                        <h4 className="font-futura text-sm truncate">{action.actionType}</h4>
+                        <div className="flex items-center text-xs text-gray-500 truncate">
+                          <Clock className="h-2.5 w-2.5 mr-1 shrink-0" />
+                          <span className="truncate">{format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}</span>
                         </div>
                       </div>
                     </div>
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95"
+                      className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95 shrink-0"
                       onClick={() => onMarkComplete(action)}
                     >
                       <Check className="h-3 w-3 mr-1" /> 
@@ -457,20 +457,20 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               <div 
                 key={action.id} 
                 className={cn(
-                  "border rounded-md p-2 bg-[#F1F0FB] transition-all duration-200 animate-[fade-in_0.3s_ease-out]",
+                  "border rounded-md p-2 bg-[#F1F0FB] transition-all duration-200 animate-[fade-in_0.3s_ease-out] w-full",
                   "opacity-80 relative"
                 )}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <div className="flex items-center gap-1.5">
-                    <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                  <div className="flex items-center gap-1.5 max-w-[80%]">
+                    <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0">
                       <Check className="h-3 w-3" />
                     </div>
-                    <div>
-                      <h4 className="font-futura text-sm text-gray-700">{action.actionType}</h4>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <Check className="h-2.5 w-2.5 mr-1 text-green-500" />
-                        {action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}
+                    <div className="min-w-0">
+                      <h4 className="font-futura text-sm text-gray-700 truncate">{action.actionType}</h4>
+                      <div className="flex items-center text-xs text-gray-500 truncate">
+                        <Check className="h-2.5 w-2.5 mr-1 text-green-500 shrink-0" />
+                        <span className="truncate">{action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}</span>
                       </div>
                     </div>
                   </div>

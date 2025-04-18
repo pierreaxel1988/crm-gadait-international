@@ -99,7 +99,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                   <Card 
                     key={action.id} 
                     className={cn(
-                      "relative overflow-hidden transition-all duration-300 rounded-lg border shadow-sm",
+                      "relative overflow-hidden transition-all duration-300 rounded-lg border shadow-sm w-full",
                       action.completedDate 
                         ? "border-loro-pearl/30 bg-[#F1F0FB]" // Soft gray for completed actions
                         : isOverdue
@@ -121,10 +121,10 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                     
                     <div className={`${isMobile ? 'p-2.5' : 'p-3'}`}>
                       <div className="flex justify-between items-start gap-2">
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2.5">
                             <div className={cn(
-                              `${isMobile ? 'p-1.5' : 'p-1.5'} rounded-md`,
+                              `${isMobile ? 'p-1.5' : 'p-1.5'} rounded-md shrink-0`,
                               action.completedDate 
                                 ? "bg-green-50" 
                                 : isOverdue
@@ -133,23 +133,23 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                             )}>
                               {getActionTypeIcon(action.actionType as TaskType)}
                             </div>
-                            <div>
+                            <div className="min-w-0">
                               <span className={`${
                                 action.completedDate 
                                   ? 'text-gray-600' 
                                   : isOverdue
                                     ? 'text-rose-800'
                                     : 'text-loro-navy/80'
-                              } font-futura ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                              } font-futura ${isMobile ? 'text-xs' : 'text-sm'} truncate block`}>
                                 {action.actionType}
                               </span>
-                              <div className="flex items-center gap-1 text-xs text-loro-navy/50 mt-0.5 font-futuraLight">
+                              <div className="flex items-center gap-1 text-xs text-loro-navy/50 mt-0.5 font-futuraLight truncate">
                                 {action.completedDate ? (
-                                  <Check className="h-3 w-3 text-green-500" />
+                                  <Check className="h-3 w-3 text-green-500 shrink-0" />
                                 ) : (
-                                  <Clock className={`h-3 w-3 ${isOverdue ? 'text-red-400' : 'text-loro-navy/40'}`} />
+                                  <Clock className={`h-3 w-3 ${isOverdue ? 'text-red-400' : 'text-loro-navy/40'} shrink-0`} />
                                 )}
-                                <span>
+                                <span className="truncate">
                                   {format(new Date(action.completedDate || action.scheduledDate), 'HH:mm', { locale: fr })}
                                 </span>
                               </div>
