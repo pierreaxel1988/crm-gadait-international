@@ -32,24 +32,24 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
   const formattedDate = format(suggestion.scheduledDate, 'dd/MM/yyyy à HH:mm', { locale: fr });
 
   return (
-    <div className="border border-loro-hazel/30 bg-loro-hazel/5 rounded-md p-3 animate-[fade-in_0.3s_ease-out]">
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex items-center gap-2">
+    <div className="border border-loro-navy/10 bg-loro-pearl/20 rounded-md p-2.5 animate-[fade-in_0.3s_ease-out] relative">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-center gap-1.5">
           {getActionTypeIcon(suggestion.actionType)}
         </div>
-        <div className="flex items-center text-xs text-gray-500">
-          <CalendarIcon className="h-3 w-3 mr-1" />
+        <div className="flex items-center text-[10px] text-gray-500 bg-white/80 px-1.5 py-0.5 rounded-full">
+          <CalendarIcon className="h-2.5 w-2.5 mr-1" />
           {formattedDate}
         </div>
       </div>
       
-      <p className="text-sm mb-3">{suggestion.notes}</p>
+      <p className="text-xs text-loro-navy/90 mb-3 line-clamp-2">{suggestion.notes}</p>
       
-      <div className="flex justify-end gap-2 mt-2">
+      <div className="flex justify-end gap-1.5">
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
-          className="text-xs border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+          className="h-7 px-2 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700"
           onClick={() => onDismiss(suggestion)}
         >
           <XIcon className="h-3 w-3 mr-1" />
@@ -58,7 +58,7 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
         <Button
           variant="outline"
           size="sm"
-          className="text-xs border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
+          className="h-7 px-2 text-xs border-loro-navy text-loro-navy hover:bg-loro-pearl/40"
           onClick={() => onImplement(suggestion)}
         >
           <CheckIcon className="h-3 w-3 mr-1" />

@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Lightbulb, Loader2, RefreshCw } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
-import { AISuggestedAction, generateLeadActionSuggestions, implementSuggestedAction } from '@/services/aiActionSuggestionService';
+import { AISuggestedAction, generateLeadActionSuggestions } from '@/services/aiActionSuggestionService';
 import { ActionSuggestionCard } from './ActionSuggestionCard';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,6 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
   const loadSuggestions = async () => {
     if (!lead) return;
     
-    // Don't reload suggestions if we've loaded them in the last 5 minutes
     const now = Date.now();
     if (now - lastLoadTime < 5 * 60 * 1000 && suggestions.length > 0) {
       return;
@@ -64,12 +62,10 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
       const success = await implementSuggestedAction(lead.id, suggestion);
       
       if (success) {
-        // Remove the implemented suggestion from the list
         setSuggestions(current => 
           current.filter(s => s.id !== suggestion.id)
         );
         
-        // Notify parent that an action was added
         onActionAdded();
         
         toast({
@@ -90,7 +86,6 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
   };
 
   const handleDismissSuggestion = (suggestion: AISuggestedAction) => {
-    // Simply remove the suggestion from the list
     setSuggestions(current => 
       current.filter(s => s.id !== suggestion.id)
     );
@@ -102,40 +97,42 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
 
   if (isLoading) {
     return (
-      <div className="border rounded-md p-4 bg-loro-hazel/5 flex flex-col items-center justify-center">
-        <Loader2 className="h-5 w-5 text-loro-hazel animate-spin mb-2" />
-        <p className="text-sm text-muted-foreground">Génération de suggestions en cours...</p>
+      <div className="border rounded-md p-3 bg-loro-pearl/20 flex flex-col items-center justify-center animate-[fade-in_0.3s_ease-out]">
+        <Loader2 className="h-5 w-5 text-loro-navy animate-spin mb-2" />
+        <p className="text-xs text-loro-navy/80">Génération des suggestions...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="border rounded-md p-4 bg-red-50 text-center">
-        <p className="text-sm text-red-600">{error}</p>
-        <Button 
-          onClick={handleManualRefresh}
-          variant="outline"
-          size="sm"
-          className="mt-2 text-xs"
-        >
-          <RefreshCw className="h-3 w-3 mr-1" />
-          Réessayer
-        </Button>
+      <div className="border rounded-md p-3 bg-red-50 animate-[fade-in_0.3s_ease-out]">
+        <p className="text-sm text-red-600 text-center mb-2">{error}</p>
+        <div className="flex justify-center">
+          <Button 
+            onClick={handleManualRefresh}
+            variant="outline"
+            size="sm"
+            className="text-xs border-red-200 text-red-600 hover:bg-red-50"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Réessayer
+          </Button>
+        </div>
       </div>
     );
   }
 
   if (!suggestions || suggestions.length === 0) {
     return (
-      <div className="border rounded-md p-4 bg-loro-hazel/5 text-center animate-[fade-in_0.3s_ease-out]">
-        <Lightbulb className="h-5 w-5 text-loro-hazel/60 mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">Aucune suggestion d'action pour le moment</p>
+      <div className="border rounded-md p-3 bg-loro-pearl/20 text-center animate-[fade-in_0.3s_ease-out]">
+        <Lightbulb className="h-5 w-5 text-loro-navy/60 mx-auto mb-2" />
+        <p className="text-xs text-loro-navy/80 mb-2">Aucune suggestion pour le moment</p>
         <Button 
           onClick={handleManualRefresh}
           variant="outline" 
           size="sm"
-          className="mt-2 text-xs border-loro-hazel text-loro-hazel hover:bg-loro-hazel/10"
+          className="text-xs border-loro-navy text-loro-navy hover:bg-loro-pearl/20 w-full"
         >
           <RefreshCw className="h-3 w-3 mr-1" />
           Générer des suggestions
@@ -145,17 +142,21 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
   }
 
   return (
-    <div className="mb-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Lightbulb className="h-4 w-4 text-loro-hazel" />
-          <h3 className="text-sm font-medium">Actions suggérées par GADAIT AI ({suggestions.length})</h3>
+    <div className="space-y-3 animate-[fade-in_0.3s_ease-out]">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <div className="p-1.5 rounded-md bg-loro-pearl">
+            <Lightbulb className="h-3.5 w-3.5 text-loro-navy" />
+          </div>
+          <span className="text-xs text-loro-navy font-medium">
+            {suggestions.length} suggestion{suggestions.length > 1 ? 's' : ''}
+          </span>
         </div>
         <Button 
           onClick={handleManualRefresh}
           variant="ghost"
           size="sm"
-          className="text-xs text-loro-hazel hover:text-loro-hazel/80 hover:bg-transparent"
+          className="h-7 px-2 text-xs text-loro-navy hover:bg-loro-pearl/20"
         >
           <RefreshCw className="h-3 w-3 mr-1" />
           Actualiser
