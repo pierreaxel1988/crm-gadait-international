@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
@@ -177,7 +178,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
               <button onClick={handleWhatsAppClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="WhatsApp">
                 <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
                   <img 
-                    src="/lovable-uploads/bf1a6b76-83f4-46cb-bb39-25f80e1c5289.png" 
+                    src="/lovable-uploads/32151dee-f234-426c-9f5d-a0eb66796e27.png" 
                     alt="WhatsApp"
                     className="h-4 w-4"
                   />
