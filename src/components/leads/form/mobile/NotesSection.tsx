@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Textarea } from '@/components/ui/textarea';
@@ -61,17 +60,6 @@ const NotesSection: React.FC<NotesSectionProps> = ({
           onChange={(e) => handleInputChange('notes', e.target.value)}
           placeholder="Ajouter des notes concernant ce lead..."
           className="min-h-[200px] font-futura"
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="internal_notes" className="text-sm">Notes internes</Label>
-        <Textarea
-          id="internal_notes"
-          value={lead.internal_notes || ''}
-          onChange={(e) => handleInputChange('internal_notes', e.target.value)}
-          placeholder="Notes internes (visibles uniquement par l'équipe)..."
-          className="min-h-[150px] font-futura"
         />
       </div>
     </div>
