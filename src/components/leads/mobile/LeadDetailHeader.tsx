@@ -50,10 +50,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   onWhatsAppClick,
   onEmailClick
 }) => {
-  const {
-    isAdmin
-  } = useAuth();
-  
+  const { isAdmin } = useAuth();
   const isMobile = useIsMobile();
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
@@ -88,7 +85,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   };
 
   const headerClasses = cn(
-    "flex items-center justify-between p-3 w-full bg-loro-50 box-border",
+    "flex items-center justify-between p-2 sm:p-3 md:p-4 w-full bg-loro-50 box-border",
     "overflow-visible min-w-0"
   );
 
@@ -99,30 +96,36 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           variant="ghost" 
           size="icon" 
           onClick={onBackClick} 
-          className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200 flex-shrink-0"
+          className="p-1 sm:p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200 flex-shrink-0"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
         <div className="min-w-0 flex-1">
           <h1 className={cn(
             "font-futura leading-tight truncate",
-            isMobile ? "text-base" : "text-lg"
+            "text-sm sm:text-base md:text-lg"
           )}>
             {name}
           </h1>
-          <p className="text-xs text-loro-terracotta">
+          <p className="text-[10px] sm:text-xs text-loro-terracotta">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
           <div className="flex flex-wrap gap-1 mt-1 w-full">
-            {budget && <span className="text-[10px] bg-[#F5F3EE] px-2 py-0.5 rounded-xl border border-zinc-200">
+            {budget && (
+              <span className="text-[10px] sm:text-xs bg-[#F5F3EE] px-2 py-0.5 rounded-xl border border-zinc-200">
                 {formatBudget(budget, currency)}
-              </span>}
-            {desiredLocation && <span className="text-[10px] bg-[#EBD5CE] px-2 py-0.5 rounded-xl">
+              </span>
+            )}
+            {desiredLocation && (
+              <span className="text-[10px] sm:text-xs bg-[#EBD5CE] px-2 py-0.5 rounded-xl">
                 {desiredLocation}
-              </span>}
-            {country && <span className="text-[10px] bg-[#F3E9D6] px-2 py-0.5 rounded-xl border border-zinc-200">
+              </span>
+            )}
+            {country && (
+              <span className="text-[10px] sm:text-xs bg-[#F3E9D6] px-2 py-0.5 rounded-xl border border-zinc-200">
                 {country}
-              </span>}
+              </span>
+            )}
           </div>
         </div>
       </div>

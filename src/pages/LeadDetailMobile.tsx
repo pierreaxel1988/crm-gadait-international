@@ -20,6 +20,7 @@ import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSectio
 import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
 import NotesSection from '@/components/leads/form/mobile/NotesSection';
 import EmailsTab from '@/components/leads/mobile/tabs/EmailsTab';
+
 const LeadDetailMobile = () => {
   const {
     id
@@ -31,6 +32,7 @@ const LeadDetailMobile = () => {
   const searchParams = new URLSearchParams(location.search);
   const activeTab = searchParams.get('tab') || 'criteria';
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
+
   const {
     lead,
     setLead,
@@ -46,6 +48,7 @@ const LeadDetailMobile = () => {
     endCallTracking,
     formatDuration
   } = useLeadDetail(id);
+
   const {
     isActionDialogOpen,
     setIsActionDialogOpen,
@@ -65,14 +68,17 @@ const LeadDetailMobile = () => {
     acceptSuggestion,
     rejectSuggestion
   } = useLeadActions(lead, setLead);
+
   const handleBackClick = () => {
     navigate('/pipeline');
   };
+
   const handleMarkComplete = (action: ActionHistory) => {
     if (action && action.id) {
       markActionComplete(action.id);
     }
   };
+
   const handleDeleteAction = async (actionId: string) => {
     if (!lead) return;
     try {
@@ -98,49 +104,77 @@ const LeadDetailMobile = () => {
       });
     }
   };
+
   const handleSaveWithIndicator = async () => {
     await handleSave();
     setShowSaveIndicator(true);
     setTimeout(() => setShowSaveIndicator(false), 2000);
   };
+
   const handlePhoneCall = (e: React.MouseEvent) => {
     e.preventDefault();
     startCallTracking('phone');
   };
+
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     startCallTracking('whatsapp');
   };
+
   const handleEmailClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (lead?.email) {
       window.location.href = `mailto:${lead.email}`;
     }
   };
+
   const handleCallComplete = (duration: number) => {
     if (lead) {
       endCallTracking(duration);
     }
   };
+
   if (isLoading) {
     return <LoadingState isLoading={isLoading} />;
   }
+
   if (!lead && id) {
     return <NotFoundState show={!lead && !!id} id={id} />;
   }
+
   if (!lead) return null;
-  return <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
+
+  return (
+    <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
       <div className="fixed top-0 left-0 right-0 z-40 bg-loro-sand w-full">
-        <LeadDetailHeader name={lead.name} createdAt={lead.createdAt} phone={lead.phone} email={lead.email} budget={lead.budget} currency={lead.currency} desiredLocation={lead.desiredLocation} country={lead.country} purchaseTimeframe={lead.purchaseTimeframe} onBackClick={handleBackClick} onSave={handleSaveWithIndicator} isSaving={isSaving} hasChanges={hasChanges} tags={lead.tags} onPhoneCall={handlePhoneCall} onWhatsAppClick={handleWhatsAppClick} onEmailClick={handleEmailClick} />
+        <LeadDetailHeader 
+          name={lead.name} 
+          createdAt={lead.createdAt} 
+          phone={lead.phone} 
+          email={lead.email} 
+          budget={lead.budget} 
+          currency={lead.currency} 
+          desiredLocation={lead.desiredLocation} 
+          country={lead.country} 
+          purchaseTimeframe={lead.purchaseTimeframe} 
+          onBackClick={handleBackClick} 
+          onSave={handleSaveWithIndicator} 
+          isSaving={isSaving} 
+          hasChanges={hasChanges} 
+          tags={lead.tags}
+          onPhoneCall={handlePhoneCall}
+          onWhatsAppClick={handleWhatsAppClick}
+          onEmailClick={handleEmailClick}
+        />
         
         <div className="bg-white">
           <LeadDetailTabs defaultTab={activeTab} />
         </div>
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto pt-16 pb-24 w-full box-border max-w-full overflow-x-hidden">
+      <ScrollArea className="flex-1 overflow-y-auto pt-16 sm:pt-20 md:pt-24 pb-24 w-full box-border max-w-full overflow-x-hidden">
         <Tabs value={activeTab} className="w-full h-full">
-          <div className="px-3 pb-36 h-full w-full box-border">
+          <div className="px-3 sm:px-4 md:px-6 pb-36 h-full w-full box-border">
             <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
@@ -158,8 +192,19 @@ const LeadDetailMobile = () => {
             </TabsContent>
             
             <TabsContent value="actions" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
-              {actionSuggestions && actionSuggestions.length > 0 && <ActionSuggestions suggestions={actionSuggestions} onAccept={acceptSuggestion} onReject={rejectSuggestion} />}
-              <ActionsPanelMobile leadId={lead.id} onAddAction={fetchLead} onMarkComplete={handleMarkComplete} actionHistory={lead.actionHistory || []} />
+              {actionSuggestions && actionSuggestions.length > 0 && (
+                <ActionSuggestions 
+                  suggestions={actionSuggestions} 
+                  onAccept={acceptSuggestion} 
+                  onReject={rejectSuggestion} 
+                />
+              )}
+              <ActionsPanelMobile 
+                leadId={lead.id} 
+                onAddAction={fetchLead} 
+                onMarkComplete={handleMarkComplete} 
+                actionHistory={lead.actionHistory || []} 
+              />
             </TabsContent>
             
             <TabsContent value="emails" className="h-full flex-1 flex-grow w-full">
@@ -169,13 +214,43 @@ const LeadDetailMobile = () => {
         </Tabs>
       </ScrollArea>
       
-      <LeadDetailActionBar autoSaveEnabled={autoSaveEnabled} onAddAction={handleAddAction} lead={lead} getActionTypeIcon={getActionTypeIcon} onMarkComplete={markActionComplete} onDeleteAction={handleDeleteAction} hasChanges={hasChanges} isSaving={isSaving} onManualSave={handleSaveWithIndicator} actionSuggestions={actionSuggestions} onAcceptSuggestion={acceptSuggestion} onRejectSuggestion={rejectSuggestion} />
+      <LeadDetailActionBar 
+        autoSaveEnabled={autoSaveEnabled}
+        onAddAction={handleAddAction}
+        lead={lead}
+        getActionTypeIcon={getActionTypeIcon}
+        onMarkComplete={markActionComplete}
+        onDeleteAction={handleDeleteAction}
+        hasChanges={hasChanges}
+        isSaving={isSaving}
+        onManualSave={handleSaveWithIndicator}
+        actionSuggestions={actionSuggestions}
+        onAcceptSuggestion={acceptSuggestion}
+        onRejectSuggestion={rejectSuggestion}
+      />
 
-      {showSaveIndicator && <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
+      {showSaveIndicator && (
+        <div className="fixed top-16 sm:top-20 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
           <CheckCircle className="h-5 w-5" />
-        </div>}
+        </div>
+      )}
 
-      <ActionDialog isOpen={isActionDialogOpen} onClose={() => setIsActionDialogOpen(false)} selectedAction={selectedAction} setSelectedAction={setSelectedAction} actionDate={actionDate} setActionDate={setActionDate} actionTime={actionTime} setActionTime={setActionTime} actionNotes={actionNotes} setActionNotes={setActionNotes} onConfirm={handleActionConfirm} getActionTypeIcon={getActionTypeIcon} />
-    </div>;
+      <ActionDialog 
+        isOpen={isActionDialogOpen}
+        onClose={() => setIsActionDialogOpen(false)}
+        selectedAction={selectedAction}
+        setSelectedAction={setSelectedAction}
+        actionDate={actionDate}
+        setActionDate={setActionDate}
+        actionTime={actionTime}
+        setActionTime={setActionTime}
+        actionNotes={actionNotes}
+        setActionNotes={setActionNotes}
+        onConfirm={handleActionConfirm}
+        getActionTypeIcon={getActionTypeIcon}
+      />
+    </div>
+  );
 };
+
 export default LeadDetailMobile;

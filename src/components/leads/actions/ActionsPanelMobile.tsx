@@ -244,7 +244,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   
   const responsiveContainerClasses = cn(
     "space-y-4 w-full max-w-full box-border",
-    "px-3 pb-4 overflow-visible"
+    "px-2 sm:px-4 md:px-6 pb-4 overflow-visible"
   );
 
   const quickPrompts = lead ? [
@@ -278,7 +278,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       {/* AI Action Suggestions */}
       {leadId && lead && (
         <div className="animate-[fade-in_0.4s_ease-out] w-full">
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3 break-words">
+          <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3 break-words">
             ACTIONS SUGGÉRÉES PAR IA
           </h3>
           <AIActionSuggestions 
@@ -291,7 +291,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       {/* Assistant IA - avec prompts rapides */}
       {leadId && (
         <div className="animate-[fade-in_0.4s_ease-out] w-full">
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b break-words">
+          <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b break-words">
             ASSISTANT IA
           </h3>
           <div className="mt-3 space-y-4 w-full">
@@ -304,7 +304,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => setPrompt(quickPrompt.prompt)}
-                      className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10 shrink-0"
+                      className="whitespace-nowrap text-xs sm:text-sm border-loro-sand hover:bg-loro-sand/10 shrink-0"
                     >
                       {quickPrompt.label}
                     </Button>
@@ -336,7 +336,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   </Button>
                 </div>
               </>
-            ) : (
+            ) : loadError ? (
               <div className="border rounded-md p-4 bg-red-100 text-center w-full">
                 <p className="text-red-600 font-medium mb-1">Erreur</p>
                 <p className="text-sm">{loadError || "Impossible de charger les données du lead. Veuillez rafraîchir la page."}</p>
@@ -348,6 +348,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 >
                   Réessayer
                 </Button>
+              </div>
+            ) : (
+              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50 w-full">
+                <div className="animate-spin h-5 w-5 border-3 border-chocolate-dark rounded-full border-t-transparent" />
               </div>
             )}
             
@@ -367,7 +371,9 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       )}
       
       <div className="flex justify-between items-center mb-4 w-full">
-        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b break-words">ACTIONS EN ATTENTE</h3>
+        <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b break-words">
+          ACTIONS EN ATTENTE
+        </h3>
       </div>
 
       {pendingActions.length === 0 ? (
