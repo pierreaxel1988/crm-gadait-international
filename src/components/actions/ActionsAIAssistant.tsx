@@ -165,12 +165,12 @@ const ActionsAIAssistant: React.FC<ActionsAIAssistantProps> = ({ onClose, onActi
                 <Users className="h-4 w-4 text-loro-hazel" />
                 <div className="text-sm font-medium">Sélectionner un lead (optionnel)</div>
               </div>
-              <Select value={selectedLeadId || ""} onValueChange={setSelectedLeadId}>
+              <Select value={selectedLeadId || "no_lead"} onValueChange={setSelectedLeadId}>
                 <SelectTrigger className="w-full border-loro-sand/60 focus:ring-loro-hazel/30">
                   <SelectValue placeholder="Sélectionner un lead pour des suggestions personnalisées" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Sans lead spécifique</SelectItem>
+                  <SelectItem value="no_lead">Sans lead spécifique</SelectItem>
                   {leads.map((lead) => (
                     <SelectItem key={lead.id} value={lead.id}>
                       {lead.name} {lead.email ? `(${lead.email})` : ''}
