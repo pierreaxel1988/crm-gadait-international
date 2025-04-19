@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { History, Bell } from 'lucide-react';
@@ -88,7 +87,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
                 </div>
               )}
               {pendingActionsCount > 0 && (
-                <Bell className="h-3 w-3 text-[#D946EF] ml-1 animate-bounce" />
+                <Bell className="h-3 w-3 text-loro-terracotta ml-1 animate-bounce" />
               )}
             </Button>
           )}
@@ -108,4 +107,3 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
 };
 
 export default LeadDetailActionBar;
-
