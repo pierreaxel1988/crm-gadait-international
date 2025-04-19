@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -242,7 +243,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
               Priorité
             </button>
             <button 
-              onClick={()={() => setSortBy('newest')}
+              onClick={() => setSortBy('newest')}
               className={`px-3 py-1 rounded-md ${sortBy === 'newest' 
                 ? 'bg-zinc-900 text-white' 
                 : 'bg-gray-100 text-gray-600'}`}
