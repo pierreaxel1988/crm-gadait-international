@@ -9,6 +9,7 @@ import { Currency } from '@/types/lead';
 import { useAuth } from '@/hooks/useAuth';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState } from 'react';
+import { ActionHistory } from '@/types/actionHistory';
 
 interface LeadDetailHeaderProps {
   name: string;
@@ -62,18 +63,16 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
     e.stopPropagation();
     
     if (phone) {
-      // Start the call dialog first
-      setIsCallDialogOpen(true);
-      setCallStatus('calling');
+      // Add a WhatsApp action
+      const whatsappAction: ActionHistory = {
+        id: crypto.randomUUID(),
+        actionType: 'WhatsApp',
+        notes: 'Déclenchement d\'une conversation WhatsApp',
+        createdAt: new Date().toISOString(),
+        scheduledDate: new Date().toISOString(),
+        completedDate: new Date().toISOString()
+      };
       
-      // Start the timer
-      const timer = setInterval(() => {
-        setCallDuration(prev => prev + 1);
-      }, 1000);
-      
-      setCallTimer(timer);
-      
-      // Trigger the parent's callback
       if (onWhatsAppClick) {
         onWhatsAppClick(e);
       }
