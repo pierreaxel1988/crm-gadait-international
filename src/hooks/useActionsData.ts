@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionItem, ActionStatus } from '@/types/actionHistory';
@@ -6,9 +5,16 @@ import { isPast, isToday } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export const useActionsData = (refreshTrigger: number = 0) => {
   const [actions, setActions] = useState<ActionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const { user, isCommercial } = useAuth();
 
   useEffect(() => {
@@ -21,7 +27,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
     try {
       console.log("Fetching team members...");
       // Get team members for assignment information
-      const { data: teamMembers, error: teamError } = await supabase
+      const { data: fetchedTeamMembers, error: teamError } = await supabase
         .from('team_members')
         .select('id, name, email');
         
@@ -30,11 +36,12 @@ export const useActionsData = (refreshTrigger: number = 0) => {
         throw teamError;
       }
       
-      console.log("Team members:", teamMembers);
+      setTeamMembers(fetchedTeamMembers || []);
+      console.log("Team members:", fetchedTeamMembers);
 
       // Find the current team member if user is a commercial
       const currentTeamMember = isCommercial && user ? 
-        teamMembers?.find(tm => tm.email === user.email) : null;
+        fetchedTeamMembers?.find(tm => tm.email === user.email) : null;
 
       // Get all leads with action history - assurez-vous de ne pas sélectionner phoneCountryCode s'il n'existe pas
       console.log("Fetching leads with action history...");
@@ -212,6 +219,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
     actions, 
     isLoading, 
     refreshActions: fetchActions,
-    markActionComplete
+    markActionComplete,
+    teamMembers
   };
 };
