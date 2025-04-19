@@ -62,6 +62,12 @@ const CalendarPageContent = () => {
   // Create colors array for AddEventDialog
   const colors = eventCategories.map(cat => ({ name: cat.name, value: cat.color }));
 
+  // Filter events based on selected agent
+  const filteredEvents = events.filter(event => {
+    if (!selectedAgent) return true;
+    return event.assignedToId === selectedAgent;
+  });
+
   return (
     <div className="container py-10 max-w-6xl mx-auto animate-fade-in">
       <div className="flex flex-col md:flex-row gap-8">
@@ -93,7 +99,7 @@ const CalendarPageContent = () => {
           <CalendarView 
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
-            events={events}
+            events={filteredEvents}
             view={view}
             setView={setView}
             activeFilters={activeFilters}
@@ -111,7 +117,7 @@ const CalendarPageContent = () => {
         <div className="md:w-1/2 lg:w-3/5">
           <DayDetail
             selectedDate={selectedDate}
-            events={events}
+            events={filteredEvents}
             setIsAddEventOpen={setIsAddEventOpen}
             activeFilters={activeFilters}
           />
@@ -128,9 +134,9 @@ const CalendarPageContent = () => {
         colors={colors}
         categories={eventCategories}
       />
-      
     </div>
   );
 };
 
 export default CalendarPageContent;
+
