@@ -159,7 +159,7 @@ const LeadDetailMobile = () => {
   
   return (
     <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
-      <div className="fixed top-0 left-0 right-0 z-40 w-full">
+      <div className="fixed top-0 left-0 right-0 z-30 w-full">
         <div className="bg-loro-sand pt-[env(safe-area-inset-top)]">
           <LeadDetailHeader
             name={lead.name}
@@ -182,35 +182,35 @@ const LeadDetailMobile = () => {
             onCallComplete={handleCallComplete}
           />
         </div>
-        
-        <div className="bg-white">
-          <LeadDetailTabs defaultTab={activeTab} />
-        </div>
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto pt-20">
+      <div className="fixed top-[108px] left-0 right-0 z-30 w-full bg-white">
+        <LeadDetailTabs defaultTab={activeTab} />
+      </div>
+      
+      <ScrollArea className="flex-1 overflow-y-auto pt-[144px] pb-20">
         <Tabs value={activeTab} className="w-full h-full">
           <div className="px-4 pb-32 h-full">
-            <TabsContent value="info" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="criteria" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="criteria" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <SearchCriteriaSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="status" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="status" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <StatusSection 
                 lead={lead} 
                 onDataChange={handleDataChange} 
               />
             </TabsContent>
             
-            <TabsContent value="notes" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="notes" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <NotesSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="actions" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="actions" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               {actionSuggestions && actionSuggestions.length > 0 && (
                 <ActionSuggestions
                   suggestions={actionSuggestions}
@@ -226,7 +226,7 @@ const LeadDetailMobile = () => {
               />
             </TabsContent>
             
-            <TabsContent value="emails" className="h-full flex-1 flex-grow mt-1">
+            <TabsContent value="emails" className="h-full flex-1 flex-grow mt-0">
               <EmailsTab leadId={id || ''} />
             </TabsContent>
           </div>

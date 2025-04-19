@@ -23,7 +23,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
       replace: true
     });
   };
-  return <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+  return <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full sticky top-0 z-40">
       <TabsList className="w-full grid grid-cols-6 bg-loro-50 border-t border-b border-loro-200/50 shadow-sm py-0.5">
         <TabsTrigger 
           value="info" 
