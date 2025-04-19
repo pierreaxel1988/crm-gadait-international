@@ -2,13 +2,16 @@
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { CircleDot } from 'lucide-react';
 
 interface LeadDetailTabsProps {
   defaultTab?: string;
+  pendingActionsCount?: number;
 }
 
 const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
-  defaultTab = "criteria"
+  defaultTab = "criteria",
+  pendingActionsCount = 0
 }) => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
@@ -16,6 +19,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
 
   const searchParams = new URLSearchParams(location.search);
   const activeTab = searchParams.get('tab') || defaultTab;
+  
   const handleTabChange = (value: string) => {
     const newSearchParams = new URLSearchParams(location.search);
     newSearchParams.set('tab', value);
@@ -23,7 +27,9 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
       replace: true
     });
   };
-  return <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+
+  return (
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
       <TabsList className="w-full grid grid-cols-6 bg-loro-50 border-t border-b border-loro-200/50 shadow-sm py-0.5">
         <TabsTrigger 
           value="info" 
@@ -75,7 +81,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
         </TabsTrigger>
         <TabsTrigger 
           value="actions" 
-          className="py-1.5 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
+          className="py-1.5 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 relative
           data-[state=active]:bg-transparent 
           data-[state=active]:text-chocolate-dark 
           data-[state=active]:font-medium
@@ -84,6 +90,11 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           data-[state=active]:shadow-none"
         >
           Actions
+          {pendingActionsCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5">
+              <CircleDot className="h-2.5 w-2.5 text-[#9b87f5]" />
+            </span>
+          )}
         </TabsTrigger>
         <TabsTrigger 
           value="emails" 
@@ -98,7 +109,8 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           Emails
         </TabsTrigger>
       </TabsList>
-    </Tabs>;
+    </Tabs>
+  );
 };
 
 export default LeadDetailTabs;

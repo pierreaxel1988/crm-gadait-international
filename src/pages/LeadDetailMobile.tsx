@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -147,6 +146,11 @@ const LeadDetailMobile = () => {
     }
   };
 
+  const getPendingActionsCount = () => {
+    if (!lead?.actionHistory) return 0;
+    return lead.actionHistory.filter(action => !action.completedDate).length;
+  };
+
   if (isLoading) {
     return <LoadingState isLoading={isLoading} />;
   }
@@ -179,12 +183,15 @@ const LeadDetailMobile = () => {
             onPhoneCall={handlePhoneCall}
             onWhatsAppClick={handleWhatsAppClick}
             onEmailClick={handleEmailClick}
-            onCallComplete={handleCallComplete}
+            onCallComplete={() => {}}
           />
         </div>
         
         <div className="bg-white">
-          <LeadDetailTabs defaultTab={activeTab} />
+          <LeadDetailTabs 
+            defaultTab={activeTab} 
+            pendingActionsCount={getPendingActionsCount()}
+          />
         </div>
       </div>
       
