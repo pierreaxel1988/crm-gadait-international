@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { Button } from '@/components/ui/button';
@@ -21,6 +20,21 @@ const Actions = () => {
   const { isAdmin } = useAuth();
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
   
+  useEffect(() => {
+    // Écouter les changements d'agent depuis d'autres composants
+    const handleAgentChange = (e: CustomEvent) => {
+      const newAgent = e.detail.selectedAgent;
+      if (newAgent !== selectedAgent) {
+        handleAgentChange(newAgent);
+      }
+    };
+
+    window.addEventListener('agent-selection-changed', handleAgentChange as EventListener);
+    return () => {
+      window.removeEventListener('agent-selection-changed', handleAgentChange as EventListener);
+    };
+  }, [selectedAgent]);
+
   // Filter actions based on search term and selected agent
   const filteredActions = actions.filter(action => {
     if (!searchTerm && !selectedAgent) return true;

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
@@ -6,11 +5,11 @@ import MobilePipelineView from '@/components/pipeline/MobilePipelineView';
 import DesktopPipelineView from '@/components/pipeline/DesktopPipelineView';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
+import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 
 const Pipeline = () => {
   const isMobile = useIsMobile();
   
-  // Use the custom hook for state management
   const { 
     activeTab,
     setActiveTab,
@@ -30,10 +29,25 @@ const Pipeline = () => {
     getAllColumns
   } = usePipelineState();
 
+  const { selectedAgent, handleAgentChange } = useSelectedAgent();
+
   useEffect(() => {
-    // Force a refresh when the component mounts to ensure data is loaded
     handleRefresh();
   }, []);
+
+  useEffect(() => {
+    const handleAgentSelectionChange = (e: CustomEvent) => {
+      const newAgent = e.detail.selectedAgent;
+      if (newAgent !== selectedAgent) {
+        handleAgentChange(newAgent);
+      }
+    };
+
+    window.addEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
+    return () => {
+      window.removeEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
+    };
+  }, [selectedAgent, handleAgentChange]);
 
   return (
     <>

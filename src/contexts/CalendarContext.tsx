@@ -94,6 +94,50 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
     }
   }, [selectedAgent, initialSelectedAgent, parentOnAgentChange]);
 
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('id, name');
+        
+        if (error) throw error;
+        
+        const newMemberMap = new Map();
+        data?.forEach(member => newMemberMap.set(member.id, member.name));
+        setMemberMap(newMemberMap);
+        
+        console.log("Loaded team members map with", newMemberMap.size, "members");
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+      }
+    };
+    
+    fetchTeamMembers();
+  }, []);
+
+  useEffect(() => {
+    console.log("Initial fetch of lead actions");
+    refreshEvents();
+    setIsInitialLoad(false);
+  }, [memberMap, refreshEvents]);
+
+  useEffect(() => {
+    console.log("Setting up action-completed listener in CalendarContext");
+    
+    const handleActionCompleted = () => {
+      console.log("Action completed event received, refreshing events");
+      refreshEvents();
+    };
+    
+    window.addEventListener('action-completed', handleActionCompleted);
+    
+    return () => {
+      console.log("Removing action-completed listener");
+      window.removeEventListener('action-completed', handleActionCompleted);
+    };
+  }, [refreshEvents]);
+
   const refreshEvents = useCallback(async () => {
     console.log("Refreshing events...");
     await fetchLeadActions();
@@ -236,48 +280,21 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
   }, [selectedAgent, toast]);
 
   useEffect(() => {
-    const fetchTeamMembers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id, name');
-        
-        if (error) throw error;
-        
-        const newMemberMap = new Map();
-        data?.forEach(member => newMemberMap.set(member.id, member.name));
-        setMemberMap(newMemberMap);
-        
-        console.log("Loaded team members map with", newMemberMap.size, "members");
-      } catch (error) {
-        console.error('Error fetching team members:', error);
+    const handleAgentChange = (e: CustomEvent) => {
+      const newAgent = e.detail.selectedAgent;
+      if (newAgent !== selectedAgent) {
+        setSelectedAgent(newAgent);
+        if (parentOnAgentChange) {
+          parentOnAgentChange(newAgent);
+        }
       }
     };
-    
-    fetchTeamMembers();
-  }, []);
 
-  useEffect(() => {
-    console.log("Initial fetch of lead actions");
-    refreshEvents();
-    setIsInitialLoad(false);
-  }, [memberMap, refreshEvents]);
-
-  useEffect(() => {
-    console.log("Setting up action-completed listener in CalendarContext");
-    
-    const handleActionCompleted = () => {
-      console.log("Action completed event received, refreshing events");
-      refreshEvents();
-    };
-    
-    window.addEventListener('action-completed', handleActionCompleted);
-    
+    window.addEventListener('agent-selection-changed', handleAgentChange as EventListener);
     return () => {
-      console.log("Removing action-completed listener");
-      window.removeEventListener('action-completed', handleActionCompleted);
+      window.removeEventListener('agent-selection-changed', handleAgentChange as EventListener);
     };
-  }, [refreshEvents]);
+  }, [selectedAgent, parentOnAgentChange]);
 
   const markEventComplete = async (eventId: string) => {
     if (eventId.startsWith('action-')) {
@@ -396,11 +413,13 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
   };
 
   const handleAgentChange = (agentId: string | null) => {
-    console.log('Changing selected agent to:', agentId);
     setSelectedAgent(agentId);
     if (parentOnAgentChange) {
       parentOnAgentChange(agentId);
     }
+    window.dispatchEvent(new CustomEvent('agent-selection-changed', {
+      detail: { selectedAgent: agentId }
+    }));
   };
 
   return (
