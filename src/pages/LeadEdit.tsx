@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LeadForm from '@/components/leads/LeadForm';
@@ -88,7 +87,6 @@ const LeadEdit = () => {
         });
         
         if (id) {
-          // Refresh lead data after update
           const refreshedLead = await getLead(id);
           if (refreshedLead) {
             console.log("Lead refreshed after update:", refreshedLead);
@@ -228,7 +226,7 @@ const LeadEdit = () => {
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="general" className="mt-1 md:mt-2 pb-16">
+        <TabsContent value="general" className="mt-0 md:mt-1 pb-16">
           <LeadForm 
             lead={lead} 
             onSubmit={handleSubmit}
@@ -240,7 +238,7 @@ const LeadEdit = () => {
           />
         </TabsContent>
         
-        <TabsContent value="criteria" className="mt-1 md:mt-2 pb-16">
+        <TabsContent value="criteria" className="mt-0 md:mt-1 pb-16">
           <LeadForm 
             lead={lead} 
             onSubmit={handleSubmit}
@@ -252,7 +250,7 @@ const LeadEdit = () => {
           />
         </TabsContent>
         
-        <TabsContent value="status" className="mt-1 md:mt-2 pb-16">
+        <TabsContent value="status" className="mt-0 md:mt-1 pb-16">
           <LeadForm 
             lead={lead} 
             onSubmit={handleSubmit}
@@ -264,7 +262,7 @@ const LeadEdit = () => {
           />
         </TabsContent>
         
-        <TabsContent value="actions" className="mt-1 md:mt-2 pb-16">
+        <TabsContent value="actions" className="mt-0 md:mt-1 pb-16">
           {lead && (
             <ActionsPanel 
               lead={lead}
