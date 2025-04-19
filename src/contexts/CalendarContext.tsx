@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -88,61 +89,7 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
 
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (selectedAgent !== initialSelectedAgent && parentOnAgentChange) {
-      parentOnAgentChange(selectedAgent);
-    }
-  }, [selectedAgent, initialSelectedAgent, parentOnAgentChange]);
-
-  useEffect(() => {
-    const fetchTeamMembers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id, name');
-        
-        if (error) throw error;
-        
-        const newMemberMap = new Map();
-        data?.forEach(member => newMemberMap.set(member.id, member.name));
-        setMemberMap(newMemberMap);
-        
-        console.log("Loaded team members map with", newMemberMap.size, "members");
-      } catch (error) {
-        console.error('Error fetching team members:', error);
-      }
-    };
-    
-    fetchTeamMembers();
-  }, []);
-
-  useEffect(() => {
-    console.log("Initial fetch of lead actions");
-    refreshEvents();
-    setIsInitialLoad(false);
-  }, [memberMap, refreshEvents]);
-
-  useEffect(() => {
-    console.log("Setting up action-completed listener in CalendarContext");
-    
-    const handleActionCompleted = () => {
-      console.log("Action completed event received, refreshing events");
-      refreshEvents();
-    };
-    
-    window.addEventListener('action-completed', handleActionCompleted);
-    
-    return () => {
-      console.log("Removing action-completed listener");
-      window.removeEventListener('action-completed', handleActionCompleted);
-    };
-  }, [refreshEvents]);
-
-  const refreshEvents = useCallback(async () => {
-    console.log("Refreshing events...");
-    await fetchLeadActions();
-  }, []);
-
+  // Define the fetchLeadActions function first
   const fetchLeadActions = useCallback(async () => {
     try {
       console.log("Fetching lead actions for calendar...");
@@ -278,6 +225,62 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
       });
     }
   }, [selectedAgent, toast]);
+
+  // Now define refreshEvents that uses fetchLeadActions
+  const refreshEvents = useCallback(async () => {
+    console.log("Refreshing events...");
+    await fetchLeadActions();
+  }, [fetchLeadActions]);
+
+  useEffect(() => {
+    if (selectedAgent !== initialSelectedAgent && parentOnAgentChange) {
+      parentOnAgentChange(selectedAgent);
+    }
+  }, [selectedAgent, initialSelectedAgent, parentOnAgentChange]);
+
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('id, name');
+        
+        if (error) throw error;
+        
+        const newMemberMap = new Map();
+        data?.forEach(member => newMemberMap.set(member.id, member.name));
+        setMemberMap(newMemberMap);
+        
+        console.log("Loaded team members map with", newMemberMap.size, "members");
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+      }
+    };
+    
+    fetchTeamMembers();
+  }, []);
+
+  useEffect(() => {
+    console.log("Initial fetch of lead actions");
+    refreshEvents();
+    setIsInitialLoad(false);
+  }, [memberMap, refreshEvents]);
+
+  useEffect(() => {
+    console.log("Setting up action-completed listener in CalendarContext");
+    
+    const handleActionCompleted = () => {
+      console.log("Action completed event received, refreshing events");
+      refreshEvents();
+    };
+    
+    window.addEventListener('action-completed', handleActionCompleted);
+    
+    return () => {
+      console.log("Removing action-completed listener");
+      window.removeEventListener('action-completed', handleActionCompleted);
+    };
+  }, [refreshEvents]);
 
   useEffect(() => {
     const handleAgentChange = (e: CustomEvent) => {
