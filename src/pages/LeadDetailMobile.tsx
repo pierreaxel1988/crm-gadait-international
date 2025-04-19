@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -244,15 +245,10 @@ const LeadDetailMobile = () => {
         autoSaveEnabled={autoSaveEnabled}
         onAddAction={handleAddAction}
         lead={lead}
-        getActionTypeIcon={getActionTypeIcon}
-        onMarkComplete={markActionComplete}
-        onDeleteAction={handleDeleteAction}
         hasChanges={hasChanges}
         isSaving={isSaving}
         onManualSave={handleSaveWithIndicator}
         actionSuggestions={actionSuggestions}
-        onAcceptSuggestion={acceptSuggestion}
-        onRejectSuggestion={rejectSuggestion}
       />
 
       {showSaveIndicator && (

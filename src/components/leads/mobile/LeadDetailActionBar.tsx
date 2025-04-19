@@ -5,6 +5,7 @@ import { History } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed } from '@/types/lead';
 import { ActionSuggestion } from '@/services/noteAnalysisService';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 interface LeadDetailActionBarProps {
   autoSaveEnabled: boolean;
