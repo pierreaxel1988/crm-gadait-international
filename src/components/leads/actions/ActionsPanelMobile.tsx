@@ -11,6 +11,7 @@ import { updateLead } from '@/services/leadUpdater';
 import { LeadAIAssistant } from '@/components/leads/ai/LeadAIAssistant';
 import { AIActionSuggestions } from '@/components/leads/ai/AIActionSuggestions';
 import { Textarea } from '@/components/ui/textarea';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ActionsPanelMobileProps {
   leadId: string;
@@ -239,9 +240,12 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     return date < today;
   };
 
-  const dynamicTopMargin = isHeaderMeasured 
-    ? `${Math.max(headerHeight + 8, 32)}px` 
-    : 'calc(32px + 4rem)';
+  const isMobile = useIsMobile();
+  
+  const responsiveContainerClasses = cn(
+    "space-y-4",
+    isMobile ? "px-3" : "px-4 lg:px-6"
+  );
 
   const quickPrompts = lead ? [
     {
@@ -263,14 +267,14 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center p-4">
+      <div className="flex justify-center items-center p-4 w-full">
         <div className="animate-spin h-5 w-5 border-3 border-chocolate-dark rounded-full border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="px-3 space-y-4">
+    <div className={responsiveContainerClasses}>
       {/* AI Action Suggestions */}
       {leadId && lead && (
         <div className="animate-[fade-in_0.4s_ease-out]">
@@ -293,14 +297,14 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
           <div className="mt-3 space-y-4">
             {lead ? (
               <>
-                <div className="flex gap-2 overflow-x-auto pb-2">
+                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
                   {quickPrompts.map((quickPrompt) => (
                     <Button
                       key={quickPrompt.id}
                       variant="outline"
                       size="sm"
                       onClick={() => setPrompt(quickPrompt.prompt)}
-                      className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10"
+                      className="whitespace-nowrap text-xs border-loro-sand hover:bg-loro-sand/10 shrink-0"
                     >
                       {quickPrompt.label}
                     </Button>
@@ -311,7 +315,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     placeholder="Ex. Propose une relance WhatsApp ou un résumé du client..."
-                    className="w-full min-h-[80px] text-sm"
+                    className="w-full min-h-[80px] text-sm resize-y"
                   />
                   <Button
                     onClick={handleSendToGPT}
@@ -319,14 +323,14 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white"
                   >
                     {isAiLoading ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center gap-2 w-full">
                         <div className="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full" />
-                        Envoi en cours...
+                        <span className="text-sm">Envoi en cours...</span>
                       </div>
                     ) : (
                       <>
                         <PlaneTakeoff className="h-4 w-4 mr-2" />
-                        Envoyer à l'IA
+                        <span className="text-sm">Envoyer à l'IA</span>
                       </>
                     )}
                   </Button>
@@ -371,7 +375,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
           <p className="text-muted-foreground text-xs font-futura">Aucune action en attente</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 w-full">
           {pendingActions.map((action) => {
             const isOverdue = isDatePast(action.scheduledDate);
             const isCallAction = action.actionType === 'Call';
@@ -447,7 +451,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       {completedActions.length > 0 && (
         <>
           <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3">HISTORIQUE DES ACTIONS</h3>
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             {completedActions.map((action) => (
               <div 
                 key={action.id} 

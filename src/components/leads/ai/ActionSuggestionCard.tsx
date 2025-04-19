@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { AISuggestedAction } from '@/services/aiActionSuggestionService';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 interface ActionSuggestionCardProps {
   suggestion: AISuggestedAction;
@@ -13,6 +15,8 @@ interface ActionSuggestionCardProps {
 }
 
 export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: ActionSuggestionCardProps) {
+  const isMobile = useIsMobile();
+  
   const getActionTypeIcon = (type: string) => {
     switch (type) {
       case 'Call': return <span className="bg-[#F8E2E8] text-[#D05A76] px-2 py-0.5 rounded-full text-[10px] font-futura">Appel</span>;
@@ -31,9 +35,15 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
 
   const formattedDate = format(suggestion.scheduledDate, 'dd/MM/yyyy à HH:mm', { locale: fr });
 
+  const cardClasses = cn(
+    "border border-loro-navy/10 bg-loro-pearl/20 rounded-md",
+    "w-full max-w-full",
+    isMobile ? "p-3" : "p-4"
+  );
+
   return (
-    <div className="border border-loro-navy/10 bg-loro-pearl/20 rounded-md p-3">
-      <div className="flex items-start justify-between gap-2 mb-2">
+    <div className={cardClasses}>
+      <div className="flex items-start justify-between gap-2 mb-2 flex-wrap">
         <div className="flex-shrink-0">
           {getActionTypeIcon(suggestion.actionType)}
         </div>
@@ -43,7 +53,10 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
         </div>
       </div>
       
-      <p className="text-sm text-loro-navy/90 mb-3 break-words">
+      <p className={cn(
+        "text-loro-navy/90 mb-3 break-words",
+        isMobile ? "text-sm" : "text-base"
+      )}>
         {suggestion.notes}
       </p>
       
@@ -51,19 +64,25 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 px-2 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+          className={cn(
+            "text-rose-600 hover:bg-rose-50 hover:text-rose-700",
+            isMobile ? "h-8 px-2 text-xs" : "h-9 px-3 text-sm"
+          )}
           onClick={() => onDismiss(suggestion)}
         >
-          <XIcon className="h-3.5 w-3.5 mr-1" />
+          <XIcon className={cn(isMobile ? "h-3.5 w-3.5 mr-1" : "h-4 w-4 mr-1.5")} />
           Ignorer
         </Button>
         <Button
           variant="outline"
           size="sm"
-          className="h-8 px-2 text-xs border-loro-navy text-loro-navy hover:bg-loro-pearl/40"
+          className={cn(
+            "border-loro-navy text-loro-navy hover:bg-loro-pearl/40",
+            isMobile ? "h-8 px-2 text-xs" : "h-9 px-3 text-sm"
+          )}
           onClick={() => onImplement(suggestion)}
         >
-          <CheckIcon className="h-3.5 w-3.5 mr-1" />
+          <CheckIcon className={cn(isMobile ? "h-3.5 w-3.5 mr-1" : "h-4 w-4 mr-1.5")} />
           Appliquer
         </Button>
       </div>

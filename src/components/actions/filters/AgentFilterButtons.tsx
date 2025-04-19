@@ -2,6 +2,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 interface AgentFilterButtonsProps {
   agentFilter: string | null;
@@ -14,12 +16,17 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
   setAgentFilter, 
   teamMembers 
 }) => {
+  const isMobile = useIsMobile();
+  
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
         <User className="h-4 w-4" /> Agent
       </h4>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className={cn(
+        "grid gap-2", 
+        isMobile ? "grid-cols-2" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+      )}>
         <Button
           variant={agentFilter === null ? "default" : "outline"}
           size="sm"
