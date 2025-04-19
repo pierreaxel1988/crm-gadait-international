@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { Button } from '@/components/ui/button';
-import { Filter, Plus, RotateCcw } from 'lucide-react';
+import { Filter, Plus, RotateCcw, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import ActionsList from '@/components/actions/ActionsList';
@@ -11,6 +11,8 @@ import { useBreakpoint } from '@/hooks/use-mobile';
 import { useActionsData } from '@/hooks/useActionsData';
 import AgentFilterButtons from '@/components/actions/filters/AgentFilterButtons';
 import { useAuth } from '@/hooks/useAuth';
+import ChatGadaitButton from '@/components/chat/ChatGadaitButton';
+import ActionsAIAssistant from '@/components/actions/ActionsAIAssistant';
 
 const Actions = () => {
   const { isMobile } = useBreakpoint();
@@ -19,6 +21,7 @@ const Actions = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [agentFilter, setAgentFilter] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   
   const { actions, isLoading, markActionComplete, teamMembers } = useActionsData(refreshTrigger);
   
@@ -98,6 +101,25 @@ const Actions = () => {
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Rafraîchir
                 </Button>
+                
+                {/* Nouveau bouton pour l'assistant IA */}
+                <Button
+                  variant="outline"
+                  size="default"
+                  className="flex-shrink-0 border-loro-hazel text-loro-hazel hover:bg-loro-hazel/10"
+                  onClick={() => setShowAIAssistant(!showAIAssistant)}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Assistant IA
+                </Button>
+                
+                {/* Bouton Chat Gadait */}
+                <ChatGadaitButton 
+                  variant="outline"
+                  size="default"
+                  showText={!isMobile}
+                  className="flex-shrink-0"
+                />
               </div>
             </div>
           </div>
@@ -128,6 +150,16 @@ const Actions = () => {
                   Appliquer
                 </Button>
               </div>
+            </div>
+          )}
+          
+          {/* Assistant IA pour les actions */}
+          {showAIAssistant && (
+            <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
+              <ActionsAIAssistant 
+                onClose={() => setShowAIAssistant(false)}
+                onActionCreated={handleRefresh}
+              />
             </div>
           )}
           
