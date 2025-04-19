@@ -9,25 +9,37 @@ import { Search } from 'lucide-react';
 import ActionsList from '@/components/actions/ActionsList';
 import { useBreakpoint } from '@/hooks/use-mobile';
 import { useActionsData } from '@/hooks/useActionsData';
+import { useAuth } from '@/hooks/useAuth';
+import { useSelectedAgent } from '@/hooks/useSelectedAgent';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Actions = () => {
   const { isMobile } = useBreakpoint();
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  
   const { actions, isLoading, markActionComplete } = useActionsData(refreshTrigger);
+  const { isAdmin } = useAuth();
+  const { selectedAgent, handleAgentChange } = useSelectedAgent();
   
-  // Filter actions based on search term
+  // Filter actions based on search term and selected agent
   const filteredActions = actions.filter(action => {
-    if (!searchTerm) return true;
+    if (!searchTerm && !selectedAgent) return true;
     
-    const searchLower = searchTerm.toLowerCase();
+    let matchesSearch = true;
+    let matchesAgent = true;
     
-    return (
-      action.leadName.toLowerCase().includes(searchLower) ||
-      action.notes?.toLowerCase().includes(searchLower) ||
-      action.assignedToName.toLowerCase().includes(searchLower)
-    );
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      matchesSearch = action.leadName.toLowerCase().includes(searchLower) ||
+        action.notes?.toLowerCase().includes(searchLower) ||
+        action.assignedToName.toLowerCase().includes(searchLower);
+    }
+    
+    if (selectedAgent) {
+      matchesAgent = action.assignedTo === selectedAgent;
+    }
+    
+    return matchesSearch && matchesAgent;
   });
   
   const handleRefresh = () => {
@@ -53,6 +65,31 @@ const Actions = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
+              
+              {isAdmin && (
+                <Select value={selectedAgent || "all"} onValueChange={(value) => handleAgentChange(value === "all" ? null : value)}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Filtrer par commercial" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les commerciaux</SelectItem>
+                    {actions
+                      .reduce((acc: { id: string; name: string }[], curr) => {
+                        if (curr.assignedTo && curr.assignedToName && 
+                            !acc.some(agent => agent.id === curr.assignedTo)) {
+                          acc.push({ id: curr.assignedTo, name: curr.assignedToName });
+                        }
+                        return acc;
+                      }, [])
+                      .map(agent => (
+                        <SelectItem key={agent.id} value={agent.id}>
+                          {agent.name}
+                        </SelectItem>
+                      ))
+                    }
+                  </SelectContent>
+                </Select>
+              )}
               
               <div className="flex gap-2">
                 <Button 

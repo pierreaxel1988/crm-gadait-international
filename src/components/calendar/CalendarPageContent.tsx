@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, ListFilter } from 'lucide-react';
@@ -8,6 +7,8 @@ import AddEventDialog from '@/components/calendar/AddEventDialog';
 import AllActionsDialog from '@/components/calendar/AllActionsDialog';
 import CategoryFilter from '@/components/calendar/CategoryFilter';
 import { eventCategories, useCalendar } from '@/contexts/CalendarContext';
+import { useAuth } from '@/hooks/useAuth';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const CalendarPageContent = () => {
   const { 
@@ -22,18 +23,16 @@ const CalendarPageContent = () => {
     newEvent, 
     setNewEvent, 
     handleAddEvent,
-    refreshEvents
+    refreshEvents,
+    selectedAgent,
+    onAgentChange
   } = useCalendar();
+  const { isAdmin } = useAuth();
   
-  // Removing the state for AllActionsDialog since we're removing the button
-  // const [isAllActionsOpen, setIsAllActionsOpen] = useState(false);
-
-  // Force refresh of events when component mounts
   useEffect(() => {
     console.log("CalendarPageContent mounted - forcing refresh of events");
     refreshEvents();
     
-    // Log events after a small delay to see what we have
     const timer = setTimeout(() => {
       console.log(`Current events count in CalendarPageContent: ${events.length}`);
       if (events.length === 0) {
@@ -54,9 +53,36 @@ const CalendarPageContent = () => {
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-1/2 lg:w-2/5 space-y-6">
           <div className="flex flex-col space-y-4">
+            {isAdmin && (
+              <div className="w-full">
+                <Select 
+                  value={selectedAgent || "all"} 
+                  onValueChange={(value) => onAgentChange(value === "all" ? null : value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Filtrer par commercial" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les commerciaux</SelectItem>
+                    {events
+                      .reduce((acc: { id: string; name: string }[], curr) => {
+                        if (curr.assignedTo && curr.assignedToName && 
+                            !acc.some(agent => agent.id === curr.assignedTo)) {
+                          acc.push({ id: curr.assignedTo, name: curr.assignedToName });
+                        }
+                        return acc;
+                      }, [])
+                      .map(agent => (
+                        <SelectItem key={agent.id} value={agent.id}>
+                          {agent.name}
+                        </SelectItem>
+                      ))
+                    }
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <CategoryFilter />
-            
-            {/* Removed the "Voir toutes les actions" button */}
           </div>
 
           <CalendarView 
@@ -98,7 +124,6 @@ const CalendarPageContent = () => {
         categories={eventCategories}
       />
       
-      {/* Removed the AllActionsDialog component since the button was removed */}
     </div>
   );
 };
