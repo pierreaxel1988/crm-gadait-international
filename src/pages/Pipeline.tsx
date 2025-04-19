@@ -7,6 +7,7 @@ import DesktopPipelineView from '@/components/pipeline/DesktopPipelineView';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
+import SelectedAgentDisplay from '@/components/pipeline/SelectedAgentDisplay';
 
 const Pipeline = () => {
   const isMobile = useIsMobile();
@@ -33,14 +34,14 @@ const Pipeline = () => {
 
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
 
-  // Récupérer le nom du commercial sélectionné
+  // Get selected agent name
   const selectedAgentName = useMemo(() => {
     if (!selectedAgent) return null;
     const agent = teamMembers.find(member => member.id === selectedAgent);
     return agent ? agent.name : null;
   }, [selectedAgent, teamMembers]);
 
-  // Synchroniser l'agent sélectionné avec les filtres de pipeline
+  // Sync selected agent with pipeline filters
   useEffect(() => {
     if (selectedAgent !== filters.assignedTo) {
       updateAgentFilter(selectedAgent);
@@ -70,12 +71,7 @@ const Pipeline = () => {
       <Navbar />
       <SubNavigation />
       <div className="p-3 md:p-6 bg-white min-h-screen">
-        {selectedAgentName && (
-          <div className="mb-4 text-sm bg-gray-50 p-2 rounded-lg text-center">
-            <span className="font-medium">Commercial sélectionné :</span>{" "}
-            <span className="text-primary font-semibold">{selectedAgentName}</span>
-          </div>
-        )}
+        <SelectedAgentDisplay agentName={selectedAgentName} />
         
         {isMobile ? (
           <MobilePipelineView
