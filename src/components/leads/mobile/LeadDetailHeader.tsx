@@ -137,7 +137,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  return <div className="flex items-center justify-between p-3 w-full bg-loro-50">
+  return <div className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between p-3 w-full bg-loro-50 pt-[env(safe-area-inset-top)] h-auto">
       <div className="flex items-center gap-2 flex-1">
         <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200 flex-shrink-0">
           <ArrowLeft className="h-5 w-5" />
