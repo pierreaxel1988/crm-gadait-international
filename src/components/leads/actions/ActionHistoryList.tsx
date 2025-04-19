@@ -77,7 +77,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
 
   return (
     <ScrollArea className="h-[calc(100vh-280px)]">
-      <div className="space-y-5 pr-2">
+      <div className="space-y-5 pr-3">
         {sortedDates.map((dateString) => (
           <div key={dateString} className="animate-[fade-in_0.4s_ease-out]">
             <div className="flex items-center gap-2 mb-2.5 sticky top-0 bg-white py-1">
@@ -99,7 +99,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                   <Card 
                     key={action.id} 
                     className={cn(
-                      "relative overflow-hidden transition-all duration-300 rounded-lg border shadow-sm w-full",
+                      "relative overflow-hidden transition-all duration-300 rounded-lg border shadow-sm",
                       action.completedDate 
                         ? "border-loro-pearl/30 bg-[#F1F0FB]" // Soft gray for completed actions
                         : isOverdue
@@ -121,10 +121,10 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                     
                     <div className={`${isMobile ? 'p-2.5' : 'p-3'}`}>
                       <div className="flex justify-between items-start gap-2">
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1">
                           <div className="flex items-center gap-2.5">
                             <div className={cn(
-                              `${isMobile ? 'p-1.5' : 'p-1.5'} rounded-md shrink-0`,
+                              `${isMobile ? 'p-1.5' : 'p-1.5'} rounded-md`,
                               action.completedDate 
                                 ? "bg-green-50" 
                                 : isOverdue
@@ -133,23 +133,23 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                             )}>
                               {getActionTypeIcon(action.actionType as TaskType)}
                             </div>
-                            <div className="min-w-0">
+                            <div>
                               <span className={`${
                                 action.completedDate 
                                   ? 'text-gray-600' 
                                   : isOverdue
                                     ? 'text-rose-800'
                                     : 'text-loro-navy/80'
-                              } font-futura ${isMobile ? 'text-xs' : 'text-sm'} truncate block`}>
+                              } font-futura ${isMobile ? 'text-xs' : 'text-sm'}`}>
                                 {action.actionType}
                               </span>
-                              <div className="flex items-center gap-1 text-xs text-loro-navy/50 mt-0.5 font-futuraLight truncate">
+                              <div className="flex items-center gap-1 text-xs text-loro-navy/50 mt-0.5 font-futuraLight">
                                 {action.completedDate ? (
-                                  <Check className="h-3 w-3 text-green-500 shrink-0" />
+                                  <Check className="h-3 w-3 text-green-500" />
                                 ) : (
-                                  <Clock className={`h-3 w-3 ${isOverdue ? 'text-red-400' : 'text-loro-navy/40'} shrink-0`} />
+                                  <Clock className={`h-3 w-3 ${isOverdue ? 'text-red-400' : 'text-loro-navy/40'}`} />
                                 )}
-                                <span className="truncate">
+                                <span>
                                   {format(new Date(action.completedDate || action.scheduledDate), 'HH:mm', { locale: fr })}
                                 </span>
                               </div>
@@ -163,7 +163,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                                 : isOverdue
                                   ? 'bg-[#FFF0F2] rounded-md font-futuraLight text-rose-800 border border-pink-100'
                                   : 'bg-[#F7FEF1] rounded-md font-futuraLight text-green-800 border border-green-100'
-                            } break-words w-full`}>
+                            }`}>
                               {action.notes}
                             </p>
                           )}
@@ -174,7 +174,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                             variant="outline"
                             size="sm"
                             onClick={() => onMarkComplete(action.id)}
-                            className={`${isMobile ? 'text-[10px] px-2 py-0.5 h-6' : 'text-xs px-2.5 py-1 h-7'} flex items-center gap-1 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 rounded-full font-futura shrink-0`}
+                            className={`${isMobile ? 'text-[10px] px-2 py-0.5 h-6' : 'text-xs px-2.5 py-1 h-7'} flex items-center gap-1 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 rounded-full font-futura`}
                           >
                             <Check className={`${isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'}`} /> Terminer
                           </Button>

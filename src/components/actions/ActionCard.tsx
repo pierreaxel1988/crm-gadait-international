@@ -86,7 +86,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
   
   return (
     <Card 
-      className={`p-4 transition-all cursor-pointer w-full overflow-hidden ${
+      className={`p-4 transition-all cursor-pointer ${
         action.status === 'overdue' 
           ? 'border-red-300 bg-[#FFDEE2]/30' 
           : action.status === 'done' 
@@ -96,9 +96,9 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
       onClick={(e) => onCardClick(action.leadId, e)}
     >
       <div className="flex justify-between items-start mb-2">
-        <div className="max-w-[70%]">
-          <div className={`font-medium truncate ${action.status === 'done' ? 'text-gray-600' : ''}`}>{action.leadName}</div>
-          <div className="text-sm text-muted-foreground mb-1 truncate">{action.assignedToName}</div>
+        <div>
+          <div className={`font-medium ${action.status === 'done' ? 'text-gray-600' : ''}`}>{action.leadName}</div>
+          <div className="text-sm text-muted-foreground mb-1">{action.assignedToName}</div>
           <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />
         </div>
         <div>
@@ -107,7 +107,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
       </div>
       
       {action.notes && (
-        <div className={`text-sm mt-2 p-2 rounded break-words max-w-full ${
+        <div className={`text-sm mt-2 p-2 rounded ${
           action.status === 'done' 
             ? 'bg-white/80 text-gray-600' 
             : action.status === 'overdue'
@@ -118,13 +118,13 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
         </div>
       )}
       
-      <div className="flex justify-between items-center mt-3 flex-wrap gap-2">
-        <div className="flex items-center text-sm text-gray-500 min-w-0 truncate">
-          <Calendar className="h-3.5 w-3.5 mr-1 shrink-0" />
-          <span className="truncate">{formatDate(action.status === 'done' ? action.completedDate : action.scheduledDate)}</span>
+      <div className="flex justify-between items-center mt-3">
+        <div className="flex items-center text-sm text-gray-500">
+          <Calendar className="h-3.5 w-3.5 mr-1" />
+          {formatDate(action.status === 'done' ? action.completedDate : action.scheduledDate)}
         </div>
         
-        <div className="flex items-center gap-1 flex-wrap justify-end">
+        <div className="flex items-center gap-1">
           {action.phoneNumber && (
             <>
               <Button 

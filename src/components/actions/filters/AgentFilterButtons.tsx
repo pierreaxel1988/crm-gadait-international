@@ -6,10 +6,7 @@ import { User } from 'lucide-react';
 interface AgentFilterButtonsProps {
   agentFilter: string | null;
   setAgentFilter: (agentId: string | null) => void;
-  teamMembers: {
-    id: string;
-    name: string;
-  }[];
+  teamMembers: { id: string; name: string }[];
 }
 
 const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({ 
