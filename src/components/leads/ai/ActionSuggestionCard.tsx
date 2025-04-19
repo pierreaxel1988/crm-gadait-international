@@ -36,18 +36,18 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
   const formattedDate = format(suggestion.scheduledDate, 'dd/MM/yyyy à HH:mm', { locale: fr });
 
   const cardClasses = cn(
-    "border border-loro-navy/10 bg-loro-pearl/20 rounded-md overflow-hidden",
-    "w-full box-border",
+    "border border-loro-navy/10 bg-loro-pearl/20 rounded-md",
+    "w-full box-border overflow-hidden",
     isMobile ? "p-2 sm:p-3" : "p-4"
   );
 
   return (
     <div className={cardClasses}>
-      <div className="flex items-start justify-between gap-2 mb-2 flex-wrap w-full">
+      <div className="flex items-start justify-between gap-2 mb-2 flex-wrap w-full overflow-hidden">
         <div className="flex-shrink-0">
           {getActionTypeIcon(suggestion.actionType)}
         </div>
-        <div className="flex-shrink-0 text-[10px] text-gray-500 bg-white/80 px-2 py-0.5 rounded-full">
+        <div className="flex-shrink-0 text-[10px] text-gray-500 bg-white/80 px-2 py-0.5 rounded-full truncate max-w-[60%]">
           <CalendarIcon className="inline h-3 w-3 mr-1" />
           {formattedDate}
         </div>

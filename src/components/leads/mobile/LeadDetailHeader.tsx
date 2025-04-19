@@ -85,13 +85,13 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   };
 
   const headerClasses = cn(
-    "flex items-center justify-between p-2 sm:p-3 md:p-4 w-full bg-loro-50 box-border",
-    "overflow-visible min-w-0"
+    "flex items-center justify-between p-2 sm:p-3 md:p-4 bg-loro-50 box-border",
+    "w-full max-w-full overflow-hidden"
   );
 
   return (
     <div className={headerClasses}>
-      <div className="flex items-center gap-2 min-w-0 flex-1 pr-1">
+      <div className="flex items-center gap-2 min-w-0 flex-1 pr-1 overflow-hidden">
         <Button 
           variant="ghost" 
           size="icon" 
@@ -100,9 +100,9 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
         >
           <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
-        <div className="min-w-0 w-full overflow-hidden">
+        <div className="min-w-0 overflow-hidden">
           <h1 className={cn(
-            "font-futura leading-tight truncate break-words",
+            "font-futura leading-tight truncate",
             "text-sm sm:text-base md:text-lg"
           )}>
             {name}
@@ -110,19 +110,19 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           <p className="text-[10px] sm:text-xs text-loro-terracotta truncate">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
-          <div className="flex flex-wrap gap-1 mt-1 w-full pr-1">
+          <div className="flex flex-wrap gap-1 mt-1 w-full overflow-hidden">
             {budget && (
-              <span className="text-[10px] sm:text-xs bg-[#F5F3EE] px-2 py-0.5 rounded-xl border border-zinc-200 max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+              <span className="text-[10px] sm:text-xs bg-[#F5F3EE] px-2 py-0.5 rounded-xl border border-zinc-200 truncate">
                 {formatBudget(budget, currency)}
               </span>
             )}
             {desiredLocation && (
-              <span className="text-[10px] sm:text-xs bg-[#EBD5CE] px-2 py-0.5 rounded-xl max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+              <span className="text-[10px] sm:text-xs bg-[#EBD5CE] px-2 py-0.5 rounded-xl truncate">
                 {desiredLocation}
               </span>
             )}
             {country && (
-              <span className="text-[10px] sm:text-xs bg-[#F3E9D6] px-2 py-0.5 rounded-xl border border-zinc-200 max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+              <span className="text-[10px] sm:text-xs bg-[#F3E9D6] px-2 py-0.5 rounded-xl border border-zinc-200 truncate">
                 {country}
               </span>
             )}
@@ -152,7 +152,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
               </div>
             </a>}
         </div>
-        {tags && tags.length > 0 && <div className="flex flex-wrap justify-end gap-1 max-w-[120px]">
+        {tags && tags.length > 0 && <div className="flex flex-wrap justify-end gap-1 max-w-[120px] overflow-hidden">
             {tags.map((tag, index) => <TagBadge key={`${tag}-${index}`} tag={tag} className="text-[10px] py-0.5" />)}
           </div>}
       </div>
