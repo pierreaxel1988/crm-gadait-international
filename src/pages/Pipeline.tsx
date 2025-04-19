@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
 import MobilePipelineView from '@/components/pipeline/MobilePipelineView';
@@ -33,6 +33,13 @@ const Pipeline = () => {
 
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
 
+  // Récupérer le nom du commercial sélectionné
+  const selectedAgentName = useMemo(() => {
+    if (!selectedAgent) return null;
+    const agent = teamMembers.find(member => member.id === selectedAgent);
+    return agent ? agent.name : null;
+  }, [selectedAgent, teamMembers]);
+
   // Synchroniser l'agent sélectionné avec les filtres de pipeline
   useEffect(() => {
     if (selectedAgent !== filters.assignedTo) {
@@ -63,6 +70,13 @@ const Pipeline = () => {
       <Navbar />
       <SubNavigation />
       <div className="p-3 md:p-6 bg-white min-h-screen">
+        {selectedAgentName && (
+          <div className="mb-4 text-sm bg-gray-50 p-2 rounded-lg text-center">
+            <span className="font-medium">Commercial sélectionné :</span>{" "}
+            <span className="text-primary font-semibold">{selectedAgentName}</span>
+          </div>
+        )}
+        
         {isMobile ? (
           <MobilePipelineView
             activeTab={activeTab}

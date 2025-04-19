@@ -31,10 +31,18 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     handleAgentChange(agentId);
   };
 
+  // Trouver le nom du commercial actuellement sélectionné
+  const selectedAgentName = assignedTo 
+    ? assignedToOptions.find(member => member.id === assignedTo)?.name || 'Inconnu'
+    : null;
+
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
         <User className="h-4 w-4" /> Agent assigné
+        {selectedAgentName && (
+          <span className="ml-1 text-primary font-medium">: {selectedAgentName}</span>
+        )}
       </h4>
       <div className="grid grid-cols-2 gap-2">
         <Button
