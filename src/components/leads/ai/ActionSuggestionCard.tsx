@@ -32,38 +32,38 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
   const formattedDate = format(suggestion.scheduledDate, 'dd/MM/yyyy à HH:mm', { locale: fr });
 
   return (
-    <div className="border border-loro-navy/10 bg-loro-pearl/20 rounded-md p-1 w-full overflow-hidden">
-      <div className="flex items-start justify-between mb-1 w-full">
-        <div className="flex-shrink-0 mb-1 mr-1">
+    <div className="border border-loro-navy/10 bg-loro-pearl/20 rounded-md p-3">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex-shrink-0">
           {getActionTypeIcon(suggestion.actionType)}
         </div>
-        <div className="flex-shrink-0 text-[9px] text-gray-500 bg-white/80 px-1 py-0.5 rounded-full">
-          <CalendarIcon className="inline h-2 w-2 mr-0.5" />
+        <div className="flex-shrink-0 text-[10px] text-gray-500 bg-white/80 px-2 py-0.5 rounded-full">
+          <CalendarIcon className="inline h-3 w-3 mr-1" />
           {formattedDate}
         </div>
       </div>
       
-      <p className="text-[10px] leading-[1.3] text-loro-navy/90 mb-2 break-words w-full">
+      <p className="text-sm text-loro-navy/90 mb-3 break-words">
         {suggestion.notes}
       </p>
       
-      <div className="flex justify-end items-center gap-1">
+      <div className="flex justify-end items-center gap-2">
         <Button
           variant="ghost"
           size="sm"
-          className="h-5 px-1 text-[10px] text-rose-600 hover:bg-rose-50 hover:text-rose-700 active:scale-95 transition-all duration-200"
+          className="h-8 px-2 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700"
           onClick={() => onDismiss(suggestion)}
         >
-          <XIcon className="h-2.5 w-2.5 mr-0.5" />
+          <XIcon className="h-3.5 w-3.5 mr-1" />
           Ignorer
         </Button>
         <Button
           variant="outline"
           size="sm"
-          className="h-5 px-1 text-[10px] border-loro-navy text-loro-navy hover:bg-loro-pearl/40 active:scale-95 transition-all duration-200"
+          className="h-8 px-2 text-xs border-loro-navy text-loro-navy hover:bg-loro-pearl/40"
           onClick={() => onImplement(suggestion)}
         >
-          <CheckIcon className="h-2.5 w-2.5 mr-0.5" />
+          <CheckIcon className="h-3.5 w-3.5 mr-1" />
           Appliquer
         </Button>
       </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -60,7 +59,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       setActionHistory(initialActionHistory);
     }
     
-    // Toujours charger les données du lead, même si actionHistory est fourni
     fetchLeadData();
   }, [leadId, initialActionHistory]);
 
@@ -149,7 +147,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
     setIsAiLoading(true);
     try {
-      // Formatage correct des données du lead pour l'envoi à l'API
       const bedroomsDisplay = Array.isArray(lead.bedrooms) 
         ? lead.bedrooms.join(', ') 
         : typeof lead.bedrooms === 'number'
@@ -195,10 +192,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         description: "L'assistant traite votre demande"
       });
 
-      // Clear the prompt after successful send
       setPrompt("");
       
-      // Refresh the lead data to get any new suggestions
       fetchLeadData();
 
     } catch (error) {
@@ -248,7 +243,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
 
-  // Création de prompts seulement si lead est disponible et a été chargé
   const quickPrompts = lead ? [
     {
       id: 'follow-up',
@@ -276,13 +270,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   }
 
   return (
-    <div 
-      className="space-y-3 pt-4"
-      style={{ marginTop: dynamicTopMargin }}
-    >
+    <div className="px-3 space-y-4">
       {/* AI Action Suggestions */}
       {leadId && lead && (
-        <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
+        <div className="animate-[fade-in_0.4s_ease-out]">
           <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3">
             ACTIONS SUGGÉRÉES PAR IA
           </h3>
@@ -295,7 +286,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {/* Assistant IA - avec prompts rapides */}
       {leadId && (
-        <div className="mb-6 animate-[fade-in_0.4s_ease-out]">
+        <div className="animate-[fade-in_0.4s_ease-out]">
           <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">
             ASSISTANT IA
           </h3>
