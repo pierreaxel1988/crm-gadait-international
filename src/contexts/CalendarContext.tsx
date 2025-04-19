@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -95,7 +94,6 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
     }
   }, [selectedAgent, initialSelectedAgent, onAgentChange]);
 
-  // Define refreshEvents function before using it
   const refreshEvents = useCallback(async () => {
     console.log("Refreshing events...");
     await fetchLeadActions();
@@ -133,11 +131,9 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
         .from('leads')
         .select('id, name, action_history, assigned_to');
       
-      // Apply agent filter if admin user has selected an agent
       if (selectedAgent) {
         query = query.eq('assigned_to', selectedAgent);
       } else if (!isUserAdmin && currentUserId) {
-        // For non-admin users, only show their assigned leads
         query = query.eq('assigned_to', currentUserId);
       }
       
@@ -149,19 +145,6 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
       }
       
       console.log(`Fetched ${leads?.length || 0} leads with action history`);
-      
-      // For debugging - log the full action history for the first few leads
-      if (leads && leads.length > 0) {
-        leads.slice(0, 3).forEach((lead: any) => {
-          console.log(`Lead ${lead.name} (ID: ${lead.id}) actions:`, 
-            lead.action_history?.map((a: any) => ({
-              id: a.id,
-              type: a.actionType,
-              scheduledDate: a.scheduledDate
-            }))
-          );
-        });
-      }
       
       let actionEvents: Event[] = [];
       
@@ -177,7 +160,6 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
               const assignedToName = memberMap.get(lead.assigned_to) || 'Non assigné';
               
               try {
-                // Parse the scheduledDate to ensure it's a valid date
                 const actionDate = new Date(action.scheduledDate);
                 
                 if (isNaN(actionDate.getTime())) {
@@ -185,11 +167,9 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
                   return;
                 }
                 
-                // Extract time if available
                 const timeMatch = action.scheduledDate.match(/T(\d{2}:\d{2})/) || [];
                 const time = timeMatch[1] || '09:00';
                 
-                // Create a more descriptive title
                 const actionTitle = `${action.actionType}${lead.name ? ` - ${lead.name}` : ''}`;
                 
                 actionEvents.push({
@@ -235,7 +215,6 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
     }
   }, [memberMap, toast, selectedAgent]);
 
-  // Fetch team members once to map IDs to names
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
@@ -258,14 +237,12 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
     fetchTeamMembers();
   }, []);
 
-  // Initial fetch of lead actions
   useEffect(() => {
     console.log("Initial fetch of lead actions");
     refreshEvents();
     setIsInitialLoad(false);
   }, [memberMap, refreshEvents]);
 
-  // Setup action-completed event listener once
   useEffect(() => {
     console.log("Setting up action-completed listener in CalendarContext");
     

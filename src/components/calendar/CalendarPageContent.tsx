@@ -1,11 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ListFilter } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import CalendarView from '@/components/calendar/CalendarView';
 import DayDetail from '@/components/calendar/DayDetail';
 import AddEventDialog from '@/components/calendar/AddEventDialog';
-import AllActionsDialog from '@/components/calendar/AllActionsDialog';
 import CategoryFilter from '@/components/calendar/CategoryFilter';
 import { eventCategories, useCalendar } from '@/contexts/CalendarContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -28,6 +27,7 @@ const CalendarPageContent = () => {
     selectedAgent,
     onAgentChange
   } = useCalendar();
+  
   const { isAdmin } = useAuth();
   
   useEffect(() => {
@@ -45,7 +45,7 @@ const CalendarPageContent = () => {
     }, 1000);
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [refreshEvents, events]);
 
   const colors = eventCategories.map(cat => ({ name: cat.name, value: cat.color }));
 

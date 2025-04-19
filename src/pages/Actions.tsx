@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { Button } from '@/components/ui/button';
-import { Check, Filter, Plus, RotateCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import ActionsList from '@/components/actions/ActionsList';
@@ -71,7 +71,7 @@ const Actions = () => {
                   <SelectTrigger className="w-[200px]">
                     <SelectValue placeholder="Filtrer par commercial" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent searchable>
                     <SelectItem value="all">Tous les commerciaux</SelectItem>
                     {actions
                       .reduce((acc: { id: string; name: string }[], curr) => {
