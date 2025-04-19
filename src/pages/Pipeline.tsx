@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
@@ -70,11 +71,9 @@ const Pipeline = () => {
       <SubNavigation />
       <div className="p-3 md:p-6 bg-white min-h-screen">
         {selectedAgentName && (
-          <div className="mb-4 bg-gradient-to-br from-gray-50 to-gray-100 p-3 rounded-xl shadow-sm border border-gray-200/50 text-center">
-            <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">Commercial sélectionné</span>
-            <div className="mt-1 text-sm font-semibold text-zinc-900 tracking-tight">
-              {selectedAgentName}
-            </div>
+          <div className="mb-4 text-sm bg-gray-50 p-2 rounded-lg text-center">
+            <span className="font-medium">Commercial sélectionné :</span>{" "}
+            <span className="text-primary font-semibold">{selectedAgentName}</span>
           </div>
         )}
         
