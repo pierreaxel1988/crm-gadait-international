@@ -104,7 +104,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
 
   const handleCommercialChange = (value: string) => {
     const newAgentId = value === "all" ? null : value;
-    
     handleAgentChange(newAgentId);
   };
   
@@ -156,11 +155,21 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     toggleFilters();
   };
 
-  const selectedAgentName = selectedAgent 
-    ? allTeamMembers?.find(member => member.id === selectedAgent)?.name || 
-      teamMembers.find(member => member.id === selectedAgent)?.name || 
-      'Inconnu'
-    : null;
+  const getSelectedAgentName = () => {
+    if (!selectedAgent) return null;
+    
+    if (allTeamMembers && allTeamMembers.length > 0) {
+      const member = allTeamMembers.find(m => m.id === selectedAgent);
+      if (member) return member.name;
+    }
+    
+    const member = teamMembers.find(m => m.id === selectedAgent);
+    if (member) return member.name;
+    
+    return 'Inconnu';
+  };
+
+  const selectedAgentName = selectedAgent ? getSelectedAgentName() : null;
 
   return (
     <div className="flex flex-col h-[calc(100vh-170px)]">
@@ -262,7 +271,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
           </div>
         </div>
         
-        {(isAdmin || !isAdmin) && allTeamMembers && allTeamMembers.length > 0 && (
+        {(allTeamMembers && allTeamMembers.length > 0) && (
           <div className="flex items-center">
             <Select 
               value={selectedAgent || "all"} 
@@ -270,7 +279,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
               defaultValue="all"
             >
               <SelectTrigger className="w-[200px]" aria-label="Filtrer par commercial">
-                <SelectValue placeholder="Filtrer par commercial">
+                <SelectValue>
                   {selectedAgentName ? selectedAgentName : "Tous les commerciaux"}
                 </SelectValue>
               </SelectTrigger>
