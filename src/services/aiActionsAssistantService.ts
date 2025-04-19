@@ -1,18 +1,46 @@
 
 import { AISuggestedAction } from './aiActionSuggestionService';
 import { supabase } from '@/integrations/supabase/client';
+import { LeadDetailed } from '@/types/lead';
 
 /**
  * Génère des suggestions d'actions en utilisant l'assistant IA Gadait
  * @param prompt - La demande de l'utilisateur
+ * @param leadData - Données du lead sélectionné (optionnel)
  * @returns Array of suggested actions
  */
-export async function generateAIActionSuggestions(prompt: string): Promise<AISuggestedAction[] | null> {
+export async function generateAIActionSuggestions(prompt: string, leadData?: LeadDetailed | null): Promise<AISuggestedAction[] | null> {
   try {
+    // Créer un contexte pour le lead si disponible
+    let leadContext = '';
+    if (leadData) {
+      leadContext = `
+Contexte du lead sélectionné:
+- Nom: ${leadData.name}
+- Email: ${leadData.email || 'Non renseigné'}
+- Téléphone: ${leadData.phone || 'Non renseigné'}
+- Budget: ${leadData.budget || 'Non renseigné'} ${leadData.currency || 'EUR'}
+- Localisation recherchée: ${leadData.desiredLocation || 'Non renseigné'}
+- Types de propriété: ${leadData.propertyTypes?.join(', ') || leadData.propertyType || 'Non renseigné'}
+- Délai d'achat: ${leadData.purchaseTimeframe || 'Non renseigné'}
+- Pays: ${leadData.country || 'Non renseigné'}
+- Statut: ${leadData.status || 'Non renseigné'}
+- Notes: ${leadData.notes || 'Aucune note'}
+- Dernière date de contact: ${leadData.lastContactedAt ? new Date(leadData.lastContactedAt).toLocaleDateString('fr-FR') : 'Non renseigné'}
+- Actions précédentes: ${leadData.actionHistory?.length ? 
+      leadData.actionHistory.slice(0, 3).map(a => 
+        `${a.actionType} (${a.completedDate ? 'complété' : 'en attente'})${a.notes ? ': ' + a.notes : ''}`
+      ).join('; ') 
+      : 'Aucune action précédente'}
+      `;
+    }
+
     // Format de la demande à l'IA
     const formattedPrompt = `
       En tant qu'assistant IA spécialisé dans l'immobilier de luxe, génère des suggestions 
       d'actions pertinentes basées sur cette demande: "${prompt}"
+      
+      ${leadData ? `\n${leadContext}\n\nUtilise ce contexte pour personnaliser les actions.` : ''}
       
       Format de réponse: Réponds UNIQUEMENT avec un tableau JSON valide au format suivant sans aucun texte avant ou après:
       [
@@ -25,14 +53,15 @@ export async function generateAIActionSuggestions(prompt: string): Promise<AISug
       ]
     `;
 
-    console.log('Envoi de la demande à l\'assistant Gadait IA');
+    console.log('Envoi de la demande à l\'assistant Gadait IA', leadData ? 'avec contexte de lead' : 'sans contexte de lead');
     
     // Appel de la fonction edge chat-gadait
     const { data, error } = await supabase.functions.invoke('chat-gadait', {
       body: {
         message: formattedPrompt,
         type: 'structured',
-        leadContext: ''
+        leadContext: leadContext,
+        leadId: leadData?.id || ''
       }
     });
 
