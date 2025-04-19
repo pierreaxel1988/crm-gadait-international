@@ -24,7 +24,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
   return (
     <div 
       className={cn(
-        "rounded-lg border p-3 animate-[fade-in_0.3s_ease-out]",
+        "rounded-lg border p-2.5 mb-2 animate-[fade-in_0.3s_ease-out]",
         isOverdue 
           ? isCallAction 
             ? 'bg-[#FDF4F6]/50 border-pink-200' 
@@ -32,9 +32,9 @@ const ActionCard: React.FC<ActionCardProps> = ({
           : 'bg-[#F2FCE2]/40 border-green-100'
       )}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2.5">
         <div className={cn(
-          "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
+          "h-7 w-7 rounded-full flex items-center justify-center shrink-0",
           isCallAction 
             ? isOverdue 
               ? 'bg-[#FDF4F6] text-[#D05A76]' 
@@ -44,26 +44,26 @@ const ActionCard: React.FC<ActionCardProps> = ({
               : 'bg-green-100 text-green-600'
         )}>
           {action.actionType === 'Call' ? (
-            <Phone className="h-5 w-5" />
+            <Phone className="h-3.5 w-3.5" />
           ) : (
-            <Calendar className="h-5 w-5" />
+            <Calendar className="h-3.5 w-3.5" />
           )}
         </div>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-medium text-loro-navy truncate">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-loro-navy truncate">
               {action.actionType}
             </span>
-            <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-              <Clock className="h-3 w-3 inline-block mr-1" />
+            <span className="text-[10px] text-gray-500 whitespace-nowrap ml-2">
+              <Clock className="h-2.5 w-2.5 inline-block mr-0.5" />
               {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
             </span>
           </div>
           
           {action.notes && (
             <p className={cn(
-              "text-sm p-2 rounded-lg mt-2 break-words",
+              "text-xs p-1.5 rounded-lg mt-1.5 break-words",
               isOverdue 
                 ? 'bg-white/80 text-rose-800 border border-rose-100' 
                 : 'bg-white/80 text-green-800 border border-green-100'
@@ -72,14 +72,14 @@ const ActionCard: React.FC<ActionCardProps> = ({
             </p>
           )}
           
-          <div className="flex justify-end items-center gap-2 mt-3">
+          <div className="flex justify-end items-center gap-1.5 mt-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onDelete(action.id)}
-              className="h-8 w-8 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
+              className="h-7 w-7 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
             
             <Button 
@@ -87,13 +87,13 @@ const ActionCard: React.FC<ActionCardProps> = ({
               size="sm"
               onClick={() => onMarkComplete(action)}
               className={cn(
-                "h-8 font-futura text-xs",
+                "h-7 px-2 text-[11px]",
                 isOverdue 
                   ? "border-rose-300 text-rose-600 hover:bg-rose-50" 
                   : "border-green-300 text-green-600 hover:bg-green-50"
               )}
             >
-              <Check className="h-3.5 w-3.5 mr-1.5" />
+              <Check className="h-3 w-3 mr-1" />
               Terminer
             </Button>
           </div>
