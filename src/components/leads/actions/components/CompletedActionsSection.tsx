@@ -12,18 +12,18 @@ const CompletedActionsSection: React.FC<CompletedActionsSectionProps> = ({ actio
   if (actions.length === 0) return null;
   
   return (
-    <div className="mt-3 w-full overflow-x-hidden">
-      <div className="flex items-center gap-1.5 mb-1.5 px-1">
-        <div className="h-5 w-5 rounded-full bg-gray-50 flex items-center justify-center">
-          <Check className="h-3 w-3 text-gray-500" />
+    <div className="mt-4 w-full overflow-x-hidden pb-safe">
+      <div className="flex items-center gap-2 mb-2 px-2">
+        <div className="h-6 w-6 rounded-full bg-gray-50 flex items-center justify-center">
+          <Check className="h-3.5 w-3.5 text-gray-500" />
         </div>
         <div>
-          <h3 className="text-xs font-medium text-gray-600">Actions terminées</h3>
-          <p className="text-[10px] text-gray-400">{actions.length} actions</p>
+          <h3 className="text-sm font-medium text-gray-600">Actions terminées</h3>
+          <p className="text-xs text-gray-400">{actions.length} actions</p>
         </div>
       </div>
       
-      <div className="space-y-1.5 w-full">
+      <div className="space-y-2 w-full px-2">
         {actions.map(action => (
           <CompletedActionCard key={action.id} action={action} />
         ))}

@@ -108,7 +108,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const completedActions = sortedActions.filter(action => action.completedDate);
 
   return (
-    <div className="flex flex-col h-full bg-white overflow-x-hidden w-full">
+    <div className="flex flex-col h-full bg-white overflow-hidden w-full">
       {leadId && lead && (
         <ActionHeader
           lead={lead}
@@ -118,8 +118,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         />
       )}
 
-      <ScrollArea className="flex-1 px-2 pb-20 animate-[fade-in_0.3s_ease-out] w-full overflow-x-hidden">
-        <div className="space-y-2 pt-1 w-full">
+      <ScrollArea className="flex-1 pb-20 w-full overflow-x-hidden">
+        <div className="space-y-2 pt-2 px-3 w-full">
           {pendingActions.map(action => {
             const isOverdue = isPast(new Date(action.scheduledDate));
             const isCallAction = action.actionType === 'Call';
@@ -141,7 +141,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       </ScrollArea>
 
       {lead && (
-        <div className="sticky bottom-0 border-t border-loro-pearl/20 bg-white p-3 pb-safe w-full overflow-x-hidden">
+        <div className="sticky bottom-0 border-t border-gray-100 bg-white p-3 pb-safe w-full overflow-x-hidden">
           <LeadAIAssistant lead={lead} />
         </div>
       )}
