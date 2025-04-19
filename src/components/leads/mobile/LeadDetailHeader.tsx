@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
@@ -61,9 +60,25 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onWhatsAppClick) {
-      onWhatsAppClick(e);
-    } else if (phone) {
+    
+    if (phone) {
+      // Start the call dialog first
+      setIsCallDialogOpen(true);
+      setCallStatus('calling');
+      
+      // Start the timer
+      const timer = setInterval(() => {
+        setCallDuration(prev => prev + 1);
+      }, 1000);
+      
+      setCallTimer(timer);
+      
+      // Trigger the parent's callback
+      if (onWhatsAppClick) {
+        onWhatsAppClick(e);
+      }
+      
+      // Actually open WhatsApp
       const cleanedPhone = phone.replace(/[^\d+]/g, '');
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
