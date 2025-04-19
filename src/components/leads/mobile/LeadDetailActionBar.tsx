@@ -83,12 +83,12 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               <History className="h-4 w-4 text-loro-navy" />
               Actions
               {(showSuggestionsBadge || pendingActionsCount > 0) && (
-                <div className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[10px] text-white ml-1">
+                <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[#FFDEE2] text-loro-terracotta text-[10px] ml-1">
                   {pendingActionsCount + (actionSuggestions?.length || 0)}
                 </div>
               )}
               {pendingActionsCount > 0 && (
-                <Bell className="h-3 w-3 text-amber-500 ml-1 animate-bounce" />
+                <Bell className="h-3 w-3 text-[#D946EF] ml-1 animate-bounce" />
               )}
             </Button>
           )}
@@ -108,3 +108,4 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
 };
 
 export default LeadDetailActionBar;
+
