@@ -9,14 +9,29 @@ interface CompletedActionCardProps {
 }
 
 const CompletedActionCard: React.FC<CompletedActionCardProps> = ({ action }) => {
+  const handlePhoneClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (action.actionType === 'Call' && action.notes?.includes('+')) {
+      // Extract phone number from notes if available
+      const phoneMatch = action.notes.match(/\+[\d\s]+/);
+      if (phoneMatch) {
+        const phoneNumber = phoneMatch[0].replace(/\s/g, '');
+        window.location.href = `tel:${phoneNumber}`;
+      }
+    }
+  };
+
   return (
-    <div className="rounded-lg border border-gray-100 p-3 bg-white shadow-sm w-full">
-      <div className="flex items-start gap-2.5">
-        <div className="h-7 w-7 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
+    <div className="rounded-lg border border-gray-100 p-3 bg-white shadow-sm w-full touch-manipulation active:bg-gray-50">
+      <div className="flex items-start gap-3">
+        <div 
+          className="h-8 w-8 rounded-full bg-gray-50 flex items-center justify-center shrink-0"
+          onClick={action.actionType === 'Call' ? handlePhoneClick : undefined}
+        >
           {action.actionType === 'Call' ? (
-            <Phone className="h-3.5 w-3.5 text-gray-500" />
+            <Phone className="h-4 w-4 text-gray-500" />
           ) : (
-            <Calendar className="h-3.5 w-3.5 text-gray-500" />
+            <Calendar className="h-4 w-4 text-gray-500" />
           )}
         </div>
         
@@ -32,7 +47,7 @@ const CompletedActionCard: React.FC<CompletedActionCardProps> = ({ action }) => 
           </div>
           
           {action.notes && (
-            <p className="text-sm mt-1.5 text-gray-500 break-words leading-snug">
+            <p className="text-sm mt-2 p-2 bg-gray-50/70 rounded-lg text-gray-600 break-words leading-snug border border-gray-100">
               {action.notes}
             </p>
           )}
