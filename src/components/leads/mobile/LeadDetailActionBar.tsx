@@ -32,9 +32,9 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   const [pendingActionsCount, setPendingActionsCount] = useState<number>(0);
   
   useEffect(() => {
-    if (lead?.action_history) {
+    if (lead?.actionHistory) {
       const now = new Date();
-      const pending = lead.action_history.filter(action => {
+      const pending = lead.actionHistory.filter(action => {
         if (action.completedDate) return false;
         if (!action.scheduledDate) return false;
         
@@ -51,7 +51,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
         });
       }
     }
-  }, [lead?.action_history]);
+  }, [lead?.actionHistory]);
 
   useEffect(() => {
     setShowSuggestionsBadge(actionSuggestions && actionSuggestions.length > 0);
