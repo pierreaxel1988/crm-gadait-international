@@ -1,28 +1,21 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
 import { toast } from '@/hooks/use-toast';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { useLeadActions } from '@/hooks/useLeadActions';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
-import ActionsPanelMobile from '@/components/leads/actions/ActionsPanelMobile';
-import ActionSuggestions from '@/components/leads/actions/ActionSuggestions';
-import { CheckCircle } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { updateLead } from '@/services/leadService';
+import { useLeadDetail } from '@/hooks/useLeadDetail';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 import LeadDetailHeader from '@/components/leads/mobile/LeadDetailHeader';
 import LeadDetailTabs from '@/components/leads/mobile/LeadDetailTabs';
 import LeadDetailActionBar from '@/components/leads/mobile/LeadDetailActionBar';
 import { LoadingState, NotFoundState } from '@/components/leads/mobile/LeadDetailErrorStates';
-import { useLeadDetail } from '@/hooks/useLeadDetail';
-
-import StatusSection from '@/components/leads/form/mobile/StatusSection';
-import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSection';
-import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
-import NotesSection from '@/components/leads/form/mobile/NotesSection';
-import EmailsTab from '@/components/leads/mobile/tabs/EmailsTab';
-import { useIsMobile } from '@/hooks/use-mobile';
+import LeadDetailContent from '@/components/leads/mobile/LeadDetailContent';
+import CallManagement from '@/components/leads/mobile/CallManagement';
+import SaveIndicator from '@/components/leads/mobile/SaveIndicator';
 
 const LeadDetailMobile = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,6 +27,7 @@ const LeadDetailMobile = () => {
   const activeTab = searchParams.get('tab') || 'criteria';
   
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
+  const [isCallDialogOpen, setIsCallDialogOpen] = useState(false);
   
   const {
     lead,
@@ -124,25 +118,20 @@ const LeadDetailMobile = () => {
     e.preventDefault();
     console.log("Phone call initiated");
     startCallTracking('phone');
+    setIsCallDialogOpen(true);
   };
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     console.log("WhatsApp initiated");
     startCallTracking('whatsapp');
+    setIsCallDialogOpen(true);
   };
 
   const handleEmailClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (lead?.email) {
       window.location.href = `mailto:${lead.email}`;
-    }
-  };
-
-  const handleCallComplete = (duration: number) => {
-    console.log("Call completed with duration:", duration);
-    if (lead) {
-      endCallTracking(duration);
     }
   };
 
@@ -178,56 +167,21 @@ const LeadDetailMobile = () => {
             onPhoneCall={handlePhoneCall}
             onWhatsAppClick={handleWhatsAppClick}
             onEmailClick={handleEmailClick}
-            onCallComplete={handleCallComplete}
           />
         </div>
         <LeadDetailTabs defaultTab={activeTab} />
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto pt-0 pb-20">
-        <Tabs value={activeTab} className="w-full h-full">
-          <div className="px-4 pb-32 h-full">
-            <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out]">
-              <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
-            </TabsContent>
-            
-            <TabsContent value="criteria" className="mt-0 animate-[fade-in_0.2s_ease-out]">
-              <SearchCriteriaSection lead={lead} onDataChange={handleDataChange} />
-            </TabsContent>
-            
-            <TabsContent value="status" className="mt-0 animate-[fade-in_0.2s_ease-out]">
-              <StatusSection 
-                lead={lead} 
-                onDataChange={handleDataChange} 
-              />
-            </TabsContent>
-            
-            <TabsContent value="notes" className="mt-0 animate-[fade-in_0.2s_ease-out]">
-              <NotesSection lead={lead} onDataChange={handleDataChange} />
-            </TabsContent>
-            
-            <TabsContent value="actions" className="mt-0 animate-[fade-in_0.2s_ease-out]">
-              {actionSuggestions && actionSuggestions.length > 0 && (
-                <ActionSuggestions
-                  suggestions={actionSuggestions}
-                  onAccept={acceptSuggestion}
-                  onReject={rejectSuggestion}
-                />
-              )}
-              <ActionsPanelMobile 
-                leadId={lead.id} 
-                onAddAction={fetchLead}
-                onMarkComplete={handleMarkComplete} 
-                actionHistory={lead.actionHistory || []}
-              />
-            </TabsContent>
-            
-            <TabsContent value="emails" className="h-full flex-1 flex-grow mt-0">
-              <EmailsTab leadId={id || ''} />
-            </TabsContent>
-          </div>
-        </Tabs>
-      </ScrollArea>
+      <LeadDetailContent
+        lead={lead}
+        activeTab={activeTab}
+        onDataChange={handleDataChange}
+        actionSuggestions={actionSuggestions}
+        onAcceptSuggestion={acceptSuggestion}
+        onRejectSuggestion={rejectSuggestion}
+        onMarkComplete={handleMarkComplete}
+        fetchLead={fetchLead}
+      />
       
       <LeadDetailActionBar
         autoSaveEnabled={autoSaveEnabled}
@@ -244,11 +198,18 @@ const LeadDetailMobile = () => {
         onRejectSuggestion={rejectSuggestion}
       />
 
-      {showSaveIndicator && (
-        <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
-          <CheckCircle className="h-5 w-5" />
-        </div>
-      )}
+      <SaveIndicator show={showSaveIndicator} />
+
+      <CallManagement
+        name={lead.name}
+        phone={getFormattedPhoneForCall()}
+        isCallDialogOpen={isCallDialogOpen}
+        setIsCallDialogOpen={setIsCallDialogOpen}
+        callStatus={lead.isCallInProgress ? 'calling' : 'idle'}
+        callDuration={lead.callDuration || 0}
+        formatDuration={formatDuration}
+        endCall={endCallTracking}
+      />
 
       <ActionDialog
         isOpen={isActionDialogOpen}
