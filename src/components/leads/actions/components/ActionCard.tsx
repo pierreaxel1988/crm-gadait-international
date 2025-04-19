@@ -24,7 +24,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
   return (
     <div 
       className={cn(
-        "rounded-lg border p-2.5 mb-2 animate-[fade-in_0.3s_ease-out]",
+        "rounded-lg border p-2 mb-2 animate-[fade-in_0.3s_ease-out] w-full",
         isOverdue 
           ? isCallAction 
             ? 'bg-[#FDF4F6]/50 border-pink-200' 
@@ -32,9 +32,9 @@ const ActionCard: React.FC<ActionCardProps> = ({
           : 'bg-[#F2FCE2]/40 border-green-100'
       )}
     >
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-2">
         <div className={cn(
-          "h-7 w-7 rounded-full flex items-center justify-center shrink-0",
+          "h-6 w-6 rounded-full flex items-center justify-center shrink-0",
           isCallAction 
             ? isOverdue 
               ? 'bg-[#FDF4F6] text-[#D05A76]' 
@@ -44,13 +44,13 @@ const ActionCard: React.FC<ActionCardProps> = ({
               : 'bg-green-100 text-green-600'
         )}>
           {action.actionType === 'Call' ? (
-            <Phone className="h-3.5 w-3.5" />
+            <Phone className="h-3 w-3" />
           ) : (
-            <Calendar className="h-3.5 w-3.5" />
+            <Calendar className="h-3 w-3" />
           )}
         </div>
         
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-loro-navy truncate">
               {action.actionType}
@@ -63,7 +63,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
           
           {action.notes && (
             <p className={cn(
-              "text-xs p-1.5 rounded-lg mt-1.5 break-words",
+              "text-xs p-1.5 rounded-lg mt-1.5 break-words max-w-full overflow-hidden",
               isOverdue 
                 ? 'bg-white/80 text-rose-800 border border-rose-100' 
                 : 'bg-white/80 text-green-800 border border-green-100'
@@ -79,7 +79,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
               onClick={() => onDelete(action.id)}
               className="h-7 w-7 p-0 text-gray-400 hover:text-rose-500 hover:bg-transparent"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-3 w-3" />
             </Button>
             
             <Button 

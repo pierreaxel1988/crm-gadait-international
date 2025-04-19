@@ -20,18 +20,18 @@ const ActionHeader: React.FC<ActionHeaderProps> = ({
   pendingActionsCount
 }) => {
   return (
-    <div className="sticky top-0 z-10 bg-white pb-1">
-      <div className="p-2.5 border-b border-gray-100">
+    <div className="sticky top-0 z-10 bg-white pb-1 w-full overflow-x-hidden">
+      <div className="p-2 border-b border-gray-100 w-full">
         <h3 className="text-xs font-medium text-gray-700 mb-1.5">
           Assistant IA
         </h3>
-        <div className="mb-1.5">
+        <div className="mb-1.5 w-full">
           <AIActionSuggestions lead={lead} onActionAdded={onActionAdded} />
         </div>
       </div>
       
-      <div className="px-2.5 pt-1.5">
-        <div className="flex justify-between items-center">
+      <div className="px-2 pt-1.5 w-full">
+        <div className="flex justify-between items-center w-full">
           <div className="flex items-center gap-1.5">
             <div className="h-6 w-6 rounded-full bg-gray-50 flex items-center justify-center">
               <MessageSquare className="h-3.5 w-3.5 text-gray-500" />
