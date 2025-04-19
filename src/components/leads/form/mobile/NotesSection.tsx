@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Textarea } from '@/components/ui/textarea';
@@ -59,7 +60,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({
           value={lead.notes || ''}
           onChange={(e) => handleInputChange('notes', e.target.value)}
           placeholder="Ajouter des notes concernant ce lead..."
-          className="min-h-[200px] font-futura"
+          className="min-h-[300px] font-futura" // Augmenté de 200px à 300px
         />
       </div>
     </div>
