@@ -59,6 +59,9 @@ const CalendarPageContent = () => {
     return acc;
   }, []);
 
+  // Create colors array for AddEventDialog
+  const colors = eventCategories.map(cat => ({ name: cat.name, value: cat.color }));
+
   return (
     <div className="container py-10 max-w-6xl mx-auto animate-fade-in">
       <div className="flex flex-col md:flex-row gap-8">

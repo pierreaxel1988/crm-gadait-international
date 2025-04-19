@@ -89,10 +89,10 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
   const { toast } = useToast();
 
   useEffect(() => {
-    if (selectedAgent !== initialSelectedAgent && onAgentChange) {
-      onAgentChange(selectedAgent);
+    if (selectedAgent !== initialSelectedAgent && parentOnAgentChange) {
+      parentOnAgentChange(selectedAgent);
     }
-  }, [selectedAgent, initialSelectedAgent, onAgentChange]);
+  }, [selectedAgent, initialSelectedAgent, parentOnAgentChange]);
 
   const refreshEvents = useCallback(async () => {
     console.log("Refreshing events...");
