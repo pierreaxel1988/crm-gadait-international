@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -22,11 +23,13 @@ import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSectio
 import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
 import NotesSection from '@/components/leads/form/mobile/NotesSection';
 import EmailsTab from '@/components/leads/mobile/tabs/EmailsTab';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const LeadDetailMobile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   const searchParams = new URLSearchParams(location.search);
   const activeTab = searchParams.get('tab') || 'criteria';
@@ -156,27 +159,29 @@ const LeadDetailMobile = () => {
   
   return (
     <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
-      <div className="fixed top-0 left-0 right-0 z-40 bg-loro-sand w-full">
-        <LeadDetailHeader
-          name={lead.name}
-          createdAt={lead.createdAt}
-          phone={getFormattedPhoneForCall()}
-          email={lead.email}
-          budget={lead.budget}
-          currency={lead.currency}
-          desiredLocation={lead.desiredLocation}
-          country={lead.country}
-          purchaseTimeframe={lead.purchaseTimeframe}
-          onBackClick={handleBackClick}
-          onSave={handleSaveWithIndicator}
-          isSaving={isSaving}
-          hasChanges={hasChanges}
-          tags={lead.tags}
-          onPhoneCall={handlePhoneCall}
-          onWhatsAppClick={handleWhatsAppClick}
-          onEmailClick={handleEmailClick}
-          onCallComplete={handleCallComplete}
-        />
+      <div className="fixed top-0 left-0 right-0 z-40 w-full">
+        <div className="bg-loro-sand pt-[env(safe-area-inset-top)]">
+          <LeadDetailHeader
+            name={lead.name}
+            createdAt={lead.createdAt}
+            phone={getFormattedPhoneForCall()}
+            email={lead.email}
+            budget={lead.budget}
+            currency={lead.currency}
+            desiredLocation={lead.desiredLocation}
+            country={lead.country}
+            purchaseTimeframe={lead.purchaseTimeframe}
+            onBackClick={handleBackClick}
+            onSave={handleSaveWithIndicator}
+            isSaving={isSaving}
+            hasChanges={hasChanges}
+            tags={lead.tags}
+            onPhoneCall={handlePhoneCall}
+            onWhatsAppClick={handleWhatsAppClick}
+            onEmailClick={handleEmailClick}
+            onCallComplete={handleCallComplete}
+          />
+        </div>
         
         <div className="bg-white">
           <LeadDetailTabs defaultTab={activeTab} />

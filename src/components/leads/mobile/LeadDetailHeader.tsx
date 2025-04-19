@@ -140,7 +140,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   };
 
   const headerClasses = isMobile
-    ? "fixed top-0 left-0 right-0 z-40 flex items-center justify-between p-3 w-full bg-loro-50 pt-[env(safe-area-inset-top)] h-auto"
+    ? "flex items-center justify-between p-3 w-full bg-loro-50"
     : "flex items-center justify-between p-3 w-full bg-loro-50";
 
   return <div className={headerClasses}>
