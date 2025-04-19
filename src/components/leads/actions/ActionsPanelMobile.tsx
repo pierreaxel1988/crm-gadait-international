@@ -211,7 +211,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
   const getActionTypeIcon = (actionType: string) => {
     switch (actionType) {
-      case 'Call': return <span className="bg-[#EBD5CE] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
+      case 'Call': return <span className="bg-[#F8E2E8] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
       case 'Visites': return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs font-futura">Visite</span>;
       case 'Compromis': return <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-futura">Compromis</span>;
       case 'Acte de vente': return <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs font-futura">Acte de vente</span>;
@@ -278,7 +278,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       {/* AI Action Suggestions */}
       {leadId && lead && (
         <div className="animate-[fade-in_0.4s_ease-out] w-full overflow-hidden">
-          <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3 break-words truncate">
+          <h3 className="text-xs uppercase tracking-wider text-gray-700 pb-2 border-b mb-3 break-words truncate">
             ACTIONS SUGGÉRÉES PAR IA
           </h3>
           <AIActionSuggestions 
@@ -291,20 +291,20 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       {/* Assistant IA - avec prompts rapides */}
       {leadId && (
         <div className="animate-[fade-in_0.4s_ease-out] w-full overflow-hidden">
-          <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b break-words truncate">
+          <h3 className="text-xs uppercase tracking-wider text-gray-700 pb-2 border-b break-words truncate">
             ASSISTANT IA
           </h3>
           <div className="mt-3 space-y-4 w-full">
             {lead ? (
               <>
-                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 w-full">
+                <div className="flex gap-2 overflow-x-auto pb-2 w-full">
                   {quickPrompts.map((quickPrompt) => (
                     <Button
                       key={quickPrompt.id}
                       variant="outline"
                       size="sm"
                       onClick={() => setPrompt(quickPrompt.prompt)}
-                      className="whitespace-nowrap text-xs sm:text-sm border-loro-sand hover:bg-loro-sand/10 shrink-0"
+                      className="whitespace-nowrap text-xs border-gray-300 hover:bg-gray-50 shrink-0"
                     >
                       {quickPrompt.label}
                     </Button>
@@ -314,23 +314,23 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   <Textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Ex. Propose une relance WhatsApp ou un résumé du client..."
-                    className="w-full min-h-[80px] text-xs sm:text-sm resize-y"
+                    placeholder="Ex. Propose une relance WhatsApp..."
+                    className="w-full min-h-[80px] text-xs resize-y"
                   />
                   <Button
                     onClick={handleSendToGPT}
                     disabled={isAiLoading || !prompt}
-                    className="w-full bg-loro-navy hover:bg-loro-navy/90 text-white"
+                    className="w-full bg-gray-800 hover:bg-gray-700 text-white"
                   >
                     {isAiLoading ? (
                       <div className="flex items-center justify-center gap-2 w-full">
                         <div className="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full" />
-                        <span className="text-xs sm:text-sm">Envoi en cours...</span>
+                        <span className="text-xs">Envoi en cours...</span>
                       </div>
                     ) : (
                       <>
                         <PlaneTakeoff className="h-4 w-4 mr-2" />
-                        <span className="text-xs sm:text-sm">Envoyer à l'IA</span>
+                        <span className="text-xs">Envoyer à l'IA</span>
                       </>
                     )}
                   </Button>
@@ -339,7 +339,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             ) : loadError ? (
               <div className="border rounded-md p-4 bg-red-100 text-center w-full">
                 <p className="text-red-600 font-medium mb-1">Erreur</p>
-                <p className="text-xs sm:text-sm">{loadError || "Impossible de charger les données du lead. Veuillez rafraîchir la page."}</p>
+                <p className="text-xs">{loadError || "Impossible de charger les données du lead. Veuillez rafraîchir la page."}</p>
                 <Button
                   variant="outline"
                   size="sm"
@@ -359,7 +359,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               <LeadAIAssistant lead={lead} />
             ) : loadError ? (
               <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50 w-full">
-                <p className="text-xs sm:text-sm text-muted-foreground">Assistant IA non disponible</p>
+                <p className="text-xs text-gray-500">Assistant IA non disponible</p>
               </div>
             ) : (
               <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50 w-full">
@@ -371,7 +371,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       )}
       
       <div className="flex justify-between items-center mb-4 w-full overflow-hidden">
-        <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b break-words truncate">
+        <h3 className="text-xs uppercase tracking-wider text-gray-700 pb-2 border-b break-words truncate">
           ACTIONS EN ATTENTE
         </h3>
       </div>
@@ -456,7 +456,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {completedActions.length > 0 && (
         <>
-          <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3 break-words truncate w-full">HISTORIQUE DES ACTIONS</h3>
+          <h3 className="text-xs uppercase tracking-wider text-gray-700 mt-6 mb-3 break-words truncate w-full">HISTORIQUE DES ACTIONS</h3>
           <div className="space-y-2 w-full">
             {completedActions.map((action) => (
               <div 

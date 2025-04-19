@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { 
@@ -160,22 +161,22 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
   };
 
   return (
-    <div className={cn("flex flex-col border rounded-lg shadow-sm bg-white overflow-hidden h-[400px] md:h-[500px] mx-3", className)}>
-      <div className="bg-loro-navy/10 px-4 py-3 border-b">
-        <h3 className="font-futura text-base text-loro-navy">Assistant IA GADAIT</h3>
+    <div className={cn("flex flex-col border rounded-lg shadow-sm bg-white overflow-hidden h-[350px] sm:h-[400px] w-full", className)}>
+      <div className="bg-gray-100 px-4 py-2 border-b">
+        <h3 className="font-medium text-sm text-gray-700">Assistant IA GADAIT</h3>
       </div>
       
-      <ScrollArea className="flex-1 px-4 overflow-y-auto">
-        <div className="space-y-4 py-4">
+      <ScrollArea className="flex-1 px-3 py-2 overflow-y-auto">
+        <div className="space-y-3">
           {isInitialLoading ? (
             <div className="flex items-center justify-center h-40">
-              <Loader2 className="h-8 w-8 animate-spin text-loro-hazel/70" />
+              <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
             </div>
           ) : conversation.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-center text-muted-foreground px-4">
+            <div className="flex items-center justify-center h-40 text-center text-gray-500 px-4">
               <div>
-                <Bot className="h-8 w-8 mx-auto mb-2 text-loro-navy/40" />
-                <p className="text-sm">Posez une question ou générez un message adapté au marché du luxe en fonction du profil client</p>
+                <Bot className="h-6 w-6 mx-auto mb-2 text-gray-400" />
+                <p className="text-xs">Posez une question ou générez un message adapté au marché du luxe</p>
               </div>
             </div>
           ) : (
@@ -188,13 +189,13 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
                 )}
               >
                 <div className={cn(
-                  "rounded-lg px-4 py-3 text-sm shadow-sm",
+                  "rounded-lg px-3 py-2 text-xs shadow-sm",
                   msg.role === 'user' 
-                    ? "bg-loro-navy/10 text-loro-navy order-1 rounded-tr-none" 
-                    : "bg-loro-hazel/20 text-loro-night order-2 rounded-tl-none"
+                    ? "bg-blue-50 text-gray-800 order-1 rounded-tr-none" 
+                    : "bg-gray-100 text-gray-800 order-2 rounded-tl-none"
                 )}>
                   <div className="whitespace-pre-wrap break-words">{msg.content}</div>
-                  <div className="text-[10px] text-muted-foreground mt-1 text-right">
+                  <div className="text-[10px] text-gray-500 mt-1 text-right">
                     {formatDate(msg.timestamp)}
                   </div>
                 </div>
@@ -205,26 +206,26 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
         </div>
       </ScrollArea>
       
-      <div className="border-t p-4">
+      <div className="border-t p-2">
         <div className="flex gap-2 items-end">
           <Textarea
             ref={textareaRef}
             value={message}
             onChange={handleTextareaChange}
             onKeyDown={handleKeyDown}
-            placeholder="Écris ici ta demande (ex: relance WhatsApp, résumé du client...)"
-            className="flex-1 resize-none min-h-[40px] py-2 px-3 border-loro-sand/60 focus-visible:ring-loro-hazel rounded-2xl text-sm"
+            placeholder="Écris ici ta demande..."
+            className="flex-1 resize-none min-h-[40px] py-2 px-3 text-xs rounded-lg"
             disabled={isLoading}
           />
           <Button 
             onClick={handleSendMessage}
             disabled={isLoading || !message.trim()}
-            className="bg-loro-hazel hover:bg-loro-hazel/80 text-white h-10 w-10 p-0 rounded-full shadow-sm"
+            className="bg-blue-500 hover:bg-blue-600 text-white h-9 w-9 p-0 rounded-full"
           >
             {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <SendHorizontal className="h-5 w-5" />
+              <SendHorizontal className="h-4 w-4" />
             )}
           </Button>
         </div>

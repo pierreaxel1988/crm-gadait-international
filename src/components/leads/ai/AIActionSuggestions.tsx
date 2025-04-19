@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Lightbulb, Loader2, RefreshCw } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
@@ -97,16 +98,16 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
 
   if (isLoading) {
     return (
-      <div className="border rounded-lg p-4 bg-loro-pearl/20 flex flex-col items-center justify-center mx-3">
-        <Loader2 className="h-5 w-5 text-loro-navy animate-spin mb-2" />
-        <p className="text-sm text-loro-navy/80">Génération des suggestions...</p>
+      <div className="border rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center w-full mx-0">
+        <Loader2 className="h-5 w-5 text-gray-500 animate-spin mb-2" />
+        <p className="text-sm text-gray-500">Génération des suggestions...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="border rounded-lg p-4 bg-red-50 mx-3">
+      <div className="border rounded-lg p-4 bg-red-50 w-full mx-0">
         <p className="text-sm text-red-600 text-center mb-2">{error}</p>
         <div className="flex justify-center">
           <Button 
@@ -125,14 +126,14 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
 
   if (!suggestions || suggestions.length === 0) {
     return (
-      <div className="border rounded-lg p-4 bg-loro-pearl/20 text-center mx-3">
-        <Lightbulb className="h-6 w-6 text-loro-navy/60 mx-auto mb-2" />
-        <p className="text-sm text-loro-navy/80 mb-3">Aucune suggestion pour le moment</p>
+      <div className="border rounded-lg p-4 bg-gray-50 text-center w-full mx-0">
+        <Lightbulb className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+        <p className="text-sm text-gray-500 mb-3">Aucune suggestion pour le moment</p>
         <Button 
           onClick={handleManualRefresh}
           variant="outline" 
           size="sm"
-          className="text-sm border-loro-navy text-loro-navy hover:bg-loro-pearl/20 w-full"
+          className="text-sm border-gray-300 text-gray-700 hover:bg-gray-100 w-full"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Générer des suggestions
@@ -142,13 +143,13 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
   }
 
   return (
-    <div className="space-y-3 mx-3">
+    <div className="w-full mx-0 space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-md bg-loro-pearl">
-            <Lightbulb className="h-4 w-4 text-loro-navy" />
+          <div className="p-1.5 rounded-md bg-gray-100">
+            <Lightbulb className="h-4 w-4 text-gray-700" />
           </div>
-          <span className="text-sm text-loro-navy font-medium">
+          <span className="text-sm text-gray-700 font-medium">
             {suggestions.length} suggestion{suggestions.length > 1 ? 's' : ''}
           </span>
         </div>
@@ -156,14 +157,14 @@ export function AIActionSuggestions({ lead, onActionAdded }: AIActionSuggestions
           onClick={handleManualRefresh}
           variant="ghost"
           size="sm"
-          className="h-8 px-2 text-sm text-loro-navy hover:bg-loro-pearl/20"
+          className="h-8 px-2 text-sm text-gray-600 hover:bg-gray-100"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Actualiser
         </Button>
       </div>
       
-      <div className="space-y-3">
+      <div className="w-full">
         {suggestions.map((suggestion) => (
           <ActionSuggestionCard
             key={suggestion.id}

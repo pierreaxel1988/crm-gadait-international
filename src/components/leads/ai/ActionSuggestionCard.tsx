@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CalendarIcon, CheckIcon, XIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,26 +36,26 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
   const formattedDate = format(suggestion.scheduledDate, 'dd/MM/yyyy à HH:mm', { locale: fr });
 
   return (
-    <div className="border border-loro-navy/10 bg-loro-pearl/20 rounded-lg p-4">
+    <div className="border border-gray-200 bg-white rounded-lg p-4 mb-3 overflow-hidden w-full">
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex-shrink-0">
           {getActionTypeIcon(suggestion.actionType)}
         </div>
-        <div className="flex-shrink-0 text-xs text-gray-500 bg-white/80 px-2 py-0.5 rounded-full">
+        <div className="flex-shrink-0 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full">
           <CalendarIcon className="inline h-3 w-3 mr-1" />
           {formattedDate}
         </div>
       </div>
       
-      <p className="text-sm text-loro-navy/90 mb-3 break-words">
+      <p className="text-sm text-gray-700 mb-3 break-words w-full">
         {suggestion.notes}
       </p>
       
-      <div className="flex justify-end items-center gap-2">
+      <div className="flex justify-between items-center gap-2 w-full">
         <Button
           variant="ghost"
           size="sm"
-          className="text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+          className="text-rose-600 hover:bg-rose-50 hover:text-rose-700 flex-1"
           onClick={() => onDismiss(suggestion)}
         >
           <XIcon className="h-4 w-4 mr-1.5" />
@@ -63,7 +64,7 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
         <Button
           variant="outline"
           size="sm"
-          className="border-loro-navy text-loro-navy hover:bg-loro-pearl/40"
+          className="border-gray-300 text-gray-700 hover:bg-gray-50 flex-1"
           onClick={() => onImplement(suggestion)}
         >
           <CheckIcon className="h-4 w-4 mr-1.5" />
