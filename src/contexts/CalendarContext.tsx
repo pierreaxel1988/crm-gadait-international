@@ -127,6 +127,26 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
       
       console.log("Current user info:", { isUserAdmin, currentUserId });
       
+      // First, fetch all team members to have their names available
+      const { data: allTeamMembers, error: teamMembersError } = await supabase
+        .from('team_members')
+        .select('id, name');
+        
+      if (teamMembersError) {
+        console.error('Error fetching team members:', teamMembersError);
+        throw teamMembersError;
+      }
+      
+      // Create a map of team member IDs to names
+      const teamMemberMap = new Map<string, string>();
+      allTeamMembers?.forEach(member => {
+        teamMemberMap.set(member.id, member.name);
+      });
+      
+      setMemberMap(teamMemberMap);
+      console.log("Loaded team members map with", teamMemberMap.size, "members");
+      
+      // Now fetch leads with their actions
       let query = supabase
         .from('leads')
         .select('id, name, action_history, assigned_to');
@@ -157,7 +177,7 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
           leadActions.forEach((action: any) => {
             if (action.scheduledDate) {
               const category = eventCategories.find(cat => cat.value === action.actionType);
-              const assignedToName = memberMap.get(lead.assigned_to) || 'Non assigné';
+              const assignedToName = teamMemberMap.get(lead.assigned_to) || 'Non assigné';
               
               try {
                 const actionDate = new Date(action.scheduledDate);
@@ -213,7 +233,7 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
         description: "Impossible de charger les actions depuis la base de données."
       });
     }
-  }, [memberMap, toast, selectedAgent]);
+  }, [selectedAgent, toast]);
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
