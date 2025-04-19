@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import CalendarView from '@/components/calendar/CalendarView';
@@ -47,7 +47,17 @@ const CalendarPageContent = () => {
     return () => clearTimeout(timer);
   }, [refreshEvents, events]);
 
-  const colors = eventCategories.map(cat => ({ name: cat.name, value: cat.color }));
+  // Get unique agents from events
+  const uniqueAgents = events.reduce((acc: { id: string; name: string }[], event) => {
+    if (event.assignedToId && event.assignedToName && 
+        !acc.some(agent => agent.id === event.assignedToId)) {
+      acc.push({ 
+        id: event.assignedToId, 
+        name: event.assignedToName 
+      });
+    }
+    return acc;
+  }, []);
 
   return (
     <div className="container py-10 max-w-6xl mx-auto animate-fade-in">
@@ -65,20 +75,11 @@ const CalendarPageContent = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Tous les commerciaux</SelectItem>
-                    {events
-                      .reduce((acc: { id: string; name: string }[], curr) => {
-                        if (curr.assignedToId && curr.assignedToName && 
-                            !acc.some(agent => agent.id === curr.assignedToId)) {
-                          acc.push({ id: curr.assignedToId, name: curr.assignedToName });
-                        }
-                        return acc;
-                      }, [])
-                      .map(agent => (
-                        <SelectItem key={agent.id} value={agent.id}>
-                          {agent.name}
-                        </SelectItem>
-                      ))
-                    }
+                    {uniqueAgents.map(agent => (
+                      <SelectItem key={agent.id} value={agent.id}>
+                        {agent.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

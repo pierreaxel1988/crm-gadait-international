@@ -68,7 +68,7 @@ interface CalendarProviderProps {
 export const CalendarProvider: React.FC<CalendarProviderProps> = ({ 
   children, 
   initialSelectedAgent = null,
-  onAgentChange
+  onAgentChange: parentOnAgentChange
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<Event[]>(initialEvents);
@@ -376,9 +376,10 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
   };
 
   const handleAgentChange = (agentId: string | null) => {
+    console.log('Changing selected agent to:', agentId);
     setSelectedAgent(agentId);
-    if (onAgentChange) {
-      onAgentChange(agentId);
+    if (parentOnAgentChange) {
+      parentOnAgentChange(agentId);
     }
   };
 
