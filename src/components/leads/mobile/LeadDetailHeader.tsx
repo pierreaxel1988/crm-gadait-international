@@ -9,6 +9,7 @@ import { Currency } from '@/types/lead';
 import { useAuth } from '@/hooks/useAuth';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState } from 'react';
+import { ActionHistory } from '@/types/actionHistory';
 
 interface LeadDetailHeaderProps {
   name: string;
