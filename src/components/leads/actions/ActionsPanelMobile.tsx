@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
 import { format, isPast } from 'date-fns';
-import { Check, Clock, Calendar, Trash2, PlaneTakeoff, Plus, MessageSquare, Phone, ChevronRight } from 'lucide-react';
+import { Check, Clock, Calendar, Trash2, Plus, MessageSquare, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
@@ -30,28 +31,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>(initialActionHistory || []);
-  const [headerHeight, setHeaderHeight] = useState<number>(0);
-  const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
-
-  useEffect(() => {
-    const measureHeader = () => {
-      const headerElement = document.querySelector('.bg-loro-sand');
-      if (headerElement) {
-        const height = headerElement.getBoundingClientRect().height;
-        setHeaderHeight(height);
-        setIsHeaderMeasured(true);
-      }
-    };
-    measureHeader();
-    window.addEventListener('resize', measureHeader);
-    const timeoutId = setTimeout(measureHeader, 300);
-    return () => {
-      window.removeEventListener('resize', measureHeader);
-      clearTimeout(timeoutId);
-    };
-  }, []);
 
   useEffect(() => {
     if (initialActionHistory) {
@@ -216,33 +197,22 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const pendingActions = sortedActions.filter(action => !action.completedDate);
   const completedActions = sortedActions.filter(action => action.completedDate);
 
-  const quickPrompts = lead ? [{
-    id: 'follow-up',
-    label: 'Relance WhatsApp',
-    prompt: `Génère une relance WhatsApp professionnelle pour ${lead.name || 'ce client'} en tenant compte de son budget de ${lead.budget || ''} ${lead.currency || 'EUR'} et sa recherche à ${lead.desiredLocation || ''}. Le message doit être cordial et adapté à son profil.`
-  }, {
-    id: 'selection',
-    label: 'Mail sélection personnalisée',
-    prompt: `Rédige un email professionnel pour présenter une sélection de biens à ${lead.name || 'ce client'}. Utilise ces critères: Budget ${lead.budget || ''} ${lead.currency || 'EUR'}, Localisation: ${lead.desiredLocation || ''}, Type de bien: ${lead.propertyTypes ? lead.propertyTypes.join(', ') : ''}.`
-  }, {
-    id: 'general-follow',
-    label: 'Follow-up général',
-    prompt: `Crée un message de suivi pour ${lead.name || 'ce client'} qui fait référence à son projet ${lead.propertyTypes ? lead.propertyTypes.join(', ') : 'immobilier'} à ${lead.desiredLocation || ''}. Le message doit être personnalisé et professionnel.`
-  }] : [];
-
   return (
     <div className="flex flex-col h-full bg-white">
+      {/* Header avec suggestions IA */}
       {leadId && lead && (
-        <div className="sticky top-0 z-10 bg-white border-b border-loro-pearl/20">
+        <div className="sticky top-0 z-10 bg-white border-b border-loro-pearl/20 pb-2">
           <div className="p-3">
-            <h3 className="text-sm font-futura text-loro-navy mb-2">
+            <h3 className="text-sm font-futura text-loro-navy mb-2.5">
               Assistant IA
             </h3>
-            <AIActionSuggestions lead={lead} onActionAdded={fetchLeadData} />
+            <div className="mb-3">
+              <AIActionSuggestions lead={lead} onActionAdded={fetchLeadData} />
+            </div>
           </div>
           
-          <div className="p-3 border-t border-loro-pearl/20">
-            <div className="flex justify-between items-center mb-3">
+          <div className="px-3 pb-1 border-t border-loro-pearl/20 pt-2.5">
+            <div className="flex justify-between items-center mb-1.5">
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-full bg-loro-pearl/20 flex items-center justify-center">
                   <MessageSquare className="h-4 w-4 text-loro-navy/60" />
@@ -266,8 +236,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         </div>
       )}
 
-      <ScrollArea className="flex-1 px-3 py-2">
-        <div className="space-y-3">
+      {/* Zone de défilement principale - contenant les actions */}
+      <ScrollArea className="flex-1 px-3 pb-20 animate-[fade-in_0.3s_ease-out]">
+        <div className="space-y-3 pt-1">
+          {/* Actions en attente */}
           {pendingActions.map(action => {
             const isOverdue = isPast(new Date(action.scheduledDate));
             const isCallAction = action.actionType === 'Call';
@@ -354,62 +326,64 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               </div>
             );
           })}
-        </div>
 
-        {completedActions.length > 0 && (
-          <div className="mt-6">
-            <div className="flex items-center gap-2 mb-3 px-1">
-              <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                <Check className="h-4 w-4 text-gray-600" />
+          {/* Actions terminées */}
+          {completedActions.length > 0 && (
+            <div className="mt-6">
+              <div className="flex items-center gap-2 mb-3 px-1">
+                <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                  <Check className="h-4 w-4 text-gray-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-futura text-gray-600">Actions terminées</h3>
+                  <p className="text-xs text-gray-500">{completedActions.length} actions</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-futura text-gray-600">Actions terminées</h3>
-                <p className="text-xs text-gray-500">{completedActions.length} actions</p>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              {completedActions.map(action => (
-                <div 
-                  key={action.id}
-                  className="rounded-lg border border-gray-200 p-3 bg-gray-50"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                      {action.actionType === 'Call' ? (
-                        <Phone className="h-5 w-5 text-gray-600" />
-                      ) : (
-                        <Calendar className="h-5 w-5 text-gray-600" />
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-gray-600 truncate">
-                          {action.actionType}
-                        </span>
-                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                          <Check className="h-3 w-3 inline-block mr-1 text-green-500" />
-                          {format(new Date(action.completedDate || ''), 'dd/MM/yyyy HH:mm')}
-                        </span>
+              
+              <div className="space-y-3">
+                {completedActions.map(action => (
+                  <div 
+                    key={action.id}
+                    className="rounded-lg border border-gray-200 p-3 bg-gray-50"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                        {action.actionType === 'Call' ? (
+                          <Phone className="h-5 w-5 text-gray-600" />
+                        ) : (
+                          <Calendar className="h-5 w-5 text-gray-600" />
+                        )}
                       </div>
                       
-                      {action.notes && (
-                        <p className="text-sm p-2 rounded-lg mt-2 bg-white text-gray-600 break-words border border-gray-100">
-                          {action.notes}
-                        </p>
-                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-gray-600 truncate">
+                            {action.actionType}
+                          </span>
+                          <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                            <Check className="h-3 w-3 inline-block mr-1 text-green-500" />
+                            {format(new Date(action.completedDate || ''), 'dd/MM/yyyy HH:mm')}
+                          </span>
+                        </div>
+                        
+                        {action.notes && (
+                          <p className="text-sm p-2 rounded-lg mt-2 bg-white text-gray-600 break-words border border-gray-100">
+                            {action.notes}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </ScrollArea>
 
+      {/* Assistant IA (footer fixé en bas) */}
       {lead && (
-        <div className="sticky bottom-0 border-t border-loro-pearl/20 bg-white p-3">
+        <div className="sticky bottom-0 border-t border-loro-pearl/20 bg-white p-3 pb-safe">
           <LeadAIAssistant lead={lead} />
         </div>
       )}
