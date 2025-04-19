@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { History } from 'lucide-react';
+import { History, Bell } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed } from '@/types/lead';
 import { ActionSuggestion } from '@/services/noteAnalysisService';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { toast } from '@/hooks/use-toast';
 
 interface LeadDetailActionBarProps {
   autoSaveEnabled: boolean;
@@ -29,6 +29,29 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const [showSuggestionsBadge, setShowSuggestionsBadge] = useState<boolean>(false);
+  const [pendingActionsCount, setPendingActionsCount] = useState<number>(0);
+  
+  useEffect(() => {
+    if (lead?.action_history) {
+      const now = new Date();
+      const pending = lead.action_history.filter(action => {
+        if (action.completedDate) return false;
+        if (!action.scheduledDate) return false;
+        
+        const scheduledDate = new Date(action.scheduledDate);
+        return scheduledDate >= now || scheduledDate < now;
+      }).length;
+      
+      setPendingActionsCount(pending);
+      
+      if (pending > 0) {
+        toast({
+          title: "Actions en attente",
+          description: `Vous avez ${pending} action${pending > 1 ? 's' : ''} à réaliser`,
+        });
+      }
+    }
+  }, [lead?.action_history]);
 
   useEffect(() => {
     setShowSuggestionsBadge(actionSuggestions && actionSuggestions.length > 0);
@@ -59,10 +82,13 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
             >
               <History className="h-4 w-4 text-loro-navy" />
               Actions
-              {showSuggestionsBadge && (
+              {(showSuggestionsBadge || pendingActionsCount > 0) && (
                 <div className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[10px] text-white ml-1">
-                  {actionSuggestions?.length || 0}
+                  {pendingActionsCount + (actionSuggestions?.length || 0)}
                 </div>
+              )}
+              {pendingActionsCount > 0 && (
+                <Bell className="h-3 w-3 text-amber-500 ml-1 animate-bounce" />
               )}
             </Button>
           )}
