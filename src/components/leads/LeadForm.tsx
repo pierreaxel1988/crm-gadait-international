@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -109,6 +110,14 @@ const LeadForm: React.FC<LeadFormProps> = ({
     }
   };
 
+  // The key fix: ensure salutation is correctly typed
+  const handleSalutationChange = (value: string) => {
+    // Only set the value if it matches the expected type
+    if (value === 'M.' || value === 'Mme') {
+      setFormData(prev => ({ ...prev, salutation: value }));
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-4">
@@ -116,7 +125,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
           <Label htmlFor="salutation" className="text-sm">Titre</Label>
           <Select 
             value={formData.salutation || ''} 
-            onValueChange={(value) => setFormData(prev => ({ ...prev, salutation: value }))}
+            onValueChange={handleSalutationChange}
           >
             <SelectTrigger id="salutation" className="w-full font-futura">
               <SelectValue placeholder="Sélectionner un titre" />
