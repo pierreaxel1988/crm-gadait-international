@@ -12,6 +12,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LeadDetailed } from '@/services/leadCore';
+import { mapToLeadDetailed } from '@/services/utils/leadMappers';
 
 interface ActionsAIAssistantProps {
   onClose: () => void;
@@ -42,7 +43,9 @@ const ActionsAIAssistant: React.FC<ActionsAIAssistantProps> = ({ onClose, onActi
           throw error;
         }
 
-        setLeads(data as LeadDetailed[]);
+        // Map the raw data to our LeadDetailed type
+        const mappedLeads = data.map(lead => mapToLeadDetailed(lead));
+        setLeads(mappedLeads);
       } catch (error) {
         console.error("Erreur lors de la récupération des leads:", error);
         toast({
