@@ -9,7 +9,6 @@ import CurrentAction from './CurrentAction';
 import ActionHistoryList from './ActionHistoryList';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { LeadAIAssistant } from '@/components/leads/ai/LeadAIAssistant';
 
 interface ActionsPanelProps {
   lead: LeadDetailed;
@@ -35,12 +34,6 @@ const ActionsPanel: React.FC<ActionsPanelProps> = ({
           getActionTypeIcon={getActionTypeIcon}
           onAddAction={onAddAction}
         />
-      </div>
-      
-      {/* Section Assistant IA - placée avant les actions en attente */}
-      <div className="mb-6 animate-[fade-in_0.5s_ease-out]">
-        <h3 className={`${isMobile ? 'text-sm' : 'text-base'} font-futura mb-3 text-loro-navy tracking-wide pb-2 border-b`}>Assistant IA</h3>
-        <LeadAIAssistant lead={lead} />
       </div>
       
       <div className="bg-transparent rounded-lg overflow-hidden">

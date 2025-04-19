@@ -11,11 +11,13 @@ import ActionSuggestions from '@/components/leads/actions/ActionSuggestions';
 import { CheckCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { updateLead } from '@/services/leadService';
+
 import LeadDetailHeader from '@/components/leads/mobile/LeadDetailHeader';
 import LeadDetailTabs from '@/components/leads/mobile/LeadDetailTabs';
 import LeadDetailActionBar from '@/components/leads/mobile/LeadDetailActionBar';
 import { LoadingState, NotFoundState } from '@/components/leads/mobile/LeadDetailErrorStates';
 import { useLeadDetail } from '@/hooks/useLeadDetail';
+
 import StatusSection from '@/components/leads/form/mobile/StatusSection';
 import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSection';
 import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
@@ -23,17 +25,15 @@ import NotesSection from '@/components/leads/form/mobile/NotesSection';
 import EmailsTab from '@/components/leads/mobile/tabs/EmailsTab';
 
 const LeadDetailMobile = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  
   const searchParams = new URLSearchParams(location.search);
   const activeTab = searchParams.get('tab') || 'criteria';
+  
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
-
+  
   const {
     lead,
     setLead,
@@ -82,15 +82,20 @@ const LeadDetailMobile = () => {
 
   const handleDeleteAction = async (actionId: string) => {
     if (!lead) return;
+    
     try {
       const updatedActionHistory = lead.actionHistory.filter(action => action.id !== actionId);
+      
       const updatedLead = {
         ...lead,
         actionHistory: updatedActionHistory
       };
+      
       const result = await updateLead(updatedLead);
+      
       if (result) {
         setLead(result);
+        
         toast({
           title: "Action supprimée",
           description: "L'action a été supprimée avec succès"
@@ -142,26 +147,26 @@ const LeadDetailMobile = () => {
   if (!lead && id) {
     return <NotFoundState show={!lead && !!id} id={id} />;
   }
-
+  
   if (!lead) return null;
-
+  
   return (
-    <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden relative">
+    <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
       <div className="fixed top-0 left-0 right-0 z-40 bg-loro-sand w-full">
-        <LeadDetailHeader 
-          name={lead.name} 
-          createdAt={lead.createdAt} 
-          phone={lead.phone} 
-          email={lead.email} 
-          budget={lead.budget} 
-          currency={lead.currency} 
-          desiredLocation={lead.desiredLocation} 
-          country={lead.country} 
-          purchaseTimeframe={lead.purchaseTimeframe} 
-          onBackClick={handleBackClick} 
-          onSave={handleSaveWithIndicator} 
-          isSaving={isSaving} 
-          hasChanges={hasChanges} 
+        <LeadDetailHeader
+          name={lead.name}
+          createdAt={lead.createdAt}
+          phone={lead.phone}
+          email={lead.email}
+          budget={lead.budget}
+          currency={lead.currency}
+          desiredLocation={lead.desiredLocation}
+          country={lead.country}
+          purchaseTimeframe={lead.purchaseTimeframe}
+          onBackClick={handleBackClick}
+          onSave={handleSaveWithIndicator}
+          isSaving={isSaving}
+          hasChanges={hasChanges}
           tags={lead.tags}
           onPhoneCall={handlePhoneCall}
           onWhatsAppClick={handleWhatsAppClick}
@@ -173,49 +178,52 @@ const LeadDetailMobile = () => {
         </div>
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto pt-24 sm:pt-28 md:pt-32 pb-24 w-full box-border max-w-full overflow-x-hidden">
+      <ScrollArea className="flex-1 overflow-y-auto pt-28">
         <Tabs value={activeTab} className="w-full h-full">
-          <div className="px-3 sm:px-4 md:px-6 pb-36 h-full w-full box-border">
-            <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
+          <div className="px-4 pb-32 h-full">
+            <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="criteria" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
+            <TabsContent value="criteria" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <SearchCriteriaSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="status" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
-              <StatusSection lead={lead} onDataChange={handleDataChange} />
+            <TabsContent value="status" className="mt-0 animate-[fade-in_0.2s_ease-out]">
+              <StatusSection 
+                lead={lead} 
+                onDataChange={handleDataChange} 
+              />
             </TabsContent>
             
-            <TabsContent value="notes" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
+            <TabsContent value="notes" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               <NotesSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="actions" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
+            <TabsContent value="actions" className="mt-0 animate-[fade-in_0.2s_ease-out]">
               {actionSuggestions && actionSuggestions.length > 0 && (
-                <ActionSuggestions 
-                  suggestions={actionSuggestions} 
-                  onAccept={acceptSuggestion} 
-                  onReject={rejectSuggestion} 
+                <ActionSuggestions
+                  suggestions={actionSuggestions}
+                  onAccept={acceptSuggestion}
+                  onReject={rejectSuggestion}
                 />
               )}
               <ActionsPanelMobile 
                 leadId={lead.id} 
-                onAddAction={fetchLead} 
+                onAddAction={fetchLead}
                 onMarkComplete={handleMarkComplete} 
-                actionHistory={lead.actionHistory || []} 
+                actionHistory={lead.actionHistory || []}
               />
             </TabsContent>
             
-            <TabsContent value="emails" className="h-full flex-1 flex-grow w-full">
+            <TabsContent value="emails" className="h-full flex-1 flex-grow">
               <EmailsTab leadId={id || ''} />
             </TabsContent>
           </div>
         </Tabs>
       </ScrollArea>
       
-      <LeadDetailActionBar 
+      <LeadDetailActionBar
         autoSaveEnabled={autoSaveEnabled}
         onAddAction={handleAddAction}
         lead={lead}
@@ -231,12 +239,12 @@ const LeadDetailMobile = () => {
       />
 
       {showSaveIndicator && (
-        <div className="fixed top-16 sm:top-20 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
+        <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
           <CheckCircle className="h-5 w-5" />
         </div>
       )}
 
-      <ActionDialog 
+      <ActionDialog
         isOpen={isActionDialogOpen}
         onClose={() => setIsActionDialogOpen(false)}
         selectedAction={selectedAction}

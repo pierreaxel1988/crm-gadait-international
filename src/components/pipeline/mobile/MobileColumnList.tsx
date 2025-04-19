@@ -12,7 +12,6 @@ import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import { sortLeadsByPriority } from './utils/leadSortUtils';
 import { useAuth } from '@/hooks/useAuth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
 
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
@@ -137,14 +136,14 @@ const MobileColumnList = ({
   };
 
   return (
-    <div className="space-y-4 px-2 sm:px-4 md:px-6 max-w-full overflow-hidden">
+    <div className="space-y-4">
       {isLoading ? (
         <div className="flex items-center justify-center h-40">
           <p className="text-sm text-muted-foreground">Chargement des leads...</p>
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto pb-1 -mx-2 px-2">
+          <div className="overflow-x-auto pb-1">
             <Tabs 
               value={activeStatus === 'all' ? 'all' : activeStatus} 
               onValueChange={value => setActiveStatus(value as LeadStatus | 'all')} 
@@ -172,34 +171,31 @@ const MobileColumnList = ({
             </Tabs>
           </div>
 
-          <div className="flex flex-col md:flex-row md:items-center gap-2 bg-gray-50 rounded-lg p-2 mb-2 max-w-full overflow-hidden">
-            <div className="flex items-center justify-between md:w-auto overflow-hidden">
-              <span className="text-sm font-medium text-gray-700 mr-2">Trier par:</span>
-              <div className="flex space-x-2 overflow-auto no-scrollbar">
+          <div className="flex flex-col md:flex-row md:items-center gap-2 bg-gray-50 rounded-lg p-2 mb-2">
+            <div className="flex items-center justify-between md:w-auto">
+              <span className="text-sm font-medium text-gray-700">Trier par:</span>
+              <div className="flex space-x-2">
                 <button 
                   onClick={() => handleChangeSortBy('priority')}
-                  className={cn(
-                    "px-2 py-1 text-xs rounded-md whitespace-nowrap",
-                    sortBy === 'priority' ? 'bg-zinc-900 text-white' : 'bg-gray-100 text-gray-600'
-                  )}
+                  className={`px-2 py-1 text-xs rounded-md ${sortBy === 'priority' 
+                    ? 'bg-zinc-900 text-white' 
+                    : 'bg-gray-100 text-gray-600'}`}
                 >
                   Priorité
                 </button>
                 <button 
                   onClick={() => handleChangeSortBy('newest')}
-                  className={cn(
-                    "px-2 py-1 text-xs rounded-md whitespace-nowrap",
-                    sortBy === 'newest' ? 'bg-zinc-900 text-white' : 'bg-gray-100 text-gray-600'
-                  )}
+                  className={`px-2 py-1 text-xs rounded-md ${sortBy === 'newest' 
+                    ? 'bg-zinc-900 text-white' 
+                    : 'bg-gray-100 text-gray-600'}`}
                 >
                   Plus récent
                 </button>
                 <button 
                   onClick={() => handleChangeSortBy('oldest')}
-                  className={cn(
-                    "px-2 py-1 text-xs rounded-md whitespace-nowrap",
-                    sortBy === 'oldest' ? 'bg-zinc-900 text-white' : 'bg-gray-100 text-gray-600'
-                  )}
+                  className={`px-2 py-1 text-xs rounded-md ${sortBy === 'oldest' 
+                    ? 'bg-zinc-900 text-white' 
+                    : 'bg-gray-100 text-gray-600'}`}
                 >
                   Plus ancien
                 </button>
@@ -227,7 +223,7 @@ const MobileColumnList = ({
             )}
           </div>
           
-          <div className="space-y-px max-w-full overflow-hidden">
+          <div className="space-y-px">
             {sortedLeads.length === 0 ? (
               <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
                 <div className="text-center">
@@ -242,7 +238,7 @@ const MobileColumnList = ({
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm max-w-full overflow-hidden">
+              <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
                 {sortedLeads.map(lead => (
                   <LeadListItem 
                     key={lead.id}

@@ -8,7 +8,6 @@ import { Check, Calendar, Phone, Mail, MessageSquare } from 'lucide-react';
 import TaskTypeIndicator from '@/components/kanban/card/TaskTypeIndicator';
 import { format, isToday, isYesterday, isTomorrow, isThisWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
 
 interface ActionCardProps {
   action: ActionItem;
@@ -87,56 +86,45 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
   
   return (
     <Card 
-      className={cn(
-        "p-3 sm:p-4 transition-all cursor-pointer w-full max-w-full overflow-hidden",
+      className={`p-4 transition-all cursor-pointer ${
         action.status === 'overdue' 
           ? 'border-red-300 bg-[#FFDEE2]/30' 
           : action.status === 'done' 
             ? 'bg-gray-50/80 border-gray-200' 
             : 'bg-[#F2FCE2]/40 border-green-100'
-      )}
+      }`}
       onClick={(e) => onCardClick(action.leadId, e)}
     >
-      <div className="flex justify-between items-start mb-2 w-full overflow-hidden">
-        <div className="min-w-0 overflow-hidden flex-1 pr-2">
-          <div className={cn(
-            "font-medium truncate", 
-            action.status === 'done' ? 'text-gray-600' : ''
-          )}>
-            {action.leadName}
-          </div>
-          <div className="text-sm text-muted-foreground mb-1 truncate">
-            {action.assignedToName}
-          </div>
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <div className={`font-medium ${action.status === 'done' ? 'text-gray-600' : ''}`}>{action.leadName}</div>
+          <div className="text-sm text-muted-foreground mb-1">{action.assignedToName}</div>
           <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />
         </div>
-        <div className="flex-shrink-0">
+        <div>
           {getStatusBadge(action.status)}
         </div>
       </div>
       
       {action.notes && (
-        <div className={cn(
-          "text-sm mt-2 p-2 rounded break-words overflow-hidden",
+        <div className={`text-sm mt-2 p-2 rounded ${
           action.status === 'done' 
             ? 'bg-white/80 text-gray-600' 
             : action.status === 'overdue'
               ? 'bg-[#FFF0F2] text-rose-800'
               : 'bg-[#F7FEF1] text-green-800'
-        )}>
+        }`}>
           {action.notes}
         </div>
       )}
       
-      <div className="flex justify-between items-center mt-3 w-full overflow-hidden">
-        <div className="flex items-center text-sm text-gray-500 min-w-0 overflow-hidden flex-1 pr-2">
-          <Calendar className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
-          <span className="truncate">
-            {formatDate(action.status === 'done' ? action.completedDate : action.scheduledDate)}
-          </span>
+      <div className="flex justify-between items-center mt-3">
+        <div className="flex items-center text-sm text-gray-500">
+          <Calendar className="h-3.5 w-3.5 mr-1" />
+          {formatDate(action.status === 'done' ? action.completedDate : action.scheduledDate)}
         </div>
         
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-1">
           {action.phoneNumber && (
             <>
               <Button 

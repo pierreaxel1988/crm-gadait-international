@@ -1,17 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
 import { format, isPast } from 'date-fns';
-import { Check, Clock, Calendar, Trash2, PlaneTakeoff } from 'lucide-react';
+import { Check, Clock, Calendar, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
 import { toast } from '@/hooks/use-toast';
 import { updateLead } from '@/services/leadUpdater';
-import { LeadAIAssistant } from '@/components/leads/ai/LeadAIAssistant';
-import { AIActionSuggestions } from '@/components/leads/ai/AIActionSuggestions';
-import { Textarea } from '@/components/ui/textarea';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ActionsPanelMobileProps {
   leadId: string;
@@ -27,13 +24,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   actionHistory: initialActionHistory
 }) => {
   const [lead, setLead] = useState<LeadDetailed | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>(initialActionHistory || []);
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
-  const [prompt, setPrompt] = useState("");
-  const [isAiLoading, setIsAiLoading] = useState(false);
 
   useEffect(() => {
     const measureHeader = () => {
@@ -58,35 +52,23 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   useEffect(() => {
     if (initialActionHistory) {
       setActionHistory(initialActionHistory);
+    } else {
+      fetchLeadData();
     }
-    
-    fetchLeadData();
   }, [leadId, initialActionHistory]);
 
   const fetchLeadData = async () => {
-    if (!leadId) {
-      setLoadError("ID de lead manquant");
-      setIsLoading(false);
-      return;
-    }
+    if (!leadId) return;
     
     try {
       setIsLoading(true);
-      setLoadError(null);
-      console.log('Fetching lead data for ActionsPanelMobile:', leadId);
       const fetchedLead = await getLead(leadId);
-      
       if (fetchedLead) {
-        console.log('Lead data fetched successfully', fetchedLead);
         setLead(fetchedLead);
         setActionHistory(fetchedLead.actionHistory || []);
-      } else {
-        console.error('No lead data returned');
-        setLoadError("Données du lead non disponibles");
       }
     } catch (error) {
       console.error("Error fetching lead data:", error);
-      setLoadError("Erreur lors du chargement des données");
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -136,82 +118,9 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     }
   };
 
-  const handleSendToGPT = async () => {
-    if (!prompt || !lead) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Veuillez entrer un message et attendre que les données du lead soient chargées."
-      });
-      return;
-    }
-
-    setIsAiLoading(true);
-    try {
-      const bedroomsDisplay = Array.isArray(lead.bedrooms) 
-        ? lead.bedrooms.join(', ') 
-        : typeof lead.bedrooms === 'number'
-          ? lead.bedrooms.toString()
-          : 'Non spécifié';
-      
-      const body = {
-        message: prompt,
-        leadContext: `
-          Lead ID: ${lead.id}
-          Nom: ${lead.name || 'Non spécifié'}
-          Langue: ${lead.preferredLanguage || 'Non spécifiée'}
-          Budget min: ${lead.budgetMin || 'Non spécifié'} 
-          Budget max: ${lead.budget || 'Non spécifié'}
-          Devise: ${lead.currency || 'EUR'}
-          Type de bien: ${lead.propertyTypes ? lead.propertyTypes.join(', ') : 'Non spécifié'}
-          Vue souhaitée: ${lead.views ? lead.views.join(', ') : 'Non spécifiée'}
-          Nombre de chambres: ${bedroomsDisplay}
-          Localisation: ${lead.desiredLocation || 'Non spécifiée'}
-          Notes: ${lead.notes || 'Aucune note'}
-          Agent: ${lead.assignedTo || 'Non assigné'}
-        `,
-        type: "action_suggestion"
-      };
-
-      const response = await fetch("https://hxqoqkfnhbpwzkjgukrc.functions.supabase.co/chat-gadait", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body)
-      });
-
-      if (!response.ok) {
-        throw new Error('Erreur lors de la communication avec l\'assistant');
-      }
-
-      const data = await response.json();
-      console.log("Réponse IA :", data.response);
-      
-      toast({
-        title: "Message envoyé",
-        description: "L'assistant traite votre demande"
-      });
-
-      setPrompt("");
-      
-      fetchLeadData();
-
-    } catch (error) {
-      console.error("Erreur lors de l'envoi à l'IA:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de communiquer avec l'assistant IA"
-      });
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
-
   const getActionTypeIcon = (actionType: string) => {
     switch (actionType) {
-      case 'Call': return <span className="bg-[#F8E2E8] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
+      case 'Call': return <span className="bg-[#EBD5CE] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
       case 'Visites': return <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs font-futura">Visite</span>;
       case 'Compromis': return <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs font-futura">Compromis</span>;
       case 'Acte de vente': return <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs font-futura">Acte de vente</span>;
@@ -240,148 +149,33 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     return date < today;
   };
 
-  const isMobile = useIsMobile();
-  
-  const responsiveContainerClasses = cn(
-    "space-y-4 w-full max-w-full box-border",
-    "px-0.5 sm:px-2 md:px-4 pb-4 overflow-visible"
-  );
-
-  const quickPrompts = lead ? [
-    {
-      id: 'follow-up',
-      label: 'Relance WhatsApp',
-      prompt: `Génère une relance WhatsApp professionnelle pour ${lead.name || 'ce client'} en tenant compte de son budget de ${lead.budget || ''} ${lead.currency || 'EUR'} et sa recherche à ${lead.desiredLocation || ''}. Le message doit être cordial et adapté à son profil.`
-    },
-    {
-      id: 'selection',
-      label: 'Mail sélection personnalisée',
-      prompt: `Rédige un email professionnel pour présenter une sélection de biens à ${lead.name || 'ce client'}. Utilise ces critères: Budget ${lead.budget || ''} ${lead.currency || 'EUR'}, Localisation: ${lead.desiredLocation || ''}, Type de bien: ${lead.propertyTypes ? lead.propertyTypes.join(', ') : ''}.`
-    },
-    {
-      id: 'general-follow',
-      label: 'Follow-up général',
-      prompt: `Crée un message de suivi pour ${lead.name || 'ce client'} qui fait référence à son projet ${lead.propertyTypes ? lead.propertyTypes.join(', ') : 'immobilier'} à ${lead.desiredLocation || ''}. Le message doit être personnalisé et professionnel.`
-    }
-  ] : [];
+  const dynamicTopMargin = isHeaderMeasured 
+    ? `${Math.max(headerHeight + 8, 32)}px` 
+    : 'calc(32px + 4rem)';
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center p-4 w-full">
+      <div className="flex justify-center items-center p-4">
         <div className="animate-spin h-5 w-5 border-3 border-chocolate-dark rounded-full border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className={responsiveContainerClasses}>
-      {/* AI Action Suggestions */}
-      {leadId && lead && (
-        <div className="animate-[fade-in_0.4s_ease-out] w-full overflow-hidden">
-          <h3 className="text-xs uppercase tracking-wider text-gray-700 pb-2 border-b mb-3 break-words truncate">
-            ACTIONS SUGGÉRÉES PAR IA
-          </h3>
-          <AIActionSuggestions 
-            lead={lead}
-            onActionAdded={fetchLeadData}
-          />
-        </div>
-      )}
-      
-      {/* Assistant IA - avec prompts rapides */}
-      {leadId && (
-        <div className="animate-[fade-in_0.4s_ease-out] w-full overflow-hidden">
-          <h3 className="text-xs uppercase tracking-wider text-gray-700 pb-2 border-b break-words truncate">
-            ASSISTANT IA
-          </h3>
-          <div className="mt-3 space-y-4 w-full">
-            {lead ? (
-              <>
-                <div className="flex gap-2 overflow-x-auto pb-2 w-full">
-                  {quickPrompts.map((quickPrompt) => (
-                    <Button
-                      key={quickPrompt.id}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPrompt(quickPrompt.prompt)}
-                      className="whitespace-nowrap text-xs border-gray-300 hover:bg-gray-50 shrink-0"
-                    >
-                      {quickPrompt.label}
-                    </Button>
-                  ))}
-                </div>
-                <div className="space-y-2 w-full">
-                  <Textarea
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Ex. Propose une relance WhatsApp..."
-                    className="w-full min-h-[80px] text-xs resize-y"
-                  />
-                  <Button
-                    onClick={handleSendToGPT}
-                    disabled={isAiLoading || !prompt}
-                    className="w-full bg-gray-800 hover:bg-gray-700 text-white"
-                  >
-                    {isAiLoading ? (
-                      <div className="flex items-center justify-center gap-2 w-full">
-                        <div className="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full" />
-                        <span className="text-xs">Envoi en cours...</span>
-                      </div>
-                    ) : (
-                      <>
-                        <PlaneTakeoff className="h-4 w-4 mr-2" />
-                        <span className="text-xs">Envoyer à l'IA</span>
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </>
-            ) : loadError ? (
-              <div className="border rounded-md p-4 bg-red-100 text-center w-full">
-                <p className="text-red-600 font-medium mb-1">Erreur</p>
-                <p className="text-xs">{loadError || "Impossible de charger les données du lead. Veuillez rafraîchir la page."}</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={fetchLeadData}
-                  className="mt-2 text-xs"
-                >
-                  Réessayer
-                </Button>
-              </div>
-            ) : (
-              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50 w-full">
-                <div className="animate-spin h-5 w-5 border-3 border-chocolate-dark rounded-full border-t-transparent" />
-              </div>
-            )}
-            
-            {lead ? (
-              <LeadAIAssistant lead={lead} />
-            ) : loadError ? (
-              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50 w-full">
-                <p className="text-xs text-gray-500">Assistant IA non disponible</p>
-              </div>
-            ) : (
-              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50 w-full">
-                <div className="animate-spin h-5 w-5 border-3 border-chocolate-dark rounded-full border-t-transparent" />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-      
-      <div className="flex justify-between items-center mb-4 w-full overflow-hidden">
-        <h3 className="text-xs uppercase tracking-wider text-gray-700 pb-2 border-b break-words truncate">
-          ACTIONS EN ATTENTE
-        </h3>
+    <div 
+      className="space-y-3 pt-4"
+      style={{ marginTop: dynamicTopMargin }}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Actions en attente</h3>
       </div>
 
       {pendingActions.length === 0 ? (
-        <div className="text-center py-5 border rounded-md bg-gray-50 animate-[fade-in_0.3s_ease-out] w-full">
+        <div className="text-center py-5 border rounded-md bg-gray-50 animate-[fade-in_0.3s_ease-out]">
           <p className="text-muted-foreground text-xs font-futura">Aucune action en attente</p>
         </div>
       ) : (
-        <div className="space-y-2 w-full">
+        <div className="space-y-2">
           {pendingActions.map((action) => {
             const isOverdue = isDatePast(action.scheduledDate);
             const isCallAction = action.actionType === 'Call';
@@ -412,22 +206,22 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${bgColorClass} relative`}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <div className="flex items-center gap-1.5 max-w-[75%]">
-                    <div className={`h-6 w-6 rounded-full flex items-center justify-center ${iconBgClass} flex-shrink-0`}>
+                  <div className="flex items-center gap-1.5">
+                    <div className={`h-6 w-6 rounded-full flex items-center justify-center ${iconBgClass}`}>
                       <Calendar className="h-3 w-3" />
                     </div>
-                    <div className="min-w-0 overflow-hidden">
-                      <h4 className="font-futura text-sm truncate">{action.actionType}</h4>
-                      <div className="flex items-center text-xs text-gray-500 truncate">
-                        <Clock className="h-2.5 w-2.5 mr-1 flex-shrink-0" />
-                        <span className="truncate">{format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}</span>
+                    <div>
+                      <h4 className="font-futura text-sm">{action.actionType}</h4>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Clock className="h-2.5 w-2.5 mr-1" />
+                        {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
                       </div>
                     </div>
                   </div>
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95 flex-shrink-0"
+                    className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95"
                     onClick={() => onMarkComplete(action)}
                   >
                     <Check className="h-3 w-3 mr-1" /> 
@@ -435,7 +229,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   </Button>
                 </div>
                 {action.notes && (
-                  <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${notesBgClass} break-words`}>
+                  <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${notesBgClass}`}>
                     {action.notes}
                   </div>
                 )}
@@ -456,8 +250,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {completedActions.length > 0 && (
         <>
-          <h3 className="text-xs uppercase tracking-wider text-gray-700 mt-6 mb-3 break-words truncate w-full">HISTORIQUE DES ACTIONS</h3>
-          <div className="space-y-2 w-full">
+          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3">Historique des actions</h3>
+          <div className="space-y-2">
             {completedActions.map((action) => (
               <div 
                 key={action.id} 
@@ -467,21 +261,21 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 )}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <div className="flex items-center gap-1.5 max-w-[82%]">
-                    <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center text-green-600">
                       <Check className="h-3 w-3" />
                     </div>
-                    <div className="min-w-0 overflow-hidden">
-                      <h4 className="font-futura text-sm text-gray-700 truncate">{action.actionType}</h4>
-                      <div className="flex items-center text-xs text-gray-500 truncate">
-                        <Check className="h-2.5 w-2.5 mr-1 text-green-500 flex-shrink-0" />
-                        <span className="truncate">{action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}</span>
+                    <div>
+                      <h4 className="font-futura text-sm text-gray-700">{action.actionType}</h4>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Check className="h-2.5 w-2.5 mr-1 text-green-500" />
+                        {action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}
                       </div>
                     </div>
                   </div>
                 </div>
                 {action.notes && (
-                  <div className="text-xs bg-white/80 p-1.5 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out] border border-gray-100 break-words">
+                  <div className="text-xs bg-white p-1.5 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out] border border-gray-100">
                     {action.notes}
                   </div>
                 )}
@@ -501,6 +295,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       )}
     </div>
   );
-}
+};
 
 export default ActionsPanelMobile;

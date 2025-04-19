@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Currency } from '@/types/lead';
@@ -6,7 +5,6 @@ import { formatDate, formatName, getActionStatusStyle } from './utils/leadFormat
 import LeadAvatar from './components/LeadAvatar';
 import LeadContactActions from './components/LeadContactActions';
 import LeadTagsList from './components/LeadTagsList';
-import { cn } from '@/lib/utils';
 
 interface LeadListItemProps {
   id: string;
@@ -63,19 +61,16 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
 
   return (
     <div 
-      className={cn(
-        "py-3 px-3 sm:px-4 flex hover:bg-slate-50 transition-colors cursor-pointer overflow-hidden w-full",
-        nextFollowUpDate ? actionStyle.containerClassName : ''
-      )}
+      className={`py-3 px-4 flex hover:bg-slate-50 transition-colors cursor-pointer ${nextFollowUpDate ? actionStyle.containerClassName : ''}`}
       onClick={() => onClick(id)}
     >
       <LeadAvatar name={name} />
       
-      <div className="flex-1 min-w-0 overflow-hidden">
+      <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
-          <div className="min-w-0 overflow-hidden pr-2 flex-1">
-            <h3 className="font-futuraLight text-base text-zinc-700 truncate">{formatName(name)}</h3>
-            <div className="text-xs text-zinc-500 whitespace-nowrap font-futuraLight truncate">
+          <div>
+            <h3 className="font-futuraLight text-base text-zinc-700">{formatName(name)}</h3>
+            <div className="text-xs text-zinc-500 whitespace-nowrap font-futuraLight">
               {formatDate(createdAt)}
             </div>
           </div>

@@ -20,8 +20,6 @@ import Calendar from './pages/Calendar';
 import Reports from './pages/Reports';
 import Admin from './pages/Admin';
 import ProtectedRoute from './components/layout/ProtectedRoute';
-import LeadEdit from './pages/LeadEdit';
-import ChatGadaitPage from './pages/ChatGadaitPage';
 
 function App() {
   return (
@@ -59,11 +57,6 @@ function App() {
           <Route path="/calendar" element={
             <ProtectedRoute commercialAllowed={true}>
               <Calendar />
-            </ProtectedRoute>
-          } />
-          <Route path="/chat-gadait" element={
-            <ProtectedRoute commercialAllowed={true}>
-              <ChatGadaitPage />
             </ProtectedRoute>
           } />
           
