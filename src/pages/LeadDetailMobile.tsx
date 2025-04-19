@@ -184,7 +184,7 @@ const LeadDetailMobile = () => {
         <LeadDetailTabs defaultTab={activeTab} />
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto pt-[108px] pb-20">
+      <ScrollArea className="flex-1 overflow-y-auto pt-0 pb-20">
         <Tabs value={activeTab} className="w-full h-full">
           <div className="px-4 pb-32 h-full">
             <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out]">
