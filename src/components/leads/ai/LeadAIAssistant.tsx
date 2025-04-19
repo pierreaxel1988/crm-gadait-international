@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { 
@@ -161,37 +160,19 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
   };
 
   return (
-    <div className={cn("flex flex-col border rounded-lg shadow-sm bg-white overflow-hidden h-[400px] md:h-[500px]", className)}>
-      <div className="bg-loro-navy/10 p-3 border-b flex items-center justify-between">
-        <div className="flex items-center">
-          <Sparkles className="h-5 w-5 text-loro-hazel mr-2" />
-          <h3 className="font-futura text-sm text-loro-navy">Assistant Gadait IA</h3>
-        </div>
+    <div className={cn("flex flex-col border rounded-lg shadow-sm bg-white overflow-hidden h-[400px] md:h-[500px] mx-3", className)}>
+      <div className="bg-loro-navy/10 px-4 py-3 border-b">
+        <h3 className="font-futura text-base text-loro-navy">Assistant IA GADAIT</h3>
       </div>
       
-      {/* Quick Actions améliorées */}
-      <div className="p-3 border-b flex gap-2 overflow-x-auto">
-        {quickActions.map((action) => (
-          <Button 
-            key={action} 
-            variant="outline" 
-            size="sm" 
-            className="text-xs whitespace-nowrap flex-shrink-0 border-loro-sand hover:bg-loro-sand/10 hover:text-loro-navy"
-            onClick={() => handleQuickAction(action)}
-          >
-            {action}
-          </Button>
-        ))}
-      </div>
-      
-      <ScrollArea className="flex-1 p-3 overflow-y-auto">
-        <div className="space-y-4">
+      <ScrollArea className="flex-1 px-4 overflow-y-auto">
+        <div className="space-y-4 py-4">
           {isInitialLoading ? (
             <div className="flex items-center justify-center h-40">
               <Loader2 className="h-8 w-8 animate-spin text-loro-hazel/70" />
             </div>
           ) : conversation.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-center text-muted-foreground">
+            <div className="flex items-center justify-center h-40 text-center text-muted-foreground px-4">
               <div>
                 <Bot className="h-8 w-8 mx-auto mb-2 text-loro-navy/40" />
                 <p className="text-sm">Posez une question ou générez un message adapté au marché du luxe en fonction du profil client</p>
@@ -202,29 +183,17 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
               <div 
                 key={msg.id}
                 className={cn(
-                  "flex items-start gap-2 max-w-[85%] animate-[fade-in_0.3s_ease-out]",
+                  "flex items-start gap-2 max-w-[85%]",
                   msg.role === 'user' ? "ml-auto" : "mr-auto"
                 )}
               >
                 <div className={cn(
-                  "flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center",
-                  msg.role === 'user' 
-                    ? "bg-loro-navy/10 text-loro-navy order-2" 
-                    : "bg-loro-hazel/20 text-loro-hazel order-1"
-                )}>
-                  {msg.role === 'user' 
-                    ? <User className="h-4 w-4" /> 
-                    : <Bot className="h-4 w-4" />
-                  }
-                </div>
-                
-                <div className={cn(
-                  "rounded-lg px-3 py-2 text-sm",
+                  "rounded-lg px-4 py-3 text-sm shadow-sm",
                   msg.role === 'user' 
                     ? "bg-loro-navy/10 text-loro-navy order-1 rounded-tr-none" 
                     : "bg-loro-hazel/20 text-loro-night order-2 rounded-tl-none"
                 )}>
-                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                  <div className="whitespace-pre-wrap break-words">{msg.content}</div>
                   <div className="text-[10px] text-muted-foreground mt-1 text-right">
                     {formatDate(msg.timestamp)}
                   </div>
@@ -236,21 +205,21 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
         </div>
       </ScrollArea>
       
-      <div className="border-t p-3">
+      <div className="border-t p-4">
         <div className="flex gap-2 items-end">
           <Textarea
             ref={textareaRef}
             value={message}
             onChange={handleTextareaChange}
             onKeyDown={handleKeyDown}
-            placeholder="Demandez à l'assistant de générer un message personnalisé pour ce client..."
-            className="flex-1 resize-none min-h-[40px] py-2 px-3 border-loro-sand/60 focus-visible:ring-loro-hazel"
+            placeholder="Écris ici ta demande (ex: relance WhatsApp, résumé du client...)"
+            className="flex-1 resize-none min-h-[40px] py-2 px-3 border-loro-sand/60 focus-visible:ring-loro-hazel rounded-2xl text-sm"
             disabled={isLoading}
           />
           <Button 
             onClick={handleSendMessage}
             disabled={isLoading || !message.trim()}
-            className="bg-loro-hazel hover:bg-loro-hazel/80 text-white h-10 w-10 p-0"
+            className="bg-loro-hazel hover:bg-loro-hazel/80 text-white h-10 w-10 p-0 rounded-full shadow-sm"
           >
             {isLoading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -258,9 +227,6 @@ export function LeadAIAssistant({ lead, className }: LeadAIAssistantProps) {
               <SendHorizontal className="h-5 w-5" />
             )}
           </Button>
-        </div>
-        <div className="text-xs text-muted-foreground mt-2 text-right">
-          Appuyez sur Ctrl+Entrée pour envoyer
         </div>
       </div>
     </div>

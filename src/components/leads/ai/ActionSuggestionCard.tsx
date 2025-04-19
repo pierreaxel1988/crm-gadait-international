@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CalendarIcon, CheckIcon, XIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,54 +34,39 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
 
   const formattedDate = format(suggestion.scheduledDate, 'dd/MM/yyyy à HH:mm', { locale: fr });
 
-  const cardClasses = cn(
-    "border border-loro-navy/10 bg-loro-pearl/20 rounded-md",
-    "w-full box-border overflow-hidden",
-    isMobile ? "p-2 sm:p-3" : "p-4"
-  );
-
   return (
-    <div className={cardClasses}>
-      <div className="flex items-start justify-between gap-2 mb-2 flex-wrap w-full overflow-hidden">
+    <div className="border border-loro-navy/10 bg-loro-pearl/20 rounded-lg p-4">
+      <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex-shrink-0">
           {getActionTypeIcon(suggestion.actionType)}
         </div>
-        <div className="flex-shrink-0 text-[10px] text-gray-500 bg-white/80 px-2 py-0.5 rounded-full truncate max-w-[60%]">
+        <div className="flex-shrink-0 text-xs text-gray-500 bg-white/80 px-2 py-0.5 rounded-full">
           <CalendarIcon className="inline h-3 w-3 mr-1" />
           {formattedDate}
         </div>
       </div>
       
-      <p className={cn(
-        "text-loro-navy/90 mb-3 w-full break-words whitespace-normal overflow-hidden px-0.5",
-        isMobile ? "text-xs sm:text-sm" : "text-base"
-      )}>
+      <p className="text-sm text-loro-navy/90 mb-3 break-words">
         {suggestion.notes}
       </p>
       
-      <div className="flex justify-end items-center gap-2 w-full">
+      <div className="flex justify-end items-center gap-2">
         <Button
           variant="ghost"
           size="sm"
-          className={cn(
-            "text-rose-600 hover:bg-rose-50 hover:text-rose-700",
-            isMobile ? "h-7 px-1.5 text-[10px] sm:h-8 sm:px-2 sm:text-xs" : "h-9 px-3 text-sm"
-          )}
+          className="text-rose-600 hover:bg-rose-50 hover:text-rose-700"
           onClick={() => onDismiss(suggestion)}
         >
-          <XIcon className={cn("h-3 w-3 mr-1 sm:h-4 sm:w-4 sm:mr-1.5")} />
+          <XIcon className="h-4 w-4 mr-1.5" />
           Ignorer
         </Button>
         <Button
           variant="outline"
           size="sm"
-          className={cn(
-            "border-loro-navy text-loro-navy hover:bg-loro-pearl/40",
-            isMobile ? "h-7 px-1.5 text-[10px] sm:h-8 sm:px-2 sm:text-xs" : "h-9 px-3 text-sm"
-          )}
+          className="border-loro-navy text-loro-navy hover:bg-loro-pearl/40"
           onClick={() => onImplement(suggestion)}
         >
-          <CheckIcon className={cn("h-3 w-3 mr-1 sm:h-4 sm:w-4 sm:mr-1.5")} />
+          <CheckIcon className="h-4 w-4 mr-1.5" />
           Appliquer
         </Button>
       </div>
