@@ -89,12 +89,12 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
 
   const headerClasses = cn(
     "flex items-center justify-between p-3 w-full bg-loro-50 box-border",
-    "overflow-x-visible"
+    "overflow-visible min-w-0"
   );
 
   return (
     <div className={headerClasses}>
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center gap-2 min-w-0 flex-1">
         <Button 
           variant="ghost" 
           size="icon" 
@@ -103,18 +103,17 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div className="truncate min-w-0">
+        <div className="min-w-0 flex-1">
           <h1 className={cn(
             "font-futura leading-tight truncate",
-            isMobile ? "text-base" : "text-lg",
-            "max-w-[150px] sm:max-w-[220px] md:max-w-[400px]"
+            isMobile ? "text-base" : "text-lg"
           )}>
             {name}
           </h1>
           <p className="text-xs text-loro-terracotta">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
-          <div className="flex flex-wrap gap-1 mt-1 max-w-[150px] sm:max-w-[220px] md:max-w-[350px]">
+          <div className="flex flex-wrap gap-1 mt-1 w-full">
             {budget && <span className="text-[10px] bg-[#F5F3EE] px-2 py-0.5 rounded-xl border border-zinc-200">
                 {formatBudget(budget, currency)}
               </span>}
@@ -127,7 +126,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
           </div>
         </div>
       </div>
-      <div className="flex flex-col items-end gap-2 flex-shrink-0">
+      <div className="flex flex-col items-end gap-2 flex-shrink-0 ml-2">
         <div className="flex items-center gap-1">
           {phone && <>
               <a href="#" onClick={handlePhoneClick} className="h-7 w-7 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Appeler">

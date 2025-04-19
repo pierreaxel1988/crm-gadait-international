@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -177,9 +178,9 @@ const LeadDetailMobile = () => {
         </div>
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto pt-[135px] w-full box-border">
+      <ScrollArea className="flex-1 overflow-y-auto pt-[135px] pb-[80px] w-full box-border">
         <Tabs value={activeTab} className="w-full h-full">
-          <div className="px-3 pb-32 h-full w-full box-border">
+          <div className="px-3 pb-36 h-full w-full box-border">
             <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>

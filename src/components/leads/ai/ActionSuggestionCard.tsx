@@ -54,7 +54,7 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
       </div>
       
       <p className={cn(
-        "text-loro-navy/90 mb-3 break-words w-full",
+        "text-loro-navy/90 mb-3 w-full break-words whitespace-normal",
         isMobile ? "text-sm" : "text-base"
       )}>
         {suggestion.notes}
