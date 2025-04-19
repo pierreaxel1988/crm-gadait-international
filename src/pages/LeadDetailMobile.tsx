@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -159,7 +158,7 @@ const LeadDetailMobile = () => {
   
   return (
     <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
-      <div className="fixed top-0 left-0 right-0 z-30 w-full">
+      <div className="sticky top-0 left-0 right-0 z-30 w-full">
         <div className="bg-loro-sand pt-[env(safe-area-inset-top)]">
           <LeadDetailHeader
             name={lead.name}
@@ -182,13 +181,10 @@ const LeadDetailMobile = () => {
             onCallComplete={handleCallComplete}
           />
         </div>
-      </div>
-      
-      <div className="fixed top-[108px] left-0 right-0 z-30 w-full bg-white">
         <LeadDetailTabs defaultTab={activeTab} />
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto pt-[144px] pb-20">
+      <ScrollArea className="flex-1 overflow-y-auto pt-[108px] pb-20">
         <Tabs value={activeTab} className="w-full h-full">
           <div className="px-4 pb-32 h-full">
             <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out]">
