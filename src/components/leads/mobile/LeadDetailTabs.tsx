@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
@@ -90,11 +89,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           data-[state=active]:shadow-none"
         >
           Actions
-          {pendingActionsCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5">
-              <CircleDot className="h-2.5 w-2.5 text-[#9b87f5]" />
-            </span>
-          )}
+          
         </TabsTrigger>
         <TabsTrigger 
           value="emails" 
