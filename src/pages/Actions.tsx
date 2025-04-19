@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
@@ -58,40 +59,45 @@ const Actions = () => {
       <SubNavigation />
       <div className="p-4 md:p-6 bg-white min-h-screen">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <h1 className="text-2xl font-futuraLight tracking-wide text-loro-navy">Actions</h1>
             
-            <div className="flex flex-col md:flex-row items-center gap-3">
-              <div className="relative flex-grow">
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <div className="relative w-full md:w-[320px]">
                 <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <Input
                   placeholder="Rechercher..."
-                  className="pl-10 w-full md:w-[280px] border-gray-300 focus:border-loro-terracotta"
+                  className="pl-10 w-full border-gray-200 focus-visible:ring-loro-hazel/30 focus-visible:border-loro-hazel/60 transition-colors"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               
-              <div className="flex items-center gap-2 flex-wrap justify-end">
+              <div className="flex items-center gap-3 flex-wrap justify-end">
                 {isAdmin && !isCommercial && (
                   <Button 
                     variant="outline"
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`flex items-center gap-2 ${getActiveFiltersCount() > 0 ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}`}
+                    className={`flex items-center gap-2 border-gray-200 hover:border-loro-hazel/60 transition-colors ${
+                      getActiveFiltersCount() > 0 ? 'bg-loro-hazel text-white hover:bg-loro-hazel/90' : ''
+                    }`}
                   >
                     <Filter className="h-4 w-4" />
                     Filtres
                     {getActiveFiltersCount() > 0 && (
-                      <span className="ml-1 h-5 w-5 rounded-full bg-white text-primary flex items-center justify-center text-xs">
+                      <span className={`ml-1 h-5 w-5 rounded-full flex items-center justify-center text-xs ${
+                        getActiveFiltersCount() > 0 ? 'bg-white text-loro-hazel' : ''
+                      }`}>
                         {getActiveFiltersCount()}
                       </span>
                     )}
                   </Button>
                 )}
+                
                 <Button 
                   variant="outline" 
                   size="default" 
-                  className="flex-shrink-0"
+                  className="border-gray-200 hover:border-loro-hazel/60 transition-colors"
                   onClick={handleRefresh}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
@@ -101,7 +107,7 @@ const Actions = () => {
                 <Button
                   variant="outline"
                   size="default"
-                  className="flex-shrink-0 border-loro-hazel text-loro-hazel hover:bg-loro-hazel/10"
+                  className="border-loro-hazel text-loro-hazel hover:bg-loro-hazel/10 transition-colors"
                   onClick={() => setShowAIAssistant(!showAIAssistant)}
                 >
                   <Sparkles className="h-4 w-4 mr-2" />
@@ -112,7 +118,7 @@ const Actions = () => {
                   variant="outline"
                   size="default"
                   showText={!isMobile}
-                  className="flex-shrink-0"
+                  className="border-gray-200 hover:border-loro-hazel/60 transition-colors"
                 />
               </div>
             </div>
