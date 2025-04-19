@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { History, Bell } from 'lucide-react';
+import { History } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed } from '@/types/lead';
 import { ActionSuggestion } from '@/services/noteAnalysisService';
-import { toast } from '@/hooks/use-toast';
 
 interface LeadDetailActionBarProps {
   autoSaveEnabled: boolean;
@@ -27,34 +27,6 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showSuggestionsBadge, setShowSuggestionsBadge] = useState<boolean>(false);
-  const [pendingActionsCount, setPendingActionsCount] = useState<number>(0);
-  
-  useEffect(() => {
-    if (lead?.actionHistory) {
-      const now = new Date();
-      const pending = lead.actionHistory.filter(action => {
-        if (action.completedDate) return false;
-        if (!action.scheduledDate) return false;
-        
-        const scheduledDate = new Date(action.scheduledDate);
-        return scheduledDate >= now || scheduledDate < now;
-      }).length;
-      
-      setPendingActionsCount(pending);
-      
-      if (pending > 0) {
-        toast({
-          title: "Actions en attente",
-          description: `Vous avez ${pending} action${pending > 1 ? 's' : ''} à réaliser`,
-        });
-      }
-    }
-  }, [lead?.actionHistory]);
-
-  useEffect(() => {
-    setShowSuggestionsBadge(actionSuggestions && actionSuggestions.length > 0);
-  }, [actionSuggestions]);
 
   const handleActionsClick = () => {
     const searchParams = new URLSearchParams(location.search);
@@ -81,14 +53,6 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
             >
               <History className="h-4 w-4 text-loro-navy" />
               Actions
-              {(showSuggestionsBadge || pendingActionsCount > 0) && (
-                <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[#FFDEE2] text-loro-terracotta text-[10px] ml-1">
-                  {pendingActionsCount + (actionSuggestions?.length || 0)}
-                </div>
-              )}
-              {pendingActionsCount > 0 && (
-                <Bell className="h-3 w-3 text-loro-terracotta ml-1 animate-bounce" />
-              )}
             </Button>
           )}
         </div>
@@ -107,3 +71,4 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
 };
 
 export default LeadDetailActionBar;
+
