@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
@@ -5,14 +6,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { toast } from '@/hooks/use-toast';
 import { PipelineType } from '@/types/lead';
-import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 
 export function usePipelineState() {
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const tabFromUrl = queryParams.get('tab');
-  const { selectedAgent } = useSelectedAgent();
   
   // State management
   const [activeTab, setActiveTab] = useState<string>(tabFromUrl === 'rental' ? 'rental' : 'purchase');
@@ -22,27 +21,17 @@ export function usePipelineState() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [teamMembers, setTeamMembers] = useState<{id: string, name: string}[]>([]);
   
-  // Initialize filter state with selectedAgent from the hook
+  // Initialize filter state
   const [filters, setFilters] = useState<FilterOptions>({
     status: null,
     tags: [],
-    assignedTo: selectedAgent,
+    assignedTo: null,
     minBudget: '',
     maxBudget: '',
     location: '',
     purchaseTimeframe: null,
     propertyType: null
   });
-
-  // Update filters when selectedAgent changes
-  useEffect(() => {
-    if (filters.assignedTo !== selectedAgent) {
-      setFilters(prev => ({
-        ...prev,
-        assignedTo: selectedAgent
-      }));
-    }
-  }, [selectedAgent]);
 
   // Auto-refresh when component mounts
   useEffect(() => {
@@ -69,7 +58,7 @@ export function usePipelineState() {
     if (refreshTrigger > 0) { // Skip the initial render
       handleRefresh();
     }
-  }, [filters, refreshTrigger]);
+  }, [filters]);
 
   // Fetch team members
   useEffect(() => {
@@ -176,12 +165,12 @@ export function usePipelineState() {
     checkLeads();
   };
 
-  // Clear all filters, but maintain selectedAgent
+  // Clear all filters
   const handleClearFilters = () => {
     setFilters({
       status: null,
       tags: [],
-      assignedTo: selectedAgent, // Keep the selected agent
+      assignedTo: null,
       minBudget: '',
       maxBudget: '',
       location: '',
