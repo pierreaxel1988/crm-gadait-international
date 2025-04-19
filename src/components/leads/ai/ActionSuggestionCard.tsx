@@ -38,7 +38,7 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
   const cardClasses = cn(
     "border border-loro-navy/10 bg-loro-pearl/20 rounded-md overflow-hidden",
     "w-full box-border",
-    isMobile ? "p-3" : "p-4"
+    isMobile ? "p-2 sm:p-3" : "p-4"
   );
 
   return (
@@ -54,8 +54,8 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
       </div>
       
       <p className={cn(
-        "text-loro-navy/90 mb-3 w-full break-words whitespace-normal",
-        isMobile ? "text-sm" : "text-base"
+        "text-loro-navy/90 mb-3 w-full break-words whitespace-normal overflow-hidden px-0.5",
+        isMobile ? "text-xs sm:text-sm" : "text-base"
       )}>
         {suggestion.notes}
       </p>
@@ -66,11 +66,11 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
           size="sm"
           className={cn(
             "text-rose-600 hover:bg-rose-50 hover:text-rose-700",
-            isMobile ? "h-8 px-2 text-xs" : "h-9 px-3 text-sm"
+            isMobile ? "h-7 px-1.5 text-[10px] sm:h-8 sm:px-2 sm:text-xs" : "h-9 px-3 text-sm"
           )}
           onClick={() => onDismiss(suggestion)}
         >
-          <XIcon className={cn("h-4 w-4 mr-1.5")} />
+          <XIcon className={cn("h-3 w-3 mr-1 sm:h-4 sm:w-4 sm:mr-1.5")} />
           Ignorer
         </Button>
         <Button
@@ -78,11 +78,11 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
           size="sm"
           className={cn(
             "border-loro-navy text-loro-navy hover:bg-loro-pearl/40",
-            isMobile ? "h-8 px-2 text-xs" : "h-9 px-3 text-sm"
+            isMobile ? "h-7 px-1.5 text-[10px] sm:h-8 sm:px-2 sm:text-xs" : "h-9 px-3 text-sm"
           )}
           onClick={() => onImplement(suggestion)}
         >
-          <CheckIcon className={cn("h-4 w-4 mr-1.5")} />
+          <CheckIcon className={cn("h-3 w-3 mr-1 sm:h-4 sm:w-4 sm:mr-1.5")} />
           Appliquer
         </Button>
       </div>

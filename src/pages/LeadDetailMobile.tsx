@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -145,7 +146,7 @@ const LeadDetailMobile = () => {
   if (!lead) return null;
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
+    <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden relative">
       <div className="fixed top-0 left-0 right-0 z-40 bg-loro-sand w-full">
         <LeadDetailHeader 
           name={lead.name} 
@@ -172,7 +173,7 @@ const LeadDetailMobile = () => {
         </div>
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto pt-16 sm:pt-20 md:pt-24 pb-24 w-full box-border max-w-full overflow-x-hidden">
+      <ScrollArea className="flex-1 overflow-y-auto pt-24 sm:pt-28 md:pt-32 pb-24 w-full box-border max-w-full overflow-x-hidden">
         <Tabs value={activeTab} className="w-full h-full">
           <div className="px-3 sm:px-4 md:px-6 pb-36 h-full w-full box-border">
             <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">

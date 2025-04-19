@@ -244,7 +244,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   
   const responsiveContainerClasses = cn(
     "space-y-4 w-full max-w-full box-border",
-    "px-2 sm:px-4 md:px-6 pb-4 overflow-visible"
+    "px-0.5 sm:px-2 md:px-4 pb-4 overflow-visible"
   );
 
   const quickPrompts = lead ? [
@@ -277,8 +277,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     <div className={responsiveContainerClasses}>
       {/* AI Action Suggestions */}
       {leadId && lead && (
-        <div className="animate-[fade-in_0.4s_ease-out] w-full">
-          <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3 break-words">
+        <div className="animate-[fade-in_0.4s_ease-out] w-full overflow-hidden">
+          <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3 break-words truncate">
             ACTIONS SUGGÉRÉES PAR IA
           </h3>
           <AIActionSuggestions 
@@ -290,8 +290,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {/* Assistant IA - avec prompts rapides */}
       {leadId && (
-        <div className="animate-[fade-in_0.4s_ease-out] w-full">
-          <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b break-words">
+        <div className="animate-[fade-in_0.4s_ease-out] w-full overflow-hidden">
+          <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b break-words truncate">
             ASSISTANT IA
           </h3>
           <div className="mt-3 space-y-4 w-full">
@@ -315,7 +315,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     placeholder="Ex. Propose une relance WhatsApp ou un résumé du client..."
-                    className="w-full min-h-[80px] text-sm resize-y"
+                    className="w-full min-h-[80px] text-xs sm:text-sm resize-y"
                   />
                   <Button
                     onClick={handleSendToGPT}
@@ -325,12 +325,12 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     {isAiLoading ? (
                       <div className="flex items-center justify-center gap-2 w-full">
                         <div className="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full" />
-                        <span className="text-sm">Envoi en cours...</span>
+                        <span className="text-xs sm:text-sm">Envoi en cours...</span>
                       </div>
                     ) : (
                       <>
                         <PlaneTakeoff className="h-4 w-4 mr-2" />
-                        <span className="text-sm">Envoyer à l'IA</span>
+                        <span className="text-xs sm:text-sm">Envoyer à l'IA</span>
                       </>
                     )}
                   </Button>
@@ -339,7 +339,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             ) : loadError ? (
               <div className="border rounded-md p-4 bg-red-100 text-center w-full">
                 <p className="text-red-600 font-medium mb-1">Erreur</p>
-                <p className="text-sm">{loadError || "Impossible de charger les données du lead. Veuillez rafraîchir la page."}</p>
+                <p className="text-xs sm:text-sm">{loadError || "Impossible de charger les données du lead. Veuillez rafraîchir la page."}</p>
                 <Button
                   variant="outline"
                   size="sm"
@@ -359,7 +359,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
               <LeadAIAssistant lead={lead} />
             ) : loadError ? (
               <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50 w-full">
-                <p className="text-sm text-muted-foreground">Assistant IA non disponible</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Assistant IA non disponible</p>
               </div>
             ) : (
               <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50 w-full">
@@ -370,8 +370,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         </div>
       )}
       
-      <div className="flex justify-between items-center mb-4 w-full">
-        <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b break-words">
+      <div className="flex justify-between items-center mb-4 w-full overflow-hidden">
+        <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b break-words truncate">
           ACTIONS EN ATTENTE
         </h3>
       </div>
@@ -412,22 +412,22 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${bgColorClass} relative`}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <div className="flex items-center gap-1.5">
-                    <div className={`h-6 w-6 rounded-full flex items-center justify-center ${iconBgClass}`}>
+                  <div className="flex items-center gap-1.5 max-w-[75%]">
+                    <div className={`h-6 w-6 rounded-full flex items-center justify-center ${iconBgClass} flex-shrink-0`}>
                       <Calendar className="h-3 w-3" />
                     </div>
-                    <div>
-                      <h4 className="font-futura text-sm">{action.actionType}</h4>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <Clock className="h-2.5 w-2.5 mr-1" />
-                        {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
+                    <div className="min-w-0 overflow-hidden">
+                      <h4 className="font-futura text-sm truncate">{action.actionType}</h4>
+                      <div className="flex items-center text-xs text-gray-500 truncate">
+                        <Clock className="h-2.5 w-2.5 mr-1 flex-shrink-0" />
+                        <span className="truncate">{format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}</span>
                       </div>
                     </div>
                   </div>
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95"
+                    className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95 flex-shrink-0"
                     onClick={() => onMarkComplete(action)}
                   >
                     <Check className="h-3 w-3 mr-1" /> 
@@ -435,7 +435,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   </Button>
                 </div>
                 {action.notes && (
-                  <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${notesBgClass}`}>
+                  <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${notesBgClass} break-words`}>
                     {action.notes}
                   </div>
                 )}
@@ -456,7 +456,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {completedActions.length > 0 && (
         <>
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3 break-words w-full">HISTORIQUE DES ACTIONS</h3>
+          <h3 className="text-xs sm:text-sm font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3 break-words truncate w-full">HISTORIQUE DES ACTIONS</h3>
           <div className="space-y-2 w-full">
             {completedActions.map((action) => (
               <div 
@@ -467,21 +467,21 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 )}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <div className="flex items-center gap-1.5">
-                    <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                  <div className="flex items-center gap-1.5 max-w-[82%]">
+                    <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
                       <Check className="h-3 w-3" />
                     </div>
-                    <div>
-                      <h4 className="font-futura text-sm text-gray-700">{action.actionType}</h4>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <Check className="h-2.5 w-2.5 mr-1 text-green-500" />
-                        {action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}
+                    <div className="min-w-0 overflow-hidden">
+                      <h4 className="font-futura text-sm text-gray-700 truncate">{action.actionType}</h4>
+                      <div className="flex items-center text-xs text-gray-500 truncate">
+                        <Check className="h-2.5 w-2.5 mr-1 text-green-500 flex-shrink-0" />
+                        <span className="truncate">{action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 {action.notes && (
-                  <div className="text-xs bg-white p-1.5 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out] border border-gray-100">
+                  <div className="text-xs bg-white/80 p-1.5 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out] border border-gray-100 break-words">
                     {action.notes}
                   </div>
                 )}

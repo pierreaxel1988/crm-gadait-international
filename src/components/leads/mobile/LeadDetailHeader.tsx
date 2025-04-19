@@ -91,7 +91,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
 
   return (
     <div className={headerClasses}>
-      <div className="flex items-center gap-2 min-w-0 flex-1">
+      <div className="flex items-center gap-2 min-w-0 flex-1 pr-1">
         <Button 
           variant="ghost" 
           size="icon" 
@@ -100,36 +100,36 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
         >
           <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 w-full overflow-hidden">
           <h1 className={cn(
-            "font-futura leading-tight truncate",
+            "font-futura leading-tight truncate break-words",
             "text-sm sm:text-base md:text-lg"
           )}>
             {name}
           </h1>
-          <p className="text-[10px] sm:text-xs text-loro-terracotta">
+          <p className="text-[10px] sm:text-xs text-loro-terracotta truncate">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
-          <div className="flex flex-wrap gap-1 mt-1 w-full">
+          <div className="flex flex-wrap gap-1 mt-1 w-full pr-1">
             {budget && (
-              <span className="text-[10px] sm:text-xs bg-[#F5F3EE] px-2 py-0.5 rounded-xl border border-zinc-200">
+              <span className="text-[10px] sm:text-xs bg-[#F5F3EE] px-2 py-0.5 rounded-xl border border-zinc-200 max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
                 {formatBudget(budget, currency)}
               </span>
             )}
             {desiredLocation && (
-              <span className="text-[10px] sm:text-xs bg-[#EBD5CE] px-2 py-0.5 rounded-xl">
+              <span className="text-[10px] sm:text-xs bg-[#EBD5CE] px-2 py-0.5 rounded-xl max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
                 {desiredLocation}
               </span>
             )}
             {country && (
-              <span className="text-[10px] sm:text-xs bg-[#F3E9D6] px-2 py-0.5 rounded-xl border border-zinc-200">
+              <span className="text-[10px] sm:text-xs bg-[#F3E9D6] px-2 py-0.5 rounded-xl border border-zinc-200 max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
                 {country}
               </span>
             )}
           </div>
         </div>
       </div>
-      <div className="flex flex-col items-end gap-2 flex-shrink-0 ml-2">
+      <div className="flex flex-col items-end gap-2 flex-shrink-0 ml-1">
         <div className="flex items-center gap-1">
           {phone && <>
               <a href="#" onClick={handlePhoneClick} className="h-7 w-7 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Appeler">
