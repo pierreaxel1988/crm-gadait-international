@@ -243,8 +243,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const isMobile = useIsMobile();
   
   const responsiveContainerClasses = cn(
-    "space-y-4",
-    isMobile ? "px-3" : "px-4 lg:px-6"
+    "space-y-4 w-full max-w-full box-border",
+    "px-3 pb-4 overflow-visible"
   );
 
   const quickPrompts = lead ? [
@@ -277,8 +277,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     <div className={responsiveContainerClasses}>
       {/* AI Action Suggestions */}
       {leadId && lead && (
-        <div className="animate-[fade-in_0.4s_ease-out]">
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3">
+        <div className="animate-[fade-in_0.4s_ease-out] w-full">
+          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-3 break-words">
             ACTIONS SUGGÉRÉES PAR IA
           </h3>
           <AIActionSuggestions 
@@ -290,14 +290,14 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {/* Assistant IA - avec prompts rapides */}
       {leadId && (
-        <div className="animate-[fade-in_0.4s_ease-out]">
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">
+        <div className="animate-[fade-in_0.4s_ease-out] w-full">
+          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b break-words">
             ASSISTANT IA
           </h3>
-          <div className="mt-3 space-y-4">
+          <div className="mt-3 space-y-4 w-full">
             {lead ? (
               <>
-                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 w-full">
                   {quickPrompts.map((quickPrompt) => (
                     <Button
                       key={quickPrompt.id}
@@ -310,7 +310,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     </Button>
                   ))}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 w-full">
                   <Textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
@@ -337,7 +337,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 </div>
               </>
             ) : (
-              <div className="border rounded-md p-4 bg-red-100 text-center">
+              <div className="border rounded-md p-4 bg-red-100 text-center w-full">
                 <p className="text-red-600 font-medium mb-1">Erreur</p>
                 <p className="text-sm">{loadError || "Impossible de charger les données du lead. Veuillez rafraîchir la page."}</p>
                 <Button
@@ -354,11 +354,11 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             {lead ? (
               <LeadAIAssistant lead={lead} />
             ) : loadError ? (
-              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50">
+              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50 w-full">
                 <p className="text-sm text-muted-foreground">Assistant IA non disponible</p>
               </div>
             ) : (
-              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50">
+              <div className="flex justify-center items-center p-4 border rounded-md bg-gray-50 w-full">
                 <div className="animate-spin h-5 w-5 border-3 border-chocolate-dark rounded-full border-t-transparent" />
               </div>
             )}
@@ -366,12 +366,12 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         </div>
       )}
       
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">ACTIONS EN ATTENTE</h3>
+      <div className="flex justify-between items-center mb-4 w-full">
+        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b break-words">ACTIONS EN ATTENTE</h3>
       </div>
 
       {pendingActions.length === 0 ? (
-        <div className="text-center py-5 border rounded-md bg-gray-50 animate-[fade-in_0.3s_ease-out]">
+        <div className="text-center py-5 border rounded-md bg-gray-50 animate-[fade-in_0.3s_ease-out] w-full">
           <p className="text-muted-foreground text-xs font-futura">Aucune action en attente</p>
         </div>
       ) : (
@@ -450,7 +450,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {completedActions.length > 0 && (
         <>
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3">HISTORIQUE DES ACTIONS</h3>
+          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3 break-words w-full">HISTORIQUE DES ACTIONS</h3>
           <div className="space-y-2 w-full">
             {completedActions.map((action) => (
               <div 

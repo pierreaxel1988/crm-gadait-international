@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -178,29 +177,29 @@ const LeadDetailMobile = () => {
         </div>
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto pt-28">
+      <ScrollArea className="flex-1 overflow-y-auto pt-[135px] w-full box-border">
         <Tabs value={activeTab} className="w-full h-full">
-          <div className="px-4 pb-32 h-full">
-            <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out]">
+          <div className="px-3 pb-32 h-full w-full box-border">
+            <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="criteria" className="mt-0 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="criteria" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
               <SearchCriteriaSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="status" className="mt-0 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="status" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
               <StatusSection 
                 lead={lead} 
                 onDataChange={handleDataChange} 
               />
             </TabsContent>
             
-            <TabsContent value="notes" className="mt-0 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="notes" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
               <NotesSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="actions" className="mt-0 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="actions" className="mt-0 animate-[fade-in_0.2s_ease-out] w-full">
               {actionSuggestions && actionSuggestions.length > 0 && (
                 <ActionSuggestions
                   suggestions={actionSuggestions}
@@ -216,7 +215,7 @@ const LeadDetailMobile = () => {
               />
             </TabsContent>
             
-            <TabsContent value="emails" className="h-full flex-1 flex-grow">
+            <TabsContent value="emails" className="h-full flex-1 flex-grow w-full">
               <EmailsTab leadId={id || ''} />
             </TabsContent>
           </div>

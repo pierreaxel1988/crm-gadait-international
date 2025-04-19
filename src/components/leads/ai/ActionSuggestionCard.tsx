@@ -36,14 +36,14 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
   const formattedDate = format(suggestion.scheduledDate, 'dd/MM/yyyy à HH:mm', { locale: fr });
 
   const cardClasses = cn(
-    "border border-loro-navy/10 bg-loro-pearl/20 rounded-md",
-    "w-full max-w-full",
+    "border border-loro-navy/10 bg-loro-pearl/20 rounded-md overflow-hidden",
+    "w-full box-border",
     isMobile ? "p-3" : "p-4"
   );
 
   return (
     <div className={cardClasses}>
-      <div className="flex items-start justify-between gap-2 mb-2 flex-wrap">
+      <div className="flex items-start justify-between gap-2 mb-2 flex-wrap w-full">
         <div className="flex-shrink-0">
           {getActionTypeIcon(suggestion.actionType)}
         </div>
@@ -54,13 +54,13 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
       </div>
       
       <p className={cn(
-        "text-loro-navy/90 mb-3 break-words",
+        "text-loro-navy/90 mb-3 break-words w-full",
         isMobile ? "text-sm" : "text-base"
       )}>
         {suggestion.notes}
       </p>
       
-      <div className="flex justify-end items-center gap-2">
+      <div className="flex justify-end items-center gap-2 w-full">
         <Button
           variant="ghost"
           size="sm"
@@ -70,7 +70,7 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
           )}
           onClick={() => onDismiss(suggestion)}
         >
-          <XIcon className={cn(isMobile ? "h-3.5 w-3.5 mr-1" : "h-4 w-4 mr-1.5")} />
+          <XIcon className={cn("h-4 w-4 mr-1.5")} />
           Ignorer
         </Button>
         <Button
@@ -82,7 +82,7 @@ export function ActionSuggestionCard({ suggestion, onImplement, onDismiss }: Act
           )}
           onClick={() => onImplement(suggestion)}
         >
-          <CheckIcon className={cn(isMobile ? "h-3.5 w-3.5 mr-1" : "h-4 w-4 mr-1.5")} />
+          <CheckIcon className={cn("h-4 w-4 mr-1.5")} />
           Appliquer
         </Button>
       </div>
