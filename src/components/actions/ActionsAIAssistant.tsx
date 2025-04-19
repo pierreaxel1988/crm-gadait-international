@@ -61,14 +61,15 @@ const ActionsAIAssistant: React.FC<ActionsAIAssistantProps> = ({ onClose, onActi
         throw new Error("Utilisateur non authentifié");
       }
       
-      // Create a new action in the leads table
-      // Note: This is a simplified implementation. In a real scenario,
-      // you would need to select a specific lead to add this action to.
-      const { error } = await supabase.rpc('create_ai_suggested_action', {
-        action_type: suggestion.actionType,
-        scheduled_date: suggestion.scheduledDate.toISOString(),
-        notes: suggestion.notes,
-        assigned_to: userId
+      // Call the Edge Function instead of using RPC
+      const { data, error } = await supabase.functions.invoke('create-ai-action', {
+        body: {
+          action_type: suggestion.actionType,
+          scheduled_date: suggestion.scheduledDate.toISOString(),
+          notes: suggestion.notes,
+          assigned_to: userId,
+          lead_id: null // Standalone action without a lead
+        }
       });
       
       if (error) throw error;
