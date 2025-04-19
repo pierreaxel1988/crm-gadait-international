@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -94,42 +93,34 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     }
   }, [filters]);
   
-  // Synchroniser la valeur de selectedCommercial avec le selectedAgent global
   useEffect(() => {
-    if (selectedAgent !== null && selectedAgent !== filters.assignedTo) {
+    if (selectedAgent !== filters.assignedTo) {
       onFilterChange({
         ...filters,
         assignedTo: selectedAgent
       });
     }
-  }, [selectedAgent]);
+  }, [selectedAgent, filters, onFilterChange]);
 
   const handleCommercialChange = (value: string) => {
     const newAgentId = value === "all" ? null : value;
     
-    // Mettre à jour à la fois le filtre local et le système global
     handleAgentChange(newAgentId);
-    
-    // Pas besoin de mettre à jour le filtre ici car l'effet ci-dessus le fera
   };
   
-  // First get all leads by status
   const leadsByStatus = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
     columnStatus: column.status
   })));
   
-  // Then filter by commercial if selected
   const leadsByCommercial = selectedAgent 
     ? leadsByStatus.filter(lead => lead.assignedToId === selectedAgent)
     : leadsByStatus;
   
-  // Then filter by active status if not 'all'
   const displayedLeads = activeStatus === 'all' 
     ? leadsByCommercial 
     : leadsByCommercial.filter(lead => lead.columnStatus === activeStatus);
   
-  // Apply search filter
   const searchFilteredLeads = searchTerm 
     ? displayedLeads.filter(item => 
         item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -137,10 +128,8 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
       )
     : displayedLeads;
     
-  // Apply smart sorting
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
   
-  // Calculate counts for each status after commercial filtering
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     const countForStatus = selectedAgent
       ? column.items.filter(item => item.assignedToId === selectedAgent).length
@@ -167,9 +156,14 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     toggleFilters();
   };
 
+  const selectedAgentName = selectedAgent 
+    ? allTeamMembers?.find(member => member.id === selectedAgent)?.name || 
+      teamMembers.find(member => member.id === selectedAgent)?.name || 
+      'Inconnu'
+    : null;
+
   return (
     <div className="flex flex-col h-[calc(100vh-170px)]">
-      {/* Use PipelineHeader component for consistent UI */}
       <PipelineHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -184,6 +178,13 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         handleRefresh={handleRefresh}
         isRefreshing={isRefreshing}
       />
+
+      {selectedAgentName && (
+        <div className="mb-4 text-sm bg-gray-50 p-2 rounded-lg text-center">
+          <span className="font-medium">Commercial sélectionné :</span>{" "}
+          <span className="text-primary font-semibold">{selectedAgentName}</span>
+        </div>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
         <TabsList className="bg-gray-100 p-1 rounded-xl w-80">
@@ -261,14 +262,17 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
           </div>
         </div>
         
-        {isAdmin && allTeamMembers && allTeamMembers.length > 0 && (
+        {(isAdmin || !isAdmin) && allTeamMembers && allTeamMembers.length > 0 && (
           <div className="flex items-center">
             <Select 
               value={selectedAgent || "all"} 
               onValueChange={handleCommercialChange}
+              defaultValue="all"
             >
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Filtrer par commercial" />
+              <SelectTrigger className="w-[200px]" aria-label="Filtrer par commercial">
+                <SelectValue placeholder="Filtrer par commercial">
+                  {selectedAgentName ? selectedAgentName : "Tous les commerciaux"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les commerciaux</SelectItem>
