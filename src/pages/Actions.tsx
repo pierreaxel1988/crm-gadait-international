@@ -36,7 +36,7 @@ const Actions = () => {
     }
     
     if (selectedAgent) {
-      matchesAgent = action.assignedTo === selectedAgent;
+      matchesAgent = action.assignedToId === selectedAgent;
     }
     
     return matchesSearch && matchesAgent;
@@ -75,9 +75,9 @@ const Actions = () => {
                     <SelectItem value="all">Tous les commerciaux</SelectItem>
                     {actions
                       .reduce((acc: { id: string; name: string }[], curr) => {
-                        if (curr.assignedTo && curr.assignedToName && 
-                            !acc.some(agent => agent.id === curr.assignedTo)) {
-                          acc.push({ id: curr.assignedTo, name: curr.assignedToName });
+                        if (curr.assignedToId && curr.assignedToName && 
+                            !acc.some(agent => agent.id === curr.assignedToId)) {
+                          acc.push({ id: curr.assignedToId, name: curr.assignedToName });
                         }
                         return acc;
                       }, [])

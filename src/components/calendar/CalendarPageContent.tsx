@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, ListFilter } from 'lucide-react';
@@ -66,9 +67,9 @@ const CalendarPageContent = () => {
                     <SelectItem value="all">Tous les commerciaux</SelectItem>
                     {events
                       .reduce((acc: { id: string; name: string }[], curr) => {
-                        if (curr.assignedTo && curr.assignedToName && 
-                            !acc.some(agent => agent.id === curr.assignedTo)) {
-                          acc.push({ id: curr.assignedTo, name: curr.assignedToName });
+                        if (curr.assignedToId && curr.assignedToName && 
+                            !acc.some(agent => agent.id === curr.assignedToId)) {
+                          acc.push({ id: curr.assignedToId, name: curr.assignedToName });
                         }
                         return acc;
                       }, [])

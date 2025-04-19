@@ -54,16 +54,29 @@ export type CalendarContextType = {
   handleAddEvent: () => void;
   refreshEvents: () => Promise<void>;
   markEventComplete: (eventId: string) => Promise<void>;
+  selectedAgent: string | null;
+  onAgentChange: (agentId: string | null) => void;
 };
 
 export const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
 
-export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface CalendarProviderProps {
+  children: React.ReactNode;
+  initialSelectedAgent?: string | null;
+  onAgentChange?: (agentId: string | null) => void;
+}
+
+export const CalendarProvider: React.FC<CalendarProviderProps> = ({ 
+  children, 
+  initialSelectedAgent = null,
+  onAgentChange
+}) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<Event[]>(initialEvents);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [view, setView] = useState<'month' | 'week'>('month');
   const [activeFilters, setActiveFilters] = useState<TaskType[]>([]);
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(initialSelectedAgent);
   const [newEvent, setNewEvent] = useState<Omit<Event, 'id' | 'date'>>({
     title: '',
     description: '',
@@ -75,6 +88,12 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (selectedAgent !== initialSelectedAgent && onAgentChange) {
+      onAgentChange(selectedAgent);
+    }
+  }, [selectedAgent, initialSelectedAgent, onAgentChange]);
 
   // Define refreshEvents function before using it
   const refreshEvents = useCallback(async () => {
@@ -114,7 +133,11 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .from('leads')
         .select('id, name, action_history, assigned_to');
       
-      if (!isUserAdmin && currentUserId) {
+      // Apply agent filter if admin user has selected an agent
+      if (selectedAgent) {
+        query = query.eq('assigned_to', selectedAgent);
+      } else if (!isUserAdmin && currentUserId) {
+        // For non-admin users, only show their assigned leads
         query = query.eq('assigned_to', currentUserId);
       }
       
@@ -210,7 +233,7 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         description: "Impossible de charger les actions depuis la base de données."
       });
     }
-  }, [memberMap, toast]);
+  }, [memberMap, toast, selectedAgent]);
 
   // Fetch team members once to map IDs to names
   useEffect(() => {
@@ -375,6 +398,13 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
+  const handleAgentChange = (agentId: string | null) => {
+    setSelectedAgent(agentId);
+    if (onAgentChange) {
+      onAgentChange(agentId);
+    }
+  };
+
   return (
     <CalendarContext.Provider
       value={{
@@ -394,6 +424,8 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         handleAddEvent,
         refreshEvents,
         markEventComplete,
+        selectedAgent,
+        onAgentChange: handleAgentChange,
       }}
     >
       {children}
