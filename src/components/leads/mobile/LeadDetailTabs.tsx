@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
@@ -18,11 +17,9 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Extract the active tab from the URL query params or use default
   const searchParams = new URLSearchParams(location.search);
   const activeTab = searchParams.get('tab') || defaultTab;
   const handleTabChange = (value: string) => {
-    // Update URL with the new tab without refreshing the page
     const newSearchParams = new URLSearchParams(location.search);
     newSearchParams.set('tab', value);
     navigate(`/leads/${id}?${newSearchParams.toString()}`, {
@@ -30,7 +27,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
     });
   };
   return <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="w-full grid grid-cols-6 bg-loro-50 border-t border-b border-loro-200/50 shadow-sm">
+      <TabsList className="w-full grid grid-cols-6 bg-loro-50 border-t border-b border-loro-200/50 shadow-sm py-1">
         <TabsTrigger 
           value="info" 
           className="py-2 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
