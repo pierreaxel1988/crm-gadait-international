@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,6 +32,14 @@ export function usePipelineState() {
     purchaseTimeframe: null,
     propertyType: null
   });
+
+  // Mettre à jour uniquement le filtre d'agent sans affecter les autres filtres
+  const updateAgentFilter = useCallback((agentId: string | null) => {
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      assignedTo: agentId
+    }));
+  }, []);
 
   // Auto-refresh when component mounts
   useEffect(() => {
@@ -167,10 +175,13 @@ export function usePipelineState() {
 
   // Clear all filters
   const handleClearFilters = () => {
+    // Nous préservons le filtre d'agent lors du nettoyage des filtres
+    const currentAgentId = filters.assignedTo;
+    
     setFilters({
       status: null,
       tags: [],
-      assignedTo: null,
+      assignedTo: currentAgentId,  // Conserver l'agent sélectionné
       minBudget: '',
       maxBudget: '',
       location: '',
@@ -231,6 +242,7 @@ export function usePipelineState() {
     isFilterActive,
     handleRefresh,
     handleClearFilters,
-    getAllColumns
+    getAllColumns,
+    updateAgentFilter // Nouvelle fonction exposée
   };
 }

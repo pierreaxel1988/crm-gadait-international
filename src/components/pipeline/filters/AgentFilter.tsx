@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
+import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 
 interface TeamMember {
   id: string;
@@ -15,6 +16,21 @@ interface AgentFilterProps {
 }
 
 const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: AgentFilterProps) => {
+  const { selectedAgent, handleAgentChange } = useSelectedAgent();
+
+  // Synchroniser avec le système global d'agent sélectionné
+  useEffect(() => {
+    if (selectedAgent !== assignedTo) {
+      onAssignedToChange(selectedAgent);
+    }
+  }, [selectedAgent, assignedTo]);
+
+  const handleAgentSelect = (agentId: string | null) => {
+    // Mettre à jour à la fois le filtre local et le système global
+    onAssignedToChange(agentId);
+    handleAgentChange(agentId);
+  };
+
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -25,7 +41,7 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
           variant={assignedTo === null ? "default" : "outline"}
           size="sm"
           className="text-xs"
-          onClick={() => onAssignedToChange(null)}
+          onClick={() => handleAgentSelect(null)}
         >
           Tous
         </Button>
@@ -35,7 +51,7 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
             variant={assignedTo === member.id ? "default" : "outline"}
             size="sm"
             className="text-xs"
-            onClick={() => onAssignedToChange(member.id)}
+            onClick={() => handleAgentSelect(member.id)}
           >
             {member.name}
           </Button>

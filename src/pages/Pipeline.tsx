@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
@@ -26,10 +27,18 @@ const Pipeline = () => {
     isFilterActive,
     handleRefresh,
     handleClearFilters,
-    getAllColumns
+    getAllColumns,
+    updateAgentFilter
   } = usePipelineState();
 
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
+
+  // Synchroniser l'agent sélectionné avec les filtres de pipeline
+  useEffect(() => {
+    if (selectedAgent !== filters.assignedTo) {
+      updateAgentFilter(selectedAgent);
+    }
+  }, [selectedAgent, filters.assignedTo, updateAgentFilter]);
 
   useEffect(() => {
     handleRefresh();
