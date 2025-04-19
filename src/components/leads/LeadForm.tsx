@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LeadDetailed, PropertyType, ViewType, Amenity, Country, PurchaseTimeframe, FinancingMethod, PropertyUse, LeadSource, Currency } from '@/types/lead';
-import GeneralInfoSection from './form/GeneralInfoSection';
-import SearchCriteriaSection from './form/SearchCriteriaSection';
-import StatusSection from './form/StatusSection';
-import { usePropertyExtraction } from '../chat/hooks/usePropertyExtraction';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { LeadDetailed } from '@/types/lead';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
-import { COUNTRIES } from '@/utils/countries';
-import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 
 interface LeadFormProps {
   lead?: LeadDetailed;
@@ -22,25 +18,6 @@ interface LeadFormProps {
   isSubmitting?: boolean;
   hideSubmitButton?: boolean;
 }
-
-const PROPERTY_TYPES: PropertyType[] = [
-  'Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 
-  'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château',
-  'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'
-];
-
-const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
-const AMENITIES: Amenity[] = ['Piscine', 'Jardin', 'Garage', 'Sécurité', 'Climatisation', 'Terrasse', 'Balcon', 'Vue mer', 'Vue montagne', 'Gym', 'Spa', 'Piscine intérieure', 'Jacuzzi', 'Court de tennis', 'Ascenseur', 'Parking'];
-const PURCHASE_TIMEFRAMES: PurchaseTimeframe[] = ['Moins de trois mois', 'Plus de trois mois'];
-const FINANCING_METHODS: FinancingMethod[] = ['Cash', 'Prêt bancaire'];
-const PROPERTY_USES: PropertyUse[] = ['Investissement locatif', 'Résidence principale'];
-const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'CHF'];
-const COUNTRIES_LIST: Country[] = COUNTRIES;
-const LEAD_SOURCES: LeadSource[] = [
-  'Site web', 'Réseaux sociaux', 'Portails immobiliers', 'Network', 
-  'Repeaters', 'Recommandations', 'Apporteur d\'affaire', 'Idealista',
-  'Le Figaro', 'Properstar', 'Property Cloud', 'L\'express Property'
-];
 
 const LeadForm: React.FC<LeadFormProps> = ({ 
   lead, 
@@ -111,224 +88,13 @@ const LeadForm: React.FC<LeadFormProps> = ({
     }
   }, [formData, onChange]);
 
-  const { 
-    propertyUrl, 
-    setPropertyUrl, 
-    isLoading, 
-    extractedData, 
-    extractPropertyData 
-  } = usePropertyExtraction();
-  
-  useEffect(() => {
-    if (formData.url) {
-      setPropertyUrl(formData.url);
-    }
-  }, [formData.url, setPropertyUrl]);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
-    console.log(`Field changed: ${name} = ${value}`);
-    
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    console.log(`Number field changed: ${name} = ${value}`);
-    
-    setFormData(prev => ({ ...prev, [name]: value ? parseInt(value) : undefined }));
-  };
-
-  const handleMultiSelectToggle = <T extends string>(name: keyof LeadDetailed, value: T) => {
-    setFormData(prev => {
-      const currentValues = prev[name] as T[] || [];
-      const newValues = currentValues.includes(value)
-        ? currentValues.filter(item => item !== value)
-        : [...currentValues, value];
-        
-      console.log(`Multi-select field changed: ${name} = ${JSON.stringify(newValues)}`);
-      
-      return { ...prev, [name]: newValues };
-    });
-  };
-
-  const handleExtractUrl = (url: string) => {
-    setPropertyUrl(url);
-    extractPropertyData();
-  };
-
-  const handleCountryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    handleInputChange(e);
-    
-    if (!formData.nationality) {
-      const selectedCountry = e.target.value;
-      const nationality = deriveNationalityFromCountry(selectedCountry);
-      
-      if (nationality) {
-        const nationalityEvent = {
-          target: {
-            name: 'nationality',
-            value: nationality
-          }
-        } as React.ChangeEvent<HTMLInputElement>;
-        
-        handleInputChange(nationalityEvent);
-      }
-    }
-  };
-
-  const detectSourceFromUrl = (url: string): LeadSource | undefined => {
-    if (!url) return undefined;
-    
-    if (url.includes('idealista.com') || url.includes('idealista.es')) {
-      return 'Idealista';
-    } else if (url.includes('lefigaro.fr') || url.includes('properties.lefigaro.com')) {
-      return 'Le Figaro';
-    } else if (url.includes('properstar.com')) {
-      return 'Properstar';
-    } else if (url.includes('propertycloud.fr')) {
-      return 'Property Cloud';
-    } else if (url.includes('lexpress-property.com')) {
-      return 'L\'express Property';
-    }
-    
-    return 'Portails immobiliers';
-  };
-
-  const findBestMatchingLocation = (location: string, country: string): string | undefined => {
-    if (!location || !country) return undefined;
-    
-    const availableLocations = LOCATIONS_BY_COUNTRY[country as keyof typeof LOCATIONS_BY_COUNTRY];
-    if (!availableLocations) return undefined;
-    
-    const exactMatch = availableLocations.find(loc => 
-      loc.toLowerCase() === location.toLowerCase()
-    );
-    
-    if (exactMatch) return exactMatch;
-    
-    const partialMatch = availableLocations.find(loc => 
-      location.toLowerCase().includes(loc.toLowerCase()) || 
-      loc.toLowerCase().includes(location.toLowerCase())
-    );
-    
-    return partialMatch;
-  };
-
-  useEffect(() => {
-    if (extractedData) {
-      setFormData(prev => {
-        const source = detectSourceFromUrl(propertyUrl);
-        let country = extractedData.country || prev.country;
-        
-        let propertyTypes = prev.propertyTypes || [];
-        if (extractedData.propertyType && !propertyTypes.includes(extractedData.propertyType as PropertyType)) {
-          propertyTypes = [...propertyTypes, extractedData.propertyType as PropertyType];
-        }
-        
-        let bedroomsValue = prev.bedrooms;
-        if (extractedData.bedrooms) {
-          const bedrooms = typeof extractedData.bedrooms === 'string' 
-            ? parseInt(extractedData.bedrooms.toString())
-            : extractedData.bedrooms;
-          
-          if (!isNaN(bedrooms)) {
-            if (Array.isArray(prev.bedrooms)) {
-              if (!prev.bedrooms.includes(bedrooms)) {
-                bedroomsValue = [...prev.bedrooms, bedrooms];
-              }
-            } else {
-              bedroomsValue = [bedrooms];
-            }
-          }
-        }
-
-        let budgetValue = prev.budget;
-        if (extractedData.price) {
-          const priceText = extractedData.price.toString();
-          const priceNumbers = priceText.replace(/[^\d,\.]/g, '').replace(',', '.');
-          if (!isNaN(parseFloat(priceNumbers))) {
-            budgetValue = priceNumbers;
-          } else {
-            budgetValue = extractedData.price;
-          }
-        }
-
-        let amenities = prev.amenities || [];
-        if (extractedData.amenities && Array.isArray(extractedData.amenities)) {
-          extractedData.amenities.forEach((amenity: string) => {
-            if (!amenities.includes(amenity)) {
-              amenities.push(amenity);
-            }
-          });
-        }
-        
-        if (extractedData.description) {
-          const description = extractedData.description.toLowerCase();
-          AMENITIES.forEach(amenity => {
-            if (description.includes(amenity.toLowerCase()) && !amenities.includes(amenity)) {
-              amenities.push(amenity);
-            }
-          });
-        }
-
-        let livingArea = prev.livingArea;
-        if (extractedData.area) {
-          const areaString = extractedData.area.toString();
-          const areaMatch = areaString.match(/(\d+)/);
-          if (areaMatch) {
-            livingArea = areaMatch[1];
-          }
-        }
-
-        let desiredLocation = prev.desiredLocation;
-        if (extractedData.location && country) {
-          const bestMatch = findBestMatchingLocation(extractedData.location, country);
-          if (bestMatch) {
-            desiredLocation = bestMatch;
-          } else if (country === 'Spain' && extractedData.location.toLowerCase().includes('marbella')) {
-            desiredLocation = 'Marbella';
-          } else if (country === 'Spain' && extractedData.location.toLowerCase().includes('malaga')) {
-            desiredLocation = 'Malaga';
-          }
-          
-          if (!desiredLocation) {
-            const formattedLocation = extractedData.location.charAt(0).toUpperCase() + 
-                                      extractedData.location.slice(1).toLowerCase();
-            desiredLocation = formattedLocation;
-          }
-        }
-
-        return {
-          ...prev,
-          propertyReference: extractedData.reference || prev.propertyReference,
-          budget: budgetValue,
-          desiredLocation,
-          propertyTypes,
-          bedrooms: bedroomsValue,
-          url: propertyUrl || prev.url,
-          source: source || prev.source,
-          country,
-          amenities,
-          livingArea,
-          currency: extractedData.currency || prev.currency
-        };
-      });
-
-      toast({
-        title: "Données extraites",
-        description: "Les informations de la propriété ont été ajoutées au formulaire."
-      });
-    }
-  }, [extractedData, propertyUrl]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submission triggered, isSubmitting:", isSubmitting);
-    console.log("Submitting form data:", formData);
-    
     if (!formData.name) {
       toast({
         variant: "destructive",
@@ -338,60 +104,43 @@ const LeadForm: React.FC<LeadFormProps> = ({
       return;
     }
     
-    console.log("Budget value being submitted:", formData.budget);
-    console.log("Desired location being submitted:", formData.desiredLocation);
-    
     if (!isSubmitting) {
       onSubmit(formData);
-    } else {
-      console.log("Submission already in progress, ignoring click");
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Tabs defaultValue={activeTab} className="space-y-2">
-        <TabsList className="grid grid-cols-3 w-full max-w-md mb-4 hidden">
-          <TabsTrigger value="general">Général</TabsTrigger>
-          <TabsTrigger value="criteria">Critères</TabsTrigger>
-          <TabsTrigger value="status">Statut</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="general" className="space-y-4">
-          <GeneralInfoSection 
-            formData={formData} 
-            handleInputChange={handleInputChange} 
-            countries={COUNTRIES}
-            sources={LEAD_SOURCES}
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="salutation" className="text-sm">Titre</Label>
+          <Select 
+            value={formData.salutation || ''} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, salutation: value }))}
+          >
+            <SelectTrigger id="salutation" className="w-full font-futura">
+              <SelectValue placeholder="Sélectionner un titre" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="M." className="font-futura">Monsieur</SelectItem>
+              <SelectItem value="Mme" className="font-futura">Madame</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="name" className="text-sm">Nom*</Label>
+          <Input 
+            id="name" 
+            value={formData.name || ''} 
+            onChange={handleInputChange}
+            name="name"
+            placeholder="Nom complet" 
+            className="w-full font-futura"
+            required
           />
-        </TabsContent>
-
-        <TabsContent value="criteria" className="space-y-4">
-          <SearchCriteriaSection 
-            formData={formData}
-            handleInputChange={handleInputChange}
-            handleNumberChange={handleNumberChange}
-            handleMultiSelectToggle={handleMultiSelectToggle}
-            propertyTypes={PROPERTY_TYPES}
-            viewTypes={VIEW_TYPES}
-            amenities={AMENITIES}
-            purchaseTimeframes={PURCHASE_TIMEFRAMES}
-            financingMethods={FINANCING_METHODS}
-            propertyUses={PROPERTY_USES}
-            onExtractUrl={handleExtractUrl}
-            extractLoading={isLoading}
-            countries={COUNTRIES}
-            handleCountryChange={handleCountryChange}
-          />
-        </TabsContent>
-
-        <TabsContent value="status" className="space-y-4">
-          <StatusSection 
-            formData={formData} 
-            handleInputChange={handleInputChange}
-          />
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
 
       {!hideSubmitButton && (
         <div className="flex justify-end space-x-3 pt-2">

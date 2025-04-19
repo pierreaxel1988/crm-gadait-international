@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed, LeadStatus } from '@/types/lead';
@@ -13,7 +12,6 @@ export const useLeadCreation = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   
-  // Get pipeline type and status from URL if available
   const pipelineFromUrl = queryParams.get('pipeline') as 'purchase' | 'rental' | null;
   const statusFromUrl = queryParams.get('status') as LeadStatus | null;
   
@@ -24,7 +22,6 @@ export const useLeadCreation = () => {
   const [error, setError] = useState<string | null>(null);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
 
-  // Check authentication before allowing lead creation
   useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
@@ -41,7 +38,6 @@ export const useLeadCreation = () => {
     checkAuth();
   }, [navigate]);
 
-  // Define available statuses for the lead
   const purchaseStatuses: LeadStatus[] = [
     'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Deposit', 'Signed', 'Gagné', 'Perdu'
   ];
@@ -50,7 +46,6 @@ export const useLeadCreation = () => {
     'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offre', 'Deposit', 'Signed', 'Gagné', 'Perdu'
   ];
   
-  // Use the appropriate statuses based on the selected pipeline type
   const availableStatuses = pipelineType === 'purchase' ? purchaseStatuses : rentalStatuses;
 
   const handleSubmit = async (data: LeadDetailed) => {
@@ -61,50 +56,27 @@ export const useLeadCreation = () => {
     
     setIsSubmitting(true);
     setError(null);
-    console.log("Starting lead creation process...");
-    console.log("Agent assignment:", assignedAgent);
     
     try {
-      // Verify authentication again
       const { data: authData } = await supabase.auth.getSession();
       if (!authData.session) {
         throw new Error("Vous devez être connecté pour créer un lead.");
       }
       
-      // Deep copy to avoid modifying the original data
       const newLeadData = structuredClone(data);
       delete newLeadData.id;
       delete newLeadData.createdAt;
       
-      // Handle assignment based on user role
       if (isAdmin && assignedAgent) {
-        console.log("Admin assigning lead to:", assignedAgent);
         newLeadData.assignedTo = assignedAgent;
-        
-        // Get agent name for logging
-        const { data: agentData } = await supabase
-          .from("team_members")
-          .select("name")
-          .eq("id", assignedAgent)
-          .single();
-          
-        if (agentData) {
-          console.log("Assigning to agent:", agentData.name);
-        }
       } else if (!isAdmin && user) {
-        console.log("Non-admin user, self-assigning lead to:", user.id);
         newLeadData.assignedTo = user.id;
       }
       
-      // Explicitly set pipeline type in both fields for database compatibility
       newLeadData.pipelineType = pipelineType;
       newLeadData.pipeline_type = pipelineType;
-      
-      // Set the selected status
-      console.log("Setting lead status to:", leadStatus);
       newLeadData.status = leadStatus;
       
-      // Add initial action to history if not present
       if (!newLeadData.actionHistory || newLeadData.actionHistory.length === 0) {
         newLeadData.actionHistory = [{
           id: crypto.randomUUID(),
@@ -115,15 +87,9 @@ export const useLeadCreation = () => {
         }];
       }
       
-      console.log("Creating lead with processed data:", newLeadData);
-      
-      // Create the lead
       const createdLead = await createLead(newLeadData);
       
       if (createdLead) {
-        console.log("Lead created successfully:", createdLead);
-        console.log("Assigned to:", createdLead.assignedTo);
-        
         let successMessage = "Le lead a été créé avec succès.";
         if (createdLead.assignedTo) {
           const { data: agentData } = await supabase
@@ -134,8 +100,6 @@ export const useLeadCreation = () => {
             
           if (agentData) {
             successMessage = `Le lead a été créé et attribué à ${agentData.name} avec succès.`;
-          } else {
-            successMessage = `Le lead a été créé et attribué à un agent avec succès.`;
           }
         }
         
@@ -144,8 +108,7 @@ export const useLeadCreation = () => {
           description: successMessage
         });
         
-        // Navigate to the lead detail page
-        navigate(`/leads/${createdLead.id}`);
+        navigate(`/leads/${createdLead.id}?tab=info`);
       } else {
         throw new Error("Aucune donnée de lead retournée après création");
       }
@@ -162,13 +125,11 @@ export const useLeadCreation = () => {
     }
   };
 
-  // Handle agent selection
   const handleAgentChange = (value: string | undefined) => {
     console.log("Agent changed to:", value);
     setAssignedAgent(value);
     
     if (value) {
-      // Fetch and log agent name for debugging
       supabase
         .from("team_members")
         .select("name")
@@ -182,10 +143,8 @@ export const useLeadCreation = () => {
     }
   };
 
-  // Handle pipeline type change
   const handlePipelineTypeChange = (value: 'purchase' | 'rental') => {
     setPipelineType(value);
-    // Reset status to 'New' when pipeline type changes only if status wasn't explicitly set
     if (!statusFromUrl) {
       setLeadStatus('New');
     }
@@ -206,3 +165,5 @@ export const useLeadCreation = () => {
     setShowDebugInfo
   };
 };
+
+export default useLeadCreation;
