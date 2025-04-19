@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
@@ -25,9 +24,7 @@ const Actions = () => {
   
   const { actions, isLoading, markActionComplete, teamMembers } = useActionsData(refreshTrigger);
   
-  // Filter actions based on search term and agent
   const filteredActions = actions.filter(action => {
-    // Search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       const matches = (
@@ -38,7 +35,6 @@ const Actions = () => {
       if (!matches) return false;
     }
     
-    // Agent filter
     if (agentFilter && action.assignedToId !== agentFilter) {
       return false;
     }
@@ -102,7 +98,6 @@ const Actions = () => {
                   Rafraîchir
                 </Button>
                 
-                {/* Nouveau bouton pour l'assistant IA */}
                 <Button
                   variant="outline"
                   size="default"
@@ -113,7 +108,6 @@ const Actions = () => {
                   Assistant IA
                 </Button>
                 
-                {/* Bouton Chat Gadait */}
                 <ChatGadaitButton 
                   variant="outline"
                   size="default"
@@ -153,7 +147,6 @@ const Actions = () => {
             </div>
           )}
           
-          {/* Assistant IA pour les actions */}
           {showAIAssistant && (
             <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
               <ActionsAIAssistant 
