@@ -188,13 +188,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         isRefreshing={isRefreshing}
       />
 
-      {selectedAgentName && (
-        <div className="mb-4 text-sm bg-gray-50 p-2 rounded-lg text-center">
-          <span className="font-medium">Commercial sélectionné :</span>{" "}
-          <span className="text-primary font-semibold">{selectedAgentName}</span>
-        </div>
-      )}
-
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
         <TabsList className="bg-gray-100 p-1 rounded-xl w-80">
           <TabsTrigger 
