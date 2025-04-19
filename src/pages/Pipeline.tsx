@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
@@ -31,23 +32,22 @@ const Pipeline = () => {
 
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
 
+  // Initial load
   useEffect(() => {
     handleRefresh();
-  }, []);
+  }, [handleRefresh]);
 
+  // Apply the selectedAgent to filters when it changes
   useEffect(() => {
-    const handleAgentSelectionChange = (e: CustomEvent) => {
-      const newAgent = e.detail.selectedAgent;
-      if (newAgent !== selectedAgent) {
-        handleAgentChange(newAgent);
-      }
-    };
-
-    window.addEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
-    return () => {
-      window.removeEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
-    };
-  }, [selectedAgent, handleAgentChange]);
+    if (filters.assignedTo !== selectedAgent) {
+      setFilters({
+        ...filters,
+        assignedTo: selectedAgent
+      });
+      // Force refresh data when agent changes
+      handleRefresh();
+    }
+  }, [selectedAgent, filters, setFilters, handleRefresh]);
 
   return (
     <>
