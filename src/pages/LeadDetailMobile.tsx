@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -45,6 +44,8 @@ const LeadDetailMobile = () => {
     handleSave,
     handleDataChange,
     fetchLead,
+    getFormattedPhoneForCall,
+    getFormattedPhoneForWhatsApp,
     startCallTracking,
     endCallTracking,
     formatDuration
@@ -119,11 +120,13 @@ const LeadDetailMobile = () => {
 
   const handlePhoneCall = (e: React.MouseEvent) => {
     e.preventDefault();
+    console.log("Phone call initiated");
     startCallTracking('phone');
   };
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    console.log("WhatsApp initiated");
     startCallTracking('whatsapp');
   };
 
@@ -135,6 +138,7 @@ const LeadDetailMobile = () => {
   };
 
   const handleCallComplete = (duration: number) => {
+    console.log("Call completed with duration:", duration);
     if (lead) {
       endCallTracking(duration);
     }
@@ -156,7 +160,7 @@ const LeadDetailMobile = () => {
         <LeadDetailHeader
           name={lead.name}
           createdAt={lead.createdAt}
-          phone={lead.phone}
+          phone={getFormattedPhoneForCall()}
           email={lead.email}
           budget={lead.budget}
           currency={lead.currency}
@@ -171,6 +175,7 @@ const LeadDetailMobile = () => {
           onPhoneCall={handlePhoneCall}
           onWhatsAppClick={handleWhatsAppClick}
           onEmailClick={handleEmailClick}
+          onCallComplete={handleCallComplete}
         />
         
         <div className="bg-white">

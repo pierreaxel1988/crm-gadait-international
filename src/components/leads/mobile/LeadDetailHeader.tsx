@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
@@ -73,20 +74,24 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
     e.stopPropagation();
     
     if (phone) {
+      // Start the call dialog first
       setIsCallDialogOpen(true);
       setCallStatus('calling');
       
+      // Start the timer
       const timer = setInterval(() => {
         setCallDuration(prev => prev + 1);
       }, 1000);
       
       setCallTimer(timer);
       
+      // Trigger the parent's callback
       if (onPhoneCall) {
         onPhoneCall(e);
-      } else {
-        window.location.href = `tel:${phone}`;
       }
+      
+      // Actually make the call using the tel: protocol
+      window.location.href = `tel:${phone}`;
     }
   };
 
@@ -193,14 +198,14 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
                       <Phone className="h-8 w-8 text-green-600" />
                     </div>
                   </div>
-                  <p>Durée : <span className="text-2xl font-semibold mt-2">{formatDuration(callDuration)}</span></p>
+                  <div>Durée : <span className="text-2xl font-semibold mt-2">{formatDuration(callDuration)}</span></div>
                 </div>
               ) : callStatus === 'completed' ? (
-                <p>L'appel a été enregistré avec succès.</p>
+                <div>L'appel a été enregistré avec succès.</div>
               ) : callStatus === 'failed' ? (
-                <p>L'appel n'a pas pu être effectué.</p>
+                <div>L'appel n'a pas pu être effectué.</div>
               ) : (
-                <p>Comment souhaitez-vous procéder ?</p>
+                <div>Comment souhaitez-vous procéder ?</div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
