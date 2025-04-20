@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useActionsData } from './useActionsData';
 import { format, isPast, isToday } from 'date-fns';
@@ -21,7 +20,6 @@ export const useNotifications = () => {
   const { actions, markActionComplete } = useActionsData();
   
   useEffect(() => {
-    // Add a few system notifications for things like platform updates
     const systemNotifications: Notification[] = [
       {
         id: 'system-1',
@@ -132,8 +130,12 @@ export const useNotifications = () => {
     return false;
   };
 
+  const sortedNotifications = notifications.sort((a, b) => 
+    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+
   return {
-    notifications,
+    notifications: sortedNotifications,
     setNotifications,
     markAsRead,
     markAllAsRead,
