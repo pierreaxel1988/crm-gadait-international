@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 
 // Import newly created components
@@ -14,40 +14,10 @@ interface NavbarProps {
   sidebarCollapsed?: boolean;
 }
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  read: boolean;
-  timestamp: Date;
-  actionId?: string;
-  leadId?: string;
-  type: 'action' | 'system';
-}
-
 const Navbar: React.FC<NavbarProps> = ({
   toggleSidebar,
   sidebarCollapsed
 }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  // Only add system notifications at initial load
-  useEffect(() => {
-    // Add a few system notifications for things like platform updates
-    const systemNotifications: Notification[] = [
-      {
-        id: 'system-1',
-        title: 'Bienvenue sur le CRM Gadait International',
-        message: 'Découvrez les nouvelles fonctionnalités de la plateforme',
-        read: false,
-        timestamp: new Date(Date.now() - 30 * 60000),
-        type: 'system'
-      }
-    ];
-    
-    setNotifications(systemNotifications);
-  }, []);
-
   return (
     <nav className={cn(
       "sticky top-0 z-50 w-full bg-loro-white border-b border-loro-pearl transition-all duration-300"
@@ -59,10 +29,7 @@ const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center space-x-2 md:space-x-4">
             <SearchBar />
             <ThemeToggle />
-            <NotificationsDropdown 
-              notifications={notifications} 
-              setNotifications={setNotifications} 
-            />
+            <NotificationsDropdown />
             <UserMenu />
           </div>
         </div>

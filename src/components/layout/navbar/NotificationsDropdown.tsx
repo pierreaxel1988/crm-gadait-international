@@ -1,31 +1,13 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Calendar, Clock, CheckCheck, Phone, Users, FileText, MessageCircle, X } from 'lucide-react';
+import { Bell, Calendar, CheckCheck, Phone, Users, FileText, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { useActionsData } from '@/hooks/useActionsData';
-import { ActionItem } from '@/types/actionHistory';
-import { format, isPast, isToday } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  read: boolean;
-  timestamp: Date;
-  actionId?: string;
-  leadId?: string;
-  type: 'action' | 'system';
-  actionType?: string;
-}
-
-interface NotificationsDropdownProps {
-  notifications: Notification[];
-  setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
-}
+import { useNotifications, Notification } from '@/hooks/useNotifications';
 
 const getActionIcon = (actionType?: string) => {
   switch (actionType?.toLowerCase()) {
@@ -43,93 +25,21 @@ const getActionIcon = (actionType?: string) => {
   }
 };
 
-const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
-  notifications,
-  setNotifications
-}) => {
+const NotificationsDropdown: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { actions, markActionComplete } = useActionsData();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  
-  useEffect(() => {
-    if (actions && actions.length > 0) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const relevantActions = actions.filter(action => {
-        if (action.status === 'done') return false;
-        
-        const scheduledDate = action.scheduledDate ? new Date(action.scheduledDate) : null;
-        if (!scheduledDate) return false;
-        
-        const isActionToday = isToday(scheduledDate);
-        const isActionOverdue = isPast(scheduledDate) && !isToday(scheduledDate);
-        
-        return isActionToday || isActionOverdue;
-      });
-      
-      const actionNotifications: Notification[] = relevantActions.map(action => {
-        const scheduledDate = new Date(action.scheduledDate || new Date());
-        const isOverdue = isPast(scheduledDate) && !isToday(scheduledDate);
-        
-        let title = '';
-        let message = '';
-        
-        if (isOverdue) {
-          title = `Action en retard : ${action.actionType}`;
-          message = `${action.leadName} - Prévue le ${format(scheduledDate, 'dd/MM/yyyy', { locale: fr })}`;
-        } else {
-          title = `Action aujourd'hui : ${action.actionType}`;
-          message = `${action.leadName} - ${format(scheduledDate, 'HH:mm', { locale: fr })}`;
-        }
-        
-        return {
-          id: `action-${action.id}`,
-          title,
-          message,
-          read: false,
-          timestamp: scheduledDate,
-          actionId: action.id,
-          leadId: action.leadId,
-          type: 'action',
-          actionType: action.actionType
-        };
-      });
-      
-      const existingActionIds = notifications
-        .filter(n => n.type === 'action')
-        .map(n => n.actionId);
-        
-      const newActionNotifications = actionNotifications
-        .filter(n => !existingActionIds.includes(n.actionId));
-      
-      if (newActionNotifications.length > 0) {
-        setNotifications(prev => [...newActionNotifications, ...prev]);
-      }
-    }
-  }, [actions, setNotifications]);
+  const { 
+    notifications, 
+    markAsRead, 
+    markAllAsRead, 
+    handleActionComplete,
+    unreadCount
+  } = useNotifications();
   
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
-  };
-
-  const markAsRead = (id: string) => {
-    setNotifications(notifications.map(notification => 
-      notification.id === id ? {
-        ...notification,
-        read: true
-      } : notification
-    ));
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(notification => ({
-      ...notification,
-      read: true
-    })));
-    toast.success('Toutes les notifications ont été marquées comme lues');
   };
   
   const handleNotificationClick = (notification: Notification) => {
@@ -141,20 +51,15 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
     }
   };
   
-  const handleActionComplete = async (notification: Notification, event: React.MouseEvent) => {
+  const handleActionCompleteClick = async (notification: Notification, event: React.MouseEvent) => {
     event.stopPropagation();
     
-    if (notification.type === 'action' && notification.actionId) {
-      try {
-        await markActionComplete(notification.actionId, notification.leadId || '');
-        
-        setNotifications(prev => prev.filter(n => n.id !== notification.id));
-        
-        toast.success('Action marquée comme terminée');
-      } catch (error) {
-        console.error("Error completing action from notification:", error);
-        toast.error("Impossible de marquer l'action comme terminée");
-      }
+    const success = await handleActionComplete(notification);
+    
+    if (success) {
+      toast.success('Action marquée comme terminée');
+    } else {
+      toast.error("Impossible de marquer l'action comme terminée");
     }
   };
 
@@ -182,8 +87,6 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
-  const unreadCount = notifications.filter(notification => !notification.read).length;
   
   const renderNotificationItem = (notification: Notification) => (
     <div 
@@ -205,7 +108,7 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
           
           {notification.type === 'action' && (
             <button 
-              onClick={(e) => handleActionComplete(notification, e)}
+              onClick={(e) => handleActionCompleteClick(notification, e)}
               className="mt-2 flex items-center text-xs text-loro-hazel hover:text-loro-navy"
             >
               <CheckCheck size={12} className="mr-1" />

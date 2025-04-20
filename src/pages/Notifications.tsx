@@ -3,32 +3,17 @@ import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bell, Calendar, CheckCheck } from 'lucide-react';
-import { format, isPast, isToday } from 'date-fns';
+import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  read: boolean;
-  timestamp: Date;
-  actionId?: string;
-  leadId?: string;
-  type: 'action' | 'system';
-  actionType?: string;
-}
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const Notifications = () => {
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
-  const [notifications, setNotifications] = useState<Notification[]>([]); // À connecter avec le state global plus tard
-
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(notif => ({
-      ...notif,
-      read: true
-    })));
-  };
+  const navigate = useNavigate();
+  const { notifications, markAllAsRead, handleActionComplete } = useNotifications();
 
   const getActionIcon = (actionType?: string) => {
     switch (actionType?.toLowerCase()) {
@@ -50,6 +35,21 @@ const Notifications = () => {
       return `${Math.floor(diffInMinutes / 60)} h`;
     } else {
       return format(date, 'dd MMM yyyy', { locale: fr });
+    }
+  };
+
+  const handleCompleteAction = async (notification) => {
+    const success = await handleActionComplete(notification);
+    if (success) {
+      toast.success('Action marquée comme terminée');
+    } else {
+      toast.error("Impossible de marquer l'action comme terminée");
+    }
+  };
+
+  const handleNotificationClick = (notification) => {
+    if (notification.type === 'action' && notification.leadId) {
+      navigate(`/leads/${notification.leadId}`);
     }
   };
 
@@ -91,7 +91,8 @@ const Notifications = () => {
             filteredNotifications.map(notification => (
               <div 
                 key={notification.id}
-                className={`p-4 rounded-lg border ${notification.read ? 'bg-white' : 'bg-loro-pearl/10'}`}
+                className={`p-4 rounded-lg border ${notification.read ? 'bg-white' : 'bg-loro-pearl/10'} cursor-pointer`}
+                onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 mt-1">
@@ -114,6 +115,10 @@ const Notifications = () => {
                         variant="ghost" 
                         size="sm" 
                         className="mt-2 h-8 text-loro-hazel hover:text-loro-navy"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCompleteAction(notification);
+                        }}
                       >
                         <CheckCheck className="w-4 h-4 mr-1" />
                         Marquer comme terminée
