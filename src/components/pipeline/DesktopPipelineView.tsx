@@ -1,22 +1,20 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { PlusCircle, Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
-import PipelineFilters, { FilterOptions } from './PipelineFilters';
-import { LeadStatus } from '@/components/common/StatusBadge';
+import PipelineFilters from './PipelineFilters';
 import { useKanbanData } from '@/hooks/useKanbanData';
-import { PipelineType } from '@/types/lead';
-import LeadListItem from './mobile/LeadListItem';
 import { useNavigate } from 'react-router-dom';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import PipelineHeader from './PipelineHeader';
 import { sortLeadsByPriority } from './mobile/utils/leadSortUtils';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import LoadingScreen from '../layout/LoadingScreen';
+import SortingControls from './components/SortingControls';
+import LeadsList from './components/LeadsList';
+import AddLeadButton from './components/AddLeadButton';
+import { DesktopPipelineViewProps, SortBy } from './types/pipelineTypes';
+import { PipelineType } from '@/types/lead';
 
-const statusTranslations: Record<LeadStatus, string> = {
+const statusTranslations: Record<string, string> = {
   'New': 'Nouveaux',
   'Contacted': 'Contactés',
   'Qualified': 'Qualifiés',
@@ -29,24 +27,6 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Gagné': 'Conclus',
   'Perdu': 'Perdu'
 };
-
-interface DesktopPipelineViewProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  filtersOpen: boolean;
-  toggleFilters: () => void;
-  activeFiltersCount: number;
-  filters: FilterOptions;
-  onFilterChange: (filters: FilterOptions) => void;
-  onClearFilters: () => void;
-  columns: any[];
-  handleRefresh: () => void;
-  isRefreshing: boolean;
-  isFilterActive: (filterName: string) => boolean;
-  teamMembers: { id: string; name: string }[];
-}
 
 const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   activeTab,
@@ -65,8 +45,8 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   isFilterActive,
   teamMembers
 }) => {
-  const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
+  const [activeStatus, setActiveStatus] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<SortBy>('priority');
   const navigate = useNavigate();
   
   const {
@@ -100,14 +80,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
   
-  const leadCountByStatus = filteredColumns.reduce((acc, column) => {
-    const countForStatus = column.items.length;
-    acc[column.status] = countForStatus;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  const totalLeadCount = leadsByStatus.length;
-  
   const handleAddLead = () => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${activeStatus === 'all' ? 'New' : activeStatus}`);
   };
@@ -120,6 +92,14 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     handleRefresh();
     toggleFilters();
   };
+
+  const leadCountByStatus = filteredColumns.reduce((acc, column) => {
+    const countForStatus = column.items.length;
+    acc[column.status] = countForStatus;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  const totalLeadCount = leadsByStatus.length;
 
   return (
     <div className="flex flex-col">
@@ -158,8 +138,8 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         
         <div className="overflow-x-auto pb-3">
           <Tabs 
-            value={activeStatus === 'all' ? 'all' : activeStatus} 
-            onValueChange={value => setActiveStatus(value as LeadStatus | 'all')} 
+            value={activeStatus} 
+            onValueChange={setActiveStatus} 
             className="w-full"
           >
             <TabsList className="inline-flex w-auto p-1 h-10 bg-gray-100 rounded-full">
@@ -185,89 +165,19 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         </div>
       </div>
       
-      <div className="flex flex-wrap gap-3 items-center justify-between bg-gray-50 rounded-lg p-3 mb-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">Trier par:</span>
-          <div className="flex space-x-2">
-            <button 
-              onClick={() => setSortBy('priority')}
-              className={`px-3 py-1 rounded-md ${sortBy === 'priority' 
-                ? 'bg-zinc-900 text-white' 
-                : 'bg-gray-100 text-gray-600'}`}
-            >
-              Priorité
-            </button>
-            <button 
-              onClick={() => setSortBy('newest')}
-              className={`px-3 py-1 rounded-md ${sortBy === 'newest' 
-                ? 'bg-zinc-900 text-white' 
-                : 'bg-gray-100 text-gray-600'}`}
-            >
-              Plus récent
-            </button>
-            <button 
-              onClick={() => setSortBy('oldest')}
-              className={`px-3 py-1 rounded-md ${sortBy === 'oldest' 
-                ? 'bg-zinc-900 text-white' 
-                : 'bg-gray-100 text-gray-600'}`}
-            >
-              Plus ancien
-            </button>
-          </div>
-        </div>
-      </div>
+      <SortingControls 
+        sortBy={sortBy} 
+        onSortChange={setSortBy} 
+      />
       
-      <div className="relative bg-gray-50 rounded-lg border border-gray-200">
-        {isLoading ? (
-          <LoadingScreen fullscreen={false} />
-        ) : (
-          <div className="p-4">
-            {sortedLeads.length === 0 ? (
-              <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
-                <div className="text-center">
-                  <p className="text-sm text-zinc-900 font-medium">Aucun lead trouvé</p>
-                  <button 
-                    onClick={handleAddLead} 
-                    className="mt-2 text-zinc-900 hover:text-zinc-700 text-sm flex items-center justify-center mx-auto"
-                  >
-                    <PlusCircle className="h-4 w-4 mr-1" />
-                    Ajouter un lead
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
-                {sortedLeads.map(lead => (
-                  <LeadListItem 
-                    key={lead.id}
-                    id={lead.id}
-                    name={lead.name}
-                    columnStatus={lead.columnStatus}
-                    budget={lead.budget}
-                    currency={lead.currency}
-                    desiredLocation={lead.desiredLocation}
-                    taskType={lead.taskType}
-                    createdAt={lead.createdAt}
-                    nextFollowUpDate={lead.nextFollowUpDate}
-                    phone={lead.phone}
-                    email={lead.email}
-                    onClick={handleLeadClick}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <LeadsList 
+        leads={sortedLeads}
+        isLoading={isLoading}
+        onLeadClick={handleLeadClick}
+        onAddLead={handleAddLead}
+      />
       
-      <div className="fixed bottom-6 right-6 z-50 hidden md:block">
-        <button 
-          onClick={handleAddLead} 
-          className="text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-colors bg-zinc-900 hover:bg-zinc-800"
-        >
-          <PlusCircle className="h-6 w-6" />
-        </button>
-      </div>
+      <AddLeadButton onClick={handleAddLead} />
       
       {filtersOpen && (
         <Sheet open={filtersOpen} onOpenChange={toggleFilters}>
