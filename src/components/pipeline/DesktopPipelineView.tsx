@@ -122,7 +122,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-170px)]">
+    <div className="flex flex-col">
       <PipelineHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -215,11 +215,11 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         </div>
       </div>
       
-      <div className="relative flex-1 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+      <div className="relative bg-gray-50 rounded-lg border border-gray-200">
         {isLoading ? (
           <LoadingScreen fullscreen={false} />
         ) : (
-          <div className="h-full overflow-y-auto p-4">
+          <div className="p-4">
             {sortedLeads.length === 0 ? (
               <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
                 <div className="text-center">
