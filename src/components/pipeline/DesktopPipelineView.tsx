@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -15,6 +14,20 @@ import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import PipelineHeader from './PipelineHeader';
 import { sortLeadsByPriority } from './mobile/utils/leadSortUtils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
+const statusTranslations: Record<LeadStatus, string> = {
+  'New': 'Nouveaux',
+  'Contacted': 'Contactés',
+  'Qualified': 'Qualifiés',
+  'Proposal': 'Propositions',
+  'Visit': 'Visites en cours',
+  'Offer': 'Offre en cours',
+  'Offer': 'Offre en cours',
+  'Deposit': 'Dépôt reçu',
+  'Signed': 'Signature finale',
+  'Gagné': 'Conclus',
+  'Perdu': 'Perdu'
+};
 
 interface DesktopPipelineViewProps {
   activeTab: string;
@@ -68,18 +81,15 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         !column.pipelineType || column.pipelineType === activeTab
       );
 
-  // First get all leads by status
   const leadsByStatus = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
     columnStatus: column.status
   })));
   
-  // Then filter by active status if not 'all'
   const displayedLeads = activeStatus === 'all' 
     ? leadsByStatus 
     : leadsByStatus.filter(lead => lead.columnStatus === activeStatus);
   
-  // Apply search filter
   const searchFilteredLeads = searchTerm 
     ? displayedLeads.filter(item => 
         item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,10 +97,8 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
       )
     : displayedLeads;
     
-  // Apply smart sorting
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
   
-  // Calculate counts for each status
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     const countForStatus = column.items.length;
     acc[column.status] = countForStatus;
@@ -114,7 +122,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
 
   return (
     <div className="flex flex-col h-[calc(100vh-170px)]">
-      {/* Use PipelineHeader component for consistent UI */}
       <PipelineHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
