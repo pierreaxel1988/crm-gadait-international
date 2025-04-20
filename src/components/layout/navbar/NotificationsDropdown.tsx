@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Calendar, Clock, CheckCheck, Phone, Users, FileText, MessageCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -28,7 +27,6 @@ interface NotificationsDropdownProps {
   setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
 }
 
-// Function to get icon based on action type
 const getActionIcon = (actionType?: string) => {
   switch (actionType?.toLowerCase()) {
     case 'call':
@@ -220,10 +218,8 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
   );
   
   const viewAllNotifications = () => {
-    // Pour l'instant, on ferme juste le panneau
-    // Dans une future version, on pourrait naviguer vers une page dédiée
     setShowNotifications(false);
-    toast.info("Fonctionnalité à venir: page de toutes les notifications");
+    navigate('/notifications');
   };
 
   return (
@@ -241,7 +237,6 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
         )}
       </button>
       
-      {/* Version desktop - dropdown */}
       {!isMobile && showNotifications && (
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-10 border border-loro-pearl">
           <div className="p-3 border-b border-loro-pearl flex justify-between items-center sticky top-0 bg-white z-10">
@@ -275,7 +270,6 @@ const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
         </div>
       )}
       
-      {/* Version mobile - drawer */}
       {isMobile && (
         <Drawer open={showNotifications} onOpenChange={setShowNotifications}>
           <DrawerContent className="max-h-[90vh] flex flex-col">

@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy } from 'react';
 import {
   BrowserRouter as Router,
@@ -23,6 +22,7 @@ const Calendar = lazy(() => import('./pages/Calendar'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Admin = lazy(() => import('./pages/Admin'));
 const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
+const Notifications = lazy(() => import('./pages/Notifications'));
 
 function App() {
   return (
@@ -61,6 +61,11 @@ function App() {
             <Route path="/calendar" element={
               <ProtectedRoute commercialAllowed={true}>
                 <Calendar />
+              </ProtectedRoute>
+            } />
+            <Route path="/notifications" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <Notifications />
               </ProtectedRoute>
             } />
             
