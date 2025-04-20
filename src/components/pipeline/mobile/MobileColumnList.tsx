@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +11,7 @@ import LeadListItem from './LeadListItem';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import { sortLeadsByPriority } from './utils/leadSortUtils';
 import { useAuth } from '@/hooks/useAuth';
+import LoadingScreen from '@/components/layout/LoadingScreen';
 
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
@@ -117,7 +119,7 @@ const MobileColumnList = ({
     <div className="space-y-4">
       {isLoading ? (
         <div className="flex items-center justify-center h-40">
-          <p className="text-sm text-muted-foreground">Chargement des leads...</p>
+          <LoadingScreen fullscreen={false} />
         </div>
       ) : (
         <>

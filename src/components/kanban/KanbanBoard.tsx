@@ -8,6 +8,7 @@ import { useKanbanDragDrop } from '@/hooks/useKanbanDragDrop';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { isPast, isToday } from 'date-fns';
 import { sortLeadsByPriority } from '@/components/pipeline/mobile/utils/leadSortUtils';
+import LoadingScreen from '@/components/layout/LoadingScreen';
 
 interface KanbanBoardProps {
   columns: {
@@ -20,9 +21,10 @@ interface KanbanBoardProps {
   filters?: FilterOptions;
   refreshTrigger?: number;
   pipelineType: 'purchase' | 'rental';
+  isLoading?: boolean;
 }
 
-const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipelineType }: KanbanBoardProps) => {
+const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipelineType, isLoading = false }: KanbanBoardProps) => {
   const isMobile = useIsMobile();
   
   // Log information for debugging
@@ -73,6 +75,14 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
     columns,
     pipelineType
   ]);
+  
+  if (isLoading) {
+    return (
+      <div className={cn('overflow-hidden h-full flex items-center justify-center', className)}>
+        <LoadingScreen fullscreen={false} />
+      </div>
+    );
+  }
   
   return (
     <div className={cn('overflow-hidden h-full', className)}>
