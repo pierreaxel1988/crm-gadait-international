@@ -129,23 +129,27 @@ const NotificationsDropdown: React.FC = () => {
       <button 
         onClick={toggleNotifications} 
         className="relative rounded-md p-1 md:p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200" 
-        aria-label="Notifications"
+        aria-label={`Notifications${unreadCount > 0 ? ` - ${unreadCount} non lues` : ''}`}
       >
         <Bell size={18} />
         {unreadCount > 0 && (
           <span 
-            className="absolute right-0 top-0 
-              h-4 w-4 
+            className="absolute -right-0.5 -top-0.5
+              min-w-[20px] h-5
+              px-1
               rounded-full 
-              bg-loro-terracotta/90 
+              bg-gradient-to-br from-loro-terracotta to-loro-terracotta/90
               text-loro-white 
               flex items-center justify-center 
-              text-[10px] font-bold
+              text-[11px] font-semibold
               animate-pulse-soft
-              border border-loro-white/50
-              shadow-sm"
+              border border-loro-white
+              shadow-sm
+              select-none
+              transition-all duration-200"
+            aria-hidden="true"
           >
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
