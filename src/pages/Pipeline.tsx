@@ -7,7 +7,6 @@ import DesktopPipelineView from '@/components/pipeline/DesktopPipelineView';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
-import SelectedAgentDisplay from '@/components/pipeline/SelectedAgentDisplay';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import ComponentLoader from '@/components/common/ComponentLoader';
 
@@ -73,8 +72,6 @@ const Pipeline = () => {
       <Navbar />
       <SubNavigation />
       <div className="p-3 md:p-6 bg-white min-h-screen">
-        <SelectedAgentDisplay agentName={selectedAgentName} />
-        
         <ComponentLoader isLoading={isRefreshing}>
           {isMobile ? (
             <MobilePipelineView
