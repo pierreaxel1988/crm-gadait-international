@@ -26,8 +26,8 @@ const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
             <Route path="/" element={<Navigate to="/pipeline" />} />
@@ -91,8 +91,8 @@ function App() {
           </Routes>
           <Toaster />
         </Suspense>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
