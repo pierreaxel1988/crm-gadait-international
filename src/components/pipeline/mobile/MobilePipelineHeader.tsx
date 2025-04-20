@@ -51,6 +51,12 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
     navigate(`/leads/${lead.id}?tab=overview`);
   };
 
+  // Function to clear filters and trigger refresh
+  const handleClearAllFilters = () => {
+    onClearFilters();
+    setTimeout(() => handleRefresh(), 0);
+  };
+
   const renderLeadItem = (lead: SearchResult) => (
     <div className="flex flex-col">
       <div className="font-medium">{lead.name}</div>
@@ -81,7 +87,7 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
               variant="outline" 
               size="icon" 
               className="h-9 w-9" 
-              onClick={onClearFilters}
+              onClick={handleClearAllFilters}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -141,7 +147,7 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
         <ActiveFiltersList
           filters={filters}
           onFilterChange={onFilterChange}
-          onClearFilters={onClearFilters}
+          onClearFilters={handleClearAllFilters}
           getTeamMemberName={getTeamMemberName}
           isFilterActive={isFilterActive}
         />
