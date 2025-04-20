@@ -123,64 +123,66 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
 
   return (
     <div className="flex flex-col">
-      <PipelineHeader
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        onToggleFilters={toggleFilters}
-        filtersOpen={filtersOpen}
-        activeFilters={activeFiltersCount}
-        isFilterActive={isFilterActive}
-        filters={filters}
-        onFilterChange={onFilterChange}
-        onClearFilters={onClearFilters}
-        teamMembers={teamMembers}
-        handleRefresh={handleRefresh}
-        isRefreshing={isRefreshing}
-      />
+      <div className="sticky top-[64px] z-20 bg-white pb-4 border-b space-y-4">
+        <PipelineHeader
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onToggleFilters={toggleFilters}
+          filtersOpen={filtersOpen}
+          activeFilters={activeFiltersCount}
+          isFilterActive={isFilterActive}
+          filters={filters}
+          onFilterChange={onFilterChange}
+          onClearFilters={onClearFilters}
+          teamMembers={teamMembers}
+          handleRefresh={handleRefresh}
+          isRefreshing={isRefreshing}
+        />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
-        <TabsList className="bg-gray-100 p-1 rounded-xl w-80">
-          <TabsTrigger 
-            value="purchase" 
-            className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-          >
-            Achat
-          </TabsTrigger>
-          <TabsTrigger 
-            value="rental" 
-            className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-          >
-            Location
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-      
-      <div className="overflow-x-auto pb-3">
-        <Tabs 
-          value={activeStatus === 'all' ? 'all' : activeStatus} 
-          onValueChange={value => setActiveStatus(value as LeadStatus | 'all')} 
-          className="w-full"
-        >
-          <TabsList className="inline-flex w-auto p-1 h-10 bg-gray-100 rounded-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
+          <TabsList className="bg-gray-100 p-1 rounded-xl w-80">
             <TabsTrigger 
-              value="all" 
-              className="rounded-full px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              value="purchase" 
+              className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
             >
-              Tous ({totalLeadCount})
+              Achat
             </TabsTrigger>
-            {filteredColumns.map(column => 
-              leadCountByStatus[column.status] > 0 && (
-                <TabsTrigger 
-                  key={column.status} 
-                  value={column.status} 
-                  className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                >
-                  {statusTranslations[column.status]} ({leadCountByStatus[column.status]})
-                </TabsTrigger>
-              )
-            )}
+            <TabsTrigger 
+              value="rental" 
+              className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
+            >
+              Location
+            </TabsTrigger>
           </TabsList>
         </Tabs>
+        
+        <div className="overflow-x-auto pb-3">
+          <Tabs 
+            value={activeStatus === 'all' ? 'all' : activeStatus} 
+            onValueChange={value => setActiveStatus(value as LeadStatus | 'all')} 
+            className="w-full"
+          >
+            <TabsList className="inline-flex w-auto p-1 h-10 bg-gray-100 rounded-full">
+              <TabsTrigger 
+                value="all" 
+                className="rounded-full px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              >
+                Tous ({totalLeadCount})
+              </TabsTrigger>
+              {filteredColumns.map(column => 
+                leadCountByStatus[column.status] > 0 && (
+                  <TabsTrigger 
+                    key={column.status} 
+                    value={column.status} 
+                    className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                  >
+                    {statusTranslations[column.status]} ({leadCountByStatus[column.status]})
+                  </TabsTrigger>
+                )
+              )}
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
       
       <div className="flex flex-wrap gap-3 items-center justify-between bg-gray-50 rounded-lg p-3 mb-4">

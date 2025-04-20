@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sheet } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -54,36 +55,38 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   
   return (
     <div className="flex flex-col h-[calc(100vh-80px)]">
-      <MobilePipelineHeader 
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        activeFiltersCount={activeFiltersCount}
-        toggleFilters={toggleFilters}
-        handleRefresh={handleRefresh}
-        isRefreshing={isRefreshing}
-        filters={filters}
-        onFilterChange={onFilterChange}
-        onClearFilters={onClearFilters}
-        isFilterActive={isFilterActive}
-        teamMembers={teamMembers}
-      />
+      <div className="sticky top-0 z-20 bg-white pb-4 border-b space-y-3">
+        <MobilePipelineHeader 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          activeFiltersCount={activeFiltersCount}
+          toggleFilters={toggleFilters}
+          handleRefresh={handleRefresh}
+          isRefreshing={isRefreshing}
+          filters={filters}
+          onFilterChange={onFilterChange}
+          onClearFilters={onClearFilters}
+          isFilterActive={isFilterActive}
+          teamMembers={teamMembers}
+        />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3">
-        <TabsList className="w-full bg-gray-100 p-0.5 rounded-xl h-11">
-          <TabsTrigger 
-            value="purchase" 
-            className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-          >
-            Achat
-          </TabsTrigger>
-          <TabsTrigger 
-            value="rental" 
-            className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-          >
-            Location
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3">
+          <TabsList className="w-full bg-gray-100 p-0.5 rounded-xl h-11">
+            <TabsTrigger 
+              value="purchase" 
+              className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
+            >
+              Achat
+            </TabsTrigger>
+            <TabsTrigger 
+              value="rental" 
+              className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
+            >
+              Location
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
 
       <div className="flex-1 overflow-y-auto mt-3 pb-20 -mx-3 px-3 bg-gray-50">
         <MobileColumnList
@@ -94,7 +97,6 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
         />
       </div>
 
-      {/* Filters sheet */}
       {filtersOpen && (
         <Sheet open={filtersOpen} onOpenChange={toggleFilters}>
           <PipelineFilters 
