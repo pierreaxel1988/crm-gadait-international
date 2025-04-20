@@ -17,6 +17,7 @@ import { sortLeadsByPriority } from './mobile/utils/leadSortUtils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/hooks/useAuth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 
 interface DesktopPipelineViewProps {
   activeTab: string;
@@ -69,9 +70,9 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
 }) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
-  const [selectedCommercial, setSelectedCommercial] = useState<string | null>(null);
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const { selectedAgent, handleAgentChange } = useSelectedAgent();
   
   const {
     loadedColumns,
@@ -100,8 +101,8 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   })));
   
   // Then filter by commercial if selected
-  const leadsByCommercial = selectedCommercial 
-    ? leadsByStatus.filter(lead => lead.assignedToId === selectedCommercial)
+  const leadsByCommercial = selectedAgent 
+    ? leadsByStatus.filter(lead => lead.assignedToId === selectedAgent)
     : leadsByStatus;
   
   // Then filter by active status if not 'all'
@@ -122,16 +123,16 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   
   // Calculate counts for each status after commercial filtering
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
-    const countForStatus = selectedCommercial
-      ? column.items.filter(item => item.assignedToId === selectedCommercial).length
+    const countForStatus = selectedAgent
+      ? column.items.filter(item => item.assignedToId === selectedAgent).length
       : column.items.length;
     
     acc[column.status] = countForStatus;
     return acc;
   }, {} as Record<string, number>);
   
-  const totalLeadCount = selectedCommercial
-    ? leadsByStatus.filter(lead => lead.assignedToId === selectedCommercial).length
+  const totalLeadCount = selectedAgent
+    ? leadsByStatus.filter(lead => lead.assignedToId === selectedAgent).length
     : leadsByStatus.length;
   
   const handleAddLead = () => {
@@ -148,7 +149,8 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   };
 
   const handleCommercialChange = (value: string) => {
-    setSelectedCommercial(value === "all" ? null : value);
+    const newAgentId = value === "all" ? null : value;
+    handleAgentChange(newAgentId);
   };
   
   return (
@@ -247,7 +249,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         
         {isAdmin && allTeamMembers && allTeamMembers.length > 0 && (
           <div className="flex items-center">
-            <Select value={selectedCommercial || "all"} onValueChange={handleCommercialChange}>
+            <Select value={selectedAgent || "all"} onValueChange={handleCommercialChange}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Filtrer par commercial" />
               </SelectTrigger>
