@@ -6,6 +6,9 @@ import MobilePipelineHeader from './mobile/MobilePipelineHeader';
 import MobileColumnList from './mobile/MobileColumnList';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { PipelineType } from '@/types/lead';
+import { SlidersHorizontal, ArrowDownAZ, Clock, Tag } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface MobilePipelineViewProps {
   activeTab: string;
@@ -51,9 +54,15 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
     toggleFilters();
   };
   
+  // Function to handle sort selection
+  const handleSortChange = (value: string) => {
+    console.log("Sorting changed to:", value);
+    // You can implement sorting logic here or pass this to parent component
+  };
+  
   return (
     <div className="flex flex-col h-[calc(100vh-80px)]">
-      <div className="sticky top-0 z-50 bg-white border-b shadow-sm">
+      <div className="sticky top-0 z-40 bg-white shadow-sm">
         <div className="space-y-3 px-3 pb-4">
           <MobilePipelineHeader 
             searchTerm={searchTerm}
@@ -85,6 +94,23 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
               </TabsTrigger>
             </TabsList>
           </Tabs>
+          
+          {/* Sort options */}
+          <div className="flex items-center justify-between py-2 border-b">
+            <div className="text-sm text-gray-500 flex items-center">
+              <span className="mr-2">Trier par :</span>
+              <Select defaultValue="priority">
+                <SelectTrigger className="border-0 p-0 h-auto text-sm font-medium">
+                  <SelectValue placeholder="Trier par" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="priority">Priorité</SelectItem>
+                  <SelectItem value="newest">Plus récent</SelectItem>
+                  <SelectItem value="oldest">Plus ancien</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
       </div>
 
