@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Calendar, CheckCheck, Phone, Users, FileText, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -6,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications, Notification as AppNotification } from '@/hooks/useNotifications';
 import NotificationBadge from './NotificationBadge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
@@ -43,7 +44,7 @@ const NotificationsDropdown: React.FC = () => {
     setShowNotifications(!showNotifications);
   };
   
-  const handleNotificationClick = (notification: Notification) => {
+  const handleNotificationClick = (notification: AppNotification) => {
     markAsRead(notification.id);
     
     if (notification.type === 'action' && notification.leadId) {
@@ -52,7 +53,7 @@ const NotificationsDropdown: React.FC = () => {
     }
   };
   
-  const handleActionCompleteClick = async (notification: Notification, event: React.MouseEvent) => {
+  const handleActionCompleteClick = async (notification: AppNotification, event: React.MouseEvent) => {
     event.stopPropagation();
     
     const success = await handleActionComplete(notification);
@@ -91,7 +92,7 @@ const NotificationsDropdown: React.FC = () => {
     );
   };
 
-  const renderNotificationItem = (notification: Notification) => (
+  const renderNotificationItem = (notification: AppNotification) => (
     <div 
       key={notification.id} 
       className={`border-b border-loro-pearl cursor-pointer hover:bg-gray-50 ${notification.read ? "bg-white" : "bg-loro-pearl/10"}`}
