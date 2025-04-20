@@ -31,9 +31,17 @@ export const useSelectedAgent = () => {
       }
     };
 
+    // Écouter un nouvel événement personnalisé pour les filtres effacés
+    const handleFiltersClear = () => {
+      setSelectedAgent(null);
+    };
+
     window.addEventListener('agent-selection-changed', handleAgentChange as EventListener);
+    window.addEventListener('filters-cleared', handleFiltersClear as EventListener);
+    
     return () => {
       window.removeEventListener('agent-selection-changed', handleAgentChange as EventListener);
+      window.removeEventListener('filters-cleared', handleFiltersClear as EventListener);
     };
   }, [selectedAgent]);
 

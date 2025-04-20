@@ -175,13 +175,11 @@ export function usePipelineState() {
 
   // Clear all filters
   const handleClearFilters = () => {
-    // Nous préservons le filtre d'agent lors du nettoyage des filtres
-    const currentAgentId = filters.assignedTo;
-    
+    // Modification: Supprimer complètement tous les filtres, y compris l'agent
     setFilters({
       status: null,
       tags: [],
-      assignedTo: currentAgentId,  // Conserver l'agent sélectionné
+      assignedTo: null,  // Réinitialiser l'agent à null
       minBudget: '',
       maxBudget: '',
       location: '',
@@ -243,6 +241,6 @@ export function usePipelineState() {
     handleRefresh,
     handleClearFilters,
     getAllColumns,
-    updateAgentFilter // Nouvelle fonction exposée
+    updateAgentFilter
   };
 }

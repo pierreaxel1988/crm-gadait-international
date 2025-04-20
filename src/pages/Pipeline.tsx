@@ -53,6 +53,7 @@ const Pipeline = () => {
     handleRefresh();
   }, []);
 
+  // Écouter les changements d'agent et mettre à jour les filtres
   useEffect(() => {
     const handleAgentSelectionChange = (e: CustomEvent) => {
       const newAgent = e.detail.selectedAgent;
@@ -66,6 +67,14 @@ const Pipeline = () => {
       window.removeEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
     };
   }, [selectedAgent, handleAgentChange]);
+
+  // Wrapper pour handleClearFilters qui émet aussi un événement pour réinitialiser l'agent
+  const handleClearAllFilters = () => {
+    // Émettre un événement pour signaler que tous les filtres sont effacés
+    window.dispatchEvent(new Event('filters-cleared'));
+    // Appeler la fonction d'origine
+    handleClearFilters();
+  };
 
   return (
     <>
@@ -84,7 +93,7 @@ const Pipeline = () => {
               activeFiltersCount={activeFiltersCount}
               filters={filters}
               onFilterChange={setFilters}
-              onClearFilters={handleClearFilters}
+              onClearFilters={handleClearAllFilters}
               columns={getAllColumns()}
               handleRefresh={handleRefresh}
               isRefreshing={isRefreshing}
@@ -102,7 +111,7 @@ const Pipeline = () => {
               activeFiltersCount={activeFiltersCount}
               filters={filters}
               onFilterChange={setFilters}
-              onClearFilters={handleClearFilters}
+              onClearFilters={handleClearAllFilters}
               columns={getAllColumns()}
               handleRefresh={handleRefresh}
               isRefreshing={isRefreshing}
