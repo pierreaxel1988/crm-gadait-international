@@ -34,7 +34,7 @@ const Pipeline = () => {
     updateAgentFilter
   } = usePipelineState();
 
-  const { selectedAgent, handleAgentChange } = useSelectedAgent();
+  const { selectedAgent, handleAgentChange, clearSelectedAgent } = useSelectedAgent();
 
   // Get selected agent name
   const selectedAgentName = useMemo(() => {
@@ -49,6 +49,19 @@ const Pipeline = () => {
       updateAgentFilter(selectedAgent);
     }
   }, [selectedAgent, filters.assignedTo, updateAgentFilter]);
+
+  // Sync pipeline filters with selected agent
+  useEffect(() => {
+    if (filters.assignedTo !== selectedAgent) {
+      handleAgentChange(filters.assignedTo);
+    }
+  }, [filters.assignedTo, selectedAgent, handleAgentChange]);
+
+  // Fonction personnalisée pour effacer tous les filtres et l'agent sélectionné
+  const handleClearAllFilters = () => {
+    clearSelectedAgent(); // Effacer l'agent sélectionné
+    handleClearFilters(); // Effacer tous les filtres
+  };
 
   useEffect(() => {
     handleRefresh();
@@ -87,7 +100,7 @@ const Pipeline = () => {
               activeFiltersCount={activeFiltersCount}
               filters={filters}
               onFilterChange={setFilters}
-              onClearFilters={handleClearFilters}
+              onClearFilters={handleClearAllFilters}
               columns={getAllColumns()}
               handleRefresh={handleRefresh}
               isRefreshing={isRefreshing}
@@ -105,7 +118,7 @@ const Pipeline = () => {
               activeFiltersCount={activeFiltersCount}
               filters={filters}
               onFilterChange={setFilters}
-              onClearFilters={handleClearFilters}
+              onClearFilters={handleClearAllFilters}
               columns={getAllColumns()}
               handleRefresh={handleRefresh}
               isRefreshing={isRefreshing}

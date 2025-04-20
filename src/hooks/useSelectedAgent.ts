@@ -41,5 +41,10 @@ export const useSelectedAgent = () => {
     setSelectedAgent(agentId);
   };
 
-  return { selectedAgent, handleAgentChange };
+  // Nouvelle fonction pour effacer l'agent sélectionné
+  const clearSelectedAgent = () => {
+    setSelectedAgent(null);
+  };
+
+  return { selectedAgent, handleAgentChange, clearSelectedAgent };
 };
