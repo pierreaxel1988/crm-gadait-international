@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useActionsData } from './useActionsData';
-import { format, isPast, isToday } from 'date-fns';
+import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export interface Notification {
@@ -13,6 +13,7 @@ export interface Notification {
   leadId?: string;
   type: 'action' | 'system';
   actionType?: string;
+  assignedToName?: string;
 }
 
 export const useNotifications = () => {
@@ -81,7 +82,8 @@ export const useNotifications = () => {
           actionId: action.id,
           leadId: action.leadId,
           type: 'action',
-          actionType: action.actionType
+          actionType: action.actionType,
+          assignedToName: action.assignedToName
         };
       });
       

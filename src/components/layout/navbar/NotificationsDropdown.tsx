@@ -6,8 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
-import { useNotifications, Notification } from '@/hooks/useNotifications';
+import { useNotifications } from '@/hooks/useNotifications';
 import NotificationBadge from './NotificationBadge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const getActionIcon = (actionType?: string) => {
   switch (actionType?.toLowerCase()) {
@@ -75,19 +76,21 @@ const NotificationsDropdown: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowNotifications(false);
-      }
-    };
+  const renderAssignedUser = (assignedToName?: string) => {
+    if (!assignedToName) return null;
+    
+    return (
+      <div className="flex items-center mt-2 text-xs text-gray-500">
+        <Avatar className="h-4 w-4 mr-1">
+          <AvatarFallback className="text-[8px]">
+            {assignedToName.split(' ').map(part => part[0]).join('')}
+          </AvatarFallback>
+        </Avatar>
+        <span>Assigné à {assignedToName}</span>
+      </div>
+    );
+  };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-  
   const renderNotificationItem = (notification: Notification) => (
     <div 
       key={notification.id} 
@@ -106,6 +109,8 @@ const NotificationsDropdown: React.FC = () => {
           </div>
           <p className="text-xs text-gray-600 mt-1 line-clamp-1">{notification.message}</p>
           
+          {notification.assignedToName && renderAssignedUser(notification.assignedToName)}
+          
           {notification.type === 'action' && (
             <button 
               onClick={(e) => handleActionCompleteClick(notification, e)}
@@ -119,6 +124,19 @@ const NotificationsDropdown: React.FC = () => {
       </div>
     </div>
   );
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   
   const viewAllNotifications = () => {
     setShowNotifications(false);
