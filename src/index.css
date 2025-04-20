@@ -147,6 +147,18 @@
   }
 }
 
+@keyframes loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
 .luxury-badge {
   @apply px-3 py-1 rounded-full text-sm font-normal;
 }
