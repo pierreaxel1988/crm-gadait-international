@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -94,23 +93,38 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     }
   }, [filters]);
   
-  // First get all leads by status
+  useEffect(() => {
+    if (filters.assignedTo !== selectedAgent) {
+      handleAgentChange(filters.assignedTo);
+    }
+  }, [filters.assignedTo, selectedAgent, handleAgentChange]);
+
+  useEffect(() => {
+    const handleAgentSelectionChange = (e: CustomEvent) => {
+      if (e.detail && e.detail.selectedAgent !== selectedAgent) {
+        handleAgentChange(e.detail.selectedAgent);
+      }
+    };
+
+    window.addEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
+    return () => {
+      window.removeEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
+    };
+  }, [selectedAgent, handleAgentChange]);
+  
   const leadsByStatus = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
     columnStatus: column.status
   })));
   
-  // Then filter by commercial if selected
   const leadsByCommercial = selectedAgent 
     ? leadsByStatus.filter(lead => lead.assignedToId === selectedAgent)
     : leadsByStatus;
   
-  // Then filter by active status if not 'all'
   const displayedLeads = activeStatus === 'all' 
     ? leadsByCommercial 
     : leadsByCommercial.filter(lead => lead.columnStatus === activeStatus);
   
-  // Apply search filter
   const searchFilteredLeads = searchTerm 
     ? displayedLeads.filter(item => 
         item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -118,10 +132,8 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
       )
     : displayedLeads;
     
-  // Apply smart sorting
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
   
-  // Calculate counts for each status after commercial filtering
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     const countForStatus = selectedAgent
       ? column.items.filter(item => item.assignedToId === selectedAgent).length
@@ -155,7 +167,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   
   return (
     <div className="flex flex-col h-[calc(100vh-170px)]">
-      {/* Use PipelineHeader component for consistent UI */}
       <PipelineHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}

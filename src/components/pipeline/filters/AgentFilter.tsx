@@ -25,6 +25,13 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     }
   }, [selectedAgent, assignedTo, onAssignedToChange]);
 
+  // Synchroniser avec les filtres locaux
+  useEffect(() => {
+    if (assignedTo !== selectedAgent) {
+      handleAgentChange(assignedTo);
+    }
+  }, [assignedTo, selectedAgent, handleAgentChange]);
+
   const handleAgentSelect = (agentId: string | null) => {
     // Mettre à jour à la fois le filtre local et le système global
     onAssignedToChange(agentId);

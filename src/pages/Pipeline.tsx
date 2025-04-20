@@ -41,22 +41,31 @@ const Pipeline = () => {
     return agent ? agent.name : null;
   }, [selectedAgent, teamMembers]);
 
-  // Sync selected agent with pipeline filters
+  // Sync pipeline filters with selected agent
   useEffect(() => {
     if (selectedAgent !== filters.assignedTo) {
       updateAgentFilter(selectedAgent);
     }
   }, [selectedAgent, filters.assignedTo, updateAgentFilter]);
 
+  // Sync selected agent with pipeline filters
+  useEffect(() => {
+    if (filters.assignedTo !== selectedAgent) {
+      handleAgentChange(filters.assignedTo);
+    }
+  }, [filters.assignedTo, selectedAgent, handleAgentChange]);
+
   useEffect(() => {
     handleRefresh();
   }, []);
 
+  // Écouter les changements d'agent depuis d'autres composants
   useEffect(() => {
     const handleAgentSelectionChange = (e: CustomEvent) => {
       const newAgent = e.detail.selectedAgent;
       if (newAgent !== selectedAgent) {
         handleAgentChange(newAgent);
+        updateAgentFilter(newAgent);
       }
     };
 
@@ -64,7 +73,7 @@ const Pipeline = () => {
     return () => {
       window.removeEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
     };
-  }, [selectedAgent, handleAgentChange]);
+  }, [selectedAgent, handleAgentChange, updateAgentFilter]);
 
   return (
     <>
