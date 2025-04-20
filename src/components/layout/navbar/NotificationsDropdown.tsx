@@ -81,8 +81,10 @@ const NotificationsDropdown: React.FC = () => {
     
     return (
       <div className="flex items-center mt-2 text-xs text-gray-500">
-        <Avatar className="h-4 w-4 mr-1">
-          <AvatarFallback className="text-[8px]">
+        <Avatar className="h-5 w-5 mr-1.5 ring-1 ring-loro-white/30 hover:scale-110 transition-transform duration-200">
+          <AvatarFallback 
+            className="bg-gradient-to-b from-loro-white to-loro-pearl text-[10px] font-futura text-loro-navy/90"
+          >
             {assignedToName.split(' ').map(part => part[0]).join('')}
           </AvatarFallback>
         </Avatar>
