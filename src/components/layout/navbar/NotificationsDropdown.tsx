@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Calendar, CheckCheck, Phone, Users, FileText, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -87,7 +86,7 @@ const NotificationsDropdown: React.FC = () => {
             {assignedToName.split(' ').map(part => part[0]).join('')}
           </AvatarFallback>
         </Avatar>
-        <span>Assigné à {assignedToName}</span>
+        <span className="text-xs">Assigné à {assignedToName}</span>
       </div>
     );
   };
