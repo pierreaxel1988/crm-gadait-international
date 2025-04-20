@@ -51,11 +51,11 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
     navigate(`/leads/${lead.id}?tab=overview`);
   };
 
-  // Function to clear filters and trigger refresh
+  // Fonction pour gérer l'effacement de tous les filtres
   const handleClearAllFilters = () => {
-    onClearFilters();
-    // Ensure refresh is triggered after filters are cleared
-    setTimeout(() => handleRefresh(), 0);
+    if (onClearFilters) {
+      onClearFilters();
+    }
   };
 
   const renderLeadItem = (lead: SearchResult) => (

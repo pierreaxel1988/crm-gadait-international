@@ -43,14 +43,17 @@ const Pipeline = () => {
     return agent ? agent.name : null;
   }, [selectedAgent, teamMembers]);
 
-  // Sync selected agent with pipeline filters
+  // Sync selected agent with pipeline filters - mais seulement s'il y a un changement réel
   useEffect(() => {
-    if (selectedAgent !== filters.assignedTo) {
+    if (selectedAgent && selectedAgent !== filters.assignedTo) {
       updateAgentFilter(selectedAgent);
+    } else if (!selectedAgent && filters.assignedTo) {
+      // Si l'agent est effacé mais pas dans les filtres
+      updateAgentFilter(null);
     }
   }, [selectedAgent, filters.assignedTo, updateAgentFilter]);
 
-  // Sync pipeline filters with selected agent
+  // Sync pipeline filters with selected agent - mais seulement s'il y a un changement réel
   useEffect(() => {
     if (filters.assignedTo !== selectedAgent) {
       handleAgentChange(filters.assignedTo);
@@ -59,14 +62,20 @@ const Pipeline = () => {
 
   // Fonction personnalisée pour effacer tous les filtres et l'agent sélectionné
   const handleClearAllFilters = () => {
-    clearSelectedAgent(); // Effacer l'agent sélectionné
-    handleClearFilters(); // Effacer tous les filtres
+    // D'abord effacer l'agent sélectionné
+    clearSelectedAgent();
+    // Ensuite effacer tous les filtres (déjà synchronisé avec l'agent)
+    handleClearFilters();
+    // Déclencher un rafraîchissement explicite après avoir effacé les filtres
+    setTimeout(() => handleRefresh(), 10);
   };
 
+  // Chargement initial
   useEffect(() => {
     handleRefresh();
   }, []);
 
+  // Gestion des événements de sélection d'agent
   useEffect(() => {
     const handleAgentSelectionChange = (e: CustomEvent) => {
       const newAgent = e.detail.selectedAgent;

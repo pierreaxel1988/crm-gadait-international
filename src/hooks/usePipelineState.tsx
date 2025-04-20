@@ -174,7 +174,7 @@ export function usePipelineState() {
   };
 
   // Clear all filters - MODIFICATION: ne plus conserver l'agent sélectionné
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     // Modification: Réinitialiser complètement tous les filtres, y compris assignedTo
     setFilters({
       status: null,
@@ -193,10 +193,7 @@ export function usePipelineState() {
       description: "Tous les filtres ont été supprimés",
       duration: 2000,
     });
-    
-    // Trigger a refresh to update data
-    handleRefresh();
-  };
+  }, []);
 
   // Toggle filters visibility
   const toggleFilters = () => {
