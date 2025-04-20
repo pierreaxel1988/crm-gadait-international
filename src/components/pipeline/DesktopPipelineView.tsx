@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -21,7 +22,6 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Qualified': 'Qualifiés',
   'Proposal': 'Propositions',
   'Visit': 'Visites en cours',
-  'Offer': 'Offre en cours',
   'Offer': 'Offre en cours',
   'Deposit': 'Dépôt reçu',
   'Signed': 'Signature finale',
@@ -286,3 +286,4 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
 };
 
 export default DesktopPipelineView;
+

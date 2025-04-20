@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +10,6 @@ import LeadListItem from './LeadListItem';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import { sortLeadsByPriority } from './utils/leadSortUtils';
 import { useAuth } from '@/hooks/useAuth';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
@@ -51,9 +49,7 @@ const MobileColumnList = ({
 }: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
-  const [selectedCommercial, setSelectedCommercial] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { isCommercial, isAdmin } = useAuth();
   
   const {
     loadedColumns,
@@ -75,7 +71,6 @@ const MobileColumnList = ({
     }
   }, [filters]);
 
-  // First, filter by status
   const leadsByStatus = activeStatus === 'all' 
     ? filteredColumns.flatMap(column => column.items.map(item => ({
         ...item,
@@ -88,51 +83,34 @@ const MobileColumnList = ({
           columnStatus: column.status
         })));
   
-  // Then filter by commercial if one is selected
-  const leadsByCommercial = selectedCommercial 
-    ? leadsByStatus.filter(lead => lead.assignedToId === selectedCommercial)
-    : leadsByStatus;
-
-  // Apply search filter
   const searchFilteredLeads = searchTerm
-    ? leadsByCommercial.filter(lead => 
+    ? leadsByStatus.filter(lead => 
         lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lead.desiredLocation?.toLowerCase().includes(searchTerm.toLowerCase())
       )
-    : leadsByCommercial;
+    : leadsByStatus;
     
-  // Apply smart sorting based on priority
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
 
-  // Calculate counts for each status after commercial filtering
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
-    const countForStatus = selectedCommercial
-      ? column.items.filter(item => item.assignedToId === selectedCommercial).length
-      : column.items.length;
+    const countForStatus = column.items.length;
     
     acc[column.status] = countForStatus;
     return acc;
   }, {} as Record<string, number>);
   
-  const totalLeadCount = selectedCommercial
-    ? leadsByStatus.filter(lead => lead.assignedToId === selectedCommercial).length
-    : leadsByStatus.length;
+  const totalLeadCount = leadsByStatus.length;
 
   const handleAddLead = (status: LeadStatus) => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
   };
 
   const handleLeadClick = (leadId: string) => {
-    // Navigate to lead detail page with criteria tab preselected
     navigate(`/leads/${leadId}?tab=criteria`);
   };
   
   const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest') => {
     setSortBy(value);
-  };
-
-  const handleCommercialChange = (value: string) => {
-    setSelectedCommercial(value === "all" ? null : value);
   };
 
   return (
@@ -201,26 +179,6 @@ const MobileColumnList = ({
                 </button>
               </div>
             </div>
-            
-            {isAdmin && teamMembers && teamMembers.length > 0 && (
-              <div className="flex items-center mt-2 md:mt-0 md:ml-auto">
-                <div className="w-full">
-                  <Select value={selectedCommercial || "all"} onValueChange={handleCommercialChange}>
-                    <SelectTrigger className="w-full text-xs h-8 px-2">
-                      <SelectValue placeholder="Filtrer par commercial" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous les commerciaux</SelectItem>
-                      {teamMembers.map(member => (
-                        <SelectItem key={member.id} value={member.id}>
-                          {member.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
           </div>
           
           <div className="space-y-px">
