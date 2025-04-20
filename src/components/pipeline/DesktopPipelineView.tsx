@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
@@ -15,8 +15,6 @@ import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import PipelineHeader from './PipelineHeader';
 import { sortLeadsByPriority } from './mobile/utils/leadSortUtils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAuth } from '@/hooks/useAuth';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface DesktopPipelineViewProps {
   activeTab: string;
@@ -35,20 +33,6 @@ interface DesktopPipelineViewProps {
   isFilterActive: (filterName: string) => boolean;
   teamMembers: { id: string; name: string }[];
 }
-
-const statusTranslations: Record<LeadStatus, string> = {
-  'New': 'Nouveaux',
-  'Contacted': 'Contactés',
-  'Qualified': 'Qualifiés',
-  'Proposal': 'Propositions',
-  'Visit': 'Visites en cours',
-  'Offer': 'Offre en cours',
-  'Offre': 'Offre en cours',
-  'Deposit': 'Dépôt reçu',
-  'Signed': 'Signature finale',
-  'Gagné': 'Conclus',
-  'Perdu': 'Perdu'
-};
 
 const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   activeTab,
@@ -69,14 +53,11 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
 }) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
-  const [selectedCommercial, setSelectedCommercial] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
   
   const {
     loadedColumns,
     isLoading,
-    teamMembers: allTeamMembers
   } = useKanbanData(columns, 0, activeTab as PipelineType);
   
   const filteredColumns = filters 
@@ -87,27 +68,16 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         !column.pipelineType || column.pipelineType === activeTab
       );
 
-  useEffect(() => {
-    if (filters?.status !== null) {
-      setActiveStatus(filters.status);
-    }
-  }, [filters]);
-  
   // First get all leads by status
   const leadsByStatus = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
     columnStatus: column.status
   })));
   
-  // Then filter by commercial if selected
-  const leadsByCommercial = selectedCommercial 
-    ? leadsByStatus.filter(lead => lead.assignedToId === selectedCommercial)
-    : leadsByStatus;
-  
   // Then filter by active status if not 'all'
   const displayedLeads = activeStatus === 'all' 
-    ? leadsByCommercial 
-    : leadsByCommercial.filter(lead => lead.columnStatus === activeStatus);
+    ? leadsByStatus 
+    : leadsByStatus.filter(lead => lead.columnStatus === activeStatus);
   
   // Apply search filter
   const searchFilteredLeads = searchTerm 
@@ -120,19 +90,14 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   // Apply smart sorting
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
   
-  // Calculate counts for each status after commercial filtering
+  // Calculate counts for each status
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
-    const countForStatus = selectedCommercial
-      ? column.items.filter(item => item.assignedToId === selectedCommercial).length
-      : column.items.length;
-    
+    const countForStatus = column.items.length;
     acc[column.status] = countForStatus;
     return acc;
   }, {} as Record<string, number>);
   
-  const totalLeadCount = selectedCommercial
-    ? leadsByStatus.filter(lead => lead.assignedToId === selectedCommercial).length
-    : leadsByStatus.length;
+  const totalLeadCount = leadsByStatus.length;
   
   const handleAddLead = () => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${activeStatus === 'all' ? 'New' : activeStatus}`);
@@ -147,10 +112,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     toggleFilters();
   };
 
-  const handleCommercialChange = (value: string) => {
-    setSelectedCommercial(value === "all" ? null : value);
-  };
-  
   return (
     <div className="flex flex-col h-[calc(100vh-170px)]">
       {/* Use PipelineHeader component for consistent UI */}
@@ -244,24 +205,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
             </button>
           </div>
         </div>
-        
-        {isAdmin && allTeamMembers && allTeamMembers.length > 0 && (
-          <div className="flex items-center">
-            <Select value={selectedCommercial || "all"} onValueChange={handleCommercialChange}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Filtrer par commercial" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les commerciaux</SelectItem>
-                {allTeamMembers.map(member => (
-                  <SelectItem key={member.id} value={member.id}>
-                    {member.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
       </div>
       
       <div className="relative flex-1 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
