@@ -23,6 +23,7 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Proposal': 'Propositions',
   'Visit': 'Visites en cours',
   'Offer': 'Offre en cours',
+  'Offre': 'Offre en cours',
   'Deposit': 'Dépôt reçu',
   'Signed': 'Signature finale',
   'Gagné': 'Conclus',
@@ -286,4 +287,3 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
 };
 
 export default DesktopPipelineView;
-
