@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 export const useSelectedAgent = () => {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(() => {
@@ -7,9 +7,6 @@ export const useSelectedAgent = () => {
     const saved = localStorage.getItem('selectedAgent');
     return saved ? saved : null;
   });
-  
-  // Flag pour éviter les boucles infinies lors de la synchronisation
-  const [isSyncingEvents, setIsSyncingEvents] = useState(false);
 
   // Sauvegarder dans localStorage à chaque changement
   useEffect(() => {
@@ -20,27 +17,17 @@ export const useSelectedAgent = () => {
     }
     
     // Émettre un événement personnalisé pour la synchronisation
-    // uniquement si on n'est pas déjà en train de traiter un événement
-    if (!isSyncingEvents) {
-      setIsSyncingEvents(true);
-      window.dispatchEvent(new CustomEvent('agent-selection-changed', {
-        detail: { selectedAgent, source: 'hook' }
-      }));
-      setTimeout(() => setIsSyncingEvents(false), 50);
-    }
-  }, [selectedAgent, isSyncingEvents]);
+    window.dispatchEvent(new CustomEvent('agent-selection-changed', {
+      detail: { selectedAgent }
+    }));
+  }, [selectedAgent]);
 
   // Écouter les changements d'autres composants
   useEffect(() => {
     const handleAgentChange = (e: CustomEvent) => {
-      // Éviter les boucles infinies en ignorant les événements générés par ce même hook
-      if (e.detail.source === 'hook') return;
-      
       const newAgent = e.detail.selectedAgent;
-      if (newAgent !== selectedAgent && !isSyncingEvents) {
-        setIsSyncingEvents(true);
+      if (newAgent !== selectedAgent) {
         setSelectedAgent(newAgent);
-        setTimeout(() => setIsSyncingEvents(false), 50);
       }
     };
 
@@ -48,20 +35,11 @@ export const useSelectedAgent = () => {
     return () => {
       window.removeEventListener('agent-selection-changed', handleAgentChange as EventListener);
     };
-  }, [selectedAgent, isSyncingEvents]);
+  }, [selectedAgent]);
 
-  const handleAgentChange = useCallback((agentId: string | null) => {
-    if (agentId !== selectedAgent && !isSyncingEvents) {
-      setSelectedAgent(agentId);
-    }
-  }, [selectedAgent, isSyncingEvents]);
+  const handleAgentChange = (agentId: string | null) => {
+    setSelectedAgent(agentId);
+  };
 
-  // Fonction pour effacer l'agent sélectionné
-  const clearSelectedAgent = useCallback(() => {
-    if (selectedAgent !== null && !isSyncingEvents) {
-      setSelectedAgent(null);
-    }
-  }, [selectedAgent, isSyncingEvents]);
-
-  return { selectedAgent, handleAgentChange, clearSelectedAgent };
+  return { selectedAgent, handleAgentChange };
 };

@@ -111,8 +111,6 @@ const ActiveFiltersList = ({
           size="sm" 
           className="text-xs text-muted-foreground hover:text-foreground"
           onClick={onClearFilters}
-          aria-label="Effacer tous les filtres"
-          title="Effacer tous les filtres"
         >
           Tout effacer
         </Button>

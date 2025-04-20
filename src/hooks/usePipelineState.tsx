@@ -35,7 +35,6 @@ export function usePipelineState() {
 
   // Mettre à jour uniquement le filtre d'agent sans affecter les autres filtres
   const updateAgentFilter = useCallback((agentId: string | null) => {
-    console.log("Mise à jour du filtre agent avec:", agentId);
     setFilters(prevFilters => ({
       ...prevFilters,
       assignedTo: agentId
@@ -60,6 +59,14 @@ export function usePipelineState() {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
+
+  // Apply filters when they change
+  useEffect(() => {
+    // When filters change, trigger a refresh to update the data
+    if (refreshTrigger > 0) { // Skip the initial render
+      handleRefresh();
+    }
+  }, [filters]);
 
   // Fetch team members
   useEffect(() => {
@@ -122,14 +129,7 @@ export function usePipelineState() {
   };
 
   // Refresh data
-  const handleRefresh = useCallback(() => {
-    // Éviter les appels multiples pendant le rafraîchissement
-    if (isRefreshing) {
-      console.log("Déjà en cours de rafraîchissement, ignoré");
-      return;
-    }
-    
-    console.log("Démarrage du rafraîchissement des données");
+  const handleRefresh = () => {
     setIsRefreshing(true);
     setRefreshTrigger(prev => prev + 1);
     
@@ -166,25 +166,22 @@ export function usePipelineState() {
       } catch (error) {
         console.error('Unexpected error:', error);
       } finally {
-        // Réduire le délai pour une meilleure réactivité
-        setTimeout(() => {
-          console.log("Fin du rafraîchissement");
-          setIsRefreshing(false);
-        }, 500);
+        setTimeout(() => setIsRefreshing(false), 500); // Reduced time for a more efficient feel
       }
     };
     
     checkLeads();
-  }, [activeFiltersCount, isRefreshing]);
+  };
 
   // Clear all filters
-  const handleClearFilters = useCallback(() => {
-    console.log("Effacement de tous les filtres");
-    // Réinitialiser complètement tous les filtres
+  const handleClearFilters = () => {
+    // Nous préservons le filtre d'agent lors du nettoyage des filtres
+    const currentAgentId = filters.assignedTo;
+    
     setFilters({
       status: null,
       tags: [],
-      assignedTo: null,
+      assignedTo: currentAgentId,  // Conserver l'agent sélectionné
       minBudget: '',
       maxBudget: '',
       location: '',
@@ -198,7 +195,10 @@ export function usePipelineState() {
       description: "Tous les filtres ont été supprimés",
       duration: 2000,
     });
-  }, []);
+    
+    // Trigger a refresh to update data
+    handleRefresh();
+  };
 
   // Toggle filters visibility
   const toggleFilters = () => {
@@ -206,7 +206,7 @@ export function usePipelineState() {
   };
 
   // Get all column data for mobile view
-  const getAllColumns = useCallback(() => {
+  const getAllColumns = () => {
     // Define the kanban columns with proper LeadStatus typing
     return [
       { title: 'Nouveaux', status: 'New' as LeadStatus },
@@ -224,7 +224,7 @@ export function usePipelineState() {
       items: [],
       pipelineType: activeTab as PipelineType
     }));
-  }, [activeTab]);
+  };
 
   return {
     activeTab,
@@ -243,6 +243,6 @@ export function usePipelineState() {
     handleRefresh,
     handleClearFilters,
     getAllColumns,
-    updateAgentFilter
+    updateAgentFilter // Nouvelle fonction exposée
   };
 }

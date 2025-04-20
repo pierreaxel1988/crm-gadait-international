@@ -53,14 +53,6 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
     onToggleFilters();
   };
 
-  // Function to clear filters and trigger refresh
-  const handleClearAllFilters = () => {
-    onClearFilters();
-    if (handleRefresh) {
-      setTimeout(() => handleRefresh(), 0);
-    }
-  };
-
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-4">
@@ -71,7 +63,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
               variant="outline" 
               size="icon" 
               className="h-10 w-10" 
-              onClick={handleClearAllFilters}
+              onClick={onClearFilters}
               title="Effacer tous les filtres"
             >
               <X className="h-5 w-5" />
@@ -127,7 +119,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
         <ActiveFiltersList
           filters={filters}
           onFilterChange={onFilterChange}
-          onClearFilters={handleClearAllFilters}
+          onClearFilters={onClearFilters}
           getTeamMemberName={getTeamMemberName}
           isFilterActive={isFilterActive}
         />

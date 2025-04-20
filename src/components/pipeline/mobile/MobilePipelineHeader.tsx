@@ -51,14 +51,6 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
     navigate(`/leads/${lead.id}?tab=overview`);
   };
 
-  // Fonction pour effacer tous les filtres
-  const handleClearAllFilters = () => {
-    if (onClearFilters) {
-      onClearFilters();
-      // Ne pas rafraîchir ici, laissons le composant parent s'en charger
-    }
-  };
-
   const renderLeadItem = (lead: SearchResult) => (
     <div className="flex flex-col">
       <div className="font-medium">{lead.name}</div>
@@ -89,21 +81,12 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
               variant="outline" 
               size="icon" 
               className="h-9 w-9" 
-              onClick={handleClearAllFilters}
-              aria-label="Effacer tous les filtres"
-              title="Effacer tous les filtres"
-              disabled={isRefreshing}
+              onClick={onClearFilters}
             >
               <X className="h-4 w-4" />
             </Button>
           )}
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="h-9 w-9" 
-            onClick={() => navigate('/import-lead')}
-            disabled={isRefreshing}
-          >
+          <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => navigate('/import-lead')}>
             <PlusCircle className="h-4 w-4" />
           </Button>
           <Button 
@@ -111,7 +94,6 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
             size="sm" 
             onClick={toggleFilters} 
             className="h-9 relative font-normal text-sm"
-            disabled={isRefreshing}
           >
             <SlidersHorizontal className="h-4 w-4 mr-1" />
             Filtres
@@ -140,7 +122,6 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
           minChars={1}
           searchIcon={true}
           clearButton={true}
-          disabled={isRefreshing}
         />
         
         <Button 
@@ -160,7 +141,7 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
         <ActiveFiltersList
           filters={filters}
           onFilterChange={onFilterChange}
-          onClearFilters={handleClearAllFilters}
+          onClearFilters={onClearFilters}
           getTeamMemberName={getTeamMemberName}
           isFilterActive={isFilterActive}
         />

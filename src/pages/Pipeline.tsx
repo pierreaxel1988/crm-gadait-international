@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
 import MobilePipelineView from '@/components/pipeline/MobilePipelineView';
@@ -34,7 +34,7 @@ const Pipeline = () => {
     updateAgentFilter
   } = usePipelineState();
 
-  const { selectedAgent, handleAgentChange, clearSelectedAgent } = useSelectedAgent();
+  const { selectedAgent, handleAgentChange } = useSelectedAgent();
 
   // Get selected agent name
   const selectedAgentName = useMemo(() => {
@@ -43,43 +43,30 @@ const Pipeline = () => {
     return agent ? agent.name : null;
   }, [selectedAgent, teamMembers]);
 
-  // Fonction pour éviter les boucles de synchronisation
-  const syncFilterWithAgent = useCallback((agentId: string | null) => {
-    console.log('Synchronisant le filtre avec agent:', agentId);
-    updateAgentFilter(agentId);
-    // Ne pas déclencher de rafraîchissement automatique ici
-  }, [updateAgentFilter]);
-
-  // Synchroniser avec le système global d'agent sélectionné, mais éviter les boucles
+  // Sync selected agent with pipeline filters
   useEffect(() => {
-    // Éviter les mises à jour si on est en train de charger ou de rafraîchir
-    if (isRefreshing) return;
-    
-    // Si l'agent sélectionné change et que le filtre ne correspond pas
     if (selectedAgent !== filters.assignedTo) {
-      console.log('Agent selected changed, updating filter:', selectedAgent);
-      syncFilterWithAgent(selectedAgent);
+      updateAgentFilter(selectedAgent);
     }
-  }, [selectedAgent, filters.assignedTo, syncFilterWithAgent, isRefreshing]);
+  }, [selectedAgent, filters.assignedTo, updateAgentFilter]);
 
-  // Fonction personnalisée pour effacer tous les filtres et l'agent sélectionné
-  const handleClearAllFilters = useCallback(() => {
-    console.log('Clearing all filters and selected agent');
-    
-    // Désactiver temporairement la synchronisation pendant le nettoyage
-    handleClearFilters();
-    
-    // Effacer l'agent sélectionné
-    clearSelectedAgent();
-    
-    // Déclencher un rafraîchissement après un délai
-    setTimeout(() => handleRefresh(), 100);
-  }, [handleClearFilters, clearSelectedAgent, handleRefresh]);
-
-  // Chargement initial
   useEffect(() => {
     handleRefresh();
   }, []);
+
+  useEffect(() => {
+    const handleAgentSelectionChange = (e: CustomEvent) => {
+      const newAgent = e.detail.selectedAgent;
+      if (newAgent !== selectedAgent) {
+        handleAgentChange(newAgent);
+      }
+    };
+
+    window.addEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
+    return () => {
+      window.removeEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
+    };
+  }, [selectedAgent, handleAgentChange]);
 
   return (
     <>
@@ -100,7 +87,7 @@ const Pipeline = () => {
               activeFiltersCount={activeFiltersCount}
               filters={filters}
               onFilterChange={setFilters}
-              onClearFilters={handleClearAllFilters}
+              onClearFilters={handleClearFilters}
               columns={getAllColumns()}
               handleRefresh={handleRefresh}
               isRefreshing={isRefreshing}
@@ -118,7 +105,7 @@ const Pipeline = () => {
               activeFiltersCount={activeFiltersCount}
               filters={filters}
               onFilterChange={setFilters}
-              onClearFilters={handleClearAllFilters}
+              onClearFilters={handleClearFilters}
               columns={getAllColumns()}
               handleRefresh={handleRefresh}
               isRefreshing={isRefreshing}

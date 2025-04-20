@@ -27,7 +27,6 @@ const SelectedTagsList: React.FC<SelectedTagsListProps> = ({
           <button 
             onClick={() => toggleTag(tag)}
             className="ml-1 bg-gray-200 dark:bg-gray-700 rounded-full w-5 h-5 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600"
-            aria-label={`Supprimer le tag ${tag}`}
           >
             <X className="h-3 w-3" />
           </button>
@@ -36,7 +35,6 @@ const SelectedTagsList: React.FC<SelectedTagsListProps> = ({
       <button
         className="text-xs text-muted-foreground hover:text-foreground mt-2"
         onClick={clearAllTags}
-        aria-label="Effacer tous les tags"
       >
         Tout effacer
       </button>
