@@ -24,6 +24,7 @@ interface SmartSearchProps {
   clearButton?: boolean;
   autoFocus?: boolean;
   onBlur?: () => void;
+  disabled?: boolean; // Added disabled prop
 }
 
 const SmartSearch: React.FC<SmartSearchProps> = ({
@@ -42,7 +43,8 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
   searchIcon = true,
   clearButton = true,
   autoFocus = false,
-  onBlur
+  onBlur,
+  disabled = false, // Add default value
 }) => {
   const [inputValue, setInputValue] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
@@ -65,12 +67,12 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
 
   // Gérer l'ouverture et la fermeture du dropdown
   useEffect(() => {
-    if (debouncedValue.length >= minChars) {
+    if (debouncedValue.length >= minChars && !disabled) {
       setIsOpen(true);
     } else {
       setIsOpen(false);
     }
-  }, [debouncedValue, minChars]);
+  }, [debouncedValue, minChars, disabled]);
 
   // Détecter les clics en dehors pour fermer le dropdown
   useEffect(() => {
@@ -94,7 +96,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
 
   // Navigation au clavier dans les résultats
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!isOpen) return;
+    if (!isOpen || disabled) return;
     
     // Flèche bas - sélectionner l'élément suivant
     if (e.key === 'ArrowDown') {
@@ -168,7 +170,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => inputValue.length >= minChars && setIsOpen(true)}
+          onFocus={() => !disabled && inputValue.length >= minChars && setIsOpen(true)}
           onBlur={handleInputBlur}
           placeholder={placeholder}
           className={cn(
@@ -177,14 +179,16 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
             inputClassName
           )}
           autoFocus={autoFocus}
+          disabled={disabled}
         />
-        {clearButton && inputValue && (
+        {clearButton && inputValue && !disabled && (
           <Button
             variant="ghost"
             size="icon"
             type="button"
             onClick={handleClear}
             className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-foreground"
+            disabled={disabled}
           >
             <X className="h-4 w-4" />
             <span className="sr-only">Effacer</span>
@@ -192,7 +196,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
         )}
       </div>
 
-      {isOpen && (inputValue.length >= minChars) && (
+      {isOpen && (inputValue.length >= minChars) && !disabled && (
         <div 
           ref={dropdownRef}
           className="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 overflow-hidden"
