@@ -122,6 +122,68 @@ const MobileColumnList = ({
         </div>
       ) : (
         <>
+          <div className="sticky top-[calc(var(--header-height)-1px)] pt-3 pb-3 z-40 bg-gray-50">
+            <div className="overflow-x-auto pb-1">
+              <Tabs 
+                value={activeStatus === 'all' ? 'all' : activeStatus} 
+                onValueChange={value => setActiveStatus(value as LeadStatus | 'all')} 
+                className="w-full"
+              >
+                <TabsList className="inline-flex w-auto p-1 h-10 bg-gray-100 rounded-full">
+                  <TabsTrigger 
+                    value="all" 
+                    className="rounded-full px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                  >
+                    Tous ({totalLeadCount})
+                  </TabsTrigger>
+                  {filteredColumns.map(column => 
+                    leadCountByStatus[column.status] > 0 && (
+                      <TabsTrigger 
+                        key={column.status} 
+                        value={column.status} 
+                        className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                      >
+                        {statusTranslations[column.status]} ({leadCountByStatus[column.status]})
+                      </TabsTrigger>
+                    )
+                  )}
+                </TabsList>
+              </Tabs>
+            </div>
+
+            <div className="flex flex-col md:flex-row md:items-center gap-2 bg-gray-50 rounded-lg p-2 mt-2">
+              <div className="flex items-center justify-between md:w-auto">
+                <span className="text-sm font-medium text-gray-700">Trier par:</span>
+                <div className="flex space-x-2">
+                  <button 
+                    onClick={() => handleChangeSortBy('priority')}
+                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'priority' 
+                      ? 'bg-zinc-900 text-white' 
+                      : 'bg-gray-100 text-gray-600'}`}
+                  >
+                    Priorité
+                  </button>
+                  <button 
+                    onClick={() => handleChangeSortBy('newest')}
+                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'newest' 
+                      ? 'bg-zinc-900 text-white' 
+                      : 'bg-gray-100 text-gray-600'}`}
+                  >
+                    Plus récent
+                  </button>
+                  <button 
+                    onClick={() => handleChangeSortBy('oldest')}
+                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'oldest' 
+                      ? 'bg-zinc-900 text-white' 
+                      : 'bg-gray-100 text-gray-600'}`}
+                  >
+                    Plus ancien
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <div className="space-y-px">
             {sortedLeads.length === 0 ? (
               <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
