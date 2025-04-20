@@ -54,6 +54,7 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
   // Function to clear filters and trigger refresh
   const handleClearAllFilters = () => {
     onClearFilters();
+    // Ensure refresh is triggered after filters are cleared
     setTimeout(() => handleRefresh(), 0);
   };
 
@@ -88,6 +89,8 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
               size="icon" 
               className="h-9 w-9" 
               onClick={handleClearAllFilters}
+              aria-label="Effacer tous les filtres"
+              title="Effacer tous les filtres"
             >
               <X className="h-4 w-4" />
             </Button>
