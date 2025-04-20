@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export const useSelectedAgent = () => {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(() => {
@@ -18,13 +18,16 @@ export const useSelectedAgent = () => {
     
     // Émettre un événement personnalisé pour la synchronisation
     window.dispatchEvent(new CustomEvent('agent-selection-changed', {
-      detail: { selectedAgent }
+      detail: { selectedAgent, source: 'hook' }
     }));
   }, [selectedAgent]);
 
   // Écouter les changements d'autres composants
   useEffect(() => {
     const handleAgentChange = (e: CustomEvent) => {
+      // Éviter les boucles infinies en ignorant les événements générés par ce même hook
+      if (e.detail.source === 'hook') return;
+      
       const newAgent = e.detail.selectedAgent;
       if (newAgent !== selectedAgent) {
         setSelectedAgent(newAgent);
@@ -37,14 +40,16 @@ export const useSelectedAgent = () => {
     };
   }, [selectedAgent]);
 
-  const handleAgentChange = (agentId: string | null) => {
-    setSelectedAgent(agentId);
-  };
+  const handleAgentChange = useCallback((agentId: string | null) => {
+    if (agentId !== selectedAgent) {
+      setSelectedAgent(agentId);
+    }
+  }, [selectedAgent]);
 
-  // Nouvelle fonction pour effacer l'agent sélectionné
-  const clearSelectedAgent = () => {
+  // Fonction pour effacer l'agent sélectionné
+  const clearSelectedAgent = useCallback(() => {
     setSelectedAgent(null);
-  };
+  }, []);
 
   return { selectedAgent, handleAgentChange, clearSelectedAgent };
 };

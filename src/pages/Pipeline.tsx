@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
 import MobilePipelineView from '@/components/pipeline/MobilePipelineView';
@@ -45,30 +45,43 @@ const Pipeline = () => {
 
   // Sync selected agent with pipeline filters - mais seulement s'il y a un changement réel
   useEffect(() => {
+    // Éviter les mises à jour si on est en train de charger ou de rafraîchir
+    if (isRefreshing) return;
+    
     if (selectedAgent && selectedAgent !== filters.assignedTo) {
       updateAgentFilter(selectedAgent);
     } else if (!selectedAgent && filters.assignedTo) {
       // Si l'agent est effacé mais pas dans les filtres
       updateAgentFilter(null);
     }
-  }, [selectedAgent, filters.assignedTo, updateAgentFilter]);
+  }, [selectedAgent, filters.assignedTo, updateAgentFilter, isRefreshing]);
 
   // Sync pipeline filters with selected agent - mais seulement s'il y a un changement réel
   useEffect(() => {
+    // Éviter les mises à jour si on est en train de charger ou de rafraîchir
+    if (isRefreshing) return;
+    
     if (filters.assignedTo !== selectedAgent) {
       handleAgentChange(filters.assignedTo);
     }
-  }, [filters.assignedTo, selectedAgent, handleAgentChange]);
+  }, [filters.assignedTo, selectedAgent, handleAgentChange, isRefreshing]);
 
   // Fonction personnalisée pour effacer tous les filtres et l'agent sélectionné
-  const handleClearAllFilters = () => {
-    // D'abord effacer l'agent sélectionné
-    clearSelectedAgent();
-    // Ensuite effacer tous les filtres (déjà synchronisé avec l'agent)
+  const handleClearAllFilters = useCallback(() => {
+    // Désactiver temporairement la synchronisation pendant le nettoyage
+    const originalAgent = selectedAgent;
+    
+    // Effacer les filtres d'abord
     handleClearFilters();
-    // Déclencher un rafraîchissement explicite après avoir effacé les filtres
-    setTimeout(() => handleRefresh(), 10);
-  };
+    
+    // Puis effacer l'agent sélectionné
+    if (originalAgent) {
+      clearSelectedAgent();
+    }
+    
+    // Déclencher un rafraîchissement explicite après un court délai
+    setTimeout(() => handleRefresh(), 50);
+  }, [selectedAgent, handleClearFilters, clearSelectedAgent, handleRefresh]);
 
   // Chargement initial
   useEffect(() => {
@@ -78,6 +91,9 @@ const Pipeline = () => {
   // Gestion des événements de sélection d'agent
   useEffect(() => {
     const handleAgentSelectionChange = (e: CustomEvent) => {
+      // Ignorer les événements générés par notre propre hook
+      if (e.detail.source === 'hook') return;
+      
       const newAgent = e.detail.selectedAgent;
       if (newAgent !== selectedAgent) {
         handleAgentChange(newAgent);

@@ -51,10 +51,11 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
     navigate(`/leads/${lead.id}?tab=overview`);
   };
 
-  // Fonction pour gérer l'effacement de tous les filtres
+  // Fonction pour effacer tous les filtres
   const handleClearAllFilters = () => {
     if (onClearFilters) {
       onClearFilters();
+      // Ne pas rafraîchir ici, laissons le composant parent s'en charger
     }
   };
 
@@ -91,11 +92,18 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
               onClick={handleClearAllFilters}
               aria-label="Effacer tous les filtres"
               title="Effacer tous les filtres"
+              disabled={isRefreshing}
             >
               <X className="h-4 w-4" />
             </Button>
           )}
-          <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => navigate('/import-lead')}>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-9 w-9" 
+            onClick={() => navigate('/import-lead')}
+            disabled={isRefreshing}
+          >
             <PlusCircle className="h-4 w-4" />
           </Button>
           <Button 
@@ -103,6 +111,7 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
             size="sm" 
             onClick={toggleFilters} 
             className="h-9 relative font-normal text-sm"
+            disabled={isRefreshing}
           >
             <SlidersHorizontal className="h-4 w-4 mr-1" />
             Filtres
@@ -131,6 +140,7 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
           minChars={1}
           searchIcon={true}
           clearButton={true}
+          disabled={isRefreshing}
         />
         
         <Button 

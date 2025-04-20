@@ -129,7 +129,10 @@ export function usePipelineState() {
   };
 
   // Refresh data
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
+    // Éviter les appels multiples pendant le rafraîchissement
+    if (isRefreshing) return;
+    
     setIsRefreshing(true);
     setRefreshTrigger(prev => prev + 1);
     
@@ -166,20 +169,21 @@ export function usePipelineState() {
       } catch (error) {
         console.error('Unexpected error:', error);
       } finally {
-        setTimeout(() => setIsRefreshing(false), 500); // Reduced time for a more efficient feel
+        // Réduire le délai pour une meilleure réactivité
+        setTimeout(() => setIsRefreshing(false), 500);
       }
     };
     
     checkLeads();
-  };
+  }, [activeFiltersCount, isRefreshing]);
 
-  // Clear all filters - MODIFICATION: ne plus conserver l'agent sélectionné
+  // Clear all filters
   const handleClearFilters = useCallback(() => {
-    // Modification: Réinitialiser complètement tous les filtres, y compris assignedTo
+    // Réinitialiser complètement tous les filtres
     setFilters({
       status: null,
       tags: [],
-      assignedTo: null,  // Effacer aussi l'agent sélectionné
+      assignedTo: null,
       minBudget: '',
       maxBudget: '',
       location: '',
@@ -201,7 +205,7 @@ export function usePipelineState() {
   };
 
   // Get all column data for mobile view
-  const getAllColumns = () => {
+  const getAllColumns = useCallback(() => {
     // Define the kanban columns with proper LeadStatus typing
     return [
       { title: 'Nouveaux', status: 'New' as LeadStatus },
@@ -219,7 +223,7 @@ export function usePipelineState() {
       items: [],
       pipelineType: activeTab as PipelineType
     }));
-  };
+  }, [activeTab]);
 
   return {
     activeTab,

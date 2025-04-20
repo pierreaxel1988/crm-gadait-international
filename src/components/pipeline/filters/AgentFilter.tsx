@@ -21,14 +21,19 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
   // Synchroniser avec le système global d'agent sélectionné
   useEffect(() => {
     if (selectedAgent !== assignedTo) {
-      onAssignedToChange(selectedAgent);
+      // Déclenchement d'un événement personnalisé pour signaler la source
+      window.dispatchEvent(new CustomEvent('agent-selection-changed', {
+        detail: { selectedAgent: assignedTo, source: 'filter' }
+      }));
     }
   }, [selectedAgent, assignedTo]);
 
   const handleAgentSelect = (agentId: string | null) => {
     // Mettre à jour à la fois le filtre local et le système global
     onAssignedToChange(agentId);
-    handleAgentChange(agentId);
+    
+    // Aucun besoin d'appeler handleAgentChange ici, car l'événement custom
+    // sera déclenché et capturé par le useEffect ci-dessus
   };
 
   // Trouver le nom du commercial actuellement sélectionné
