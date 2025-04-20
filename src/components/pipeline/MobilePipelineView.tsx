@@ -1,13 +1,10 @@
-
 import React from 'react';
 import { Sheet } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobilePipelineHeader from './mobile/MobilePipelineHeader';
 import MobileColumnList from './mobile/MobileColumnList';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
-import { LeadStatus } from '@/components/common/StatusBadge';
 import { PipelineType } from '@/types/lead';
-import { Filter, ListFilter, PlusCircle, RotateCcw, Search, X } from 'lucide-react';
 
 interface MobilePipelineViewProps {
   activeTab: string;
@@ -55,46 +52,50 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   
   return (
     <div className="flex flex-col h-[calc(100vh-80px)]">
-      <div className="sticky top-0 z-20 bg-white pb-4 border-b space-y-3">
-        <MobilePipelineHeader 
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          activeFiltersCount={activeFiltersCount}
-          toggleFilters={toggleFilters}
-          handleRefresh={handleRefresh}
-          isRefreshing={isRefreshing}
-          filters={filters}
-          onFilterChange={onFilterChange}
-          onClearFilters={onClearFilters}
-          isFilterActive={isFilterActive}
-          teamMembers={teamMembers}
-        />
+      <div className="sticky top-0 z-50 bg-white border-b">
+        <div className="space-y-3 px-3 pb-4">
+          <MobilePipelineHeader 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            activeFiltersCount={activeFiltersCount}
+            toggleFilters={toggleFilters}
+            handleRefresh={handleRefresh}
+            isRefreshing={isRefreshing}
+            filters={filters}
+            onFilterChange={onFilterChange}
+            onClearFilters={onClearFilters}
+            isFilterActive={isFilterActive}
+            teamMembers={teamMembers}
+          />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3">
-          <TabsList className="w-full bg-gray-100 p-0.5 rounded-xl h-11">
-            <TabsTrigger 
-              value="purchase" 
-              className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-            >
-              Achat
-            </TabsTrigger>
-            <TabsTrigger 
-              value="rental" 
-              className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-            >
-              Location
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3">
+            <TabsList className="w-full bg-gray-100 p-0.5 rounded-xl h-11">
+              <TabsTrigger 
+                value="purchase" 
+                className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
+              >
+                Achat
+              </TabsTrigger>
+              <TabsTrigger 
+                value="rental" 
+                className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
+              >
+                Location
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto mt-3 pb-20 -mx-3 px-3 bg-gray-50">
-        <MobileColumnList
-          columns={columns}
-          activeTab={activeTab as PipelineType}
-          searchTerm={searchTerm}
-          filters={filters}
-        />
+      <div className="flex-1 overflow-y-auto mt-3 pb-20 bg-gray-50">
+        <div className="px-3">
+          <MobileColumnList
+            columns={columns}
+            activeTab={activeTab as PipelineType}
+            searchTerm={searchTerm}
+            filters={filters}
+          />
+        </div>
       </div>
 
       {filtersOpen && (
