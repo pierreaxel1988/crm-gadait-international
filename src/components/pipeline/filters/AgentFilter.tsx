@@ -18,22 +18,14 @@ interface AgentFilterProps {
 const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: AgentFilterProps) => {
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
 
-  // Synchroniser avec le système global d'agent sélectionné
-  useEffect(() => {
-    if (selectedAgent !== assignedTo) {
-      // Déclenchement d'un événement personnalisé pour signaler la source
-      window.dispatchEvent(new CustomEvent('agent-selection-changed', {
-        detail: { selectedAgent: assignedTo, source: 'filter' }
-      }));
-    }
-  }, [selectedAgent, assignedTo]);
-
   const handleAgentSelect = (agentId: string | null) => {
-    // Mettre à jour à la fois le filtre local et le système global
+    // Mettre à jour le filtre local
     onAssignedToChange(agentId);
     
-    // Aucun besoin d'appeler handleAgentChange ici, car l'événement custom
-    // sera déclenché et capturé par le useEffect ci-dessus
+    // Propager la sélection au système global via un événement custom
+    window.dispatchEvent(new CustomEvent('agent-selection-changed', {
+      detail: { selectedAgent: agentId, source: 'filter' }
+    }));
   };
 
   // Trouver le nom du commercial actuellement sélectionné

@@ -35,6 +35,7 @@ export function usePipelineState() {
 
   // Mettre à jour uniquement le filtre d'agent sans affecter les autres filtres
   const updateAgentFilter = useCallback((agentId: string | null) => {
+    console.log("Mise à jour du filtre agent avec:", agentId);
     setFilters(prevFilters => ({
       ...prevFilters,
       assignedTo: agentId
@@ -59,14 +60,6 @@ export function usePipelineState() {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
-
-  // Apply filters when they change
-  useEffect(() => {
-    // When filters change, trigger a refresh to update the data
-    if (refreshTrigger > 0) { // Skip the initial render
-      handleRefresh();
-    }
-  }, [filters]);
 
   // Fetch team members
   useEffect(() => {
@@ -131,8 +124,12 @@ export function usePipelineState() {
   // Refresh data
   const handleRefresh = useCallback(() => {
     // Éviter les appels multiples pendant le rafraîchissement
-    if (isRefreshing) return;
+    if (isRefreshing) {
+      console.log("Déjà en cours de rafraîchissement, ignoré");
+      return;
+    }
     
+    console.log("Démarrage du rafraîchissement des données");
     setIsRefreshing(true);
     setRefreshTrigger(prev => prev + 1);
     
@@ -170,7 +167,10 @@ export function usePipelineState() {
         console.error('Unexpected error:', error);
       } finally {
         // Réduire le délai pour une meilleure réactivité
-        setTimeout(() => setIsRefreshing(false), 500);
+        setTimeout(() => {
+          console.log("Fin du rafraîchissement");
+          setIsRefreshing(false);
+        }, 500);
       }
     };
     
@@ -179,6 +179,7 @@ export function usePipelineState() {
 
   // Clear all filters
   const handleClearFilters = useCallback(() => {
+    console.log("Effacement de tous les filtres");
     // Réinitialiser complètement tous les filtres
     setFilters({
       status: null,

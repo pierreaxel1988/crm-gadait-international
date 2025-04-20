@@ -43,68 +43,43 @@ const Pipeline = () => {
     return agent ? agent.name : null;
   }, [selectedAgent, teamMembers]);
 
-  // Sync selected agent with pipeline filters - mais seulement s'il y a un changement réel
-  useEffect(() => {
-    // Éviter les mises à jour si on est en train de charger ou de rafraîchir
-    if (isRefreshing) return;
-    
-    if (selectedAgent && selectedAgent !== filters.assignedTo) {
-      updateAgentFilter(selectedAgent);
-    } else if (!selectedAgent && filters.assignedTo) {
-      // Si l'agent est effacé mais pas dans les filtres
-      updateAgentFilter(null);
-    }
-  }, [selectedAgent, filters.assignedTo, updateAgentFilter, isRefreshing]);
+  // Fonction pour éviter les boucles de synchronisation
+  const syncFilterWithAgent = useCallback((agentId: string | null) => {
+    console.log('Synchronisant le filtre avec agent:', agentId);
+    updateAgentFilter(agentId);
+    // Ne pas déclencher de rafraîchissement automatique ici
+  }, [updateAgentFilter]);
 
-  // Sync pipeline filters with selected agent - mais seulement s'il y a un changement réel
+  // Synchroniser avec le système global d'agent sélectionné, mais éviter les boucles
   useEffect(() => {
     // Éviter les mises à jour si on est en train de charger ou de rafraîchir
     if (isRefreshing) return;
     
-    if (filters.assignedTo !== selectedAgent) {
-      handleAgentChange(filters.assignedTo);
+    // Si l'agent sélectionné change et que le filtre ne correspond pas
+    if (selectedAgent !== filters.assignedTo) {
+      console.log('Agent selected changed, updating filter:', selectedAgent);
+      syncFilterWithAgent(selectedAgent);
     }
-  }, [filters.assignedTo, selectedAgent, handleAgentChange, isRefreshing]);
+  }, [selectedAgent, filters.assignedTo, syncFilterWithAgent, isRefreshing]);
 
   // Fonction personnalisée pour effacer tous les filtres et l'agent sélectionné
   const handleClearAllFilters = useCallback(() => {
-    // Désactiver temporairement la synchronisation pendant le nettoyage
-    const originalAgent = selectedAgent;
+    console.log('Clearing all filters and selected agent');
     
-    // Effacer les filtres d'abord
+    // Désactiver temporairement la synchronisation pendant le nettoyage
     handleClearFilters();
     
-    // Puis effacer l'agent sélectionné
-    if (originalAgent) {
-      clearSelectedAgent();
-    }
+    // Effacer l'agent sélectionné
+    clearSelectedAgent();
     
-    // Déclencher un rafraîchissement explicite après un court délai
-    setTimeout(() => handleRefresh(), 50);
-  }, [selectedAgent, handleClearFilters, clearSelectedAgent, handleRefresh]);
+    // Déclencher un rafraîchissement après un délai
+    setTimeout(() => handleRefresh(), 100);
+  }, [handleClearFilters, clearSelectedAgent, handleRefresh]);
 
   // Chargement initial
   useEffect(() => {
     handleRefresh();
   }, []);
-
-  // Gestion des événements de sélection d'agent
-  useEffect(() => {
-    const handleAgentSelectionChange = (e: CustomEvent) => {
-      // Ignorer les événements générés par notre propre hook
-      if (e.detail.source === 'hook') return;
-      
-      const newAgent = e.detail.selectedAgent;
-      if (newAgent !== selectedAgent) {
-        handleAgentChange(newAgent);
-      }
-    };
-
-    window.addEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
-    return () => {
-      window.removeEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
-    };
-  }, [selectedAgent, handleAgentChange]);
 
   return (
     <>

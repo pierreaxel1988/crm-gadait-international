@@ -7,6 +7,9 @@ export const useSelectedAgent = () => {
     const saved = localStorage.getItem('selectedAgent');
     return saved ? saved : null;
   });
+  
+  // Flag pour éviter les boucles infinies lors de la synchronisation
+  const [isSyncingEvents, setIsSyncingEvents] = useState(false);
 
   // Sauvegarder dans localStorage à chaque changement
   useEffect(() => {
@@ -17,10 +20,15 @@ export const useSelectedAgent = () => {
     }
     
     // Émettre un événement personnalisé pour la synchronisation
-    window.dispatchEvent(new CustomEvent('agent-selection-changed', {
-      detail: { selectedAgent, source: 'hook' }
-    }));
-  }, [selectedAgent]);
+    // uniquement si on n'est pas déjà en train de traiter un événement
+    if (!isSyncingEvents) {
+      setIsSyncingEvents(true);
+      window.dispatchEvent(new CustomEvent('agent-selection-changed', {
+        detail: { selectedAgent, source: 'hook' }
+      }));
+      setTimeout(() => setIsSyncingEvents(false), 50);
+    }
+  }, [selectedAgent, isSyncingEvents]);
 
   // Écouter les changements d'autres composants
   useEffect(() => {
@@ -29,8 +37,10 @@ export const useSelectedAgent = () => {
       if (e.detail.source === 'hook') return;
       
       const newAgent = e.detail.selectedAgent;
-      if (newAgent !== selectedAgent) {
+      if (newAgent !== selectedAgent && !isSyncingEvents) {
+        setIsSyncingEvents(true);
         setSelectedAgent(newAgent);
+        setTimeout(() => setIsSyncingEvents(false), 50);
       }
     };
 
@@ -38,18 +48,20 @@ export const useSelectedAgent = () => {
     return () => {
       window.removeEventListener('agent-selection-changed', handleAgentChange as EventListener);
     };
-  }, [selectedAgent]);
+  }, [selectedAgent, isSyncingEvents]);
 
   const handleAgentChange = useCallback((agentId: string | null) => {
-    if (agentId !== selectedAgent) {
+    if (agentId !== selectedAgent && !isSyncingEvents) {
       setSelectedAgent(agentId);
     }
-  }, [selectedAgent]);
+  }, [selectedAgent, isSyncingEvents]);
 
   // Fonction pour effacer l'agent sélectionné
   const clearSelectedAgent = useCallback(() => {
-    setSelectedAgent(null);
-  }, []);
+    if (selectedAgent !== null && !isSyncingEvents) {
+      setSelectedAgent(null);
+    }
+  }, [selectedAgent, isSyncingEvents]);
 
   return { selectedAgent, handleAgentChange, clearSelectedAgent };
 };
