@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Sheet } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -45,19 +44,15 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   isFilterActive,
   teamMembers
 }) => {
-  // Force a console log to track the active tab for debugging
   console.log(`MobilePipelineView - activeTab: ${activeTab}`);
   
-  // Function to apply filters and close the drawer
   const handleApplyFilters = () => {
     handleRefresh();
     toggleFilters();
   };
   
-  // Function to handle sort selection
   const handleSortChange = (value: string) => {
     console.log("Sorting changed to:", value);
-    // You can implement sorting logic here or pass this to parent component
   };
   
   return (
@@ -94,23 +89,6 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
               </TabsTrigger>
             </TabsList>
           </Tabs>
-          
-          {/* Sort options */}
-          <div className="flex items-center justify-between py-2 border-b">
-            <div className="text-sm text-gray-500 flex items-center">
-              <span className="mr-2">Trier par :</span>
-              <Select defaultValue="priority">
-                <SelectTrigger className="border-0 p-0 h-auto text-sm font-medium">
-                  <SelectValue placeholder="Trier par" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="priority">Priorité</SelectItem>
-                  <SelectItem value="newest">Plus récent</SelectItem>
-                  <SelectItem value="oldest">Plus ancien</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
         </div>
       </div>
 
