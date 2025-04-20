@@ -1,9 +1,9 @@
-
 import React from 'react';
-import { Loader2, Mail, RefreshCw, AlertCircle } from 'lucide-react';
+import { Mail, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/hooks/use-toast';
+import LoadingScreen from '@/components/layout/LoadingScreen';
 
 interface EmailLoadingProps {
   onManualRefresh?: () => void;
@@ -103,8 +103,10 @@ const EmailLoading: React.FC<EmailLoadingProps> = ({ onManualRefresh }) => {
       <div className="bg-loro-pearl/30 rounded-full p-3 mb-4">
         <Mail className="h-6 w-6 text-loro-terracotta/70" />
       </div>
-      <Loader2 className="h-8 w-8 text-loro-terracotta animate-spin mb-2" />
-      <p className="text-sm text-gray-500">Chargement des emails...</p>
+      
+      <LoadingScreen fullscreen={false} className="h-auto py-2" />
+      
+      <p className="text-sm text-gray-500 mt-2">Chargement des emails...</p>
       <p className="text-xs text-gray-400 mt-1">Veuillez patienter</p>
       
       {hasDetectedRedirect && (

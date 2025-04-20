@@ -3,10 +3,17 @@ import React from 'react';
 import { Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const LoadingScreen = ({ className }: { className?: string }) => {
+interface LoadingScreenProps {
+  className?: string;
+  fullscreen?: boolean;
+}
+
+const LoadingScreen = ({ className, fullscreen = true }: LoadingScreenProps) => {
   return (
     <div className={cn(
-      "fixed inset-0 flex flex-col items-center justify-center bg-white z-50",
+      "flex flex-col items-center justify-center bg-white z-50",
+      fullscreen && "fixed inset-0",
+      !fullscreen && "h-full w-full min-h-[200px] py-8",
       className
     )}>
       <div className="animate-[scale-in_1.5s_ease-in-out_infinite_alternate]">

@@ -1,5 +1,5 @@
 
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import {
   BrowserRouter as Router,
   Route,
@@ -9,18 +9,20 @@ import {
 import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from '@/components/ui/toaster';
 import LoadingScreen from './components/layout/LoadingScreen';
-import Auth from './pages/Auth';
-import Pipeline from './pages/Pipeline';
-import LeadsPage from './pages/Leads';
-import LeadDetail from './pages/LeadDetailMobile';
-import LeadNew from './pages/LeadNew';
-import LeadImport from './pages/LeadImport';
-import MobileLeadImport from './pages/MobileLeadImport';
-import ActionsPage from './pages/Actions';
-import Calendar from './pages/Calendar';
-import Reports from './pages/Reports';
-import Admin from './pages/Admin';
-import ProtectedRoute from './components/layout/ProtectedRoute';
+
+// Lazy load all pages to use suspense
+const Auth = lazy(() => import('./pages/Auth'));
+const Pipeline = lazy(() => import('./pages/Pipeline'));
+const LeadsPage = lazy(() => import('./pages/Leads'));
+const LeadDetail = lazy(() => import('./pages/LeadDetailMobile'));
+const LeadNew = lazy(() => import('./pages/LeadNew'));
+const LeadImport = lazy(() => import('./pages/LeadImport'));
+const MobileLeadImport = lazy(() => import('./pages/MobileLeadImport'));
+const ActionsPage = lazy(() => import('./pages/Actions'));
+const Calendar = lazy(() => import('./pages/Calendar'));
+const Reports = lazy(() => import('./pages/Reports'));
+const Admin = lazy(() => import('./pages/Admin'));
+const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
 
 function App() {
   return (

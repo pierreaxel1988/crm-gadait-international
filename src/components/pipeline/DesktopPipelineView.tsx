@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -15,6 +14,7 @@ import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import PipelineHeader from './PipelineHeader';
 import { sortLeadsByPriority } from './mobile/utils/leadSortUtils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import LoadingScreen from '../layout/LoadingScreen';
 
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
@@ -217,9 +217,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
       
       <div className="relative flex-1 bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-sm text-muted-foreground">Chargement des leads...</p>
-          </div>
+          <LoadingScreen fullscreen={false} />
         ) : (
           <div className="h-full overflow-y-auto p-4">
             {sortedLeads.length === 0 ? (

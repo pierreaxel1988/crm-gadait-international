@@ -8,6 +8,8 @@ import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import SelectedAgentDisplay from '@/components/pipeline/SelectedAgentDisplay';
+import LoadingScreen from '@/components/layout/LoadingScreen';
+import ComponentLoader from '@/components/common/ComponentLoader';
 
 const Pipeline = () => {
   const isMobile = useIsMobile();
@@ -73,43 +75,45 @@ const Pipeline = () => {
       <div className="p-3 md:p-6 bg-white min-h-screen">
         <SelectedAgentDisplay agentName={selectedAgentName} />
         
-        {isMobile ? (
-          <MobilePipelineView
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filtersOpen={filtersOpen}
-            toggleFilters={toggleFilters}
-            activeFiltersCount={activeFiltersCount}
-            filters={filters}
-            onFilterChange={setFilters}
-            onClearFilters={handleClearFilters}
-            columns={getAllColumns()}
-            handleRefresh={handleRefresh}
-            isRefreshing={isRefreshing}
-            isFilterActive={isFilterActive}
-            teamMembers={teamMembers}
-          />
-        ) : (
-          <DesktopPipelineView
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filtersOpen={filtersOpen}
-            toggleFilters={toggleFilters}
-            activeFiltersCount={activeFiltersCount}
-            filters={filters}
-            onFilterChange={setFilters}
-            onClearFilters={handleClearFilters}
-            columns={getAllColumns()}
-            handleRefresh={handleRefresh}
-            isRefreshing={isRefreshing}
-            isFilterActive={isFilterActive}
-            teamMembers={teamMembers}
-          />
-        )}
+        <ComponentLoader isLoading={isRefreshing}>
+          {isMobile ? (
+            <MobilePipelineView
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filtersOpen={filtersOpen}
+              toggleFilters={toggleFilters}
+              activeFiltersCount={activeFiltersCount}
+              filters={filters}
+              onFilterChange={setFilters}
+              onClearFilters={handleClearFilters}
+              columns={getAllColumns()}
+              handleRefresh={handleRefresh}
+              isRefreshing={isRefreshing}
+              isFilterActive={isFilterActive}
+              teamMembers={teamMembers}
+            />
+          ) : (
+            <DesktopPipelineView
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filtersOpen={filtersOpen}
+              toggleFilters={toggleFilters}
+              activeFiltersCount={activeFiltersCount}
+              filters={filters}
+              onFilterChange={setFilters}
+              onClearFilters={handleClearFilters}
+              columns={getAllColumns()}
+              handleRefresh={handleRefresh}
+              isRefreshing={isRefreshing}
+              isFilterActive={isFilterActive}
+              teamMembers={teamMembers}
+            />
+          )}
+        </ComponentLoader>
       </div>
     </>
   );
