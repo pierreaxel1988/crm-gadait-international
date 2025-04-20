@@ -135,6 +135,10 @@ export default {
 					'0%': { transform: 'translateX(0)' },
 					'100%': { transform: 'translateX(100%)' },
 				},
+				'pulse-soft': {
+					'0%, 100%': { transform: 'scale(1)' },
+					'50%': { transform: 'scale(1.05)' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -144,6 +148,7 @@ export default {
 				'scale-in': 'scale-in 0.3s ease-out forwards',
 				'slide-in-right': 'slide-in-right 0.3s ease-out',
 				'slide-out-right': 'slide-out-right 0.3s ease-out',
+				'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
 			},
 			boxShadow: {
 				'luxury': '0 4px 14px 0 rgba(0, 0, 0, 0.05)',

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Calendar, CheckCheck, Phone, Users, FileText, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -134,7 +133,18 @@ const NotificationsDropdown: React.FC = () => {
       >
         <Bell size={18} />
         {unreadCount > 0 && (
-          <span className="absolute right-0 top-0 h-3 w-3 md:h-4 md:w-4 rounded-full bg-loro-terracotta text-[#F5F5F0] flex items-center justify-center text-[8px] md:text-xs font-semibold">
+          <span 
+            className="absolute right-0 top-0 
+              h-4 w-4 
+              rounded-full 
+              bg-loro-terracotta/90 
+              text-loro-white 
+              flex items-center justify-center 
+              text-[10px] font-bold
+              animate-pulse-soft
+              border border-loro-white/50
+              shadow-sm"
+          >
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
