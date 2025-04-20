@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sheet } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -52,7 +53,7 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   
   return (
     <div className="flex flex-col h-[calc(100vh-80px)]">
-      <div className="sticky top-0 z-50 bg-white border-b">
+      <div className="sticky top-0 z-50 bg-white border-b shadow-sm">
         <div className="space-y-3 px-3 pb-4">
           <MobilePipelineHeader 
             searchTerm={searchTerm}
@@ -87,7 +88,7 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto mt-3 pb-20 bg-gray-50">
+      <div className="flex-1 overflow-y-auto bg-gray-50">
         <div className="px-3">
           <MobileColumnList
             columns={columns}
