@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -16,7 +17,6 @@ import { sortLeadsByPriority } from './mobile/utils/leadSortUtils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/hooks/useAuth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 
 interface DesktopPipelineViewProps {
   activeTab: string;
@@ -69,9 +69,9 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
 }) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
+  const [selectedCommercial, setSelectedCommercial] = useState<string | null>(null);
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
-  const { selectedAgent, handleAgentChange } = useSelectedAgent();
   
   const {
     loadedColumns,
@@ -93,38 +93,23 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     }
   }, [filters]);
   
-  useEffect(() => {
-    if (filters.assignedTo !== selectedAgent) {
-      handleAgentChange(filters.assignedTo);
-    }
-  }, [filters.assignedTo, selectedAgent, handleAgentChange]);
-
-  useEffect(() => {
-    const handleAgentSelectionChange = (e: CustomEvent) => {
-      if (e.detail && e.detail.selectedAgent !== selectedAgent) {
-        handleAgentChange(e.detail.selectedAgent);
-      }
-    };
-
-    window.addEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
-    return () => {
-      window.removeEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
-    };
-  }, [selectedAgent, handleAgentChange]);
-  
+  // First get all leads by status
   const leadsByStatus = filteredColumns.flatMap(column => column.items.map(item => ({
     ...item,
     columnStatus: column.status
   })));
   
-  const leadsByCommercial = selectedAgent 
-    ? leadsByStatus.filter(lead => lead.assignedToId === selectedAgent)
+  // Then filter by commercial if selected
+  const leadsByCommercial = selectedCommercial 
+    ? leadsByStatus.filter(lead => lead.assignedToId === selectedCommercial)
     : leadsByStatus;
   
+  // Then filter by active status if not 'all'
   const displayedLeads = activeStatus === 'all' 
     ? leadsByCommercial 
     : leadsByCommercial.filter(lead => lead.columnStatus === activeStatus);
   
+  // Apply search filter
   const searchFilteredLeads = searchTerm 
     ? displayedLeads.filter(item => 
         item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -132,19 +117,21 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
       )
     : displayedLeads;
     
+  // Apply smart sorting
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
   
+  // Calculate counts for each status after commercial filtering
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
-    const countForStatus = selectedAgent
-      ? column.items.filter(item => item.assignedToId === selectedAgent).length
+    const countForStatus = selectedCommercial
+      ? column.items.filter(item => item.assignedToId === selectedCommercial).length
       : column.items.length;
     
     acc[column.status] = countForStatus;
     return acc;
   }, {} as Record<string, number>);
   
-  const totalLeadCount = selectedAgent
-    ? leadsByStatus.filter(lead => lead.assignedToId === selectedAgent).length
+  const totalLeadCount = selectedCommercial
+    ? leadsByStatus.filter(lead => lead.assignedToId === selectedCommercial).length
     : leadsByStatus.length;
   
   const handleAddLead = () => {
@@ -161,12 +148,12 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   };
 
   const handleCommercialChange = (value: string) => {
-    const newAgentId = value === "all" ? null : value;
-    handleAgentChange(newAgentId);
+    setSelectedCommercial(value === "all" ? null : value);
   };
   
   return (
     <div className="flex flex-col h-[calc(100vh-170px)]">
+      {/* Use PipelineHeader component for consistent UI */}
       <PipelineHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -260,7 +247,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         
         {isAdmin && allTeamMembers && allTeamMembers.length > 0 && (
           <div className="flex items-center">
-            <Select value={selectedAgent || "all"} onValueChange={handleCommercialChange}>
+            <Select value={selectedCommercial || "all"} onValueChange={handleCommercialChange}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Filtrer par commercial" />
               </SelectTrigger>
