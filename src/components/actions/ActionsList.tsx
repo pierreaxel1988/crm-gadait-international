@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { ActionItem } from '@/types/actionHistory';
 import TaskTypeIndicator from '@/components/kanban/card/TaskTypeIndicator';
 import { useNavigate } from 'react-router-dom';
 import ActionCard from './ActionCard';
+import LoadingScreen from '@/components/layout/LoadingScreen';
 
 interface ActionsListProps {
   actions: ActionItem[];
@@ -28,8 +28,8 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
   
   if (isLoading) {
     return (
-      <div className="text-center py-10">
-        <p>Chargement des actions...</p>
+      <div className="flex items-center justify-center h-[400px]">
+        <LoadingScreen fullscreen={false} />
       </div>
     );
   }
