@@ -134,14 +134,14 @@ const NotificationsDropdown: React.FC = () => {
         <Bell size={18} />
         {unreadCount > 0 && (
           <span 
-            className="absolute -right-0.5 -top-0.5
+            className="absolute -top-1.5 -right-1.5
               min-w-[20px] h-5
-              px-1
+              px-1.5
               rounded-full 
               bg-gradient-to-br from-loro-terracotta to-loro-terracotta/90
               text-loro-white 
               flex items-center justify-center 
-              text-[11px] font-semibold
+              text-[10px] font-semibold
               animate-pulse-soft
               border border-loro-white
               shadow-sm
