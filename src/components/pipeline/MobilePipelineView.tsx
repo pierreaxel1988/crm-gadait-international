@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Sheet } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -87,12 +86,6 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
                 className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
               >
                 Location
-              </TabsTrigger>
-              <TabsTrigger 
-                value="owner" 
-                className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-              >
-                Propriétaires
               </TabsTrigger>
             </TabsList>
           </Tabs>

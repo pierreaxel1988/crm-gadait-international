@@ -14,10 +14,7 @@ export function usePipelineState() {
   const tabFromUrl = queryParams.get('tab');
   
   // State management
-  const [activeTab, setActiveTab] = useState<string>(
-    tabFromUrl === 'rental' ? 'rental' : 
-    tabFromUrl === 'owner' ? 'owner' : 'purchase'
-  );
+  const [activeTab, setActiveTab] = useState<string>(tabFromUrl === 'rental' ? 'rental' : 'purchase');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,7 +55,7 @@ export function usePipelineState() {
 
   // Update tab from URL when it changes
   useEffect(() => {
-    if (tabFromUrl === 'rental' || tabFromUrl === 'purchase' || tabFromUrl === 'owner') {
+    if (tabFromUrl === 'rental' || tabFromUrl === 'purchase') {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
@@ -209,37 +206,22 @@ export function usePipelineState() {
   // Get all column data for mobile view
   const getAllColumns = () => {
     // Define the kanban columns with proper LeadStatus typing
-    if (activeTab === 'owner') {
-      return [
-        { title: 'Nouveau contact', status: 'NouveauContact' as LeadStatus },
-        { title: 'En cours de qualification', status: 'Qualification' as LeadStatus },
-        { title: 'Mandat proposé', status: 'MandatPropose' as LeadStatus },
-        { title: 'Mandat signé', status: 'MandatSigne' as LeadStatus },
-        { title: 'Mandat expiré', status: 'MandatExpire' as LeadStatus },
-        { title: 'Inactif / En pause', status: 'Inactif' as LeadStatus }
-      ].map(col => ({
-        ...col,
-        items: [],
-        pipelineType: activeTab as PipelineType
-      }));
-    } else {
-      return [
-        { title: 'Nouveaux', status: 'New' as LeadStatus },
-        { title: 'Contactés', status: 'Contacted' as LeadStatus },
-        { title: 'Qualifiés', status: 'Qualified' as LeadStatus },
-        { title: 'Propositions', status: 'Proposal' as LeadStatus },
-        { title: 'Visites en cours', status: 'Visit' as LeadStatus },
-        { title: 'Offre en cours', status: 'Offer' as LeadStatus },
-        { title: 'Dépôt reçu', status: 'Deposit' as LeadStatus },
-        { title: 'Signature finale', status: 'Signed' as LeadStatus },
-        { title: 'Conclus', status: 'Gagné' as LeadStatus },
-        { title: 'Perdu', status: 'Perdu' as LeadStatus }
-      ].map(col => ({
-        ...col,
-        items: [],
-        pipelineType: activeTab as PipelineType
-      }));
-    }
+    return [
+      { title: 'Nouveaux', status: 'New' as LeadStatus },
+      { title: 'Contactés', status: 'Contacted' as LeadStatus },
+      { title: 'Qualifiés', status: 'Qualified' as LeadStatus },
+      { title: 'Propositions', status: 'Proposal' as LeadStatus },
+      { title: 'Visites en cours', status: 'Visit' as LeadStatus },
+      { title: 'Offre en cours', status: 'Offer' as LeadStatus },
+      { title: 'Dépôt reçu', status: 'Deposit' as LeadStatus },
+      { title: 'Signature finale', status: 'Signed' as LeadStatus },
+      { title: 'Conclus', status: 'Gagné' as LeadStatus },
+      { title: 'Perdu', status: 'Perdu' as LeadStatus }
+    ].map(col => ({
+      ...col,
+      items: [],
+      pipelineType: activeTab as PipelineType
+    }));
   };
 
   return {

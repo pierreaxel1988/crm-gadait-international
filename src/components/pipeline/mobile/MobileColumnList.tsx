@@ -12,9 +12,6 @@ import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import { sortLeadsByPriority } from './utils/leadSortUtils';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 
-// Define the SortBy type to include the mandate option
-type SortBy = 'priority' | 'newest' | 'oldest' | 'mandate';
-
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
   'Contacted': 'Contactés',
@@ -26,13 +23,7 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Deposit': 'Dépôt reçu',
   'Signed': 'Signature finale',
   'Gagné': 'Conclus',
-  'Perdu': 'Perdu',
-  'NouveauContact': 'Nouveau contact',
-  'Qualification': 'En qualification',
-  'MandatPropose': 'Mandat proposé',
-  'MandatSigne': 'Mandat signé',
-  'MandatExpire': 'Mandat expiré',
-  'Inactif': 'Inactif / En pause'
+  'Perdu': 'Perdu'
 };
 
 interface MobileColumnListProps {
@@ -58,7 +49,7 @@ const MobileColumnList = ({
   filters
 }: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
-  const [sortBy, setSortBy] = useState<SortBy>('priority');
+  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
   const navigate = useNavigate();
   
   const {
@@ -100,20 +91,7 @@ const MobileColumnList = ({
       )
     : leadsByStatus;
     
-  // Add a custom sort function that handles the 'mandate' sort option
-  const sortedLeads = (() => {
-    if (sortBy === 'mandate' && activeTab === 'owner') {
-      return [...searchFilteredLeads].sort((a, b) => {
-        // Sort by mandate type (alphabetically)
-        if (!a.mandate_type) return 1;
-        if (!b.mandate_type) return -1;
-        return a.mandate_type.localeCompare(b.mandate_type);
-      });
-    }
-    
-    // For other sorts, use the existing function
-    return sortLeadsByPriority(searchFilteredLeads, sortBy as 'priority' | 'newest' | 'oldest');
-  })();
+  const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
 
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     const countForStatus = column.items.length;
@@ -125,22 +103,14 @@ const MobileColumnList = ({
   const totalLeadCount = leadsByStatus.length;
 
   const handleAddLead = (status: LeadStatus) => {
-    if (activeTab === 'owner') {
-      navigate('/owners/new');
-    } else {
-      navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
-    }
+    navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
   };
 
   const handleLeadClick = (leadId: string) => {
-    if (activeTab === 'owner') {
-      navigate(`/owners/${leadId}`);
-    } else {
-      navigate(`/leads/${leadId}?tab=criteria`);
-    }
+    navigate(`/leads/${leadId}?tab=criteria`);
   };
   
-  const handleChangeSortBy = (value: SortBy) => {
+  const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest') => {
     setSortBy(value);
   };
 
@@ -209,16 +179,6 @@ const MobileColumnList = ({
                   >
                     Plus ancien
                   </button>
-                  {activeTab === 'owner' && (
-                    <button 
-                      onClick={() => handleChangeSortBy('mandate')}
-                      className={`px-2 py-1 text-xs rounded-md ${sortBy === 'mandate' 
-                        ? 'bg-zinc-900 text-white' 
-                        : 'bg-gray-100 text-gray-600'}`}
-                    >
-                      Type mandat
-                    </button>
-                  )}
                 </div>
               </div>
             </div>
@@ -228,13 +188,13 @@ const MobileColumnList = ({
             {sortedLeads.length === 0 ? (
               <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
                 <div className="text-center">
-                  <p className="text-sm text-zinc-900 font-medium">Aucun {activeTab === 'owner' ? 'propriétaire' : 'lead'} trouvé</p>
+                  <p className="text-sm text-zinc-900 font-medium">Aucun lead trouvé</p>
                   <button 
                     onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
                     className="mt-2 text-zinc-900 hover:text-zinc-700 text-sm flex items-center justify-center mx-auto"
                   >
                     <PlusCircle className="h-4 w-4 mr-1" />
-                    Ajouter un {activeTab === 'owner' ? 'propriétaire' : 'lead'}
+                    Ajouter un lead
                   </button>
                 </div>
               </div>
@@ -255,9 +215,6 @@ const MobileColumnList = ({
                     phone={lead.phone}
                     email={lead.email}
                     onClick={handleLeadClick}
-                    pipelineType={activeTab as PipelineType}
-                    mandate_type={lead.mandate_type}
-                    propertyReference={lead.property_reference}
                   />
                 ))}
               </div>

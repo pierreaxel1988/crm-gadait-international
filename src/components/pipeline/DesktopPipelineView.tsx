@@ -25,14 +25,7 @@ const statusTranslations: Record<string, string> = {
   'Deposit': 'Dépôt reçu',
   'Signed': 'Signature finale',
   'Gagné': 'Conclus',
-  'Perdu': 'Perdu',
-  // Statuts pour le pipeline propriétaires
-  'NouveauContact': 'Nouveau contact',
-  'Qualification': 'En cours de qualification',
-  'MandatPropose': 'Mandat proposé',
-  'MandatSigne': 'Mandat signé',
-  'MandatExpire': 'Mandat expiré',
-  'Inactif': 'Inactif / En pause'
+  'Perdu': 'Perdu'
 };
 
 const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
@@ -88,19 +81,11 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
   
   const handleAddLead = () => {
-    if (activeTab === 'owner') {
-      navigate('/owners?mode=create');
-    } else {
-      navigate(`/leads/new?pipeline=${activeTab}&status=${activeStatus === 'all' ? 'New' : activeStatus}`);
-    }
+    navigate(`/leads/new?pipeline=${activeTab}&status=${activeStatus === 'all' ? 'New' : activeStatus}`);
   };
   
   const handleLeadClick = (leadId: string) => {
-    if (activeTab === 'owner') {
-      navigate(`/owners/${leadId}`);
-    } else {
-      navigate(`/leads/${leadId}`);
-    }
+    navigate(`/leads/${leadId}`);
   };
   
   const handleApplyFilters = () => {
@@ -135,7 +120,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
-          <TabsList className="bg-gray-100 p-1 rounded-xl w-[480px]">
+          <TabsList className="bg-gray-100 p-1 rounded-xl w-80">
             <TabsTrigger 
               value="purchase" 
               className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
@@ -147,12 +132,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
               className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
             >
               Location
-            </TabsTrigger>
-            <TabsTrigger 
-              value="owner" 
-              className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-            >
-              Propriétaires
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -177,7 +156,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
                     value={column.status} 
                     className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm"
                   >
-                    {statusTranslations[column.status] || column.status} ({leadCountByStatus[column.status]})
+                    {statusTranslations[column.status]} ({leadCountByStatus[column.status]})
                   </TabsTrigger>
                 )
               )}

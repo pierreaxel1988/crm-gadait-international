@@ -1,3 +1,4 @@
+
 import { LeadStatus, PipelineType } from '@/types/lead';
 import { addActionToLead } from '@/services/leadActions';
 import { toast } from '@/hooks/use-toast';
@@ -13,37 +14,19 @@ export const RENTAL_STATUSES: LeadStatus[] = [
   "Offre", "Deposit", "Signed", "Gagné", "Perdu"
 ];
 
-export const OWNER_STATUSES: LeadStatus[] = [
-  "NouveauContact", "Qualification", "MandatPropose", 
-  "MandatSigne", "MandatExpire", "Inactif"
-];
-
 /**
  * Checks if a status is valid for a given pipeline type
  */
 export const isStatusValidForPipeline = (status: LeadStatus, pipelineType: PipelineType): boolean => {
-  if (pipelineType === 'purchase') {
-    return PURCHASE_STATUSES.includes(status);
-  } else if (pipelineType === 'rental') {
-    return RENTAL_STATUSES.includes(status);
-  } else if (pipelineType === 'owner') {
-    return OWNER_STATUSES.includes(status);
-  }
-  return false;
+  const validStatuses = pipelineType === 'purchase' ? PURCHASE_STATUSES : RENTAL_STATUSES;
+  return validStatuses.includes(status);
 };
 
 /**
  * Returns the available statuses for a given pipeline type
  */
 export const getStatusesForPipeline = (pipelineType: PipelineType): LeadStatus[] => {
-  if (pipelineType === 'purchase') {
-    return PURCHASE_STATUSES;
-  } else if (pipelineType === 'rental') {
-    return RENTAL_STATUSES;
-  } else if (pipelineType === 'owner') {
-    return OWNER_STATUSES;
-  }
-  return PURCHASE_STATUSES; // Default
+  return pipelineType === 'purchase' ? PURCHASE_STATUSES : RENTAL_STATUSES;
 };
 
 /**
@@ -60,25 +43,15 @@ export const getRecommendedStatusForPipelineTransition = (
     return currentStatus;
   }
   
-  // Otherwise return an appropriate default status based on the target pipeline
-  if (targetPipelineType === 'owner') {
-    return "NouveauContact";
-  } else {
-    return "New";
-  }
+  // Otherwise return "New" as a safe default
+  return "New";
 };
 
 /**
  * Helper function to get a description of the pipeline type in French
  */
 export const getPipelineTypeLabel = (pipelineType: PipelineType): string => {
-  const mapping: Record<PipelineType, string> = {
-    purchase: 'Achat',
-    rental: 'Location',
-    owner: 'Propriétaire'
-  };
-  
-  return mapping[pipelineType] || 'Achat';
+  return pipelineType === 'purchase' ? 'Achat' : 'Location';
 };
 
 /**
@@ -87,8 +60,7 @@ export const getPipelineTypeLabel = (pipelineType: PipelineType): string => {
 export const getPipelineTypeFrench = (pipelineType: PipelineType): string => {
   const mapping: Record<PipelineType, string> = {
     purchase: 'Achat',
-    rental: 'Location',
-    owner: 'Propriétaire'
+    rental: 'Location'
   };
   
   return mapping[pipelineType] || 'Achat';
@@ -110,20 +82,15 @@ export const handlePipelineTypeTransition = async (
   
   // Check if status needs adjustment
   const shouldChangeStatus = !isStatusValidForPipeline(currentStatus, targetPipelineType);
-  let newStatus: LeadStatus;
+  const newStatus = shouldChangeStatus ? "New" : currentStatus;
   
+  // Update status if needed
   if (shouldChangeStatus) {
-    if (targetPipelineType === 'owner') {
-      newStatus = "NouveauContact";
-    } else {
-      newStatus = "New";
-    }
-    
     handleStatusChange(newStatus);
     
     toast({
       title: "Statut réinitialisé",
-      description: `Le statut a été réinitialisé à "${newStatus}" car "${currentStatus}" n'est pas valide pour un dossier de ${getPipelineTypeFrench(targetPipelineType).toLowerCase()}.`
+      description: `Le statut a été réinitialisé à "New" car "${currentStatus}" n'est pas valide pour un dossier de ${getPipelineTypeFrench(targetPipelineType).toLowerCase()}.`
     });
   }
   
