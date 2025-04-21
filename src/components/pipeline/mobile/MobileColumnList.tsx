@@ -54,7 +54,7 @@ const MobileColumnList = ({
   filters
 }: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
+  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest' | 'mandate'>('priority');
   const navigate = useNavigate();
   
   const {
@@ -108,14 +108,18 @@ const MobileColumnList = ({
   const totalLeadCount = leadsByStatus.length;
 
   const handleAddLead = (status: LeadStatus) => {
-    navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
+    if (activeTab === 'owner') {
+      navigate('/owners/new');
+    } else {
+      navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
+    }
   };
 
   const handleLeadClick = (leadId: string) => {
     navigate(`/leads/${leadId}?tab=criteria`);
   };
   
-  const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest') => {
+  const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest' | 'mandate') => {
     setSortBy(value);
   };
 
@@ -184,6 +188,16 @@ const MobileColumnList = ({
                   >
                     Plus ancien
                   </button>
+                  {activeTab === 'owner' && (
+                    <button 
+                      onClick={() => handleChangeSortBy('mandate')}
+                      className={`px-2 py-1 text-xs rounded-md ${sortBy === 'mandate' 
+                        ? 'bg-zinc-900 text-white' 
+                        : 'bg-gray-100 text-gray-600'}`}
+                    >
+                      Type mandat
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -193,13 +207,13 @@ const MobileColumnList = ({
             {sortedLeads.length === 0 ? (
               <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
                 <div className="text-center">
-                  <p className="text-sm text-zinc-900 font-medium">Aucun lead trouvé</p>
+                  <p className="text-sm text-zinc-900 font-medium">Aucun {activeTab === 'owner' ? 'propriétaire' : 'lead'} trouvé</p>
                   <button 
                     onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
                     className="mt-2 text-zinc-900 hover:text-zinc-700 text-sm flex items-center justify-center mx-auto"
                   >
                     <PlusCircle className="h-4 w-4 mr-1" />
-                    Ajouter un lead
+                    Ajouter un {activeTab === 'owner' ? 'propriétaire' : 'lead'}
                   </button>
                 </div>
               </div>
@@ -220,6 +234,9 @@ const MobileColumnList = ({
                     phone={lead.phone}
                     email={lead.email}
                     onClick={handleLeadClick}
+                    pipelineType={activeTab as PipelineType}
+                    mandate_type={lead.mandate_type}
+                    propertyReference={lead.property_reference}
                   />
                 ))}
               </div>

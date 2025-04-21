@@ -1,17 +1,19 @@
+
 import React from 'react';
-import { LeadStatus } from '@/components/common/StatusBadge';
-import { Currency } from '@/types/lead';
-import { formatDate, formatName, getActionStatusStyle } from './utils/leadFormatUtils';
-import LeadAvatar from './components/LeadAvatar';
+import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Calendar, Clock, Tag } from 'lucide-react';
 import LeadContactActions from './components/LeadContactActions';
-import LeadTagsList from './components/LeadTagsList';
+import LeadAvatar from './components/LeadAvatar';
+import { PipelineType } from '@/types/lead';
 
 interface LeadListItemProps {
   id: string;
   name: string;
-  columnStatus: LeadStatus;
+  columnStatus: string;
   budget?: string;
-  currency?: Currency;
+  currency?: string;
   desiredLocation?: string;
   taskType?: string;
   createdAt?: string;
@@ -19,6 +21,9 @@ interface LeadListItemProps {
   phone?: string;
   email?: string;
   onClick: (id: string) => void;
+  pipelineType?: PipelineType;
+  mandate_type?: string;
+  propertyReference?: string;
 }
 
 const LeadListItem: React.FC<LeadListItemProps> = ({
@@ -33,65 +38,90 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
   nextFollowUpDate,
   phone,
   email,
-  onClick
+  onClick,
+  pipelineType = 'purchase',
+  mandate_type,
+  propertyReference
 }) => {
-  const actionStyle = getActionStatusStyle(nextFollowUpDate);
-
-  const handlePhoneCall = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (phone) {
-      window.location.href = `tel:${phone}`;
+  const isOwner = pipelineType === 'owner';
+  
+  const formatCreatedAt = (date?: string) => {
+    if (!date) return '';
+    
+    try {
+      return formatDistanceToNow(new Date(date), { addSuffix: true, locale: fr });
+    } catch (e) {
+      return '';
     }
   };
-
-  const handleEmailClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (email) {
-      window.location.href = `mailto:${email}`;
-    }
+  
+  const handleClick = () => {
+    onClick(id);
   };
-
-  const handleWhatsAppClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (phone) {
-      const cleanedPhone = phone.replace(/[^\d+]/g, '');
-      window.open(`https://wa.me/${cleanedPhone}`, '_blank');
-    }
-  };
-
+  
   return (
     <div 
-      className={`py-3 px-4 flex hover:bg-slate-50 transition-colors cursor-pointer ${nextFollowUpDate ? actionStyle.containerClassName : ''}`}
-      onClick={() => onClick(id)}
+      className="flex items-start gap-3 p-3 cursor-pointer hover:bg-slate-50"
+      onClick={handleClick}
     >
-      <LeadAvatar name={name} />
+      <LeadAvatar name={name} className="hidden sm:flex" />
       
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-futuraLight text-base text-zinc-700">{formatName(name)}</h3>
-            <div className="text-xs text-zinc-500 whitespace-nowrap font-futuraLight">
-              {formatDate(createdAt)}
-            </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-medium text-sm truncate">
+              {name}
+            </h3>
+            
+            {isOwner ? (
+              <div className="mt-1 space-y-1 text-xs">
+                {mandate_type && (
+                  <div className="flex items-center text-muted-foreground">
+                    <Tag className="w-3 h-3 mr-1 flex-shrink-0" />
+                    <span>Mandat: {mandate_type}</span>
+                  </div>
+                )}
+                {propertyReference && (
+                  <div className="flex items-center text-muted-foreground">
+                    <Clock className="w-3 h-3 mr-1 flex-shrink-0" />
+                    <span>Réf: {propertyReference}</span>
+                  </div>
+                )}
+                {createdAt && (
+                  <div className="flex items-center text-muted-foreground">
+                    <Calendar className="w-3 h-3 mr-1 flex-shrink-0" />
+                    <span>Ajouté {formatCreatedAt(createdAt)}</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="mt-1 space-y-1 text-xs">
+                {budget && (
+                  <div className="text-muted-foreground">
+                    Budget: {budget} {currency || '€'}
+                  </div>
+                )}
+                {desiredLocation && (
+                  <div className="text-muted-foreground truncate">
+                    Lieu: {desiredLocation}
+                  </div>
+                )}
+                {createdAt && (
+                  <div className="flex items-center text-muted-foreground">
+                    <Calendar className="w-3 h-3 mr-1 flex-shrink-0" />
+                    <span>Ajouté {formatCreatedAt(createdAt)}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
-          <LeadContactActions 
+          <LeadContactActions
             phone={phone}
             email={email}
-            handlePhoneCall={handlePhoneCall}
-            handleWhatsAppClick={handleWhatsAppClick}
-            handleEmailClick={handleEmailClick}
+            id={id}
           />
         </div>
-        
-        <LeadTagsList 
-          columnStatus={columnStatus}
-          taskType={taskType}
-          nextFollowUpDate={nextFollowUpDate}
-          desiredLocation={desiredLocation}
-          budget={budget}
-          currency={currency}
-        />
       </div>
     </div>
   );
