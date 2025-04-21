@@ -1,12 +1,11 @@
-
 import { LeadStatus, PipelineType } from '@/types/lead';
 import { addActionToLead } from '@/services/leadActions';
 import { toast } from '@/hooks/use-toast';
 
-// Define specific status sets for different pipeline types
+// Modifier la liste des statuts pour le pipeline d'achat
 export const PURCHASE_STATUSES: LeadStatus[] = [
   "New", "Contacted", "Qualified", "Proposal", "Visit", 
-  "Offer", "Offre", "Deposit", "Signed", "Gagné", "Perdu"
+  "Offer", "Deposit", "Signed", "Gagné", "Perdu"
 ];
 
 export const RENTAL_STATUSES: LeadStatus[] = [
@@ -14,7 +13,6 @@ export const RENTAL_STATUSES: LeadStatus[] = [
   "Offre", "Deposit", "Signed", "Gagné", "Perdu"
 ];
 
-// Définir les statuts spécifiques pour le pipeline des propriétaires
 export const OWNERS_STATUSES: LeadStatus[] = [
   "New",              // Premier contact
   "Contacted",        // Rendez-vous programmé
