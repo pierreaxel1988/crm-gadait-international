@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 interface OwnerFormProps {
   onComplete?: () => void;
@@ -47,7 +48,16 @@ const OwnerForm: React.FC<OwnerFormProps> = ({ onComplete }) => {
       <Input name="preferred_language" placeholder="Langue préférée" value={form.preferred_language} onChange={handleChange} />
       <Input name="contact_source" placeholder="Source du contact" value={form.contact_source} onChange={handleChange} />
       <Input name="mandate_type" placeholder="Type de mandat" value={form.mandate_type} onChange={handleChange} />
-      <Button type="submit" loading={loading} className="col-span-2 w-full">Créer</Button>
+      <Button type="submit" disabled={loading} className="col-span-2 w-full">
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Création...
+          </>
+        ) : (
+          "Créer"
+        )}
+      </Button>
     </form>
   );
 };
