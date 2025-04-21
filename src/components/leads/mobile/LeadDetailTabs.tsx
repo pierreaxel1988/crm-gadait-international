@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
@@ -89,7 +90,6 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           data-[state=active]:shadow-none"
         >
           Actions
-          
         </TabsTrigger>
         <TabsTrigger 
           value="emails" 
