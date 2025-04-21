@@ -21,11 +21,34 @@ const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
   pipelineType,
   leadStatus,
   assignedAgent,
-  availableStatuses,
   onPipelineTypeChange,
   onStatusChange,
   onAgentChange
 }) => {
+  // Get the correct statuses based on the current pipeline type
+  const availableStatuses = getStatusesForPipeline(pipelineType);
+
+  // Status label mapping based on pipeline type
+  const getStatusLabel = (status: LeadStatus): string => {
+    if (pipelineType === 'owners') {
+      const ownerStatusLabels: Record<LeadStatus, string> = {
+        'New': 'Premier contact',
+        'Contacted': 'Rendez-vous programmé',
+        'Qualified': 'Visite effectuée',
+        'Proposal': 'Mandat en négociation',
+        'Visit': 'Bien en commercialisation',
+        'Offer': 'Offre reçue',
+        'Offre': 'Offre en cours',
+        'Deposit': 'Compromis signé',
+        'Signed': 'Mandat signé',
+        'Gagné': 'Vente finalisée',
+        'Perdu': 'Perdu/Annulé'
+      };
+      return ownerStatusLabels[status] || status;
+    }
+    return status;
+  };
+
   return (
     <div className="space-y-4 bg-white border rounded-lg p-4">
       <div className="space-y-2">
@@ -61,7 +84,9 @@ const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
           </SelectTrigger>
           <SelectContent>
             {availableStatuses.map(status => (
-              <SelectItem key={status} value={status}>{status}</SelectItem>
+              <SelectItem key={status} value={status}>
+                {getStatusLabel(status)}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
