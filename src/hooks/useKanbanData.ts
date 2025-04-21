@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -29,6 +30,9 @@ export interface ExtendedKanbanItem extends KanbanItem {
   phoneCountryCodeDisplay?: string | null; // Add phone country code display
   preferredLanguage?: string | null; // Add preferred language
   regions?: MauritiusRegion[];
+  // Propriétés supplémentaires pour les propriétaires
+  mandate_type?: string;
+  property_reference?: string;
 }
 
 interface KanbanColumn {
@@ -82,6 +86,86 @@ export const useKanbanData = (
         
         if (teamMembersData) {
           setTeamMembers(teamMembersData);
+        }
+        
+        // Si on est dans le pipeline propriétaires, on récupère les données depuis la table owners
+        if (pipelineType === 'owner') {
+          const { data: ownersData, error: ownersError } = await supabase
+            .from('owners')
+            .select('*');
+            
+          if (ownersError) {
+            console.error('Error fetching owners:', ownersError);
+            toast({
+              variant: "destructive",
+              title: "Erreur de chargement",
+              description: "Impossible de charger les propriétaires."
+            });
+            return;
+          }
+            
+          console.log("Fetched owners from Supabase:", ownersData?.length);
+          
+          if (!ownersData || ownersData.length === 0) {
+            setLoadedColumns(columns.map(col => ({ ...col, items: [] })));
+            setIsLoading(false);
+            return;
+          }
+          
+          // Transformer les propriétaires en format KanbanItem
+          const mappedOwners = ownersData.map(owner => {
+            const assignedTeamMember = teamMembersData?.find(tm => tm.id === owner.assigned_to);
+            
+            return {
+              id: owner.id,
+              name: owner.full_name,
+              email: owner.email || '',
+              phone: owner.phone,
+              status: owner.relationship_status as LeadStatus || 'NouveauContact' as LeadStatus,
+              tags: [], // Pas de tags pour les propriétaires pour l'instant
+              assignedTo: owner.assigned_to,
+              assignedToId: owner.assigned_to,
+              dueDate: owner.next_action_date,
+              nextFollowUpDate: owner.next_action_date,
+              pipelineType: 'owner' as PipelineType,
+              mandate_type: owner.mandate_type,
+              nationality: owner.nationality,
+              tax_residence: owner.tax_residence,
+              preferredLanguage: owner.preferred_language,
+              createdAt: owner.created_at,
+              // Autres propriétés spécifiques aux propriétaires
+              specific_needs: owner.specific_needs,
+              attention_points: owner.attention_points,
+              relationship_details: owner.relationship_details
+            };
+          });
+          
+          console.log(`Mapped owners: ${mappedOwners.length}`);
+          
+          // Distribuer les propriétaires dans leurs colonnes respectives
+          const updatedColumns = columns.map(column => {
+            const columnItems = mappedOwners.filter(owner => {
+              // Mappage des statuts de la base de données aux statuts du pipeline
+              let ownerStatus = owner.status;
+              
+              // Si le statut est 'Nouveau contact', mapper à 'NouveauContact'
+              if (owner.status === 'Nouveau contact') ownerStatus = 'NouveauContact' as LeadStatus;
+              
+              return ownerStatus === column.status;
+            });
+            
+            console.log(`Column ${column.title} (${column.status}): ${columnItems.length} owners`);
+            
+            return {
+              ...column,
+              items: columnItems as ExtendedKanbanItem[],
+              pipelineType
+            };
+          });
+          
+          setLoadedColumns(updatedColumns);
+          setIsLoading(false);
+          return;
         }
         
         // Direct query to get leads with filters based on user role

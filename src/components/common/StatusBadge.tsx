@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 export type LeadStatus =
+  // Statuts pour les pipelines Achat/Location
   | 'New'              // Nouveaux
   | 'Contacted'        // Contactés
   | 'Qualified'        // Qualifiés
@@ -14,7 +15,14 @@ export type LeadStatus =
   | 'Deposit'          // Dépôt reçu
   | 'Signed'           // Signature finale
   | 'Gagné'            // Conclus
-  | 'Perdu';           // Perdu
+  | 'Perdu'            // Perdu
+  // Statuts pour le pipeline Propriétaires
+  | 'NouveauContact'   // Nouveau contact
+  | 'Qualification'    // En cours de qualification
+  | 'MandatPropose'    // Mandat proposé
+  | 'MandatSigne'      // Mandat signé
+  | 'MandatExpire'     // Mandat expiré
+  | 'Inactif';         // Inactif / En pause
 
 interface StatusBadgeProps {
   status: LeadStatus;
@@ -24,6 +32,7 @@ interface StatusBadgeProps {
 const StatusBadge = ({ status, className }: StatusBadgeProps) => {
   const getStatusStyles = (status: LeadStatus) => {
     switch (status) {
+      // Statuts pour les pipelines Achat/Location
       case 'New':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
       case 'Contacted':
@@ -45,8 +54,51 @@ const StatusBadge = ({ status, className }: StatusBadgeProps) => {
         return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
       case 'Perdu':
         return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+        
+      // Statuts pour le pipeline Propriétaires
+      case 'NouveauContact':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+      case 'Qualification':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
+      case 'MandatPropose':
+        return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
+      case 'MandatSigne':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+      case 'MandatExpire':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
+      case 'Inactif':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+        
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+    }
+  };
+
+  // Traduction française des statuts
+  const getStatusLabel = (status: LeadStatus): string => {
+    switch (status) {
+      // Statuts pour les pipelines Achat/Location
+      case 'New': return 'Nouveau';
+      case 'Contacted': return 'Contacté';
+      case 'Qualified': return 'Qualifié';
+      case 'Proposal': return 'Proposition';
+      case 'Visit': return 'Visite';
+      case 'Offer': return 'Offre';
+      case 'Offre': return 'Offre';
+      case 'Deposit': return 'Dépôt';
+      case 'Signed': return 'Signé';
+      case 'Gagné': return 'Gagné';
+      case 'Perdu': return 'Perdu';
+      
+      // Statuts pour le pipeline Propriétaires
+      case 'NouveauContact': return 'Nouveau contact';
+      case 'Qualification': return 'En qualification';
+      case 'MandatPropose': return 'Mandat proposé';
+      case 'MandatSigne': return 'Mandat signé';
+      case 'MandatExpire': return 'Mandat expiré';
+      case 'Inactif': return 'Inactif / Pause';
+      
+      default: return status;
     }
   };
 
@@ -59,7 +111,7 @@ const StatusBadge = ({ status, className }: StatusBadgeProps) => {
         className
       )}
     >
-      {status}
+      {getStatusLabel(status)}
     </Badge>
   );
 };

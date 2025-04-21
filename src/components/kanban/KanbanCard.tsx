@@ -36,7 +36,7 @@ export interface KanbanItem {
   assignedTo?: string;
   dueDate?: string;
   status: LeadStatus;
-  pipelineType?: 'purchase' | 'rental';
+  pipelineType?: 'purchase' | 'rental' | 'owner';
   taskType?: TaskType;
   // Ajout des propriétés supplémentaires
   propertyType?: string;
@@ -48,19 +48,27 @@ export interface KanbanItem {
   createdAt?: string;
   importedAt?: string;
   nextFollowUpDate?: string;
+  // Propriétés spécifiques aux propriétaires
+  mandate_type?: string;
+  specific_needs?: string;
+  attention_points?: string;
+  relationship_details?: string;
+  nationality?: string;
+  tax_residence?: string;
+  preferredLanguage?: string;
 }
 
 interface KanbanCardProps {
   item: KanbanItem;
   className?: string;
   draggable?: boolean;
-  pipelineType?: 'purchase' | 'rental';
+  pipelineType?: 'purchase' | 'rental' | 'owner';
 }
 
 const KanbanCard = ({ item, className, draggable = false, pipelineType }: KanbanCardProps) => {
   const navigate = useNavigate();
   
-  // Debug des informations du lead
+  // Debug des informations du lead ou propriétaire
   console.log(`KanbanCard: ${item.name}`, {
     id: item.id,
     status: item.status,
@@ -69,8 +77,13 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
   });
 
   const handleCardClick = () => {
-    // Navigate to lead detail page with criteria tab preselected
-    navigate(`/leads/${item.id}?tab=criteria`);
+    // Navigate to lead detail page or owner detail page based on pipeline type
+    if (item.pipelineType === 'owner' || pipelineType === 'owner') {
+      navigate(`/owners/${item.id}`);
+    } else {
+      // Navigate to lead detail page with criteria tab preselected
+      navigate(`/leads/${item.id}?tab=criteria`);
+    }
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
@@ -89,8 +102,12 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
 
   const handleAssignClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Navigation vers la page d'édition du lead pour assigner un commercial
-    navigate(`/leads/${item.id}?assign=true`);
+    if (item.pipelineType === 'owner' || pipelineType === 'owner') {
+      navigate(`/owners/${item.id}?assign=true`);
+    } else {
+      // Navigation vers la page d'édition du lead pour assigner un commercial
+      navigate(`/leads/${item.id}?assign=true`);
+    }
   };
 
   const handleLinkClick = (e: React.MouseEvent) => {
@@ -118,6 +135,9 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     }
     return '';
   };
+
+  // Déterminer s'il s'agit d'une carte propriétaire
+  const isOwnerCard = item.pipelineType === 'owner' || pipelineType === 'owner';
 
   return (
     <Card 
@@ -147,19 +167,46 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
           leadId={item.id} 
         />
         
-        {/* Informations sur la propriété */}
-        <PropertyInfo 
-          propertyType={item.propertyType}
-          budget={item.budget}
-          desiredLocation={item.desiredLocation}
-          country={item.country}
-          bedrooms={item.bedrooms}
-          url={item.url}
-          onLinkClick={handleLinkClick}
-        />
+        {isOwnerCard ? (
+          /* Informations spécifiques pour les propriétaires */
+          <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+            {item.mandate_type && (
+              <div className="flex items-center gap-1">
+                <span className="font-medium">Type de mandat:</span> 
+                <span>{item.mandate_type}</span>
+              </div>
+            )}
+            {item.nationality && (
+              <div className="flex items-center gap-1">
+                <span className="font-medium">Nationalité:</span> 
+                <span>{item.nationality}</span>
+              </div>
+            )}
+            {item.specific_needs && (
+              <div className="flex items-center gap-1">
+                <span className="font-medium">Besoins:</span> 
+                <span className="truncate">{item.specific_needs}</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Informations sur la propriété pour les leads */
+          <PropertyInfo 
+            propertyType={item.propertyType}
+            budget={item.budget}
+            desiredLocation={item.desiredLocation}
+            country={item.country}
+            bedrooms={item.bedrooms}
+            url={item.url}
+            onLinkClick={handleLinkClick}
+          />
+        )}
         
-        {/* Date d'importation */}
-        <ImportInfo importedAt={item.importedAt} createdAt={item.createdAt} />
+        {/* Date d'importation/création */}
+        <ImportInfo 
+          importedAt={item.importedAt} 
+          createdAt={item.createdAt} 
+        />
         
         {/* Commercial assigné ou bouton pour assigner */}
         <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">

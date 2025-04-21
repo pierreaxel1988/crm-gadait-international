@@ -1,4 +1,3 @@
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -58,9 +57,7 @@ export type PropertyUse =
   | "Investissement locatif" 
   | "Résidence principale";
 
-export type PipelineType = 
-  | "purchase" 
-  | "rental";
+export type PipelineType = 'purchase' | 'rental' | 'owner';
 
 export type Currency =
   | "EUR"
