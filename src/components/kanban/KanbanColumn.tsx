@@ -162,3 +162,4 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
 };
 
 export default KanbanColumn;
+

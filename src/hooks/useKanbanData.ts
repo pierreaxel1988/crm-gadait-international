@@ -20,7 +20,7 @@ export interface ExtendedKanbanItem extends KanbanItem {
   url?: string;
   createdAt?: string;
   importedAt?: string;
-  pipelineType?: PipelineType;
+  pipelineType?: PipelineType; // PipelineType now includes 'owners'
   pipeline_type?: PipelineType; // Add database field name for compatibility
   currency?: Currency; // Ensure currency is included in the type
   nextFollowUpDate?: string; // Add nextFollowUpDate for action status
