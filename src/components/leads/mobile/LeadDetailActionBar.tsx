@@ -28,6 +28,8 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [showSuggestionsBadge, setShowSuggestionsBadge] = useState<boolean>(false);
+  const [pendingActionsCount, setPendingActionsCount] = useState<number>(0);
   
   useEffect(() => {
     if (lead?.actionHistory) {
