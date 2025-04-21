@@ -60,7 +60,8 @@ export const getPipelineTypeLabel = (pipelineType: PipelineType): string => {
 export const getPipelineTypeFrench = (pipelineType: PipelineType): string => {
   const mapping: Record<PipelineType, string> = {
     purchase: 'Achat',
-    rental: 'Location'
+    rental: 'Location',
+    owners: 'Propriétaires'
   };
   
   return mapping[pipelineType] || 'Achat';

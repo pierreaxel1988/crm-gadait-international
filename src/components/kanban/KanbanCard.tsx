@@ -36,7 +36,7 @@ export interface KanbanItem {
   assignedTo?: string;
   dueDate?: string;
   status: LeadStatus;
-  pipelineType?: 'purchase' | 'rental';
+  pipelineType?: 'purchase' | 'rental' | 'owners';
   taskType?: TaskType;
   // Ajout des propriétés supplémentaires
   propertyType?: string;

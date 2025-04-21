@@ -15,12 +15,12 @@ interface KanbanBoardProps {
     title: string;
     status: LeadStatus;
     items: any[]; // Will be populated by the hook
-    pipelineType?: 'purchase' | 'rental';
+    pipelineType?: 'purchase' | 'rental' | 'owners';
   }[];
   className?: string;
   filters?: FilterOptions;
   refreshTrigger?: number;
-  pipelineType: 'purchase' | 'rental';
+  pipelineType: 'purchase' | 'rental' | 'owners';
   isLoading?: boolean;
 }
 

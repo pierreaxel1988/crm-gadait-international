@@ -14,7 +14,7 @@ interface KanbanColumnProps {
   items: KanbanItem[];
   className?: string;
   onDrop?: (item: KanbanItem, status: LeadStatus) => void;
-  pipelineType: 'purchase' | 'rental';
+  pipelineType: 'purchase' | 'rental' | 'owners';
 }
 
 const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }: KanbanColumnProps) => {
