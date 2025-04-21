@@ -47,7 +47,7 @@ const TaskTypeIndicator = ({
             : 'text-[#D05A76] bg-[#EBD5CE] border-amber-200 hover:bg-amber-100',
           text: 'Appel',
           classes: 'text-[#D05A76]',
-          icon: <Phone className="h-3 w-3" />,
+          icon: <Phone className="h-4 w-4" />,  // Harmonisation : une seule icône, taille 16px (h-4, w-4)
           isClickable
         };
       case 'Visites':
@@ -144,7 +144,7 @@ const TaskTypeIndicator = ({
       <span className={cn("text-xs font-medium whitespace-nowrap", classes)}>
         {text}
       </span>
-      {isClickable && <Phone className={cn("h-3 w-3 ml-1", classes)} />}
+      {/* Suppression de la seconde icône Phone pour harmonisation */}
     </div>
   );
 };
