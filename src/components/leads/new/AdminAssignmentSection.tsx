@@ -1,23 +1,20 @@
 
-import React, { useState, useEffect } from 'react';
-import { LeadStatus } from '@/components/common/StatusBadge';
+import React from 'react';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
+import { LeadStatus, PipelineType } from '@/types/lead';
+import { getStatusesForPipeline } from '@/utils/pipelineUtils';
 
 interface AdminAssignmentSectionProps {
-  pipelineType: 'purchase' | 'rental';
+  pipelineType: PipelineType;
   leadStatus: LeadStatus;
-  assignedAgent: string | undefined;
+  assignedAgent?: string;
   availableStatuses: LeadStatus[];
-  onPipelineTypeChange: (value: 'purchase' | 'rental') => void;
-  onStatusChange: (value: LeadStatus) => void;
-  onAgentChange: (value: string | undefined) => void;
-}
-
-interface TeamMember {
-  id: string;
-  name: string;
+  onPipelineTypeChange: (type: PipelineType) => void;
+  onStatusChange: (status: LeadStatus) => void;
+  onAgentChange: (agentId: string | undefined) => void;
 }
 
 const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
@@ -29,112 +26,53 @@ const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
   onStatusChange,
   onAgentChange
 }) => {
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [agentName, setAgentName] = useState<string>('');
-  const [isLoadingAgentName, setIsLoadingAgentName] = useState<boolean>(false);
-
-  // Fetch agent name when assignedAgent changes
-  useEffect(() => {
-    if (assignedAgent) {
-      setIsLoadingAgentName(true);
-      const fetchAgentName = async () => {
-        try {
-          const { data, error } = await supabase
-            .from('team_members')
-            .select('name')
-            .eq('id', assignedAgent)
-            .single();
-            
-          if (error) {
-            console.error('Error fetching agent name:', error);
-            return;
-          }
-          
-          if (data) {
-            setAgentName(data.name);
-            console.log("Assigned agent name:", data.name);
-          }
-        } catch (error) {
-          console.error('Error fetching agent name:', error);
-        } finally {
-          setIsLoadingAgentName(false);
-        }
-      };
-      
-      fetchAgentName();
-    } else {
-      setAgentName('');
-    }
-  }, [assignedAgent]);
-
   return (
-    <div className="luxury-card p-4 border-loro-sand">
-      <h2 className="text-lg font-medium mb-4">Attribution du lead</h2>
-      <div className="space-y-4">
-        <div>
-          <label className="text-sm font-medium mb-1 block">Type de pipeline</label>
-          <Select
-            value={pipelineType}
-            onValueChange={(value: 'purchase' | 'rental') => onPipelineTypeChange(value)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Sélectionner un pipeline" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="purchase">Achat</SelectItem>
-              <SelectItem value="rental">Location</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div>
-          <label className="text-sm font-medium mb-1 block">Statut initial</label>
-          <Select
-            value={leadStatus}
-            onValueChange={(value: LeadStatus) => onStatusChange(value)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Sélectionner un statut" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableStatuses.map(status => (
-                <SelectItem key={status} value={status}>
-                  {status === 'New' ? 'Nouveaux' : 
-                   status === 'Contacted' ? 'Contactés' :
-                   status === 'Qualified' ? 'Qualifiés' :
-                   status === 'Proposal' ? 'Propositions' :
-                   status === 'Visit' ? 'Visites en cours' :
-                   status === 'Offer' ? 'Offre en cours' :
-                   status === 'Offre' ? 'Offre en cours' :
-                   status === 'Deposit' ? 'Dépôt reçu' :
-                   status === 'Signed' ? 'Signature finale' :
-                   status === 'Gagné' ? 'Conclus' :
-                   status === 'Perdu' ? 'Perdu' : 
-                   status}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
+    <div className="space-y-4 bg-white border rounded-lg p-4">
+      <div className="space-y-2">
+        <Label>Type de pipeline</Label>
+        <RadioGroup 
+          value={pipelineType} 
+          onValueChange={(value: PipelineType) => onPipelineTypeChange(value)}
+          className="flex space-x-4"
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="purchase" id="purchase" />
+            <Label htmlFor="purchase" className="cursor-pointer">Achat</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="rental" id="rental" />
+            <Label htmlFor="rental" className="cursor-pointer">Location</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="owners" id="owners" />
+            <Label htmlFor="owners" className="cursor-pointer">Propriétaires</Label>
+          </div>
+        </RadioGroup>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Statut du lead</Label>
+        <Select 
+          value={leadStatus} 
+          onValueChange={(value: LeadStatus) => onStatusChange(value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner un statut" />
+          </SelectTrigger>
+          <SelectContent>
+            {availableStatuses.map(status => (
+              <SelectItem key={status} value={status}>{status}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Attribuer à un agent</Label>
         <TeamMemberSelect
           value={assignedAgent}
           onChange={onAgentChange}
-          label="Attribuer ce lead à"
-          autoSelectPierreAxel={false}
         />
-        
-        {isLoadingAgentName && (
-          <div className="text-sm text-gray-500">
-            Chargement des informations de l'agent...
-          </div>
-        )}
-        
-        {assignedAgent && agentName && !isLoadingAgentName && (
-          <div className="text-sm text-green-600 font-medium">
-            Lead sera attribué à: {agentName}
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LeadDetailed, LeadStatus } from '@/types/lead';
-import { createLead, addActionToLead } from '@/services/leadService';
+import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
+import { createLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { getStatusesForPipeline } from '@/utils/pipelineUtils';
 
 export const useLeadCreation = () => {
   const navigate = useNavigate();
@@ -12,11 +13,11 @@ export const useLeadCreation = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   
-  const pipelineFromUrl = queryParams.get('pipeline') as 'purchase' | 'rental' | null;
+  const pipelineFromUrl = queryParams.get('pipeline') as PipelineType | null;
   const statusFromUrl = queryParams.get('status') as LeadStatus | null;
   
   const [assignedAgent, setAssignedAgent] = useState<string | undefined>(undefined);
-  const [pipelineType, setPipelineType] = useState<'purchase' | 'rental'>(pipelineFromUrl || 'purchase');
+  const [pipelineType, setPipelineType] = useState<PipelineType>(pipelineFromUrl || 'purchase');
   const [leadStatus, setLeadStatus] = useState<LeadStatus>(statusFromUrl || 'New');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,15 +39,7 @@ export const useLeadCreation = () => {
     checkAuth();
   }, [navigate]);
 
-  const purchaseStatuses: LeadStatus[] = [
-    'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offer', 'Deposit', 'Signed', 'Gagné', 'Perdu'
-  ];
-  
-  const rentalStatuses: LeadStatus[] = [
-    'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offre', 'Deposit', 'Signed', 'Gagné', 'Perdu'
-  ];
-  
-  const availableStatuses = pipelineType === 'purchase' ? purchaseStatuses : rentalStatuses;
+  const availableStatuses = getStatusesForPipeline(pipelineType);
 
   const handleSubmit = async (data: LeadDetailed) => {
     if (isSubmitting) {
@@ -128,22 +121,9 @@ export const useLeadCreation = () => {
   const handleAgentChange = (value: string | undefined) => {
     console.log("Agent changed to:", value);
     setAssignedAgent(value);
-    
-    if (value) {
-      supabase
-        .from("team_members")
-        .select("name")
-        .eq("id", value)
-        .single()
-        .then(({ data }) => {
-          if (data) {
-            console.log("Selected agent name:", data.name);
-          }
-        });
-    }
   };
 
-  const handlePipelineTypeChange = (value: 'purchase' | 'rental') => {
+  const handlePipelineTypeChange = (value: PipelineType) => {
     setPipelineType(value);
     if (!statusFromUrl) {
       setLeadStatus('New');
