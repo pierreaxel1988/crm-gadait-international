@@ -1,12 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { Button } from '@/components/ui/button';
 import { RotateCcw } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
-import ActionsList from '@/components/actions/ActionsList';
 import { useBreakpoint } from '@/hooks/use-mobile';
 import { useActionsData } from '@/hooks/useActionsData';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,6 +11,9 @@ import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TypeFilterButtons from '@/components/actions/filters/TypeFilterButtons';
 import { TaskType } from '@/components/kanban/KanbanCard';
+import ActionsList from '@/components/actions/ActionsList';
+import { useDebounce } from '@/hooks/useDebounce';
+import PipelineSearchBar from '@/components/pipeline/PipelineSearchBar';
 
 const Actions = () => {
   const { isMobile } = useBreakpoint();
@@ -22,50 +22,33 @@ const Actions = () => {
   const { actions, isLoading, markActionComplete } = useActionsData(refreshTrigger);
   const { isAdmin } = useAuth();
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
-  
-  // NOUVEAU: Le filtre par type d’action
   const [typeFilter, setTypeFilter] = useState<TaskType | 'all'>('all');
+  
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  useEffect(() => {
-    // Écouter les changements d'agent depuis d'autres composants
-    const handleAgentChange = (e: CustomEvent) => {
-      const newAgent = e.detail.selectedAgent;
-      if (newAgent !== selectedAgent) {
-        handleAgentChange(newAgent);
-      }
-    };
+  // Optimized filtering using useMemo
+  const filteredActions = useMemo(() => {
+    return actions.filter(action => {
+      if (!debouncedSearchTerm && !selectedAgent && typeFilter === 'all') return true;
 
-    window.addEventListener('agent-selection-changed', handleAgentChange as EventListener);
-    return () => {
-      window.removeEventListener('agent-selection-changed', handleAgentChange as EventListener);
-    };
-  }, [selectedAgent]);
-
-  // Filter actions based on search term, selected agent, et type d’action
-  const filteredActions = actions.filter(action => {
-    if (!searchTerm && !selectedAgent && (typeFilter === 'all')) return true;
-
-    let matchesSearch = true;
-    let matchesAgent = true;
-    let matchesType = true;
-
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      matchesSearch = action.leadName.toLowerCase().includes(searchLower) ||
+      const searchLower = debouncedSearchTerm.toLowerCase();
+      
+      // Match criteria
+      const matchesSearch = !debouncedSearchTerm || (
+        action.leadName?.toLowerCase().includes(searchLower) ||
         action.notes?.toLowerCase().includes(searchLower) ||
-        action.assignedToName.toLowerCase().includes(searchLower);
-    }
+        action.assignedToName?.toLowerCase().includes(searchLower) ||
+        action.actionType?.toLowerCase().includes(searchLower) ||
+        action.email?.toLowerCase().includes(searchLower) ||
+        action.phoneNumber?.toLowerCase().includes(searchLower)
+      );
+      
+      const matchesAgent = !selectedAgent || action.assignedToId === selectedAgent;
+      const matchesType = typeFilter === 'all' || action.actionType === typeFilter;
 
-    if (selectedAgent) {
-      matchesAgent = action.assignedToId === selectedAgent;
-    }
-
-    if (typeFilter !== 'all') {
-      matchesType = action.actionType === typeFilter;
-    }
-
-    return matchesSearch && matchesAgent && matchesType;
-  });
+      return matchesSearch && matchesAgent && matchesType;
+    });
+  }, [actions, debouncedSearchTerm, selectedAgent, typeFilter]);
 
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -81,13 +64,11 @@ const Actions = () => {
             <h1 className="text-2xl font-futuraLight tracking-wide text-loro-navy">Actions</h1>
             
             <div className="flex flex-col md:flex-row gap-3">
-              <div className="relative">
-                <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <Input
-                  placeholder="Rechercher..."
-                  className="pl-10 w-full md:w-[280px] border-gray-300 focus:border-loro-terracotta text-xs"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+              <div className="w-full md:w-[280px]">
+                <PipelineSearchBar
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  onRefresh={handleRefresh}
                 />
               </div>
               
@@ -130,7 +111,6 @@ const Actions = () => {
             </div>
           </div>
 
-          {/* NOUVEAU: filtre type d’action */}
           <div className="mb-4">
             <TypeFilterButtons typeFilter={typeFilter} setTypeFilter={setTypeFilter} />
           </div>
