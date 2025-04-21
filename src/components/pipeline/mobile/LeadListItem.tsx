@@ -64,7 +64,7 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
       className="flex items-start gap-3 p-3 cursor-pointer hover:bg-slate-50"
       onClick={handleClick}
     >
-      <LeadAvatar name={name} className="hidden sm:flex" />
+      <LeadAvatar name={name} />
       
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
@@ -119,7 +119,6 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
           <LeadContactActions
             phone={phone}
             email={email}
-            id={id}
           />
         </div>
       </div>

@@ -1,8 +1,8 @@
 
-import { LeadStatus, PipelineType } from '@/types/lead';
 import { FilterOptions } from '../PipelineFilters';
+import { PipelineType } from '@/types/lead';
 
-export type SortBy = 'priority' | 'newest' | 'oldest';
+export type SortBy = 'priority' | 'newest' | 'oldest' | 'mandate';
 
 export interface DesktopPipelineViewProps {
   activeTab: string;
@@ -20,16 +20,4 @@ export interface DesktopPipelineViewProps {
   isRefreshing: boolean;
   isFilterActive: (filterName: string) => boolean;
   teamMembers: { id: string; name: string }[];
-}
-
-export interface SortingControlsProps {
-  sortBy: SortBy;
-  onSortChange: (sort: SortBy) => void;
-}
-
-export interface LeadsListProps {
-  leads: any[];
-  isLoading: boolean;
-  onLeadClick: (leadId: string) => void;
-  onAddLead: () => void;
 }

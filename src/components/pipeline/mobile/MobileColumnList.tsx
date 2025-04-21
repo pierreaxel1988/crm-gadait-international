@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +11,9 @@ import LeadListItem from './LeadListItem';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import { sortLeadsByPriority } from './utils/leadSortUtils';
 import LoadingScreen from '@/components/layout/LoadingScreen';
+
+// Define the SortBy type to include the mandate option
+type SortBy = 'priority' | 'newest' | 'oldest' | 'mandate';
 
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
@@ -54,7 +58,7 @@ const MobileColumnList = ({
   filters
 }: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest' | 'mandate'>('priority');
+  const [sortBy, setSortBy] = useState<SortBy>('priority');
   const navigate = useNavigate();
   
   const {
@@ -96,7 +100,20 @@ const MobileColumnList = ({
       )
     : leadsByStatus;
     
-  const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
+  // Add a custom sort function that handles the 'mandate' sort option
+  const sortedLeads = (() => {
+    if (sortBy === 'mandate' && activeTab === 'owner') {
+      return [...searchFilteredLeads].sort((a, b) => {
+        // Sort by mandate type (alphabetically)
+        if (!a.mandate_type) return 1;
+        if (!b.mandate_type) return -1;
+        return a.mandate_type.localeCompare(b.mandate_type);
+      });
+    }
+    
+    // For other sorts, use the existing function
+    return sortLeadsByPriority(searchFilteredLeads, sortBy as 'priority' | 'newest' | 'oldest');
+  })();
 
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     const countForStatus = column.items.length;
@@ -116,10 +133,14 @@ const MobileColumnList = ({
   };
 
   const handleLeadClick = (leadId: string) => {
-    navigate(`/leads/${leadId}?tab=criteria`);
+    if (activeTab === 'owner') {
+      navigate(`/owners/${leadId}`);
+    } else {
+      navigate(`/leads/${leadId}?tab=criteria`);
+    }
   };
   
-  const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest' | 'mandate') => {
+  const handleChangeSortBy = (value: SortBy) => {
     setSortBy(value);
   };
 

@@ -12,14 +12,16 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 // Définir les types pour les props
 interface TeamMemberSelectProps {
-  value: string | undefined;
+  value?: string;
   onChange: (value: string | undefined) => void;
   label?: string;
   autoSelectPierreAxel?: boolean;
   disabled?: boolean;
+  className?: string;
 }
 
 interface TeamMember {
@@ -33,7 +35,8 @@ const TeamMemberSelect = ({
   onChange, 
   label = "Attribuer à",
   autoSelectPierreAxel = false,
-  disabled = false
+  disabled = false,
+  className
 }: TeamMemberSelectProps) => {
   const isMobile = useIsMobile();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -109,7 +112,7 @@ const TeamMemberSelect = ({
   };
 
   return (
-    <div className="space-y-1 md:space-y-2">
+    <div className={cn("space-y-1 md:space-y-2", className)}>
       <Label htmlFor="assigned_to" className={isMobile ? 'text-xs' : ''}>
         {label}
       </Label>

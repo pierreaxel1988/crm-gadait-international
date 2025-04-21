@@ -54,7 +54,7 @@ const OwnerInfoForm: React.FC<OwnerInfoFormProps> = ({
             id="full_name"
             placeholder="Nom et prénom"
             {...register("full_name", { required: true })}
-            error={errors.full_name ? true : false}
+            className={errors.full_name ? "border-red-500" : ""}
           />
           {errors.full_name && <p className="text-xs text-red-500">Ce champ est requis</p>}
         </div>
@@ -130,8 +130,8 @@ const OwnerInfoForm: React.FC<OwnerInfoFormProps> = ({
         <div className="space-y-2">
           <Label>Commercial assigné</Label>
           <TeamMemberSelect
-            selectedId={assignedToValue}
-            onAgentChange={handleAssignedToChange}
+            value={assignedToValue}
+            onChange={handleAssignedToChange}
             label=""
             className="w-full"
           />
