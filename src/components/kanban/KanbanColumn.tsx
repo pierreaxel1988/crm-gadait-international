@@ -7,6 +7,7 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
 import { isPast, isToday } from 'date-fns';
+import { PipelineType } from '@/types/lead';
 
 interface KanbanColumnProps {
   title: string;
@@ -14,7 +15,7 @@ interface KanbanColumnProps {
   items: KanbanItem[];
   className?: string;
   onDrop?: (item: KanbanItem, status: LeadStatus) => void;
-  pipelineType: 'purchase' | 'rental' | 'owners';
+  pipelineType: PipelineType; // Utilisez PipelineType de @/types/lead qui inclut 'owners'
 }
 
 const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }: KanbanColumnProps) => {
@@ -162,4 +163,3 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
 };
 
 export default KanbanColumn;
-

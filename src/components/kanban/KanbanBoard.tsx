@@ -9,18 +9,19 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { isPast, isToday } from 'date-fns';
 import { sortLeadsByPriority } from '@/components/pipeline/mobile/utils/leadSortUtils';
 import LoadingScreen from '@/components/layout/LoadingScreen';
+import { PipelineType } from '@/types/lead';
 
 interface KanbanBoardProps {
   columns: {
     title: string;
     status: LeadStatus;
     items: any[]; // Will be populated by the hook
-    pipelineType?: 'purchase' | 'rental' | 'owners';
+    pipelineType?: PipelineType;
   }[];
   className?: string;
   filters?: FilterOptions;
   refreshTrigger?: number;
-  pipelineType: 'purchase' | 'rental' | 'owners';
+  pipelineType: PipelineType;
   isLoading?: boolean;
 }
 

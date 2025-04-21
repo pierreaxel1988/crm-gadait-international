@@ -6,13 +6,14 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import { ExtendedKanbanItem } from './useKanbanData';
 import { updateLead, getLead } from '@/services/leadService';
+import { PipelineType } from '@/types/lead';
 
 export const useKanbanDragDrop = (
   setLoadedColumns: React.Dispatch<React.SetStateAction<{
     title: string;
     status: LeadStatus;
     items: ExtendedKanbanItem[];
-    pipelineType?: 'purchase' | 'rental';
+    pipelineType?: PipelineType;
   }[]>>
 ) => {
   const [isDragging, setIsDragging] = useState(false);

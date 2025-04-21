@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -6,6 +5,7 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import { Card, CardContent } from "@/components/ui/card";
 import { isPast, isToday } from 'date-fns';
+import { PipelineType } from '@/types/lead';
 
 // Import sub-components
 import ContactInfo from './card/ContactInfo';
@@ -36,7 +36,7 @@ export interface KanbanItem {
   assignedTo?: string;
   dueDate?: string;
   status: LeadStatus;
-  pipelineType?: 'purchase' | 'rental' | 'owners';
+  pipelineType?: PipelineType;
   taskType?: TaskType;
   // Ajout des propriétés supplémentaires
   propertyType?: string;
@@ -54,7 +54,7 @@ interface KanbanCardProps {
   item: KanbanItem;
   className?: string;
   draggable?: boolean;
-  pipelineType?: 'purchase' | 'rental';
+  pipelineType?: PipelineType;
 }
 
 const KanbanCard = ({ item, className, draggable = false, pipelineType }: KanbanCardProps) => {
