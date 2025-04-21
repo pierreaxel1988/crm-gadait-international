@@ -60,7 +60,8 @@ export type PropertyUse =
 
 export type PipelineType = 
   | "purchase" 
-  | "rental";
+  | "rental"
+  | "owners"; // Ajout du pipeline propriétaires
 
 export type Currency =
   | "EUR"
@@ -125,3 +126,4 @@ export interface LeadDetailed {
   livingArea?: string;
   external_id?: string;
 }
+

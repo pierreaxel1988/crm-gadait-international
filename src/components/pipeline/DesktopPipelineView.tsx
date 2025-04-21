@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -48,12 +47,18 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   const [activeStatus, setActiveStatus] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortBy>('priority');
   const navigate = useNavigate();
-  
+
+  const pipelines = [
+    { label: "Achat", value: "purchase" },
+    { label: "Location", value: "rental" },
+    { label: "Propriétaires", value: "owners" },
+  ];
+
   const {
     loadedColumns,
     isLoading,
   } = useKanbanData(columns, 0, activeTab as PipelineType);
-  
+
   const filteredColumns = filters 
     ? applyFiltersToColumns(loadedColumns.filter(column => 
         !column.pipelineType || column.pipelineType === activeTab
@@ -120,19 +125,16 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
-          <TabsList className="bg-gray-100 p-1 rounded-xl w-80">
-            <TabsTrigger 
-              value="purchase" 
-              className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-            >
-              Achat
-            </TabsTrigger>
-            <TabsTrigger 
-              value="rental" 
-              className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-            >
-              Location
-            </TabsTrigger>
+          <TabsList className="bg-gray-100 p-1 rounded-xl w-fit">
+            {pipelines.map(pipeline => (
+              <TabsTrigger
+                key={pipeline.value}
+                value={pipeline.value}
+                className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
+              >
+                {pipeline.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
         </Tabs>
         

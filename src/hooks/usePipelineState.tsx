@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
@@ -13,15 +12,19 @@ export function usePipelineState() {
   const queryParams = new URLSearchParams(location.search);
   const tabFromUrl = queryParams.get('tab');
   
-  // State management
-  const [activeTab, setActiveTab] = useState<string>(tabFromUrl === 'rental' ? 'rental' : 'purchase');
+  const [activeTab, setActiveTab] = useState<string>(
+    tabFromUrl === 'rental'
+      ? 'rental'
+      : tabFromUrl === "owners"
+        ? "owners"
+        : 'purchase'
+  );
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [teamMembers, setTeamMembers] = useState<{id: string, name: string}[]>([]);
   
-  // Initialize filter state
   const [filters, setFilters] = useState<FilterOptions>({
     status: null,
     tags: [],
@@ -33,7 +36,6 @@ export function usePipelineState() {
     propertyType: null
   });
 
-  // Mettre à jour uniquement le filtre d'agent sans affecter les autres filtres
   const updateAgentFilter = useCallback((agentId: string | null) => {
     setFilters(prevFilters => ({
       ...prevFilters,
@@ -41,34 +43,27 @@ export function usePipelineState() {
     }));
   }, []);
 
-  // Auto-refresh when component mounts
   useEffect(() => {
     handleRefresh();
   }, []);
 
-  // Update URL when tab changes
   useEffect(() => {
     navigate(`/pipeline?tab=${activeTab}`, { replace: true });
-    // Force a refresh when switching tabs
     handleRefresh();
   }, [activeTab, navigate]);
 
-  // Update tab from URL when it changes
   useEffect(() => {
-    if (tabFromUrl === 'rental' || tabFromUrl === 'purchase') {
+    if (tabFromUrl === 'rental' || tabFromUrl === 'purchase' || tabFromUrl === "owners") {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
 
-  // Apply filters when they change
   useEffect(() => {
-    // When filters change, trigger a refresh to update the data
-    if (refreshTrigger > 0) { // Skip the initial render
+    if (refreshTrigger > 0) {
       handleRefresh();
     }
   }, [filters]);
 
-  // Fetch team members
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
@@ -92,7 +87,6 @@ export function usePipelineState() {
     fetchTeamMembers();
   }, []);
 
-  // Check if any filters are active
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (filters.status !== null) count++;
@@ -106,7 +100,6 @@ export function usePipelineState() {
     return count;
   }, [filters]);
 
-  // Check if a specific filter is active
   const isFilterActive = (filterName: string): boolean => {
     switch (filterName) {
       case 'status':
@@ -128,12 +121,10 @@ export function usePipelineState() {
     }
   };
 
-  // Refresh data
   const handleRefresh = () => {
     setIsRefreshing(true);
     setRefreshTrigger(prev => prev + 1);
     
-    // Provide visual confirmation that filters are being applied
     if (activeFiltersCount > 0) {
       toast({
         title: "Filtres appliqués",
@@ -142,7 +133,6 @@ export function usePipelineState() {
       });
     }
     
-    // Vérifier s'il y a des leads dans la base de données
     const checkLeads = async () => {
       try {
         const { count, error } = await supabase
@@ -166,20 +156,18 @@ export function usePipelineState() {
       } catch (error) {
         console.error('Unexpected error:', error);
       } finally {
-        setTimeout(() => setIsRefreshing(false), 500); // Reduced time for a more efficient feel
+        setTimeout(() => setIsRefreshing(false), 500);
       }
     };
     
     checkLeads();
   };
 
-  // Clear all filters
   const handleClearFilters = () => {
-    // Modification: Supprimer complètement tous les filtres, y compris l'agent
     setFilters({
       status: null,
       tags: [],
-      assignedTo: null,  // Réinitialiser l'agent à null
+      assignedTo: null,
       minBudget: '',
       maxBudget: '',
       location: '',
@@ -187,25 +175,29 @@ export function usePipelineState() {
       propertyType: null
     });
     
-    // Notification that filters were cleared
     toast({
       title: "Filtres effacés",
       description: "Tous les filtres ont été supprimés",
       duration: 2000,
     });
     
-    // Trigger a refresh to update data
     handleRefresh();
   };
 
-  // Toggle filters visibility
   const toggleFilters = () => {
     setFiltersOpen(prev => !prev);
   };
 
-  // Get all column data for mobile view
   const getAllColumns = () => {
-    // Define the kanban columns with proper LeadStatus typing
+    if (activeTab === "owners") {
+      return [
+        { title: 'Propriétaires', status: 'New' as LeadStatus }
+      ].map(col => ({
+        ...col,
+        items: [],
+        pipelineType: "owners"
+      }));
+    }
     return [
       { title: 'Nouveaux', status: 'New' as LeadStatus },
       { title: 'Contactés', status: 'Contacted' as LeadStatus },

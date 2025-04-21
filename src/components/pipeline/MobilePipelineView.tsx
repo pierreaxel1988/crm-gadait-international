@@ -27,6 +27,12 @@ interface MobilePipelineViewProps {
   teamMembers: { id: string; name: string }[];
 }
 
+const pipelines = [
+  { label: "Achat", value: "purchase" },
+  { label: "Location", value: "rental" },
+  { label: "Propriétaires", value: "owners" },
+];
+
 const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   activeTab,
   setActiveTab,
@@ -75,18 +81,15 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3">
             <TabsList className="w-full bg-gray-100 p-0.5 rounded-xl h-11">
-              <TabsTrigger 
-                value="purchase" 
-                className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-              >
-                Achat
-              </TabsTrigger>
-              <TabsTrigger 
-                value="rental" 
-                className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-              >
-                Location
-              </TabsTrigger>
+              {pipelines.map(pipeline => (
+                <TabsTrigger
+                  key={pipeline.value}
+                  value={pipeline.value}
+                  className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
+                >
+                  {pipeline.label}
+                </TabsTrigger>
+              ))}
             </TabsList>
           </Tabs>
         </div>

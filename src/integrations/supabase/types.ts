@@ -322,6 +322,183 @@ export type Database = {
           },
         ]
       }
+      owner_actions: {
+        Row: {
+          action_date: string
+          action_type: string
+          completed_by: string | null
+          completed_date: string | null
+          created_by: string | null
+          id: string
+          notes: string | null
+          owner_id: string
+          scheduled_date: string | null
+          status: string | null
+        }
+        Insert: {
+          action_date?: string
+          action_type: string
+          completed_by?: string | null
+          completed_date?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          owner_id: string
+          scheduled_date?: string | null
+          status?: string | null
+        }
+        Update: {
+          action_date?: string
+          action_type?: string
+          completed_by?: string | null
+          completed_date?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          scheduled_date?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_actions_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_actions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_actions_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      owner_properties: {
+        Row: {
+          created_at: string
+          id: string
+          owner_id: string
+          property_id: string | null
+          property_reference: string | null
+          property_status: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          owner_id: string
+          property_id?: string | null
+          property_reference?: string | null
+          property_status?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          owner_id?: string
+          property_id?: string | null
+          property_reference?: string | null
+          property_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_properties_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_properties_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      owners: {
+        Row: {
+          assigned_to: string | null
+          attention_points: string | null
+          contact_source: string | null
+          created_at: string
+          email: string | null
+          first_contact_date: string | null
+          full_name: string
+          id: string
+          last_contact_date: string | null
+          mandate_type: string | null
+          nationality: string | null
+          next_action_date: string | null
+          phone: string | null
+          preferred_language: string | null
+          relationship_details: string | null
+          relationship_status: string | null
+          specific_needs: string | null
+          tax_residence: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          attention_points?: string | null
+          contact_source?: string | null
+          created_at?: string
+          email?: string | null
+          first_contact_date?: string | null
+          full_name: string
+          id?: string
+          last_contact_date?: string | null
+          mandate_type?: string | null
+          nationality?: string | null
+          next_action_date?: string | null
+          phone?: string | null
+          preferred_language?: string | null
+          relationship_details?: string | null
+          relationship_status?: string | null
+          specific_needs?: string | null
+          tax_residence?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          attention_points?: string | null
+          contact_source?: string | null
+          created_at?: string
+          email?: string | null
+          first_contact_date?: string | null
+          full_name?: string
+          id?: string
+          last_contact_date?: string | null
+          mandate_type?: string | null
+          nationality?: string | null
+          next_action_date?: string | null
+          phone?: string | null
+          preferred_language?: string | null
+          relationship_details?: string | null
+          relationship_status?: string | null
+          specific_needs?: string | null
+          tax_residence?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owners_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       properties: {
         Row: {
           amenities: string[] | null
