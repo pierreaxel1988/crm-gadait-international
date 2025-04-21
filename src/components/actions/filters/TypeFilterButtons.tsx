@@ -33,31 +33,38 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
   // Get text color for each task type
   const getTextColorForTaskType = (type: TaskType): string => {
     switch (type) {
-      case 'Call': return '#25D366'; // WhatsApp brand green
-      case 'Visites': return '#9B51E0'; // Purple
-      case 'Compromis': return '#E8B64B'; // Gold
-      case 'Acte de vente': return '#4CAF50'; // Green
-      case 'Contrat de Location': return '#3D8FD1'; // Blue
-      case 'Propositions': return '#9C27B0'; // Magenta
-      case 'Follow up': return '#E91E63'; // Pink
-      case 'Estimation': return '#009688'; // Teal
-      case 'Prospection': return '#F44336'; // Red
-      case 'Admin': return '#607D8B'; // Blue Grey
-      default: return '#607D8B';
+      case 'Call': return '#221F26'; // Noire premium
+      case 'Visites': return '#7E69AB'; // Violet chic
+      case 'Compromis': return '#D2B24C'; // Gold soft
+      case 'Acte de vente': return '#403E43'; // Gris foncé profond
+      case 'Contrat de Location': return '#9F9EA1'; // Gris argenté
+      case 'Propositions': return '#6E59A5';
+      case 'Follow up': return '#AAADB0'; 
+      case 'Estimation': return '#A68C6D'; // Crème café
+      case 'Prospection': return '#8E9196';
+      case 'Admin': return '#8E9196';
+      default: return '#403E43';
     }
   };
 
   return (
     <div>
-      <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+      <h4 className="text-xs font-futuraMedium mb-2 flex items-center gap-2 text-loro-navy/90">
         <Tag className="h-4 w-4" /> Type d'action
       </h4>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           variant={typeFilter === 'all' ? "default" : "outline"}
           size="sm"
-          className="text-xs"
+          className={`text-xs font-futura rounded-full px-3 py-1 border border-gray-200 ${typeFilter === 'all' ? 'ring-2 ring-loro-navy/30' : ''}`}
           onClick={() => setTypeFilter('all')}
+          style={{
+            background: typeFilter === 'all' ? '#F5F4F0' : '#fff',
+            color: typeFilter === 'all' ? '#221F26' : '#888',
+            fontWeight: 500,
+            boxShadow: typeFilter === 'all' ? '0 2px 6px 0 #a68c6d22' : undefined,
+            letterSpacing: '0.04em',
+          }}
         >
           Tous
         </Button>
@@ -66,13 +73,18 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
             key={type}
             variant="outline"
             size="sm"
-            className={`text-xs max-w-fit ${typeFilter === type ? 'ring-2 ring-offset-1' : ''}`}
+            className={`text-xs font-futura rounded-full px-3 py-1 border border-gray-200 transition-transform duration-200 ${typeFilter === type ? 'ring-2 ring-offset-1 scale-105' : ''}`}
             onClick={() => setTypeFilter(type)}
             style={{
-              backgroundColor: typeFilter === type ? getColorForTaskType(type) : 'transparent',
-              borderColor: typeFilter === type ? getTextColorForTaskType(type) + '20' : undefined,
-              color: typeFilter === type ? getTextColorForTaskType(type) : undefined,
-              ...(typeFilter === type ? { ringColor: getTextColorForTaskType(type) } : {})
+              background: typeFilter === type ? '#F5F4F0' : '#fff',
+              borderColor: typeFilter === type ? getTextColorForTaskType(type) + '40' : '#eee',
+              color: typeFilter === type ? getTextColorForTaskType(type) : '#8E9196',
+              fontWeight: typeFilter === type ? 600 : 400,
+              fontFamily: 'Futura, Optima, Verdana, Geneva, sans-serif',
+              letterSpacing: '0.035em',
+              boxShadow: typeFilter === type ? '0 2px 8px 0 #a68c6d21' : undefined,
+              transition: 'all 0.18s cubic-bezier(.68,-0.55,.27,1.55)',
+              outline: 'none'
             }}
           >
             {type}

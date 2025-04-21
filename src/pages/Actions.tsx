@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
@@ -11,6 +12,8 @@ import { useActionsData } from '@/hooks/useActionsData';
 import { useAuth } from '@/hooks/useAuth';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import TypeFilterButtons from '@/components/actions/filters/TypeFilterButtons';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 const Actions = () => {
   const { isMobile } = useBreakpoint();
@@ -20,6 +23,9 @@ const Actions = () => {
   const { isAdmin } = useAuth();
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
   
+  // NOUVEAU: Le filtre par type d’action
+  const [typeFilter, setTypeFilter] = useState<TaskType | 'all'>('all');
+
   useEffect(() => {
     // Écouter les changements d'agent depuis d'autres composants
     const handleAgentChange = (e: CustomEvent) => {
@@ -35,27 +41,32 @@ const Actions = () => {
     };
   }, [selectedAgent]);
 
-  // Filter actions based on search term and selected agent
+  // Filter actions based on search term, selected agent, et type d’action
   const filteredActions = actions.filter(action => {
-    if (!searchTerm && !selectedAgent) return true;
-    
+    if (!searchTerm && !selectedAgent && (typeFilter === 'all')) return true;
+
     let matchesSearch = true;
     let matchesAgent = true;
-    
+    let matchesType = true;
+
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       matchesSearch = action.leadName.toLowerCase().includes(searchLower) ||
         action.notes?.toLowerCase().includes(searchLower) ||
         action.assignedToName.toLowerCase().includes(searchLower);
     }
-    
+
     if (selectedAgent) {
       matchesAgent = action.assignedToId === selectedAgent;
     }
-    
-    return matchesSearch && matchesAgent;
+
+    if (typeFilter !== 'all') {
+      matchesType = action.actionType === typeFilter;
+    }
+
+    return matchesSearch && matchesAgent && matchesType;
   });
-  
+
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
   };
@@ -74,7 +85,7 @@ const Actions = () => {
                 <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <Input
                   placeholder="Rechercher..."
-                  className="pl-10 w-full md:w-[280px] border-gray-300 focus:border-loro-terracotta"
+                  className="pl-10 w-full md:w-[280px] border-gray-300 focus:border-loro-terracotta text-xs"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -82,7 +93,7 @@ const Actions = () => {
               
               {isAdmin && (
                 <Select value={selectedAgent || "all"} onValueChange={(value) => handleAgentChange(value === "all" ? null : value)}>
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="w-[200px] text-xs">
                     <SelectValue placeholder="Filtrer par commercial" />
                   </SelectTrigger>
                   <SelectContent searchable>
@@ -117,6 +128,11 @@ const Actions = () => {
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* NOUVEAU: filtre type d’action */}
+          <div className="mb-4">
+            <TypeFilterButtons typeFilter={typeFilter} setTypeFilter={setTypeFilter} />
           </div>
           
           <ActionsList 
