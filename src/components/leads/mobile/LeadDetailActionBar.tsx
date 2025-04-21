@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { History, Bell } from 'lucide-react';
@@ -27,8 +28,6 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showSuggestionsBadge, setShowSuggestionsBadge] = useState<boolean>(false);
-  const [pendingActionsCount, setPendingActionsCount] = useState<number>(0);
   
   useEffect(() => {
     if (lead?.actionHistory) {
@@ -64,6 +63,10 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
     });
   };
 
+  const handleNavigateToActions = () => {
+    navigate('/actions');
+  };
+
   const searchParams = new URLSearchParams(location.search);
   const currentTab = searchParams.get('tab');
   const isActionsTab = currentTab === 'actions';
@@ -71,7 +74,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex justify-center items-center transition-all animate-[slide-in_0.3s_ease-out] z-50">
       <div className="flex gap-3 w-full justify-between items-center">
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           {!isActionsTab && (
             <Button 
               variant="outline" 
@@ -91,6 +94,14 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               )}
             </Button>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20"
+            onClick={handleNavigateToActions}
+          >
+            Toutes les actions
+          </Button>
         </div>
         <Button 
           onClick={onAddAction} 
