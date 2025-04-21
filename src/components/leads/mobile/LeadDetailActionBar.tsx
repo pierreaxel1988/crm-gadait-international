@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { History, Bell } from 'lucide-react';
@@ -96,14 +95,16 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               )}
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20"
-            onClick={handleNavigateToActions}
-          >
-            Toutes les actions
-          </Button>
+          {isActionsTab && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20"
+              onClick={handleNavigateToActions}
+            >
+              Toutes les actions
+            </Button>
+          )}
         </div>
         <Button 
           onClick={onAddAction} 
