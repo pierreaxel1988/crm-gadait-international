@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +22,13 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Deposit': 'Dépôt reçu',
   'Signed': 'Signature finale',
   'Gagné': 'Conclus',
-  'Perdu': 'Perdu'
+  'Perdu': 'Perdu',
+  'NouveauContact': 'Nouveau contact',
+  'Qualification': 'En qualification',
+  'MandatPropose': 'Mandat proposé',
+  'MandatSigne': 'Mandat signé',
+  'MandatExpire': 'Mandat expiré',
+  'Inactif': 'Inactif / En pause'
 };
 
 interface MobileColumnListProps {

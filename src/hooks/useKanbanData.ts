@@ -116,12 +116,30 @@ export const useKanbanData = (
           const mappedOwners = ownersData.map(owner => {
             const assignedTeamMember = teamMembersData?.find(tm => tm.id === owner.assigned_to);
             
+            // Map database status to LeadStatus enum values
+            let ownerStatus: LeadStatus = 'NouveauContact' as LeadStatus;
+            
+            // Convert database status values to our LeadStatus type
+            if (owner.relationship_status === 'Nouveau contact') {
+              ownerStatus = 'NouveauContact' as LeadStatus;
+            } else if (owner.relationship_status === 'En cours de qualification') {
+              ownerStatus = 'Qualification' as LeadStatus;
+            } else if (owner.relationship_status === 'Mandat proposé') {
+              ownerStatus = 'MandatPropose' as LeadStatus;
+            } else if (owner.relationship_status === 'Mandat signé') {
+              ownerStatus = 'MandatSigne' as LeadStatus;
+            } else if (owner.relationship_status === 'Mandat expiré') {
+              ownerStatus = 'MandatExpire' as LeadStatus;
+            } else if (owner.relationship_status === 'Inactif' || owner.relationship_status === 'Inactif / En pause') {
+              ownerStatus = 'Inactif' as LeadStatus;
+            }
+            
             return {
               id: owner.id,
               name: owner.full_name,
               email: owner.email || '',
               phone: owner.phone,
-              status: owner.relationship_status as LeadStatus || 'NouveauContact' as LeadStatus,
+              status: ownerStatus,
               tags: [], // Pas de tags pour les propriétaires pour l'instant
               assignedTo: owner.assigned_to,
               assignedToId: owner.assigned_to,
@@ -145,13 +163,7 @@ export const useKanbanData = (
           // Distribuer les propriétaires dans leurs colonnes respectives
           const updatedColumns = columns.map(column => {
             const columnItems = mappedOwners.filter(owner => {
-              // Mappage des statuts de la base de données aux statuts du pipeline
-              let ownerStatus = owner.status;
-              
-              // Si le statut est 'Nouveau contact', mapper à 'NouveauContact'
-              if (owner.status === 'Nouveau contact') ownerStatus = 'NouveauContact' as LeadStatus;
-              
-              return ownerStatus === column.status;
+              return owner.status === column.status;
             });
             
             console.log(`Column ${column.title} (${column.status}): ${columnItems.length} owners`);
