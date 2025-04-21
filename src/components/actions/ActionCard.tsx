@@ -7,11 +7,13 @@ import { Check, Calendar, Phone, Mail, MessageSquare } from 'lucide-react';
 import TaskTypeIndicator from '@/components/kanban/card/TaskTypeIndicator';
 import { format, isToday, isYesterday, isTomorrow, isThisWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
+
 interface ActionCardProps {
   action: ActionItem;
   onMarkComplete: (actionId: string, leadId: string) => void;
   onCardClick: (leadId: string, e: React.MouseEvent) => void;
 }
+
 const ActionCard: React.FC<ActionCardProps> = ({
   action,
   onMarkComplete,
@@ -29,6 +31,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
         return null;
     }
   };
+
   const formatDate = (dateStr: string | undefined) => {
     if (!dateStr) return 'Non programmé';
     const date = new Date(dateStr);
@@ -48,6 +51,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
       });
     }
   };
+
   const getButtonClasses = (status: string) => {
     switch (status) {
       case 'overdue':
@@ -58,6 +62,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
         return "h-8";
     }
   };
+
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (action.phoneNumber) {
@@ -65,54 +70,52 @@ const ActionCard: React.FC<ActionCardProps> = ({
       window.open(`https://wa.me/${cleanedPhone}`, '_blank');
     }
   };
+
   const handlePhoneClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (action.phoneNumber) {
       window.location.href = `tel:${action.phoneNumber}`;
     }
   };
+
   const handleEmailClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (action.email) {
       window.location.href = `mailto:${action.email}`;
     }
   };
+
   return <Card className={`p-4 transition-all cursor-pointer ${action.status === 'overdue' ? 'border-red-300 bg-[#FFDEE2]/30' : action.status === 'done' ? 'bg-gray-50/80 border-gray-200' : 'bg-[#F2FCE2]/40 border-green-100'}`} onClick={e => onCardClick(action.leadId, e)}>
-      <div className="flex justify-between items-start mb-2">
-        <div>
-          <div className={`font-medium ${action.status === 'done' ? 'text-gray-600' : ''}`}>{action.leadName}</div>
-          <div className="text-sm text-muted-foreground mb-1">{action.assignedToName}</div>
-          <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />
-        </div>
-        <div>
-          {getStatusBadge(action.status)}
-        </div>
+    <div className="flex justify-between items-start mb-2">
+      <div>
+        <div className={`font-medium ${action.status === 'done' ? 'text-gray-600' : ''}`}>{action.leadName}</div>
+        <div className="text-sm text-muted-foreground mb-1">{action.assignedToName}</div>
+        <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />
+      </div>
+      <div>
+        {getStatusBadge(action.status)}
+      </div>
+    </div>
+    
+    {action.notes && <div className={`text-sm mt-2 p-2 rounded ${action.status === 'done' ? 'bg-white/80 text-gray-600' : action.status === 'overdue' ? 'bg-[#FFF0F2] text-rose-800' : 'bg-[#F7FEF1] text-green-800'}`}>
+      {action.notes}
+    </div>}
+    
+    <div className="flex justify-between items-center mt-3">
+      <div className="flex items-center space-x-1 text-xs text-gray-500 font-medium">
+        <Calendar className="h-4 w-4" />
+        <span className="text-xs">
+          {formatDate(action.status === 'done' ? action.completedDate : action.scheduledDate)}
+        </span>
       </div>
       
-      {action.notes && <div className={`text-sm mt-2 p-2 rounded ${action.status === 'done' ? 'bg-white/80 text-gray-600' : action.status === 'overdue' ? 'bg-[#FFF0F2] text-rose-800' : 'bg-[#F7FEF1] text-green-800'}`}>
-          {action.notes}
-        </div>}
-      
-      <div className="flex justify-between items-center mt-3">
-        <div className="flex items-center space-x-1 text-xs text-gray-500 font-medium">
-          <Calendar className="h-4 w-4" />
-          <span className="text-xs">
-            {formatDate(action.status === 'done' ? action.completedDate : action.scheduledDate)}
-          </span>
-        </div>
-        
-        <div className="flex items-center gap-1">
-          {action.phoneNumber && <>
+      <div className="flex items-center gap-1">
+        {action.phoneNumber && <>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 p-0 rounded-full transition-all hover:bg-loro-sand/30 hover:scale-110" 
-            onClick={e => {
-              e.stopPropagation();
-              if (action.phoneNumber) {
-                window.open(`https://wa.me/${action.phoneNumber.replace(/[^\d+]/g, '')}`, '_blank');
-              }
-            }} 
+            className="h-8 w-8 p-0 rounded-full transition-all hover:scale-110 border border-[#25D366]/30 hover:border-[#25D366]/50" 
+            onClick={handleWhatsAppClick}
             title="Contacter par WhatsApp"
           >
             <svg 
@@ -128,13 +131,8 @@ const ActionCard: React.FC<ActionCardProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 p-0 rounded-full transition-all hover:bg-loro-sand/30 hover:scale-110" 
-            onClick={e => {
-              e.stopPropagation();
-              if (action.phoneNumber) {
-                window.location.href = `tel:${action.phoneNumber}`;
-              }
-            }} 
+            className="h-8 w-8 p-0 rounded-full transition-all hover:scale-110 border border-blue-600/30 hover:border-blue-600/50" 
+            onClick={handlePhoneClick}
             title="Appeler"
           >
             <Phone className="h-5 w-5 text-blue-600" />
@@ -144,13 +142,8 @@ const ActionCard: React.FC<ActionCardProps> = ({
         {action.email && <Button 
           variant="ghost" 
           size="sm" 
-          className="h-8 w-8 p-0 rounded-full transition-all hover:bg-loro-sand/30 hover:scale-110" 
-          onClick={e => {
-            e.stopPropagation();
-            if (action.email) {
-              window.location.href = `mailto:${action.email}`;
-            }
-          }} 
+          className="h-8 w-8 p-0 rounded-full transition-all hover:scale-110 border border-red-600/30 hover:border-red-600/50" 
+          onClick={handleEmailClick}
           title="Envoyer un email"
         >
           <Mail className="h-5 w-5 text-red-600" />
@@ -171,4 +164,5 @@ const ActionCard: React.FC<ActionCardProps> = ({
     </div>
   </Card>;
 };
+
 export default ActionCard;
