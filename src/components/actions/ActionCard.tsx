@@ -117,9 +117,11 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
       )}
       
       <div className="flex justify-between items-center mt-3">
-        <div className="flex items-center text-xs text-gray-500">
-          <Calendar className="h-3.5 w-3.5 mr-1" />
-          {formatDate(action.status === 'done' ? action.completedDate : action.scheduledDate)}
+        <div className="flex items-center space-x-1 text-xs text-gray-500 font-medium">
+          <Calendar className="h-4 w-4" />
+          <span>
+            {formatDate(action.status === 'done' ? action.completedDate : action.scheduledDate)}
+          </span>
         </div>
         
         <div className="flex items-center gap-1">
@@ -129,7 +131,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
                 variant="ghost" 
                 size="sm" 
                 className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
-                onClick={handleWhatsAppClick}
+                onClick={(e) => { e.stopPropagation(); if(action.phoneNumber){ const cleanedPhone = action.phoneNumber.replace(/[^\d+]/g, ''); window.open(`https://wa.me/${cleanedPhone}`, '_blank'); } }}
                 title="Contacter par WhatsApp"
               >
                 <MessageSquare className="h-4 w-4" />
@@ -139,7 +141,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
                 variant="ghost" 
                 size="sm" 
                 className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
-                onClick={handlePhoneClick}
+                onClick={(e) => { e.stopPropagation(); if(action.phoneNumber){ window.location.href = `tel:${action.phoneNumber}`; } }}
                 title="Appeler"
               >
                 <Phone className="h-4 w-4" />
@@ -152,7 +154,7 @@ const ActionCard: React.FC<ActionCardProps> = ({ action, onMarkComplete, onCardC
               variant="ghost" 
               size="sm" 
               className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
-              onClick={handleEmailClick}
+              onClick={(e) => { e.stopPropagation(); if(action.email){ window.location.href = `mailto:${action.email}`; } }}
               title="Envoyer un email"
             >
               <Mail className="h-4 w-4" />
