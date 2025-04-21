@@ -21,6 +21,7 @@ const ActionsPage = lazy(() => import('./pages/Actions'));
 const Calendar = lazy(() => import('./pages/Calendar'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Admin = lazy(() => import('./pages/Admin'));
+const OwnersPage = lazy(() => import('./pages/Owners'));
 const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 
@@ -88,6 +89,11 @@ function App() {
             <Route path="/admin" element={
               <ProtectedRoute adminOnly={true} commercialAllowed={false}>
                 <Admin />
+              </ProtectedRoute>
+            } />
+            <Route path="/owners" element={
+              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+                <OwnersPage />
               </ProtectedRoute>
             } />
             

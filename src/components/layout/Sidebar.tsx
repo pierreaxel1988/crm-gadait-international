@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { X, Upload, MessageSquare, ListTodo, Calendar, PieChart, File, Settings, LayoutDashboard, Users, Code, Shield, ClipboardList } from 'lucide-react';
@@ -65,6 +64,11 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
     {
       name: 'Leads',
       path: '/leads',
+      icon: Users,
+    },
+    {
+      name: 'Propriétaires',
+      path: '/owners',
       icon: Users,
     },
     {
