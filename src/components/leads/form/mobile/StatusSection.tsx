@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadTag, PipelineType } from '@/types/lead';
+import { LeadStatus } from '@/components/common/StatusBadge';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Activity, Trash2, Phone, Home } from 'lucide-react';
@@ -21,18 +22,18 @@ import { deleteLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
-// Define specific status sets for different pipeline types
-const PURCHASE_STATUSES = [
+// Définition des statuts pour chaque pipeline en utilisant le type LeadStatus
+const PURCHASE_STATUSES: LeadStatus[] = [
   "New", "Contacted", "Qualified", "Proposal", "Visit", 
   "Offer", "Offre", "Deposit", "Signed", "Gagné", "Perdu"
 ];
 
-const RENTAL_STATUSES = [
+const RENTAL_STATUSES: LeadStatus[] = [
   "New", "Contacted", "Qualified", "Visit", 
   "Offre", "Deposit", "Signed", "Gagné", "Perdu"
 ];
 
-const OWNERS_STATUSES = [
+const OWNERS_STATUSES: LeadStatus[] = [
   "New",              // Premier contact
   "Contacted",        // Rendez-vous programmé
   "Qualified",        // Visite effectuée
@@ -110,15 +111,10 @@ const StatusSection: React.FC<StatusSectionProps> = ({
   };
 
   const handlePipelineTypeChange = (value: PipelineType) => {
-    if (value === lead.pipelineType) return; // No change needed
-    
-    // Apply the pipeline type change
+    if (value === lead.pipelineType) return;
     handleInputChange('pipelineType', value);
-    
-    // Check if we need to adjust the status based on pipeline type
     const currentStatus = lead.status;
     let targetStatusList: LeadStatus[];
-    
     if (value === 'purchase') {
       targetStatusList = PURCHASE_STATUSES;
     } else if (value === 'rental') {
@@ -126,11 +122,8 @@ const StatusSection: React.FC<StatusSectionProps> = ({
     } else {
       targetStatusList = OWNERS_STATUSES;
     }
-    
-    // If current status is not valid in the new pipeline type, reset to "New"
     if (!targetStatusList.includes(currentStatus)) {
       handleInputChange('status', 'New');
-      
       toast({
         title: "Statut réinitialisé",
         description: `Le statut a été réinitialisé à "New" car "${currentStatus}" n'est pas valide pour un dossier de ${value === 'purchase' ? 'achat' : value === 'rental' ? 'location' : 'propriétaires'}.`
@@ -156,7 +149,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
     }
   };
 
-  // Determine which status list to use based on pipeline type
+  // Correction : définition du type pour availableStatuses
   let availableStatuses: LeadStatus[];
   if (lead.pipelineType === 'rental') {
     availableStatuses = RENTAL_STATUSES;
@@ -176,7 +169,6 @@ const StatusSection: React.FC<StatusSectionProps> = ({
       style={{ marginTop: dynamicTopMargin }}
     >
       <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Statut et Suivi</h2>
-      
       <div className="space-y-4">
         <div className="space-y-2">
           <Label className="text-sm">Type de pipeline</Label>
