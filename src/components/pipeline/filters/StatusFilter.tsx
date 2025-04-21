@@ -3,50 +3,43 @@ import React from 'react';
 import { Filter } from 'lucide-react';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { PipelineType } from '@/types/lead';
+import { getStatusesForPipeline } from '@/utils/pipelineUtils';
 
 interface StatusFilterProps {
   status: LeadStatus | null;
   onStatusChange: (status: LeadStatus | null) => void;
+  pipelineType?: PipelineType;
 }
 
 const StatusFilter: React.FC<StatusFilterProps> = ({
   status,
-  onStatusChange
+  onStatusChange,
+  pipelineType = 'purchase'
 }) => {
-  // Standardized statuses matching the database values
-  const statuses: (LeadStatus | null)[] = [
-    null, // All / None
-    'New',       // Nouveaux
-    'Contacted', // Contactés
-    'Qualified', // Qualifiés
-    'Proposal',  // Propositions
-    'Visit',     // Visites en cours
-    'Offer',     // Offre en cours (English/Purchase)
-    'Offre',     // Offre en cours (French/Rental)
-    'Deposit',   // Dépôt reçu
-    'Signed',    // Signature finale
-    'Gagné',     // Conclus
-    'Perdu'      // Perdu
-  ];
+  // Get statuses based on the current pipeline type
+  const statuses = [null, ...getStatusesForPipeline(pipelineType)];
 
   // Map status values to display labels
-  const statusLabels: Record<string, string> = {
-    'null': 'Tous les statuts', // Use 'null' as a string key for null value
-    'New': 'Nouveaux',
-    'Contacted': 'Contactés',
-    'Qualified': 'Qualifiés',
-    'Proposal': 'Propositions',
-    'Visit': 'Visites en cours',
-    'Offer': 'Offre en cours',
-    'Offre': 'Offre en cours',
-    'Deposit': 'Dépôt reçu',
-    'Signed': 'Signature finale',
-    'Gagné': 'Conclus',
-    'Perdu': 'Perdu'
+  const getStatusLabel = (status: LeadStatus | null): string => {
+    if (status === null) return 'Tous les statuts';
+    
+    const statusLabels: Record<LeadStatus, string> = {
+      'New': pipelineType === 'owners' ? 'Premier contact' : 'Nouveaux',
+      'Contacted': pipelineType === 'owners' ? 'Rendez-vous programmé' : 'Contactés',
+      'Qualified': pipelineType === 'owners' ? 'Visite effectuée' : 'Qualifiés',
+      'Proposal': pipelineType === 'owners' ? 'Mandat en négociation' : 'Propositions',
+      'Visit': pipelineType === 'owners' ? 'Bien en commercialisation' : 'Visites en cours',
+      'Offer': pipelineType === 'owners' ? 'Offre reçue' : 'Offre en cours',
+      'Offre': 'Offre en cours',
+      'Deposit': pipelineType === 'owners' ? 'Compromis signé' : 'Dépôt reçu',
+      'Signed': pipelineType === 'owners' ? 'Mandat signé' : 'Signature finale',
+      'Gagné': pipelineType === 'owners' ? 'Vente finalisée' : 'Conclus',
+      'Perdu': pipelineType === 'owners' ? 'Perdu/Annulé' : 'Perdu'
+    };
+    
+    return statusLabels[status] || status;
   };
-
-  // Add logging to debug selected status
-  console.log("Current selected status:", status);
 
   return (
     <div>
@@ -70,7 +63,7 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
             className="text-xs"
             onClick={() => onStatusChange(statusValue)}
           >
-            {statusLabels[statusValue || 'null']}
+            {getStatusLabel(statusValue)}
           </Button>
         ))}
       </div>

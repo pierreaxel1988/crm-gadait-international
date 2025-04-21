@@ -1,12 +1,14 @@
 
 import React from 'react';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { PipelineType } from '@/types/lead';
 
 interface StatusBadgeProps {
   status: LeadStatus;
+  pipelineType?: PipelineType;
 }
 
-const StatusBadge = ({ status }: StatusBadgeProps) => {
+const StatusBadge = ({ status, pipelineType = 'purchase' }: StatusBadgeProps) => {
   const statusConfig = {
     'New': { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
     'Contacted': { bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-200' },
@@ -27,9 +29,31 @@ const StatusBadge = ({ status }: StatusBadgeProps) => {
   
   const config = statusConfig[status] || { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-200' };
   
+  // Get the display label based on status and pipeline type
+  const getStatusLabel = (status: LeadStatus, pipelineType: PipelineType): string => {
+    if (pipelineType === 'owners') {
+      const ownerStatusLabels: Record<LeadStatus, string> = {
+        'New': 'Premier contact',
+        'Contacted': 'RDV programmé',
+        'Qualified': 'Visite effectuée',
+        'Proposal': 'Mandat en négo',
+        'Signed': 'Mandat signé',
+        'Visit': 'En commercialisation',
+        'Offer': 'Offre reçue',
+        'Offre': 'Offre reçue',
+        'Deposit': 'Compromis signé',
+        'Gagné': 'Vente finalisée',
+        'Perdu': 'Perdu/Annulé'
+      };
+      return ownerStatusLabels[status] || status;
+    }
+    
+    return status;
+  };
+  
   return (
     <div className={`px-2.5 py-0.5 rounded-full text-xs font-futura tracking-wide uppercase ${config.bg} ${config.text}`}>
-      {status}
+      {getStatusLabel(status, pipelineType)}
     </div>
   );
 };

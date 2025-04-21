@@ -115,12 +115,13 @@ const StatusSection = ({
         icon={Home}
         renderCustomField={() => (
           <RadioSelectButtons
-            options={['purchase', 'rental'] as PipelineType[]}
+            options={['purchase', 'rental', 'owners'] as PipelineType[]}
             selectedValue={formData.pipelineType || 'purchase'}
             onSelect={handlePipelineTypeChange}
             labelMapping={{
               purchase: 'Achat',
-              rental: 'Location'
+              rental: 'Location',
+              owners: 'Propriétaires'
             }}
           />
         )}

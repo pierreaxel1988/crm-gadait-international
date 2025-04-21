@@ -4,17 +4,17 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 export type LeadStatus =
-  | 'New'              // Nouveaux
-  | 'Contacted'        // Contactés
-  | 'Qualified'        // Qualifiés
-  | 'Proposal'         // Propositions
-  | 'Visit'            // Visites en cours
-  | 'Offer'            // Offre en cours (English/Purchase)
+  | 'New'              // Premier contact / Nouveaux
+  | 'Contacted'        // Rendez-vous programmé / Contactés
+  | 'Qualified'        // Visite effectuée / Qualifiés
+  | 'Proposal'         // Mandat en négociation / Propositions
+  | 'Visit'            // Bien en commercialisation / Visites en cours
+  | 'Offer'            // Offre reçue / Offre en cours (English/Purchase)
   | 'Offre'            // Offre en cours (French/Rental)
-  | 'Deposit'          // Dépôt reçu
-  | 'Signed'           // Signature finale
-  | 'Gagné'            // Conclus
-  | 'Perdu';           // Perdu
+  | 'Deposit'          // Compromis signé / Dépôt reçu
+  | 'Signed'           // Mandat signé / Signature finale
+  | 'Gagné'            // Vente finalisée / Conclus
+  | 'Perdu';           // Perdu/Annulé / Perdu
 
 interface StatusBadgeProps {
   status: LeadStatus;

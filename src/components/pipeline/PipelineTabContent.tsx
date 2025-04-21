@@ -5,7 +5,7 @@ import { PipelineType } from '@/types/lead';
 import LocationFilter from './filters/LocationFilter';
 
 interface PipelineTabContentProps {
-  contentType: 'purchase' | 'rental';
+  contentType: PipelineType;
   filters: FilterOptions;
   refreshTrigger: number;
 }

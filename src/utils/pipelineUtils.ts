@@ -14,10 +14,27 @@ export const RENTAL_STATUSES: LeadStatus[] = [
   "Offre", "Deposit", "Signed", "Gagné", "Perdu"
 ];
 
+// Définir les statuts spécifiques pour le pipeline des propriétaires
+export const OWNERS_STATUSES: LeadStatus[] = [
+  "New",              // Premier contact
+  "Contacted",        // Rendez-vous programmé
+  "Qualified",        // Visite effectuée
+  "Proposal",         // Mandat en négociation
+  "Signed",           // Mandat signé
+  "Visit",            // Bien en commercialisation
+  "Offer",            // Offre reçue
+  "Deposit",          // Compromis signé
+  "Gagné",            // Vente finalisée
+  "Perdu"             // Perdu/Annulé
+];
+
 /**
  * Checks if a status is valid for a given pipeline type
  */
 export const isStatusValidForPipeline = (status: LeadStatus, pipelineType: PipelineType): boolean => {
+  if (pipelineType === 'owners') {
+    return OWNERS_STATUSES.includes(status);
+  }
   const validStatuses = pipelineType === 'purchase' ? PURCHASE_STATUSES : RENTAL_STATUSES;
   return validStatuses.includes(status);
 };
@@ -26,6 +43,9 @@ export const isStatusValidForPipeline = (status: LeadStatus, pipelineType: Pipel
  * Returns the available statuses for a given pipeline type
  */
 export const getStatusesForPipeline = (pipelineType: PipelineType): LeadStatus[] => {
+  if (pipelineType === 'owners') {
+    return OWNERS_STATUSES;
+  }
   return pipelineType === 'purchase' ? PURCHASE_STATUSES : RENTAL_STATUSES;
 };
 
@@ -51,7 +71,16 @@ export const getRecommendedStatusForPipelineTransition = (
  * Helper function to get a description of the pipeline type in French
  */
 export const getPipelineTypeLabel = (pipelineType: PipelineType): string => {
-  return pipelineType === 'purchase' ? 'Achat' : 'Location';
+  switch (pipelineType) {
+    case 'purchase':
+      return 'Achat';
+    case 'rental':
+      return 'Location';
+    case 'owners':
+      return 'Propriétaires';
+    default:
+      return 'Achat';
+  }
 };
 
 /**

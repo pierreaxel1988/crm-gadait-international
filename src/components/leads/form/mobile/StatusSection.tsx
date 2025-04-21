@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadTag, PipelineType } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -31,6 +30,19 @@ const PURCHASE_STATUSES = [
 const RENTAL_STATUSES = [
   "New", "Contacted", "Qualified", "Visit", 
   "Offre", "Deposit", "Signed", "Gagné", "Perdu"
+];
+
+const OWNERS_STATUSES = [
+  "New",              // Premier contact
+  "Contacted",        // Rendez-vous programmé
+  "Qualified",        // Visite effectuée
+  "Proposal",         // Mandat en négociation
+  "Signed",           // Mandat signé
+  "Visit",            // Bien en commercialisation
+  "Offer",            // Offre reçue
+  "Deposit",          // Compromis signé
+  "Gagné",            // Vente finalisée
+  "Perdu"             // Perdu/Annulé
 ];
 
 const LEAD_TAGS = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];
@@ -105,7 +117,15 @@ const StatusSection: React.FC<StatusSectionProps> = ({
     
     // Check if we need to adjust the status based on pipeline type
     const currentStatus = lead.status;
-    const targetStatusList = value === 'purchase' ? PURCHASE_STATUSES : RENTAL_STATUSES;
+    let targetStatusList: LeadStatus[];
+    
+    if (value === 'purchase') {
+      targetStatusList = PURCHASE_STATUSES;
+    } else if (value === 'rental') {
+      targetStatusList = RENTAL_STATUSES;
+    } else {
+      targetStatusList = OWNERS_STATUSES;
+    }
     
     // If current status is not valid in the new pipeline type, reset to "New"
     if (!targetStatusList.includes(currentStatus)) {
@@ -113,7 +133,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
       
       toast({
         title: "Statut réinitialisé",
-        description: `Le statut a été réinitialisé à "New" car "${currentStatus}" n'est pas valide pour un dossier de ${value === 'purchase' ? 'achat' : 'location'}.`
+        description: `Le statut a été réinitialisé à "New" car "${currentStatus}" n'est pas valide pour un dossier de ${value === 'purchase' ? 'achat' : value === 'rental' ? 'location' : 'propriétaires'}.`
       });
     }
   };
@@ -137,9 +157,14 @@ const StatusSection: React.FC<StatusSectionProps> = ({
   };
 
   // Determine which status list to use based on pipeline type
-  const availableStatuses = lead.pipelineType === 'rental' 
-    ? RENTAL_STATUSES 
-    : PURCHASE_STATUSES;
+  let availableStatuses: LeadStatus[];
+  if (lead.pipelineType === 'rental') {
+    availableStatuses = RENTAL_STATUSES;
+  } else if (lead.pipelineType === 'owners') {
+    availableStatuses = OWNERS_STATUSES;
+  } else {
+    availableStatuses = PURCHASE_STATUSES;
+  }
 
   const dynamicTopMargin = isHeaderMeasured 
     ? `${Math.max(headerHeight + 8, 32)}px` 
@@ -171,6 +196,10 @@ const StatusSection: React.FC<StatusSectionProps> = ({
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="rental" id="rental" />
                 <Label htmlFor="rental" className="text-sm font-futura cursor-pointer">Location</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="owners" id="owners" />
+                <Label htmlFor="owners" className="text-sm font-futura cursor-pointer">Propriétaires</Label>
               </div>
             </RadioGroup>
           </div>

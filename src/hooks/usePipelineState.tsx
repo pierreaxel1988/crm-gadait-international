@@ -191,11 +191,20 @@ export function usePipelineState() {
   const getAllColumns = () => {
     if (activeTab === "owners") {
       return [
-        { title: 'Propriétaires', status: 'New' as LeadStatus }
+        { title: 'Premier contact', status: 'New' as LeadStatus },
+        { title: 'Rendez-vous programmé', status: 'Contacted' as LeadStatus },
+        { title: 'Visite effectuée', status: 'Qualified' as LeadStatus },
+        { title: 'Mandat en négociation', status: 'Proposal' as LeadStatus },
+        { title: 'Mandat signé', status: 'Signed' as LeadStatus },
+        { title: 'Bien en commercialisation', status: 'Visit' as LeadStatus },
+        { title: 'Offre reçue', status: 'Offer' as LeadStatus },
+        { title: 'Compromis signé', status: 'Deposit' as LeadStatus },
+        { title: 'Vente finalisée', status: 'Gagné' as LeadStatus },
+        { title: 'Perdu/Annulé', status: 'Perdu' as LeadStatus }
       ].map(col => ({
         ...col,
         items: [],
-        pipelineType: "owners"
+        pipelineType: "owners" as PipelineType
       }));
     }
     return [
