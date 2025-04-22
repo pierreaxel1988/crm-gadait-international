@@ -99,6 +99,7 @@ const StatusSection = ({
         'Signed': 'Mandat signé',
         'Visit': 'Bien en commercialisation',
         'Offer': 'Offre reçue',
+        'Offre': 'Offre reçue',
         'Deposit': 'Compromis signé',
         'Gagné': 'Vente finalisée',
         'Perdu': 'Perdu/Annulé'

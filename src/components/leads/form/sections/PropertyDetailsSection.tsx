@@ -6,6 +6,7 @@ import PropertyUrlField from '../PropertyUrlField';
 import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import CustomTagInput from '../CustomTagInput';
+import OwnerPropertyDetailsSection from './OwnerPropertyDetailsSection';
 
 interface PropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -34,7 +35,16 @@ const PropertyDetailsSection = ({
   countries,
   handleCountryChange
 }: PropertyDetailsSectionProps) => {
-  // Get locations based on selected country
+  if (formData.pipelineType === 'owners') {
+    return (
+      <OwnerPropertyDetailsSection
+        formData={formData}
+        handleInputChange={handleInputChange}
+        handleMultiSelectToggle={handleMultiSelectToggle}
+      />
+    );
+  }
+
   const getLocations = () => {
     if (!formData.country) return [];
     
@@ -49,47 +59,38 @@ const PropertyDetailsSection = ({
     return [];
   };
 
-  // Correctly handle the URL extraction
   const handleExtractUrl = (url: string) => {
     if (onExtractUrl) {
       onExtractUrl(url);
     }
   };
 
-  // Convert bedroom numbers to strings for MultiSelectButtons
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
   
-  // Improved function to convert bedrooms data for display in the MultiSelectButtons
   const getSelectedBedrooms = () => {
     if (!formData.bedrooms) return [];
     
     if (Array.isArray(formData.bedrooms)) {
-      // Map bedrooms array to strings, handling special case for 8 and higher
       return formData.bedrooms.map(num => {
         return num >= 8 ? "8+" : num.toString();
       });
     }
     
-    // Handle single value case
     const value = formData.bedrooms;
     return [value >= 8 ? "8+" : value.toString()];
   };
   
-  // Improved bedroom selection handler
   const handleBedroomToggle = (value: string) => {
     const numValue = value === "8+" ? 8 : parseInt(value);
     
-    // Get current bedrooms array or create one
     const currentBedrooms = Array.isArray(formData.bedrooms) 
       ? [...formData.bedrooms] 
       : formData.bedrooms ? [formData.bedrooms] : [];
     
-    // Toggle the selected value
     const newBedrooms = currentBedrooms.includes(numValue)
       ? currentBedrooms.filter(b => b !== numValue)
       : [...currentBedrooms, numValue];
     
-    // Create a properly typed synthetic event object
     const syntheticEvent = {
       target: {
         name: 'bedrooms',
@@ -101,12 +102,9 @@ const PropertyDetailsSection = ({
     console.log("Updated bedrooms:", newBedrooms);
   };
 
-  // Handle budget changes
   const handleBudgetChange = (type: 'min' | 'max', value: string) => {
-    // Create field name based on type
     const fieldName = type === 'min' ? 'budgetMin' : 'budget';
     
-    // Create a synthetic event to use with handleInputChange
     const syntheticEvent = {
       target: {
         name: fieldName,
@@ -117,7 +115,6 @@ const PropertyDetailsSection = ({
     handleInputChange(syntheticEvent);
   };
 
-  // Handle currency changes
   const handleCurrencyChange = (value: string) => {
     const syntheticEvent = {
       target: {
@@ -129,7 +126,6 @@ const PropertyDetailsSection = ({
     handleInputChange(syntheticEvent);
   };
 
-  // Handle amenities changes
   const handleAmenitiesChange = (newAmenities: string[]) => {
     const syntheticEvent = {
       target: {
@@ -141,17 +137,14 @@ const PropertyDetailsSection = ({
     handleInputChange(syntheticEvent);
   };
 
-  // Wrap handleInputChange for URL changes
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleInputChange(e);
   };
 
-  // Handle property type selection
   const handlePropertyTypeChange = (value: PropertyType) => {
     handleMultiSelectToggle('propertyTypes', value);
   };
 
-  // Handle view type selection
   const handleViewTypeChange = (value: string) => {
     handleMultiSelectToggle('views', value as ViewType);
   };
