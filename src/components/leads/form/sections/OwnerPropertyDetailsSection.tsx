@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed } from '@/types/lead';
 import FormInput from '../FormInput';
@@ -53,6 +52,27 @@ const OwnerPropertyDetailsSection = ({
     handleInputChange(syntheticEvent);
   };
 
+  const handleBedroomChange = (value: string) => {
+    const numValue = value === "8+" ? 8 : parseInt(value);
+    const currentBedrooms = Array.isArray(formData.bedrooms)
+      ? [...formData.bedrooms]
+      : formData.bedrooms
+      ? [formData.bedrooms]
+      : [];
+    
+    const newBedrooms = currentBedrooms.includes(numValue)
+      ? currentBedrooms.filter(b => b !== numValue)
+      : [...currentBedrooms, numValue];
+    
+    const syntheticEvent = {
+      target: {
+        name: 'bedrooms',
+        value: newBedrooms
+      }
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    handleInputChange(syntheticEvent);
+  };
+
   return (
     <div className="space-y-4">
       <FormInput
@@ -72,7 +92,7 @@ const OwnerPropertyDetailsSection = ({
       />
 
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Nombre de chambres</Label>
+        <h4 className="text-sm font-medium mb-3">Nombre de chambres</h4>
         <MultiSelectButtons
           options={["1", "2", "3", "4", "5", "6", "7", "8+"]}
           selectedValues={
@@ -82,20 +102,7 @@ const OwnerPropertyDetailsSection = ({
               ? [formData.bedrooms >= 8 ? "8+" : formData.bedrooms.toString()]
               : []
           }
-          onChange={(value) => {
-            const numValue = value === "8+" ? 8 : parseInt(value);
-            const currentBedrooms = Array.isArray(formData.bedrooms)
-              ? [...formData.bedrooms]
-              : formData.bedrooms
-              ? [formData.bedrooms]
-              : [];
-            
-            const newBedrooms = currentBedrooms.includes(numValue)
-              ? currentBedrooms.filter(b => b !== numValue)
-              : [...currentBedrooms, numValue];
-            
-            handleArrayFieldChange('bedrooms', newBedrooms);
-          }}
+          onChange={handleBedroomChange}
           specialOption="8+"
         />
       </div>
@@ -118,6 +125,49 @@ const OwnerPropertyDetailsSection = ({
         value={formData.constructionYear || ''}
         onChange={handleInputChange}
         placeholder="Année de construction"
+      />
+
+      <FormInput
+        label="Nombre de places de parking"
+        name="parkingSpaces"
+        type="number"
+        value={formData.parkingSpaces?.toString() || ''}
+        onChange={handleInputChange}
+        placeholder="Nombre de places"
+      />
+
+      <FormInput
+        label="Nombre d'étages"
+        name="floors"
+        type="number"
+        value={formData.floors?.toString() || ''}
+        onChange={handleInputChange}
+        placeholder="Nombre d'étages"
+      />
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Orientation</Label>
+        <MultiSelectButtons
+          options={["Nord", "Sud", "Est", "Ouest"]}
+          selectedValues={formData.orientation || []}
+          onChange={(value) => handleMultiSelectToggle('orientation', value)}
+        />
+      </div>
+
+      <FormInput
+        label="Classe énergétique"
+        name="energyClass"
+        value={formData.energyClass || ''}
+        onChange={handleInputChange}
+        placeholder="Ex: A, B, C..."
+      />
+
+      <FormInput
+        label="Taxes annuelles"
+        name="yearlyTaxes"
+        value={formData.yearlyTaxes || ''}
+        onChange={handleInputChange}
+        placeholder="Montant des taxes annuelles"
       />
 
       <div className="space-y-2">

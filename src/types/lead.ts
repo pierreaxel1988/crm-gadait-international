@@ -131,7 +131,13 @@ export interface LeadDetailed {
   renovationNeeded?: string;
   propertyDescription?: string;
   keyFeatures?: string[];
-  amenities?: string[];
   condoFees?: string;
   facilities?: string[];
+  
+  // Additional owner-specific fields
+  parkingSpaces?: number;
+  floors?: number;
+  orientation?: string[];
+  energyClass?: string;
+  yearlyTaxes?: string;
 }
