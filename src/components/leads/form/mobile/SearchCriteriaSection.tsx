@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency, AssetType, Equipment, MauritiusRegion } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,18 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import ActionButtons from '@/components/pipeline/filters/ActionButtons';
-import { Home } from 'lucide-react';
+import { 
+  Home, 
+  Bed, 
+  Camera, 
+  Fan, 
+  Sofa, 
+  Shower, 
+  Car, 
+  DoorClosed, 
+  MicroWave, 
+  Refrigerator 
+} from 'lucide-react';
 
 const PROPERTY_TYPES: PropertyType[] = ['Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'];
 const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
@@ -24,6 +36,11 @@ const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'CHF', 'AED', 'MUR'];
 const COUNTRIES = ['Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 'Portugal', 'Seychelles', 'Spain', 'Switzerland', 'UAE', 'UK', 'USA', 'Autre'];
 
 const MAURITIUS_REGIONS: MauritiusRegion[] = ['North', 'South', 'West', 'East'];
+
+// Custom icon components to represent assets and equipment
+const createIconComponent = (IconComponent: React.ComponentType<any>) => {
+  return IconComponent;
+};
 
 const countryMatchesSearch = (country: string, searchTerm: string): boolean => {
   if (!searchTerm) return true;
@@ -244,9 +261,10 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     }
   };
 
-  const ASSETS: { value: AssetType; icon: React.ComponentType }[] = [
+  // Définir les assets avec des icônes Lucide
+  const ASSETS: { value: AssetType; icon: React.ComponentType<any> }[] = [
     { value: "Vue mer", icon: Home },
-    { value: "Vue panoramique", icon: Home },
+    { value: "Vue panoramique", icon: Camera },
     { value: "Bord de mer", icon: Home },
     { value: "Front de mer", icon: Home },
     { value: "Domaine de chasse", icon: Home },
@@ -262,23 +280,24 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     { value: "Proche golf", icon: Home },
   ];
 
-  const EQUIPMENT: { value: Equipment; icon: React.ComponentType }[] = [
-    { value: "Piscine", icon: Home },
+  // Définir les équipements avec des icônes Lucide
+  const EQUIPMENT: { value: Equipment; icon: React.ComponentType<any> }[] = [
+    { value: "Piscine", icon: Shower },
     { value: "Ascenseur", icon: Home },
-    { value: "Garage & Parking", icon: Home },
-    { value: "Climatisation", icon: Home },
+    { value: "Garage & Parking", icon: Car },
+    { value: "Climatisation", icon: Fan },
     { value: "Salle de réception", icon: Home },
     { value: "Dépendances", icon: Home },
     { value: "Loge gardien", icon: Home },
-    { value: "Spa", icon: Home },
+    { value: "Spa", icon: Shower },
     { value: "Viager", icon: Home },
     { value: "Terrasse", icon: Home },
     { value: "Jardin", icon: Home },
-    { value: "Meublé", icon: Home },
+    { value: "Meublé", icon: Sofa },
     { value: "Cheminée", icon: Home },
     { value: "Maison d'amis", icon: Home },
     { value: "Bâtiments agricoles", icon: Home },
-    { value: "Chambre de bonne", icon: Home },
+    { value: "Chambre de bonne", icon: Bed },
     { value: "Accessible aux handicapés", icon: Home },
   ];
 
@@ -380,14 +399,18 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
           <TabsContent value="property" className="space-y-4 py-2">
             <div className="space-y-2">
               <Label className="text-sm">Type de bien</Label>
-              <MultiSelectButtons options={PROPERTY_TYPES} selectedValues={Array.isArray(lead.propertyTypes) ? lead.propertyTypes : []} onToggle={value => {
-                const updatedTypes = Array.isArray(lead.propertyTypes) ? [...lead.propertyTypes] : [];
-                if (updatedTypes.includes(value as PropertyType)) {
-                  handleInputChange('propertyTypes', updatedTypes.filter(t => t !== value));
-                } else {
-                  handleInputChange('propertyTypes', [...updatedTypes, value as PropertyType]);
-                }
-              }} />
+              <MultiSelectButtons 
+                options={PROPERTY_TYPES} 
+                selectedValues={Array.isArray(lead.propertyTypes) ? lead.propertyTypes : []} 
+                onToggle={value => {
+                  const updatedTypes = Array.isArray(lead.propertyTypes) ? [...lead.propertyTypes] : [];
+                  if (updatedTypes.includes(value as PropertyType)) {
+                    handleInputChange('propertyTypes', updatedTypes.filter(t => t !== value));
+                  } else {
+                    handleInputChange('propertyTypes', [...updatedTypes, value as PropertyType]);
+                  }
+                }}
+              />
             </div>
             
             <div className="space-y-2">
@@ -397,24 +420,38 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
             
             <div className="space-y-2">
               <Label className="text-sm">Nombre de chambres</Label>
-              <MultiSelectButtons options={bedroomOptions} selectedValues={getSelectedBedrooms()} onChange={handleBedroomToggle} specialOption="8+" />
+              <MultiSelectButtons 
+                options={bedroomOptions} 
+                selectedValues={getSelectedBedrooms()} 
+                onChange={handleBedroomToggle} 
+                specialOption="8+" 
+              />
             </div>
             
             <div className="space-y-2">
               <Label className="text-sm">Vue souhaitée</Label>
-              <MultiSelectButtons options={VIEW_TYPES} selectedValues={lead.views || []} onToggle={value => {
-                const updatedViews = lead.views ? [...lead.views] : [];
-                if (updatedViews.includes(value as ViewType)) {
-                  handleInputChange('views', updatedViews.filter(v => v !== value));
-                } else {
-                  handleInputChange('views', [...updatedViews, value as ViewType]);
-                }
-              }} />
+              <MultiSelectButtons 
+                options={VIEW_TYPES} 
+                selectedValues={lead.views || []} 
+                onToggle={value => {
+                  const updatedViews = lead.views ? [...lead.views] : [];
+                  if (updatedViews.includes(value as ViewType)) {
+                    handleInputChange('views', updatedViews.filter(v => v !== value));
+                  } else {
+                    handleInputChange('views', [...updatedViews, value as ViewType]);
+                  }
+                }}
+              />
             </div>
             
             <div className="space-y-2">
               <Label className="text-sm">Prestations souhaitées</Label>
-              <CustomTagInput tags={lead.amenities || []} onChange={newTags => handleInputChange('amenities', newTags)} placeholder="Ajouter une commodité..." predefinedOptions={AMENITIES} />
+              <CustomTagInput 
+                tags={lead.amenities || []} 
+                onChange={newTags => handleInputChange('amenities', newTags)} 
+                placeholder="Ajouter une commodité..." 
+                predefinedOptions={AMENITIES} 
+              />
             </div>
             
             {lead.pipelineType === 'owners' && (
@@ -491,7 +528,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                       } else {
                         handleInputChange('orientation', [...updatedOrientation, value]);
                       }
-                    }} 
+                    }}
                   />
                 </div>
 
