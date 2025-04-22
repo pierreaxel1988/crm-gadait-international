@@ -1,3 +1,4 @@
+
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -182,4 +183,10 @@ export interface LeadDetailed {
   
   // Add the equipment field
   equipment?: Equipment[];
+  
+  // New fields for commission and furniture
+  commissionFee?: number;
+  isFurnished?: boolean;
+  furnitureIncludedInPrice?: boolean;
+  furniturePrice?: string;
 }

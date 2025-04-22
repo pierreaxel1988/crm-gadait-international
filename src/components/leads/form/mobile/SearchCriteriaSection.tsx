@@ -323,6 +323,79 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
               />
             </div>
             
+            {lead.pipelineType === 'owners' && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="commissionFee" className="text-sm">Honoraires (%)</Label>
+                  <Input 
+                    id="commissionFee" 
+                    value={lead.commissionFee || ''} 
+                    onChange={e => handleInputChange('commissionFee', e.target.value)} 
+                    placeholder="Pourcentage de commission" 
+                    className="w-full font-futura" 
+                    type="number" 
+                    min="0"
+                    max="100"
+                    step="0.5"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm">Meublé</Label>
+                  <RadioGroup value={lead.isFurnished ? 'true' : 'false'} onValueChange={value => handleInputChange('isFurnished', value === 'true')} className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="true" id="furnished-yes" />
+                      <Label htmlFor="furnished-yes" className="font-futura">
+                        Oui
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="false" id="furnished-no" />
+                      <Label htmlFor="furnished-no" className="font-futura">
+                        Non
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                
+                {lead.isFurnished && (
+                  <>
+                    <div className="space-y-2">
+                      <Label className="text-sm">Prix inclus le mobilier</Label>
+                      <RadioGroup value={lead.furnitureIncludedInPrice ? 'true' : 'false'} onValueChange={value => handleInputChange('furnitureIncludedInPrice', value === 'true')} className="flex flex-col space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="true" id="furniture-included-yes" />
+                          <Label htmlFor="furniture-included-yes" className="font-futura">
+                            Oui
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="false" id="furniture-included-no" />
+                          <Label htmlFor="furniture-included-no" className="font-futura">
+                            Non
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                    
+                    {!lead.furnitureIncludedInPrice && (
+                      <div className="space-y-2">
+                        <Label htmlFor="furniturePrice" className="text-sm">Prix du mobilier</Label>
+                        <Input 
+                          id="furniturePrice" 
+                          value={lead.furniturePrice || ''} 
+                          onChange={e => handleInputChange('furniturePrice', e.target.value)} 
+                          placeholder="Prix du mobilier" 
+                          className="w-full font-futura" 
+                          type="text" 
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="currency" className="text-sm">Devise</Label>
               <Select value={lead.currency || 'EUR'} onValueChange={value => handleInputChange('currency', value)}>

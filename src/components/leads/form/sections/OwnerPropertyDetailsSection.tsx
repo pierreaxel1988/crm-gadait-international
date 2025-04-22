@@ -19,6 +19,8 @@ import {
   Wrench,
   Bed
 } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Input } from '@/components/ui/input';
 
 interface OwnerPropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -78,6 +80,16 @@ const OwnerPropertyDetailsSection = ({
       target: {
         name: 'bedrooms',
         value: newBedrooms
+      }
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    handleInputChange(syntheticEvent);
+  };
+
+  const handleBooleanChange = (fieldName: keyof LeadDetailed, value: boolean) => {
+    const syntheticEvent = {
+      target: {
+        name: fieldName,
+        value
       }
     } as unknown as React.ChangeEvent<HTMLInputElement>;
     handleInputChange(syntheticEvent);
@@ -165,6 +177,66 @@ const OwnerPropertyDetailsSection = ({
           onCurrencyChange={handleCurrencyChange}
         />
       </div>
+
+      <FormInput
+        label="Honoraires (%)"
+        name="commissionFee"
+        type="number"
+        value={formData.commissionFee?.toString() || ''}
+        onChange={handleInputChange}
+        placeholder="Pourcentage de commission"
+        min="0"
+        max="100"
+        step="0.5"
+      />
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Meublé</Label>
+        <RadioGroup 
+          value={formData.isFurnished ? 'true' : 'false'} 
+          onValueChange={(value) => handleBooleanChange('isFurnished', value === 'true')}
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="true" id="furnished-yes" />
+            <Label htmlFor="furnished-yes">Oui</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="false" id="furnished-no" />
+            <Label htmlFor="furnished-no">Non</Label>
+          </div>
+        </RadioGroup>
+      </div>
+      
+      {formData.isFurnished && (
+        <>
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Prix inclus le mobilier</Label>
+            <RadioGroup 
+              value={formData.furnitureIncludedInPrice ? 'true' : 'false'} 
+              onValueChange={(value) => handleBooleanChange('furnitureIncludedInPrice', value === 'true')}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="true" id="furniture-included-yes" />
+                <Label htmlFor="furniture-included-yes">Oui</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="false" id="furniture-included-no" />
+                <Label htmlFor="furniture-included-no">Non</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          
+          {!formData.furnitureIncludedInPrice && (
+            <FormInput
+              label="Prix du mobilier"
+              name="furniturePrice"
+              value={formData.furniturePrice || ''}
+              onChange={handleInputChange}
+              placeholder="Prix du mobilier"
+            />
+          )}
+        </>
+      )}
 
       <FormInput
         label="Année de construction"

@@ -29,6 +29,23 @@ export interface ExtendedKanbanItem extends KanbanItem {
   phoneCountryCodeDisplay?: string | null; // Add phone country code display
   preferredLanguage?: string | null; // Add preferred language
   regions?: MauritiusRegion[];
+  assets?: any[];
+  equipment?: any[];
+  condoFees?: number | null;
+  energyClass?: string | null;
+  yearlyTaxes?: number | null;
+  parkingSpaces?: number | null;
+  floors?: number | null;
+  orientation?: string[];
+  landArea?: number | null;
+  renovationNeeded?: boolean | null;
+  propertyDescription?: string | null;
+  keyFeatures?: string[];
+  facilities?: string[];
+  commissionFee?: number | null;
+  isFurnished?: boolean | null;
+  furnitureIncludedInPrice?: boolean | null;
+  furniturePrice?: number | null;
 }
 
 interface KanbanColumn {
@@ -178,11 +195,33 @@ export const useKanbanData = (
               task_type: lead.taskType || null,
               url: lead.url || null,
               views: lead.views || [],
+              
               // Add missing fields to fix the type error
               phone_country_code: lead.phoneCountryCode || null,
               phone_country_code_display: lead.phoneCountryCodeDisplay || null,
               preferred_language: lead.preferredLanguage || null,
-              regions: lead.regions || []
+              regions: lead.regions || [],
+              
+              // Add owner-specific fields
+              assets: lead.assets || [],
+              equipment: lead.equipment || [],
+              condo_fees: lead.condoFees || null,
+              energy_class: lead.energyClass || null,
+              yearly_taxes: lead.yearlyTaxes || null,
+              parking_spaces: lead.parkingSpaces || null,
+              floors: lead.floors || null,
+              orientation: lead.orientation || [],
+              land_area: lead.landArea || null,
+              renovation_needed: lead.renovationNeeded || null,
+              property_description: lead.propertyDescription || null,
+              key_features: lead.keyFeatures || [],
+              facilities: lead.facilities || [],
+              
+              // Add new commission and furniture fields
+              commission_fee: lead.commissionFee || null,
+              is_furnished: lead.isFurnished || null,
+              furniture_included_in_price: lead.furnitureIncludedInPrice || null,
+              furniture_price: lead.furniturePrice || null,
             }));
           }
         }
