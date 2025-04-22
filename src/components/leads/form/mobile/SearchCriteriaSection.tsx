@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import ActionButtons from '@/components/pipeline/filters/ActionButtons';
 import { Home } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 const PROPERTY_TYPES: PropertyType[] = ['Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'];
 const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
@@ -639,6 +640,17 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                       </button>
                     ))}
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Description du bien</Label>
+                  <Textarea
+                    name="propertyDescription"
+                    value={lead.propertyDescription || ''}
+                    onChange={(e) => handleInputChange('propertyDescription', e.target.value)}
+                    placeholder="Description détaillée du bien"
+                    className="min-h-[150px] w-full font-futura"
+                  />
                 </div>
               </>
             )}
