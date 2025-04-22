@@ -1,14 +1,15 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BaseSelectButtonsProps<T extends string> {
-  options: T[];
+  options: readonly T[] | T[]; // Handle readonly arrays
   isSelected: (option: T) => boolean;
   onSelectOption: (option: T) => void;
   renderOptionContent?: (option: T, isSelected: boolean) => React.ReactNode;
-  specialOption?: T;
-  className?: string;
+  specialOption?: T; // Special option like "8+" that needs special handling
+  className?: string; // Add className prop
 }
 
 const BaseSelectButtons = <T extends string>({
@@ -19,8 +20,13 @@ const BaseSelectButtons = <T extends string>({
   specialOption,
   className,
 }: BaseSelectButtonsProps<T>) => {
+  const isMobile = useIsMobile();
+
   return (
-    <div className={cn("flex flex-wrap gap-2", className)}>
+    <div className={cn(
+      "flex flex-wrap gap-2", 
+      className
+    )}>
       {options.map(option => {
         const selected = isSelected(option);
         return (
@@ -28,11 +34,13 @@ const BaseSelectButtons = <T extends string>({
             key={option}
             type="button"
             onClick={() => onSelectOption(option)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+            className={cn(
+              "flex items-center rounded-full text-sm font-medium transition-colors",
+              isMobile ? "py-1.5 px-3 text-xs" : "py-2 px-4",
               selected
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-            } ${option === specialOption ? 'special-option' : ''}`}
+                ? "bg-primary text-white shadow-sm"
+                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+            )}
           >
             {renderOptionContent ? renderOptionContent(option, selected) : option}
           </button>

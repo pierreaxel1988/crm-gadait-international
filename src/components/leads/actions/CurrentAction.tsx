@@ -1,10 +1,12 @@
-
 import React from 'react';
-import { format, isPast, isToday } from 'date-fns';
-import { Button } from '@/components/ui/button';
+import { Plus, CalendarIcon, Clock, AlertCircle } from 'lucide-react';
+import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Plus, AlertTriangle, Calendar, Home, Check } from 'lucide-react';
-import { TaskType } from '@/types/actionHistory';
+import { TaskType } from '@/components/kanban/KanbanCard';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CurrentActionProps {
   taskType?: TaskType;
@@ -13,77 +15,102 @@ interface CurrentActionProps {
   onAddAction: () => void;
 }
 
-const CurrentAction: React.FC<CurrentActionProps> = ({ 
+const CurrentAction: React.FC<CurrentActionProps> = ({
   taskType,
   nextFollowUpDate,
   getActionTypeIcon,
   onAddAction
 }) => {
-  const isOverdue = nextFollowUpDate ? isPast(new Date(nextFollowUpDate)) && !isToday(new Date(nextFollowUpDate)) : false;
-  
-  const getBackgroundClass = () => {
-    if (isOverdue) return 'bg-[#FFF5F6]/70 border-rose-200';
-    if (nextFollowUpDate && isToday(new Date(nextFollowUpDate))) return 'bg-amber-50/70 border-amber-200';
-    return 'bg-gray-50 border-gray-200';
-  };
-  
-  const getTaskTitle = () => {
-    switch (taskType) {
-      case 'Call': return 'Appel';
-      case 'Visit': return 'Visite';
-      case 'Contract': return 'Compromis';
-      case 'Sales Act': return 'Acte de vente';
-      case 'Rental Contract': return 'Contrat de Location';
-      case 'Offer': return 'Proposition';
-      case 'Follow Up': return 'Follow-up';
-      case 'Estimation': return 'Estimation';
-      case 'Prospecting': return 'Prospection';
-      case 'Admin': return 'Administratif';
-      default: return 'Action';
+  const isMobile = useIsMobile();
+
+  const getActionTypeBg = (type: TaskType): string => {
+    switch (type) {
+      case 'Call': return '#E7F7E4';
+      case 'Visites': return '#F4F3FF';
+      case 'Compromis': return '#FFF8E6';
+      case 'Acte de vente': return '#E8F5E9';
+      case 'Contrat de Location': return '#E3F2FD';
+      case 'Propositions': return '#F3E5F5';
+      case 'Follow up': return '#FCE4EC';
+      case 'Estimation': return '#E0F2F1';
+      case 'Prospection': return '#FFEBEE';
+      case 'Admin': return '#ECEFF1';
+      default: return 'bg-loro-pearl/30';
     }
   };
+
+  if (!taskType) {
+    return (
+      <div className="space-y-2 animate-[fade-in_0.4s_ease-out]">
+        <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-futura text-loro-navy mb-2`}>Action actuelle</h3>
+        <Card className="border border-loro-pearl/60 bg-white overflow-hidden rounded-lg">
+          <div className="text-center py-5 px-4">
+            <div className={`mx-auto ${isMobile ? 'h-10 w-10 mb-3' : 'h-12 w-12 mb-4'} rounded-full bg-loro-pearl/50 flex items-center justify-center`}>
+              <AlertCircle className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} text-loro-navy/70`} />
+            </div>
+            <p className={`text-loro-navy font-futura ${isMobile ? 'text-base' : 'text-lg'} tracking-wide`}>Aucune action en cours</p>
+            <p className="text-sm text-loro-navy/60 font-futuraLight mt-2 mb-4">Programmez une action pour ce lead</p>
+            <Button 
+              onClick={onAddAction} 
+              className="font-futura flex mx-auto items-center gap-2 bg-chocolate-dark hover:bg-chocolate-light rounded-full"
+              size={isMobile ? "sm" : "default"}
+            >
+              <Plus className={`${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'}`} /> 
+              <span className="tracking-wide">Ajouter une action</span>
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
   
   return (
-    <div className={`border rounded-lg p-4 ${getBackgroundClass()}`}>
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-medium text-sm mb-1 flex items-center gap-2">
-            {taskType ? (
-              <>
-                <span className="text-gray-600">Prochaine action:</span> 
+    <div className="space-y-2 animate-[fade-in_0.4s_ease-out]">
+      <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-futura text-loro-navy mb-2`}>Action actuelle</h3>
+      <Card className="border border-loro-pearl/60 bg-white overflow-hidden rounded-lg">
+        <div className={`${isMobile ? 'p-3' : 'p-4'}`}>
+          <div className="space-y-4 w-full">
+            <div className={`flex items-center gap-3 ${isMobile ? 'p-2.5' : 'p-3'} rounded-lg border border-loro-pearl/50 bg-loro-pearl/10`}>
+              <div className="p-2 rounded-md" style={{ backgroundColor: getActionTypeBg(taskType) }}>
                 {getActionTypeIcon(taskType)}
-              </>
-            ) : (
-              'Aucune action programmée'
+              </div>
+              <span className={`text-loro-navy font-futura ${isMobile ? 'text-base' : 'text-lg'} tracking-wide`}>{taskType}</span>
+            </div>
+            
+            {nextFollowUpDate && (
+              <div className={`${isMobile ? 'p-2.5' : 'p-3'} rounded-lg border border-loro-pearl/50 bg-loro-pearl/10`}>
+                <p className="text-sm text-loro-navy/70 font-futuraLight mb-1">Prochain suivi prévu</p>
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} text-loro-navy`} />
+                  <p className={`${isMobile ? 'text-base' : 'text-base'} text-loro-navy font-futura tracking-wide`}>
+                    {format(new Date(nextFollowUpDate), 'dd/MM/yyyy', { locale: fr })}
+                  </p>
+                </div>
+                <div className="flex items-center mt-1 text-sm text-loro-navy/70 ml-6">
+                  <Clock className="h-3.5 w-3.5 text-loro-navy/70 mr-2" />
+                  <span className="font-futuraLight">
+                    {format(new Date(nextFollowUpDate), 'HH:mm', { locale: fr })}
+                  </span>
+                </div>
+                <p className="text-xs text-loro-navy/50 font-futuraLight mt-2 ml-6">
+                  Programmé automatiquement lors de la création d'une action
+                </p>
+              </div>
             )}
-          </h3>
-          
-          {nextFollowUpDate && (
-            <p className="text-xs text-gray-600 flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              {isOverdue ? (
-                <span className="flex items-center gap-1 text-rose-700">
-                  <AlertTriangle className="h-3 w-3" />
-                  En retard - {format(new Date(nextFollowUpDate), 'dd/MM/yyyy à HH:mm', { locale: fr })}
-                </span>
-              ) : isToday(new Date(nextFollowUpDate)) ? (
-                <span className="text-amber-700">Aujourd'hui - {format(new Date(nextFollowUpDate), 'HH:mm', { locale: fr })}</span>
-              ) : (
-                <span>{format(new Date(nextFollowUpDate), 'dd/MM/yyyy à HH:mm', { locale: fr })}</span>
-              )}
-            </p>
-          )}
+            
+            <div className="flex justify-end pt-1">
+              <Button 
+                variant="outline" 
+                onClick={onAddAction} 
+                size="sm"
+                className="text-sm flex items-center gap-2 border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20 rounded-full font-futura tracking-wide"
+              >
+                <Plus className="h-3.5 w-3.5" /> Modifier
+              </Button>
+            </div>
+          </div>
         </div>
-        
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="h-8 px-2" 
-          onClick={onAddAction}
-        >
-          <Plus className="h-4 w-4 mr-1" /> Ajouter
-        </Button>
-      </div>
+      </Card>
     </div>
   );
 };

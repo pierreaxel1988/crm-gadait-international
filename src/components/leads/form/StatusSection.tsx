@@ -99,7 +99,7 @@ const StatusSection = ({
         'Signed': 'Mandat signé',
         'Visit': 'Bien en commercialisation',
         'Offer': 'Offre reçue',
-        'Offer': 'Offre reçue',
+        'Offre': 'Offre reçue',
         'Deposit': 'Compromis signé',
         'Gagné': 'Vente finalisée',
         'Perdu': 'Perdu/Annulé'
@@ -155,8 +155,7 @@ const StatusSection = ({
           <MultiSelectButtons
             options={leadTags}
             selectedValues={formData.tags || []}
-            onChange={handleTagToggleInternal}
-            className="w-full"
+            onToggle={handleTagToggleInternal}
           />
         )}
       />

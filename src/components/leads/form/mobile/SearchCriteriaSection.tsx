@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency, AssetType, Equipment, MauritiusRegion } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -12,8 +13,18 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import ActionButtons from '@/components/pipeline/filters/ActionButtons';
-import { Home } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
+import { 
+  Home, 
+  Bed, 
+  Camera, 
+  Fan, 
+  Sofa, 
+  Shower, 
+  Car, 
+  DoorClosed, 
+  MicroWave, 
+  Refrigerator 
+} from 'lucide-react';
 
 const PROPERTY_TYPES: PropertyType[] = ['Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'];
 const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
@@ -25,6 +36,11 @@ const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'CHF', 'AED', 'MUR'];
 const COUNTRIES = ['Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 'Portugal', 'Seychelles', 'Spain', 'Switzerland', 'UAE', 'UK', 'USA', 'Autre'];
 
 const MAURITIUS_REGIONS: MauritiusRegion[] = ['North', 'South', 'West', 'East'];
+
+// Custom icon components to represent assets and equipment
+const createIconComponent = (IconComponent: React.ComponentType<any>) => {
+  return IconComponent;
+};
 
 const countryMatchesSearch = (country: string, searchTerm: string): boolean => {
   if (!searchTerm) return true;
@@ -245,9 +261,10 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     }
   };
 
-  const ASSETS: { value: AssetType; icon: React.ComponentType }[] = [
+  // Définir les assets avec des icônes Lucide
+  const ASSETS: { value: AssetType; icon: React.ComponentType<any> }[] = [
     { value: "Vue mer", icon: Home },
-    { value: "Vue panoramique", icon: Home },
+    { value: "Vue panoramique", icon: Camera },
     { value: "Bord de mer", icon: Home },
     { value: "Front de mer", icon: Home },
     { value: "Domaine de chasse", icon: Home },
@@ -263,23 +280,24 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     { value: "Proche golf", icon: Home },
   ];
 
-  const EQUIPMENT: { value: Equipment; icon: React.ComponentType }[] = [
-    { value: "Piscine", icon: Home },
+  // Définir les équipements avec des icônes Lucide
+  const EQUIPMENT: { value: Equipment; icon: React.ComponentType<any> }[] = [
+    { value: "Piscine", icon: Shower },
     { value: "Ascenseur", icon: Home },
-    { value: "Garage & Parking", icon: Home },
-    { value: "Climatisation", icon: Home },
+    { value: "Garage & Parking", icon: Car },
+    { value: "Climatisation", icon: Fan },
     { value: "Salle de réception", icon: Home },
     { value: "Dépendances", icon: Home },
     { value: "Loge gardien", icon: Home },
-    { value: "Spa", icon: Home },
+    { value: "Spa", icon: Shower },
     { value: "Viager", icon: Home },
     { value: "Terrasse", icon: Home },
     { value: "Jardin", icon: Home },
-    { value: "Meublé", icon: Home },
+    { value: "Meublé", icon: Sofa },
     { value: "Cheminée", icon: Home },
     { value: "Maison d'amis", icon: Home },
     { value: "Bâtiments agricoles", icon: Home },
-    { value: "Chambre de bonne", icon: Home },
+    { value: "Chambre de bonne", icon: Bed },
     { value: "Accessible aux handicapés", icon: Home },
   ];
 
@@ -302,97 +320,15 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
           </TabsList>
           
           <TabsContent value="budget" className="space-y-4 py-2">
-            {lead.pipelineType !== 'owners' && (
-              <div className="space-y-2">
-                <Label htmlFor="budgetMin" className="text-sm">Budget minimum</Label>
-                <Input id="budgetMin" value={lead.budgetMin || ''} onChange={e => handleInputChange('budgetMin', e.target.value)} placeholder="Budget minimum" className="w-full font-futura" type="text" />
-              </div>
-            )}
-            
             <div className="space-y-2">
-              <Label htmlFor="budget" className="text-sm">
-                {lead.pipelineType === 'owners' ? 'Prix souhaité' : 'Budget maximum'}
-              </Label>
-              <Input 
-                id="budget" 
-                value={lead.budget || ''} 
-                onChange={e => handleInputChange('budget', e.target.value)} 
-                placeholder={lead.pipelineType === 'owners' ? 'Prix souhaité' : 'Budget maximum'} 
-                className="w-full font-futura" 
-                type="text" 
-              />
+              <Label htmlFor="budgetMin" className="text-sm">Budget minimum</Label>
+              <Input id="budgetMin" value={lead.budgetMin || ''} onChange={e => handleInputChange('budgetMin', e.target.value)} placeholder="Budget minimum" className="w-full font-futura" type="text" />
             </div>
             
-            {lead.pipelineType === 'owners' && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="commissionFee" className="text-sm">Honoraires (%)</Label>
-                  <Input 
-                    id="commissionFee" 
-                    value={lead.commissionFee || ''} 
-                    onChange={e => handleInputChange('commissionFee', e.target.value)} 
-                    placeholder="Pourcentage de commission" 
-                    className="w-full font-futura" 
-                    type="number" 
-                    min="0"
-                    max="100"
-                    step="0.5"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-sm">Meublé</Label>
-                  <RadioGroup 
-                    value={lead.isFurnished ? 'true' : 'false'} 
-                    onValueChange={value => handleInputChange('isFurnished', value === 'true')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="true" id="furnished-yes" />
-                      <Label htmlFor="furnished-yes">Oui</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="false" id="furnished-no" />
-                      <Label htmlFor="furnished-no">Non</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                
-                {lead.isFurnished && (
-                  <>
-                    <div className="space-y-2">
-                      <Label className="text-sm">Prix inclus le mobilier</Label>
-                      <RadioGroup 
-                        value={lead.furnitureIncludedInPrice ? 'true' : 'false'} 
-                        onValueChange={value => handleInputChange('furnitureIncludedInPrice', value === 'true')}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="true" id="furniture-included-yes" />
-                          <Label htmlFor="furniture-included-yes">Oui</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="false" id="furniture-included-no" />
-                          <Label htmlFor="furniture-included-no">Non</Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-                    
-                    {!lead.furnitureIncludedInPrice && (
-                      <div className="space-y-2">
-                        <Label htmlFor="furniturePrice" className="text-sm">Prix du mobilier</Label>
-                        <Input 
-                          id="furniturePrice" 
-                          value={lead.furniturePrice || ''} 
-                          onChange={e => handleInputChange('furniturePrice', e.target.value)} 
-                          placeholder="Prix du mobilier" 
-                          className="w-full font-futura" 
-                          type="text" 
-                        />
-                      </div>
-                    )}
-                  </>
-                )}
-              </>
-            )}
+            <div className="space-y-2">
+              <Label htmlFor="budget" className="text-sm">Budget maximum</Label>
+              <Input id="budget" value={lead.budget || ''} onChange={e => handleInputChange('budget', e.target.value)} placeholder="Budget maximum" className="w-full font-futura" type="text" />
+            </div>
             
             <div className="space-y-2">
               <Label htmlFor="currency" className="text-sm">Devise</Label>
@@ -402,7 +338,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   {CURRENCIES.map(currency => (
-                    <SelectItem key={currency} value={currency}>
+                    <SelectItem key={currency} value={currency} className="font-futura">
                       {currency}
                     </SelectItem>
                   ))}
@@ -462,49 +398,19 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
 
           <TabsContent value="property" className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Type de bien</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {PROPERTY_TYPES.map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => {
-                      const updatedTypes = Array.isArray(lead.propertyTypes) ? [...lead.propertyTypes] : [];
-                      const newTypes = updatedTypes.includes(type) 
-                        ? updatedTypes.filter(t => t !== type) 
-                        : [...updatedTypes, type];
-                      handleInputChange({ propertyTypes: newTypes });
-                    }}
-                    className={`
-                      px-3 py-2 rounded-xl text-xs text-center transition-all duration-200
-                      ${(lead.propertyTypes || []).includes(type) 
-                        ? 'bg-chocolate-dark text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
-                    `}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Nombre de chambres</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {bedroomOptions.map((bedroom) => (
-                  <button
-                    key={bedroom}
-                    onClick={() => handleBedroomToggle(bedroom)}
-                    className={`
-                      px-3 py-2 rounded-xl text-xs text-center transition-all duration-200
-                      ${(getSelectedBedrooms()).includes(bedroom) 
-                        ? 'bg-chocolate-dark text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
-                    `}
-                  >
-                    {bedroom}
-                  </button>
-                ))}
-              </div>
+              <Label className="text-sm">Type de bien</Label>
+              <MultiSelectButtons 
+                options={PROPERTY_TYPES} 
+                selectedValues={Array.isArray(lead.propertyTypes) ? lead.propertyTypes : []} 
+                onToggle={value => {
+                  const updatedTypes = Array.isArray(lead.propertyTypes) ? [...lead.propertyTypes] : [];
+                  if (updatedTypes.includes(value as PropertyType)) {
+                    handleInputChange('propertyTypes', updatedTypes.filter(t => t !== value));
+                  } else {
+                    handleInputChange('propertyTypes', [...updatedTypes, value as PropertyType]);
+                  }
+                }}
+              />
             </div>
             
             <div className="space-y-2">
@@ -513,20 +419,39 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
             </div>
             
             <div className="space-y-2">
+              <Label className="text-sm">Nombre de chambres</Label>
+              <MultiSelectButtons 
+                options={bedroomOptions} 
+                selectedValues={getSelectedBedrooms()} 
+                onChange={handleBedroomToggle} 
+                specialOption="8+" 
+              />
+            </div>
+            
+            <div className="space-y-2">
               <Label className="text-sm">Vue souhaitée</Label>
-              <MultiSelectButtons options={VIEW_TYPES} selectedValues={lead.views || []} onToggle={value => {
-                const updatedViews = lead.views ? [...lead.views] : [];
-                if (updatedViews.includes(value as ViewType)) {
-                  handleInputChange('views', updatedViews.filter(v => v !== value));
-                } else {
-                  handleInputChange('views', [...updatedViews, value as ViewType]);
-                }
-              }} />
+              <MultiSelectButtons 
+                options={VIEW_TYPES} 
+                selectedValues={lead.views || []} 
+                onToggle={value => {
+                  const updatedViews = lead.views ? [...lead.views] : [];
+                  if (updatedViews.includes(value as ViewType)) {
+                    handleInputChange('views', updatedViews.filter(v => v !== value));
+                  } else {
+                    handleInputChange('views', [...updatedViews, value as ViewType]);
+                  }
+                }}
+              />
             </div>
             
             <div className="space-y-2">
               <Label className="text-sm">Prestations souhaitées</Label>
-              <CustomTagInput tags={lead.amenities || []} onChange={newTags => handleInputChange('amenities', newTags)} placeholder="Ajouter une commodité..." predefinedOptions={AMENITIES} />
+              <CustomTagInput 
+                tags={lead.amenities || []} 
+                onChange={newTags => handleInputChange('amenities', newTags)} 
+                placeholder="Ajouter une commodité..." 
+                predefinedOptions={AMENITIES} 
+              />
             </div>
             
             {lead.pipelineType === 'owners' && (
@@ -603,7 +528,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                       } else {
                         handleInputChange('orientation', [...updatedOrientation, value]);
                       }
-                    }} 
+                    }}
                   />
                 </div>
 
@@ -669,17 +594,6 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                       </button>
                     ))}
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Description du bien</Label>
-                  <Textarea
-                    name="propertyDescription"
-                    value={lead.propertyDescription || ''}
-                    onChange={(e) => handleInputChange('propertyDescription', e.target.value)}
-                    placeholder="Description détaillée du bien"
-                    className="min-h-[150px] w-full font-futura"
-                  />
                 </div>
               </>
             )}

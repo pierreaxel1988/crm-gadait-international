@@ -1,63 +1,43 @@
 
 import React from 'react';
-import { cn } from '@/lib/utils';
+import BaseSelectButtons from './BaseSelectButtons';
 
-interface MultiSelectButtonsProps {
-  options: string[];
-  selectedValues?: string[]; 
-  onChange?: (value: string) => void;
-  onToggle?: (values: string[]) => void;
-  specialOption?: string;
-  className?: string;
-  multiple?: boolean;
+interface MultiSelectButtonsProps<T extends string> {
+  options: readonly T[] | T[];
+  selectedValues: T[];
+  onChange?: (value: T) => void; // Make onChange optional
+  onToggle?: (value: T) => void; // Add back onToggle for backward compatibility
+  specialOption?: T;
+  className?: string; // Add className prop to be passed to BaseSelectButtons
 }
 
-const MultiSelectButtons: React.FC<MultiSelectButtonsProps> = ({
+const MultiSelectButtons = <T extends string>({
   options,
-  selectedValues = [], 
+  selectedValues = [],
   onChange,
   onToggle,
   specialOption,
   className,
-  multiple = true
-}) => {
-  const handleClick = (option: string) => {
-    let newSelectedValues: string[];
-
-    if (multiple) {
-      newSelectedValues = selectedValues.includes(option)
-        ? selectedValues.filter(val => val !== option)
-        : [...selectedValues, option];
-    } else {
-      newSelectedValues = [option];
-    }
-
-    if (onChange) {
-      onChange(option);
-    }
-    
+}: MultiSelectButtonsProps<T>) => {
+  const isSelected = (option: T) => selectedValues.includes(option);
+  
+  // Handle both onChange and onToggle patterns
+  const handleSelectOption = (value: T) => {
     if (onToggle) {
-      onToggle(newSelectedValues);
+      onToggle(value);
+    } else if (onChange) {
+      onChange(value);
     }
   };
-
+  
   return (
-    <div className={cn("flex flex-wrap gap-2", className)}>
-      {options.map(option => (
-        <button
-          key={option}
-          type="button"
-          onClick={() => handleClick(option)}
-          className={`py-1 px-3 text-sm rounded-md transition-colors flex items-center ${
-            selectedValues.includes(option)
-              ? 'bg-primary text-white'
-              : 'bg-secondary text-foreground'
-          } ${option === specialOption ? 'font-bold' : ''}`}
-        >
-          {option}
-        </button>
-      ))}
-    </div>
+    <BaseSelectButtons
+      options={[...options]} // Convert readonly array to regular array with spread
+      isSelected={isSelected}
+      onSelectOption={handleSelectOption}
+      specialOption={specialOption}
+      className={className}
+    />
   );
 };
 

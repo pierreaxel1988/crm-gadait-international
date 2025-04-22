@@ -6,7 +6,6 @@ import { LeadTag } from '@/components/common/TagBadge';
 import { Card, CardContent } from "@/components/ui/card";
 import { isPast, isToday } from 'date-fns';
 import { PipelineType } from '@/types/lead';
-import { TaskType } from '@/types/actionHistory';
 
 // Import sub-components
 import ContactInfo from './card/ContactInfo';
@@ -15,6 +14,18 @@ import TaskTypeIndicator from './card/TaskTypeIndicator';
 import AssignedUser from './card/AssignedUser';
 import ImportInfo from './card/ImportInfo';
 import TagList from './card/TagList';
+
+export type TaskType = 
+  | 'Call'
+  | 'Visites'
+  | 'Compromis'
+  | 'Acte de vente'
+  | 'Contrat de Location'
+  | 'Propositions'
+  | 'Follow up'
+  | 'Estimation'
+  | 'Prospection'
+  | 'Admin';
 
 export interface KanbanItem {
   id: string;

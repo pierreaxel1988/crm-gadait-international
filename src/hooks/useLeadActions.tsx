@@ -1,8 +1,6 @@
-
-// Just updating the getActionTypeIcon function to use the updated TaskType values
 import { useState, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
-import { TaskType } from '@/types/actionHistory';
+import { TaskType } from '@/components/kanban/KanbanCard';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { addActionToLead } from '@/services/leadActions';
@@ -237,14 +235,14 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
   const getActionTypeIcon = (type: TaskType) => {
     switch (type) {
       case 'Call': return <span className="text-[#D05A76] px-1 py-0.5 rounded text-xs font-medium">Appel</span>;
-      case 'Visit': return <span className="text-purple-800 px-1 py-0.5 rounded text-xs font-medium">Visite</span>;
-      case 'Contract': return <span className="text-amber-800 px-1 py-0.5 rounded text-xs font-medium">Compromis</span>;
-      case 'Sales Act': return <span className="text-red-800 px-1 py-0.5 rounded text-xs font-medium">Acte de vente</span>;
-      case 'Rental Contract': return <span className="text-blue-800 px-1 py-0.5 rounded text-xs font-medium">Contrat Location</span>;
-      case 'Offer': return <span className="text-indigo-800 px-1 py-0.5 rounded text-xs font-medium">Proposition</span>;
-      case 'Follow Up': return <span className="text-pink-800 px-1 py-0.5 rounded text-xs font-medium">Follow-up</span>;
+      case 'Visites': return <span className="text-purple-800 px-1 py-0.5 rounded text-xs font-medium">Visite</span>;
+      case 'Compromis': return <span className="text-amber-800 px-1 py-0.5 rounded text-xs font-medium">Compromis</span>;
+      case 'Acte de vente': return <span className="text-red-800 px-1 py-0.5 rounded text-xs font-medium">Acte de vente</span>;
+      case 'Contrat de Location': return <span className="text-blue-800 px-1 py-0.5 rounded text-xs font-medium">Contrat Location</span>;
+      case 'Propositions': return <span className="text-indigo-800 px-1 py-0.5 rounded text-xs font-medium">Proposition</span>;
+      case 'Follow up': return <span className="text-pink-800 px-1 py-0.5 rounded text-xs font-medium">Follow-up</span>;
       case 'Estimation': return <span className="text-teal-800 px-1 py-0.5 rounded text-xs font-medium">Estimation</span>;
-      case 'Prospecting': return <span className="text-orange-800 px-1 py-0.5 rounded text-xs font-medium">Prospection</span>;
+      case 'Prospection': return <span className="text-orange-800 px-1 py-0.5 rounded text-xs font-medium">Prospection</span>;
       case 'Admin': return <span className="text-gray-800 px-1 py-0.5 rounded text-xs font-medium">Admin</span>;
       default: return null;
     }

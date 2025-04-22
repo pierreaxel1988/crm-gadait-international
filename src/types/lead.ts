@@ -1,117 +1,185 @@
-
-import { TaskType, ActionHistory } from '@/types/actionHistory';
-
-// Re-export using the correct syntax for isolated modules
-export type { TaskType, ActionHistory };
-
-export type LeadStatus = 
-  | 'New'
-  | 'Contacted'
-  | 'Qualified'
-  | 'Proposition'
-  | 'Negotiation'
-  | 'Won'
-  | 'Lost'
-  | 'Inactive';
-
-export type LeadTag = 
-  | 'Hot'
-  | 'Warm'
-  | 'Cold'
-  | 'VIP'
-  | 'Urgent'
-  | 'Needs Follow-up'
-  | 'Ready to Buy'
-  | 'Long Term'
-  | 'Imported'
-  | 'Referred';
-
-export type PipelineType = 'Buyer' | 'Renter' | 'Seller' | 'Landlord';
+export type LeadSource = 
+  | "Site web" 
+  | "Réseaux sociaux" 
+  | "Portails immobiliers" 
+  | "Network" 
+  | "Repeaters" 
+  | "Recommandations"
+  | "Apporteur d'affaire"
+  | "Idealista"
+  | "Le Figaro"
+  | "Properstar"
+  | "Property Cloud"
+  | "L'express Property"
+  | "James Edition"
+  | "Annonce"
+  | "Email"
+  | "Téléphone"
+  | "Autre"
+  | "Recommendation";
 
 export type PropertyType = 
-  | 'Apartment'
-  | 'House'
-  | 'Villa'
-  | 'Land'
-  | 'Commercial'
-  | 'Building'
-  | 'Penthouse'
-  | 'Duplex';
+  | "Villa" 
+  | "Appartement" 
+  | "Penthouse" 
+  | "Maison"
+  | "Duplex"
+  | "Chalet"
+  | "Terrain" 
+  | "Manoir"
+  | "Maison de ville"
+  | "Château"
+  | "Local commercial"
+  | "Commercial" 
+  | "Hotel" 
+  | "Vignoble" 
+  | "Autres";
 
-export type CountryCode = '+230' | '+33' | '+44' | '+1' | '+49' | '+61' | '+32' | string;
+export type Country = string;
 
 export type ViewType = 
-  | 'Mountain'
-  | 'Ocean'
-  | 'Garden'
-  | 'City'
-  | 'Lake'
-  | 'River'
-  | 'Golf';
+  | "Mer" 
+  | "Montagne" 
+  | "Golf" 
+  | "Autres";
 
-export type MauritiusRegion = 
-  | 'North'
-  | 'South'
-  | 'East'
-  | 'West'
-  | 'Central';
+export type Amenity = string;
 
-export interface Note {
-  id: string;
-  content: string;
-  timestamp: string;
-  author: string;
-}
+export type PurchaseTimeframe = 
+  | "Moins de trois mois" 
+  | "Plus de trois mois";
+  
+export type FinancingMethod = 
+  | "Cash" 
+  | "Prêt bancaire";
 
-export type LeadSource = 
-  | 'Website'
-  | 'Direct call'
-  | 'Email'
-  | 'Referral'
-  | 'Social media'
-  | 'Property portal'
-  | 'Walk-in';
+export type PropertyUse = 
+  | "Investissement locatif" 
+  | "Résidence principale";
+
+export type PipelineType = 
+  | "purchase" 
+  | "rental"
+  | "owners"; // Ajout du pipeline propriétaires
+
+export type Currency =
+  | "EUR"
+  | "USD"
+  | "GBP"
+  | "CHF"
+  | "AED"
+  | "MUR";
+
+export type MauritiusRegion = 'North' | 'South' | 'West' | 'East';
+
+export type AssetType = 
+  | "Vue mer"
+  | "Vue panoramique"
+  | "Bord de mer"
+  | "Front de mer"
+  | "Domaine de chasse"
+  | "Écurie"
+  | "Bien d'architecte"
+  | "Style contemporain"
+  | "Monument classé"
+  | "Court de tennis"
+  | "Pied des pistes"
+  | "Proche montagne"
+  | "Proche aéroport"
+  | "Proche gare"
+  | "Proche golf";
+
+export type Equipment = 
+  | "Piscine"
+  | "Ascenseur"
+  | "Garage & Parking"
+  | "Climatisation"
+  | "Salle de réception"
+  | "Dépendances"
+  | "Loge gardien"
+  | "Spa"
+  | "Viager"
+  | "Terrasse"
+  | "Jardin"
+  | "Meublé"
+  | "Cheminée"
+  | "Maison d'amis"
+  | "Bâtiments agricoles"
+  | "Chambre de bonne"
+  | "Accessible aux handicapés";
+
+import { LeadStatus } from "@/components/common/StatusBadge";
+import { LeadTag } from "@/components/common/TagBadge";
+import { TaskType } from "@/components/kanban/KanbanCard";
+
+export type { LeadStatus, LeadTag, TaskType };
 
 export interface LeadDetailed {
   id: string;
   name: string;
+  salutation?: 'M.' | 'Mme';  // New field for "Civilité"
   email?: string;
   phone?: string;
-  phoneCountryCode?: CountryCode;
+  phoneCountryCode?: string;
   phoneCountryCodeDisplay?: string;
-  preferredLanguage?: string | null;
-  leadSource?: LeadSource;
-  lastContactedAt?: string;
-  nextFollowUpDate?: string;
-  notes?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  status?: LeadStatus;
+  location?: string;
+  status: LeadStatus;
   tags?: LeadTag[];
-  pipelineType?: PipelineType;
+  createdAt: string;
+  lastContactedAt?: string;
   assignedTo?: string;
+  source?: LeadSource;
+  propertyReference?: string;
+  budget?: string;
+  budgetMin?: string;
+  currency?: Currency;
+  desiredLocation?: string;
+  propertyType?: string;
+  propertyTypes?: PropertyType[];
+  bedrooms?: number | number[];
+  views?: string[];
+  amenities?: string[];
+  purchaseTimeframe?: string;
+  financingMethod?: string;
+  propertyUse?: string;
+  nationality?: string;
+  preferredLanguage?: string;
   taskType?: TaskType;
-  propertyType?: PropertyType[];
-  budget?: {
-    min?: number;
-    max?: number;
-    currency?: string;
-  };
-  location?: string[];
-  bedrooms?: number;
-  bathrooms?: number;
-  searchAreas?: MauritiusRegion[];
-  view?: ViewType[];
-  landSize?: number;
-  buildingSize?: number;
-  isOwner?: boolean;
-  propertyAddress?: string;
+  notes?: string;
+  internal_notes?: string; 
+  nextFollowUpDate?: string;
+  country?: Country;
+  url?: string;
+  pipelineType?: PipelineType;
+  pipeline_type?: PipelineType;
+  taxResidence?: string;
+  regions?: MauritiusRegion[];
+  
+  imported_at?: string;
+  integration_source?: string;
+  actionHistory?: any[];
+  livingArea?: string;
+  external_id?: string;
+  
+  // Property details for owners
+  landArea?: string;
+  constructionYear?: string;
+  renovationNeeded?: string;
   propertyDescription?: string;
-  askingPrice?: number;
-  propertyFeatures?: string[];
-  actionHistory?: ActionHistory[];
-  importSource?: string;
-  importDate?: string;
-  importId?: string;
-  importConfidence?: number;
+  keyFeatures?: string[];
+  condoFees?: string;
+  facilities?: string[];
+  
+  // Additional owner-specific fields
+  parkingSpaces?: number;
+  floors?: number;
+  orientation?: string[];
+  energyClass?: string;
+  yearlyTaxes?: string;
+  
+  // Add the assets field
+  assets?: AssetType[];
+  
+  // Add the equipment field
+  equipment?: Equipment[];
 }

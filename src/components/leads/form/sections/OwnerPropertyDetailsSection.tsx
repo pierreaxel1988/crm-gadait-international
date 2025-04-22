@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { LeadDetailed, AssetType, Equipment } from '@/types/lead';
 import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
@@ -8,23 +9,16 @@ import CustomTagInput from '../CustomTagInput';
 import { Textarea } from '@/components/ui/textarea';
 import { 
   Home,
-  Ruler,
-  CalendarDays,
-  ParkingCircle,
-  Layers,
-  Compass,
-  Thermometer,
-  Coins,
-  Star,
-  Wrench,
-  Bed
+  Camera,
+  Car,
+  Fan,
+  Building,
+  Building2,
+  Bed,
+  Sofa,
+  Shower,
+  DoorClosed
 } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 
 interface OwnerPropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -37,8 +31,6 @@ const OwnerPropertyDetailsSection = ({
   handleInputChange,
   handleMultiSelectToggle
 }: OwnerPropertyDetailsSectionProps) => {
-  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
-
   const handleBudgetChange = (type: 'min' | 'max', value: string) => {
     const fieldName = type === 'min' ? 'budgetMin' : 'budget';
     const syntheticEvent = {
@@ -91,19 +83,10 @@ const OwnerPropertyDetailsSection = ({
     handleInputChange(syntheticEvent);
   };
 
-  const handleBooleanChange = (fieldName: keyof LeadDetailed, value: boolean) => {
-    const syntheticEvent = {
-      target: {
-        name: fieldName,
-        value
-      }
-    } as unknown as React.ChangeEvent<HTMLInputElement>;
-    handleInputChange(syntheticEvent);
-  };
-
-  const ASSETS: { value: AssetType; icon: React.ComponentType }[] = [
+  // Définir les atouts avec des icônes Lucide
+  const ASSETS: { value: AssetType; icon: React.ComponentType<any>; }[] = [
     { value: "Vue mer", icon: Home },
-    { value: "Vue panoramique", icon: Home },
+    { value: "Vue panoramique", icon: Camera },
     { value: "Bord de mer", icon: Home },
     { value: "Front de mer", icon: Home },
     { value: "Domaine de chasse", icon: Home },
@@ -119,86 +102,29 @@ const OwnerPropertyDetailsSection = ({
     { value: "Proche golf", icon: Home },
   ];
 
-  const EQUIPMENT: { value: Equipment; icon: React.ComponentType }[] = [
-    { value: "Piscine", icon: Home },
-    { value: "Ascenseur", icon: Home },
-    { value: "Garage & Parking", icon: ParkingCircle },
-    { value: "Climatisation", icon: Thermometer },
-    { value: "Salle de réception", icon: Home },
-    { value: "Dépendances", icon: Home },
-    { value: "Loge gardien", icon: Home },
-    { value: "Spa", icon: Home },
-    { value: "Viager", icon: Home },
-    { value: "Terrasse", icon: Home },
-    { value: "Jardin", icon: Home },
-    { value: "Meublé", icon: Home },
-    { value: "Cheminée", icon: Home },
-    { value: "Maison d'amis", icon: Home },
-    { value: "Bâtiments agricoles", icon: Home },
-    { value: "Chambre de bonne", icon: Bed },
-    { value: "Accessible aux handicapés", icon: Home },
+  // Définir les équipements avec des icônes Lucide
+  const EQUIPMENT: { value: Equipment; icon: React.ComponentType<any>; label: string; }[] = [
+    { value: "Piscine", icon: Shower, label: "Piscine" },
+    { value: "Ascenseur", icon: Home, label: "Ascenseur" },
+    { value: "Garage & Parking", icon: Car, label: "Garage & Parking" },
+    { value: "Climatisation", icon: Fan, label: "Climatisation" },
+    { value: "Salle de réception", icon: Building, label: "Salle de réception" },
+    { value: "Dépendances", icon: Building2, label: "Dépendances" },
+    { value: "Loge gardien", icon: Home, label: "Loge gardien" },
+    { value: "Spa", icon: Shower, label: "Spa" },
+    { value: "Viager", icon: Home, label: "Viager" },
+    { value: "Terrasse", icon: Home, label: "Terrasse" },
+    { value: "Jardin", icon: Home, label: "Jardin" },
+    { value: "Meublé", icon: Sofa, label: "Meublé" },
+    { value: "Cheminée", icon: Home, label: "Cheminée" },
+    { value: "Maison d'amis", icon: Home, label: "Maison d'amis" },
+    { value: "Bâtiments agricoles", icon: Home, label: "Bâtiments agricoles" },
+    { value: "Chambre de bonne", icon: Bed, label: "Chambre de bonne" },
+    { value: "Accessible aux handicapés", icon: Home, label: "Accessible aux handicapés" }
   ];
-
-  const generateDescription = async () => {
-    try {
-      setIsGeneratingDescription(true);
-      
-      const { data, error } = await supabase.functions.invoke('generate-property-description', {
-        body: { propertyData: formData }
-      });
-
-      if (error) throw error;
-
-      const syntheticEvent = {
-        target: {
-          name: 'propertyDescription',
-          value: data.description
-        }
-      } as React.ChangeEvent<HTMLTextAreaElement>;
-      
-      handleInputChange(syntheticEvent);
-      
-      toast({
-        title: "Description générée avec succès",
-        description: "La description a été mise à jour avec la version générée par l'IA."
-      });
-    } catch (error) {
-      console.error('Error generating description:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de générer la description. Veuillez réessayer."
-      });
-    } finally {
-      setIsGeneratingDescription(false);
-    }
-  };
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2 pt-2 border-2 border-chocolate-dark/20 rounded-md p-4 bg-loro-pearl/10">
-        <Label className="text-sm font-medium text-chocolate-dark">Description du bien</Label>
-        <div className="flex flex-col gap-2">
-          <Textarea
-            name="propertyDescription"
-            value={formData.propertyDescription || ''}
-            onChange={handleInputChange}
-            placeholder="Description détaillée du bien"
-            className="min-h-[200px]"
-          />
-          <Button 
-            type="button" 
-            variant="outline" 
-            className="w-full bg-chocolate-light/10 hover:bg-chocolate-light/20 border-chocolate-dark/30" 
-            onClick={generateDescription}
-            disabled={isGeneratingDescription}
-          >
-            {isGeneratingDescription && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Générer une description avec l'IA
-          </Button>
-        </div>
-      </div>
-
       <FormInput
         label="Surface habitable (m²)"
         name="livingArea"
@@ -241,66 +167,6 @@ const OwnerPropertyDetailsSection = ({
           onCurrencyChange={handleCurrencyChange}
         />
       </div>
-
-      <FormInput
-        label="Honoraires (%)"
-        name="commissionFee"
-        type="number"
-        value={formData.commissionFee?.toString() || ''}
-        onChange={handleInputChange}
-        placeholder="Pourcentage de commission"
-        min="0"
-        max="100"
-        step="0.5"
-      />
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Meublé</Label>
-        <RadioGroup 
-          value={formData.isFurnished ? 'true' : 'false'} 
-          onValueChange={(value) => handleBooleanChange('isFurnished', value === 'true')}
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="true" id="furnished-yes" />
-            <Label htmlFor="furnished-yes">Oui</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="false" id="furnished-no" />
-            <Label htmlFor="furnished-no">Non</Label>
-          </div>
-        </RadioGroup>
-      </div>
-      
-      {formData.isFurnished && (
-        <>
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Prix inclus le mobilier</Label>
-            <RadioGroup 
-              value={formData.furnitureIncludedInPrice ? 'true' : 'false'} 
-              onValueChange={(value) => handleBooleanChange('furnitureIncludedInPrice', value === 'true')}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="true" id="furniture-included-yes" />
-                <Label htmlFor="furniture-included-yes">Oui</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="false" id="furniture-included-no" />
-                <Label htmlFor="furniture-included-no">Non</Label>
-              </div>
-            </RadioGroup>
-          </div>
-          
-          {!formData.furnitureIncludedInPrice && (
-            <FormInput
-              label="Prix du mobilier"
-              name="furniturePrice"
-              value={formData.furniturePrice || ''}
-              onChange={handleInputChange}
-              placeholder="Prix du mobilier"
-            />
-          )}
-        </>
-      )}
 
       <FormInput
         label="Année de construction"
@@ -355,6 +221,17 @@ const OwnerPropertyDetailsSection = ({
       />
 
       <div className="space-y-2">
+        <Label className="text-sm font-medium">Description du bien</Label>
+        <Textarea
+          name="propertyDescription"
+          value={formData.propertyDescription || ''}
+          onChange={handleInputChange}
+          placeholder="Description détaillée du bien"
+          className="min-h-[100px]"
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label className="text-sm font-medium">Points forts du bien</Label>
         <CustomTagInput
           tags={formData.keyFeatures || []}
@@ -366,7 +243,7 @@ const OwnerPropertyDetailsSection = ({
       <div className="space-y-2">
         <Label className="text-sm font-medium">Équipements</Label>
         <div className="grid grid-cols-2 gap-2">
-          {EQUIPMENT.map(({ value, icon: Icon }) => (
+          {EQUIPMENT.map(({ value, icon: Icon, label }) => (
             <button
               key={value}
               type="button"
@@ -378,7 +255,7 @@ const OwnerPropertyDetailsSection = ({
               }`}
             >
               <Icon className="h-4 w-4" />
-              {value}
+              {label}
             </button>
           ))}
         </div>

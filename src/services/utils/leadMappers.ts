@@ -1,5 +1,6 @@
-import { LeadDetailed } from '@/types/lead';
-import { ActionHistory, TaskType } from '@/types/actionHistory';
+import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
+import { ActionHistory } from '@/types/actionHistory';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 export const mapToLeadDetailed = (lead: any): LeadDetailed => {
   // Parse and validate action history
@@ -84,29 +85,7 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     actionHistory: actionHistory,
     livingArea: lead.living_area,
     external_id: lead.external_id,
-    regions: lead.regions || [],
-    
-    // Owner-specific property details
-    landArea: lead.land_area,
-    constructionYear: lead.construction_year,
-    renovationNeeded: lead.renovation_needed,
-    propertyDescription: lead.property_description,
-    keyFeatures: lead.key_features || [],
-    condoFees: lead.condo_fees,
-    facilities: lead.facilities || [],
-    parkingSpaces: lead.parking_spaces,
-    floors: lead.floors,
-    orientation: lead.orientation || [],
-    energyClass: lead.energy_class,
-    yearlyTaxes: lead.yearly_taxes,
-    assets: lead.assets || [],
-    equipment: lead.equipment || [],
-    
-    // New commission and furniture fields
-    commissionFee: lead.honoraires_agence,
-    isFurnished: lead.est_meuble,
-    furnitureIncludedInPrice: lead.mobilier_inclus_prix,
-    furniturePrice: lead.prix_mobilier
+    regions: lead.regions || []
   };
 };
 
@@ -180,28 +159,7 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     living_area: lead.livingArea,
     external_id: lead.external_id,
     action_history: actionHistoryForDb,
-    regions: lead.regions || [],
-    
-    // Owner-specific property details
-    land_area: lead.landArea,
-    renovation_needed: lead.renovationNeeded,
-    property_description: lead.propertyDescription,
-    key_features: lead.keyFeatures,
-    condo_fees: lead.condoFees,
-    facilities: lead.facilities,
-    parking_spaces: lead.parkingSpaces,
-    floors: lead.floors,
-    orientation: lead.orientation,
-    energy_class: lead.energyClass,
-    yearly_taxes: lead.yearlyTaxes,
-    assets: lead.assets,
-    equipment: lead.equipment,
-    
-    // New commission and furniture fields
-    honoraires_agence: lead.commissionFee,
-    est_meuble: lead.isFurnished,
-    mobilier_inclus_prix: lead.furnitureIncludedInPrice,
-    prix_mobilier: lead.furniturePrice
+    regions: lead.regions || []
   };
 };
 

@@ -1,106 +1,129 @@
 
-import React, { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { fetchActions, markActionComplete } from '@/services/actionService';
+import React, { useState, useEffect, useMemo } from 'react';
+import Navbar from '@/components/layout/Navbar';
+import SubNavigation from '@/components/layout/SubNavigation';
+import { Button } from '@/components/ui/button';
+import { RotateCcw } from 'lucide-react';
+import { useBreakpoint } from '@/hooks/use-mobile';
+import { useActionsData } from '@/hooks/useActionsData';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { formatPhoneNumber } from '@/utils/formatters';
-import { ActionItem, ActionStatus } from '@/types/actionHistory';
-import { TaskType } from '@/types/actionHistory';
-import ActionsHeader from '@/components/actions/ActionsHeader';
+import { useSelectedAgent } from '@/hooks/useSelectedAgent';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import TypeFilterButtons from '@/components/actions/filters/TypeFilterButtons';
+import { TaskType } from '@/components/kanban/KanbanCard';
 import ActionsList from '@/components/actions/ActionsList';
+import { useDebounce } from '@/hooks/useDebounce';
+import PipelineSearchBar from '@/components/pipeline/PipelineSearchBar';
 
 const Actions = () => {
-  const { user, isAdmin, isCommercial, teamMembers } = useAuth();
-  const { toast } = useToast();
-  const isMobile = useIsMobile();
-  
-  const [statusFilter, setStatusFilter] = useState<ActionStatus | 'all'>('all');
-  const [typeFilter, setTypeFilter] = useState<TaskType | 'all'>('all');
-  const [agentFilter, setAgentFilter] = useState<string | null>(null);
+  const { isMobile } = useBreakpoint();
   const [searchTerm, setSearchTerm] = useState('');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const { actions, isLoading, markActionComplete } = useActionsData(refreshTrigger);
+  const { isAdmin } = useAuth();
+  const { selectedAgent, handleAgentChange } = useSelectedAgent();
+  const [typeFilter, setTypeFilter] = useState<TaskType | 'all'>('all');
   
-  const { 
-    data: actions, 
-    isLoading, 
-    refetch 
-  } = useQuery({
-    queryKey: ['actions', statusFilter, typeFilter, agentFilter, searchTerm],
-    queryFn: () => fetchActions(statusFilter, typeFilter, agentFilter, searchTerm),
-  });
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  useEffect(() => {
-    if (!user) return;
-    refetch();
-  }, [user, refetch]);
+  // Optimized filtering using useMemo
+  const filteredActions = useMemo(() => {
+    return actions.filter(action => {
+      if (!debouncedSearchTerm && !selectedAgent && typeFilter === 'all') return true;
 
-  const handleMarkComplete = async (actionId: string, leadId: string) => {
-    try {
-      // Optimistically update the UI
-      const updatedActions = actions?.map(action =>
-        action.id === actionId ? { ...action, status: 'done' } : action
+      const searchLower = debouncedSearchTerm.toLowerCase();
+      
+      // Match criteria
+      const matchesSearch = !debouncedSearchTerm || (
+        action.leadName?.toLowerCase().includes(searchLower) ||
+        action.notes?.toLowerCase().includes(searchLower) ||
+        action.assignedToName?.toLowerCase().includes(searchLower) ||
+        action.actionType?.toLowerCase().includes(searchLower) ||
+        action.email?.toLowerCase().includes(searchLower) ||
+        action.phoneNumber?.toLowerCase().includes(searchLower)
       );
       
-      // Call the API to mark the action as complete
-      await markActionComplete(actionId, leadId);
-      
-      toast({
-        title: "Action complétée",
-        description: "L'action a été marquée comme terminée."
-      });
-      
-      refetch();
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour l'action."
-      });
-    }
-  };
-  
-  const formatAction = (action: any): ActionItem => ({
-    id: action.id,
-    leadId: action.lead_id,
-    leadName: action.lead_name,
-    actionType: action.action_type as TaskType,
-    createdAt: action.created_at,
-    scheduledDate: action.scheduled_date,
-    completedDate: action.completed_date,
-    notes: action.notes,
-    assignedToId: action.assigned_to_id,
-    assignedToName: action.assigned_to_name,
-    status: action.status,
-    phoneNumber: formatPhoneNumber(action.phone_number),
-    email: action.email,
-  });
+      const matchesAgent = !selectedAgent || action.assignedToId === selectedAgent;
+      const matchesType = typeFilter === 'all' || action.actionType === typeFilter;
 
-  const formattedActions = actions?.map(action => formatAction(action)) || [];
+      return matchesSearch && matchesAgent && matchesType;
+    });
+  }, [actions, debouncedSearchTerm, selectedAgent, typeFilter]);
+
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   return (
-    <div className="container mx-auto py-6">
-      <ActionsHeader
-        isAdmin={isAdmin}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        typeFilter={typeFilter}
-        setTypeFilter={setTypeFilter}
-        agentFilter={agentFilter}
-        setAgentFilter={setAgentFilter}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        teamMembers={teamMembers}
-        handleRefresh={refetch}
-      />
-      
-      <ActionsList 
-        actions={formattedActions} 
-        isLoading={isLoading}
-        onMarkComplete={handleMarkComplete}
-        isMobile={isMobile}
-      />
-    </div>
+    <>
+      <Navbar />
+      <SubNavigation />
+      <div className="p-4 md:p-6 bg-white min-h-screen">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <h1 className="text-2xl font-futuraLight tracking-wide text-loro-navy">Actions</h1>
+            
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="w-full md:w-[280px]">
+                <PipelineSearchBar
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  onRefresh={handleRefresh}
+                />
+              </div>
+              
+              {isAdmin && (
+                <Select value={selectedAgent || "all"} onValueChange={(value) => handleAgentChange(value === "all" ? null : value)}>
+                  <SelectTrigger className="w-[200px] text-xs">
+                    <SelectValue placeholder="Filtrer par commercial" />
+                  </SelectTrigger>
+                  <SelectContent searchable>
+                    <SelectItem value="all">Tous les commerciaux</SelectItem>
+                    {actions
+                      .reduce((acc: { id: string; name: string }[], curr) => {
+                        if (curr.assignedToId && curr.assignedToName && 
+                            !acc.some(agent => agent.id === curr.assignedToId)) {
+                          acc.push({ id: curr.assignedToId, name: curr.assignedToName });
+                        }
+                        return acc;
+                      }, [])
+                      .map(agent => (
+                        <SelectItem key={agent.id} value={agent.id}>
+                          {agent.name}
+                        </SelectItem>
+                      ))
+                    }
+                  </SelectContent>
+                </Select>
+              )}
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="default" 
+                  className="flex-shrink-0"
+                  onClick={handleRefresh}
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Rafraîchir
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <TypeFilterButtons typeFilter={typeFilter} setTypeFilter={setTypeFilter} />
+          </div>
+          
+          <ActionsList 
+            actions={filteredActions}
+            isLoading={isLoading}
+            onMarkComplete={markActionComplete}
+            isMobile={isMobile}
+          />
+        </div>
+      </div>
+    </>
   );
 };
 

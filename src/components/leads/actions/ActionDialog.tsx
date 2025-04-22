@@ -1,14 +1,15 @@
 
 import React from 'react';
+import { X, Check, CalendarClock, Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar } from '@/components/ui/calendar';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { TaskType } from '@/components/kanban/KanbanCard';
+import CustomButton from '@/components/ui/CustomButton';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { TaskType } from '@/types/actionHistory';
+import { Calendar } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface ActionDialogProps {
   isOpen: boolean;
@@ -37,129 +38,177 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
   actionNotes,
   setActionNotes,
   onConfirm,
-  getActionTypeIcon
+  getActionTypeIcon,
 }) => {
-  // Action types available in the system
-  const actionTypes: TaskType[] = [
-    'Call',
-    'Visit',
-    'Contract',
-    'Sales Act',
-    'Rental Contract',
-    'Offer',
-    'Follow Up',
-    'Estimation',
-    'Prospecting',
-    'Admin'
-  ];
+  const isMobile = useIsMobile();
 
-  // Validate if form can be submitted
-  const canSubmit = selectedAction !== null;
+  if (!isOpen) return null;
+
+  const handleConfirmClick = () => {
+    // Appeler la fonction onConfirm pour enregistrer l'action
+    onConfirm();
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-times">Planifier une action</DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium">Type d'action</h3>
-            <Tabs 
-              onValueChange={(value) => setSelectedAction(value as TaskType)} 
-              value={selectedAction || undefined}
-              className="w-full"
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50" 
+      onClick={onClose}
+    >
+      <div 
+        className={cn(
+          "bg-white dark:bg-gray-800 rounded-t-lg sm:rounded-lg w-full shadow-luxury transition-all duration-300 animate-slide-in",
+          isMobile ? "max-h-[85vh] overflow-y-auto" : "max-w-md"
+        )} 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 p-4 border-b">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">
+              {!selectedAction ? "Nouvelle action" : `Planifier ${selectedAction}`}
+            </h2>
+            <button 
+              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+              onClick={onClose}
             >
-              <TabsList className="grid grid-cols-2 w-full">
-                <div className="grid grid-cols-2 gap-1 col-span-2">
-                  {actionTypes.map(type => (
-                    <TabsTrigger 
-                      key={type} 
-                      value={type} 
-                      className="py-1.5 px-1 text-xs rounded flex items-center justify-center gap-1"
-                    >
-                      {type}
-                    </TabsTrigger>
-                  ))}
-                </div>
-              </TabsList>
-            </Tabs>
+              <X className="h-5 w-5" />
+            </button>
           </div>
           
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium">Date et heure</h3>
-            <div className="flex items-center gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="h-4 w-4 mr-2" />
-                    {actionDate ? (
-                      format(actionDate, "dd/MM/yyyy")
-                    ) : (
-                      <span>Sélectionner une date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={actionDate}
-                    onSelect={setActionDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              
-              <select 
-                value={actionTime}
-                onChange={(e) => setActionTime(e.target.value)}
-                className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+          {selectedAction && (
+            <div className="mt-2 flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                {getActionTypeIcon(selectedAction)}
+              </div>
+              <button 
+                className="text-xs text-blue-600 hover:underline"
+                onClick={() => setSelectedAction(null)}
               >
-                {Array.from({ length: 24 }).map((_, hour) => {
-                  return (
-                    <React.Fragment key={hour}>
-                      <option value={`${hour.toString().padStart(2, '0')}:00`}>
-                        {hour.toString().padStart(2, '0')}:00
-                      </option>
-                      <option value={`${hour.toString().padStart(2, '0')}:30`}>
-                        {hour.toString().padStart(2, '0')}:30
-                      </option>
-                    </React.Fragment>
-                  );
-                })}
-              </select>
+                Changer
+              </button>
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium">Notes</h3>
-            <Textarea 
-              value={actionNotes}
-              onChange={(e) => setActionNotes(e.target.value)}
-              placeholder="Ajouter des notes concernant cette action..."
-              className="min-h-[80px]"
-            />
-          </div>
+          )}
         </div>
         
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Annuler
-          </Button>
-          <Button 
-            disabled={!canSubmit} 
-            className="bg-chocolate-dark hover:bg-chocolate-light text-white"
-            onClick={onConfirm}
-          >
-            Planifier
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <div className="p-4">
+          {!selectedAction ? (
+            <ActionTypeSelector onSelect={setSelectedAction} />
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Date</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal border rounded-md h-11",
+                        !actionDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarClock className="mr-2 h-4 w-4" />
+                      {actionDate ? format(actionDate, 'dd/MM/yyyy') : <span>Sélectionner une date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    className="w-auto p-0" 
+                    align="start"
+                  >
+                    <Calendar
+                      mode="single"
+                      selected={actionDate}
+                      onSelect={setActionDate}
+                      initialFocus
+                      className="p-3"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Heure</label>
+                <Input
+                  type="time"
+                  value={actionTime}
+                  onChange={(e) => setActionTime(e.target.value)}
+                  className="w-full h-11 rounded-md"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Notes</label>
+                <textarea
+                  value={actionNotes}
+                  onChange={(e) => setActionNotes(e.target.value)}
+                  className="w-full p-3 border rounded-md resize-none h-24"
+                  placeholder="Notes sur cette action..."
+                />
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="p-4 border-t bg-gray-50 dark:bg-gray-800 sticky bottom-0">
+          {selectedAction ? (
+            <div className="flex gap-3">
+              <CustomButton 
+                variant="outline" 
+                onClick={() => setSelectedAction(null)}
+                className="flex-1 flex justify-center"
+              >
+                Retour
+              </CustomButton>
+              <CustomButton 
+                variant="chocolate" 
+                onClick={handleConfirmClick}
+                className="flex-1 flex justify-center"
+                type="button"
+                aria-label="Confirmer l'action"
+              >
+                Confirmer
+              </CustomButton>
+            </div>
+          ) : (
+            <CustomButton 
+              variant="outline" 
+              onClick={onClose}
+              className="w-full"
+            >
+              Annuler
+            </CustomButton>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ActionTypeSelector: React.FC<{ onSelect: (action: TaskType) => void }> = ({ onSelect }) => {
+  const actionGroups = [
+    ['Call', 'Follow up', 'Visites'],
+    ['Estimation', 'Propositions', 'Prospection'],
+    ['Compromis', 'Acte de vente', 'Contrat de Location', 'Admin']
+  ];
+  
+  return (
+    <div className="space-y-4">
+      {actionGroups.map((group, groupIndex) => (
+        <div key={groupIndex} className="grid grid-cols-3 gap-2">
+          {group.map(actionType => (
+            <CustomButton 
+              key={actionType} 
+              variant="outline"
+              onClick={() => onSelect(actionType as TaskType)} 
+              className={cn(
+                "justify-center text-center py-2 text-sm h-auto",
+                "text-zinc-800 font-normal border-zinc-200"
+              )}
+            >
+              {actionType}
+            </CustomButton>
+          ))}
+        </div>
+      ))}
+    </div>
   );
 };
 

@@ -1,69 +1,117 @@
 
 import React from 'react';
+import { CalendarClock, Check, X, Lightbulb } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Check, X, CalendarClock, Lightbulb } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { ActionSuggestion } from '@/services/noteAnalysisService';
-import { TaskType } from '@/types/actionHistory';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
-interface ActionSuggestionItemProps {
+interface ActionSuggestionProps {
   suggestion: ActionSuggestion;
   onAccept: (suggestion: ActionSuggestion) => void;
   onReject: (suggestion: ActionSuggestion) => void;
+  className?: string;
+  compact?: boolean;
 }
 
-const ActionSuggestionItem: React.FC<ActionSuggestionItemProps> = ({
+const ActionSuggestionCard: React.FC<ActionSuggestionProps> = ({
   suggestion,
   onAccept,
-  onReject
+  onReject,
+  className,
+  compact = false
 }) => {
-  return (
-    <Card className="mb-3 border-amber-100">
-      <CardContent className="p-3">
-        <div className="flex items-start gap-2">
-          <div className="mt-1 text-amber-500">
-            <Lightbulb className="h-5 w-5" />
+  if (compact) {
+    return (
+      <div className={`border rounded-md p-2 shadow-sm bg-amber-50/80 animate-[fade-in_0.4s_ease-out] ${className}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-700">
+              <Lightbulb className="h-3.5 w-3.5" />
+            </div>
+            <div>
+              <div className="text-xs font-medium text-amber-800">{suggestion.actionType}</div>
+              <div className="text-xs text-amber-700/80">
+                {format(suggestion.scheduledDate, 'EEEE d MMMM', { locale: fr })} à {format(suggestion.scheduledDate, 'HH:mm')}
+              </div>
+            </div>
           </div>
-          <div className="flex-1">
-            <h3 className="text-sm font-medium">
-              Action suggérée : <span className="font-semibold text-amber-700">{suggestion.actionType}</span>
-            </h3>
-            <p className="text-xs text-gray-500 mb-2 mt-1">
-              <span className="flex items-center gap-1">
-                <CalendarClock className="h-3.5 w-3.5 mr-1" />
-                {format(suggestion.scheduledDate, "EEEE d MMMM yyyy à HH:mm", { locale: fr })}
-              </span>
-            </p>
-            <p className="text-xs italic text-gray-500 my-1">
-              Créée à partir de : "{suggestion.matchedText}"
-            </p>
-            <div className="flex gap-2 mt-2">
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="h-7 rounded px-2 py-0 text-xs border-green-600 text-green-700 hover:bg-green-50"
-                onClick={() => onAccept(suggestion)}
-              >
-                <Check className="h-3.5 w-3.5 mr-1" />
-                Accepter
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="h-7 rounded px-2 py-0 text-xs border-gray-300 text-gray-600 hover:bg-gray-50"
-                onClick={() => onReject(suggestion)}
-              >
-                <X className="h-3.5 w-3.5 mr-1" />
-                Ignorer
-              </Button>
+          
+          <div className="flex items-center gap-1">
+            <Button 
+              size="sm"
+              variant="ghost" 
+              onClick={() => onAccept(suggestion)}
+              className="h-6 w-6 p-0 text-green-600"
+            >
+              <Check className="h-3.5 w-3.5" />
+            </Button>
+            <Button 
+              size="sm"
+              variant="ghost" 
+              onClick={() => onReject(suggestion)}
+              className="h-6 w-6 p-0 text-gray-500 hover:text-red-500"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className={`border rounded-md p-3 shadow-sm bg-loro-pearl/30 animate-[fade-in_0.4s_ease-out] ${className}`}>
+      <div className="flex items-center gap-2 mb-2">
+        <div className="h-7 w-7 rounded-full bg-amber-100 flex items-center justify-center text-amber-700">
+          <Lightbulb className="h-4 w-4" />
+        </div>
+        <div className="flex-1">
+          <h4 className="font-futura text-sm">Action suggérée</h4>
+          <div className="text-xs text-muted-foreground">
+            Basée sur les notes du client
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button 
+            size="sm"
+            variant="ghost" 
+            onClick={() => onReject(suggestion)}
+            className="h-7 w-7 p-0 text-gray-500 hover:text-red-500"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      
+      <div className="bg-white border rounded-md p-2 mb-2">
+        <div className="flex items-start gap-2">
+          <CalendarClock className="h-4 w-4 text-chocolate-dark mt-0.5" />
+          <div>
+            <div className="text-sm font-medium">{suggestion.actionType}</div>
+            <div className="text-xs text-muted-foreground">
+              {format(suggestion.scheduledDate, 'EEEE d MMMM yyyy', { locale: fr })} à {format(suggestion.scheduledDate, 'HH:mm')}
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      
+      <div className="text-xs bg-amber-50 border border-amber-100 rounded p-2 mb-3 text-amber-800">
+        {suggestion.matchedText}
+      </div>
+      
+      <Button 
+        onClick={() => onAccept(suggestion)} 
+        size="sm" 
+        variant="outline"
+        className="w-full border-green-500 hover:bg-green-50 text-green-600 flex items-center gap-1.5"
+      >
+        <Check className="h-3.5 w-3.5" />
+        <span>Ajouter cette action</span>
+      </Button>
+    </div>
   );
 };
 
-export default ActionSuggestionItem;
+export default ActionSuggestionCard;

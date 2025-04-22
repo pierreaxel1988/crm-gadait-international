@@ -1,14 +1,5 @@
-export type TaskType = 
-  | 'Call' 
-  | 'Visit' 
-  | 'Contract' 
-  | 'Sales Act' 
-  | 'Rental Contract' 
-  | 'Offer' 
-  | 'Follow Up' 
-  | 'Estimation' 
-  | 'Prospecting' 
-  | 'Admin';
+
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 export interface ActionHistory {
   id: string;

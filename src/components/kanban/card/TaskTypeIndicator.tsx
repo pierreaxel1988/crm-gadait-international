@@ -2,7 +2,7 @@
 import React from 'react';
 import { Phone, Calendar, FileText, ClipboardCheck, Building, Send, Clock, FileSearch, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { TaskType } from '@/types/actionHistory';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 interface TaskTypeIndicatorProps {
   taskType?: TaskType;
@@ -47,10 +47,10 @@ const TaskTypeIndicator = ({
             : 'text-[#D05A76] bg-[#EBD5CE] border-amber-200 hover:bg-amber-100',
           text: 'Appel',
           classes: 'text-[#D05A76]',
-          icon: <Phone className="h-4 w-4" />,
+          icon: <Phone className="h-4 w-4" />,  // Harmonisation : une seule icône, taille 16px (h-4, w-4)
           isClickable
         };
-      case 'Visit':
+      case 'Visites':
         return {
           color: 'text-purple-800 bg-purple-50 border-purple-200',
           text: 'Visite',
@@ -58,7 +58,7 @@ const TaskTypeIndicator = ({
           icon: <Calendar className="h-3 w-3" />,
           isClickable: false
         };
-      case 'Contract':
+      case 'Compromis':
         return {
           color: 'text-amber-800 bg-amber-50 border-amber-200',
           text: 'Compromis',
@@ -66,7 +66,7 @@ const TaskTypeIndicator = ({
           icon: <FileText className="h-3 w-3" />,
           isClickable: false
         };
-      case 'Sales Act':
+      case 'Acte de vente':
         return {
           color: 'text-red-800 bg-red-50 border-red-200',
           text: 'Acte',
@@ -74,7 +74,7 @@ const TaskTypeIndicator = ({
           icon: <ClipboardCheck className="h-3 w-3" />,
           isClickable: false
         };
-      case 'Rental Contract':
+      case 'Contrat de Location':
         return {
           color: 'text-blue-800 bg-blue-50 border-blue-200',
           text: 'Location',
@@ -82,7 +82,7 @@ const TaskTypeIndicator = ({
           icon: <Building className="h-3 w-3" />,
           isClickable: false
         };
-      case 'Offer':
+      case 'Propositions':
         return {
           color: 'text-indigo-800 bg-indigo-50 border-indigo-200',
           text: 'Proposition',
@@ -90,7 +90,7 @@ const TaskTypeIndicator = ({
           icon: <Send className="h-3 w-3" />,
           isClickable: false
         };
-      case 'Follow Up':
+      case 'Follow up':
         return {
           color: 'text-pink-800 bg-[#F3E9D6] border-pink-200',
           text: 'Follow-up',
@@ -106,7 +106,7 @@ const TaskTypeIndicator = ({
           icon: <FileSearch className="h-3 w-3" />,
           isClickable: false
         };
-      case 'Prospecting':
+      case 'Prospection':
         return {
           color: 'text-orange-800 bg-orange-50 border-orange-200',
           text: 'Prospection',
@@ -144,6 +144,7 @@ const TaskTypeIndicator = ({
       <span className={cn("text-xs font-medium whitespace-nowrap", classes)}>
         {text}
       </span>
+      {/* Suppression de la seconde icône Phone pour harmonisation */}
     </div>
   );
 };
