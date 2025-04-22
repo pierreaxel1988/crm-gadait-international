@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LeadDetailed, AssetType, Equipment } from '@/types/lead';
 import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
@@ -21,6 +21,10 @@ import {
 } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface OwnerPropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -33,6 +37,8 @@ const OwnerPropertyDetailsSection = ({
   handleInputChange,
   handleMultiSelectToggle
 }: OwnerPropertyDetailsSectionProps) => {
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+
   const handleBudgetChange = (type: 'min' | 'max', value: string) => {
     const fieldName = type === 'min' ? 'budgetMin' : 'budget';
     const syntheticEvent = {
@@ -132,6 +138,41 @@ const OwnerPropertyDetailsSection = ({
     { value: "Chambre de bonne", icon: Bed },
     { value: "Accessible aux handicapés", icon: Home },
   ];
+
+  const generateDescription = async () => {
+    try {
+      setIsGeneratingDescription(true);
+      
+      const { data, error } = await supabase.functions.invoke('generate-property-description', {
+        body: { propertyData: formData }
+      });
+
+      if (error) throw error;
+
+      const syntheticEvent = {
+        target: {
+          name: 'propertyDescription',
+          value: data.description
+        }
+      } as React.ChangeEvent<HTMLTextAreaElement>;
+      
+      handleInputChange(syntheticEvent);
+      
+      toast({
+        title: "Description générée avec succès",
+        description: "La description a été mise à jour avec la version générée par l'IA."
+      });
+    } catch (error) {
+      console.error('Error generating description:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de générer la description. Veuillez réessayer."
+      });
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -292,13 +333,25 @@ const OwnerPropertyDetailsSection = ({
 
       <div className="space-y-2">
         <Label className="text-sm font-medium">Description du bien</Label>
-        <Textarea
-          name="propertyDescription"
-          value={formData.propertyDescription || ''}
-          onChange={handleInputChange}
-          placeholder="Description détaillée du bien"
-          className="min-h-[100px]"
-        />
+        <div className="flex flex-col gap-2">
+          <Textarea
+            name="propertyDescription"
+            value={formData.propertyDescription || ''}
+            onChange={handleInputChange}
+            placeholder="Description détaillée du bien"
+            className="min-h-[200px]"
+          />
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="w-full" 
+            onClick={generateDescription}
+            disabled={isGeneratingDescription}
+          >
+            {isGeneratingDescription && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Générer une description avec l'IA
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-2">
