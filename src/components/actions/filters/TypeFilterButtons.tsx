@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tag } from 'lucide-react';
@@ -13,14 +12,14 @@ interface TypeFilterButtonsProps {
 const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTypeFilter }) => {
   const taskTypes: TaskType[] = [
     'Call', 
-    'Visites', 
-    'Compromis', 
-    'Acte de vente', 
-    'Contrat de Location', 
-    'Propositions', 
-    'Follow up', 
+    'Visit', 
+    'Contract', 
+    'Sales Act', 
+    'Rental Contract', 
+    'Offer', 
+    'Follow Up', 
     'Estimation', 
-    'Prospection', 
+    'Prospecting', 
     'Admin'
   ];
 
@@ -34,14 +33,14 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
   const getTextColorForTaskType = (type: TaskType): string => {
     switch (type) {
       case 'Call': return '#221F26'; // Noire premium
-      case 'Visites': return '#7E69AB'; // Violet chic
-      case 'Compromis': return '#D2B24C'; // Gold soft
-      case 'Acte de vente': return '#403E43'; // Gris foncé profond
-      case 'Contrat de Location': return '#9F9EA1'; // Gris argenté
-      case 'Propositions': return '#6E59A5';
-      case 'Follow up': return '#AAADB0'; 
+      case 'Visit': return '#7E69AB'; // Violet chic
+      case 'Contract': return '#D2B24C'; // Gold soft
+      case 'Sales Act': return '#403E43'; // Gris foncé profond
+      case 'Rental Contract': return '#9F9EA1'; // Gris argenté
+      case 'Offer': return '#6E59A5';
+      case 'Follow Up': return '#AAADB0'; 
       case 'Estimation': return '#A68C6D'; // Crème café
-      case 'Prospection': return '#8E9196';
+      case 'Prospecting': return '#8E9196';
       case 'Admin': return '#8E9196';
       default: return '#403E43';
     }

@@ -608,6 +608,7 @@ export type Database = {
         Row: {
           created_at: string | null
           created_by: string | null
+          criteria_label: string | null
           email_opened_at: string | null
           email_sent_at: string | null
           id: string
@@ -616,12 +617,14 @@ export type Database = {
           link_visited_at: string | null
           name: string
           properties: string[]
+          property_criteria: Json | null
           status: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           created_by?: string | null
+          criteria_label?: string | null
           email_opened_at?: string | null
           email_sent_at?: string | null
           id?: string
@@ -630,12 +633,14 @@ export type Database = {
           link_visited_at?: string | null
           name: string
           properties: string[]
+          property_criteria?: Json | null
           status?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           created_by?: string | null
+          criteria_label?: string | null
           email_opened_at?: string | null
           email_sent_at?: string | null
           id?: string
@@ -644,6 +649,7 @@ export type Database = {
           link_visited_at?: string | null
           name?: string
           properties?: string[]
+          property_criteria?: Json | null
           status?: string | null
           updated_at?: string | null
         }

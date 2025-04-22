@@ -1,5 +1,14 @@
-
-export type TaskType = 'Call' | 'Email' | 'Visit' | 'Meeting' | 'Note' | 'Offer' | 'Document' | 'Other';
+export type TaskType = 
+  | 'Call' 
+  | 'Visit' 
+  | 'Contract' 
+  | 'Sales Act' 
+  | 'Rental Contract' 
+  | 'Offer' 
+  | 'Follow Up' 
+  | 'Estimation' 
+  | 'Prospecting' 
+  | 'Admin';
 
 export interface ActionHistory {
   id: string;
