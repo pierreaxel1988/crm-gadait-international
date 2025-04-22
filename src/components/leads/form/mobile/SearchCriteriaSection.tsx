@@ -447,14 +447,12 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                 <MultiSelectButtons 
                   options={MAURITIUS_REGIONS} 
                   selectedValues={lead.regions || []} 
-                  onToggle={region => {
-                    const updatedRegions = lead.regions ? [...lead.regions] : [];
-                    if (updatedRegions.includes(region as MauritiusRegion)) {
-                      handleInputChange('regions', updatedRegions.filter(r => r !== region));
-                    } else {
-                      handleInputChange('regions', [...updatedRegions, region as MauritiusRegion]);
-                    }
-                  }} 
+                  onChange={(region) => onDataChange({
+                    regions: lead.regions?.includes(region as MauritiusRegion) 
+                      ? lead.regions.filter(r => r !== region) 
+                      : [...(lead.regions || []), region as MauritiusRegion]
+                  })}
+                  className="w-full"
                 />
               </div>
             )}
@@ -514,7 +512,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
             
             <div className="space-y-2">
               <Label className="text-sm">Vue souhaitée</Label>
-              <MultiSelectButtons options={VIEW_TYPES} selectedValues={lead.views || []} onToggle={value => {
+              <MultiSelectButtons options={VIEW_TYPES} selectedValues={lead.views || []} onChange={value => {
                 const updatedViews = lead.views ? [...lead.views] : [];
                 if (updatedViews.includes(value as ViewType)) {
                   handleInputChange('views', updatedViews.filter(v => v !== value));
@@ -596,7 +594,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                   <MultiSelectButtons 
                     options={["Nord", "Sud", "Est", "Ouest"]} 
                     selectedValues={lead.orientation || []} 
-                    onToggle={value => {
+                    onChange={value => {
                       const updatedOrientation = lead.orientation ? [...lead.orientation] : [];
                       if (updatedOrientation.includes(value)) {
                         handleInputChange('orientation', updatedOrientation.filter(o => o !== value));
