@@ -176,6 +176,29 @@ const OwnerPropertyDetailsSection = ({
 
   return (
     <div className="space-y-4">
+      <div className="space-y-2 pt-2 border-2 border-chocolate-dark/20 rounded-md p-4 bg-loro-pearl/10">
+        <Label className="text-sm font-medium text-chocolate-dark">Description du bien</Label>
+        <div className="flex flex-col gap-2">
+          <Textarea
+            name="propertyDescription"
+            value={formData.propertyDescription || ''}
+            onChange={handleInputChange}
+            placeholder="Description détaillée du bien"
+            className="min-h-[200px]"
+          />
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="w-full bg-chocolate-light/10 hover:bg-chocolate-light/20 border-chocolate-dark/30" 
+            onClick={generateDescription}
+            disabled={isGeneratingDescription}
+          >
+            {isGeneratingDescription && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Générer une description avec l'IA
+          </Button>
+        </div>
+      </div>
+
       <FormInput
         label="Surface habitable (m²)"
         name="livingArea"
@@ -330,29 +353,6 @@ const OwnerPropertyDetailsSection = ({
         onChange={handleInputChange}
         placeholder="Montant des taxes annuelles"
       />
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Description du bien</Label>
-        <div className="flex flex-col gap-2">
-          <Textarea
-            name="propertyDescription"
-            value={formData.propertyDescription || ''}
-            onChange={handleInputChange}
-            placeholder="Description détaillée du bien"
-            className="min-h-[200px]"
-          />
-          <Button 
-            type="button" 
-            variant="outline" 
-            className="w-full" 
-            onClick={generateDescription}
-            disabled={isGeneratingDescription}
-          >
-            {isGeneratingDescription && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Générer une description avec l'IA
-          </Button>
-        </div>
-      </div>
 
       <div className="space-y-2">
         <Label className="text-sm font-medium">Points forts du bien</Label>
