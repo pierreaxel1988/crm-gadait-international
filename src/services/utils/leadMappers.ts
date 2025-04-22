@@ -1,6 +1,4 @@
-import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
-import { ActionHistory } from '@/types/actionHistory';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { LeadDetailed } from '@/types/lead';
 
 export const mapToLeadDetailed = (lead: any): LeadDetailed => {
   // Parse and validate action history
@@ -104,10 +102,10 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     equipment: lead.equipment || [],
     
     // New commission and furniture fields
-    commissionFee: lead.commission_fee,
-    isFurnished: lead.is_furnished,
-    furnitureIncludedInPrice: lead.furniture_included_in_price,
-    furniturePrice: lead.furniture_price
+    commissionFee: lead.honoraires_agence,
+    isFurnished: lead.est_meuble,
+    furnitureIncludedInPrice: lead.mobilier_inclus_prix,
+    furniturePrice: lead.prix_mobilier
   };
 };
 
@@ -199,10 +197,10 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     equipment: lead.equipment,
     
     // New commission and furniture fields
-    commission_fee: lead.commissionFee,
-    is_furnished: lead.isFurnished,
-    furniture_included_in_price: lead.furnitureIncludedInPrice,
-    furniture_price: lead.furniturePrice
+    honoraires_agence: lead.commissionFee,
+    est_meuble: lead.isFurnished,
+    mobilier_inclus_prix: lead.furnitureIncludedInPrice,
+    prix_mobilier: lead.furniturePrice
   };
 };
 
