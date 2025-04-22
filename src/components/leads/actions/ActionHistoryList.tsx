@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format, isPast, isToday } from 'date-fns';
 import { Check, AlertTriangle, Phone, ExternalLink } from 'lucide-react';
@@ -26,7 +27,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
           <div className="flex justify-between items-start">
             <div>
               <h4 className="text-sm font-medium flex items-center gap-2">
-                {getActionTypeIcon(action.actionType)}
+                {getActionTypeIcon(action.actionType as TaskType)}
                 {action.notes && (
                   <span className="text-xs text-gray-500 italic">
                     {action.notes}
@@ -53,7 +54,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
             </div>
             
             {!action.completedDate && (
-              <Button variant="outline" size="xs" onClick={() => onMarkComplete(action.id)}>
+              <Button variant="outline" size="sm" onClick={() => onMarkComplete(action.id)}>
                 <Check className="h-3 w-3 mr-2" />
                 Terminer
               </Button>

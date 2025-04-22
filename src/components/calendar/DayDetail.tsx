@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -31,6 +32,11 @@ const DayDetail = ({
     ? filteredEvents.filter(event => format(event.date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) 
     : [];
   
+  // Convert the markEventComplete function to the format expected by CalendarEventsList
+  const handleMarkComplete = async (id: string) => {
+    await markEventComplete(id);
+  };
+  
   return (
     <Card className="bg-white shadow-luxury h-full">
       <CardHeader className="pb-2">
@@ -53,7 +59,7 @@ const DayDetail = ({
           events={filteredEvents} 
           selectedDate={selectedDate} 
           openAddEventDialog={() => setIsAddEventOpen(true)} 
-          onMarkComplete={markEventComplete}
+          onMarkComplete={handleMarkComplete}
         />
       </CardContent>
     </Card>

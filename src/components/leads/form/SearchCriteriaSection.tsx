@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, MauritiusRegion } from '@/types/lead';
 import FormSection from './FormSection';
@@ -47,11 +46,9 @@ const SearchCriteriaSection = ({
   countries,
   handleCountryChange
 }: SearchCriteriaSectionProps) => {
-  // Handle nationality auto-completion when country changes
   const handleCountryChangeWithNationality = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     handleCountryChange(e);
     
-    // If nationality is empty, try to derive it from country
     if (!formData.nationality) {
       const selectedCountry = e.target.value;
       const nationality = deriveNationalityFromCountry(selectedCountry);
@@ -100,14 +97,8 @@ const SearchCriteriaSection = ({
                   <MultiSelectButtons 
                     options={MAURITIUS_REGIONS} 
                     selectedValues={formData.regions || []} 
-                    onToggle={region => {
-                      const updatedRegions = formData.regions ? [...formData.regions] : [];
-                      if (updatedRegions.includes(region as MauritiusRegion)) {
-                        handleMultiSelectToggle('regions', region as MauritiusRegion);
-                      } else {
-                        handleMultiSelectToggle('regions', region as MauritiusRegion);
-                      }
-                    }} 
+                    onChange={(region) => handleMultiSelectToggle('regions', region as MauritiusRegion)}
+                    className="w-full"
                   />
                 </div>
               )}

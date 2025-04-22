@@ -7,7 +7,7 @@ interface MultiSelectButtonsProps {
   selectedValues: string[];
   onChange: (value: string) => void;
   specialOption?: string;
-  className?: string; // Added className prop
+  className?: string;
 }
 
 const MultiSelectButtons: React.FC<MultiSelectButtonsProps> = ({
