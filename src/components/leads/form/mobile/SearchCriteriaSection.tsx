@@ -1,26 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, MauritiusRegion } from '@/types/lead';
+import { supabase } from '@/integrations/supabase/client';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+import MultiSelectButtons from '../MultiSelectButtons';
 import FormSection from './FormSection';
 import PropertyDetailsSection from './sections/PropertyDetailsSection';
 import PurchaseDetailsSection from './sections/PurchaseDetailsSection';
 import BuyerInfoSection from './sections/BuyerInfoSection';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
-import { Label } from '@/components/ui/label';
-import MultiSelectButtons from '../../leads/form/MultiSelectButtons';
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Textarea } from "@/components/ui/textarea";
 
 interface SearchCriteriaSectionProps {
-  formData: LeadDetailed;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  handleNumberChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleMultiSelectToggle: <T extends string>(name: keyof LeadDetailed, value: T) => void;
+  lead: LeadDetailed;
+  onDataChange: (data: Partial<LeadDetailed>) => void;
   propertyTypes: PropertyType[];
   viewTypes: ViewType[];
   amenities: Amenity[];
@@ -30,16 +28,13 @@ interface SearchCriteriaSectionProps {
   onExtractUrl?: (url: string) => void;
   extractLoading?: boolean;
   countries: Country[];
-  handleCountryChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
 }
 
 const MAURITIUS_REGIONS: MauritiusRegion[] = ['North', 'South', 'West', 'East'];
 
 const SearchCriteriaSection = ({
-  formData,
-  handleInputChange,
-  handleNumberChange,
-  handleMultiSelectToggle,
+  lead,
+  onDataChange,
   propertyTypes,
   viewTypes,
   amenities,
@@ -49,48 +44,22 @@ const SearchCriteriaSection = ({
   onExtractUrl,
   extractLoading = false,
   countries,
-  handleCountryChange
 }: SearchCriteriaSectionProps) => {
-  const handleCountryChangeWithNationality = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    handleCountryChange(e);
-    
-    if (!formData.nationality) {
-      const selectedCountry = e.target.value;
-      const nationality = deriveNationalityFromCountry(selectedCountry);
-      
-      if (nationality) {
-        const nationalityEvent = {
-          target: {
-            name: 'nationality',
-            value: nationality
-          }
-        } as React.ChangeEvent<HTMLInputElement>;
-        
-        handleInputChange(nationalityEvent);
-      }
-    }
-  };
-  
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
-  const generatePropertyDescription = async () => {
+  const generateDescription = async () => {
     try {
       setIsGeneratingDescription(true);
       
       const { data, error } = await supabase.functions.invoke('generate-property-description', {
-        body: { propertyData: formData }
+        body: { propertyData: lead }
       });
 
       if (error) throw error;
 
-      const syntheticEvent = {
-        target: {
-          name: 'propertyDescription',
-          value: data.description
-        }
-      } as React.ChangeEvent<HTMLInputElement>;
-      
-      handleInputChange(syntheticEvent);
+      onDataChange({ 
+        propertyDescription: data.description 
+      });
       
       toast({
         title: "Description générée avec succès",
@@ -108,6 +77,16 @@ const SearchCriteriaSection = ({
     }
   };
 
+  const handleCountryChangeWithNationality = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const selectedCountry = e.target.value;
+    const nationality = deriveNationalityFromCountry(selectedCountry);
+    
+    if (nationality) {
+      onDataChange({ nationality: nationality });
+    }
+    onDataChange({ country: selectedCountry });
+  };
+
   return (
     <FormSection title="Critères de Recherche">
       <ScrollArea className="h-[calc(100vh-350px)] pr-4">
@@ -121,10 +100,8 @@ const SearchCriteriaSection = ({
             
             <TabsContent value="property" className="space-y-6">
               <PropertyDetailsSection
-                formData={formData}
-                handleInputChange={handleInputChange}
-                handleNumberChange={handleNumberChange}
-                handleMultiSelectToggle={handleMultiSelectToggle}
+                lead={lead}
+                onDataChange={onDataChange}
                 propertyTypes={propertyTypes}
                 viewTypes={viewTypes}
                 amenities={amenities}
@@ -133,24 +110,25 @@ const SearchCriteriaSection = ({
                 countries={countries}
                 handleCountryChange={handleCountryChangeWithNationality}
               />
-              {formData.country === 'Mauritius' && (
+              {lead.country === 'Mauritius' && (
                 <div className="space-y-2">
                   <Label className="text-sm">Régions souhaitées</Label>
                   <MultiSelectButtons 
                     options={MAURITIUS_REGIONS} 
-                    selectedValues={formData.regions || []} 
-                    onChange={(region) => handleMultiSelectToggle('regions', region as MauritiusRegion)}
+                    selectedValues={lead.regions || []} 
+                    onChange={(region) => onDataChange({ regions: lead.regions?.includes(region as MauritiusRegion) ? lead.regions.filter(r => r !== region) : [...(lead.regions || []), region as MauritiusRegion] })}
                     className="w-full"
                   />
                 </div>
               )}
+
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Description du bien</Label>
                 <div className="space-y-2">
                   <Textarea
                     name="propertyDescription"
-                    value={formData.propertyDescription || ''}
-                    onChange={handleInputChange}
+                    value={lead.propertyDescription || ''}
+                    onChange={(e) => onDataChange({ propertyDescription: e.target.value })}
                     placeholder="Description détaillée du bien"
                     className="min-h-[150px] w-full font-futura"
                   />
@@ -158,7 +136,7 @@ const SearchCriteriaSection = ({
                     type="button" 
                     variant="outline" 
                     className="w-full bg-chocolate-light/10 hover:bg-chocolate-light/20 border-chocolate-dark/30" 
-                    onClick={generatePropertyDescription}
+                    onClick={generateDescription}
                     disabled={isGeneratingDescription}
                   >
                     {isGeneratingDescription && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -170,9 +148,8 @@ const SearchCriteriaSection = ({
             
             <TabsContent value="purchase" className="space-y-6 py-2">
               <PurchaseDetailsSection
-                formData={formData}
-                handleInputChange={handleInputChange}
-                handleMultiSelectToggle={handleMultiSelectToggle}
+                lead={lead}
+                onDataChange={onDataChange}
                 purchaseTimeframes={purchaseTimeframes}
                 financingMethods={financingMethods}
                 propertyUses={propertyUses}
@@ -181,8 +158,8 @@ const SearchCriteriaSection = ({
             
             <TabsContent value="buyer" className="space-y-6 py-2">
               <BuyerInfoSection
-                formData={formData}
-                handleInputChange={handleInputChange}
+                lead={lead}
+                onDataChange={onDataChange}
               />
             </TabsContent>
           </Tabs>
