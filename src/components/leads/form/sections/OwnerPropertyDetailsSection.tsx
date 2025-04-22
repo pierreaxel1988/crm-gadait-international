@@ -1,11 +1,27 @@
 import React from 'react';
-import { LeadDetailed } from '@/types/lead';
+import { LeadDetailed, AssetType } from '@/types/lead';
 import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
 import { Label } from '@/components/ui/label';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import CustomTagInput from '../CustomTagInput';
 import { Textarea } from '@/components/ui/textarea';
+import { 
+  SeaView, 
+  PanoramaView,
+  Waterfront,
+  HuntingEstate,
+  Stable,
+  ArchitectsProperty,
+  ContemporaryStyle,
+  ListedBuilding,
+  TennisCourt,
+  Slopeside,
+  NearMountain,
+  NearAirport,
+  NearTrainStation,
+  NearGolf
+} from 'lucide-react';
 
 interface OwnerPropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -18,7 +34,6 @@ const OwnerPropertyDetailsSection = ({
   handleInputChange,
   handleMultiSelectToggle
 }: OwnerPropertyDetailsSectionProps) => {
-  // Handle budget changes
   const handleBudgetChange = (type: 'min' | 'max', value: string) => {
     const fieldName = type === 'min' ? 'budgetMin' : 'budget';
     const syntheticEvent = {
@@ -30,7 +45,6 @@ const OwnerPropertyDetailsSection = ({
     handleInputChange(syntheticEvent);
   };
 
-  // Handle currency changes
   const handleCurrencyChange = (value: string) => {
     const syntheticEvent = {
       target: {
@@ -41,7 +55,6 @@ const OwnerPropertyDetailsSection = ({
     handleInputChange(syntheticEvent);
   };
 
-  // Handle array fields changes
   const handleArrayFieldChange = (fieldName: keyof LeadDetailed, newValues: string[]) => {
     const syntheticEvent = {
       target: {
@@ -72,6 +85,24 @@ const OwnerPropertyDetailsSection = ({
     } as unknown as React.ChangeEvent<HTMLInputElement>;
     handleInputChange(syntheticEvent);
   };
+
+  const ASSETS: { value: AssetType; icon: React.ComponentType; }[] = [
+    { value: "Vue mer", icon: SeaView },
+    { value: "Vue panoramique", icon: PanoramaView },
+    { value: "Bord de mer", icon: Waterfront },
+    { value: "Front de mer", icon: Waterfront },
+    { value: "Domaine de chasse", icon: HuntingEstate },
+    { value: "Écurie", icon: Stable },
+    { value: "Bien d'architecte", icon: ArchitectsProperty },
+    { value: "Style contemporain", icon: ContemporaryStyle },
+    { value: "Monument classé", icon: ListedBuilding },
+    { value: "Court de tennis", icon: TennisCourt },
+    { value: "Pied des pistes", icon: Slopeside },
+    { value: "Proche montagne", icon: NearMountain },
+    { value: "Proche aéroport", icon: NearAirport },
+    { value: "Proche gare", icon: NearTrainStation },
+    { value: "Proche golf", icon: NearGolf },
+  ];
 
   return (
     <div className="space-y-4">
@@ -225,6 +256,27 @@ const OwnerPropertyDetailsSection = ({
           placeholder="Description des travaux nécessaires"
           className="min-h-[100px]"
         />
+      </div>
+
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium mb-3">Les atouts</h4>
+        <div className="grid grid-cols-2 gap-2">
+          {ASSETS.map(({ value, icon: Icon }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => handleMultiSelectToggle('assets', value)}
+              className={`flex items-center gap-2 p-2 rounded-md text-sm transition-colors ${
+                formData.assets?.includes(value)
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {value}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

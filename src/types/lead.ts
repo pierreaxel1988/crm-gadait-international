@@ -72,6 +72,23 @@ export type Currency =
 
 export type MauritiusRegion = 'North' | 'South' | 'West' | 'East';
 
+export type AssetType = 
+  | "Vue mer"
+  | "Vue panoramique"
+  | "Bord de mer"
+  | "Front de mer"
+  | "Domaine de chasse"
+  | "Écurie"
+  | "Bien d'architecte"
+  | "Style contemporain"
+  | "Monument classé"
+  | "Court de tennis"
+  | "Pied des pistes"
+  | "Proche montagne"
+  | "Proche aéroport"
+  | "Proche gare"
+  | "Proche golf";
+
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
@@ -140,4 +157,7 @@ export interface LeadDetailed {
   orientation?: string[];
   energyClass?: string;
   yearlyTaxes?: string;
+  
+  // Add the assets field
+  assets?: AssetType[];
 }
