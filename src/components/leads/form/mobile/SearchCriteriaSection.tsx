@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency, AssetType, Equipment, MauritiusRegion } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -342,16 +341,16 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                 
                 <div className="space-y-2">
                   <Label className="text-sm">Meublé</Label>
-                  <RadioGroup value={lead.isFurnished ? 'true' : 'false'} onValueChange={value => handleInputChange('isFurnished', value === 'true')} className="flex flex-col space-y-2">
+                  <RadioGroup value={lead.isFurnished ? 'true' : 'false'} onValueChange={value => handleInputChange('isFurnished', value === 'true')}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="true" id="furnished-yes" />
-                      <Label htmlFor="furnished-yes" className="font-futura">
+                      <Label htmlFor="furnished-yes">
                         Oui
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="false" id="furnished-no" />
-                      <Label htmlFor="furnished-no" className="font-futura">
+                      <Label htmlFor="furnished-no">
                         Non
                       </Label>
                     </div>
@@ -362,16 +361,16 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                   <>
                     <div className="space-y-2">
                       <Label className="text-sm">Prix inclus le mobilier</Label>
-                      <RadioGroup value={lead.furnitureIncludedInPrice ? 'true' : 'false'} onValueChange={value => handleInputChange('furnitureIncludedInPrice', value === 'true')} className="flex flex-col space-y-2">
+                      <RadioGroup value={lead.furnitureIncludedInPrice ? 'true' : 'false'} onValueChange={value => handleInputChange('furnitureIncludedInPrice', value === 'true')}>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="true" id="furniture-included-yes" />
-                          <Label htmlFor="furniture-included-yes" className="font-futura">
+                          <Label htmlFor="furniture-included-yes">
                             Oui
                           </Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="false" id="furniture-included-no" />
-                          <Label htmlFor="furniture-included-no" className="font-futura">
+                          <Label htmlFor="furniture-included-no">
                             Non
                           </Label>
                         </div>
@@ -404,7 +403,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   {CURRENCIES.map(currency => (
-                    <SelectItem key={currency} value={currency} className="font-futura">
+                    <SelectItem key={currency} value={currency}>
                       {currency}
                     </SelectItem>
                   ))}
