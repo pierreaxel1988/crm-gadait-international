@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, MauritiusRegion } from '@/types/lead';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,10 +11,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import MultiSelectButtons from '../MultiSelectButtons';
-import FormSection from './FormSection';
-import PropertyDetailsSection from './sections/PropertyDetailsSection';
-import PurchaseDetailsSection from './sections/PurchaseDetailsSection';
-import BuyerInfoSection from './sections/BuyerInfoSection';
+import FormSection from '../FormSection';
+import PropertyDetailsSection from '../sections/PropertyDetailsSection';
+import PurchaseDetailsSection from '../sections/PurchaseDetailsSection';
+import BuyerInfoSection from '../sections/BuyerInfoSection';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 
 interface SearchCriteriaSectionProps {
