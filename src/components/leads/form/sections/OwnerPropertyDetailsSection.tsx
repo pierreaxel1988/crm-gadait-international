@@ -1,5 +1,5 @@
 import React from 'react';
-import { LeadDetailed, AssetType } from '@/types/lead';
+import { LeadDetailed, AssetType, Equipment } from '@/types/lead';
 import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
 import { Label } from '@/components/ui/label';
@@ -7,20 +7,22 @@ import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import CustomTagInput from '../CustomTagInput';
 import { Textarea } from '@/components/ui/textarea';
 import { 
-  SeaView, 
-  PanoramaView,
-  Waterfront,
-  HuntingEstate,
-  Stable,
-  ArchitectsProperty,
-  ContemporaryStyle,
-  ListedBuilding,
-  TennisCourt,
-  Slopeside,
-  NearMountain,
-  NearAirport,
-  NearTrainStation,
-  NearGolf
+  Pool,
+  Elevator,
+  ParkingCircle,
+  Wind,
+  Home,
+  Building2,
+  Building,
+  Spa,
+  Timer,
+  TreePine,
+  Armchair,
+  Flame,
+  House,
+  Warehouse,
+  Bed,
+  Accessibility
 } from 'lucide-react';
 
 interface OwnerPropertyDetailsSectionProps {
@@ -102,6 +104,26 @@ const OwnerPropertyDetailsSection = ({
     { value: "Proche aéroport", icon: NearAirport },
     { value: "Proche gare", icon: NearTrainStation },
     { value: "Proche golf", icon: NearGolf },
+  ];
+
+  const EQUIPMENT: { value: Equipment; icon: React.ComponentType; label: string; }[] = [
+    { value: "Piscine", icon: Pool, label: "Piscine" },
+    { value: "Ascenseur", icon: Elevator, label: "Ascenseur" },
+    { value: "Garage & Parking", icon: ParkingCircle, label: "Garage & Parking" },
+    { value: "Climatisation", icon: Wind, label: "Climatisation" },
+    { value: "Salle de réception", icon: Building, label: "Salle de réception" },
+    { value: "Dépendances", icon: Building2, label: "Dépendances" },
+    { value: "Loge gardien", icon: Home, label: "Loge gardien" },
+    { value: "Spa", icon: Spa, label: "Spa" },
+    { value: "Viager", icon: Timer, label: "Viager" },
+    { value: "Terrasse", icon: Home, label: "Terrasse" },
+    { value: "Jardin", icon: TreePine, label: "Jardin" },
+    { value: "Meublé", icon: Armchair, label: "Meublé" },
+    { value: "Cheminée", icon: Flame, label: "Cheminée" },
+    { value: "Maison d'amis", icon: House, label: "Maison d'amis" },
+    { value: "Bâtiments agricoles", icon: Warehouse, label: "Bâtiments agricoles" },
+    { value: "Chambre de bonne", icon: Bed, label: "Chambre de bonne" },
+    { value: "Accessible aux handicapés", icon: Accessibility, label: "Accessible aux handicapés" }
   ];
 
   return (
@@ -223,11 +245,23 @@ const OwnerPropertyDetailsSection = ({
 
       <div className="space-y-2">
         <Label className="text-sm font-medium">Équipements</Label>
-        <CustomTagInput
-          tags={formData.amenities || []}
-          onChange={(newTags) => handleArrayFieldChange('amenities', newTags)}
-          placeholder="Ajouter un équipement..."
-        />
+        <div className="grid grid-cols-2 gap-2">
+          {EQUIPMENT.map(({ value, icon: Icon, label }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => handleMultiSelectToggle('equipment', value)}
+              className={`flex items-center gap-2 p-2 rounded-md text-sm transition-colors ${
+                formData.equipment?.includes(value)
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <FormInput

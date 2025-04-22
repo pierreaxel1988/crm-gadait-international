@@ -89,6 +89,25 @@ export type AssetType =
   | "Proche gare"
   | "Proche golf";
 
+export type Equipment = 
+  | "Piscine"
+  | "Ascenseur"
+  | "Garage & Parking"
+  | "Climatisation"
+  | "Salle de réception"
+  | "Dépendances"
+  | "Loge gardien"
+  | "Spa"
+  | "Viager"
+  | "Terrasse"
+  | "Jardin"
+  | "Meublé"
+  | "Cheminée"
+  | "Maison d'amis"
+  | "Bâtiments agricoles"
+  | "Chambre de bonne"
+  | "Accessible aux handicapés";
+
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
@@ -160,4 +179,7 @@ export interface LeadDetailed {
   
   // Add the assets field
   assets?: AssetType[];
+  
+  // Add the equipment field
+  equipment?: Equipment[];
 }
