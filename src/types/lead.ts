@@ -1,4 +1,3 @@
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -125,5 +124,14 @@ export interface LeadDetailed {
   actionHistory?: any[];
   livingArea?: string;
   external_id?: string;
+  
+  // Property details for owners
+  landArea?: string;
+  constructionYear?: string;
+  renovationNeeded?: string;
+  propertyDescription?: string;
+  keyFeatures?: string[];
+  amenities?: string[];
+  condoFees?: string;
+  facilities?: string[];
 }
-

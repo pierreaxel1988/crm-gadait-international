@@ -5,6 +5,8 @@ import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
 import { Label } from '@/components/ui/label';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
+import CustomTagInput from '../CustomTagInput';
+import { Textarea } from '@/components/ui/textarea';
 
 interface OwnerPropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -37,6 +39,17 @@ const OwnerPropertyDetailsSection = ({
         value
       }
     } as React.ChangeEvent<HTMLInputElement>;
+    handleInputChange(syntheticEvent);
+  };
+
+  // Handle array fields changes
+  const handleArrayFieldChange = (fieldName: keyof LeadDetailed, newValues: string[]) => {
+    const syntheticEvent = {
+      target: {
+        name: fieldName,
+        value: newValues
+      }
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
     handleInputChange(syntheticEvent);
   };
 
@@ -81,14 +94,7 @@ const OwnerPropertyDetailsSection = ({
               ? currentBedrooms.filter(b => b !== numValue)
               : [...currentBedrooms, numValue];
             
-            const syntheticEvent = {
-              target: {
-                name: 'bedrooms',
-                value: newBedrooms.length ? newBedrooms : undefined
-              }
-            } as React.ChangeEvent<HTMLInputElement>;
-            
-            handleInputChange(syntheticEvent);
+            handleArrayFieldChange('bedrooms', newBedrooms);
           }}
           specialOption="8+"
         />
@@ -114,14 +120,62 @@ const OwnerPropertyDetailsSection = ({
         placeholder="Année de construction"
       />
 
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Description du bien</Label>
+        <Textarea
+          name="propertyDescription"
+          value={formData.propertyDescription || ''}
+          onChange={handleInputChange}
+          placeholder="Description détaillée du bien"
+          className="min-h-[100px]"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Points forts du bien</Label>
+        <CustomTagInput
+          tags={formData.keyFeatures || []}
+          onChange={(newTags) => handleArrayFieldChange('keyFeatures', newTags)}
+          placeholder="Ajouter un point fort..."
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Équipements</Label>
+        <CustomTagInput
+          tags={formData.amenities || []}
+          onChange={(newTags) => handleArrayFieldChange('amenities', newTags)}
+          placeholder="Ajouter un équipement..."
+        />
+      </div>
+
       <FormInput
-        label="Travaux nécessaires"
-        name="renovationNeeded"
-        type="textarea"
-        value={formData.renovationNeeded || ''}
+        label="Frais de syndic"
+        name="condoFees"
+        value={formData.condoFees || ''}
         onChange={handleInputChange}
-        placeholder="Description des travaux nécessaires"
+        placeholder="Montant des frais de syndic"
       />
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Facilités</Label>
+        <CustomTagInput
+          tags={formData.facilities || []}
+          onChange={(newTags) => handleArrayFieldChange('facilities', newTags)}
+          placeholder="Ajouter une facilité..."
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Travaux nécessaires</Label>
+        <Textarea
+          name="renovationNeeded"
+          value={formData.renovationNeeded || ''}
+          onChange={handleInputChange}
+          placeholder="Description des travaux nécessaires"
+          className="min-h-[100px]"
+        />
+      </div>
     </div>
   );
 };
