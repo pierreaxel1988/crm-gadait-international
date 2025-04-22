@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Plus, CalendarIcon, Clock, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { TaskType } from '@/types/actionHistory';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';

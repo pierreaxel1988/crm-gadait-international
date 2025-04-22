@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { TaskType } from '@/types/actionHistory';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { addActionToLead } from '@/services/leadActions';

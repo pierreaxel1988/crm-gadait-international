@@ -2,7 +2,7 @@
 import React from 'react';
 import { Phone, Calendar, FileText, ClipboardCheck, Building, Send, Clock, FileSearch, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { TaskType } from '@/types/actionHistory';
 
 interface TaskTypeIndicatorProps {
   taskType?: TaskType;

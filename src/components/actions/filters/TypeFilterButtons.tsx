@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tag } from 'lucide-react';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { TaskType } from '@/types/actionHistory';
 import { eventCategories } from '@/contexts/CalendarContext';
 
 interface TypeFilterButtonsProps {

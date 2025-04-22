@@ -2,7 +2,7 @@
 import React from 'react';
 import { Plus, History, Calendar, Clock } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { TaskType } from '@/types/actionHistory';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import CurrentAction from './CurrentAction';
