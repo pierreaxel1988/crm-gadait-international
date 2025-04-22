@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { LeadDetailed, PipelineType } from '@/types/lead';
-import { LeadStatus } from '@/types/lead';
-import { LeadTag } from '@/types/lead';
+import { LeadDetailed, LeadTag, PipelineType } from '@/types/lead';
+import { LeadStatus } from '@/components/common/StatusBadge';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Activity, Trash2, Phone, Home } from 'lucide-react';
@@ -246,7 +245,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
           <MultiSelectButtons
             options={LEAD_TAGS}
             selectedValues={lead.tags || []}
-            onChange={handleTagToggle}
+            onToggle={handleTagToggle}
           />
         </div>
         

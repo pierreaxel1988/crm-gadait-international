@@ -2,53 +2,37 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-export interface MultiSelectButtonsProps {
+interface MultiSelectButtonsProps {
   options: string[];
   selectedValues: string[];
-  onChange?: (value: string) => void;
-  onToggle?: (value: string) => void;
-  className?: string;
+  onChange: (value: string) => void;
   specialOption?: string;
+  className?: string;
 }
 
-const MultiSelectButtons = ({
+const MultiSelectButtons: React.FC<MultiSelectButtonsProps> = ({
   options,
   selectedValues,
   onChange,
-  onToggle,
-  className,
-  specialOption
-}: MultiSelectButtonsProps) => {
-  const handleToggle = (value: string) => {
-    if (onChange) {
-      onChange(value);
-    } else if (onToggle) {
-      onToggle(value);
-    }
-  };
-
+  specialOption,
+  className
+}) => {
   return (
     <div className={cn("flex flex-wrap gap-2", className)}>
-      {options.map((option) => {
-        const isSelected = selectedValues.includes(option);
-        
-        return (
-          <button
-            key={option}
-            type="button"
-            onClick={() => handleToggle(option)}
-            className={cn(
-              "rounded-full px-3 py-1 text-sm font-medium transition-colors",
-              isSelected
-                ? "bg-chocolate-dark text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200",
-              specialOption === option ? "border border-green-500" : ""
-            )}
-          >
-            {option}
-          </button>
-        );
-      })}
+      {options.map(option => (
+        <button
+          key={option}
+          type="button"
+          onClick={() => onChange(option)}
+          className={`py-1 px-3 text-sm rounded-md transition-colors flex items-center ${
+            selectedValues.includes(option)
+              ? 'bg-primary text-white'
+              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+          } ${option === specialOption ? 'font-bold' : ''}`}
+        >
+          {option}
+        </button>
+      ))}
     </div>
   );
 };

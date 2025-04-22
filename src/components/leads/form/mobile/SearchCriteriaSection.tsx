@@ -447,12 +447,14 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                 <MultiSelectButtons 
                   options={MAURITIUS_REGIONS} 
                   selectedValues={lead.regions || []} 
-                  onChange={(region) => onDataChange({
-                    regions: lead.regions?.includes(region as MauritiusRegion) 
-                      ? lead.regions.filter(r => r !== region) 
-                      : [...(lead.regions || []), region as MauritiusRegion]
-                  })}
-                  className="w-full"
+                  onToggle={region => {
+                    const updatedRegions = lead.regions ? [...lead.regions] : [];
+                    if (updatedRegions.includes(region as MauritiusRegion)) {
+                      handleInputChange('regions', updatedRegions.filter(r => r !== region));
+                    } else {
+                      handleInputChange('regions', [...updatedRegions, region as MauritiusRegion]);
+                    }
+                  }} 
                 />
               </div>
             )}
@@ -460,49 +462,15 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
 
           <TabsContent value="property" className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Type de bien</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {PROPERTY_TYPES.map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => {
-                      const updatedTypes = Array.isArray(lead.propertyTypes) ? [...lead.propertyTypes] : [];
-                      const newTypes = updatedTypes.includes(type) 
-                        ? updatedTypes.filter(t => t !== type) 
-                        : [...updatedTypes, type];
-                      handleInputChange({ propertyTypes: newTypes });
-                    }}
-                    className={`
-                      px-3 py-2 rounded-xl text-xs text-center transition-all duration-200
-                      ${(lead.propertyTypes || []).includes(type) 
-                        ? 'bg-chocolate-dark text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
-                    `}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Nombre de chambres</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {bedroomOptions.map((bedroom) => (
-                  <button
-                    key={bedroom}
-                    onClick={() => handleBedroomToggle(bedroom)}
-                    className={`
-                      px-3 py-2 rounded-xl text-xs text-center transition-all duration-200
-                      ${(getSelectedBedrooms()).includes(bedroom) 
-                        ? 'bg-chocolate-dark text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
-                    `}
-                  >
-                    {bedroom}
-                  </button>
-                ))}
-              </div>
+              <Label className="text-sm">Type de bien</Label>
+              <MultiSelectButtons options={PROPERTY_TYPES} selectedValues={Array.isArray(lead.propertyTypes) ? lead.propertyTypes : []} onToggle={value => {
+                const updatedTypes = Array.isArray(lead.propertyTypes) ? [...lead.propertyTypes] : [];
+                if (updatedTypes.includes(value as PropertyType)) {
+                  handleInputChange('propertyTypes', updatedTypes.filter(t => t !== value));
+                } else {
+                  handleInputChange('propertyTypes', [...updatedTypes, value as PropertyType]);
+                }
+              }} />
             </div>
             
             <div className="space-y-2">
@@ -511,8 +479,13 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
             </div>
             
             <div className="space-y-2">
+              <Label className="text-sm">Nombre de chambres</Label>
+              <MultiSelectButtons options={bedroomOptions} selectedValues={getSelectedBedrooms()} onChange={handleBedroomToggle} specialOption="8+" />
+            </div>
+            
+            <div className="space-y-2">
               <Label className="text-sm">Vue souhaitée</Label>
-              <MultiSelectButtons options={VIEW_TYPES} selectedValues={lead.views || []} onChange={value => {
+              <MultiSelectButtons options={VIEW_TYPES} selectedValues={lead.views || []} onToggle={value => {
                 const updatedViews = lead.views ? [...lead.views] : [];
                 if (updatedViews.includes(value as ViewType)) {
                   handleInputChange('views', updatedViews.filter(v => v !== value));
@@ -594,7 +567,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                   <MultiSelectButtons 
                     options={["Nord", "Sud", "Est", "Ouest"]} 
                     selectedValues={lead.orientation || []} 
-                    onChange={value => {
+                    onToggle={value => {
                       const updatedOrientation = lead.orientation ? [...lead.orientation] : [];
                       if (updatedOrientation.includes(value)) {
                         handleInputChange('orientation', updatedOrientation.filter(o => o !== value));

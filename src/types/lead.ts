@@ -1,26 +1,6 @@
+import { LeadTag } from '@/components/common/TagBadge';
+import { LeadStatus } from '@/components/common/StatusBadge';
 import { ActionHistory, TaskType } from '@/types/actionHistory';
-
-export type LeadTag = 
-  | "Vip" 
-  | "Hot" 
-  | "Serious" 
-  | "Cold" 
-  | "No response" 
-  | "No phone" 
-  | "Fake";
-
-export type LeadStatus = 
-  | "New" 
-  | "Contacted" 
-  | "Qualified" 
-  | "Proposal" 
-  | "Visit" 
-  | "Offer" 
-  | "Offre" 
-  | "Deposit" 
-  | "Signed" 
-  | "Gagné" 
-  | "Perdu";
 
 export type LeadSource = 
   | "Site web" 

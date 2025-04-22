@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { CalendarClock, CalendarDays, Activity, Home } from 'lucide-react';
 import { LeadDetailed, LeadSource, PipelineType } from '@/types/lead';
-import { LeadStatus } from '@/types/lead';
-import { LeadTag } from '@/types/lead';
+import { LeadStatus } from '@/components/common/StatusBadge';
+import { LeadTag } from '@/components/common/TagBadge';
 import FormSection from './FormSection';
 import FormInput from './FormInput';
 import MultiSelectButtons from './MultiSelectButtons';
@@ -100,7 +99,7 @@ const StatusSection = ({
         'Signed': 'Mandat signé',
         'Visit': 'Bien en commercialisation',
         'Offer': 'Offre reçue',
-        'Offre': 'Offre reçue', // Duplicate property fixed by merging with line above
+        'Offer': 'Offre reçue',
         'Deposit': 'Compromis signé',
         'Gagné': 'Vente finalisée',
         'Perdu': 'Perdu/Annulé'

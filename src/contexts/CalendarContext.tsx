@@ -1,10 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { isSameDay } from 'date-fns';
 import { TaskType } from '@/types/actionHistory';
 
-export interface Event {
+interface Event {
   id: string;
   date: Date;
   time: string;
@@ -12,12 +11,6 @@ export interface Event {
   description: string;
   category: TaskType;
   color: string;
-  isCompleted?: boolean;
-  actionId?: string;
-  assignedToId?: string;
-  assignedToName?: string;
-  leadId?: string;
-  leadName?: string;
 }
 
 interface CalendarContextType {
@@ -26,41 +19,25 @@ interface CalendarContextType {
   deleteEvent: (id: string) => void;
   updateEvent: (updatedEvent: Event) => void;
   markEventComplete: (id: string) => void;
-  selectedDate?: Date;
-  setSelectedDate: (date: Date | undefined) => void;
-  view: 'month' | 'week';
-  setView: (view: 'month' | 'week') => void;
-  activeFilters: TaskType[];
-  toggleFilter: (filter: TaskType) => void;
-  isAddEventOpen: boolean;
-  setIsAddEventOpen: (isOpen: boolean) => void;
-  newEvent: Omit<Event, 'id' | 'date'>;
-  setNewEvent: React.Dispatch<React.SetStateAction<Omit<Event, 'id' | 'date'>>>;
-  handleAddEvent: () => void;
-  refreshEvents: () => void;
-  selectedAgent: string | null;
-  onAgentChange: (agentId: string | null) => void;
 }
 
 const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
 
 interface CalendarProviderProps {
   children: ReactNode;
-  initialSelectedAgent?: string | null;
-  onAgentChange?: (agentId: string | null) => void;
 }
 
 export const eventCategories = [
-  { name: 'Appel', value: 'Call' as TaskType, color: '#D05A76' },
-  { name: 'Visite', value: 'Visit' as TaskType, color: '#7E69AB' },
-  { name: 'Compromis', value: 'Contract' as TaskType, color: '#D2B24C' },
-  { name: 'Acte de vente', value: 'Sales Act' as TaskType, color: '#403E43' },
-  { name: 'Contrat de Location', value: 'Rental Contract' as TaskType, color: '#9F9EA1' },
-  { name: 'Proposition', value: 'Offer' as TaskType, color: '#6E59A5' },
-  { name: 'Follow-up', value: 'Follow Up' as TaskType, color: '#AAADB0' },
-  { name: 'Estimation', value: 'Estimation' as TaskType, color: '#A68C6D' },
-  { name: 'Prospection', value: 'Prospecting' as TaskType, color: '#8E9196' },
-  { name: 'Admin', value: 'Admin' as TaskType, color: '#8E9196' },
+  { name: 'Appel', value: 'Call', color: '#D05A76' },
+  { name: 'Visite', value: 'Visit', color: '#7E69AB' },
+  { name: 'Compromis', value: 'Contract', color: '#D2B24C' },
+  { name: 'Acte de vente', value: 'Sales Act', color: '#403E43' },
+  { name: 'Contrat de Location', value: 'Rental Contract', color: '#9F9EA1' },
+  { name: 'Proposition', value: 'Offer', color: '#6E59A5' },
+  { name: 'Follow-up', value: 'Follow Up', color: '#AAADB0' },
+  { name: 'Estimation', value: 'Estimation', color: '#A68C6D' },
+  { name: 'Prospection', value: 'Prospecting', color: '#8E9196' },
+  { name: 'Admin', value: 'Admin', color: '#8E9196' },
 ];
 
 export const useCalendar = () => {
@@ -71,52 +48,23 @@ export const useCalendar = () => {
   return context;
 };
 
-export const CalendarProvider: React.FC<CalendarProviderProps> = ({ 
-  children, 
-  initialSelectedAgent = null,
-  onAgentChange: externalAgentChange
-}) => {
+export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) => {
   const [events, setEvents] = useState<Event[]>(() => {
     try {
       const storedEvents = localStorage.getItem('calendarEvents');
-      const parsedEvents = storedEvents ? JSON.parse(storedEvents) : [];
-      
-      // Convert string dates to Date objects
-      return parsedEvents.map((event: any) => ({
-        ...event,
-        date: new Date(event.date)
-      }));
+      return storedEvents ? JSON.parse(storedEvents) : [];
     } catch (error) {
       console.error("Failed to load events from localStorage, defaulting to empty array.", error);
       return [];
     }
   });
 
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [view, setView] = useState<'month' | 'week'>('month');
-  const [activeFilters, setActiveFilters] = useState<TaskType[]>([]);
-  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  const [selectedAgent, setSelectedAgent] = useState<string | null>(initialSelectedAgent);
-  
-  const [newEvent, setNewEvent] = useState<Omit<Event, 'id' | 'date'>>({
-    time: '09:00',
-    title: '',
-    description: '',
-    category: 'Call',
-    color: eventCategories[0].color
-  });
-
   useEffect(() => {
-    // Convert Date objects to ISO strings for storage
-    const eventsForStorage = events.map(event => ({
-      ...event,
-      date: event.date.toISOString()
-    }));
-    localStorage.setItem('calendarEvents', JSON.stringify(eventsForStorage));
+    localStorage.setItem('calendarEvents', JSON.stringify(events));
   }, [events]);
 
   const addEvent = (event: Omit<Event, 'id'>) => {
-    const newEvent: Event = { ...event, id: uuidv4(), date: new Date(event.date) };
+    const newEvent: Event = { ...event, id: uuidv4() , date: new Date(event.date) };
     setEvents(prevEvents => [...prevEvents, newEvent]);
   };
 
@@ -133,63 +81,9 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
   const markEventComplete = (id: string) => {
     setEvents(prevEvents =>
       prevEvents.map(event =>
-        event.id === id && isSameDay(event.date, new Date()) 
-          ? { ...event, title: `✅ ${event.title}`, isCompleted: true } 
-          : event
+        event.id === id && isSameDay(event.date, new Date()) ? { ...event, title: `✅ ${event.title}` } : event
       )
     );
-  };
-
-  const toggleFilter = (filter: TaskType) => {
-    setActiveFilters(prevFilters =>
-      prevFilters.includes(filter)
-        ? prevFilters.filter(f => f !== filter)
-        : [...prevFilters, filter]
-    );
-  };
-
-  const handleAddEvent = () => {
-    if (selectedDate && newEvent.title) {
-      addEvent({
-        ...newEvent,
-        date: selectedDate
-      });
-
-      // Reset new event form
-      setNewEvent({
-        time: '09:00',
-        title: '',
-        description: '',
-        category: 'Call',
-        color: eventCategories[0].color
-      });
-
-      setIsAddEventOpen(false);
-    }
-  };
-
-  const refreshEvents = () => {
-    console.log("Refreshing events...");
-    try {
-      const storedEvents = localStorage.getItem('calendarEvents');
-      if (storedEvents) {
-        const parsedEvents = JSON.parse(storedEvents);
-        // Convert string dates to Date objects
-        setEvents(parsedEvents.map((event: any) => ({
-          ...event,
-          date: new Date(event.date)
-        })));
-      }
-    } catch (error) {
-      console.error("Failed to refresh events from localStorage", error);
-    }
-  };
-
-  const onAgentChange = (agentId: string | null) => {
-    setSelectedAgent(agentId);
-    if (externalAgentChange) {
-      externalAgentChange(agentId);
-    }
   };
 
   const value: CalendarContextType = {
@@ -198,20 +92,6 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({
     deleteEvent,
     updateEvent,
     markEventComplete,
-    selectedDate,
-    setSelectedDate,
-    view,
-    setView,
-    activeFilters,
-    toggleFilter,
-    isAddEventOpen,
-    setIsAddEventOpen,
-    newEvent,
-    setNewEvent,
-    handleAddEvent,
-    refreshEvents,
-    selectedAgent,
-    onAgentChange,
   };
 
   return (

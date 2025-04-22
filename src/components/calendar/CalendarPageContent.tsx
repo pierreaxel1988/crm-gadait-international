@@ -9,7 +9,6 @@ import CategoryFilter from '@/components/calendar/CategoryFilter';
 import { eventCategories, useCalendar } from '@/contexts/CalendarContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TaskType } from '@/types/actionHistory';
 
 const CalendarPageContent = () => {
   const { 
@@ -60,11 +59,8 @@ const CalendarPageContent = () => {
     return acc;
   }, []);
 
-  // Create colors array for AddEventDialog with proper typing
-  const colors = eventCategories.map(cat => ({ 
-    name: cat.name, 
-    value: cat.color 
-  }));
+  // Create colors array for AddEventDialog
+  const colors = eventCategories.map(cat => ({ name: cat.name, value: cat.color }));
 
   // Filter events based on selected agent
   const filteredEvents = events.filter(event => {
@@ -143,3 +139,4 @@ const CalendarPageContent = () => {
 };
 
 export default CalendarPageContent;
+
