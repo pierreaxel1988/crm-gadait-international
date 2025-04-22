@@ -341,18 +341,17 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                 
                 <div className="space-y-2">
                   <Label className="text-sm">Meublé</Label>
-                  <RadioGroup value={lead.isFurnished ? 'true' : 'false'} onValueChange={value => handleInputChange('isFurnished', value === 'true')}>
+                  <RadioGroup 
+                    value={lead.isFurnished ? 'true' : 'false'} 
+                    onValueChange={value => handleInputChange('isFurnished', value === 'true')}
+                  >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="true" id="furnished-yes" />
-                      <Label htmlFor="furnished-yes">
-                        Oui
-                      </Label>
+                      <Label htmlFor="furnished-yes">Oui</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="false" id="furnished-no" />
-                      <Label htmlFor="furnished-no">
-                        Non
-                      </Label>
+                      <Label htmlFor="furnished-no">Non</Label>
                     </div>
                   </RadioGroup>
                 </div>
@@ -361,18 +360,17 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                   <>
                     <div className="space-y-2">
                       <Label className="text-sm">Prix inclus le mobilier</Label>
-                      <RadioGroup value={lead.furnitureIncludedInPrice ? 'true' : 'false'} onValueChange={value => handleInputChange('furnitureIncludedInPrice', value === 'true')}>
+                      <RadioGroup 
+                        value={lead.furnitureIncludedInPrice ? 'true' : 'false'} 
+                        onValueChange={value => handleInputChange('furnitureIncludedInPrice', value === 'true')}
+                      >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="true" id="furniture-included-yes" />
-                          <Label htmlFor="furniture-included-yes">
-                            Oui
-                          </Label>
+                          <Label htmlFor="furniture-included-yes">Oui</Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="false" id="furniture-included-no" />
-                          <Label htmlFor="furniture-included-no">
-                            Non
-                          </Label>
+                          <Label htmlFor="furniture-included-no">Non</Label>
                         </div>
                       </RadioGroup>
                     </div>
