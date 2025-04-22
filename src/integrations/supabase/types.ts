@@ -180,20 +180,28 @@ export type Database = {
         Row: {
           action_history: Json | null
           amenities: string[] | null
+          assets: string[] | null
           assigned_to: string | null
           bedrooms: number | null
           budget: string | null
           budget_min: string | null
+          condo_fees: string | null
           country: string | null
           created_at: string
           currency: string | null
           desired_location: string | null
           email: string | null
+          energy_class: string | null
+          equipment: string[] | null
           external_id: string | null
+          facilities: string[] | null
           financing_method: string | null
+          floors: number | null
           id: string
           imported_at: string | null
           integration_source: string | null
+          key_features: string[] | null
+          land_area: string | null
           last_contacted_at: string | null
           living_area: string | null
           location: string | null
@@ -201,11 +209,14 @@ export type Database = {
           nationality: string | null
           next_follow_up_date: string | null
           notes: string | null
+          orientation: string[] | null
+          parking_spaces: number | null
           phone: string | null
           phone_country_code: string | null
           phone_country_code_display: string | null
-          pipeline_type: string | null
+          pipeline_type: string
           preferred_language: string | null
+          property_description: string | null
           property_reference: string | null
           property_type: string | null
           property_types: string[] | null
@@ -213,6 +224,7 @@ export type Database = {
           purchase_timeframe: string | null
           raw_data: Json | null
           regions: string[] | null
+          renovation_needed: string | null
           salutation: string | null
           source: string | null
           status: string
@@ -221,24 +233,33 @@ export type Database = {
           tax_residence: string | null
           url: string | null
           views: string[] | null
+          yearly_taxes: string | null
         }
         Insert: {
           action_history?: Json | null
           amenities?: string[] | null
+          assets?: string[] | null
           assigned_to?: string | null
           bedrooms?: number | null
           budget?: string | null
           budget_min?: string | null
+          condo_fees?: string | null
           country?: string | null
           created_at?: string
           currency?: string | null
           desired_location?: string | null
           email?: string | null
+          energy_class?: string | null
+          equipment?: string[] | null
           external_id?: string | null
+          facilities?: string[] | null
           financing_method?: string | null
+          floors?: number | null
           id?: string
           imported_at?: string | null
           integration_source?: string | null
+          key_features?: string[] | null
+          land_area?: string | null
           last_contacted_at?: string | null
           living_area?: string | null
           location?: string | null
@@ -246,11 +267,14 @@ export type Database = {
           nationality?: string | null
           next_follow_up_date?: string | null
           notes?: string | null
+          orientation?: string[] | null
+          parking_spaces?: number | null
           phone?: string | null
           phone_country_code?: string | null
           phone_country_code_display?: string | null
-          pipeline_type?: string | null
+          pipeline_type: string
           preferred_language?: string | null
+          property_description?: string | null
           property_reference?: string | null
           property_type?: string | null
           property_types?: string[] | null
@@ -258,6 +282,7 @@ export type Database = {
           purchase_timeframe?: string | null
           raw_data?: Json | null
           regions?: string[] | null
+          renovation_needed?: string | null
           salutation?: string | null
           source?: string | null
           status: string
@@ -266,24 +291,33 @@ export type Database = {
           tax_residence?: string | null
           url?: string | null
           views?: string[] | null
+          yearly_taxes?: string | null
         }
         Update: {
           action_history?: Json | null
           amenities?: string[] | null
+          assets?: string[] | null
           assigned_to?: string | null
           bedrooms?: number | null
           budget?: string | null
           budget_min?: string | null
+          condo_fees?: string | null
           country?: string | null
           created_at?: string
           currency?: string | null
           desired_location?: string | null
           email?: string | null
+          energy_class?: string | null
+          equipment?: string[] | null
           external_id?: string | null
+          facilities?: string[] | null
           financing_method?: string | null
+          floors?: number | null
           id?: string
           imported_at?: string | null
           integration_source?: string | null
+          key_features?: string[] | null
+          land_area?: string | null
           last_contacted_at?: string | null
           living_area?: string | null
           location?: string | null
@@ -291,11 +325,14 @@ export type Database = {
           nationality?: string | null
           next_follow_up_date?: string | null
           notes?: string | null
+          orientation?: string[] | null
+          parking_spaces?: number | null
           phone?: string | null
           phone_country_code?: string | null
           phone_country_code_display?: string | null
-          pipeline_type?: string | null
+          pipeline_type?: string
           preferred_language?: string | null
+          property_description?: string | null
           property_reference?: string | null
           property_type?: string | null
           property_types?: string[] | null
@@ -303,6 +340,7 @@ export type Database = {
           purchase_timeframe?: string | null
           raw_data?: Json | null
           regions?: string[] | null
+          renovation_needed?: string | null
           salutation?: string | null
           source?: string | null
           status?: string
@@ -311,6 +349,7 @@ export type Database = {
           tax_residence?: string | null
           url?: string | null
           views?: string[] | null
+          yearly_taxes?: string | null
         }
         Relationships: [
           {
@@ -569,6 +608,7 @@ export type Database = {
         Row: {
           created_at: string | null
           created_by: string | null
+          criteria_label: string | null
           email_opened_at: string | null
           email_sent_at: string | null
           id: string
@@ -577,12 +617,14 @@ export type Database = {
           link_visited_at: string | null
           name: string
           properties: string[]
+          property_criteria: Json | null
           status: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           created_by?: string | null
+          criteria_label?: string | null
           email_opened_at?: string | null
           email_sent_at?: string | null
           id?: string
@@ -591,12 +633,14 @@ export type Database = {
           link_visited_at?: string | null
           name: string
           properties: string[]
+          property_criteria?: Json | null
           status?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           created_by?: string | null
+          criteria_label?: string | null
           email_opened_at?: string | null
           email_sent_at?: string | null
           id?: string
@@ -605,6 +649,7 @@ export type Database = {
           link_visited_at?: string | null
           name?: string
           properties?: string[]
+          property_criteria?: Json | null
           status?: string | null
           updated_at?: string | null
         }
