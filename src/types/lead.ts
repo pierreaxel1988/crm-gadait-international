@@ -2,9 +2,6 @@ import { LeadTag } from '@/components/common/TagBadge';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { ActionHistory, TaskType } from '@/types/actionHistory';
 
-export { LeadTag } from '@/components/common/TagBadge';
-export { LeadStatus } from '@/components/common/StatusBadge';
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
