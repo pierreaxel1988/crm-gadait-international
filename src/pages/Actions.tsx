@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchActions } from '@/services/actionService';
+import { fetchActions, markActionComplete } from '@/services/actionService';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -41,11 +42,8 @@ const Actions = () => {
         action.id === actionId ? { ...action, status: 'done' } : action
       );
       
-      // TODO: Update the cache with the optimistic update
-      // queryClient.setQueryData(['actions'], updatedActions);
-
       // Call the API to mark the action as complete
-      // await markActionComplete(actionId);
+      await markActionComplete(actionId, leadId);
       
       toast({
         title: "Action complétée",

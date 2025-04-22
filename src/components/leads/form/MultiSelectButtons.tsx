@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils';
 interface MultiSelectButtonsProps {
   options: string[];
   selectedValues: string[];
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
+  onToggle?: (value: string) => void;
   specialOption?: string;
   className?: string;
 }
@@ -14,16 +15,27 @@ const MultiSelectButtons: React.FC<MultiSelectButtonsProps> = ({
   options,
   selectedValues,
   onChange,
+  onToggle,
   specialOption,
   className
 }) => {
+  const handleClick = (option: string) => {
+    if (onChange) {
+      onChange(option);
+    }
+    
+    if (onToggle) {
+      onToggle(option);
+    }
+  };
+
   return (
     <div className={cn("flex flex-wrap gap-2", className)}>
       {options.map(option => (
         <button
           key={option}
           type="button"
-          onClick={() => onChange(option)}
+          onClick={() => handleClick(option)}
           className={`py-1 px-3 text-sm rounded-md transition-colors flex items-center ${
             selectedValues.includes(option)
               ? 'bg-primary text-white'

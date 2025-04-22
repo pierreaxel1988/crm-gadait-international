@@ -3,6 +3,13 @@ import React, { useState, useEffect, createContext, useContext, ReactNode } from
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role?: string;
+}
+
 interface AuthContextType {
   session: Session | null;
   user: User | null;
@@ -12,6 +19,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isCommercial: boolean;
   userRole: 'admin' | 'commercial' | 'guest';
+  teamMembers: TeamMember[];
 }
 
 // Création du contexte avec une valeur par défaut complète
@@ -23,7 +31,8 @@ const defaultContext: AuthContextType = {
   signInWithGoogle: async () => {},
   isAdmin: false,
   isCommercial: false,
-  userRole: 'guest'
+  userRole: 'guest',
+  teamMembers: []
 };
 
 const AuthContext = createContext<AuthContextType>(defaultContext);
@@ -35,6 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCommercial, setIsCommercial] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'commercial' | 'guest'>('guest');
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
   useEffect(() => {
     // Configuration explicite de Supabase pour assurer la persistance de session
@@ -75,10 +85,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setUserRole('guest');
         }
+        
+        // Fetch team members when user is logged in
+        fetchTeamMembers();
       } else {
         setIsAdmin(false);
         setIsCommercial(false);
         setUserRole('guest');
+        setTeamMembers([]);
       }
       
       setLoading(false);
@@ -125,6 +139,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           } else {
             setUserRole('guest');
           }
+          
+          // Fetch team members when user is logged in
+          fetchTeamMembers();
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
@@ -139,6 +156,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       subscription.unsubscribe();
     };
   }, []);
+  
+  // Fetch team members from the database
+  const fetchTeamMembers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('*')
+        .order('name');
+        
+      if (error) {
+        console.error('Error fetching team members:', error);
+        return;
+      }
+      
+      if (data) {
+        setTeamMembers(data);
+      }
+    } catch (error) {
+      console.error('Error in fetchTeamMembers:', error);
+    }
+  };
 
   const signOut = async () => {
     try {
@@ -179,7 +217,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signInWithGoogle,
     isAdmin,
     isCommercial,
-    userRole
+    userRole,
+    teamMembers
   };
 
   console.log('AuthProvider rendering with user:', user?.email);
