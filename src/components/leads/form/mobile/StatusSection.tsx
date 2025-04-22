@@ -22,7 +22,6 @@ import { deleteLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
-// Définition des statuts pour chaque pipeline en utilisant le type LeadStatus
 const PURCHASE_STATUSES: LeadStatus[] = [
   "New", "Contacted", "Qualified", "Proposal", "Visit", 
   "Offer", "Offre", "Deposit", "Signed", "Gagné", "Perdu"
@@ -149,15 +148,34 @@ const StatusSection: React.FC<StatusSectionProps> = ({
     }
   };
 
-  // Correction : définition du type pour availableStatuses
-  let availableStatuses: LeadStatus[];
-  if (lead.pipelineType === 'rental') {
-    availableStatuses = RENTAL_STATUSES;
-  } else if (lead.pipelineType === 'owners') {
-    availableStatuses = OWNERS_STATUSES;
-  } else {
-    availableStatuses = PURCHASE_STATUSES;
-  }
+  const getStatusLabel = (status: LeadStatus): string => {
+    if (lead.pipelineType === 'owners') {
+      const ownerStatusLabels: Record<LeadStatus, string> = {
+        'New': 'Premier contact',
+        'Contacted': 'Rendez-vous programmé',
+        'Qualified': 'Visite effectuée',
+        'Proposal': 'Mandat en négociation',
+        'Signed': 'Mandat signé',
+        'Visit': 'Bien en commercialisation',
+        'Offer': 'Offre reçue',
+        'Deposit': 'Compromis signé',
+        'Gagné': 'Vente finalisée',
+        'Perdu': 'Perdu/Annulé'
+      };
+      return ownerStatusLabels[status] || status;
+    }
+    return status;
+  };
+
+  const getStatusesForPipeline = (pipelineType: PipelineType): LeadStatus[] => {
+    if (pipelineType === 'rental') {
+      return RENTAL_STATUSES;
+    } else if (pipelineType === 'owners') {
+      return OWNERS_STATUSES;
+    } else {
+      return PURCHASE_STATUSES;
+    }
+  };
 
   const dynamicTopMargin = isHeaderMeasured 
     ? `${Math.max(headerHeight + 8, 32)}px` 
@@ -211,9 +229,9 @@ const StatusSection: React.FC<StatusSectionProps> = ({
                 <SelectValue placeholder="Sélectionner un statut" />
               </SelectTrigger>
               <SelectContent>
-                {availableStatuses.map(status => (
+                {getStatusesForPipeline(lead.pipelineType || 'purchase').map(status => (
                   <SelectItem key={status} value={status} className="font-futura">
-                    {status}
+                    {getStatusLabel(status)}
                   </SelectItem>
                 ))}
               </SelectContent>

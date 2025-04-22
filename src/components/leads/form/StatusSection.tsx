@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CalendarClock, CalendarDays, Activity, Home } from 'lucide-react';
 import { LeadDetailed, LeadSource, PipelineType } from '@/types/lead';
@@ -11,10 +10,7 @@ import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { format } from 'date-fns';
 import RadioSelectButtons from './RadioSelectButtons';
 import { toast } from '@/hooks/use-toast';
-import { 
-  getStatusesForPipeline, 
-  handlePipelineTypeTransition 
-} from '@/utils/pipelineUtils';
+import { getStatusesForPipeline, handlePipelineTypeTransition } from '@/utils/pipelineUtils';
 
 interface StatusSectionProps {
   formData: LeadDetailed;
@@ -32,14 +28,11 @@ const StatusSection = ({
   leadTags = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"] as LeadTag[],
   sources
 }: StatusSectionProps) => {
-  // Handle tag toggle if provided, otherwise create an empty handler
   const handleTagToggleInternal = handleTagToggle || ((tag: LeadTag) => {
-    // Create a new array with the updated tags
     const updatedTags = formData.tags?.includes(tag)
       ? formData.tags.filter(t => t !== tag)
       : [...(formData.tags || []), tag];
     
-    // Create a custom event-like object that conforms to the expected structure
     const syntheticEvent = {
       target: {
         name: 'tags',
@@ -47,11 +40,9 @@ const StatusSection = ({
       }
     } as unknown as React.ChangeEvent<HTMLInputElement>;
     
-    // Pass this synthetic event to the handleInputChange function
     handleInputChange(syntheticEvent);
   });
 
-  // Format dates for display, if they exist
   const formattedLastContact = formData.lastContactedAt 
     ? format(new Date(formData.lastContactedAt), 'dd/MM/yyyy HH:mm')
     : '';
@@ -60,7 +51,6 @@ const StatusSection = ({
     ? format(new Date(formData.nextFollowUpDate), 'dd/MM/yyyy HH:mm')
     : '';
 
-  // Create a handler for status changes
   const handleStatusChange = (newStatus: LeadStatus) => {
     const statusEvent = {
       target: {
@@ -72,14 +62,11 @@ const StatusSection = ({
     handleInputChange(statusEvent);
   };
 
-  // Handle pipeline type change with appropriate validations and transformations
   const handlePipelineTypeChange = (value: PipelineType) => {
-    if (value === formData.pipelineType) return; // No change needed
+    if (value === formData.pipelineType) return;
     
-    // Remember the original pipeline type
     const originalPipelineType = formData.pipelineType || 'purchase';
     
-    // Create a pipeline change event
     const pipelineEvent = {
       target: {
         name: 'pipelineType',
@@ -87,10 +74,8 @@ const StatusSection = ({
       }
     } as unknown as React.ChangeEvent<HTMLInputElement>;
     
-    // Apply the pipeline type change
     handleInputChange(pipelineEvent);
     
-    // Handle the transition logic and create requalification action
     if (formData.id) {
       handlePipelineTypeTransition(
         formData.id,
@@ -102,8 +87,26 @@ const StatusSection = ({
     }
   };
 
-  // Determine which status list to use based on pipeline type
   const availableStatuses = getStatusesForPipeline(formData.pipelineType || 'purchase');
+
+  const getStatusLabel = (status: LeadStatus): string => {
+    if (formData.pipelineType === 'owners') {
+      const ownerStatusLabels: Record<LeadStatus, string> = {
+        'New': 'Premier contact',
+        'Contacted': 'Rendez-vous programmé',
+        'Qualified': 'Visite effectuée',
+        'Proposal': 'Mandat en négociation',
+        'Signed': 'Mandat signé',
+        'Visit': 'Bien en commercialisation',
+        'Offer': 'Offre reçue',
+        'Deposit': 'Compromis signé',
+        'Gagné': 'Vente finalisée',
+        'Perdu': 'Perdu/Annulé'
+      };
+      return ownerStatusLabels[status] || status;
+    }
+    return status;
+  };
 
   return (
     <FormSection title="Statut et Suivi">
@@ -135,7 +138,10 @@ const StatusSection = ({
         onChange={handleInputChange}
         required
         icon={Activity}
-        options={availableStatuses.map(status => ({ value: status, label: status }))}
+        options={availableStatuses.map(status => ({ 
+          value: status, 
+          label: getStatusLabel(status)
+        }))}
       />
 
       <FormInput
