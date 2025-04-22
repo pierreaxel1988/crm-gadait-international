@@ -1,11 +1,11 @@
-
 import React, { useEffect } from 'react';
 import { isSameDay, startOfWeek, endOfWeek, addDays } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Event } from '@/contexts/CalendarContext';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { TaskType } from '@/types/actionHistory';
+
 interface CalendarViewProps {
   selectedDate: Date | undefined;
   setSelectedDate: (date: Date | undefined) => void;
@@ -14,6 +14,7 @@ interface CalendarViewProps {
   setView: (view: 'month' | 'week') => void;
   activeFilters: TaskType[];
 }
+
 const CalendarView = ({
   selectedDate,
   setSelectedDate,
@@ -22,10 +23,8 @@ const CalendarView = ({
   setView,
   activeFilters
 }: CalendarViewProps) => {
-  // Filter events based on active category filters
   const filteredEvents = activeFilters.length > 0 ? events.filter(event => event.category && activeFilters.includes(event.category)) : events;
 
-  // Function to generate day content - small dots for events
   const renderDayContent = (day: Date) => {
     const eventsOnDay = filteredEvents.filter(event => isSameDay(event.date, day));
     if (eventsOnDay.length === 0) return null;
@@ -37,12 +36,11 @@ const CalendarView = ({
       </div>;
   };
 
-  // For week view, calculate the current week's date range
   const getWeekRange = () => {
     if (!selectedDate) return undefined;
     const start = startOfWeek(selectedDate, {
       weekStartsOn: 1
-    }); // Week starts on Monday
+    });
     const end = endOfWeek(selectedDate, {
       weekStartsOn: 1
     });
@@ -52,10 +50,8 @@ const CalendarView = ({
     };
   };
 
-  // Effect to handle view change - when switching to week view, reset the visible dates
   useEffect(() => {
     if (view === 'week' && selectedDate) {
-      // Reset date to the first day of the current week when switching to week view
       const start = startOfWeek(selectedDate, {
         weekStartsOn: 1
       });
@@ -63,14 +59,12 @@ const CalendarView = ({
     }
   }, [view, setSelectedDate]);
 
-  // Different calendar props for month and week views
   const calendarProps = view === 'week' ? {
     mode: "single" as const,
     selected: selectedDate,
     onSelect: setSelectedDate,
     className: "border-0",
     weekStartsOn: 1 as const,
-    // Start week on Monday
     numberOfMonths: 1,
     disabled: [{
       before: getWeekRange()?.from
@@ -101,7 +95,6 @@ const CalendarView = ({
     onSelect: setSelectedDate,
     className: "border-0",
     weekStartsOn: 1 as const,
-    // Start week on Monday
     numberOfMonths: 1,
     components: {
       DayContent: ({
@@ -121,7 +114,6 @@ const CalendarView = ({
     }
   };
 
-  // Generate array of weekdays for week view
   const weekDays = selectedDate && view === 'week' ? Array.from({
     length: 7
   }, (_, i) => addDays(startOfWeek(selectedDate, {
@@ -158,4 +150,5 @@ const CalendarView = ({
       </CardContent>
     </Card>;
 };
+
 export default CalendarView;

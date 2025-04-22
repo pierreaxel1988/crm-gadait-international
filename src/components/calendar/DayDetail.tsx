@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Calendar as CalendarIcon } from 'lucide-react';
 import CalendarEventsList from './CalendarEventsList';
 import { Event, useCalendar } from '@/contexts/CalendarContext';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { TaskType } from '@/types/actionHistory';
 
 interface DayDetailProps {
   selectedDate: Date | undefined;

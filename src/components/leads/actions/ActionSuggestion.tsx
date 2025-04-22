@@ -1,16 +1,16 @@
-
 import React from 'react';
-import { CalendarClock, Check, X, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { format } from 'date-fns';
+import { Check, X, Calendar, Clock } from 'lucide-react';
 import { fr } from 'date-fns/locale';
-import { ActionSuggestion } from '@/services/noteAnalysisService';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { ActionSuggestion as ActionSuggestionType } from '@/services/noteAnalysisService';
+import { TaskType } from '@/types/actionHistory';
 
 interface ActionSuggestionProps {
-  suggestion: ActionSuggestion;
-  onAccept: (suggestion: ActionSuggestion) => void;
-  onReject: (suggestion: ActionSuggestion) => void;
+  suggestion: ActionSuggestionType;
+  onAccept: (suggestion: ActionSuggestionType) => void;
+  onReject: (suggestion: ActionSuggestionType) => void;
   className?: string;
   compact?: boolean;
 }

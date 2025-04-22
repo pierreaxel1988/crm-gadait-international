@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { CalendarIcon, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Event, eventCategories } from '@/contexts/CalendarContext';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { TaskType } from '@/types/actionHistory';
 
 interface AddEventDialogProps {
   isOpen: boolean;
@@ -33,7 +32,6 @@ const AddEventDialog = ({
   colors,
   categories
 }: AddEventDialogProps) => {
-  // Generate time options (every 30 min)
   const timeOptions = () => {
     const options = [];
     for (let hour = 0; hour < 24; hour++) {

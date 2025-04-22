@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, RefreshCcw, SlidersHorizontal, X } from 'lucide-react';
-import { TaskType } from '@/components/kanban/KanbanCard';
-import { ActionStatus } from '@/types/actionHistory';
+import { TaskType, ActionStatus } from '@/types/actionHistory';
 import StatusFilterButtons from './filters/StatusFilterButtons';
 import TypeFilterButtons from './filters/TypeFilterButtons';
 import AgentFilterButtons from './filters/AgentFilterButtons';
@@ -43,7 +41,6 @@ const ActionsHeader: React.FC<ActionsHeaderProps> = ({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { isCommercial } = useAuth();
 
-  // Count active filters
   const getActiveFiltersCount = () => {
     let count = 0;
     if (statusFilter !== 'all') count++;

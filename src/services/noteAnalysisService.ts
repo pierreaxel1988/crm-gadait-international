@@ -1,7 +1,7 @@
-
-import { format, parse, isValid, addDays } from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
+import { format, parse, addDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { TaskType } from '@/types/actionHistory';
 
 export interface ActionSuggestion {
   actionType: TaskType;

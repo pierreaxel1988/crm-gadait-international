@@ -1,3 +1,6 @@
+import { LeadTag } from '@/components/common/TagBadge';
+import { LeadStatus } from '@/components/common/StatusBadge';
+import { ActionHistory, TaskType } from '@/types/actionHistory';
 
 export type LeadSource = 
   | "Site web" 
@@ -109,12 +112,6 @@ export type Equipment =
   | "Chambre de bonne"
   | "Accessible aux handicapés";
 
-import { LeadStatus } from "@/components/common/StatusBadge";
-import { LeadTag } from "@/components/common/TagBadge";
-import { TaskType } from "@/components/kanban/KanbanCard";
-
-export type { LeadStatus, LeadTag, TaskType };
-
 export interface LeadDetailed {
   id: string;
   name: string;
@@ -158,7 +155,7 @@ export interface LeadDetailed {
   
   imported_at?: string;
   integration_source?: string;
-  actionHistory?: any[];
+  actionHistory?: ActionHistory[];
   livingArea?: string;
   external_id?: string;
   

@@ -1,43 +1,39 @@
 
 import React from 'react';
-import BaseSelectButtons from './BaseSelectButtons';
+import { cn } from '@/lib/utils';
 
-interface MultiSelectButtonsProps<T extends string> {
-  options: readonly T[] | T[];
-  selectedValues: T[];
-  onChange?: (value: T) => void;
-  onToggle?: (value: T) => void;
-  specialOption?: T;
-  className?: string;
+interface MultiSelectButtonsProps {
+  options: string[];
+  selectedValues: string[];
+  onChange: (value: string) => void;
+  specialOption?: string;
+  className?: string; // Added className prop
 }
 
-const MultiSelectButtons = <T extends string>({
+const MultiSelectButtons: React.FC<MultiSelectButtonsProps> = ({
   options,
-  selectedValues = [],
+  selectedValues,
   onChange,
-  onToggle,
   specialOption,
-  className,
-}: MultiSelectButtonsProps<T>) => {
-  const isSelected = (option: T) => selectedValues.includes(option);
-  
-  // Handle both onChange and onToggle patterns
-  const handleSelectOption = (value: T) => {
-    if (onToggle) {
-      onToggle(value);
-    } else if (onChange) {
-      onChange(value);
-    }
-  };
-  
+  className
+}) => {
   return (
-    <BaseSelectButtons
-      options={[...options]}
-      isSelected={isSelected}
-      onSelectOption={handleSelectOption}
-      specialOption={specialOption}
-      className={className}
-    />
+    <div className={cn("flex flex-wrap gap-2", className)}>
+      {options.map(option => (
+        <button
+          key={option}
+          type="button"
+          onClick={() => onChange(option)}
+          className={`py-1 px-3 text-sm rounded-md transition-colors flex items-center ${
+            selectedValues.includes(option)
+              ? 'bg-primary text-white'
+              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+          } ${option === specialOption ? 'font-bold' : ''}`}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
   );
 };
 

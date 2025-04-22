@@ -1,462 +1,102 @@
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { isSameDay } from 'date-fns';
+import { TaskType } from '@/types/actionHistory';
 
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { TaskType } from '@/components/kanban/KanbanCard';
-import { supabase } from '@/integrations/supabase/client';
-import { ActionItem, ActionStatus } from '@/types/actionHistory';
-import { format, parseISO } from 'date-fns';
-
-export type Event = {
+interface Event {
   id: string;
+  date: Date;
+  time: string;
   title: string;
   description: string;
-  date: Date;
-  time?: string;
-  color?: string;
-  category?: TaskType;
-  leadId?: string;
-  leadName?: string;
-  actionId?: string; // To track if this event is from an action
-  isCompleted?: boolean;
-  assignedToId?: string;
-  assignedToName?: string;
-};
-
-export const eventCategories = [
-  { name: 'Call', color: '#E7F7E4', value: 'Call' as TaskType },
-  { name: 'Visites', color: '#F4F3FF', value: 'Visites' as TaskType },
-  { name: 'Compromis', color: '#FFF8E6', value: 'Compromis' as TaskType },
-  { name: 'Acte de vente', color: '#E8F5E9', value: 'Acte de vente' as TaskType },
-  { name: 'Contrat de Location', color: '#E3F2FD', value: 'Contrat de Location' as TaskType },
-  { name: 'Propositions', color: '#F3E5F5', value: 'Propositions' as TaskType },
-  { name: 'Follow up', color: '#FCE4EC', value: 'Follow up' as TaskType },
-  { name: 'Estimation', color: '#E0F2F1', value: 'Estimation' as TaskType },
-  { name: 'Prospection', color: '#FFEBEE', value: 'Prospection' as TaskType },
-  { name: 'Admin', color: '#ECEFF1', value: 'Admin' as TaskType },
-];
-
-export const initialEvents: Event[] = [];
-
-export type CalendarContextType = {
-  selectedDate: Date | undefined;
-  setSelectedDate: (date: Date | undefined) => void;
-  events: Event[];
-  setEvents: React.Dispatch<React.SetStateAction<Event[]>>;
-  view: 'month' | 'week';
-  setView: React.Dispatch<React.SetStateAction<'month' | 'week'>>;
-  activeFilters: TaskType[];
-  setActiveFilters: React.Dispatch<React.SetStateAction<TaskType[]>>;
-  isAddEventOpen: boolean;
-  setIsAddEventOpen: (isOpen: boolean) => void;
-  newEvent: Omit<Event, 'id' | 'date'>;
-  setNewEvent: React.Dispatch<React.SetStateAction<Omit<Event, 'id' | 'date'>>>;
-  toggleFilter: (category: TaskType) => void;
-  handleAddEvent: () => void;
-  refreshEvents: () => Promise<void>;
-  markEventComplete: (eventId: string) => Promise<void>;
-  selectedAgent: string | null;
-  onAgentChange: (agentId: string | null) => void;
-};
-
-export const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
-
-interface CalendarProviderProps {
-  children: React.ReactNode;
-  initialSelectedAgent?: string | null;
-  onAgentChange?: (agentId: string | null) => void;
+  category: TaskType;
+  color: string;
 }
 
-export const CalendarProvider: React.FC<CalendarProviderProps> = ({ 
-  children, 
-  initialSelectedAgent = null,
-  onAgentChange: parentOnAgentChange
-}) => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [events, setEvents] = useState<Event[]>(initialEvents);
-  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  const [view, setView] = useState<'month' | 'week'>('month');
-  const [activeFilters, setActiveFilters] = useState<TaskType[]>([]);
-  const [selectedAgent, setSelectedAgent] = useState<string | null>(initialSelectedAgent);
-  const [newEvent, setNewEvent] = useState<Omit<Event, 'id' | 'date'>>({
-    title: '',
-    description: '',
-    color: '#FDE1D3',
-    category: 'Call',
-    time: '09:00',
-  });
-  const [memberMap, setMemberMap] = useState<Map<string, string>>(new Map());
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+interface CalendarContextType {
+  events: Event[];
+  addEvent: (event: Omit<Event, 'id'>) => void;
+  deleteEvent: (id: string) => void;
+  updateEvent: (updatedEvent: Event) => void;
+  markEventComplete: (id: string) => void;
+}
 
-  const { toast } = useToast();
+const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
 
-  // Define the fetchLeadActions function first
-  const fetchLeadActions = useCallback(async () => {
-    try {
-      console.log("Fetching lead actions for calendar...");
-      
-      const { data: userData } = await supabase.auth.getUser();
-      const currentUserEmail = userData?.user?.email;
-      
-      console.log("Current user email:", currentUserEmail);
-      if (!currentUserEmail) {
-        console.warn("No user email found - you might need to log in");
-      }
-      
-      const { data: teamMemberData, error: teamMemberError } = await supabase
-        .from('team_members')
-        .select('id, is_admin')
-        .eq('email', currentUserEmail)
-        .single();
-      
-      if (teamMemberError) {
-        console.error('Error fetching team member:', teamMemberError);
-        throw teamMemberError;
-      }
-      
-      const isUserAdmin = teamMemberData?.is_admin || false;
-      const currentUserId = teamMemberData?.id;
-      
-      console.log("Current user info:", { isUserAdmin, currentUserId });
-      
-      // First, fetch all team members to have their names available
-      const { data: allTeamMembers, error: teamMembersError } = await supabase
-        .from('team_members')
-        .select('id, name');
-        
-      if (teamMembersError) {
-        console.error('Error fetching team members:', teamMembersError);
-        throw teamMembersError;
-      }
-      
-      // Create a map of team member IDs to names
-      const teamMemberMap = new Map<string, string>();
-      allTeamMembers?.forEach(member => {
-        teamMemberMap.set(member.id, member.name);
-      });
-      
-      setMemberMap(teamMemberMap);
-      console.log("Loaded team members map with", teamMemberMap.size, "members");
-      
-      // Now fetch leads with their actions
-      let query = supabase
-        .from('leads')
-        .select('id, name, action_history, assigned_to');
-      
-      if (selectedAgent) {
-        query = query.eq('assigned_to', selectedAgent);
-      } else if (!isUserAdmin && currentUserId) {
-        query = query.eq('assigned_to', currentUserId);
-      }
-      
-      const { data: leads, error } = await query;
-      
-      if (error) {
-        console.error('Error fetching leads:', error);
-        throw error;
-      }
-      
-      console.log(`Fetched ${leads?.length || 0} leads with action history`);
-      
-      let actionEvents: Event[] = [];
-      
-      leads?.forEach((lead: any) => {
-        const leadActions = lead.action_history || [];
-        
-        if (Array.isArray(leadActions) && leadActions.length > 0) {
-          console.log(`Processing ${leadActions.length} actions for lead: ${lead.name}`);
-          
-          leadActions.forEach((action: any) => {
-            if (action.scheduledDate) {
-              const category = eventCategories.find(cat => cat.value === action.actionType);
-              const assignedToName = teamMemberMap.get(lead.assigned_to) || 'Non assigné';
-              
-              try {
-                const actionDate = new Date(action.scheduledDate);
-                
-                if (isNaN(actionDate.getTime())) {
-                  console.error(`Invalid date for action ${action.id}: ${action.scheduledDate}`);
-                  return;
-                }
-                
-                const timeMatch = action.scheduledDate.match(/T(\d{2}:\d{2})/) || [];
-                const time = timeMatch[1] || '09:00';
-                
-                const actionTitle = `${action.actionType}${lead.name ? ` - ${lead.name}` : ''}`;
-                
-                actionEvents.push({
-                  id: `action-${action.id}`,
-                  title: actionTitle,
-                  description: action.notes || '',
-                  date: actionDate,
-                  time: time,
-                  color: category?.color || '#D3D3D3',
-                  category: action.actionType as TaskType,
-                  leadId: lead.id,
-                  leadName: lead.name,
-                  actionId: action.id,
-                  isCompleted: !!action.completedDate,
-                  assignedToId: lead.assigned_to,
-                  assignedToName: assignedToName
-                });
-              } catch (err) {
-                console.error(`Error processing action date: ${err}`);
-              }
-            }
-          });
-        } else {
-          console.log(`No actions found for lead: ${lead.name}`);
-        }
-      });
-      
-      console.log(`Converted ${actionEvents.length} actions to calendar events`);
-      if (actionEvents.length > 0) {
-        console.log("Sample of events:", actionEvents.slice(0, 3));
-      } else {
-        console.warn("No action events were generated from leads data");
-      }
-      
-      setEvents([...initialEvents, ...actionEvents]);
-    } catch (error) {
-      console.error('Error fetching lead actions:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de charger les actions depuis la base de données."
-      });
-    }
-  }, [selectedAgent, toast]);
+interface CalendarProviderProps {
+  children: ReactNode;
+}
 
-  // Now define refreshEvents that uses fetchLeadActions
-  const refreshEvents = useCallback(async () => {
-    console.log("Refreshing events...");
-    await fetchLeadActions();
-  }, [fetchLeadActions]);
-
-  useEffect(() => {
-    if (selectedAgent !== initialSelectedAgent && parentOnAgentChange) {
-      parentOnAgentChange(selectedAgent);
-    }
-  }, [selectedAgent, initialSelectedAgent, parentOnAgentChange]);
-
-  useEffect(() => {
-    const fetchTeamMembers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id, name');
-        
-        if (error) throw error;
-        
-        const newMemberMap = new Map();
-        data?.forEach(member => newMemberMap.set(member.id, member.name));
-        setMemberMap(newMemberMap);
-        
-        console.log("Loaded team members map with", newMemberMap.size, "members");
-      } catch (error) {
-        console.error('Error fetching team members:', error);
-      }
-    };
-    
-    fetchTeamMembers();
-  }, []);
-
-  useEffect(() => {
-    console.log("Initial fetch of lead actions");
-    refreshEvents();
-    setIsInitialLoad(false);
-  }, [memberMap, refreshEvents]);
-
-  useEffect(() => {
-    console.log("Setting up action-completed listener in CalendarContext");
-    
-    const handleActionCompleted = () => {
-      console.log("Action completed event received, refreshing events");
-      refreshEvents();
-    };
-    
-    window.addEventListener('action-completed', handleActionCompleted);
-    
-    return () => {
-      console.log("Removing action-completed listener");
-      window.removeEventListener('action-completed', handleActionCompleted);
-    };
-  }, [refreshEvents]);
-
-  useEffect(() => {
-    const handleAgentChange = (e: CustomEvent) => {
-      const newAgent = e.detail.selectedAgent;
-      if (newAgent !== selectedAgent) {
-        setSelectedAgent(newAgent);
-        if (parentOnAgentChange) {
-          parentOnAgentChange(newAgent);
-        }
-      }
-    };
-
-    window.addEventListener('agent-selection-changed', handleAgentChange as EventListener);
-    return () => {
-      window.removeEventListener('agent-selection-changed', handleAgentChange as EventListener);
-    };
-  }, [selectedAgent, parentOnAgentChange]);
-
-  const markEventComplete = async (eventId: string) => {
-    if (eventId.startsWith('action-')) {
-      const actionId = eventId.replace('action-', '');
-      
-      try {
-        console.log(`Marking action ${actionId} as complete`);
-        
-        const event = events.find(e => e.id === eventId);
-        if (!event || !event.leadId) {
-          console.error("Cannot find event or leadId is missing");
-          return;
-        }
-        
-        const { data: lead, error: leadError } = await supabase
-          .from('leads')
-          .select('action_history')
-          .eq('id', event.leadId)
-          .single();
-        
-        if (leadError) {
-          console.error('Error fetching lead:', leadError);
-          throw leadError;
-        }
-        
-        if (lead && lead.action_history) {
-          const actionHistory = lead.action_history as any[];
-          const actionIndex = actionHistory.findIndex((a: any) => a.id === actionId);
-          
-          if (actionIndex !== -1) {
-            actionHistory[actionIndex].completedDate = new Date().toISOString();
-            
-            const { error: updateError } = await supabase
-              .from('leads')
-              .update({ 
-                action_history: actionHistory,
-                last_contacted_at: new Date().toISOString()
-              })
-              .eq('id', event.leadId);
-            
-            if (updateError) {
-              console.error('Error updating lead:', updateError);
-              throw updateError;
-            }
-            
-            setEvents(prev => 
-              prev.map(e => 
-                e.id === eventId 
-                  ? {...e, isCompleted: true} 
-                  : e
-              )
-            );
-            
-            window.dispatchEvent(new CustomEvent('action-completed'));
-            
-            toast({
-              title: "Action complétée",
-              description: "L'action a été marquée comme complétée."
-            });
-          } else {
-            console.error(`Action ${actionId} not found in lead's action history`);
-          }
-        }
-      } catch (error) {
-        console.error('Error marking action as complete:', error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de mettre à jour l'action."
-        });
-      }
-    }
-  };
-
-  const toggleFilter = (category: TaskType) => {
-    setActiveFilters(prev => 
-      prev.includes(category) 
-        ? prev.filter(c => c !== category) 
-        : [...prev, category]
-    );
-  };
-
-  const handleAddEvent = () => {
-    if (!selectedDate || !newEvent.title.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez saisir au moins un titre pour l'événement",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const categoryInfo = eventCategories.find(cat => cat.value === newEvent.category);
-
-    const event: Event = {
-      id: Date.now().toString(),
-      ...newEvent,
-      date: selectedDate,
-      color: categoryInfo?.color || newEvent.color,
-    };
-
-    setEvents([...events, event]);
-    setIsAddEventOpen(false);
-    setNewEvent({ 
-      title: '', 
-      description: '', 
-      color: '#FDE1D3', 
-      category: 'Call',
-      time: '09:00'
-    });
-    
-    toast({
-      title: "Événement ajouté",
-      description: `L'événement "${event.title}" a été ajouté au ${selectedDate.toLocaleDateString('fr-FR')}${event.time ? ' à ' + event.time : ''}`,
-    });
-  };
-
-  const handleAgentChange = (agentId: string | null) => {
-    setSelectedAgent(agentId);
-    if (parentOnAgentChange) {
-      parentOnAgentChange(agentId);
-    }
-    window.dispatchEvent(new CustomEvent('agent-selection-changed', {
-      detail: { selectedAgent: agentId }
-    }));
-  };
-
-  return (
-    <CalendarContext.Provider
-      value={{
-        selectedDate,
-        setSelectedDate,
-        events,
-        setEvents,
-        isAddEventOpen,
-        setIsAddEventOpen,
-        view,
-        setView,
-        activeFilters,
-        setActiveFilters,
-        newEvent,
-        setNewEvent,
-        toggleFilter,
-        handleAddEvent,
-        refreshEvents,
-        markEventComplete,
-        selectedAgent,
-        onAgentChange: handleAgentChange,
-      }}
-    >
-      {children}
-    </CalendarContext.Provider>
-  );
-};
+export const eventCategories = [
+  { name: 'Appel', value: 'Call', color: '#D05A76' },
+  { name: 'Visite', value: 'Visit', color: '#7E69AB' },
+  { name: 'Compromis', value: 'Contract', color: '#D2B24C' },
+  { name: 'Acte de vente', value: 'Sales Act', color: '#403E43' },
+  { name: 'Contrat de Location', value: 'Rental Contract', color: '#9F9EA1' },
+  { name: 'Proposition', value: 'Offer', color: '#6E59A5' },
+  { name: 'Follow-up', value: 'Follow Up', color: '#AAADB0' },
+  { name: 'Estimation', value: 'Estimation', color: '#A68C6D' },
+  { name: 'Prospection', value: 'Prospecting', color: '#8E9196' },
+  { name: 'Admin', value: 'Admin', color: '#8E9196' },
+];
 
 export const useCalendar = () => {
   const context = useContext(CalendarContext);
-  if (context === undefined) {
-    throw new Error('useCalendar must be used within a CalendarProvider');
+  if (!context) {
+    throw new Error("useCalendar must be used within a CalendarProvider");
   }
   return context;
+};
+
+export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) => {
+  const [events, setEvents] = useState<Event[]>(() => {
+    try {
+      const storedEvents = localStorage.getItem('calendarEvents');
+      return storedEvents ? JSON.parse(storedEvents) : [];
+    } catch (error) {
+      console.error("Failed to load events from localStorage, defaulting to empty array.", error);
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('calendarEvents', JSON.stringify(events));
+  }, [events]);
+
+  const addEvent = (event: Omit<Event, 'id'>) => {
+    const newEvent: Event = { ...event, id: uuidv4() , date: new Date(event.date) };
+    setEvents(prevEvents => [...prevEvents, newEvent]);
+  };
+
+  const deleteEvent = (id: string) => {
+    setEvents(prevEvents => prevEvents.filter(event => event.id !== id));
+  };
+
+  const updateEvent = (updatedEvent: Event) => {
+    setEvents(prevEvents =>
+      prevEvents.map(event => (event.id === updatedEvent.id ? updatedEvent : event))
+    );
+  };
+
+  const markEventComplete = (id: string) => {
+    setEvents(prevEvents =>
+      prevEvents.map(event =>
+        event.id === id && isSameDay(event.date, new Date()) ? { ...event, title: `✅ ${event.title}` } : event
+      )
+    );
+  };
+
+  const value: CalendarContextType = {
+    events,
+    addEvent,
+    deleteEvent,
+    updateEvent,
+    markEventComplete,
+  };
+
+  return (
+    <CalendarContext.Provider value={value}>
+      {children}
+    </CalendarContext.Provider>
+  );
 };

@@ -1,10 +1,11 @@
-
+import { v4 as uuidv4 } from 'uuid';
 import { LeadDetailed } from "@/types/lead";
-import { ActionHistory } from "@/types/actionHistory";
-import { getLead, updateLead } from "./leadCore";
-import { TaskType } from "@/components/kanban/KanbanCard";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { updateLead } from './leadUpdater';
+import { TaskType } from '@/types/actionHistory';
+import { supabase } from "@/integrations/supabase/client";
+import { ActionHistory } from "@/types/actionHistory";
+import { getLead } from "./leadCore";
 
 export const addActionToLead = async (leadId: string, action: Omit<ActionHistory, 'id' | 'createdAt'>): Promise<LeadDetailed | undefined> => {
   try {
