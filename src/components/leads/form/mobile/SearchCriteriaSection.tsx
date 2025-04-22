@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency, AssetType, Equipment, MauritiusRegion } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -301,13 +302,17 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
           </TabsList>
           
           <TabsContent value="budget" className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="budgetMin" className="text-sm">Budget minimum</Label>
-              <Input id="budgetMin" value={lead.budgetMin || ''} onChange={e => handleInputChange('budgetMin', e.target.value)} placeholder="Budget minimum" className="w-full font-futura" type="text" />
-            </div>
+            {lead.pipelineType !== 'owners' && (
+              <div className="space-y-2">
+                <Label htmlFor="budgetMin" className="text-sm">Budget minimum</Label>
+                <Input id="budgetMin" value={lead.budgetMin || ''} onChange={e => handleInputChange('budgetMin', e.target.value)} placeholder="Budget minimum" className="w-full font-futura" type="text" />
+              </div>
+            )}
             
             <div className="space-y-2">
-              <Label htmlFor="budget" className="text-sm">{lead.pipelineType === 'owners' ? 'Prix souhaité' : 'Budget maximum'}</Label>
+              <Label htmlFor="budget" className="text-sm">
+                {lead.pipelineType === 'owners' ? 'Prix souhaité' : 'Budget maximum'}
+              </Label>
               <Input 
                 id="budget" 
                 value={lead.budget || ''} 
