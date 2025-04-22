@@ -462,29 +462,49 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
 
           <TabsContent value="property" className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label className="text-sm">Type de bien</Label>
-              <MultiSelectButtons 
-                options={PROPERTY_TYPES} 
-                selectedValues={Array.isArray(lead.propertyTypes) ? lead.propertyTypes : []} 
-                onChange={value => {
-                  const updatedTypes = Array.isArray(lead.propertyTypes) ? [...lead.propertyTypes] : [];
-                  if (updatedTypes.includes(value as PropertyType)) {
-                    handleInputChange('propertyTypes', updatedTypes.filter(t => t !== value));
-                  } else {
-                    handleInputChange('propertyTypes', [...updatedTypes, value as PropertyType]);
-                  }
-                }}
-              />
+              <Label className="text-sm font-medium">Type de bien</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {PROPERTY_TYPES.map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      const updatedTypes = Array.isArray(lead.propertyTypes) ? [...lead.propertyTypes] : [];
+                      const newTypes = updatedTypes.includes(type) 
+                        ? updatedTypes.filter(t => t !== type) 
+                        : [...updatedTypes, type];
+                      handleInputChange({ propertyTypes: newTypes });
+                    }}
+                    className={`
+                      px-3 py-2 rounded-xl text-xs text-center transition-all duration-200
+                      ${(lead.propertyTypes || []).includes(type) 
+                        ? 'bg-chocolate-dark text-white' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
+                    `}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm">Nombre de chambres</Label>
-              <MultiSelectButtons 
-                options={bedroomOptions} 
-                selectedValues={getSelectedBedrooms()} 
-                onChange={handleBedroomToggle} 
-                specialOption="8+" 
-              />
+              <Label className="text-sm font-medium">Nombre de chambres</Label>
+              <div className="grid grid-cols-4 gap-2">
+                {bedroomOptions.map((bedroom) => (
+                  <button
+                    key={bedroom}
+                    onClick={() => handleBedroomToggle(bedroom)}
+                    className={`
+                      px-3 py-2 rounded-xl text-xs text-center transition-all duration-200
+                      ${(getSelectedBedrooms()).includes(bedroom) 
+                        ? 'bg-chocolate-dark text-white' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
+                    `}
+                  >
+                    {bedroom}
+                  </button>
+                ))}
+              </div>
             </div>
             
             <div className="space-y-2">
