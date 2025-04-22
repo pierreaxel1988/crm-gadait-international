@@ -17,13 +17,18 @@ const MultiSelectButtons: React.FC<MultiSelectButtonsProps> = ({
   specialOption,
   className
 }) => {
+  // La fonction de gestion de clic pour basculer entre sélectionné et non sélectionné
+  const handleToggle = (value: string) => {
+    onChange(value);
+  };
+
   return (
     <div className={cn("flex flex-wrap gap-2", className)}>
       {options.map(option => (
         <button
           key={option}
           type="button"
-          onClick={() => onChange(option)}
+          onClick={() => handleToggle(option)}
           className={`py-1 px-3 text-sm rounded-md transition-colors flex items-center ${
             selectedValues.includes(option)
               ? 'bg-primary text-white'

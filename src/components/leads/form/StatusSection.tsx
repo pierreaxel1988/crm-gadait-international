@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CalendarClock, CalendarDays, Activity, Home } from 'lucide-react';
 import { LeadDetailed, LeadSource, PipelineType } from '@/types/lead';
@@ -25,7 +26,7 @@ const StatusSection = ({
   formData,
   handleInputChange,
   handleTagToggle,
-  leadTags = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"] as LeadTag[],
+  leadTags = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake", "Imported"] as LeadTag[],
   sources
 }: StatusSectionProps) => {
   const handleTagToggleInternal = handleTagToggle || ((tag: LeadTag) => {
@@ -98,7 +99,6 @@ const StatusSection = ({
         'Proposal': 'Mandat en négociation',
         'Signed': 'Mandat signé',
         'Visit': 'Bien en commercialisation',
-        'Offer': 'Offre reçue',
         'Offer': 'Offre reçue',
         'Deposit': 'Compromis signé',
         'Gagné': 'Vente finalisée',
