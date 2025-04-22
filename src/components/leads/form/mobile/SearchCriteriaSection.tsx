@@ -307,8 +307,15 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="budget" className="text-sm">Prix souhaité</Label>
-              <Input id="budget" value={lead.budget || ''} onChange={e => handleInputChange('budget', e.target.value)} placeholder="Prix souhaité" className="w-full font-futura" type="text" />
+              <Label htmlFor="budget" className="text-sm">{lead.pipelineType === 'owners' ? 'Prix souhaité' : 'Budget maximum'}</Label>
+              <Input 
+                id="budget" 
+                value={lead.budget || ''} 
+                onChange={e => handleInputChange('budget', e.target.value)} 
+                placeholder={lead.pipelineType === 'owners' ? 'Prix souhaité' : 'Budget maximum'} 
+                className="w-full font-futura" 
+                type="text" 
+              />
             </div>
             
             <div className="space-y-2">

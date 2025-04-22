@@ -7,22 +7,17 @@ import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import CustomTagInput from '../CustomTagInput';
 import { Textarea } from '@/components/ui/textarea';
 import { 
-  Pool,
-  Elevator,
-  ParkingCircle,
-  Wind,
   Home,
-  Building2,
-  Building,
-  Spa,
-  Timer,
-  TreePine,
-  Armchair,
-  Flame,
-  House,
-  Warehouse,
-  Bed,
-  Accessibility
+  Ruler,
+  CalendarDays,
+  ParkingCircle,
+  Layers,
+  Compass,
+  Thermometer,
+  Coins,
+  Star,
+  Wrench,
+  Bed
 } from 'lucide-react';
 
 interface OwnerPropertyDetailsSectionProps {
@@ -88,42 +83,42 @@ const OwnerPropertyDetailsSection = ({
     handleInputChange(syntheticEvent);
   };
 
-  const ASSETS: { value: AssetType; icon: React.ComponentType; }[] = [
-    { value: "Vue mer", icon: SeaView },
-    { value: "Vue panoramique", icon: PanoramaView },
-    { value: "Bord de mer", icon: Waterfront },
-    { value: "Front de mer", icon: Waterfront },
-    { value: "Domaine de chasse", icon: HuntingEstate },
-    { value: "Écurie", icon: Stable },
-    { value: "Bien d'architecte", icon: ArchitectsProperty },
-    { value: "Style contemporain", icon: ContemporaryStyle },
-    { value: "Monument classé", icon: ListedBuilding },
-    { value: "Court de tennis", icon: TennisCourt },
-    { value: "Pied des pistes", icon: Slopeside },
-    { value: "Proche montagne", icon: NearMountain },
-    { value: "Proche aéroport", icon: NearAirport },
-    { value: "Proche gare", icon: NearTrainStation },
-    { value: "Proche golf", icon: NearGolf },
+  const ASSETS: { value: AssetType; icon: React.ComponentType }[] = [
+    { value: "Vue mer", icon: Home },
+    { value: "Vue panoramique", icon: Home },
+    { value: "Bord de mer", icon: Home },
+    { value: "Front de mer", icon: Home },
+    { value: "Domaine de chasse", icon: Home },
+    { value: "Écurie", icon: Home },
+    { value: "Bien d'architecte", icon: Home },
+    { value: "Style contemporain", icon: Home },
+    { value: "Monument classé", icon: Home },
+    { value: "Court de tennis", icon: Home },
+    { value: "Pied des pistes", icon: Home },
+    { value: "Proche montagne", icon: Home },
+    { value: "Proche aéroport", icon: Home },
+    { value: "Proche gare", icon: Home },
+    { value: "Proche golf", icon: Home },
   ];
 
-  const EQUIPMENT: { value: Equipment; icon: React.ComponentType; label: string; }[] = [
-    { value: "Piscine", icon: Pool, label: "Piscine" },
-    { value: "Ascenseur", icon: Elevator, label: "Ascenseur" },
-    { value: "Garage & Parking", icon: ParkingCircle, label: "Garage & Parking" },
-    { value: "Climatisation", icon: Wind, label: "Climatisation" },
-    { value: "Salle de réception", icon: Building, label: "Salle de réception" },
-    { value: "Dépendances", icon: Building2, label: "Dépendances" },
-    { value: "Loge gardien", icon: Home, label: "Loge gardien" },
-    { value: "Spa", icon: Spa, label: "Spa" },
-    { value: "Viager", icon: Timer, label: "Viager" },
-    { value: "Terrasse", icon: Home, label: "Terrasse" },
-    { value: "Jardin", icon: TreePine, label: "Jardin" },
-    { value: "Meublé", icon: Armchair, label: "Meublé" },
-    { value: "Cheminée", icon: Flame, label: "Cheminée" },
-    { value: "Maison d'amis", icon: House, label: "Maison d'amis" },
-    { value: "Bâtiments agricoles", icon: Warehouse, label: "Bâtiments agricoles" },
-    { value: "Chambre de bonne", icon: Bed, label: "Chambre de bonne" },
-    { value: "Accessible aux handicapés", icon: Accessibility, label: "Accessible aux handicapés" }
+  const EQUIPMENT: { value: Equipment; icon: React.ComponentType }[] = [
+    { value: "Piscine", icon: Home },
+    { value: "Ascenseur", icon: Home },
+    { value: "Garage & Parking", icon: ParkingCircle },
+    { value: "Climatisation", icon: Thermometer },
+    { value: "Salle de réception", icon: Home },
+    { value: "Dépendances", icon: Home },
+    { value: "Loge gardien", icon: Home },
+    { value: "Spa", icon: Home },
+    { value: "Viager", icon: Home },
+    { value: "Terrasse", icon: Home },
+    { value: "Jardin", icon: Home },
+    { value: "Meublé", icon: Home },
+    { value: "Cheminée", icon: Home },
+    { value: "Maison d'amis", icon: Home },
+    { value: "Bâtiments agricoles", icon: Home },
+    { value: "Chambre de bonne", icon: Bed },
+    { value: "Accessible aux handicapés", icon: Home },
   ];
 
   return (
@@ -246,7 +241,7 @@ const OwnerPropertyDetailsSection = ({
       <div className="space-y-2">
         <Label className="text-sm font-medium">Équipements</Label>
         <div className="grid grid-cols-2 gap-2">
-          {EQUIPMENT.map(({ value, icon: Icon, label }) => (
+          {EQUIPMENT.map(({ value, icon: Icon }) => (
             <button
               key={value}
               type="button"
@@ -258,7 +253,7 @@ const OwnerPropertyDetailsSection = ({
               }`}
             >
               <Icon className="h-4 w-4" />
-              {label}
+              {value}
             </button>
           ))}
         </div>
