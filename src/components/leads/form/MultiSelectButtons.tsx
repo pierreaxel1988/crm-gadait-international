@@ -5,10 +5,10 @@ import BaseSelectButtons from './BaseSelectButtons';
 interface MultiSelectButtonsProps<T extends string> {
   options: readonly T[] | T[];
   selectedValues: T[];
-  onChange?: (value: T) => void; // Make onChange optional
-  onToggle?: (value: T) => void; // Add back onToggle for backward compatibility
+  onChange?: (value: T) => void;
+  onToggle?: (value: T) => void;
   specialOption?: T;
-  className?: string; // Add className prop to be passed to BaseSelectButtons
+  className?: string;
 }
 
 const MultiSelectButtons = <T extends string>({
@@ -32,7 +32,7 @@ const MultiSelectButtons = <T extends string>({
   
   return (
     <BaseSelectButtons
-      options={[...options]} // Convert readonly array to regular array with spread
+      options={[...options]}
       isSelected={isSelected}
       onSelectOption={handleSelectOption}
       specialOption={specialOption}

@@ -1,4 +1,6 @@
+
 import { LeadDetailed } from '@/types/lead';
+import { ActionHistory, TaskType } from '@/types/actionHistory';
 
 export const mapToLeadDetailed = (lead: any): LeadDetailed => {
   // Parse and validate action history
