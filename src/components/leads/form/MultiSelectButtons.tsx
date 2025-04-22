@@ -6,6 +6,7 @@ interface MultiSelectButtonsProps {
   options: string[];
   selectedValues: string[];
   onChange: (value: string) => void;
+  onToggle?: (value: string) => void; // Ajout de cette prop pour compatibilité
   specialOption?: string;
   className?: string;
 }
@@ -14,12 +15,17 @@ const MultiSelectButtons: React.FC<MultiSelectButtonsProps> = ({
   options,
   selectedValues,
   onChange,
+  onToggle,
   specialOption,
   className
 }) => {
   // La fonction de gestion de clic pour basculer entre sélectionné et non sélectionné
   const handleToggle = (value: string) => {
-    onChange(value);
+    if (onToggle) {
+      onToggle(value);
+    } else {
+      onChange(value);
+    }
   };
 
   return (

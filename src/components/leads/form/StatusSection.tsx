@@ -92,7 +92,7 @@ const StatusSection = ({
 
   const getStatusLabel = (status: LeadStatus): string => {
     if (formData.pipelineType === 'owners') {
-      const ownerStatusLabels: Record<LeadStatus, string> = {
+      const ownerStatusLabels: Record<string, string> = {
         'New': 'Premier contact',
         'Contacted': 'Rendez-vous programmé',
         'Qualified': 'Visite effectuée',
