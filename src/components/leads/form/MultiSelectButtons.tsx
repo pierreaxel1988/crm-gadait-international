@@ -4,28 +4,40 @@ import { cn } from '@/lib/utils';
 
 interface MultiSelectButtonsProps {
   options: string[];
-  selectedValues: string[];
+  selectedValues?: string[]; 
   onChange?: (value: string) => void;
-  onToggle?: (value: string) => void;
+  onToggle?: (values: string[]) => void;
   specialOption?: string;
   className?: string;
+  multiple?: boolean;
 }
 
 const MultiSelectButtons: React.FC<MultiSelectButtonsProps> = ({
   options,
-  selectedValues,
+  selectedValues = [], 
   onChange,
   onToggle,
   specialOption,
-  className
+  className,
+  multiple = true
 }) => {
   const handleClick = (option: string) => {
+    let newSelectedValues: string[];
+
+    if (multiple) {
+      newSelectedValues = selectedValues.includes(option)
+        ? selectedValues.filter(val => val !== option)
+        : [...selectedValues, option];
+    } else {
+      newSelectedValues = [option];
+    }
+
     if (onChange) {
       onChange(option);
     }
     
     if (onToggle) {
-      onToggle(option);
+      onToggle(newSelectedValues);
     }
   };
 
@@ -39,7 +51,7 @@ const MultiSelectButtons: React.FC<MultiSelectButtonsProps> = ({
           className={`py-1 px-3 text-sm rounded-md transition-colors flex items-center ${
             selectedValues.includes(option)
               ? 'bg-primary text-white'
-              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              : 'bg-secondary text-foreground'
           } ${option === specialOption ? 'font-bold' : ''}`}
         >
           {option}
