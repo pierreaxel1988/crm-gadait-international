@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency } from '@/types/lead';
+import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency, AssetType, Equipment, MauritiusRegion } from '@/types/lead';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import ActionButtons from '@/components/pipeline/filters/ActionButtons';
-import { MauritiusRegion } from '@/types/lead';
+import { Home } from 'lucide-react';
 
 const PROPERTY_TYPES: PropertyType[] = ['Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'];
 const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
@@ -226,6 +226,62 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
 
+  const handleAssetToggle = (value: AssetType) => {
+    const updatedAssets = lead.assets ? [...lead.assets] : [];
+    if (updatedAssets.includes(value)) {
+      handleInputChange('assets', updatedAssets.filter(asset => asset !== value));
+    } else {
+      handleInputChange('assets', [...updatedAssets, value]);
+    }
+  };
+
+  const handleEquipmentToggle = (value: Equipment) => {
+    const updatedEquipment = lead.equipment ? [...lead.equipment] : [];
+    if (updatedEquipment.includes(value)) {
+      handleInputChange('equipment', updatedEquipment.filter(equipment => equipment !== value));
+    } else {
+      handleInputChange('equipment', [...updatedEquipment, value]);
+    }
+  };
+
+  const ASSETS: { value: AssetType; icon: React.ComponentType }[] = [
+    { value: "Vue mer", icon: Home },
+    { value: "Vue panoramique", icon: Home },
+    { value: "Bord de mer", icon: Home },
+    { value: "Front de mer", icon: Home },
+    { value: "Domaine de chasse", icon: Home },
+    { value: "Écurie", icon: Home },
+    { value: "Bien d'architecte", icon: Home },
+    { value: "Style contemporain", icon: Home },
+    { value: "Monument classé", icon: Home },
+    { value: "Court de tennis", icon: Home },
+    { value: "Pied des pistes", icon: Home },
+    { value: "Proche montagne", icon: Home },
+    { value: "Proche aéroport", icon: Home },
+    { value: "Proche gare", icon: Home },
+    { value: "Proche golf", icon: Home },
+  ];
+
+  const EQUIPMENT: { value: Equipment; icon: React.ComponentType }[] = [
+    { value: "Piscine", icon: Home },
+    { value: "Ascenseur", icon: Home },
+    { value: "Garage & Parking", icon: Home },
+    { value: "Climatisation", icon: Home },
+    { value: "Salle de réception", icon: Home },
+    { value: "Dépendances", icon: Home },
+    { value: "Loge gardien", icon: Home },
+    { value: "Spa", icon: Home },
+    { value: "Viager", icon: Home },
+    { value: "Terrasse", icon: Home },
+    { value: "Jardin", icon: Home },
+    { value: "Meublé", icon: Home },
+    { value: "Cheminée", icon: Home },
+    { value: "Maison d'amis", icon: Home },
+    { value: "Bâtiments agricoles", icon: Home },
+    { value: "Chambre de bonne", icon: Home },
+    { value: "Accessible aux handicapés", icon: Home },
+  ];
+
   return (
     <div 
       className="space-y-5 pt-4" 
@@ -360,6 +416,150 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
               <Label className="text-sm">Prestations souhaitées</Label>
               <CustomTagInput tags={lead.amenities || []} onChange={newTags => handleInputChange('amenities', newTags)} placeholder="Ajouter une commodité..." predefinedOptions={AMENITIES} />
             </div>
+            
+            {lead.pipelineType === 'owners' && (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-sm">Surface habitable (m²)</Label>
+                  <Input 
+                    id="livingArea" 
+                    value={lead.livingArea || ''} 
+                    onChange={e => handleInputChange('livingArea', e.target.value)} 
+                    placeholder="Surface en m²" 
+                    className="w-full font-futura" 
+                    type="text" 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm">Surface du terrain (m²)</Label>
+                  <Input 
+                    id="landArea" 
+                    value={lead.landArea || ''} 
+                    onChange={e => handleInputChange('landArea', e.target.value)} 
+                    placeholder="Surface du terrain" 
+                    className="w-full font-futura" 
+                    type="text" 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm">Année de construction</Label>
+                  <Input 
+                    id="constructionYear" 
+                    value={lead.constructionYear || ''} 
+                    onChange={e => handleInputChange('constructionYear', e.target.value)} 
+                    placeholder="Année de construction" 
+                    className="w-full font-futura" 
+                    type="number" 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm">Nombre de places de parking</Label>
+                  <Input 
+                    id="parkingSpaces" 
+                    value={lead.parkingSpaces?.toString() || ''} 
+                    onChange={e => handleInputChange('parkingSpaces', e.target.value)} 
+                    placeholder="Nombre de places" 
+                    className="w-full font-futura" 
+                    type="number" 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm">Nombre d'étages</Label>
+                  <Input 
+                    id="floors" 
+                    value={lead.floors?.toString() || ''} 
+                    onChange={e => handleInputChange('floors', e.target.value)} 
+                    placeholder="Nombre d'étages" 
+                    className="w-full font-futura" 
+                    type="number" 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm">Orientation</Label>
+                  <MultiSelectButtons 
+                    options={["Nord", "Sud", "Est", "Ouest"]} 
+                    selectedValues={lead.orientation || []} 
+                    onToggle={value => {
+                      const updatedOrientation = lead.orientation ? [...lead.orientation] : [];
+                      if (updatedOrientation.includes(value)) {
+                        handleInputChange('orientation', updatedOrientation.filter(o => o !== value));
+                      } else {
+                        handleInputChange('orientation', [...updatedOrientation, value]);
+                      }
+                    }} 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm">Classe énergétique</Label>
+                  <Input 
+                    id="energyClass" 
+                    value={lead.energyClass || ''} 
+                    onChange={e => handleInputChange('energyClass', e.target.value)} 
+                    placeholder="Ex: A, B, C..." 
+                    className="w-full font-futura" 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm">Taxes annuelles</Label>
+                  <Input 
+                    id="yearlyTaxes" 
+                    value={lead.yearlyTaxes || ''} 
+                    onChange={e => handleInputChange('yearlyTaxes', e.target.value)} 
+                    placeholder="Montant des taxes annuelles" 
+                    className="w-full font-futura" 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm">Les atouts</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {ASSETS.map(({ value, icon: Icon }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => handleAssetToggle(value)}
+                        className={`flex items-center gap-2 p-2 rounded-md text-sm transition-colors ${
+                          lead.assets?.includes(value)
+                            ? 'bg-primary text-white'
+                            : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm">Équipements</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {EQUIPMENT.map(({ value, icon: Icon }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => handleEquipmentToggle(value)}
+                        className={`flex items-center gap-2 p-2 rounded-md text-sm transition-colors ${
+                          lead.equipment?.includes(value)
+                            ? 'bg-primary text-white'
+                            : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </TabsContent>
 
           <TabsContent value="purchase" className="space-y-4 py-2">
