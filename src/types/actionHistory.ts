@@ -1,5 +1,5 @@
 
-import { TaskType } from '@/components/kanban/KanbanCard';
+export type TaskType = 'Call' | 'Email' | 'Visit' | 'Meeting' | 'Note' | 'Offer' | 'Document' | 'Other';
 
 export interface ActionHistory {
   id: string;

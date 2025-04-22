@@ -1,4 +1,3 @@
-
 import { LeadDetailed } from '@/types/lead';
 import { ActionHistory, TaskType } from '@/types/actionHistory';
 
