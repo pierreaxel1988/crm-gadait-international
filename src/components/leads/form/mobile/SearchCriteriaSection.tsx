@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { LeadDetailed, Currency, PropertyState } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -10,30 +9,20 @@ import { Separator } from '@/components/ui/separator';
 import { 
   Home,
   Bath,
-  Stairs,
-  Compass,
-  Star,
   Building,
-  Car,
+  Compass,
   Camera,
-  Pool,
-  Spa,
-  Security,
+  Car,
+  Fan,
+  Bed,
+  Sofa,
+  Clock,
+  DoorClosed,
+  Star,
   Settings,
-  SolarPanel,
-  Water,
-  Wheelchair,
-  Architecture,
-  Neighbor,
-  Extension,
-  Heritage,
-  Restrictions,
-  ConciergeService,
-  Nuisance,
-  Roof,
-  Wine,
-  Access
+  FileText
 } from 'lucide-react';
+import { getIcon } from '@/utils/icons';
 
 interface OwnerPriceFieldsProps {
   lead: LeadDetailed;
@@ -466,8 +455,8 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
             <Label className="text-sm">Prestations de luxe</Label>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { name: 'Piscine', icon: Pool },
-                { name: 'Spa', icon: Spa },
+                { name: 'Piscine', icon: Home },
+                { name: 'Spa', icon: Home },
                 { name: 'Home cinéma', icon: Home },
                 { name: 'Court de tennis', icon: Home },
                 { name: 'Hammam', icon: Home },
@@ -504,7 +493,7 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                   }`}
                 >
-                  <Architecture className="h-4 w-4" />
+                  <Building className="h-4 w-4" />
                   {material}
                 </button>
               ))}
@@ -580,7 +569,7 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                   }`}
                 >
-                  <Security className="h-4 w-4" />
+                  <DoorClosed className="h-4 w-4" />
                   {security}
                 </button>
               ))}
@@ -624,7 +613,7 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                   }`}
                 >
-                  <SolarPanel className="h-4 w-4" />
+                  <FileText className="h-4 w-4" />
                   {eco}
                 </button>
               ))}
