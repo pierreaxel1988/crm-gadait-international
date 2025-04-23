@@ -6,7 +6,6 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { formatBudget } from '../utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
 import { isPast, isToday } from 'date-fns';
-import { countryToFlag } from '@/utils/countryUtils';
 
 interface LeadTagsListProps {
   columnStatus: LeadStatus;
@@ -15,7 +14,6 @@ interface LeadTagsListProps {
   desiredLocation?: string;
   budget?: string;
   currency?: Currency;
-  country?: string;
 }
 
 const LeadTagsList: React.FC<LeadTagsListProps> = ({
@@ -24,8 +22,7 @@ const LeadTagsList: React.FC<LeadTagsListProps> = ({
   nextFollowUpDate,
   desiredLocation,
   budget,
-  currency,
-  country
+  currency
 }) => {
   const statusColors = getStatusColors(columnStatus);
   
@@ -76,15 +73,6 @@ const LeadTagsList: React.FC<LeadTagsListProps> = ({
           label={taskType} 
           bgColor={taskStyle.bg} 
           textColor={taskStyle.text} 
-          className="font-futuraLight" 
-        />
-      )}
-      
-      {country && (
-        <LeadTag 
-          label={`${countryToFlag(country)} ${country}`} 
-          bgColor="bg-[#F5F3EE]" 
-          textColor="text-[#7A6C5D]" 
           className="font-futuraLight" 
         />
       )}

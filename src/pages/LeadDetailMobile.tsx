@@ -195,29 +195,29 @@ const LeadDetailMobile = () => {
         </div>
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto pt-24 mt-2">
+      <ScrollArea className="flex-1 overflow-y-auto pt-20">
         <Tabs value={activeTab} className="w-full h-full">
-          <div className="px-4 pb-28 h-full pt-2">
-            <TabsContent value="info" className="mt-0 animate-[fade-in_0.2s_ease-out]">
+          <div className="px-4 pb-32 h-full">
+            <TabsContent value="info" className="mt-1 animate-[fade-in_0.2s_ease-out]">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="criteria" className="mt-0 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="criteria" className="mt-1 animate-[fade-in_0.2s_ease-out]">
               <SearchCriteriaSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="status" className="mt-0 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="status" className="mt-1 animate-[fade-in_0.2s_ease-out]">
               <StatusSection 
                 lead={lead} 
                 onDataChange={handleDataChange} 
               />
             </TabsContent>
             
-            <TabsContent value="notes" className="mt-0 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="notes" className="mt-1 animate-[fade-in_0.2s_ease-out]">
               <NotesSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
-            <TabsContent value="actions" className="mt-0 animate-[fade-in_0.2s_ease-out]">
+            <TabsContent value="actions" className="mt-1 animate-[fade-in_0.2s_ease-out]">
               {actionSuggestions && actionSuggestions.length > 0 && (
                 <ActionSuggestions
                   suggestions={actionSuggestions}
@@ -233,7 +233,7 @@ const LeadDetailMobile = () => {
               />
             </TabsContent>
             
-            <TabsContent value="emails" className="h-full flex-1 flex-grow mt-0">
+            <TabsContent value="emails" className="h-full flex-1 flex-grow mt-1">
               <EmailsTab leadId={id || ''} />
             </TabsContent>
           </div>

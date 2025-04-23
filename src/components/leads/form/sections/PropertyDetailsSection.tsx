@@ -7,11 +7,6 @@ import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import CustomTagInput from '../CustomTagInput';
 import OwnerPropertyDetailsSection from './OwnerPropertyDetailsSection';
-import LocationFilter from '@/components/pipeline/filters/LocationFilter';
-import SmartSearch from '@/components/common/SmartSearch';
-import { Label } from '@/components/ui/label';
-import { COUNTRIES } from '@/utils/countries';
-import { countryToFlag } from '@/utils/countryUtils';
 
 interface PropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -40,7 +35,6 @@ const PropertyDetailsSection = ({
   countries,
   handleCountryChange
 }: PropertyDetailsSectionProps) => {
-  // Si c'est un lead de type "owners", utiliser le composant OwnerPropertyDetailsSection
   if (formData.pipelineType === 'owners') {
     return (
       <OwnerPropertyDetailsSection
@@ -51,38 +45,6 @@ const PropertyDetailsSection = ({
     );
   }
 
-  const handleLocationChange = (location: string) => {
-    const syntheticEvent = {
-      target: {
-        name: 'desiredLocation',
-        value: location
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    
-    handleInputChange(syntheticEvent);
-  };
-
-  const handleSmartCountryChange = (country: string) => {
-    if (COUNTRIES.includes(country)) {
-      const syntheticEvent = {
-        target: {
-          name: 'country',
-          value: country
-        }
-      } as React.ChangeEvent<HTMLSelectElement>;
-      
-      handleCountryChange(syntheticEvent);
-    }
-  };
-
-  const renderCountryItem = (country: string) => (
-    <div className="text-sm py-1 flex items-center gap-2">
-      <span className="mr-1">{countryToFlag(country)}</span> {country}
-    </div>
-  );
-
-  const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
-  
   const getLocations = () => {
     if (!formData.country) return [];
     
@@ -103,6 +65,8 @@ const PropertyDetailsSection = ({
     }
   };
 
+  const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
+  
   const getSelectedBedrooms = () => {
     if (!formData.bedrooms) return [];
     
@@ -194,32 +158,25 @@ const PropertyDetailsSection = ({
         isLoading={extractLoading}
       />
 
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Pays recherché</Label>
-        <SmartSearch
-          placeholder="Sélectionnez un pays..."
-          value={formData.country || ''}
-          onChange={handleSmartCountryChange}
-          results={COUNTRIES.filter(country => 
-            country.toLowerCase().includes(formData.country?.toLowerCase() || '')
-          ).slice(0, 10)}
-          onSelect={handleSmartCountryChange}
-          renderItem={renderCountryItem}
-          className="w-full"
-          inputClassName="h-9 text-sm"
-          minChars={1}
-          searchIcon={true}
-          clearButton={true}
-          emptyMessage="Aucun pays trouvé"
-        />
-      </div>
+      <FormInput
+        label="Pays recherché"
+        name="country"
+        type="select"
+        value={formData.country || ''}
+        onChange={handleCountryChange}
+        options={countries.map(country => ({ value: country, label: country }))}
+        placeholder="Pays de recherche"
+      />
 
-      <div className="space-y-2">
-        <LocationFilter 
-          location={formData.desiredLocation || ''} 
-          onLocationChange={handleLocationChange} 
-        />
-      </div>
+      <FormInput
+        label="Localisation souhaitée"
+        name="desiredLocation"
+        type="select"
+        value={formData.desiredLocation || ''}
+        onChange={handleInputChange}
+        options={getLocations()}
+        placeholder="Localisation souhaitée"
+      />
 
       <div className="pt-2">
         <h4 className="text-sm font-medium mb-3">Type de propriété</h4>
