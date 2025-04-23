@@ -34,6 +34,8 @@ const OwnerPropertyDetailsSection = ({
 
   // Modified to ensure only valid countries are selected
   const handleSmartCountryChange = (country: string) => {
+    console.log('OwnerPropertyDetailsSection - Pays reçu:', country);
+    
     // Only update if the selected country is in our predefined list
     if (COUNTRIES.includes(country)) {
       const syntheticEvent = {
@@ -43,7 +45,10 @@ const OwnerPropertyDetailsSection = ({
         }
       } as React.ChangeEvent<HTMLSelectElement>;
       
+      console.log('OwnerPropertyDetailsSection - Mise à jour du pays:', country);
       handleInputChange(syntheticEvent);
+    } else {
+      console.log('OwnerPropertyDetailsSection - Pays invalide ignoré:', country);
     }
   };
 
@@ -66,6 +71,19 @@ const OwnerPropertyDetailsSection = ({
     </div>
   );
 
+  // Filtre les pays en fonction de la recherche
+  const filterCountries = () => {
+    if (!formData.country) {
+      return popularCountries; // Afficher les pays populaires si aucune recherche
+    }
+    
+    const searchTerm = formData.country.toLowerCase();
+    
+    return COUNTRIES.filter(country => 
+      country.toLowerCase().includes(searchTerm)
+    ).slice(0, 10);
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -75,15 +93,22 @@ const OwnerPropertyDetailsSection = ({
         <SmartSearch
           placeholder="Sélectionnez un pays..."
           value={formData.country || ''}
-          onChange={handleSmartCountryChange}
-          results={COUNTRIES.filter(country => 
-            country.toLowerCase().includes(formData.country?.toLowerCase() || '')
-          ).slice(0, 10)}
+          onChange={(value) => {
+            const syntheticEvent = {
+              target: {
+                name: 'country',
+                value: value
+              }
+            } as React.ChangeEvent<HTMLInputElement>;
+            
+            handleInputChange(syntheticEvent);
+          }}
+          results={filterCountries()}
           onSelect={handleSmartCountryChange}
           renderItem={renderCountryItem}
           className="w-full"
           inputClassName="h-9 text-sm"
-          minChars={1}
+          minChars={0}
           searchIcon={true}
           clearButton={true}
           emptyMessage="Aucun pays trouvé"
