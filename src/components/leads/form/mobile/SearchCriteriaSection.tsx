@@ -1,4 +1,14 @@
 
+import React from 'react';
+import { LeadDetailed } from '@/types/lead';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+
+interface OwnerPriceFieldsProps {
+  lead: LeadDetailed;
+  onDataChange: (data: Partial<LeadDetailed>) => void;
+}
+
 const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange }) => {
   const handleFurnishedToggle = () => {
     const updatedFurnished = !lead.furnished;
@@ -81,3 +91,23 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange 
     </div>
   );
 };
+
+interface SearchCriteriaSectionProps {
+  lead: LeadDetailed;
+  onDataChange: (data: Partial<LeadDetailed>) => void;
+}
+
+const SearchCriteriaSection = ({ lead, onDataChange }: SearchCriteriaSectionProps) => {
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold mb-2">Critères de Recherche</h2>
+      
+      {lead.pipelineType === 'owners' && (
+        <OwnerPriceFields lead={lead} onDataChange={onDataChange} />
+      )}
+    </div>
+  );
+};
+
+// Ajout d'une exportation par défaut pour résoudre l'erreur
+export default SearchCriteriaSection;
