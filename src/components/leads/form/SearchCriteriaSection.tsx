@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, MauritiusRegion } from '@/types/lead';
 import FormSection from './FormSection';
@@ -11,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import MultiSelectButtons from '../../leads/form/MultiSelectButtons';
+import SmartSearch from '@/components/common/SmartSearch';
 
 interface SearchCriteriaSectionProps {
   formData: LeadDetailed;
@@ -47,11 +47,9 @@ const SearchCriteriaSection = ({
   countries,
   handleCountryChange
 }: SearchCriteriaSectionProps) => {
-  // Handle nationality auto-completion when country changes
   const handleCountryChangeWithNationality = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     handleCountryChange(e);
     
-    // If nationality is empty, try to derive it from country
     if (!formData.nationality) {
       const selectedCountry = e.target.value;
       const nationality = deriveNationalityFromCountry(selectedCountry);
