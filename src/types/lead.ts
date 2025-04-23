@@ -1,4 +1,3 @@
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -188,4 +187,6 @@ export interface LeadDetailed {
   desired_price?: string;
   fees?: string;
   furnished?: boolean;
+  furniture_included_in_price?: boolean;
+  furniture_price?: string;
 }

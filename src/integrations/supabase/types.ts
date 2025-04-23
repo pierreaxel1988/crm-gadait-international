@@ -200,6 +200,8 @@ export type Database = {
           financing_method: string | null
           floors: number | null
           furnished: boolean | null
+          furniture_included_in_price: boolean | null
+          furniture_price: string | null
           id: string
           imported_at: string | null
           integration_source: string | null
@@ -261,6 +263,8 @@ export type Database = {
           financing_method?: string | null
           floors?: number | null
           furnished?: boolean | null
+          furniture_included_in_price?: boolean | null
+          furniture_price?: string | null
           id?: string
           imported_at?: string | null
           integration_source?: string | null
@@ -322,6 +326,8 @@ export type Database = {
           financing_method?: string | null
           floors?: number | null
           furnished?: boolean | null
+          furniture_included_in_price?: boolean | null
+          furniture_price?: string | null
           id?: string
           imported_at?: string | null
           integration_source?: string | null
