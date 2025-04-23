@@ -130,7 +130,7 @@ interface SearchCriteriaSectionProps {
 const SearchCriteriaSection = ({ lead, onDataChange }: SearchCriteriaSectionProps) => {
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold mb-2">Critères de Recherche</h2>
+      <h2 className="text-lg font-semibold mb-2">Critères de la Propriété</h2>
       
       {lead.pipelineType === 'owners' && (
         <OwnerPriceFields lead={lead} onDataChange={onDataChange} />
@@ -140,3 +140,4 @@ const SearchCriteriaSection = ({ lead, onDataChange }: SearchCriteriaSectionProp
 };
 
 export default SearchCriteriaSection;
+
