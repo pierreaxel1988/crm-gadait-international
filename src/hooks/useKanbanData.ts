@@ -41,6 +41,11 @@ export interface ExtendedKanbanItem extends KanbanItem {
   parkingSpaces?: number;
   constructionYear?: string;
   yearlyTaxes?: string;
+  // Ajout des propriétés également manquantes dans l'erreur
+  facilities?: string[];
+  key_features?: string[];
+  property_description?: string;
+  renovation_needed?: string;
 }
 
 interface KanbanColumn {
@@ -205,7 +210,12 @@ export const useKanbanData = (
               orientation: lead.orientation || [],
               parking_spaces: lead.parkingSpaces || null,
               construction_year: lead.constructionYear || '',
-              yearly_taxes: lead.yearlyTaxes || ''
+              yearly_taxes: lead.yearlyTaxes || '',
+              // Ajout des propriétés également manquantes dans l'erreur
+              facilities: lead.facilities || [],
+              key_features: lead.keyFeatures || [],
+              property_description: lead.propertyDescription || '',
+              renovation_needed: lead.renovationNeeded || ''
             }));
           }
         }

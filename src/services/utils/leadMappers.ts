@@ -85,7 +85,21 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     actionHistory: actionHistory,
     livingArea: lead.living_area,
     external_id: lead.external_id,
-    regions: lead.regions || []
+    regions: lead.regions || [],
+    facilities: lead.facilities || [],
+    keyFeatures: lead.key_features || [],
+    propertyDescription: lead.property_description || '',
+    renovationNeeded: lead.renovation_needed || '',
+    condoFees: lead.condo_fees || '',
+    energyClass: lead.energy_class || '',
+    equipment: lead.equipment || [],
+    floors: lead.floors,
+    landArea: lead.land_area || '',
+    orientation: lead.orientation || [],
+    parkingSpaces: lead.parking_spaces,
+    constructionYear: lead.construction_year || '',
+    yearlyTaxes: lead.yearly_taxes || '',
+    assets: lead.assets || []
   };
 };
 
