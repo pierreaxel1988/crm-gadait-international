@@ -127,11 +127,6 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
     </div>;
 };
 
-interface SearchCriteriaSectionProps {
-  lead: LeadDetailed;
-  onDataChange: (data: Partial<LeadDetailed>) => void;
-}
-
 interface OwnerPriceFieldsProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
@@ -162,7 +157,10 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange,
 
     <div className="space-y-2">
       <Label htmlFor="currency" className="text-sm">Devise</Label>
-      <Select value={lead.currency || 'EUR'} onValueChange={value => onDataChange({ currency: value })}>
+      <Select 
+        value={lead.currency || 'EUR'} 
+        onValueChange={(value: string) => onDataChange({ currency: value as Currency })}
+      >
         <SelectTrigger id="currency" className="w-full font-futura">
           <SelectValue placeholder="Sélectionner une devise" />
         </SelectTrigger>
