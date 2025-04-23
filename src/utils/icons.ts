@@ -1,5 +1,10 @@
 
-import { Droplets, Bath, Home, Camera, Car, Fan, Bed, Sofa, Clock, DoorClosed, FileText, ClipboardCheck, Send, FileSearch, Users, Building, Star, Compass, Settings } from 'lucide-react';
+import { 
+  Droplets, Bath, Home, Camera, Car, Fan, Bed, Sofa, 
+  Clock, DoorClosed, FileText, ClipboardCheck, Send, 
+  FileSearch, Users, Building, Star, Compass, Settings,
+  MapPin, Search, Navigation, Map, Location
+} from 'lucide-react';
 
 export const AllowedIcons = {
   Droplets,
@@ -20,7 +25,12 @@ export const AllowedIcons = {
   Building,
   Star,
   Compass,
-  Settings
+  Settings,
+  MapPin,
+  Search,
+  Navigation,
+  Map,
+  Location
 };
 
 export type AllowedIconName = keyof typeof AllowedIcons;

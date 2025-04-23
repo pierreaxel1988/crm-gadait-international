@@ -20,9 +20,13 @@ import {
   DoorClosed,
   Star,
   Settings,
-  FileText
+  FileText,
+  MapPin
 } from 'lucide-react';
 import { getIcon } from '@/utils/icons';
+import LocationFilter from '@/components/pipeline/filters/LocationFilter';
+import SmartSearch from '@/components/common/SmartSearch';
+import { getAllLocations } from '@/utils/locationsByCountry';
 
 interface OwnerPriceFieldsProps {
   lead: LeadDetailed;
@@ -147,31 +151,46 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange 
   );
 };
 
-// Location section component
+// Location section component with enhanced search capabilities
 const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange }) => {
+  // Handle country selection using SmartSearch
+  const handleCountryChange = (country: string) => {
+    onDataChange({ country });
+  };
+  
+  // Handle location selection using LocationFilter
+  const handleLocationChange = (location: string) => {
+    onDataChange({ desiredLocation: location });
+  };
+  
+  // Get all available countries
+  const allCountries = Object.keys(getAllLocations()).sort();
+  
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="country" className="text-sm">Pays</Label>
-        <Input
-          id="country"
+        <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+          <MapPin className="h-4 w-4" /> Pays
+        </h4>
+        <SmartSearch
+          placeholder="Sélectionnez un pays..."
           value={lead.country || ''}
-          onChange={e => onDataChange({ country: e.target.value })}
-          placeholder="Ex : France"
-          className="w-full font-futura"
-          type="text"
+          onChange={handleCountryChange}
+          results={['France', 'Switzerland', 'Spain', 'Portugal', 'United Kingdom', 'United States', 'Mauritius', 'UAE']}
+          renderItem={(country) => <div className="text-sm py-1">{country}</div>}
+          className="w-full"
+          inputClassName="h-9 text-sm"
+          minChars={1}
+          searchIcon={true}
+          clearButton={true}
+          emptyMessage="Aucun pays trouvé"
         />
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="desiredLocation" className="text-sm">Localisation souhaitée</Label>
-        <Input
-          id="desiredLocation"
-          value={lead.desiredLocation || ''}
-          onChange={e => onDataChange({ desiredLocation: e.target.value })}
-          placeholder="Ex : Paris 16e"
-          className="w-full font-futura"
-          type="text"
+        <LocationFilter 
+          location={lead.desiredLocation || ''} 
+          onLocationChange={handleLocationChange}
         />
       </div>
     </div>

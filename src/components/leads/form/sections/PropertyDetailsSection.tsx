@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, Country } from '@/types/lead';
 import FormInput from '../FormInput';
@@ -38,6 +39,7 @@ const PropertyDetailsSection = ({
   countries,
   handleCountryChange
 }: PropertyDetailsSectionProps) => {
+  // Si c'est un lead de type "owners", utiliser le composant OwnerPropertyDetailsSection
   if (formData.pipelineType === 'owners') {
     return (
       <OwnerPropertyDetailsSection
@@ -196,6 +198,7 @@ const PropertyDetailsSection = ({
           minChars={1}
           searchIcon={true}
           clearButton={true}
+          emptyMessage="Aucun pays trouvé"
         />
       </div>
 
