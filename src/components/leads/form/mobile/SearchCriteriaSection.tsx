@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 interface OwnerPriceFieldsProps {
   lead: LeadDetailed;
@@ -122,22 +123,117 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange 
   );
 };
 
+// Location section component
+const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange }) => {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="desiredLocation" className="text-sm">Localisation souhaitée</Label>
+        <Input
+          id="desiredLocation"
+          value={lead.desiredLocation || ''}
+          onChange={e => onDataChange({ desiredLocation: e.target.value })}
+          placeholder="Ex : Paris 16e"
+          className="w-full font-futura"
+          type="text"
+        />
+      </div>
+    </div>
+  );
+};
+
+// Property details section component
+const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange }) => {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="livingArea" className="text-sm">Surface habitable</Label>
+        <Input
+          id="livingArea"
+          value={lead.livingArea || ''}
+          onChange={e => onDataChange({ livingArea: e.target.value })}
+          placeholder="Ex : 120 m²"
+          className="w-full font-futura"
+          type="text"
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="bedrooms" className="text-sm">Chambres</Label>
+        <Input
+          id="bedrooms"
+          value={lead.bedrooms || ''}
+          onChange={e => onDataChange({ bedrooms: e.target.value })}
+          placeholder="Ex : 3"
+          className="w-full font-futura"
+          type="number"
+        />
+      </div>
+    </div>
+  );
+};
+
+// Purchase details section component
+const OwnerPurchaseSection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange }) => {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="purchaseTimeframe" className="text-sm">Délai de vente</Label>
+        <Input
+          id="purchaseTimeframe"
+          value={lead.purchaseTimeframe || ''}
+          onChange={e => onDataChange({ purchaseTimeframe: e.target.value })}
+          placeholder="Ex : 3-6 mois"
+          className="w-full font-futura"
+          type="text"
+        />
+      </div>
+    </div>
+  );
+};
+
 interface SearchCriteriaSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
 
 const SearchCriteriaSection = ({ lead, onDataChange }: SearchCriteriaSectionProps) => {
+  const [activeTab, setActiveTab] = useState('budget');
+  
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold mb-2">Critères de la Propriété</h2>
       
       {lead.pipelineType === 'owners' && (
-        <OwnerPriceFields lead={lead} onDataChange={onDataChange} />
+        <div className="space-y-4">
+          <Tabs defaultValue="budget" className="w-full" onValueChange={setActiveTab}>
+            <TabsList className="w-full grid grid-cols-4 mb-4">
+              <TabsTrigger value="budget">Budget</TabsTrigger>
+              <TabsTrigger value="location">Localisation</TabsTrigger>
+              <TabsTrigger value="property">Bien</TabsTrigger>
+              <TabsTrigger value="purchase">Achat</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="budget" className="space-y-4">
+              <OwnerPriceFields lead={lead} onDataChange={onDataChange} />
+            </TabsContent>
+            
+            <TabsContent value="location" className="space-y-4">
+              <OwnerLocationSection lead={lead} onDataChange={onDataChange} />
+            </TabsContent>
+            
+            <TabsContent value="property" className="space-y-4">
+              <OwnerPropertySection lead={lead} onDataChange={onDataChange} />
+            </TabsContent>
+            
+            <TabsContent value="purchase" className="space-y-4">
+              <OwnerPurchaseSection lead={lead} onDataChange={onDataChange} />
+            </TabsContent>
+          </Tabs>
+        </div>
       )}
     </div>
   );
 };
 
 export default SearchCriteriaSection;
-
