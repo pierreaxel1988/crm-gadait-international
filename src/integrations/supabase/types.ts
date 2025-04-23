@@ -190,13 +190,16 @@ export type Database = {
           created_at: string
           currency: string | null
           desired_location: string | null
+          desired_price: string | null
           email: string | null
           energy_class: string | null
           equipment: string[] | null
           external_id: string | null
           facilities: string[] | null
+          fees: string | null
           financing_method: string | null
           floors: number | null
+          furnished: boolean | null
           id: string
           imported_at: string | null
           integration_source: string | null
@@ -248,13 +251,16 @@ export type Database = {
           created_at?: string
           currency?: string | null
           desired_location?: string | null
+          desired_price?: string | null
           email?: string | null
           energy_class?: string | null
           equipment?: string[] | null
           external_id?: string | null
           facilities?: string[] | null
+          fees?: string | null
           financing_method?: string | null
           floors?: number | null
+          furnished?: boolean | null
           id?: string
           imported_at?: string | null
           integration_source?: string | null
@@ -306,13 +312,16 @@ export type Database = {
           created_at?: string
           currency?: string | null
           desired_location?: string | null
+          desired_price?: string | null
           email?: string | null
           energy_class?: string | null
           equipment?: string[] | null
           external_id?: string | null
           facilities?: string[] | null
+          fees?: string | null
           financing_method?: string | null
           floors?: number | null
+          furnished?: boolean | null
           id?: string
           imported_at?: string | null
           integration_source?: string | null

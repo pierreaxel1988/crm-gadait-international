@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import ActionButtons from '@/components/pipeline/filters/ActionButtons';
 import { Building, Building2 } from '@/utils/icons';
 import { Home, Bed, Camera, Fan, Sofa, Droplets, Car, DoorClosed } from 'lucide-react';
+
 const PROPERTY_TYPES: PropertyType[] = ['Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'];
 const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
 const AMENITIES: Amenity[] = ['Piscine', 'Jardin', 'Garage', 'Sécurité', 'Climatisation', 'Terrasse', 'Balcon', 'Vue mer', 'Vue montagne', 'Gym', 'Spa', 'Piscine intérieure', 'Jacuzzi', 'Court de tennis', 'Ascenseur', 'Parking'];
@@ -23,19 +24,23 @@ const PROPERTY_USES: PropertyUse[] = ['Investissement locatif', 'Résidence prin
 const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'CHF', 'AED', 'MUR'];
 const COUNTRIES = ['Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 'Portugal', 'Seychelles', 'Spain', 'Switzerland', 'UAE', 'UK', 'USA', 'Autre'];
 const MAURITIUS_REGIONS: MauritiusRegion[] = ['North', 'South', 'West', 'East'];
+
 const createIconComponent = (IconComponent: React.ComponentType<any>) => {
   return IconComponent;
 };
+
 const countryMatchesSearch = (country: string, searchTerm: string): boolean => {
   if (!searchTerm) return true;
   const normalizedCountry = country.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   return normalizedCountry.includes(normalizedSearch);
 };
+
 interface SearchCriteriaSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
+
 interface SmartSearchFieldProps {
   label: string;
   value: string;
@@ -43,6 +48,7 @@ interface SmartSearchFieldProps {
   options: string[];
   placeholder?: string;
 }
+
 const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
   label,
   value,
@@ -55,6 +61,7 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
   const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (searchTerm) {
       const filtered = options.filter(option => countryMatchesSearch(option, searchTerm));
@@ -63,9 +70,11 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
       setFilteredOptions(options);
     }
   }, [searchTerm, options]);
+
   useEffect(() => {
     setSearchTerm(value);
   }, [value]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) && inputRef.current && !inputRef.current.contains(event.target as Node)) {
@@ -77,24 +86,29 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setIsOpen(true);
   };
+
   const handleOptionClick = (option: string) => {
     onChange(option);
     setSearchTerm(option);
     setIsOpen(false);
   };
+
   const handleApply = () => {
     onChange(searchTerm);
     setIsOpen(false);
   };
+
   const handleClear = () => {
     setSearchTerm('');
     onChange('');
     setIsOpen(false);
   };
+
   return <div className="space-y-2 relative">
       <Label htmlFor={label} className="text-sm">{label}</Label>
       <Input ref={inputRef} id={label} value={searchTerm} onChange={handleInputChange} placeholder={placeholder || `Rechercher ${label}`} className="w-full font-futura" onFocus={() => setIsOpen(true)} />
@@ -112,12 +126,14 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
         </div>}
     </div>;
 };
+
 const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
   lead,
   onDataChange
 }) => {
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
+
   useEffect(() => {
     const measureHeader = () => {
       const headerElement = document.querySelector('.bg-loro-sand');
@@ -135,11 +151,13 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       clearTimeout(timeoutId);
     };
   }, []);
+
   const handleInputChange = (field: keyof LeadDetailed, value: any) => {
     onDataChange({
       [field]: value
     } as Partial<LeadDetailed>);
   };
+
   const getLocations = () => {
     if (!lead.country) return [];
     let countryKey = lead.country;
@@ -157,6 +175,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     }
     return [];
   };
+
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
   const getSelectedBedrooms = () => {
     if (!lead.bedrooms) return [];
@@ -168,12 +187,14 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     const value = lead.bedrooms;
     return [value >= 8 ? "8+" : value.toString()];
   };
+
   const handleBedroomToggle = (value: string) => {
     const numValue = value === "8+" ? 8 : parseInt(value);
     let currentBedrooms = Array.isArray(lead.bedrooms) ? [...lead.bedrooms] : lead.bedrooms ? [lead.bedrooms] : [];
     const newBedrooms = currentBedrooms.includes(numValue) ? currentBedrooms.filter(b => b !== numValue) : [...currentBedrooms, numValue];
     handleInputChange('bedrooms', newBedrooms.length ? newBedrooms : undefined);
   };
+
   const handleCountryChange = (value: string) => {
     handleInputChange('country', value);
     if (!lead.nationality) {
@@ -183,7 +204,9 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       }
     }
   };
+
   const dynamicTopMargin = isHeaderMeasured ? `${Math.max(headerHeight + 8, 32)}px` : 'calc(32px + 4rem)';
+
   const handleAssetToggle = (value: AssetType) => {
     const updatedAssets = lead.assets ? [...lead.assets] : [];
     if (updatedAssets.includes(value)) {
@@ -192,6 +215,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       handleInputChange('assets', [...updatedAssets, value]);
     }
   };
+
   const handleEquipmentToggle = (value: Equipment) => {
     const updatedEquipment = lead.equipment ? [...lead.equipment] : [];
     if (updatedEquipment.includes(value)) {
@@ -200,6 +224,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       handleInputChange('equipment', [...updatedEquipment, value]);
     }
   };
+
   const ASSETS: {
     value: AssetType;
     icon: React.ComponentType<any>;
@@ -249,6 +274,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     value: "Proche golf",
     icon: Home
   }];
+
   const EQUIPMENT: {
     value: Equipment;
     icon: React.ComponentType<any>;
@@ -304,6 +330,11 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     value: "Accessible aux handicapés",
     icon: Home
   }];
+
+  const handleFurnishedToggle = () => {
+    onDataChange({ furnished: !lead.furnished });
+  };
+
   return <div className="space-y-5 pt-4" style={{
     marginTop: dynamicTopMargin
   }}>
@@ -319,29 +350,54 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
           </TabsList>
           
           <TabsContent value="budget" className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="budgetMin" className="text-sm">Budget minimum</Label>
-              <Input id="budgetMin" value={lead.budgetMin || ''} onChange={e => handleInputChange('budgetMin', e.target.value)} placeholder="Budget minimum" className="w-full font-futura" type="text" />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="budget" className="text-sm">Budget maximum</Label>
-              <Input id="budget" value={lead.budget || ''} onChange={e => handleInputChange('budget', e.target.value)} placeholder="Budget maximum" className="w-full font-futura" type="text" />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="currency" className="text-sm">Devise</Label>
-              <Select value={lead.currency || 'EUR'} onValueChange={value => handleInputChange('currency', value)}>
-                <SelectTrigger id="currency" className="w-full font-futura">
-                  <SelectValue placeholder="Sélectionner une devise" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CURRENCIES.map(currency => <SelectItem key={currency} value={currency} className="font-futura">
-                      {currency}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+            {lead.pipelineType === 'owners' ? (
+              <>
+                <OwnerPriceFields />
+                <div className="space-y-2">
+                  <Label htmlFor="currency" className="text-sm">Devise</Label>
+                  <Select value={lead.currency || 'EUR'} onValueChange={value => handleInputChange('currency', value)}>
+                    <SelectTrigger id="currency" className="w-full font-futura">
+                      <SelectValue placeholder="Sélectionner une devise" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map(currency => (
+                        <SelectItem key={currency} value={currency} className="font-futura">
+                          {currency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="budgetMin" className="text-sm">Budget minimum</Label>
+                  <Input id="budgetMin" value={lead.budgetMin || ''} onChange={e => handleInputChange('budgetMin', e.target.value)} placeholder="Budget minimum" className="w-full font-futura" type="text" />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="budget" className="text-sm">Budget maximum</Label>
+                  <Input id="budget" value={lead.budget || ''} onChange={e => handleInputChange('budget', e.target.value)} placeholder="Budget maximum" className="w-full font-futura" type="text" />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="currency" className="text-sm">Devise</Label>
+                  <Select value={lead.currency || 'EUR'} onValueChange={value => handleInputChange('currency', value)}>
+                    <SelectTrigger id="currency" className="w-full font-futura">
+                      <SelectValue placeholder="Sélectionner une devise" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map(currency => (
+                        <SelectItem key={currency} value={currency} className="font-futura">
+                          {currency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
           </TabsContent>
 
           <TabsContent value="location" className="space-y-4 py-2">
@@ -532,4 +588,51 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       </ScrollArea>
     </div>;
 };
+
+const OwnerPriceFields = () => (
+  <div className="space-y-2">
+    <Label htmlFor="desiredPrice" className="text-sm">Prix souhaité</Label>
+    <Input
+      id="desiredPrice"
+      value={lead.desired_price || ''}
+      onChange={e => onDataChange({ desired_price: e.target.value })}
+      placeholder="Ex : 1 250 000"
+      className="w-full font-futura"
+      type="text"
+    />
+
+    <Label htmlFor="fees" className="text-sm">Honoraires</Label>
+    <Input
+      id="fees"
+      value={lead.fees || ''}
+      onChange={e => onDataChange({ fees: e.target.value })}
+      placeholder="Ex : 4% du prix net vendeur"
+      className="w-full font-futura"
+      type="text"
+    />
+
+    <div className="flex items-center gap-3 pt-2">
+      <Label htmlFor="furnished" className="text-sm">Meublé</Label>
+      <button
+        id="furnished"
+        type="button"
+        aria-pressed={!!lead.furnished}
+        onClick={handleFurnishedToggle}
+        className={`w-12 h-7 inline-flex rounded-full border border-gray-300 bg-gray-100 transition relative focus:outline-none ${
+          lead.furnished ? 'bg-primary border-primary' : ''
+        }`}
+      >
+        <span
+          className={`block w-6 h-6 bg-white rounded-full shadow transform transition ${
+            lead.furnished ? 'translate-x-5' : 'translate-x-0'
+          }`}
+        />
+      </button>
+      <span className="ml-2 text-xs font-futura">
+        {lead.furnished ? 'Oui' : 'Non'}
+      </span>
+    </div>
+  </div>
+);
+
 export default SearchCriteriaSection;
