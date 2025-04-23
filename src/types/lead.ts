@@ -1,3 +1,4 @@
+
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -182,4 +183,9 @@ export interface LeadDetailed {
   
   // Add the equipment field
   equipment?: Equipment[];
+  
+  // Nouveaux champs pour les propriétaires
+  desired_price?: string;
+  fees?: string;
+  furnished?: boolean;
 }

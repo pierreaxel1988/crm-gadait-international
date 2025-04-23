@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -46,6 +45,10 @@ export interface ExtendedKanbanItem extends KanbanItem {
   key_features?: string[];
   property_description?: string;
   renovation_needed?: string;
+  // Ajout des nouveaux champs pour les propriétaires
+  desired_price?: string;
+  fees?: string;
+  furnished?: boolean;
 }
 
 interface KanbanColumn {
@@ -215,7 +218,11 @@ export const useKanbanData = (
               facilities: lead.facilities || [],
               key_features: lead.keyFeatures || [],
               property_description: lead.propertyDescription || '',
-              renovation_needed: lead.renovationNeeded || ''
+              renovation_needed: lead.renovationNeeded || '',
+              // Ajout des nouveaux champs pour les propriétaires
+              desired_price: lead.desired_price || '',
+              fees: lead.fees || '',
+              furnished: lead.furnished || false
             }));
           }
         }

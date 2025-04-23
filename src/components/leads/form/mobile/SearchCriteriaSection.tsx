@@ -127,6 +127,79 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
     </div>;
 };
 
+interface SearchCriteriaSectionProps {
+  lead: LeadDetailed;
+  onDataChange: (data: Partial<LeadDetailed>) => void;
+}
+
+interface OwnerPriceFieldsProps {
+  lead: LeadDetailed;
+  onDataChange: (data: Partial<LeadDetailed>) => void;
+  handleFurnishedToggle: () => void;
+}
+
+const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange, handleFurnishedToggle }) => (
+  <div className="space-y-2">
+    <Label htmlFor="desired_price" className="text-sm">Prix souhaité</Label>
+    <Input
+      id="desired_price"
+      value={lead.desired_price || ''}
+      onChange={e => onDataChange({ desired_price: e.target.value })}
+      placeholder="Ex : 1 250 000"
+      className="w-full font-futura"
+      type="text"
+    />
+
+    <Label htmlFor="fees" className="text-sm">Honoraires</Label>
+    <Input
+      id="fees"
+      value={lead.fees || ''}
+      onChange={e => onDataChange({ fees: e.target.value })}
+      placeholder="Ex : 4% du prix net vendeur"
+      className="w-full font-futura"
+      type="text"
+    />
+
+    <div className="space-y-2">
+      <Label htmlFor="currency" className="text-sm">Devise</Label>
+      <Select value={lead.currency || 'EUR'} onValueChange={value => onDataChange({ currency: value })}>
+        <SelectTrigger id="currency" className="w-full font-futura">
+          <SelectValue placeholder="Sélectionner une devise" />
+        </SelectTrigger>
+        <SelectContent>
+          {CURRENCIES.map(currency => (
+            <SelectItem key={currency} value={currency} className="font-futura">
+              {currency}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+
+    <div className="flex items-center gap-3 pt-2">
+      <Label htmlFor="furnished" className="text-sm">Meublé</Label>
+      <button
+        id="furnished"
+        type="button"
+        aria-pressed={!!lead.furnished}
+        onClick={handleFurnishedToggle}
+        className={`w-12 h-7 inline-flex rounded-full border border-gray-300 bg-gray-100 transition relative focus:outline-none ${
+          lead.furnished ? 'bg-primary border-primary' : ''
+        }`}
+      >
+        <span
+          className={`block w-6 h-6 bg-white rounded-full shadow transform transition ${
+            lead.furnished ? 'translate-x-5' : 'translate-x-0'
+          }`}
+        />
+      </button>
+      <span className="ml-2 text-xs font-futura">
+        {lead.furnished ? 'Oui' : 'Non'}
+      </span>
+    </div>
+  </div>
+);
+
 const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
   lead,
   onDataChange
@@ -351,24 +424,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
           
           <TabsContent value="budget" className="space-y-4 py-2">
             {lead.pipelineType === 'owners' ? (
-              <>
-                <OwnerPriceFields />
-                <div className="space-y-2">
-                  <Label htmlFor="currency" className="text-sm">Devise</Label>
-                  <Select value={lead.currency || 'EUR'} onValueChange={value => handleInputChange('currency', value)}>
-                    <SelectTrigger id="currency" className="w-full font-futura">
-                      <SelectValue placeholder="Sélectionner une devise" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CURRENCIES.map(currency => (
-                        <SelectItem key={currency} value={currency} className="font-futura">
-                          {currency}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
+              <OwnerPriceFields lead={lead} onDataChange={onDataChange} handleFurnishedToggle={handleFurnishedToggle} />
             ) : (
               <>
                 <div className="space-y-2">
@@ -588,51 +644,5 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       </ScrollArea>
     </div>;
 };
-
-const OwnerPriceFields = () => (
-  <div className="space-y-2">
-    <Label htmlFor="desiredPrice" className="text-sm">Prix souhaité</Label>
-    <Input
-      id="desiredPrice"
-      value={lead.desired_price || ''}
-      onChange={e => onDataChange({ desired_price: e.target.value })}
-      placeholder="Ex : 1 250 000"
-      className="w-full font-futura"
-      type="text"
-    />
-
-    <Label htmlFor="fees" className="text-sm">Honoraires</Label>
-    <Input
-      id="fees"
-      value={lead.fees || ''}
-      onChange={e => onDataChange({ fees: e.target.value })}
-      placeholder="Ex : 4% du prix net vendeur"
-      className="w-full font-futura"
-      type="text"
-    />
-
-    <div className="flex items-center gap-3 pt-2">
-      <Label htmlFor="furnished" className="text-sm">Meublé</Label>
-      <button
-        id="furnished"
-        type="button"
-        aria-pressed={!!lead.furnished}
-        onClick={handleFurnishedToggle}
-        className={`w-12 h-7 inline-flex rounded-full border border-gray-300 bg-gray-100 transition relative focus:outline-none ${
-          lead.furnished ? 'bg-primary border-primary' : ''
-        }`}
-      >
-        <span
-          className={`block w-6 h-6 bg-white rounded-full shadow transform transition ${
-            lead.furnished ? 'translate-x-5' : 'translate-x-0'
-          }`}
-        />
-      </button>
-      <span className="ml-2 text-xs font-futura">
-        {lead.furnished ? 'Oui' : 'Non'}
-      </span>
-    </div>
-  </div>
-);
 
 export default SearchCriteriaSection;
