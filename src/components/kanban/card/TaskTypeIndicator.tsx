@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Phone, Calendar, FileText, ClipboardCheck, Building, Send, Clock, FileSearch, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -47,7 +46,7 @@ const TaskTypeIndicator = ({
             : 'text-[#D05A76] bg-[#EBD5CE] border-amber-200 hover:bg-amber-100',
           text: 'Appel',
           classes: 'text-[#D05A76]',
-          icon: <Phone className="h-4 w-4" />,  // Harmonisation : une seule icône, taille 16px (h-4, w-4)
+          icon: <Phone className="h-4 w-4" />,
           isClickable
         };
       case 'Visites':
@@ -126,7 +125,6 @@ const TaskTypeIndicator = ({
     }
   };
 
-  // Get task styling based on type and overdue status
   const { color, text, classes, icon, isClickable } = getTaskStyles();
 
   return (
@@ -144,7 +142,6 @@ const TaskTypeIndicator = ({
       <span className={cn("text-xs font-medium whitespace-nowrap", classes)}>
         {text}
       </span>
-      {/* Suppression de la seconde icône Phone pour harmonisation */}
     </div>
   );
 };

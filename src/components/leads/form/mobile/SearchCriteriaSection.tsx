@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency, AssetType, Equipment, MauritiusRegion } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -13,17 +12,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import ActionButtons from '@/components/pipeline/filters/ActionButtons';
+import { AllowedIcons } from '@/utils/icons';
 import { 
   Home, 
   Bed, 
   Camera, 
   Fan, 
   Sofa, 
-  Shower, 
+  Droplets, 
   Car, 
-  DoorClosed, 
-  MicroWave, 
-  Refrigerator 
+  DoorClosed
 } from 'lucide-react';
 
 const PROPERTY_TYPES: PropertyType[] = ['Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'];
@@ -37,7 +35,6 @@ const COUNTRIES = ['Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 'Port
 
 const MAURITIUS_REGIONS: MauritiusRegion[] = ['North', 'South', 'West', 'East'];
 
-// Custom icon components to represent assets and equipment
 const createIconComponent = (IconComponent: React.ComponentType<any>) => {
   return IconComponent;
 };
@@ -261,7 +258,6 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     }
   };
 
-  // Définir les assets avec des icônes Lucide
   const ASSETS: { value: AssetType; icon: React.ComponentType<any> }[] = [
     { value: "Vue mer", icon: Home },
     { value: "Vue panoramique", icon: Camera },
@@ -280,16 +276,15 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     { value: "Proche golf", icon: Home },
   ];
 
-  // Définir les équipements avec des icônes Lucide
   const EQUIPMENT: { value: Equipment; icon: React.ComponentType<any> }[] = [
-    { value: "Piscine", icon: Shower },
+    { value: "Piscine", icon: Droplets },
     { value: "Ascenseur", icon: Home },
     { value: "Garage & Parking", icon: Car },
     { value: "Climatisation", icon: Fan },
-    { value: "Salle de réception", icon: Home },
-    { value: "Dépendances", icon: Home },
+    { value: "Salle de réception", icon: Building },
+    { value: "Dépendances", icon: Building2 },
     { value: "Loge gardien", icon: Home },
-    { value: "Spa", icon: Shower },
+    { value: "Spa", icon: Droplets },
     { value: "Viager", icon: Home },
     { value: "Terrasse", icon: Home },
     { value: "Jardin", icon: Home },

@@ -16,7 +16,7 @@ import {
   Building2,
   Bed,
   Sofa,
-  Shower,
+  Droplets,
   DoorClosed
 } from 'lucide-react';
 
@@ -104,14 +104,14 @@ const OwnerPropertyDetailsSection = ({
 
   // Définir les équipements avec des icônes Lucide
   const EQUIPMENT: { value: Equipment; icon: React.ComponentType<any>; label: string; }[] = [
-    { value: "Piscine", icon: Shower, label: "Piscine" },
+    { value: "Piscine", icon: Droplets, label: "Piscine" },
     { value: "Ascenseur", icon: Home, label: "Ascenseur" },
     { value: "Garage & Parking", icon: Car, label: "Garage & Parking" },
     { value: "Climatisation", icon: Fan, label: "Climatisation" },
     { value: "Salle de réception", icon: Building, label: "Salle de réception" },
     { value: "Dépendances", icon: Building2, label: "Dépendances" },
     { value: "Loge gardien", icon: Home, label: "Loge gardien" },
-    { value: "Spa", icon: Shower, label: "Spa" },
+    { value: "Spa", icon: Droplets, label: "Spa" },
     { value: "Viager", icon: Home, label: "Viager" },
     { value: "Terrasse", icon: Home, label: "Terrasse" },
     { value: "Jardin", icon: Home, label: "Jardin" },

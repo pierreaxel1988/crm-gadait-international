@@ -19,16 +19,16 @@ export interface Event {
 }
 
 export const eventCategories = [
-  { name: 'Call', value: 'Call', color: '#25D366' }, // WhatsApp brand green
-  { name: 'Visites', value: 'Visites', color: '#9B51E0' }, // Purple
-  { name: 'Compromis', value: 'Compromis', color: '#E8B64B' }, // Gold
-  { name: 'Acte de vente', value: 'Acte de vente', color: '#4CAF50' }, // Green
-  { name: 'Contrat de Location', value: 'Contrat de Location', color: '#3D8FD1' }, // Blue
-  { name: 'Propositions', value: 'Propositions', color: '#9C27B0' }, // Magenta
-  { name: 'Follow up', value: 'Follow up', color: '#E91E63' }, // Pink
-  { name: 'Estimation', value: 'Estimation', color: '#009688' }, // Teal
-  { name: 'Prospection', value: 'Prospection', color: '#F44336' }, // Red
-  { name: 'Admin', value: 'Admin', color: '#607D8B' }, // Blue Grey
+  { name: 'Call', value: 'Call' as TaskType, color: '#25D366' }, // WhatsApp brand green
+  { name: 'Visites', value: 'Visites' as TaskType, color: '#9B51E0' }, // Purple
+  { name: 'Compromis', value: 'Compromis' as TaskType, color: '#E8B64B' }, // Gold
+  { name: 'Acte de vente', value: 'Acte de vente' as TaskType, color: '#4CAF50' }, // Green
+  { name: 'Contrat de Location', value: 'Contrat de Location' as TaskType, color: '#3D8FD1' }, // Blue
+  { name: 'Propositions', value: 'Propositions' as TaskType, color: '#9C27B0' }, // Magenta
+  { name: 'Follow up', value: 'Follow up' as TaskType, color: '#E91E63' }, // Pink
+  { name: 'Estimation', value: 'Estimation' as TaskType, color: '#009688' }, // Teal
+  { name: 'Prospection', value: 'Prospection' as TaskType, color: '#F44336' }, // Red
+  { name: 'Admin', value: 'Admin' as TaskType, color: '#607D8B' }, // Blue Grey
 ];
 
 export interface CalendarContextType {
