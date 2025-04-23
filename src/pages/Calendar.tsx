@@ -14,7 +14,7 @@ const Calendar = () => {
       <Navbar />
       <SubNavigation />
       <main className="flex-1 pb-12">
-        <CalendarProvider initialSelectedAgent={selectedAgent} onAgentChange={handleAgentChange}>
+        <CalendarProvider>
           <CalendarPageContent />
         </CalendarProvider>
       </main>

@@ -9,6 +9,7 @@ import CategoryFilter from '@/components/calendar/CategoryFilter';
 import { eventCategories, useCalendar } from '@/contexts/CalendarContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 
 const CalendarPageContent = () => {
   const { 
@@ -24,11 +25,16 @@ const CalendarPageContent = () => {
     setNewEvent, 
     handleAddEvent,
     refreshEvents,
-    selectedAgent,
     onAgentChange
   } = useCalendar();
   
   const { isAdmin } = useAuth();
+  const { selectedAgent, handleAgentChange } = useSelectedAgent();
+  
+  useEffect(() => {
+    // Mettre à jour le contexte du calendrier avec l'agent sélectionné
+    onAgentChange(selectedAgent);
+  }, [selectedAgent, onAgentChange]);
   
   useEffect(() => {
     console.log("CalendarPageContent mounted - forcing refresh of events");
@@ -77,7 +83,7 @@ const CalendarPageContent = () => {
               <div className="w-full">
                 <Select 
                   value={selectedAgent || "all"} 
-                  onValueChange={(value) => onAgentChange(value === "all" ? null : value)}
+                  onValueChange={(value) => handleAgentChange(value === "all" ? null : value)}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Filtrer par commercial" />
@@ -139,4 +145,3 @@ const CalendarPageContent = () => {
 };
 
 export default CalendarPageContent;
-

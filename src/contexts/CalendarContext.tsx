@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { TaskType } from '@/components/kanban/KanbanCard';
 
@@ -78,6 +79,11 @@ export const CalendarProvider: React.FC<CalendarProviderProps> = ({ children }) 
     color: '#25D366'
   });
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
+
+  // Charger les événements depuis le localStorage au démarrage
+  React.useEffect(() => {
+    refreshEvents();
+  }, []);
 
   const refreshEvents = async () => {
     try {

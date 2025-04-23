@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -29,6 +30,17 @@ export interface ExtendedKanbanItem extends KanbanItem {
   phoneCountryCodeDisplay?: string | null; // Add phone country code display
   preferredLanguage?: string | null; // Add preferred language
   regions?: MauritiusRegion[];
+  // Ajout des propriétés manquantes pour corriger l'erreur de type
+  assets?: string[];
+  condo_fees?: string;
+  energy_class?: string;
+  equipment?: string[];
+  floors?: number;
+  landArea?: string;
+  orientation?: string[];
+  parkingSpaces?: number;
+  constructionYear?: string;
+  yearlyTaxes?: string;
 }
 
 interface KanbanColumn {
@@ -182,7 +194,18 @@ export const useKanbanData = (
               phone_country_code: lead.phoneCountryCode || null,
               phone_country_code_display: lead.phoneCountryCodeDisplay || null,
               preferred_language: lead.preferredLanguage || null,
-              regions: lead.regions || []
+              regions: lead.regions || [],
+              // Ajout des propriétés manquantes pour corriger l'erreur de type
+              assets: lead.assets || [],
+              condo_fees: lead.condoFees || '',
+              energy_class: lead.energyClass || '',
+              equipment: lead.equipment || [],
+              floors: lead.floors || null,
+              land_area: lead.landArea || '',
+              orientation: lead.orientation || [],
+              parking_spaces: lead.parkingSpaces || null,
+              construction_year: lead.constructionYear || '',
+              yearly_taxes: lead.yearlyTaxes || ''
             }));
           }
         }
