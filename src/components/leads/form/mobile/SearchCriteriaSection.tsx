@@ -1,14 +1,4 @@
 
-import React from 'react';
-import { LeadDetailed } from '@/types/lead';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-
-interface OwnerPriceFieldsProps {
-  lead: LeadDetailed;
-  onDataChange: (data: Partial<LeadDetailed>) => void;
-}
-
 const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange }) => {
   const handleFurnishedToggle = () => {
     const updatedFurnished = !lead.furnished;
@@ -91,27 +81,3 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange 
     </div>
   );
 };
-
-interface SearchCriteriaSectionProps {
-  lead: LeadDetailed;
-  onDataChange: (data: Partial<LeadDetailed>) => void;
-}
-
-const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({ lead, onDataChange }) => {
-  return (
-    <div className="space-y-4">
-      <div className="bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-sm font-medium mb-3">Critères de recherche</h3>
-        
-        {/* Afficher les champs du prix pour les propriétaires si le pipeline est 'owners' */}
-        {lead.pipeline_type === 'owners' && (
-          <OwnerPriceFields lead={lead} onDataChange={onDataChange} />
-        )}
-        
-        {/* Autres champs de critères selon le type de pipeline */}
-      </div>
-    </div>
-  );
-};
-
-export default SearchCriteriaSection;

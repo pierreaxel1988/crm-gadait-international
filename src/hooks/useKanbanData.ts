@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -9,26 +8,28 @@ import { PropertyType, PurchaseTimeframe, PipelineType, Currency, MauritiusRegio
 import type { Json } from '@/integrations/supabase/types';
 import { useAuth } from '@/hooks/useAuth';
 
+// Extend KanbanItem with the additional properties needed for filtering
 export interface ExtendedKanbanItem extends KanbanItem {
   budget?: string;
   desiredLocation?: string;
   purchaseTimeframe?: PurchaseTimeframe;
   propertyType?: PropertyType;
-  assignedToId?: string;
+  assignedToId?: string; // Store the original ID
   country?: string;
   bedrooms?: number;
   url?: string;
   createdAt?: string;
   importedAt?: string;
-  pipelineType?: PipelineType;
-  pipeline_type?: PipelineType;
-  currency?: Currency;
-  nextFollowUpDate?: string;
-  actionHistory?: Json;
-  phoneCountryCode?: string | null;
-  phoneCountryCodeDisplay?: string | null;
-  preferredLanguage?: string | null;
+  pipelineType?: PipelineType; // PipelineType now includes 'owners'
+  pipeline_type?: PipelineType; // Add database field name for compatibility
+  currency?: Currency; // Ensure currency is included in the type
+  nextFollowUpDate?: string; // Add nextFollowUpDate for action status
+  actionHistory?: Json; // Include actionHistory
+  phoneCountryCode?: string | null; // Add phone country code
+  phoneCountryCodeDisplay?: string | null; // Add phone country code display
+  preferredLanguage?: string | null; // Add preferred language
   regions?: MauritiusRegion[];
+  // Ajout des propriétés manquantes pour corriger l'erreur de type
   assets?: string[];
   condo_fees?: string;
   energy_class?: string;
@@ -39,15 +40,15 @@ export interface ExtendedKanbanItem extends KanbanItem {
   parkingSpaces?: number;
   constructionYear?: string;
   yearlyTaxes?: string;
+  // Ajout des propriétés également manquantes dans l'erreur
   facilities?: string[];
   key_features?: string[];
   property_description?: string;
   renovation_needed?: string;
+  // Ajout des nouveaux champs pour les propriétaires
   desired_price?: string;
   fees?: string;
   furnished?: boolean;
-  furniture_included_in_price?: boolean;
-  furniture_price?: string;
 }
 
 interface KanbanColumn {
@@ -71,7 +72,7 @@ export const useKanbanData = (
   const [loadedColumns, setLoadedColumns] = useState<KanbanColumn[]>(columns);
   const [isLoading, setIsLoading] = useState(true);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const { isCommercial, user } = useAuth();
+  const { isCommercial, user } = useAuth(); // Récupérer les infos d'authentification
 
   useEffect(() => {
     console.log("useKanbanData useEffect triggered");
@@ -84,6 +85,7 @@ export const useKanbanData = (
       try {
         setIsLoading(true);
         
+        // Fetch team members for assignment information
         const { data: teamMembersData, error: teamError } = await supabase
           .from('team_members')
           .select('id, email, name');
@@ -102,9 +104,12 @@ export const useKanbanData = (
           setTeamMembers(teamMembersData);
         }
         
+        // Direct query to get leads with filters based on user role
         let query = supabase.from('leads').select('*, action_history');
         
+        // Si c'est un commercial, filtrer pour n'afficher que ses leads
         if (isCommercial && user) {
+          // Trouver l'ID du team member correspondant à l'email de l'utilisateur
           const currentTeamMember = teamMembersData?.find(tm => tm.email === user.email);
           
           if (currentTeamMember) {
@@ -115,6 +120,7 @@ export const useKanbanData = (
           }
         }
         
+        // Finaliser la requête
         query = query.order('created_at', { ascending: false });
         
         const { data: supabaseLeads, error: leadsError } = await query;
@@ -129,11 +135,17 @@ export const useKanbanData = (
           return;
         }
         
+        // Log the fetched leads to help diagnose issues
+        console.log("Fetched leads from Supabase:", supabaseLeads?.length);
+        console.log("First few leads:", supabaseLeads?.slice(0, 3));
+        
+        // If no leads found in Supabase, try to get data locally
         let allLeads = supabaseLeads || [];
         if (!allLeads || allLeads.length === 0) {
           console.log("No leads in Supabase, trying local data");
           let localLeads = await getLeads();
           
+          // Si c'est un commercial, filtrer les leads locaux aussi
           if (isCommercial && user && localLeads) {
             const currentTeamMember = teamMembersData?.find(tm => tm.email === user.email);
             if (currentTeamMember) {
@@ -144,7 +156,9 @@ export const useKanbanData = (
           if (localLeads && localLeads.length > 0) {
             console.log("Found local leads:", localLeads.length);
             
+            // Make sure the returned data from getLeads() is compatible with our expected structure
             allLeads = localLeads.map(lead => ({
+              // Required fields with defaults to satisfy TypeScript
               id: lead.id,
               name: lead.name,
               email: lead.email || '',
@@ -184,10 +198,12 @@ export const useKanbanData = (
               task_type: lead.taskType || null,
               url: lead.url || null,
               views: lead.views || [],
+              // Add missing fields to fix the type error
               phone_country_code: lead.phoneCountryCode || null,
               phone_country_code_display: lead.phoneCountryCodeDisplay || null,
               preferred_language: lead.preferredLanguage || null,
               regions: lead.regions || [],
+              // Ajout des propriétés manquantes pour corriger l'erreur de type
               assets: lead.assets || [],
               condo_fees: lead.condoFees || '',
               energy_class: lead.energyClass || '',
@@ -198,15 +214,15 @@ export const useKanbanData = (
               parking_spaces: lead.parkingSpaces || null,
               construction_year: lead.constructionYear || '',
               yearly_taxes: lead.yearlyTaxes || '',
+              // Ajout des propriétés également manquantes dans l'erreur
               facilities: lead.facilities || [],
               key_features: lead.keyFeatures || [],
               property_description: lead.propertyDescription || '',
               renovation_needed: lead.renovationNeeded || '',
+              // Ajout des nouveaux champs pour les propriétaires
               desired_price: lead.desired_price || '',
               fees: lead.fees || '',
-              furnished: lead.furnished || false,
-              furniture_included_in_price: lead.furniture_included_in_price || true,
-              furniture_price: lead.furniture_price || ''
+              furnished: lead.furnished || false
             }));
           }
         }
@@ -220,9 +236,11 @@ export const useKanbanData = (
         
         console.log(`Retrieved leads: ${allLeads.length}`);
         
+        // Map leads data to KanbanItem format
         const mappedLeads = allLeads.map(lead => {
           const assignedTeamMember = teamMembersData?.find(tm => tm.id === lead.assigned_to);
           
+          // Ensure pipeline_type has a default value
           const leadPipelineType = lead.pipeline_type || 'purchase';
           
           return {
@@ -235,7 +253,7 @@ export const useKanbanData = (
             assignedTo: lead.assigned_to,
             assignedToId: lead.assigned_to,
             dueDate: lead.next_follow_up_date,
-            nextFollowUpDate: lead.next_follow_up_date,
+            nextFollowUpDate: lead.next_follow_up_date, // Include nextFollowUpDate for action status
             pipelineType: leadPipelineType as PipelineType,
             pipeline_type: leadPipelineType as PipelineType,
             taskType: lead.task_type,
@@ -249,37 +267,19 @@ export const useKanbanData = (
             createdAt: lead.created_at,
             importedAt: lead.imported_at,
             external_id: lead.external_id,
-            currency: lead.currency as Currency,
-            actionHistory: lead.action_history,
-            phoneCountryCode: lead.phone_country_code,
-            phoneCountryCodeDisplay: lead.phone_country_code_display,
-            preferredLanguage: lead.preferred_language,
-            regions: lead.regions,
-            assets: lead.assets,
-            condo_fees: lead.condo_fees,
-            energy_class: lead.energy_class,
-            equipment: lead.equipment,
-            floors: lead.floors,
-            landArea: lead.land_area,
-            orientation: lead.orientation,
-            parkingSpaces: lead.parking_spaces,
-            constructionYear: lead.construction_year,
-            yearlyTaxes: lead.yearly_taxes,
-            facilities: lead.facilities,
-            key_features: lead.key_features,
-            property_description: lead.property_description,
-            renovation_needed: lead.renovation_needed,
-            desired_price: lead.desired_price,
-            fees: lead.fees,
-            furnished: lead.furnished,
-            furniture_included_in_price: lead.furniture_included_in_price,
-            furniture_price: lead.furniture_price
+            currency: lead.currency as Currency, // Make sure to include the currency
+            actionHistory: lead.action_history, // Include the action_history
+            phoneCountryCode: lead.phone_country_code, // Use snake_case property from the database
+            phoneCountryCodeDisplay: lead.phone_country_code_display, // Use snake_case property from the database
+            preferredLanguage: lead.preferred_language // Add preferred_language to mapped leads
           };
         });
         
         console.log(`Mapped leads: ${mappedLeads.length}`);
         
+        // Filter leads by pipeline type first
         const filteredByPipelineType = mappedLeads.filter(lead => {
+          // Check both pipelineType and pipeline_type properties
           const leadType = lead.pipelineType || lead.pipeline_type;
           console.log(`Lead ${lead.id} (${lead.name}) has pipeline type: ${leadType}`);
           return leadType === pipelineType;
@@ -287,6 +287,7 @@ export const useKanbanData = (
         
         console.log(`Leads filtered by pipeline type (${pipelineType}): ${filteredByPipelineType.length}`);
         
+        // Distribute leads to their respective columns based on status
         const updatedColumns = columns.map(column => {
           const columnItems = filteredByPipelineType.filter(lead => lead.status === column.status);
           
