@@ -114,8 +114,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
     else if (e.key === 'Enter' && selectedIndex >= 0) {
       e.preventDefault();
       if (results[selectedIndex] && onSelect) {
-        onSelect(results[selectedIndex]);
-        setIsOpen(false);
+        handleItemSelect(results[selectedIndex]);
       }
     }
     
@@ -141,19 +140,26 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
     }
   };
 
-  const handleItemClick = (item: any) => {
+  const handleItemSelect = (item: any) => {
     if (onSelect) {
-      onSelect(item);
+      const itemValue = typeof item === 'string' ? item : item.value || item;
+      onSelect(itemValue);
+      
+      // Important: Update the input value immediately for better visual feedback
+      setInputValue(typeof item === 'string' ? item : item.value || item);
+      
+      // Close the dropdown after selection
+      setIsOpen(false);
     }
-    setIsOpen(false);
   };
 
   const handleInputBlur = () => {
-    if (onBlur) {
-      setTimeout(() => {
+    // Delay closing dropdown to allow click events to register
+    setTimeout(() => {
+      if (onBlur) {
         onBlur();
-      }, 200);
-    }
+      }
+    }, 200);
   };
 
   return (
@@ -211,7 +217,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
                 {results.map((item, index) => (
                   <div
                     key={index}
-                    onClick={() => handleItemClick(item)}
+                    onClick={() => handleItemSelect(item)}
                     className={cn(
                       "px-3 py-2 cursor-pointer",
                       selectedIndex === index ? "bg-gray-100" : "hover:bg-gray-50"
