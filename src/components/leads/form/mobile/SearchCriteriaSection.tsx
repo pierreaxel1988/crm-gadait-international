@@ -1,7 +1,28 @@
 import React, { useState } from 'react';
-import { LeadDetailed } from '@/types/lead';
+import { LeadDetailed, Currency, PropertyState } from '@/types/lead';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import FormSection from '../FormSection';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { 
+  Home,
+  Bath,
+  Building,
+  Compass,
+  Camera,
+  Car,
+  Fan,
+  Bed,
+  Sofa,
+  Clock,
+  DoorClosed,
+  Star,
+  Settings,
+  FileText
+} from 'lucide-react';
+import { getIcon } from '@/utils/icons';
 
 interface OwnerPriceFieldsProps {
   lead: LeadDetailed;
@@ -765,14 +786,12 @@ const SearchCriteriaSection = ({ lead, onDataChange }: SearchCriteriaSectionProp
   const [activeTab, setActiveTab] = useState('budget');
   
   return (
-    <FormSection title="Critères de la Propriété">
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold mb-2">Critères de la Propriété</h2>
+      
       {lead.pipelineType === 'owners' && (
         <div className="space-y-4">
-          <Tabs 
-            defaultValue="budget" 
-            className="w-full" 
-            onValueChange={setActiveTab}
-          >
+          <Tabs defaultValue="budget" className="w-full" onValueChange={setActiveTab}>
             <TabsList className="w-full grid grid-cols-3 mb-4">
               <TabsTrigger value="budget">Prix</TabsTrigger>
               <TabsTrigger value="location">Localisation</TabsTrigger>
@@ -793,7 +812,7 @@ const SearchCriteriaSection = ({ lead, onDataChange }: SearchCriteriaSectionProp
           </Tabs>
         </div>
       )}
-    </FormSection>
+    </div>
   );
 };
 
