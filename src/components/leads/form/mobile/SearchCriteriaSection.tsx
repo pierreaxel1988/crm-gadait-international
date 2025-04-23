@@ -312,7 +312,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       <ScrollArea className="h-[calc(100vh-150px)]">
         <Tabs defaultValue="budget" className="w-full">
           <TabsList className="w-full grid grid-cols-4 mb-4">
-            <TabsTrigger value="budget" className="text-xs">PRIX</TabsTrigger>
+            <TabsTrigger value="budget" className="text-xs">Prix</TabsTrigger>
             <TabsTrigger value="location" className="text-xs">Localisation</TabsTrigger>
             <TabsTrigger value="property" className="text-xs">Bien</TabsTrigger>
             <TabsTrigger value="purchase" className="text-xs">Achat</TabsTrigger>
