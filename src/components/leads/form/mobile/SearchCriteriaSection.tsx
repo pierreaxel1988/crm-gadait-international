@@ -21,29 +21,59 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange 
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-3 pt-2">
-        <Label htmlFor="furnished" className="text-sm">Meublé</Label>
-        <button
-          id="furnished"
-          type="button"
-          aria-pressed={!!lead.furnished}
-          onClick={handleFurnishedToggle}
-          className={`w-12 h-7 inline-flex rounded-full border border-gray-300 bg-gray-100 transition relative focus:outline-none ${
-            lead.furnished ? 'bg-primary border-primary' : ''
-          }`}
-        >
-          <span
-            className={`block w-6 h-6 bg-white rounded-full shadow transform transition ${
-              lead.furnished ? 'translate-x-5' : 'translate-x-0'
-            }`}
-          />
-        </button>
-        <span className="ml-2 text-xs font-futura">
-          {lead.furnished ? 'Oui' : 'Non'}
-        </span>
+    <div className="space-y-4">
+      {/* Prix souhaité */}
+      <div className="space-y-2">
+        <Label htmlFor="desired_price" className="text-sm">Prix souhaité</Label>
+        <Input
+          id="desired_price"
+          value={lead.desired_price || ''}
+          onChange={e => onDataChange({ desired_price: e.target.value })}
+          placeholder="Ex : 450 000"
+          className="w-full font-futura"
+          type="text"
+        />
       </div>
 
+      {/* Honoraires */}
+      <div className="space-y-2">
+        <Label htmlFor="fees" className="text-sm">Honoraires</Label>
+        <Input
+          id="fees"
+          value={lead.fees || ''}
+          onChange={e => onDataChange({ fees: e.target.value })}
+          placeholder="Ex : 5%"
+          className="w-full font-futura"
+          type="text"
+        />
+      </div>
+
+      {/* Meublé - Toggle Switch */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3 pt-2">
+          <Label htmlFor="furnished" className="text-sm">Meublé</Label>
+          <button
+            id="furnished"
+            type="button"
+            aria-pressed={!!lead.furnished}
+            onClick={handleFurnishedToggle}
+            className={`w-12 h-7 inline-flex rounded-full border border-gray-300 bg-gray-100 transition relative focus:outline-none ${
+              lead.furnished ? 'bg-primary border-primary' : ''
+            }`}
+          >
+            <span
+              className={`block w-6 h-6 bg-white rounded-full shadow transform transition ${
+                lead.furnished ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+          <span className="ml-2 text-xs font-futura">
+            {lead.furnished ? 'Oui' : 'Non'}
+          </span>
+        </div>
+      </div>
+
+      {/* Additional fields when "Meublé" is toggled on */}
       {lead.furnished && (
         <>
           <div className="space-y-2 mt-2">
@@ -109,5 +139,4 @@ const SearchCriteriaSection = ({ lead, onDataChange }: SearchCriteriaSectionProp
   );
 };
 
-// Ajout d'une exportation par défaut pour résoudre l'erreur
 export default SearchCriteriaSection;
