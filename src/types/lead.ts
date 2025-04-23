@@ -1,3 +1,4 @@
+
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -108,6 +109,13 @@ export type Equipment =
   | "Chambre de bonne"
   | "Accessible aux handicapés";
 
+export type PropertyState =
+  | "Neuf"
+  | "Bon état"
+  | "À rafraîchir" 
+  | "À rénover"
+  | "À reconstruire";
+
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
 import { TaskType } from "@/components/kanban/KanbanCard";
@@ -189,4 +197,36 @@ export interface LeadDetailed {
   furnished?: boolean;
   furniture_included_in_price?: boolean;
   furniture_price?: string;
+
+  // Nouveaux champs pour le luxe immobilier
+  bathrooms?: number;
+  propertyState?: PropertyState;
+  hasTerrace?: boolean;
+  hasBalcony?: boolean;
+  hasGarden?: boolean;
+  terrace_size?: string;
+  garden_size?: string;
+  luxuryAmenities?: string[];
+  buildingMaterials?: string[];
+  architecturalStyle?: string;
+  staffAccommodation?: string;
+  receptionCapacity?: string;
+  sportFacilities?: string;
+  securityFeatures?: string[];
+  homeAutomation?: string;
+  heatingSystem?: string;
+  ecoFeatures?: string[];
+  hasAccessibility?: boolean;
+  dependencies?: string;
+  neighborhood?: string;
+  extensionPotential?: string;
+  historicalFeatures?: string;
+  restrictions?: string;
+  includedServices?: string;
+  nuisances?: string;
+  roofType?: string;
+  hasWineStorage?: boolean;
+  wineStorageCapacity?: string;
+  accessibility?: string;
+  exposure?: string;
 }
