@@ -8,8 +8,8 @@ import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import CustomTagInput from '../CustomTagInput';
 import OwnerPropertyDetailsSection from './OwnerPropertyDetailsSection';
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
-import SmartSearch from '@/components/pipeline/filters/SmartSearch';
-import Label from '@/components/Label';
+import SmartSearch from '@/components/common/SmartSearch';
+import { Label } from '@/components/ui/label';
 
 interface PropertyDetailsSectionProps {
   formData: LeadDetailed;

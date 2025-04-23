@@ -110,7 +110,7 @@ const LocationFilter = ({ location, onLocationChange }: LocationFilterProps) => 
           onSelect={handleLocationSelect}
           results={filteredLocations}
           renderItem={renderLocationItem}
-          noResultsElement={renderNoResults()}
+          emptyMessage="Aucun résultat trouvé"
           className="w-full"
           inputClassName="h-9 text-sm"
           minChars={0} // Show recent locations even when empty
