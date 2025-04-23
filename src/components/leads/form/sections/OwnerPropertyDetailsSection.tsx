@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 import SmartSearch from '@/components/common/SmartSearch';
 import { MapPin } from 'lucide-react';
+import { COUNTRIES } from '@/utils/countries';
+import { countryToFlag } from '@/utils/countryUtils';
 
 interface OwnerPropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -30,16 +32,39 @@ const OwnerPropertyDetailsSection = ({
     handleInputChange(syntheticEvent);
   };
 
+  // Modified to ensure only valid countries are selected
   const handleSmartCountryChange = (country: string) => {
-    const syntheticEvent = {
-      target: {
-        name: 'country',
-        value: country
-      }
-    } as React.ChangeEvent<HTMLSelectElement>;
-    
-    handleInputChange(syntheticEvent);
+    // Only update if the selected country is in our predefined list
+    if (COUNTRIES.includes(country)) {
+      const syntheticEvent = {
+        target: {
+          name: 'country',
+          value: country
+        }
+      } as React.ChangeEvent<HTMLSelectElement>;
+      
+      handleInputChange(syntheticEvent);
+    }
   };
+
+  // Get popular countries with their flags for better UI
+  const popularCountries = [
+    'France', 
+    'Switzerland', 
+    'Spain', 
+    'Portugal', 
+    'United Kingdom', 
+    'United States', 
+    'Mauritius', 
+    'UAE'
+  ];
+
+  // Render country with flag emoji
+  const renderCountryItem = (country: string) => (
+    <div className="text-sm py-1 flex items-center gap-2">
+      <span className="mr-1">{countryToFlag(country)}</span> {country}
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -51,8 +76,11 @@ const OwnerPropertyDetailsSection = ({
           placeholder="Sélectionnez un pays..."
           value={formData.country || ''}
           onChange={handleSmartCountryChange}
-          results={['France', 'Switzerland', 'Spain', 'Portugal', 'United Kingdom', 'United States', 'Mauritius', 'UAE']}
-          renderItem={(country) => <div className="text-sm py-1">{country}</div>}
+          results={COUNTRIES.filter(country => 
+            country.toLowerCase().includes(formData.country?.toLowerCase() || '')
+          ).slice(0, 10)}
+          onSelect={handleSmartCountryChange}
+          renderItem={renderCountryItem}
           className="w-full"
           inputClassName="h-9 text-sm"
           minChars={1}

@@ -82,17 +82,7 @@ const LocationFilter = ({ location, onLocationChange }: LocationFilterProps) => 
     );
   };
 
-  const renderNoResults = () => {
-    if (searchTerm && filteredLocations.length === 0) {
-      return (
-        <div className="text-sm py-2 px-2 text-muted-foreground italic">
-          Aucun résultat trouvé
-        </div>
-      );
-    }
-    return null;
-  };
-
+  // Important change: Don't update onChage, only on select
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -104,8 +94,8 @@ const LocationFilter = ({ location, onLocationChange }: LocationFilterProps) => 
           value={searchTerm}
           onChange={(value) => {
             setSearchTerm(value);
-            // Update filter value directly when typing
-            onLocationChange(value);
+            // Don't update filter value directly when typing anymore
+            // Only update when a specific location is selected
           }}
           onSelect={handleLocationSelect}
           results={filteredLocations}

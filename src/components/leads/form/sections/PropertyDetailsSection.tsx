@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, Country } from '@/types/lead';
 import FormInput from '../FormInput';
@@ -11,6 +10,8 @@ import OwnerPropertyDetailsSection from './OwnerPropertyDetailsSection';
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 import SmartSearch from '@/components/common/SmartSearch';
 import { Label } from '@/components/ui/label';
+import { COUNTRIES } from '@/utils/countries';
+import { countryToFlag } from '@/utils/countryUtils';
 
 interface PropertyDetailsSectionProps {
   formData: LeadDetailed;
@@ -62,15 +63,23 @@ const PropertyDetailsSection = ({
   };
 
   const handleSmartCountryChange = (country: string) => {
-    const syntheticEvent = {
-      target: {
-        name: 'country',
-        value: country
-      }
-    } as React.ChangeEvent<HTMLSelectElement>;
-    
-    handleCountryChange(syntheticEvent);
+    if (COUNTRIES.includes(country)) {
+      const syntheticEvent = {
+        target: {
+          name: 'country',
+          value: country
+        }
+      } as React.ChangeEvent<HTMLSelectElement>;
+      
+      handleCountryChange(syntheticEvent);
+    }
   };
+
+  const renderCountryItem = (country: string) => (
+    <div className="text-sm py-1 flex items-center gap-2">
+      <span className="mr-1">{countryToFlag(country)}</span> {country}
+    </div>
+  );
 
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
   
@@ -191,8 +200,11 @@ const PropertyDetailsSection = ({
           placeholder="Sélectionnez un pays..."
           value={formData.country || ''}
           onChange={handleSmartCountryChange}
-          results={countries}
-          renderItem={(country) => <div className="text-sm py-1">{country}</div>}
+          results={COUNTRIES.filter(country => 
+            country.toLowerCase().includes(formData.country?.toLowerCase() || '')
+          ).slice(0, 10)}
+          onSelect={handleSmartCountryChange}
+          renderItem={renderCountryItem}
           className="w-full"
           inputClassName="h-9 text-sm"
           minChars={1}
