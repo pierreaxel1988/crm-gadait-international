@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency, AssetType, Equipment, MauritiusRegion } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -14,17 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import ActionButtons from '@/components/pipeline/filters/ActionButtons';
 import { Building, Building2 } from '@/utils/icons';
-import { 
-  Home, 
-  Bed, 
-  Camera, 
-  Fan, 
-  Sofa, 
-  Droplets, 
-  Car, 
-  DoorClosed
-} from 'lucide-react';
-
+import { Home, Bed, Camera, Fan, Sofa, Droplets, Car, DoorClosed } from 'lucide-react';
 const PROPERTY_TYPES: PropertyType[] = ['Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Terrain', 'Chalet', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'];
 const VIEW_TYPES: ViewType[] = ['Mer', 'Montagne', 'Golf', 'Autres'];
 const AMENITIES: Amenity[] = ['Piscine', 'Jardin', 'Garage', 'Sécurité', 'Climatisation', 'Terrasse', 'Balcon', 'Vue mer', 'Vue montagne', 'Gym', 'Spa', 'Piscine intérieure', 'Jacuzzi', 'Court de tennis', 'Ascenseur', 'Parking'];
@@ -33,25 +22,20 @@ const FINANCING_METHODS: FinancingMethod[] = ['Cash', 'Prêt bancaire'];
 const PROPERTY_USES: PropertyUse[] = ['Investissement locatif', 'Résidence principale'];
 const CURRENCIES: Currency[] = ['EUR', 'USD', 'GBP', 'CHF', 'AED', 'MUR'];
 const COUNTRIES = ['Croatia', 'France', 'Greece', 'Maldives', 'Mauritius', 'Portugal', 'Seychelles', 'Spain', 'Switzerland', 'UAE', 'UK', 'USA', 'Autre'];
-
 const MAURITIUS_REGIONS: MauritiusRegion[] = ['North', 'South', 'West', 'East'];
-
 const createIconComponent = (IconComponent: React.ComponentType<any>) => {
   return IconComponent;
 };
-
 const countryMatchesSearch = (country: string, searchTerm: string): boolean => {
   if (!searchTerm) return true;
   const normalizedCountry = country.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   return normalizedCountry.includes(normalizedSearch);
 };
-
 interface SearchCriteriaSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
-
 interface SmartSearchFieldProps {
   label: string;
   value: string;
@@ -59,7 +43,6 @@ interface SmartSearchFieldProps {
   options: string[];
   placeholder?: string;
 }
-
 const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
   label,
   value,
@@ -72,7 +55,6 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
   const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (searchTerm) {
       const filtered = options.filter(option => countryMatchesSearch(option, searchTerm));
@@ -81,11 +63,9 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
       setFilteredOptions(options);
     }
   }, [searchTerm, options]);
-
   useEffect(() => {
     setSearchTerm(value);
   }, [value]);
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) && inputRef.current && !inputRef.current.contains(event.target as Node)) {
@@ -97,68 +77,47 @@ const SmartSearchField: React.FC<SmartSearchFieldProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setIsOpen(true);
   };
-
   const handleOptionClick = (option: string) => {
     onChange(option);
     setSearchTerm(option);
     setIsOpen(false);
   };
-
   const handleApply = () => {
     onChange(searchTerm);
     setIsOpen(false);
   };
-
   const handleClear = () => {
     setSearchTerm('');
     onChange('');
     setIsOpen(false);
   };
-
-  return (
-    <div className="space-y-2 relative">
+  return <div className="space-y-2 relative">
       <Label htmlFor={label} className="text-sm">{label}</Label>
       <Input ref={inputRef} id={label} value={searchTerm} onChange={handleInputChange} placeholder={placeholder || `Rechercher ${label}`} className="w-full font-futura" onFocus={() => setIsOpen(true)} />
       
-      {isOpen && (
-        <div ref={dropdownRef} className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg border max-h-64 overflow-y-auto">
+      {isOpen && <div ref={dropdownRef} className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg border max-h-64 overflow-y-auto">
           <div className="py-1 max-h-48 overflow-y-auto">
-            {filteredOptions.length > 0 ? (
-              filteredOptions.map(option => (
-                <div
-                  key={option}
-                  className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer font-futura"
-                  onClick={() => handleOptionClick(option)}
-                >
+            {filteredOptions.length > 0 ? filteredOptions.map(option => <div key={option} className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer font-futura" onClick={() => handleOptionClick(option)}>
                   {option}
-                </div>
-              ))
-            ) : (
-              <div className="px-4 py-2 text-sm text-gray-500">
+                </div>) : <div className="px-4 py-2 text-sm text-gray-500">
                 Aucun résultat
-              </div>
-            )}
+              </div>}
           </div>
           
           <ActionButtons onClear={handleClear} onApply={handleApply} />
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
-
 const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
   lead,
   onDataChange
 }) => {
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
-  
   useEffect(() => {
     const measureHeader = () => {
       const headerElement = document.querySelector('.bg-loro-sand');
@@ -168,35 +127,27 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
         setIsHeaderMeasured(true);
       }
     };
-    
     measureHeader();
-    
     window.addEventListener('resize', measureHeader);
-    
     const timeoutId = setTimeout(measureHeader, 300);
-    
     return () => {
       window.removeEventListener('resize', measureHeader);
       clearTimeout(timeoutId);
     };
   }, []);
-
   const handleInputChange = (field: keyof LeadDetailed, value: any) => {
     onDataChange({
       [field]: value
     } as Partial<LeadDetailed>);
   };
-
   const getLocations = () => {
     if (!lead.country) return [];
-    
     let countryKey = lead.country;
     if (lead.country === "USA" && !LOCATIONS_BY_COUNTRY["USA"]) {
       countryKey = "United States";
     } else if (lead.country === "United States" && !LOCATIONS_BY_COUNTRY["United States"]) {
       countryKey = "USA";
     }
-    
     const locations = LOCATIONS_BY_COUNTRY[countryKey as keyof typeof LOCATIONS_BY_COUNTRY];
     if (locations) {
       return locations.map(location => ({
@@ -206,9 +157,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     }
     return [];
   };
-
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
-  
   const getSelectedBedrooms = () => {
     if (!lead.bedrooms) return [];
     if (Array.isArray(lead.bedrooms)) {
@@ -219,14 +168,12 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
     const value = lead.bedrooms;
     return [value >= 8 ? "8+" : value.toString()];
   };
-
   const handleBedroomToggle = (value: string) => {
     const numValue = value === "8+" ? 8 : parseInt(value);
     let currentBedrooms = Array.isArray(lead.bedrooms) ? [...lead.bedrooms] : lead.bedrooms ? [lead.bedrooms] : [];
     const newBedrooms = currentBedrooms.includes(numValue) ? currentBedrooms.filter(b => b !== numValue) : [...currentBedrooms, numValue];
     handleInputChange('bedrooms', newBedrooms.length ? newBedrooms : undefined);
   };
-
   const handleCountryChange = (value: string) => {
     handleInputChange('country', value);
     if (!lead.nationality) {
@@ -236,11 +183,7 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       }
     }
   };
-
-  const dynamicTopMargin = isHeaderMeasured 
-    ? `${Math.max(headerHeight + 8, 32)}px` 
-    : 'calc(32px + 4rem)';
-
+  const dynamicTopMargin = isHeaderMeasured ? `${Math.max(headerHeight + 8, 32)}px` : 'calc(32px + 4rem)';
   const handleAssetToggle = (value: AssetType) => {
     const updatedAssets = lead.assets ? [...lead.assets] : [];
     if (updatedAssets.includes(value)) {
@@ -249,7 +192,6 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       handleInputChange('assets', [...updatedAssets, value]);
     }
   };
-
   const handleEquipmentToggle = (value: Equipment) => {
     const updatedEquipment = lead.equipment ? [...lead.equipment] : [];
     if (updatedEquipment.includes(value)) {
@@ -258,53 +200,114 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
       handleInputChange('equipment', [...updatedEquipment, value]);
     }
   };
-
-  const ASSETS: { value: AssetType; icon: React.ComponentType<any> }[] = [
-    { value: "Vue mer", icon: Home },
-    { value: "Vue panoramique", icon: Camera },
-    { value: "Bord de mer", icon: Home },
-    { value: "Front de mer", icon: Home },
-    { value: "Domaine de chasse", icon: Home },
-    { value: "Écurie", icon: Home },
-    { value: "Bien d'architecte", icon: Home },
-    { value: "Style contemporain", icon: Home },
-    { value: "Monument classé", icon: Home },
-    { value: "Court de tennis", icon: Home },
-    { value: "Pied des pistes", icon: Home },
-    { value: "Proche montagne", icon: Home },
-    { value: "Proche aéroport", icon: Home },
-    { value: "Proche gare", icon: Home },
-    { value: "Proche golf", icon: Home },
-  ];
-
-  const EQUIPMENT: { value: Equipment; icon: React.ComponentType<any> }[] = [
-    { value: "Piscine", icon: Droplets },
-    { value: "Ascenseur", icon: Home },
-    { value: "Garage & Parking", icon: Car },
-    { value: "Climatisation", icon: Fan },
-    { value: "Salle de réception", icon: Building },
-    { value: "Dépendances", icon: Building2 },
-    { value: "Loge gardien", icon: Home },
-    { value: "Spa", icon: Droplets },
-    { value: "Viager", icon: Home },
-    { value: "Terrasse", icon: Home },
-    { value: "Jardin", icon: Home },
-    { value: "Meublé", icon: Sofa },
-    { value: "Cheminée", icon: Home },
-    { value: "Maison d'amis", icon: Home },
-    { value: "Bâtiments agricoles", icon: Home },
-    { value: "Chambre de bonne", icon: Bed },
-    { value: "Accessible aux handicapés", icon: Home },
-  ];
-
-  return (
-    <div 
-      className="space-y-5 pt-4" 
-      style={{ 
-        marginTop: dynamicTopMargin,
-      }}
-    >
-      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Critères de Recherche</h2>
+  const ASSETS: {
+    value: AssetType;
+    icon: React.ComponentType<any>;
+  }[] = [{
+    value: "Vue mer",
+    icon: Home
+  }, {
+    value: "Vue panoramique",
+    icon: Camera
+  }, {
+    value: "Bord de mer",
+    icon: Home
+  }, {
+    value: "Front de mer",
+    icon: Home
+  }, {
+    value: "Domaine de chasse",
+    icon: Home
+  }, {
+    value: "Écurie",
+    icon: Home
+  }, {
+    value: "Bien d'architecte",
+    icon: Home
+  }, {
+    value: "Style contemporain",
+    icon: Home
+  }, {
+    value: "Monument classé",
+    icon: Home
+  }, {
+    value: "Court de tennis",
+    icon: Home
+  }, {
+    value: "Pied des pistes",
+    icon: Home
+  }, {
+    value: "Proche montagne",
+    icon: Home
+  }, {
+    value: "Proche aéroport",
+    icon: Home
+  }, {
+    value: "Proche gare",
+    icon: Home
+  }, {
+    value: "Proche golf",
+    icon: Home
+  }];
+  const EQUIPMENT: {
+    value: Equipment;
+    icon: React.ComponentType<any>;
+  }[] = [{
+    value: "Piscine",
+    icon: Droplets
+  }, {
+    value: "Ascenseur",
+    icon: Home
+  }, {
+    value: "Garage & Parking",
+    icon: Car
+  }, {
+    value: "Climatisation",
+    icon: Fan
+  }, {
+    value: "Salle de réception",
+    icon: Building
+  }, {
+    value: "Dépendances",
+    icon: Building2
+  }, {
+    value: "Loge gardien",
+    icon: Home
+  }, {
+    value: "Spa",
+    icon: Droplets
+  }, {
+    value: "Viager",
+    icon: Home
+  }, {
+    value: "Terrasse",
+    icon: Home
+  }, {
+    value: "Jardin",
+    icon: Home
+  }, {
+    value: "Meublé",
+    icon: Sofa
+  }, {
+    value: "Cheminée",
+    icon: Home
+  }, {
+    value: "Maison d'amis",
+    icon: Home
+  }, {
+    value: "Bâtiments agricoles",
+    icon: Home
+  }, {
+    value: "Chambre de bonne",
+    icon: Bed
+  }, {
+    value: "Accessible aux handicapés",
+    icon: Home
+  }];
+  return <div className="space-y-5 pt-4" style={{
+    marginTop: dynamicTopMargin
+  }}>
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">CRITÈRES DE LA PROPRIETE</h2>
       
       <ScrollArea className="h-[calc(100vh-150px)]">
         <Tabs defaultValue="budget" className="w-full">
@@ -333,80 +336,56 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
                   <SelectValue placeholder="Sélectionner une devise" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CURRENCIES.map(currency => (
-                    <SelectItem key={currency} value={currency} className="font-futura">
+                  {CURRENCIES.map(currency => <SelectItem key={currency} value={currency} className="font-futura">
                       {currency}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           </TabsContent>
 
           <TabsContent value="location" className="space-y-4 py-2">
-            <SmartSearchField 
-              label="Pays recherché" 
-              value={lead.country || ''} 
-              onChange={handleCountryChange} 
-              options={COUNTRIES} 
-              placeholder="Rechercher un pays" 
-            />
+            <SmartSearchField label="Pays recherché" value={lead.country || ''} onChange={handleCountryChange} options={COUNTRIES} placeholder="Rechercher un pays" />
             
             <div className="space-y-2">
               <Label htmlFor="desiredLocation" className="text-sm">Localisation souhaitée</Label>
-              <Select 
-                value={lead.desiredLocation || 'none'} 
-                onValueChange={value => handleInputChange('desiredLocation', value === 'none' ? undefined : value)} 
-                disabled={!lead.country}
-              >
+              <Select value={lead.desiredLocation || 'none'} onValueChange={value => handleInputChange('desiredLocation', value === 'none' ? undefined : value)} disabled={!lead.country}>
                 <SelectTrigger id="desiredLocation" className="w-full font-futura">
                   <SelectValue placeholder="Sélectionner une localisation" />
                 </SelectTrigger>
                 <SelectContent searchable={true}>
                   <SelectItem value="none" className="font-futura">Aucune localisation</SelectItem>
-                  {getLocations().map(location => (
-                    <SelectItem key={location.value} value={location.value} className="font-futura">
+                  {getLocations().map(location => <SelectItem key={location.value} value={location.value} className="font-futura">
                       {location.label}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
-            {lead.country === 'Mauritius' && (
-              <div className="space-y-2">
+            {lead.country === 'Mauritius' && <div className="space-y-2">
                 <Label className="text-sm">Régions souhaitées</Label>
-                <MultiSelectButtons 
-                  options={MAURITIUS_REGIONS} 
-                  selectedValues={lead.regions || []} 
-                  onToggle={region => {
-                    const updatedRegions = lead.regions ? [...lead.regions] : [];
-                    if (updatedRegions.includes(region as MauritiusRegion)) {
-                      handleInputChange('regions', updatedRegions.filter(r => r !== region));
-                    } else {
-                      handleInputChange('regions', [...updatedRegions, region as MauritiusRegion]);
-                    }
-                  }} 
-                />
-              </div>
-            )}
+                <MultiSelectButtons options={MAURITIUS_REGIONS} selectedValues={lead.regions || []} onToggle={region => {
+              const updatedRegions = lead.regions ? [...lead.regions] : [];
+              if (updatedRegions.includes(region as MauritiusRegion)) {
+                handleInputChange('regions', updatedRegions.filter(r => r !== region));
+              } else {
+                handleInputChange('regions', [...updatedRegions, region as MauritiusRegion]);
+              }
+            }} />
+              </div>}
           </TabsContent>
 
           <TabsContent value="property" className="space-y-4 py-2">
             <div className="space-y-2">
               <Label className="text-sm">Type de bien</Label>
-              <MultiSelectButtons 
-                options={PROPERTY_TYPES} 
-                selectedValues={Array.isArray(lead.propertyTypes) ? lead.propertyTypes : []} 
-                onToggle={value => {
-                  const updatedTypes = Array.isArray(lead.propertyTypes) ? [...lead.propertyTypes] : [];
-                  if (updatedTypes.includes(value as PropertyType)) {
-                    handleInputChange('propertyTypes', updatedTypes.filter(t => t !== value));
-                  } else {
-                    handleInputChange('propertyTypes', [...updatedTypes, value as PropertyType]);
-                  }
-                }}
-              />
+              <MultiSelectButtons options={PROPERTY_TYPES} selectedValues={Array.isArray(lead.propertyTypes) ? lead.propertyTypes : []} onToggle={value => {
+              const updatedTypes = Array.isArray(lead.propertyTypes) ? [...lead.propertyTypes] : [];
+              if (updatedTypes.includes(value as PropertyType)) {
+                handleInputChange('propertyTypes', updatedTypes.filter(t => t !== value));
+              } else {
+                handleInputChange('propertyTypes', [...updatedTypes, value as PropertyType]);
+              }
+            }} />
             </div>
             
             <div className="space-y-2">
@@ -416,183 +395,100 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
             
             <div className="space-y-2">
               <Label className="text-sm">Nombre de chambres</Label>
-              <MultiSelectButtons 
-                options={bedroomOptions} 
-                selectedValues={getSelectedBedrooms()} 
-                onChange={handleBedroomToggle} 
-                specialOption="8+" 
-              />
+              <MultiSelectButtons options={bedroomOptions} selectedValues={getSelectedBedrooms()} onChange={handleBedroomToggle} specialOption="8+" />
             </div>
             
             <div className="space-y-2">
               <Label className="text-sm">Vue souhaitée</Label>
-              <MultiSelectButtons 
-                options={VIEW_TYPES} 
-                selectedValues={lead.views || []} 
-                onToggle={value => {
-                  const updatedViews = lead.views ? [...lead.views] : [];
-                  if (updatedViews.includes(value as ViewType)) {
-                    handleInputChange('views', updatedViews.filter(v => v !== value));
-                  } else {
-                    handleInputChange('views', [...updatedViews, value as ViewType]);
-                  }
-                }}
-              />
+              <MultiSelectButtons options={VIEW_TYPES} selectedValues={lead.views || []} onToggle={value => {
+              const updatedViews = lead.views ? [...lead.views] : [];
+              if (updatedViews.includes(value as ViewType)) {
+                handleInputChange('views', updatedViews.filter(v => v !== value));
+              } else {
+                handleInputChange('views', [...updatedViews, value as ViewType]);
+              }
+            }} />
             </div>
             
             <div className="space-y-2">
               <Label className="text-sm">Prestations souhaitées</Label>
-              <CustomTagInput 
-                tags={lead.amenities || []} 
-                onChange={newTags => handleInputChange('amenities', newTags)} 
-                placeholder="Ajouter une commodité..." 
-                predefinedOptions={AMENITIES} 
-              />
+              <CustomTagInput tags={lead.amenities || []} onChange={newTags => handleInputChange('amenities', newTags)} placeholder="Ajouter une commodité..." predefinedOptions={AMENITIES} />
             </div>
             
-            {lead.pipelineType === 'owners' && (
-              <>
+            {lead.pipelineType === 'owners' && <>
                 <div className="space-y-2">
                   <Label className="text-sm">Surface habitable (m²)</Label>
-                  <Input 
-                    id="livingArea" 
-                    value={lead.livingArea || ''} 
-                    onChange={e => handleInputChange('livingArea', e.target.value)} 
-                    placeholder="Surface en m²" 
-                    className="w-full font-futura" 
-                    type="text" 
-                  />
+                  <Input id="livingArea" value={lead.livingArea || ''} onChange={e => handleInputChange('livingArea', e.target.value)} placeholder="Surface en m²" className="w-full font-futura" type="text" />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm">Surface du terrain (m²)</Label>
-                  <Input 
-                    id="landArea" 
-                    value={lead.landArea || ''} 
-                    onChange={e => handleInputChange('landArea', e.target.value)} 
-                    placeholder="Surface du terrain" 
-                    className="w-full font-futura" 
-                    type="text" 
-                  />
+                  <Input id="landArea" value={lead.landArea || ''} onChange={e => handleInputChange('landArea', e.target.value)} placeholder="Surface du terrain" className="w-full font-futura" type="text" />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm">Année de construction</Label>
-                  <Input 
-                    id="constructionYear" 
-                    value={lead.constructionYear || ''} 
-                    onChange={e => handleInputChange('constructionYear', e.target.value)} 
-                    placeholder="Année de construction" 
-                    className="w-full font-futura" 
-                    type="number" 
-                  />
+                  <Input id="constructionYear" value={lead.constructionYear || ''} onChange={e => handleInputChange('constructionYear', e.target.value)} placeholder="Année de construction" className="w-full font-futura" type="number" />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm">Nombre de places de parking</Label>
-                  <Input 
-                    id="parkingSpaces" 
-                    value={lead.parkingSpaces?.toString() || ''} 
-                    onChange={e => handleInputChange('parkingSpaces', e.target.value)} 
-                    placeholder="Nombre de places" 
-                    className="w-full font-futura" 
-                    type="number" 
-                  />
+                  <Input id="parkingSpaces" value={lead.parkingSpaces?.toString() || ''} onChange={e => handleInputChange('parkingSpaces', e.target.value)} placeholder="Nombre de places" className="w-full font-futura" type="number" />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm">Nombre d'étages</Label>
-                  <Input 
-                    id="floors" 
-                    value={lead.floors?.toString() || ''} 
-                    onChange={e => handleInputChange('floors', e.target.value)} 
-                    placeholder="Nombre d'étages" 
-                    className="w-full font-futura" 
-                    type="number" 
-                  />
+                  <Input id="floors" value={lead.floors?.toString() || ''} onChange={e => handleInputChange('floors', e.target.value)} placeholder="Nombre d'étages" className="w-full font-futura" type="number" />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm">Orientation</Label>
-                  <MultiSelectButtons 
-                    options={["Nord", "Sud", "Est", "Ouest"]} 
-                    selectedValues={lead.orientation || []} 
-                    onToggle={value => {
-                      const updatedOrientation = lead.orientation ? [...lead.orientation] : [];
-                      if (updatedOrientation.includes(value)) {
-                        handleInputChange('orientation', updatedOrientation.filter(o => o !== value));
-                      } else {
-                        handleInputChange('orientation', [...updatedOrientation, value]);
-                      }
-                    }}
-                  />
+                  <MultiSelectButtons options={["Nord", "Sud", "Est", "Ouest"]} selectedValues={lead.orientation || []} onToggle={value => {
+                const updatedOrientation = lead.orientation ? [...lead.orientation] : [];
+                if (updatedOrientation.includes(value)) {
+                  handleInputChange('orientation', updatedOrientation.filter(o => o !== value));
+                } else {
+                  handleInputChange('orientation', [...updatedOrientation, value]);
+                }
+              }} />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm">Classe énergétique</Label>
-                  <Input 
-                    id="energyClass" 
-                    value={lead.energyClass || ''} 
-                    onChange={e => handleInputChange('energyClass', e.target.value)} 
-                    placeholder="Ex: A, B, C..." 
-                    className="w-full font-futura" 
-                  />
+                  <Input id="energyClass" value={lead.energyClass || ''} onChange={e => handleInputChange('energyClass', e.target.value)} placeholder="Ex: A, B, C..." className="w-full font-futura" />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm">Taxes annuelles</Label>
-                  <Input 
-                    id="yearlyTaxes" 
-                    value={lead.yearlyTaxes || ''} 
-                    onChange={e => handleInputChange('yearlyTaxes', e.target.value)} 
-                    placeholder="Montant des taxes annuelles" 
-                    className="w-full font-futura" 
-                  />
+                  <Input id="yearlyTaxes" value={lead.yearlyTaxes || ''} onChange={e => handleInputChange('yearlyTaxes', e.target.value)} placeholder="Montant des taxes annuelles" className="w-full font-futura" />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm">Les atouts</Label>
                   <div className="grid grid-cols-2 gap-2">
-                    {ASSETS.map(({ value, icon: Icon }) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => handleAssetToggle(value)}
-                        className={`flex items-center gap-2 p-2 rounded-md text-sm transition-colors ${
-                          lead.assets?.includes(value)
-                            ? 'bg-primary text-white'
-                            : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                        }`}
-                      >
+                    {ASSETS.map(({
+                  value,
+                  icon: Icon
+                }) => <button key={value} type="button" onClick={() => handleAssetToggle(value)} className={`flex items-center gap-2 p-2 rounded-md text-sm transition-colors ${lead.assets?.includes(value) ? 'bg-primary text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
                         <Icon className="h-4 w-4" />
                         {value}
-                      </button>
-                    ))}
+                      </button>)}
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm">Équipements</Label>
                   <div className="grid grid-cols-2 gap-2">
-                    {EQUIPMENT.map(({ value, icon: Icon }) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => handleEquipmentToggle(value)}
-                        className={`flex items-center gap-2 p-2 rounded-md text-sm transition-colors ${
-                          lead.equipment?.includes(value)
-                            ? 'bg-primary text-white'
-                            : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                        }`}
-                      >
+                    {EQUIPMENT.map(({
+                  value,
+                  icon: Icon
+                }) => <button key={value} type="button" onClick={() => handleEquipmentToggle(value)} className={`flex items-center gap-2 p-2 rounded-md text-sm transition-colors ${lead.equipment?.includes(value) ? 'bg-primary text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
                         <Icon className="h-4 w-4" />
                         {value}
-                      </button>
-                    ))}
+                      </button>)}
                   </div>
                 </div>
-              </>
-            )}
+              </>}
           </TabsContent>
 
           <TabsContent value="purchase" className="space-y-4 py-2">
@@ -634,8 +530,6 @@ const SearchCriteriaSection: React.FC<SearchCriteriaSectionProps> = ({
           </TabsContent>
         </Tabs>
       </ScrollArea>
-    </div>
-  );
+    </div>;
 };
-
 export default SearchCriteriaSection;
