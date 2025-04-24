@@ -1,14 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { LeadDetailed } from '@/types/lead';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 
 interface LeadFormProps {
   lead?: LeadDetailed;
@@ -19,8 +18,6 @@ interface LeadFormProps {
   adminAssignedAgent?: string | undefined;
   isSubmitting?: boolean;
   hideSubmitButton?: boolean;
-  currentUserTeamId?: string | undefined;
-  enforceRlsRules?: boolean;
 }
 
 const LeadForm: React.FC<LeadFormProps> = ({ 
@@ -31,11 +28,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
   activeTab = 'general',
   adminAssignedAgent,
   isSubmitting = false,
-  hideSubmitButton = false,
-  currentUserTeamId,
-  enforceRlsRules = false,
+  hideSubmitButton = false
 }) => {
-  const { isAdmin, isCommercial, user } = useAuth();
   const [formData, setFormData] = useState<LeadDetailed>({
     id: lead?.id || uuidv4(),
     name: lead?.name || '',
@@ -47,7 +41,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
     location: lead?.location || '',
     status: lead?.status || 'New',
     tags: lead?.tags || [],
-    assignedTo: lead?.assignedTo || adminAssignedAgent || undefined,
+    assignedTo: lead?.assignedTo || undefined,
     createdAt: lead?.createdAt || new Date().toISOString(),
     lastContactedAt: lead?.lastContactedAt || undefined,
     source: lead?.source || undefined,
@@ -74,60 +68,11 @@ const LeadForm: React.FC<LeadFormProps> = ({
     taxResidence: lead?.taxResidence || '',
   });
 
-  const [currentUserTeamMemberId, setCurrentUserTeamMemberId] = useState<string | undefined>(currentUserTeamId);
-
   useEffect(() => {
-    const fetchCurrentUserTeamId = async () => {
-      if ((isCommercial || enforceRlsRules) && user?.email) {
-        try {
-          console.log("[LeadForm] Récupération de l'ID de l'équipe pour l'utilisateur:", user.email);
-          
-          const { data, error } = await supabase
-            .from('team_members')
-            .select('id, name')
-            .eq('email', user.email)
-            .maybeSingle();
-            
-          if (error) {
-            console.error("[LeadForm] Erreur lors de la récupération de l'ID de l'équipe:", error);
-            return;
-          }
-          
-          if (data) {
-            console.log("[LeadForm] ID de l'équipe trouvé:", data.id, "pour", data.name);
-            setCurrentUserTeamMemberId(data.id);
-            
-            if (enforceRlsRules && !isAdmin) {
-              setFormData(prev => {
-                if (!prev.assignedTo) {
-                  console.log("[LeadForm] Auto-assignation au commercial actuel:", data.id);
-                  return { ...prev, assignedTo: data.id };
-                }
-                return prev;
-              });
-            }
-          } else {
-            console.log("[LeadForm] Aucun membre d'équipe trouvé pour cet email");
-          }
-        } catch (error) {
-          console.error("[LeadForm] Exception lors de la récupération de l'ID de l'équipe:", error);
-        }
-      }
-    };
-    
-    fetchCurrentUserTeamId();
-  }, [isCommercial, isAdmin, user, enforceRlsRules]);
-
-  useEffect(() => {
-    if (adminAssignedAgent !== undefined && isAdmin) {
-      console.log("[LeadForm] Application de l'agent assigné par l'admin:", adminAssignedAgent);
+    if (adminAssignedAgent !== undefined) {
       setFormData(prev => ({ ...prev, assignedTo: adminAssignedAgent }));
-    } 
-    else if (enforceRlsRules && !isAdmin && currentUserTeamMemberId) {
-      console.log("[LeadForm] Auto-assignation au commercial actuel:", currentUserTeamMemberId);
-      setFormData(prev => ({ ...prev, assignedTo: currentUserTeamMemberId }));
     }
-  }, [adminAssignedAgent, currentUserTeamMemberId, isAdmin, isCommercial, enforceRlsRules]);
+  }, [adminAssignedAgent]);
 
   useEffect(() => {
     if (lead) {
@@ -160,42 +105,18 @@ const LeadForm: React.FC<LeadFormProps> = ({
       return;
     }
     
-    if (enforceRlsRules && !isAdmin && currentUserTeamMemberId) {
-      console.log("[LeadForm] Forçage de l'assignation au commercial actuel avant soumission:", currentUserTeamMemberId);
-      const updatedData = { ...formData, assignedTo: currentUserTeamMemberId };
-      
-      if (!isSubmitting) {
-        onSubmit(updatedData);
-      }
-    } else if (!isSubmitting) {
+    if (!isSubmitting) {
       onSubmit(formData);
     }
   };
 
+  // The key fix: ensure salutation is correctly typed
   const handleSalutationChange = (value: string) => {
+    // Only set the value if it matches the expected type
     if (value === 'M.' || value === 'Mme') {
       setFormData(prev => ({ ...prev, salutation: value }));
     }
   };
-
-  const handleAssignedToChange = (value: string | undefined) => {
-    if (enforceRlsRules && !isAdmin && value !== currentUserTeamMemberId && value !== undefined) {
-      console.log("[LeadForm] Tentative d'assigner à quelqu'un d'autre avec RLS activé - bloqué");
-      toast({
-        variant: "destructive",
-        title: "Action non autorisée",
-        description: "Pour ce lead, l'assignation est restreinte."
-      });
-      return;
-    }
-    
-    setFormData(prev => ({ ...prev, assignedTo: value }));
-  };
-
-  console.log("[LeadForm] Render - isAdmin:", isAdmin, "isCommercial:", isCommercial);
-  console.log("[LeadForm] currentUserTeamMemberId:", currentUserTeamMemberId);
-  console.log("[LeadForm] formData.assignedTo:", formData.assignedTo);
-  console.log("[LeadForm] enforceRlsRules:", enforceRlsRules);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -226,15 +147,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
             placeholder="Nom complet" 
             className="w-full font-futura"
             required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <TeamMemberSelect
-            value={formData.assignedTo}
-            onChange={handleAssignedToChange}
-            label="Attribuer à"
-            disabled={enforceRlsRules && isCommercial && !isAdmin}
           />
         </div>
       </div>

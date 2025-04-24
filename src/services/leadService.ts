@@ -30,16 +30,36 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       status: leadData.status
     });
     
-    // Get the current authenticated user (for logging only)
+    // Vérifier si l'utilisateur actuel est un commercial
     const { data: sessionData } = await supabase.auth.getSession();
     const user = sessionData?.session?.user;
     
-    if (!user) {
-      throw new Error("Vous devez être connecté pour créer un lead.");
+    // Liste des emails commerciaux
+    const commercialEmails = [
+      'jade@gadait-international.com',
+      'ophelie@gadait-international.com',
+      'jeanmarc@gadait-international.com',
+      'jacques@gadait-international.com',
+      'sharon@gadait-international.com'
+    ];
+    
+    // Si c'est un commercial, s'assurer que le lead est assigné à lui-même
+    if (commercialEmails.includes(user?.email || '')) {
+      // Récupérer l'ID du commercial connecté depuis la table team_members
+      const { data: teamMember } = await supabase
+        .from('team_members')
+        .select('id, name')
+        .eq('email', user?.email)
+        .single();
+        
+      if (teamMember && teamMember.id) {
+        console.log(`Commercial user creating lead, auto-assigning to: ${teamMember.name} (${teamMember.id})`);
+        leadData.assignedTo = teamMember.id;
+      }
     }
     
-    // RLS is enabled, so the lead will be created as is,
-    // without assignment restrictions
+    // Si aucun agent n'est assigné, on ne fait pas d'assignation automatique
+    // L'utilisateur doit explicitement choisir un agent
     
     console.log("leadService: Creating lead with processed data:", leadData);
     
@@ -48,28 +68,14 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     console.log("Lead creation result:", result);
     
     if (result) {
-      let successMessage = "Lead créé avec succès";
-      
-      if (result.assignedTo) {
-        const { data: agentData } = await supabase
-          .from("team_members")
-          .select("name")
-          .eq("id", result.assignedTo)
-          .single();
-            
-        if (agentData) {
-          successMessage = `Le lead a été créé et attribué à ${agentData.name} avec succès.`;
-        }
-      }
-      
       toast({
-        title: "Lead créé",
-        description: successMessage,
+        title: "Lead créé avec succès",
+        description: "Le nouveau lead a été ajouté à la base de données.",
       });
 
-      // Check if lead is in "New" status and has an assigned agent
+      // Vérifier si le lead est en statut "New" et a un agent assigné
       if (result.status === "New" && result.assignedTo) {
-        // Add a "Call" action to qualify the lead
+        // Ajouter une action de type "Call" pour qualifier le lead
         const qualificationAction = {
           actionType: "Call",
           scheduledDate: new Date().toISOString(),
@@ -101,18 +107,16 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     return result;
   } catch (error) {
     console.error("Error in leadService.createLead:", error);
-    
     toast({
       variant: "destructive",
       title: "Erreur lors de la création du lead",
       description: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
     });
-    
-    throw error;
+    throw error; // Re-throw to allow handling by the caller
   }
 };
 
-// Re-export all the necessary functions
+// Re-export all the necessary functions from leadCore and leadActions
 export { 
   getLeads, 
   getLead, 
@@ -122,6 +126,7 @@ export {
   addActionToLead
 };
 
-// Export types
+// Export the LeadDetailed type for convenience
 export type { LeadDetailed };
+// Export ActionHistory type
 export type { ActionHistory } from "@/types/actionHistory";

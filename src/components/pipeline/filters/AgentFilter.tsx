@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
-import AgentFilterButton from '@/components/actions/filters/AgentFilterButton';
 
 interface TeamMember {
   id: string;
@@ -20,89 +17,8 @@ interface AgentFilterProps {
 
 const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: AgentFilterProps) => {
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(assignedToOptions);
-  const [isLoading, setIsLoading] = useState(false);
-  const { isAdmin, isCommercial, user } = useAuth();
-  const [currentUserTeamId, setCurrentUserTeamId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadTeamMembers = async () => {
-      setIsLoading(true);
-      try {
-        console.log("[AgentFilter] Loading team members");
-        
-        // Récupération des membres d'équipe
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id, name')
-          .order('name');
-            
-        if (error) {
-          throw error;
-        } else if (data) {
-          console.log("[AgentFilter] Team members loaded:", data.length);
-          setTeamMembers(data);
-          
-          // Si l'utilisateur est un commercial, trouver son ID
-          if (isCommercial && user?.email) {
-            const { data: userData } = await supabase
-              .from('team_members')
-              .select('id')
-              .eq('email', user.email)
-              .maybeSingle();
-              
-            if (userData) {
-              setCurrentUserTeamId(userData.id);
-              
-              // Auto-sélectionner UNIQUEMENT pour les commerciaux non-admin
-              if (!assignedTo && isCommercial && !isAdmin) {
-                handleAgentSelect(userData.id);
-              }
-            }
-          }
-        }
-      } catch (err) {
-        console.error("[AgentFilter] Exception:", err);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger la liste des agents."
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    // Utiliser les options si fournies, sinon charger depuis la base
-    if (assignedToOptions.length === 0) {
-      loadTeamMembers();
-    } else {
-      setTeamMembers(assignedToOptions);
-      
-      // Pour les commerciaux, trouver leur ID s'il n'est pas déjà défini
-      if (isCommercial && !isAdmin && user?.email && !currentUserTeamId) {
-        const findUserTeamMember = async () => {
-          const { data } = await supabase
-            .from('team_members')
-            .select('id')
-            .eq('email', user.email)
-            .maybeSingle();
-            
-          if (data) {
-            setCurrentUserTeamId(data.id);
-            
-            // Auto-sélectionner UNIQUEMENT pour les commerciaux non-admin
-            if (!assignedTo && isCommercial && !isAdmin) {
-              handleAgentSelect(data.id);
-            }
-          }
-        };
-        
-        findUserTeamMember();
-      }
-    }
-  }, [assignedToOptions, isAdmin, isCommercial, user?.email]);
-
+  // Synchroniser avec le système global d'agent sélectionné
   useEffect(() => {
     if (selectedAgent !== assignedTo) {
       onAssignedToChange(selectedAgent);
@@ -110,25 +26,15 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
   }, [selectedAgent, assignedTo]);
 
   const handleAgentSelect = (agentId: string | null) => {
-    // Pour les commerciaux, bloquer la sélection d'autres agents
-    if (isCommercial && !isAdmin && agentId !== currentUserTeamId && agentId !== null) {
-      toast({
-        variant: "destructive",
-        title: "Accès limité",
-        description: "En tant que commercial, vous ne pouvez voir que vos propres leads."
-      });
-      return;
-    }
-    
+    // Mettre à jour à la fois le filtre local et le système global
     onAssignedToChange(agentId);
     handleAgentChange(agentId);
   };
 
+  // Trouver le nom du commercial actuellement sélectionné
   const selectedAgentName = assignedTo 
-    ? teamMembers.find(member => member.id === assignedTo)?.name || 'Inconnu'
+    ? assignedToOptions.find(member => member.id === assignedTo)?.name || 'Inconnu'
     : null;
-
-  const canSelectAll = isAdmin || !isCommercial;
 
   return (
     <div>
@@ -138,36 +44,27 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
           <span className="ml-1 text-primary font-medium">: {selectedAgentName}</span>
         )}
       </h4>
-      {isLoading ? (
-        <div className="text-xs text-amber-600">Chargement des agents...</div>
-      ) : (
-        <div className="grid grid-cols-2 gap-2">
-          {canSelectAll && (
-            <Button
-              variant={assignedTo === null ? "default" : "outline"}
-              size="sm"
-              className="text-xs"
-              onClick={() => handleAgentSelect(null)}
-            >
-              Tous
-            </Button>
-          )}
-          {teamMembers.map((member) => (
-            <AgentFilterButton
-              key={member.id}
-              memberId={member.id}
-              memberName={member.name}
-              isSelected={assignedTo === member.id}
-              onClick={() => handleAgentSelect(member.id)}
-            />
-          ))}
-          {teamMembers.length === 0 && (
-            <div className="col-span-2 text-xs text-amber-600 p-2">
-              Aucun agent disponible. Vérifiez la connexion à Supabase.
-            </div>
-          )}
-        </div>
-      )}
+      <div className="grid grid-cols-2 gap-2">
+        <Button
+          variant={assignedTo === null ? "default" : "outline"}
+          size="sm"
+          className="text-xs"
+          onClick={() => handleAgentSelect(null)}
+        >
+          Tous
+        </Button>
+        {assignedToOptions.map((member) => (
+          <Button
+            key={member.id}
+            variant={assignedTo === member.id ? "default" : "outline"}
+            size="sm"
+            className="text-xs"
+            onClick={() => handleAgentSelect(member.id)}
+          >
+            {member.name}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 };

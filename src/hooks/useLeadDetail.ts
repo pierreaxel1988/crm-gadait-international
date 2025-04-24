@@ -1,8 +1,7 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
-import { getLead, updateLead, getLeads } from '@/services/leadService';
+import { getLead, updateLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 
 export function useLeadDetail(id: string | undefined) {
@@ -17,37 +16,16 @@ export function useLeadDetail(id: string | undefined) {
   const [callType, setCallType] = useState<'phone' | 'whatsapp'>('phone');
   const [isSilentSave, setIsSilentSave] = useState(false);
   const [hasShownPendingActionsToast, setHasShownPendingActionsToast] = useState(false);
-  const [lastFetchAttempt, setLastFetchAttempt] = useState<Date | null>(null);
 
   const fetchLead = useCallback(async () => {
     if (id) {
       try {
         setIsLoading(true);
-        
-        setLastFetchAttempt(new Date());
-        
         const leadData = await getLead(id);
         console.log("Fetched lead data:", leadData);
-        
-        if (leadData) {
-          setLead(leadData);
-          setHasChanges(false);
-        } else {
-          console.log("Lead data not found, will retry later");
-          
-          const allLeads = await getLeads();
-          const matchingLead = allLeads.find(l => l.id === id);
-          
-          if (matchingLead) {
-            console.log("Lead found in all leads:", matchingLead);
-            setLead(matchingLead);
-            setHasChanges(false);
-          } else {
-            console.log("Lead not found in database");
-          }
-        }
+        setLead(leadData || undefined);
+        setHasChanges(false);
       } catch (error) {
-        console.error("Error fetching lead:", error);
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -61,21 +39,7 @@ export function useLeadDetail(id: string | undefined) {
   
   useEffect(() => {
     fetchLead();
-    
-    const intervalId = setInterval(() => {
-      if (!lead && lastFetchAttempt) {
-        const now = new Date();
-        const diffSeconds = (now.getTime() - lastFetchAttempt.getTime()) / 1000;
-        
-        if (diffSeconds > 30) {
-          console.log("No lead data after 30 seconds, retrying fetch");
-          fetchLead();
-        }
-      }
-    }, 5000);
-    
-    return () => clearInterval(intervalId);
-  }, [fetchLead, lead, lastFetchAttempt]);
+  }, [fetchLead]);
 
   const handleSave = async (silent = false) => {
     if (!lead) return;

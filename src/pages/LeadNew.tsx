@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useLeadCreation } from '@/hooks/useLeadCreation';
@@ -8,7 +8,7 @@ import LeadErrorAlert from '@/components/leads/new/LeadErrorAlert';
 import AdminAssignmentSection from '@/components/leads/new/AdminAssignmentSection';
 import LeadFormWrapper from '@/components/leads/new/LeadFormWrapper';
 
-const LeadNew: React.FC = () => {
+const LeadNew = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const { 
@@ -21,21 +21,12 @@ const LeadNew: React.FC = () => {
     handleSubmit,
     handleAgentChange,
     handlePipelineTypeChange,
-    setLeadStatus,
-    currentUserTeamId
+    setLeadStatus
   } = useLeadCreation();
-
-  const handleCancel = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
-
-  console.log("LeadNew render - currentUserTeamId:", currentUserTeamId);
-  console.log("LeadNew render - isAdmin:", isAdmin);
-  console.log("LeadNew render - assignedAgent:", assignedAgent);
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      <LeadNewHeader onBack={handleCancel} />
+      <LeadNewHeader onBack={() => navigate(-1)} />
 
       {error && <LeadErrorAlert error={error} />}
 
@@ -53,11 +44,9 @@ const LeadNew: React.FC = () => {
 
       <LeadFormWrapper 
         onSubmit={handleSubmit}
-        onCancel={handleCancel}
+        onCancel={() => navigate(-1)}
         adminAssignedAgent={assignedAgent}
         isSubmitting={isSubmitting}
-        currentUserTeamId={currentUserTeamId}
-        enforceRlsRules={false} // Ensuring this is set to false to show all team members
       />
     </div>
   );

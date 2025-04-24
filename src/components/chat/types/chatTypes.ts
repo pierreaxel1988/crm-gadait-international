@@ -15,7 +15,6 @@ export interface ExtractedData {
 export interface TeamMember {
   id: string;
   name: string;
-  email?: string;
 }
 
 export interface PropertyDetails {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
 import { createLead } from '@/services/leadService';
@@ -21,32 +21,7 @@ export const useLeadCreation = () => {
   const [leadStatus, setLeadStatus] = useState<LeadStatus>(statusFromUrl || 'New');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentUserTeamId, setCurrentUserTeamId] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    const fetchCurrentUserTeamId = async () => {
-      if (!user?.email) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id')
-          .eq('email', user.email)
-          .single();
-          
-        if (error) throw error;
-        
-        if (data) {
-          setCurrentUserTeamId(data.id);
-          console.log("Current user team ID:", data.id);
-        }
-      } catch (error) {
-        console.error("Error fetching current user team ID:", error);
-      }
-    };
-    
-    fetchCurrentUserTeamId();
-  }, [user, isAdmin]);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -66,8 +41,11 @@ export const useLeadCreation = () => {
 
   const availableStatuses = getStatusesForPipeline(pipelineType);
 
-  const handleSubmit = useCallback(async (data: LeadDetailed) => {
-    if (isSubmitting) return;
+  const handleSubmit = async (data: LeadDetailed) => {
+    if (isSubmitting) {
+      console.log("Submission already in progress, ignoring");
+      return;
+    }
     
     setIsSubmitting(true);
     setError(null);
@@ -82,11 +60,10 @@ export const useLeadCreation = () => {
       delete newLeadData.id;
       delete newLeadData.createdAt;
       
-      // Conserver l'assignation définie par l'utilisateur
-      if (data.assignedTo) {
-        newLeadData.assignedTo = data.assignedTo;
-      } else if (assignedAgent) {
+      if (isAdmin && assignedAgent) {
         newLeadData.assignedTo = assignedAgent;
+      } else if (!isAdmin && user) {
+        newLeadData.assignedTo = user.id;
       }
       
       newLeadData.pipelineType = pipelineType;
@@ -103,10 +80,27 @@ export const useLeadCreation = () => {
         }];
       }
       
-      console.log("Creating lead with data:", newLeadData);
       const createdLead = await createLead(newLeadData);
       
       if (createdLead) {
+        let successMessage = "Le lead a été créé avec succès.";
+        if (createdLead.assignedTo) {
+          const { data: agentData } = await supabase
+            .from("team_members")
+            .select("name")
+            .eq("id", createdLead.assignedTo)
+            .single();
+            
+          if (agentData) {
+            successMessage = `Le lead a été créé et attribué à ${agentData.name} avec succès.`;
+          }
+        }
+        
+        toast({
+          title: "Lead créé",
+          description: successMessage
+        });
+        
         navigate(`/leads/${createdLead.id}?tab=info`);
       } else {
         throw new Error("Aucune donnée de lead retournée après création");
@@ -114,7 +108,6 @@ export const useLeadCreation = () => {
     } catch (error) {
       console.error("Error creating lead:", error);
       setError(error instanceof Error ? error.message : "Une erreur inconnue est survenue");
-      
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -123,18 +116,19 @@ export const useLeadCreation = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [assignedAgent, isAdmin, isSubmitting, leadStatus, navigate, pipelineType, currentUserTeamId]);
+  };
 
-  const handleAgentChange = useCallback((value: string | undefined) => {
+  const handleAgentChange = (value: string | undefined) => {
+    console.log("Agent changed to:", value);
     setAssignedAgent(value);
-  }, []);
+  };
 
-  const handlePipelineTypeChange = useCallback((value: PipelineType) => {
+  const handlePipelineTypeChange = (value: PipelineType) => {
     setPipelineType(value);
     if (!statusFromUrl) {
       setLeadStatus('New');
     }
-  }, [statusFromUrl]);
+  };
 
   return {
     assignedAgent,
@@ -147,8 +141,8 @@ export const useLeadCreation = () => {
     handleAgentChange,
     handlePipelineTypeChange,
     setLeadStatus,
-    currentUserTeamId,
-    isAdmin
+    showDebugInfo,
+    setShowDebugInfo
   };
 };
 

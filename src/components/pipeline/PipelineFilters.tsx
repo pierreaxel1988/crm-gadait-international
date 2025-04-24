@@ -84,12 +84,14 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
         onTagsChange={tags => handleFilterChange('tags', tags)} 
       />
 
-      {/* Agent filter - montrer pour tout le monde */}
-      <AgentFilter 
-        assignedTo={filters.assignedTo} 
-        onAssignedToChange={agent => handleFilterChange('assignedTo', agent)} 
-        assignedToOptions={assignedToOptions} 
-      />
+      {/* Agent filter - only show for admins */}
+      {!isCommercial && (
+        <AgentFilter 
+          assignedTo={filters.assignedTo} 
+          onAssignedToChange={agent => handleFilterChange('assignedTo', agent)} 
+          assignedToOptions={assignedToOptions} 
+        />
+      )}
 
       {/* Budget filter */}
       <BudgetFilter 
