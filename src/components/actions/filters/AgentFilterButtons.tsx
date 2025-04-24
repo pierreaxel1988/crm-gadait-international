@@ -21,70 +21,70 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
   const [localTeamMembers, setLocalTeamMembers] = useState<{ id: string; name: string }[]>(providedMembers);
   const [isLoading, setIsLoading] = useState(false);
   const [currentUserTeamId, setCurrentUserTeamId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  
+  // Effet séparé pour gérer l'auto-sélection
+  useEffect(() => {
+    // Si l'ID du commercial est défini mais qu'aucun filtre n'est actif, appliquer le filtre
+    if (currentUserTeamId && !agentFilter && userRole === 'commercial') {
+      console.log("[AgentFilterButtons] Auto-selecting commercial:", currentUserTeamId);
+      setAgentFilter(currentUserTeamId);
+    }
+  }, [currentUserTeamId, agentFilter, userRole, setAgentFilter]);
   
   useEffect(() => {
     const loadTeamMembers = async () => {
       setIsLoading(true);
       try {
         console.log("[AgentFilterButtons] Loading team members");
+        console.log("[AgentFilterButtons] Debug - isCommercial:", isCommercial, "isAdmin:", isAdmin, "user:", user?.email);
         
-        // Si c'est un commercial sans privilèges admin, ne montrer que lui-même
-        if (isCommercial && !isAdmin && user?.email) {
-          const { data: currentUserData, error } = await supabase
+        // D'abord, obtenez le rôle de l'utilisateur à partir de la base de données
+        if (user?.email) {
+          const { data: userData, error: userError } = await supabase
             .from('team_members')
-            .select('id, name')
+            .select('id, name, role, is_admin')
             .eq('email', user.email)
             .maybeSingle();
             
-          if (error) {
-            throw error;
-          }
-          
-          if (currentUserData) {
-            setLocalTeamMembers([currentUserData]);
-            setCurrentUserTeamId(currentUserData.id);
+          if (userError) {
+            console.error("[AgentFilterButtons] Error fetching user data:", userError);
+          } else if (userData) {
+            console.log("[AgentFilterButtons] User data:", userData);
+            setCurrentUserTeamId(userData.id);
+            setUserRole(userData.role);
             
-            // Auto-sélectionner le commercial uniquement s'il s'agit d'un commercial (pas admin)
-            if (!agentFilter && isCommercial && !isAdmin) {
-              setAgentFilter(currentUserData.id);
+            // Déterminer si l'utilisateur est commercial ou admin basé sur les données de la DB
+            const isUserCommercial = userData.role === 'commercial';
+            const isUserAdmin = userData.is_admin || userData.role === 'admin';
+            
+            // Si c'est uniquement un commercial (sans droits admin)
+            if (isUserCommercial && !isUserAdmin) {
+              console.log("[AgentFilterButtons] Setting up for commercial:", userData.name);
+              setLocalTeamMembers([userData]);
+            } else {
+              // Admin ou commercial avec droits admin - charger tous les membres
+              console.log("[AgentFilterButtons] Loading for admin or commercial with admin rights");
+              const { data, error } = await supabase
+                .from('team_members')
+                .select('id, name, role, is_admin')
+                .order('name');
+                
+              if (error) {
+                console.error("[AgentFilterButtons] Error fetching team members:", error);
+                throw error;
+              } else if (data) {
+                console.log("[AgentFilterButtons] Loaded team members:", data.length);
+                setLocalTeamMembers(data);
+              }
             }
           } else {
-            console.warn("[AgentFilterButtons] Commercial user not found:", user.email);
+            console.warn("[AgentFilterButtons] User not found:", user.email);
             toast({
               variant: "destructive",
               title: "Erreur d'identification",
               description: "Votre compte utilisateur n'est pas correctement configuré.",
             });
-          }
-        } else {
-          // Admin - charge tous les membres
-          const { data, error } = await supabase
-            .from('team_members')
-            .select('id, name')
-            .order('name');
-            
-          if (error) {
-            throw error;
-          } else if (data) {
-            setLocalTeamMembers(data);
-            
-            // Si l'utilisateur est aussi un commercial, trouver son ID
-            if (isCommercial && user?.email) {
-              const { data: userData } = await supabase
-                .from('team_members')
-                .select('id')
-                .eq('email', user.email)
-                .maybeSingle();
-                
-              if (userData) {
-                setCurrentUserTeamId(userData.id);
-                
-                // Auto-sélectionner UNIQUEMENT pour les commerciaux non-admin
-                if (!agentFilter && isCommercial && !isAdmin) {
-                  setAgentFilter(userData.id);
-                }
-              }
-            }
           }
         }
       } catch (err) {
@@ -103,35 +103,43 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
     if (providedMembers.length === 0) {
       loadTeamMembers();
     } else {
+      console.log("[AgentFilterButtons] Using provided members:", providedMembers.length);
       setLocalTeamMembers(providedMembers);
       
-      // Si l'utilisateur est un commercial, essayer de trouver son ID
-      if (isCommercial && !isAdmin && user?.email) {
-        const findUserIdFromEmail = async () => {
+      // Si nous avons un utilisateur, essayer de trouver son ID et rôle
+      if (user?.email) {
+        const findUserInfo = async () => {
+          console.log("[AgentFilterButtons] Finding user info for:", user.email);
+          
           const { data: userData } = await supabase
             .from('team_members')
-            .select('id')
+            .select('id, role, is_admin')
             .eq('email', user.email)
             .maybeSingle();
-            
+              
           if (userData) {
+            console.log("[AgentFilterButtons] Found user info:", userData);
             setCurrentUserTeamId(userData.id);
+            setUserRole(userData.role);
             
-            // Auto-sélectionner UNIQUEMENT pour les commerciaux non-admin
-            if (!agentFilter && isCommercial && !isAdmin) {
+            // Si commercial et pas de filtre actif, auto-sélectionner
+            if (userData.role === 'commercial' && !userData.is_admin && !agentFilter) {
+              console.log("[AgentFilterButtons] Auto-selecting agent filter for commercial");
               setAgentFilter(userData.id);
             }
+          } else {
+            console.warn("[AgentFilterButtons] User not found in database:", user.email);
           }
         };
         
-        findUserIdFromEmail();
+        findUserInfo();
       }
     }
-  }, [providedMembers, isAdmin, isCommercial, user?.email]);
+  }, [providedMembers, isAdmin, isCommercial, user?.email, agentFilter]);
   
   const handleFilterClick = (agentId: string | null) => {
-    // Pour les commerciaux, bloquer la sélection d'autres agents
-    if (isCommercial && !isAdmin && agentId !== currentUserTeamId && agentId !== null) {
+    // Pour les commerciaux sans droits admin, bloquer la sélection d'autres agents
+    if (userRole === 'commercial' && !isAdmin && agentId !== currentUserTeamId && agentId !== null) {
       toast({
         variant: "destructive",
         title: "Accès limité",
@@ -140,11 +148,12 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
       return;
     }
     
+    console.log("[AgentFilterButtons] Setting agent filter to:", agentId);
     setAgentFilter(agentId);
   };
   
   // Pour les commerciaux non-admin, ne pas montrer le bouton "Tous"
-  const canSelectAll = isAdmin || !isCommercial;
+  const canSelectAll = isAdmin || userRole !== 'commercial';
   
   // Utiliser les membres locaux pour l'affichage
   const membersToDisplay = localTeamMembers.length > 0 ? localTeamMembers : providedMembers;
