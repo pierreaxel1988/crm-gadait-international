@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -77,7 +76,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
 
   const [currentUserTeamMemberId, setCurrentUserTeamMemberId] = useState<string | undefined>(currentUserTeamId);
 
-  // Effet pour récupérer l'ID de l'utilisateur actuel si c'est un commercial
   useEffect(() => {
     const fetchCurrentUserTeamId = async () => {
       if ((isCommercial || enforceRlsRules) && user?.email) {
@@ -99,7 +97,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
             console.log("[LeadForm] ID de l'équipe trouvé:", data.id, "pour", data.name);
             setCurrentUserTeamMemberId(data.id);
             
-            // Pour les commerciaux ou quand enforceRlsRules est true, force l'assignation à eux-mêmes
             if (enforceRlsRules && !isAdmin) {
               setFormData(prev => {
                 if (!prev.assignedTo) {
@@ -121,7 +118,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
     fetchCurrentUserTeamId();
   }, [isCommercial, isAdmin, user, enforceRlsRules]);
 
-  // Effet pour appliquer les modifications d'adminAssignedAgent et currentUserTeamId
   useEffect(() => {
     if (adminAssignedAgent !== undefined && isAdmin) {
       console.log("[LeadForm] Application de l'agent assigné par l'admin:", adminAssignedAgent);
@@ -164,7 +160,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
       return;
     }
     
-    // Pour les commerciaux avec RLS activé, forcer l'assignation à eux-mêmes
     if (enforceRlsRules && !isAdmin && currentUserTeamMemberId) {
       console.log("[LeadForm] Forçage de l'assignation au commercial actuel avant soumission:", currentUserTeamMemberId);
       const updatedData = { ...formData, assignedTo: currentUserTeamMemberId };
@@ -184,7 +179,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
   };
 
   const handleAssignedToChange = (value: string | undefined) => {
-    // Uniquement si RLS est activé, restreindre l'assignation
     if (enforceRlsRules && !isAdmin && value !== currentUserTeamMemberId && value !== undefined) {
       console.log("[LeadForm] Tentative d'assigner à quelqu'un d'autre avec RLS activé - bloqué");
       toast({
@@ -240,7 +234,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
             value={formData.assignedTo}
             onChange={handleAssignedToChange}
             label="Attribuer à"
-            disabled={enforceRlsRules && isCommercial && !isAdmin} // Désactiver uniquement si RLS est activé pour les commerciaux
+            disabled={enforceRlsRules && isCommercial && !isAdmin}
           />
         </div>
       </div>

@@ -23,7 +23,6 @@ export const useLeadCreation = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentUserTeamId, setCurrentUserTeamId] = useState<string | undefined>(undefined);
 
-  // Récupérer les informations de l'utilisateur courant
   useEffect(() => {
     const fetchCurrentUserTeamId = async () => {
       if (!user?.email) return;
