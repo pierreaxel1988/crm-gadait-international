@@ -40,18 +40,32 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     if (selectedAgent !== assignedTo) {
       onAssignedToChange(selectedAgent);
     }
-  }, [selectedAgent, assignedTo]);
+  }, [selectedAgent, assignedTo, onAssignedToChange]);
+
+  // Synchroniser le système global avec le filtre local
+  useEffect(() => {
+    if (assignedTo !== selectedAgent) {
+      handleAgentChange(assignedTo);
+    }
+  }, [assignedTo, selectedAgent, handleAgentChange]);
 
   const handleAgentSelect = (agentId: string | null) => {
     // Mettre à jour à la fois le filtre local et le système global
     onAssignedToChange(agentId);
     handleAgentChange(agentId);
+    
+    console.log(`Agent sélectionné: ${agentId}`);
+    
+    // Déclencher un événement de changement d'agent pour la synchronisation globale
+    window.dispatchEvent(new CustomEvent('agent-selection-changed', {
+      detail: { selectedAgent: agentId }
+    }));
   };
 
   // S'assurer que tous les membres garantis sont présents dans les options
   const allMembers = [...assignedToOptions];
   Object.entries(GUARANTEED_MEMBERS).forEach(([id, member]) => {
-    const memberExists = allMembers.some(m => m.name === member.name);
+    const memberExists = allMembers.some(m => m.id === id);
     if (!memberExists) {
       allMembers.push({
         id: id,
