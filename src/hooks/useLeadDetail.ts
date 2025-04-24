@@ -1,7 +1,8 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
-import { getLead, updateLead } from '@/services/leadService';
+import { getLead, updateLead, getLeads } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 
 export function useLeadDetail(id: string | undefined) {
