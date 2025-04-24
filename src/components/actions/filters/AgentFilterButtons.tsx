@@ -31,7 +31,7 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
         // Requête sans filtre pour récupérer tous les membres
         const { data, error } = await supabase
           .from('team_members')
-          .select('id, name, email')
+          .select('id, name')
           .order('name');
           
         if (error) {

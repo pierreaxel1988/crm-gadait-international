@@ -31,10 +31,18 @@ export const applyFiltersToColumns = (
       );
     }
     
-    // Filter by assignedTo without any restrictions
+    // Filter by assignedTo - using UUID comparison
     if (filters.assignedTo) {
+      console.log(`Filtering by agent ID: ${filters.assignedTo}`);
+      
       filteredItems = filteredItems.filter(item => {
-        return item.assignedToId === filters.assignedTo;
+        // Check all possible assignments that might exist in different fields
+        const assignedId = item.assignedTo || item.assignedToId;
+        
+        console.log(`Lead: ${item.id} - Assigned to: ${assignedId}, comparing with: ${filters.assignedTo}`);
+        
+        // Return true if the assignment matches, considering different field names
+        return assignedId === filters.assignedTo;
       });
     }
     
