@@ -118,10 +118,10 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
 
 export const reassignJadeLeads = async () => {
   try {
-    // Use Jade's correct Supabase ID
+    // Use Jade's correct Supabase UUID
     const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
 
-    // Update leads assigned to common variations of Jade's ID to use her correct ID
+    // Update leads with any variation of Jade's ID to use her correct UUID
     const { error } = await supabase
       .from('leads')
       .update({ assigned_to: JADE_ID })
@@ -132,7 +132,7 @@ export const reassignJadeLeads = async () => {
       throw error;
     }
     
-    console.log('Successfully restored all leads to Jade\'s correct ID:', JADE_ID);
+    console.log('Successfully reassigned all leads to Jade\'s correct UUID:', JADE_ID);
     return { success: true };
   } catch (error) {
     console.error('Error in reassignJadeLeads:', error);

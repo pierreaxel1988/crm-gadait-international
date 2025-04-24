@@ -1,9 +1,13 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { getLead, updateLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
+// ID constant for Jade to ensure consistency
+const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
 
 export function useLeadDetail(id: string | undefined) {
   const [lead, setLead] = useState<LeadDetailed | undefined>(undefined);
@@ -24,6 +28,12 @@ export function useLeadDetail(id: string | undefined) {
         setIsLoading(true);
         const leadData = await getLead(id);
         console.log("Fetched lead data:", leadData);
+        
+        // Ensure Jade's ID is properly formatted if it's assigned to her
+        if (leadData && leadData.assignedTo === 'jade-diouane') {
+          leadData.assignedTo = JADE_ID;
+        }
+        
         setLead(leadData || undefined);
         setHasChanges(false);
       } catch (error) {
@@ -49,11 +59,17 @@ export function useLeadDetail(id: string | undefined) {
       setIsSaving(true);
       console.log("Saving lead data:", lead);
       
+      // Ensure Jade's ID is in the correct format before saving
+      const updatedLeadData = { ...lead };
+      if (updatedLeadData.assignedTo === 'jade-diouane') {
+        updatedLeadData.assignedTo = JADE_ID;
+      }
+      
       const updatedLead = await updateLead({
-        ...lead,
-        phoneCountryCode: lead.phoneCountryCode || '+33',
-        phoneCountryCodeDisplay: lead.phoneCountryCodeDisplay || '🇫🇷',
-        preferredLanguage: lead.preferredLanguage || null
+        ...updatedLeadData,
+        phoneCountryCode: updatedLeadData.phoneCountryCode || '+33',
+        phoneCountryCodeDisplay: updatedLeadData.phoneCountryCodeDisplay || '🇫🇷',
+        preferredLanguage: updatedLeadData.preferredLanguage || null
       });
       
       if (updatedLead) {
@@ -103,6 +119,11 @@ export function useLeadDetail(id: string | undefined) {
     if (!lead) return;
     
     console.log("Updating lead data:", data);
+    
+    // If we're updating assignedTo, ensure we convert any legacy ID to the proper UUID
+    if (data.assignedTo === 'jade-diouane') {
+      data.assignedTo = JADE_ID;
+    }
     
     setLead(prev => {
       if (!prev) return prev;

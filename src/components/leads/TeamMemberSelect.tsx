@@ -1,206 +1,105 @@
 
 import React, { useEffect, useState } from 'react';
-import { User } from 'lucide-react';
-import { Label } from '@/components/ui/label';
+import { Check, User, ChevronDown } from 'lucide-react';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+} from "@/components/ui/select"
+import { useTeamMembers } from '@/components/chat/hooks/useTeamMembers';
+
+const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69"; // Jade's correct UUID
 
 interface TeamMemberSelectProps {
   value: string | undefined;
   onChange: (value: string | undefined) => void;
   label?: string;
-  autoSelectPierreAxel?: boolean;
+  placeholder?: string;
   disabled?: boolean;
 }
 
-interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-}
-
-const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
-const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9";
-
-const GUARANTEED_MEMBERS: Record<string, {name: string, email: string}> = {
-  [JACQUES_ID]: {
-    name: 'Jacques Charles',
-    email: 'jacques@gadait-international.com'
-  },
-  [PIERRE_AXEL_ID]: {
-    name: 'Pierre-Axel Gadait',
-    email: 'pierre@gadait-international.com'
-  },
-  "chloe-valentin": {
-    name: 'Chloe Valentin',
-    email: 'chloe@gadait-international.com'
-  },
-  "christelle-gadait": {
-    name: 'Christelle Gadait',
-    email: 'christelle@gadait-international.com'
-  },
-  "christine-francoise": {
-    name: 'Christine Francoise',
-    email: 'christine@gadait-international.com'
-  },
-  "jade-diouane": {
-    name: 'Jade Diouane',
-    email: 'jade@gadait-international.com'
-  },
-  "jean-marc-perrissol": {
-    name: 'Jean Marc Perrissol',
-    email: 'jeanmarc@gadait-international.com'
-  },
-  "sharon-ramdiane": {
-    name: 'Sharon Ramdiane',
-    email: 'sharon@gadait-international.com'
-  },
-  "ophelie-durand": {
-    name: 'Ophelie Durand',
-    email: 'ophelie@gadait-international.com'
-  }
-};
-
-const TeamMemberSelect = ({
-  value, 
-  onChange, 
-  label = "Attribuer à",
-  autoSelectPierreAxel = false,
+const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
+  value,
+  onChange,
+  label = "Responsable du suivi",
+  placeholder = "Sélectionner un agent",
   disabled = false
-}: TeamMemberSelectProps) => {
-  const isMobile = useIsMobile();
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedMemberName, setSelectedMemberName] = useState<string | undefined>();
+}) => {
+  const { teamMembers } = useTeamMembers();
+  const [selectedMemberName, setSelectedMemberName] = useState<string | null>(null);
 
+  // Convert legacy IDs to proper UUIDs
   useEffect(() => {
-    const fetchTeamMembers = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id, name, email')
-          .order('name');
+    // Convert 'jade-diouane' string ID to the correct UUID if needed
+    if (value === 'jade-diouane') {
+      onChange(JADE_ID);
+    }
+  }, [value, onChange]);
 
-        if (error) {
-          throw error;
-        }
-
-        let membersData = data || [];
-        
-        Object.entries(GUARANTEED_MEMBERS).forEach(([id, member]) => {
-          const memberIndex = membersData.findIndex(m => m.name === member.name);
-          if (memberIndex === -1) {
-            membersData.push({
-              id,
-              name: member.name,
-              email: member.email
-            });
-            console.log(`${member.name} a été ajouté manuellement à la liste des agents`);
-          } else {
-            membersData[memberIndex].name = member.name;
-            membersData[memberIndex].email = member.email;
-          }
-        });
-        
-        membersData.sort((a, b) => a.name.localeCompare(b.name));
-        
-        setTeamMembers(membersData);
-        
-        if (autoSelectPierreAxel && !value && membersData.length > 0) {
-          const pierreAxel = membersData.find(member => member.id === PIERRE_AXEL_ID);
-          
-          if (pierreAxel) {
-            onChange(pierreAxel.id);
-            setSelectedMemberName(pierreAxel.name);
-            console.log("Auto-selected Pierre-Axel:", pierreAxel.id);
-          }
-        }
-        
-        if (value && membersData.length > 0) {
-          const selectedMember = membersData.find(member => member.id === value);
-          if (selectedMember) {
-            setSelectedMemberName(selectedMember.name);
-            console.log("Found selected member:", selectedMember.name);
-          }
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement des commerciaux:', error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger la liste des commerciaux."
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTeamMembers();
-  }, [autoSelectPierreAxel, onChange, value]);
-
-  const handleChange = (newValue: string) => {
-    console.log("Selected agent value:", newValue);
-    
-    if (newValue !== "non_assigné") {
-      const selectedMember = teamMembers.find(member => member.id === newValue);
-      if (selectedMember) {
-        setSelectedMemberName(selectedMember.name);
-        console.log("Selected agent name:", selectedMember.name);
+  // Find selected member name for display
+  useEffect(() => {
+    if (value) {
+      const member = teamMembers.find(m => m.id === value);
+      if (member) {
+        console.log("Found selected member:", member.name);
+        setSelectedMemberName(member.name);
+      } else if (value === JADE_ID) {
+        // Fallback for Jade if teamMembers hasn't loaded her yet
+        setSelectedMemberName("Jade Diouane");
       }
     } else {
-      setSelectedMemberName(undefined);
+      setSelectedMemberName(null);
     }
-    
-    onChange(newValue === "non_assigné" ? undefined : newValue);
+  }, [value, teamMembers]);
+
+  const handleValueChange = (newValue: string) => {
+    console.log("Selected agent value:", newValue);
+    const member = teamMembers.find(m => m.id === newValue);
+    if (member) {
+      console.log("Selected agent name:", member.name);
+    }
+    onChange(newValue);
   };
 
   return (
-    <div className="space-y-1 md:space-y-2">
-      <Label htmlFor="assigned_to" className={isMobile ? 'text-xs' : ''}>
-        {label}
-      </Label>
-      <div className="relative">
-        <Select
-          value={value || "non_assigné"}
-          onValueChange={handleChange}
-          disabled={isLoading || disabled}
-        >
-          <SelectTrigger className={`w-full ${isMobile ? 'h-8 text-sm' : ''}`} id="assigned_to">
-            <div className="flex items-center gap-2">
-              <User className="h-3.5 w-3.5" />
-              <SelectValue placeholder="Non assigné" />
-            </div>
-          </SelectTrigger>
-          <SelectContent searchable>
-            <SelectItem value="non_assigné">Non assigné</SelectItem>
-            {teamMembers.map((member) => (
-              <SelectItem key={member.id} value={member.id}>
-                {member.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {isLoading && (
-          <div className="absolute right-10 top-1/2 transform -translate-y-1/2">
-            <div className="animate-spin h-4 w-4 border-2 border-chocolate-dark rounded-full border-t-transparent"></div>
+    <Select
+      value={value || ""}
+      onValueChange={handleValueChange}
+      disabled={disabled}
+    >
+      <SelectTrigger className="w-full flex bg-white font-futura">
+        <SelectValue placeholder={placeholder}>
+          <div className="flex items-center">
+            {value && (
+              <div className="flex items-center">
+                <User className="h-4 w-4 mr-2" />
+                {selectedMemberName || placeholder}
+              </div>
+            )}
+            {!value && placeholder}
           </div>
-        )}
-      </div>
-      {selectedMemberName && (
-        <div className="text-sm text-green-600 mt-1">
-          Agent sélectionné: {selectedMemberName}
-        </div>
-      )}
-    </div>
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent className="max-h-64 font-futura">
+        <SelectGroup>
+          {teamMembers.map(member => (
+            <SelectItem 
+              key={member.id} 
+              value={member.id}
+              className="flex items-center cursor-pointer py-1.5"
+            >
+              <div className="flex items-center">
+                <User className="h-4 w-4 mr-2" />
+                {member.name}
+              </div>
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   );
 };
 

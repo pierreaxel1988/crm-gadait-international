@@ -3,12 +3,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { LeadDetailed } from "@/types/lead";
 import { mapToLeadDetailed, mapToSupabaseFormat } from "./utils/leadMappers";
 
+// Jade's correct UUID
+const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
+
 /**
  * Updates an existing lead in the database
  */
 export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed | null> => {
   try {
     console.log("Updating lead with data:", leadData);
+    
+    // If assignedTo is still using the old string ID for Jade, use the correct UUID
+    if (leadData.assignedTo === 'jade-diouane') {
+      leadData.assignedTo = JADE_ID;
+      console.log("Converting legacy Jade ID to proper UUID:", JADE_ID);
+    }
     
     const supabaseLeadData = mapToSupabaseFormat(leadData);
     console.log("Preparing lead data for update:", supabaseLeadData);
