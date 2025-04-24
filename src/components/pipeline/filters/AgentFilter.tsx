@@ -15,6 +15,23 @@ interface AgentFilterProps {
   assignedToOptions: TeamMember[];
 }
 
+// IDs importants à ne jamais oublier
+const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
+const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9";
+
+// Liste des membres garantis
+const GUARANTEED_MEMBERS: Record<string, {name: string}> = {
+  [JACQUES_ID]: { name: 'Jacques Charles' },
+  [PIERRE_AXEL_ID]: { name: 'Pierre-Axel Gadait' },
+  "chloe-valentin": { name: 'Chloe Valentin' },
+  "christelle-gadait": { name: 'Christelle Gadait' },
+  "christine-francoise": { name: 'Christine Francoise' },
+  "jade-diouane": { name: 'Jade Diouane' },
+  "jean-marc-perrissol": { name: 'Jean Marc Perrissol' },
+  "sharon-ramdiane": { name: 'Sharon Ramdiane' },
+  "ophelie-durand": { name: 'Ophelie Durand' }
+};
+
 const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: AgentFilterProps) => {
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
 
@@ -31,9 +48,24 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     handleAgentChange(agentId);
   };
 
+  // S'assurer que tous les membres garantis sont présents dans les options
+  const allMembers = [...assignedToOptions];
+  Object.entries(GUARANTEED_MEMBERS).forEach(([id, member]) => {
+    const memberExists = allMembers.some(m => m.name === member.name);
+    if (!memberExists) {
+      allMembers.push({
+        id: id,
+        name: member.name
+      });
+    }
+  });
+
+  // Trier les membres par ordre alphabétique
+  allMembers.sort((a, b) => a.name.localeCompare(b.name));
+
   // Trouver le nom du commercial actuellement sélectionné
   const selectedAgentName = assignedTo 
-    ? assignedToOptions.find(member => member.id === assignedTo)?.name || 'Inconnu'
+    ? allMembers.find(member => member.id === assignedTo)?.name || 'Inconnu'
     : null;
 
   return (
@@ -53,7 +85,7 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
         >
           Tous
         </Button>
-        {assignedToOptions.map((member) => (
+        {allMembers.map((member) => (
           <Button
             key={member.id}
             variant={assignedTo === member.id ? "default" : "outline"}
