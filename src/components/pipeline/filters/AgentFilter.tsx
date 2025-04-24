@@ -30,7 +30,6 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
       try {
         console.log("[AgentFilter] Loading all team members");
         
-        // Load all team members without restrictions
         const { data, error } = await supabase
           .from('team_members')
           .select('id, name')
@@ -42,7 +41,6 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
           console.log("[AgentFilter] Team members loaded:", data.length);
           setTeamMembers(data);
           
-          // For commercial users, identify their own ID
           if (isCommercial && !isAdmin && user?.email) {
             const { data: currentUserData } = await supabase
               .from('team_members')
@@ -54,7 +52,6 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
               setCurrentUserTeamId(currentUserData.id);
               console.log("[AgentFilter] Current commercial ID:", currentUserData.id);
               
-              // Auto-select the commercial user if no agent is selected
               if (!assignedTo) {
                 handleAgentSelect(currentUserData.id);
               }
@@ -68,7 +65,6 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
       }
     };
     
-    // Use provided options or load from Supabase if empty
     if (assignedToOptions.length === 0) {
       loadTeamMembers();
     } else {
