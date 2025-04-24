@@ -24,28 +24,26 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
   const { isAdmin, isCommercial, user } = useAuth();
   const [currentUserTeamId, setCurrentUserTeamId] = useState<string | null>(null);
 
-  // Charger tous les membres d'équipe sans filtrage
   useEffect(() => {
     const loadTeamMembers = async () => {
       setIsLoading(true);
       try {
         console.log("[AgentFilter] Chargement de tous les membres d'équipe");
         
-        // Requête sans filtre pour récupérer tous les membres
+        // Chargement de tous les membres sans restriction
         const { data, error } = await supabase
           .from('team_members')
-          .select('id, name, email')
+          .select('id, name')
           .order('name');
           
         if (error) {
-          console.error("[AgentFilter] Erreur lors du chargement des membres:", error);
+          console.error("[AgentFilter] Erreur:", error);
         } else if (data) {
           console.log("[AgentFilter] Membres chargés:", data.length);
           setTeamMembers(data);
           
           // Pour les commerciaux, identifier leur propre ID
           if (isCommercial && !isAdmin && user?.email) {
-            // Instead of directly comparing email, we need to fetch the current user's team member ID
             const { data: currentUserData } = await supabase
               .from('team_members')
               .select('id')
@@ -56,15 +54,15 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
               setCurrentUserTeamId(currentUserData.id);
               console.log("[AgentFilter] ID du commercial actuel:", currentUserData.id);
               
-              // Auto-sélectionner le commercial
+              // Auto-sélectionner le commercial si aucun agent n'est sélectionné
               if (!assignedTo) {
                 handleAgentSelect(currentUserData.id);
               }
             }
           }
         }
-      } catch (error) {
-        console.error("[AgentFilter] Exception:", error);
+      } catch (err) {
+        console.error("[AgentFilter] Exception:", err);
       } finally {
         setIsLoading(false);
       }
@@ -75,42 +73,23 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
       loadTeamMembers();
     } else {
       setTeamMembers(assignedToOptions);
-      console.log("[AgentFilter] Utilisation des options fournies:", assignedToOptions.length);
     }
   }, [assignedToOptions, isAdmin, isCommercial, user?.email]);
 
-  // Synchroniser avec le système global d'agent sélectionné
   useEffect(() => {
     if (selectedAgent !== assignedTo) {
       onAssignedToChange(selectedAgent);
     }
-    
-    // Pour les commerciaux, forcer la sélection de leur propre ID
-    if (isCommercial && !isAdmin && currentUserTeamId && assignedTo !== currentUserTeamId) {
-      console.log("[AgentFilter] Forçage de la sélection pour le commercial:", currentUserTeamId);
-      handleAgentSelect(currentUserTeamId);
-    }
-  }, [selectedAgent, assignedTo, isCommercial, isAdmin, currentUserTeamId]);
+  }, [selectedAgent, assignedTo]);
 
   const handleAgentSelect = (agentId: string | null) => {
-    // Pour les commerciaux, ne permettre que la sélection de leur propre ID
-    if (isCommercial && !isAdmin && agentId !== currentUserTeamId && agentId !== null) {
-      console.log("[AgentFilter] Commercial tentant de filtrer par un autre agent - bloqué");
-      return;
-    }
-    
-    // Mettre à jour à la fois le filtre local et le système global
     onAssignedToChange(agentId);
     handleAgentChange(agentId);
   };
 
-  // Trouver le nom du commercial actuellement sélectionné
   const selectedAgentName = assignedTo 
     ? teamMembers.find(member => member.id === assignedTo)?.name || 'Inconnu'
     : null;
-
-  // Pour les commerciaux, désactiver le bouton "Tous"
-  const canSelectAll = isAdmin || !isCommercial;
 
   return (
     <div>
@@ -124,16 +103,14 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
         <div className="text-xs text-amber-600">Chargement des agents...</div>
       ) : (
         <div className="grid grid-cols-2 gap-2">
-          {canSelectAll && (
-            <Button
-              variant={assignedTo === null ? "default" : "outline"}
-              size="sm"
-              className="text-xs"
-              onClick={() => handleAgentSelect(null)}
-            >
-              Tous
-            </Button>
-          )}
+          <Button
+            variant={assignedTo === null ? "default" : "outline"}
+            size="sm"
+            className="text-xs"
+            onClick={() => handleAgentSelect(null)}
+          >
+            Tous
+          </Button>
           {teamMembers.map((member) => (
             <Button
               key={member.id}
