@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, MauritiusRegion } from '@/types/lead';
 import FormSection from './FormSection';
@@ -130,17 +131,17 @@ const SearchCriteriaSection = ({
                 <div className="space-y-2">
                   <Label className="text-sm flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
-                    Coordonnées Google Maps
+                    Pin Location
                   </Label>
                   <Input
                     name="mapCoordinates"
                     value={formData.mapCoordinates || ''}
                     onChange={handleInputChange}
-                    placeholder="Ex: 48.8566,2.3522"
+                    placeholder="Collez le lien Google Maps ici"
                     className="font-futura"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Format: latitude,longitude (ex: 48.8566,2.3522)
+                    Copiez-collez le lien Google Maps de la propriété
                   </p>
                 </div>
               </div>
