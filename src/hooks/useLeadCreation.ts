@@ -40,12 +40,10 @@ export const useLeadCreation = () => {
         
         if (data) {
           setCurrentUserTeamId(data.id);
-          console.log("Current team member ID set to:", data.id);
           
           // Auto-assigner au commercial si ce n'est pas un admin
           if (!isAdmin) {
             setAssignedAgent(data.id);
-            console.log("Auto-assigned to current non-admin user:", data.id);
           }
         }
       } catch (error) {
@@ -56,7 +54,6 @@ export const useLeadCreation = () => {
     fetchCurrentUserTeamId();
   }, [user, isAdmin]);
 
-  // Utilisez useEffect pour les effets secondaires liés à l'authentification
   useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
@@ -73,28 +70,16 @@ export const useLeadCreation = () => {
     checkAuth();
   }, [navigate]);
 
-  // Utilisez useEffect séparé pour la journalisation de l'agent
-  useEffect(() => {
-    console.log("Current assigned agent in useLeadCreation:", assignedAgent);
-  }, [assignedAgent]);
-
   const availableStatuses = getStatusesForPipeline(pipelineType);
 
-  // Utilisez useCallback pour la fonction handleSubmit pour éviter les recréations inutiles
+  // Fonction pour soumettre un lead
   const handleSubmit = useCallback(async (data: LeadDetailed) => {
-    if (isSubmitting) {
-      console.log("Submission already in progress, ignoring");
-      return;
-    }
+    if (isSubmitting) return;
     
     setIsSubmitting(true);
     setError(null);
     
     try {
-      console.log("Submitting lead data:", data);
-      console.log("Current assigned agent:", assignedAgent);
-      console.log("Is admin:", isAdmin);
-      
       const { data: authData } = await supabase.auth.getSession();
       if (!authData.session) {
         throw new Error("Vous devez être connecté pour créer un lead.");
@@ -104,10 +89,8 @@ export const useLeadCreation = () => {
       delete newLeadData.id;
       delete newLeadData.createdAt;
       
-      // Assignation de l'agent
-      // Si c'est un commercial et qu'il essaie d'assigner à quelqu'un d'autre, bloquer
+      // Gestion de l'assignation
       if (!isAdmin && data.assignedTo && data.assignedTo !== currentUserTeamId) {
-        console.log("Non-admin trying to assign to someone else. Redirecting to self:", currentUserTeamId);
         toast({
           variant: "destructive", 
           title: "Attribution automatique",
@@ -115,23 +98,19 @@ export const useLeadCreation = () => {
         });
         newLeadData.assignedTo = currentUserTeamId;
       } 
-      // Sinon utiliser la logique normale d'assignation
       else if (data.assignedTo) {
-        console.log("Using form's assignedTo:", data.assignedTo);
         newLeadData.assignedTo = data.assignedTo;
-      } else if (isAdmin && assignedAgent) {
-        console.log("Using admin's assignedTo:", assignedAgent);
+      } 
+      else if (isAdmin && assignedAgent) {
         newLeadData.assignedTo = assignedAgent;
-      } else if (!isAdmin && currentUserTeamId) {
-        console.log("Using current user as assignedTo:", currentUserTeamId);
+      } 
+      else if (!isAdmin && currentUserTeamId) {
         newLeadData.assignedTo = currentUserTeamId;
       }
       
       newLeadData.pipelineType = pipelineType;
       newLeadData.pipeline_type = pipelineType;
       newLeadData.status = leadStatus;
-      
-      console.log("Final lead data to submit:", newLeadData);
       
       if (!newLeadData.actionHistory || newLeadData.actionHistory.length === 0) {
         newLeadData.actionHistory = [{
@@ -173,11 +152,8 @@ export const useLeadCreation = () => {
   }, [assignedAgent, isAdmin, isSubmitting, leadStatus, navigate, pipelineType, currentUserTeamId]);
 
   const handleAgentChange = useCallback((value: string | undefined) => {
-    console.log("Agent changed to:", value);
-    
     // Si l'utilisateur n'est pas admin, on force l'assignation à lui-même
     if (!isAdmin && currentUserTeamId && value !== currentUserTeamId) {
-      console.log("Non-admin trying to change agent. Ignoring and keeping self-assignment.");
       return;
     }
     
