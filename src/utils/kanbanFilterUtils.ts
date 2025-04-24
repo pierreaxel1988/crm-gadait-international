@@ -31,7 +31,7 @@ export const applyFiltersToColumns = (
       );
     }
     
-    // Filter by assignedTo - using UUID comparison
+    // Filter by assignedTo - using UUID comparison with enhanced logging
     if (filters.assignedTo) {
       console.log(`Filtering by agent ID: ${filters.assignedTo}`);
       

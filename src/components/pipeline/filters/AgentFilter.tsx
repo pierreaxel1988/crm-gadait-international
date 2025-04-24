@@ -28,21 +28,21 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     const loadTeamMembers = async () => {
       setIsLoading(true);
       try {
-        console.log("[AgentFilter] Chargement de tous les membres d'équipe");
+        console.log("[AgentFilter] Loading all team members");
         
-        // Chargement de tous les membres sans restriction
+        // Load all team members without restrictions
         const { data, error } = await supabase
           .from('team_members')
           .select('id, name')
           .order('name');
           
         if (error) {
-          console.error("[AgentFilter] Erreur:", error);
+          console.error("[AgentFilter] Error:", error);
         } else if (data) {
-          console.log("[AgentFilter] Membres chargés:", data.length);
+          console.log("[AgentFilter] Team members loaded:", data.length);
           setTeamMembers(data);
           
-          // Pour les commerciaux, identifier leur propre ID
+          // For commercial users, identify their own ID
           if (isCommercial && !isAdmin && user?.email) {
             const { data: currentUserData } = await supabase
               .from('team_members')
@@ -52,9 +52,9 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
               
             if (currentUserData) {
               setCurrentUserTeamId(currentUserData.id);
-              console.log("[AgentFilter] ID du commercial actuel:", currentUserData.id);
+              console.log("[AgentFilter] Current commercial ID:", currentUserData.id);
               
-              // Auto-sélectionner le commercial si aucun agent n'est sélectionné
+              // Auto-select the commercial user if no agent is selected
               if (!assignedTo) {
                 handleAgentSelect(currentUserData.id);
               }
@@ -68,7 +68,7 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
       }
     };
     
-    // Utiliser les options fournies ou charger depuis Supabase si vide
+    // Use provided options or load from Supabase if empty
     if (assignedToOptions.length === 0) {
       loadTeamMembers();
     } else {
