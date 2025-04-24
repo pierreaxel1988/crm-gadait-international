@@ -21,6 +21,7 @@ interface LeadFormProps {
   isSubmitting?: boolean;
   hideSubmitButton?: boolean;
   currentUserTeamId?: string | undefined;
+  enforceRlsRules?: boolean; // Ajout de la nouvelle propriété
 }
 
 const LeadForm: React.FC<LeadFormProps> = ({ 
@@ -33,6 +34,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
   isSubmitting = false,
   hideSubmitButton = false,
   currentUserTeamId,
+  enforceRlsRules = false, // Valeur par défaut à false
 }) => {
   const { isAdmin, isCommercial, user } = useAuth();
   const [formData, setFormData] = useState<LeadDetailed>({
