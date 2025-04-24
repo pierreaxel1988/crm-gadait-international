@@ -47,6 +47,62 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchTeamMembers = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('id, name, email, is_admin')
+          .order('name');
+
+        if (error) {
+          throw error;
+        }
+
+        console.log('Fetched team members:', data);
+
+        if (data && data.length > 0) {
+          setTeamMembers(data);
+          
+          if (autoSelectPierreAxel && !value) {
+            const pierreAxel = data.find(member => 
+              member.name.toLowerCase().includes('pierre-axel gadait'));
+            
+            if (pierreAxel) {
+              onChange(pierreAxel.id);
+              setSelectedMemberName(pierreAxel.name);
+            }
+          }
+          
+          if (value && data) {
+            const selectedMember = data.find(member => member.id === value);
+            if (selectedMember) {
+              setSelectedMemberName(selectedMember.name);
+            }
+          }
+        } else {
+          console.log("Aucun membre d'équipe trouvé");
+          setError("Aucun membre d'équipe n'a été trouvé");
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des commerciaux:', error);
+        setError("Impossible de charger la liste des commerciaux");
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger la liste des commerciaux."
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTeamMembers();
+  }, [autoSelectPierreAxel, onChange, value]);
+
+  useEffect(() => {
     const fetchCurrentUser = async () => {
       if (!user?.email) return;
       
@@ -70,76 +126,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
     fetchCurrentUser();
   }, [user]);
 
-  useEffect(() => {
-    const fetchTeamMembers = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id, name, email, is_admin')
-          .order('name');
-
-        if (error) {
-          throw error;
-        }
-
-        if (data && data.length > 0) {
-          setTeamMembers(data);
-          console.log("Team members loaded:", data.length, data);
-          
-          if (autoSelectPierreAxel && !value && data) {
-            const pierreAxel = data.find(member => 
-              member.name.toLowerCase().includes('pierre-axel gadait'));
-            
-            if (pierreAxel) {
-              onChange(pierreAxel.id);
-              setSelectedMemberName(pierreAxel.name);
-            }
-          }
-          
-          if (value && data) {
-            const selectedMember = data.find(member => member.id === value);
-            if (selectedMember) {
-              setSelectedMemberName(selectedMember.name);
-            }
-          }
-        } else {
-          console.log("No team members found or empty result");
-          setError("Aucun membre d'équipe n'a été trouvé");
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement des commerciaux:', error);
-        setError("Impossible de charger la liste des commerciaux");
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger la liste des commerciaux."
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTeamMembers();
-  }, [autoSelectPierreAxel, onChange, value]);
-
   const handleChange = (newValue: string) => {
-    if (enforceRlsRules && !isAdmin && currentUserId && newValue !== "non_assigné" && newValue !== currentUserId) {
-      toast({
-        variant: "destructive",
-        title: "Action non autorisée",
-        description: "En tant que commercial, vous ne pouvez assigner les leads qu'à vous-même."
-      });
-      
-      if (!value || value === "non_assigné") {
-        newValue = currentUserId;
-      } else {
-        return;
-      }
-    }
-    
     if (newValue !== "non_assigné") {
       const selectedMember = teamMembers.find(member => member.id === newValue);
       if (selectedMember) {
@@ -152,9 +139,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
     onChange(newValue === "non_assigné" ? undefined : newValue);
   };
 
-  // Since enforceRlsRules is set to false by default, we don't need to restrict the selection
-  const shouldDisableSelect = disabled || (enforceRlsRules && !isAdmin && !!currentUserId);
-
   return (
     <div className="space-y-1 md:space-y-2">
       <Label htmlFor="assigned_to" className={isMobile ? 'text-xs' : ''}>
@@ -164,7 +148,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         <Select
           value={value || "non_assigné"}
           onValueChange={handleChange}
-          disabled={isLoading || shouldDisableSelect}
+          disabled={isLoading || disabled}
         >
           <SelectTrigger className={`w-full ${isMobile ? 'h-8 text-sm' : ''}`} id="assigned_to">
             <div className="flex items-center gap-2">
@@ -200,11 +184,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       {teamMembers.length === 0 && !isLoading && !error && (
         <div className="text-xs text-amber-600 mt-1">
           Aucun commercial disponible dans la liste.
-        </div>
-      )}
-      {enforceRlsRules && !isAdmin && currentUserId && (
-        <div className="text-xs text-amber-600 mt-1">
-          En tant que commercial, vous ne pouvez créer que des leads assignés à vous-même.
         </div>
       )}
     </div>
