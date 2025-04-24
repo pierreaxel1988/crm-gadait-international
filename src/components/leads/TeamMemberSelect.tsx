@@ -12,7 +12,6 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 
 // Définir les types pour les props
 interface TeamMemberSelectProps {
@@ -21,7 +20,6 @@ interface TeamMemberSelectProps {
   label?: string;
   autoSelectPierreAxel?: boolean;
   disabled?: boolean;
-  syncWithGlobalAgent?: boolean; // Nouvelle prop pour synchroniser avec l'agent global
 }
 
 interface TeamMember {
@@ -35,24 +33,12 @@ const TeamMemberSelect = ({
   onChange, 
   label = "Attribuer à",
   autoSelectPierreAxel = false,
-  disabled = false,
-  syncWithGlobalAgent = true
+  disabled = false
 }: TeamMemberSelectProps) => {
   const isMobile = useIsMobile();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMemberName, setSelectedMemberName] = useState<string | undefined>();
-  
-  // Utiliser le hook useSelectedAgent pour synchroniser avec l'état global
-  const { selectedAgent, handleAgentChange: setGlobalAgent } = useSelectedAgent();
-  
-  // Synchroniser avec l'agent global si nécessaire
-  useEffect(() => {
-    if (syncWithGlobalAgent && selectedAgent && !value && selectedAgent !== 'non_assigné') {
-      console.log("TeamMemberSelect: Synchronizing with global agent:", selectedAgent);
-      onChange(selectedAgent);
-    }
-  }, [selectedAgent, value, onChange, syncWithGlobalAgent]);
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
@@ -105,7 +91,7 @@ const TeamMemberSelect = ({
   }, [autoSelectPierreAxel, onChange, value]);
 
   const handleChange = (newValue: string) => {
-    console.log("TeamMemberSelect: Selected agent value:", newValue);
+    console.log("Selected agent value:", newValue);
     
     // Update selected member name
     if (newValue !== "non_assigné") {
@@ -113,19 +99,9 @@ const TeamMemberSelect = ({
       if (selectedMember) {
         setSelectedMemberName(selectedMember.name);
         console.log("Selected agent name:", selectedMember.name);
-        
-        // Synchroniser avec l'état global si nécessaire
-        if (syncWithGlobalAgent) {
-          setGlobalAgent(newValue);
-        }
       }
     } else {
       setSelectedMemberName(undefined);
-      
-      // Synchroniser avec l'état global si nécessaire
-      if (syncWithGlobalAgent) {
-        setGlobalAgent(null);
-      }
     }
     
     // Si "non_assigné" est sélectionné, on passe undefined

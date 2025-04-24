@@ -1,74 +1,53 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 
-// Ce hook permet de synchroniser la sélection d'agent entre les différentes parties de l'application
 export const useSelectedAgent = () => {
-  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
-  const [agentName, setAgentName] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // Effet pour récupérer les informations de l'agent sélectionné
+  const [selectedAgent, setSelectedAgent] = useState<string | null>(() => {
+    // Récupérer la valeur depuis le localStorage au démarrage
+    const saved = localStorage.getItem('selectedAgent');
+    return saved ? saved : null;
+  });
+
+  // Sauvegarder dans localStorage à chaque changement
   useEffect(() => {
-    if (!selectedAgent) {
-      setAgentName(null);
-      return;
-    }
-    
-    const fetchAgentDetails = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('name')
-          .eq('id', selectedAgent)
-          .single();
-          
-        if (error) {
-          console.error('Erreur lors de la récupération des détails de l\'agent:', error);
-          return;
-        }
-        
-        if (data) {
-          setAgentName(data.name);
-        }
-      } catch (error) {
-        console.error('Erreur inattendue:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchAgentDetails();
-  }, [selectedAgent]);
-  
-  const handleAgentChange = (agentId: string | null) => {
-    console.log("useSelectedAgent: Mise à jour de l'agent sélectionné:", agentId);
-    setSelectedAgent(agentId);
-    
-    // Option: Stocker dans localStorage pour conserver la sélection entre les rechargements de page
-    if (agentId) {
-      localStorage.setItem('selectedAgent', agentId);
+    if (selectedAgent) {
+      localStorage.setItem('selectedAgent', selectedAgent);
     } else {
       localStorage.removeItem('selectedAgent');
     }
-  };
-  
-  // Charger l'agent précédemment sélectionné depuis le localStorage lors de l'initialisation
-  useEffect(() => {
-    const savedAgent = localStorage.getItem('selectedAgent');
-    if (savedAgent) {
-      setSelectedAgent(savedAgent);
-    }
-  }, []);
-  
-  return {
-    selectedAgent,
-    agentName,
-    isLoading,
-    handleAgentChange
-  };
-};
+    
+    // Émettre un événement personnalisé pour la synchronisation
+    window.dispatchEvent(new CustomEvent('agent-selection-changed', {
+      detail: { selectedAgent }
+    }));
+  }, [selectedAgent]);
 
-export default useSelectedAgent;
+  // Écouter les changements d'autres composants
+  useEffect(() => {
+    const handleAgentChange = (e: CustomEvent) => {
+      const newAgent = e.detail.selectedAgent;
+      if (newAgent !== selectedAgent) {
+        setSelectedAgent(newAgent);
+      }
+    };
+
+    // Écouter un nouvel événement personnalisé pour les filtres effacés
+    const handleFiltersClear = () => {
+      setSelectedAgent(null);
+    };
+
+    window.addEventListener('agent-selection-changed', handleAgentChange as EventListener);
+    window.addEventListener('filters-cleared', handleFiltersClear as EventListener);
+    
+    return () => {
+      window.removeEventListener('agent-selection-changed', handleAgentChange as EventListener);
+      window.removeEventListener('filters-cleared', handleFiltersClear as EventListener);
+    };
+  }, [selectedAgent]);
+
+  const handleAgentChange = (agentId: string | null) => {
+    setSelectedAgent(agentId);
+  };
+
+  return { selectedAgent, handleAgentChange };
+};
