@@ -121,7 +121,20 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         }
       } else {
         console.log("[TeamMemberSelect] Aucun membre d'équipe trouvé dans la réponse");
-        setError("Aucun membre d'équipe n'a été trouvé");
+        
+        // Vérifier le nombre total de membres dans la table
+        const { count, error: countError } = await supabase
+          .from('team_members')
+          .select('*', { count: 'exact', head: true });
+          
+        if (countError) {
+          console.error('[TeamMemberSelect] Erreur lors du comptage des membres:', countError);
+        } else {
+          console.log(`[TeamMemberSelect] Nombre total de membres dans la table: ${count}`);
+          if (count === 0) {
+            setError("Aucun membre d'équipe n'a été trouvé dans la base de données");
+          }
+        }
       }
     } catch (error) {
       console.error('[TeamMemberSelect] Erreur détaillée:', error);
