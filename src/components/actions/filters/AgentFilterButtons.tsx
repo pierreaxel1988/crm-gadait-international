@@ -44,8 +44,8 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
             setLocalTeamMembers([currentUserData]);
             setCurrentUserTeamId(currentUserData.id);
             
-            // Auto-sélectionner le commercial
-            if (!agentFilter) {
+            // Auto-sélectionner le commercial uniquement s'il s'agit d'un commercial (pas admin)
+            if (!agentFilter && isCommercial && !isAdmin) {
               setAgentFilter(currentUserData.id);
             }
           } else {
@@ -79,8 +79,8 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
               if (userData) {
                 setCurrentUserTeamId(userData.id);
                 
-                // Auto-sélectionner pour les commerciaux
-                if (!agentFilter) {
+                // Auto-sélectionner UNIQUEMENT pour les commerciaux non-admin
+                if (!agentFilter && isCommercial && !isAdmin) {
                   setAgentFilter(userData.id);
                 }
               }
@@ -117,8 +117,8 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
           if (userData) {
             setCurrentUserTeamId(userData.id);
             
-            // Auto-sélectionner pour les commerciaux
-            if (!agentFilter) {
+            // Auto-sélectionner UNIQUEMENT pour les commerciaux non-admin
+            if (!agentFilter && isCommercial && !isAdmin) {
               setAgentFilter(userData.id);
             }
           }

@@ -48,8 +48,10 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
             setCurrentUserTeamId(currentUserData.id);
             console.log("[AgentFilter] Commercial ID:", currentUserData.id);
             
-            // Auto-sélectionner le commercial
-            handleAgentSelect(currentUserData.id);
+            // Auto-sélectionner le commercial UNIQUEMENT s'il est commercial sans privilèges admin
+            if (!assignedTo && isCommercial && !isAdmin) {
+              handleAgentSelect(currentUserData.id);
+            }
           } else {
             console.warn("[AgentFilter] Commercial user not found:", user.email);
             toast({
@@ -82,6 +84,11 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
                 
               if (userData) {
                 setCurrentUserTeamId(userData.id);
+                
+                // Auto-sélectionner UNIQUEMENT pour les commerciaux non-admin
+                if (!assignedTo && isCommercial && !isAdmin) {
+                  handleAgentSelect(userData.id);
+                }
               }
             }
           }
@@ -116,8 +123,8 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
           if (data) {
             setCurrentUserTeamId(data.id);
             
-            // Auto-sélectionner pour les commerciaux
-            if (!assignedTo) {
+            // Auto-sélectionner UNIQUEMENT pour les commerciaux non-admin
+            if (!assignedTo && isCommercial && !isAdmin) {
               handleAgentSelect(data.id);
             }
           }
