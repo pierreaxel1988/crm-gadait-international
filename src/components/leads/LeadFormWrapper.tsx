@@ -21,7 +21,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   adminAssignedAgent,
   isSubmitting,
   currentUserTeamId,
-  enforceRlsRules = false,
+  enforceRlsRules = true, // Modifié de false à true par défaut
   lead,
 }) => {
   const { isAdmin } = useAuth();
@@ -41,7 +41,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
         adminAssignedAgent={adminAssignedAgent}
         isSubmitting={isSubmitting}
         currentUserTeamId={currentUserTeamId}
-        enforceRlsRules={false} // Désactiver les restrictions RLS
+        enforceRlsRules={enforceRlsRules} // Passer le paramètre au lieu de forcer false
       />
     </div>
   );

@@ -40,7 +40,7 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
     
     console.log("[leadReader] User roles - Admin:", isUserAdmin, "Commercial:", isUserCommercial);
     
-    // Récupérer tous les leads sans filtrer
+    // Récupérer tous les leads pour simplifier
     const { data, error } = await supabase.from('leads').select('*');
 
     if (error) {
@@ -65,6 +65,14 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
             console.log("[leadReader] Filtering leads for commercial:", user.email, "with ID:", teamMember.id);
             const filteredLeads = data.filter(lead => lead.assigned_to === teamMember.id);
             console.log(`[leadReader] Filtered: ${filteredLeads.length} leads for commercial`);
+            
+            // Log all assigned_to values to debug
+            console.log("[leadReader] All lead assignments:", data.map(lead => ({
+              id: lead.id,
+              name: lead.name,
+              assigned_to: lead.assigned_to
+            })));
+            
             return filteredLeads.map(lead => mapToLeadDetailed(lead));
           } else {
             // Si le membre n'est pas trouvé, retourner tous les leads comme solution de secours
@@ -123,7 +131,26 @@ export const getLead = async (id: string): Promise<LeadDetailed | null> => {
       return null;
     }
     
-    console.log(`[leadReader] Lead ${id} found, returning without permission check`);
+    console.log(`[leadReader] Lead ${id} found:`, data);
+    
+    // Afficher l'attribution pour aider au debugging
+    if (data.assigned_to) {
+      console.log(`[leadReader] Lead assigned to: ${data.assigned_to}`);
+      
+      // Vérifier si l'agent existe
+      const { data: agent } = await supabase
+        .from('team_members')
+        .select('id, name, email')
+        .eq('id', data.assigned_to)
+        .maybeSingle();
+        
+      if (agent) {
+        console.log(`[leadReader] Agent found: ${agent.name} (${agent.email})`);
+      } else {
+        console.log(`[leadReader] No agent found with ID: ${data.assigned_to}`);
+      }
+    }
+    
     return mapToLeadDetailed(data);
   } catch (error) {
     console.error("[leadReader] Error in getLead:", error);

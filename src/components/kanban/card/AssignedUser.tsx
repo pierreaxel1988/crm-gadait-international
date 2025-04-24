@@ -12,6 +12,7 @@ interface AssignedUserProps {
 const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
   const [assignedToName, setAssignedToName] = useState<string>('Non assigné');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [retryCount, setRetryCount] = useState<number>(0);
   
   useEffect(() => {
     const fetchTeamMemberInfo = async () => {
@@ -27,6 +28,12 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
             
           if (error) {
             console.error('[AssignedUser] Erreur:', error);
+            // Si erreur et moins de 3 tentatives, réessayer après un délai
+            if (retryCount < 3) {
+              setTimeout(() => {
+                setRetryCount(count => count + 1);
+              }, 1000);
+            }
             return;
           }
           
@@ -36,6 +43,26 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
           } else {
             console.log(`[AssignedUser] Aucune info trouvée pour l'ID: ${assignedToId}`);
             setAssignedToName('Agent inconnu');
+            
+            // Essayer de récupérer tous les membres d'équipe pour diagnostic
+            const { data: allMembers } = await supabase
+              .from('team_members')
+              .select('id, name')
+              .order('name');
+              
+            if (allMembers && allMembers.length > 0) {
+              console.log('[AssignedUser] Liste complète des membres:', allMembers);
+              
+              // Vérifier si l'ID est dans la liste mais sous un format différent
+              const matchingMember = allMembers.find(m => 
+                m.id.toLowerCase() === assignedToId.toLowerCase()
+              );
+              
+              if (matchingMember) {
+                console.log(`[AssignedUser] Membre trouvé avec correspondance insensible à la casse: ${matchingMember.name}`);
+                setAssignedToName(matchingMember.name);
+              }
+            }
           }
         } catch (error) {
           console.error('[AssignedUser] Exception:', error);
@@ -46,7 +73,7 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
     };
 
     fetchTeamMemberInfo();
-  }, [assignedToId]);
+  }, [assignedToId, retryCount]);
   
   // Now properly check for assignedToId to determine whether to show the assigned user or the assign button
   if (assignedToId) {
