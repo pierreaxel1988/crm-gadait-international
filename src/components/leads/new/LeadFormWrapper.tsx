@@ -11,6 +11,7 @@ interface LeadFormWrapperProps {
   isSubmitting: boolean;
   currentUserTeamId?: string | undefined;
   isAdmin?: boolean;
+  enforceRlsRules?: boolean; // Ajout de la propriété optionnelle
 }
 
 const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
@@ -19,6 +20,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   adminAssignedAgent,
   isSubmitting,
   currentUserTeamId,
+  enforceRlsRules = false, // Valeur par défaut à false
 }) => {
   const { isAdmin } = useAuth();
   
@@ -34,9 +36,11 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
         adminAssignedAgent={adminAssignedAgent}
         isSubmitting={isSubmitting}
         currentUserTeamId={currentUserTeamId}
+        enforceRlsRules={enforceRlsRules} // Ajout de la propriété
       />
     </div>
   );
 };
 
 export default LeadFormWrapper;
+
