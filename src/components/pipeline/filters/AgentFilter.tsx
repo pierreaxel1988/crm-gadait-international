@@ -24,48 +24,38 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
   const { isAdmin, isCommercial, user } = useAuth();
   const [currentUserTeamId, setCurrentUserTeamId] = useState<string | null>(null);
 
-  // Charger les membres d'équipe en fonction du rôle
+  // Charger tous les membres d'équipe sans filtrage
   useEffect(() => {
     const loadTeamMembers = async () => {
       setIsLoading(true);
       try {
-        console.log("[AgentFilter] Chargement des membres d'équipe - isAdmin:", isAdmin, "isCommercial:", isCommercial);
+        console.log("[AgentFilter] Chargement de tous les membres d'équipe");
         
-        let query = supabase
+        // Requête sans filtre pour récupérer tous les membres
+        const { data, error } = await supabase
           .from('team_members')
-          .select('id, name');
-          
-        // Pour les commerciaux, filtrer pour ne voir que leur propre entrée
-        if (isCommercial && !isAdmin && user?.email) {
-          console.log(`[AgentFilter] Filtrage pour commercial: ${user.email}`);
-          query = query.eq('email', user.email);
-          
-          // Récupérer l'ID du commercial actuel
-          const { data: currentUser } = await supabase
-            .from('team_members')
-            .select('id')
-            .eq('email', user.email)
-            .maybeSingle();
-            
-          if (currentUser) {
-            setCurrentUserTeamId(currentUser.id);
-            console.log("[AgentFilter] ID du commercial actuel:", currentUser.id);
-            
-            // Auto-sélectionner le commercial
-            if (!assignedTo) {
-              handleAgentSelect(currentUser.id);
-            }
-          }
-        }
-        
-        // Exécuter la requête finale
-        const { data, error } = await query.order('name');
+          .select('id, name')
+          .order('name');
           
         if (error) {
           console.error("[AgentFilter] Erreur lors du chargement des membres:", error);
         } else if (data) {
           console.log("[AgentFilter] Membres chargés:", data.length);
           setTeamMembers(data);
+          
+          // Pour les commerciaux, identifier leur propre ID
+          if (isCommercial && !isAdmin && user?.email) {
+            const currentUser = data.find(member => member.email === user.email);
+            if (currentUser) {
+              setCurrentUserTeamId(currentUser.id);
+              console.log("[AgentFilter] ID du commercial actuel:", currentUser.id);
+              
+              // Auto-sélectionner le commercial
+              if (!assignedTo) {
+                handleAgentSelect(currentUser.id);
+              }
+            }
+          }
         }
       } catch (error) {
         console.error("[AgentFilter] Exception:", error);
@@ -74,7 +64,13 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
       }
     };
     
-    loadTeamMembers();
+    // Utiliser les options fournies ou charger depuis Supabase si vide
+    if (assignedToOptions.length === 0) {
+      loadTeamMembers();
+    } else {
+      setTeamMembers(assignedToOptions);
+      console.log("[AgentFilter] Utilisation des options fournies:", assignedToOptions.length);
+    }
   }, [assignedToOptions, isAdmin, isCommercial, user?.email]);
 
   // Synchroniser avec le système global d'agent sélectionné

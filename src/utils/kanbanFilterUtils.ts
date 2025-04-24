@@ -38,11 +38,7 @@ export const applyFiltersToColumns = (
       filteredItems = filteredItems.filter(item => {
         // Check if the item has an assignedTo property that matches the filter
         // This can be either the name or the ID
-        if (typeof item.assignedTo === 'string') {
-          return item.assignedTo === filters.assignedTo || 
-                 item.assignedToId === filters.assignedTo;
-        }
-        return false;
+        return item.assignedToId === filters.assignedTo;
       });
     }
     

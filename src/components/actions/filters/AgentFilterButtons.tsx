@@ -21,48 +21,38 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [currentUserTeamId, setCurrentUserTeamId] = useState<string | null>(null);
   
-  // Charger les membres d'équipe directement si nécessaire
+  // Charger tous les membres d'équipe sans filtrage
   useEffect(() => {
     const loadTeamMembers = async () => {
       setIsLoading(true);
       try {
-        console.log("[AgentFilterButtons] Chargement des membres d'équipe - isAdmin:", isAdmin, "isCommercial:", isCommercial);
+        console.log("[AgentFilterButtons] Chargement de tous les membres d'équipe");
         
-        let query = supabase
+        // Requête sans filtre pour récupérer tous les membres
+        const { data, error } = await supabase
           .from('team_members')
-          .select('id, name');
-          
-        // Pour les commerciaux, filtrer pour ne voir que leur propre entrée
-        if (isCommercial && !isAdmin && user?.email) {
-          console.log(`[AgentFilterButtons] Filtrage pour commercial: ${user.email}`);
-          query = query.eq('email', user.email);
-          
-          // Récupérer l'ID du commercial actuel
-          const { data: currentUser } = await supabase
-            .from('team_members')
-            .select('id')
-            .eq('email', user.email)
-            .maybeSingle();
-            
-          if (currentUser) {
-            setCurrentUserTeamId(currentUser.id);
-            console.log("[AgentFilterButtons] ID du commercial actuel:", currentUser.id);
-            
-            // Auto-sélectionner le commercial
-            if (!agentFilter) {
-              setAgentFilter(currentUser.id);
-            }
-          }
-        }
-        
-        // Exécuter la requête finale
-        const { data, error } = await query.order('name');
+          .select('id, name')
+          .order('name');
           
         if (error) {
           console.error("[AgentFilterButtons] Erreur:", error);
         } else if (data && data.length > 0) {
           console.log("[AgentFilterButtons] Membres chargés:", data.length);
           setLocalTeamMembers(data);
+          
+          // Pour les commerciaux, identifier leur propre ID
+          if (isCommercial && !isAdmin && user?.email) {
+            const currentUser = data.find(member => member.email === user.email);
+            if (currentUser) {
+              setCurrentUserTeamId(currentUser.id);
+              console.log("[AgentFilterButtons] ID du commercial:", currentUser.id);
+              
+              // Auto-sélectionner le commercial
+              if (!agentFilter) {
+                setAgentFilter(currentUser.id);
+              }
+            }
+          }
         }
       } catch (err) {
         console.error("[AgentFilterButtons] Exception:", err);
@@ -74,6 +64,8 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
     if (providedMembers.length === 0) {
       loadTeamMembers();
     } else {
+      setLocalTeamMembers(providedMembers);
+      
       // Vérifier s'il faut filtrer les membres fournis pour un commercial
       if (isCommercial && !isAdmin && user?.email) {
         // Trouver l'ID du commercial actuel parmi les membres fournis
@@ -87,10 +79,7 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
               
             if (currentUser) {
               setCurrentUserTeamId(currentUser.id);
-              console.log("[AgentFilterButtons] ID du commercial trouvé parmi les membres fournis:", currentUser.id);
-              
-              // Filtrer pour ne garder que l'entrée du commercial
-              setLocalTeamMembers(providedMembers.filter(member => member.id === currentUser.id));
+              console.log("[AgentFilterButtons] ID du commercial trouvé:", currentUser.id);
               
               // Auto-sélectionner le commercial
               if (!agentFilter) {

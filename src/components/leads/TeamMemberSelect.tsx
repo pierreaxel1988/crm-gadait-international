@@ -45,7 +45,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   const [currentUserTeamId, setCurrentUserTeamId] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Fonction pour charger les membres de l'équipe
+  // Fonction pour charger tous les membres de l'équipe sans filtrage
   const fetchTeamMembers = async () => {
     setIsLoading(true);
     setError(null);
@@ -65,7 +65,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       }
       
       // Récupérer tous les membres d'équipe sans filtre
-      // C'est ici le problème: nous devons récupérer TOUS les membres d'équipe
       const { data, error: fetchError } = await supabase
         .from('team_members')
         .select('id, name, email, is_admin')
@@ -185,7 +184,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   }, [value, teamMembers]);
 
   const handleChange = (newValue: string) => {
-    // Nous permettons à tous les utilisateurs de choisir n'importe quel agent
+    // Permettre à tous les utilisateurs de choisir n'importe quel agent
     if (newValue !== "non_assigné") {
       const selectedMember = teamMembers.find(member => member.id === newValue);
       if (selectedMember) {
