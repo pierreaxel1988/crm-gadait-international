@@ -6,15 +6,16 @@ import { TeamMember } from '../types/chatTypes';
 // IDs importants à ne jamais oublier
 const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
 const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9";
+const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69"; // Ajout de l'ID correct de Jade
 
 // Liste des membres garantis
 const GUARANTEED_MEMBERS: Record<string, {name: string}> = {
   [JACQUES_ID]: { name: 'Jacques Charles' },
   [PIERRE_AXEL_ID]: { name: 'Pierre-Axel Gadait' },
+  [JADE_ID]: { name: 'Jade Diouane' }, // Utilisation de l'ID correct
   "chloe-valentin": { name: 'Chloe Valentin' },
   "christelle-gadait": { name: 'Christelle Gadait' },
   "christine-francoise": { name: 'Christine Francoise' },
-  "jade-diouane": { name: 'Jade Diouane' },
   "jean-marc-perrissol": { name: 'Jean Marc Perrissol' },
   "sharon-ramdiane": { name: 'Sharon Ramdiane' },
   "ophelie-durand": { name: 'Ophelie Durand' }
