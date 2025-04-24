@@ -40,8 +40,6 @@ export const useLeadCreation = () => {
         
         if (data) {
           setCurrentUserTeamId(data.id);
-          
-          // Auto-assigner au commercial si ce n'est pas un admin
           if (!isAdmin) {
             setAssignedAgent(data.id);
           }
@@ -72,7 +70,6 @@ export const useLeadCreation = () => {
 
   const availableStatuses = getStatusesForPipeline(pipelineType);
 
-  // Fonction pour soumettre un lead
   const handleSubmit = useCallback(async (data: LeadDetailed) => {
     if (isSubmitting) return;
     
@@ -89,23 +86,20 @@ export const useLeadCreation = () => {
       delete newLeadData.id;
       delete newLeadData.createdAt;
       
-      // Gestion de l'assignation
-      if (!isAdmin && data.assignedTo && data.assignedTo !== currentUserTeamId) {
-        toast({
-          variant: "destructive", 
-          title: "Attribution automatique",
-          description: "En tant que commercial, le lead a été automatiquement assigné à vous-même."
-        });
+      // Assignation basée sur les rôles et permissions
+      if (!isAdmin && currentUserTeamId) {
+        // Les commerciaux sont toujours auto-assignés
         newLeadData.assignedTo = currentUserTeamId;
-      } 
-      else if (data.assignedTo) {
-        newLeadData.assignedTo = data.assignedTo;
-      } 
-      else if (isAdmin && assignedAgent) {
-        newLeadData.assignedTo = assignedAgent;
-      } 
-      else if (!isAdmin && currentUserTeamId) {
-        newLeadData.assignedTo = currentUserTeamId;
+        if (data.assignedTo && data.assignedTo !== currentUserTeamId) {
+          toast({
+            variant: "destructive",
+            title: "Attribution automatique",
+            description: "En tant que commercial, le lead a été automatiquement assigné à vous-même."
+          });
+        }
+      } else if (isAdmin) {
+        // Les admins peuvent assigner à n'importe qui
+        newLeadData.assignedTo = data.assignedTo || assignedAgent;
       }
       
       newLeadData.pipelineType = pipelineType;
@@ -131,15 +125,7 @@ export const useLeadCreation = () => {
       }
     } catch (error) {
       console.error("Error creating lead:", error);
-      
-      // Essayer de détecter si c'est une erreur RLS
-      if (error instanceof Error && 
-          (error.message.includes("violates row-level security") || 
-           error.message.includes("new row violates"))) {
-        setError("Vous n'avez pas les permissions nécessaires pour créer ce lead avec cette assignation.");
-      } else {
-        setError(error instanceof Error ? error.message : "Une erreur inconnue est survenue");
-      }
+      setError(error instanceof Error ? error.message : "Une erreur inconnue est survenue");
       
       toast({
         variant: "destructive",
@@ -152,11 +138,9 @@ export const useLeadCreation = () => {
   }, [assignedAgent, isAdmin, isSubmitting, leadStatus, navigate, pipelineType, currentUserTeamId]);
 
   const handleAgentChange = useCallback((value: string | undefined) => {
-    // Si l'utilisateur n'est pas admin, on force l'assignation à lui-même
-    if (!isAdmin && currentUserTeamId && value !== currentUserTeamId) {
-      return;
+    if (!isAdmin && currentUserTeamId) {
+      return; // Les commerciaux ne peuvent pas changer l'assignation
     }
-    
     setAssignedAgent(value);
   }, [isAdmin, currentUserTeamId]);
 
