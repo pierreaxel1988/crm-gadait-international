@@ -10,7 +10,7 @@ interface LeadFormWrapperProps {
   isSubmitting: boolean;
   currentUserTeamId?: string | undefined;
   isAdmin?: boolean;
-  enforceRlsRules?: boolean; // This prop was added but needs to be passed to LeadForm
+  enforceRlsRules?: boolean;
 }
 
 const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({

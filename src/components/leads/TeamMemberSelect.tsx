@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 import { Label } from '@/components/ui/label';
@@ -99,10 +100,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
             setSelectedMemberName(selectedMember.name);
           }
         }
-        
-        if (enforceRlsRules && !isAdmin && currentUserId && currentUserId !== value) {
-          handleChange(currentUserId);
-        }
       } catch (error) {
         console.error('Erreur lors du chargement des commerciaux:', error);
         toast({
@@ -116,7 +113,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
     };
 
     fetchTeamMembers();
-  }, [autoSelectPierreAxel, onChange, value, isAdmin, currentUserId, enforceRlsRules]);
+  }, [autoSelectPierreAxel, onChange, value]);
 
   const handleChange = (newValue: string) => {
     if (enforceRlsRules && !isAdmin && currentUserId && newValue !== "non_assigné" && newValue !== currentUserId) {
@@ -145,6 +142,9 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
     onChange(newValue === "non_assigné" ? undefined : newValue);
   };
 
+  // Since enforceRlsRules is always false by default, we don't need to restrict the selection
+  const shouldDisableSelect = disabled || (enforceRlsRules && !isAdmin && !!currentUserId);
+
   return (
     <div className="space-y-1 md:space-y-2">
       <Label htmlFor="assigned_to" className={isMobile ? 'text-xs' : ''}>
@@ -154,7 +154,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         <Select
           value={value || "non_assigné"}
           onValueChange={handleChange}
-          disabled={isLoading || disabled || (enforceRlsRules && !isAdmin && !!currentUserId)}
+          disabled={isLoading || shouldDisableSelect}
         >
           <SelectTrigger className={`w-full ${isMobile ? 'h-8 text-sm' : ''}`} id="assigned_to">
             <div className="flex items-center gap-2">
@@ -163,17 +163,12 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
             </div>
           </SelectTrigger>
           <SelectContent>
-            {(!enforceRlsRules || isAdmin) && <SelectItem value="non_assigné">Non assigné</SelectItem>}
-            {teamMembers.map((member) => {
-              if (enforceRlsRules && !isAdmin && member.id !== currentUserId) {
-                return null;
-              }
-              return (
-                <SelectItem key={member.id} value={member.id}>
-                  {member.name}
-                </SelectItem>
-              );
-            })}
+            <SelectItem value="non_assigné">Non assigné</SelectItem>
+            {teamMembers.map((member) => (
+              <SelectItem key={member.id} value={member.id}>
+                {member.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         {isLoading && (
@@ -187,7 +182,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
           Agent sélectionné: {selectedMemberName}
         </div>
       )}
-      {!isAdmin && enforceRlsRules && currentUserId && (
+      {enforceRlsRules && !isAdmin && currentUserId && (
         <div className="text-xs text-amber-600 mt-1">
           En tant que commercial, vous ne pouvez créer que des leads assignés à vous-même.
         </div>

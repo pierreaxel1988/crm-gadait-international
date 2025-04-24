@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -47,7 +48,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
     location: lead?.location || '',
     status: lead?.status || 'New',
     tags: lead?.tags || [],
-    assignedTo: lead?.assignedTo || undefined,
+    assignedTo: lead?.assignedTo || adminAssignedAgent || undefined,
     createdAt: lead?.createdAt || new Date().toISOString(),
     lastContactedAt: lead?.lastContactedAt || undefined,
     source: lead?.source || undefined,
@@ -75,13 +76,13 @@ const LeadForm: React.FC<LeadFormProps> = ({
   });
 
   useEffect(() => {
-    if (isAdmin && adminAssignedAgent !== undefined) {
+    if (adminAssignedAgent !== undefined) {
       setFormData(prev => ({ ...prev, assignedTo: adminAssignedAgent }));
     } 
-    else if (!isAdmin && currentUserTeamId) {
+    else if (!isAdmin && currentUserTeamId && enforceRlsRules) {
       setFormData(prev => ({ ...prev, assignedTo: currentUserTeamId }));
     }
-  }, [adminAssignedAgent, isAdmin, currentUserTeamId]);
+  }, [adminAssignedAgent, isAdmin, currentUserTeamId, enforceRlsRules]);
 
   useEffect(() => {
     if (lead) {
@@ -114,7 +115,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
       return;
     }
     
-    if (!isAdmin && currentUserTeamId && formData.assignedTo !== currentUserTeamId) {
+    if (!isAdmin && currentUserTeamId && enforceRlsRules && formData.assignedTo !== currentUserTeamId) {
       console.log("Setting assignedTo to current user before submit:", currentUserTeamId);
       const updatedData = { ...formData, assignedTo: currentUserTeamId };
       
@@ -133,11 +134,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
   };
 
   const handleAssignedToChange = (value: string | undefined) => {
-    if (!isAdmin && currentUserTeamId && value !== currentUserTeamId) {
-      console.log("Non-admin trying to change assignedTo in form. Ignoring.");
-      return;
-    }
-    
+    // Since RLS is disabled, allow assignment to anyone regardless of user role
     setFormData(prev => ({ ...prev, assignedTo: value }));
   };
 
@@ -179,7 +176,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
             onChange={handleAssignedToChange}
             label="Attribuer à"
             enforceRlsRules={enforceRlsRules}
-            disabled={!isAdmin}
+            disabled={false} // Remove the restriction that only admins can change assignment
           />
         </div>
       </div>

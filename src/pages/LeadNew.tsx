@@ -54,7 +54,7 @@ const LeadNew: React.FC = () => {
         isSubmitting={isSubmitting}
         currentUserTeamId={currentUserTeamId}
         isAdmin={isAdmin}
-        enforceRlsRules={false} // Set to false since RLS is disabled
+        enforceRlsRules={false} // Set to false to disable RLS enforcement in the UI
       />
     </div>
   );
