@@ -237,17 +237,8 @@ export function useLeadDetail(id: string | undefined) {
 const handleReassignToJacques = async () => {
   if (!lead) return;
 
-  const jacquesId = await fetchJacquesId();
-  
-  if (!jacquesId) {
-    toast({
-      variant: "destructive",
-      title: "Erreur",
-      description: "Impossible de trouver l'ID de Jacques."
-    });
-    return;
-  }
-
+  const jacquesId = 'e59037a6-218d-4504-a3ad-d2c399784dc7'; // UUID direct de Jacques
+    
   try {
     const updatedLead = await updateLead({
       ...lead,
