@@ -898,7 +898,24 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({ lead, onDat
     return [value >= 8 ? "8+" : value.toString()];
   };
 
-  const propertyTypesList = ["Appartement", "Villa", "Penthouse", "Maison", "Duplex", "Terrain", "Local commercial"];
+  const propertyTypesList = [
+    "Villa", 
+    "Appartement", 
+    "Penthouse", 
+    "Maison",
+    "Duplex",
+    "Chalet", 
+    "Terrain", 
+    "Manoir",
+    "Maison de ville",
+    "Château",
+    "Local commercial",
+    "Commercial",
+    "Hotel",
+    "Vignoble",
+    "Autres"
+  ];
+
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
   const viewTypesList = ["Mer", "Montagne", "Ville", "Panoramique", "Jardin", "Piscine"];
   const amenitiesList = ["Piscine", "Terrasse", "Balcon", "Jardin", "Parking", "Ascenseur", "Sécurité", "Climatisation"];
