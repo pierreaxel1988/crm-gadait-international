@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
@@ -39,6 +40,11 @@ export const useLeadCreation = () => {
     checkAuth();
   }, [navigate]);
 
+  useEffect(() => {
+    // Log l'état actuel de l'agent assigné pour le débogage
+    console.log("Current assigned agent in useLeadCreation:", assignedAgent);
+  }, [assignedAgent]);
+
   const availableStatuses = getStatusesForPipeline(pipelineType);
 
   const handleSubmit = async (data: LeadDetailed) => {
@@ -51,6 +57,11 @@ export const useLeadCreation = () => {
     setError(null);
     
     try {
+      console.log("Submitting lead data:", data);
+      console.log("Current assigned agent:", assignedAgent);
+      console.log("Is admin:", isAdmin);
+      console.log("Current user:", user);
+      
       const { data: authData } = await supabase.auth.getSession();
       if (!authData.session) {
         throw new Error("Vous devez être connecté pour créer un lead.");
@@ -60,15 +71,23 @@ export const useLeadCreation = () => {
       delete newLeadData.id;
       delete newLeadData.createdAt;
       
-      if (isAdmin && assignedAgent) {
+      // Assignation de l'agent
+      if (data.assignedTo) {
+        console.log("Using form's assignedTo:", data.assignedTo);
+        newLeadData.assignedTo = data.assignedTo;
+      } else if (isAdmin && assignedAgent) {
+        console.log("Using admin's assignedTo:", assignedAgent);
         newLeadData.assignedTo = assignedAgent;
       } else if (!isAdmin && user) {
+        console.log("Using current user as assignedTo:", user.id);
         newLeadData.assignedTo = user.id;
       }
       
       newLeadData.pipelineType = pipelineType;
       newLeadData.pipeline_type = pipelineType;
       newLeadData.status = leadStatus;
+      
+      console.log("Final lead data to submit:", newLeadData);
       
       if (!newLeadData.actionHistory || newLeadData.actionHistory.length === 0) {
         newLeadData.actionHistory = [{

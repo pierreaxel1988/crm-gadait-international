@@ -53,6 +53,7 @@ const TeamMemberSelect = ({
           throw error;
         }
 
+        console.log("Fetched team members:", data);
         setTeamMembers(data || []);
         
         // Auto-select Pierre Axel Gadait if requested and no value is already set

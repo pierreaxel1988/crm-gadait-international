@@ -16,6 +16,8 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   adminAssignedAgent,
   isSubmitting
 }) => {
+  console.log("LeadFormWrapper - adminAssignedAgent:", adminAssignedAgent);
+  
   return (
     <div className="luxury-card p-6 border-loro-sand">
       <LeadForm 

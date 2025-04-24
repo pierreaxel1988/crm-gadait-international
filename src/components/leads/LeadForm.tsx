@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 
 interface LeadFormProps {
   lead?: LeadDetailed;
@@ -118,6 +119,11 @@ const LeadForm: React.FC<LeadFormProps> = ({
     }
   };
 
+  // Handle assignedTo changes
+  const handleAssignedToChange = (value: string | undefined) => {
+    setFormData(prev => ({ ...prev, assignedTo: value }));
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-4">
@@ -147,6 +153,14 @@ const LeadForm: React.FC<LeadFormProps> = ({
             placeholder="Nom complet" 
             className="w-full font-futura"
             required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <TeamMemberSelect
+            value={formData.assignedTo}
+            onChange={handleAssignedToChange}
+            label="Attribuer à"
           />
         </div>
       </div>
