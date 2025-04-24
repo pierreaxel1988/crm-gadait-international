@@ -925,12 +925,22 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({ lead, onDat
           >
             <option value="">Sélectionner un pays</option>
             <option value="France">France</option>
+            <option value="Monaco">Monaco</option>
+            <option value="Switzerland">Suisse</option>
             <option value="Spain">Espagne</option>
             <option value="Portugal">Portugal</option>
             <option value="Italy">Italie</option>
-            <option value="Switzerland">Suisse</option>
-            <option value="Monaco">Monaco</option>
+            <option value="United Kingdom">Royaume-Uni</option>
+            <option value="Belgium">Belgique</option>
+            <option value="Luxembourg">Luxembourg</option>
+            <option value="Germany">Allemagne</option>
+            <option value="Netherlands">Pays-Bas</option>
+            <option value="Greece">Grèce</option>
+            <option value="Morocco">Maroc</option>
+            <option value="United Arab Emirates">Émirats Arabes Unis</option>
             <option value="Mauritius">Île Maurice</option>
+            <option value="Thailand">Thaïlande</option>
+            <option value="United States">États-Unis</option>
           </select>
         </div>
 
