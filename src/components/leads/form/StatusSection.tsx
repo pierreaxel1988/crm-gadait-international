@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { CalendarClock, CalendarDays, Activity, Home } from 'lucide-react';
+import { CalendarClock, CalendarDays, Activity, Home, MapPin } from 'lucide-react';
 import { LeadDetailed, LeadSource, PipelineType } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
@@ -180,6 +181,18 @@ const StatusSection = ({
           />
         )}
       />
+
+      {formData.pipelineType === 'owners' && (
+        <FormInput
+          label="Pin Location"
+          name="mapCoordinates"
+          value={formData.mapCoordinates || ''}
+          onChange={handleInputChange}
+          icon={MapPin}
+          placeholder="Collez le lien Google Maps ici"
+          helpText="Copiez-collez le lien Google Maps de la propriété"
+        />
+      )}
 
       <FormInput
         label="Date du dernier contact"
