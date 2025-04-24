@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
 import { createLead } from '@/services/leadService';
@@ -24,6 +24,7 @@ export const useLeadCreation = () => {
   const [error, setError] = useState<string | null>(null);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
 
+  // Utilisez useEffect pour les effets secondaires liés à l'authentification
   useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
@@ -40,14 +41,15 @@ export const useLeadCreation = () => {
     checkAuth();
   }, [navigate]);
 
+  // Utilisez useEffect séparé pour la journalisation de l'agent
   useEffect(() => {
-    // Log l'état actuel de l'agent assigné pour le débogage
     console.log("Current assigned agent in useLeadCreation:", assignedAgent);
   }, [assignedAgent]);
 
   const availableStatuses = getStatusesForPipeline(pipelineType);
 
-  const handleSubmit = async (data: LeadDetailed) => {
+  // Utilisez useCallback pour la fonction handleSubmit pour éviter les recréations inutiles
+  const handleSubmit = useCallback(async (data: LeadDetailed) => {
     if (isSubmitting) {
       console.log("Submission already in progress, ignoring");
       return;
@@ -135,19 +137,19 @@ export const useLeadCreation = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [assignedAgent, isAdmin, isSubmitting, leadStatus, navigate, pipelineType, user]);
 
-  const handleAgentChange = (value: string | undefined) => {
+  const handleAgentChange = useCallback((value: string | undefined) => {
     console.log("Agent changed to:", value);
     setAssignedAgent(value);
-  };
+  }, []);
 
-  const handlePipelineTypeChange = (value: PipelineType) => {
+  const handlePipelineTypeChange = useCallback((value: PipelineType) => {
     setPipelineType(value);
     if (!statusFromUrl) {
       setLeadStatus('New');
     }
-  };
+  }, [statusFromUrl]);
 
   return {
     assignedAgent,

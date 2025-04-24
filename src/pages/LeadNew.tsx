@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useLeadCreation } from '@/hooks/useLeadCreation';
@@ -8,7 +8,7 @@ import LeadErrorAlert from '@/components/leads/new/LeadErrorAlert';
 import AdminAssignmentSection from '@/components/leads/new/AdminAssignmentSection';
 import LeadFormWrapper from '@/components/leads/new/LeadFormWrapper';
 
-const LeadNew = () => {
+const LeadNew: React.FC = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const { 
@@ -24,9 +24,14 @@ const LeadNew = () => {
     setLeadStatus
   } = useLeadCreation();
 
+  // Utiliser useCallback pour la navigation pour éviter des re-renders inutiles
+  const handleCancel = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
+
   return (
     <div className="p-4 md:p-6 space-y-6">
-      <LeadNewHeader onBack={() => navigate(-1)} />
+      <LeadNewHeader onBack={handleCancel} />
 
       {error && <LeadErrorAlert error={error} />}
 
@@ -44,7 +49,7 @@ const LeadNew = () => {
 
       <LeadFormWrapper 
         onSubmit={handleSubmit}
-        onCancel={() => navigate(-1)}
+        onCancel={handleCancel}
         adminAssignedAgent={assignedAgent}
         isSubmitting={isSubmitting}
       />

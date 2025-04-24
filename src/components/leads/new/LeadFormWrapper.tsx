@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import LeadForm from '@/components/leads/LeadForm';
 import { LeadDetailed } from '@/types/lead';
 
@@ -16,7 +16,9 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   adminAssignedAgent,
   isSubmitting
 }) => {
-  console.log("LeadFormWrapper - adminAssignedAgent:", adminAssignedAgent);
+  useEffect(() => {
+    console.log("LeadFormWrapper - adminAssignedAgent:", adminAssignedAgent);
+  }, [adminAssignedAgent]);
   
   return (
     <div className="luxury-card p-6 border-loro-sand">

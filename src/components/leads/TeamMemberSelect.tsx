@@ -28,13 +28,13 @@ interface TeamMember {
   email: string;
 }
 
-const TeamMemberSelect = ({ 
+const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({ 
   value, 
   onChange, 
   label = "Attribuer à",
   autoSelectPierreAxel = false,
   disabled = false
-}: TeamMemberSelectProps) => {
+}) => {
   const isMobile = useIsMobile();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(false);
