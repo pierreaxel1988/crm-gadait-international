@@ -28,6 +28,8 @@ interface TeamMember {
   email: string;
 }
 
+const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
+
 const TeamMemberSelect = ({ 
   value, 
   onChange, 
@@ -53,11 +55,27 @@ const TeamMemberSelect = ({
           throw error;
         }
 
-        setTeamMembers(data || []);
+        let membersData = data || [];
+        
+        // Vérifier si Jacques est présent, sinon l'ajouter
+        const jacquesIndex = membersData.findIndex(member => member.id === JACQUES_ID);
+        if (jacquesIndex === -1) {
+          membersData.push({
+            id: JACQUES_ID,
+            name: 'Jacques',
+            email: 'jacques@example.com' // Email par défaut, sera remplacé si les données réelles sont disponibles
+          });
+          console.log("Jacques a été ajouté manuellement à la liste des agents");
+        }
+        
+        // Trier les membres par nom
+        membersData.sort((a, b) => a.name.localeCompare(b.name));
+        
+        setTeamMembers(membersData);
         
         // Auto-select Pierre Axel Gadait if requested and no value is already set
-        if (autoSelectPierreAxel && !value && data) {
-          const pierreAxel = data.find(member => 
+        if (autoSelectPierreAxel && !value && membersData.length > 0) {
+          const pierreAxel = membersData.find(member => 
             member.name.toLowerCase().includes('pierre-axel gadait'));
           
           if (pierreAxel) {
@@ -68,8 +86,8 @@ const TeamMemberSelect = ({
         }
         
         // Set the name for the already selected member
-        if (value && data) {
-          const selectedMember = data.find(member => member.id === value);
+        if (value && membersData.length > 0) {
+          const selectedMember = membersData.find(member => member.id === value);
           if (selectedMember) {
             setSelectedMemberName(selectedMember.name);
             console.log("Found selected member:", selectedMember.name);
