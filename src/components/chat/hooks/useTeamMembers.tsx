@@ -15,10 +15,11 @@ export const useTeamMembers = () => {
       try {
         console.log('[useTeamMembers] Chargement des membres d\'équipe - isAdmin:', isAdmin, 'isCommercial:', isCommercial);
         setIsLoading(true);
+        setError(null);
         
         let query = supabase
           .from('team_members')
-          .select('id, name');
+          .select('id, name, email');
         
         // Pour les commerciaux, filtrer pour ne voir que leur propre entrée
         if (isCommercial && !isAdmin && user?.email) {
@@ -37,11 +38,24 @@ export const useTeamMembers = () => {
           return;
         }
 
-        if (data) {
+        if (data && data.length > 0) {
           console.log('[useTeamMembers] Membres trouvés:', data.length);
           setTeamMembers(data);
         } else {
-          console.log('[useTeamMembers] Aucun membre trouvé');
+          console.log('[useTeamMembers] Aucun membre trouvé ou tableau vide');
+          // Vérifie si la requête a été exécutée correctement mais n'a pas retourné de données
+          const { count, error: countError } = await supabase
+            .from('team_members')
+            .select('*', { count: 'exact', head: true });
+            
+          if (countError) {
+            console.error('[useTeamMembers] Erreur lors du comptage des membres:', countError);
+          } else {
+            console.log(`[useTeamMembers] Nombre total de membres dans la table: ${count}`);
+            if (count === 0) {
+              setError(new Error('Aucun membre d\'équipe trouvé dans la base de données'));
+            }
+          }
           setTeamMembers([]);
         }
       } catch (err) {
