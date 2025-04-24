@@ -23,9 +23,14 @@ const SearchCriteriaSection = ({
   lead,
   onDataChange
 }: SearchCriteriaSectionProps) => {
-  const [activeTab, setActiveTab] = useState('budget');
-  
-  return <div className="space-y-4">
+  const handleLocationChange = (location: string) => {
+    onDataChange({
+      desiredLocation: location
+    });
+  };
+
+  return (
+    <div className="space-y-4">
       <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Critères de la Propriété</h2>
       
       {lead.pipelineType === 'owners' ? <div className="space-y-4">
@@ -51,7 +56,8 @@ const SearchCriteriaSection = ({
         </div> : <ScrollArea className="h-[calc(100vh-270px)]">
           <BuyerCriteriaSection lead={lead} onDataChange={onDataChange} />
         </ScrollArea>}
-    </div>;
+    </div>
+  );
 };
 
 interface OwnerPriceFieldsProps {
@@ -145,12 +151,6 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
   lead,
   onDataChange
 }) => {
-  const handleLocationChange = (location: string) => {
-    onDataChange({
-      desiredLocation: location
-    });
-  };
-
   return <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="country" className="text-sm">Pays</Label>
@@ -173,6 +173,7 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
         <LocationFilter 
           location={lead.desiredLocation || ''} 
           onLocationChange={handleLocationChange}
+          country={lead.country}
         />
       </div>
 
@@ -711,6 +712,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
           <LocationFilter 
             location={lead.desiredLocation || ''} 
             onLocationChange={handleLocationChange}
+            country={lead.country}
           />
         </div>
 

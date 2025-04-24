@@ -1,38 +1,25 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
+import React from 'react';
 import { MapPin } from 'lucide-react';
-import { getAllLocations } from '@/utils/locationsByCountry';
+import { getAllLocations, getLocationsByCountry } from '@/utils/locationsByCountry';
 import SmartSearch from '@/components/common/SmartSearch';
 
 interface LocationFilterProps {
   location: string;
   onLocationChange: (location: string) => void;
+  country?: string;
 }
 
-const LocationFilter = ({ location, onLocationChange }: LocationFilterProps) => {
-  const [searchTerm, setSearchTerm] = useState(location);
-  const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
-  
-  // Get all available locations
-  const allLocations = getAllLocations();
-
-  useEffect(() => {
-    // Update filtered locations when search term changes
-    if (searchTerm) {
-      const normalizedSearchTerm = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      const filtered = allLocations.filter(loc => {
-        const normalizedLoc = loc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return normalizedLoc.includes(normalizedSearchTerm);
-      }).slice(0, 10); // Limit to 10 suggestions
-      setFilteredLocations(filtered);
-    } else {
-      setFilteredLocations([]);
-    }
-  }, [searchTerm, allLocations]);
-
-  const handleLocationSelect = (location: string) => {
-    onLocationChange(location);
+const LocationFilter = ({ location, onLocationChange, country }: LocationFilterProps) => {
+  // Get locations based on selected country
+  const getFilteredLocations = (searchTerm: string) => {
+    const locations = country ? getLocationsByCountry(country) : getAllLocations();
+    return locations
+      .filter(loc => 
+        loc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+      )
+      .slice(0, 10); // Limit to 10 suggestions
   };
 
   const renderLocationItem = (location: string) => (
@@ -46,15 +33,11 @@ const LocationFilter = ({ location, onLocationChange }: LocationFilterProps) => 
       </h4>
       <div className="relative">
         <SmartSearch
-          placeholder="Ville, région, pays..."
-          value={searchTerm}
-          onChange={(value) => {
-            setSearchTerm(value);
-            // Update filter value directly when typing
-            onLocationChange(value);
-          }}
-          onSelect={handleLocationSelect}
-          results={filteredLocations}
+          placeholder="Ville, région..."
+          value={location}
+          onChange={onLocationChange}
+          onSelect={onLocationChange}
+          results={getFilteredLocations(location)}
           renderItem={renderLocationItem}
           className="w-full"
           inputClassName="h-8 text-sm"
