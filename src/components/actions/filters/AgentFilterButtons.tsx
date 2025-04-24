@@ -70,9 +70,19 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
             
             // Si l'utilisateur est aussi un commercial, trouver son ID
             if (isCommercial && user?.email) {
-              const currentUser = data.find(m => m.email === user.email);
-              if (currentUser) {
-                setCurrentUserTeamId(currentUser.id);
+              const { data: userData } = await supabase
+                .from('team_members')
+                .select('id')
+                .eq('email', user.email)
+                .maybeSingle();
+                
+              if (userData) {
+                setCurrentUserTeamId(userData.id);
+                
+                // Auto-sélectionner pour les commerciaux
+                if (!agentFilter) {
+                  setAgentFilter(userData.id);
+                }
               }
             }
           }
@@ -98,18 +108,18 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
       // Si l'utilisateur est un commercial, essayer de trouver son ID
       if (isCommercial && !isAdmin && user?.email) {
         const findUserIdFromEmail = async () => {
-          const { data: currentUser } = await supabase
+          const { data: userData } = await supabase
             .from('team_members')
             .select('id')
             .eq('email', user.email)
             .maybeSingle();
             
-          if (currentUser) {
-            setCurrentUserTeamId(currentUser.id);
+          if (userData) {
+            setCurrentUserTeamId(userData.id);
             
             // Auto-sélectionner pour les commerciaux
             if (!agentFilter) {
-              setAgentFilter(currentUser.id);
+              setAgentFilter(userData.id);
             }
           }
         };
