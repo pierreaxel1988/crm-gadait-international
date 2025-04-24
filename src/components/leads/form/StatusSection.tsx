@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CalendarClock, CalendarDays, Activity, Home, MapPin } from 'lucide-react';
 import { LeadDetailed, LeadSource, PipelineType } from '@/types/lead';
@@ -12,6 +11,7 @@ import { format } from 'date-fns';
 import RadioSelectButtons from './RadioSelectButtons';
 import { toast } from '@/hooks/use-toast';
 import { getStatusesForPipeline, handlePipelineTypeTransition } from '@/utils/pipelineUtils';
+import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 
 interface StatusSectionProps {
   formData: LeadDetailed;
@@ -88,6 +88,17 @@ const StatusSection = ({
     }
   };
 
+  const handleLocationChange = (location: string) => {
+    const locationEvent = {
+      target: {
+        name: 'desiredLocation',
+        value: location
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(locationEvent);
+  };
+
   const availableStatuses = getStatusesForPipeline(formData.pipelineType || 'purchase');
 
   const getStatusLabel = (status: LeadStatus): string => {
@@ -100,7 +111,7 @@ const StatusSection = ({
         'Signed': 'Mandat signé',
         'Visit': 'Bien en commercialisation',
         'Offer': 'Offre reçue',
-        'Offre': 'Offre reçue',
+        'Offer': 'Offre reçue',
         'Deposit': 'Compromis signé',
         'Gagné': 'Vente finalisée',
         'Perdu': 'Perdu/Annulé'
@@ -146,6 +157,22 @@ const StatusSection = ({
         }))}
       />
 
+      {formData.pipelineType === 'owners' && (
+        <FormInput
+          label="Localisation"
+          name="desiredLocation"
+          value={formData.desiredLocation || ''}
+          onChange={() => {}}
+          icon={MapPin}
+          renderCustomField={() => (
+            <LocationFilter
+              location={formData.desiredLocation || ''}
+              onLocationChange={handleLocationChange}
+            />
+          )}
+        />
+      )}
+
       <FormInput
         label="Tags"
         name="tags"
@@ -181,18 +208,6 @@ const StatusSection = ({
           />
         )}
       />
-
-      {formData.pipelineType === 'owners' && (
-        <FormInput
-          label="Pin Location"
-          name="mapCoordinates"
-          value={formData.mapCoordinates || ''}
-          onChange={handleInputChange}
-          icon={MapPin}
-          placeholder="Collez le lien Google Maps ici"
-          helpText="Copiez-collez le lien Google Maps de la propriété"
-        />
-      )}
 
       <FormInput
         label="Date du dernier contact"
