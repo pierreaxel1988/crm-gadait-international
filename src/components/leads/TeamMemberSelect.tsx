@@ -45,6 +45,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   const [selectedMemberName, setSelectedMemberName] = useState<string | undefined>();
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
@@ -52,23 +53,44 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       setError(null);
       
       try {
+        console.log('Tentative de récupération des membres d\'équipe...');
+        
+        // Vérifier d'abord la connexion à Supabase
+        try {
+          const { data: pingData, error: pingError } = await supabase.from('team_members').select('count(*)', { count: 'exact', head: true });
+          if (pingError) {
+            console.error('Erreur de connexion à Supabase:', pingError);
+            throw new Error('Problème de connexion à la base de données');
+          }
+          console.log('Connexion à Supabase établie, compte:', pingData);
+        } catch (pingError) {
+          console.error('Erreur lors du ping à Supabase:', pingError);
+          setConnectionAttempts(prev => prev + 1);
+          if (connectionAttempts < 3) {
+            // Attendre un peu et réessayer
+            setTimeout(() => fetchTeamMembers(), 1000);
+            return;
+          }
+        }
+        
         const { data, error } = await supabase
           .from('team_members')
-          .select('id, name, email, is_admin')
-          .order('name');
+          .select('id, name, email, is_admin');
 
         if (error) {
+          console.error('Erreur Supabase complète:', error);
           throw error;
         }
 
-        console.log('Fetched team members:', data);
+        console.log('Réponse Supabase pour les membres d\'équipe:', data);
 
         if (data && data.length > 0) {
           setTeamMembers(data);
+          console.log('Nombre de membres d\'équipe trouvés:', data.length);
           
           if (autoSelectPierreAxel && !value) {
             const pierreAxel = data.find(member => 
-              member.name.toLowerCase().includes('pierre-axel gadait'));
+              member.name.toLowerCase().includes('pierre-axel'));
             
             if (pierreAxel) {
               onChange(pierreAxel.id);
@@ -83,15 +105,15 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
             }
           }
         } else {
-          console.log("Aucun membre d'équipe trouvé");
+          console.log("Aucun membre d'équipe trouvé dans la réponse");
           setError("Aucun membre d'équipe n'a été trouvé");
         }
       } catch (error) {
-        console.error('Erreur lors du chargement des commerciaux:', error);
+        console.error('Erreur détaillée lors du chargement des commerciaux:', error);
         setError("Impossible de charger la liste des commerciaux");
         toast({
           variant: "destructive",
-          title: "Erreur",
+          title: "Erreur de chargement",
           description: "Impossible de charger la liste des commerciaux."
         });
       } finally {
@@ -100,7 +122,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
     };
 
     fetchTeamMembers();
-  }, [autoSelectPierreAxel, onChange, value]);
+  }, [autoSelectPierreAxel, onChange, value, connectionAttempts]);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -111,12 +133,18 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
           .from('team_members')
           .select('id')
           .eq('email', user.email)
-          .single();
+          .maybeSingle(); // Utiliser maybeSingle au lieu de single pour éviter l'erreur
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching current user ID:", error);
+          return;
+        }
         
         if (data) {
+          console.log("ID d'utilisateur actuel trouvé:", data.id);
           setCurrentUserId(data.id);
+        } else {
+          console.log("Aucun utilisateur trouvé avec l'email:", user.email);
         }
       } catch (error) {
         console.error("Error fetching current user ID:", error);
@@ -183,7 +211,12 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       )}
       {teamMembers.length === 0 && !isLoading && !error && (
         <div className="text-xs text-amber-600 mt-1">
-          Aucun commercial disponible dans la liste.
+          Aucun commercial disponible dans la liste. Vérifiez votre connexion à Supabase.
+        </div>
+      )}
+      {isLoading && (
+        <div className="text-xs text-amber-600 mt-1">
+          Chargement des commerciaux en cours...
         </div>
       )}
     </div>
