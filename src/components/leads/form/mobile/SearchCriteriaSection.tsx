@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LeadDetailed, Currency, PropertyState } from '@/types/lead';
+import { LeadDetailed, Currency, PropertyState, PropertyType, ViewType, MauritiusRegion } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -22,7 +22,7 @@ import {
   Settings,
   FileText
 } from 'lucide-react';
-import { getIcon } from '@/utils/icons';
+import { getIcon, AllowedIconName } from '@/utils/icons';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import MultiSelectButtons from '../../form/MultiSelectButtons';
 import FormInput from '../../form/FormInput';
@@ -82,7 +82,6 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange 
     const updatedFurnished = !lead.furnished;
     onDataChange({ 
       furnished: updatedFurnished,
-      // Reset furniture details when toggling furnished status
       furniture_included_in_price: updatedFurnished ? true : undefined,
       furniture_price: updatedFurnished ? undefined : lead.furniture_price
     });
@@ -90,7 +89,6 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange 
 
   return (
     <div className="space-y-4">
-      {/* Prix souhaité */}
       <div className="space-y-2">
         <Label htmlFor="desired_price" className="text-sm">Prix souhaité</Label>
         <Input
@@ -103,7 +101,6 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange 
         />
       </div>
 
-      {/* Honoraires */}
       <div className="space-y-2">
         <Label htmlFor="fees" className="text-sm">Honoraires</Label>
         <Input
@@ -116,7 +113,6 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange 
         />
       </div>
 
-      {/* Devise */}
       <div className="space-y-2">
         <Label htmlFor="currency" className="text-sm">Devise</Label>
         <select
@@ -134,7 +130,6 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange 
         </select>
       </div>
 
-      {/* Meublé - Toggle Switch */}
       <div className="space-y-2">
         <div className="flex items-center gap-3 pt-2">
           <Label htmlFor="furnished" className="text-sm">Meublé</Label>
@@ -156,7 +151,6 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange 
         </div>
       </div>
 
-      {/* Additional fields when "Meublé" is toggled on */}
       {lead.furnished && (
         <>
           <div className="space-y-2 mt-2">
@@ -228,7 +222,6 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
 const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange }) => {
   const handleBedroomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Convert to number if the value is a valid number
     const numValue = value === '' ? undefined : Number(value);
     onDataChange({ bedrooms: numValue });
   };
@@ -243,7 +236,6 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
 
   return (
     <div className="space-y-6">
-      {/* Caractéristiques essentielles */}
       <div>
         <h3 className="text-sm font-semibold mb-3">Caractéristiques essentielles</h3>
         <div className="space-y-4">
@@ -408,7 +400,6 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
 
       <Separator />
 
-      {/* Éléments de valorisation pour le luxe */}
       <div>
         <h3 className="text-sm font-semibold mb-3">Éléments de valorisation pour le luxe</h3>
         <div className="space-y-4">
@@ -500,27 +491,30 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
             <Label className="text-sm">Prestations de luxe</Label>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { name: 'Piscine', icon: Home },
-                { name: 'Spa', icon: Home },
-                { name: 'Home cinéma', icon: Home },
-                { name: 'Court de tennis', icon: Home },
-                { name: 'Hammam', icon: Home },
-                { name: 'Sauna', icon: Home }
-              ].map((luxury) => (
-                <button
-                  key={luxury.name}
-                  type="button"
-                  onClick={() => handleMultipleChoice('luxuryAmenities', luxury.name)}
-                  className={`flex items-center gap-2 p-2 rounded-md text-sm transition-colors ${
-                    (lead.luxuryAmenities || []).includes(luxury.name)
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                  }`}
-                >
-                  <luxury.icon className="h-4 w-4" />
-                  {luxury.name}
-                </button>
-              ))}
+                { name: 'Piscine', icon: 'Home' as AllowedIconName },
+                { name: 'Spa', icon: 'Home' as AllowedIconName },
+                { name: 'Home cinéma', icon: 'Home' as AllowedIconName },
+                { name: 'Court de tennis', icon: 'Home' as AllowedIconName },
+                { name: 'Hammam', icon: 'Home' as AllowedIconName },
+                { name: 'Sauna', icon: 'Home' as AllowedIconName }
+              ].map((luxury) => {
+                const IconComponent = getIcon(luxury.icon);
+                return (
+                  <button
+                    key={luxury.name}
+                    type="button"
+                    onClick={() => handleMultipleChoice('luxuryAmenities', luxury.name)}
+                    className={`flex items-center gap-2 p-2 rounded-md text-sm transition-colors ${
+                      (lead.luxuryAmenities || []).includes(luxury.name)
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                    }`}
+                  >
+                    <IconComponent className="h-4 w-4" />
+                    {luxury.name}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -596,7 +590,6 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
 
       <Separator />
 
-      {/* Caractéristiques techniques */}
       <div>
         <h3 className="text-sm font-semibold mb-3">Caractéristiques techniques</h3>
         <div className="space-y-4">
@@ -683,7 +676,6 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
 
       <Separator />
 
-      {/* Informations complémentaires */}
       <div>
         <h3 className="text-sm font-semibold mb-3">Informations complémentaires</h3>
         <div className="space-y-4">
@@ -828,7 +820,7 @@ interface BuyerCriteriaSectionProps {
 }
 
 const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({ lead, onDataChange }) => {
-  const handlePropertyTypeChange = (propertyType: string) => {
+  const handlePropertyTypeChange = (propertyType: PropertyType) => {
     const currentTypes = lead.propertyTypes || [];
     const updatedTypes = currentTypes.includes(propertyType)
       ? currentTypes.filter(type => type !== propertyType)
@@ -898,7 +890,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({ lead, onDat
     return [value >= 8 ? "8+" : value.toString()];
   };
 
-  const propertyTypesList = [
+  const propertyTypesList: PropertyType[] = [
     "Villa", 
     "Appartement", 
     "Penthouse", 
@@ -917,7 +909,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({ lead, onDat
   ];
 
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
-  const viewTypesList = ["Mer", "Montagne", "Ville", "Panoramique", "Jardin", "Piscine"];
+  const viewTypesList: ViewType[] = ["Mer", "Montagne", "Golf", "Autres"];
   const amenitiesList = ["Piscine", "Terrasse", "Balcon", "Jardin", "Parking", "Ascenseur", "Sécurité", "Climatisation"];
 
   return (
