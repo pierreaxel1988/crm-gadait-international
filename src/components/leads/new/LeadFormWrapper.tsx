@@ -11,7 +11,8 @@ interface LeadFormWrapperProps {
   isSubmitting: boolean;
   currentUserTeamId?: string | undefined;
   isAdmin?: boolean;
-  enforceRlsRules?: boolean; // Ajout de la propriété optionnelle
+  enforceRlsRules?: boolean;
+  lead?: LeadDetailed;
 }
 
 const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
@@ -20,23 +21,27 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   adminAssignedAgent,
   isSubmitting,
   currentUserTeamId,
-  enforceRlsRules = false, // Valeur par défaut à false
+  enforceRlsRules = false,
+  lead,
 }) => {
   const { isAdmin } = useAuth();
   
   console.log("[LeadFormWrapper] Render - isAdmin:", isAdmin);
   console.log("[LeadFormWrapper] adminAssignedAgent:", adminAssignedAgent);
   console.log("[LeadFormWrapper] currentUserTeamId:", currentUserTeamId);
+  console.log("[LeadFormWrapper] enforceRlsRules:", enforceRlsRules);
+  console.log("[LeadFormWrapper] Lead ID:", lead?.id);
   
   return (
     <div className="luxury-card p-6 border-loro-sand">
       <LeadForm 
+        lead={lead}
         onSubmit={onSubmit} 
         onCancel={onCancel}
         adminAssignedAgent={adminAssignedAgent}
         isSubmitting={isSubmitting}
         currentUserTeamId={currentUserTeamId}
-        enforceRlsRules={enforceRlsRules} // Ajout de la propriété
+        enforceRlsRules={enforceRlsRules}
       />
     </div>
   );

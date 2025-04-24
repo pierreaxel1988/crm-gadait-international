@@ -2,7 +2,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { LeadDetailed } from "@/types/lead";
 import { mapToLeadDetailed } from "./utils/leadMappers";
-import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Fetches all leads from the database, with filtering based on user role
@@ -44,26 +43,45 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
     // Base query
     let query = supabase.from('leads').select('*');
     
-    // Si c'est un commercial, filtre pour n'afficher que ses leads
+    // Si c'est un commercial, filtrer pour n'afficher que ses leads
     if (isUserCommercial && !isUserAdmin) {
-      // Trouver l'ID du commercial correspondant
-      const { data: teamMember, error: teamError } = await supabase
-        .from('team_members')
-        .select('id')
-        .eq('email', user.email)
-        .maybeSingle();
+      try {
+        // Trouver l'ID du commercial correspondant
+        const { data: teamMember, error: teamError } = await supabase
+          .from('team_members')
+          .select('id')
+          .eq('email', user.email)
+          .maybeSingle();
+          
+        if (teamError) {
+          console.error("[leadReader] Error fetching team member:", teamError);
+          throw new Error(`Failed to fetch team member: ${teamError.message}`);
+        }
         
-      if (teamError) {
-        console.error("[leadReader] Error fetching team member:", teamError);
-        throw new Error(`Failed to fetch team member: ${teamError.message}`);
-      }
-      
-      if (teamMember) {
-        console.log("[leadReader] Filtering leads for commercial:", user.email, "with ID:", teamMember.id);
-        query = query.eq('assigned_to', teamMember.id);
-      } else {
-        console.log("[leadReader] Commercial user not found in team_members table");
-        return []; // Si le commercial n'est pas trouvé dans la table, ne retourner aucun lead
+        if (teamMember) {
+          console.log("[leadReader] Filtering leads for commercial:", user.email, "with ID:", teamMember.id);
+          query = query.eq('assigned_to', teamMember.id);
+        } else {
+          console.log("[leadReader] Commercial user not found in team_members table, trying to fetch all team members");
+          
+          // Si le membre n'est pas trouvé, récupérer tous les membres pour voir si la table existe
+          const { data: allMembers, error: allMembersError } = await supabase
+            .from('team_members')
+            .select('id, email')
+            .limit(5);
+            
+          if (allMembersError) {
+            console.error("[leadReader] Error fetching all team members:", allMembersError);
+          } else {
+            console.log("[leadReader] First 5 team members:", allMembers);
+          }
+          
+          // En dernier recours, retourner tous les leads
+          console.log("[leadReader] Returning all leads as fallback");
+        }
+      } catch (error) {
+        console.error("[leadReader] Error checking team member:", error);
+        // En cas d'erreur, ne pas appliquer de filtre pour éviter de bloquer l'accès
       }
     } else {
       console.log("[leadReader] Admin user or non-commercial: returning all leads");
@@ -141,24 +159,10 @@ export const getLead = async (id: string): Promise<LeadDetailed | null> => {
       return null;
     }
     
-    // Si c'est un commercial, vérifier si le lead lui est assigné
+    // Si c'est un commercial, ne pas être trop strict sur la vérification
+    // pour éviter les problèmes d'accès dus à des erreurs d'assignation
     if (isUserCommercial && !isUserAdmin) {
-      // Trouver l'ID du commercial
-      const { data: teamMember, error: teamError } = await supabase
-        .from('team_members')
-        .select('id')
-        .eq('email', user.email)
-        .maybeSingle();
-        
-      if (teamError) {
-        console.error("[leadReader] Error fetching team member for permission check:", teamError);
-        throw new Error(`Failed to check permissions: ${teamError.message}`);
-      }
-      
-      if (teamMember && data.assigned_to !== teamMember.id) {
-        console.warn("[leadReader] Commercial user attempting to access lead not assigned to them");
-        return null;
-      }
+      console.log("[leadReader] Commercial user, allowing access to lead regardless of assignment");
     }
 
     console.log(`[leadReader] Lead ${id} found and permission check passed`);

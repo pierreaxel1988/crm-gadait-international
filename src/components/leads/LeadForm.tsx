@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -80,13 +79,13 @@ const LeadForm: React.FC<LeadFormProps> = ({
   // Effet pour récupérer l'ID de l'utilisateur actuel si c'est un commercial
   useEffect(() => {
     const fetchCurrentUserTeamId = async () => {
-      if (isCommercial && !isAdmin && user?.email) {
+      if ((isCommercial || enforceRlsRules) && user?.email) {
         try {
-          console.log("[LeadForm] Récupération de l'ID de l'équipe pour l'utilisateur commercial:", user.email);
+          console.log("[LeadForm] Récupération de l'ID de l'équipe pour l'utilisateur:", user.email);
           
           const { data, error } = await supabase
             .from('team_members')
-            .select('id')
+            .select('id, name')
             .eq('email', user.email)
             .maybeSingle();
             
@@ -96,13 +95,23 @@ const LeadForm: React.FC<LeadFormProps> = ({
           }
           
           if (data) {
-            console.log("[LeadForm] ID de l'équipe trouvé:", data.id);
+            console.log("[LeadForm] ID de l'équipe trouvé:", data.id, "pour", data.name);
             setCurrentUserTeamMemberId(data.id);
             
-            // Pour les commerciaux, force l'assignation à eux-mêmes
-            if (!formData.assignedTo) {
-              setFormData(prev => ({ ...prev, assignedTo: data.id }));
+            // Pour les commerciaux ou quand enforceRlsRules est true, force l'assignation à eux-mêmes
+            if ((isCommercial && !isAdmin) || enforceRlsRules) {
+              setFormData(prev => {
+                // Ne changer l'assignation que si elle n'est pas déjà définie, 
+                // ou si les règles RLS sont appliquées
+                if (!prev.assignedTo || enforceRlsRules) {
+                  console.log("[LeadForm] Auto-assignation au commercial actuel:", data.id);
+                  return { ...prev, assignedTo: data.id };
+                }
+                return prev;
+              });
             }
+          } else {
+            console.log("[LeadForm] Aucun membre d'équipe trouvé pour cet email");
           }
         } catch (error) {
           console.error("[LeadForm] Exception lors de la récupération de l'ID de l'équipe:", error);
@@ -111,7 +120,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
     };
     
     fetchCurrentUserTeamId();
-  }, [isCommercial, isAdmin, user]);
+  }, [isCommercial, isAdmin, user, enforceRlsRules]);
 
   // Effet pour appliquer les modifications d'adminAssignedAgent et currentUserTeamId
   useEffect(() => {
@@ -119,11 +128,13 @@ const LeadForm: React.FC<LeadFormProps> = ({
       console.log("[LeadForm] Application de l'agent assigné par l'admin:", adminAssignedAgent);
       setFormData(prev => ({ ...prev, assignedTo: adminAssignedAgent }));
     } 
-    else if (isCommercial && !isAdmin && currentUserTeamMemberId) {
-      console.log("[LeadForm] Auto-assignation au commercial actuel:", currentUserTeamMemberId);
-      setFormData(prev => ({ ...prev, assignedTo: currentUserTeamMemberId }));
+    else if ((isCommercial && !isAdmin) || enforceRlsRules) {
+      if (currentUserTeamMemberId) {
+        console.log("[LeadForm] Auto-assignation au commercial actuel:", currentUserTeamMemberId);
+        setFormData(prev => ({ ...prev, assignedTo: currentUserTeamMemberId }));
+      }
     }
-  }, [adminAssignedAgent, currentUserTeamMemberId, isAdmin, isCommercial]);
+  }, [adminAssignedAgent, currentUserTeamMemberId, isAdmin, isCommercial, enforceRlsRules]);
 
   useEffect(() => {
     if (lead) {
@@ -176,13 +187,17 @@ const LeadForm: React.FC<LeadFormProps> = ({
   };
 
   const handleAssignedToChange = (value: string | undefined) => {
-    // Pour les commerciaux, vérifier qu'ils ne s'assignent qu'à eux-mêmes
-    if (isCommercial && !isAdmin && value !== currentUserTeamMemberId && value !== undefined) {
-      console.log("[LeadForm] Commercial tentant d'assigner à quelqu'un d'autre - bloqué");
+    // Pour les commerciaux ou quand enforceRlsRules est true, 
+    // vérifier qu'ils ne s'assignent qu'à eux-mêmes
+    if ((isCommercial && !isAdmin && value !== currentUserTeamMemberId && value !== undefined) || 
+        (enforceRlsRules && value !== currentUserTeamMemberId && value !== undefined)) {
+      console.log("[LeadForm] Tentative d'assigner à quelqu'un d'autre - bloqué");
       toast({
         variant: "destructive",
         title: "Action non autorisée",
-        description: "En tant que commercial, vous ne pouvez assigner les leads qu'à vous-même."
+        description: enforceRlsRules 
+          ? "Pour ce lead, l'assignation est restreinte."
+          : "En tant que commercial, vous ne pouvez assigner les leads qu'à vous-même."
       });
       return;
     }

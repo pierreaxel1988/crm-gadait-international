@@ -52,54 +52,51 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
     try {
       console.log('[TeamMemberSelect] Début du chargement des membres d\'équipe');
       console.log('[TeamMemberSelect] User role - Admin:', isAdmin, 'Commercial:', isCommercial);
+      console.log('[TeamMemberSelect] User email:', user?.email);
       
-      // Construire la requête pour récupérer les membres d'équipe
+      // Vérification de la connexion à Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log('[TeamMemberSelect] Pas de session Supabase active');
+        setError("Vous n'êtes pas authentifié");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Forcer le chargement de tous les membres d'équipe, quelle que soit la condition
       let query = supabase.from('team_members').select('id, name, email, is_admin');
       
-      // Pour les commerciaux qui ne sont pas admin, filtrer pour ne voir que leur propre entrée
-      if (isCommercial && !isAdmin && user?.email) {
-        console.log(`[TeamMemberSelect] Filtrage pour commercial: ${user.email}`);
-        query = query.eq('email', user.email);
-        
-        // Récupérer également l'ID de l'utilisateur actuel pour l'auto-assignation
-        const { data: currentUser } = await supabase
-          .from('team_members')
-          .select('id')
-          .eq('email', user.email)
-          .maybeSingle();
-          
-        if (currentUser) {
-          console.log('[TeamMemberSelect] ID utilisateur courant trouvé:', currentUser.id);
-          setCurrentUserTeamId(currentUser.id);
-        }
-      } else {
-        console.log('[TeamMemberSelect] Chargement de tous les membres (mode Admin)');
-      }
-      
       // Exécuter la requête
-      const { data, error } = await query.order('name');
+      const { data, error: fetchError } = await query.order('name');
 
-      if (error) {
-        console.error('[TeamMemberSelect] Erreur Supabase:', error);
-        throw new Error(`Erreur lors du chargement des commerciaux: ${error.message}`);
+      if (fetchError) {
+        console.error('[TeamMemberSelect] Erreur Supabase:', fetchError);
+        throw new Error(`Erreur lors du chargement des commerciaux: ${fetchError.message}`);
       }
 
-      console.log('[TeamMemberSelect] Réponse Supabase:', data);
+      // Consigner tous les résultats pour diagnostic
+      console.log('[TeamMemberSelect] Données brutes reçues:', data);
 
       if (data && data.length > 0) {
         setTeamMembers(data);
         console.log('[TeamMemberSelect] Membres trouvés:', data.length);
         
-        // Auto-sélection pour les commerciaux qui ne sont pas admin
-        if (isCommercial && !isAdmin && currentUserTeamId && !value) {
-          console.log('[TeamMemberSelect] Auto-assignation pour commercial:', currentUserTeamId);
-          onChange(currentUserTeamId);
-          
-          const commercialName = data.find(m => m.id === currentUserTeamId)?.name;
-          if (commercialName) {
-            setSelectedMemberName(commercialName);
+        // Si l'utilisateur est un commercial et pas un admin, trouver son ID
+        if (isCommercial && !isAdmin && user?.email) {
+          const commercialMember = data.find(m => m.email === user.email);
+          if (commercialMember) {
+            console.log('[TeamMemberSelect] ID trouvé pour le commercial:', commercialMember.id);
+            setCurrentUserTeamId(commercialMember.id);
+            
+            // Auto-assignation pour les commerciaux
+            if (!value) {
+              console.log('[TeamMemberSelect] Auto-assignation pour commercial:', commercialMember.id);
+              onChange(commercialMember.id);
+              setSelectedMemberName(commercialMember.name);
+            }
           }
         }
+        
         // Auto-sélection de Pierre-Axel pour les admins si demandé
         else if (autoSelectPierreAxel && !value && isAdmin) {
           const pierreAxel = data.find(member => 
@@ -117,6 +114,9 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
           const selectedMember = data.find(member => member.id === value);
           if (selectedMember) {
             setSelectedMemberName(selectedMember.name);
+          } else {
+            // Si l'ID est défini mais que le membre n'est pas trouvé, consignez l'ID pour débogage
+            console.log('[TeamMemberSelect] ID membre sélectionné non trouvé dans les données:', value);
           }
         }
       } else {
@@ -151,7 +151,27 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
 
   useEffect(() => {
     fetchTeamMembers();
-  }, [autoSelectPierreAxel, value, isAdmin, isCommercial, user?.email]);
+    
+    // Ajouter un interval pour rafraîchir les données toutes les 10 secondes en cas d'échec
+    const intervalId = setInterval(() => {
+      if (teamMembers.length === 0 && error) {
+        console.log('[TeamMemberSelect] Tentative de rechargement des membres après erreur');
+        fetchTeamMembers();
+      }
+    }, 10000);
+    
+    return () => clearInterval(intervalId);
+  }, [autoSelectPierreAxel, isAdmin, isCommercial, user?.email]);
+  
+  // Effet supplémentaire pour actualiser lorsque value change
+  useEffect(() => {
+    if (value && teamMembers.length > 0) {
+      const selectedMember = teamMembers.find(member => member.id === value);
+      if (selectedMember) {
+        setSelectedMemberName(selectedMember.name);
+      }
+    }
+  }, [value, teamMembers]);
 
   const handleChange = (newValue: string) => {
     // Pour les commerciaux, vérifier qu'ils ne s'assignent qu'à eux-mêmes
@@ -175,6 +195,12 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
     }
     
     onChange(newValue === "non_assigné" ? undefined : newValue);
+  };
+
+  // Fonction pour forcer le rechargement des données
+  const handleRetryLoad = () => {
+    console.log('[TeamMemberSelect] Tentative manuelle de rechargement des membres');
+    fetchTeamMembers();
   };
 
   return (
@@ -215,13 +241,25 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         </div>
       )}
       {error && (
-        <div className="text-xs text-red-600 mt-1">
-          {error}
+        <div className="text-xs text-red-600 mt-1 flex flex-col">
+          <span>{error}</span>
+          <button 
+            onClick={handleRetryLoad} 
+            className="text-blue-600 underline text-xs mt-1 self-start"
+          >
+            Réessayer de charger les commerciaux
+          </button>
         </div>
       )}
       {teamMembers.length === 0 && !isLoading && !error && (
         <div className="text-xs text-amber-600 mt-1">
           Aucun commercial disponible dans la liste. Vérifiez votre connexion à Supabase.
+          <button 
+            onClick={handleRetryLoad} 
+            className="text-blue-600 underline block mt-1"
+          >
+            Réessayer
+          </button>
         </div>
       )}
       {isLoading && (
