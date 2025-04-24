@@ -28,19 +28,14 @@ export const useTeamMembers = () => {
           return;
         }
         
-        // Toujours récupérer tous les membres d'équipe
+        // Toujours récupérer tous les membres d'équipe sans filtre
         let query = supabase
           .from('team_members')
-          .select('id, name, email');
-          
-        // Si l'utilisateur est un commercial sans droits d'admin, filtrer pour son propre email
-        if (isCommercial && !isAdmin && user?.email) {
-          console.log(`[useTeamMembers] Filtrage pour commercial: ${user.email}`);
-          query = query.eq('email', user.email);
-        }
+          .select('id, name, email')
+          .order('name');
         
         // Exécuter la requête finale
-        const { data, error: fetchError } = await query.order('name');
+        const { data, error: fetchError } = await query;
 
         if (fetchError) {
           console.error('[useTeamMembers] Erreur Supabase:', fetchError);
@@ -68,24 +63,6 @@ export const useTeamMembers = () => {
             console.log(`[useTeamMembers] Nombre total de membres dans la table: ${count}`);
             if (count === 0) {
               setError(new Error('Aucun membre d\'équipe trouvé dans la base de données'));
-            } else if (isCommercial && !isAdmin && user?.email) {
-              // Si c'est un commercial, essayer sans filtre comme dernier recours
-              console.log('[useTeamMembers] Tentative sans filtre pour un commercial');
-              const { data: allData } = await supabase
-                .from('team_members')
-                .select('id, name, email')
-                .order('name');
-                
-              if (allData && allData.length > 0) {
-                console.log('[useTeamMembers] Membres trouvés sans filtre:', allData.length);
-                const userMember = allData.filter(m => m.email === user.email);
-                if (userMember.length > 0) {
-                  console.log('[useTeamMembers] Membre trouvé pour l\'utilisateur:', userMember[0].name);
-                  setTeamMembers(userMember);
-                } else {
-                  setTeamMembers([]);
-                }
-              }
             }
           }
         }

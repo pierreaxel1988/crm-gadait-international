@@ -43,14 +43,15 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   const [selectedMemberName, setSelectedMemberName] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
   const [currentUserTeamId, setCurrentUserTeamId] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
-  // Fonction pour charger les membres de l'équipe en fonction du rôle utilisateur
+  // Fonction pour charger les membres de l'équipe
   const fetchTeamMembers = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      console.log('[TeamMemberSelect] Début du chargement des membres d\'équipe');
+      console.log('[TeamMemberSelect] Début du chargement des membres d\'équipe - Tentative #', retryCount + 1);
       console.log('[TeamMemberSelect] User role - Admin:', isAdmin, 'Commercial:', isCommercial);
       console.log('[TeamMemberSelect] User email:', user?.email);
       
@@ -63,11 +64,11 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         return;
       }
       
-      // Forcer le chargement de tous les membres d'équipe, quelle que soit la condition
-      let query = supabase.from('team_members').select('id, name, email, is_admin');
-      
-      // Exécuter la requête
-      const { data, error: fetchError } = await query.order('name');
+      // Récupérer tous les membres d'équipe sans filtre
+      const { data, error: fetchError } = await supabase
+        .from('team_members')
+        .select('id, name, email, is_admin')
+        .order('name');
 
       if (fetchError) {
         console.error('[TeamMemberSelect] Erreur Supabase:', fetchError);
@@ -139,11 +140,18 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
     } catch (error) {
       console.error('[TeamMemberSelect] Erreur détaillée:', error);
       setError("Impossible de charger la liste des commerciaux");
-      toast({
-        variant: "destructive",
-        title: "Erreur de chargement",
-        description: "Impossible de charger la liste des commerciaux."
-      });
+      
+      // Ne pas afficher de toast après plusieurs tentatives pour éviter le spam
+      if (retryCount < 3) {
+        toast({
+          variant: "destructive",
+          title: "Erreur de chargement",
+          description: "Impossible de charger la liste des commerciaux. Nouvelle tentative en cours..."
+        });
+      }
+      
+      // Incrémenter le compteur de tentatives
+      setRetryCount(prev => prev + 1);
     } finally {
       setIsLoading(false);
     }
@@ -152,13 +160,14 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   useEffect(() => {
     fetchTeamMembers();
     
-    // Ajouter un interval pour rafraîchir les données toutes les 10 secondes en cas d'échec
+    // Ajouter un interval pour rafraîchir les données périodiquement
     const intervalId = setInterval(() => {
-      if (teamMembers.length === 0 && error) {
-        console.log('[TeamMemberSelect] Tentative de rechargement des membres après erreur');
+      // Réessayer régulièrement si aucun membre n'est trouvé ou s'il y a une erreur
+      if (teamMembers.length === 0 || error) {
+        console.log('[TeamMemberSelect] Tentative programmée de rechargement des membres');
         fetchTeamMembers();
       }
-    }, 10000);
+    }, 5000); // Toutes les 5 secondes
     
     return () => clearInterval(intervalId);
   }, [autoSelectPierreAxel, isAdmin, isCommercial, user?.email]);
@@ -174,17 +183,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   }, [value, teamMembers]);
 
   const handleChange = (newValue: string) => {
-    // Pour les commerciaux, vérifier qu'ils ne s'assignent qu'à eux-mêmes
-    if (isCommercial && !isAdmin && currentUserTeamId && newValue !== "non_assigné" && newValue !== currentUserTeamId) {
-      console.log('[TeamMemberSelect] Commercial tentant d\'assigner à un autre commercial - bloqué');
-      toast({
-        variant: "destructive",
-        title: "Action non autorisée",
-        description: "En tant que commercial, vous ne pouvez assigner les leads qu'à vous-même."
-      });
-      return;
-    }
-    
+    // Ne plus restreindre les commerciaux à s'auto-assigner
     if (newValue !== "non_assigné") {
       const selectedMember = teamMembers.find(member => member.id === newValue);
       if (selectedMember) {
@@ -227,6 +226,11 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
                 {member.name}
               </SelectItem>
             ))}
+            {teamMembers.length === 0 && (
+              <SelectItem value="loading" disabled>
+                Chargement des commerciaux...
+              </SelectItem>
+            )}
           </SelectContent>
         </Select>
         {isLoading && (
@@ -253,12 +257,12 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       )}
       {teamMembers.length === 0 && !isLoading && !error && (
         <div className="text-xs text-amber-600 mt-1">
-          Aucun commercial disponible dans la liste. Vérifiez votre connexion à Supabase.
+          Aucun commercial disponible dans la liste. Vérification en cours...
           <button 
             onClick={handleRetryLoad} 
             className="text-blue-600 underline block mt-1"
           >
-            Réessayer
+            Forcer le rechargement
           </button>
         </div>
       )}

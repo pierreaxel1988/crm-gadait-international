@@ -41,7 +41,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
         adminAssignedAgent={adminAssignedAgent}
         isSubmitting={isSubmitting}
         currentUserTeamId={currentUserTeamId}
-        enforceRlsRules={enforceRlsRules}
+        enforceRlsRules={false} // Désactiver les restrictions RLS
       />
     </div>
   );
