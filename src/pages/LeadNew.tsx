@@ -21,7 +21,8 @@ const LeadNew: React.FC = () => {
     handleSubmit,
     handleAgentChange,
     handlePipelineTypeChange,
-    setLeadStatus
+    setLeadStatus,
+    currentUserTeamId
   } = useLeadCreation();
 
   // Utiliser useCallback pour la navigation pour éviter des re-renders inutiles
@@ -52,6 +53,8 @@ const LeadNew: React.FC = () => {
         onCancel={handleCancel}
         adminAssignedAgent={assignedAgent}
         isSubmitting={isSubmitting}
+        currentUserTeamId={currentUserTeamId}
+        isAdmin={isAdmin}
       />
     </div>
   );

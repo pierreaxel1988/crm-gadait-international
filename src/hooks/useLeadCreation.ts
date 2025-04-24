@@ -23,6 +23,39 @@ export const useLeadCreation = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const [currentUserTeamId, setCurrentUserTeamId] = useState<string | undefined>(undefined);
+
+  // Récupérer les informations de l'utilisateur courant
+  useEffect(() => {
+    const fetchCurrentUserTeamId = async () => {
+      if (!user?.email) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('id')
+          .eq('email', user.email)
+          .single();
+          
+        if (error) throw error;
+        
+        if (data) {
+          setCurrentUserTeamId(data.id);
+          console.log("Current team member ID set to:", data.id);
+          
+          // Auto-assigner au commercial si ce n'est pas un admin
+          if (!isAdmin) {
+            setAssignedAgent(data.id);
+            console.log("Auto-assigned to current non-admin user:", data.id);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching current user team ID:", error);
+      }
+    };
+    
+    fetchCurrentUserTeamId();
+  }, [user, isAdmin]);
 
   // Utilisez useEffect pour les effets secondaires liés à l'authentification
   useEffect(() => {
@@ -74,15 +107,26 @@ export const useLeadCreation = () => {
       delete newLeadData.createdAt;
       
       // Assignation de l'agent
-      if (data.assignedTo) {
+      // Si c'est un commercial et qu'il essaie d'assigner à quelqu'un d'autre, bloquer
+      if (!isAdmin && data.assignedTo && data.assignedTo !== currentUserTeamId) {
+        console.log("Non-admin trying to assign to someone else. Redirecting to self:", currentUserTeamId);
+        toast({
+          variant: "warning",
+          title: "Attribution automatique",
+          description: "En tant que commercial, le lead a été automatiquement assigné à vous-même."
+        });
+        newLeadData.assignedTo = currentUserTeamId;
+      } 
+      // Sinon utiliser la logique normale d'assignation
+      else if (data.assignedTo) {
         console.log("Using form's assignedTo:", data.assignedTo);
         newLeadData.assignedTo = data.assignedTo;
       } else if (isAdmin && assignedAgent) {
         console.log("Using admin's assignedTo:", assignedAgent);
         newLeadData.assignedTo = assignedAgent;
-      } else if (!isAdmin && user) {
-        console.log("Using current user as assignedTo:", user.id);
-        newLeadData.assignedTo = user.id;
+      } else if (!isAdmin && currentUserTeamId) {
+        console.log("Using current user as assignedTo:", currentUserTeamId);
+        newLeadData.assignedTo = currentUserTeamId;
       }
       
       newLeadData.pipelineType = pipelineType;
@@ -104,31 +148,22 @@ export const useLeadCreation = () => {
       const createdLead = await createLead(newLeadData);
       
       if (createdLead) {
-        let successMessage = "Le lead a été créé avec succès.";
-        if (createdLead.assignedTo) {
-          const { data: agentData } = await supabase
-            .from("team_members")
-            .select("name")
-            .eq("id", createdLead.assignedTo)
-            .single();
-            
-          if (agentData) {
-            successMessage = `Le lead a été créé et attribué à ${agentData.name} avec succès.`;
-          }
-        }
-        
-        toast({
-          title: "Lead créé",
-          description: successMessage
-        });
-        
         navigate(`/leads/${createdLead.id}?tab=info`);
       } else {
         throw new Error("Aucune donnée de lead retournée après création");
       }
     } catch (error) {
       console.error("Error creating lead:", error);
-      setError(error instanceof Error ? error.message : "Une erreur inconnue est survenue");
+      
+      // Essayer de détecter si c'est une erreur RLS
+      if (error instanceof Error && 
+          (error.message.includes("violates row-level security") || 
+           error.message.includes("new row violates"))) {
+        setError("Vous n'avez pas les permissions nécessaires pour créer ce lead avec cette assignation.");
+      } else {
+        setError(error instanceof Error ? error.message : "Une erreur inconnue est survenue");
+      }
+      
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -137,12 +172,19 @@ export const useLeadCreation = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [assignedAgent, isAdmin, isSubmitting, leadStatus, navigate, pipelineType, user]);
+  }, [assignedAgent, isAdmin, isSubmitting, leadStatus, navigate, pipelineType, user, currentUserTeamId]);
 
   const handleAgentChange = useCallback((value: string | undefined) => {
     console.log("Agent changed to:", value);
+    
+    // Si l'utilisateur n'est pas admin, on force l'assignation à lui-même
+    if (!isAdmin && currentUserTeamId && value !== currentUserTeamId) {
+      console.log("Non-admin trying to change agent. Ignoring and keeping self-assignment.");
+      return;
+    }
+    
     setAssignedAgent(value);
-  }, []);
+  }, [isAdmin, currentUserTeamId]);
 
   const handlePipelineTypeChange = useCallback((value: PipelineType) => {
     setPipelineType(value);
@@ -163,7 +205,9 @@ export const useLeadCreation = () => {
     handlePipelineTypeChange,
     setLeadStatus,
     showDebugInfo,
-    setShowDebugInfo
+    setShowDebugInfo,
+    currentUserTeamId,
+    isAdmin
   };
 };
 

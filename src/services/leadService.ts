@@ -30,36 +30,53 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       status: leadData.status
     });
     
-    // Vérifier si l'utilisateur actuel est un commercial
+    // Vérifier l'utilisateur actuel et son rôle
     const { data: sessionData } = await supabase.auth.getSession();
     const user = sessionData?.session?.user;
     
-    // Liste des emails commerciaux
-    const commercialEmails = [
-      'jade@gadait-international.com',
-      'ophelie@gadait-international.com',
-      'jeanmarc@gadait-international.com',
-      'jacques@gadait-international.com',
-      'sharon@gadait-international.com'
-    ];
+    if (!user) {
+      throw new Error("Vous devez être connecté pour créer un lead.");
+    }
     
-    // Si c'est un commercial, s'assurer que le lead est assigné à lui-même
-    if (commercialEmails.includes(user?.email || '')) {
-      // Récupérer l'ID du commercial connecté depuis la table team_members
-      const { data: teamMember } = await supabase
-        .from('team_members')
-        .select('id, name')
-        .eq('email', user?.email)
-        .single();
+    // Vérifier si l'utilisateur est admin
+    const { data: currentUserData, error: userError } = await supabase
+      .from('team_members')
+      .select('id, name, is_admin')
+      .eq('email', user.email)
+      .single();
+      
+    if (userError) {
+      console.error("Erreur lors de la récupération des informations utilisateur:", userError);
+      throw new Error("Impossible de vérifier vos permissions.");
+    }
+    
+    const isAdmin = currentUserData?.is_admin === true;
+    console.log("User is admin:", isAdmin, "Current user ID:", currentUserData?.id);
+    
+    // Si c'est un commercial (non admin), s'assurer que le lead est assigné à lui-même
+    // conformément aux politiques RLS
+    if (!isAdmin) {
+      if (!leadData.assignedTo || leadData.assignedTo !== currentUserData.id) {
+        console.log("Non-admin user creating lead, auto-assigning to self:", currentUserData.name);
+        leadData.assignedTo = currentUserData.id;
         
-      if (teamMember && teamMember.id) {
-        console.log(`Commercial user creating lead, auto-assigning to: ${teamMember.name} (${teamMember.id})`);
-        leadData.assignedTo = teamMember.id;
+        toast({
+          title: "Information",
+          description: "En tant que commercial, le lead est automatiquement assigné à vous-même.",
+        });
       }
     }
     
-    // Si aucun agent n'est assigné, on ne fait pas d'assignation automatique
-    // L'utilisateur doit explicitement choisir un agent
+    // Si un admin crée un lead sans assigner d'agent, on le lui signale
+    if (isAdmin && !leadData.assignedTo) {
+      console.log("Admin creating lead without assignment");
+      toast({
+        title: "Information",
+        description: "Le lead sera créé sans être assigné à un agent.",
+      });
+    }
+    
+    console.log("Final assignedTo value:", leadData.assignedTo);
     
     console.log("leadService: Creating lead with processed data:", leadData);
     
@@ -68,9 +85,23 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     console.log("Lead creation result:", result);
     
     if (result) {
+      let successMessage = "Lead créé avec succès";
+      
+      if (result.assignedTo) {
+        const { data: agentData } = await supabase
+          .from("team_members")
+          .select("name")
+          .eq("id", result.assignedTo)
+          .single();
+            
+        if (agentData) {
+          successMessage = `Le lead a été créé et attribué à ${agentData.name} avec succès.`;
+        }
+      }
+      
       toast({
-        title: "Lead créé avec succès",
-        description: "Le nouveau lead a été ajouté à la base de données.",
+        title: "Lead créé",
+        description: successMessage,
       });
 
       // Vérifier si le lead est en statut "New" et a un agent assigné
@@ -107,11 +138,24 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     return result;
   } catch (error) {
     console.error("Error in leadService.createLead:", error);
-    toast({
-      variant: "destructive",
-      title: "Erreur lors de la création du lead",
-      description: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
-    });
+    
+    // Gestion spécifique des erreurs RLS
+    if (error instanceof Error && 
+        (error.message.includes("violates row-level security") || 
+         error.message.includes("new row violates"))) {
+      toast({
+        variant: "destructive",
+        title: "Erreur d'autorisation",
+        description: "Vous n'avez pas les droits nécessaires pour créer ce lead avec cette assignation. Si vous êtes commercial, vous devez vous assigner le lead à vous-même.",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Erreur lors de la création du lead",
+        description: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
+      });
+    }
+    
     throw error; // Re-throw to allow handling by the caller
   }
 };

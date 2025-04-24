@@ -8,17 +8,23 @@ interface LeadFormWrapperProps {
   onCancel: () => void;
   adminAssignedAgent?: string | undefined;
   isSubmitting: boolean;
+  currentUserTeamId?: string | undefined;
+  isAdmin?: boolean;
 }
 
 const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   onSubmit,
   onCancel,
   adminAssignedAgent,
-  isSubmitting
+  isSubmitting,
+  currentUserTeamId,
+  isAdmin
 }) => {
   useEffect(() => {
     console.log("LeadFormWrapper - adminAssignedAgent:", adminAssignedAgent);
-  }, [adminAssignedAgent]);
+    console.log("LeadFormWrapper - currentUserTeamId:", currentUserTeamId);
+    console.log("LeadFormWrapper - isAdmin:", isAdmin);
+  }, [adminAssignedAgent, currentUserTeamId, isAdmin]);
   
   return (
     <div className="luxury-card p-6 border-loro-sand">
@@ -27,6 +33,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
         onCancel={onCancel}
         adminAssignedAgent={adminAssignedAgent}
         isSubmitting={isSubmitting}
+        currentUserTeamId={currentUserTeamId}
       />
     </div>
   );

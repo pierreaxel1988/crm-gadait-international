@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LeadFormProps {
   lead?: LeadDetailed;
@@ -19,6 +20,7 @@ interface LeadFormProps {
   adminAssignedAgent?: string | undefined;
   isSubmitting?: boolean;
   hideSubmitButton?: boolean;
+  currentUserTeamId?: string | undefined;
 }
 
 const LeadForm: React.FC<LeadFormProps> = ({ 
@@ -29,8 +31,10 @@ const LeadForm: React.FC<LeadFormProps> = ({
   activeTab = 'general',
   adminAssignedAgent,
   isSubmitting = false,
-  hideSubmitButton = false
+  hideSubmitButton = false,
+  currentUserTeamId
 }) => {
+  const { isAdmin } = useAuth();
   const [formData, setFormData] = useState<LeadDetailed>({
     id: lead?.id || uuidv4(),
     name: lead?.name || '',
@@ -70,10 +74,15 @@ const LeadForm: React.FC<LeadFormProps> = ({
   });
 
   useEffect(() => {
-    if (adminAssignedAgent !== undefined) {
+    // Si un agent est spécifié par l'admin, mettre à jour le formulaire
+    if (isAdmin && adminAssignedAgent !== undefined) {
       setFormData(prev => ({ ...prev, assignedTo: adminAssignedAgent }));
+    } 
+    // Si l'utilisateur est un commercial non-admin, forcer l'auto-assignation
+    else if (!isAdmin && currentUserTeamId) {
+      setFormData(prev => ({ ...prev, assignedTo: currentUserTeamId }));
     }
-  }, [adminAssignedAgent]);
+  }, [adminAssignedAgent, isAdmin, currentUserTeamId]);
 
   useEffect(() => {
     if (lead) {
@@ -106,7 +115,15 @@ const LeadForm: React.FC<LeadFormProps> = ({
       return;
     }
     
-    if (!isSubmitting) {
+    // Pour les commerciaux (non-admin), on vérifie que le lead est bien auto-assigné
+    if (!isAdmin && currentUserTeamId && formData.assignedTo !== currentUserTeamId) {
+      console.log("Setting assignedTo to current user before submit:", currentUserTeamId);
+      const updatedData = { ...formData, assignedTo: currentUserTeamId };
+      
+      if (!isSubmitting) {
+        onSubmit(updatedData);
+      }
+    } else if (!isSubmitting) {
       onSubmit(formData);
     }
   };
@@ -121,6 +138,12 @@ const LeadForm: React.FC<LeadFormProps> = ({
 
   // Handle assignedTo changes
   const handleAssignedToChange = (value: string | undefined) => {
+    // Si l'utilisateur n'est pas admin, on force l'assignation à lui-même
+    if (!isAdmin && currentUserTeamId && value !== currentUserTeamId) {
+      console.log("Non-admin trying to change assignedTo in form. Ignoring.");
+      return;
+    }
+    
     setFormData(prev => ({ ...prev, assignedTo: value }));
   };
 
@@ -161,6 +184,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
             value={formData.assignedTo}
             onChange={handleAssignedToChange}
             label="Attribuer à"
+            enforceRlsRules={true}
+            disabled={!isAdmin}
           />
         </div>
       </div>
