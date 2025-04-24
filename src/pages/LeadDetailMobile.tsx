@@ -10,31 +10,29 @@ import ActionSuggestions from '@/components/leads/actions/ActionSuggestions';
 import { CheckCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { updateLead } from '@/services/leadService';
-
 import LeadDetailHeader from '@/components/leads/mobile/LeadDetailHeader';
 import LeadDetailTabs from '@/components/leads/mobile/LeadDetailTabs';
 import LeadDetailActionBar from '@/components/leads/mobile/LeadDetailActionBar';
 import { LoadingState, NotFoundState } from '@/components/leads/mobile/LeadDetailErrorStates';
 import { useLeadDetail } from '@/hooks/useLeadDetail';
-
 import StatusSection from '@/components/leads/form/mobile/StatusSection';
 import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSection';
 import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
 import NotesSection from '@/components/leads/form/mobile/NotesSection';
 import EmailsTab from '@/components/leads/mobile/tabs/EmailsTab';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 const LeadDetailMobile = () => {
-  const { id } = useParams<{ id: string }>();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
-  
   const searchParams = new URLSearchParams(location.search);
   const activeTab = searchParams.get('tab') || 'criteria';
-  
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
-  
   const {
     lead,
     setLead,
@@ -52,7 +50,6 @@ const LeadDetailMobile = () => {
     endCallTracking,
     formatDuration
   } = useLeadDetail(id);
-
   const {
     isActionDialogOpen,
     setIsActionDialogOpen,
@@ -72,33 +69,25 @@ const LeadDetailMobile = () => {
     acceptSuggestion,
     rejectSuggestion
   } = useLeadActions(lead, setLead);
-
   const handleBackClick = () => {
     navigate('/pipeline');
   };
-
   const handleMarkComplete = (action: ActionHistory) => {
     if (action && action.id) {
       markActionComplete(action.id);
     }
   };
-
   const handleDeleteAction = async (actionId: string) => {
     if (!lead) return;
-    
     try {
       const updatedActionHistory = lead.actionHistory.filter(action => action.id !== actionId);
-      
       const updatedLead = {
         ...lead,
         actionHistory: updatedActionHistory
       };
-      
       const result = await updateLead(updatedLead);
-      
       if (result) {
         setLead(result);
-        
         toast({
           title: "Action supprimée",
           description: "L'action a été supprimée avec succès"
@@ -113,91 +102,58 @@ const LeadDetailMobile = () => {
       });
     }
   };
-
   const handleSaveWithIndicator = async () => {
     await handleSave();
     setShowSaveIndicator(true);
     setTimeout(() => setShowSaveIndicator(false), 2000);
   };
-
   const handlePhoneCall = (e: React.MouseEvent) => {
     e.preventDefault();
     console.log("Phone call initiated");
     startCallTracking('phone');
   };
-
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     console.log("WhatsApp initiated");
     startCallTracking('whatsapp');
   };
-
   const handleEmailClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (lead?.email) {
       window.location.href = `mailto:${lead.email}`;
     }
   };
-
   const handleCallComplete = (duration: number) => {
     console.log("Call completed with duration:", duration);
     if (lead) {
       endCallTracking(duration);
     }
   };
-
   const getPendingActionsCount = () => {
     if (!lead?.actionHistory) return 0;
     return lead.actionHistory.filter(action => !action.completedDate).length;
   };
-
   if (isLoading) {
     return <LoadingState isLoading={isLoading} />;
   }
-
   if (!lead && id) {
     return <NotFoundState show={!lead && !!id} id={id} />;
   }
-  
   if (!lead) return null;
-  
-  return (
-    <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
+  return <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
       <div className="fixed top-0 left-0 right-0 z-40 w-full">
         <div className="bg-loro-sand pt-[env(safe-area-inset-top)]">
-          <LeadDetailHeader
-            name={lead.name}
-            createdAt={lead.createdAt}
-            phone={getFormattedPhoneForCall()}
-            email={lead.email}
-            budget={lead.budget}
-            currency={lead.currency}
-            desiredLocation={lead.desiredLocation}
-            country={lead.country}
-            purchaseTimeframe={lead.purchaseTimeframe}
-            onBackClick={handleBackClick}
-            onSave={handleSaveWithIndicator}
-            isSaving={isSaving}
-            hasChanges={hasChanges}
-            tags={lead.tags}
-            onPhoneCall={handlePhoneCall}
-            onWhatsAppClick={handleWhatsAppClick}
-            onEmailClick={handleEmailClick}
-            onCallComplete={() => {}}
-          />
+          <LeadDetailHeader name={lead.name} createdAt={lead.createdAt} phone={getFormattedPhoneForCall()} email={lead.email} budget={lead.budget} currency={lead.currency} desiredLocation={lead.desiredLocation} country={lead.country} purchaseTimeframe={lead.purchaseTimeframe} onBackClick={handleBackClick} onSave={handleSaveWithIndicator} isSaving={isSaving} hasChanges={hasChanges} tags={lead.tags} onPhoneCall={handlePhoneCall} onWhatsAppClick={handleWhatsAppClick} onEmailClick={handleEmailClick} onCallComplete={() => {}} />
         </div>
         
         <div className="bg-white">
-          <LeadDetailTabs 
-            defaultTab={activeTab} 
-            pendingActionsCount={getPendingActionsCount()}
-          />
+          <LeadDetailTabs defaultTab={activeTab} pendingActionsCount={getPendingActionsCount()} />
         </div>
       </div>
       
       <ScrollArea className="flex-1 overflow-y-auto pt-20">
         <Tabs value={activeTab} className="w-full h-full">
-          <div className="px-4 pb-32 h-full mt-4">
+          <div className="px-4 pb-32 h-full my-[70px]">
             <TabsContent value="info" className="mt-1 animate-[fade-in_0.2s_ease-out]">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
@@ -207,10 +163,7 @@ const LeadDetailMobile = () => {
             </TabsContent>
             
             <TabsContent value="status" className="mt-1 animate-[fade-in_0.2s_ease-out]">
-              <StatusSection 
-                lead={lead} 
-                onDataChange={handleDataChange} 
-              />
+              <StatusSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
             <TabsContent value="notes" className="mt-1 animate-[fade-in_0.2s_ease-out]">
@@ -218,19 +171,8 @@ const LeadDetailMobile = () => {
             </TabsContent>
             
             <TabsContent value="actions" className="mt-1 animate-[fade-in_0.2s_ease-out]">
-              {actionSuggestions && actionSuggestions.length > 0 && (
-                <ActionSuggestions
-                  suggestions={actionSuggestions}
-                  onAccept={acceptSuggestion}
-                  onReject={rejectSuggestion}
-                />
-              )}
-              <ActionsPanelMobile 
-                leadId={lead.id} 
-                onAddAction={fetchLead}
-                onMarkComplete={handleMarkComplete} 
-                actionHistory={lead.actionHistory || []}
-              />
+              {actionSuggestions && actionSuggestions.length > 0 && <ActionSuggestions suggestions={actionSuggestions} onAccept={acceptSuggestion} onReject={rejectSuggestion} />}
+              <ActionsPanelMobile leadId={lead.id} onAddAction={fetchLead} onMarkComplete={handleMarkComplete} actionHistory={lead.actionHistory || []} />
             </TabsContent>
             
             <TabsContent value="emails" className="h-full flex-1 flex-grow mt-1">
@@ -240,38 +182,13 @@ const LeadDetailMobile = () => {
         </Tabs>
       </ScrollArea>
       
-      <LeadDetailActionBar
-        autoSaveEnabled={autoSaveEnabled}
-        onAddAction={handleAddAction}
-        lead={lead}
-        hasChanges={hasChanges}
-        isSaving={isSaving}
-        onManualSave={handleSaveWithIndicator}
-        actionSuggestions={actionSuggestions}
-      />
+      <LeadDetailActionBar autoSaveEnabled={autoSaveEnabled} onAddAction={handleAddAction} lead={lead} hasChanges={hasChanges} isSaving={isSaving} onManualSave={handleSaveWithIndicator} actionSuggestions={actionSuggestions} />
 
-      {showSaveIndicator && (
-        <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
+      {showSaveIndicator && <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
           <CheckCircle className="h-5 w-5" />
-        </div>
-      )}
+        </div>}
 
-      <ActionDialog
-        isOpen={isActionDialogOpen}
-        onClose={() => setIsActionDialogOpen(false)}
-        selectedAction={selectedAction}
-        setSelectedAction={setSelectedAction}
-        actionDate={actionDate}
-        setActionDate={setActionDate}
-        actionTime={actionTime}
-        setActionTime={setActionTime}
-        actionNotes={actionNotes}
-        setActionNotes={setActionNotes}
-        onConfirm={handleActionConfirm}
-        getActionTypeIcon={getActionTypeIcon}
-      />
-    </div>
-  );
+      <ActionDialog isOpen={isActionDialogOpen} onClose={() => setIsActionDialogOpen(false)} selectedAction={selectedAction} setSelectedAction={setSelectedAction} actionDate={actionDate} setActionDate={setActionDate} actionTime={actionTime} setActionTime={setActionTime} actionNotes={actionNotes} setActionNotes={setActionNotes} onConfirm={handleActionConfirm} getActionTypeIcon={getActionTypeIcon} />
+    </div>;
 };
-
 export default LeadDetailMobile;
