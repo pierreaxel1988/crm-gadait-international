@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
 
 interface AgentFilterButtonsProps {
   agentFilter: string | null;
@@ -21,79 +22,95 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [currentUserTeamId, setCurrentUserTeamId] = useState<string | null>(null);
   
-  // Load all team members without filtering
   useEffect(() => {
     const loadTeamMembers = async () => {
       setIsLoading(true);
       try {
-        console.log("[AgentFilterButtons] Loading all team members");
+        console.log("[AgentFilterButtons] Loading team members");
         
-        // Fetch all team members without filters
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id, name')
-          .order('name');
+        // Si c'est un commercial sans privilèges admin, ne montrer que lui-même
+        if (isCommercial && !isAdmin && user?.email) {
+          const { data: currentUserData, error } = await supabase
+            .from('team_members')
+            .select('id, name')
+            .eq('email', user.email)
+            .maybeSingle();
+            
+          if (error) {
+            throw error;
+          }
           
-        if (error) {
-          console.error("[AgentFilterButtons] Error:", error);
-        } else if (data && data.length > 0) {
-          console.log("[AgentFilterButtons] Team members loaded:", data.length);
-          setLocalTeamMembers(data);
-          
-          // For commercial users, find their own ID
-          if (isCommercial && !isAdmin && user?.email) {
-            // Find the current user's team member ID
-            const { data: currentUserData } = await supabase
-              .from('team_members')
-              .select('id')
-              .eq('email', user.email)
-              .maybeSingle();
-              
-            if (currentUserData) {
-              setCurrentUserTeamId(currentUserData.id);
-              console.log("[AgentFilterButtons] Commercial ID:", currentUserData.id);
-              
-              // Auto-select the commercial user
-              if (!agentFilter) {
-                setAgentFilter(currentUserData.id);
+          if (currentUserData) {
+            setLocalTeamMembers([currentUserData]);
+            setCurrentUserTeamId(currentUserData.id);
+            
+            // Auto-sélectionner le commercial
+            if (!agentFilter) {
+              setAgentFilter(currentUserData.id);
+            }
+          } else {
+            console.warn("[AgentFilterButtons] Commercial user not found:", user.email);
+            toast({
+              variant: "destructive",
+              title: "Erreur d'identification",
+              description: "Votre compte utilisateur n'est pas correctement configuré.",
+            });
+          }
+        } else {
+          // Admin - charge tous les membres
+          const { data, error } = await supabase
+            .from('team_members')
+            .select('id, name')
+            .order('name');
+            
+          if (error) {
+            throw error;
+          } else if (data) {
+            setLocalTeamMembers(data);
+            
+            // Si l'utilisateur est aussi un commercial, trouver son ID
+            if (isCommercial && user?.email) {
+              const currentUser = data.find(m => m.email === user.email);
+              if (currentUser) {
+                setCurrentUserTeamId(currentUser.id);
               }
             }
           }
         }
       } catch (err) {
         console.error("[AgentFilterButtons] Exception:", err);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger la liste des agents."
+        });
       } finally {
         setIsLoading(false);
       }
     };
     
+    // Utiliser les options si fournies, sinon charger depuis la base
     if (providedMembers.length === 0) {
       loadTeamMembers();
     } else {
       setLocalTeamMembers(providedMembers);
       
-      // Check if we need to filter provided members for commercial users
+      // Si l'utilisateur est un commercial, essayer de trouver son ID
       if (isCommercial && !isAdmin && user?.email) {
-        // Find current commercial user ID among provided members
         const findUserIdFromEmail = async () => {
-          try {
-            const { data: currentUser } = await supabase
-              .from('team_members')
-              .select('id')
-              .eq('email', user.email)
-              .maybeSingle();
-              
-            if (currentUser) {
-              setCurrentUserTeamId(currentUser.id);
-              console.log("[AgentFilterButtons] Commercial ID found:", currentUser.id);
-              
-              // Auto-select the commercial user
-              if (!agentFilter) {
-                setAgentFilter(currentUser.id);
-              }
+          const { data: currentUser } = await supabase
+            .from('team_members')
+            .select('id')
+            .eq('email', user.email)
+            .maybeSingle();
+            
+          if (currentUser) {
+            setCurrentUserTeamId(currentUser.id);
+            
+            // Auto-sélectionner pour les commerciaux
+            if (!agentFilter) {
+              setAgentFilter(currentUser.id);
             }
-          } catch (error) {
-            console.error("[AgentFilterButtons] Error finding commercial ID:", error);
           }
         };
         
@@ -103,19 +120,23 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
   }, [providedMembers, isAdmin, isCommercial, user?.email]);
   
   const handleFilterClick = (agentId: string | null) => {
-    // For commercial users, only allow selecting their own ID
+    // Pour les commerciaux, bloquer la sélection d'autres agents
     if (isCommercial && !isAdmin && agentId !== currentUserTeamId && agentId !== null) {
-      console.log("[AgentFilterButtons] Commercial trying to filter by another agent - blocked");
+      toast({
+        variant: "destructive",
+        title: "Accès limité",
+        description: "En tant que commercial, vous ne pouvez voir que vos propres leads."
+      });
       return;
     }
     
     setAgentFilter(agentId);
   };
   
-  // For commercial users, disable the "All" button
+  // Pour les commerciaux non-admin, ne pas montrer le bouton "Tous"
   const canSelectAll = isAdmin || !isCommercial;
   
-  // Use local members for rendering
+  // Utiliser les membres locaux pour l'affichage
   const membersToDisplay = localTeamMembers.length > 0 ? localTeamMembers : providedMembers;
   
   return (

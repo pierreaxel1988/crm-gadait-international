@@ -45,7 +45,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   const [currentUserTeamId, setCurrentUserTeamId] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Fonction pour charger tous les membres de l'équipe sans filtrage
+  // Fonction pour charger tous les membres de l'équipe
   const fetchTeamMembers = async () => {
     setIsLoading(true);
     setError(null);
@@ -64,7 +64,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         return;
       }
       
-      // Récupérer tous les membres d'équipe sans filtre
+      // Récupérer tous les membres d'équipe
       const { data, error: fetchError } = await supabase
         .from('team_members')
         .select('id, name, email, is_admin')
@@ -75,7 +75,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         throw new Error(`Erreur lors du chargement des commerciaux: ${fetchError.message}`);
       }
 
-      // Consigner tous les résultats pour diagnostic
       console.log('[TeamMemberSelect] Données brutes reçues:', data);
 
       if (data && data.length > 0) {
@@ -89,12 +88,17 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
             console.log('[TeamMemberSelect] ID trouvé pour le commercial:', commercialMember.id);
             setCurrentUserTeamId(commercialMember.id);
             
-            // Pour les commerciaux, on peut leur proposer de s'auto-assigner
-            // mais sans forçage
+            // Pour les commerciaux, proposer l'auto-assignation
             if (!value) {
               console.log('[TeamMemberSelect] Auto-assignation pour commercial:', commercialMember.id);
               onChange(commercialMember.id);
               setSelectedMemberName(commercialMember.name);
+              
+              // Montrer un toast pour informer
+              toast({
+                title: "Auto-assignation",
+                description: `Le lead sera assigné à vous (${commercialMember.name})`,
+              });
             }
           }
         }
@@ -117,7 +121,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
           if (selectedMember) {
             setSelectedMemberName(selectedMember.name);
           } else {
-            // Si l'ID est défini mais que le membre n'est pas trouvé, consignez l'ID pour débogage
             console.log('[TeamMemberSelect] ID membre sélectionné non trouvé dans les données:', value);
           }
         }
@@ -142,7 +145,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       console.error('[TeamMemberSelect] Erreur détaillée:', error);
       setError("Impossible de charger la liste des commerciaux");
       
-      // Ne pas afficher de toast après plusieurs tentatives pour éviter le spam
       if (retryCount < 3) {
         toast({
           variant: "destructive",
@@ -151,7 +153,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         });
       }
       
-      // Incrémenter le compteur de tentatives
       setRetryCount(prev => prev + 1);
     } finally {
       setIsLoading(false);
@@ -161,9 +162,8 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   useEffect(() => {
     fetchTeamMembers();
     
-    // Ajouter un interval pour rafraîchir les données périodiquement
+    // Rafraîchir périodiquement si nécessaire
     const intervalId = setInterval(() => {
-      // Réessayer régulièrement si aucun membre n'est trouvé ou s'il y a une erreur
       if (teamMembers.length === 0 || error) {
         console.log('[TeamMemberSelect] Tentative programmée de rechargement des membres');
         fetchTeamMembers();
@@ -173,7 +173,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
     return () => clearInterval(intervalId);
   }, [autoSelectPierreAxel, isAdmin, isCommercial, user?.email]);
   
-  // Effet supplémentaire pour actualiser lorsque value change
+  // Effet pour actualiser lorsque value change
   useEffect(() => {
     if (value && teamMembers.length > 0) {
       const selectedMember = teamMembers.find(member => member.id === value);
@@ -184,7 +184,16 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   }, [value, teamMembers]);
 
   const handleChange = (newValue: string) => {
-    // Permettre à tous les utilisateurs de choisir n'importe quel agent
+    // Valider la sélection pour les commerciaux
+    if (isCommercial && !isAdmin && newValue !== "non_assigné" && newValue !== currentUserTeamId) {
+      toast({
+        variant: "destructive",
+        title: "Permission refusée",
+        description: "En tant que commercial, vous ne pouvez assigner qu'à vous-même."
+      });
+      return;
+    }
+    
     if (newValue !== "non_assigné") {
       const selectedMember = teamMembers.find(member => member.id === newValue);
       if (selectedMember) {
@@ -195,12 +204,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
     }
     
     onChange(newValue === "non_assigné" ? undefined : newValue);
-  };
-
-  // Fonction pour forcer le rechargement des données
-  const handleRetryLoad = () => {
-    console.log('[TeamMemberSelect] Tentative manuelle de rechargement des membres');
-    fetchTeamMembers();
   };
 
   return (
@@ -249,7 +252,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         <div className="text-xs text-red-600 mt-1 flex flex-col">
           <span>{error}</span>
           <button 
-            onClick={handleRetryLoad} 
+            onClick={fetchTeamMembers} 
             className="text-blue-600 underline text-xs mt-1 self-start"
           >
             Réessayer de charger les commerciaux
@@ -260,7 +263,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         <div className="text-xs text-amber-600 mt-1">
           Aucun commercial disponible dans la liste. Vérification en cours...
           <button 
-            onClick={handleRetryLoad} 
+            onClick={fetchTeamMembers} 
             className="text-blue-600 underline block mt-1"
           >
             Forcer le rechargement

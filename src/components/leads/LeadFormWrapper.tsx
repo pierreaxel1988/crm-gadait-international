@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import LeadForm from '@/components/leads/LeadForm';
 import { LeadDetailed } from '@/types/lead';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LeadFormWrapperProps {
   onSubmit: (data: LeadDetailed) => void;
@@ -23,13 +25,70 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   lead,
   enforceRlsRules = true, // Default to true for RLS enforcement
 }) => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isCommercial, user } = useAuth();
   
   console.log("[LeadFormWrapper] Render - isAdmin:", isAdmin);
   console.log("[LeadFormWrapper] adminAssignedAgent:", adminAssignedAgent);
   console.log("[LeadFormWrapper] currentUserTeamId:", currentUserTeamId);
   console.log("[LeadFormWrapper] Lead ID:", lead?.id);
   console.log("[LeadFormWrapper] enforceRlsRules:", enforceRlsRules);
+  
+  // Vérifier les permissions si c'est un lead existant
+  useEffect(() => {
+    const checkPermissions = async () => {
+      if (lead?.id && isCommercial && !isAdmin) {
+        // Si c'est un commercial et pas un admin, vérifier qu'il est bien assigné à ce lead
+        try {
+          // Récupérer l'ID du commercial connecté
+          const { data } = await supabase
+            .from('team_members')
+            .select('id')
+            .eq('email', user?.email)
+            .single();
+            
+          if (data && lead.assignedTo !== data.id) {
+            toast({
+              variant: "destructive",
+              title: "Accès refusé",
+              description: "Vous n'êtes pas autorisé à modifier ce lead car il est assigné à un autre commercial.",
+              duration: 5000,
+            });
+            // Retourner à la page précédente
+            onCancel();
+          }
+        } catch (error) {
+          console.error("Erreur lors de la vérification des permissions:", error);
+        }
+      }
+    };
+    
+    if (enforceRlsRules) {
+      checkPermissions();
+    }
+  }, [lead?.id, isCommercial, isAdmin, user?.email, enforceRlsRules]);
+  
+  // Si un commercial tente de créer un nouveau lead, pré-assigner à lui-même
+  useEffect(() => {
+    if (!lead && isCommercial && !adminAssignedAgent) {
+      const autoAssignToCurrentUser = async () => {
+        try {
+          const { data } = await supabase
+            .from('team_members')
+            .select('id, name')
+            .eq('email', user?.email)
+            .single();
+            
+          if (data) {
+            console.log("[LeadFormWrapper] Auto-assignation au commercial:", data.name);
+          }
+        } catch (error) {
+          console.error("Erreur d'assignation automatique:", error);
+        }
+      };
+      
+      autoAssignToCurrentUser();
+    }
+  }, [lead, isCommercial, adminAssignedAgent, user?.email]);
   
   return (
     <div className="luxury-card p-6 border-loro-sand">
