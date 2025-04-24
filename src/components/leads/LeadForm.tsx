@@ -8,6 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import ContactSection from './form/ContactSection';
+import StatusSection from './form/StatusSection';
+import SearchCriteriaSection from './form/SearchCriteriaSection';
+import NotesSection from './form/NotesSection';
+import { LeadStatus } from '@/components/common/StatusBadge';
+import { LeadTag } from '@/components/common/TagBadge';
+import { LeadSource, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
+import { COUNTRIES } from '@/utils/countries';
+import TeamMemberSelect from './TeamMemberSelect';
 
 interface LeadFormProps {
   lead?: LeadDetailed;
@@ -68,6 +77,56 @@ const LeadForm: React.FC<LeadFormProps> = ({
     taxResidence: lead?.taxResidence || '',
   });
 
+  const [activeFormTab, setActiveFormTab] = useState(activeTab);
+  
+  // Statuts de lead disponibles
+  const leadStatuses: LeadStatus[] = [
+    'New', 'Contacted', 'Qualified', 'Visit', 'Proposal', 'Offre', 'Deposit', 'Signed', 'Gagné', 'Perdu'
+  ];
+  
+  // Tags disponibles
+  const leadTags: LeadTag[] = [
+    'Vip', 'Hot', 'Serious', 'Cold', 'No response', 'No phone', 'Fake'
+  ];
+  
+  // Sources de lead disponibles
+  const leadSources: LeadSource[] = [
+    'Site web', 'Réseaux sociaux', 'Portails immobiliers', 'Network', 'Repeaters', 'Recommandations',
+    'Apporteur d\'affaire', 'Idealista', 'Le Figaro', 'Properstar', 'Property Cloud', 'L\'express Property',
+    'James Edition', 'Annonce', 'Email', 'Téléphone', 'Autre'
+  ];
+  
+  // Types de propriété
+  const propertyTypes: PropertyType[] = [
+    'Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Chalet', 'Terrain', 'Manoir', 
+    'Maison de ville', 'Château', 'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'
+  ];
+  
+  // Types de vue
+  const viewTypes: ViewType[] = [
+    'Mer', 'Montagne', 'Golf', 'Autres'
+  ];
+  
+  // Prestations
+  const amenities: Amenity[] = [
+    'Piscine', 'Jardin', 'Terrasse', 'Parking', 'Ascenseur', 'Vue mer', 'Climatisation', 'Sécurité'
+  ];
+  
+  // Délai d'achat
+  const purchaseTimeframes: PurchaseTimeframe[] = [
+    'Moins de trois mois', 'Plus de trois mois'
+  ];
+  
+  // Méthode de financement
+  const financingMethods: FinancingMethod[] = [
+    'Cash', 'Prêt bancaire'
+  ];
+  
+  // Utilisation de la propriété
+  const propertyUses: PropertyUse[] = [
+    'Investissement locatif', 'Résidence principale'
+  ];
+
   useEffect(() => {
     if (adminAssignedAgent !== undefined) {
       setFormData(prev => ({ ...prev, assignedTo: adminAssignedAgent }));
@@ -94,6 +153,23 @@ const LeadForm: React.FC<LeadFormProps> = ({
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const numValue = value === '' ? undefined : parseInt(value);
+    setFormData(prev => ({ ...prev, [name]: numValue }));
+  };
+
+  const handleMultiSelectToggle = <T extends string>(name: keyof LeadDetailed, value: T) => {
+    setFormData(prev => {
+      const currentValues = prev[name] as T[] || [];
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter(v => v !== value)
+        : [...currentValues, value];
+      
+      return { ...prev, [name]: newValues };
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name) {
@@ -116,6 +192,23 @@ const LeadForm: React.FC<LeadFormProps> = ({
     if (value === 'M.' || value === 'Mme') {
       setFormData(prev => ({ ...prev, salutation: value }));
     }
+  };
+
+  const handleTagToggle = (tag: LeadTag) => {
+    const updatedTags = formData.tags?.includes(tag)
+      ? formData.tags.filter(t => t !== tag)
+      : [...(formData.tags || []), tag];
+    
+    setFormData(prev => ({ ...prev, tags: updatedTags }));
+  };
+  
+  const handleCountryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value, desiredLocation: '' }));
+  };
+
+  const handleAgentChange = (value: string | undefined) => {
+    setFormData(prev => ({ ...prev, assignedTo: value }));
   };
 
   return (
@@ -149,7 +242,50 @@ const LeadForm: React.FC<LeadFormProps> = ({
             required
           />
         </div>
+        
+        {/* Agent select */}
+        <div className="space-y-2">
+          <Label htmlFor="assignedTo" className="text-sm">Commercial assigné</Label>
+          <TeamMemberSelect
+            value={formData.assignedTo}
+            onChange={handleAgentChange}
+            label="Commercial assigné"
+          />
+        </div>
       </div>
+
+      <Tabs value={activeFormTab} onValueChange={setActiveFormTab} className="pt-4">
+        <TabsContent value="general" className="space-y-6 mt-0">
+          <ContactSection formData={formData} handleInputChange={handleInputChange} />
+          <StatusSection 
+            formData={formData} 
+            handleInputChange={handleInputChange}
+            handleTagToggle={handleTagToggle}
+            leadStatuses={leadStatuses}
+            leadTags={leadTags}
+            sources={leadSources}
+          />
+        </TabsContent>
+        <TabsContent value="criteria" className="mt-0">
+          <SearchCriteriaSection 
+            formData={formData}
+            handleInputChange={handleInputChange}
+            handleNumberChange={handleNumberChange}
+            handleMultiSelectToggle={handleMultiSelectToggle}
+            propertyTypes={propertyTypes}
+            viewTypes={viewTypes}
+            amenities={amenities}
+            purchaseTimeframes={purchaseTimeframes}
+            financingMethods={financingMethods}
+            propertyUses={propertyUses}
+            countries={COUNTRIES}
+            handleCountryChange={handleCountryChange}
+          />
+        </TabsContent>
+        <TabsContent value="notes" className="mt-0">
+          <NotesSection formData={formData} handleInputChange={handleInputChange} />
+        </TabsContent>
+      </Tabs>
 
       {!hideSubmitButton && (
         <div className="flex justify-end space-x-3 pt-2">
