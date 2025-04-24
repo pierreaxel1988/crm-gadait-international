@@ -182,6 +182,25 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
           className="w-full font-futura" 
         />
       </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm flex items-center gap-2">
+          <MapPin className="h-4 w-4" />
+          Pin Location
+        </Label>
+        <Input
+          name="mapCoordinates"
+          value={lead.mapCoordinates || ''}
+          onChange={e => onDataChange({
+            mapCoordinates: e.target.value
+          })}
+          placeholder="Collez le lien Google Maps ici"
+          className="w-full font-futura"
+        />
+        <p className="text-xs text-muted-foreground">
+          Copiez-collez le lien Google Maps de la propriété
+        </p>
+      </div>
     </div>;
 };
 
