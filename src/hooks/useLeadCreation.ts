@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
@@ -23,6 +24,7 @@ export const useLeadCreation = () => {
   const [error, setError] = useState<string | null>(null);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
 
+  // Vérifiez l'authentification de l'utilisateur
   useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
@@ -39,8 +41,10 @@ export const useLeadCreation = () => {
     checkAuth();
   }, [navigate]);
 
+  // Récupérer les statuts disponibles en fonction du type de pipeline
   const availableStatuses = getStatusesForPipeline(pipelineType);
 
+  // Gérer la soumission du formulaire de lead
   const handleSubmit = async (data: LeadDetailed) => {
     if (isSubmitting) {
       console.log("Submission already in progress, ignoring");
@@ -56,20 +60,32 @@ export const useLeadCreation = () => {
         throw new Error("Vous devez être connecté pour créer un lead.");
       }
       
+      console.log("Creating lead with data:", data);
+      console.log("Assigned agent:", assignedAgent);
+      console.log("Pipeline type:", pipelineType);
+      
       const newLeadData = structuredClone(data);
       delete newLeadData.id;
       delete newLeadData.createdAt;
       
+      // Logique d'assignation d'agent
       if (isAdmin && assignedAgent) {
         newLeadData.assignedTo = assignedAgent;
+        console.log("Admin assigning agent:", assignedAgent);
       } else if (!isAdmin && user) {
         newLeadData.assignedTo = user.id;
+        console.log("Commercial self-assigning lead:", user.id);
+      } else if (data.assignedTo) {
+        // Conserver l'agent sélectionné directement dans le formulaire
+        console.log("Using form-selected agent:", data.assignedTo);
       }
       
+      // S'assurer que le type de pipeline et le statut sont définis
       newLeadData.pipelineType = pipelineType;
       newLeadData.pipeline_type = pipelineType;
       newLeadData.status = leadStatus;
       
+      // Ajouter une entrée dans l'historique des actions si nécessaire
       if (!newLeadData.actionHistory || newLeadData.actionHistory.length === 0) {
         newLeadData.actionHistory = [{
           id: crypto.randomUUID(),
@@ -80,6 +96,9 @@ export const useLeadCreation = () => {
         }];
       }
       
+      console.log("Final lead data before submission:", newLeadData);
+      
+      // Créer le lead avec les données préparées
       const createdLead = await createLead(newLeadData);
       
       if (createdLead) {
@@ -118,12 +137,15 @@ export const useLeadCreation = () => {
     }
   };
 
+  // Gestion du changement d'agent
   const handleAgentChange = (value: string | undefined) => {
     console.log("Agent changed to:", value);
     setAssignedAgent(value);
   };
 
+  // Gestion du changement de type de pipeline
   const handlePipelineTypeChange = (value: PipelineType) => {
+    console.log("Pipeline type changed to:", value);
     setPipelineType(value);
     if (!statusFromUrl) {
       setLeadStatus('New');

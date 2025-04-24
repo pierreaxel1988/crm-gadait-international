@@ -23,9 +23,11 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     if (selectedAgent !== assignedTo) {
       onAssignedToChange(selectedAgent);
     }
-  }, [selectedAgent, assignedTo]);
+  }, [selectedAgent, assignedTo, onAssignedToChange]);
 
   const handleAgentSelect = (agentId: string | null) => {
+    console.log("AgentFilter: Agent selected:", agentId);
+    
     // Mettre à jour à la fois le filtre local et le système global
     onAssignedToChange(agentId);
     handleAgentChange(agentId);

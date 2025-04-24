@@ -100,6 +100,19 @@ const StatusSection = ({
     handleInputChange(locationEvent);
   };
 
+  const handleAgentChange = (value: string | undefined) => {
+    console.log("StatusSection: Agent changed to:", value);
+    
+    const event = {
+      target: {
+        name: 'assignedTo',
+        value: value || ''
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(event);
+  };
+
   const availableStatuses = getStatusesForPipeline(formData.pipelineType || 'purchase');
 
   const getStatusLabel = (status: LeadStatus): string => {
@@ -196,15 +209,8 @@ const StatusSection = ({
         renderCustomField={() => (
           <TeamMemberSelect
             value={formData.assignedTo}
-            onChange={(value) => {
-              const event = {
-                target: {
-                  name: 'assignedTo',
-                  value: value || ''
-                }
-              } as React.ChangeEvent<HTMLInputElement>;
-              handleInputChange(event);
-            }}
+            onChange={handleAgentChange}
+            label="Commercial assigné"
           />
         )}
       />
