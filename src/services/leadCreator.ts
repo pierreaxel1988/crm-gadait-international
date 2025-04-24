@@ -36,7 +36,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       // Verify agent exists
       const { data: agentData, error: agentError } = await supabase
         .from("team_members")
-        .select("name, is_admin")
+        .select("name")
         .eq("id", completeLeadData.assignedTo)
         .single();
         
@@ -44,21 +44,6 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
         console.warn("Warning: Could not verify agent exists:", agentError);
       } else {
         console.log("Lead will be assigned to agent:", agentData.name);
-      }
-      
-      // Vérifier si l'utilisateur actuel est admin
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (sessionData?.session?.user) {
-        const { data: currentUser } = await supabase
-          .from("team_members")
-          .select("id, is_admin")
-          .eq("email", sessionData.session.user.email)
-          .single();
-          
-        // Si l'utilisateur n'est pas admin, vérifier qu'il s'assigne à lui-même
-        if (currentUser && !currentUser.is_admin && currentUser.id !== completeLeadData.assignedTo) {
-          console.warn("Non-admin user trying to assign lead to someone else. This might fail due to RLS.");
-        }
       }
     } else {
       console.log("Lead will not be assigned to any agent");
@@ -83,14 +68,6 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     
     if (error) {
       console.error("Error creating lead:", error);
-      
-      // Vérifier s'il s'agit d'une erreur RLS
-      if (error.message && 
-          (error.message.includes("violates row-level security") ||
-           error.message.includes("new row violates"))) {
-        throw new Error("Violation de la politique de sécurité RLS: Vous n'avez pas les droits nécessaires pour créer ce lead avec cette assignation.");
-      }
-      
       throw error;
     }
     
