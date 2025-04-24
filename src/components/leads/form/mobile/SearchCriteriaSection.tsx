@@ -145,6 +145,12 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
   lead,
   onDataChange
 }) => {
+  const handleLocationChange = (location: string) => {
+    onDataChange({
+      desiredLocation: location
+    });
+  };
+
   return <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="country" className="text-sm">Pays</Label>
@@ -162,12 +168,12 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
           <option value="UAE">Émirats Arabes Unis</option>
         </select>
       </div>
-      
+
       <div className="space-y-2">
-        <Label htmlFor="desiredLocation" className="text-sm">Localisation souhaitée</Label>
-        <Input id="desiredLocation" value={lead.desiredLocation || ''} onChange={e => onDataChange({
-        desiredLocation: e.target.value
-      })} placeholder="Ex : Paris 16e" className="w-full font-futura" />
+        <LocationFilter 
+          location={lead.desiredLocation || ''} 
+          onLocationChange={handleLocationChange}
+        />
       </div>
 
       <div className="space-y-2">
@@ -702,7 +708,10 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
         </div>
 
         <div className="space-y-2">
-          <LocationFilter location={lead.desiredLocation || ''} onLocationChange={handleLocationChange} />
+          <LocationFilter 
+            location={lead.desiredLocation || ''} 
+            onLocationChange={handleLocationChange}
+          />
         </div>
 
         <div className="pt-2">
