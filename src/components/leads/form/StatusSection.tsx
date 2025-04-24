@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CalendarClock, CalendarDays, Activity, Home, MapPin } from 'lucide-react';
 import { LeadDetailed, LeadSource, PipelineType } from '@/types/lead';
@@ -110,7 +111,6 @@ const StatusSection = ({
         'Proposal': 'Mandat en négociation',
         'Signed': 'Mandat signé',
         'Visit': 'Bien en commercialisation',
-        'Offer': 'Offre reçue',
         'Offre': 'Offre reçue',
         'Deposit': 'Compromis signé',
         'Gagné': 'Vente finalisée',
