@@ -23,6 +23,8 @@ const SearchCriteriaSection = ({
   lead,
   onDataChange
 }: SearchCriteriaSectionProps) => {
+  const [activeTab, setActiveTab] = useState('budget');
+  
   const handleLocationChange = (location: string) => {
     onDataChange({
       desiredLocation: location
@@ -151,6 +153,12 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
   lead,
   onDataChange
 }) => {
+  const handleLocationChange = (location: string) => {
+    onDataChange({
+      desiredLocation: location
+    });
+  };
+  
   return <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="country" className="text-sm">Pays</Label>
