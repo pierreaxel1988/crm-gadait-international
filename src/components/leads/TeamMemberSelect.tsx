@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 import { Label } from '@/components/ui/label';
@@ -14,14 +13,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
-// Définir les types pour les props
 interface TeamMemberSelectProps {
   value: string | undefined;
   onChange: (value: string | undefined) => void;
   label?: string;
   autoSelectPierreAxel?: boolean;
   disabled?: boolean;
-  enforceRlsRules?: boolean; // Propriété pour activer/désactiver les règles RLS
+  enforceRlsRules?: boolean;
 }
 
 interface TeamMember {
@@ -37,7 +35,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   label = "Attribuer à",
   autoSelectPierreAxel = false,
   disabled = false,
-  enforceRlsRules = false // Désactivé par défaut pour suivre la demande de l'utilisateur
+  enforceRlsRules = false
 }) => {
   const isMobile = useIsMobile();
   const { user, isAdmin } = useAuth();
@@ -47,7 +45,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
 
   useEffect(() => {
-    // Récupérer l'ID de l'utilisateur courant
     const fetchCurrentUser = async () => {
       if (!user?.email) return;
       
@@ -86,7 +83,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
 
         setTeamMembers(data || []);
         
-        // Auto-select Pierre Axel Gadait if requested and no value is already set
         if (autoSelectPierreAxel && !value && data) {
           const pierreAxel = data.find(member => 
             member.name.toLowerCase().includes('pierre-axel gadait'));
@@ -97,7 +93,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
           }
         }
         
-        // Set the name for the already selected member
         if (value && data) {
           const selectedMember = data.find(member => member.id === value);
           if (selectedMember) {
@@ -105,8 +100,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
           }
         }
         
-        // Si l'utilisateur n'est pas admin et que enforceRlsRules est activé,
-        // vérifions si on doit forcer l'auto-assignation
         if (enforceRlsRules && !isAdmin && currentUserId && currentUserId !== value) {
           handleChange(currentUserId);
         }
@@ -126,8 +119,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   }, [autoSelectPierreAxel, onChange, value, isAdmin, currentUserId, enforceRlsRules]);
 
   const handleChange = (newValue: string) => {
-    // Si l'utilisateur n'est pas admin et que enforceRlsRules est activé,
-    // on ne permet que l'auto-assignation
     if (enforceRlsRules && !isAdmin && currentUserId && newValue !== "non_assigné" && newValue !== currentUserId) {
       toast({
         variant: "destructive",
@@ -135,16 +126,13 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         description: "En tant que commercial, vous ne pouvez assigner les leads qu'à vous-même."
       });
       
-      // Si aucune valeur n'était déjà sélectionnée, on force l'auto-assignation
       if (!value || value === "non_assigné") {
         newValue = currentUserId;
       } else {
-        // Sinon on garde la valeur précédente
         return;
       }
     }
     
-    // Update selected member name
     if (newValue !== "non_assigné") {
       const selectedMember = teamMembers.find(member => member.id === newValue);
       if (selectedMember) {
@@ -154,7 +142,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       setSelectedMemberName(undefined);
     }
     
-    // Si "non_assigné" est sélectionné, on passe undefined
     onChange(newValue === "non_assigné" ? undefined : newValue);
   };
 
@@ -178,8 +165,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
           <SelectContent>
             {(!enforceRlsRules || isAdmin) && <SelectItem value="non_assigné">Non assigné</SelectItem>}
             {teamMembers.map((member) => {
-              // Si enforceRlsRules est activé et que l'utilisateur n'est pas admin,
-              // on ne montre que son propre ID
               if (enforceRlsRules && !isAdmin && member.id !== currentUserId) {
                 return null;
               }

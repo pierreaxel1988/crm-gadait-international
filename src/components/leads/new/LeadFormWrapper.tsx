@@ -10,7 +10,7 @@ interface LeadFormWrapperProps {
   isSubmitting: boolean;
   currentUserTeamId?: string | undefined;
   isAdmin?: boolean;
-  enforceRlsRules?: boolean; // Added this line to fix the TypeScript error
+  enforceRlsRules?: boolean; // This prop was added but needs to be passed to LeadForm
 }
 
 const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
@@ -20,7 +20,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   isSubmitting,
   currentUserTeamId,
   isAdmin,
-  enforceRlsRules = false // Default to false
+  enforceRlsRules = false // Default to false since RLS is disabled on the leads table
 }) => {
   return (
     <div className="luxury-card p-6 border-loro-sand">
