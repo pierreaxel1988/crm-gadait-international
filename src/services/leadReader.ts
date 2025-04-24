@@ -5,17 +5,6 @@ import { mapToLeadDetailed } from "./utils/leadMappers";
 
 export const getLeads = async (): Promise<LeadDetailed[]> => {
   try {
-    // Get the current authenticated user
-    const { data: sessionData } = await supabase.auth.getSession();
-    const user = sessionData?.session?.user;
-    
-    if (!user) {
-      console.log("[leadReader] No authenticated user found");
-      return [];
-    }
-    
-    console.log("[leadReader] Fetching leads for user:", user.email);
-    
     // With RLS enabled, we can simply fetch all leads - RLS will handle the filtering
     const { data, error } = await supabase.from('leads').select('*');
 
@@ -38,17 +27,6 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
 
 export const getLead = async (id: string): Promise<LeadDetailed | null> => {
   try {
-    // Get the current authenticated user
-    const { data: sessionData } = await supabase.auth.getSession();
-    const user = sessionData?.session?.user;
-    
-    if (!user) {
-      console.log("[leadReader] No authenticated user found for single lead");
-      return null;
-    }
-    
-    console.log(`[leadReader] Fetching lead ${id} for user:`, user.email);
-    
     // With RLS enabled, we can simply fetch the lead - RLS will handle the permissions
     const { data, error } = await supabase
       .from('leads')

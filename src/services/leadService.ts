@@ -30,7 +30,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       status: leadData.status
     });
     
-    // Vérifier l'utilisateur actuel (pour la journalisation uniquement)
+    // Get the current authenticated user (for logging only)
     const { data: sessionData } = await supabase.auth.getSession();
     const user = sessionData?.session?.user;
     
@@ -38,8 +38,8 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       throw new Error("Vous devez être connecté pour créer un lead.");
     }
     
-    // RLS est désactivé, donc le lead est créé tel quel,
-    // sans restriction d'assignation
+    // RLS is enabled, so the lead will be created as is,
+    // without assignment restrictions
     
     console.log("leadService: Creating lead with processed data:", leadData);
     
@@ -67,9 +67,9 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
         description: successMessage,
       });
 
-      // Vérifier si le lead est en statut "New" et a un agent assigné
+      // Check if lead is in "New" status and has an assigned agent
       if (result.status === "New" && result.assignedTo) {
-        // Ajouter une action de type "Call" pour qualifier le lead
+        // Add a "Call" action to qualify the lead
         const qualificationAction = {
           actionType: "Call",
           scheduledDate: new Date().toISOString(),
@@ -108,11 +108,11 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       description: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
     });
     
-    throw error; // Re-throw to allow handling by the caller
+    throw error;
   }
 };
 
-// Re-export all the necessary functions from leadCore and leadActions
+// Re-export all the necessary functions
 export { 
   getLeads, 
   getLead, 
@@ -122,7 +122,6 @@ export {
   addActionToLead
 };
 
-// Export the LeadDetailed type for convenience
+// Export types
 export type { LeadDetailed };
-// Export ActionHistory type
 export type { ActionHistory } from "@/types/actionHistory";
