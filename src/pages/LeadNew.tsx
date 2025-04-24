@@ -25,7 +25,6 @@ const LeadNew: React.FC = () => {
     currentUserTeamId
   } = useLeadCreation();
 
-  // Utiliser useCallback pour la navigation pour éviter des re-renders inutiles
   const handleCancel = useCallback(() => {
     navigate(-1);
   }, [navigate]);

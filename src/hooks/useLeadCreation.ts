@@ -22,7 +22,6 @@ export const useLeadCreation = () => {
   const [leadStatus, setLeadStatus] = useState<LeadStatus>(statusFromUrl || 'New');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showDebugInfo, setShowDebugInfo] = useState(false);
   const [currentUserTeamId, setCurrentUserTeamId] = useState<string | undefined>(undefined);
 
   // Récupérer les informations de l'utilisateur courant
@@ -95,7 +94,6 @@ export const useLeadCreation = () => {
       console.log("Submitting lead data:", data);
       console.log("Current assigned agent:", assignedAgent);
       console.log("Is admin:", isAdmin);
-      console.log("Current user:", user);
       
       const { data: authData } = await supabase.auth.getSession();
       if (!authData.session) {
@@ -111,7 +109,7 @@ export const useLeadCreation = () => {
       if (!isAdmin && data.assignedTo && data.assignedTo !== currentUserTeamId) {
         console.log("Non-admin trying to assign to someone else. Redirecting to self:", currentUserTeamId);
         toast({
-          variant: "destructive", // Changed from "warning" to "destructive" to match allowed variants
+          variant: "destructive", 
           title: "Attribution automatique",
           description: "En tant que commercial, le lead a été automatiquement assigné à vous-même."
         });
@@ -172,7 +170,7 @@ export const useLeadCreation = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [assignedAgent, isAdmin, isSubmitting, leadStatus, navigate, pipelineType, user, currentUserTeamId]);
+  }, [assignedAgent, isAdmin, isSubmitting, leadStatus, navigate, pipelineType, currentUserTeamId]);
 
   const handleAgentChange = useCallback((value: string | undefined) => {
     console.log("Agent changed to:", value);
@@ -204,8 +202,6 @@ export const useLeadCreation = () => {
     handleAgentChange,
     handlePipelineTypeChange,
     setLeadStatus,
-    showDebugInfo,
-    setShowDebugInfo,
     currentUserTeamId,
     isAdmin
   };

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import LeadForm from '@/components/leads/LeadForm';
 import { LeadDetailed } from '@/types/lead';
 
@@ -20,12 +20,6 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   currentUserTeamId,
   isAdmin
 }) => {
-  useEffect(() => {
-    console.log("LeadFormWrapper - adminAssignedAgent:", adminAssignedAgent);
-    console.log("LeadFormWrapper - currentUserTeamId:", currentUserTeamId);
-    console.log("LeadFormWrapper - isAdmin:", isAdmin);
-  }, [adminAssignedAgent, currentUserTeamId, isAdmin]);
-  
   return (
     <div className="luxury-card p-6 border-loro-sand">
       <LeadForm 
