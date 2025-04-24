@@ -28,7 +28,21 @@ interface TeamMember {
   email: string;
 }
 
+// IDs de tous les membres importants - à ne jamais supprimer de l'interface
 const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
+const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9";
+
+// Liste des membres garantis pour avoir toujours les données à jour
+const GUARANTEED_MEMBERS: Record<string, {name: string, email: string}> = {
+  [JACQUES_ID]: {
+    name: 'Jacques Charles',
+    email: 'jacques@gadait-international.com'
+  },
+  [PIERRE_AXEL_ID]: {
+    name: 'Pierre-Axel Gadait',
+    email: 'pierre@gadait-international.com'
+  }
+};
 
 const TeamMemberSelect = ({ 
   value, 
@@ -57,16 +71,22 @@ const TeamMemberSelect = ({
 
         let membersData = data || [];
         
-        // Vérifier si Jacques est présent, sinon l'ajouter
-        const jacquesIndex = membersData.findIndex(member => member.id === JACQUES_ID);
-        if (jacquesIndex === -1) {
-          membersData.push({
-            id: JACQUES_ID,
-            name: 'Jacques',
-            email: 'jacques@example.com' // Email par défaut, sera remplacé si les données réelles sont disponibles
-          });
-          console.log("Jacques a été ajouté manuellement à la liste des agents");
-        }
+        // S'assurer que tous les membres garantis sont présents
+        Object.entries(GUARANTEED_MEMBERS).forEach(([id, member]) => {
+          const memberIndex = membersData.findIndex(m => m.id === id);
+          if (memberIndex === -1) {
+            membersData.push({
+              id,
+              name: member.name,
+              email: member.email
+            });
+            console.log(`${member.name} a été ajouté manuellement à la liste des agents`);
+          } else {
+            // Mettre à jour les informations pour s'assurer qu'elles sont correctes
+            membersData[memberIndex].name = member.name;
+            membersData[memberIndex].email = member.email;
+          }
+        });
         
         // Trier les membres par nom
         membersData.sort((a, b) => a.name.localeCompare(b.name));
@@ -75,8 +95,7 @@ const TeamMemberSelect = ({
         
         // Auto-select Pierre Axel Gadait if requested and no value is already set
         if (autoSelectPierreAxel && !value && membersData.length > 0) {
-          const pierreAxel = membersData.find(member => 
-            member.name.toLowerCase().includes('pierre-axel gadait'));
+          const pierreAxel = membersData.find(member => member.id === PIERRE_AXEL_ID);
           
           if (pierreAxel) {
             onChange(pierreAxel.id);

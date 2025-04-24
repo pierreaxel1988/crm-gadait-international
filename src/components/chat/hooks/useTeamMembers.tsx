@@ -3,6 +3,16 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { TeamMember } from '../types/chatTypes';
 
+// IDs importants à ne jamais oublier
+const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
+const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9";
+
+// Liste des membres garantis
+const GUARANTEED_MEMBERS: Record<string, {name: string}> = {
+  [JACQUES_ID]: { name: 'Jacques Charles' },
+  [PIERRE_AXEL_ID]: { name: 'Pierre-Axel Gadait' }
+};
+
 export const useTeamMembers = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   
@@ -19,8 +29,25 @@ export const useTeamMembers = () => {
           return;
         }
 
-        if (data) {
-          setTeamMembers(data);
+        let membersData = data || [];
+        
+        // S'assurer que tous les membres garantis sont présents
+        Object.entries(GUARANTEED_MEMBERS).forEach(([id, member]) => {
+          const memberExists = membersData.some(m => m.id === id);
+          if (!memberExists) {
+            membersData.push({
+              id: id,
+              name: member.name
+            });
+            console.log(`${member.name} a été ajouté manuellement à la liste des agents (hook)`);
+          }
+        });
+        
+        // Trier les membres par nom
+        membersData.sort((a, b) => a.name.localeCompare(b.name));
+
+        if (membersData) {
+          setTeamMembers(membersData);
         }
       } catch (error) {
         console.error('Unexpected error fetching team members:', error);
