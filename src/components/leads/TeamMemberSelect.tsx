@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 import { Label } from '@/components/ui/label';
@@ -49,6 +50,22 @@ const GUARANTEED_MEMBERS: Record<string, {name: string, email: string}> = {
   "christine-francoise": {
     name: 'Christine Francoise',
     email: 'christine@gadait-international.com'
+  },
+  "jade-diouane": {
+    name: 'Jade Diouane',
+    email: 'jade@gadait-international.com'
+  },
+  "jean-marc-perrissol": {
+    name: 'Jean Marc Perrissol',
+    email: 'jeanmarc@gadait-international.com'
+  },
+  "sharon-ramdiane": {
+    name: 'Sharon Ramdiane',
+    email: 'sharon@gadait-international.com'
+  },
+  "ophelie-durand": {
+    name: 'Ophelie Durand',
+    email: 'ophelie@gadait-international.com'
   }
 };
 

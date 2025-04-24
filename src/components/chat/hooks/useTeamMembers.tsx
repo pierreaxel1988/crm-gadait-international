@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { TeamMember } from '../types/chatTypes';
@@ -12,7 +13,11 @@ const GUARANTEED_MEMBERS: Record<string, {name: string}> = {
   [PIERRE_AXEL_ID]: { name: 'Pierre-Axel Gadait' },
   "chloe-valentin": { name: 'Chloe Valentin' },
   "christelle-gadait": { name: 'Christelle Gadait' },
-  "christine-francoise": { name: 'Christine Francoise' }
+  "christine-francoise": { name: 'Christine Francoise' },
+  "jade-diouane": { name: 'Jade Diouane' },
+  "jean-marc-perrissol": { name: 'Jean Marc Perrissol' },
+  "sharon-ramdiane": { name: 'Sharon Ramdiane' },
+  "ophelie-durand": { name: 'Ophelie Durand' }
 };
 
 export const useTeamMembers = () => {
