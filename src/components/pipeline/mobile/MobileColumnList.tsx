@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +18,7 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Qualified': 'Qualifiés',
   'Proposal': 'Propositions',
   'Visit': 'Visites en cours',
+  'Offer': 'Offre en cours',
   'Offre': 'Offre en cours',
   'Deposit': 'Dépôt reçu',
   'Signed': 'Signature finale',

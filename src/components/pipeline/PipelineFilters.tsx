@@ -66,10 +66,6 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     });
   };
 
-  const handleLocationChange = (location: string) => {
-    handleFilterChange('location', location);
-  };
-
   const filtersContent = (
     <div className={`${isMobile ? 'pt-2' : 'p-4'} space-y-6`}>
       {/* Status filter */}
@@ -109,7 +105,7 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
       {/* Location filter */}
       <LocationFilter 
         location={filters.location} 
-        onLocationChange={handleLocationChange} 
+        onLocationChange={location => handleFilterChange('location', location)} 
       />
 
       {/* Timeframe filter */}

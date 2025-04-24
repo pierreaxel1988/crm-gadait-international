@@ -9,7 +9,8 @@ export type LeadStatus =
   | 'Qualified'        // Visite effectuée / Qualifiés
   | 'Proposal'         // Mandat en négociation / Propositions
   | 'Visit'            // Bien en commercialisation / Visites en cours
-  | 'Offre'            // Offre reçue (for both purchase and rental)
+  | 'Offer'            // Offre reçue / Offre en cours (English/Purchase)
+  | 'Offre'            // Offre en cours (French/Rental)
   | 'Deposit'          // Compromis signé / Dépôt reçu
   | 'Signed'           // Mandat signé / Signature finale
   | 'Gagné'            // Vente finalisée / Conclus
@@ -33,6 +34,7 @@ const StatusBadge = ({ status, className }: StatusBadgeProps) => {
         return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300';
       case 'Visit':
         return 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300';
+      case 'Offer':
       case 'Offre':
         return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
       case 'Deposit':

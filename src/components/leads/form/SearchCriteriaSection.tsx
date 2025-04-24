@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, MauritiusRegion } from '@/types/lead';
 import FormSection from './FormSection';
@@ -7,10 +8,9 @@ import BuyerInfoSection from './sections/BuyerInfoSection';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import MultiSelectButtons from '../../leads/form/MultiSelectButtons';
-import { MapPin } from 'lucide-react';
 
 interface SearchCriteriaSectionProps {
   formData: LeadDetailed;
@@ -47,9 +47,11 @@ const SearchCriteriaSection = ({
   countries,
   handleCountryChange
 }: SearchCriteriaSectionProps) => {
+  // Handle nationality auto-completion when country changes
   const handleCountryChangeWithNationality = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     handleCountryChange(e);
     
+    // If nationality is empty, try to derive it from country
     if (!formData.nationality) {
       const selectedCountry = e.target.value;
       const nationality = deriveNationalityFromCountry(selectedCountry);
@@ -80,34 +82,17 @@ const SearchCriteriaSection = ({
             
             <TabsContent value="property" className="space-y-6">
               <PropertyDetailsSection
-                formData={{
-                  propertyTypes: formData.propertyTypes as PropertyType[],
-                  views: formData.views as ViewType[],
-                  amenities: formData.amenities as Amenity[],
-                  country: formData.country,
-                  desiredLocation: formData.desiredLocation,
-                  url: formData.url,
-                  livingArea: formData.livingArea,
-                  landArea: formData.landArea
-                }}
+                formData={formData}
                 handleInputChange={handleInputChange}
-                handleMultiSelectToggle={(name, value) => {
-                  handleMultiSelectToggle(name as keyof LeadDetailed, value as any);
-                }}
+                handleNumberChange={handleNumberChange}
+                handleMultiSelectToggle={handleMultiSelectToggle}
                 propertyTypes={propertyTypes}
                 viewTypes={viewTypes}
                 amenities={amenities}
                 onExtractUrl={onExtractUrl}
                 extractLoading={extractLoading}
-                handleCountryChange={(value) => {
-                  const syntheticEvent = {
-                    target: {
-                      name: 'country',
-                      value
-                    }
-                  } as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
-                  handleCountryChangeWithNationality(syntheticEvent);
-                }}
+                countries={countries}
+                handleCountryChange={handleCountryChangeWithNationality}
               />
               {formData.country === 'Mauritius' && (
                 <div className="space-y-2">
@@ -126,24 +111,6 @@ const SearchCriteriaSection = ({
                   />
                 </div>
               )}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    Pin Location
-                  </Label>
-                  <Input
-                    name="mapCoordinates"
-                    value={formData.mapCoordinates || ''}
-                    onChange={handleInputChange}
-                    placeholder="Collez le lien Google Maps ici"
-                    className="font-futura"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Copiez-collez le lien Google Maps de la propriété
-                  </p>
-                </div>
-              </div>
             </TabsContent>
             
             <TabsContent value="purchase" className="space-y-6 py-2">

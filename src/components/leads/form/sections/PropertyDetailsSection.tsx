@@ -1,120 +1,236 @@
-
 import React from 'react';
-import { Label } from '@/components/ui/label';
-import FormField from '../FormField';
-import { PropertyType, ViewType, Amenity } from '@/types/lead';
+import { LeadDetailed, PropertyType, ViewType, Amenity, Country } from '@/types/lead';
+import FormInput from '../FormInput';
 import MultiSelectButtons from '../MultiSelectButtons';
 import PropertyUrlField from '../PropertyUrlField';
-import LocationSearchSection from './LocationSearchSection';
+import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
+import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
+import CustomTagInput from '../CustomTagInput';
+import OwnerPropertyDetailsSection from './OwnerPropertyDetailsSection';
 
 interface PropertyDetailsSectionProps {
-  formData: {
-    propertyTypes?: PropertyType[];
-    views?: ViewType[];
-    amenities?: Amenity[];
-    country?: string;
-    desiredLocation?: string;
-    url?: string;
-    livingArea?: string;
-    landArea?: string;
-  };
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleMultiSelectToggle: (name: string, value: PropertyType | ViewType | Amenity) => void;
+  formData: LeadDetailed;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  handleNumberChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleMultiSelectToggle: <T extends string>(name: keyof LeadDetailed, value: T) => void;
   propertyTypes: PropertyType[];
   viewTypes: ViewType[];
   amenities: Amenity[];
   onExtractUrl?: (url: string) => void;
   extractLoading?: boolean;
-  handleCountryChange: (value: string) => void;
+  countries: Country[];
+  handleCountryChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
 }
 
-const PropertyDetailsSection: React.FC<PropertyDetailsSectionProps> = ({
+const PropertyDetailsSection = ({
   formData,
   handleInputChange,
+  handleNumberChange,
   handleMultiSelectToggle,
   propertyTypes,
   viewTypes,
   amenities,
   onExtractUrl,
-  extractLoading,
-  handleCountryChange,
-}) => {
-  const handleLocationChange = (value: string) => {
+  extractLoading = false,
+  countries,
+  handleCountryChange
+}: PropertyDetailsSectionProps) => {
+  if (formData.pipelineType === 'owners') {
+    return (
+      <OwnerPropertyDetailsSection
+        formData={formData}
+        handleInputChange={handleInputChange}
+        handleMultiSelectToggle={handleMultiSelectToggle}
+      />
+    );
+  }
+
+  const getLocations = () => {
+    if (!formData.country) return [];
+    
+    const locations = LOCATIONS_BY_COUNTRY[formData.country as keyof typeof LOCATIONS_BY_COUNTRY];
+    if (locations) {
+      return locations.map(location => ({
+        value: location,
+        label: location
+      }));
+    }
+    
+    return [];
+  };
+
+  const handleExtractUrl = (url: string) => {
+    if (onExtractUrl) {
+      onExtractUrl(url);
+    }
+  };
+
+  const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
+  
+  const getSelectedBedrooms = () => {
+    if (!formData.bedrooms) return [];
+    
+    if (Array.isArray(formData.bedrooms)) {
+      return formData.bedrooms.map(num => {
+        return num >= 8 ? "8+" : num.toString();
+      });
+    }
+    
+    const value = formData.bedrooms;
+    return [value >= 8 ? "8+" : value.toString()];
+  };
+  
+  const handleBedroomToggle = (value: string) => {
+    const numValue = value === "8+" ? 8 : parseInt(value);
+    
+    const currentBedrooms = Array.isArray(formData.bedrooms) 
+      ? [...formData.bedrooms] 
+      : formData.bedrooms ? [formData.bedrooms] : [];
+    
+    const newBedrooms = currentBedrooms.includes(numValue)
+      ? currentBedrooms.filter(b => b !== numValue)
+      : [...currentBedrooms, numValue];
+    
     const syntheticEvent = {
       target: {
-        name: 'desiredLocation',
-        value
+        name: 'bedrooms',
+        value: newBedrooms.length ? newBedrooms : undefined
+      }
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(syntheticEvent);
+    console.log("Updated bedrooms:", newBedrooms);
+  };
+
+  const handleBudgetChange = (type: 'min' | 'max', value: string) => {
+    const fieldName = type === 'min' ? 'budgetMin' : 'budget';
+    
+    const syntheticEvent = {
+      target: {
+        name: fieldName,
+        value: value
       }
     } as React.ChangeEvent<HTMLInputElement>;
+    
     handleInputChange(syntheticEvent);
   };
 
+  const handleCurrencyChange = (value: string) => {
+    const syntheticEvent = {
+      target: {
+        name: 'currency',
+        value
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(syntheticEvent);
+  };
+
+  const handleAmenitiesChange = (newAmenities: string[]) => {
+    const syntheticEvent = {
+      target: {
+        name: 'amenities',
+        value: newAmenities
+      }
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(syntheticEvent);
+  };
+
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleInputChange(e);
+  };
+
+  const handlePropertyTypeChange = (value: PropertyType) => {
+    handleMultiSelectToggle('propertyTypes', value);
+  };
+
+  const handleViewTypeChange = (value: string) => {
+    handleMultiSelectToggle('views', value as ViewType);
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Label>Types de bien</Label>
+    <div className="space-y-4">
+      <PropertyUrlField 
+        value={formData.url || ''} 
+        onChange={handleUrlChange} 
+        onExtract={handleExtractUrl}
+        isLoading={extractLoading}
+      />
+
+      <FormInput
+        label="Pays recherché"
+        name="country"
+        type="select"
+        value={formData.country || ''}
+        onChange={handleCountryChange}
+        options={countries.map(country => ({ value: country, label: country }))}
+        placeholder="Pays de recherche"
+      />
+
+      <FormInput
+        label="Localisation souhaitée"
+        name="desiredLocation"
+        type="select"
+        value={formData.desiredLocation || ''}
+        onChange={handleInputChange}
+        options={getLocations()}
+        placeholder="Localisation souhaitée"
+      />
+
+      <div className="pt-2">
+        <h4 className="text-sm font-medium mb-3">Type de propriété</h4>
         <MultiSelectButtons
           options={propertyTypes}
-          selectedValues={formData.propertyTypes || []}
-          onToggle={(value) => handleMultiSelectToggle('propertyTypes', value as PropertyType)}
+          selectedValues={Array.isArray(formData.propertyTypes) ? formData.propertyTypes : []}
+          onChange={handlePropertyTypeChange}
         />
       </div>
 
-      <LocationSearchSection
-        country={formData.country || ''}
-        desiredLocation={formData.desiredLocation || ''}
-        onCountryChange={(value) => {
-          const syntheticEvent = {
-            target: {
-              name: 'country',
-              value
-            }
-          } as React.ChangeEvent<HTMLInputElement>;
-          handleCountryChange(value);
-        }}
-        onLocationChange={handleLocationChange}
-      />
-
-      {formData.url !== undefined && (
-        <PropertyUrlField
-          value={formData.url}
-          onChange={handleInputChange}
-          onExtract={onExtractUrl}
-          isLoading={extractLoading}
+      <div className="pt-2">
+        <h4 className="text-sm font-medium mb-3">Nombre de chambres recherchées</h4>
+        <MultiSelectButtons
+          options={bedroomOptions}
+          selectedValues={getSelectedBedrooms()}
+          onChange={handleBedroomToggle}
+          specialOption="8+"
         />
-      )}
+      </div>
 
-      <FormField
-        label="Surface habitable"
+      <FormInput
+        label="Surface habitable (m²)"
+        name="livingArea"
         value={formData.livingArea || ''}
         onChange={handleInputChange}
-        placeholder="m²"
-        fieldName="livingArea"
+        placeholder="Surface habitable approximative"
       />
 
-      <FormField
-        label="Surface terrain"
-        value={formData.landArea || ''}
-        onChange={handleInputChange}
-        placeholder="m²"
-        fieldName="landArea"
-      />
+      <div className="pt-2">
+        <BudgetFilter 
+          minBudget={formData.budgetMin || ''}
+          maxBudget={formData.budget || ''}
+          onBudgetChange={handleBudgetChange}
+          currency={formData.currency as string || 'EUR'}
+          onCurrencyChange={handleCurrencyChange}
+        />
+      </div>
 
-      <div className="space-y-2">
-        <Label>Vue</Label>
+      <div className="pt-2">
+        <h4 className="text-sm font-medium mb-3">Vue souhaitée</h4>
         <MultiSelectButtons
           options={viewTypes}
           selectedValues={formData.views || []}
-          onToggle={(value) => handleMultiSelectToggle('views', value as ViewType)}
+          onChange={handleViewTypeChange}
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>Prestations</Label>
-        <MultiSelectButtons
-          options={amenities}
-          selectedValues={formData.amenities || []}
-          onToggle={(value) => handleMultiSelectToggle('amenities', value as Amenity)}
+      <div className="pt-2">
+        <h4 className="text-sm font-medium mb-3">Commodités souhaitées</h4>
+        <CustomTagInput
+          tags={formData.amenities || []}
+          onChange={handleAmenitiesChange}
+          placeholder="Ajouter une commodité..."
+          predefinedOptions={amenities}
         />
       </div>
     </div>

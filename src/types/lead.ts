@@ -1,3 +1,4 @@
+
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -228,6 +229,4 @@ export interface LeadDetailed {
   wineStorageCapacity?: string;
   accessibility?: string;
   exposure?: string;
-
-  mapCoordinates?: string;
 }
