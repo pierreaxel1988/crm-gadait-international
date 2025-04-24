@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
@@ -40,9 +39,9 @@ export const useLeadCreation = () => {
         
         if (data) {
           setCurrentUserTeamId(data.id);
-          if (!isAdmin) {
-            setAssignedAgent(data.id);
-          }
+          console.log("Current user team ID:", data.id);
+          // Nous ne définissons plus automatiquement assignedAgent ici
+          // parce que nous voulons permettre l'attribution à n'importe quel agent
         }
       } catch (error) {
         console.error("Error fetching current user team ID:", error);
@@ -87,7 +86,6 @@ export const useLeadCreation = () => {
       delete newLeadData.createdAt;
       
       // Conserver l'assignation définie par l'utilisateur
-      // puisque RLS est désactivé, pas besoin de vérifier les permissions
       if (data.assignedTo) {
         newLeadData.assignedTo = data.assignedTo;
       } else if (assignedAgent) {
@@ -108,6 +106,7 @@ export const useLeadCreation = () => {
         }];
       }
       
+      console.log("Creating lead with data:", newLeadData);
       const createdLead = await createLead(newLeadData);
       
       if (createdLead) {

@@ -30,7 +30,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
         adminAssignedAgent={adminAssignedAgent}
         isSubmitting={isSubmitting}
         currentUserTeamId={currentUserTeamId}
-        enforceRlsRules={enforceRlsRules} // Pass the prop to LeadForm
+        enforceRlsRules={enforceRlsRules} // Pass the prop to LeadForm 
       />
     </div>
   );

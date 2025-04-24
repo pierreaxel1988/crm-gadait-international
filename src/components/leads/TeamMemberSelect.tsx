@@ -44,6 +44,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMemberName, setSelectedMemberName] = useState<string | undefined>();
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -72,6 +73,8 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   useEffect(() => {
     const fetchTeamMembers = async () => {
       setIsLoading(true);
+      setError(null);
+      
       try {
         const { data, error } = await supabase
           .from('team_members')
@@ -82,26 +85,33 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
           throw error;
         }
 
-        setTeamMembers(data || []);
-        
-        if (autoSelectPierreAxel && !value && data) {
-          const pierreAxel = data.find(member => 
-            member.name.toLowerCase().includes('pierre-axel gadait'));
+        if (data && data.length > 0) {
+          setTeamMembers(data);
+          console.log("Team members loaded:", data.length, data);
           
-          if (pierreAxel) {
-            onChange(pierreAxel.id);
-            setSelectedMemberName(pierreAxel.name);
+          if (autoSelectPierreAxel && !value && data) {
+            const pierreAxel = data.find(member => 
+              member.name.toLowerCase().includes('pierre-axel gadait'));
+            
+            if (pierreAxel) {
+              onChange(pierreAxel.id);
+              setSelectedMemberName(pierreAxel.name);
+            }
           }
-        }
-        
-        if (value && data) {
-          const selectedMember = data.find(member => member.id === value);
-          if (selectedMember) {
-            setSelectedMemberName(selectedMember.name);
+          
+          if (value && data) {
+            const selectedMember = data.find(member => member.id === value);
+            if (selectedMember) {
+              setSelectedMemberName(selectedMember.name);
+            }
           }
+        } else {
+          console.log("No team members found or empty result");
+          setError("Aucun membre d'équipe n'a été trouvé");
         }
       } catch (error) {
         console.error('Erreur lors du chargement des commerciaux:', error);
+        setError("Impossible de charger la liste des commerciaux");
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -142,7 +152,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
     onChange(newValue === "non_assigné" ? undefined : newValue);
   };
 
-  // Since enforceRlsRules is always false by default, we don't need to restrict the selection
+  // Since enforceRlsRules is set to false by default, we don't need to restrict the selection
   const shouldDisableSelect = disabled || (enforceRlsRules && !isAdmin && !!currentUserId);
 
   return (
@@ -180,6 +190,16 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       {selectedMemberName && (
         <div className="text-sm text-green-600 mt-1">
           Agent sélectionné: {selectedMemberName}
+        </div>
+      )}
+      {error && (
+        <div className="text-xs text-red-600 mt-1">
+          {error}
+        </div>
+      )}
+      {teamMembers.length === 0 && !isLoading && !error && (
+        <div className="text-xs text-amber-600 mt-1">
+          Aucun commercial disponible dans la liste.
         </div>
       )}
       {enforceRlsRules && !isAdmin && currentUserId && (

@@ -29,6 +29,10 @@ const LeadNew: React.FC = () => {
     navigate(-1);
   }, [navigate]);
 
+  console.log("LeadNew render - currentUserTeamId:", currentUserTeamId);
+  console.log("LeadNew render - isAdmin:", isAdmin);
+  console.log("LeadNew render - assignedAgent:", assignedAgent);
+
   return (
     <div className="p-4 md:p-6 space-y-6">
       <LeadNewHeader onBack={handleCancel} />
