@@ -15,6 +15,7 @@ export function useLeadDetail(id: string | undefined) {
   const [isCallTracking, setIsCallTracking] = useState(false);
   const [callStartTime, setCallStartTime] = useState<Date | null>(null);
   const [callType, setCallType] = useState<'phone' | 'whatsapp'>('phone');
+  const [isSilentSave, setIsSilentSave] = useState(false);
 
   const fetchLead = useCallback(async () => {
     if (id) {
@@ -40,7 +41,7 @@ export function useLeadDetail(id: string | undefined) {
     fetchLead();
   }, [fetchLead]);
 
-  const handleSave = async () => {
+  const handleSave = async (silent = false) => {
     if (!lead) return;
     
     try {
@@ -56,10 +57,12 @@ export function useLeadDetail(id: string | undefined) {
       });
       
       if (updatedLead) {
-        toast({
-          title: "Lead mis à jour",
-          description: "Les modifications ont été enregistrées avec succès."
-        });
+        if (!silent) {
+          toast({
+            title: "Lead mis à jour",
+            description: "Les modifications ont été enregistrées avec succès."
+          });
+        }
         
         // Mettre à jour le lead avec les données retournées par l'API pour assurer la cohérence
         setLead(updatedLead);
@@ -84,7 +87,8 @@ export function useLeadDetail(id: string | undefined) {
       }
       
       const timer = setTimeout(() => {
-        handleSave();
+        // Use silent save for automatic saves
+        handleSave(true);
       }, 2000);
       
       setAutoSaveTimer(timer);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LeadDetailed, Currency, PropertyState, PropertyType, ViewType, MauritiusRegion } from '@/types/lead';
+import { LeadDetailed, Currency, PropertyState, PropertyType, ViewType, MauritiusRegion, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -13,15 +13,18 @@ import MultiSelectButtons from '../../form/MultiSelectButtons';
 import FormInput from '../../form/FormInput';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
+
 interface SearchCriteriaSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
+
 const SearchCriteriaSection = ({
   lead,
   onDataChange
 }: SearchCriteriaSectionProps) => {
   const [activeTab, setActiveTab] = useState('budget');
+  
   return <div className="space-y-4">
       <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Critères de la Propriété</h2>
       
@@ -50,10 +53,12 @@ const SearchCriteriaSection = ({
         </ScrollArea>}
     </div>;
 };
+
 interface OwnerPriceFieldsProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
+
 const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({
   lead,
   onDataChange
@@ -135,6 +140,7 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({
         </>}
     </div>;
 };
+
 const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
   lead,
   onDataChange
@@ -155,6 +161,7 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
       </div>
     </div>;
 };
+
 const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({
   lead,
   onDataChange
@@ -550,10 +557,12 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({
       </div>
     </div>;
 };
+
 interface BuyerCriteriaSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
+
 const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
   lead,
   onDataChange
@@ -562,9 +571,10 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
     const currentTypes = lead.propertyTypes || [];
     const updatedTypes = currentTypes.includes(propertyType) ? currentTypes.filter(type => type !== propertyType) : [...currentTypes, propertyType];
     onDataChange({
-      propertyTypes: updatedTypes
+      propertyTypes: updatedTypes as PropertyType[]
     });
   };
+  
   const handleBedroomToggle = (value: string) => {
     const numValue = value === "8+" ? 8 : parseInt(value);
     const currentBedrooms = Array.isArray(lead.bedrooms) ? [...lead.bedrooms] : lead.bedrooms ? [lead.bedrooms] : [];
@@ -573,13 +583,15 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
       bedrooms: newBedrooms.length ? newBedrooms : undefined
     });
   };
+  
   const handleViewToggle = (view: string) => {
     const currentViews = lead.views || [];
     const updatedViews = currentViews.includes(view) ? currentViews.filter(v => v !== view) : [...currentViews, view];
     onDataChange({
-      views: updatedViews
+      views: updatedViews as ViewType[]
     });
   };
+  
   const handleAmenityToggle = (amenity: string) => {
     const currentAmenities = lead.amenities || [];
     const updatedAmenities = currentAmenities.includes(amenity) ? currentAmenities.filter(a => a !== amenity) : [...currentAmenities, amenity];
@@ -587,6 +599,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
       amenities: updatedAmenities
     });
   };
+  
   const handleBudgetChange = (type: 'min' | 'max', value: string) => {
     if (type === 'min') {
       onDataChange({
@@ -598,16 +611,19 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
       });
     }
   };
+  
   const handleCurrencyChange = (value: string) => {
     onDataChange({
       currency: value as Currency
     });
   };
+  
   const handleLocationChange = (location: string) => {
     onDataChange({
       desiredLocation: location
     });
   };
+  
   const getSelectedBedrooms = () => {
     if (!lead.bedrooms) return [];
     if (Array.isArray(lead.bedrooms)) {
@@ -618,10 +634,12 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
     const value = lead.bedrooms;
     return [value >= 8 ? "8+" : value.toString()];
   };
+  
   const propertyTypesList: PropertyType[] = ["Villa", "Appartement", "Penthouse", "Maison", "Duplex", "Chalet", "Terrain", "Manoir", "Maison de ville", "Château", "Local commercial", "Commercial", "Hotel", "Vignoble", "Autres"];
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
   const viewTypesList: ViewType[] = ["Mer", "Montagne", "Golf", "Autres"];
   const amenitiesList = ["Piscine", "Terrasse", "Balcon", "Jardin", "Parking", "Ascenseur", "Sécurité", "Climatisation"];
+  
   return <div className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
@@ -696,8 +714,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
           <div className="space-y-2">
             <Label htmlFor="purchaseTimeframe" className="text-sm font-medium">Délai d'acquisition</Label>
             <select id="purchaseTimeframe" value={lead.purchaseTimeframe || ''} onChange={e => onDataChange({
-            purchaseTimeframe: e.target.value
-          })} className="w-full p-2 border border-gray-300 rounded font-futura">
+              purchaseTimeframe: e.target.value as PurchaseTimeframe
+            })} className="w-full p-2 border border-gray-300 rounded font-futura">
               <option value="">Sélectionner</option>
               <option value="Immédiat">Immédiat</option>
               <option value="1-3 mois">1-3 mois</option>
@@ -712,8 +730,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
           <div className="space-y-2">
             <Label htmlFor="financingMethod" className="text-sm font-medium">Mode de financement</Label>
             <select id="financingMethod" value={lead.financingMethod || ''} onChange={e => onDataChange({
-            financingMethod: e.target.value
-          })} className="w-full p-2 border border-gray-300 rounded font-futura">
+              financingMethod: e.target.value as FinancingMethod
+            })} className="w-full p-2 border border-gray-300 rounded font-futura">
               <option value="">Sélectionner</option>
               <option value="Cash">Cash</option>
               <option value="Crédit">Crédit</option>
@@ -726,8 +744,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
           <div className="space-y-2">
             <Label htmlFor="propertyUse" className="text-sm font-medium">Utilisation prévue</Label>
             <select id="propertyUse" value={lead.propertyUse || ''} onChange={e => onDataChange({
-            propertyUse: e.target.value
-          })} className="w-full p-2 border border-gray-300 rounded font-futura">
+              propertyUse: e.target.value as PropertyUse
+            })} className="w-full p-2 border border-gray-300 rounded font-futura">
               <option value="">Sélectionner</option>
               <option value="Résidence principale">Résidence principale</option>
               <option value="Résidence secondaire">Résidence secondaire</option>
@@ -738,4 +756,5 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
       </div>
     </div>;
 };
+
 export default SearchCriteriaSection;
