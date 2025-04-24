@@ -203,13 +203,7 @@ const LeadDetailMobile = () => {
             </TabsContent>
             
             <TabsContent value="criteria" className="mt-1 animate-[fade-in_0.2s_ease-out]">
-              <SearchCriteriaSection 
-                lead={lead} 
-                onDataChange={(e) => {
-                  const { name, value } = e.target;
-                  handleDataChange({ [name]: value });
-                }} 
-              />
+              <SearchCriteriaSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
             
             <TabsContent value="status" className="mt-1 animate-[fade-in_0.2s_ease-out]">
