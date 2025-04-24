@@ -82,17 +82,34 @@ const SearchCriteriaSection = ({
             
             <TabsContent value="property" className="space-y-6">
               <PropertyDetailsSection
-                formData={formData}
+                formData={{
+                  propertyTypes: formData.propertyTypes as PropertyType[],
+                  views: formData.views as ViewType[],
+                  amenities: formData.amenities as Amenity[],
+                  country: formData.country,
+                  desiredLocation: formData.desiredLocation,
+                  url: formData.url,
+                  livingArea: formData.livingArea,
+                  landArea: formData.landArea
+                }}
                 handleInputChange={handleInputChange}
-                handleNumberChange={handleNumberChange}
-                handleMultiSelectToggle={handleMultiSelectToggle}
+                handleMultiSelectToggle={(name, value) => {
+                  handleMultiSelectToggle(name as keyof LeadDetailed, value as any);
+                }}
                 propertyTypes={propertyTypes}
                 viewTypes={viewTypes}
                 amenities={amenities}
                 onExtractUrl={onExtractUrl}
                 extractLoading={extractLoading}
-                countries={countries}
-                handleCountryChange={handleCountryChangeWithNationality}
+                handleCountryChange={(value) => {
+                  const syntheticEvent = {
+                    target: {
+                      name: 'country',
+                      value
+                    }
+                  } as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
+                  handleCountryChangeWithNationality(syntheticEvent);
+                }}
               />
               {formData.country === 'Mauritius' && (
                 <div className="space-y-2">
