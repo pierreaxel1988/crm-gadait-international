@@ -64,7 +64,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         return;
       }
       
-      // Récupérer tous les membres d'équipe
+      // Récupérer tous les membres d'équipe sans filtre sur le rôle
       const { data, error: fetchError } = await supabase
         .from('team_members')
         .select('id, name, email, is_admin')

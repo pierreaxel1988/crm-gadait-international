@@ -6,6 +6,7 @@ import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import AgentFilterButton from '@/components/actions/filters/AgentFilterButton';
 
 interface TeamMember {
   id: string;
@@ -61,7 +62,7 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
             });
           }
         } else {
-          // Admin - charge tous les membres
+          // Admin ou autre - charge tous les membres sans filtrer sur le rôle
           const { data, error } = await supabase
             .from('team_members')
             .select('id, name')
@@ -187,15 +188,13 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
             </Button>
           )}
           {teamMembers.map((member) => (
-            <Button
+            <AgentFilterButton
               key={member.id}
-              variant={assignedTo === member.id ? "default" : "outline"}
-              size="sm"
-              className="text-xs"
+              memberId={member.id}
+              memberName={member.name}
+              isSelected={assignedTo === member.id}
               onClick={() => handleAgentSelect(member.id)}
-            >
-              {member.name}
-            </Button>
+            />
           ))}
           {teamMembers.length === 0 && (
             <div className="col-span-2 text-xs text-amber-600 p-2">

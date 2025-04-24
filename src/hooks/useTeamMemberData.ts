@@ -34,6 +34,7 @@ export const useTeamMemberData = (providedMembers: TeamMember[]) => {
         console.log("[useTeamMemberData] Loading team members");
         
         if (user?.email) {
+          // Récupération des données de l'utilisateur courant
           const { data: userData, error: userError } = await supabase
             .from('team_members')
             .select('id, name, role, is_admin')
@@ -50,19 +51,18 @@ export const useTeamMemberData = (providedMembers: TeamMember[]) => {
             const userIsAdmin = userData.is_admin || userData.role === 'admin';
             setIsUserAdmin(userIsAdmin);
             
-            if (isUserCommercial && !userIsAdmin) {
-              setLocalTeamMembers([userData]);
-            } else {
-              const { data, error } = await supabase
-                .from('team_members')
-                .select('id, name, role, is_admin')
-                .order('name');
-                
-              if (error) {
-                throw error;
-              } else if (data) {
-                setLocalTeamMembers(data);
-              }
+            // Pour tous les cas, récupérer tous les membres de l'équipe
+            // Suppression du filtre restrictif pour les commerciaux
+            const { data, error } = await supabase
+              .from('team_members')
+              .select('id, name, role, is_admin')
+              .order('name');
+              
+            if (error) {
+              throw error;
+            } else if (data) {
+              console.log("[useTeamMemberData] All team members loaded:", data.length);
+              setLocalTeamMembers(data);
             }
           } else {
             console.warn("[useTeamMemberData] User not found:", user.email);
@@ -71,6 +71,18 @@ export const useTeamMemberData = (providedMembers: TeamMember[]) => {
               title: "Erreur d'identification",
               description: "Votre compte utilisateur n'est pas correctement configuré.",
             });
+            
+            // Même si l'utilisateur n'est pas trouvé, on charge quand même tous les membres
+            const { data, error } = await supabase
+              .from('team_members')
+              .select('id, name, role, is_admin')
+              .order('name');
+              
+            if (error) {
+              throw error;
+            } else if (data) {
+              setLocalTeamMembers(data);
+            }
           }
         }
       } catch (err) {

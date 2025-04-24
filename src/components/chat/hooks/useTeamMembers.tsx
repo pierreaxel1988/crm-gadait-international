@@ -29,14 +29,11 @@ export const useTeamMembers = () => {
         }
         
         // Toujours récupérer tous les membres d'équipe sans filtre
-        let query = supabase
+        const { data, error: fetchError } = await supabase
           .from('team_members')
           .select('id, name, email')
           .order('name');
         
-        // Exécuter la requête finale
-        const { data, error: fetchError } = await query;
-
         if (fetchError) {
           console.error('[useTeamMembers] Erreur Supabase:', fetchError);
           setError(new Error(`Erreur lors du chargement des membres: ${fetchError.message}`));
