@@ -221,55 +221,55 @@ export function useLeadDetail(id: string | undefined) {
         .select('id')
         .ilike('name', '%jacques%')
         .single();
-      
-      if (error) {
-        console.error('Error fetching Jacques ID:', error);
-        return null;
-      }
-      
-      return data?.id || null;
-    } catch (error) {
-      console.error('Unexpected error fetching Jacques ID:', error);
+    
+    if (error) {
+      console.error('Error fetching Jacques ID:', error);
       return null;
     }
-  };
-
-  const handleReassignToJacques = async () => {
-    if (!lead) return;
-
-    const jacquesId = await fetchJacquesId();
     
-    if (!jacquesId) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de trouver l'ID de Jacques."
-      });
-      return;
-    }
+    return data?.id || null;
+  } catch (error) {
+    console.error('Unexpected error fetching Jacques ID:', error);
+    return null;
+  }
+};
 
-    try {
-      const updatedLead = await updateLead({
-        ...lead,
-        assignedTo: jacquesId
-      });
-      
-      if (updatedLead) {
-        setLead(updatedLead);
-        toast({
-          title: "Lead réassigné",
-          description: "Le lead a été réassigné à Jacques avec succès."
-        });
-      }
-    } catch (error) {
-      console.error("Error reassigning lead:", error);
+const handleReassignToJacques = async () => {
+  if (!lead) return;
+
+  const jacquesId = await fetchJacquesId();
+  
+  if (!jacquesId) {
+    toast({
+      variant: "destructive",
+      title: "Erreur",
+      description: "Impossible de trouver l'ID de Jacques."
+    });
+    return;
+  }
+
+  try {
+    const updatedLead = await updateLead({
+      ...lead,
+      assignedTo: jacquesId
+    });
+    
+    if (updatedLead) {
+      setLead(updatedLead);
       toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de réassigner le lead à Jacques."
+        title: "Lead réassigné",
+        description: "Le lead a été réassigné à Jacques avec succès."
       });
     }
-  };
+  } catch (error) {
+    console.error("Error reassigning lead:", error);
+    toast({
+      variant: "destructive",
+      title: "Erreur",
+      description: "Impossible de réassigner le lead à Jacques."
+    });
+  }
+};
 
   return {
     lead,
