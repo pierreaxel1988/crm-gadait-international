@@ -12,6 +12,7 @@ interface LeadFormWrapperProps {
   currentUserTeamId?: string | undefined;
   isAdmin?: boolean;
   lead?: LeadDetailed;
+  enforceRlsRules?: boolean;
 }
 
 const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
@@ -21,6 +22,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   isSubmitting,
   currentUserTeamId,
   lead,
+  enforceRlsRules = true, // Default to true for RLS enforcement
 }) => {
   const { isAdmin } = useAuth();
   
@@ -28,6 +30,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   console.log("[LeadFormWrapper] adminAssignedAgent:", adminAssignedAgent);
   console.log("[LeadFormWrapper] currentUserTeamId:", currentUserTeamId);
   console.log("[LeadFormWrapper] Lead ID:", lead?.id);
+  console.log("[LeadFormWrapper] enforceRlsRules:", enforceRlsRules);
   
   return (
     <div className="luxury-card p-6 border-loro-sand">
@@ -38,7 +41,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
         adminAssignedAgent={adminAssignedAgent}
         isSubmitting={isSubmitting}
         currentUserTeamId={currentUserTeamId}
-        enforceRlsRules={true} // Always enforce RLS rules now that they're implemented
+        enforceRlsRules={enforceRlsRules}
       />
     </div>
   );
