@@ -1,13 +1,11 @@
 
 import React from 'react';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import FormField from '../FormField';
 import { PropertyType, ViewType, Amenity } from '@/types/lead';
 import MultiSelectButtons from '../MultiSelectButtons';
 import PropertyUrlField from '../PropertyUrlField';
 import LocationSearchSection from './LocationSearchSection';
-import { Country } from '@/types/lead';
 
 interface PropertyDetailsSectionProps {
   formData: {
@@ -21,11 +19,10 @@ interface PropertyDetailsSectionProps {
     landArea?: string;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleMultiSelectToggle: <T extends string>(name: keyof any, value: T) => void;
+  handleMultiSelectToggle: (name: string, value: PropertyType | ViewType | Amenity) => void;
   propertyTypes: PropertyType[];
   viewTypes: ViewType[];
   amenities: Amenity[];
-  countries: Country[];
   onExtractUrl?: (url: string) => void;
   extractLoading?: boolean;
   handleCountryChange: (value: string) => void;
@@ -42,9 +39,18 @@ const PropertyDetailsSection: React.FC<PropertyDetailsSectionProps> = ({
   extractLoading,
   handleCountryChange,
 }) => {
+  const handleLocationChange = (value: string) => {
+    const syntheticEvent = {
+      target: {
+        name: 'desiredLocation',
+        value
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    handleInputChange(syntheticEvent);
+  };
+
   return (
     <div className="space-y-6">
-      {/* Types de bien */}
       <div className="space-y-2">
         <Label>Types de bien</Label>
         <MultiSelectButtons
@@ -54,49 +60,46 @@ const PropertyDetailsSection: React.FC<PropertyDetailsSectionProps> = ({
         />
       </div>
 
-      {/* Location Search Section */}
       <LocationSearchSection
         country={formData.country || ''}
         desiredLocation={formData.desiredLocation || ''}
-        onCountryChange={handleCountryChange}
-        onLocationChange={(value) => {
-          const e = {
+        onCountryChange={(value) => {
+          const syntheticEvent = {
             target: {
-              name: 'desiredLocation',
+              name: 'country',
               value
             }
           } as React.ChangeEvent<HTMLInputElement>;
-          handleInputChange(e);
+          handleCountryChange(value);
         }}
+        onLocationChange={handleLocationChange}
       />
 
-      {/* Property URL Field */}
-      <PropertyUrlField
-        url={formData.url || ''}
-        handleInputChange={handleInputChange}
-        onExtract={onExtractUrl}
-        isLoading={extractLoading}
-      />
+      {formData.url !== undefined && (
+        <PropertyUrlField
+          value={formData.url}
+          onChange={handleInputChange}
+          onExtract={onExtractUrl}
+          isLoading={extractLoading}
+        />
+      )}
 
-      {/* Living Area */}
       <FormField
         label="Surface habitable"
-        name="livingArea"
         value={formData.livingArea || ''}
         onChange={handleInputChange}
         placeholder="m²"
+        fieldName="livingArea"
       />
 
-      {/* Land Area */}
       <FormField
         label="Surface terrain"
-        name="landArea"
         value={formData.landArea || ''}
         onChange={handleInputChange}
         placeholder="m²"
+        fieldName="landArea"
       />
 
-      {/* Vue */}
       <div className="space-y-2">
         <Label>Vue</Label>
         <MultiSelectButtons
@@ -106,7 +109,6 @@ const PropertyDetailsSection: React.FC<PropertyDetailsSectionProps> = ({
         />
       </div>
 
-      {/* Prestations */}
       <div className="space-y-2">
         <Label>Prestations</Label>
         <MultiSelectButtons

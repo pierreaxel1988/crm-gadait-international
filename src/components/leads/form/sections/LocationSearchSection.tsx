@@ -9,8 +9,8 @@ import { MapPin } from 'lucide-react';
 interface LocationSearchSectionProps {
   country: string;
   desiredLocation: string;
-  onCountryChange: (country: string) => void;
-  onLocationChange: (location: string) => void;
+  onCountryChange: (value: string) => void;
+  onLocationChange: (value: string) => void;
 }
 
 const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
@@ -19,7 +19,6 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
   onCountryChange,
   onLocationChange,
 }) => {
-  // Filter locations based on selected country
   const getFilteredLocations = (searchTerm: string) => {
     if (!country) {
       return getAllLocations()
@@ -37,7 +36,6 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Country Selection */}
       <div className="space-y-2">
         <Label className="text-sm">Pays</Label>
         <SmartSearch
@@ -57,7 +55,6 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
         />
       </div>
 
-      {/* Location Selection */}
       <div className="space-y-2">
         <Label className="text-sm font-medium mb-2 flex items-center gap-2">
           <MapPin className="h-4 w-4" /> Localisation
