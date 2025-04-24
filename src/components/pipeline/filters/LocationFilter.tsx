@@ -13,7 +13,9 @@ interface LocationFilterProps {
 const LocationFilter = ({ location, onLocationChange, country }: LocationFilterProps) => {
   // Get locations based on selected country
   const getFilteredLocations = (searchTerm: string) => {
+    // If a country is selected, only show locations from that country
     const locations = country ? getLocationsByCountry(country) : getAllLocations();
+    
     return locations
       .filter(loc => 
         loc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
