@@ -31,7 +31,7 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
         // Requête sans filtre pour récupérer tous les membres
         const { data, error } = await supabase
           .from('team_members')
-          .select('id, name')
+          .select('id, name, email')
           .order('name');
           
         if (error) {
@@ -42,14 +42,20 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
           
           // Pour les commerciaux, identifier leur propre ID
           if (isCommercial && !isAdmin && user?.email) {
-            const currentUser = data.find(member => member.email === user.email);
-            if (currentUser) {
-              setCurrentUserTeamId(currentUser.id);
-              console.log("[AgentFilterButtons] ID du commercial:", currentUser.id);
+            // Instead of directly comparing email, we need to fetch the current user's team member ID
+            const { data: currentUserData } = await supabase
+              .from('team_members')
+              .select('id')
+              .eq('email', user.email)
+              .maybeSingle();
+              
+            if (currentUserData) {
+              setCurrentUserTeamId(currentUserData.id);
+              console.log("[AgentFilterButtons] ID du commercial:", currentUserData.id);
               
               // Auto-sélectionner le commercial
               if (!agentFilter) {
-                setAgentFilter(currentUser.id);
+                setAgentFilter(currentUserData.id);
               }
             }
           }

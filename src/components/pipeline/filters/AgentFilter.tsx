@@ -34,7 +34,7 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
         // Requête sans filtre pour récupérer tous les membres
         const { data, error } = await supabase
           .from('team_members')
-          .select('id, name')
+          .select('id, name, email')
           .order('name');
           
         if (error) {
@@ -45,14 +45,20 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
           
           // Pour les commerciaux, identifier leur propre ID
           if (isCommercial && !isAdmin && user?.email) {
-            const currentUser = data.find(member => member.email === user.email);
-            if (currentUser) {
-              setCurrentUserTeamId(currentUser.id);
-              console.log("[AgentFilter] ID du commercial actuel:", currentUser.id);
+            // Instead of directly comparing email, we need to fetch the current user's team member ID
+            const { data: currentUserData } = await supabase
+              .from('team_members')
+              .select('id')
+              .eq('email', user.email)
+              .maybeSingle();
+              
+            if (currentUserData) {
+              setCurrentUserTeamId(currentUserData.id);
+              console.log("[AgentFilter] ID du commercial actuel:", currentUserData.id);
               
               // Auto-sélectionner le commercial
               if (!assignedTo) {
-                handleAgentSelect(currentUser.id);
+                handleAgentSelect(currentUserData.id);
               }
             }
           }
