@@ -39,8 +39,6 @@ export const useLeadCreation = () => {
         if (data) {
           setCurrentUserTeamId(data.id);
           console.log("Current user team ID:", data.id);
-          // Nous ne définissons plus automatiquement assignedAgent ici
-          // parce que nous voulons permettre l'attribution à n'importe quel agent
         }
       } catch (error) {
         console.error("Error fetching current user team ID:", error);
@@ -128,8 +126,6 @@ export const useLeadCreation = () => {
   }, [assignedAgent, isAdmin, isSubmitting, leadStatus, navigate, pipelineType, currentUserTeamId]);
 
   const handleAgentChange = useCallback((value: string | undefined) => {
-    // Permettre à tous les utilisateurs de changer l'assignation
-    // puisque RLS est désactivé
     setAssignedAgent(value);
   }, []);
 

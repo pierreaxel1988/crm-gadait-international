@@ -37,7 +37,6 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   useEffect(() => {
     const checkPermissions = async () => {
       if (lead?.id && isCommercial && !isAdmin) {
-        // Si c'est un commercial et pas un admin, vérifier qu'il est bien assigné à ce lead
         try {
           // Récupérer l'ID du commercial connecté
           const { data } = await supabase
@@ -66,29 +65,6 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
       checkPermissions();
     }
   }, [lead?.id, isCommercial, isAdmin, user?.email, enforceRlsRules]);
-  
-  // Si un commercial tente de créer un nouveau lead, pré-assigner à lui-même
-  useEffect(() => {
-    if (!lead && isCommercial && !adminAssignedAgent) {
-      const autoAssignToCurrentUser = async () => {
-        try {
-          const { data } = await supabase
-            .from('team_members')
-            .select('id, name')
-            .eq('email', user?.email)
-            .single();
-            
-          if (data) {
-            console.log("[LeadFormWrapper] Auto-assignation au commercial:", data.name);
-          }
-        } catch (error) {
-          console.error("Erreur d'assignation automatique:", error);
-        }
-      };
-      
-      autoAssignToCurrentUser();
-    }
-  }, [lead, isCommercial, adminAssignedAgent, user?.email]);
   
   return (
     <div className="luxury-card p-6 border-loro-sand">

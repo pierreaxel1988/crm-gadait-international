@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
@@ -30,66 +29,34 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     const loadTeamMembers = async () => {
       setIsLoading(true);
       try {
-        console.log("[AgentFilter] Loading all team members");
+        console.log("[AgentFilter] Loading team members");
         
-        // Si c'est un commercial et pas un admin, il ne peut voir que lui-même
-        if (isCommercial && !isAdmin && user?.email) {
-          const { data: currentUserData, error } = await supabase
-            .from('team_members')
-            .select('id, name')
-            .eq('email', user.email)
-            .maybeSingle();
+        // Récupération des membres d'équipe
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('id, name')
+          .order('name');
             
-          if (error) {
-            throw error;
-          }
-            
-          if (currentUserData) {
-            setTeamMembers([currentUserData]);
-            setCurrentUserTeamId(currentUserData.id);
-            console.log("[AgentFilter] Commercial ID:", currentUserData.id);
-            
-            // Auto-sélectionner le commercial UNIQUEMENT s'il est commercial sans privilèges admin
-            if (!assignedTo && isCommercial && !isAdmin) {
-              handleAgentSelect(currentUserData.id);
-            }
-          } else {
-            console.warn("[AgentFilter] Commercial user not found:", user.email);
-            toast({
-              variant: "destructive",
-              title: "Erreur d'identification",
-              description: "Votre compte utilisateur n'est pas correctement configuré.",
-            });
-          }
-        } else {
-          // Admin ou autre - charge tous les membres sans filtrer sur le rôle
-          const { data, error } = await supabase
-            .from('team_members')
-            .select('id, name')
-            .order('name');
-            
-          if (error) {
-            throw error;
-          } else if (data) {
-            console.log("[AgentFilter] Team members loaded:", data.length);
-            setTeamMembers(data);
-            
-            // Si l'utilisateur est un commercial mais qu'on charge quand même tous les membres (cas spécial)
-            if (isCommercial && user?.email) {
-              // Nous devons faire une requête séparée pour trouver l'ID du commercial par son email
-              const { data: userData } = await supabase
-                .from('team_members')
-                .select('id')
-                .eq('email', user.email)
-                .maybeSingle();
-                
-              if (userData) {
-                setCurrentUserTeamId(userData.id);
-                
-                // Auto-sélectionner UNIQUEMENT pour les commerciaux non-admin
-                if (!assignedTo && isCommercial && !isAdmin) {
-                  handleAgentSelect(userData.id);
-                }
+        if (error) {
+          throw error;
+        } else if (data) {
+          console.log("[AgentFilter] Team members loaded:", data.length);
+          setTeamMembers(data);
+          
+          // Si l'utilisateur est un commercial, trouver son ID
+          if (isCommercial && user?.email) {
+            const { data: userData } = await supabase
+              .from('team_members')
+              .select('id')
+              .eq('email', user.email)
+              .maybeSingle();
+              
+            if (userData) {
+              setCurrentUserTeamId(userData.id);
+              
+              // Auto-sélectionner UNIQUEMENT pour les commerciaux non-admin
+              if (!assignedTo && isCommercial && !isAdmin) {
+                handleAgentSelect(userData.id);
               }
             }
           }
@@ -136,7 +103,6 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     }
   }, [assignedToOptions, isAdmin, isCommercial, user?.email]);
 
-  // Mise à jour du filtre quand l'agent sélectionné change
   useEffect(() => {
     if (selectedAgent !== assignedTo) {
       onAssignedToChange(selectedAgent);
@@ -162,7 +128,6 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     ? teamMembers.find(member => member.id === assignedTo)?.name || 'Inconnu'
     : null;
 
-  // Pour les commerciaux non-admin, ne pas montrer le bouton "Tous"
   const canSelectAll = isAdmin || !isCommercial;
 
   return (
