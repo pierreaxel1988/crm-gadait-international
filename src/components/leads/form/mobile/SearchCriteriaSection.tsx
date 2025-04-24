@@ -655,6 +655,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             <option value="Switzerland">Suisse</option>
             <option value="Monaco">Monaco</option>
             <option value="Mauritius">Île Maurice</option>
+            <option value="UAE">Émirats Arabes Unis</option>
           </select>
         </div>
 
