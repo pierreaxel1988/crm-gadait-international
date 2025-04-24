@@ -3,6 +3,8 @@ import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TeamMember {
   id: string;
@@ -17,6 +19,38 @@ interface AgentFilterProps {
 
 const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: AgentFilterProps) => {
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(assignedToOptions);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Effectuer un chargement indépendant des membres d'équipe
+  useEffect(() => {
+    const loadTeamMembers = async () => {
+      setIsLoading(true);
+      try {
+        console.log("[AgentFilter] Chargement direct des membres d'équipe...");
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('id, name')
+          .order('name');
+          
+        if (error) {
+          console.error("[AgentFilter] Erreur lors du chargement des membres:", error);
+        } else if (data) {
+          console.log("[AgentFilter] Membres chargés:", data.length);
+          setTeamMembers(data);
+        }
+      } catch (error) {
+        console.error("[AgentFilter] Exception:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    // N'effectuer le chargement que si assignedToOptions est vide
+    if (assignedToOptions.length === 0) {
+      loadTeamMembers();
+    }
+  }, [assignedToOptions]);
 
   // Synchroniser avec le système global d'agent sélectionné
   useEffect(() => {
@@ -33,7 +67,7 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
 
   // Trouver le nom du commercial actuellement sélectionné
   const selectedAgentName = assignedTo 
-    ? assignedToOptions.find(member => member.id === assignedTo)?.name || 'Inconnu'
+    ? teamMembers.find(member => member.id === assignedTo)?.name || 'Inconnu'
     : null;
 
   return (
@@ -44,27 +78,36 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
           <span className="ml-1 text-primary font-medium">: {selectedAgentName}</span>
         )}
       </h4>
-      <div className="grid grid-cols-2 gap-2">
-        <Button
-          variant={assignedTo === null ? "default" : "outline"}
-          size="sm"
-          className="text-xs"
-          onClick={() => handleAgentSelect(null)}
-        >
-          Tous
-        </Button>
-        {assignedToOptions.map((member) => (
+      {isLoading ? (
+        <div className="text-xs text-amber-600">Chargement des agents...</div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
           <Button
-            key={member.id}
-            variant={assignedTo === member.id ? "default" : "outline"}
+            variant={assignedTo === null ? "default" : "outline"}
             size="sm"
             className="text-xs"
-            onClick={() => handleAgentSelect(member.id)}
+            onClick={() => handleAgentSelect(null)}
           >
-            {member.name}
+            Tous
           </Button>
-        ))}
-      </div>
+          {teamMembers.map((member) => (
+            <Button
+              key={member.id}
+              variant={assignedTo === member.id ? "default" : "outline"}
+              size="sm"
+              className="text-xs"
+              onClick={() => handleAgentSelect(member.id)}
+            >
+              {member.name}
+            </Button>
+          ))}
+          {teamMembers.length === 0 && (
+            <div className="col-span-2 text-xs text-amber-600 p-2">
+              Aucun agent disponible. Vérifiez la connexion à Supabase.
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

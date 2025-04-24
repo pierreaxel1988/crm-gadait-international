@@ -12,7 +12,6 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
 
 interface TeamMemberSelectProps {
   value: string | undefined;
@@ -36,123 +35,73 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   label = "Attribuer à",
   autoSelectPierreAxel = false,
   disabled = false,
-  enforceRlsRules = false
 }) => {
   const isMobile = useIsMobile();
-  const { user, isAdmin } = useAuth();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedMemberName, setSelectedMemberName] = useState<string | undefined>();
-  const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
-  const [connectionAttempts, setConnectionAttempts] = useState(0);
 
-  useEffect(() => {
-    const fetchTeamMembers = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        console.log('Tentative de récupération des membres d\'équipe...');
-        
-        // Vérifier d'abord la connexion à Supabase
-        try {
-          const { data: pingData, error: pingError } = await supabase.from('team_members').select('count(*)', { count: 'exact', head: true });
-          if (pingError) {
-            console.error('Erreur de connexion à Supabase:', pingError);
-            throw new Error('Problème de connexion à la base de données');
-          }
-          console.log('Connexion à Supabase établie, compte:', pingData);
-        } catch (pingError) {
-          console.error('Erreur lors du ping à Supabase:', pingError);
-          setConnectionAttempts(prev => prev + 1);
-          if (connectionAttempts < 3) {
-            // Attendre un peu et réessayer
-            setTimeout(() => fetchTeamMembers(), 1000);
-            return;
-          }
-        }
-        
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id, name, email, is_admin');
-
-        if (error) {
-          console.error('Erreur Supabase complète:', error);
-          throw error;
-        }
-
-        console.log('Réponse Supabase pour les membres d\'équipe:', data);
-
-        if (data && data.length > 0) {
-          setTeamMembers(data);
-          console.log('Nombre de membres d\'équipe trouvés:', data.length);
-          
-          if (autoSelectPierreAxel && !value) {
-            const pierreAxel = data.find(member => 
-              member.name.toLowerCase().includes('pierre-axel'));
-            
-            if (pierreAxel) {
-              onChange(pierreAxel.id);
-              setSelectedMemberName(pierreAxel.name);
-            }
-          }
-          
-          if (value && data) {
-            const selectedMember = data.find(member => member.id === value);
-            if (selectedMember) {
-              setSelectedMemberName(selectedMember.name);
-            }
-          }
-        } else {
-          console.log("Aucun membre d'équipe trouvé dans la réponse");
-          setError("Aucun membre d'équipe n'a été trouvé");
-        }
-      } catch (error) {
-        console.error('Erreur détaillée lors du chargement des commerciaux:', error);
-        setError("Impossible de charger la liste des commerciaux");
-        toast({
-          variant: "destructive",
-          title: "Erreur de chargement",
-          description: "Impossible de charger la liste des commerciaux."
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTeamMembers();
-  }, [autoSelectPierreAxel, onChange, value, connectionAttempts]);
-
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      if (!user?.email) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('id')
-          .eq('email', user.email)
-          .maybeSingle(); // Utiliser maybeSingle au lieu de single pour éviter l'erreur
-          
-        if (error) {
-          console.error("Error fetching current user ID:", error);
-          return;
-        }
-        
-        if (data) {
-          console.log("ID d'utilisateur actuel trouvé:", data.id);
-          setCurrentUserId(data.id);
-        } else {
-          console.log("Aucun utilisateur trouvé avec l'email:", user.email);
-        }
-      } catch (error) {
-        console.error("Error fetching current user ID:", error);
-      }
-    };
+  // Fonction pour charger tous les membres de l'équipe
+  const fetchAllTeamMembers = async () => {
+    setIsLoading(true);
+    setError(null);
     
-    fetchCurrentUser();
-  }, [user]);
+    try {
+      console.log('[TeamMemberSelect] Chargement de tous les membres d\'équipe...');
+      
+      // Query simple sans filtres ni RLS
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('id, name, email, is_admin');
+
+      if (error) {
+        console.error('[TeamMemberSelect] Erreur Supabase:', error);
+        throw new Error(`Erreur lors du chargement des commerciaux: ${error.message}`);
+      }
+
+      console.log('[TeamMemberSelect] Réponse Supabase:', data);
+
+      if (data && data.length > 0) {
+        setTeamMembers(data);
+        console.log('[TeamMemberSelect] Membres trouvés:', data.length);
+        
+        if (autoSelectPierreAxel && !value) {
+          const pierreAxel = data.find(member => 
+            member.name.toLowerCase().includes('pierre-axel'));
+          
+          if (pierreAxel) {
+            onChange(pierreAxel.id);
+            setSelectedMemberName(pierreAxel.name);
+          }
+        }
+        
+        if (value) {
+          const selectedMember = data.find(member => member.id === value);
+          if (selectedMember) {
+            setSelectedMemberName(selectedMember.name);
+          }
+        }
+      } else {
+        console.log("[TeamMemberSelect] Aucun membre d'équipe trouvé dans la réponse");
+        setError("Aucun membre d'équipe n'a été trouvé");
+      }
+    } catch (error) {
+      console.error('[TeamMemberSelect] Erreur détaillée:', error);
+      setError("Impossible de charger la liste des commerciaux");
+      toast({
+        variant: "destructive",
+        title: "Erreur de chargement",
+        description: "Impossible de charger la liste des commerciaux."
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllTeamMembers();
+  }, [autoSelectPierreAxel, value]);
 
   const handleChange = (newValue: string) => {
     if (newValue !== "non_assigné") {

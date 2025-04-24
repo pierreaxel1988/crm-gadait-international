@@ -20,8 +20,12 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   isSubmitting,
   currentUserTeamId,
   isAdmin,
-  enforceRlsRules = false // Default to false since RLS is disabled on the leads table
+  // Forcer enforceRlsRules à false pour ignorer complètement les restrictions RLS
+  enforceRlsRules = false 
 }) => {
+  console.log("[LeadFormWrapper] Render avec enforceRlsRules:", enforceRlsRules);
+  console.log("[LeadFormWrapper] adminAssignedAgent:", adminAssignedAgent);
+  
   return (
     <div className="luxury-card p-6 border-loro-sand">
       <LeadForm 
@@ -30,7 +34,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
         adminAssignedAgent={adminAssignedAgent}
         isSubmitting={isSubmitting}
         currentUserTeamId={currentUserTeamId}
-        enforceRlsRules={enforceRlsRules} // Pass the prop to LeadForm 
+        enforceRlsRules={false} // Forcer à false pour désactiver les restrictions
       />
     </div>
   );

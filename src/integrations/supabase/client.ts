@@ -11,7 +11,14 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 console.log('Initialisation du client Supabase avec URL:', SUPABASE_URL);
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// Configuration explicite du client avec autoRefreshToken et persistSession
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
 
 // Test d'initialisation
 (async () => {
@@ -21,6 +28,21 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
       console.error('Erreur lors de l\'initialisation de Supabase:', error);
     } else {
       console.log('Client Supabase initialisé avec succès. Session:', data.session ? 'Authentifié' : 'Non authentifié');
+      
+      // Test de connexion à la table team_members
+      try {
+        const { data: countData, error: countError } = await supabase
+          .from('team_members')
+          .select('*', { count: 'exact' });
+          
+        if (countError) {
+          console.error('Erreur lors du test de connexion à la table team_members:', countError);
+        } else {
+          console.log('Test de connexion à team_members réussi, nombre d\'entrées:', countData?.length || 0);
+        }
+      } catch (e) {
+        console.error('Exception lors du test team_members:', e);
+      }
     }
   } catch (e) {
     console.error('Exception lors de l\'initialisation de Supabase:', e);

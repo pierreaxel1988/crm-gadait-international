@@ -18,22 +18,27 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
       if (assignedToId) {
         setIsLoading(true);
         try {
+          console.log(`[AssignedUser] Chargement des infos pour l'utilisateur: ${assignedToId}`);
           const { data, error } = await supabase
             .from('team_members')
             .select('id, name')
             .eq('id', assignedToId)
-            .single();
+            .maybeSingle(); // Utiliser maybeSingle au lieu de single
             
           if (error) {
-            console.error('Error fetching team member info:', error);
+            console.error('[AssignedUser] Erreur:', error);
             return;
           }
           
           if (data) {
+            console.log(`[AssignedUser] Info trouvée: ${data.name}`);
             setAssignedToName(data.name);
+          } else {
+            console.log(`[AssignedUser] Aucune info trouvée pour l'ID: ${assignedToId}`);
+            setAssignedToName('Agent inconnu');
           }
         } catch (error) {
-          console.error('Unexpected error fetching team member info:', error);
+          console.error('[AssignedUser] Exception:', error);
         } finally {
           setIsLoading(false);
         }
@@ -49,10 +54,13 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
       <div className="flex items-center">
         <Avatar className="h-5 w-5 mr-1">
           <AvatarFallback className="text-[9px] font-futura">
-            {assignedToName.split(' ').map(part => part[0]).join('')}
+            {assignedToName === 'Agent inconnu' ? '?' : 
+             assignedToName.split(' ').map(part => part[0]).join('')}
           </AvatarFallback>
         </Avatar>
-        <span className="text-xs font-futura">{assignedToName}</span>
+        <span className="text-xs font-futura">
+          {isLoading ? 'Chargement...' : assignedToName}
+        </span>
       </div>
     );
   }
