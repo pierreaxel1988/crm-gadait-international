@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { LeadDetailed, Currency, PropertyState, PropertyType } from '@/types/lead';
+import { LeadDetailed, Currency, PropertyState } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -7,70 +8,32 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { 
-  MapPin,
+  Home,
   Bath,
+  Stairs,
   Compass,
-  Camera,
-  Car,
-  Fan,
-  Bed,
-  Sofa,
-  Clock,
-  DoorClosed,
-  FileText,
-  Building,
   Star,
-  Settings
+  Building,
+  Car,
+  Camera,
+  Pool,
+  Spa,
+  Security,
+  Settings,
+  SolarPanel,
+  Water,
+  Wheelchair,
+  Architecture,
+  Neighbor,
+  Extension,
+  Heritage,
+  Restrictions,
+  ConciergeService,
+  Nuisance,
+  Roof,
+  Wine,
+  Access
 } from 'lucide-react';
-import { getIcon } from '@/utils/icons';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import MultiSelectButtons from '../../form/MultiSelectButtons';
-import FormInput from '../../form/FormInput';
-import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
-import LocationFilter from '@/components/pipeline/filters/LocationFilter';
-
-interface SearchCriteriaSectionProps {
-  lead: LeadDetailed;
-  onDataChange: (data: Partial<LeadDetailed>) => void;
-}
-
-const SearchCriteriaSection = ({ lead, onDataChange }: SearchCriteriaSectionProps) => {
-  const [activeTab, setActiveTab] = useState('budget');
-  
-  return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold mb-2">Critères de la Propriété</h2>
-      
-      {lead.pipelineType === 'owners' ? (
-        <div className="space-y-4">
-          <Tabs defaultValue="budget" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="w-full grid grid-cols-3 mb-4">
-              <TabsTrigger value="budget">Prix</TabsTrigger>
-              <TabsTrigger value="location">Localisation</TabsTrigger>
-              <TabsTrigger value="property">Bien</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="budget" className="space-y-4">
-              <OwnerPriceFields lead={lead} onDataChange={onDataChange} />
-            </TabsContent>
-            
-            <TabsContent value="location" className="space-y-4">
-              <OwnerLocationSection lead={lead} onDataChange={onDataChange} />
-            </TabsContent>
-            
-            <TabsContent value="property" className="space-y-4">
-              <OwnerPropertySection lead={lead} onDataChange={onDataChange} />
-            </TabsContent>
-          </Tabs>
-        </div>
-      ) : (
-        <ScrollArea className="h-[calc(100vh-270px)]">
-          <BuyerCriteriaSection lead={lead} onDataChange={onDataChange} />
-        </ScrollArea>
-      )}
-    </div>
-  );
-};
 
 interface OwnerPriceFieldsProps {
   lead: LeadDetailed;
@@ -195,6 +158,7 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange 
   );
 };
 
+// Location section component
 const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange }) => {
   return (
     <div className="space-y-4">
@@ -225,6 +189,7 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
   );
 };
 
+// Property details section component - Expanded with luxury real estate fields
 const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataChange }) => {
   const handleBedroomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -241,6 +206,7 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
     onDataChange({ [field]: updated });
   };
 
+  // Sections for better organization
   return (
     <div className="space-y-6">
       {/* Caractéristiques essentielles */}
@@ -500,12 +466,12 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
             <Label className="text-sm">Prestations de luxe</Label>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { name: 'Piscine', icon: Building },
-                { name: 'Spa', icon: Building },
-                { name: 'Home cinéma', icon: Building },
-                { name: 'Court de tennis', icon: Building },
-                { name: 'Hammam', icon: Building },
-                { name: 'Sauna', icon: Building }
+                { name: 'Piscine', icon: Pool },
+                { name: 'Spa', icon: Spa },
+                { name: 'Home cinéma', icon: Home },
+                { name: 'Court de tennis', icon: Home },
+                { name: 'Hammam', icon: Home },
+                { name: 'Sauna', icon: Home }
               ].map((luxury) => (
                 <button
                   key={luxury.name}
@@ -517,7 +483,7 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                   }`}
                 >
-                  <Building className="h-4 w-4" />
+                  <luxury.icon className="h-4 w-4" />
                   {luxury.name}
                 </button>
               ))}
@@ -538,7 +504,7 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                   }`}
                 >
-                  <Building className="h-4 w-4" />
+                  <Architecture className="h-4 w-4" />
                   {material}
                 </button>
               ))}
@@ -614,7 +580,7 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                   }`}
                 >
-                  <DoorClosed className="h-4 w-4" />
+                  <Security className="h-4 w-4" />
                   {security}
                 </button>
               ))}
@@ -658,7 +624,7 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                   }`}
                 >
-                  <FileText className="h-4 w-4" />
+                  <SolarPanel className="h-4 w-4" />
                   {eco}
                 </button>
               ))}
@@ -822,16 +788,43 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({ lead, onDataCha
   );
 };
 
-interface BuyerCriteriaSectionProps {
+interface SearchCriteriaSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
 
-const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({ lead, onDataChange }) => {
-  const handlePropertyTypeChange = (propertyType: string) => {
-    const currentTypes = lead.propertyTypes || [];
-    const updatedTypes = currentTypes.includes(propertyType)
-      ? currentTypes.filter(type => type !== propertyType)
-      : [...currentTypes, propertyType];
-    
-    onDataChange({ propertyTypes: updatedTypes });
+const SearchCriteriaSection = ({ lead, onDataChange }: SearchCriteriaSectionProps) => {
+  const [activeTab, setActiveTab] = useState('budget');
+  
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold mb-2">Critères de la Propriété</h2>
+      
+      {lead.pipelineType === 'owners' && (
+        <div className="space-y-4">
+          <Tabs defaultValue="budget" className="w-full" onValueChange={setActiveTab}>
+            <TabsList className="w-full grid grid-cols-3 mb-4">
+              <TabsTrigger value="budget">Prix</TabsTrigger>
+              <TabsTrigger value="location">Localisation</TabsTrigger>
+              <TabsTrigger value="property">Bien</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="budget" className="space-y-4">
+              <OwnerPriceFields lead={lead} onDataChange={onDataChange} />
+            </TabsContent>
+            
+            <TabsContent value="location" className="space-y-4">
+              <OwnerLocationSection lead={lead} onDataChange={onDataChange} />
+            </TabsContent>
+            
+            <TabsContent value="property" className="space-y-4">
+              <OwnerPropertySection lead={lead} onDataChange={onDataChange} />
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SearchCriteriaSection;
