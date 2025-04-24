@@ -73,9 +73,15 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
             
             // Si l'utilisateur est un commercial mais qu'on charge quand même tous les membres (cas spécial)
             if (isCommercial && user?.email) {
-              const currentUserData = data.find(member => member.email === user.email);
-              if (currentUserData) {
-                setCurrentUserTeamId(currentUserData.id);
+              // Nous devons faire une requête séparée pour trouver l'ID du commercial par son email
+              const { data: userData } = await supabase
+                .from('team_members')
+                .select('id')
+                .eq('email', user.email)
+                .maybeSingle();
+                
+              if (userData) {
+                setCurrentUserTeamId(userData.id);
               }
             }
           }
