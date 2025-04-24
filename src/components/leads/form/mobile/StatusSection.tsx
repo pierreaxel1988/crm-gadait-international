@@ -24,7 +24,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const PURCHASE_STATUSES: LeadStatus[] = [
   "New", "Contacted", "Qualified", "Proposal", "Visit", 
-  "Offer", "Offre", "Deposit", "Signed", "Gagné", "Perdu"
+  "Offre", "Deposit", "Signed", "Gagné", "Perdu"
 ];
 
 const RENTAL_STATUSES: LeadStatus[] = [
@@ -39,7 +39,7 @@ const OWNERS_STATUSES: LeadStatus[] = [
   "Proposal",         // Mandat en négociation
   "Signed",           // Mandat signé
   "Visit",            // Bien en commercialisation
-  "Offer",            // Offre reçue
+  "Offre",            // Offre reçue
   "Deposit",          // Compromis signé
   "Gagné",            // Vente finalisée
   "Perdu"             // Perdu/Annulé
@@ -157,7 +157,6 @@ const StatusSection: React.FC<StatusSectionProps> = ({
         'Proposal': 'Mandat en négociation',
         'Signed': 'Mandat signé',
         'Visit': 'Bien en commercialisation',
-        'Offer': 'Offre reçue',
         'Offre': 'Offre reçue',
         'Deposit': 'Compromis signé',
         'Gagné': 'Vente finalisée',

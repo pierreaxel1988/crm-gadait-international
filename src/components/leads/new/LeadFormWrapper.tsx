@@ -8,13 +8,19 @@ interface LeadFormWrapperProps {
   onCancel: () => void;
   adminAssignedAgent?: string | undefined;
   isSubmitting: boolean;
+  currentUserTeamId?: string | undefined;
+  isAdmin?: boolean;
+  enforceRlsRules?: boolean;
 }
 
 const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   onSubmit,
   onCancel,
   adminAssignedAgent,
-  isSubmitting
+  isSubmitting,
+  currentUserTeamId,
+  isAdmin,
+  enforceRlsRules = false // Default to false since RLS is disabled on the leads table
 }) => {
   return (
     <div className="luxury-card p-6 border-loro-sand">
@@ -23,6 +29,8 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
         onCancel={onCancel}
         adminAssignedAgent={adminAssignedAgent}
         isSubmitting={isSubmitting}
+        currentUserTeamId={currentUserTeamId}
+        enforceRlsRules={enforceRlsRules} // Pass the prop to LeadForm 
       />
     </div>
   );

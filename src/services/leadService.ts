@@ -30,36 +30,16 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       status: leadData.status
     });
     
-    // Vérifier si l'utilisateur actuel est un commercial
+    // Vérifier l'utilisateur actuel (pour la journalisation uniquement)
     const { data: sessionData } = await supabase.auth.getSession();
     const user = sessionData?.session?.user;
     
-    // Liste des emails commerciaux
-    const commercialEmails = [
-      'jade@gadait-international.com',
-      'ophelie@gadait-international.com',
-      'jeanmarc@gadait-international.com',
-      'jacques@gadait-international.com',
-      'sharon@gadait-international.com'
-    ];
-    
-    // Si c'est un commercial, s'assurer que le lead est assigné à lui-même
-    if (commercialEmails.includes(user?.email || '')) {
-      // Récupérer l'ID du commercial connecté depuis la table team_members
-      const { data: teamMember } = await supabase
-        .from('team_members')
-        .select('id, name')
-        .eq('email', user?.email)
-        .single();
-        
-      if (teamMember && teamMember.id) {
-        console.log(`Commercial user creating lead, auto-assigning to: ${teamMember.name} (${teamMember.id})`);
-        leadData.assignedTo = teamMember.id;
-      }
+    if (!user) {
+      throw new Error("Vous devez être connecté pour créer un lead.");
     }
     
-    // Si aucun agent n'est assigné, on ne fait pas d'assignation automatique
-    // L'utilisateur doit explicitement choisir un agent
+    // RLS est désactivé, donc le lead est créé tel quel,
+    // sans restriction d'assignation
     
     console.log("leadService: Creating lead with processed data:", leadData);
     
@@ -68,9 +48,23 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     console.log("Lead creation result:", result);
     
     if (result) {
+      let successMessage = "Lead créé avec succès";
+      
+      if (result.assignedTo) {
+        const { data: agentData } = await supabase
+          .from("team_members")
+          .select("name")
+          .eq("id", result.assignedTo)
+          .single();
+            
+        if (agentData) {
+          successMessage = `Le lead a été créé et attribué à ${agentData.name} avec succès.`;
+        }
+      }
+      
       toast({
-        title: "Lead créé avec succès",
-        description: "Le nouveau lead a été ajouté à la base de données.",
+        title: "Lead créé",
+        description: successMessage,
       });
 
       // Vérifier si le lead est en statut "New" et a un agent assigné
@@ -107,11 +101,13 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     return result;
   } catch (error) {
     console.error("Error in leadService.createLead:", error);
+    
     toast({
       variant: "destructive",
       title: "Erreur lors de la création du lead",
       description: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
     });
+    
     throw error; // Re-throw to allow handling by the caller
   }
 };

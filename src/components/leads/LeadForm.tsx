@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LeadFormProps {
   lead?: LeadDetailed;
@@ -18,6 +20,8 @@ interface LeadFormProps {
   adminAssignedAgent?: string | undefined;
   isSubmitting?: boolean;
   hideSubmitButton?: boolean;
+  currentUserTeamId?: string | undefined;
+  enforceRlsRules?: boolean;
 }
 
 const LeadForm: React.FC<LeadFormProps> = ({ 
@@ -28,8 +32,11 @@ const LeadForm: React.FC<LeadFormProps> = ({
   activeTab = 'general',
   adminAssignedAgent,
   isSubmitting = false,
-  hideSubmitButton = false
+  hideSubmitButton = false,
+  currentUserTeamId,
+  enforceRlsRules = false
 }) => {
+  const { isAdmin } = useAuth();
   const [formData, setFormData] = useState<LeadDetailed>({
     id: lead?.id || uuidv4(),
     name: lead?.name || '',
@@ -41,7 +48,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
     location: lead?.location || '',
     status: lead?.status || 'New',
     tags: lead?.tags || [],
-    assignedTo: lead?.assignedTo || undefined,
+    assignedTo: lead?.assignedTo || adminAssignedAgent || undefined,
     createdAt: lead?.createdAt || new Date().toISOString(),
     lastContactedAt: lead?.lastContactedAt || undefined,
     source: lead?.source || undefined,
@@ -71,8 +78,11 @@ const LeadForm: React.FC<LeadFormProps> = ({
   useEffect(() => {
     if (adminAssignedAgent !== undefined) {
       setFormData(prev => ({ ...prev, assignedTo: adminAssignedAgent }));
+    } 
+    else if (!isAdmin && currentUserTeamId && enforceRlsRules) {
+      setFormData(prev => ({ ...prev, assignedTo: currentUserTeamId }));
     }
-  }, [adminAssignedAgent]);
+  }, [adminAssignedAgent, isAdmin, currentUserTeamId, enforceRlsRules]);
 
   useEffect(() => {
     if (lead) {
@@ -105,17 +115,27 @@ const LeadForm: React.FC<LeadFormProps> = ({
       return;
     }
     
-    if (!isSubmitting) {
+    if (!isAdmin && currentUserTeamId && enforceRlsRules && formData.assignedTo !== currentUserTeamId) {
+      console.log("Setting assignedTo to current user before submit:", currentUserTeamId);
+      const updatedData = { ...formData, assignedTo: currentUserTeamId };
+      
+      if (!isSubmitting) {
+        onSubmit(updatedData);
+      }
+    } else if (!isSubmitting) {
       onSubmit(formData);
     }
   };
 
-  // The key fix: ensure salutation is correctly typed
   const handleSalutationChange = (value: string) => {
-    // Only set the value if it matches the expected type
     if (value === 'M.' || value === 'Mme') {
       setFormData(prev => ({ ...prev, salutation: value }));
     }
+  };
+
+  const handleAssignedToChange = (value: string | undefined) => {
+    // Since RLS is disabled, allow assignment to anyone regardless of user role
+    setFormData(prev => ({ ...prev, assignedTo: value }));
   };
 
   return (
@@ -147,6 +167,16 @@ const LeadForm: React.FC<LeadFormProps> = ({
             placeholder="Nom complet" 
             className="w-full font-futura"
             required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <TeamMemberSelect
+            value={formData.assignedTo}
+            onChange={handleAssignedToChange}
+            label="Attribuer à"
+            enforceRlsRules={enforceRlsRules}
+            disabled={false} // Remove the restriction that only admins can change assignment
           />
         </div>
       </div>

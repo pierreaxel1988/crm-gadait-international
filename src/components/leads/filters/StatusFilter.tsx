@@ -26,8 +26,7 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
     'Qualified', // Qualifiés
     'Proposal',  // Propositions
     'Visit',     // Visites en cours
-    'Offer',     // Offre en cours (English/Purchase)
-    'Offre',     // Offre en cours (French/Rental)
+    'Offre',     // Offre en cours (for both purchase and rental)
     'Deposit',   // Dépôt reçu
     'Signed',    // Signature finale
     'Gagné',     // Conclus

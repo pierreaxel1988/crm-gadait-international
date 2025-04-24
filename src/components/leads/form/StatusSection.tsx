@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { CalendarClock, CalendarDays, Activity, Home } from 'lucide-react';
+import { CalendarClock, CalendarDays, Activity, Home, MapPin } from 'lucide-react';
 import { LeadDetailed, LeadSource, PipelineType } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
@@ -11,6 +12,7 @@ import { format } from 'date-fns';
 import RadioSelectButtons from './RadioSelectButtons';
 import { toast } from '@/hooks/use-toast';
 import { getStatusesForPipeline, handlePipelineTypeTransition } from '@/utils/pipelineUtils';
+import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 
 interface StatusSectionProps {
   formData: LeadDetailed;
@@ -87,6 +89,17 @@ const StatusSection = ({
     }
   };
 
+  const handleLocationChange = (location: string) => {
+    const locationEvent = {
+      target: {
+        name: 'desiredLocation',
+        value: location
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleInputChange(locationEvent);
+  };
+
   const availableStatuses = getStatusesForPipeline(formData.pipelineType || 'purchase');
 
   const getStatusLabel = (status: LeadStatus): string => {
@@ -98,7 +111,6 @@ const StatusSection = ({
         'Proposal': 'Mandat en négociation',
         'Signed': 'Mandat signé',
         'Visit': 'Bien en commercialisation',
-        'Offer': 'Offre reçue',
         'Offre': 'Offre reçue',
         'Deposit': 'Compromis signé',
         'Gagné': 'Vente finalisée',
@@ -144,6 +156,22 @@ const StatusSection = ({
           label: getStatusLabel(status)
         }))}
       />
+
+      {formData.pipelineType === 'owners' && (
+        <FormInput
+          label="Localisation"
+          name="desiredLocation"
+          value={formData.desiredLocation || ''}
+          onChange={() => {}}
+          icon={MapPin}
+          renderCustomField={() => (
+            <LocationFilter
+              location={formData.desiredLocation || ''}
+              onLocationChange={handleLocationChange}
+            />
+          )}
+        />
+      )}
 
       <FormInput
         label="Tags"

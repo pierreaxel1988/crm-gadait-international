@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
@@ -15,6 +14,8 @@ export function useLeadDetail(id: string | undefined) {
   const [isCallTracking, setIsCallTracking] = useState(false);
   const [callStartTime, setCallStartTime] = useState<Date | null>(null);
   const [callType, setCallType] = useState<'phone' | 'whatsapp'>('phone');
+  const [isSilentSave, setIsSilentSave] = useState(false);
+  const [hasShownPendingActionsToast, setHasShownPendingActionsToast] = useState(false);
 
   const fetchLead = useCallback(async () => {
     if (id) {
@@ -40,28 +41,28 @@ export function useLeadDetail(id: string | undefined) {
     fetchLead();
   }, [fetchLead]);
 
-  const handleSave = async () => {
+  const handleSave = async (silent = false) => {
     if (!lead) return;
     
     try {
       setIsSaving(true);
       console.log("Saving lead data:", lead);
       
-      // Make sure we're sending all required fields explicitly with fallbacks
       const updatedLead = await updateLead({
         ...lead,
         phoneCountryCode: lead.phoneCountryCode || '+33',
         phoneCountryCodeDisplay: lead.phoneCountryCodeDisplay || '🇫🇷',
-        preferredLanguage: lead.preferredLanguage || null // Explicit null if not defined
+        preferredLanguage: lead.preferredLanguage || null
       });
       
       if (updatedLead) {
-        toast({
-          title: "Lead mis à jour",
-          description: "Les modifications ont été enregistrées avec succès."
-        });
+        if (!silent) {
+          toast({
+            title: "Lead mis à jour",
+            description: "Les modifications ont été enregistrées avec succès."
+          });
+        }
         
-        // Mettre à jour le lead avec les données retournées par l'API pour assurer la cohérence
         setLead(updatedLead);
         setHasChanges(false);
       }
@@ -84,7 +85,7 @@ export function useLeadDetail(id: string | undefined) {
       }
       
       const timer = setTimeout(() => {
-        handleSave();
+        handleSave(true);
       }, 2000);
       
       setAutoSaveTimer(timer);
@@ -106,7 +107,6 @@ export function useLeadDetail(id: string | undefined) {
       if (!prev) return prev;
       const updated = { ...prev, ...data };
       
-      // Log fields changes for debugging
       if (data.phoneCountryCode || data.phoneCountryCodeDisplay || data.phone) {
         console.log("Phone data change detected:", {
           prevCode: prev.phoneCountryCode,
@@ -131,45 +131,36 @@ export function useLeadDetail(id: string | undefined) {
     setHasChanges(true);
   };
 
-  // Format a phone number for calls
   const getFormattedPhoneForCall = () => {
     if (!lead?.phone) return '';
     
-    // Ensure country code is present
     const countryCode = lead.phoneCountryCode || '+33';
     const phoneNumber = lead.phone.startsWith('+') 
-      ? lead.phone.substring(1) // Remove + if it exists
+      ? lead.phone.substring(1)
       : lead.phone.startsWith('0') 
-        ? lead.phone.substring(1) // Remove leading 0 if it exists
+        ? lead.phone.substring(1)
         : lead.phone;
     
-    // Assemble the complete number with country code
     return `${countryCode}${phoneNumber}`;
   };
-  
-  // Format a phone number for WhatsApp
+
   const getFormattedPhoneForWhatsApp = () => {
     if (!lead?.phone) return '';
     
-    // Get formatted phone for international format (same as call)
     const fullPhone = getFormattedPhoneForCall();
     
-    // Remove any non-digit characters for WhatsApp
     return fullPhone.replace(/\D/g, '');
   };
 
-  // Start tracking a call
   const startCallTracking = (type: 'phone' | 'whatsapp' = 'phone') => {
     setIsCallTracking(true);
     setCallStartTime(new Date());
     setCallType(type);
   };
 
-  // End call tracking and record the action
   const endCallTracking = (callDuration: number) => {
     if (!lead || !isCallTracking) return;
     
-    // Create a new action for the call
     const callAction: ActionHistory = {
       id: crypto.randomUUID(),
       actionType: 'Call',
@@ -179,13 +170,11 @@ export function useLeadDetail(id: string | undefined) {
       completedDate: new Date().toISOString()
     };
     
-    // Update the lead with the new action
     handleDataChange({
       actionHistory: [...(lead.actionHistory || []), callAction],
       lastContactedAt: new Date().toISOString()
     });
     
-    // Reset call tracking state
     setIsCallTracking(false);
     setCallStartTime(null);
     
@@ -194,12 +183,35 @@ export function useLeadDetail(id: string | undefined) {
       description: `Un ${callType === 'whatsapp' ? 'appel WhatsApp' : 'appel'} de ${formatDuration(callDuration)} a été enregistré.`
     });
   };
-  
+
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
+
+  useEffect(() => {
+    if (lead?.actionHistory) {
+      const now = new Date();
+      const pendingActions = lead.actionHistory.filter(action => {
+        if (action.completedDate) return false;
+        if (!action.scheduledDate) return false;
+        
+        const scheduledDate = new Date(action.scheduledDate);
+        return scheduledDate >= now || scheduledDate < now;
+      });
+
+      const pendingActionsCount = pendingActions.length;
+      
+      if (pendingActionsCount > 0 && !hasShownPendingActionsToast) {
+        toast({
+          title: "Actions en attente",
+          description: `Vous avez ${pendingActionsCount} action${pendingActionsCount > 1 ? 's' : ''} à réaliser`,
+        });
+        setHasShownPendingActionsToast(true);
+      }
+    }
+  }, [lead?.actionHistory, hasShownPendingActionsToast]);
 
   return {
     lead,

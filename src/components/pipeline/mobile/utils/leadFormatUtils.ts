@@ -1,4 +1,3 @@
-
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -151,7 +150,6 @@ export function getStatusColors(status: LeadStatus): {
       return { bg: 'bg-pink-100', text: 'text-pink-800' };
     case 'Visit':
       return { bg: 'bg-cyan-100', text: 'text-cyan-800' };
-    case 'Offer':
     case 'Offre':
       return { bg: 'bg-teal-100', text: 'text-teal-800' };
     case 'Deposit':
