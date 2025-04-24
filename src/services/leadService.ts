@@ -1,4 +1,3 @@
-
 import { LeadDetailed } from "@/types/lead";
 import { 
   createLead as createLeadCore,
@@ -113,6 +112,27 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       description: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
     });
     throw error; // Re-throw to allow handling by the caller
+  }
+};
+
+export const reassignJadeLeads = async () => {
+  try {
+    const JADE_ID = "jade-diouane";
+
+    const { error } = await supabase
+      .from('leads')
+      .update({ assigned_to: JADE_ID })
+      .eq('assigned_to', 'jade'); // Previous incorrect ID
+
+    if (error) {
+      console.error('Error reassigning Jade\'s leads:', error);
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in reassignJadeLeads:', error);
+    throw error;
   }
 };
 

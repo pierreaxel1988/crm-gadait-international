@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
@@ -9,6 +8,7 @@ import SubNavigation from '@/components/layout/SubNavigation';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import ComponentLoader from '@/components/common/ComponentLoader';
+import { reassignJadeLeads } from '@/services/leadService';
 
 const Pipeline = () => {
   const isMobile = useIsMobile();
@@ -35,14 +35,12 @@ const Pipeline = () => {
 
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
 
-  // Get selected agent name
   const selectedAgentName = useMemo(() => {
     if (!selectedAgent) return null;
     const agent = teamMembers.find(member => member.id === selectedAgent);
     return agent ? agent.name : null;
   }, [selectedAgent, teamMembers]);
 
-  // Sync selected agent with pipeline filters
   useEffect(() => {
     if (selectedAgent !== filters.assignedTo) {
       updateAgentFilter(selectedAgent);
@@ -53,7 +51,18 @@ const Pipeline = () => {
     handleRefresh();
   }, []);
 
-  // Écouter les changements d'agent et mettre à jour les filtres
+  useEffect(() => {
+    const fixJadeLeads = async () => {
+      try {
+        await reassignJadeLeads();
+      } catch (error) {
+        console.error('Error fixing Jade leads:', error);
+      }
+    };
+
+    fixJadeLeads();
+  }, []);
+
   useEffect(() => {
     const handleAgentSelectionChange = (e: CustomEvent) => {
       const newAgent = e.detail.selectedAgent;
@@ -68,11 +77,8 @@ const Pipeline = () => {
     };
   }, [selectedAgent, handleAgentChange]);
 
-  // Wrapper pour handleClearFilters qui émet aussi un événement pour réinitialiser l'agent
   const handleClearAllFilters = () => {
-    // Émettre un événement pour signaler que tous les filtres sont effacés
     window.dispatchEvent(new Event('filters-cleared'));
-    // Appeler la fonction d'origine
     handleClearFilters();
   };
 
