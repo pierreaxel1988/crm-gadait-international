@@ -7,6 +7,11 @@ import PropertyDetailsSection from '../sections/PropertyDetailsSection';
 import PurchaseDetailsSection from '../sections/PurchaseDetailsSection';
 import BuyerInfoSection from '../sections/BuyerInfoSection';
 
+// Define constants for the options required by PurchaseDetailsSection
+const PURCHASE_TIMEFRAMES = ["Moins de trois mois", "Plus de trois mois"];
+const FINANCING_METHODS = ["Cash", "Prêt bancaire"];
+const PROPERTY_USES = ["Investissement locatif", "Résidence principale"];
+
 interface SearchCriteriaSectionProps {
   lead: LeadDetailed;
   onDataChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
@@ -16,8 +21,14 @@ const SearchCriteriaSection = ({
   lead, 
   onDataChange 
 }: SearchCriteriaSectionProps) => {
+  // Define dummy function for multi-select toggle
+  const handleMultiSelectToggle = (name: string, value: string) => {
+    console.log("MultiSelect toggle requested but not implemented in mobile view", { name, value });
+    // In a production context, this would need proper implementation
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-6">
       <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">
         Critères de Recherche
       </h2>
@@ -25,9 +36,34 @@ const SearchCriteriaSection = ({
         <Tabs defaultValue="property" className="w-full">
           <TabsContent value="property" className="space-y-6">
             <PropertyDetailsSection
-              formData={lead}
+              formData={{
+                propertyTypes: lead.propertyTypes || [],
+                views: lead.views || [],
+                amenities: lead.amenities || [],
+                country: lead.country,
+                desiredLocation: lead.desiredLocation,
+                url: lead.url,
+                livingArea: lead.livingArea,
+                landArea: lead.landArea
+              }}
               handleInputChange={onDataChange}
-              handleMultiSelectToggle={() => {}}
+              handleMultiSelectToggle={handleMultiSelectToggle}
+              propertyTypes={[
+                "Villa", "Appartement", "Penthouse", "Maison", "Duplex", 
+                "Chalet", "Terrain", "Manoir", "Maison de ville", "Château", 
+                "Local commercial", "Commercial", "Hotel", "Vignoble", "Autres"
+              ]}
+              viewTypes={["Mer", "Montagne", "Golf", "Autres"]}
+              amenities={["Piscine", "Jardin", "Terrasse", "Garage", "Vue mer"]}
+              handleCountryChange={(value) => {
+                const syntheticEvent = {
+                  target: {
+                    name: 'country',
+                    value
+                  }
+                } as React.ChangeEvent<HTMLInputElement>;
+                onDataChange(syntheticEvent);
+              }}
             />
           </TabsContent>
           
@@ -35,7 +71,10 @@ const SearchCriteriaSection = ({
             <PurchaseDetailsSection
               formData={lead}
               handleInputChange={onDataChange}
-              handleMultiSelectToggle={() => {}}
+              handleMultiSelectToggle={handleMultiSelectToggle}
+              purchaseTimeframes={PURCHASE_TIMEFRAMES}
+              financingMethods={FINANCING_METHODS}
+              propertyUses={PROPERTY_USES}
             />
           </TabsContent>
           
@@ -52,4 +91,3 @@ const SearchCriteriaSection = ({
 };
 
 export default SearchCriteriaSection;
-
