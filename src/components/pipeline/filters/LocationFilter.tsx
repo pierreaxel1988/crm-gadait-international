@@ -24,6 +24,10 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
       .slice(0, 10); // Limit to 10 suggestions
   };
 
+  const handleLocationSelect = (selectedLocation: string) => {
+    onLocationChange(selectedLocation);
+  };
+
   const renderLocationItem = (location: string) => (
     <div className="text-sm py-1">{location}</div>
   );
@@ -38,7 +42,7 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
           placeholder="Ville, région..."
           value={location}
           onChange={onLocationChange}
-          onSelect={onLocationChange}
+          onSelect={handleLocationSelect}
           results={getFilteredLocations(location)}
           renderItem={renderLocationItem}
           className="w-full"

@@ -30,6 +30,14 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
       .slice(0, 10);
   };
 
+  const handleLocationSelect = (location: string) => {
+    onLocationChange(location);
+  };
+
+  const handleCountrySelect = (country: string) => {
+    onCountryChange(country);
+  };
+
   const renderLocationItem = (location: string) => (
     <div className="text-sm py-1">{location}</div>
   );
@@ -42,7 +50,7 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
           placeholder="Sélectionner un pays..."
           value={country}
           onChange={onCountryChange}
-          onSelect={onCountryChange}
+          onSelect={handleCountrySelect}
           results={COUNTRIES.filter(c => 
             c.toLowerCase().includes(country.toLowerCase())
           ).slice(0, 10)}
@@ -63,7 +71,7 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
           placeholder="Ville, région..."
           value={desiredLocation}
           onChange={onLocationChange}
-          onSelect={onLocationChange}
+          onSelect={handleLocationSelect}
           results={getFilteredLocations(desiredLocation)}
           renderItem={renderLocationItem}
           className="w-full"
