@@ -111,7 +111,7 @@ export const useLeadCreation = () => {
       if (!isAdmin && data.assignedTo && data.assignedTo !== currentUserTeamId) {
         console.log("Non-admin trying to assign to someone else. Redirecting to self:", currentUserTeamId);
         toast({
-          variant: "warning",
+          variant: "destructive", // Changed from "warning" to "destructive" to match allowed variants
           title: "Attribution automatique",
           description: "En tant que commercial, le lead a été automatiquement assigné à vous-même."
         });
