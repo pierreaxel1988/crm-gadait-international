@@ -11,7 +11,6 @@ interface LeadFormWrapperProps {
   isSubmitting: boolean;
   currentUserTeamId?: string | undefined;
   isAdmin?: boolean;
-  enforceRlsRules?: boolean;
   lead?: LeadDetailed;
 }
 
@@ -21,7 +20,6 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   adminAssignedAgent,
   isSubmitting,
   currentUserTeamId,
-  enforceRlsRules = true, // Modifié de false à true par défaut
   lead,
 }) => {
   const { isAdmin } = useAuth();
@@ -29,7 +27,6 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   console.log("[LeadFormWrapper] Render - isAdmin:", isAdmin);
   console.log("[LeadFormWrapper] adminAssignedAgent:", adminAssignedAgent);
   console.log("[LeadFormWrapper] currentUserTeamId:", currentUserTeamId);
-  console.log("[LeadFormWrapper] enforceRlsRules:", enforceRlsRules);
   console.log("[LeadFormWrapper] Lead ID:", lead?.id);
   
   return (
@@ -41,7 +38,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
         adminAssignedAgent={adminAssignedAgent}
         isSubmitting={isSubmitting}
         currentUserTeamId={currentUserTeamId}
-        enforceRlsRules={enforceRlsRules} // Passer le paramètre au lieu de forcer false
+        enforceRlsRules={true} // Always enforce RLS rules now that they're implemented
       />
     </div>
   );
