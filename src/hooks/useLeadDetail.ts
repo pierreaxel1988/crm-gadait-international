@@ -3,6 +3,7 @@ import { LeadDetailed } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { getLead, updateLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useLeadDetail(id: string | undefined) {
   const [lead, setLead] = useState<LeadDetailed | undefined>(undefined);
@@ -213,6 +214,63 @@ export function useLeadDetail(id: string | undefined) {
     }
   }, [lead?.actionHistory, hasShownPendingActionsToast]);
 
+  const fetchJacquesId = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('id')
+        .ilike('name', '%jacques%')
+        .single();
+      
+      if (error) {
+        console.error('Error fetching Jacques ID:', error);
+        return null;
+      }
+      
+      return data?.id || null;
+    } catch (error) {
+      console.error('Unexpected error fetching Jacques ID:', error);
+      return null;
+    }
+  };
+
+  const handleReassignToJacques = async () => {
+    if (!lead) return;
+
+    const jacquesId = await fetchJacquesId();
+    
+    if (!jacquesId) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de trouver l'ID de Jacques."
+      });
+      return;
+    }
+
+    try {
+      const updatedLead = await updateLead({
+        ...lead,
+        assignedTo: jacquesId
+      });
+      
+      if (updatedLead) {
+        setLead(updatedLead);
+        toast({
+          title: "Lead réassigné",
+          description: "Le lead a été réassigné à Jacques avec succès."
+        });
+      }
+    } catch (error) {
+      console.error("Error reassigning lead:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de réassigner le lead à Jacques."
+      });
+    }
+  };
+
   return {
     lead,
     setLead,
@@ -228,6 +286,7 @@ export function useLeadDetail(id: string | undefined) {
     getFormattedPhoneForWhatsApp,
     startCallTracking,
     endCallTracking,
-    formatDuration
+    formatDuration,
+    handleReassignToJacques
   };
 }
