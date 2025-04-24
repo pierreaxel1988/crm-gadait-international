@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 import { Label } from '@/components/ui/label';
@@ -13,7 +12,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-// Définir les types pour les props
 interface TeamMemberSelectProps {
   value: string | undefined;
   onChange: (value: string | undefined) => void;
@@ -28,11 +26,9 @@ interface TeamMember {
   email: string;
 }
 
-// IDs de tous les membres importants - à ne jamais supprimer de l'interface
 const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
 const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9";
 
-// Liste des membres garantis pour avoir toujours les données à jour
 const GUARANTEED_MEMBERS: Record<string, {name: string, email: string}> = {
   [JACQUES_ID]: {
     name: 'Jacques Charles',
@@ -41,10 +37,22 @@ const GUARANTEED_MEMBERS: Record<string, {name: string, email: string}> = {
   [PIERRE_AXEL_ID]: {
     name: 'Pierre-Axel Gadait',
     email: 'pierre@gadait-international.com'
+  },
+  "chloe-valentin": {
+    name: 'Chloe Valentin',
+    email: 'chloe@gadait-international.com'
+  },
+  "christelle-gadait": {
+    name: 'Christelle Gadait',
+    email: 'christelle@gadait-international.com'
+  },
+  "christine-francoise": {
+    name: 'Christine Francoise',
+    email: 'christine@gadait-international.com'
   }
 };
 
-const TeamMemberSelect = ({ 
+const TeamMemberSelect = ({
   value, 
   onChange, 
   label = "Attribuer à",
@@ -71,9 +79,8 @@ const TeamMemberSelect = ({
 
         let membersData = data || [];
         
-        // S'assurer que tous les membres garantis sont présents
         Object.entries(GUARANTEED_MEMBERS).forEach(([id, member]) => {
-          const memberIndex = membersData.findIndex(m => m.id === id);
+          const memberIndex = membersData.findIndex(m => m.name === member.name);
           if (memberIndex === -1) {
             membersData.push({
               id,
@@ -82,18 +89,15 @@ const TeamMemberSelect = ({
             });
             console.log(`${member.name} a été ajouté manuellement à la liste des agents`);
           } else {
-            // Mettre à jour les informations pour s'assurer qu'elles sont correctes
             membersData[memberIndex].name = member.name;
             membersData[memberIndex].email = member.email;
           }
         });
         
-        // Trier les membres par nom
         membersData.sort((a, b) => a.name.localeCompare(b.name));
         
         setTeamMembers(membersData);
         
-        // Auto-select Pierre Axel Gadait if requested and no value is already set
         if (autoSelectPierreAxel && !value && membersData.length > 0) {
           const pierreAxel = membersData.find(member => member.id === PIERRE_AXEL_ID);
           
@@ -104,7 +108,6 @@ const TeamMemberSelect = ({
           }
         }
         
-        // Set the name for the already selected member
         if (value && membersData.length > 0) {
           const selectedMember = membersData.find(member => member.id === value);
           if (selectedMember) {
@@ -130,7 +133,6 @@ const TeamMemberSelect = ({
   const handleChange = (newValue: string) => {
     console.log("Selected agent value:", newValue);
     
-    // Update selected member name
     if (newValue !== "non_assigné") {
       const selectedMember = teamMembers.find(member => member.id === newValue);
       if (selectedMember) {
@@ -141,7 +143,6 @@ const TeamMemberSelect = ({
       setSelectedMemberName(undefined);
     }
     
-    // Si "non_assigné" est sélectionné, on passe undefined
     onChange(newValue === "non_assigné" ? undefined : newValue);
   };
 

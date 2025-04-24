@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { TeamMember } from '../types/chatTypes';
@@ -10,7 +9,10 @@ const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9";
 // Liste des membres garantis
 const GUARANTEED_MEMBERS: Record<string, {name: string}> = {
   [JACQUES_ID]: { name: 'Jacques Charles' },
-  [PIERRE_AXEL_ID]: { name: 'Pierre-Axel Gadait' }
+  [PIERRE_AXEL_ID]: { name: 'Pierre-Axel Gadait' },
+  "chloe-valentin": { name: 'Chloe Valentin' },
+  "christelle-gadait": { name: 'Christelle Gadait' },
+  "christine-francoise": { name: 'Christine Francoise' }
 };
 
 export const useTeamMembers = () => {
@@ -33,7 +35,7 @@ export const useTeamMembers = () => {
         
         // S'assurer que tous les membres garantis sont présents
         Object.entries(GUARANTEED_MEMBERS).forEach(([id, member]) => {
-          const memberExists = membersData.some(m => m.id === id);
+          const memberExists = membersData.some(m => m.name === member.name);
           if (!memberExists) {
             membersData.push({
               id: id,
