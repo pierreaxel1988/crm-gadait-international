@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AgentFilterButtonsProps {
   agentFilter: string | null;
@@ -15,21 +16,47 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
   setAgentFilter, 
   teamMembers: providedMembers
 }) => {
+  const { isAdmin, isCommercial, user } = useAuth();
   const [localTeamMembers, setLocalTeamMembers] = useState<{ id: string; name: string }[]>(providedMembers);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentUserTeamId, setCurrentUserTeamId] = useState<string | null>(null);
   
   // Charger les membres d'équipe directement si nécessaire
   useEffect(() => {
     const loadTeamMembers = async () => {
-      if (providedMembers.length > 0) return; // Ne pas charger si déjà fourni
-      
       setIsLoading(true);
       try {
-        console.log("[AgentFilterButtons] Chargement des membres d'équipe...");
-        const { data, error } = await supabase
+        console.log("[AgentFilterButtons] Chargement des membres d'équipe - isAdmin:", isAdmin, "isCommercial:", isCommercial);
+        
+        let query = supabase
           .from('team_members')
-          .select('id, name')
-          .order('name');
+          .select('id, name');
+          
+        // Pour les commerciaux, filtrer pour ne voir que leur propre entrée
+        if (isCommercial && !isAdmin && user?.email) {
+          console.log(`[AgentFilterButtons] Filtrage pour commercial: ${user.email}`);
+          query = query.eq('email', user.email);
+          
+          // Récupérer l'ID du commercial actuel
+          const { data: currentUser } = await supabase
+            .from('team_members')
+            .select('id')
+            .eq('email', user.email)
+            .maybeSingle();
+            
+          if (currentUser) {
+            setCurrentUserTeamId(currentUser.id);
+            console.log("[AgentFilterButtons] ID du commercial actuel:", currentUser.id);
+            
+            // Auto-sélectionner le commercial
+            if (!agentFilter) {
+              setAgentFilter(currentUser.id);
+            }
+          }
+        }
+        
+        // Exécuter la requête finale
+        const { data, error } = await query.order('name');
           
         if (error) {
           console.error("[AgentFilterButtons] Erreur:", error);
@@ -44,8 +71,54 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
       }
     };
     
-    loadTeamMembers();
-  }, [providedMembers]);
+    if (providedMembers.length === 0) {
+      loadTeamMembers();
+    } else {
+      // Vérifier s'il faut filtrer les membres fournis pour un commercial
+      if (isCommercial && !isAdmin && user?.email) {
+        // Trouver l'ID du commercial actuel parmi les membres fournis
+        const findUserIdFromEmail = async () => {
+          try {
+            const { data: currentUser } = await supabase
+              .from('team_members')
+              .select('id')
+              .eq('email', user.email)
+              .maybeSingle();
+              
+            if (currentUser) {
+              setCurrentUserTeamId(currentUser.id);
+              console.log("[AgentFilterButtons] ID du commercial trouvé parmi les membres fournis:", currentUser.id);
+              
+              // Filtrer pour ne garder que l'entrée du commercial
+              setLocalTeamMembers(providedMembers.filter(member => member.id === currentUser.id));
+              
+              // Auto-sélectionner le commercial
+              if (!agentFilter) {
+                setAgentFilter(currentUser.id);
+              }
+            }
+          } catch (error) {
+            console.error("[AgentFilterButtons] Erreur lors de la recherche de l'ID du commercial:", error);
+          }
+        };
+        
+        findUserIdFromEmail();
+      }
+    }
+  }, [providedMembers, isAdmin, isCommercial, user?.email]);
+  
+  const handleFilterClick = (agentId: string | null) => {
+    // Pour les commerciaux, ne permettre que la sélection de leur propre ID
+    if (isCommercial && !isAdmin && agentId !== currentUserTeamId && agentId !== null) {
+      console.log("[AgentFilterButtons] Commercial tentant de filtrer par un autre agent - bloqué");
+      return;
+    }
+    
+    setAgentFilter(agentId);
+  };
+  
+  // Pour les commerciaux, désactiver le bouton "Tous"
+  const canSelectAll = isAdmin || !isCommercial;
   
   // Utilisez les membres locaux pour le rendu
   const membersToDisplay = localTeamMembers.length > 0 ? localTeamMembers : providedMembers;
@@ -59,21 +132,23 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
         <div className="text-xs text-amber-600 p-2">Chargement des agents...</div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <Button
-            variant={agentFilter === null ? "default" : "outline"}
-            size="sm"
-            className="text-xs"
-            onClick={() => setAgentFilter(null)}
-          >
-            Tous
-          </Button>
+          {canSelectAll && (
+            <Button
+              variant={agentFilter === null ? "default" : "outline"}
+              size="sm"
+              className="text-xs"
+              onClick={() => handleFilterClick(null)}
+            >
+              Tous
+            </Button>
+          )}
           {membersToDisplay.map(member => (
             <Button
               key={member.id}
               variant={agentFilter === member.id ? "default" : "outline"}
               size="sm"
               className="text-xs whitespace-normal h-auto py-1.5"
-              onClick={() => setAgentFilter(member.id)}
+              onClick={() => handleFilterClick(member.id)}
             >
               {member.name}
             </Button>

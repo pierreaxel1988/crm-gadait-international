@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { LeadDetailed } from '@/types/lead';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -10,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LeadFormProps {
   lead?: LeadDetailed;
@@ -21,7 +21,6 @@ interface LeadFormProps {
   isSubmitting?: boolean;
   hideSubmitButton?: boolean;
   currentUserTeamId?: string | undefined;
-  enforceRlsRules?: boolean;
 }
 
 const LeadForm: React.FC<LeadFormProps> = ({ 
@@ -34,9 +33,8 @@ const LeadForm: React.FC<LeadFormProps> = ({
   isSubmitting = false,
   hideSubmitButton = false,
   currentUserTeamId,
-  enforceRlsRules = false
 }) => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isCommercial, user } = useAuth();
   const [formData, setFormData] = useState<LeadDetailed>({
     id: lead?.id || uuidv4(),
     name: lead?.name || '',
@@ -75,14 +73,55 @@ const LeadForm: React.FC<LeadFormProps> = ({
     taxResidence: lead?.taxResidence || '',
   });
 
+  const [currentUserTeamMemberId, setCurrentUserTeamMemberId] = useState<string | undefined>(currentUserTeamId);
+
+  // Effet pour récupérer l'ID de l'utilisateur actuel si c'est un commercial
   useEffect(() => {
-    if (adminAssignedAgent !== undefined) {
+    const fetchCurrentUserTeamId = async () => {
+      if (isCommercial && !isAdmin && user?.email) {
+        try {
+          console.log("[LeadForm] Récupération de l'ID de l'équipe pour l'utilisateur commercial:", user.email);
+          
+          const { data, error } = await supabase
+            .from('team_members')
+            .select('id')
+            .eq('email', user.email)
+            .maybeSingle();
+            
+          if (error) {
+            console.error("[LeadForm] Erreur lors de la récupération de l'ID de l'équipe:", error);
+            return;
+          }
+          
+          if (data) {
+            console.log("[LeadForm] ID de l'équipe trouvé:", data.id);
+            setCurrentUserTeamMemberId(data.id);
+            
+            // Pour les commerciaux, force l'assignation à eux-mêmes
+            if (!formData.assignedTo) {
+              setFormData(prev => ({ ...prev, assignedTo: data.id }));
+            }
+          }
+        } catch (error) {
+          console.error("[LeadForm] Exception lors de la récupération de l'ID de l'équipe:", error);
+        }
+      }
+    };
+    
+    fetchCurrentUserTeamId();
+  }, [isCommercial, isAdmin, user]);
+
+  // Effet pour appliquer les modifications d'adminAssignedAgent et currentUserTeamId
+  useEffect(() => {
+    if (adminAssignedAgent !== undefined && isAdmin) {
+      console.log("[LeadForm] Application de l'agent assigné par l'admin:", adminAssignedAgent);
       setFormData(prev => ({ ...prev, assignedTo: adminAssignedAgent }));
     } 
-    else if (!isAdmin && currentUserTeamId && enforceRlsRules) {
-      setFormData(prev => ({ ...prev, assignedTo: currentUserTeamId }));
+    else if (isCommercial && !isAdmin && currentUserTeamMemberId) {
+      console.log("[LeadForm] Auto-assignation au commercial actuel:", currentUserTeamMemberId);
+      setFormData(prev => ({ ...prev, assignedTo: currentUserTeamMemberId }));
     }
-  }, [adminAssignedAgent, isAdmin, currentUserTeamId, enforceRlsRules]);
+  }, [adminAssignedAgent, currentUserTeamMemberId, isAdmin, isCommercial]);
 
   useEffect(() => {
     if (lead) {
@@ -115,9 +154,10 @@ const LeadForm: React.FC<LeadFormProps> = ({
       return;
     }
     
-    if (!isAdmin && currentUserTeamId && enforceRlsRules && formData.assignedTo !== currentUserTeamId) {
-      console.log("Setting assignedTo to current user before submit:", currentUserTeamId);
-      const updatedData = { ...formData, assignedTo: currentUserTeamId };
+    // Pour les commerciaux, forcer l'assignation à eux-mêmes
+    if (isCommercial && !isAdmin && currentUserTeamMemberId) {
+      console.log("[LeadForm] Forçage de l'assignation au commercial actuel avant soumission:", currentUserTeamMemberId);
+      const updatedData = { ...formData, assignedTo: currentUserTeamMemberId };
       
       if (!isSubmitting) {
         onSubmit(updatedData);
@@ -134,9 +174,23 @@ const LeadForm: React.FC<LeadFormProps> = ({
   };
 
   const handleAssignedToChange = (value: string | undefined) => {
-    // Since RLS is disabled, allow assignment to anyone regardless of user role
+    // Pour les commerciaux, vérifier qu'ils ne s'assignent qu'à eux-mêmes
+    if (isCommercial && !isAdmin && value !== currentUserTeamMemberId && value !== undefined) {
+      console.log("[LeadForm] Commercial tentant d'assigner à quelqu'un d'autre - bloqué");
+      toast({
+        variant: "destructive",
+        title: "Action non autorisée",
+        description: "En tant que commercial, vous ne pouvez assigner les leads qu'à vous-même."
+      });
+      return;
+    }
+    
     setFormData(prev => ({ ...prev, assignedTo: value }));
   };
+
+  console.log("[LeadForm] Render - isAdmin:", isAdmin, "isCommercial:", isCommercial);
+  console.log("[LeadForm] currentUserTeamMemberId:", currentUserTeamMemberId);
+  console.log("[LeadForm] formData.assignedTo:", formData.assignedTo);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -175,8 +229,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
             value={formData.assignedTo}
             onChange={handleAssignedToChange}
             label="Attribuer à"
-            enforceRlsRules={enforceRlsRules}
-            disabled={false} // Remove the restriction that only admins can change assignment
+            disabled={isCommercial && !isAdmin} // Désactiver pour les commerciaux
           />
         </div>
       </div>

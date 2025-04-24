@@ -23,7 +23,7 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
             .from('team_members')
             .select('id, name')
             .eq('id', assignedToId)
-            .maybeSingle(); // Utiliser maybeSingle au lieu de single
+            .maybeSingle();
             
           if (error) {
             console.error('[AssignedUser] Erreur:', error);

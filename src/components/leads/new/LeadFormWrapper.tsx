@@ -2,6 +2,7 @@
 import React from 'react';
 import LeadForm from '@/components/leads/LeadForm';
 import { LeadDetailed } from '@/types/lead';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LeadFormWrapperProps {
   onSubmit: (data: LeadDetailed) => void;
@@ -10,7 +11,6 @@ interface LeadFormWrapperProps {
   isSubmitting: boolean;
   currentUserTeamId?: string | undefined;
   isAdmin?: boolean;
-  enforceRlsRules?: boolean;
 }
 
 const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
@@ -19,12 +19,12 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   adminAssignedAgent,
   isSubmitting,
   currentUserTeamId,
-  isAdmin,
-  // Forcer enforceRlsRules à false pour ignorer complètement les restrictions RLS
-  enforceRlsRules = false 
 }) => {
-  console.log("[LeadFormWrapper] Render avec enforceRlsRules:", enforceRlsRules);
+  const { isAdmin } = useAuth();
+  
+  console.log("[LeadFormWrapper] Render - isAdmin:", isAdmin);
   console.log("[LeadFormWrapper] adminAssignedAgent:", adminAssignedAgent);
+  console.log("[LeadFormWrapper] currentUserTeamId:", currentUserTeamId);
   
   return (
     <div className="luxury-card p-6 border-loro-sand">
@@ -34,7 +34,6 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
         adminAssignedAgent={adminAssignedAgent}
         isSubmitting={isSubmitting}
         currentUserTeamId={currentUserTeamId}
-        enforceRlsRules={false} // Forcer à false pour désactiver les restrictions
       />
     </div>
   );

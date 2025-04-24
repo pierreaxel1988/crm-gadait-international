@@ -12,6 +12,7 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TeamMemberSelectProps {
   value: string | undefined;
@@ -19,7 +20,6 @@ interface TeamMemberSelectProps {
   label?: string;
   autoSelectPierreAxel?: boolean;
   disabled?: boolean;
-  enforceRlsRules?: boolean;
 }
 
 interface TeamMember {
@@ -37,23 +37,47 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   disabled = false,
 }) => {
   const isMobile = useIsMobile();
+  const { isAdmin, isCommercial, user } = useAuth();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMemberName, setSelectedMemberName] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
+  const [currentUserTeamId, setCurrentUserTeamId] = useState<string | null>(null);
 
-  // Fonction pour charger tous les membres de l'équipe
-  const fetchAllTeamMembers = async () => {
+  // Fonction pour charger les membres de l'équipe en fonction du rôle utilisateur
+  const fetchTeamMembers = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      console.log('[TeamMemberSelect] Chargement de tous les membres d\'équipe...');
+      console.log('[TeamMemberSelect] Début du chargement des membres d\'équipe');
+      console.log('[TeamMemberSelect] User role - Admin:', isAdmin, 'Commercial:', isCommercial);
       
-      // Query simple sans filtres ni RLS
-      const { data, error } = await supabase
-        .from('team_members')
-        .select('id, name, email, is_admin');
+      // Construire la requête pour récupérer les membres d'équipe
+      let query = supabase.from('team_members').select('id, name, email, is_admin');
+      
+      // Pour les commerciaux qui ne sont pas admin, filtrer pour ne voir que leur propre entrée
+      if (isCommercial && !isAdmin && user?.email) {
+        console.log(`[TeamMemberSelect] Filtrage pour commercial: ${user.email}`);
+        query = query.eq('email', user.email);
+        
+        // Récupérer également l'ID de l'utilisateur actuel pour l'auto-assignation
+        const { data: currentUser } = await supabase
+          .from('team_members')
+          .select('id')
+          .eq('email', user.email)
+          .maybeSingle();
+          
+        if (currentUser) {
+          console.log('[TeamMemberSelect] ID utilisateur courant trouvé:', currentUser.id);
+          setCurrentUserTeamId(currentUser.id);
+        }
+      } else {
+        console.log('[TeamMemberSelect] Chargement de tous les membres (mode Admin)');
+      }
+      
+      // Exécuter la requête
+      const { data, error } = await query.order('name');
 
       if (error) {
         console.error('[TeamMemberSelect] Erreur Supabase:', error);
@@ -66,16 +90,29 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
         setTeamMembers(data);
         console.log('[TeamMemberSelect] Membres trouvés:', data.length);
         
-        if (autoSelectPierreAxel && !value) {
+        // Auto-sélection pour les commerciaux qui ne sont pas admin
+        if (isCommercial && !isAdmin && currentUserTeamId && !value) {
+          console.log('[TeamMemberSelect] Auto-assignation pour commercial:', currentUserTeamId);
+          onChange(currentUserTeamId);
+          
+          const commercialName = data.find(m => m.id === currentUserTeamId)?.name;
+          if (commercialName) {
+            setSelectedMemberName(commercialName);
+          }
+        }
+        // Auto-sélection de Pierre-Axel pour les admins si demandé
+        else if (autoSelectPierreAxel && !value && isAdmin) {
           const pierreAxel = data.find(member => 
             member.name.toLowerCase().includes('pierre-axel'));
           
           if (pierreAxel) {
+            console.log('[TeamMemberSelect] Auto-sélection de Pierre-Axel');
             onChange(pierreAxel.id);
             setSelectedMemberName(pierreAxel.name);
           }
         }
         
+        // Mettre à jour le nom sélectionné si une valeur est déjà définie
         if (value) {
           const selectedMember = data.find(member => member.id === value);
           if (selectedMember) {
@@ -100,10 +137,21 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   };
 
   useEffect(() => {
-    fetchAllTeamMembers();
-  }, [autoSelectPierreAxel, value]);
+    fetchTeamMembers();
+  }, [autoSelectPierreAxel, value, isAdmin, isCommercial, user?.email]);
 
   const handleChange = (newValue: string) => {
+    // Pour les commerciaux, vérifier qu'ils ne s'assignent qu'à eux-mêmes
+    if (isCommercial && !isAdmin && currentUserTeamId && newValue !== "non_assigné" && newValue !== currentUserTeamId) {
+      console.log('[TeamMemberSelect] Commercial tentant d\'assigner à un autre commercial - bloqué');
+      toast({
+        variant: "destructive",
+        title: "Action non autorisée",
+        description: "En tant que commercial, vous ne pouvez assigner les leads qu'à vous-même."
+      });
+      return;
+    }
+    
     if (newValue !== "non_assigné") {
       const selectedMember = teamMembers.find(member => member.id === newValue);
       if (selectedMember) {

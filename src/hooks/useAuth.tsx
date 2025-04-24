@@ -14,6 +14,22 @@ interface AuthContextType {
   userRole: 'admin' | 'commercial' | 'guest';
 }
 
+// Liste des emails pour l'équipe administrative et commerciale
+const ADMIN_EMAILS = [
+  'pierre@gadait-international.com',
+  'christelle@gadait-international.com',
+  'admin@gadait-international.com',
+  'chloe@gadait-international.com'
+];
+
+const COMMERCIAL_EMAILS = [
+  'jade@gadait-international.com',
+  'ophelie@gadait-international.com',
+  'jeanmarc@gadait-international.com',
+  'jacques@gadait-international.com',
+  'sharon@gadait-international.com'
+];
+
 // Création du contexte avec une valeur par défaut complète
 const defaultContext: AuthContextType = {
   session: null,
@@ -36,10 +52,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isCommercial, setIsCommercial] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'commercial' | 'guest'>('guest');
 
+  // Fonction pour déterminer le rôle d'un utilisateur à partir de son email
+  const determineUserRole = (email: string | null | undefined) => {
+    if (!email) {
+      return { isAdmin: false, isCommercial: false, role: 'guest' as const };
+    }
+
+    const isUserAdmin = ADMIN_EMAILS.includes(email);
+    const isUserCommercial = COMMERCIAL_EMAILS.includes(email);
+
+    let role: 'admin' | 'commercial' | 'guest' = 'guest';
+    if (isUserAdmin) role = 'admin';
+    else if (isUserCommercial) role = 'commercial';
+
+    return { isAdmin: isUserAdmin, isCommercial: isUserCommercial, role };
+  };
+
   useEffect(() => {
+    console.log('[useAuth] Initialisation du hook d\'authentification');
+
     // Configuration explicite de Supabase pour assurer la persistance de session
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      console.log('Auth state changed:', event, newSession?.user?.email);
+      console.log('[useAuth] Auth state changed:', event, newSession?.user?.email);
       
       setSession(newSession);
       setUser(newSession?.user ?? null);
@@ -47,34 +81,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Vérification du rôle utilisateur
       if (newSession?.user) {
         const userEmail = newSession.user.email;
-        const adminEmails = [
-          'pierre@gadait-international.com',
-          'christelle@gadait-international.com',
-          'admin@gadait-international.com',
-          'chloe@gadait-international.com'
-        ];
+        const { isAdmin: isUserAdmin, isCommercial: isUserCommercial, role } = determineUserRole(userEmail);
         
-        const commercialEmails = [
-          'jade@gadait-international.com',
-          'ophelie@gadait-international.com',
-          'jeanmarc@gadait-international.com',
-          'jacques@gadait-international.com',
-          'sharon@gadait-international.com'
-        ];
-        
-        const isUserAdmin = adminEmails.includes(userEmail || '');
-        const isUserCommercial = commercialEmails.includes(userEmail || '');
+        console.log(`[useAuth] User role determined: ${role} (Admin: ${isUserAdmin}, Commercial: ${isUserCommercial})`);
         
         setIsAdmin(isUserAdmin);
         setIsCommercial(isUserCommercial);
-        
-        if (isUserAdmin) {
-          setUserRole('admin');
-        } else if (isUserCommercial) {
-          setUserRole('commercial');
-        } else {
-          setUserRole('guest');
-        }
+        setUserRole(role);
       } else {
         setIsAdmin(false);
         setIsCommercial(false);
@@ -87,9 +100,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Récupération initiale de la session
     const getInitialSession = async () => {
       try {
-        console.log('Getting initial session...');
+        console.log('[useAuth] Getting initial session...');
         const { data } = await supabase.auth.getSession();
-        console.log('Initial session retrieved:', data.session?.user?.email);
+        console.log('[useAuth] Initial session retrieved:', data.session?.user?.email);
         
         setSession(data.session);
         setUser(data.session?.user ?? null);
@@ -97,37 +110,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Vérification du rôle utilisateur
         if (data.session?.user) {
           const userEmail = data.session.user.email;
-          const adminEmails = [
-            'pierre@gadait-international.com',
-            'christelle@gadait-international.com',
-            'admin@gadait-international.com',
-            'chloe@gadait-international.com'
-          ];
+          const { isAdmin: isUserAdmin, isCommercial: isUserCommercial, role } = determineUserRole(userEmail);
           
-          const commercialEmails = [
-            'jade@gadait-international.com',
-            'ophelie@gadait-international.com',
-            'jeanmarc@gadait-international.com',
-            'jacques@gadait-international.com',
-            'sharon@gadait-international.com'
-          ];
-          
-          const isUserAdmin = adminEmails.includes(userEmail || '');
-          const isUserCommercial = commercialEmails.includes(userEmail || '');
+          console.log(`[useAuth] Initial user role: ${role} (Admin: ${isUserAdmin}, Commercial: ${isUserCommercial})`);
           
           setIsAdmin(isUserAdmin);
           setIsCommercial(isUserCommercial);
-          
-          if (isUserAdmin) {
-            setUserRole('admin');
-          } else if (isUserCommercial) {
-            setUserRole('commercial');
-          } else {
-            setUserRole('guest');
-          }
+          setUserRole(role);
         }
       } catch (error) {
-        console.error('Error getting initial session:', error);
+        console.error('[useAuth] Error getting initial session:', error);
       } finally {
         setLoading(false);
       }
@@ -142,17 +134,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signOut = async () => {
     try {
-      console.log('Signing out...');
+      console.log('[useAuth] Signing out...');
       await supabase.auth.signOut();
-      console.log('Signed out successfully');
+      console.log('[useAuth] Signed out successfully');
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('[useAuth] Error signing out:', error);
     }
   };
 
   const signInWithGoogle = async () => {
     try {
-      console.log('Signing in with Google...');
+      console.log('[useAuth] Signing in with Google...');
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -160,12 +152,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       });
       if (error) {
-        console.error('Error signing in with Google:', error);
+        console.error('[useAuth] Error signing in with Google:', error);
         throw error;
       }
-      console.log('Google auth initiated');
+      console.log('[useAuth] Google auth initiated');
     } catch (error) {
-      console.error('Error signing in with Google:', error);
+      console.error('[useAuth] Error signing in with Google:', error);
       throw error;
     }
   };
@@ -182,7 +174,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     userRole
   };
 
-  console.log('AuthProvider rendering with user:', user?.email);
+  console.log('[useAuth] Provider rendering with user:', user?.email, 'role:', userRole);
 
   return (
     <AuthContext.Provider value={contextValue}>
@@ -194,7 +186,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    console.error('useAuth must be used within an AuthProvider');
+    console.error('[useAuth] must be used within an AuthProvider');
     // Retourner la valeur par défaut au lieu de lever une erreur
     return defaultContext;
   }
