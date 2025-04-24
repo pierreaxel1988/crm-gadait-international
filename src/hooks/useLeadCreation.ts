@@ -86,20 +86,12 @@ export const useLeadCreation = () => {
       delete newLeadData.id;
       delete newLeadData.createdAt;
       
-      // Assignation basée sur les rôles et permissions
-      if (!isAdmin && currentUserTeamId) {
-        // Les commerciaux sont toujours auto-assignés
-        newLeadData.assignedTo = currentUserTeamId;
-        if (data.assignedTo && data.assignedTo !== currentUserTeamId) {
-          toast({
-            variant: "destructive",
-            title: "Attribution automatique",
-            description: "En tant que commercial, le lead a été automatiquement assigné à vous-même."
-          });
-        }
-      } else if (isAdmin) {
-        // Les admins peuvent assigner à n'importe qui
-        newLeadData.assignedTo = data.assignedTo || assignedAgent;
+      // Conserver l'assignation définie par l'utilisateur
+      // puisque RLS est désactivé, pas besoin de vérifier les permissions
+      if (data.assignedTo) {
+        newLeadData.assignedTo = data.assignedTo;
+      } else if (assignedAgent) {
+        newLeadData.assignedTo = assignedAgent;
       }
       
       newLeadData.pipelineType = pipelineType;
@@ -138,11 +130,10 @@ export const useLeadCreation = () => {
   }, [assignedAgent, isAdmin, isSubmitting, leadStatus, navigate, pipelineType, currentUserTeamId]);
 
   const handleAgentChange = useCallback((value: string | undefined) => {
-    if (!isAdmin && currentUserTeamId) {
-      return; // Les commerciaux ne peuvent pas changer l'assignation
-    }
+    // Permettre à tous les utilisateurs de changer l'assignation
+    // puisque RLS est désactivé
     setAssignedAgent(value);
-  }, [isAdmin, currentUserTeamId]);
+  }, []);
 
   const handlePipelineTypeChange = useCallback((value: PipelineType) => {
     setPipelineType(value);
