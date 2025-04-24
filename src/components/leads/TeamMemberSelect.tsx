@@ -65,6 +65,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       }
       
       // Récupérer tous les membres d'équipe sans filtre
+      // C'est ici le problème: nous devons récupérer TOUS les membres d'équipe
       const { data, error: fetchError } = await supabase
         .from('team_members')
         .select('id, name, email, is_admin')
@@ -89,7 +90,8 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
             console.log('[TeamMemberSelect] ID trouvé pour le commercial:', commercialMember.id);
             setCurrentUserTeamId(commercialMember.id);
             
-            // Auto-assignation pour les commerciaux
+            // Pour les commerciaux, on peut leur proposer de s'auto-assigner
+            // mais sans forçage
             if (!value) {
               console.log('[TeamMemberSelect] Auto-assignation pour commercial:', commercialMember.id);
               onChange(commercialMember.id);
@@ -183,7 +185,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   }, [value, teamMembers]);
 
   const handleChange = (newValue: string) => {
-    // Ne plus restreindre les commerciaux à s'auto-assigner
+    // Nous permettons à tous les utilisateurs de choisir n'importe quel agent
     if (newValue !== "non_assigné") {
       const selectedMember = teamMembers.find(member => member.id === newValue);
       if (selectedMember) {

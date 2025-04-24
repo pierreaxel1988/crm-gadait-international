@@ -57,8 +57,7 @@ const LeadNew: React.FC = () => {
         adminAssignedAgent={assignedAgent}
         isSubmitting={isSubmitting}
         currentUserTeamId={currentUserTeamId}
-        isAdmin={isAdmin}
-        enforceRlsRules={false} // Set to false to disable RLS enforcement in the UI
+        enforceRlsRules={false} // Ensuring this is set to false to show all team members
       />
     </div>
   );
