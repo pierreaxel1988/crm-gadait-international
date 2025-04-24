@@ -148,16 +148,39 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
   return <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="country" className="text-sm">Pays</Label>
-        <Input id="country" value={lead.country || ''} onChange={e => onDataChange({
+        <select id="country" value={lead.country || ''} onChange={e => onDataChange({
         country: e.target.value
-      })} placeholder="Ex : France" className="w-full font-futura" type="text" />
+      })} className="w-full p-2 border border-gray-300 rounded font-futura">
+          <option value="">Sélectionner un pays</option>
+          <option value="France">France</option>
+          <option value="Spain">Espagne</option>
+          <option value="Portugal">Portugal</option>
+          <option value="Italy">Italie</option>
+          <option value="Switzerland">Suisse</option>
+          <option value="Monaco">Monaco</option>
+          <option value="Mauritius">Île Maurice</option>
+          <option value="UAE">Émirats Arabes Unis</option>
+        </select>
       </div>
       
       <div className="space-y-2">
         <Label htmlFor="desiredLocation" className="text-sm">Localisation souhaitée</Label>
         <Input id="desiredLocation" value={lead.desiredLocation || ''} onChange={e => onDataChange({
         desiredLocation: e.target.value
-      })} placeholder="Ex : Paris 16e" className="w-full font-futura" type="text" />
+      })} placeholder="Ex : Paris 16e" className="w-full font-futura" />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="location" className="text-sm">Adresse</Label>
+        <Input 
+          id="location" 
+          value={lead.location || ''} 
+          onChange={e => onDataChange({
+            location: e.target.value
+          })} 
+          placeholder="Ex : 123 Avenue des Champs-Élysées" 
+          className="w-full font-futura" 
+        />
       </div>
     </div>;
 };
