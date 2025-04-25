@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Currency } from '@/types/lead';
@@ -18,6 +19,7 @@ interface LeadListItemProps {
   nextFollowUpDate?: string;
   phone?: string;
   email?: string;
+  assignedTo?: string; // Add this prop to receive the assigned agent's name or ID
   onClick: (id: string) => void;
 }
 
@@ -33,6 +35,7 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
   nextFollowUpDate,
   phone,
   email,
+  assignedTo, // New prop
   onClick
 }) => {
   const actionStyle = getActionStatusStyle(nextFollowUpDate);
@@ -92,9 +95,16 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
           budget={budget}
           currency={currency}
         />
+
+        {assignedTo && (
+          <div className="text-xs text-zinc-400 mt-1">
+            Responsable: {assignedTo}
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default LeadListItem;
+
