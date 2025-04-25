@@ -18,6 +18,7 @@ import TimeframeFilter from './TimeframeFilter';
 import PropertyTypeFilter from './PropertyTypeFilter';
 import FilterActions from './FilterActions';
 import ActiveFilterTags from './ActiveFilterTags';
+import { SPECIFIC_AGENTS } from '@/components/actions/filters/AgentFilterButtons';
 
 export interface FilterOptions {
   status: LeadStatus | null;
@@ -88,8 +89,8 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
       {!isCommercial && (
         <AgentFilterSelect 
           assignedTo={filters.assignedTo} 
-          onAssignedToChange={(agent) => handleFilterChange('assignedTo', agent)} 
-          assignedToOptions={assignedToOptions} 
+          onAssignedToChange={(agent) => handleFilterChange('assignedTo', agent)}
+          className=""
         />
       )}
       

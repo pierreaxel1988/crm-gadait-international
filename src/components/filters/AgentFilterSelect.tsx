@@ -9,6 +9,7 @@ interface AgentFilterSelectProps {
   assignedTo: string | null;
   onAssignedToChange: (agentId: string | null) => void;
   className?: string;
+  assignedToOptions?: { id: string; name: string }[];
 }
 
 const AgentFilterSelect = ({ 
