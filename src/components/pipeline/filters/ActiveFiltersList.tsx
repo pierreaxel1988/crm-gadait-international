@@ -5,24 +5,30 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import TagBadge from '@/components/common/TagBadge';
 import { PurchaseTimeframe, PropertyType } from '@/types/lead';
-import { FilterOptions } from '@/components/pipeline/PipelineFilters';
+import { FilterOptions } from '@/components/pipeline/types/filterTypes';
 import { Button } from '@/components/ui/button';
 
 interface ActiveFiltersListProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
-  getTeamMemberName: (id: string) => string;
   isFilterActive: (filterName: string) => boolean;
+  teamMembers?: { id: string; name: string }[];
 }
 
 const ActiveFiltersList = ({ 
   filters, 
   onFilterChange, 
   onClearFilters, 
-  getTeamMemberName,
-  isFilterActive 
+  isFilterActive,
+  teamMembers = []
 }: ActiveFiltersListProps) => {
+  // Helper function to get team member name from ID
+  const getTeamMemberName = (id: string): string => {
+    const member = teamMembers.find(member => member.id === id);
+    return member ? member.name : 'Unknown';
+  };
+
   // Check if any filters are active by using the isFilterActive function
   const hasActiveFilters = 
     isFilterActive('status') || 
@@ -63,7 +69,7 @@ const ActiveFiltersList = ({
       {filters.assignedTo && (
         <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
           {getTeamMemberName(filters.assignedTo)}
-          <button onClick={() => onFilterChange({...filters, assignedTo: null})}>
+          <button onClick={() => onFilterChange({...filters, assignedTo: undefined})}>
             <X className="h-3 w-3 ml-1" />
           </button>
         </div>

@@ -20,6 +20,7 @@ export interface PipelineFiltersProps {
   isFilterActive: (filterName: string) => boolean;
   isMobile?: boolean;
   onApplyFilters?: () => void;
+  teamMembers?: { id: string; name: string }[];
 }
 
 const PipelineFilters: React.FC<PipelineFiltersProps> = ({
@@ -28,7 +29,8 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   onClearFilters,
   isFilterActive,
   isMobile = false,
-  onApplyFilters
+  onApplyFilters,
+  teamMembers = []
 }) => {
   const filtersContent = (
     <div className={`${isMobile ? 'pt-2' : 'p-4'} space-y-6`}>
@@ -93,6 +95,7 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
         onFilterChange={onFilterChange} 
         onClearFilters={onClearFilters}
         isFilterActive={isFilterActive}
+        teamMembers={teamMembers}
       />
     </div>
   );

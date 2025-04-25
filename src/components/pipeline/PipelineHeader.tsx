@@ -3,10 +3,11 @@ import React from 'react';
 import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, SlidersHorizontal, X, RefreshCcw } from 'lucide-react';
-import PipelineFilters, { FilterOptions } from './PipelineFilters';
+import PipelineFilters from './PipelineFilters';
 import { useNavigate } from 'react-router-dom';
 import ActiveFiltersList from './filters/ActiveFiltersList';
 import PipelineSearchBar from './PipelineSearchBar';
+import { FilterOptions } from './types/filterTypes';
 
 interface PipelineHeaderProps {
   searchTerm: string;
@@ -38,12 +39,6 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   isRefreshing = false
 }) => {
   const navigate = useNavigate();
-
-  // Get team member name by ID
-  const getTeamMemberName = (id: string): string => {
-    const member = teamMembers.find(member => member.id === id);
-    return member ? member.name : 'Unknown';
-  };
 
   // Function to apply filters
   const handleApplyFilters = () => {
@@ -120,8 +115,8 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
           filters={filters}
           onFilterChange={onFilterChange}
           onClearFilters={onClearFilters}
-          getTeamMemberName={getTeamMemberName}
           isFilterActive={isFilterActive}
+          teamMembers={teamMembers}
         />
       )}
 
@@ -132,9 +127,9 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
             filters={filters}
             onFilterChange={onFilterChange}
             onClearFilters={onClearFilters}
-            assignedToOptions={teamMembers}
             isFilterActive={isFilterActive}
             onApplyFilters={handleApplyFilters}
+            teamMembers={teamMembers}
           />
         </div>
       )}
