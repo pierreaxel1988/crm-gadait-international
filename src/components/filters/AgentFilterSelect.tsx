@@ -14,12 +14,29 @@ interface AgentFilterSelectProps {
   className?: string;
 }
 
+const SPECIFIC_AGENTS = [
+  { id: "jade-diouane", name: "Jade Diouane" },
+  { id: "jean-marc-perrissol", name: "Jean Marc Perrissol" },
+  { id: "jacques-charles", name: "Jacques Charles" },
+  { id: "sharon-ramdiane", name: "Sharon Ramdiane" },
+  { id: "ophelie-durand", name: "Ophelie Durand" },
+  { id: "pierre-axel-gadait", name: "Pierre-Axel Gadait" }
+];
+
 const AgentFilterSelect = ({ 
   assignedTo, 
   onAssignedToChange, 
-  assignedToOptions,
-  className
+  assignedToOptions = [], 
+  className 
 }: AgentFilterSelectProps) => {
+  // Combine and deduplicate agents
+  const combinedAgents = [
+    ...SPECIFIC_AGENTS,
+    ...assignedToOptions.filter(
+      agent => !SPECIFIC_AGENTS.some(specificAgent => specificAgent.name === agent.name)
+    )
+  ];
+
   return (
     <FilterGroup className={className}>
       <div className="flex items-center gap-2 text-sm">
@@ -36,7 +53,7 @@ const AgentFilterSelect = ({
         <SelectContent>
           <SelectGroup>
             <SelectItem value="all">Tous les agents</SelectItem>
-            {assignedToOptions.map((agent) => (
+            {combinedAgents.map((agent) => (
               <SelectItem key={agent.id} value={agent.id}>
                 {agent.name}
               </SelectItem>
