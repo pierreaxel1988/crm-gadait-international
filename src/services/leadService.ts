@@ -1,3 +1,4 @@
+
 import { LeadDetailed } from "@/types/lead";
 import { 
   createLead as createLeadCore,
@@ -195,10 +196,7 @@ export {
   updateLead, 
   deleteLead, 
   convertToSimpleLead,
-  addActionToLead,
-  reassignJadeLeads,
-  reassignJeanMarcLeads,
-  reassignSharonLeads
+  addActionToLead
 };
 
 export type { LeadDetailed };
