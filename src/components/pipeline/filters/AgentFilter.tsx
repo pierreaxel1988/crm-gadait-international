@@ -1,8 +1,8 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
+import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 
 interface TeamMember {
   id: string;
@@ -14,25 +14,6 @@ interface AgentFilterProps {
   onAssignedToChange: (assignedTo: string | null) => void;
   assignedToOptions: TeamMember[];
 }
-
-// Important IDs to never forget
-const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
-const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9";
-const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
-const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11"; // Jean Marc's correct UUID
-
-// Liste des membres garantis
-const GUARANTEED_MEMBERS: Record<string, {name: string}> = {
-  [JACQUES_ID]: { name: 'Jacques Charles' },
-  [PIERRE_AXEL_ID]: { name: 'Pierre-Axel Gadait' },
-  [JADE_ID]: { name: 'Jade Diouane' },
-  [JEAN_MARC_ID]: { name: 'Jean Marc Perrissol' }, // Using correct UUID
-  "chloe-valentin": { name: 'Chloe Valentin' },
-  "christelle-gadait": { name: 'Christelle Gadait' },
-  "christine-francoise": { name: 'Christine Francoise' },
-  "sharon-ramdiane": { name: 'Sharon Ramdiane' },
-  "ophelie-durand": { name: 'Ophelie Durand' }
-};
 
 const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: AgentFilterProps) => {
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
@@ -65,19 +46,8 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
   };
 
   // S'assurer que tous les membres garantis sont présents dans les options
-  const allMembers = [...assignedToOptions];
-  Object.entries(GUARANTEED_MEMBERS).forEach(([id, member]) => {
-    const memberExists = allMembers.some(m => m.id === id);
-    if (!memberExists) {
-      allMembers.push({
-        id: id,
-        name: member.name
-      });
-    }
-  });
-
-  // Trier les membres par ordre alphabétique
-  allMembers.sort((a, b) => a.name.localeCompare(b.name));
+  const allMembers = [...GUARANTEED_TEAM_MEMBERS]
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   // Trouver le nom du commercial actuellement sélectionné
   const selectedAgentName = assignedTo 

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { getLeads } from '@/services/leadCore';
+import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import { PropertyType, PurchaseTimeframe, PipelineType, Currency, MauritiusRegion } from '@/types/lead';
 import type { Json } from '@/integrations/supabase/types';
@@ -66,26 +67,20 @@ interface TeamMember {
   email: string;
 }
 
-export const useKanbanData = (
-  columns: KanbanColumn[],
-  refreshTrigger: number = 0,
-  pipelineType: PipelineType = 'purchase'
-) => {
+export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 0, pipelineType: PipelineType = 'purchase') => {
   const [loadedColumns, setLoadedColumns] = useState<KanbanColumn[]>(columns);
   const [isLoading, setIsLoading] = useState(true);
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(GUARANTEED_TEAM_MEMBERS);
   const { isCommercial, user } = useAuth();
 
   useEffect(() => {
-    console.log("useKanbanData useEffect triggered");
-    console.log("Initial columns:", columns);
-    console.log("Pipeline type:", pipelineType);
-    console.log("Refresh trigger:", refreshTrigger);
-    console.log("User is commercial:", isCommercial);
-    
     const fetchLeads = async () => {
       try {
         setIsLoading(true);
+        
+        // Ensure we have all guaranteed team members
+        const allTeamMembers = [...GUARANTEED_TEAM_MEMBERS];
+        setTeamMembers(allTeamMembers);
         
         const { data: teamMembersData, error: teamError } = await supabase
           .from('team_members')
@@ -225,7 +220,7 @@ export const useKanbanData = (
         console.log(`Retrieved leads: ${allLeads.length}`);
         
         const mappedLeads = allLeads.map(lead => {
-          const assignedTeamMember = teamMembersData?.find(tm => tm.id === lead.assigned_to);
+          const assignedTeamMember = allTeamMembers.find(tm => tm.id === lead.assigned_to);
           
           const leadPipelineType = lead.pipeline_type || 'purchase';
           

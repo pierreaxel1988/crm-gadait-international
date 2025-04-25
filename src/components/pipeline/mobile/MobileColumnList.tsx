@@ -38,14 +38,7 @@ interface MobileColumnListProps {
   filters?: FilterOptions;
 }
 
-const MobileColumnList = ({
-  columns,
-  expandedColumn = null,
-  toggleColumnExpand = () => {},
-  activeTab = 'purchase',
-  searchTerm,
-  filters
-}: MobileColumnListProps) => {
+const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand = () => {}, activeTab = 'purchase', searchTerm, filters }: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
   const navigate = useNavigate();
@@ -69,6 +62,15 @@ const MobileColumnList = ({
       setActiveStatus(filters.status);
     }
   }, [filters]);
+
+  useEffect(() => {
+    console.log('Team Members in MobileColumnList:', teamMembers);
+    console.log('First few leads:', sortedLeads.slice(0, 3).map(lead => ({
+      name: lead.name,
+      assignedTo: lead.assignedTo,
+      assignedToName: teamMembers?.find(m => m.id === lead.assignedTo)?.name
+    })));
+  }, [teamMembers, sortedLeads]);
 
   const leadsByStatus = activeStatus === 'all' 
     ? filteredColumns.flatMap(column => column.items.map(item => ({

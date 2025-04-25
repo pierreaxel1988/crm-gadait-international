@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 // Important IDs to never forget
@@ -170,4 +169,9 @@ const synchronizeTeamMembers = async (): Promise<void> => {
   } catch (error) {
     console.error("Erreur lors de la synchronisation des membres d'équipe:", error);
   }
+};
+
+// Nouvelle fonction pour obtenir les agents garantis
+export const getGuaranteedAgents = () => {
+  return GUARANTEED_TEAM_MEMBERS.sort((a, b) => a.name.localeCompare(b.name));
 };
