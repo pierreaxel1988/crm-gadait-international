@@ -32,4 +32,5 @@ export interface LeadsListProps {
   isLoading: boolean;
   onLeadClick: (leadId: string) => void;
   onAddLead: () => void;
+  teamMembers?: { id: string; name: string }[];
 }

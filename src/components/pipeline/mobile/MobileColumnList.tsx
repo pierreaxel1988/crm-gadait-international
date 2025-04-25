@@ -212,6 +212,9 @@ const MobileColumnList = ({
                     nextFollowUpDate={lead.nextFollowUpDate}
                     phone={lead.phone}
                     email={lead.email}
+                    assignedTo={lead.assignedTo ? 
+                      teamMembers?.find(member => member.id === lead.assignedTo)?.name : 
+                      undefined}
                     onClick={handleLeadClick}
                   />
                 ))}

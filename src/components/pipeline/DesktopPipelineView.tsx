@@ -177,6 +177,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         isLoading={isLoading}
         onLeadClick={handleLeadClick}
         onAddLead={handleAddLead}
+        teamMembers={teamMembers}
       />
       
       <AddLeadButton onClick={handleAddLead} />
