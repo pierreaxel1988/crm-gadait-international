@@ -61,12 +61,14 @@ const LeadTagsList: React.FC<LeadTagsListProps> = ({
   
   return (
     <div className="flex flex-wrap items-center text-sm mt-1 gap-1.5 rounded-sm mx-0 px-0 py-[4px] bg-black/0">
-      <LeadTag 
-        label={columnStatus} 
-        bgColor={statusColors.bg} 
-        textColor={statusColors.text} 
-        className="font-futuraLight" 
-      />
+      {columnStatus && (
+        <LeadTag 
+          label={columnStatus} 
+          bgColor={statusColors.bg} 
+          textColor={statusColors.text} 
+          className="font-futuraLight" 
+        />
+      )}
       
       {taskType && (
         <LeadTag 

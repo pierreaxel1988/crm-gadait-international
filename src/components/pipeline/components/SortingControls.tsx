@@ -1,39 +1,37 @@
 
 import React from 'react';
-import { SortingControlsProps, SortBy } from '../types/pipelineTypes';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowDownAZ, Clock, Tag } from 'lucide-react';
+import { SortingControlsProps } from '../types/pipelineTypes';
 
 const SortingControls: React.FC<SortingControlsProps> = ({ sortBy, onSortChange }) => {
   return (
-    <div className="flex flex-wrap gap-3 items-center justify-between bg-gray-50 rounded-lg p-3 mb-4">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-gray-700">Trier par:</span>
-        <div className="flex space-x-2">
-          <button 
-            onClick={() => onSortChange('priority')}
-            className={`px-3 py-1 rounded-md ${sortBy === 'priority' 
-              ? 'bg-zinc-900 text-white' 
-              : 'bg-gray-100 text-gray-600'}`}
-          >
-            Priorité
-          </button>
-          <button 
-            onClick={() => onSortChange('newest')}
-            className={`px-3 py-1 rounded-md ${sortBy === 'newest' 
-              ? 'bg-zinc-900 text-white' 
-              : 'bg-gray-100 text-gray-600'}`}
-          >
-            Plus récent
-          </button>
-          <button 
-            onClick={() => onSortChange('oldest')}
-            className={`px-3 py-1 rounded-md ${sortBy === 'oldest' 
-              ? 'bg-zinc-900 text-white' 
-              : 'bg-gray-100 text-gray-600'}`}
-          >
-            Plus ancien
-          </button>
-        </div>
-      </div>
+    <div className="flex justify-end mb-4">
+      <Select value={sortBy} onValueChange={(value) => onSortChange(value as "priority" | "newest" | "oldest")}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Trier par" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="priority">
+            <div className="flex items-center">
+              <Tag className="h-4 w-4 mr-2" />
+              <span>Priorité</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="newest">
+            <div className="flex items-center">
+              <Clock className="h-4 w-4 mr-2" />
+              <span>Plus récent</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="oldest">
+            <div className="flex items-center">
+              <Clock className="h-4 w-4 mr-2" />
+              <span>Plus ancien</span>
+            </div>
+          </SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 };

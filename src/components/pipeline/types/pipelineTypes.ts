@@ -3,7 +3,7 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
 import { FilterOptions } from '@/components/filters/PipelineFilters';
 
-export type SortBy = 'priority' | 'date' | 'alphabetical';
+export type SortBy = 'priority' | 'newest' | 'oldest';
 
 export interface DesktopPipelineViewProps {
   activeTab: string;
@@ -25,4 +25,16 @@ export interface DesktopPipelineViewProps {
   isRefreshing: boolean;
   isFilterActive: (filterName: string) => boolean;
   teamMembers: { id: string; name: string }[];
+}
+
+export interface SortingControlsProps {
+  sortBy: SortBy;
+  onSortChange: (sort: SortBy) => void;
+}
+
+export interface LeadsListProps {
+  leads: ExtendedKanbanItem[];
+  isLoading?: boolean;
+  onLeadClick: (id: string) => void;
+  onAddLead?: () => void;
 }
