@@ -1,6 +1,5 @@
-
+import { FilterOptions } from './filterTypes';
 import { LeadStatus, PipelineType } from '@/types/lead';
-import { FilterOptions } from '../PipelineFilters';
 
 export type SortBy = 'priority' | 'newest' | 'oldest';
 
