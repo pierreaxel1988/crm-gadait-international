@@ -102,6 +102,7 @@ export const useKanbanData = (
         }
         
         if (teamMembersData) {
+          console.log("Loaded team members:", teamMembersData);
           setTeamMembers(teamMembersData);
         }
         

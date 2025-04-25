@@ -198,26 +198,35 @@ const MobileColumnList = ({
               </div>
             ) : (
               <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
-                {sortedLeads.map(lead => (
-                  <LeadListItem 
-                    key={lead.id}
-                    id={lead.id}
-                    name={lead.name}
-                    columnStatus={lead.columnStatus}
-                    budget={lead.budget}
-                    currency={lead.currency}
-                    desiredLocation={lead.desiredLocation}
-                    taskType={lead.taskType}
-                    createdAt={lead.createdAt}
-                    nextFollowUpDate={lead.nextFollowUpDate}
-                    phone={lead.phone}
-                    email={lead.email}
-                    assignedTo={lead.assignedTo ? 
-                      teamMembers?.find(member => member.id === lead.assignedTo)?.name : 
-                      undefined}
-                    onClick={handleLeadClick}
-                  />
-                ))}
+                {sortedLeads.map(lead => {
+                  if (lead.name && lead.name.includes("HEINRICH SCHEMBERG")) {
+                    console.log("Found HEINRICH SCHEMBERG:", lead);
+                    console.log("Team members:", teamMembers);
+                    console.log("Assigned agent:", 
+                      teamMembers?.find(member => member.id === lead.assignedTo)?.name);
+                  }
+                  
+                  return (
+                    <LeadListItem 
+                      key={lead.id}
+                      id={lead.id}
+                      name={lead.name}
+                      columnStatus={lead.columnStatus}
+                      budget={lead.budget}
+                      currency={lead.currency}
+                      desiredLocation={lead.desiredLocation}
+                      taskType={lead.taskType}
+                      createdAt={lead.createdAt}
+                      nextFollowUpDate={lead.nextFollowUpDate}
+                      phone={lead.phone}
+                      email={lead.email}
+                      assignedTo={lead.assignedTo ? 
+                        teamMembers?.find(member => member.id === lead.assignedTo)?.name : 
+                        undefined}
+                      onClick={handleLeadClick}
+                    />
+                  );
+                })}
               </div>
             )}
           </div>

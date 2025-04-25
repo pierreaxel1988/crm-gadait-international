@@ -39,6 +39,14 @@ const LeadsList: React.FC<LeadsListProps> = ({
     );
   }
 
+  // Add console log to debug team members and lead assignments
+  console.log("TeamMembers in LeadsList:", teamMembers);
+  console.log("First few leads with assignedTo:", leads.slice(0, 3).map(l => ({ 
+    name: l.name, 
+    assignedTo: l.assignedTo,
+    assignedToName: teamMembers?.find(m => m.id === l.assignedTo)?.name 
+  })));
+
   return (
     <div className="mt-2 space-y-px">
       <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
@@ -56,8 +64,8 @@ const LeadsList: React.FC<LeadsListProps> = ({
             nextFollowUpDate={lead.nextFollowUpDate}
             phone={lead.phone}
             email={lead.email}
-            assignedTo={lead.assignedTo ? 
-              teamMembers?.find(member => member.id === lead.assignedTo)?.name : 
+            assignedTo={lead.assignedTo && teamMembers ? 
+              teamMembers.find(member => member.id === lead.assignedTo)?.name : 
               undefined}
             onClick={onLeadClick}
           />

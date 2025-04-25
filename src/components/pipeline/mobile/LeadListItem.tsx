@@ -19,7 +19,7 @@ interface LeadListItemProps {
   nextFollowUpDate?: string;
   phone?: string;
   email?: string;
-  assignedTo?: string; // Add this prop to receive the assigned agent's name or ID
+  assignedTo?: string; // This is the agent's name
   onClick: (id: string) => void;
 }
 
@@ -35,7 +35,7 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
   nextFollowUpDate,
   phone,
   email,
-  assignedTo, // New prop
+  assignedTo,
   onClick
 }) => {
   const actionStyle = getActionStatusStyle(nextFollowUpDate);
@@ -107,4 +107,3 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
 };
 
 export default LeadListItem;
-
