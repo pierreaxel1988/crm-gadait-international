@@ -11,14 +11,12 @@ import { PurchaseTimeframe, PropertyType } from '@/types/lead';
 import FilterGroup from './FilterGroup';
 import StatusFilterChips from './StatusFilterChips';
 import TagsFilterChips from './TagsFilterChips';
-import AgentFilterSelect from './AgentFilterSelect';
 import BudgetRangeFilter from './BudgetRangeFilter';
 import LocationSearchFilter from './LocationSearchFilter';
 import TimeframeFilter from './TimeframeFilter';
 import PropertyTypeFilter from './PropertyTypeFilter';
 import FilterActions from './FilterActions';
 import ActiveFilterTags from './ActiveFilterTags';
-import { SPECIFIC_AGENTS } from '@/components/actions/filters/AgentFilterButtons';
 
 export interface FilterOptions {
   status: LeadStatus | null;
@@ -35,10 +33,6 @@ export interface PipelineFiltersProps {
   filters: FilterOptions;
   onFilterChange: (newFilters: FilterOptions) => void;
   onClearFilters: () => void;
-  assignedToOptions?: {
-    id: string;
-    name: string;
-  }[];
   isMobile?: boolean;
   onApplyFilters?: () => void;
   isFilterActive?: (filterName: string) => boolean;
@@ -48,20 +42,10 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   filters,
   onFilterChange,
   onClearFilters,
-  assignedToOptions = [],
   isMobile = false,
   onApplyFilters,
   isFilterActive
 }) => {
-  const { isCommercial } = useAuth();
-
-  // Helper to get team member name by ID
-  const getTeamMemberName = (id: string): string => {
-    const member = assignedToOptions.find(member => member.id === id);
-    return member ? member.name : 'Inconnu';
-  };
-
-  // Handle change for a specific filter
   const handleFilterChange = <K extends keyof FilterOptions,>(filterName: K, value: FilterOptions[K]) => {
     onFilterChange({
       ...filters,
@@ -84,15 +68,6 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
         selectedTags={filters.tags} 
         onTagsChange={(tags) => handleFilterChange('tags', tags)} 
       />
-      
-      {/* Agent filter - only show for admins */}
-      {!isCommercial && (
-        <AgentFilterSelect 
-          assignedTo={filters.assignedTo} 
-          onAssignedToChange={(agent) => handleFilterChange('assignedTo', agent)}
-          className=""
-        />
-      )}
       
       {/* Budget and Location Filters */}
       <div>
@@ -141,8 +116,7 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
         <ActiveFilterTags 
           filters={filters} 
           onFilterChange={onFilterChange} 
-          onClearFilters={onClearFilters} 
-          getTeamMemberName={getTeamMemberName} 
+          onClearFilters={onClearFilters}
           className="mt-4" 
         />
       )}
