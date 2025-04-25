@@ -42,7 +42,7 @@ const AgentFilterSelect = ({
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Tous les agents" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent searchable>
           <SelectGroup>
             <SelectItem value="all">Tous les agents</SelectItem>
             {combinedAgents.map((agent) => (
