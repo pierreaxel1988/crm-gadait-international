@@ -1,5 +1,5 @@
 
-import { FilterOptions } from '@/components/pipeline/PipelineFilters';
+import { FilterOptions } from '@/components/filters/PipelineFilters';
 import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { PropertyType, PurchaseTimeframe } from '@/types/lead';

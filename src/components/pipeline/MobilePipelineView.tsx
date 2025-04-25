@@ -113,7 +113,6 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
             filters={filters}
             onFilterChange={onFilterChange}
             onClearFilters={onClearFilters}
-            assignedToOptions={teamMembers}
             isMobile={true}
             onApplyFilters={handleApplyFilters}
             isFilterActive={isFilterActive}

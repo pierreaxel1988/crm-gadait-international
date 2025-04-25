@@ -11,7 +11,7 @@ interface ActiveFilterTagsProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
-  getTeamMemberName: (id: string) => string;
+  getTeamMemberName?: (id: string) => string;
   className?: string;
 }
 
@@ -19,7 +19,7 @@ const ActiveFilterTags = ({
   filters,
   onFilterChange,
   onClearFilters,
-  getTeamMemberName,
+  getTeamMemberName = (id) => 'Inconnu',
   className
 }: ActiveFilterTagsProps) => {
   // Check if any filter is active
@@ -58,7 +58,7 @@ const ActiveFilterTags = ({
         </Badge>
       )}
 
-      {filters.assignedTo && (
+      {filters.assignedTo && getTeamMemberName && (
         <Badge variant="secondary" className="pl-2 pr-1 py-0.5 flex items-center gap-1">
           {getTeamMemberName(filters.assignedTo)}
           <Button

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { X } from 'lucide-react';
 import { FilterOptions } from '../PipelineFilters';
@@ -10,7 +11,7 @@ interface ActiveFiltersListProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
-  getTeamMemberName: (id: string) => string;
+  getTeamMemberName?: (id: string) => string;
   isFilterActive: (filterName: string) => boolean;
 }
 
@@ -18,7 +19,7 @@ const ActiveFiltersList = ({
   filters,
   onFilterChange,
   onClearFilters,
-  getTeamMemberName,
+  getTeamMemberName = (id: string) => 'Inconnu',
   isFilterActive
 }: ActiveFiltersListProps) => {
   // Check if there are any active filters

@@ -188,9 +188,9 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
             filters={filters}
             onFilterChange={onFilterChange}
             onClearFilters={onClearFilters}
-            assignedToOptions={teamMembers}
             isMobile={false}
             onApplyFilters={handleApplyFilters}
+            isFilterActive={isFilterActive}
           />
         </Sheet>
       )}
