@@ -7,18 +7,19 @@ import { TeamMember } from '../types/chatTypes';
 const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
 const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9";
 const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
-const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11"; // Jean Marc's correct UUID
+const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11";
+const SHARON_ID = "e564a874-2520-4167-bfa8-26d39f119470"; // Sharon's UUID
 
 // Liste des membres garantis
 const GUARANTEED_MEMBERS: Record<string, {name: string}> = {
   [JACQUES_ID]: { name: 'Jacques Charles' },
   [PIERRE_AXEL_ID]: { name: 'Pierre-Axel Gadait' },
   [JADE_ID]: { name: 'Jade Diouane' },
-  [JEAN_MARC_ID]: { name: 'Jean Marc Perrissol' }, // Using correct UUID
+  [JEAN_MARC_ID]: { name: 'Jean Marc Perrissol' },
+  [SHARON_ID]: { name: 'Sharon Ramdiane' }, // Added Sharon with correct UUID
   "chloe-valentin": { name: 'Chloe Valentin' },
   "christelle-gadait": { name: 'Christelle Gadait' },
   "christine-francoise": { name: 'Christine Francoise' },
-  "sharon-ramdiane": { name: 'Sharon Ramdiane' },
   "ophelie-durand": { name: 'Ophelie Durand' }
 };
 

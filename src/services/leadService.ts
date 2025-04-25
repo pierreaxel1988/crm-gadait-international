@@ -1,4 +1,3 @@
-
 import { LeadDetailed } from "@/types/lead";
 import { 
   createLead as createLeadCore,
@@ -15,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 // Important IDs
 const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
 const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11";
+const SHARON_ID = "e564a874-2520-4167-bfa8-26d39f119470";
 
 export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt">): Promise<LeadDetailed | null> => {
   try {
@@ -166,17 +166,40 @@ export const reassignJeanMarcLeads = async () => {
   }
 };
 
-// Re-export all the necessary functions from leadCore and leadActions
+export const reassignSharonLeads = async () => {
+  try {
+    console.log("Starting reassignment of Sharon's leads to her correct UUID:", SHARON_ID);
+    
+    // Update leads with any variation of Sharon's ID to use her correct UUID
+    const { error } = await supabase
+      .from('leads')
+      .update({ assigned_to: SHARON_ID })
+      .in('assigned_to', ['sharon', 'sharon-ramdiane']);
+
+    if (error) {
+      console.error('Error reassigning Sharon\'s leads:', error);
+      throw error;
+    }
+    
+    console.log('Successfully reassigned all Sharon\'s leads to correct UUID');
+    return { success: true };
+  } catch (error) {
+    console.error('Error in reassignSharonLeads:', error);
+    throw error;
+  }
+};
+
 export { 
   getLeads, 
   getLead, 
   updateLead, 
   deleteLead, 
   convertToSimpleLead,
-  addActionToLead
+  addActionToLead,
+  reassignJadeLeads,
+  reassignJeanMarcLeads,
+  reassignSharonLeads
 };
 
-// Export the LeadDetailed type for convenience
 export type { LeadDetailed };
-// Export ActionHistory type
 export type { ActionHistory } from "@/types/actionHistory";
