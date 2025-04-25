@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sheet } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,6 +9,7 @@ import { PipelineType } from '@/types/lead';
 import { SlidersHorizontal, ArrowDownAZ, Clock, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FilterOptions } from '../filters/PipelineFilters';
 
 interface MobilePipelineViewProps {
   activeTab: string;
@@ -75,8 +77,6 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
             filters={filters}
             onFilterChange={onFilterChange}
             onClearFilters={onClearFilters}
-            isFilterActive={isFilterActive}
-            teamMembers={teamMembers}
           />
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3">

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -12,6 +13,7 @@ import LeadsList from './components/LeadsList';
 import AddLeadButton from './components/AddLeadButton';
 import { DesktopPipelineViewProps, SortBy } from './types/pipelineTypes';
 import { PipelineType } from '@/types/lead';
+import { FilterOptions } from '../filters/PipelineFilters';
 
 const statusTranslations: Record<string, string> = {
   'New': 'Nouveaux',
@@ -114,8 +116,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
           setSearchTerm={setSearchTerm}
           onToggleFilters={toggleFilters}
           filtersOpen={filtersOpen}
-          activeFilters={activeFiltersCount}
-          isFilterActive={isFilterActive}
+          activeFiltersCount={activeFiltersCount}
           filters={filters}
           onFilterChange={onFilterChange}
           onClearFilters={onClearFilters}

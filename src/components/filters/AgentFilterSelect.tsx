@@ -27,15 +27,15 @@ const AgentFilterSelect = ({
         <span className="font-medium">Agent assigné</span>
       </div>
       <Select
-        value={assignedTo || ""}
-        onValueChange={(value) => onAssignedToChange(value || null)}
+        value={assignedTo || "all"}
+        onValueChange={(value) => onAssignedToChange(value === "all" ? null : value)}
       >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Tous les agents" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="">Tous les agents</SelectItem>
+            <SelectItem value="all">Tous les agents</SelectItem>
             {assignedToOptions.map((agent) => (
               <SelectItem key={agent.id} value={agent.id}>
                 {agent.name}
