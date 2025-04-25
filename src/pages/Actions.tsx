@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
@@ -15,6 +14,18 @@ import ActionsList from '@/components/actions/ActionsList';
 import { useDebounce } from '@/hooks/useDebounce';
 import PipelineSearchBar from '@/components/pipeline/PipelineSearchBar';
 
+const GUARANTEED_TEAM = [
+  { id: "e59037a6-218d-4504-a3ad-d2c399784dc7", name: "Jacques Charles", role: "agent" },
+  { id: "ccbc635f-0282-427b-b130-82c1f0fbdbf9", name: "Pierre-Axel Gadait", role: "admin" },
+  { id: "acab847b-7ace-4681-989d-86f78549aa69", name: "Jade Diouane", role: "agent" },
+  { id: "af8e053c-8fae-4424-abaa-d79029fd8a11", name: "Jean Marc Perrissol", role: "agent" },
+  { id: "e564a874-2520-4167-bfa8-26d39f119470", name: "Sharon Ramdiane", role: "agent" },
+  { id: "06e60e2c-4835-4d19-bdf1-5d06f5d2b7e9", name: "Christelle Gadait", role: "admin" },
+  { id: "28c03acf-cb78-46b7-8dba-c1edee49c932", name: "Chloe Valentin", role: "admin" },
+  { id: "af1c9117-f94f-44d0-921f-776dd5fd6f96", name: "Christine Francoise", role: "admin" },
+  { id: "2d8bae00-a935-439d-8685-0adf238a612e", name: "Ophelie Durand", role: "agent" }
+];
+
 const Actions = () => {
   const { isMobile } = useBreakpoint();
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,14 +37,31 @@ const Actions = () => {
   
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Optimized filtering using useMemo
+  const guaranteedTeamMembers = useMemo(() => {
+    const guaranteedIds = new Set(GUARANTEED_TEAM.map(member => member.id));
+    const existingIds = new Set(actions.map(action => action.assignedToId));
+    
+    const allMembers = [...GUARANTEED_TEAM];
+    
+    actions.forEach(action => {
+      if (action.assignedToId && action.assignedToName && !guaranteedIds.has(action.assignedToId)) {
+        allMembers.push({
+          id: action.assignedToId,
+          name: action.assignedToName,
+          role: "agent"
+        });
+      }
+    });
+    
+    return allMembers.sort((a, b) => a.name.localeCompare(b.name));
+  }, [actions]);
+
   const filteredActions = useMemo(() => {
     return actions.filter(action => {
       if (!debouncedSearchTerm && !selectedAgent && typeFilter === 'all') return true;
 
       const searchLower = debouncedSearchTerm.toLowerCase();
       
-      // Match criteria
       const matchesSearch = !debouncedSearchTerm || (
         action.leadName?.toLowerCase().includes(searchLower) ||
         action.notes?.toLowerCase().includes(searchLower) ||
@@ -79,20 +107,11 @@ const Actions = () => {
                   </SelectTrigger>
                   <SelectContent searchable>
                     <SelectItem value="all">Tous les commerciaux</SelectItem>
-                    {actions
-                      .reduce((acc: { id: string; name: string }[], curr) => {
-                        if (curr.assignedToId && curr.assignedToName && 
-                            !acc.some(agent => agent.id === curr.assignedToId)) {
-                          acc.push({ id: curr.assignedToId, name: curr.assignedToName });
-                        }
-                        return acc;
-                      }, [])
-                      .map(agent => (
-                        <SelectItem key={agent.id} value={agent.id}>
-                          {agent.name}
-                        </SelectItem>
-                      ))
-                    }
+                    {guaranteedTeamMembers.map(agent => (
+                      <SelectItem key={agent.id} value={agent.id}>
+                        {agent.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               )}
