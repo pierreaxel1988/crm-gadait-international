@@ -1,27 +1,21 @@
-
 import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import StatusFilter from './StatusFilter';
 import TagsFilter from './TagsFilter';
-import AgentFilter from './AgentFilter';
 import BudgetFilter from './BudgetFilter';
 import LocationFilter from './LocationFilter';
 import TimeframeFilter from './TimeframeFilter';
 import PropertyTypeFilter from './PropertyTypeFilter';
 import ActionButtons from './ActionButtons';
 import ActiveFiltersList from './ActiveFiltersList';
-import { FilterOptions } from '../PipelineFilters';
+import { FilterOptions } from '@/components/filters/PipelineFilters';
 
 export interface PipelineFiltersProps {
   filters: FilterOptions;
   onFilterChange: (newFilters: FilterOptions) => void;
   onClearFilters: () => void;
-  assignedToOptions?: {
-    id: string;
-    name: string;
-  }[];
   isFilterActive: (filterName: string) => boolean;
   isMobile?: boolean;
   onApplyFilters?: () => void;
@@ -31,7 +25,6 @@ const PipelineFilters = ({
   filters,
   onFilterChange,
   onClearFilters,
-  assignedToOptions = [],
   isFilterActive,
   isMobile = false,
   onApplyFilters
@@ -53,14 +46,8 @@ const PipelineFilters = ({
       ]
     },
     {
-      title: 'Agent et Budget',
+      title: 'Budget',
       components: [
-        <AgentFilter 
-          key="agent"
-          assignedTo={filters.assignedTo} 
-          onAssignedToChange={agent => onFilterChange({ ...filters, assignedTo: agent })} 
-          assignedToOptions={assignedToOptions} 
-        />,
         <BudgetFilter 
           key="budget"
           minBudget={filters.minBudget} 

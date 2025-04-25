@@ -13,7 +13,7 @@ import LeadsList from './components/LeadsList';
 import AddLeadButton from './components/AddLeadButton';
 import { DesktopPipelineViewProps, SortBy } from './types/pipelineTypes';
 import { PipelineType } from '@/types/lead';
-import { FilterOptions } from '../filters/PipelineFilters';
+import { FilterOptions } from '@/components/filters/PipelineFilters';
 
 const statusTranslations: Record<string, string> = {
   'New': 'Nouveaux',

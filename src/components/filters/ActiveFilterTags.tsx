@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { X } from 'lucide-react';
-import { FilterOptions } from '../pipeline/PipelineFilters'; 
+import { FilterOptions } from './PipelineFilters'; 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -52,20 +52,6 @@ const ActiveFilterTags = ({
             size="sm"
             className="h-4 w-4 p-0 hover:bg-transparent"
             onClick={() => onFilterChange({ ...filters, status: null })}
-          >
-            <X className="h-3 w-3" />
-          </Button>
-        </Badge>
-      )}
-
-      {filters.assignedTo && getTeamMemberName && (
-        <Badge variant="secondary" className="pl-2 pr-1 py-0.5 flex items-center gap-1">
-          {getTeamMemberName(filters.assignedTo)}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-4 w-4 p-0 hover:bg-transparent"
-            onClick={() => onFilterChange({ ...filters, assignedTo: null })}
           >
             <X className="h-3 w-3" />
           </Button>

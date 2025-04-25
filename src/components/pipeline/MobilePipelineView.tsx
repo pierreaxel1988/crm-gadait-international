@@ -9,7 +9,7 @@ import { PipelineType } from '@/types/lead';
 import { SlidersHorizontal, ArrowDownAZ, Clock, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FilterOptions } from '../filters/PipelineFilters';
+import { FilterOptions } from '@/components/filters/PipelineFilters';
 
 interface MobilePipelineViewProps {
   activeTab: string;
