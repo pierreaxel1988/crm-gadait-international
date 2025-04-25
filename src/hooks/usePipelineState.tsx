@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FilterOptions } from '@/components/filters/PipelineFilters';
@@ -37,6 +38,7 @@ export function usePipelineState() {
   });
 
   const updateAgentFilter = useCallback((agentId: string | null) => {
+    console.log("Updating agent filter to:", agentId);
     setFilters(prevFilters => ({
       ...prevFilters,
       assignedTo: agentId
@@ -67,6 +69,7 @@ export function usePipelineState() {
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
+        console.log("Fetching team members...");
         const { data, error } = await supabase
           .from('team_members')
           .select('id, name');
@@ -77,6 +80,7 @@ export function usePipelineState() {
         }
         
         if (data) {
+          console.log("Team members fetched:", data);
           setTeamMembers(data);
         }
       } catch (error) {
@@ -135,6 +139,7 @@ export function usePipelineState() {
     
     const checkLeads = async () => {
       try {
+        console.log("Checking leads and refreshing...");
         const { count, error } = await supabase
           .from('leads')
           .select('*', { count: 'exact', head: true });
@@ -164,6 +169,7 @@ export function usePipelineState() {
   };
 
   const handleClearFilters = () => {
+    console.log("Clearing all filters");
     setFilters({
       status: null,
       tags: [],

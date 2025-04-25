@@ -60,6 +60,7 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 
   // Handle change for a specific filter
   const handleFilterChange = <K extends keyof FilterOptions,>(filterName: K, value: FilterOptions[K]) => {
+    console.log(`Changing filter ${filterName.toString()} to:`, value);
     onFilterChange({
       ...filters,
       [filterName]: value
