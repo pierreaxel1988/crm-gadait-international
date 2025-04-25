@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -63,15 +64,6 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
     }
   }, [filters]);
 
-  useEffect(() => {
-    console.log('Team Members in MobileColumnList:', teamMembers);
-    console.log('First few leads:', sortedLeads.slice(0, 3).map(lead => ({
-      name: lead.name,
-      assignedTo: lead.assignedTo,
-      assignedToName: teamMembers?.find(m => m.id === lead.assignedTo)?.name
-    })));
-  }, [teamMembers, sortedLeads]);
-
   const leadsByStatus = activeStatus === 'all' 
     ? filteredColumns.flatMap(column => column.items.map(item => ({
         ...item,
@@ -92,6 +84,15 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
     : leadsByStatus;
     
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
+
+  useEffect(() => {
+    console.log('Team Members in MobileColumnList:', teamMembers);
+    console.log('First few leads:', sortedLeads.slice(0, 3).map(lead => ({
+      name: lead.name,
+      assignedTo: lead.assignedTo,
+      assignedToName: teamMembers?.find(m => m.id === lead.assignedTo)?.name
+    })));
+  }, [teamMembers, sortedLeads]);
 
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     const countForStatus = column.items.length;
