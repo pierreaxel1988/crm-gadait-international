@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
-import PipelineFilters from './PipelineFilters';
+import PipelineFilters from '../filters/PipelineFilters';
 import { useKanbanData } from '@/hooks/useKanbanData';
 import { useNavigate } from 'react-router-dom';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
@@ -188,7 +188,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
             onFilterChange={onFilterChange}
             onClearFilters={onClearFilters}
             assignedToOptions={teamMembers}
-            isFilterActive={isFilterActive}
             isMobile={false}
             onApplyFilters={handleApplyFilters}
           />

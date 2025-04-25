@@ -2,11 +2,11 @@
 import React from 'react';
 import { SlidersHorizontal, RefreshCcw, PlusCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { FilterOptions } from '../PipelineFilters';
 import { useNavigate } from 'react-router-dom';
-import ActiveFiltersList from '../filters/ActiveFiltersList';
 import SmartSearch from '@/components/common/SmartSearch';
 import { useLeadSearch, SearchResult } from '@/hooks/useLeadSearch';
+import ActiveFilterTags from '../../filters/ActiveFilterTags';
+import { FilterOptions } from '../../filters/PipelineFilters';
 
 interface MobilePipelineHeaderProps {
   searchTerm: string;
@@ -18,7 +18,6 @@ interface MobilePipelineHeaderProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
-  isFilterActive: (filterName: string) => boolean;
   teamMembers: {
     id: string;
     name: string;
@@ -35,7 +34,6 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
   filters,
   onFilterChange,
   onClearFilters,
-  isFilterActive,
   teamMembers
 }) => {
   const navigate = useNavigate();
@@ -44,7 +42,7 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
   // Helper function to get team member name by ID
   const getTeamMemberName = (id: string): string => {
     const member = teamMembers.find(member => member.id === id);
-    return member ? member.name : 'Unknown';
+    return member ? member.name : 'Inconnu';
   };
   
   const handleSelectLead = (lead: SearchResult) => {
@@ -138,12 +136,12 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
       
       {/* Display active filters */}
       {activeFiltersCount > 0 && (
-        <ActiveFiltersList
+        <ActiveFilterTags
           filters={filters}
           onFilterChange={onFilterChange}
           onClearFilters={onClearFilters}
           getTeamMemberName={getTeamMemberName}
-          isFilterActive={isFilterActive}
+          className="mt-1"
         />
       )}
     </div>
