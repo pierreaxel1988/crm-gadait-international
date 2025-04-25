@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FilterOptions } from '@/components/filters/PipelineFilters';
+import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { supabase } from '@/integrations/supabase/client';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { toast } from '@/hooks/use-toast';

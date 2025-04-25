@@ -3,7 +3,7 @@ import { Sheet } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobilePipelineHeader from './mobile/MobilePipelineHeader';
 import MobileColumnList from './mobile/MobileColumnList';
-import PipelineFilters from '../filters/PipelineFilters';
+import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { PipelineType } from '@/types/lead';
 import { SlidersHorizontal, ArrowDownAZ, Clock, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -113,6 +113,7 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
             onFilterChange={onFilterChange}
             onClearFilters={onClearFilters}
             assignedToOptions={teamMembers}
+            isFilterActive={isFilterActive}
             isMobile={true}
             onApplyFilters={handleApplyFilters}
           />
