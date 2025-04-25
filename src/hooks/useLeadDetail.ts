@@ -6,8 +6,10 @@ import { getLead, updateLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-// ID constant for Jade to ensure consistency
+// Important UUIDs
 const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
+const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11";
+const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
 
 export function useLeadDetail(id: string | undefined) {
   const [lead, setLead] = useState<LeadDetailed | undefined>(undefined);
@@ -29,12 +31,21 @@ export function useLeadDetail(id: string | undefined) {
         const leadData = await getLead(id);
         console.log("Fetched lead data:", leadData);
         
-        // Ensure Jade's ID is properly formatted if it's assigned to her
-        if (leadData && leadData.assignedTo === 'jade-diouane') {
-          leadData.assignedTo = JADE_ID;
+        if (leadData) {
+          // Ensure Jade's and Jean Marc's IDs are properly formatted
+          if (leadData.assignedTo === 'jade-diouane') {
+            leadData.assignedTo = JADE_ID;
+            console.log("Converted legacy Jade ID to UUID in useLeadDetail:", JADE_ID);
+          } else if (leadData.assignedTo === 'jean-marc-perrissol') {
+            leadData.assignedTo = JEAN_MARC_ID;
+            console.log("Converted legacy Jean Marc ID to UUID in useLeadDetail:", JEAN_MARC_ID);
+          }
+          
+          setLead(leadData);
+        } else {
+          setLead(undefined);
         }
         
-        setLead(leadData || undefined);
         setHasChanges(false);
       } catch (error) {
         toast({
@@ -59,10 +70,14 @@ export function useLeadDetail(id: string | undefined) {
       setIsSaving(true);
       console.log("Saving lead data:", lead);
       
-      // Ensure Jade's ID is in the correct format before saving
+      // Ensure agent IDs are in the correct format before saving
       const updatedLeadData = { ...lead };
       if (updatedLeadData.assignedTo === 'jade-diouane') {
         updatedLeadData.assignedTo = JADE_ID;
+        console.log("Converting 'jade-diouane' to proper UUID before save:", JADE_ID);
+      } else if (updatedLeadData.assignedTo === 'jean-marc-perrissol') {
+        updatedLeadData.assignedTo = JEAN_MARC_ID;
+        console.log("Converting 'jean-marc-perrissol' to proper UUID before save:", JEAN_MARC_ID);
       }
       
       const updatedLead = await updateLead({
@@ -120,9 +135,13 @@ export function useLeadDetail(id: string | undefined) {
     
     console.log("Updating lead data:", data);
     
-    // If we're updating assignedTo, ensure we convert any legacy ID to the proper UUID
+    // Check for agent ID conversions
     if (data.assignedTo === 'jade-diouane') {
       data.assignedTo = JADE_ID;
+      console.log("Converting 'jade-diouane' to proper UUID in handleDataChange:", JADE_ID);
+    } else if (data.assignedTo === 'jean-marc-perrissol') {
+      data.assignedTo = JEAN_MARC_ID;
+      console.log("Converting 'jean-marc-perrissol' to proper UUID in handleDataChange:", JEAN_MARC_ID);
     }
     
     setLead(prev => {
@@ -258,7 +277,7 @@ export function useLeadDetail(id: string | undefined) {
 const handleReassignToJacques = async () => {
   if (!lead) return;
 
-  const jacquesId = 'e59037a6-218d-4504-a3ad-d2c399784dc7'; // UUID direct de Jacques
+  const jacquesId = JACQUES_ID; // Using the constant
     
   try {
     const updatedLead = await updateLead({
@@ -294,11 +313,71 @@ const handleReassignToJacques = async () => {
     handleSave,
     handleDataChange,
     fetchLead,
-    getFormattedPhoneForCall,
-    getFormattedPhoneForWhatsApp,
-    startCallTracking,
-    endCallTracking,
-    formatDuration,
+    getFormattedPhoneForCall: lead?.phone ? () => {
+      const countryCode = lead.phoneCountryCode || '+33';
+      const phoneNumber = lead.phone.startsWith('+') 
+        ? lead.phone.substring(1)
+        : lead.phone.startsWith('0') 
+          ? lead.phone.substring(1)
+          : lead.phone;
+      
+      return `${countryCode}${phoneNumber}`;
+    } : () => '',
+    getFormattedPhoneForWhatsApp: lead?.phone ? () => {
+      const fullPhone = (() => {
+        const countryCode = lead.phoneCountryCode || '+33';
+        const phoneNumber = lead.phone.startsWith('+') 
+          ? lead.phone.substring(1)
+          : lead.phone.startsWith('0') 
+            ? lead.phone.substring(1)
+            : lead.phone;
+        
+        return `${countryCode}${phoneNumber}`;
+      })();
+      
+      return fullPhone.replace(/\D/g, '');
+    } : () => '',
+    startCallTracking: (type: 'phone' | 'whatsapp' = 'phone') => {
+      setIsCallTracking(true);
+      setCallStartTime(new Date());
+      setCallType(type);
+    },
+    endCallTracking: (callDuration: number) => {
+      if (!lead || !isCallTracking) return;
+      
+      const formatDuration = (seconds: number): string => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      };
+      
+      const callAction: ActionHistory = {
+        id: crypto.randomUUID(),
+        actionType: 'Call',
+        notes: `${callType === 'whatsapp' ? 'WhatsApp' : 'Appel'} de ${formatDuration(callDuration)}`,
+        createdAt: callStartTime?.toISOString() || new Date().toISOString(),
+        scheduledDate: callStartTime?.toISOString() || new Date().toISOString(),
+        completedDate: new Date().toISOString()
+      };
+      
+      handleDataChange({
+        actionHistory: [...(lead.actionHistory || []), callAction],
+        lastContactedAt: new Date().toISOString()
+      });
+      
+      setIsCallTracking(false);
+      setCallStartTime(null);
+      
+      toast({
+        title: callType === 'whatsapp' ? "WhatsApp enregistré" : "Appel enregistré",
+        description: `Un ${callType === 'whatsapp' ? 'appel WhatsApp' : 'appel'} de ${formatDuration(callDuration)} a été enregistré.`
+      });
+    },
+    formatDuration: (seconds: number): string => {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    },
     handleReassignToJacques
   };
 }

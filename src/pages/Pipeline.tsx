@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
@@ -8,7 +9,7 @@ import SubNavigation from '@/components/layout/SubNavigation';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import ComponentLoader from '@/components/common/ComponentLoader';
-import { reassignJadeLeads } from '@/services/leadService';
+import { reassignJadeLeads, reassignJeanMarcLeads } from '@/services/leadService';
 
 const Pipeline = () => {
   const isMobile = useIsMobile();
@@ -52,15 +53,18 @@ const Pipeline = () => {
   }, []);
 
   useEffect(() => {
-    const fixJadeLeads = async () => {
+    const fixLeadsAssignment = async () => {
       try {
+        console.log("Running lead reassignment for Jade and Jean Marc...");
         await reassignJadeLeads();
+        await reassignJeanMarcLeads();
+        console.log("Lead reassignments completed successfully");
       } catch (error) {
-        console.error('Error fixing Jade leads:', error);
+        console.error('Error fixing lead assignments:', error);
       }
     };
 
-    fixJadeLeads();
+    fixLeadsAssignment();
   }, []);
 
   useEffect(() => {

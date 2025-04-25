@@ -12,6 +12,10 @@ import { addActionToLead } from "./leadActions";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+// Important IDs
+const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
+const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11";
+
 export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt">): Promise<LeadDetailed | null> => {
   try {
     console.log("leadService: Starting lead creation process");
@@ -118,9 +122,8 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
 
 export const reassignJadeLeads = async () => {
   try {
-    // Use Jade's correct Supabase UUID
-    const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
-
+    console.log("Starting reassignment of Jade's leads to her correct UUID:", JADE_ID);
+    
     // Update leads with any variation of Jade's ID to use her correct UUID
     const { error } = await supabase
       .from('leads')
@@ -132,10 +135,33 @@ export const reassignJadeLeads = async () => {
       throw error;
     }
     
-    console.log('Successfully reassigned all leads to Jade\'s correct UUID:', JADE_ID);
+    console.log('Successfully reassigned all Jade\'s leads to correct UUID');
     return { success: true };
   } catch (error) {
     console.error('Error in reassignJadeLeads:', error);
+    throw error;
+  }
+};
+
+export const reassignJeanMarcLeads = async () => {
+  try {
+    console.log("Starting reassignment of Jean Marc's leads to his correct UUID:", JEAN_MARC_ID);
+    
+    // Update leads with any variation of Jean Marc's ID to use his correct UUID
+    const { error } = await supabase
+      .from('leads')
+      .update({ assigned_to: JEAN_MARC_ID })
+      .in('assigned_to', ['jean-marc', 'jean-marc-perrissol']);
+
+    if (error) {
+      console.error('Error reassigning Jean Marc\'s leads:', error);
+      throw error;
+    }
+    
+    console.log('Successfully reassigned all Jean Marc\'s leads to correct UUID');
+    return { success: true };
+  } catch (error) {
+    console.error('Error in reassignJeanMarcLeads:', error);
     throw error;
   }
 };

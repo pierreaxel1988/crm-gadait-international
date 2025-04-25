@@ -11,7 +11,9 @@ import {
 } from "@/components/ui/select"
 import { useTeamMembers } from '@/components/chat/hooks/useTeamMembers';
 
+// Important IDs that must be preserved
 const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69"; // Jade's correct UUID
+const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11"; // Jean Marc's correct UUID
 
 interface TeamMemberSelectProps {
   value: string | undefined;
@@ -33,9 +35,13 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
 
   // Convert legacy IDs to proper UUIDs
   useEffect(() => {
-    // Convert 'jade-diouane' string ID to the correct UUID if needed
+    // Convert string IDs to the correct UUIDs if needed
     if (value === 'jade-diouane') {
+      console.log("Converting 'jade-diouane' to proper UUID:", JADE_ID);
       onChange(JADE_ID);
+    } else if (value === 'jean-marc-perrissol') {
+      console.log("Converting 'jean-marc-perrissol' to proper UUID:", JEAN_MARC_ID);
+      onChange(JEAN_MARC_ID);
     }
   }, [value, onChange]);
 
@@ -49,6 +55,9 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       } else if (value === JADE_ID) {
         // Fallback for Jade if teamMembers hasn't loaded her yet
         setSelectedMemberName("Jade Diouane");
+      } else if (value === JEAN_MARC_ID) {
+        // Fallback for Jean Marc if teamMembers hasn't loaded him yet
+        setSelectedMemberName("Jean Marc Perrissol");
       }
     } else {
       setSelectedMemberName(null);
