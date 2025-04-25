@@ -77,6 +77,7 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
             filters={filters}
             onFilterChange={onFilterChange}
             onClearFilters={onClearFilters}
+            teamMembers={teamMembers}
           />
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3">
@@ -115,6 +116,7 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
             assignedToOptions={teamMembers}
             isMobile={true}
             onApplyFilters={handleApplyFilters}
+            isFilterActive={isFilterActive}
           />
         </Sheet>
       )}
