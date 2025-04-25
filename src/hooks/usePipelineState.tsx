@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FilterOptions } from '@/components/filters/PipelineFilters';
@@ -6,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { toast } from '@/hooks/use-toast';
 import { PipelineType } from '@/types/lead';
+import { usePersistentFilters } from './usePersistentFilters';
 
 export function usePipelineState() {
   const location = useLocation();
@@ -25,8 +25,8 @@ export function usePipelineState() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [teamMembers, setTeamMembers] = useState<{id: string, name: string}[]>([]);
-  
-  const [filters, setFilters] = useState<FilterOptions>({
+
+  const initialFilters: FilterOptions = {
     status: null,
     tags: [],
     assignedTo: null,
@@ -35,15 +35,13 @@ export function usePipelineState() {
     location: '',
     purchaseTimeframe: null,
     propertyType: null
-  });
+  };
 
-  const updateAgentFilter = useCallback((agentId: string | null) => {
-    console.log("Updating agent filter to:", agentId);
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      assignedTo: agentId
-    }));
-  }, []);
+  const {
+    filters,
+    setFilters,
+    clearFilters: handleClearFilters
+  } = usePersistentFilters(initialFilters);
 
   useEffect(() => {
     handleRefresh();
@@ -168,27 +166,13 @@ export function usePipelineState() {
     checkLeads();
   };
 
-  const handleClearFilters = () => {
-    console.log("Clearing all filters");
-    setFilters({
-      status: null,
-      tags: [],
-      assignedTo: null,
-      minBudget: '',
-      maxBudget: '',
-      location: '',
-      purchaseTimeframe: null,
-      propertyType: null
-    });
-    
-    toast({
-      title: "Filtres effacés",
-      description: "Tous les filtres ont été supprimés",
-      duration: 2000,
-    });
-    
-    handleRefresh();
-  };
+  const updateAgentFilter = useCallback((agentId: string | null) => {
+    console.log("Updating agent filter to:", agentId);
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      assignedTo: agentId
+    }));
+  }, [setFilters]);
 
   const toggleFilters = () => {
     setFiltersOpen(prev => !prev);
