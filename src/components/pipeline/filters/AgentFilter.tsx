@@ -2,16 +2,7 @@
 import React from 'react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@/components/ui/select';
 import { User } from 'lucide-react';
-
-// Same specific agents as the AgentFilterSelect component
-const SPECIFIC_AGENTS = [
-  { id: "jade-diouane", name: "Jade Diouane" },
-  { id: "jean-marc-perrissol", name: "Jean Marc Perrissol" },
-  { id: "jacques-charles", name: "Jacques Charles" },
-  { id: "sharon-ramdiane", name: "Sharon Ramdiane" },
-  { id: "ophelie-durand", name: "Ophelie Durand" },
-  { id: "pierre-axel-gadait", name: "Pierre-Axel Gadait" }
-];
+import { SPECIFIC_AGENTS } from '@/components/actions/filters/AgentFilterButtons';
 
 interface AgentFilterProps {
   assignedTo: string | null;
@@ -27,7 +18,7 @@ const AgentFilter = ({
   onAssignedToChange,
   assignedToOptions = []
 }: AgentFilterProps) => {
-  // Combine and deduplicate agents, just like in AgentFilterSelect
+  // Only add team members that aren't in SPECIFIC_AGENTS
   const combinedAgents = [
     ...SPECIFIC_AGENTS,
     ...assignedToOptions.filter(
@@ -48,7 +39,7 @@ const AgentFilter = ({
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Tous les agents" />
         </SelectTrigger>
-        <SelectContent searchable>
+        <SelectContent>
           <SelectGroup>
             <SelectItem value="all">Tous les agents</SelectItem>
             {combinedAgents.map((agent) => (

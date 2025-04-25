@@ -3,14 +3,14 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
 
-// Same specific agents as the other components
-const SPECIFIC_AGENTS = [
-  { id: "jade-diouane", name: "Jade Diouane" },
-  { id: "jean-marc-perrissol", name: "Jean Marc Perrissol" },
-  { id: "jacques-charles", name: "Jacques Charles" },
-  { id: "ophelie-durand", name: "Ophelie Durand" },
-  { id: "pierre-axel-gadait", name: "Pierre-Axel Gadait" },
-  { id: "sharon-ramdiane", name: "Sharon Ramdiane" }
+// Specific team members with their correct UUIDs
+export const SPECIFIC_AGENTS = [
+  { id: "2d8bae00-a935-439d-8685-0adf238a612e", name: "Ophelie Durand" },
+  { id: "acab847b-7ace-4681-989d-86f78549aa69", name: "Jade Diouane" },
+  { id: "af8e053c-8fae-4424-abaa-d79029fd8a11", name: "Jean Marc Perrissol" },
+  { id: "e564a874-2520-4167-bfa8-26d39f119470", name: "Sharon Ramdiane" },
+  { id: "e59037a6-218d-4504-a3ad-d2c399784dc7", name: "Jacques Charles" },
+  { id: "ccbc635f-0282-427b-b130-82c1f0fbbdf9", name: "Pierre-Axel Gadait" }
 ];
 
 interface AgentFilterButtonsProps {
@@ -24,11 +24,11 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
   setAgentFilter, 
   teamMembers 
 }) => {
-  // Combine and deduplicate agents
+  // Only add team members that aren't in SPECIFIC_AGENTS
   const combinedAgents = [
     ...SPECIFIC_AGENTS,
     ...teamMembers.filter(
-      member => !SPECIFIC_AGENTS.some(specificAgent => specificAgent.id === member.id)
+      member => !SPECIFIC_AGENTS.some(agent => agent.id === member.id)
     )
   ];
 
