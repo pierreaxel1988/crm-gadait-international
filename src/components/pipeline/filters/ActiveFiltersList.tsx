@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { X } from 'lucide-react';
 import { FilterOptions } from '../PipelineFilters';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import TagBadge from '@/components/common/TagBadge';
 
 interface ActiveFiltersListProps {
   filters: FilterOptions;
@@ -63,7 +65,7 @@ const ActiveFiltersList = ({
 
       {filters.tags.map(tag => (
         <div key={tag} className="flex items-center">
-          <Badge tag={tag} className="text-xs" />
+          <TagBadge tag={tag} className="text-xs" />
           <Button
             variant="ghost"
             size="sm"
