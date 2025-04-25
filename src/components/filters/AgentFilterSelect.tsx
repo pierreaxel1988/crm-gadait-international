@@ -25,7 +25,10 @@ const AgentFilterSelect = ({
       </div>
       <Select
         value={assignedTo || "all"}
-        onValueChange={(value) => onAssignedToChange(value === "all" ? null : value)}
+        onValueChange={(value) => {
+          console.log("Agent sélectionné:", value);
+          onAssignedToChange(value === "all" ? null : value);
+        }}
       >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Tous les agents" />

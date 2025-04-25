@@ -1,3 +1,4 @@
+
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -31,11 +32,18 @@ export const applyFiltersToColumns = (
     if (filters.assignedTo) {
       console.log("Filtering by assignedTo:", filters.assignedTo);
       filteredItems = filteredItems.filter(item => {
-        const matchesAssignedTo = item.assignedTo === filters.assignedTo;
+        // Vérifier à la fois assignedTo et assignedToId
         const matchesAssignedToId = item.assignedToId === filters.assignedTo;
-        console.log(`Item ${item.id}: assignedTo=${item.assignedTo}, assignedToId=${item.assignedToId}, matches=${matchesAssignedTo || matchesAssignedToId}`);
+        const matchesAssignedTo = item.assignedTo === filters.assignedTo;
+        
+        if (matchesAssignedTo || matchesAssignedToId) {
+          console.log(`Lead ${item.id} (${item.name}) matches agent ${filters.assignedTo}`);
+        }
+        
         return matchesAssignedTo || matchesAssignedToId;
       });
+      
+      console.log(`Filtered items count for agent ${filters.assignedTo}:`, filteredItems.length);
     }
     
     if (filters.minBudget || filters.maxBudget) {

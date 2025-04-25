@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
@@ -9,6 +10,7 @@ import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import ComponentLoader from '@/components/common/ComponentLoader';
 import { reassignJadeLeads, reassignJeanMarcLeads, reassignSharonLeads } from '@/services/leadService';
+import { SPECIFIC_AGENTS } from '@/components/actions/filters/AgentFilterButtons';
 
 const Pipeline = () => {
   const isMobile = useIsMobile();
@@ -37,12 +39,19 @@ const Pipeline = () => {
 
   const selectedAgentName = useMemo(() => {
     if (!selectedAgent) return null;
+    
+    // D'abord vérifier dans SPECIFIC_AGENTS
+    const specificAgent = SPECIFIC_AGENTS.find(agent => agent.id === selectedAgent);
+    if (specificAgent) return specificAgent.name;
+    
+    // Sinon vérifier dans teamMembers
     const agent = teamMembers.find(member => member.id === selectedAgent);
     return agent ? agent.name : null;
   }, [selectedAgent, teamMembers]);
 
   useEffect(() => {
     if (selectedAgent !== filters.assignedTo) {
+      console.log("Updating agent filter from selectedAgent:", selectedAgent);
       updateAgentFilter(selectedAgent);
     }
   }, [selectedAgent, filters.assignedTo, updateAgentFilter]);
@@ -71,6 +80,7 @@ const Pipeline = () => {
     const handleAgentSelectionChange = (e: CustomEvent) => {
       const newAgent = e.detail.selectedAgent;
       if (newAgent !== selectedAgent) {
+        console.log("Agent selection changed via custom event:", newAgent);
         handleAgentChange(newAgent);
       }
     };
@@ -80,6 +90,17 @@ const Pipeline = () => {
       window.removeEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
     };
   }, [selectedAgent, handleAgentChange]);
+
+  // Ajout d'un effet pour afficher les logs de débogage pour les filtres
+  useEffect(() => {
+    console.log("Current filters:", JSON.stringify(filters, null, 2));
+    if (filters.assignedTo) {
+      const agentName = SPECIFIC_AGENTS.find(agent => agent.id === filters.assignedTo)?.name || 
+                      teamMembers.find(member => member.id === filters.assignedTo)?.name || 
+                      "Unknown";
+      console.log(`Current agent filter: ${agentName} (${filters.assignedTo})`);
+    }
+  }, [filters, teamMembers]);
 
   const handleClearAllFilters = () => {
     window.dispatchEvent(new Event('filters-cleared'));
