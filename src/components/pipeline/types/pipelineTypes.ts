@@ -1,7 +1,6 @@
 
-import { LeadStatus } from '@/components/common/StatusBadge';
-import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
-import { FilterOptions } from '@/components/filters/PipelineFilters';
+import { LeadStatus, PipelineType } from '@/types/lead';
+import { FilterOptions } from '../PipelineFilters';
 
 export type SortBy = 'priority' | 'newest' | 'oldest';
 
@@ -16,11 +15,7 @@ export interface DesktopPipelineViewProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
-  columns: {
-    title: string;
-    status: LeadStatus;
-    items: ExtendedKanbanItem[];
-  }[];
+  columns: any[];
   handleRefresh: () => void;
   isRefreshing: boolean;
   isFilterActive: (filterName: string) => boolean;
@@ -33,8 +28,8 @@ export interface SortingControlsProps {
 }
 
 export interface LeadsListProps {
-  leads: ExtendedKanbanItem[];
-  isLoading?: boolean;
-  onLeadClick: (id: string) => void;
-  onAddLead?: () => void;
+  leads: any[];
+  isLoading: boolean;
+  onLeadClick: (leadId: string) => void;
+  onAddLead: () => void;
 }

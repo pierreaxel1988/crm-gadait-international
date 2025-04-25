@@ -1,8 +1,9 @@
+
 import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import KanbanColumn from './KanbanColumn';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { FilterOptions } from '@/components/pipeline/types/filterTypes';
+import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { useKanbanDragDrop } from '@/hooks/useKanbanDragDrop';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { isPast, isToday } from 'date-fns';

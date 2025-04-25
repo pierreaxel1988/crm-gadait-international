@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { X } from 'lucide-react';
-import { FilterOptions } from '@/components/filters/PipelineFilters';
+import { FilterOptions } from '../PipelineFilters';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,7 @@ interface ActiveFiltersListProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
-  getTeamMemberName?: (id: string) => string;
+  getTeamMemberName: (id: string) => string;
   isFilterActive: (filterName: string) => boolean;
 }
 
@@ -19,19 +19,10 @@ const ActiveFiltersList = ({
   filters,
   onFilterChange,
   onClearFilters,
-  getTeamMemberName = (id: string) => 'Inconnu',
+  getTeamMemberName,
   isFilterActive
 }: ActiveFiltersListProps) => {
-  // Check if there are any active filters
-  const hasActiveFilters = 
-    filters.status !== null || 
-    filters.tags.length > 0 || 
-    filters.assignedTo !== null || 
-    filters.minBudget !== '' || 
-    filters.maxBudget !== '' || 
-    filters.location !== '' || 
-    filters.purchaseTimeframe !== null || 
-    filters.propertyType !== null;
+  const hasActiveFilters = Object.values(isFilterActive).some(active => active);
 
   if (!hasActiveFilters) return null;
 

@@ -1,42 +1,58 @@
 
 import React from 'react';
+import { PlusCircle } from 'lucide-react';
 import LeadListItem from '../mobile/LeadListItem';
-import { ComponentLoader } from '@/components/ui/component-loader';
-import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
+import LoadingScreen from '../../layout/LoadingScreen';
+import { LeadsListProps } from '../types/pipelineTypes';
 
-interface LeadsListProps {
-  leads: ExtendedKanbanItem[];
-  isLoading?: boolean;
-  onLeadClick: (id: string) => void;
-  onAddLead?: () => void;
-}
-
-const LeadsList: React.FC<LeadsListProps> = ({
-  leads,
-  isLoading = false,
+const LeadsList: React.FC<LeadsListProps> = ({ 
+  leads, 
+  isLoading, 
   onLeadClick,
-  onAddLead
+  onAddLead 
 }) => {
   if (isLoading) {
-    return <ComponentLoader />;
+    return <LoadingScreen fullscreen={false} />;
   }
 
   return (
-    <div className="space-y-2">
-      {leads.map((lead) => (
-        <LeadListItem
-          key={lead.id}
-          id={lead.id}
-          title={lead.name}
-          status={lead.status}
-          taskType={lead.taskType}
-          nextFollowUpDate={lead.nextFollowUpDate}
-          desiredLocation={lead.desiredLocation}
-          budget={lead.budget}
-          currency={lead.currency}
-          onClick={() => onLeadClick(lead.id)}
-        />
-      ))}
+    <div className="relative bg-gray-50 rounded-lg border border-gray-200">
+      <div className="p-4">
+        {leads.length === 0 ? (
+          <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
+            <div className="text-center">
+              <p className="text-sm text-zinc-900 font-medium">Aucun lead trouvé</p>
+              <button 
+                onClick={onAddLead} 
+                className="mt-2 text-zinc-900 hover:text-zinc-700 text-sm flex items-center justify-center mx-auto"
+              >
+                <PlusCircle className="h-4 w-4 mr-1" />
+                Ajouter un lead
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
+            {leads.map(lead => (
+              <LeadListItem 
+                key={lead.id}
+                id={lead.id}
+                name={lead.name}
+                columnStatus={lead.columnStatus}
+                budget={lead.budget}
+                currency={lead.currency}
+                desiredLocation={lead.desiredLocation}
+                taskType={lead.taskType}
+                createdAt={lead.createdAt}
+                nextFollowUpDate={lead.nextFollowUpDate}
+                phone={lead.phone}
+                email={lead.email}
+                onClick={onLeadClick}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

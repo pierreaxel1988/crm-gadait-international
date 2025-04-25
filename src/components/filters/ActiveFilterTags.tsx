@@ -1,16 +1,17 @@
+
 import React from 'react';
 import { X } from 'lucide-react';
-import { FilterOptions } from '@/components/pipeline/types/filterTypes';
+import { FilterOptions } from '../pipeline/PipelineFilters'; 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import TagBadge from '@/components/common/TagBadge';
-import { SPECIFIC_AGENTS } from '@/components/actions/filters/AgentFilterButtons';
 
 interface ActiveFilterTagsProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
+  getTeamMemberName: (id: string) => string;
   className?: string;
 }
 
@@ -18,13 +19,10 @@ const ActiveFilterTags = ({
   filters,
   onFilterChange,
   onClearFilters,
+  getTeamMemberName,
   className
 }: ActiveFilterTagsProps) => {
-  const getTeamMemberName = (id: string): string => {
-    const agent = SPECIFIC_AGENTS.find(a => a.id === id);
-    return agent ? agent.name : id;
-  };
-
+  // Check if any filter is active
   const hasActiveFilters = 
     filters.status !== null ||
     filters.tags.length > 0 ||
@@ -60,6 +58,20 @@ const ActiveFilterTags = ({
         </Badge>
       )}
 
+      {filters.assignedTo && (
+        <Badge variant="secondary" className="pl-2 pr-1 py-0.5 flex items-center gap-1">
+          {getTeamMemberName(filters.assignedTo)}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-4 w-4 p-0 hover:bg-transparent"
+            onClick={() => onFilterChange({ ...filters, assignedTo: null })}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </Badge>
+      )}
+
       {filters.tags.map(tag => (
         <div key={tag} className="flex items-center">
           <TagBadge tag={tag} className="text-xs" />
@@ -73,20 +85,6 @@ const ActiveFilterTags = ({
           </Button>
         </div>
       ))}
-
-      {filters.assignedTo && (
-        <Badge variant="secondary" className="pl-2 pr-1 py-0.5 flex items-center gap-1">
-          {getTeamMemberName(filters.assignedTo)}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-4 w-4 p-0 hover:bg-transparent"
-            onClick={() => onFilterChange({...filters, assignedTo: null})}
-          >
-            <X className="h-3 w-3" />
-          </Button>
-        </Badge>
-      )}
 
       {(filters.minBudget || filters.maxBudget) && (
         <Badge 

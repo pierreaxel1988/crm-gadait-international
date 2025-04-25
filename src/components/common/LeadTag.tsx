@@ -25,9 +25,6 @@ const LeadTag = ({
 }: LeadTagProps) => {
   // Format numeric values in the label with proper thousand separators
   const formattedLabel = React.useMemo(() => {
-    // Safety check - if label is undefined or null, return empty string
-    if (!label) return '';
-    
     // Check if label is a budget value by detecting currency symbols or K/M suffix
     const budgetRegex = /^(\D*)(\d+(?:[,.]\d+)?)(\s*[KkMm€$£]*|\s*EUR|\s*USD|\s*GBP)?$/;
     const match = label.match(budgetRegex);
@@ -64,22 +61,22 @@ const LeadTag = ({
   
   // Check if the colors are hex values or Tailwind classes
   const getBgStyle = () => {
-    if (bgColor?.startsWith('#') || bgColor?.startsWith('rgb')) {
+    if (bgColor.startsWith('#') || bgColor.startsWith('rgb')) {
       return { backgroundColor: bgColor };
     }
     return {};
   };
 
   const getTextStyle = () => {
-    if (textColor?.startsWith('#') || textColor?.startsWith('rgb')) {
+    if (textColor.startsWith('#') || textColor.startsWith('rgb')) {
       return { color: textColor };
     }
     return {};
   };
 
   // Determine the className based on whether bgColor is a Tailwind class or a hex value
-  const bgClassName = bgColor?.startsWith('bg-') ? bgColor : '';
-  const textClassName = textColor?.startsWith('text-') ? textColor : '';
+  const bgClassName = bgColor.startsWith('bg-') ? bgColor : '';
+  const textClassName = textColor.startsWith('text-') ? textColor : '';
 
   return (
     <span 

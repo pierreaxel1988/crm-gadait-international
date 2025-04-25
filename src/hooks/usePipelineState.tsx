@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { toast } from '@/hooks/use-toast';
 import { PipelineType } from '@/types/lead';
-import { usePersistentFilters } from './usePersistentFilters';
 
 export function usePipelineState() {
   const location = useLocation();
@@ -25,8 +24,8 @@ export function usePipelineState() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [teamMembers, setTeamMembers] = useState<{id: string, name: string}[]>([]);
-
-  const initialFilters: FilterOptions = {
+  
+  const [filters, setFilters] = useState<FilterOptions>({
     status: null,
     tags: [],
     assignedTo: null,
@@ -35,13 +34,14 @@ export function usePipelineState() {
     location: '',
     purchaseTimeframe: null,
     propertyType: null
-  };
+  });
 
-  const {
-    filters,
-    setFilters,
-    clearFilters: handleClearFilters
-  } = usePersistentFilters(initialFilters);
+  const updateAgentFilter = useCallback((agentId: string | null) => {
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      assignedTo: agentId
+    }));
+  }, []);
 
   useEffect(() => {
     handleRefresh();
@@ -67,7 +67,6 @@ export function usePipelineState() {
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
-        console.log("Fetching team members...");
         const { data, error } = await supabase
           .from('team_members')
           .select('id, name');
@@ -78,7 +77,6 @@ export function usePipelineState() {
         }
         
         if (data) {
-          console.log("Team members fetched:", data);
           setTeamMembers(data);
         }
       } catch (error) {
@@ -137,22 +135,6 @@ export function usePipelineState() {
     
     const checkLeads = async () => {
       try {
-        console.log("Checking leads and refreshing...");
-        console.log("Filtres actifs:", JSON.stringify(filters, null, 2));
-        
-        if (filters.assignedTo) {
-          console.log(`Filtre par responsable du suivi: ${filters.assignedTo}`);
-          
-          const { data: sampleLead, error: sampleError } = await supabase
-            .from('leads')
-            .select('id, name, assignedTo')
-            .limit(5);
-            
-          if (!sampleError && sampleLead) {
-            console.log("Échantillon de leads pour vérifier le format assignedTo:", sampleLead);
-          }
-        }
-        
         const { count, error } = await supabase
           .from('leads')
           .select('*', { count: 'exact', head: true });
@@ -181,13 +163,26 @@ export function usePipelineState() {
     checkLeads();
   };
 
-  const updateAgentFilter = useCallback((agentId: string | null) => {
-    console.log("Updating agent filter to:", agentId);
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      assignedTo: agentId
-    }));
-  }, [setFilters]);
+  const handleClearFilters = () => {
+    setFilters({
+      status: null,
+      tags: [],
+      assignedTo: null,
+      minBudget: '',
+      maxBudget: '',
+      location: '',
+      purchaseTimeframe: null,
+      propertyType: null
+    });
+    
+    toast({
+      title: "Filtres effacés",
+      description: "Tous les filtres ont été supprimés",
+      duration: 2000,
+    });
+    
+    handleRefresh();
+  };
 
   const toggleFilters = () => {
     setFiltersOpen(prev => !prev);

@@ -1,143 +1,168 @@
+
 import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import StatusFilter from './filters/StatusFilter';
-import TagsFilter from './filters/TagsFilter';
-import BudgetFilter from './filters/BudgetFilter';
-import LocationFilter from './filters/LocationFilter';
-import TimeframeFilter from './filters/TimeframeFilter';
-import PropertyTypeFilter from './filters/PropertyTypeFilter';
-import ActionButtons from './filters/ActionButtons';
-import ActiveFilterTags from './filters/ActiveFilterTags';
-import { FilterOptions } from '@/components/pipeline/types/filterTypes';
+import { useAuth } from '@/hooks/useAuth';
+import { LeadStatus } from '@/components/common/StatusBadge';
+import { LeadTag } from '@/components/common/TagBadge';
+import { PurchaseTimeframe, PropertyType } from '@/types/lead';
+
+import FilterGroup from './FilterGroup';
+import StatusFilterChips from './StatusFilterChips';
+import TagsFilterChips from './TagsFilterChips';
 import AgentFilterSelect from './AgentFilterSelect';
-import { SPECIFIC_AGENTS } from '@/components/actions/filters/AgentFilterButtons';
+import BudgetRangeFilter from './BudgetRangeFilter';
+import LocationSearchFilter from './LocationSearchFilter';
+import TimeframeFilter from './TimeframeFilter';
+import PropertyTypeFilter from './PropertyTypeFilter';
+import FilterActions from './FilterActions';
+import ActiveFilterTags from './ActiveFilterTags';
+
+export interface FilterOptions {
+  status: LeadStatus | null;
+  tags: LeadTag[];
+  assignedTo: string | null;
+  minBudget: string;
+  maxBudget: string;
+  location: string;
+  purchaseTimeframe: PurchaseTimeframe | null;
+  propertyType: PropertyType | null;
+}
 
 export interface PipelineFiltersProps {
   filters: FilterOptions;
   onFilterChange: (newFilters: FilterOptions) => void;
   onClearFilters: () => void;
+  assignedToOptions?: {
+    id: string;
+    name: string;
+  }[];
   isMobile?: boolean;
   onApplyFilters?: () => void;
-  isFilterActive?: (filterName: string) => boolean;
 }
 
-const PipelineFilters = ({
+const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   filters,
   onFilterChange,
   onClearFilters,
+  assignedToOptions = [],
   isMobile = false,
-  onApplyFilters,
-  isFilterActive
-}: PipelineFiltersProps) => {
-  const filterGroups = [
-    {
-      title: 'État et Tags',
-      components: [
-        <StatusFilter 
-          key="status"
-          status={filters.status} 
-          onStatusChange={status => onFilterChange({ ...filters, status })} 
-        />,
-        <TagsFilter 
-          key="tags"
-          selectedTags={filters.tags} 
-          onTagsChange={tags => onFilterChange({ ...filters, tags })} 
-        />,
-        <AgentFilterSelect
-          key="agent"
-          assignedTo={filters.assignedTo}
-          onAssignedToChange={value => onFilterChange({ ...filters, assignedTo: value })}
-        />
-      ]
-    },
-    {
-      title: 'Budget',
-      components: [
-        <BudgetFilter 
-          key="budget"
-          minBudget={filters.minBudget} 
-          maxBudget={filters.maxBudget} 
-          onBudgetChange={(type, value) => {
-            if (type === 'min') {
-              onFilterChange({ ...filters, minBudget: value });
-            } else {
-              onFilterChange({ ...filters, maxBudget: value });
-            }
-          }} 
-        />
-      ]
-    },
-    {
-      title: 'Localisation et Planning',
-      components: [
-        <LocationFilter 
-          key="location"
-          location={filters.location} 
-          onLocationChange={location => onFilterChange({ ...filters, location })} 
-        />,
-        <TimeframeFilter 
-          key="timeframe"
-          purchaseTimeframe={filters.purchaseTimeframe} 
-          onTimeframeChange={timeframe => onFilterChange({ ...filters, purchaseTimeframe: timeframe })} 
-        />
-      ]
-    },
-    {
-      title: 'Type de bien',
-      components: [
-        <PropertyTypeFilter 
-          key="propertyType"
-          propertyType={filters.propertyType} 
-          onPropertyTypeChange={type => onFilterChange({ ...filters, propertyType: type })} 
-        />
-      ]
-    }
-  ];
+  onApplyFilters
+}) => {
+  const { isCommercial } = useAuth();
+
+  // Helper to get team member name by ID
+  const getTeamMemberName = (id: string): string => {
+    const member = assignedToOptions.find(member => member.id === id);
+    return member ? member.name : 'Inconnu';
+  };
+
+  // Handle change for a specific filter
+  const handleFilterChange = <K extends keyof FilterOptions,>(filterName: K, value: FilterOptions[K]) => {
+    onFilterChange({
+      ...filters,
+      [filterName]: value
+    });
+  };
 
   const filterContent = (
-    <div className={`${isMobile ? 'space-y-6' : 'space-y-8'} px-6`}>
-      {filterGroups.map((group, index) => (
-        <div key={group.title} className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-muted-foreground">{group.title}</h3>
-          </div>
-          <div className="space-y-4">
-            {group.components}
-          </div>
-          {index < filterGroups.length - 1 && <Separator className="mt-4" />}
-        </div>
-      ))}
+    <div className="space-y-6">
+      {/* Status Filter */}
+      <FilterGroup title="Status">
+        <StatusFilterChips 
+          status={filters.status} 
+          onStatusChange={(status) => handleFilterChange('status', status)} 
+        />
+      </FilterGroup>
       
-      <ActionButtons 
-        onClearFilters={onClearFilters} 
-        onApplyFilters={onApplyFilters}
+      {/* Tags Filter */}
+      <TagsFilterChips 
+        selectedTags={filters.tags} 
+        onTagsChange={(tags) => handleFilterChange('tags', tags)} 
       />
+      
+      {/* Agent filter - only show for admins */}
+      {!isCommercial && (
+        <AgentFilterSelect 
+          assignedTo={filters.assignedTo} 
+          onAssignedToChange={(agent) => handleFilterChange('assignedTo', agent)} 
+          assignedToOptions={assignedToOptions} 
+        />
+      )}
+      
+      {/* Budget and Location Filters */}
+      <div>
+        <Separator className="my-4" />
+        
+        <BudgetRangeFilter 
+          minBudget={filters.minBudget} 
+          maxBudget={filters.maxBudget} 
+          onMinBudgetChange={(value) => handleFilterChange('minBudget', value)}
+          onMaxBudgetChange={(value) => handleFilterChange('maxBudget', value)}
+        />
+        
+        <div className="h-4"></div>
+        
+        <LocationSearchFilter 
+          location={filters.location} 
+          onLocationChange={(location) => handleFilterChange('location', location)} 
+        />
+      </div>
+      
+      {/* Timeframe and Property Type Filters */}
+      <div>
+        <Separator className="my-4" />
+        
+        <TimeframeFilter 
+          purchaseTimeframe={filters.purchaseTimeframe} 
+          onTimeframeChange={(timeframe) => handleFilterChange('purchaseTimeframe', timeframe)} 
+        />
+        
+        <div className="h-4"></div>
+        
+        <PropertyTypeFilter 
+          propertyType={filters.propertyType} 
+          onPropertyTypeChange={(type) => handleFilterChange('propertyType', type)} 
+        />
+      </div>
+      
+      {/* Action buttons */}
+      <FilterActions 
+        onClear={onClearFilters} 
+        onApply={onApplyFilters || (() => {})} 
+      />
+      
+      {/* Show active filters on desktop only */}
+      {!isMobile && (
+        <ActiveFilterTags 
+          filters={filters} 
+          onFilterChange={onFilterChange} 
+          onClearFilters={onClearFilters} 
+          getTeamMemberName={getTeamMemberName} 
+          className="mt-4" 
+        />
+      )}
     </div>
   );
 
-  if (!isMobile) {
+  if (isMobile) {
     return (
-      <div className="bg-background border rounded-lg shadow-sm">
-        <div className="p-4">
+      <SheetContent side="right" className="w-full sm:max-w-md p-0">
+        <SheetHeader className="px-6 py-4 border-b sticky top-0 bg-background z-10">
+          <SheetTitle className="text-lg font-medium">Filtres</SheetTitle>
+        </SheetHeader>
+        <ScrollArea className="h-[calc(100vh-5rem)] px-6 py-4">
           {filterContent}
-        </div>
-      </div>
+        </ScrollArea>
+      </SheetContent>
     );
   }
 
   return (
-    <SheetContent side="right" className="w-full sm:max-w-md p-0">
-      <SheetHeader className="px-6 py-4 border-b">
-        <SheetTitle className="text-lg font-medium">Filtres</SheetTitle>
-      </SheetHeader>
-      <ScrollArea className="h-[calc(100vh-5rem)] pb-8">
-        <div className="pt-4">
-          {filterContent}
-        </div>
-      </ScrollArea>
-    </SheetContent>
+    <div className="bg-background border rounded-lg shadow-sm p-6">
+      {filterContent}
+    </div>
   );
 };
 

@@ -75,7 +75,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
 
   return (
     <Select
-      value={value || "none"}
+      value={value || ""}
       onValueChange={handleValueChange}
       disabled={disabled}
     >
@@ -94,9 +94,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       </SelectTrigger>
       <SelectContent className="max-h-64 font-futura">
         <SelectGroup>
-          <SelectItem value="none" className="text-muted-foreground italic">
-            {placeholder}
-          </SelectItem>
           {teamMembers.map(member => (
             <SelectItem 
               key={member.id} 
