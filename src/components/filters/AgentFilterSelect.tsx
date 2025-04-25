@@ -33,7 +33,7 @@ const AgentFilterSelect = ({
     <FilterGroup className={className}>
       <div className="flex items-center gap-2 text-sm">
         <User className="h-4 w-4" />
-        <span className="font-medium">Agent assigné</span>
+        <span className="font-medium">Responsable du suivi</span>
       </div>
       <Select
         value={assignedTo || "all"}

@@ -35,7 +35,7 @@ const AgentFilterButtons: React.FC<AgentFilterButtonsProps> = ({
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-        <User className="h-4 w-4" /> Agent
+        <User className="h-4 w-4" /> Responsable du suivi
       </h4>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <Button

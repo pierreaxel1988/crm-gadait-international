@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { SPECIFIC_AGENTS } from '@/components/actions/filters/AgentFilterButtons';
 
 interface AssignedUserProps {
   assignedToId?: string;
@@ -16,8 +17,17 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
   useEffect(() => {
     const fetchTeamMemberInfo = async () => {
       if (assignedToId) {
+        // Vérifier d'abord dans SPECIFIC_AGENTS pour éviter une requête inutile
+        const specificAgent = SPECIFIC_AGENTS.find(agent => agent.id === assignedToId);
+        if (specificAgent) {
+          console.log("Agent trouvé dans SPECIFIC_AGENTS:", specificAgent.name);
+          setAssignedToName(specificAgent.name);
+          return;
+        }
+        
         setIsLoading(true);
         try {
+          console.log("Recherche de l'agent avec ID:", assignedToId);
           const { data, error } = await supabase
             .from('team_members')
             .select('id, name')
@@ -30,6 +40,7 @@ const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
           }
           
           if (data) {
+            console.log("Agent trouvé dans la base:", data.name);
             setAssignedToName(data.name);
           }
         } catch (error) {

@@ -1,3 +1,4 @@
+
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -21,8 +22,6 @@ export const applyFiltersToColumns = (
     
     // Filter by status if status filter is applied
     if (filters.status !== null) {
-      // This logic was incorrectly emptying columns that don't match the filter
-      // Instead, we need to filter the items in all columns and only keep items that match the status
       filteredItems = filteredItems.filter(item => item.status === filters.status);
     }
     
@@ -33,16 +32,13 @@ export const applyFiltersToColumns = (
       );
     }
     
-    // Filter by assignedTo
+    // Filter by assignedTo - PROBLÈME CORRIGÉ ICI
+    // Vérifie à la fois assignedTo et assignedToId qui correspondent tous deux au "Responsable du suivi"
     if (filters.assignedTo) {
       filteredItems = filteredItems.filter(item => {
-        // Check if the item has an assignedTo property that matches the filter
-        // This can be either the name or the ID
-        if (typeof item.assignedTo === 'string') {
-          return item.assignedTo === filters.assignedTo || 
-                 item.assignedToId === filters.assignedTo;
-        }
-        return false;
+        // Vérification complète des différentes façons dont l'agent peut être référencé
+        return item.assignedTo === filters.assignedTo || 
+               item.assignedToId === filters.assignedTo;
       });
     }
     
@@ -67,14 +63,14 @@ export const applyFiltersToColumns = (
       );
     }
     
-    // Filter by purchase timeframe - fixed comparison
+    // Filter by purchase timeframe
     if (filters.purchaseTimeframe !== null) {
       filteredItems = filteredItems.filter(item => 
         item.purchaseTimeframe === filters.purchaseTimeframe
       );
     }
     
-    // Filter by property type - fixed comparison
+    // Filter by property type
     if (filters.propertyType !== null) {
       filteredItems = filteredItems.filter(item => 
         item.propertyType === filters.propertyType

@@ -138,6 +138,21 @@ export function usePipelineState() {
     const checkLeads = async () => {
       try {
         console.log("Checking leads and refreshing...");
+        console.log("Filtres actifs:", JSON.stringify(filters, null, 2));
+        
+        if (filters.assignedTo) {
+          console.log(`Filtre par responsable du suivi: ${filters.assignedTo}`);
+          
+          const { data: sampleLead, error: sampleError } = await supabase
+            .from('leads')
+            .select('id, name, assignedTo')
+            .limit(5);
+            
+          if (!sampleError && sampleLead) {
+            console.log("Échantillon de leads pour vérifier le format assignedTo:", sampleLead);
+          }
+        }
+        
         const { count, error } = await supabase
           .from('leads')
           .select('*', { count: 'exact', head: true });
