@@ -1,17 +1,16 @@
-
 import React from 'react';
 import { X } from 'lucide-react';
-import { FilterOptions } from './PipelineFilters'; 
+import { FilterOptions } from '@/components/pipeline/types/filterTypes';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import TagBadge from '@/components/common/TagBadge';
+import { SPECIFIC_AGENTS } from '@/components/actions/filters/AgentFilterButtons';
 
 interface ActiveFilterTagsProps {
   filters: FilterOptions;
   onFilterChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
-  getTeamMemberName?: (id: string) => string;
   className?: string;
 }
 
@@ -19,10 +18,13 @@ const ActiveFilterTags = ({
   filters,
   onFilterChange,
   onClearFilters,
-  getTeamMemberName = (id) => 'Inconnu',
   className
 }: ActiveFilterTagsProps) => {
-  // Check if any filter is active
+  const getTeamMemberName = (id: string): string => {
+    const agent = SPECIFIC_AGENTS.find(a => a.id === id);
+    return agent ? agent.name : id;
+  };
+
   const hasActiveFilters = 
     filters.status !== null ||
     filters.tags.length > 0 ||
@@ -71,6 +73,20 @@ const ActiveFilterTags = ({
           </Button>
         </div>
       ))}
+
+      {filters.assignedTo && (
+        <Badge variant="secondary" className="pl-2 pr-1 py-0.5 flex items-center gap-1">
+          {getTeamMemberName(filters.assignedTo)}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-4 w-4 p-0 hover:bg-transparent"
+            onClick={() => onFilterChange({...filters, assignedTo: null})}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </Badge>
+      )}
 
       {(filters.minBudget || filters.maxBudget) && (
         <Badge 

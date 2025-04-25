@@ -1,52 +1,40 @@
 
 import React from 'react';
-import { Loader2 } from 'lucide-react';
-import LeadCard from '@/components/leads/LeadCard'; 
-import { LeadsListProps } from '../types/pipelineTypes';
+import LeadListItem from '../mobile/LeadListItem';
+import { ComponentLoader } from '@/components/ui/component-loader';
+import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
 
-const LeadsList: React.FC<LeadsListProps> = ({ leads, isLoading, onLeadClick, onAddLead }) => {
+interface LeadsListProps {
+  leads: ExtendedKanbanItem[];
+  isLoading?: boolean;
+  onLeadClick: (id: string) => void;
+  onAddLead?: () => void;
+}
+
+const LeadsList: React.FC<LeadsListProps> = ({
+  leads,
+  isLoading = false,
+  onLeadClick,
+  onAddLead
+}) => {
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-10">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (leads.length === 0) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-muted-foreground mb-3">Aucun lead trouvé</p>
-        {onAddLead && (
-          <button 
-            className="text-sm text-primary underline"
-            onClick={onAddLead}
-          >
-            Ajouter un lead
-          </button>
-        )}
-      </div>
-    );
+    return <ComponentLoader />;
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-20">
+    <div className="space-y-2">
       {leads.map((lead) => (
-        <LeadCard
+        <LeadListItem
           key={lead.id}
-          lead={{
-            id: lead.id,
-            name: lead.name || 'Sans nom',
-            email: lead.email || '',
-            phone: lead.phone,
-            location: lead.desiredLocation,
-            status: lead.status,
-            tags: lead.tags || [],
-            assignedTo: lead.assignedTo,
-            createdAt: lead.createdAt || '',
-            lastContactedAt: lead.lastContactedAt
-          }}
-          onView={() => onLeadClick(lead.id)}
+          id={lead.id}
+          title={lead.name}
+          status={lead.status}
+          taskType={lead.taskType}
+          nextFollowUpDate={lead.nextFollowUpDate}
+          desiredLocation={lead.desiredLocation}
+          budget={lead.budget}
+          currency={lead.currency}
+          onClick={() => onLeadClick(lead.id)}
         />
       ))}
     </div>

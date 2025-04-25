@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { FilterOptions } from '@/components/pipeline/PipelineFilters';
+import { FilterOptions } from '@/components/pipeline/types/filterTypes';
 import { PipelineType } from '@/types/lead';
 import LocationFilter from './filters/LocationFilter';
 
