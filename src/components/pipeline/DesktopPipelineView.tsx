@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -188,10 +187,10 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
             filters={filters}
             onFilterChange={onFilterChange}
             onClearFilters={onClearFilters}
+            assignedToOptions={teamMembers}
             isFilterActive={isFilterActive}
             isMobile={false}
             onApplyFilters={handleApplyFilters}
-            teamMembers={teamMembers}
           />
         </Sheet>
       )}

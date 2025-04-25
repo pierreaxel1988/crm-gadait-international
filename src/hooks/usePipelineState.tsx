@@ -1,12 +1,10 @@
-
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FilterOptions } from '@/components/pipeline/types/filterTypes';
-import { usePersistentFilters } from './usePersistentFilters';
+import { FilterOptions } from '@/components/pipeline/PipelineFilters';
+import { supabase } from '@/integrations/supabase/client';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { toast } from '@/hooks/use-toast';
 import { PipelineType } from '@/types/lead';
-import { supabase } from '@/integrations/supabase/client';
 
 export function usePipelineState() {
   const location = useLocation();
@@ -30,15 +28,13 @@ export function usePipelineState() {
   const [filters, setFilters] = useState<FilterOptions>({
     status: null,
     tags: [],
-    assignedTo: undefined,
+    assignedTo: null,
     minBudget: '',
     maxBudget: '',
     location: '',
     purchaseTimeframe: null,
     propertyType: null
   });
-
-  usePersistentFilters(filters, setFilters);
 
   const updateAgentFilter = useCallback((agentId: string | null) => {
     setFilters(prevFilters => ({
@@ -171,7 +167,7 @@ export function usePipelineState() {
     setFilters({
       status: null,
       tags: [],
-      assignedTo: undefined,
+      assignedTo: null,
       minBudget: '',
       maxBudget: '',
       location: '',

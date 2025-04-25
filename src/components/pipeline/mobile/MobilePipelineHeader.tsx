@@ -2,11 +2,11 @@
 import React from 'react';
 import { SlidersHorizontal, RefreshCcw, PlusCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { FilterOptions } from '../PipelineFilters';
 import { useNavigate } from 'react-router-dom';
 import ActiveFiltersList from '../filters/ActiveFiltersList';
 import SmartSearch from '@/components/common/SmartSearch';
 import { useLeadSearch, SearchResult } from '@/hooks/useLeadSearch';
-import { FilterOptions } from '../types/filterTypes';
 
 interface MobilePipelineHeaderProps {
   searchTerm: string;
@@ -40,6 +40,12 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
   const { results, isLoading } = useLeadSearch(searchTerm);
+  
+  // Helper function to get team member name by ID
+  const getTeamMemberName = (id: string): string => {
+    const member = teamMembers.find(member => member.id === id);
+    return member ? member.name : 'Unknown';
+  };
   
   const handleSelectLead = (lead: SearchResult) => {
     navigate(`/leads/${lead.id}?tab=overview`);
@@ -136,8 +142,8 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
           filters={filters}
           onFilterChange={onFilterChange}
           onClearFilters={onClearFilters}
+          getTeamMemberName={getTeamMemberName}
           isFilterActive={isFilterActive}
-          teamMembers={teamMembers}
         />
       )}
     </div>
