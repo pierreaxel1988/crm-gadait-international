@@ -40,6 +40,7 @@ export interface PipelineFiltersProps {
   }[];
   isMobile?: boolean;
   onApplyFilters?: () => void;
+  isFilterActive?: (filterName: string) => boolean;
 }
 
 const PipelineFilters: React.FC<PipelineFiltersProps> = ({
@@ -48,7 +49,8 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   onClearFilters,
   assignedToOptions = [],
   isMobile = false,
-  onApplyFilters
+  onApplyFilters,
+  isFilterActive
 }) => {
   const { isCommercial } = useAuth();
 

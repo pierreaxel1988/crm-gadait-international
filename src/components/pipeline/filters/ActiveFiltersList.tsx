@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { X } from 'lucide-react';
 import { FilterOptions } from '../PipelineFilters';
@@ -22,7 +21,16 @@ const ActiveFiltersList = ({
   getTeamMemberName,
   isFilterActive
 }: ActiveFiltersListProps) => {
-  const hasActiveFilters = Object.values(isFilterActive).some(active => active);
+  // Check if there are any active filters
+  const hasActiveFilters = 
+    filters.status !== null || 
+    filters.tags.length > 0 || 
+    filters.assignedTo !== null || 
+    filters.minBudget !== '' || 
+    filters.maxBudget !== '' || 
+    filters.location !== '' || 
+    filters.purchaseTimeframe !== null || 
+    filters.propertyType !== null;
 
   if (!hasActiveFilters) return null;
 
