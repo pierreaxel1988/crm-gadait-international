@@ -16,16 +16,7 @@ interface AgentFilterProps {
 const AgentFilter = ({
   assignedTo,
   onAssignedToChange,
-  assignedToOptions = []
 }: AgentFilterProps) => {
-  // Only add team members that aren't in SPECIFIC_AGENTS
-  const combinedAgents = [
-    ...SPECIFIC_AGENTS,
-    ...assignedToOptions.filter(
-      agent => !SPECIFIC_AGENTS.some(specificAgent => specificAgent.id === agent.id)
-    )
-  ];
-
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 text-sm">
@@ -42,7 +33,7 @@ const AgentFilter = ({
         <SelectContent searchable>
           <SelectGroup>
             <SelectItem value="all">Tous les agents</SelectItem>
-            {combinedAgents.map((agent) => (
+            {SPECIFIC_AGENTS.map((agent) => (
               <SelectItem key={agent.id} value={agent.id}>
                 {agent.name}
               </SelectItem>

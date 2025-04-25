@@ -8,27 +8,14 @@ import { SPECIFIC_AGENTS } from '@/components/actions/filters/AgentFilterButtons
 interface AgentFilterSelectProps {
   assignedTo: string | null;
   onAssignedToChange: (agentId: string | null) => void;
-  assignedToOptions: {
-    id: string;
-    name: string;
-  }[];
   className?: string;
 }
 
 const AgentFilterSelect = ({ 
   assignedTo, 
   onAssignedToChange, 
-  assignedToOptions = [], 
   className 
 }: AgentFilterSelectProps) => {
-  // Only add team members that aren't in SPECIFIC_AGENTS
-  const combinedAgents = [
-    ...SPECIFIC_AGENTS,
-    ...assignedToOptions.filter(
-      agent => !SPECIFIC_AGENTS.some(specificAgent => specificAgent.id === agent.id)
-    )
-  ];
-
   return (
     <FilterGroup className={className}>
       <div className="flex items-center gap-2 text-sm">
@@ -45,7 +32,7 @@ const AgentFilterSelect = ({
         <SelectContent searchable>
           <SelectGroup>
             <SelectItem value="all">Tous les agents</SelectItem>
-            {combinedAgents.map((agent) => (
+            {SPECIFIC_AGENTS.map((agent) => (
               <SelectItem key={agent.id} value={agent.id}>
                 {agent.name}
               </SelectItem>
