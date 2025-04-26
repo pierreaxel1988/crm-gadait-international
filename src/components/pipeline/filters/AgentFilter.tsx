@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
@@ -45,8 +46,15 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     }));
   };
 
-  // S'assurer que tous les membres garantis sont présents dans les options
-  const allMembers = [...GUARANTEED_TEAM_MEMBERS]
+  // Use the guaranteed members list to ensure we have unique entries
+  // Create a Map to ensure uniqueness by ID
+  const memberMap = new Map();
+  GUARANTEED_TEAM_MEMBERS.forEach(member => {
+    memberMap.set(member.id, member);
+  });
+  
+  // Convert back to array and sort by name
+  const allMembers = Array.from(memberMap.values())
     .sort((a, b) => a.name.localeCompare(b.name));
 
   // Trouver le nom du commercial actuellement sélectionné
