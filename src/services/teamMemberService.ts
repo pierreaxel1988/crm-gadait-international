@@ -1,4 +1,3 @@
-
 // Define types for team members
 export interface TeamMember {
   id: string;
@@ -39,4 +38,27 @@ export const getTeamMemberById = (id: string): TeamMember | undefined => {
 export const getTeamMemberName = (id: string): string => {
   const member = GUARANTEED_TEAM_MEMBERS.find(member => member.id === id);
   return member ? member.name : 'Unknown';
+};
+
+// Function to synchronize lead assignments with correct UUIDs
+export const synchronizeLeadAssignments = async () => {
+  try {
+    // Update leads assigned to Pierre-Axel to use the correct UUID
+    const { error: pierreAxelError } = await supabase
+      .from('leads')
+      .update({ assigned_to: PIERRE_AXEL_ID })
+      .eq('assigned_to', 'ccbc635f-0282-427b-b130-82c1f0fbbdf9');
+
+    if (pierreAxelError) {
+      console.error('Error updating Pierre-Axel assignments:', pierreAxelError);
+    } else {
+      console.log('Successfully updated Pierre-Axel assignments');
+    }
+
+    // Sync other team members if needed...
+    return { success: true };
+  } catch (error) {
+    console.error('Error in synchronizeLeadAssignments:', error);
+    throw error;
+  }
 };
