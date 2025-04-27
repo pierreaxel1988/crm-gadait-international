@@ -1,4 +1,7 @@
+
 // Define types for team members
+import { supabase } from '@/integrations/supabase/client';
+
 export interface TeamMember {
   id: string;
   name: string;
