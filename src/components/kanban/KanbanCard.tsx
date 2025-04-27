@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -65,7 +66,8 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     id: item.id,
     status: item.status,
     pipelineType: item.pipelineType,
-    providedPipelineType: pipelineType
+    providedPipelineType: pipelineType,
+    assignedTo: item.assignedTo
   });
 
   const handleCardClick = () => {

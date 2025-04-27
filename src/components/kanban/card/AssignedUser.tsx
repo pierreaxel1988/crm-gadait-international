@@ -1,8 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
-import { User } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { getTeamMemberById } from '@/services/teamMemberService';
+import { User, UserPlus } from 'lucide-react';
 
 interface AssignedUserProps {
   assignedToId?: string;
@@ -10,60 +9,31 @@ interface AssignedUserProps {
 }
 
 const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
-  const [assignedToName, setAssignedToName] = useState<string>('Non assigné');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [assignedUserName, setAssignedUserName] = useState<string | undefined>(undefined);
   
   useEffect(() => {
-    const fetchTeamMemberInfo = async () => {
-      if (assignedToId) {
-        setIsLoading(true);
-        try {
-          const { data, error } = await supabase
-            .from('team_members')
-            .select('id, name')
-            .eq('id', assignedToId)
-            .single();
-            
-          if (error) {
-            console.error('Error fetching team member info:', error);
-            return;
-          }
-          
-          if (data) {
-            setAssignedToName(data.name);
-          }
-        } catch (error) {
-          console.error('Unexpected error fetching team member info:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchTeamMemberInfo();
+    if (assignedToId) {
+      const teamMember = getTeamMemberById(assignedToId);
+      setAssignedUserName(teamMember?.name);
+    }
   }, [assignedToId]);
-  
-  // Now properly check for assignedToId to determine whether to show the assigned user or the assign button
-  if (assignedToId) {
+
+  if (assignedToId && assignedUserName) {
     return (
-      <div className="flex items-center">
-        <Avatar className="h-5 w-5 mr-1">
-          <AvatarFallback className="text-[9px] font-futura">
-            {assignedToName.split(' ').map(part => part[0]).join('')}
-          </AvatarFallback>
-        </Avatar>
-        <span className="text-xs font-futura">{assignedToName}</span>
+      <div className="flex items-center gap-1.5 text-xs text-gray-600">
+        <User className="h-3.5 w-3.5" />
+        <span>{assignedUserName}</span>
       </div>
     );
   }
-  
+
   return (
     <button 
       onClick={onAssignClick}
-      className="text-xs font-futura text-primary hover:underline flex items-center"
+      className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600"
     >
-      <User className="h-3 w-3 mr-1" />
-      Assigner
+      <UserPlus className="h-3.5 w-3.5" />
+      <span>Assigner</span>
     </button>
   );
 };
