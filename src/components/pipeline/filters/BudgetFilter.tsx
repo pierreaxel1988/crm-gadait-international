@@ -46,7 +46,11 @@ const BudgetFilter = ({
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: currency,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
+      // Ensure minimum fraction digits is set to 0 to avoid decimal places for whole numbers
+      minimumFractionDigits: 0,
+      // Use this option to ensure the currency symbol is always displayed
+      currencyDisplay: 'symbol'
     }).format(number);
   };
   

@@ -1,3 +1,4 @@
+
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -168,10 +169,16 @@ export function getStatusColors(status: LeadStatus): {
 export function formatBudget(budget?: string, currency: Currency = 'EUR'): string {
   if (!budget) return '';
 
-  const numericBudget = parseFloat(budget);
+  // Remove any existing formatting or currency symbols first
+  const cleanBudget = budget.toString().replace(/[^\d.,]/g, '');
+  
+  // Handle both comma and dot as decimal separators
+  const numericBudget = parseFloat(cleanBudget.replace(',', '.'));
+  
   if (isNaN(numericBudget)) return budget;
 
-  // Always display the full number with thousand separators
+  // Format the number with thousand separators using fr-FR locale
+  // This ensures numbers like 3000000 are displayed as 3 000 000
   const formattedNumber = numericBudget.toLocaleString('fr-FR');
   
   // Add currency symbol

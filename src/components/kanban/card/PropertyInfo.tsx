@@ -23,35 +23,37 @@ const PropertyInfo = ({
   onLinkClick 
 }: PropertyInfoProps) => {
   
-  // Formater le prix pour un affichage plus lisible
+  // Format budget for better display
   const formatBudget = (budget?: string) => {
     if (!budget) return '';
     
-    // Si le budget est déjà formaté correctement, le retourner tel quel
+    // If the budget is already formatted correctly, return it as is
     if (budget.includes('€') && (budget.includes('.') || budget.includes(','))) {
       return budget;
     }
     
-    // Extraire la valeur numérique et formater
+    // Extract the numeric value
     const numericValue = extractNumericValue(budget);
     
-    // Formatter avec séparateur de milliers
+    // Format with thousand separators - ensure large numbers display correctly
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'EUR',
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
+      // Ensure minimum fraction digits is set to 0 to avoid decimal places for whole numbers
+      minimumFractionDigits: 0
     }).format(numericValue);
   };
 
-  // Vérifier si le budget est valide pour l'affichage (non vide et non nul)
+  // Check if budget is valid for display (non-empty and non-null)
   const hasBudget = budget && budget.trim() !== '';
   
-  // Vérifier si la localisation est valide pour l'affichage (non vide et non nulle)
+  // Check if location is valid for display (non-empty and non-null)
   const hasLocation = desiredLocation && desiredLocation.trim() !== '';
 
   return (
     <>
-      {/* Budget maximum mis en évidence */}
+      {/* Budget maximum highlighted */}
       {hasBudget && (
         <div className="mb-2 flex items-center text-xs font-medium bg-gray-100 px-3 py-2 rounded">
           <Euro className="h-3.5 w-3.5 mr-1.5 text-gray-700" />
@@ -59,7 +61,7 @@ const PropertyInfo = ({
         </div>
       )}
       
-      {/* Localisation souhaitée mise en évidence */}
+      {/* Desired location highlighted */}
       {hasLocation && (
         <div className="mb-2 flex items-center text-xs font-medium bg-gray-100 px-3 py-2 rounded">
           <MapPin className="h-3.5 w-3.5 mr-1.5 text-red-500" />
@@ -67,7 +69,7 @@ const PropertyInfo = ({
         </div>
       )}
       
-      {/* Pays */}
+      {/* Country */}
       {country && (
         <div className="mb-2 flex items-center text-xs">
           <MapPin className="h-3.5 w-3.5 mr-1.5 text-indigo-500" />
@@ -75,7 +77,7 @@ const PropertyInfo = ({
         </div>
       )}
       
-      {/* Type de bien */}
+      {/* Property type */}
       {propertyType && (
         <div className="mb-2 flex items-center text-xs">
           <Home className="h-3.5 w-3.5 mr-1.5 text-green-600" />
@@ -83,7 +85,7 @@ const PropertyInfo = ({
         </div>
       )}
       
-      {/* Nombre de chambres */}
+      {/* Number of bedrooms */}
       {bedrooms && (
         <div className="mb-2 flex items-center text-xs">
           <BedDouble className="h-3.5 w-3.5 mr-1.5 text-indigo-500" />
@@ -91,7 +93,7 @@ const PropertyInfo = ({
         </div>
       )}
       
-      {/* Lien vers l'annonce */}
+      {/* Link to listing */}
       {url && (
         <div className="mb-2">
           <button 
