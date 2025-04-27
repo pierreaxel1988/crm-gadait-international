@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -87,10 +86,10 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
 
   useEffect(() => {
     console.log('Team Members in MobileColumnList:', teamMembers);
-    console.log('First few leads:', sortedLeads.slice(0, 3).map(lead => ({
+    console.log('First few leads with assignments:', sortedLeads.slice(0, 3).map(lead => ({
       name: lead.name,
-      assignedTo: lead.assignedTo,
-      assignedToName: teamMembers?.find(m => m.id === lead.assignedTo)?.name
+      assignedToId: lead.assignedTo,
+      assignedToName: teamMembers?.find(m => m.id === lead.assignedTo)?.name || 'Unknown'
     })));
   }, [teamMembers, sortedLeads]);
 
@@ -113,6 +112,12 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
   
   const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest') => {
     setSortBy(value);
+  };
+
+  const findAgentNameById = (agentId: string | undefined): string | undefined => {
+    if (!agentId) return undefined;
+    const agent = teamMembers?.find(member => member.id === agentId);
+    return agent?.name;
   };
 
   return (
@@ -202,12 +207,7 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
             ) : (
               <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
                 {sortedLeads.map(lead => {
-                  if (lead.name && lead.name.includes("HEINRICH SCHEMBERG")) {
-                    console.log("Found HEINRICH SCHEMBERG:", lead);
-                    console.log("Team members:", teamMembers);
-                    console.log("Assigned agent:", 
-                      teamMembers?.find(member => member.id === lead.assignedTo)?.name);
-                  }
+                  const agentName = findAgentNameById(lead.assignedTo);
                   
                   return (
                     <LeadListItem 
@@ -223,9 +223,7 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
                       nextFollowUpDate={lead.nextFollowUpDate}
                       phone={lead.phone}
                       email={lead.email}
-                      assignedTo={lead.assignedTo ? 
-                        teamMembers?.find(member => member.id === lead.assignedTo)?.name : 
-                        undefined}
+                      assignedTo={agentName}
                       onClick={handleLeadClick}
                     />
                   );

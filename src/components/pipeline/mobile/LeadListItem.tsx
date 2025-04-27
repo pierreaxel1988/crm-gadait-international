@@ -97,7 +97,7 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
         />
 
         {assignedTo && (
-          <div className="text-xs text-zinc-400 mt-1">
+          <div className="text-xs text-zinc-500 mt-1 font-futuraLight">
             Responsable: {assignedTo}
           </div>
         )}
