@@ -76,7 +76,7 @@ const Actions = () => {
                   <SelectTrigger className="w-[200px] text-xs">
                     <SelectValue placeholder="Filtrer par commercial" />
                   </SelectTrigger>
-                  <SelectContent searchable>
+                  <SelectContent>
                     <SelectItem value="all">Tous les commerciaux</SelectItem>
                     {GUARANTEED_TEAM_MEMBERS.map(agent => (
                       <SelectItem key={agent.id} value={agent.id}>

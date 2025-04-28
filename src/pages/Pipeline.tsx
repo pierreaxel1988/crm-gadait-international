@@ -1,5 +1,6 @@
+
 import React, { useEffect, useMemo } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useBreakpoint } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
 import MobilePipelineView from '@/components/pipeline/MobilePipelineView';
 import DesktopPipelineView from '@/components/pipeline/DesktopPipelineView';
@@ -11,7 +12,7 @@ import ComponentLoader from '@/components/common/ComponentLoader';
 import { reassignJadeLeads, reassignJeanMarcLeads, reassignSharonLeads } from '@/services/leadService';
 
 const Pipeline = () => {
-  const isMobile = useIsMobile();
+  const { isMobile } = useBreakpoint();
   
   const { 
     activeTab,
