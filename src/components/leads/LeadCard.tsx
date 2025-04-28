@@ -6,7 +6,7 @@ import StatusBadge, { LeadStatus } from '@/components/common/StatusBadge';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
 import CustomButton from '@/components/ui/CustomButton';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { getTeamMemberName } from '@/services/teamMemberService';
 
 export interface Lead {
   id: string;
@@ -30,34 +30,7 @@ interface LeadCardProps {
 
 const LeadCard = ({ lead, className, onView, onContact }: LeadCardProps) => {
   const navigate = useNavigate();
-  const [assignedToName, setAssignedToName] = useState<string>('Non assigné');
-
-  useEffect(() => {
-    const fetchTeamMemberName = async () => {
-      if (lead.assignedTo) {
-        try {
-          const { data, error } = await supabase
-            .from('team_members')
-            .select('name')
-            .eq('id', lead.assignedTo)
-            .single();
-            
-          if (error) {
-            console.error('Error fetching team member name:', error);
-            return;
-          }
-          
-          if (data && data.name) {
-            setAssignedToName(data.name);
-          }
-        } catch (error) {
-          console.error('Unexpected error fetching team member name:', error);
-        }
-      }
-    };
-
-    fetchTeamMemberName();
-  }, [lead.assignedTo]);
+  const assignedToName = lead.assignedTo ? getTeamMemberName(lead.assignedTo) : 'Non assigné';
 
   const handleCardClick = () => {
     navigate(`/leads/${lead.id}?tab=criteria`);

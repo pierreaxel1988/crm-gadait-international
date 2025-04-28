@@ -1,104 +1,51 @@
-import React, { Suspense, lazy } from 'react';
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate
-} from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
-import { Toaster } from '@/components/ui/toaster';
-import LoadingScreen from './components/layout/LoadingScreen';
+import { correctAllLeadAssignments } from './services/leadService';
+import RequireAuth from './components/auth/RequireAuth';
+import DashboardLayout from './components/layout/DashboardLayout';
+import LoginPage from './pages/auth/LoginPage';
+import PipelinePage from './pages/PipelinePage';
+import LeadDetailPage from './pages/LeadDetailPage';
+import NewLeadPage from './pages/NewLeadPage';
+import ActionsPage from './pages/ActionsPage';
+import SettingsPage from './pages/SettingsPage';
+import TeamMembersPage from './pages/TeamMembersPage';
+import { Toast } from "@/components/ui/toast"
+import { Toaster } from "@/components/ui/toaster"
 
-// Lazy load all pages to use suspense
-const Auth = lazy(() => import('./pages/Auth'));
-const Pipeline = lazy(() => import('./pages/Pipeline'));
-const LeadsPage = lazy(() => import('./pages/Leads'));
-const LeadDetail = lazy(() => import('./pages/LeadDetailMobile'));
-const LeadNew = lazy(() => import('./pages/LeadNew'));
-const LeadImport = lazy(() => import('./pages/LeadImport'));
-const MobileLeadImport = lazy(() => import('./pages/MobileLeadImport'));
-const ActionsPage = lazy(() => import('./pages/Actions'));
-const Calendar = lazy(() => import('./pages/Calendar'));
-const Reports = lazy(() => import('./pages/Reports'));
-const Admin = lazy(() => import('./pages/Admin'));
-const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
-const Notifications = lazy(() => import('./pages/Notifications'));
-
-function App() {
+const App = () => {
+  useEffect(() => {
+    // Corriger les assignations de leads au démarrage de l'application
+    const fixLeadAssignments = async () => {
+      try {
+        console.log("Correcting lead assignments at application startup...");
+        await correctAllLeadAssignments();
+        console.log("Lead assignments correction completed successfully");
+      } catch (error) {
+        console.error("Error correcting lead assignments:", error);
+      }
+    };
+    
+    fixLeadAssignments();
+  }, []);
+  
   return (
-    <Router>
-      <AuthProvider>
-        <Suspense fallback={<LoadingScreen />}>
-          <Routes>
-            <Route path="/" element={<Navigate to="/pipeline" />} />
-            
-            {/* Routes accessibles à tous */}
-            <Route path="/pipeline" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <Pipeline />
-              </ProtectedRoute>
-            } />
-            <Route path="/leads" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <LeadsPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/leads/:id" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <LeadDetail />
-              </ProtectedRoute>
-            } />
-            <Route path="/leads/new" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <LeadNew />
-              </ProtectedRoute>
-            } />
-            <Route path="/actions" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <ActionsPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/calendar" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <Calendar />
-              </ProtectedRoute>
-            } />
-            <Route path="/notifications" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <Notifications />
-              </ProtectedRoute>
-            } />
-            
-            {/* Routes réservées aux administrateurs */}
-            <Route path="/leads/import" element={
-              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
-                <LeadImport />
-              </ProtectedRoute>
-            } />
-            <Route path="/import-lead" element={
-              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
-                <MobileLeadImport />
-              </ProtectedRoute>
-            } />
-            <Route path="/reports" element={
-              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
-                <Reports />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin" element={
-              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
-                <Admin />
-              </ProtectedRoute>
-            } />
-            
-            {/* Route d'authentification */}
-            <Route path="/auth" element={<Auth />} />
-          </Routes>
-          <Toaster />
-        </Suspense>
-      </AuthProvider>
-    </Router>
+    <AuthProvider>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<RequireAuth><DashboardLayout><PipelinePage /></DashboardLayout></RequireAuth>} />
+        <Route path="/pipeline" element={<RequireAuth><DashboardLayout><PipelinePage /></DashboardLayout></RequireAuth>} />
+        <Route path="/leads/:leadId" element={<RequireAuth><DashboardLayout><LeadDetailPage /></DashboardLayout></RequireAuth>} />
+        <Route path="/leads/new" element={<RequireAuth><DashboardLayout><NewLeadPage /></DashboardLayout></RequireAuth>} />
+        <Route path="/actions" element={<RequireAuth><DashboardLayout><ActionsPage /></DashboardLayout></RequireAuth>} />
+        <Route path="/settings" element={<RequireAuth><DashboardLayout><SettingsPage /></DashboardLayout></RequireAuth>} />
+        <Route path="/team-members" element={<RequireAuth><DashboardLayout><TeamMembersPage /></DashboardLayout></RequireAuth>} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+      <Toaster />
+    </AuthProvider>
   );
-}
+};
 
 export default App;
