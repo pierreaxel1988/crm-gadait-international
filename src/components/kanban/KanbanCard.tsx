@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -91,7 +90,6 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
 
   const handleAssignClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Navigation vers la page d'édition du lead pour assigner un commercial
     navigate(`/leads/${item.id}?assign=true`);
   };
 

@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { getTeamMemberById } from '@/services/teamMemberService';
 import { User, UserPlus } from 'lucide-react';
 
@@ -9,20 +9,14 @@ interface AssignedUserProps {
 }
 
 const AssignedUser = ({ assignedToId, onAssignClick }: AssignedUserProps) => {
-  const [assignedUserName, setAssignedUserName] = useState<string | undefined>(undefined);
-  
-  useEffect(() => {
-    if (assignedToId) {
-      const teamMember = getTeamMemberById(assignedToId);
-      setAssignedUserName(teamMember?.name);
-    }
-  }, [assignedToId]);
+  // Using getTeamMemberById directly since it's synchronous and contains the guaranteed team members
+  const assignedTeamMember = assignedToId ? getTeamMemberById(assignedToId) : undefined;
 
-  if (assignedToId && assignedUserName) {
+  if (assignedTeamMember) {
     return (
       <div className="flex items-center gap-1.5 text-xs text-gray-600">
         <User className="h-3.5 w-3.5" />
-        <span>{assignedUserName}</span>
+        <span>Responsable: {assignedTeamMember.name}</span>
       </div>
     );
   }
