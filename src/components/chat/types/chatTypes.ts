@@ -15,6 +15,9 @@ export interface ExtractedData {
 export interface TeamMember {
   id: string;
   name: string;
+  email: string;
+  role: string;
+  is_admin?: boolean;
 }
 
 export interface PropertyDetails {

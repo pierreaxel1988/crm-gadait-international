@@ -12,7 +12,7 @@ export const useTeamMembers = () => {
       try {
         const { data, error } = await supabase
           .from('team_members')
-          .select('id, name, email')
+          .select('id, name, email, role')
           .order('name');
 
         if (error) {
