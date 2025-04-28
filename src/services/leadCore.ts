@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { LeadDetailed } from "@/types/lead";
 import { mapToLeadDetailed } from "./utils/leadMappers";
-import { GUARANTEED_TEAM_MEMBERS, getTeamMemberId } from "./teamMemberService";
+import { GUARANTEED_TEAM_MEMBERS } from "./teamMemberService";
 
 // Emails autorisés pour les rôles administratifs et commerciaux
 const adminEmails = [
@@ -56,11 +56,11 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
     
     // Si l'utilisateur est un commercial, filtrer pour ne montrer que ses leads assignés
     if (!isAdmin && userEmail) {
-      const teamMemberId = getTeamMemberId(userEmail);
+      const teamMember = GUARANTEED_TEAM_MEMBERS.find(member => member.email === userEmail);
       
-      if (teamMemberId) {
-        console.log(`Filtering leads for commercial: ${userEmail} (ID: ${teamMemberId})`);
-        query = query.eq('assigned_to', teamMemberId);
+      if (teamMember) {
+        console.log(`Filtering leads for commercial: ${userEmail} (ID: ${teamMember.id})`);
+        query = query.eq('assigned_to', teamMember.id);
       }
     }
     
