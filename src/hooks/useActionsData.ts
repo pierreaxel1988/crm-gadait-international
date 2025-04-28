@@ -21,13 +21,11 @@ export const useActionsData = (refreshTrigger: number = 0) => {
     try {
       // First step: synchronize lead assignments to fix UUIDs
       try {
-        console.log("Running lead reassignment for Jade, Jean Marc, and Sharon...");
-        // Dynamically import to avoid circular dependencies
-        const { reassignJadeLeads, reassignJeanMarcLeads, reassignSharonLeads } = await import('@/services/leadService');
-        await reassignJadeLeads();
-        await reassignJeanMarcLeads();
-        await reassignSharonLeads();
-        console.log("Lead reassignments completed successfully");
+        console.log("Running lead assignment synchronization...");
+        // Import the synchronization function
+        const { synchronizeLeadAssignments } = await import('@/services/teamMemberService');
+        await synchronizeLeadAssignments();
+        console.log("Lead assignments synchronization completed successfully");
       } catch (error) {
         console.error('Error fixing lead assignments:', error);
       }

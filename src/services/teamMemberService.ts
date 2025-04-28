@@ -105,37 +105,23 @@ export const synchronizeLeadAssignments = async () => {
       { oldValues: ["jacques", "jacques-charles"], correctId: JACQUES_ID }
     ];
     
-    // Pour chaque mapping, effectuer une mise à jour
+    // Pour chaque mapping, effectuer une mise à jour directe
     for (const mapping of agentMappings) {
       if (mapping.oldValues.length > 0) {
         console.log(`Correction des assignations pour ${mapping.oldValues.join(", ")} vers ${mapping.correctId}`);
         
-        // Convertir les valeurs en format compatible avec la clause IN
-        const oldValuesFormatted = mapping.oldValues.map(val => `"${val}"`).join(',');
-        
-        // Exécuter la mise à jour directement via RPC pour éviter les problèmes de RLS
-        const { data, error } = await supabase.rpc('update_assigned_leads', {
-          old_values: mapping.oldValues,
-          correct_id: mapping.correctId
-        });
-        
-        if (error) {
-          // Tenter une approche alternative si la RPC échoue
-          console.warn(`Erreur avec la RPC, essai avec méthode alternative: ${error.message}`);
-          
-          // Utiliser une mise à jour directe via SQL pour chaque valeur
-          for (const oldValue of mapping.oldValues) {
-            const { error: updateError } = await supabase
-              .from('leads')
-              .update({ assigned_to: mapping.correctId })
-              .eq('assigned_to', oldValue);
-              
-            if (updateError) {
-              console.error(`Erreur lors de la mise à jour pour ${oldValue}:`, updateError);
-            }
+        // Utiliser une approche directe avec une requête SQL via la requête UPDATE
+        for (const oldValue of mapping.oldValues) {
+          const { error: updateError } = await supabase
+            .from('leads')
+            .update({ assigned_to: mapping.correctId })
+            .eq('assigned_to', oldValue);
+            
+          if (updateError) {
+            console.error(`Erreur lors de la mise à jour pour ${oldValue}:`, updateError);
+          } else {
+            console.log(`Mise à jour réussie pour ${oldValue} -> ${mapping.correctId}`);
           }
-        } else {
-          console.log(`Synchronisation réussie pour ${mapping.oldValues.join(", ")}`);
         }
       }
     }
