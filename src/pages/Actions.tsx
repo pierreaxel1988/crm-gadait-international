@@ -17,7 +17,7 @@ import PipelineSearchBar from '@/components/pipeline/PipelineSearchBar';
 import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 
 const Actions = () => {
-  const { isMobile } = useBreakpoint();
+  const { isMobile, isTablet, isDesktop } = useBreakpoint();
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { actions, isLoading, markActionComplete } = useActionsData(refreshTrigger);

@@ -2,7 +2,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { LeadDetailed } from "@/types/lead";
 import { mapToLeadDetailed } from "./utils/leadMappers";
-import { isUserAdmin, getTeamMemberId } from "./leadCore";
+import { isUserAdmin } from "./leadCore";
+import { getTeamMemberId } from "./teamMemberService";
 
 /**
  * Récupère un lead spécifique par son ID
