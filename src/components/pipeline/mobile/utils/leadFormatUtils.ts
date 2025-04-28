@@ -1,3 +1,4 @@
+
 import { format, isToday, isYesterday, isThisWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -168,11 +169,14 @@ export function getStatusColors(status: LeadStatus): {
 export function formatBudget(budget?: string, currency: Currency = 'EUR'): string {
   if (!budget) return '';
 
-  const numericBudget = parseFloat(budget);
+  // Try to extract a clean numeric value from the budget string
+  const cleanedBudget = budget.replace(/[^\d,.]/g, '').replace(',', '.');
+  const numericBudget = parseFloat(cleanedBudget);
+  
   if (isNaN(numericBudget)) return budget;
 
   // Always display the full number with thousand separators
-  const formattedNumber = numericBudget.toLocaleString('fr-FR');
+  const formattedNumber = new Intl.NumberFormat('fr-FR').format(numericBudget);
   
   // Add currency symbol
   switch (currency) {

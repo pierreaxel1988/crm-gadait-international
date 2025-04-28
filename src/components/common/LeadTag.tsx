@@ -40,16 +40,19 @@ const LeadTag = ({
         const numericValue = parseFloat(value.replace(',', '.'));
         
         if (!isNaN(numericValue)) {
+          // Format the number with thousand separators without truncating digits
+          const formattedValue = new Intl.NumberFormat('fr-FR').format(numericValue);
+          
           // If the value is in K or M format, convert it
           if (suffix.toUpperCase().includes('K')) {
             const fullValue = numericValue * 1000;
-            return prefix + fullValue.toLocaleString('fr-FR') + (suffix.replace(/[KkMm]/g, '') || '');
+            return prefix + new Intl.NumberFormat('fr-FR').format(fullValue) + (suffix.replace(/[KkMm]/g, '') || '');
           } else if (suffix.toUpperCase().includes('M')) {
             const fullValue = numericValue * 1000000;
-            return prefix + fullValue.toLocaleString('fr-FR') + (suffix.replace(/[KkMm]/g, '') || '');
+            return prefix + new Intl.NumberFormat('fr-FR').format(fullValue) + (suffix.replace(/[KkMm]/g, '') || '');
           } else {
             // Normal formatting with thousand separators
-            return prefix + numericValue.toLocaleString('fr-FR') + suffix;
+            return prefix + formattedValue + suffix;
           }
         }
       }
