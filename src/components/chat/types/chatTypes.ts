@@ -17,7 +17,8 @@ export interface TeamMember {
   name: string;
   email: string;
   role: string;
-  is_admin?: boolean;
+  is_admin: boolean;
+  created_at?: string; // Optional timestamp field
 }
 
 export interface PropertyDetails {

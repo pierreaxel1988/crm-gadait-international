@@ -9,6 +9,7 @@ import { Loader2, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import CustomButton from '../ui/CustomButton';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ImportedLead {
   id: string;
@@ -19,6 +20,7 @@ interface ImportedLead {
   source: string | null;
   integration_source: string | null;
   imported_at: string | null;
+  assigned_to: string | null;
 }
 
 const ImportedLeadsSection = () => {
@@ -26,19 +28,32 @@ const ImportedLeadsSection = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { isAdmin, teamMemberId } = useAuth();
 
   useEffect(() => {
     const fetchImportedLeads = async () => {
       try {
-        const { data, error } = await supabase
+        // Build the query based on user role
+        let query = supabase
           .from('leads')
-          .select('id, name, email, phone, property_reference, source, integration_source, imported_at')
-          .not('imported_at', 'is', null)
+          .select('id, name, email, phone, property_reference, source, integration_source, imported_at, assigned_to')
+          .not('imported_at', 'is', null);
+
+        // Filter by assigned_to for commercial users
+        if (!isAdmin && teamMemberId) {
+          console.log(`Filtering imported leads for commercial user with ID: ${teamMemberId}`);
+          query = query.eq('assigned_to', teamMemberId);
+        }
+        
+        // Complete the query with ordering and limit
+        const { data, error } = await query
           .order('imported_at', { ascending: false })
           .limit(5);
 
         if (error) throw error;
         setLeads(data || []);
+        
+        console.log(`Fetched ${data?.length || 0} imported leads for ${isAdmin ? 'admin' : 'commercial'} user`);
       } catch (err) {
         console.error('Erreur lors du chargement des leads importés:', err);
         setError("Impossible de charger les leads importés");
@@ -48,7 +63,7 @@ const ImportedLeadsSection = () => {
     };
 
     fetchImportedLeads();
-  }, []);
+  }, [isAdmin, teamMemberId]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '—';
