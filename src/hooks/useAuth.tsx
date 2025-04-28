@@ -47,34 +47,63 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Vérification du rôle utilisateur
       if (newSession?.user) {
         const userEmail = newSession.user.email;
-        const adminEmails = [
-          'pierre@gadait-international.com',
-          'christelle@gadait-international.com',
-          'admin@gadait-international.com',
-          'chloe@gadait-international.com'
-        ];
         
-        const commercialEmails = [
-          'jade@gadait-international.com',
-          'ophelie@gadait-international.com',
-          'jeanmarc@gadait-international.com',
-          'jacques@gadait-international.com',
-          'sharon@gadait-international.com'
-        ];
+        // Mise à jour des rôles dans la base de données
+        const checkUserRoleInDatabase = async () => {
+          try {
+            const { data, error } = await supabase
+              .from('team_members')
+              .select('is_admin, role')
+              .eq('email', userEmail)
+              .single();
+              
+            if (error) {
+              console.error('Error fetching user role:', error);
+              return;
+            }
+            
+            if (data) {
+              console.log('User role from database:', data);
+              setIsAdmin(data.is_admin || false);
+              setIsCommercial(data.role === 'commercial');
+              setUserRole(data.is_admin ? 'admin' : data.role === 'commercial' ? 'commercial' : 'guest');
+            } else {
+              // Fallback aux rôles codés en dur si l'utilisateur n'est pas trouvé dans la base de données
+              const adminEmails = [
+                'pierre@gadait-international.com',
+                'christelle@gadait-international.com',
+                'admin@gadait-international.com',
+                'chloe@gadait-international.com'
+              ];
+              
+              const commercialEmails = [
+                'jade@gadait-international.com',
+                'ophelie@gadait-international.com',
+                'jeanmarc@gadait-international.com',
+                'jacques@gadait-international.com',
+                'sharon@gadait-international.com'
+              ];
+              
+              const isUserAdmin = adminEmails.includes(userEmail || '');
+              const isUserCommercial = commercialEmails.includes(userEmail || '');
+              
+              setIsAdmin(isUserAdmin);
+              setIsCommercial(isUserCommercial);
+              
+              if (isUserAdmin) {
+                setUserRole('admin');
+              } else if (isUserCommercial) {
+                setUserRole('commercial');
+              } else {
+                setUserRole('guest');
+              }
+            }
+          } catch (err) {
+            console.error('Error checking user role:', err);
+          }
+        };
         
-        const isUserAdmin = adminEmails.includes(userEmail || '');
-        const isUserCommercial = commercialEmails.includes(userEmail || '');
-        
-        setIsAdmin(isUserAdmin);
-        setIsCommercial(isUserCommercial);
-        
-        if (isUserAdmin) {
-          setUserRole('admin');
-        } else if (isUserCommercial) {
-          setUserRole('commercial');
-        } else {
-          setUserRole('guest');
-        }
+        checkUserRoleInDatabase();
       } else {
         setIsAdmin(false);
         setIsCommercial(false);
@@ -97,33 +126,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Vérification du rôle utilisateur
         if (data.session?.user) {
           const userEmail = data.session.user.email;
-          const adminEmails = [
-            'pierre@gadait-international.com',
-            'christelle@gadait-international.com',
-            'admin@gadait-international.com',
-            'chloe@gadait-international.com'
-          ];
           
-          const commercialEmails = [
-            'jade@gadait-international.com',
-            'ophelie@gadait-international.com',
-            'jeanmarc@gadait-international.com',
-            'jacques@gadait-international.com',
-            'sharon@gadait-international.com'
-          ];
-          
-          const isUserAdmin = adminEmails.includes(userEmail || '');
-          const isUserCommercial = commercialEmails.includes(userEmail || '');
-          
-          setIsAdmin(isUserAdmin);
-          setIsCommercial(isUserCommercial);
-          
-          if (isUserAdmin) {
-            setUserRole('admin');
-          } else if (isUserCommercial) {
-            setUserRole('commercial');
+          // Vérifier le rôle dans la base de données
+          const { data: userData, error } = await supabase
+            .from('team_members')
+            .select('is_admin, role')
+            .eq('email', userEmail)
+            .single();
+            
+          if (error || !userData) {
+            console.error('Error fetching user role or user not found:', error);
+            
+            // Fallback aux rôles codés en dur
+            const adminEmails = [
+              'pierre@gadait-international.com',
+              'christelle@gadait-international.com',
+              'admin@gadait-international.com',
+              'chloe@gadait-international.com'
+            ];
+            
+            const commercialEmails = [
+              'jade@gadait-international.com',
+              'ophelie@gadait-international.com',
+              'jeanmarc@gadait-international.com',
+              'jacques@gadait-international.com',
+              'sharon@gadait-international.com'
+            ];
+            
+            const isUserAdmin = adminEmails.includes(userEmail || '');
+            const isUserCommercial = commercialEmails.includes(userEmail || '');
+            
+            setIsAdmin(isUserAdmin);
+            setIsCommercial(isUserCommercial);
+            
+            if (isUserAdmin) {
+              setUserRole('admin');
+            } else if (isUserCommercial) {
+              setUserRole('commercial');
+            } else {
+              setUserRole('guest');
+            }
           } else {
-            setUserRole('guest');
+            // Utilisateur trouvé dans la base de données
+            setIsAdmin(userData.is_admin || false);
+            setIsCommercial(userData.role === 'commercial');
+            setUserRole(userData.is_admin ? 'admin' : userData.role === 'commercial' ? 'commercial' : 'guest');
           }
         }
       } catch (error) {
@@ -182,7 +229,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     userRole
   };
 
-  console.log('AuthProvider rendering with user:', user?.email);
+  console.log('AuthProvider rendering with user:', user?.email, 'isAdmin:', isAdmin, 'isCommercial:', isCommercial);
 
   return (
     <AuthContext.Provider value={contextValue}>
