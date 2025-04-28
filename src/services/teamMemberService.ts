@@ -128,6 +128,7 @@ export const synchronizeLeadAssignments = async (): Promise<{
 
 /**
  * Synchronise la table team_members avec les membres garantis
+ * et supprime les entrées en double
  */
 const synchronizeTeamMembers = async (): Promise<void> => {
   try {
@@ -140,6 +141,45 @@ const synchronizeTeamMembers = async (): Promise<void> => {
     
     if (fetchError) {
       throw fetchError;
+    }
+    
+    // Trouver et supprimer les entrées en double potentielles
+    const memberIds = new Set();
+    const duplicateIds: string[] = [];
+    
+    existingMembers?.forEach(member => {
+      // Si l'ID n'est pas dans notre liste de membres garantis, il pourrait s'agir d'un doublon
+      const isGuaranteedMember = GUARANTEED_TEAM_MEMBERS.some(m => m.id === member.id);
+      
+      // Si l'ID est déjà dans notre ensemble ou n'est pas dans notre liste garantie, c'est un doublon potentiel
+      if (memberIds.has(member.id) || !isGuaranteedMember) {
+        // Vérifier le nom pour s'assurer que c'est bien un doublon de Pierre-Axel
+        if (member.name.toLowerCase().includes('pierre') || 
+            member.name.toLowerCase().includes('axel') ||
+            member.name.toLowerCase().includes('gadait')) {
+          duplicateIds.push(member.id);
+        }
+      }
+      
+      memberIds.add(member.id);
+    });
+    
+    // Supprimer les entrées en double détectées
+    if (duplicateIds.length > 0) {
+      console.log(`${duplicateIds.length} entrées en double détectées, suppression...`);
+      
+      for (const id of duplicateIds) {
+        const { error } = await supabase
+          .from('team_members')
+          .delete()
+          .eq('id', id);
+          
+        if (error) {
+          console.error(`Erreur lors de la suppression du membre ${id}: ${error.message}`);
+        } else {
+          console.log(`Membre en double supprimé: ${id}`);
+        }
+      }
     }
     
     // Pour chaque membre garanti, vérifier s'il existe déjà
@@ -163,6 +203,23 @@ const synchronizeTeamMembers = async (): Promise<void> => {
         } else {
           console.log(`Membre ajouté: ${member.name} (${member.id})`);
         }
+      } else {
+        // S'il existe, mettre à jour ses informations pour être sûr
+        const { error: updateError } = await supabase
+          .from('team_members')
+          .update({
+            name: member.name,
+            email: member.email,
+            role: member.role,
+            is_admin: member.role === 'admin'
+          })
+          .eq('id', member.id);
+          
+        if (updateError) {
+          console.error(`Erreur lors de la mise à jour du membre ${member.name}:`, updateError);
+        } else {
+          console.log(`Membre mis à jour: ${member.name} (${member.id})`);
+        }
       }
     }
     
@@ -171,6 +228,11 @@ const synchronizeTeamMembers = async (): Promise<void> => {
     console.error("Erreur lors de la synchronisation des membres d'équipe:", error);
   }
 };
+
+// Exécuter la synchronisation lors du chargement du service
+synchronizeTeamMembers().catch(error => {
+  console.error("Erreur lors de l'initialisation du service de membres:", error);
+});
 
 // Nouvelle fonction pour obtenir les agents garantis
 export const getGuaranteedAgents = () => {

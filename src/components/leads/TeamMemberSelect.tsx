@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useTeamMembers } from '@/components/chat/hooks/useTeamMembers';
+import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 
 // Important IDs that must be preserved
 const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69"; // Jade's correct UUID
@@ -30,8 +30,8 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
   placeholder = "Sélectionner un agent",
   disabled = false
 }) => {
-  const { teamMembers } = useTeamMembers();
   const [selectedMemberName, setSelectedMemberName] = useState<string | null>(null);
+  const [teamMembers, setTeamMembers] = useState(GUARANTEED_TEAM_MEMBERS);
 
   // Convert legacy IDs to proper UUIDs
   useEffect(() => {
@@ -52,12 +52,14 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       if (member) {
         console.log("Found selected member:", member.name);
         setSelectedMemberName(member.name);
-      } else if (value === JADE_ID) {
-        // Fallback for Jade if teamMembers hasn't loaded her yet
-        setSelectedMemberName("Jade Diouane");
-      } else if (value === JEAN_MARC_ID) {
-        // Fallback for Jean Marc if teamMembers hasn't loaded him yet
-        setSelectedMemberName("Jean Marc Perrissol");
+      } else {
+        // Chercher dans les membres garantis au cas où le membre n'est pas encore chargé
+        const guaranteedMember = GUARANTEED_TEAM_MEMBERS.find(m => m.id === value);
+        if (guaranteedMember) {
+          setSelectedMemberName(guaranteedMember.name);
+        } else {
+          setSelectedMemberName(null);
+        }
       }
     } else {
       setSelectedMemberName(null);

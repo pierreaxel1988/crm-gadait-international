@@ -5,7 +5,7 @@ import { TeamMember } from '../types/chatTypes';
 
 // Important IDs to never forget
 const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
-const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9";
+const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbbdf9"; // Corrected UUID
 const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
 const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11";
 const SHARON_ID = "e564a874-2520-4167-bfa8-26d39f119470"; // Sharon's UUID
