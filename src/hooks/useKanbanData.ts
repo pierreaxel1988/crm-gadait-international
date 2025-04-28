@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from '@/components/common/StatusBadge';
-import { getLeads } from '@/services/leadCore';
+import { getLeads, isUserAdmin, isUserCommercial } from '@/services/leadCore';
 import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import { PropertyType, PurchaseTimeframe, PipelineType, Currency, MauritiusRegion } from '@/types/lead';
@@ -103,7 +104,9 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
         
         let query = supabase.from('leads').select('*, action_history');
         
+        // Filtrer les leads par l'ID du commercial si nécessaire
         if (isCommercial && user) {
+          // Trouver l'ID du commercial dans les membres d'équipe
           const currentTeamMember = teamMembersData?.find(tm => tm.email === user.email);
           
           if (currentTeamMember) {
@@ -133,6 +136,7 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
           console.log("No leads in Supabase, trying local data");
           let localLeads = await getLeads();
           
+          // Si c'est un commercial, filtrer les leads locaux également
           if (isCommercial && user && localLeads) {
             const currentTeamMember = teamMembersData?.find(tm => tm.email === user.email);
             if (currentTeamMember) {
@@ -192,7 +196,7 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
               energy_class: lead.energyClass || '',
               equipment: lead.equipment || [],
               floors: lead.floors || null,
-              land_area: lead.landArea || '',  /* Fixed typo: was 'leadArea' now it's 'lead.landArea' */
+              land_area: lead.landArea || '',
               orientation: lead.orientation || [],
               parking_spaces: lead.parkingSpaces || null,
               construction_year: lead.constructionYear || '',

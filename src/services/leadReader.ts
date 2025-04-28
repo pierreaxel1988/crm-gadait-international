@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { LeadDetailed } from "@/types/lead";
 import { mapToLeadDetailed } from "./utils/leadMappers";
-import { useAuth } from "@/hooks/useAuth";
+import { isUserAdmin, isUserCommercial, getTeamMemberId } from "./leadCore";
 
 /**
  * Fetches all leads from the database
@@ -12,8 +12,9 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
     // Get the current authenticated user
     const { data: sessionData } = await supabase.auth.getSession();
     const user = sessionData?.session?.user;
+    const userEmail = user?.email;
     
-    // Get team members to check if the user is a commercial
+    // Get team members
     const { data: teamMembers, error: teamError } = await supabase
       .from('team_members')
       .select('*');
@@ -23,35 +24,22 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
       throw new Error(`Failed to fetch team members: ${teamError.message}`);
     }
     
-    // Vérifier si c'est un utilisateur commercial
-    const adminEmails = [
-      'pierre@gadait-international.com',
-      'christelle@gadait-international.com',
-      'admin@gadait-international.com',
-      'chloe@gadait-international.com'
-    ];
-    
-    const commercialEmails = [
-      'jade@gadait-international.com',
-      'ophelie@gadait-international.com',
-      'jeanmarc@gadait-international.com',
-      'jacques@gadait-international.com',
-      'sharon@gadait-international.com'
-    ];
-    
-    const isUserAdmin = adminEmails.includes(user?.email || '');
-    const isUserCommercial = commercialEmails.includes(user?.email || '');
+    const isAdmin = isUserAdmin(userEmail);
+    const isCommercial = isUserCommercial(userEmail);
     
     // Base query
     let query = supabase.from('leads').select('*');
     
-    // Si c'est un commercial, filtre pour n'afficher que ses leads
-    if (isUserCommercial && !isUserAdmin) {
+    // Si c'est un commercial mais pas un admin, filtrer les leads
+    if (isCommercial && !isAdmin) {
       // Trouver l'ID du commercial correspondant
-      const currentTeamMember = teamMembers?.find(tm => tm.email === user?.email);
-      if (currentTeamMember) {
-        console.log("Filtering leads for commercial:", currentTeamMember.name);
-        query = query.eq('assigned_to', currentTeamMember.id);
+      const currentTeamMemberId = getTeamMemberId(userEmail, teamMembers || []);
+      
+      if (currentTeamMemberId) {
+        console.log(`Filtering leads for commercial user: ${userEmail} (ID: ${currentTeamMemberId})`);
+        query = query.eq('assigned_to', currentTeamMemberId);
+      } else {
+        console.warn(`Commercial user (${userEmail}) not found in team_members table`);
       }
     }
     
@@ -82,8 +70,9 @@ export const getLead = async (id: string): Promise<LeadDetailed | null> => {
     // Get the current authenticated user
     const { data: sessionData } = await supabase.auth.getSession();
     const user = sessionData?.session?.user;
+    const userEmail = user?.email;
     
-    // Get team members to check if the user is a commercial
+    // Get team members
     const { data: teamMembers, error: teamError } = await supabase
       .from('team_members')
       .select('*');
@@ -93,24 +82,8 @@ export const getLead = async (id: string): Promise<LeadDetailed | null> => {
       throw new Error(`Failed to fetch team members: ${teamError.message}`);
     }
     
-    // Vérifier si c'est un utilisateur commercial
-    const adminEmails = [
-      'pierre@gadait-international.com',
-      'christelle@gadait-international.com',
-      'admin@gadait-international.com',
-      'chloe@gadait-international.com'
-    ];
-    
-    const commercialEmails = [
-      'jade@gadait-international.com',
-      'ophelie@gadait-international.com',
-      'jeanmarc@gadait-international.com',
-      'jacques@gadait-international.com',
-      'sharon@gadait-international.com'
-    ];
-    
-    const isUserAdmin = adminEmails.includes(user?.email || '');
-    const isUserCommercial = commercialEmails.includes(user?.email || '');
+    const isAdmin = isUserAdmin(userEmail);
+    const isCommercial = isUserCommercial(userEmail);
     
     // Récupérer le lead
     const { data, error } = await supabase
@@ -125,11 +98,12 @@ export const getLead = async (id: string): Promise<LeadDetailed | null> => {
     }
     
     // Si c'est un commercial, vérifier si le lead lui est assigné
-    if (isUserCommercial && !isUserAdmin) {
-      const currentTeamMember = teamMembers?.find(tm => tm.email === user?.email);
-      if (currentTeamMember && data.assigned_to !== currentTeamMember.id) {
-        console.warn("Commercial user attempting to access lead not assigned to them");
-        return null;
+    if (isCommercial && !isAdmin) {
+      const currentTeamMemberId = getTeamMemberId(userEmail, teamMembers || []);
+      
+      if (currentTeamMemberId && data.assigned_to !== currentTeamMemberId) {
+        console.warn(`Commercial user attempting to access lead not assigned to them: ${userEmail} trying to access ${data.name}'s lead assigned to ${data.assigned_to}`);
+        return null; // Refuser l'accès au lead
       }
     }
 
