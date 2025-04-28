@@ -2,7 +2,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { LeadDetailed } from "@/types/lead";
 import { mapToLeadDetailed } from "./utils/leadMappers";
-import { useAuth } from "@/hooks/useAuth";
 
 // Emails autorisés pour les rôles administratifs et commerciaux
 const adminEmails = [
@@ -51,42 +50,15 @@ export const getTeamMemberId = (userEmail: string | undefined, teamMembers: any[
   return teamMember ? teamMember.id : null;
 };
 
+/**
+ * Récupère tous les leads avec les filtres RLS appliqués automatiquement
+ */
 export const getLeads = async (): Promise<LeadDetailed[]> => {
   try {
-    const { data: sessionData } = await supabase.auth.getSession();
-    const user = sessionData?.session?.user;
-    const userEmail = user?.email;
-    
-    // Récupérer tous les membres de l'équipe
-    const { data: teamMembers, error: teamError } = await supabase
-      .from('team_members')
+    // Exécuter la requête - les politiques RLS sont appliquées automatiquement
+    const { data, error } = await supabase
+      .from('leads')
       .select('*');
-      
-    if (teamError) {
-      console.error("Error fetching team members:", teamError);
-      throw new Error(`Failed to fetch team members: ${teamError.message}`);
-    }
-    
-    const isAdmin = isUserAdmin(userEmail);
-    const isCommercial = isUserCommercial(userEmail);
-    
-    // Préparer la requête pour récupérer les leads
-    let query = supabase.from('leads').select('*');
-    
-    // Si c'est un commercial mais pas un admin, filtrer les leads par l'ID du commercial
-    if (isCommercial && !isAdmin) {
-      const currentTeamMemberId = getTeamMemberId(userEmail, teamMembers || []);
-      
-      if (currentTeamMemberId) {
-        console.log(`Filtering leads for commercial: ${userEmail} (ID: ${currentTeamMemberId})`);
-        query = query.eq('assigned_to', currentTeamMemberId);
-      } else {
-        console.warn(`Commercial user (${userEmail}) not found in team_members table`);
-      }
-    }
-    
-    // Exécuter la requête
-    const { data, error } = await query;
 
     if (error) {
       console.error("Error fetching leads:", error);

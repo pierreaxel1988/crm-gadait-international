@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from '@/components/common/StatusBadge';
-import { getLeads, isUserAdmin, isUserCommercial } from '@/services/leadCore';
+import { getLeads } from '@/services/leadCore';
 import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import { PropertyType, PurchaseTimeframe, PipelineType, Currency, MauritiusRegion } from '@/types/lead';
@@ -102,24 +101,11 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
           setTeamMembers(teamMembersData);
         }
         
-        let query = supabase.from('leads').select('*, action_history');
-        
-        // Filtrer les leads par l'ID du commercial si nécessaire
-        if (isCommercial && user) {
-          // Trouver l'ID du commercial dans les membres d'équipe
-          const currentTeamMember = teamMembersData?.find(tm => tm.email === user.email);
-          
-          if (currentTeamMember) {
-            console.log("Filtering leads for team member:", currentTeamMember.id, currentTeamMember.name);
-            query = query.eq('assigned_to', currentTeamMember.id);
-          } else {
-            console.warn("Commercial user not found in team_members table:", user.email);
-          }
-        }
-        
-        query = query.order('created_at', { ascending: false });
-        
-        const { data: supabaseLeads, error: leadsError } = await query;
+        // Récupérer les leads - RLS appliquée automatiquement par Supabase
+        const { data: supabaseLeads, error: leadsError } = await supabase
+          .from('leads')
+          .select('*, action_history')
+          .order('created_at', { ascending: false });
         
         if (leadsError) {
           console.error('Error fetching leads:', leadsError);
@@ -135,14 +121,6 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
         if (!allLeads || allLeads.length === 0) {
           console.log("No leads in Supabase, trying local data");
           let localLeads = await getLeads();
-          
-          // Si c'est un commercial, filtrer les leads locaux également
-          if (isCommercial && user && localLeads) {
-            const currentTeamMember = teamMembersData?.find(tm => tm.email === user.email);
-            if (currentTeamMember) {
-              localLeads = localLeads.filter(lead => lead.assignedTo === currentTeamMember.id);
-            }
-          }
           
           if (localLeads && localLeads.length > 0) {
             console.log("Found local leads:", localLeads.length);
