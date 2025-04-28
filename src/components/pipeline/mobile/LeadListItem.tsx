@@ -6,7 +6,6 @@ import { formatDate, formatName, getActionStatusStyle } from './utils/leadFormat
 import LeadAvatar from './components/LeadAvatar';
 import LeadContactActions from './components/LeadContactActions';
 import LeadTagsList from './components/LeadTagsList';
-import { getTeamMemberName } from '@/services/teamMemberService';
 
 interface LeadListItemProps {
   id: string;
@@ -20,7 +19,7 @@ interface LeadListItemProps {
   nextFollowUpDate?: string;
   phone?: string;
   email?: string;
-  assignedTo?: string; // This is the agent's ID
+  assignedTo?: string; // This is the agent's name
   onClick: (id: string) => void;
 }
 
@@ -40,7 +39,6 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
   onClick
 }) => {
   const actionStyle = getActionStatusStyle(nextFollowUpDate);
-  const assignedToName = assignedTo ? getTeamMemberName(assignedTo) : undefined;
 
   const handlePhoneCall = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -98,9 +96,9 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
           currency={currency}
         />
 
-        {assignedToName && (
+        {assignedTo && (
           <div className="text-xs text-zinc-500 mt-1 font-futuraLight">
-            Responsable: {assignedToName}
+            Responsable: {assignedTo}
           </div>
         )}
       </div>

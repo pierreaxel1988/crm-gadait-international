@@ -1,3 +1,4 @@
+
 import { LeadDetailed } from "@/types/lead";
 import { 
   createLead as createLeadCore,
@@ -10,7 +11,7 @@ import {
 import { addActionToLead } from "./leadActions";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { JADE_ID, JEAN_MARC_ID, SHARON_ID, PIERRE_AXEL_ID } from "./teamMemberService";
+import { JADE_ID, JEAN_MARC_ID, SHARON_ID } from "./teamMemberService";
 
 export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt">): Promise<LeadDetailed | null> => {
   try {
@@ -181,43 +182,6 @@ export const reassignSharonLeads = async () => {
     return { success: true };
   } catch (error) {
     console.error('Error in reassignSharonLeads:', error);
-    throw error;
-  }
-};
-
-export const reassignPierreAxelLeads = async () => {
-  try {
-    console.log("Starting reassignment of Pierre-Axel's leads to his correct UUID:", PIERRE_AXEL_ID);
-    
-    // Utiliser directement l'UUID correct, en utilisant la notation text[] pour les valeurs à rechercher
-    const { data, error } = await supabase
-      .from('leads')
-      .update({ assigned_to: PIERRE_AXEL_ID })
-      .filter('assigned_to::text', 'in', '("pierre-axel","pierre-axel-gadait","pierre")');
-
-    if (error) {
-      console.error('Error reassigning Pierre-Axel\'s leads:', error);
-      throw error;
-    }
-    
-    console.log('Successfully reassigned all Pierre-Axel\'s leads to correct UUID');
-    return { success: true };
-  } catch (error) {
-    console.error('Error in reassignPierreAxelLeads:', error);
-    throw error;
-  }
-};
-
-export const correctAllLeadAssignments = async () => {
-  try {
-    await reassignJadeLeads();
-    await reassignJeanMarcLeads();
-    await reassignSharonLeads();
-    await reassignPierreAxelLeads();
-    
-    return { success: true, message: "Toutes les assignations ont été corrigées" };
-  } catch (error) {
-    console.error('Error correcting all lead assignments:', error);
     throw error;
   }
 };

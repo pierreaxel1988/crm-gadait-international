@@ -10,7 +10,7 @@ export interface TeamMember {
 
 // Important IDs to never forget - we'll ensure these are consistent
 export const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
-export const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9"; // ID correct de Pierre-Axel
+export const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9"; // Corrected UUID
 export const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
 export const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11";
 export const SHARON_ID = "e564a874-2520-4167-bfa8-26d39f119470";
@@ -40,7 +40,7 @@ export const getTeamMemberById = (id: string): TeamMember | undefined => {
 // Export function to get team member name by ID
 export const getTeamMemberName = (id: string): string => {
   const member = GUARANTEED_TEAM_MEMBERS.find(member => member.id === id);
-  return member ? member.name : 'Non assigné';
+  return member ? member.name : 'Unknown';
 };
 
 // Function to synchronize lead assignments with correct UUIDs
@@ -50,7 +50,7 @@ export const synchronizeLeadAssignments = async () => {
     const { error: pierreAxelError } = await supabase
       .from('leads')
       .update({ assigned_to: PIERRE_AXEL_ID })
-      .filter('assigned_to::text', 'in', '("pierre-axel","pierre-axel-gadait","pierre")');
+      .eq('assigned_to', 'ccbc635f-0282-427b-b130-82c1f0fbbdf9');
 
     if (pierreAxelError) {
       console.error('Error updating Pierre-Axel assignments:', pierreAxelError);
@@ -58,6 +58,7 @@ export const synchronizeLeadAssignments = async () => {
       console.log('Successfully updated Pierre-Axel assignments');
     }
 
+    // Sync other team members if needed...
     return { success: true };
   } catch (error) {
     console.error('Error in synchronizeLeadAssignments:', error);
