@@ -3,7 +3,7 @@
 export const GUARANTEED_TEAM_MEMBERS = [
   {
     id: "f3923d1c-5d1b-4021-8343-95365d29f776",
-    name: "Pierre Gadait",
+    name: "Pierre-Axel Gadait",
     email: "pierre@gadait-international.com",
     role: "admin",
     is_admin: true
@@ -24,42 +24,42 @@ export const GUARANTEED_TEAM_MEMBERS = [
   },
   {
     id: "3c030a64-dd8f-4040-855e-b3eaa921aeaf",
-    name: "Ophélie Dumas",
+    name: "Ophelie Durand",
     email: "ophelie@gadait-international.com",
     role: "commercial",
     is_admin: false
   },
   {
     id: "612c08e2-0fdc-4513-8e77-4bfa9d957a86",
-    name: "Jacques Gadait",
+    name: "Jacques Charles",
     email: "jacques@gadait-international.com",
     role: "commercial",
     is_admin: false
   },
   {
     id: "ce00d664-a232-4285-b0b5-eb2df9db4f43", 
-    name: "Jade Gadait",
+    name: "Jade Diouane",
     email: "jade@gadait-international.com",
     role: "commercial",
     is_admin: false
   },
   {
     id: "632995f6-1391-419f-832c-8580e2408821",
-    name: "Jean-Marc Levy",
+    name: "Jean Marc Perrissol",
     email: "jeanmarc@gadait-international.com",
     role: "commercial",
     is_admin: false
   },
   {
     id: "63214446-0ce1-4cc4-88e1-f047b0ae064e", 
-    name: "Sharon Madar",
+    name: "Sharon Ramdiane",
     email: "sharon@gadait-international.com",
     role: "commercial",
     is_admin: false
   },
   {
     id: "c8762711-92fe-4d49-a927-833966ab04d4",
-    name: "Chloé Gadait",
+    name: "Chloé Valentin",
     email: "chloe@gadait-international.com", 
     role: "admin",
     is_admin: true
