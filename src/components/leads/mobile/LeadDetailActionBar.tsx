@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { History, Bell } from 'lucide-react';
@@ -29,6 +30,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   const location = useLocation();
   const [showSuggestionsBadge, setShowSuggestionsBadge] = useState<boolean>(false);
   const [pendingActionsCount, setPendingActionsCount] = useState<number>(0);
+  const [notificationShown, setNotificationShown] = useState<boolean>(false);
   
   useEffect(() => {
     if (lead?.actionHistory) {
@@ -43,14 +45,15 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
       
       setPendingActionsCount(pending);
       
-      if (pending > 0) {
+      if (pending > 0 && !notificationShown) {
         toast({
           title: "Actions en attente",
           description: `Vous avez ${pending} action${pending > 1 ? 's' : ''} à réaliser`,
         });
+        setNotificationShown(true);
       }
     }
-  }, [lead?.actionHistory]);
+  }, [lead?.actionHistory, notificationShown]);
 
   useEffect(() => {
     setShowSuggestionsBadge(actionSuggestions && actionSuggestions.length > 0);

@@ -19,36 +19,45 @@ export interface Notification {
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [processedActionIds, setProcessedActionIds] = useState<Set<string>>(new Set());
+  const [systemNotificationsShown, setSystemNotificationsShown] = useState<boolean>(false);
   const { actions, markActionComplete } = useActionsData();
   
+  // Load system notifications only once
   useEffect(() => {
-    const systemNotifications: Notification[] = [
-      {
-        id: 'system-1',
-        title: 'Bienvenue sur le CRM Gadait International',
-        message: 'Découvrez les nouvelles fonctionnalités de la plateforme',
-        read: false,
-        timestamp: new Date(Date.now() - 30 * 60000),
-        type: 'system'
-      }
-    ];
-    
-    setNotifications(prev => {
-      const existingIds = prev.map(n => n.id);
-      return [
-        ...prev,
-        ...systemNotifications.filter(n => !existingIds.includes(n.id))
+    if (!systemNotificationsShown) {
+      const systemNotifications: Notification[] = [
+        {
+          id: 'system-1',
+          title: 'Bienvenue sur le CRM Gadait International',
+          message: 'Découvrez les nouvelles fonctionnalités de la plateforme',
+          read: false,
+          timestamp: new Date(Date.now() - 30 * 60000),
+          type: 'system'
+        }
       ];
-    });
-  }, []);
+      
+      setNotifications(prev => {
+        const existingIds = prev.map(n => n.id);
+        return [
+          ...prev,
+          ...systemNotifications.filter(n => !existingIds.includes(n.id))
+        ];
+      });
+      
+      setSystemNotificationsShown(true);
+    }
+  }, [systemNotificationsShown]);
   
+  // Process action notifications with deduplication
   useEffect(() => {
     if (actions && actions.length > 0) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
       const relevantActions = actions.filter(action => {
-        if (action.status === 'done') return false;
+        if (action.status === 'done' || !action.id) return false;
+        if (processedActionIds.has(action.id)) return false;
         
         const scheduledDate = action.scheduledDate ? new Date(action.scheduledDate) : null;
         if (!scheduledDate) return false;
@@ -59,7 +68,14 @@ export const useNotifications = () => {
         return isActionToday || isActionOverdue;
       });
       
+      if (relevantActions.length === 0) return;
+      
+      // Track which action IDs we've processed to avoid duplicates
+      const newProcessedIds = new Set(processedActionIds);
+      
       const actionNotifications: Notification[] = relevantActions.map(action => {
+        newProcessedIds.add(action.id);
+        
         const scheduledDate = new Date(action.scheduledDate || new Date());
         const isOverdue = isPast(scheduledDate) && !isToday(scheduledDate);
         
@@ -88,18 +104,15 @@ export const useNotifications = () => {
         };
       });
       
-      const existingActionIds = notifications
-        .filter(n => n.type === 'action')
-        .map(n => n.actionId);
-        
-      const newActionNotifications = actionNotifications
-        .filter(n => !existingActionIds.includes(n.actionId));
+      // Update the processed action IDs
+      setProcessedActionIds(newProcessedIds);
       
-      if (newActionNotifications.length > 0) {
-        setNotifications(prev => [...newActionNotifications, ...prev]);
+      // Add only the new notifications
+      if (actionNotifications.length > 0) {
+        setNotifications(prev => [...actionNotifications, ...prev]);
       }
     }
-  }, [actions, notifications]);
+  }, [actions, processedActionIds]);
   
   const markAsRead = (id: string) => {
     setNotifications(notifications.map(notification => 

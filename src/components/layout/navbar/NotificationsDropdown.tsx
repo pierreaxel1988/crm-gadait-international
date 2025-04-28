@@ -39,6 +39,15 @@ const NotificationsDropdown: React.FC = () => {
     unreadCount
   } = useNotifications();
   
+  const [notificationToastShown, setNotificationToastShown] = useState(false);
+  
+  useEffect(() => {
+    if (unreadCount > 0 && !notificationToastShown) {
+      toast.info(`Vous avez ${unreadCount} notification${unreadCount > 1 ? 's' : ''} non lue${unreadCount > 1 ? 's' : ''}`);
+      setNotificationToastShown(true);
+    }
+  }, [unreadCount, notificationToastShown]);
+  
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
   };
