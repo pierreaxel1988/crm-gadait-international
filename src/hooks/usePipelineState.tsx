@@ -5,8 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { toast } from '@/hooks/use-toast';
 import { PipelineType } from '@/types/lead';
+import { useAuth } from './useAuth';
 
 export function usePipelineState() {
+  const { isAdmin, teamMemberId } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
@@ -28,7 +30,7 @@ export function usePipelineState() {
   const [filters, setFilters] = useState<FilterOptions>({
     status: null,
     tags: [],
-    assignedTo: null,
+    assignedTo: isAdmin ? null : teamMemberId || null,
     minBudget: '',
     maxBudget: '',
     location: '',
@@ -36,12 +38,27 @@ export function usePipelineState() {
     propertyType: null
   });
 
+  useEffect(() => {
+    if (!isAdmin && teamMemberId && filters.assignedTo !== teamMemberId) {
+      console.log("Auto-setting assignedTo filter for commercial user to:", teamMemberId);
+      setFilters(prev => ({
+        ...prev,
+        assignedTo: teamMemberId
+      }));
+    }
+  }, [isAdmin, teamMemberId]);
+
   const updateAgentFilter = useCallback((agentId: string | null) => {
+    if (!isAdmin && teamMemberId) {
+      console.log("Commercial user cannot change assignedTo filter");
+      return;
+    }
+    
     setFilters(prevFilters => ({
       ...prevFilters,
       assignedTo: agentId
     }));
-  }, []);
+  }, [isAdmin, teamMemberId]);
 
   useEffect(() => {
     handleRefresh();
@@ -135,21 +152,27 @@ export function usePipelineState() {
     
     const checkLeads = async () => {
       try {
-        const { count, error } = await supabase
-          .from('leads')
-          .select('*', { count: 'exact', head: true });
+        let query = supabase.from('leads').select('*', { count: 'exact', head: true });
+        
+        if (!isAdmin && teamMemberId) {
+          query = query.eq('assigned_to', teamMemberId);
+        }
+        
+        const { count, error } = await query;
           
         if (error) {
           console.error('Error checking leads:', error);
           return;
         }
         
-        console.log(`Nombre de leads dans la base de données: ${count}`);
+        console.log(`Nombre de leads dans la base de données (avec filtre rôle): ${count}`);
         
         if (count === 0) {
           toast({
             title: "Aucun lead trouvé",
-            description: "La base de données ne contient pas de leads. Ajoutez-en un pour commencer.",
+            description: isAdmin 
+              ? "La base de données ne contient pas de leads. Ajoutez-en un pour commencer." 
+              : "Aucun lead ne vous est assigné pour le moment.",
             duration: 3000,
           });
         }
@@ -164,20 +187,33 @@ export function usePipelineState() {
   };
 
   const handleClearFilters = () => {
-    setFilters({
-      status: null,
-      tags: [],
-      assignedTo: null,
-      minBudget: '',
-      maxBudget: '',
-      location: '',
-      purchaseTimeframe: null,
-      propertyType: null
-    });
+    if (!isAdmin && teamMemberId) {
+      setFilters({
+        status: null,
+        tags: [],
+        assignedTo: teamMemberId,
+        minBudget: '',
+        maxBudget: '',
+        location: '',
+        purchaseTimeframe: null,
+        propertyType: null
+      });
+    } else {
+      setFilters({
+        status: null,
+        tags: [],
+        assignedTo: null,
+        minBudget: '',
+        maxBudget: '',
+        location: '',
+        purchaseTimeframe: null,
+        propertyType: null
+      });
+    }
     
     toast({
       title: "Filtres effacés",
-      description: "Tous les filtres ont été supprimés",
+      description: "Les filtres ont été réinitialisés",
       duration: 2000,
     });
     

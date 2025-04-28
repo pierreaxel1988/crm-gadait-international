@@ -6,6 +6,8 @@ export interface TeamMember {
   id: string;
   name: string;
   email: string;
+  role?: string;
+  is_admin?: boolean;
 }
 
 // Important IDs to never forget - we'll ensure these are consistent
@@ -19,17 +21,17 @@ export const CHLOE_ID = "28c03acf-cb78-46b7-8dba-c1edee49c932";
 export const CHRISTINE_ID = "af1c9117-f94f-44d0-921f-776dd5fd6f96";
 export const OPHELIE_ID = "2d8bae00-a935-439d-8685-0adf238a612e";
 
-// Define the guaranteed team members list with correct IDs
+// Define the guaranteed team members list with correct IDs and roles
 export const GUARANTEED_TEAM_MEMBERS: TeamMember[] = [
-  { id: JACQUES_ID, name: 'Jacques Charles', email: 'jacques@gadait-international.com' },
-  { id: PIERRE_AXEL_ID, name: 'Pierre-Axel Gadait', email: 'pierre@gadait-international.com' },
-  { id: JADE_ID, name: 'Jade Diouane', email: 'jade@gadait-international.com' },
-  { id: JEAN_MARC_ID, name: 'Jean Marc Perrissol', email: 'jeanmarc@gadait-international.com' },
-  { id: SHARON_ID, name: 'Sharon Ramdiane', email: 'sharon@gadait-international.com' },
-  { id: CHRISTELLE_ID, name: 'Christelle Gadait', email: 'christelle@gadait-international.com' },
-  { id: CHLOE_ID, name: 'Chloe Valentin', email: 'chloe@gadait-international.com' },
-  { id: CHRISTINE_ID, name: 'Christine Francoise', email: 'admin@gadait-international.com' },
-  { id: OPHELIE_ID, name: 'Ophelie Durand', email: 'ophelie@gadait-international.com' }
+  { id: JACQUES_ID, name: 'Jacques Charles', email: 'jacques@gadait-international.com', role: 'commercial' },
+  { id: PIERRE_AXEL_ID, name: 'Pierre-Axel Gadait', email: 'pierre@gadait-international.com', role: 'admin', is_admin: true },
+  { id: JADE_ID, name: 'Jade Diouane', email: 'jade@gadait-international.com', role: 'commercial' },
+  { id: JEAN_MARC_ID, name: 'Jean Marc Perrissol', email: 'jeanmarc@gadait-international.com', role: 'commercial' },
+  { id: SHARON_ID, name: 'Sharon Ramdiane', email: 'sharon@gadait-international.com', role: 'commercial' },
+  { id: CHRISTELLE_ID, name: 'Christelle Gadait', email: 'christelle@gadait-international.com', role: 'admin', is_admin: true },
+  { id: CHLOE_ID, name: 'Chloe Valentin', email: 'chloe@gadait-international.com', role: 'admin', is_admin: true },
+  { id: CHRISTINE_ID, name: 'Christine Francoise', email: 'admin@gadait-international.com', role: 'admin', is_admin: true },
+  { id: OPHELIE_ID, name: 'Ophelie Durand', email: 'ophelie@gadait-international.com', role: 'commercial' }
 ];
 
 // Export function to get a team member by ID
@@ -41,6 +43,24 @@ export const getTeamMemberById = (id: string): TeamMember | undefined => {
 export const getTeamMemberName = (id: string): string => {
   const member = GUARANTEED_TEAM_MEMBERS.find(member => member.id === id);
   return member ? member.name : 'Unknown';
+};
+
+// Get team member by email
+export const getTeamMemberByEmail = (email: string): TeamMember | undefined => {
+  return GUARANTEED_TEAM_MEMBERS.find(member => member.email === email);
+};
+
+// Get team member ID by email
+export const getTeamMemberId = (email: string | undefined): string | null => {
+  if (!email) return null;
+  const member = getTeamMemberByEmail(email);
+  return member ? member.id : null;
+};
+
+// Determine if a team member is an admin
+export const isTeamMemberAdmin = (id: string): boolean => {
+  const member = getTeamMemberById(id);
+  return member?.is_admin === true;
 };
 
 // Function to synchronize lead assignments with correct UUIDs
@@ -63,5 +83,26 @@ export const synchronizeLeadAssignments = async () => {
   } catch (error) {
     console.error('Error in synchronizeLeadAssignments:', error);
     throw error;
+  }
+};
+
+// Fetch all team members from database
+export const fetchTeamMembers = async (): Promise<TeamMember[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('team_members')
+      .select('*');
+      
+    if (error) {
+      console.error('Error fetching team members:', error);
+      // Fallback to guaranteed list if database fetch fails
+      return GUARANTEED_TEAM_MEMBERS;
+    }
+    
+    return data || GUARANTEED_TEAM_MEMBERS;
+  } catch (error) {
+    console.error('Error in fetchTeamMembers:', error);
+    // Fallback to guaranteed list on error
+    return GUARANTEED_TEAM_MEMBERS;
   }
 };

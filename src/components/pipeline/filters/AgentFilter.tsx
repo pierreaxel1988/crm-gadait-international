@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TeamMember {
   id: string;
@@ -18,6 +19,7 @@ interface AgentFilterProps {
 
 const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: AgentFilterProps) => {
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
+  const { isAdmin, teamMemberId } = useAuth();
 
   // Synchroniser avec le système global d'agent sélectionné
   useEffect(() => {
@@ -33,7 +35,22 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     }
   }, [assignedTo, selectedAgent, handleAgentChange]);
 
+  // Pour les commerciaux, force l'agent à être eux-mêmes
+  useEffect(() => {
+    if (!isAdmin && teamMemberId && assignedTo !== teamMemberId) {
+      console.log("Commercial user - forcing agent filter to self:", teamMemberId);
+      onAssignedToChange(teamMemberId);
+      handleAgentChange(teamMemberId);
+    }
+  }, [isAdmin, teamMemberId, onAssignedToChange, handleAgentChange]);
+
   const handleAgentSelect = (agentId: string | null) => {
+    // Si commercial, empêcher de changer l'agent
+    if (!isAdmin && teamMemberId) {
+      console.log("Commercial users cannot change agent filter");
+      return;
+    }
+    
     // Mettre à jour à la fois le filtre local et le système global
     onAssignedToChange(agentId);
     handleAgentChange(agentId);
@@ -71,25 +88,40 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
         )}
       </h4>
       <div className="grid grid-cols-2 gap-2">
-        <Button
-          variant={assignedTo === null ? "default" : "outline"}
-          size="sm"
-          className="text-xs"
-          onClick={() => handleAgentSelect(null)}
-        >
-          Tous
-        </Button>
-        {allMembers.map((member) => (
+        {/* Pour les admins: montrer le bouton "Tous" et tous les agents */}
+        {isAdmin ? (
+          <>
+            <Button
+              variant={assignedTo === null ? "default" : "outline"}
+              size="sm"
+              className="text-xs"
+              onClick={() => handleAgentSelect(null)}
+            >
+              Tous
+            </Button>
+            {allMembers.map((member) => (
+              <Button
+                key={member.id}
+                variant={assignedTo === member.id ? "default" : "outline"}
+                size="sm"
+                className="text-xs"
+                onClick={() => handleAgentSelect(member.id)}
+              >
+                {member.name}
+              </Button>
+            ))}
+          </>
+        ) : (
+          // Pour les commerciaux: montrer uniquement leur nom, désactivé
           <Button
-            key={member.id}
-            variant={assignedTo === member.id ? "default" : "outline"}
+            variant="default"
             size="sm"
-            className="text-xs"
-            onClick={() => handleAgentSelect(member.id)}
+            className="text-xs col-span-2"
+            disabled
           >
-            {member.name}
+            {selectedAgentName || 'Vos leads'}
           </Button>
-        ))}
+        )}
       </div>
     </div>
   );
