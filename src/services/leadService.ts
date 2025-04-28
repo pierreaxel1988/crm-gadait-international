@@ -1,4 +1,3 @@
-
 import { LeadDetailed } from "@/types/lead";
 import { 
   createLead as createLeadCore,
@@ -114,75 +113,6 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       description: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
     });
     throw error; // Re-throw to allow handling by the caller
-  }
-};
-
-export const reassignJadeLeads = async () => {
-  try {
-    console.log("Starting reassignment of Jade's leads to her correct UUID:", JADE_ID);
-    
-    // Utiliser directement l'UUID correct, en utilisant la notation text[] pour les valeurs à rechercher
-    const { data, error } = await supabase
-      .from('leads')
-      .update({ assigned_to: JADE_ID })
-      .filter('assigned_to::text', 'in', '("jade","jade-diouane")');
-
-    if (error) {
-      console.error('Error reassigning Jade\'s leads:', error);
-      throw error;
-    }
-    
-    console.log('Successfully reassigned Jade\'s leads to correct UUID');
-    return { success: true };
-  } catch (error) {
-    console.error('Error in reassignJadeLeads:', error);
-    throw error;
-  }
-};
-
-export const reassignJeanMarcLeads = async () => {
-  try {
-    console.log("Starting reassignment of Jean Marc's leads to his correct UUID:", JEAN_MARC_ID);
-    
-    // Utiliser directement l'UUID correct, en utilisant la notation text[] pour les valeurs à rechercher
-    const { data, error } = await supabase
-      .from('leads')
-      .update({ assigned_to: JEAN_MARC_ID })
-      .filter('assigned_to::text', 'in', '("jean-marc","jean-marc-perrissol")');
-
-    if (error) {
-      console.error('Error reassigning Jean Marc\'s leads:', error);
-      throw error;
-    }
-    
-    console.log('Successfully reassigned all Jean Marc\'s leads to correct UUID');
-    return { success: true };
-  } catch (error) {
-    console.error('Error in reassignJeanMarcLeads:', error);
-    throw error;
-  }
-};
-
-export const reassignSharonLeads = async () => {
-  try {
-    console.log("Starting reassignment of Sharon's leads to her correct UUID:", SHARON_ID);
-    
-    // Utiliser directement l'UUID correct, en utilisant la notation text[] pour les valeurs à rechercher
-    const { data, error } = await supabase
-      .from('leads')
-      .update({ assigned_to: SHARON_ID })
-      .filter('assigned_to::text', 'in', '("sharon","sharon-ramdiane")');
-
-    if (error) {
-      console.error('Error reassigning Sharon\'s leads:', error);
-      throw error;
-    }
-    
-    console.log('Successfully reassigned all Sharon\'s leads to correct UUID');
-    return { success: true };
-  } catch (error) {
-    console.error('Error in reassignSharonLeads:', error);
-    throw error;
   }
 };
 
