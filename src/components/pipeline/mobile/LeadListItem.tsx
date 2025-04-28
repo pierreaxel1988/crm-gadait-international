@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Currency } from '@/types/lead';
 import { formatDate, formatName, getActionStatusStyle } from './utils/leadFormatUtils';
 import LeadAvatar from './components/LeadAvatar';
 import LeadContactActions from './components/LeadContactActions';
 import LeadTagsList from './components/LeadTagsList';
+import { getTeamMemberName } from '@/services/teamMemberService';
 
 interface LeadListItemProps {
   id: string;
@@ -19,7 +20,7 @@ interface LeadListItemProps {
   nextFollowUpDate?: string;
   phone?: string;
   email?: string;
-  assignedTo?: string; // This is the agent's name
+  assignedTo?: string; // This is the agent's ID
   onClick: (id: string) => void;
 }
 
@@ -39,6 +40,15 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
   onClick
 }) => {
   const actionStyle = getActionStatusStyle(nextFollowUpDate);
+  const [assignedToName, setAssignedToName] = useState<string>('Non assigné');
+
+  useEffect(() => {
+    if (assignedTo) {
+      // Use the getTeamMemberName function directly
+      const memberName = getTeamMemberName(assignedTo);
+      setAssignedToName(memberName);
+    }
+  }, [assignedTo]);
 
   const handlePhoneCall = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -98,7 +108,7 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
 
         {assignedTo && (
           <div className="text-xs text-zinc-500 mt-1 font-futuraLight">
-            Responsable: {assignedTo}
+            Responsable: {assignedToName}
           </div>
         )}
       </div>

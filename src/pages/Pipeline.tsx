@@ -9,7 +9,7 @@ import SubNavigation from '@/components/layout/SubNavigation';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import ComponentLoader from '@/components/common/ComponentLoader';
-import { reassignJadeLeads, reassignJeanMarcLeads, reassignSharonLeads } from '@/services/leadService';
+import { synchronizeLeadAssignments } from '@/services/teamMemberService';
 
 const Pipeline = () => {
   const { isMobile } = useBreakpoint();
@@ -53,12 +53,11 @@ const Pipeline = () => {
   }, []);
 
   useEffect(() => {
+    // Run lead ID synchronization on mount
     const fixLeadsAssignment = async () => {
       try {
-        console.log("Running lead reassignment for Jade, Jean Marc, and Sharon...");
-        await reassignJadeLeads();
-        await reassignJeanMarcLeads();
-        await reassignSharonLeads();
+        console.log("Running lead reassignment synchronization...");
+        await synchronizeLeadAssignments();
         console.log("Lead reassignments completed successfully");
       } catch (error) {
         console.error('Error fixing lead assignments:', error);
