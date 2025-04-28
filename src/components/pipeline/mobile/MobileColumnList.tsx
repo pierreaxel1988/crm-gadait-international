@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +11,7 @@ import LeadListItem from './LeadListItem';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import { sortLeadsByPriority } from './utils/leadSortUtils';
 import LoadingScreen from '@/components/layout/LoadingScreen';
+import { getTeamMemberName } from '@/services/teamMemberService';
 
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
@@ -89,7 +91,7 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
     console.log('First few leads with assignments:', sortedLeads.slice(0, 3).map(lead => ({
       name: lead.name,
       assignedToId: lead.assignedTo,
-      assignedToName: teamMembers?.find(m => m.id === lead.assignedTo)?.name || 'Unknown'
+      assignedToName: getTeamMemberName(lead.assignedTo)
     })));
   }, [teamMembers, sortedLeads]);
 
@@ -116,8 +118,7 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
 
   const findAgentNameById = (agentId: string | undefined): string | undefined => {
     if (!agentId) return undefined;
-    const agent = teamMembers?.find(member => member.id === agentId);
-    return agent?.name;
+    return getTeamMemberName(agentId);
   };
 
   return (
