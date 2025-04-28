@@ -192,7 +192,7 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
               energy_class: lead.energyClass || '',
               equipment: lead.equipment || [],
               floors: lead.floors || null,
-              land_area: lead.landArea || '',
+              land_area: leadArea || '',
               orientation: lead.orientation || [],
               parking_spaces: lead.parkingSpaces || null,
               construction_year: lead.constructionYear || '',
