@@ -25,7 +25,7 @@ const LeadTag = ({
 }: LeadTagProps) => {
   // Format numeric values in the label with proper thousand separators
   const formattedLabel = React.useMemo(() => {
-    // Check if label contains a number that might need formatting
+    // Check if label is a budget value by detecting currency symbols or K/M suffix
     const budgetRegex = /^(\D*)(\d+(?:[,.]\d+)?)(\s*[KkMm€$£]*|\s*EUR|\s*USD|\s*GBP)?$/;
     const match = label.match(budgetRegex);
     
@@ -40,13 +40,7 @@ const LeadTag = ({
         const numericValue = parseFloat(value.replace(',', '.'));
         
         if (!isNaN(numericValue)) {
-          // Format large numbers directly with thousand separators
-          // For example: 3000000 should become 3 000 000
-          if (numericValue >= 1000) {
-            return prefix + numericValue.toLocaleString('fr-FR') + (suffix || '');
-          }
-          
-          // If the value is in K or M format, convert it to the full number
+          // If the value is in K or M format, convert it
           if (suffix.toUpperCase().includes('K')) {
             const fullValue = numericValue * 1000;
             return prefix + fullValue.toLocaleString('fr-FR') + (suffix.replace(/[KkMm]/g, '') || '');
@@ -61,7 +55,7 @@ const LeadTag = ({
       }
     }
     
-    // Return original label if not a budget value or formatting fails
+    // Return original label if not a budget value
     return label;
   }, [label]);
   

@@ -1,61 +1,83 @@
 
 import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
+import { MessageSquare, PieChart, Calendar, ListTodo, File, ClipboardList } from 'lucide-react';
 import { useBreakpoint } from '@/hooks/use-mobile';
-
-interface SubNavButtonProps {
-  href: string;
-  label: string;
-}
-
-const SubNavButton: React.FC<SubNavButtonProps> = ({ href, label }) => {
-  const location = useLocation();
-  const isActive = location.pathname === href;
-
-  return (
-    <Link
-      to={href}
-      className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border h-9 px-4 py-2 hover:bg-accent hover:text-accent-foreground",
-        isActive
-          ? "bg-primary text-primary-foreground border-primary"
-          : "bg-secondary text-secondary-foreground border-secondary"
-      )}
-    >
-      {label}
-    </Link>
-  );
-};
 
 const SubNavigation = () => {
   const location = useLocation();
-  const pathname = location.pathname;
   const { isMobile, isTablet, isDesktop } = useBreakpoint();
+  
+  const navigationItems = [{
+    name: 'Pipeline',
+    path: '/pipeline',
+    icon: ListTodo
+  }, {
+    name: 'Actions',
+    path: '/actions',
+    icon: ClipboardList
+  }, {
+    name: 'Calendrier',
+    path: '/calendar',
+    icon: Calendar
+  }, {
+    name: 'Rapports',
+    path: '/reports',
+    icon: PieChart
+  }, {
+    name: 'Chat Gadait',
+    path: '/chat-gadait',
+    icon: MessageSquare
+  }, {
+    name: 'Propriétés',
+    path: '/properties',
+    icon: File
+  }];
 
-  const navButtons = React.useMemo(() => {
-    return [
-      { href: '/pipeline', label: 'Pipeline' },
-      { href: '/leads', label: 'Leads' },
-      { href: '/actions', label: 'Actions' },
-      { href: '/calendar', label: 'Calendar' },
-      { href: '/notifications', label: 'Notifications' },
-    ];
-  }, []);
-
+  // Mobile navigation with horizontal scrolling - icons only
   if (isMobile) {
-    return null;
+    return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
+        <div className="overflow-x-auto py-2 bg-loro-50">
+          <div className="flex justify-between px-2 w-full">
+            {navigationItems.map(item => <Link key={item.name} to={item.path} className={cn("flex items-center justify-center whitespace-nowrap rounded-md p-2 flex-1 mx-1 transition-transform hover:scale-110 duration-200", location.pathname === item.path ? "text-loro-terracotta bg-loro-white" : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70")}>
+                {item.icon && <item.icon className="h-5 w-5" />}
+              </Link>)}
+          </div>
+        </div>
+      </div>;
   }
 
-  return (
-    <div className="border-b bg-secondary">
-      <div className="container flex h-12 items-center space-x-4 px-4">
-        {navButtons.map((button) => (
-          <SubNavButton key={button.href} href={button.href} label={button.label} />
-        ))}
+  // Desktop and tablet navigation with text and better responsive behavior
+  return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
+      <div className="bg-loro-50 py-2">
+        <div className="max-w-screen-xl mx-auto px-4">
+          <NavigationMenu className="mx-auto flex justify-center w-full">
+            <NavigationMenuList className={cn(
+              "flex",
+              isTablet ? "space-x-3" : "space-x-4 md:space-x-6 lg:space-x-8"
+            )}>
+              {navigationItems.map(item => <NavigationMenuItem key={item.name}>
+                  <Link 
+                    to={item.path} 
+                    className={cn(
+                      "flex items-center justify-center rounded-md transition-transform hover:scale-110 duration-200",
+                      isTablet ? "px-2 py-2" : "px-3 py-2",
+                      location.pathname === item.path 
+                        ? "text-loro-terracotta bg-loro-white" 
+                        : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70"
+                    )}
+                  >
+                    {item.icon && <item.icon className="h-5 w-5 mr-2" />}
+                    <span className={cn("font-medium", isTablet ? "text-xs" : "text-sm")}>{item.name}</span>
+                  </Link>
+                </NavigationMenuItem>)}
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
       </div>
-    </div>
-  );
+    </div>;
 };
 
 export default SubNavigation;

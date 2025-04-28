@@ -15,10 +15,6 @@ export interface ExtractedData {
 export interface TeamMember {
   id: string;
   name: string;
-  email: string;
-  role: string;
-  is_admin: boolean;
-  created_at?: string; // Optional timestamp field
 }
 
 export interface PropertyDetails {

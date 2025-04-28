@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 import { ActionItem, ActionStatus } from '@/types/actionHistory';
 import { isPast, isToday } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
+import { synchronizeLeadAssignments, GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 
 export const useActionsData = (refreshTrigger: number = 0) => {
   const [actions, setActions] = useState<ActionItem[]>([]);
@@ -19,17 +20,10 @@ export const useActionsData = (refreshTrigger: number = 0) => {
   const fetchActions = async () => {
     setIsLoading(true);
     try {
-      // First step: synchronize lead assignments to fix UUIDs
-      try {
-        console.log("Running lead assignment synchronization...");
-        // Import the synchronization function
-        const { synchronizeLeadAssignments } = await import('@/services/teamMemberService');
-        await synchronizeLeadAssignments();
-        console.log("Lead assignments synchronization completed successfully");
-      } catch (error) {
-        console.error('Error fixing lead assignments:', error);
-      }
+      // Première étape : synchroniser les assignations de leads pour corriger les UUIDs
+      await synchronizeLeadAssignments();
       
+      console.log("Fetching team members...");
       // Récupérer les membres d'équipe pour l'information d'assignation
       const { data: teamMembers, error: teamError } = await supabase
         .from('team_members')

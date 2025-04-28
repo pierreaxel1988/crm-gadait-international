@@ -7,7 +7,6 @@ import TagBadge from '@/components/common/TagBadge';
 import { PurchaseTimeframe, PropertyType } from '@/types/lead';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { Button } from '@/components/ui/button';
-import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 
 interface ActiveFiltersListProps {
   filters: FilterOptions;
@@ -24,9 +23,6 @@ const ActiveFiltersList = ({
   getTeamMemberName,
   isFilterActive 
 }: ActiveFiltersListProps) => {
-  // Get the guaranteed team members for reference
-  const guaranteedMembers = GUARANTEED_TEAM_MEMBERS;
-
   // Check if any filters are active by using the isFilterActive function
   const hasActiveFilters = 
     isFilterActive('status') || 
@@ -38,24 +34,6 @@ const ActiveFiltersList = ({
     isFilterActive('propertyType');
 
   if (!hasActiveFilters) return null;
-
-  // Enhanced getTeamMemberName function that also checks guaranteed members
-  const getEnhancedTeamMemberName = (id: string): string => {
-    // First try the passed getTeamMemberName function
-    const nameFromProps = getTeamMemberName(id);
-    if (nameFromProps && nameFromProps !== 'Unknown') {
-      return nameFromProps;
-    }
-    
-    // If that doesn't work, check the guaranteed members list
-    const guaranteedMember = guaranteedMembers.find(member => member.id === id);
-    if (guaranteedMember) {
-      return guaranteedMember.name;
-    }
-    
-    // Fallback to the ID if we can't find the name
-    return id;
-  };
 
   return (
     <div className="flex flex-wrap gap-2 items-center mt-4">
@@ -84,7 +62,7 @@ const ActiveFiltersList = ({
       
       {filters.assignedTo && (
         <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-          {getEnhancedTeamMemberName(filters.assignedTo)}
+          {getTeamMemberName(filters.assignedTo)}
           <button onClick={() => onFilterChange({...filters, assignedTo: null})}>
             <X className="h-3 w-3 ml-1" />
           </button>

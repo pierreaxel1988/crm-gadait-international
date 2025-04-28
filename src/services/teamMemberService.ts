@@ -1,135 +1,177 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { MOCK_USERS } from "@/components/admin/types/userTypes";
 
-// Liste des IDs garantis pour les membres de l'équipe
-// Utilisée comme source de vérité pour les opérations importantes
-export const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
-export const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11";
-export const SHARON_ID = "e564a874-2520-4167-bfa8-26d39f119470";
-export const PIERRE_AXEL_ID = "8857c5c7-f331-43e0-86e6-7b1d79ed4a42";
-export const CHRISTELLE_ID = "e408c5e8-f264-42da-9f9b-5fb8e16d84c9";
-export const ADMIN_ID = "45df44f5-72c8-4b2a-b6f1-35ca9d92d59d";
-export const CHLOE_ID = "22ce5f2a-1cc4-4b5a-bec4-a630c5a9e76d";
-export const OPHELIE_ID = "c5dc51ac-449a-4e6d-9e9a-aab1bbef3999";
-export const JACQUES_ID = "d4c4c8eb-3a0f-450d-b69e-e597c6cad885";
+// Important IDs to never forget
+const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
+const PIERRE_AXEL_ID = "ccbc635f-0282-427b-b130-82c1f0fbdbf9";
+const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
+const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11";
+const SHARON_ID = "e564a874-2520-4167-bfa8-26d39f119470";
+const CHRISTELLE_ID = "06e60e2c-4835-4d19-bdf1-5d06f5d2b7e9";
+const CHLOE_ID = "28c03acf-cb78-46b7-8dba-c1edee49c932";
+const CHRISTINE_ID = "af1c9117-f94f-44d0-921f-776dd5fd6f96";
+const OPHELIE_ID = "2d8bae00-a935-439d-8685-0adf238a612e";
 
-// Liste garantie des membres de l'équipe avec leurs ID corrects
+// Liste complète des membres garantis avec leur ID officiel
 export const GUARANTEED_TEAM_MEMBERS = [
-  { id: PIERRE_AXEL_ID, name: "Pierre-Axel Gadait", email: "pierre@gadait-international.com", is_admin: true, role: 'admin' },
-  { id: CHRISTELLE_ID, name: "Christelle Gadait", email: "christelle@gadait-international.com", is_admin: true, role: 'admin' },
-  { id: ADMIN_ID, name: "Admin", email: "admin@gadait-international.com", is_admin: true, role: 'admin' },
-  { id: CHLOE_ID, name: "Chloé Valentin", email: "chloe@gadait-international.com", is_admin: true, role: 'admin' },
-  { id: JADE_ID, name: "Jade Diouane", email: "jade@gadait-international.com", is_admin: false, role: 'commercial' },
-  { id: OPHELIE_ID, name: "Ophelie Durand", email: "ophelie@gadait-international.com", is_admin: false, role: 'commercial' },
-  { id: JEAN_MARC_ID, name: "Jean Marc Perrissol", email: "jeanmarc@gadait-international.com", is_admin: false, role: 'commercial' },
-  { id: JACQUES_ID, name: "Jacques Charles", email: "jacques@gadait-international.com", is_admin: false, role: 'commercial' },
-  { id: SHARON_ID, name: "Sharon Ramdiane", email: "sharon@gadait-international.com", is_admin: false, role: 'commercial' },
+  { id: JACQUES_ID, name: "Jacques Charles", email: "jacques@gadait-international.com", role: "agent" },
+  { id: PIERRE_AXEL_ID, name: "Pierre-Axel Gadait", email: "pierre@gadait-international.com", role: "admin" },
+  { id: JADE_ID, name: "Jade Diouane", email: "jade@gadait-international.com", role: "agent" },
+  { id: JEAN_MARC_ID, name: "Jean Marc Perrissol", email: "jeanmarc@gadait-international.com", role: "agent" },
+  { id: SHARON_ID, name: "Sharon Ramdiane", email: "sharon@gadait-international.com", role: "agent" },
+  { id: CHRISTELLE_ID, name: "Christelle Gadait", email: "christelle@gadait-international.com", role: "admin" },
+  { id: CHLOE_ID, name: "Chloe Valentin", email: "chloe@gadait-international.com", role: "admin" },
+  { id: CHRISTINE_ID, name: "Christine Francoise", email: "admin@gadait-international.com", role: "admin" },
+  { id: OPHELIE_ID, name: "Ophelie Durand", email: "ophelie@gadait-international.com", role: "agent" }
 ];
 
-/**
- * Récupère le nom d'un membre de l'équipe à partir de son ID
- * @param id ID du membre
- * @returns Le nom du membre ou "Inconnu" si non trouvé
- */
-export const getTeamMemberName = (id: string): string => {
-  if (!id) return "Non assigné";
-  
-  const teamMember = GUARANTEED_TEAM_MEMBERS.find(member => member.id === id);
-  return teamMember ? teamMember.name : "Inconnu";
+// Anciennes clés utilisées pour les agents, à remplacer par les UUIDs corrects
+const LEGACY_KEYS_MAP: Record<string, string> = {
+  'jade': JADE_ID,
+  'jade-diouane': JADE_ID,
+  'jean-marc': JEAN_MARC_ID,
+  'jean-marc-perrissol': JEAN_MARC_ID,
+  'sharon': SHARON_ID,
+  'sharon-ramdiane': SHARON_ID,
+  'jacques': JACQUES_ID,
+  'jacques-charles': JACQUES_ID,
+  'pierre': PIERRE_AXEL_ID,
+  'pierre-axel': PIERRE_AXEL_ID,
+  'ophelie': OPHELIE_ID,
+  'ophelie-durand': OPHELIE_ID
 };
 
 /**
- * Récupère les informations complètes d'un membre de l'équipe à partir de son ID
- * @param id ID du membre
- * @returns L'objet complet du membre ou null si non trouvé
+ * Vérifie et corrige les assignations de leads dans la base de données
+ * en remplaçant les anciennes clés par les UUIDs corrects
  */
-export const getTeamMemberById = (id: string) => {
-  if (!id) return null;
+export const synchronizeLeadAssignments = async (): Promise<{
+  success: boolean;
+  corrected: number;
+  errors: string[];
+}> => {
+  const errors: string[] = [];
+  let correctedCount = 0;
   
-  return GUARANTEED_TEAM_MEMBERS.find(member => member.id === id) || null;
-};
-
-/**
- * Récupère l'ID d'un membre de l'équipe à partir de son email
- * @param email Email du membre
- * @returns L'ID du membre ou null si non trouvé
- */
-export const getTeamMemberId = (email: string | undefined): string | null => {
-  if (!email) return null;
-  
-  const member = GUARANTEED_TEAM_MEMBERS.find(m => m.email === email);
-  return member ? member.id : null;
-};
-
-/**
- * Récupère tous les membres de l'équipe depuis la base de données
- * @returns La liste des membres de l'équipe
- */
-export const getAllTeamMembers = async () => {
   try {
-    const { data, error } = await supabase.from('team_members').select('*');
+    console.log("Démarrage de la synchronisation des assignations de leads...");
     
-    if (error) {
-      console.error("Erreur lors de la récupération des membres de l'équipe:", error);
-      // Fallback sur la liste garantie
-      return GUARANTEED_TEAM_MEMBERS;
+    // Récupérer tous les leads qui ont une assignation
+    const { data: leads, error: fetchError } = await supabase
+      .from('leads')
+      .select('id, assigned_to')
+      .not('assigned_to', 'is', null);
+    
+    if (fetchError) {
+      throw fetchError;
     }
     
-    return data;
+    // Vérifier les leads qui pourraient avoir des anciennes clés
+    const leadsToUpdate = leads?.filter(lead => {
+      // Vérifier si l'assigned_to n'est pas un UUID valide
+      const isValidUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
+        .test(lead.assigned_to);
+      
+      // Ou si c'est une ancienne clé qui doit être remplacée
+      const isLegacyKey = Object.keys(LEGACY_KEYS_MAP).includes(lead.assigned_to);
+      
+      return !isValidUUID || isLegacyKey;
+    });
+    
+    console.log(`${leadsToUpdate?.length || 0} leads à mettre à jour avec des UUIDs corrects`);
+    
+    // Mettre à jour les leads avec des UUIDs incorrects
+    const updatePromises = leadsToUpdate?.map(async (lead) => {
+      const correctUUID = LEGACY_KEYS_MAP[lead.assigned_to];
+      
+      if (correctUUID) {
+        const { error: updateError } = await supabase
+          .from('leads')
+          .update({ assigned_to: correctUUID })
+          .eq('id', lead.id);
+        
+        if (updateError) {
+          errors.push(`Erreur lors de la mise à jour du lead ${lead.id}: ${updateError.message}`);
+          return false;
+        }
+        
+        console.log(`Lead ${lead.id}: assigné de "${lead.assigned_to}" à "${correctUUID}"`);
+        return true;
+      }
+      
+      errors.push(`Pas d'UUID correspondant trouvé pour le lead ${lead.id} avec assigned_to=${lead.assigned_to}`);
+      return false;
+    }) || [];
+    
+    const results = await Promise.all(updatePromises);
+    correctedCount = results.filter(Boolean).length;
+    
+    // Synchroniser la table team_members avec les membres garantis
+    await synchronizeTeamMembers();
+    
+    return {
+      success: true,
+      corrected: correctedCount,
+      errors
+    };
   } catch (error) {
-    console.error("Exception lors de la récupération des membres de l'équipe:", error);
-    // Fallback sur la liste garantie
-    return GUARANTEED_TEAM_MEMBERS;
+    console.error("Erreur lors de la synchronisation des assignations:", error);
+    errors.push(`Erreur générale: ${error.message}`);
+    
+    return {
+      success: false,
+      corrected: correctedCount,
+      errors
+    };
   }
 };
 
 /**
- * Synchronise les assignations de leads pour corriger les ID des agents
- * @returns Un objet indiquant le succès de l'opération
+ * Synchronise la table team_members avec les membres garantis
  */
-export const synchronizeLeadAssignments = async () => {
+const synchronizeTeamMembers = async (): Promise<void> => {
   try {
-    console.log("Démarrage de la synchronisation des assignations de leads...");
+    console.log("Synchronisation de la table team_members...");
     
-    // Structure de mappage: ancien format -> UUID correct
-    const agentMappings = [
-      { oldValues: ["jade", "jade-diouane"], correctId: JADE_ID },
-      { oldValues: ["jean-marc", "jean-marc-perrissol"], correctId: JEAN_MARC_ID },
-      { oldValues: ["sharon", "sharon-ramdiane"], correctId: SHARON_ID },
-      { oldValues: ["pierre", "pierre-gadait"], correctId: PIERRE_AXEL_ID },
-      { oldValues: ["christelle", "christelle-gadait"], correctId: CHRISTELLE_ID },
-      { oldValues: ["admin"], correctId: ADMIN_ID },
-      { oldValues: ["chloe", "chloe-gadait"], correctId: CHLOE_ID },
-      { oldValues: ["ophelie", "ophelie-durand"], correctId: OPHELIE_ID },
-      { oldValues: ["jacques", "jacques-charles"], correctId: JACQUES_ID }
-    ];
+    // Récupérer tous les membres d'équipe existants
+    const { data: existingMembers, error: fetchError } = await supabase
+      .from('team_members')
+      .select('id, name, email, role');
     
-    // Pour chaque mapping, effectuer une mise à jour directe
-    for (const mapping of agentMappings) {
-      if (mapping.oldValues.length > 0) {
-        console.log(`Correction des assignations pour ${mapping.oldValues.join(", ")} vers ${mapping.correctId}`);
+    if (fetchError) {
+      throw fetchError;
+    }
+    
+    // Pour chaque membre garanti, vérifier s'il existe déjà
+    for (const member of GUARANTEED_TEAM_MEMBERS) {
+      const exists = existingMembers?.some(m => m.id === member.id);
+      
+      if (!exists) {
+        // S'il n'existe pas, l'ajouter
+        const { error: insertError } = await supabase
+          .from('team_members')
+          .insert({
+            id: member.id,
+            name: member.name,
+            email: member.email,
+            role: member.role,
+            is_admin: member.role === 'admin'
+          });
         
-        // Utiliser une approche directe avec une requête SQL via la requête UPDATE
-        for (const oldValue of mapping.oldValues) {
-          const { error: updateError } = await supabase
-            .from('leads')
-            .update({ assigned_to: mapping.correctId })
-            .eq('assigned_to', oldValue);
-            
-          if (updateError) {
-            console.error(`Erreur lors de la mise à jour pour ${oldValue}:`, updateError);
-          } else {
-            console.log(`Mise à jour réussie pour ${oldValue} -> ${mapping.correctId}`);
-          }
+        if (insertError) {
+          console.error(`Erreur lors de l'ajout du membre ${member.name}:`, insertError);
+        } else {
+          console.log(`Membre ajouté: ${member.name} (${member.id})`);
         }
       }
     }
     
-    console.log("Synchronisation des assignations de leads terminée avec succès");
-    return { success: true };
+    console.log("Synchronisation des membres d'équipe terminée");
   } catch (error) {
-    console.error('Erreur lors de la synchronisation des assignations de leads:', error);
-    throw error;
+    console.error("Erreur lors de la synchronisation des membres d'équipe:", error);
   }
+};
+
+// Nouvelle fonction pour obtenir les agents garantis
+export const getGuaranteedAgents = () => {
+  return GUARANTEED_TEAM_MEMBERS.sort((a, b) => a.name.localeCompare(b.name));
 };

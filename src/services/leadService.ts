@@ -1,3 +1,4 @@
+
 import { LeadDetailed } from "@/types/lead";
 import { 
   createLead as createLeadCore,
@@ -10,7 +11,11 @@ import {
 import { addActionToLead } from "./leadActions";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { JADE_ID, JEAN_MARC_ID, SHARON_ID } from "./teamMemberService";
+
+// Important IDs
+const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
+const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11";
+const SHARON_ID = "e564a874-2520-4167-bfa8-26d39f119470";
 
 export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt">): Promise<LeadDetailed | null> => {
   try {
@@ -113,6 +118,75 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       description: error instanceof Error ? error.message : "Une erreur inconnue est survenue",
     });
     throw error; // Re-throw to allow handling by the caller
+  }
+};
+
+export const reassignJadeLeads = async () => {
+  try {
+    console.log("Starting reassignment of Jade's leads to her correct UUID:", JADE_ID);
+    
+    // Update leads with any variation of Jade's ID to use her correct UUID
+    const { error } = await supabase
+      .from('leads')
+      .update({ assigned_to: JADE_ID })
+      .in('assigned_to', ['jade', 'jade-diouane']);
+
+    if (error) {
+      console.error('Error reassigning Jade\'s leads:', error);
+      throw error;
+    }
+    
+    console.log('Successfully reassigned all Jade\'s leads to correct UUID');
+    return { success: true };
+  } catch (error) {
+    console.error('Error in reassignJadeLeads:', error);
+    throw error;
+  }
+};
+
+export const reassignJeanMarcLeads = async () => {
+  try {
+    console.log("Starting reassignment of Jean Marc's leads to his correct UUID:", JEAN_MARC_ID);
+    
+    // Update leads with any variation of Jean Marc's ID to use his correct UUID
+    const { error } = await supabase
+      .from('leads')
+      .update({ assigned_to: JEAN_MARC_ID })
+      .in('assigned_to', ['jean-marc', 'jean-marc-perrissol']);
+
+    if (error) {
+      console.error('Error reassigning Jean Marc\'s leads:', error);
+      throw error;
+    }
+    
+    console.log('Successfully reassigned all Jean Marc\'s leads to correct UUID');
+    return { success: true };
+  } catch (error) {
+    console.error('Error in reassignJeanMarcLeads:', error);
+    throw error;
+  }
+};
+
+export const reassignSharonLeads = async () => {
+  try {
+    console.log("Starting reassignment of Sharon's leads to her correct UUID:", SHARON_ID);
+    
+    // Update leads with any variation of Sharon's ID to use her correct UUID
+    const { error } = await supabase
+      .from('leads')
+      .update({ assigned_to: SHARON_ID })
+      .in('assigned_to', ['sharon', 'sharon-ramdiane']);
+
+    if (error) {
+      console.error('Error reassigning Sharon\'s leads:', error);
+      throw error;
+    }
+    
+    console.log('Successfully reassigned all Sharon\'s leads to correct UUID');
+    return { success: true };
+  } catch (error) {
+    console.error('Error in reassignSharonLeads:', error);
+    throw error;
   }
 };
 

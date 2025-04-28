@@ -101,11 +101,22 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
           setTeamMembers(teamMembersData);
         }
         
-        // Récupérer les leads - RLS appliquée automatiquement par Supabase
-        const { data: supabaseLeads, error: leadsError } = await supabase
-          .from('leads')
-          .select('*, action_history')
-          .order('created_at', { ascending: false });
+        let query = supabase.from('leads').select('*, action_history');
+        
+        if (isCommercial && user) {
+          const currentTeamMember = teamMembersData?.find(tm => tm.email === user.email);
+          
+          if (currentTeamMember) {
+            console.log("Filtering leads for team member:", currentTeamMember.id, currentTeamMember.name);
+            query = query.eq('assigned_to', currentTeamMember.id);
+          } else {
+            console.warn("Commercial user not found in team_members table:", user.email);
+          }
+        }
+        
+        query = query.order('created_at', { ascending: false });
+        
+        const { data: supabaseLeads, error: leadsError } = await query;
         
         if (leadsError) {
           console.error('Error fetching leads:', leadsError);
@@ -121,6 +132,13 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
         if (!allLeads || allLeads.length === 0) {
           console.log("No leads in Supabase, trying local data");
           let localLeads = await getLeads();
+          
+          if (isCommercial && user && localLeads) {
+            const currentTeamMember = teamMembersData?.find(tm => tm.email === user.email);
+            if (currentTeamMember) {
+              localLeads = localLeads.filter(lead => lead.assignedTo === currentTeamMember.id);
+            }
+          }
           
           if (localLeads && localLeads.length > 0) {
             console.log("Found local leads:", localLeads.length);

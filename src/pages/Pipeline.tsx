@@ -1,6 +1,5 @@
-
 import React, { useEffect, useMemo } from 'react';
-import { useBreakpoint } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
 import MobilePipelineView from '@/components/pipeline/MobilePipelineView';
 import DesktopPipelineView from '@/components/pipeline/DesktopPipelineView';
@@ -9,10 +8,10 @@ import SubNavigation from '@/components/layout/SubNavigation';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import ComponentLoader from '@/components/common/ComponentLoader';
-import { synchronizeLeadAssignments } from '@/services/teamMemberService';
+import { reassignJadeLeads, reassignJeanMarcLeads, reassignSharonLeads } from '@/services/leadService';
 
 const Pipeline = () => {
-  const { isMobile } = useBreakpoint();
+  const isMobile = useIsMobile();
   
   const { 
     activeTab,
@@ -53,11 +52,12 @@ const Pipeline = () => {
   }, []);
 
   useEffect(() => {
-    // Run lead ID synchronization on mount
     const fixLeadsAssignment = async () => {
       try {
-        console.log("Running lead reassignment synchronization...");
-        await synchronizeLeadAssignments();
+        console.log("Running lead reassignment for Jade, Jean Marc, and Sharon...");
+        await reassignJadeLeads();
+        await reassignJeanMarcLeads();
+        await reassignSharonLeads();
         console.log("Lead reassignments completed successfully");
       } catch (error) {
         console.error('Error fixing lead assignments:', error);

@@ -23,20 +23,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
   
   if (!user) {
-    // Redirect to auth page with return URL
-    return <Navigate to={`/auth?returnTo=${encodeURIComponent(location.pathname)}`} replace />;
+    return <Navigate to="/auth" replace />;
   }
   
-  // Admin-only route check
   if (adminOnly && !isAdmin) {
-    console.log("Access denied: Admin-only route");
-    return <Navigate to="/pipeline" replace />;
+    return <Navigate to="/" replace />;
   }
   
-  // Commercial restrictions check
   if (isCommercial && !commercialAllowed) {
-    console.log("Access denied: Not available for commercial users");
-    return <Navigate to="/pipeline" replace />;
+    if (
+      !location.pathname.startsWith('/leads') &&
+      !location.pathname.startsWith('/actions') &&
+      !location.pathname.startsWith('/calendar') &&
+      location.pathname !== '/' &&
+      location.pathname !== '/pipeline'
+    ) {
+      return <Navigate to="/pipeline" replace />;
+    }
   }
   
   return <>{children}</>;

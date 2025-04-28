@@ -1,10 +1,8 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { User } from 'lucide-react';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
-import { useAuth } from '@/hooks/useAuth';
 
 interface TeamMember {
   id: string;
@@ -19,7 +17,6 @@ interface AgentFilterProps {
 
 const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: AgentFilterProps) => {
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
-  const { isAdmin, teamMemberId } = useAuth();
 
   // Synchroniser avec le système global d'agent sélectionné
   useEffect(() => {
@@ -35,22 +32,7 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     }
   }, [assignedTo, selectedAgent, handleAgentChange]);
 
-  // Pour les commerciaux, force l'agent à être eux-mêmes
-  useEffect(() => {
-    if (!isAdmin && teamMemberId && assignedTo !== teamMemberId) {
-      console.log("Commercial user - forcing agent filter to self:", teamMemberId);
-      onAssignedToChange(teamMemberId);
-      handleAgentChange(teamMemberId);
-    }
-  }, [isAdmin, teamMemberId, onAssignedToChange, handleAgentChange]);
-
   const handleAgentSelect = (agentId: string | null) => {
-    // Si commercial, empêcher de changer l'agent
-    if (!isAdmin && teamMemberId) {
-      console.log("Commercial users cannot change agent filter");
-      return;
-    }
-    
     // Mettre à jour à la fois le filtre local et le système global
     onAssignedToChange(agentId);
     handleAgentChange(agentId);
@@ -63,15 +45,8 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
     }));
   };
 
-  // Use the guaranteed members list to ensure we have unique entries
-  // Create a Map to ensure uniqueness by ID
-  const memberMap = new Map();
-  GUARANTEED_TEAM_MEMBERS.forEach(member => {
-    memberMap.set(member.id, member);
-  });
-  
-  // Convert back to array and sort by name
-  const allMembers = Array.from(memberMap.values())
+  // S'assurer que tous les membres garantis sont présents dans les options
+  const allMembers = [...GUARANTEED_TEAM_MEMBERS]
     .sort((a, b) => a.name.localeCompare(b.name));
 
   // Trouver le nom du commercial actuellement sélectionné
@@ -88,40 +63,25 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
         )}
       </h4>
       <div className="grid grid-cols-2 gap-2">
-        {/* Pour les admins: montrer le bouton "Tous" et tous les agents */}
-        {isAdmin ? (
-          <>
-            <Button
-              variant={assignedTo === null ? "default" : "outline"}
-              size="sm"
-              className="text-xs"
-              onClick={() => handleAgentSelect(null)}
-            >
-              Tous
-            </Button>
-            {allMembers.map((member) => (
-              <Button
-                key={member.id}
-                variant={assignedTo === member.id ? "default" : "outline"}
-                size="sm"
-                className="text-xs"
-                onClick={() => handleAgentSelect(member.id)}
-              >
-                {member.name}
-              </Button>
-            ))}
-          </>
-        ) : (
-          // Pour les commerciaux: montrer uniquement leur nom, désactivé
+        <Button
+          variant={assignedTo === null ? "default" : "outline"}
+          size="sm"
+          className="text-xs"
+          onClick={() => handleAgentSelect(null)}
+        >
+          Tous
+        </Button>
+        {allMembers.map((member) => (
           <Button
-            variant="default"
+            key={member.id}
+            variant={assignedTo === member.id ? "default" : "outline"}
             size="sm"
-            className="text-xs col-span-2"
-            disabled
+            className="text-xs"
+            onClick={() => handleAgentSelect(member.id)}
           >
-            {selectedAgentName || 'Vos leads'}
+            {member.name}
           </Button>
-        )}
+        ))}
       </div>
     </div>
   );

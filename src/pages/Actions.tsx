@@ -17,7 +17,7 @@ import PipelineSearchBar from '@/components/pipeline/PipelineSearchBar';
 import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 
 const Actions = () => {
-  const { isMobile, isTablet, isDesktop } = useBreakpoint();
+  const { isMobile } = useBreakpoint();
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { actions, isLoading, markActionComplete } = useActionsData(refreshTrigger);
@@ -76,7 +76,7 @@ const Actions = () => {
                   <SelectTrigger className="w-[200px] text-xs">
                     <SelectValue placeholder="Filtrer par commercial" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent searchable>
                     <SelectItem value="all">Tous les commerciaux</SelectItem>
                     {GUARANTEED_TEAM_MEMBERS.map(agent => (
                       <SelectItem key={agent.id} value={agent.id}>

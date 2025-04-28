@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import CustomButton from '../ui/CustomButton';
 import StatusBadge from '../common/StatusBadge';
 import TagBadge from '../common/TagBadge';
-import { useAuth } from '@/hooks/useAuth';
 
 interface ImportedLeadsPanelProps {
   limit?: number;
@@ -19,7 +18,6 @@ const ImportedLeadsPanel = ({ limit = 5, className }: ImportedLeadsPanelProps) =
   const [recentImports, setRecentImports] = useState<LeadDetailed[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const { isAdmin, teamMemberId } = useAuth();
 
   useEffect(() => {
     const fetchLeads = async () => {
@@ -27,15 +25,8 @@ const ImportedLeadsPanel = ({ limit = 5, className }: ImportedLeadsPanelProps) =
         setIsLoading(true);
         const allLeads = await getLeads();
         
-        // Filter for commercial users - ensure we only show leads assigned to them
-        let filteredLeads = allLeads;
-        if (!isAdmin && teamMemberId) {
-          console.log(`Filtering imported leads for commercial user: ${teamMemberId}`);
-          filteredLeads = allLeads.filter(lead => lead.assignedTo === teamMemberId);
-        }
-        
         // Filtrer et trier les leads importés
-        const importedLeads = filteredLeads
+        const importedLeads = allLeads
           .filter(lead => lead.integration_source)
           .sort((a, b) => {
             const dateA = a.imported_at ? new Date(a.imported_at).getTime() : 0;
@@ -45,7 +36,6 @@ const ImportedLeadsPanel = ({ limit = 5, className }: ImportedLeadsPanelProps) =
           .slice(0, limit);
         
         setRecentImports(importedLeads);
-        console.log(`Showing ${importedLeads.length} imported leads for ${isAdmin ? 'admin' : 'commercial'} user`);
       } catch (error) {
         console.error('Error fetching imported leads:', error);
       } finally {
@@ -54,7 +44,7 @@ const ImportedLeadsPanel = ({ limit = 5, className }: ImportedLeadsPanelProps) =
     };
     
     fetchLeads();
-  }, [limit, isAdmin, teamMemberId]);
+  }, [limit]);
 
   const handleViewLead = (id: string) => {
     navigate(`/leads/${id}`);

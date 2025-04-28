@@ -10,7 +10,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useTeamMembers } from '@/components/chat/hooks/useTeamMembers';
-import { PIERRE_AXEL_ID } from '@/services/teamMemberService';
+
+// Important IDs that must be preserved
+const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69"; // Jade's correct UUID
+const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11"; // Jean Marc's correct UUID
 
 interface TeamMemberSelectProps {
   value: string | undefined;
@@ -29,31 +32,32 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
 }) => {
   const { teamMembers } = useTeamMembers();
   const [selectedMemberName, setSelectedMemberName] = useState<string | null>(null);
-  
-  // Log team members to help debug
+
+  // Convert legacy IDs to proper UUIDs
   useEffect(() => {
-    console.log("TeamMemberSelect - Available team members:", teamMembers);
-  }, [teamMembers]);
-  
-  // Log when value changes
-  useEffect(() => {
-    console.log("TeamMemberSelect - Selected value:", value);
-    
-    // Ensure we're using the correct Pierre Axel ID
-    if (value && value !== PIERRE_AXEL_ID && teamMembers.find(m => m.id === value)?.name === 'Pierre-Axel Gadait') {
-      console.log("Converting to correct Pierre Axel ID");
-      onChange(PIERRE_AXEL_ID);
+    // Convert string IDs to the correct UUIDs if needed
+    if (value === 'jade-diouane') {
+      console.log("Converting 'jade-diouane' to proper UUID:", JADE_ID);
+      onChange(JADE_ID);
+    } else if (value === 'jean-marc-perrissol') {
+      console.log("Converting 'jean-marc-perrissol' to proper UUID:", JEAN_MARC_ID);
+      onChange(JEAN_MARC_ID);
     }
-  }, [value, teamMembers, onChange]);
+  }, [value, onChange]);
 
   // Find selected member name for display
   useEffect(() => {
     if (value) {
       const member = teamMembers.find(m => m.id === value);
       if (member) {
+        console.log("Found selected member:", member.name);
         setSelectedMemberName(member.name);
-      } else {
-        setSelectedMemberName(null);
+      } else if (value === JADE_ID) {
+        // Fallback for Jade if teamMembers hasn't loaded her yet
+        setSelectedMemberName("Jade Diouane");
+      } else if (value === JEAN_MARC_ID) {
+        // Fallback for Jean Marc if teamMembers hasn't loaded him yet
+        setSelectedMemberName("Jean Marc Perrissol");
       }
     } else {
       setSelectedMemberName(null);
@@ -68,11 +72,6 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
     }
     onChange(newValue);
   };
-
-  // Make sure we only have unique team members for display
-  const uniqueMembers = Array.from(
-    new Map(teamMembers.map(member => [member.id, member])).values()
-  ).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <Select
@@ -95,7 +94,7 @@ const TeamMemberSelect: React.FC<TeamMemberSelectProps> = ({
       </SelectTrigger>
       <SelectContent className="max-h-64 font-futura">
         <SelectGroup>
-          {uniqueMembers.map(member => (
+          {teamMembers.map(member => (
             <SelectItem 
               key={member.id} 
               value={member.id}

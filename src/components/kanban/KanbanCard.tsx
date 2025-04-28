@@ -65,8 +65,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     id: item.id,
     status: item.status,
     pipelineType: item.pipelineType,
-    providedPipelineType: pipelineType,
-    assignedTo: item.assignedTo
+    providedPipelineType: pipelineType
   });
 
   const handleCardClick = () => {
@@ -90,6 +89,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
 
   const handleAssignClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // Navigation vers la page d'édition du lead pour assigner un commercial
     navigate(`/leads/${item.id}?assign=true`);
   };
 
