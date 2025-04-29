@@ -63,43 +63,61 @@ export const useLeadResponseTime = (period: string) => {
           if (contactActions.length > 0) {
             // Sort by createdAt date to find the earliest contact
             contactActions.sort((a: any, b: any) => {
-              // Handle different possible formats of createdAt
-              const aDate = typeof a.createdAt === 'string' ? new Date(a.createdAt) : 
-                            a.createdAt && typeof a.createdAt === 'object' ? new Date(a.createdAt.toString()) :
-                            null;
+              // Extract the createdAt field from the action objects safely
+              let aDate: Date | null = null;
+              let bDate: Date | null = null;
               
-              const bDate = typeof b.createdAt === 'string' ? new Date(b.createdAt) : 
-                            b.createdAt && typeof b.createdAt === 'object' ? new Date(b.createdAt.toString()) :
-                            null;
+              // Handle different formats and structures
+              if (a && typeof a === 'object') {
+                if (typeof a.createdAt === 'string') {
+                  aDate = new Date(a.createdAt);
+                } else if (a.createdAt && typeof a.createdAt === 'object') {
+                  aDate = new Date(a.createdAt.toString());
+                }
+              }
+              
+              if (b && typeof b === 'object') {
+                if (typeof b.createdAt === 'string') {
+                  bDate = new Date(b.createdAt);
+                } else if (b.createdAt && typeof b.createdAt === 'object') {
+                  bDate = new Date(b.createdAt.toString());
+                }
+              }
               
               if (!aDate || !bDate) return 0;
               return aDate.getTime() - bDate.getTime();
             });
 
             const firstContact = contactActions[0];
-            if (firstContact && firstContact.createdAt) {
-              // Handle different possible formats of createdAt
-              const contactedAt = typeof firstContact.createdAt === 'string' ? 
-                                  new Date(firstContact.createdAt) : 
-                                  new Date(firstContact.createdAt.toString());
+            if (firstContact && typeof firstContact === 'object') {
+              let contactedAt: Date | null = null;
               
-              const createdAt = new Date(lead.created_at);
-              const diffMinutes = (contactedAt.getTime() - createdAt.getTime()) / (1000 * 60);
+              // Handle different formats of createdAt
+              if (typeof firstContact.createdAt === 'string') {
+                contactedAt = new Date(firstContact.createdAt);
+              } else if (firstContact.createdAt && typeof firstContact.createdAt === 'object') {
+                contactedAt = new Date(firstContact.createdAt.toString());
+              }
               
-              // Only count if response was within 7 days (10080 minutes)
-              // This prevents outliers from skewing the average
-              if (diffMinutes > 0 && diffMinutes < 10080) {
-                totalResponseTime += diffMinutes;
-                countedLeads++;
+              if (contactedAt) {
+                const createdAt = new Date(lead.created_at);
+                const diffMinutes = (contactedAt.getTime() - createdAt.getTime()) / (1000 * 60);
                 
-                // Track by agent if assigned
-                if (lead.assigned_to) {
-                  if (!agentResponseTimes[lead.assigned_to]) {
-                    agentResponseTimes[lead.assigned_to] = { totalMinutes: 0, count: 0 };
-                  }
+                // Only count if response was within 7 days (10080 minutes)
+                // This prevents outliers from skewing the average
+                if (diffMinutes > 0 && diffMinutes < 10080) {
+                  totalResponseTime += diffMinutes;
+                  countedLeads++;
                   
-                  agentResponseTimes[lead.assigned_to].totalMinutes += diffMinutes;
-                  agentResponseTimes[lead.assigned_to].count++;
+                  // Track by agent if assigned
+                  if (lead.assigned_to) {
+                    if (!agentResponseTimes[lead.assigned_to]) {
+                      agentResponseTimes[lead.assigned_to] = { totalMinutes: 0, count: 0 };
+                    }
+                    
+                    agentResponseTimes[lead.assigned_to].totalMinutes += diffMinutes;
+                    agentResponseTimes[lead.assigned_to].count++;
+                  }
                 }
               }
             }
