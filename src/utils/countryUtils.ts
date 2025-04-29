@@ -1,4 +1,3 @@
-
 /**
  * Converts a country code (two-letter ISO) to a flag emoji
  */
@@ -214,6 +213,8 @@ const countryToISOMap: Record<string, string> = {
   'Zimbabwe': 'ZW',
   // Common aliases
   'USA': 'US', // Added USA alias explicitly
+  'États-Unis': 'US', // French version
+  'Etats-Unis': 'US', // French version without accent
   'UK': 'GB',
   'Great Britain': 'GB',
   'Angleterre': 'GB',

@@ -1,4 +1,3 @@
-
 // Map of countries to their major locations
 export const LOCATIONS_BY_COUNTRY: Record<string, string[]> = {
   'France': [
@@ -61,6 +60,15 @@ export const LOCATIONS_BY_COUNTRY: Record<string, string[]> = {
     'Seattle', 'San Diego', 'Las Vegas', 'Austin', 'Denver', 'Aspen', 'Beverly Hills',
     'Malibu', 'Palm Springs', 'Hamptons', 'Telluride', 'Key West', 'Orlando',
     'Scottsdale', 'Santa Barbara', 'Napa Valley', 'Sonoma', 'Hawaii', 'Maui', 'Kauai'
+  ],
+  
+  // Add French alias for United States
+  'États-Unis': [
+    'New York', 'Los Angeles', 'Miami', 'Miami Beach', 'South Beach', 'Fort Lauderdale',
+    'Palm Beach', 'Naples', 'San Francisco', 'Chicago', 'Boston', 'Washington D.C.',
+    'Seattle', 'San Diego', 'Las Vegas', 'Austin', 'Denver', 'Aspen', 'Beverly Hills',
+    'Malibu', 'Palm Springs', 'Hamptons', 'Telluride', 'Key West', 'Orlando',
+    'Scottsdale', 'Santa Barbara', 'Napa Valley', 'Sonoma', 'Hawaii', 'Maui', 'Kauai'
   ]
 };
 
@@ -75,8 +83,8 @@ export const getAllLocations = (): string[] => {
 
 // Get locations for a specific country
 export const getLocationsByCountry = (country: string): string[] => {
-  // Handle USA and United States as the same country
-  if (country === 'USA' && !LOCATIONS_BY_COUNTRY[country]) {
+  // Handle USA, United States, and French variations as the same country
+  if ((country === 'USA' || country === 'États-Unis' || country === 'Etats-Unis') && !LOCATIONS_BY_COUNTRY[country]) {
     return LOCATIONS_BY_COUNTRY['United States'] || [];
   }
   
