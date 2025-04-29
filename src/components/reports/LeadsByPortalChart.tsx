@@ -14,8 +14,19 @@ const LeadsByPortalChart = ({ data, isLoading = false }: LeadsByPortalChartProps
   const isMobile = useIsMobile();
   const [activeIndex, setActiveIndex] = React.useState<number | undefined>(undefined);
   
-  // Palette de couleurs élégante pour les portails immobiliers
-  const COLORS = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2'];
+  // Palette de couleurs élégante pour les portails immobiliers (enrichie)
+  const COLORS = [
+    '#1f77b4', // Bleu SeLoger
+    '#ff7f0e', // Orange LeBonCoin
+    '#2ca02c', // Vert Meilleurs Agents
+    '#d62728', // Rouge Propriétés Le Figaro
+    '#9467bd', // Violet Belles demeures
+    '#8c564b', // Marron Barnes
+    '#e377c2', // Rose Sotheby's
+    '#7f7f7f', // Gris Particulier à Particulier
+    '#bcbd22', // Chartreuse Century 21
+    '#17becf'  // Bleu clair Se Loger Prestige
+  ];
   
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);
