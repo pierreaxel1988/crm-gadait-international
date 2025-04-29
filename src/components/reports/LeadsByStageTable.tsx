@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -5,24 +6,29 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getGuaranteedAgents } from '@/services/teamMemberService';
+
 interface LeadsByStageTableProps {
   period: string;
 }
+
 interface StageCount {
   [key: string]: number;
 }
+
 interface LeadStagesData {
   name: string;
   firstName: string; // First name field for display purposes
   stages: StageCount;
   total: number;
 }
+
 interface TeamMember {
   id: string;
   name: string;
   role?: string;
   email?: string;
 }
+
 const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
   period
 }) => {
@@ -31,6 +37,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
   const [stages, setStages] = useState<string[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<string>("all");
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+
   useEffect(() => {
     // Fetch team members when component mounts
     const fetchTeamMembers = async () => {
@@ -57,6 +64,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
     };
     fetchTeamMembers();
   }, []);
+
   useEffect(() => {
     fetchData();
   }, [period, selectedAgent]);
@@ -65,6 +73,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
   const getFirstName = (fullName: string): string => {
     return fullName.split(' ')[0];
   };
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -170,21 +179,22 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
       setIsLoading(false);
     }
   };
+
   if (isLoading) {
-    return <Card>
-        <CardHeader>
-          <CardTitle>Leads par commercial et stade</CardTitle>
+    return <Card className="border-none shadow-luxury">
+        <CardHeader className="border-b bg-gray-50">
+          <CardTitle className="font-futura text-xl text-gray-800">Leads par commercial et stade</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Commercial</TableHead>
+                <TableRow className="bg-gray-50/50">
+                  <TableHead className="font-futura text-gray-700">Commercial</TableHead>
                   {[1, 2, 3, 4, 5].map((_, index) => <TableHead key={index}>
                       <Skeleton className="h-4 w-20" />
                     </TableHead>)}
-                  <TableHead>Total</TableHead>
+                  <TableHead className="font-futura text-gray-700">Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -205,12 +215,13 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
         </CardContent>
       </Card>;
   }
-  return <Card>
-      <CardHeader className="border-b">
+
+  return <Card className="border-none shadow-luxury overflow-hidden">
+      <CardHeader className="border-b bg-gradient-to-r from-gray-50 to-gray-100">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <CardTitle>Leads par commercial et stade</CardTitle>
+          <CardTitle className="font-futura text-xl text-gray-800">Leads par commercial et stade</CardTitle>
           <Select value={selectedAgent} onValueChange={setSelectedAgent}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] bg-white">
               <SelectValue placeholder="Tous les commerciaux" />
             </SelectTrigger>
             <SelectContent>
@@ -220,11 +231,47 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
           </Select>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <div className="overflow-x-auto">
-          
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50/50">
+                <TableHead className="font-futura text-gray-700 whitespace-nowrap px-6 py-4">Commercial</TableHead>
+                {stages.map(stage => (
+                  <TableHead key={stage} className="font-futura text-gray-700 whitespace-nowrap px-4 py-4">
+                    {stage}
+                  </TableHead>
+                ))}
+                <TableHead className="font-futura text-gray-700 whitespace-nowrap px-6 py-4">Total</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.map((row, index) => (
+                <TableRow 
+                  key={row.name} 
+                  className={`
+                    ${index === data.length - 1 ? 'font-medium bg-gray-50/50' : 'hover:bg-gray-50/30'} 
+                    ${row.name === "Non assigné" ? 'italic text-gray-600' : ''}
+                  `}
+                >
+                  <TableCell className="px-6 py-4 font-medium">
+                    {row.name === "Total" || row.name === "Non assigné" ? row.name : row.firstName}
+                  </TableCell>
+                  {stages.map(stage => (
+                    <TableCell key={`${row.name}-${stage}`} className="text-center px-4 py-4">
+                      {row.stages[stage] || 0}
+                    </TableCell>
+                  ))}
+                  <TableCell className="px-6 py-4 font-medium">
+                    {row.total}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </CardContent>
     </Card>;
 };
+
 export default LeadsByStageTable;

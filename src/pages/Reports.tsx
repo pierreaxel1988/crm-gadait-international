@@ -48,57 +48,79 @@ const Reports = () => {
   };
   
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-white to-gray-50">
       <Navbar />
       <SubNavigation />
       
-      <div className="p-4 lg:p-8 space-y-6 max-w-[1920px] mx-auto">
+      <div className="p-4 lg:p-8 space-y-8 max-w-[1920px] mx-auto">
         <ReportsHeader period={period} setPeriod={setPeriod} onExport={handleExport} />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-            <CardContent className="pt-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-800">Leads totaux</p>
-                  <h3 className="text-3xl font-bold mt-1 text-blue-900">{totalLeads}</h3>
-                  <p className="text-sm text-blue-700 mt-1">+{leadsChange}% depuis le dernier mois</p>
+        {/* Refined cards with luxury styling */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="overflow-hidden border-none shadow-luxury transition-all duration-300 hover:shadow-luxury-hover">
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-1">
+              <CardContent className="pt-6 pb-6 bg-white">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider font-futura">Leads totaux</p>
+                    <h3 className="text-3xl font-bold mt-1 font-futura text-gray-900">{totalLeads}</h3>
+                    <div className="flex items-center mt-2">
+                      <span className={`inline-flex items-center text-xs font-medium px-1.5 py-0.5 rounded ${leadsChange > 0 ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-50'}`}>
+                        {leadsChange > 0 ? '+' : ''}{leadsChange}%
+                      </span>
+                      <span className="ml-1.5 text-xs text-gray-500">depuis le dernier {period}</span>
+                    </div>
+                  </div>
+                  <div className="bg-blue-100 p-2.5 rounded-full">
+                    <ChartBar className="h-6 w-6 text-blue-700" />
+                  </div>
                 </div>
-                <div className="bg-blue-200 p-2 rounded-full">
-                  <ChartBar className="h-6 w-6 text-blue-700" />
-                </div>
-              </div>
-            </CardContent>
+              </CardContent>
+            </div>
           </Card>
           
-          <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200">
-            <CardContent className="pt-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-emerald-800">Taux de conversion</p>
-                  <h3 className="text-3xl font-bold mt-1 text-emerald-900">{conversionRate}%</h3>
-                  <p className="text-sm text-emerald-700 mt-1">+{conversionChange}% depuis le dernier mois</p>
+          <Card className="overflow-hidden border-none shadow-luxury transition-all duration-300 hover:shadow-luxury-hover">
+            <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 p-1">
+              <CardContent className="pt-6 pb-6 bg-white">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider font-futura">Taux de conversion</p>
+                    <h3 className="text-3xl font-bold mt-1 font-futura text-gray-900">{conversionRate}%</h3>
+                    <div className="flex items-center mt-2">
+                      <span className={`inline-flex items-center text-xs font-medium px-1.5 py-0.5 rounded ${conversionChange > 0 ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-50'}`}>
+                        {conversionChange > 0 ? '+' : ''}{conversionChange}%
+                      </span>
+                      <span className="ml-1.5 text-xs text-gray-500">depuis le dernier {period}</span>
+                    </div>
+                  </div>
+                  <div className="bg-emerald-100 p-2.5 rounded-full">
+                    <ChartPie className="h-6 w-6 text-emerald-700" />
+                  </div>
                 </div>
-                <div className="bg-emerald-200 p-2 rounded-full">
-                  <ChartPie className="h-6 w-6 text-emerald-700" />
-                </div>
-              </div>
-            </CardContent>
+              </CardContent>
+            </div>
           </Card>
           
-          <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
-            <CardContent className="pt-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-amber-800">Valeur moyenne</p>
-                  <h3 className="text-3xl font-bold mt-1 text-amber-900">{averageValue}</h3>
-                  <p className="text-sm text-amber-700 mt-1">+{valueChange}% depuis le dernier mois</p>
+          <Card className="overflow-hidden border-none shadow-luxury transition-all duration-300 hover:shadow-luxury-hover">
+            <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-1">
+              <CardContent className="pt-6 pb-6 bg-white">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider font-futura">Valeur moyenne</p>
+                    <h3 className="text-3xl font-bold mt-1 font-futura text-gray-900">{averageValue}</h3>
+                    <div className="flex items-center mt-2">
+                      <span className={`inline-flex items-center text-xs font-medium px-1.5 py-0.5 rounded ${valueChange > 0 ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-50'}`}>
+                        {valueChange > 0 ? '+' : ''}{valueChange}%
+                      </span>
+                      <span className="ml-1.5 text-xs text-gray-500">depuis le dernier {period}</span>
+                    </div>
+                  </div>
+                  <div className="bg-amber-100 p-2.5 rounded-full">
+                    <LineChart className="h-6 w-6 text-amber-700" />
+                  </div>
                 </div>
-                <div className="bg-amber-200 p-2 rounded-full">
-                  <LineChart className="h-6 w-6 text-amber-700" />
-                </div>
-              </div>
-            </CardContent>
+              </CardContent>
+            </div>
           </Card>
         </div>
         
@@ -106,23 +128,32 @@ const Reports = () => {
         <LeadsByStageTable period={period} />
         
         <Tabs defaultValue="performance" className="w-full">
-          <TabsList className="mb-6 grid grid-cols-3 md:flex md:flex-wrap w-full md:w-auto bg-secondary/20">
-            <TabsTrigger value="performance" className="flex items-center gap-2">
+          <TabsList className="mb-6 grid grid-cols-3 md:flex md:flex-wrap w-full md:w-auto bg-gray-100/50 p-1 rounded-lg">
+            <TabsTrigger 
+              value="performance" 
+              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
               <BarChart3 className="h-4 w-4" />
               <span>Performance</span>
             </TabsTrigger>
-            <TabsTrigger value="leads" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="leads" 
+              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
               <ChartBar className="h-4 w-4" />
               <span>Leads</span>
             </TabsTrigger>
-            <TabsTrigger value="conversion" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="conversion" 
+              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
               <ChartPie className="h-4 w-4" />
               <span>Conversion</span>
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="performance">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <PerformanceTabContent 
                 isLoading={isLoadingPerformance} 
                 performanceData={performanceData || []} 
