@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,8 +31,8 @@ const Reports = () => {
   const conversionRate = performanceData && totalLeads ? 
     Math.round((performanceData.filter(d => d.total > 0).length / totalLeads) * 100) : 28;
   
-  const averageValue = performanceData?.length ? 
-    formatAverageValue(performanceData.map(d => d.total)) : '€1.2M';
+  // Calculate the actual average value from real budget data
+  const averageValue = calculateAverageBudget(performanceData);
   
   // Calcul de l'évolution par rapport au mois précédent (simulation)
   const leadsChange = 12;
@@ -156,13 +157,27 @@ const Reports = () => {
   );
 };
 
-// Fonction utilitaire pour formater la valeur moyenne
-const formatAverageValue = (values: number[]): string => {
-  if (!values.length) return '€0';
+// Function to calculate the real average budget from lead data
+const calculateAverageBudget = (performanceData: any[]): string => {
+  if (!performanceData?.length) return '€0';
   
-  const total = values.reduce((sum, value) => sum + value, 0);
-  const average = total / values.length;
+  // Extract budget values and calculate total
+  let totalValue = 0;
+  let validBudgetCount = 0;
   
+  performanceData.forEach(item => {
+    if (typeof item.total === 'number' && item.total > 0) {
+      totalValue += item.total;
+      validBudgetCount++;
+    }
+  });
+  
+  // Avoid division by zero
+  if (validBudgetCount === 0) return '€0';
+  
+  const average = totalValue / validBudgetCount;
+  
+  // Format the average value
   if (average >= 1000000) {
     return `€${(average / 1000000).toFixed(1)}M`;
   } else if (average >= 1000) {
