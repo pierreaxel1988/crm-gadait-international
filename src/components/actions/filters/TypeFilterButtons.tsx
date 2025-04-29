@@ -27,7 +27,7 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
   // Helper function to get color for a task type
   const getColorForTaskType = (type: TaskType): string => {
     const category = eventCategories.find(cat => cat.value === type);
-    return category?.color || '#F5F5F5';
+    return category?.color || '#F5F5F0';
   };
   
   // Get text color for each task type
@@ -48,13 +48,14 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
         <Button
           variant={typeFilter === 'all' ? "default" : "outline"}
           size="sm"
-          className={`text-xs font-futura rounded-full px-3 py-1 border ${typeFilter === 'all' ? 'ring-2 ring-loro-navy/30' : ''}`}
+          className={`text-xs font-futura rounded-full px-3 py-1 ${typeFilter === 'all' ? 'ring-1 ring-loro-sand/40' : 'border-loro-pearl/60'}`}
           onClick={() => setTypeFilter('all')}
           style={{
             background: typeFilter === 'all' ? '#F5F4F0' : '#fff',
-            color: typeFilter === 'all' ? '#221F26' : '#888',
+            color: typeFilter === 'all' ? '#221F26' : '#8E9196',
             fontWeight: 500,
-            boxShadow: typeFilter === 'all' ? '0 2px 6px 0 #a68c6d22' : undefined,
+            border: typeFilter === 'all' ? '1px solid rgba(211, 197, 180, 0.7)' : '1px solid rgba(211, 197, 180, 0.3)',
+            boxShadow: typeFilter === 'all' ? '0 2px 5px rgba(139, 111, 78, 0.1)' : undefined,
             letterSpacing: '0.04em',
           }}
         >
@@ -65,17 +66,17 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
             key={type}
             variant="outline"
             size="sm"
-            className={`text-xs font-futura rounded-full px-3 py-1 border transition-transform duration-200 ${typeFilter === type ? 'ring-2 ring-offset-1 scale-105' : ''}`}
+            className={`text-xs font-futura rounded-full px-3 py-1 transition-transform duration-200 ${typeFilter === type ? 'ring-1 ring-offset-1 scale-105' : ''}`}
             onClick={() => setTypeFilter(type)}
             style={{
               background: typeFilter === type ? getColorForTaskType(type) : '#fff',
-              borderColor: typeFilter === type ? getColorForTaskType(type) : '#eee',
+              border: typeFilter === type ? `1px solid rgba(211, 197, 180, 0.7)` : '1px solid rgba(211, 197, 180, 0.3)',
               color: typeFilter === type ? getTextColorForTaskType(type) : '#8E9196',
               fontWeight: typeFilter === type ? 600 : 400,
               fontFamily: 'Futura, Optima, Verdana, Geneva, sans-serif',
               letterSpacing: '0.035em',
-              boxShadow: typeFilter === type ? '0 2px 8px 0 rgba(0,0,0,0.1)' : undefined,
-              transition: 'all 0.18s cubic-bezier(.68,-0.55,.27,1.55)',
+              boxShadow: typeFilter === type ? '0 2px 5px rgba(139, 111, 78, 0.1)' : undefined,
+              transition: 'all 0.2s ease-out',
               outline: 'none'
             }}
           >

@@ -13,7 +13,7 @@ const CategoryFilter = () => {
   // Get background color for each category button
   const getBackgroundColorForCategory = (categoryValue: string): string => {
     const category = eventCategories.find(cat => cat.value === categoryValue);
-    return category?.color || '#F5F5F5';
+    return category?.color || '#F5F5F0';
   };
 
   // Get text color for each category
@@ -41,7 +41,7 @@ const CategoryFilter = () => {
   ];
 
   return (
-    <Card className="bg-white shadow-luxury">
+    <Card className="bg-loro-white shadow-luxury">
       <CardHeader className="pb-2">
         <CardTitle className="font-futuraLight text-loro-terracotta text-base font-normal">Catégories</CardTitle>
         <CardDescription className="font-times text-chocolate-dark">
@@ -64,23 +64,24 @@ const CategoryFilter = () => {
                   key={category.value}
                   onClick={() => toggleFilter(category.value)}
                   className={`flex items-center justify-center gap-1 rounded-full py-2 px-4 text-sm font-normal transition-all 
-                    ${isActive ? 'ring-2 ring-offset-1 scale-105' : 'opacity-85 hover:opacity-100'}
+                    ${isActive ? 'ring-1 ring-offset-1 scale-105' : 'opacity-90 hover:opacity-100'}
                     ${rowIndex === 0 && 'flex-1 min-w-[100px]'}
                     ${rowIndex === 1 && 'flex-1 min-w-[150px]'}
                     ${rowIndex === 2 && 'flex-1 min-w-[120px]'}`}
                   style={{ 
                     backgroundColor: backgroundColor,
                     color: textColor,
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    transition: 'all 0.2s ease',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                    border: `1px solid ${isActive ? 'rgba(211, 197, 180, 0.7)' : 'rgba(211, 197, 180, 0.3)'}`,
+                    transition: 'all 0.2s ease-out',
                     ...(isActive ? { 
-                      ringColor: 'rgba(255,255,255,0.5)',
+                      boxShadow: '0 2px 5px rgba(139, 111, 78, 0.1)',
                       transform: 'translateY(-1px)'
                     } : {})
                   }}
                 >
                   {category.name}
-                  {isActive && <Check className="h-4 w-4" style={{ color: textColor }} />}
+                  {isActive && <Check className="h-3.5 w-3.5" style={{ color: textColor }} />}
                 </button>
               );
             })}
