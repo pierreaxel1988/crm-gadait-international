@@ -213,7 +213,7 @@ const countryToISOMap: Record<string, string> = {
   'Zambia': 'ZM',
   'Zimbabwe': 'ZW',
   // Common aliases
-  'USA': 'US',
+  'USA': 'US', // Added USA alias explicitly
   'UK': 'GB',
   'Great Britain': 'GB',
   'Angleterre': 'GB',

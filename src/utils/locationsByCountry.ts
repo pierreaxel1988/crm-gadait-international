@@ -54,7 +54,7 @@ export const LOCATIONS_BY_COUNTRY: Record<string, string[]> = {
     'Dubai', 'Abu Dhabi', 'Sharjah', 'Ras Al Khaimah', 'Ajman',
     'Palm Jumeirah', 'Downtown Dubai', 'Dubai Marina', 'Jumeirah Beach', 'Al Ain'
   ],
-  // Add USA as alias for United States
+  // Add USA as an alias for United States
   'USA': [
     'New York', 'Los Angeles', 'Miami', 'Miami Beach', 'South Beach', 'Fort Lauderdale',
     'Palm Beach', 'Naples', 'San Francisco', 'Chicago', 'Boston', 'Washington D.C.',

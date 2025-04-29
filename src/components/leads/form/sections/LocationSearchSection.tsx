@@ -5,6 +5,7 @@ import SmartSearch from '@/components/common/SmartSearch';
 import { COUNTRIES } from '@/utils/countries';
 import { getAllLocations, getLocationsByCountry } from '@/utils/locationsByCountry';
 import { MapPin } from 'lucide-react';
+import { countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
 
 interface LocationSearchSectionProps {
   country: string;
@@ -30,6 +31,12 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
       .slice(0, 10);
   };
 
+  const getFilteredCountries = (searchTerm: string) => {
+    return COUNTRIES.filter(c => 
+      countryMatchesSearch(c, searchTerm)
+    ).slice(0, 10);
+  };
+
   const handleLocationSelect = (location: string) => {
     onLocationChange(location);
   };
@@ -51,9 +58,7 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
           value={country}
           onChange={onCountryChange}
           onSelect={handleCountrySelect}
-          results={COUNTRIES.filter(c => 
-            c.toLowerCase().includes(country.toLowerCase())
-          ).slice(0, 10)}
+          results={getFilteredCountries(country)}
           renderItem={renderLocationItem}
           className="w-full"
           inputClassName="h-8 text-sm"
