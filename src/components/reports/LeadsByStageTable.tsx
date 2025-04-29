@@ -6,6 +6,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getGuaranteedAgents } from '@/services/teamMemberService';
+import { PipelineType } from '@/types/lead';
+import { 
+  PURCHASE_STATUSES, 
+  RENTAL_STATUSES, 
+  OWNERS_STATUSES,
+  getPipelineTypeFrench 
+} from '@/utils/pipelineUtils';
 
 interface LeadsByStageTableProps {
   period: string;
@@ -37,6 +44,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
   const [stages, setStages] = useState<string[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<string>("all");
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [pipelineType, setPipelineType] = useState<PipelineType>('purchase');
 
   useEffect(() => {
     // Fetch team members when component mounts
@@ -67,11 +75,25 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
 
   useEffect(() => {
     fetchData();
-  }, [period, selectedAgent]);
+  }, [period, selectedAgent, pipelineType]);
 
   // Helper function to extract first name
   const getFirstName = (fullName: string): string => {
     return fullName.split(' ')[0];
+  };
+
+  // Helper function to get the ordered statuses based on pipeline type
+  const getOrderedStatuses = (): string[] => {
+    switch (pipelineType) {
+      case 'purchase':
+        return PURCHASE_STATUSES;
+      case 'rental':
+        return RENTAL_STATUSES;
+      case 'owners':
+        return OWNERS_STATUSES;
+      default:
+        return PURCHASE_STATUSES;
+    }
   };
 
   const fetchData = async () => {
@@ -94,18 +116,35 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
       const {
         data: statusData,
         error: statusError
-      } = await supabase.from('leads').select('status').not('status', 'is', null).filter('status', 'neq', '');
+      } = await supabase.from('leads')
+        .select('status')
+        .eq('pipeline_type', pipelineType)
+        .not('status', 'is', null)
+        .filter('status', 'neq', '');
+        
       if (statusError) {
         console.error('Erreur lors du chargement des statuts:', statusError);
         throw new Error(statusError.message);
       }
 
-      // Get unique statuses for table columns
-      const allStatuses = [...new Set(statusData?.map(item => item.status))].filter(Boolean).sort();
-      setStages(allStatuses);
+      // Get unique statuses and sort them according to the pipeline order
+      const allUniqueSatuses = [...new Set(statusData?.map(item => item.status))].filter(Boolean);
+      const orderedStatuses = getOrderedStatuses();
+      
+      // Sort the statuses based on the predefined order
+      const sortedStatuses = allUniqueSatuses.sort((a, b) => {
+        const indexA = orderedStatuses.indexOf(a);
+        const indexB = orderedStatuses.indexOf(b);
+        return indexA - indexB;
+      });
+      
+      setStages(sortedStatuses);
 
       // Prepare leads query
-      let leadsQuery = supabase.from('leads').select('id, name, status, assigned_to').gte('created_at', startDate.toISOString());
+      let leadsQuery = supabase.from('leads')
+        .select('id, name, status, assigned_to, pipeline_type')
+        .eq('pipeline_type', pipelineType)
+        .gte('created_at', startDate.toISOString());
 
       // Filter by agent if one is selected
       if (selectedAgent !== "all") {
@@ -128,7 +167,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
 
         // Count leads by status
         const stagesCount: StageCount = {};
-        allStatuses.forEach(stage => {
+        sortedStatuses.forEach(stage => {
           stagesCount[stage] = agentLeads.filter(lead => lead.status === stage).length;
         });
         return {
@@ -145,7 +184,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
         const unassignedLeads = leads?.filter(lead => !lead.assigned_to) || [];
         if (unassignedLeads.length > 0) {
           const unassignedStages: StageCount = {};
-          allStatuses.forEach(stage => {
+          sortedStatuses.forEach(stage => {
             unassignedStages[stage] = unassignedLeads.filter(lead => lead.status === stage).length;
           });
           agentData.push({
@@ -160,7 +199,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
 
       // Calculate column totals
       const columnTotals: StageCount = {};
-      allStatuses.forEach(stage => {
+      sortedStatuses.forEach(stage => {
         columnTotals[stage] = leads?.filter(lead => lead.status === stage).length || 0;
       });
 
@@ -220,15 +259,27 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({
       <CardHeader className="border-b bg-gradient-to-r from-gray-50 to-gray-100">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <CardTitle className="font-futura text-xl text-gray-800">Leads par commercial et stade</CardTitle>
-          <Select value={selectedAgent} onValueChange={setSelectedAgent}>
-            <SelectTrigger className="w-[180px] bg-white">
-              <SelectValue placeholder="Tous les commerciaux" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les commerciaux</SelectItem>
-              {teamMembers.map(member => <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col md:flex-row gap-2">
+            <Select value={pipelineType} onValueChange={(value: PipelineType) => setPipelineType(value)}>
+              <SelectTrigger className="w-[180px] bg-white">
+                <SelectValue placeholder="Type de pipeline" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="purchase">{getPipelineTypeFrench('purchase')}</SelectItem>
+                <SelectItem value="rental">{getPipelineTypeFrench('rental')}</SelectItem>
+                <SelectItem value="owners">{getPipelineTypeFrench('owners')}</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+              <SelectTrigger className="w-[180px] bg-white">
+                <SelectValue placeholder="Tous les commerciaux" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les commerciaux</SelectItem>
+                {teamMembers.map(member => <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-0">
