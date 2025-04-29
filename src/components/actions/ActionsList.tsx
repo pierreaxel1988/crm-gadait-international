@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -24,8 +25,10 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
   const navigate = useNavigate();
   
   const handleCardClick = (leadId: string, e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button')) return;
-    navigate(`/leads/${leadId}?tab=actions`);
+    // Only navigate if the click wasn't on a button or interactive element
+    if (!(e.target as HTMLElement).closest('button')) {
+      navigate(`/leads/${leadId}?tab=actions`);
+    }
   };
   
   if (isLoading) {
@@ -249,7 +252,7 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
               }`}
               onClick={(e) => handleCardClick(action.leadId, e)}
             >
-              <TableCell onClick={(e) => { e.stopPropagation(); handleCardClick(action.leadId, e); }}>{action.leadName}</TableCell>
+              <TableCell>{action.leadName}</TableCell>
               <TableCell>
                 <div 
                   className="text-xs font-medium px-3 py-1 rounded-full inline-flex items-center gap-1"
