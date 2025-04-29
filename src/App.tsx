@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy } from 'react';
 import {
   BrowserRouter as Router,
@@ -8,6 +9,17 @@ import {
 import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from '@/components/ui/toaster';
 import LoadingScreen from './components/layout/LoadingScreen';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1
+    }
+  }
+});
 
 // Lazy load all pages to use suspense
 const Auth = lazy(() => import('./pages/Auth'));
@@ -26,78 +38,80 @@ const Notifications = lazy(() => import('./pages/Notifications'));
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <Suspense fallback={<LoadingScreen />}>
-          <Routes>
-            <Route path="/" element={<Navigate to="/pipeline" />} />
-            
-            {/* Routes accessibles à tous */}
-            <Route path="/pipeline" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <Pipeline />
-              </ProtectedRoute>
-            } />
-            <Route path="/leads" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <LeadsPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/leads/:id" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <LeadDetail />
-              </ProtectedRoute>
-            } />
-            <Route path="/leads/new" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <LeadNew />
-              </ProtectedRoute>
-            } />
-            <Route path="/actions" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <ActionsPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/calendar" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <Calendar />
-              </ProtectedRoute>
-            } />
-            <Route path="/notifications" element={
-              <ProtectedRoute commercialAllowed={true}>
-                <Notifications />
-              </ProtectedRoute>
-            } />
-            
-            {/* Routes réservées aux administrateurs */}
-            <Route path="/leads/import" element={
-              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
-                <LeadImport />
-              </ProtectedRoute>
-            } />
-            <Route path="/import-lead" element={
-              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
-                <MobileLeadImport />
-              </ProtectedRoute>
-            } />
-            <Route path="/reports" element={
-              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
-                <Reports />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin" element={
-              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
-                <Admin />
-              </ProtectedRoute>
-            } />
-            
-            {/* Route d'authentification */}
-            <Route path="/auth" element={<Auth />} />
-          </Routes>
-          <Toaster />
-        </Suspense>
-      </AuthProvider>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AuthProvider>
+          <Suspense fallback={<LoadingScreen />}>
+            <Routes>
+              <Route path="/" element={<Navigate to="/pipeline" />} />
+              
+              {/* Routes accessibles à tous */}
+              <Route path="/pipeline" element={
+                <ProtectedRoute commercialAllowed={true}>
+                  <Pipeline />
+                </ProtectedRoute>
+              } />
+              <Route path="/leads" element={
+                <ProtectedRoute commercialAllowed={true}>
+                  <LeadsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/leads/:id" element={
+                <ProtectedRoute commercialAllowed={true}>
+                  <LeadDetail />
+                </ProtectedRoute>
+              } />
+              <Route path="/leads/new" element={
+                <ProtectedRoute commercialAllowed={true}>
+                  <LeadNew />
+                </ProtectedRoute>
+              } />
+              <Route path="/actions" element={
+                <ProtectedRoute commercialAllowed={true}>
+                  <ActionsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/calendar" element={
+                <ProtectedRoute commercialAllowed={true}>
+                  <Calendar />
+                </ProtectedRoute>
+              } />
+              <Route path="/notifications" element={
+                <ProtectedRoute commercialAllowed={true}>
+                  <Notifications />
+                </ProtectedRoute>
+              } />
+              
+              {/* Routes réservées aux administrateurs */}
+              <Route path="/leads/import" element={
+                <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+                  <LeadImport />
+                </ProtectedRoute>
+              } />
+              <Route path="/import-lead" element={
+                <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+                  <MobileLeadImport />
+                </ProtectedRoute>
+              } />
+              <Route path="/reports" element={
+                <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+                  <Reports />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin" element={
+                <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+                  <Admin />
+                </ProtectedRoute>
+              } />
+              
+              {/* Route d'authentification */}
+              <Route path="/auth" element={<Auth />} />
+            </Routes>
+            <Toaster />
+          </Suspense>
+        </AuthProvider>
+      </Router>
+    </QueryClientProvider>
   );
 }
 
