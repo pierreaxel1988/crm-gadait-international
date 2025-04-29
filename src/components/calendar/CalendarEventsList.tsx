@@ -124,7 +124,7 @@ const CalendarEventsList = ({
                 {event.assignedToName && (
                   <div className="flex items-center mt-2 text-xs text-gray-600">
                     <User className="h-3 w-3 mr-1" /> 
-                    <span>Assigné à: {event.assignedToName}</span>
+                    <span className="text-xs">Assigné à: <span className="text-[10px]">{event.assignedToName}</span></span>
                   </div>
                 )}
                 {event.leadName && !event.title.includes(event.leadName) && (
