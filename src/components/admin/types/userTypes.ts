@@ -21,4 +21,5 @@ export const MOCK_USERS: User[] = [
   { id: '7', name: 'Jean Marc Perrissol', email: 'jeanmarc@gadait-international.com', role: 'Commercial' },
   { id: '8', name: 'Jacques Charles', email: 'jacques@gadait-international.com', role: 'Commercial' },
   { id: '9', name: 'Sharon Ramdiane', email: 'sharon@gadait-international.com', role: 'Commercial' },
+  { id: '10', name: 'Matthieu Lapierre', email: 'matthieu@gadait-international.com', role: 'Commercial' },
 ];

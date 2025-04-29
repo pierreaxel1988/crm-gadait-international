@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -59,7 +58,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           'ophelie@gadait-international.com',
           'jeanmarc@gadait-international.com',
           'jacques@gadait-international.com',
-          'sharon@gadait-international.com'
+          'sharon@gadait-international.com',
+          'matthieu@gadait-international.com'
         ];
         
         const isUserAdmin = adminEmails.includes(userEmail || '');
@@ -109,7 +109,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             'ophelie@gadait-international.com',
             'jeanmarc@gadait-international.com',
             'jacques@gadait-international.com',
-            'sharon@gadait-international.com'
+            'sharon@gadait-international.com',
+            'matthieu@gadait-international.com'
           ];
           
           const isUserAdmin = adminEmails.includes(userEmail || '');
