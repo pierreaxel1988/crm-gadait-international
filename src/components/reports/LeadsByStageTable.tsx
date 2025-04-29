@@ -35,6 +35,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
   const [stages, setStages] = useState<string[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<string>("all");
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [totalLeadCount, setTotalLeadCount] = useState<number>(0);
   
   useEffect(() => {
     // Fetch team members when component mounts
@@ -113,6 +114,21 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
       const allStatuses = [...new Set(statusData?.map(item => item.status))].filter(Boolean).sort();
       setStages(allStatuses);
       
+      // First, get the total count of leads for the period
+      const { count: totalCount, error: countError } = await supabase
+        .from('leads')
+        .select('id', { count: 'exact', head: true })
+        .gte('created_at', startDate.toISOString());
+        
+      if (countError) {
+        console.error('Erreur lors du comptage des leads:', countError);
+        throw new Error(countError.message);
+      }
+      
+      // Store the actual count from the database
+      setTotalLeadCount(totalCount || 0);
+      console.log('Total leads count from CRM:', totalCount);
+      
       // Prepare leads query
       let leadsQuery = supabase
         .from('leads')
@@ -131,6 +147,8 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
         console.error('Erreur lors du chargement des leads:', leadsError);
         throw new Error(leadsError.message);
       }
+      
+      console.log('Fetched leads for the report:', leads?.length || 0);
       
       // Prepare data by agent
       const agentData: LeadStagesData[] = teamMembers.map(member => {
@@ -238,7 +256,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
     <Card>
       <CardHeader className="border-b">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <CardTitle>Leads par commercial et stade</CardTitle>
+          <CardTitle>Leads par commercial et stade ({totalLeadCount} leads au total)</CardTitle>
           <Select value={selectedAgent} onValueChange={setSelectedAgent}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Tous les commerciaux" />

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +25,7 @@ const Reports = () => {
   const { data: agentData, isLoading: isLoadingAgentData } = useAgentPerformanceData(period);
 
   // Calculer les métriques pour les cartes en haut de la page
+  // Using actual data from the API calls
   const totalLeads = leadsData?.reduce((sum, item) => sum + item.count, 0) || 0;
   const conversionRate = performanceData && totalLeads ? 
     Math.round((performanceData.filter(d => d.total > 0).length / totalLeads) * 100) : 28;
@@ -60,7 +60,7 @@ const Reports = () => {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-medium text-blue-800">Leads totaux</p>
-                  <h3 className="text-3xl font-bold mt-1 text-blue-900">{totalLeads || '...'}</h3>
+                  <h3 className="text-3xl font-bold mt-1 text-blue-900">{totalLeads}</h3>
                   <p className="text-sm text-blue-700 mt-1">+{leadsChange}% depuis le dernier mois</p>
                 </div>
                 <div className="bg-blue-200 p-2 rounded-full">
