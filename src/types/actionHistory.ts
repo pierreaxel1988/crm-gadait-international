@@ -1,4 +1,3 @@
-
 import { TaskType } from '@/components/kanban/KanbanCard';
 
 export interface ActionHistory {
@@ -26,4 +25,20 @@ export interface ActionItem {
   status: ActionStatus;
   phoneNumber?: string;
   email?: string;
+}
+
+// These interfaces define the possible shapes of action history items
+// which can contain various date fields
+export interface ActionHistoryItem {
+  actionType: string;
+  // Various possible date fields that might be present
+  date?: string;
+  timestamp?: string;
+  created?: string;
+  createdDate?: string;
+  createdAt?: string;
+  // Other potential fields
+  notes?: string;
+  status?: string;
+  [key: string]: any; // Allow for other properties
 }

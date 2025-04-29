@@ -1,6 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { ActionHistoryItem } from '@/types/actionHistory';
 
 export const useLeadResponseTime = (period: string) => {
   const periodMap: Record<string, string> = {
@@ -53,8 +54,11 @@ export const useLeadResponseTime = (period: string) => {
 
       leads?.forEach(lead => {
         if (lead.action_history && Array.isArray(lead.action_history)) {
+          // Type assertion to help TypeScript understand our array type
+          const actionHistory = lead.action_history as ActionHistoryItem[];
+          
           // Find first contact action (call, email, message, etc.)
-          const contactActions = lead.action_history.filter((action: any) => 
+          const contactActions = actionHistory.filter((action) => 
             ['call', 'email', 'message', 'contact'].some(term => 
               action.actionType?.toLowerCase().includes(term)
             )
@@ -62,33 +66,35 @@ export const useLeadResponseTime = (period: string) => {
 
           if (contactActions.length > 0) {
             // Sort by date to find the earliest contact
-            contactActions.sort((a: any, b: any) => {
+            contactActions.sort((a, b) => {
               // Extract date information safely, handling different data formats
               let aDate: Date | null = null;
               let bDate: Date | null = null;
               
-              if (a && typeof a === 'object') {
-                if (a.date && typeof a.date === 'string') {
-                  aDate = new Date(a.date);
-                } else if (a.timestamp && typeof a.timestamp === 'string') {
-                  aDate = new Date(a.timestamp);
-                } else if (a.created && typeof a.created === 'string') {
-                  aDate = new Date(a.created);
-                } else if (a.createdDate && typeof a.createdDate === 'string') {
-                  aDate = new Date(a.createdDate); 
-                }
+              // Try different date fields for first action
+              if (a.date) {
+                aDate = new Date(a.date);
+              } else if (a.timestamp) {
+                aDate = new Date(a.timestamp);
+              } else if (a.created) {
+                aDate = new Date(a.created);
+              } else if (a.createdDate) {
+                aDate = new Date(a.createdDate);
+              } else if (a.createdAt) {
+                aDate = new Date(a.createdAt);
               }
               
-              if (b && typeof b === 'object') {
-                if (b.date && typeof b.date === 'string') {
-                  bDate = new Date(b.date);
-                } else if (b.timestamp && typeof b.timestamp === 'string') {
-                  bDate = new Date(b.timestamp);
-                } else if (b.created && typeof b.created === 'string') {
-                  bDate = new Date(b.created);
-                } else if (b.createdDate && typeof b.createdDate === 'string') {
-                  bDate = new Date(b.createdDate);
-                }
+              // Try different date fields for second action
+              if (b.date) {
+                bDate = new Date(b.date);
+              } else if (b.timestamp) {
+                bDate = new Date(b.timestamp);
+              } else if (b.created) {
+                bDate = new Date(b.created);
+              } else if (b.createdDate) {
+                bDate = new Date(b.createdDate);
+              } else if (b.createdAt) {
+                bDate = new Date(b.createdAt);
               }
               
               if (!aDate || !bDate) return 0;
@@ -96,18 +102,20 @@ export const useLeadResponseTime = (period: string) => {
             });
 
             const firstContact = contactActions[0];
-            if (firstContact && typeof firstContact === 'object') {
+            if (firstContact) {
               let contactedAt: Date | null = null;
               
               // Try to extract date from various possible fields
-              if (firstContact.date && typeof firstContact.date === 'string') {
+              if (firstContact.date) {
                 contactedAt = new Date(firstContact.date);
-              } else if (firstContact.timestamp && typeof firstContact.timestamp === 'string') {
+              } else if (firstContact.timestamp) {
                 contactedAt = new Date(firstContact.timestamp);
-              } else if (firstContact.created && typeof firstContact.created === 'string') {
+              } else if (firstContact.created) {
                 contactedAt = new Date(firstContact.created);
-              } else if (firstContact.createdDate && typeof firstContact.createdDate === 'string') {
+              } else if (firstContact.createdDate) {
                 contactedAt = new Date(firstContact.createdDate);
+              } else if (firstContact.createdAt) {
+                contactedAt = new Date(firstContact.createdAt);
               }
               
               if (contactedAt) {
@@ -145,7 +153,8 @@ export const useLeadResponseTime = (period: string) => {
         return {
           agentId,
           avgResponseTime: avgMinutes, 
-          leadsCount: data.count
+          leadsCount: data.count,
+          name: undefined // This will be populated by the component that uses this data
         };
       }).sort((a, b) => a.avgResponseTime - b.avgResponseTime);
 
