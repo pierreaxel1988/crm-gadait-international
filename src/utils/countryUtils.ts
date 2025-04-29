@@ -1,3 +1,4 @@
+
 /**
  * Converts a country code (two-letter ISO) to a flag emoji
  */
@@ -220,8 +221,6 @@ const countryToISOMap: Record<string, string> = {
   'Angleterre': 'GB',
   'England': 'GB',
   'Royaume-Uni': 'GB',
-  'États-Unis': 'US',
-  'Etats-Unis': 'US',
   'Espagne': 'ES',
   'Allemagne': 'DE',
   'Italie': 'IT',
