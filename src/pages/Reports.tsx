@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -145,11 +146,7 @@ const Reports = () => {
         {/* Nouveau tableau de leads par commercial et stade */}
         <LeadsByStageTable period={period} />
         
-        {/* Tableau de temps de réponse par agent */}
-        <ResponseTimeByAgentTable 
-          data={responseTimeData?.byAgent || []}
-          isLoading={isLoadingResponseTime}
-        />
+        {/* Removed duplicate ResponseTimeByAgentTable since it's already in the responseTime tab */}
         
         <Tabs defaultValue="performance" className="w-full">
           <TabsList className="mb-6 grid grid-cols-3 md:flex md:flex-wrap w-full md:w-auto bg-gray-100/50 p-1 rounded-lg">
