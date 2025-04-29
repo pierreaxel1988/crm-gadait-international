@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,9 +9,10 @@ import PerformanceTabContent from '@/components/reports/PerformanceTabContent';
 import LeadsTabContent from '@/components/reports/LeadsTabContent';
 import ConversionTabContent from '@/components/reports/ConversionTabContent';
 import { useToast } from "@/components/ui/use-toast";
-import { usePerformanceData, useLeadsSourceData, useConversionFunnelData } from '@/hooks/useReportsData';
+import { usePerformanceData, useLeadsSourceData, useConversionFunnelData, useAgentPerformanceData } from '@/hooks/useReportsData';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
+import TopAgentsTable from '@/components/reports/TopAgentsTable';
 
 const Reports = () => {
   const [period, setPeriod] = useState<string>('month');
@@ -20,6 +22,7 @@ const Reports = () => {
   const { data: performanceData, isLoading: isLoadingPerformance } = usePerformanceData(period);
   const { data: leadsData, isLoading: isLoadingLeads } = useLeadsSourceData(period);
   const { data: conversionData, isLoading: isLoadingConversion } = useConversionFunnelData(period);
+  const { data: agentData, isLoading: isLoadingAgentData } = useAgentPerformanceData(period);
 
   // Calculer les métriques pour les cartes en haut de la page
   const totalLeads = leadsData?.reduce((sum, item) => sum + item.count, 0) || 0;
@@ -114,11 +117,18 @@ const Reports = () => {
           </TabsList>
           
           <TabsContent value="performance">
-            <PerformanceTabContent 
-              isLoading={isLoadingPerformance} 
-              performanceData={performanceData || []} 
-              period={period}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <PerformanceTabContent 
+                isLoading={isLoadingPerformance} 
+                performanceData={performanceData || []} 
+                period={period}
+              />
+              <TopAgentsTable 
+                agentData={agentData || []}
+                isLoading={isLoadingAgentData}
+                period={period}
+              />
+            </div>
           </TabsContent>
           
           <TabsContent value="leads">
