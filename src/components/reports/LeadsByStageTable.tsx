@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getGuaranteedAgents } from '@/services/teamMemberService';
 
 interface LeadsByStageTableProps {
   period: string;
@@ -19,14 +21,58 @@ interface LeadStagesData {
   total: number;
 }
 
+interface TeamMember {
+  id: string;
+  name: string;
+  role?: string;
+  email?: string;
+}
+
 const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<LeadStagesData[]>([]);
   const [stages, setStages] = useState<string[]>([]);
+  const [selectedAgent, setSelectedAgent] = useState<string>("all");
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  
+  useEffect(() => {
+    // Fetch team members when component mounts
+    const fetchTeamMembers = async () => {
+      try {
+        const { data: members, error } = await supabase
+          .from('team_members')
+          .select('id, name, role')
+          .eq('role', 'commercial')
+          .order('name');
+          
+        if (error) {
+          console.error('Erreur lors du chargement des commerciaux:', error);
+          return;
+        }
+        
+        // Use the guaranteed agents as a fallback or merge with fetched data
+        const guaranteedAgents = getGuaranteedAgents().filter(agent => 
+          agent.role === 'agent' || agent.role === 'commercial'
+        );
+        
+        // Combine and remove duplicates
+        const allMembers = [...(members || []), ...guaranteedAgents];
+        const uniqueMembers = Array.from(
+          new Map(allMembers.map(m => [m.id, m])).values()
+        ).sort((a, b) => a.name.localeCompare(b.name));
+        
+        setTeamMembers(uniqueMembers);
+      } catch (error) {
+        console.error('Erreur inattendue:', error);
+      }
+    };
+    
+    fetchTeamMembers();
+  }, []);
   
   useEffect(() => {
     fetchData();
-  }, [period]);
+  }, [period, selectedAgent]);
   
   const fetchData = async () => {
     setIsLoading(true);
@@ -56,11 +102,19 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
         throw new Error(teamError.message);
       }
       
-      // Récupérer tous les leads pour la période
-      const { data: leads, error: leadsError } = await supabase
+      // Préparer la requête pour les leads
+      let leadsQuery = supabase
         .from('leads')
         .select('id, name, status, assigned_to')
         .gte('created_at', startDate.toISOString());
+        
+      // Filtrer par commercial si un est sélectionné
+      if (selectedAgent !== "all") {
+        leadsQuery = leadsQuery.eq('assigned_to', selectedAgent);
+      }
+        
+      // Récupérer les leads
+      const { data: leads, error: leadsError } = await leadsQuery;
         
       if (leadsError) {
         console.error('Erreur lors du chargement des leads:', leadsError);
@@ -88,19 +142,21 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
         };
       }) || [];
       
-      // Ajouter une ligne pour les leads non assignés
-      const unassignedLeads = leads?.filter(lead => !lead.assigned_to) || [];
-      if (unassignedLeads.length > 0) {
-        const unassignedStages: StageCount = {};
-        allStages.forEach(stage => {
-          unassignedStages[stage] = unassignedLeads.filter(lead => lead.status === stage).length;
-        });
-        
-        agentData.push({
-          name: "Non assigné",
-          stages: unassignedStages,
-          total: unassignedLeads.length
-        });
+      // Si on ne filtre pas par agent spécifique, ajouter une ligne pour les leads non assignés
+      if (selectedAgent === "all") {
+        const unassignedLeads = leads?.filter(lead => !lead.assigned_to) || [];
+        if (unassignedLeads.length > 0) {
+          const unassignedStages: StageCount = {};
+          allStages.forEach(stage => {
+            unassignedStages[stage] = unassignedLeads.filter(lead => lead.status === stage).length;
+          });
+          
+          agentData.push({
+            name: "Non assigné",
+            stages: unassignedStages,
+            total: unassignedLeads.length
+          });
+        }
       }
       
       // Calculer les totaux par colonne
@@ -171,7 +227,20 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
   return (
     <Card>
       <CardHeader className="border-b">
-        <CardTitle>Leads par commercial et stade</CardTitle>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <CardTitle>Leads par commercial et stade</CardTitle>
+          <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Tous les commerciaux" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les commerciaux</SelectItem>
+              {teamMembers.map((member) => (
+                <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
