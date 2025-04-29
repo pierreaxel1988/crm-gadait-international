@@ -33,9 +33,12 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
   // Get text color for each task type
   const getTextColorForTaskType = (type: TaskType): string => {
     switch (type) {
-      case 'Call': return '#221F26'; // Dark text for light green
-      case 'Compromis': return '#221F26'; // Dark text for gold
-      default: return '#FFFFFF'; // White text for other categories
+      case 'Call':
+        return '#221F26'; // Dark text for light background
+      case 'Compromis':
+        return '#221F26'; // Dark text for gold
+      default:
+        return '#FFFFFF'; // White text for other categories
     }
   };
 
@@ -61,28 +64,36 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
         >
           Tous
         </Button>
-        {taskTypes.map(type => (
-          <Button
-            key={type}
-            variant="outline"
-            size="sm"
-            className={`text-xs font-futura rounded-full px-3 py-1 transition-transform duration-200 ${typeFilter === type ? 'ring-1 ring-offset-1 scale-105' : ''}`}
-            onClick={() => setTypeFilter(type)}
-            style={{
-              background: typeFilter === type ? getColorForTaskType(type) : '#fff',
-              border: typeFilter === type ? `1px solid rgba(211, 197, 180, 0.7)` : '1px solid rgba(211, 197, 180, 0.3)',
-              color: typeFilter === type ? getTextColorForTaskType(type) : '#8E9196',
-              fontWeight: typeFilter === type ? 600 : 400,
-              fontFamily: 'Futura, Optima, Verdana, Geneva, sans-serif',
-              letterSpacing: '0.035em',
-              boxShadow: typeFilter === type ? '0 2px 5px rgba(139, 111, 78, 0.1)' : undefined,
-              transition: 'all 0.2s ease-out',
-              outline: 'none'
-            }}
-          >
-            {type}
-          </Button>
-        ))}
+        {taskTypes.map(type => {
+          const isSelected = typeFilter === type;
+          const bgColor = getColorForTaskType(type);
+          const textColor = getTextColorForTaskType(type);
+          
+          return (
+            <Button
+              key={type}
+              variant="outline"
+              size="sm"
+              className={`text-xs font-futura rounded-full px-3 py-1 transition-all duration-200 ${isSelected ? 'ring-1 ring-offset-1 scale-105' : ''}`}
+              onClick={() => setTypeFilter(type)}
+              style={{
+                background: isSelected ? bgColor : 'transparent',
+                border: isSelected 
+                  ? `1px solid rgba(211, 197, 180, 0.7)` 
+                  : '1px solid rgba(211, 197, 180, 0.3)',
+                color: isSelected ? textColor : '#8E9196',
+                fontWeight: isSelected ? 600 : 400,
+                fontFamily: 'Futura, Optima, Verdana, Geneva, sans-serif',
+                letterSpacing: '0.035em',
+                boxShadow: isSelected ? '0 2px 5px rgba(139, 111, 78, 0.1)' : undefined,
+                transition: 'all 0.2s ease-out',
+                outline: 'none'
+              }}
+            >
+              {type}
+            </Button>
+          );
+        })}
       </div>
     </div>
   );

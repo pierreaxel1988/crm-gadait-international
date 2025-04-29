@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import TaskTypeIndicator from '@/components/kanban/card/TaskTypeIndicator';
 import { useNavigate } from 'react-router-dom';
 import ActionCard from './ActionCard';
 import LoadingScreen from '@/components/layout/LoadingScreen';
+import { eventCategories } from '@/contexts/CalendarContext';
 
 interface ActionsListProps {
   actions: ActionItem[];
@@ -59,6 +59,21 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
         return <Badge variant="default" weight="normal" className="font-futuraLight">Terminé</Badge>;
       default:
         return null;
+    }
+  };
+
+  // Get color from eventCategories for consistent styling
+  const getTaskTypeColor = (taskType: string) => {
+    const category = eventCategories.find(cat => cat.value === taskType);
+    return category?.color || '#9BA3AD'; // Default gray
+  };
+  
+  // Get text color based on background color
+  const getTaskTypeTextColor = (taskType: string) => {
+    switch (taskType) {
+      case 'Call': return '#221F26'; // Dark text for light green
+      case 'Compromis': return '#221F26'; // Dark text for gold
+      default: return '#FFFFFF';  // White text for other categories
     }
   };
   
@@ -135,7 +150,17 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
             >
               <TableCell>{action.leadName}</TableCell>
               <TableCell>
-                <TaskTypeIndicator taskType={action.actionType} phoneNumber={action.phoneNumber} />
+                <div 
+                  className="text-xs font-medium px-3 py-1 rounded-full inline-flex items-center gap-1.5"
+                  style={{
+                    backgroundColor: getTaskTypeColor(action.actionType),
+                    color: getTaskTypeTextColor(action.actionType),
+                    border: '1px solid rgba(211, 197, 180, 0.3)',
+                    boxShadow: '0 1px 2px rgba(139, 111, 78, 0.05)',
+                  }}
+                >
+                  {action.actionType}
+                </div>
               </TableCell>
               <TableCell>{getStatusBadge(action.status)}</TableCell>
               <TableCell>
