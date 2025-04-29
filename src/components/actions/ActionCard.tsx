@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ActionItem } from '@/types/actionHistory';
 import { Card } from '@/components/ui/card';
@@ -85,9 +86,12 @@ const ActionCard: React.FC<ActionCardProps> = ({
     }
   };
 
-  const handleCardClick = () => {
+  const handleCardClick = (e: React.MouseEvent) => {
     if (action.leadId) {
-      onCardClick(action.leadId, new MouseEvent('click'));
+      // Only navigate if the click wasn't on a button or interactive element
+      if (!(e.target as HTMLElement).closest('button')) {
+        onCardClick(action.leadId, e);
+      }
     }
   };
 

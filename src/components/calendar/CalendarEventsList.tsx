@@ -4,6 +4,7 @@ import { isSameDay } from 'date-fns';
 import { Event, eventCategories } from '@/contexts/CalendarContext';
 import { Check, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface CalendarEventsListProps {
   events: Event[];
@@ -18,6 +19,8 @@ const CalendarEventsList = ({
   openAddEventDialog,
   onMarkComplete
 }: CalendarEventsListProps) => {
+  const navigate = useNavigate();
+  
   // Filter events for the selected date
   const eventsForSelectedDate = selectedDate
     ? events.filter((event) => {
@@ -51,6 +54,13 @@ const CalendarEventsList = ({
     }
   };
   
+  // Handle navigation to lead action page
+  const handleEventClick = (leadId?: string) => {
+    if (leadId) {
+      navigate(`/leads/${leadId}?tab=actions`);
+    }
+  };
+  
   return (
     <>
       {eventsForSelectedDate.length > 0 ? (
@@ -68,13 +78,19 @@ const CalendarEventsList = ({
                   event.isCompleted 
                     ? 'opacity-80' 
                     : 'hover:shadow-luxury-hover'
-                }`}
+                } ${event.leadId ? 'cursor-pointer' : ''}`}
                 style={{ 
                   backgroundColor: event.isCompleted 
                     ? '#F1F0FB' // Soft gray for completed events
                     : isOverdue 
                       ? '#FFDEE240' // Soft pink for overdue with transparency
                       : `${categoryColor}30` // Light version of category color
+                }}
+                onClick={(e) => {
+                  // Only navigate if the click wasn't on a button
+                  if (event.leadId && !(e.target as HTMLElement).closest('button')) {
+                    handleEventClick(event.leadId);
+                  }
                 }}
               >
                 <div className="flex justify-between items-start">
@@ -98,7 +114,10 @@ const CalendarEventsList = ({
                         size="sm" 
                         variant="outline" 
                         className="h-7 px-2 text-xs text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
-                        onClick={() => onMarkComplete(event.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onMarkComplete(event.id);
+                        }}
                       >
                         <Check className="h-3 w-3 mr-1" /> Terminer
                       </Button>
