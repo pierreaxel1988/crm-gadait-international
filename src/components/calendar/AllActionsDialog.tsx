@@ -25,18 +25,20 @@ interface TeamMember {
 }
 
 const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
-  const { events, markEventComplete } = useCalendar();
+  const { events, markEventComplete, refreshEvents } = useCalendar();
   const [activeTab, setActiveTab] = useState<'all' | 'today' | 'upcoming' | 'overdue'>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedAssignee, setSelectedAssignee] = useState<string>('all');
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const isMobile = useIsMobile();
 
+  // Refresh events and fetch team members when dialog opens
   useEffect(() => {
     if (isOpen) {
       fetchTeamMembers();
+      refreshEvents();
     }
-  }, [isOpen]);
+  }, [isOpen, refreshEvents]);
 
   const fetchTeamMembers = async () => {
     try {
@@ -142,7 +144,7 @@ const AllActionsDialog = ({ isOpen, onOpenChange }: AllActionsDialogProps) => {
   };
 
   const EventCard = ({ event }: { event: Event }) => (
-    <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-3">
+    <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-3 transition-all hover:shadow-md">
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center space-x-2">
           <div>{getStatusIcon(event)}</div>

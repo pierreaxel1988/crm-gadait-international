@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionItem, ActionStatus } from '@/types/actionHistory';
 import { isPast, isToday } from 'date-fns';
@@ -17,7 +17,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
     fetchActions();
   }, [refreshTrigger]);
 
-  const fetchActions = async () => {
+  const fetchActions = useCallback(async () => {
     setIsLoading(true);
     try {
       // Première étape : synchroniser les assignations de leads pour corriger les UUIDs
@@ -143,6 +143,9 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       });
 
       setActions(sortedActions);
+      
+      // Cache actions for calendar sync
+      localStorage.setItem('cachedActions', JSON.stringify(sortedActions));
     } catch (error) {
       console.error('Error fetching actions:', error);
       toast({
@@ -153,7 +156,9 @@ export const useActionsData = (refreshTrigger: number = 0) => {
     } finally {
       setIsLoading(false);
     }
-  };
+    
+    return actions;
+  }, [isCommercial, user]);
 
   const markActionComplete = async (actionId: string, leadId: string) => {
     try {
@@ -213,6 +218,16 @@ export const useActionsData = (refreshTrigger: number = 0) => {
         title: "Action complétée",
         description: "L'action a été marquée comme terminée."
       });
+      
+      // Update cached actions for calendar sync
+      const cachedActions = JSON.parse(localStorage.getItem('cachedActions') || '[]');
+      const updatedCachedActions = cachedActions.map((action: ActionItem) => {
+        if (action.id === actionId) {
+          return { ...action, status: 'done', completedDate: new Date().toISOString() };
+        }
+        return action;
+      });
+      localStorage.setItem('cachedActions', JSON.stringify(updatedCachedActions));
       
       // Récupérer à nouveau pour s'assurer que nous avons les dernières données
       fetchActions();

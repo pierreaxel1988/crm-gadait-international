@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed } from '@/types/lead';
 import { ActionSuggestion } from '@/services/noteAnalysisService';
 import { toast } from '@/hooks/use-toast';
+import { useCalendar } from '@/contexts/CalendarContext';
 
 interface LeadDetailActionBarProps {
   autoSaveEnabled: boolean;
@@ -31,6 +32,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   const [showSuggestionsBadge, setShowSuggestionsBadge] = useState<boolean>(false);
   const [pendingActionsCount, setPendingActionsCount] = useState<number>(0);
   const [notificationShown, setNotificationShown] = useState<boolean>(false);
+  const { syncActionsToCalendar } = useCalendar();
   
   useEffect(() => {
     if (lead?.actionHistory) {
@@ -52,8 +54,13 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
         });
         setNotificationShown(true);
       }
+      
+      // Ensure actions are synced to calendar when lead details are loaded
+      if (lead.actionHistory.length > 0) {
+        syncActionsToCalendar();
+      }
     }
-  }, [lead?.actionHistory, notificationShown]);
+  }, [lead?.actionHistory, notificationShown, syncActionsToCalendar]);
 
   useEffect(() => {
     setShowSuggestionsBadge(actionSuggestions && actionSuggestions.length > 0);
