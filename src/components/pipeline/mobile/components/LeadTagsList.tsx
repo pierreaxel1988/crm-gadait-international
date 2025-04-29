@@ -3,8 +3,8 @@ import React from 'react';
 import LeadTag from '@/components/common/LeadTag';
 import { getStatusColors } from '../utils/leadFormatUtils';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { Currency, LeadTag as LeadTagType } from '@/types/lead';
 import { formatBudget } from '../utils/leadFormatUtils';
-import { Currency } from '@/types/lead';
 import { isPast, isToday } from 'date-fns';
 
 interface LeadTagsListProps {
@@ -14,6 +14,7 @@ interface LeadTagsListProps {
   desiredLocation?: string;
   budget?: string;
   currency?: Currency;
+  tags?: LeadTagType[]; // Ajout des tags
 }
 
 const LeadTagsList: React.FC<LeadTagsListProps> = ({
@@ -22,7 +23,8 @@ const LeadTagsList: React.FC<LeadTagsListProps> = ({
   nextFollowUpDate,
   desiredLocation,
   budget,
-  currency
+  currency,
+  tags = [] // Valeur par défaut pour les tags
 }) => {
   const statusColors = getStatusColors(columnStatus);
   
@@ -75,6 +77,19 @@ const LeadTagsList: React.FC<LeadTagsListProps> = ({
           textColor={taskStyle.text} 
           className="font-futuraLight" 
         />
+      )}
+      
+      {/* Affichage des tags prioritaires */}
+      {tags && tags.length > 0 && (
+        tags.slice(0, 2).map((tag) => (
+          <LeadTag
+            key={tag}
+            label={tag}
+            bgColor="bg-loro-50"
+            textColor="text-loro-700"
+            className="font-futuraLight"
+          />
+        ))
       )}
       
       {desiredLocation && (
