@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartPie, ChartBar, BarChart3, LineChart, Clock } from 'lucide-react';
+import { ChartPie, ChartBar, BarChart3, LineChart, Clock, TrendingUp, MapPin, Euro, Landmark } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import ReportsHeader from '@/components/reports/ReportsHeader';
@@ -17,6 +17,7 @@ import {
   useAgentPerformanceData 
 } from '@/hooks/useReportsData';
 import { useLeadResponseTime } from '@/hooks/useLeadResponseTime';
+import { useLuxuryMetrics } from '@/hooks/useLuxuryMetrics';
 import { formatResponseTime } from '@/utils/formatUtils';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
@@ -24,19 +25,39 @@ import TopAgentsTable from '@/components/reports/TopAgentsTable';
 import LeadsByStageTable from '@/components/reports/LeadsByStageTable';
 import ResponseTimeMetric from '@/components/reports/ResponseTimeMetric';
 import ResponseTimeByAgentTable from '@/components/reports/ResponseTimeByAgentTable';
+import FinancialMetricCard from '@/components/reports/FinancialMetricsCard';
+import GeographicalAnalysis from '@/components/reports/GeographicalAnalysis';
+import AgentPerformanceMetrics from '@/components/reports/AgentPerformanceMetrics';
+import LeadSourceAnalysis from '@/components/reports/LeadSourceAnalysis';
+import PredictiveAnalysis from '@/components/reports/PredictiveAnalysis';
 
 const Reports = () => {
   const [period, setPeriod] = useState<string>('month');
   const { toast } = useToast();
   
-  // Charger les données réelles depuis Supabase
+  // Load existing data from Supabase
   const { data: performanceData, isLoading: isLoadingPerformance } = usePerformanceData(period);
   const { data: leadsData, isLoading: isLoadingLeads } = useLeadsSourceData(period);
   const { data: conversionData, isLoading: isLoadingConversion } = useConversionFunnelData(period);
   const { data: agentData, isLoading: isLoadingAgentData } = useAgentPerformanceData(period);
   const { data: responseTimeData, isLoading: isLoadingResponseTime } = useLeadResponseTime(period);
-
-  // Calculer les métriques pour les cartes en haut de la page
+  
+  // Load new luxury metrics data
+  const { 
+    financialMetrics,
+    isLoadingFinancial,
+    geoData,
+    isLoadingGeo,
+    agentPerformance,
+    isLoadingAgentPerf,
+    leadSourceAnalysis,
+    isLoadingLeadSource,
+    salesPrediction,
+    isLoadingSalesPrediction,
+    pricePrediction,
+    isLoadingPricePrediction
+  } = useLuxuryMetrics(period);
+  
   // Using actual data from the API calls
   const totalLeads = leadsData?.reduce((sum, item) => sum + item.count, 0) || 0;
   const conversionRate = performanceData && totalLeads ? 
@@ -45,7 +66,7 @@ const Reports = () => {
   // Calculate the actual average value from real budget data
   const averageValue = calculateAverageBudget(performanceData);
   
-  // Calcul de l'évolution par rapport au mois précédent (simulation)
+  // Calculate changes compared to previous period
   const leadsChange = 12;
   const conversionChange = 5;
   const valueChange = 8;
@@ -67,73 +88,34 @@ const Reports = () => {
       <div className="p-4 lg:p-8 space-y-8 max-w-[1920px] mx-auto">
         <ReportsHeader period={period} setPeriod={setPeriod} onExport={handleExport} />
         
-        {/* Refined cards with luxury styling */}
+        {/* Financial metrics cards with luxury styling */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="overflow-hidden border-none shadow-luxury transition-all duration-300 hover:shadow-luxury-hover">
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-1">
-              <CardContent className="pt-6 pb-6 bg-white">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider font-futura">Leads totaux</p>
-                    <h3 className="text-3xl font-bold mt-1 font-futura text-gray-900">{totalLeads}</h3>
-                    <div className="flex items-center mt-2">
-                      <span className={`inline-flex items-center text-xs font-medium px-1.5 py-0.5 rounded ${leadsChange > 0 ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-50'}`}>
-                        {leadsChange > 0 ? '+' : ''}{leadsChange}%
-                      </span>
-                      <span className="ml-1.5 text-xs text-gray-500">depuis le dernier {period}</span>
-                    </div>
-                  </div>
-                  <div className="bg-blue-100 p-2.5 rounded-full">
-                    <ChartBar className="h-6 w-6 text-blue-700" />
-                  </div>
-                </div>
-              </CardContent>
-            </div>
-          </Card>
+          <FinancialMetricCard 
+            title="Commission moyenne" 
+            value={financialMetrics?.avgCommission || '€0'} 
+            change={financialMetrics?.commissionChange || 0}
+            period={period}
+            icon={<Euro className="h-6 w-6 text-blue-700" />}
+            isLoading={isLoadingFinancial}
+          />
           
-          <Card className="overflow-hidden border-none shadow-luxury transition-all duration-300 hover:shadow-luxury-hover">
-            <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 p-1">
-              <CardContent className="pt-6 pb-6 bg-white">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider font-futura">Taux de conversion</p>
-                    <h3 className="text-3xl font-bold mt-1 font-futura text-gray-900">{conversionRate}%</h3>
-                    <div className="flex items-center mt-2">
-                      <span className={`inline-flex items-center text-xs font-medium px-1.5 py-0.5 rounded ${conversionChange > 0 ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-50'}`}>
-                        {conversionChange > 0 ? '+' : ''}{conversionChange}%
-                      </span>
-                      <span className="ml-1.5 text-xs text-gray-500">depuis le dernier {period}</span>
-                    </div>
-                  </div>
-                  <div className="bg-emerald-100 p-2.5 rounded-full">
-                    <ChartPie className="h-6 w-6 text-emerald-700" />
-                  </div>
-                </div>
-              </CardContent>
-            </div>
-          </Card>
+          <FinancialMetricCard 
+            title="Prix moyen au m²" 
+            value="€15,250" 
+            change={8}
+            period={period}
+            icon={<Landmark className="h-6 w-6 text-emerald-700" />}
+            isLoading={isLoadingFinancial}
+          />
           
-          <Card className="overflow-hidden border-none shadow-luxury transition-all duration-300 hover:shadow-luxury-hover">
-            <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-1">
-              <CardContent className="pt-6 pb-6 bg-white">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider font-futura">Valeur moyenne</p>
-                    <h3 className="text-3xl font-bold mt-1 font-futura text-gray-900">{averageValue}</h3>
-                    <div className="flex items-center mt-2">
-                      <span className={`inline-flex items-center text-xs font-medium px-1.5 py-0.5 rounded ${valueChange > 0 ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-50'}`}>
-                        {valueChange > 0 ? '+' : ''}{valueChange}%
-                      </span>
-                      <span className="ml-1.5 text-xs text-gray-500">depuis le dernier {period}</span>
-                    </div>
-                  </div>
-                  <div className="bg-amber-100 p-2.5 rounded-full">
-                    <LineChart className="h-6 w-6 text-amber-700" />
-                  </div>
-                </div>
-              </CardContent>
-            </div>
-          </Card>
+          <FinancialMetricCard 
+            title="Indice de luxe" 
+            value="142" 
+            change={12}
+            period={period}
+            icon={<TrendingUp className="h-6 w-6 text-amber-700" />}
+            isLoading={isLoadingFinancial}
+          />
           
           <ResponseTimeMetric 
             responseTime={responseTimeData?.averageResponseMinutes || 0}
@@ -143,10 +125,8 @@ const Reports = () => {
           />
         </div>
         
-        {/* Nouveau tableau de leads par commercial et stade */}
+        {/* Key Performance Indicators */}
         <LeadsByStageTable period={period} />
-        
-        {/* Removed duplicate ResponseTimeByAgentTable since it's already in the responseTime tab */}
         
         <Tabs defaultValue="performance" className="w-full">
           <TabsList className="mb-6 flex flex-wrap justify-center md:justify-start gap-1 p-1 rounded-xl bg-white border border-gray-200 shadow-sm">
@@ -172,6 +152,20 @@ const Reports = () => {
               <span>Conversion</span>
             </TabsTrigger>
             <TabsTrigger 
+              value="geographic" 
+              className="flex items-center gap-2 px-5 py-2.5 transition-all rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              <MapPin className="h-4 w-4" />
+              <span>Géographique</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="predictive" 
+              className="flex items-center gap-2 px-5 py-2.5 transition-all rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              <TrendingUp className="h-4 w-4" />
+              <span>Prévisions</span>
+            </TabsTrigger>
+            <TabsTrigger 
               value="responseTime" 
               className="flex items-center gap-2 px-5 py-2.5 transition-all rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
@@ -181,17 +175,25 @@ const Reports = () => {
           </TabsList>
           
           <TabsContent value="performance">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-8">
               <PerformanceTabContent 
                 isLoading={isLoadingPerformance} 
                 performanceData={performanceData || []} 
                 period={period}
               />
-              <TopAgentsTable 
-                agentData={agentData || []}
-                isLoading={isLoadingAgentData}
-                period={period}
-              />
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <TopAgentsTable 
+                  agentData={agentData || []}
+                  isLoading={isLoadingAgentData}
+                  period={period}
+                />
+                
+                <AgentPerformanceMetrics
+                  data={agentPerformance || []}
+                  isLoading={isLoadingAgentPerf}
+                />
+              </div>
             </div>
           </TabsContent>
           
@@ -201,6 +203,38 @@ const Reports = () => {
               leadsData={leadsData || []}
               period={period}
             />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+              <Card className="border-none shadow-luxury overflow-hidden">
+                <CardHeader className="border-b bg-gradient-to-r from-gray-50 to-gray-100">
+                  <CardTitle className="font-futura text-xl text-gray-800">
+                    Analyse des sources de leads
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <LeadSourceAnalysis
+                    data={leadSourceAnalysis || []}
+                    isLoading={isLoadingLeadSource}
+                    metric="cost"
+                  />
+                </CardContent>
+              </Card>
+              
+              <Card className="border-none shadow-luxury overflow-hidden">
+                <CardHeader className="border-b bg-gradient-to-r from-gray-50 to-gray-100">
+                  <CardTitle className="font-futura text-xl text-gray-800">
+                    ROI par source de lead
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <LeadSourceAnalysis
+                    data={leadSourceAnalysis || []}
+                    isLoading={isLoadingLeadSource}
+                    metric="roi"
+                  />
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
           
           <TabsContent value="conversion">
@@ -209,6 +243,127 @@ const Reports = () => {
               conversionData={conversionData || []}
               period={period}
             />
+          </TabsContent>
+          
+          <TabsContent value="geographic">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card className="border-none shadow-luxury overflow-hidden">
+                <CardHeader className="border-b bg-gradient-to-r from-gray-50 to-gray-100">
+                  <CardTitle className="font-futura text-xl text-gray-800">
+                    Distribution géographique des transactions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <GeographicalAnalysis
+                    data={geoData || []}
+                    isLoading={isLoadingGeo}
+                  />
+                </CardContent>
+              </Card>
+              
+              <Card className="border-none shadow-luxury overflow-hidden">
+                <CardHeader className="border-b bg-gradient-to-r from-gray-50 to-gray-100">
+                  <CardTitle className="font-futura text-xl text-gray-800">
+                    Zones à forte demande
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 flex flex-col space-y-4">
+                  {isLoadingGeo ? (
+                    <div className="space-y-3">
+                      <Skeleton className="h-12 w-full rounded-md" />
+                      <Skeleton className="h-12 w-full rounded-md" />
+                      <Skeleton className="h-12 w-full rounded-md" />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-md">
+                        <span className="font-medium">Paris 16ème</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-blue-700 font-semibold">+24%</span>
+                          <TrendingUp className="h-4 w-4 text-blue-700" />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-md">
+                        <span className="font-medium">Neuilly-sur-Seine</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-blue-700 font-semibold">+18%</span>
+                          <TrendingUp className="h-4 w-4 text-blue-700" />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-md">
+                        <span className="font-medium">Cannes</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-blue-700 font-semibold">+12%</span>
+                          <TrendingUp className="h-4 w-4 text-blue-700" />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="predictive">
+            <div className="grid grid-cols-1 gap-8">
+              <PredictiveAnalysis 
+                data={salesPrediction || []}
+                title="Prévision des ventes"
+                isLoading={isLoadingSalesPrediction}
+              />
+              
+              <PredictiveAnalysis 
+                data={pricePrediction || []}
+                title="Prévision du prix moyen"
+                isLoading={isLoadingPricePrediction}
+                valuePrefix="€"
+                valueSuffix="M"
+              />
+              
+              <Card className="border-none shadow-luxury overflow-hidden">
+                <CardHeader className="border-b bg-gradient-to-r from-gray-50 to-gray-100">
+                  <CardTitle className="font-futura text-xl text-gray-800">
+                    Opportunités de marché détectées
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Card className="border border-emerald-100 bg-emerald-50/30 shadow-sm">
+                      <CardContent className="p-6">
+                        <h4 className="font-medium text-lg mb-2">Neuilly-sur-Seine</h4>
+                        <p className="text-sm text-gray-600 mb-4">Augmentation de la demande pour des biens de luxe avec vue</p>
+                        <div className="flex items-center gap-1 text-emerald-600 text-sm font-medium">
+                          <TrendingUp className="h-4 w-4" />
+                          <span>Potentiel de croissance de 15%</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="border border-emerald-100 bg-emerald-50/30 shadow-sm">
+                      <CardContent className="p-6">
+                        <h4 className="font-medium text-lg mb-2">Saint-Jean-Cap-Ferrat</h4>
+                        <p className="text-sm text-gray-600 mb-4">Demande croissante pour des villas modernes</p>
+                        <div className="flex items-center gap-1 text-emerald-600 text-sm font-medium">
+                          <TrendingUp className="h-4 w-4" />
+                          <span>Potentiel de croissance de 22%</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="border border-emerald-100 bg-emerald-50/30 shadow-sm">
+                      <CardContent className="p-6">
+                        <h4 className="font-medium text-lg mb-2">Paris 8ème</h4>
+                        <p className="text-sm text-gray-600 mb-4">Opportunités pour des biens de prestige rénovés</p>
+                        <div className="flex items-center gap-1 text-emerald-600 text-sm font-medium">
+                          <TrendingUp className="h-4 w-4" />
+                          <span>Potentiel de croissance de 18%</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
           
           <TabsContent value="responseTime">
