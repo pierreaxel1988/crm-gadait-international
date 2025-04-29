@@ -62,15 +62,28 @@ export const useLeadResponseTime = (period: string) => {
 
           if (contactActions.length > 0) {
             // Sort by createdAt date to find the earliest contact
-            contactActions.sort((a: any, b: any) => 
-              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-            );
+            contactActions.sort((a: any, b: any) => {
+              // Handle different possible formats of createdAt
+              const aDate = typeof a.createdAt === 'string' ? new Date(a.createdAt) : 
+                            a.createdAt && typeof a.createdAt === 'object' ? new Date(a.createdAt.toString()) :
+                            null;
+              
+              const bDate = typeof b.createdAt === 'string' ? new Date(b.createdAt) : 
+                            b.createdAt && typeof b.createdAt === 'object' ? new Date(b.createdAt.toString()) :
+                            null;
+              
+              if (!aDate || !bDate) return 0;
+              return aDate.getTime() - bDate.getTime();
+            });
 
             const firstContact = contactActions[0];
-            if (firstContact.createdAt) {
-              // Calculate difference in minutes
+            if (firstContact && firstContact.createdAt) {
+              // Handle different possible formats of createdAt
+              const contactedAt = typeof firstContact.createdAt === 'string' ? 
+                                  new Date(firstContact.createdAt) : 
+                                  new Date(firstContact.createdAt.toString());
+              
               const createdAt = new Date(lead.created_at);
-              const contactedAt = new Date(firstContact.createdAt);
               const diffMinutes = (contactedAt.getTime() - createdAt.getTime()) / (1000 * 60);
               
               // Only count if response was within 7 days (10080 minutes)
@@ -116,19 +129,4 @@ export const useLeadResponseTime = (period: string) => {
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
-};
-
-// Helper function to format minutes into human-readable time
-export const formatResponseTime = (minutes: number): string => {
-  if (minutes < 60) {
-    return `${Math.round(minutes)}min`;
-  } else if (minutes < 1440) { // Less than 24 hours
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.round(minutes % 60);
-    return `${hours}h ${mins}min`;
-  } else { // Days
-    const days = Math.floor(minutes / 1440);
-    const hours = Math.round((minutes % 1440) / 60);
-    return `${days}j ${hours}h`;
-  }
 };

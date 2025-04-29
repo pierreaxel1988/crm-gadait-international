@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartPie, ChartBar, BarChart3, LineChart, Clock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import ReportsHeader from '@/components/reports/ReportsHeader';
 import PerformanceTabContent from '@/components/reports/PerformanceTabContent';
 import LeadsTabContent from '@/components/reports/LeadsTabContent';
@@ -16,6 +17,7 @@ import {
   useAgentPerformanceData 
 } from '@/hooks/useReportsData';
 import { useLeadResponseTime } from '@/hooks/useLeadResponseTime';
+import { formatResponseTime } from '@/utils/formatUtils';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import TopAgentsTable from '@/components/reports/TopAgentsTable';
