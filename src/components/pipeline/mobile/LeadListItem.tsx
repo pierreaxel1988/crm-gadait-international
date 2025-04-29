@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { LeadStatus } from '@/components/common/StatusBadge';
-import { Currency, LeadTag } from '@/types/lead';
+import { Currency } from '@/types/lead';
 import { formatDate, formatName, getActionStatusStyle } from './utils/leadFormatUtils';
 import LeadAvatar from './components/LeadAvatar';
 import LeadContactActions from './components/LeadContactActions';
@@ -21,7 +21,6 @@ interface LeadListItemProps {
   email?: string;
   assignedTo?: string; // This is the agent's name
   onClick: (id: string) => void;
-  tags?: LeadTag[]; // Ajout des tags
 }
 
 const LeadListItem: React.FC<LeadListItemProps> = ({
@@ -37,8 +36,7 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
   phone,
   email,
   assignedTo,
-  onClick,
-  tags = [] // Valeur par défaut pour les tags
+  onClick
 }) => {
   const actionStyle = getActionStatusStyle(nextFollowUpDate);
 
@@ -96,7 +94,6 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
           desiredLocation={desiredLocation}
           budget={budget}
           currency={currency}
-          tags={tags} // Passage des tags au composant LeadTagsList
         />
 
         {assignedTo && (
