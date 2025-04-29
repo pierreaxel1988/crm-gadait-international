@@ -27,7 +27,13 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
           .includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")))
         .slice(0, 10);
     }
-    return getLocationsByCountry(country)
+    
+    // Handle special case for USA aliases
+    const lookupCountry = country === 'USA' || country === 'États-Unis' || country === 'Etats-Unis' 
+      ? 'United States' 
+      : country;
+      
+    return getLocationsByCountry(lookupCountry)
       .filter(loc => loc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
         .includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")))
       .slice(0, 10);
