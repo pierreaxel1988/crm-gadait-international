@@ -17,7 +17,7 @@ interface StageCount {
 
 interface LeadStagesData {
   name: string;
-  firstName: string; // Added firstName field to store just first name
+  firstName: string; // First name field for display purposes
   stages: StageCount;
   total: number;
 }
@@ -42,7 +42,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
       try {
         const { data: members, error } = await supabase
           .from('team_members')
-          .select('id, name, role')
+          .select('id, name, role, email')
           .eq('role', 'commercial')
           .order('name');
           
@@ -83,7 +83,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Calculer la période en fonction du filtre sélectionné
+      // Calculate period based on selected filter
       const now = new Date();
       let startDate = new Date();
       
@@ -97,29 +97,34 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
         startDate.setFullYear(now.getFullYear() - 1);
       }
       
-      // Récupérer les agents commerciaux
-      const { data: teamMembers, error: teamError } = await supabase
-        .from('team_members')
-        .select('id, name')
-        .eq('role', 'commercial');
+      // Get all lead statuses from the CRM to show as columns
+      const { data: statusData, error: statusError } = await supabase
+        .from('leads')
+        .select('status')
+        .not('status', 'is', null)
+        .filter('status', 'neq', '');
         
-      if (teamError) {
-        console.error('Erreur lors du chargement des agents:', teamError);
-        throw new Error(teamError.message);
+      if (statusError) {
+        console.error('Erreur lors du chargement des statuts:', statusError);
+        throw new Error(statusError.message);
       }
       
-      // Préparer la requête pour les leads
+      // Get unique statuses for table columns
+      const allStatuses = [...new Set(statusData?.map(item => item.status))].filter(Boolean).sort();
+      setStages(allStatuses);
+      
+      // Prepare leads query
       let leadsQuery = supabase
         .from('leads')
         .select('id, name, status, assigned_to')
         .gte('created_at', startDate.toISOString());
         
-      // Filtrer par commercial si un est sélectionné
+      // Filter by agent if one is selected
       if (selectedAgent !== "all") {
         leadsQuery = leadsQuery.eq('assigned_to', selectedAgent);
       }
         
-      // Récupérer les leads
+      // Get leads
       const { data: leads, error: leadsError } = await leadsQuery;
         
       if (leadsError) {
@@ -127,17 +132,13 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
         throw new Error(leadsError.message);
       }
       
-      // Déterminer tous les statuts uniques pour les entêtes de colonnes
-      const allStages = [...new Set(leads?.map(lead => lead.status))].filter(Boolean).sort();
-      setStages(allStages);
-      
-      // Préparer les données par agent
-      const agentData: LeadStagesData[] = teamMembers?.map(member => {
+      // Prepare data by agent
+      const agentData: LeadStagesData[] = teamMembers.map(member => {
         const agentLeads = leads?.filter(lead => lead.assigned_to === member.id) || [];
         
-        // Comptabiliser les leads par statut
+        // Count leads by status
         const stagesCount: StageCount = {};
-        allStages.forEach(stage => {
+        allStatuses.forEach(stage => {
           stagesCount[stage] = agentLeads.filter(lead => lead.status === stage).length;
         });
         
@@ -149,12 +150,12 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
         };
       }) || [];
       
-      // Si on ne filtre pas par agent spécifique, ajouter une ligne pour les leads non assignés
+      // Add unassigned leads row if not filtering by agent
       if (selectedAgent === "all") {
         const unassignedLeads = leads?.filter(lead => !lead.assigned_to) || [];
         if (unassignedLeads.length > 0) {
           const unassignedStages: StageCount = {};
-          allStages.forEach(stage => {
+          allStatuses.forEach(stage => {
             unassignedStages[stage] = unassignedLeads.filter(lead => lead.status === stage).length;
           });
           
@@ -167,13 +168,13 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
         }
       }
       
-      // Calculer les totaux par colonne
+      // Calculate column totals
       const columnTotals: StageCount = {};
-      allStages.forEach(stage => {
+      allStatuses.forEach(stage => {
         columnTotals[stage] = leads?.filter(lead => lead.status === stage).length || 0;
       });
       
-      // Ajouter une ligne de totaux
+      // Add totals row
       agentData.push({
         name: "Total",
         firstName: "Total", // Keep the full text for total row
