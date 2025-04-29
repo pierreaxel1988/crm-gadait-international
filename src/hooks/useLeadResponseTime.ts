@@ -61,26 +61,33 @@ export const useLeadResponseTime = (period: string) => {
           );
 
           if (contactActions.length > 0) {
-            // Sort by createdAt date to find the earliest contact
+            // Sort by date to find the earliest contact
             contactActions.sort((a: any, b: any) => {
-              // Extract the createdAt field from the action objects safely
+              // Extract date information safely, handling different data formats
               let aDate: Date | null = null;
               let bDate: Date | null = null;
               
-              // Handle different formats and structures
               if (a && typeof a === 'object') {
-                if (typeof a.createdAt === 'string') {
-                  aDate = new Date(a.createdAt);
-                } else if (a.createdAt && typeof a.createdAt === 'object') {
-                  aDate = new Date(a.createdAt.toString());
+                if (a.date && typeof a.date === 'string') {
+                  aDate = new Date(a.date);
+                } else if (a.timestamp && typeof a.timestamp === 'string') {
+                  aDate = new Date(a.timestamp);
+                } else if (a.created && typeof a.created === 'string') {
+                  aDate = new Date(a.created);
+                } else if (a.createdDate && typeof a.createdDate === 'string') {
+                  aDate = new Date(a.createdDate); 
                 }
               }
               
               if (b && typeof b === 'object') {
-                if (typeof b.createdAt === 'string') {
-                  bDate = new Date(b.createdAt);
-                } else if (b.createdAt && typeof b.createdAt === 'object') {
-                  bDate = new Date(b.createdAt.toString());
+                if (b.date && typeof b.date === 'string') {
+                  bDate = new Date(b.date);
+                } else if (b.timestamp && typeof b.timestamp === 'string') {
+                  bDate = new Date(b.timestamp);
+                } else if (b.created && typeof b.created === 'string') {
+                  bDate = new Date(b.created);
+                } else if (b.createdDate && typeof b.createdDate === 'string') {
+                  bDate = new Date(b.createdDate);
                 }
               }
               
@@ -92,11 +99,15 @@ export const useLeadResponseTime = (period: string) => {
             if (firstContact && typeof firstContact === 'object') {
               let contactedAt: Date | null = null;
               
-              // Handle different formats of createdAt
-              if (typeof firstContact.createdAt === 'string') {
-                contactedAt = new Date(firstContact.createdAt);
-              } else if (firstContact.createdAt && typeof firstContact.createdAt === 'object') {
-                contactedAt = new Date(firstContact.createdAt.toString());
+              // Try to extract date from various possible fields
+              if (firstContact.date && typeof firstContact.date === 'string') {
+                contactedAt = new Date(firstContact.date);
+              } else if (firstContact.timestamp && typeof firstContact.timestamp === 'string') {
+                contactedAt = new Date(firstContact.timestamp);
+              } else if (firstContact.created && typeof firstContact.created === 'string') {
+                contactedAt = new Date(firstContact.created);
+              } else if (firstContact.createdDate && typeof firstContact.createdDate === 'string') {
+                contactedAt = new Date(firstContact.createdDate);
               }
               
               if (contactedAt) {
