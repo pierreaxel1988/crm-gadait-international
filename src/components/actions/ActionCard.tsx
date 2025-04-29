@@ -85,7 +85,10 @@ const ActionCard: React.FC<ActionCardProps> = ({
     }
   };
 
-  return <Card className={`p-4 transition-all cursor-pointer ${action.status === 'overdue' ? 'border-red-300 bg-[#FFDEE2]/30' : action.status === 'done' ? 'bg-gray-50/80 border-gray-200' : 'bg-[#F2FCE2]/40 border-green-100'}`} onClick={e => onCardClick(action.leadId, e)}>
+  return <Card 
+    className={`p-4 transition-all cursor-pointer ${action.status === 'overdue' ? 'border-red-300 bg-[#FFDEE2]/30' : action.status === 'done' ? 'bg-gray-50/80 border-gray-200' : 'bg-[#F2FCE2]/40 border-green-100'}`} 
+    onClick={e => onCardClick(action.leadId, e)}
+  >
     <div className="flex justify-between items-start mb-2">
       <div>
         <div className={`font-medium ${action.status === 'done' ? 'text-gray-600' : ''}`}>{action.leadName}</div>
