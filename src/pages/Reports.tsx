@@ -13,6 +13,7 @@ import { usePerformanceData, useLeadsSourceData, useConversionFunnelData, useAge
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import TopAgentsTable from '@/components/reports/TopAgentsTable';
+import LeadsByStageTable from '@/components/reports/LeadsByStageTable';
 
 const Reports = () => {
   const [period, setPeriod] = useState<string>('month');
@@ -99,6 +100,9 @@ const Reports = () => {
             </CardContent>
           </Card>
         </div>
+        
+        {/* Nouveau tableau de leads par commercial et stade */}
+        <LeadsByStageTable period={period} />
         
         <Tabs defaultValue="performance" className="w-full">
           <TabsList className="mb-6 grid grid-cols-3 md:flex md:flex-wrap w-full md:w-auto bg-secondary/20">
