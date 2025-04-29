@@ -38,6 +38,10 @@ export const LOCATIONS_BY_COUNTRY: Record<string, string[]> = {
     'Athens', 'Santorini', 'Mykonos', 'Crete', 'Rhodes', 'Corfu', 'Paros',
     'Naxos', 'Zakynthos', 'Thessaloniki', 'Kos', 'Milos', 'Hydra', 'Aegina'
   ],
+  'Grèce': [
+    'Athens', 'Santorini', 'Mykonos', 'Crete', 'Rhodes', 'Corfu', 'Paros',
+    'Naxos', 'Zakynthos', 'Thessaloniki', 'Kos', 'Milos', 'Hydra', 'Aegina'
+  ],
   'Maldives': [
     'Malé', 'Baa Atoll', 'North Malé Atoll', 'South Malé Atoll', 'Ari Atoll',
     'Noonu Atoll', 'Raa Atoll', 'Lhaviyani Atoll', 'Dhaalu Atoll', 'Thaa Atoll'
@@ -82,13 +86,21 @@ export const getAllLocations = (): string[] => {
 
 // Get locations for a specific country
 export const getLocationsByCountry = (country: string): string[] => {
-  // Handle USA, United States, and Etats-Unis as the same country
+  // Handle USA, United States, Etats-Unis, Greece, and Grèce as the same countries
   if ((country === 'USA' || country === 'Etats-Unis') && !LOCATIONS_BY_COUNTRY[country]) {
     return LOCATIONS_BY_COUNTRY['United States'] || [];
   }
   
   if (country === 'United States' && !LOCATIONS_BY_COUNTRY[country]) {
     return LOCATIONS_BY_COUNTRY['USA'] || LOCATIONS_BY_COUNTRY['Etats-Unis'] || [];
+  }
+  
+  if (country === 'Greece' && !LOCATIONS_BY_COUNTRY[country]) {
+    return LOCATIONS_BY_COUNTRY['Grèce'] || [];
+  }
+  
+  if (country === 'Grèce' && !LOCATIONS_BY_COUNTRY[country]) {
+    return LOCATIONS_BY_COUNTRY['Greece'] || [];
   }
   
   return LOCATIONS_BY_COUNTRY[country] || [];

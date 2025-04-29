@@ -175,6 +175,7 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
           <option value="Mauritius">Île Maurice</option>
           <option value="United States">United States</option>
           <option value="Etats-Unis">Etats-Unis</option>
+          <option value="Grèce">Grèce</option>
           <option value="UAE">Émirats Arabes Unis</option>
         </select>
       </div>
@@ -715,6 +716,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             <option value="Monaco">Monaco</option>
             <option value="United States">United States</option>
             <option value="Etats-Unis">Etats-Unis</option>
+            <option value="Grèce">Grèce</option>
             <option value="Mauritius">Île Maurice</option>
             <option value="UAE">Émirats Arabes Unis</option>
           </select>
