@@ -2,6 +2,7 @@
 import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface DashboardCardProps {
   title: string;
@@ -10,6 +11,7 @@ interface DashboardCardProps {
   action?: ReactNode;
   className?: string;
   children: ReactNode;
+  isLoading?: boolean;
 }
 
 const DashboardCard = ({
@@ -19,6 +21,7 @@ const DashboardCard = ({
   action,
   className,
   children,
+  isLoading = false,
 }: DashboardCardProps) => {
   return (
     <Card className={cn('p-6 lg:p-8 shadow-luxury border-0 flex flex-col h-full', className)}>
@@ -32,7 +35,18 @@ const DashboardCard = ({
           {icon && <div className="text-muted-foreground">{icon}</div>}
         </div>
       </div>
-      <div className="flex-1 overflow-hidden flex flex-col h-full">{children}</div>
+      <div className="flex-1 overflow-hidden flex flex-col h-full">
+        {isLoading ? (
+          <div className="flex-1 flex flex-col space-y-4 p-4">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-8 w-1/2" />
+          </div>
+        ) : (
+          children
+        )}
+      </div>
     </Card>
   );
 };

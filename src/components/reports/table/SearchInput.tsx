@@ -6,9 +6,10 @@ interface SearchInputProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
+  disabled?: boolean;
 }
 
-const SearchInput = ({ searchTerm, onSearchChange, onClearSearch }: SearchInputProps) => {
+const SearchInput = ({ searchTerm, onSearchChange, onClearSearch, disabled = false }: SearchInputProps) => {
   return (
     <SmartSearch
       placeholder="Rechercher un agent..."
@@ -19,6 +20,7 @@ const SearchInput = ({ searchTerm, onSearchChange, onClearSearch }: SearchInputP
       minChars={1}
       clearButton={true}
       searchIcon={true}
+      disabled={disabled}
     />
   );
 };
