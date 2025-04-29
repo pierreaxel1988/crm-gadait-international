@@ -17,6 +17,7 @@ interface StageCount {
 
 interface LeadStagesData {
   name: string;
+  firstName: string; // Added firstName field to store just first name
   stages: StageCount;
   total: number;
 }
@@ -73,6 +74,11 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
   useEffect(() => {
     fetchData();
   }, [period, selectedAgent]);
+  
+  // Helper function to extract first name
+  const getFirstName = (fullName: string): string => {
+    return fullName.split(' ')[0];
+  };
   
   const fetchData = async () => {
     setIsLoading(true);
@@ -137,6 +143,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
         
         return {
           name: member.name,
+          firstName: getFirstName(member.name), // Extract first name
           stages: stagesCount,
           total: agentLeads.length
         };
@@ -153,6 +160,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
           
           agentData.push({
             name: "Non assigné",
+            firstName: "Non assigné", // Keep the full text for unassigned
             stages: unassignedStages,
             total: unassignedLeads.length
           });
@@ -168,6 +176,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
       // Ajouter une ligne de totaux
       agentData.push({
         name: "Total",
+        firstName: "Total", // Keep the full text for total row
         stages: columnTotals,
         total: leads?.length || 0
       });
@@ -264,7 +273,7 @@ const LeadsByStageTable: React.FC<LeadsByStageTableProps> = ({ period }) => {
                     key={row.name} 
                     className={isLastRow ? "font-medium bg-muted/20" : ""}
                   >
-                    <TableCell className="font-medium">{row.name}</TableCell>
+                    <TableCell className="font-medium">{row.firstName}</TableCell>
                     {stages.map((stage) => (
                       <TableCell key={stage} className="text-center">
                         {row.stages[stage] || 0}
