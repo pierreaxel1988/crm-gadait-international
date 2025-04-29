@@ -3,17 +3,35 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartPie, ChartBar, BarChart3, LineChart } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import ReportsHeader from '@/components/reports/ReportsHeader';
 import PerformanceTabContent from '@/components/reports/PerformanceTabContent';
 import LeadsTabContent from '@/components/reports/LeadsTabContent';
 import ConversionTabContent from '@/components/reports/ConversionTabContent';
 import { useToast } from "@/components/ui/use-toast";
+import { usePerformanceData, useLeadsSourceData, useConversionFunnelData } from '@/hooks/useReportsData';
 
 const Reports = () => {
   const [period, setPeriod] = useState<string>('month');
   const { toast } = useToast();
+  
+  // Charger les données réelles depuis Supabase
+  const { data: performanceData, isLoading: isLoadingPerformance } = usePerformanceData(period);
+  const { data: leadsData, isLoading: isLoadingLeads } = useLeadsSourceData(period);
+  const { data: conversionData, isLoading: isLoadingConversion } = useConversionFunnelData(period);
+
+  // Calculer les métriques pour les cartes en haut de la page
+  const totalLeads = leadsData?.reduce((sum, item) => sum + item.count, 0) || 0;
+  const conversionRate = performanceData && totalLeads ? 
+    Math.round((performanceData.filter(d => d.total > 0).length / totalLeads) * 100) : 28;
+  
+  const averageValue = performanceData?.length ? 
+    formatAverageValue(performanceData.map(d => d.total)) : '€1.2M';
+  
+  // Calcul de l'évolution par rapport au mois précédent (simulation)
+  const leadsChange = 12;
+  const conversionChange = 5;
+  const valueChange = 8;
   
   const handleExport = () => {
     toast({
@@ -33,8 +51,8 @@ const Reports = () => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-blue-800">Leads totaux</p>
-                <h3 className="text-3xl font-bold mt-1 text-blue-900">527</h3>
-                <p className="text-sm text-blue-700 mt-1">+12% depuis le dernier mois</p>
+                <h3 className="text-3xl font-bold mt-1 text-blue-900">{totalLeads || '...'}</h3>
+                <p className="text-sm text-blue-700 mt-1">+{leadsChange}% depuis le dernier mois</p>
               </div>
               <div className="bg-blue-200 p-2 rounded-full">
                 <ChartBar className="h-6 w-6 text-blue-700" />
@@ -48,8 +66,8 @@ const Reports = () => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-emerald-800">Taux de conversion</p>
-                <h3 className="text-3xl font-bold mt-1 text-emerald-900">28%</h3>
-                <p className="text-sm text-emerald-700 mt-1">+5% depuis le dernier mois</p>
+                <h3 className="text-3xl font-bold mt-1 text-emerald-900">{conversionRate}%</h3>
+                <p className="text-sm text-emerald-700 mt-1">+{conversionChange}% depuis le dernier mois</p>
               </div>
               <div className="bg-emerald-200 p-2 rounded-full">
                 <ChartPie className="h-6 w-6 text-emerald-700" />
@@ -63,8 +81,8 @@ const Reports = () => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-amber-800">Valeur moyenne</p>
-                <h3 className="text-3xl font-bold mt-1 text-amber-900">€1.2M</h3>
-                <p className="text-sm text-amber-700 mt-1">+8% depuis le dernier mois</p>
+                <h3 className="text-3xl font-bold mt-1 text-amber-900">{averageValue}</h3>
+                <p className="text-sm text-amber-700 mt-1">+{valueChange}% depuis le dernier mois</p>
               </div>
               <div className="bg-amber-200 p-2 rounded-full">
                 <LineChart className="h-6 w-6 text-amber-700" />
@@ -91,19 +109,47 @@ const Reports = () => {
         </TabsList>
         
         <TabsContent value="performance">
-          <PerformanceTabContent />
+          <PerformanceTabContent 
+            isLoading={isLoadingPerformance} 
+            performanceData={performanceData || []} 
+            period={period}
+          />
         </TabsContent>
         
         <TabsContent value="leads">
-          <LeadsTabContent />
+          <LeadsTabContent 
+            isLoading={isLoadingLeads} 
+            leadsData={leadsData || []}
+            period={period}
+          />
         </TabsContent>
         
         <TabsContent value="conversion">
-          <ConversionTabContent />
+          <ConversionTabContent 
+            isLoading={isLoadingConversion} 
+            conversionData={conversionData || []}
+            period={period}
+          />
         </TabsContent>
       </Tabs>
     </div>
   );
+};
+
+// Fonction utilitaire pour formater la valeur moyenne
+const formatAverageValue = (values: number[]): string => {
+  if (!values.length) return '€0';
+  
+  const total = values.reduce((sum, value) => sum + value, 0);
+  const average = total / values.length;
+  
+  if (average >= 1000000) {
+    return `€${(average / 1000000).toFixed(1)}M`;
+  } else if (average >= 1000) {
+    return `€${(average / 1000).toFixed(0)}K`;
+  } else {
+    return `€${average.toFixed(0)}`;
+  }
 };
 
 export default Reports;

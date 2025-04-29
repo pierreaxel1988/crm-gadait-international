@@ -1,49 +1,32 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody } from "@/components/ui/table";
 import SearchInput from './table/SearchInput';
 import AgentsTableHeader from './table/AgentsTableHeader';
 import AgentTableRow from './table/AgentTableRow';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface LeadsData {
   name: string;
-  semaine: number;
-  mois: number;
-  annee: number;
+  semaine?: number;
+  mois?: number;
+  annee?: number;
+  change: number;
 }
-
-// En situation réelle, ces données viendraient de la base de données Supabase
-const mockLeadsData: LeadsData[] = [
-  { name: 'Jade Diouane', semaine: 4, mois: 12, annee: 85 },
-  { name: 'Ophelie Durand', semaine: 3, mois: 10, annee: 62 },
-  { name: 'Jean Marc Perrissol', semaine: 2, mois: 8, annee: 54 },
-  { name: 'Jacques Charles', semaine: 3, mois: 9, annee: 48 },
-  { name: 'Sharon Ramdiane', semaine: 1, mois: 7, annee: 35 },
-];
 
 interface LeadsAgentsTableProps {
   period: 'semaine' | 'mois' | 'annee';
+  data: LeadsData[];
+  isLoading?: boolean;
 }
 
 type SortColumn = 'name' | 'leads';
 type SortDirection = 'asc' | 'desc';
 
-const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
+const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period, data, isLoading = false }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortColumn, setSortColumn] = useState<SortColumn>('leads');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-
-  // Calculer la différence par rapport à la période précédente
-  const getChange = (agent: string): number => {
-    // Cette fonction simule une évolution - en réalité, ces données viendraient de l'API
-    const randomValues = {
-      'Jade Diouane': 3,
-      'Ophelie Durand': 2,
-      'Jean Marc Perrissol': 9,
-      'Jacques Charles': -10,
-      'Sharon Ramdiane': -5
-    };
-    return randomValues[agent as keyof typeof randomValues] || 0;
-  };
 
   const periodLabel = 
     period === 'semaine' ? 'Cette semaine' : 
@@ -58,7 +41,7 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
     }
   };
 
-  const sortedAgents = [...mockLeadsData]
+  const sortedAgents = [...data]
     .filter(agent => agent.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
       if (sortColumn === 'name') {
@@ -66,9 +49,11 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
           ? a.name.localeCompare(b.name)
           : b.name.localeCompare(a.name);
       } else {
+        const valueA = a[period] || 0;
+        const valueB = b[period] || 0;
         return sortDirection === 'asc'
-          ? a[period] - b[period]
-          : b[period] - a[period];
+          ? valueA - valueB
+          : valueB - valueA;
       }
     });
 
@@ -78,6 +63,7 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onClearSearch={() => setSearchTerm('')}
+        disabled={isLoading}
       />
       
       <div className="bg-white rounded-md border border-gray-200 shadow-sm overflow-hidden">
@@ -89,14 +75,32 @@ const LeadsAgentsTable: React.FC<LeadsAgentsTableProps> = ({ period }) => {
             periodLabel={periodLabel}
           />
           <TableBody>
-            {sortedAgents.length > 0 ? (
+            {isLoading ? (
+              // Afficher des skeletons pendant le chargement
+              Array(5).fill(0).map((_, index) => (
+                <tr key={`skeleton-${index}`}>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-7 w-7 rounded-full" />
+                      <Skeleton className="h-6 w-[150px]" />
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Skeleton className="h-6 w-[50px] ml-auto" />
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Skeleton className="h-6 w-[70px] ml-auto" />
+                  </td>
+                </tr>
+              ))
+            ) : sortedAgents.length > 0 ? (
               sortedAgents.map((agent, index) => (
                 <AgentTableRow
                   key={agent.name}
                   agent={agent}
                   period={period}
                   isTopAgent={index === 0}
-                  change={getChange(agent.name)}
+                  change={agent.change}
                 />
               ))
             ) : (

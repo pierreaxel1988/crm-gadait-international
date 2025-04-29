@@ -3,25 +3,20 @@ import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Sector } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { LeadSource, PropertyType } from '@/types/lead';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface LeadSourceDistributionProps {
   isLeadSources?: boolean;
+  data?: { name: string; value: number; count: number }[];
+  isLoading?: boolean;
 }
 
-const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributionProps) => {
+const LeadSourceDistribution = ({ isLeadSources = false, data, isLoading = false }: LeadSourceDistributionProps) => {
   const isMobile = useIsMobile();
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
   
-  // Données mockées pour la distribution des sources/types avec les nombres absolus
-  const data = isLeadSources ? [
-    { name: 'Site web', value: 30, count: 148 },
-    { name: 'Réseaux sociaux', value: 15, count: 74 },
-    { name: 'Portails immobiliers', value: 45, count: 221 },
-    { name: 'Network', value: 10, count: 49 },
-    { name: 'Repeaters', value: 8, count: 39 },
-    { name: 'Recommandations', value: 12, count: 59 },
-    { name: "Apporteur d'affaire", value: 5, count: 25 },
-  ] : [
+  // Données mockées pour les types de propriété si aucune donnée n'est fournie
+  const mockTypeData = [
     { name: 'Villa', value: 25, count: 136 },
     { name: 'Appartement', value: 20, count: 109 },
     { name: 'Penthouse', value: 10, count: 54 },
@@ -31,6 +26,11 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
     { name: 'Vignoble', value: 5, count: 27 },
     { name: 'Autres', value: 5, count: 27 },
   ];
+  
+  // Utiliser les données fournies ou les données mockées
+  const chartData = isLeadSources ? 
+    data || [] : 
+    mockTypeData;
   
   // Custom color palette with more elegant, sophisticated colors
   const COLORS = isLeadSources 
@@ -101,6 +101,24 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
     return null;
   };
   
+  // Si en chargement, afficher un skeleton
+  if (isLoading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <Skeleton className="h-[300px] w-[300px] rounded-full" />
+      </div>
+    );
+  }
+  
+  // Si pas de données, afficher un message
+  if (chartData.length === 0) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <p className="text-gray-500">Aucune donnée disponible</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="w-full h-full flex items-center justify-center">
       <ResponsiveContainer width="100%" height={isMobile ? 300 : 360}>
@@ -110,7 +128,7 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
           <Pie
             activeIndex={activeIndex}
             activeShape={renderActiveShape}
-            data={data}
+            data={chartData}
             cx="50%"
             cy="50%"
             labelLine={false}
@@ -126,7 +144,7 @@ const LeadSourceDistribution = ({ isLeadSources = false }: LeadSourceDistributio
             animationEasing="ease-out"
             className="drop-shadow-sm"
           >
-            {data.map((entry, index) => (
+            {chartData.map((entry, index) => (
               <Cell 
                 key={`cell-${index}`} 
                 fill={COLORS[index % COLORS.length]} 

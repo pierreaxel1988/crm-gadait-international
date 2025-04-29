@@ -6,23 +6,24 @@ import ConversionRateCard from '@/components/reports/ConversionRateCard';
 import SalesPerformanceChart from '@/components/reports/SalesPerformanceChart';
 import LeadSourceDistribution from '@/components/reports/LeadSourceDistribution';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLeadsSourceData } from '@/hooks/useReportsData';
 
-const ConversionTabContent: React.FC = () => {
+interface ConversionTabContentProps {
+  conversionData: { name: string; total: number }[];
+  isLoading: boolean;
+  period: string;
+}
+
+const ConversionTabContent: React.FC<ConversionTabContentProps> = ({
+  conversionData,
+  isLoading,
+  period
+}) => {
   const isMobile = useIsMobile();
   
-  // Données du parcours de conversion avec les nouvelles étapes
-  const conversionData = [
-    { name: 'Nouveaux', total: 180 },
-    { name: 'Contactés', total: 150 },
-    { name: 'Qualifiés', total: 120 },
-    { name: 'Propositions', total: 100 },
-    { name: 'Visites en cours', total: 80 },
-    { name: 'Offre en cours', total: 60 },
-    { name: 'Dépôt reçu', total: 40 },
-    { name: 'Signature finale', total: 30 },
-    { name: 'Conclus', total: 25 }
-  ];
-
+  // Récupérer les données des sources de leads pour la distribution
+  const { data: leadsSourceData, isLoading: isLoadingLeadSources } = useLeadsSourceData(period);
+  
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -51,6 +52,7 @@ const ConversionTabContent: React.FC = () => {
         subtitle="Évolution du statut des leads dans le pipeline" 
         icon={<ArrowDownUp className="h-5 w-5" />}
         className={isMobile ? "h-[750px]" : "h-[500px]"}
+        isLoading={isLoading}
       >
         <div className={`h-full w-full ${isMobile ? "pt-2" : "pt-6"}`}>
           <SalesPerformanceChart 
@@ -66,9 +68,10 @@ const ConversionTabContent: React.FC = () => {
           subtitle="Répartition par canal d'acquisition" 
           icon={<ArrowDownUp className="h-5 w-5" />}
           className="h-[400px]"
+          isLoading={isLoadingLeadSources}
         >
           <div className="h-full w-full pt-4">
-            <LeadSourceDistribution isLeadSources={true} />
+            <LeadSourceDistribution isLeadSources={true} data={leadsSourceData || []} />
           </div>
         </DashboardCard>
         

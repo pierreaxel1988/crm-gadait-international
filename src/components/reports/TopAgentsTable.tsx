@@ -2,23 +2,44 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody } from "@/components/ui/table";
-import { agentsDataByPeriod, PeriodType } from './agentsData';
 import PeriodSelector, { Period } from './PeriodSelector';
 import AgentsTableHeader from './AgentsTableHeader';
 import AgentTableRow from './AgentTableRow';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const TopAgentsTable = () => {
-  const [period, setPeriod] = useState<Period>({ type: 'mois' });
+interface Agent {
+  name: string;
+  leads: number;
+  sales: number;
+  value: string;
+  conversion: number;
+  change: number;
+}
+
+interface TopAgentsTableProps {
+  agentData: Agent[];
+  isLoading: boolean;
+  period?: string;
+}
+
+const TopAgentsTable: React.FC<TopAgentsTableProps> = ({ 
+  agentData, 
+  isLoading,
+  period = 'mois'
+}) => {
+  const [tablePeriod, setTablePeriod] = useState<Period>({ type: period === 'month' ? 'mois' : period === 'week' ? 'semaine' : period === 'year' ? 'annee' : 'mois' });
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'name' | 'leads' | 'sales' | 'value' | 'conversion' | null>(null);
+  const [sortBy, setSortBy] = useState<'name' | 'leads' | 'sales' | 'value' | 'conversion' | null>('leads');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
   const filteredAndSortedAgents = useMemo(() => {
-    let filtered = period.type === 'custom' 
-      ? agentsDataByPeriod['mois']
-      : agentsDataByPeriod[period.type];
+    if (isLoading) return [];
+    
+    let filtered = agentData.filter(agent => 
+      agent.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     
     if (sortBy) {
       filtered = [...filtered].sort((a, b) => {
@@ -38,7 +59,7 @@ const TopAgentsTable = () => {
     }
     
     return filtered;
-  }, [period, searchTerm, sortBy, sortDirection]);
+  }, [agentData, searchTerm, sortBy, sortDirection, isLoading]);
   
   const handleSort = (column: 'name' | 'leads' | 'sales' | 'value' | 'conversion') => {
     if (sortBy === column) {
@@ -54,7 +75,7 @@ const TopAgentsTable = () => {
       <CardHeader className="pb-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
           <CardTitle>Top Agents Commerciaux</CardTitle>
-          <PeriodSelector period={period} setPeriod={setPeriod} />
+          <PeriodSelector period={tablePeriod} setPeriod={setTablePeriod} />
         </div>
       </CardHeader>
       
@@ -67,6 +88,7 @@ const TopAgentsTable = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 pr-4 py-2 border-gray-200 rounded-md w-full"
+            disabled={isLoading}
           />
         </div>
         
@@ -78,7 +100,31 @@ const TopAgentsTable = () => {
               sortDirection={sortDirection}
             />
             <TableBody>
-              {filteredAndSortedAgents.length > 0 ? (
+              {isLoading ? (
+                // Afficher des skeletons pendant le chargement
+                Array(5).fill(0).map((_, index) => (
+                  <tr key={`skeleton-${index}`}>
+                    <td className="p-4">
+                      <Skeleton className="h-6 w-[180px]" />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton className="h-6 w-[50px] ml-auto" />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton className="h-6 w-[50px] ml-auto" />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton className="h-6 w-[60px] ml-auto" />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton className="h-6 w-[40px] ml-auto" />
+                    </td>
+                    <td className="p-4">
+                      <Skeleton className="h-6 w-[70px] ml-auto" />
+                    </td>
+                  </tr>
+                ))
+              ) : filteredAndSortedAgents.length > 0 ? (
                 filteredAndSortedAgents.map((agent) => (
                   <AgentTableRow key={agent.name} agent={agent} />
                 ))

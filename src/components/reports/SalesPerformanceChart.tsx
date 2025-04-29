@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface SalesPerformanceChartProps {
   data: {
@@ -19,9 +20,14 @@ interface SalesPerformanceChartProps {
     total: number;
   }[];
   isConversionFunnel?: boolean;
+  isLoading?: boolean;
 }
 
-const SalesPerformanceChart = ({ data, isConversionFunnel = false }: SalesPerformanceChartProps) => {
+const SalesPerformanceChart = ({ 
+  data,
+  isConversionFunnel = false,
+  isLoading = false
+}: SalesPerformanceChartProps) => {
   const isMobile = useIsMobile();
   
   // Palette de couleurs améliorée avec une progression plus claire
@@ -61,6 +67,24 @@ const SalesPerformanceChart = ({ data, isConversionFunnel = false }: SalesPerfor
 
   // Taille de police adaptative
   const fontSize = isMobile ? 10 : 12;
+  
+  // Si en chargement, afficher un skeleton
+  if (isLoading) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    );
+  }
+  
+  // Si pas de données, afficher un message
+  if (!data || data.length === 0) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <p className="text-gray-500">Aucune donnée disponible</p>
+      </div>
+    );
+  }
   
   return (
     <ChartContainer 

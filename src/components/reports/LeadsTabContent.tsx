@@ -10,18 +10,35 @@ import LeadsPerAgentChart from '@/components/reports/LeadsPerAgentChart';
 import LeadsAgentsTable from '@/components/reports/LeadsAgentsTable';
 import LeadsByPortalChart from '@/components/reports/LeadsByPortalChart';
 import { Period } from '@/components/reports/PeriodSelector';
+import { useLeadsAgentData, usePortalLeadsData } from '@/hooks/useReportsData';
 
-const LeadsTabContent: React.FC = () => {
+interface LeadsTabContentProps {
+  leadsData: { name: string; value: number; count: number }[];
+  isLoading: boolean;
+  period: string;
+}
+
+const LeadsTabContent: React.FC<LeadsTabContentProps> = ({ 
+  leadsData, 
+  isLoading,
+  period 
+}) => {
   const [leadsPeriod, setLeadsPeriod] = useState<'semaine' | 'mois' | 'annee'>('mois');
   const [displayMode, setDisplayMode] = useState<'chart' | 'table'>('chart');
-  const [period, setPeriod] = useState<Period>({ type: 'mois' });
+  const [periodState, setPeriodState] = useState<Period>({ type: 'mois' });
+
+  // Récupérer les données de leads par agent
+  const { data: leadsAgentData, isLoading: isLoadingAgents } = useLeadsAgentData(leadsPeriod);
+  
+  // Récupérer les données de leads par portail
+  const { data: portalData, isLoading: isLoadingPortals } = usePortalLeadsData(period);
   
   return (
     <div className="grid grid-cols-1 gap-6 h-full min-h-[calc(100vh-250px)]">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <ConversionRateCard 
           title="Nouveaux leads" 
-          value={124} 
+          value={leadsData.reduce((sum, item) => sum + item.count, 0) || 0} 
           change={8} 
           period="vs dernier mois"
         />
@@ -45,9 +62,10 @@ const LeadsTabContent: React.FC = () => {
           title="Origine des leads" 
           subtitle="Distribution par source d'acquisition" 
           icon={<Filter className="h-5 w-5" />}
+          isLoading={isLoading}
         >
           <div className="h-[400px] flex items-center justify-center">
-            <LeadSourceDistribution isLeadSources />
+            <LeadSourceDistribution isLeadSources data={leadsData} />
           </div>
         </DashboardCard>
         
@@ -55,9 +73,10 @@ const LeadsTabContent: React.FC = () => {
           title="Leads par portail immobilier" 
           subtitle="Distribution des leads par portail" 
           icon={<PieChart className="h-5 w-5" />}
+          isLoading={isLoadingPortals}
         >
           <div className="h-[400px] flex items-center justify-center">
-            <LeadsByPortalChart period={period} />
+            <LeadsByPortalChart data={portalData || []} />
           </div>
         </DashboardCard>
       </div>
@@ -66,6 +85,7 @@ const LeadsTabContent: React.FC = () => {
         title="Leads par commercial" 
         subtitle="Nombre de leads par agent commercial"
         icon={<Users className="h-5 w-5" />}
+        isLoading={isLoadingAgents}
         action={
           <div className="flex items-center space-x-3">
             <ToggleGroup 
@@ -108,9 +128,17 @@ const LeadsTabContent: React.FC = () => {
       >
         <div className="flex-1 w-full h-full min-h-[500px]">
           {displayMode === 'chart' ? (
-            <LeadsPerAgentChart period={leadsPeriod} />
+            <LeadsPerAgentChart 
+              period={leadsPeriod} 
+              data={leadsAgentData || []} 
+              isLoading={isLoadingAgents} 
+            />
           ) : (
-            <LeadsAgentsTable period={leadsPeriod} />
+            <LeadsAgentsTable 
+              period={leadsPeriod} 
+              data={leadsAgentData || []} 
+              isLoading={isLoadingAgents} 
+            />
           )}
         </div>
       </DashboardCard>

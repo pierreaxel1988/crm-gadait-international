@@ -13,28 +13,23 @@ import {
 } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface LeadsData {
   name: string;
-  semaine: number;
-  mois: number;
-  annee: number;
+  semaine?: number;
+  mois?: number;
+  annee?: number;
+  change: number;
 }
-
-// En situation réelle, ces données viendraient de la base de données Supabase
-const mockLeadsData: LeadsData[] = [
-  { name: 'Jade Diouane', semaine: 4, mois: 12, annee: 85 },
-  { name: 'Ophelie Durand', semaine: 3, mois: 10, annee: 62 },
-  { name: 'Jean Marc Perrissol', semaine: 2, mois: 8, annee: 54 },
-  { name: 'Jacques Charles', semaine: 3, mois: 9, annee: 48 },
-  { name: 'Sharon Ramdiane', semaine: 1, mois: 7, annee: 35 },
-];
 
 interface LeadsPerAgentChartProps {
   period: 'semaine' | 'mois' | 'annee';
+  data: LeadsData[];
+  isLoading?: boolean;
 }
 
-const LeadsPerAgentChart = ({ period }: LeadsPerAgentChartProps) => {
+const LeadsPerAgentChart = ({ period, data, isLoading = false }: LeadsPerAgentChartProps) => {
   const isMobile = useIsMobile();
   const [activeBar, setActiveBar] = useState<number | null>(null);
   
@@ -67,6 +62,24 @@ const LeadsPerAgentChart = ({ period }: LeadsPerAgentChartProps) => {
     setActiveBar(null);
   };
   
+  // Si en chargement, afficher un skeleton
+  if (isLoading) {
+    return (
+      <div className="h-full w-full flex-1 flex flex-col items-center justify-center">
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    );
+  }
+  
+  // Si pas de données, afficher un message
+  if (data.length === 0) {
+    return (
+      <div className="h-full w-full flex-1 flex flex-col items-center justify-center">
+        <p className="text-gray-500">Aucune donnée disponible</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="h-full w-full flex-1 flex flex-col">
       <ChartContainer 
@@ -81,7 +94,7 @@ const LeadsPerAgentChart = ({ period }: LeadsPerAgentChartProps) => {
       >
         <ResponsiveContainer width="100%" height="100%">
           <RechartsBarChart 
-            data={mockLeadsData}
+            data={data}
             margin={chartMargin}
             barCategoryGap={barGap}
             onMouseLeave={handleMouseLeave}
@@ -157,7 +170,7 @@ const LeadsPerAgentChart = ({ period }: LeadsPerAgentChartProps) => {
               onMouseEnter={handleMouseEnter}
               className="hover:opacity-80 transition-opacity"
             >
-              {mockLeadsData.map((entry, index) => (
+              {data.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
                   fill={`url(#colorBar${index % COLORS.length})`}
