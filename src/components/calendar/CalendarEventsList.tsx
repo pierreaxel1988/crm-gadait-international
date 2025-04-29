@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { isSameDay } from 'date-fns';
-import { Event } from '@/contexts/CalendarContext';
+import { Event, eventCategories } from '@/contexts/CalendarContext';
 import { Check, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -22,24 +22,9 @@ const CalendarEventsList = ({
   const eventsForSelectedDate = selectedDate
     ? events.filter((event) => {
         const isSameDayResult = isSameDay(event.date, selectedDate);
-        if (!isSameDayResult) {
-          // For debugging: Only log some of the mismatches to avoid console spam
-          if (Math.random() < 0.2) {
-            console.log(
-              `Event date mismatch - Event: ${event.title}, ` +
-              `Event date: ${event.date.toISOString()}, ` +
-              `Selected date: ${selectedDate.toISOString()}`
-            );
-          }
-        }
         return isSameDayResult;
       })
     : [];
-
-  console.log(`Displaying ${eventsForSelectedDate.length} events for selected date:`, selectedDate);
-  if (eventsForSelectedDate.length > 0) {
-    console.log("Events for this date:", eventsForSelectedDate);
-  }
   
   // Determine if date is in the past
   const isDatePast = (date: Date): boolean => {
@@ -50,6 +35,22 @@ const CalendarEventsList = ({
     return compareDate < today;
   };
   
+  // Get proper category color
+  const getCategoryColor = (categoryValue?: string): string => {
+    if (!categoryValue) return '#9BA3AD'; // Default gray
+    const category = eventCategories.find(cat => cat.value === categoryValue);
+    return category?.color || '#9BA3AD';
+  };
+  
+  // Get text color based on background color
+  const getTextColor = (categoryValue?: string): string => {
+    switch (categoryValue) {
+      case 'Call': return '#221F26'; // Dark text for light green
+      case 'Compromis': return '#221F26'; // Dark text for gold
+      default: return '#FFFFFF';  // White text for other categories
+    }
+  };
+  
   return (
     <>
       {eventsForSelectedDate.length > 0 ? (
@@ -57,38 +58,34 @@ const CalendarEventsList = ({
           {eventsForSelectedDate.map((event) => {
             // Determine if event is overdue (past date and not completed)
             const isOverdue = isDatePast(event.date) && !event.isCompleted;
+            const categoryColor = getCategoryColor(event.category);
+            const textColor = getTextColor(event.category);
             
             return (
               <div 
                 key={event.id} 
-                className={`p-3 rounded-lg border transition-all ${
+                className={`p-3 rounded-lg transition-all ${
                   event.isCompleted 
-                    ? 'bg-gray-50/80 border-gray-200 opacity-80' 
-                    : isOverdue
-                      ? 'bg-[#FFDEE2]/30 border-pink-200 hover:shadow-luxury-hover'
-                      : 'bg-[#F2FCE2]/40 border-green-100 hover:shadow-luxury-hover'
+                    ? 'opacity-80' 
+                    : 'hover:shadow-luxury-hover'
                 }`}
                 style={{ 
                   backgroundColor: event.isCompleted 
                     ? '#F1F0FB' // Soft gray for completed events
                     : isOverdue 
-                      ? 'rgba(255, 222, 226, 0.3)' // Soft pink for overdue
-                      : 'rgba(242, 252, 226, 0.4)', // Soft green for upcoming
-                  borderColor: event.isCompleted
-                    ? '#e2e2e2'
-                    : isOverdue
-                      ? '#f9c6ce'
-                      : '#d1e7c5'
+                      ? '#FFDEE240' // Soft pink for overdue with transparency
+                      : `${categoryColor}30` // Light version of category color
                 }}
               >
                 <div className="flex justify-between items-start">
-                  <div>
+                  <div className="flex items-center">
+                    <div 
+                      className="w-3 h-3 rounded-full mr-2 flex-shrink-0" 
+                      style={{ backgroundColor: categoryColor }}
+                    ></div>
                     <h3 className={`font-futura text-sm font-medium ${event.isCompleted ? 'text-gray-600' : ''}`}>
                       {event.title}
                     </h3>
-                    {event.leadName && (
-                      <div className="text-xs italic text-gray-600 mt-1">Lead: {event.leadName}</div>
-                    )}
                   </div>
                   <div className="flex items-center space-x-2">
                     {event.time && (
@@ -118,8 +115,8 @@ const CalendarEventsList = ({
                     event.isCompleted 
                       ? 'text-gray-500 bg-white/80' 
                       : isOverdue
-                        ? 'text-rose-800 bg-[#FFF0F2]'
-                        : 'text-green-800 bg-[#F7FEF1]'
+                        ? 'text-rose-800 bg-white/60'
+                        : 'text-gray-800 bg-white/60'
                   }`}>
                     {event.description}
                   </p>
@@ -128,6 +125,11 @@ const CalendarEventsList = ({
                   <div className="flex items-center mt-2 text-xs text-gray-600">
                     <User className="h-3 w-3 mr-1" /> 
                     <span>Assigné à: {event.assignedToName}</span>
+                  </div>
+                )}
+                {event.leadName && !event.title.includes(event.leadName) && (
+                  <div className="text-xs mt-1 text-gray-600">
+                    Lead: {event.leadName}
                   </div>
                 )}
               </div>

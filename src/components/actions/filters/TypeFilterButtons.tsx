@@ -33,17 +33,9 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
   // Get text color for each task type
   const getTextColorForTaskType = (type: TaskType): string => {
     switch (type) {
-      case 'Call': return '#221F26'; // Noire premium
-      case 'Visites': return '#7E69AB'; // Violet chic
-      case 'Compromis': return '#D2B24C'; // Gold soft
-      case 'Acte de vente': return '#403E43'; // Gris foncé profond
-      case 'Contrat de Location': return '#9F9EA1'; // Gris argenté
-      case 'Propositions': return '#6E59A5';
-      case 'Follow up': return '#AAADB0'; 
-      case 'Estimation': return '#A68C6D'; // Crème café
-      case 'Prospection': return '#8E9196';
-      case 'Admin': return '#8E9196';
-      default: return '#403E43';
+      case 'Call': return '#221F26'; // Dark text for light green
+      case 'Compromis': return '#221F26'; // Dark text for gold
+      default: return '#FFFFFF'; // White text for other categories
     }
   };
 
@@ -56,7 +48,7 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
         <Button
           variant={typeFilter === 'all' ? "default" : "outline"}
           size="sm"
-          className={`text-xs font-futura rounded-full px-3 py-1 border border-gray-200 ${typeFilter === 'all' ? 'ring-2 ring-loro-navy/30' : ''}`}
+          className={`text-xs font-futura rounded-full px-3 py-1 border ${typeFilter === 'all' ? 'ring-2 ring-loro-navy/30' : ''}`}
           onClick={() => setTypeFilter('all')}
           style={{
             background: typeFilter === 'all' ? '#F5F4F0' : '#fff',
@@ -73,16 +65,16 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
             key={type}
             variant="outline"
             size="sm"
-            className={`text-xs font-futura rounded-full px-3 py-1 border border-gray-200 transition-transform duration-200 ${typeFilter === type ? 'ring-2 ring-offset-1 scale-105' : ''}`}
+            className={`text-xs font-futura rounded-full px-3 py-1 border transition-transform duration-200 ${typeFilter === type ? 'ring-2 ring-offset-1 scale-105' : ''}`}
             onClick={() => setTypeFilter(type)}
             style={{
-              background: typeFilter === type ? '#F5F4F0' : '#fff',
-              borderColor: typeFilter === type ? getTextColorForTaskType(type) + '40' : '#eee',
+              background: typeFilter === type ? getColorForTaskType(type) : '#fff',
+              borderColor: typeFilter === type ? getColorForTaskType(type) : '#eee',
               color: typeFilter === type ? getTextColorForTaskType(type) : '#8E9196',
               fontWeight: typeFilter === type ? 600 : 400,
               fontFamily: 'Futura, Optima, Verdana, Geneva, sans-serif',
               letterSpacing: '0.035em',
-              boxShadow: typeFilter === type ? '0 2px 8px 0 #a68c6d21' : undefined,
+              boxShadow: typeFilter === type ? '0 2px 8px 0 rgba(0,0,0,0.1)' : undefined,
               transition: 'all 0.18s cubic-bezier(.68,-0.55,.27,1.55)',
               outline: 'none'
             }}

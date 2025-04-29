@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ListChecks } from 'lucide-react';
+import { PlusCircle, ListCheck } from 'lucide-react';
 import CalendarView from '@/components/calendar/CalendarView';
 import DayDetail from '@/components/calendar/DayDetail';
 import AddEventDialog from '@/components/calendar/AddEventDialog';
@@ -12,7 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import AllActionsDialog from './AllActionsDialog';
 import { useActionsData } from '@/hooks/useActionsData';
-import { ActionItem } from '@/types/actionHistory';
 
 const CalendarPageContent = () => {
   const { 
@@ -106,7 +105,7 @@ const CalendarPageContent = () => {
                     onValueChange={(value) => handleAgentChange(value === "all" ? null : value)}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Filtrer par commercial" />
+                      <SelectValue placeholder="Tous les commerciaux" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Tous les commerciaux</SelectItem>
@@ -123,10 +122,10 @@ const CalendarPageContent = () => {
               <Button 
                 variant="outline"
                 size="sm" 
-                className="w-full sm:w-auto transition-all border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20"
+                className="w-full sm:w-auto transition-all border-loro-navy/30 text-loro-navy hover:bg-loro-pearl/20 flex items-center justify-center"
                 onClick={() => setIsAllActionsOpen(true)}
               >
-                <ListChecks className="mr-2 h-4 w-4" />
+                <ListCheck className="mr-2 h-4 w-4" />
                 Toutes les actions
               </Button>
             </div>
