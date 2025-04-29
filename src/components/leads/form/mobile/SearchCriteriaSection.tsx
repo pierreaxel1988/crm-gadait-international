@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { LeadDetailed, Currency, PropertyState, PropertyType, ViewType, MauritiusRegion, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
+import { LeadDetailed, Currency, PropertyState, PropertyType, ViewType, MauritiusRegion, PurchaseTimeframe, FinancingMethod, PropertyUse, Country } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -712,6 +713,10 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             <option value="Switzerland">Suisse</option>
             <option value="Monaco">Monaco</option>
             <option value="Mauritius">Île Maurice</option>
+            <option value="United States">United States</option>
+            <option value="USA">USA</option>
+            <option value="États-Unis">États-Unis</option>
+            <option value="Etats-Unis">Etats-Unis</option>
             <option value="UAE">Émirats Arabes Unis</option>
           </select>
         </div>
