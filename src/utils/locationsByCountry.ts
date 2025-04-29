@@ -54,26 +54,8 @@ export const LOCATIONS_BY_COUNTRY: Record<string, string[]> = {
     'Dubai', 'Abu Dhabi', 'Sharjah', 'Ras Al Khaimah', 'Ajman',
     'Palm Jumeirah', 'Downtown Dubai', 'Dubai Marina', 'Jumeirah Beach', 'Al Ain'
   ],
-  // Add USA as an alias for United States
+  // Add USA as alias for United States
   'USA': [
-    'New York', 'Los Angeles', 'Miami', 'Miami Beach', 'South Beach', 'Fort Lauderdale',
-    'Palm Beach', 'Naples', 'San Francisco', 'Chicago', 'Boston', 'Washington D.C.',
-    'Seattle', 'San Diego', 'Las Vegas', 'Austin', 'Denver', 'Aspen', 'Beverly Hills',
-    'Malibu', 'Palm Springs', 'Hamptons', 'Telluride', 'Key West', 'Orlando',
-    'Scottsdale', 'Santa Barbara', 'Napa Valley', 'Sonoma', 'Hawaii', 'Maui', 'Kauai'
-  ],
-  
-  // Add French alias for United States
-  'États-Unis': [
-    'New York', 'Los Angeles', 'Miami', 'Miami Beach', 'South Beach', 'Fort Lauderdale',
-    'Palm Beach', 'Naples', 'San Francisco', 'Chicago', 'Boston', 'Washington D.C.',
-    'Seattle', 'San Diego', 'Las Vegas', 'Austin', 'Denver', 'Aspen', 'Beverly Hills',
-    'Malibu', 'Palm Springs', 'Hamptons', 'Telluride', 'Key West', 'Orlando',
-    'Scottsdale', 'Santa Barbara', 'Napa Valley', 'Sonoma', 'Hawaii', 'Maui', 'Kauai'
-  ],
-  
-  // Add non-accented French alias for United States
-  'Etats-Unis': [
     'New York', 'Los Angeles', 'Miami', 'Miami Beach', 'South Beach', 'Fort Lauderdale',
     'Palm Beach', 'Naples', 'San Francisco', 'Chicago', 'Boston', 'Washington D.C.',
     'Seattle', 'San Diego', 'Las Vegas', 'Austin', 'Denver', 'Aspen', 'Beverly Hills',
@@ -93,13 +75,13 @@ export const getAllLocations = (): string[] => {
 
 // Get locations for a specific country
 export const getLocationsByCountry = (country: string): string[] => {
-  // Handle USA, United States, and French variations as the same country
-  if (country === 'USA' || country === 'États-Unis' || country === 'Etats-Unis') {
-    return LOCATIONS_BY_COUNTRY[country] || LOCATIONS_BY_COUNTRY['United States'] || [];
+  // Handle USA and United States as the same country
+  if (country === 'USA' && !LOCATIONS_BY_COUNTRY[country]) {
+    return LOCATIONS_BY_COUNTRY['United States'] || [];
   }
   
-  if (country === 'United States') {
-    return LOCATIONS_BY_COUNTRY[country] || LOCATIONS_BY_COUNTRY['USA'] || [];
+  if (country === 'United States' && !LOCATIONS_BY_COUNTRY[country]) {
+    return LOCATIONS_BY_COUNTRY['USA'] || [];
   }
   
   return LOCATIONS_BY_COUNTRY[country] || [];

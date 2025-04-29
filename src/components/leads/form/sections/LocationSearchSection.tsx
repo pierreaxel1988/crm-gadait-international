@@ -5,7 +5,6 @@ import SmartSearch from '@/components/common/SmartSearch';
 import { COUNTRIES } from '@/utils/countries';
 import { getAllLocations, getLocationsByCountry } from '@/utils/locationsByCountry';
 import { MapPin } from 'lucide-react';
-import { countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
 
 interface LocationSearchSectionProps {
   country: string;
@@ -23,47 +22,12 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
   const getFilteredLocations = (searchTerm: string) => {
     if (!country) {
       return getAllLocations()
-        .filter(loc => loc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-          .includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")))
+        .filter(loc => loc.toLowerCase().includes(searchTerm.toLowerCase()))
         .slice(0, 10);
     }
-    
-    // Handle special case for USA aliases
-    const lookupCountry = country === 'USA' || country === 'États-Unis' || country === 'Etats-Unis' 
-      ? 'United States' 
-      : country;
-      
-    return getLocationsByCountry(lookupCountry)
-      .filter(loc => loc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        .includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")))
+    return getLocationsByCountry(country)
+      .filter(loc => loc.toLowerCase().includes(searchTerm.toLowerCase()))
       .slice(0, 10);
-  };
-
-  const getFilteredCountries = (searchTerm: string) => {
-    if (!searchTerm) return COUNTRIES.slice(0, 10);
-    
-    // Normalize the search term to handle accents
-    const normalizedSearchTerm = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
-    // Special case for USA/United States search
-    if (normalizedSearchTerm === 'usa' || 
-        normalizedSearchTerm === 'us' || 
-        normalizedSearchTerm === 'united' || 
-        normalizedSearchTerm === 'etats' || 
-        normalizedSearchTerm === 'états' || 
-        normalizedSearchTerm === 'unis') {
-      return COUNTRIES.filter(c => 
-        c === 'USA' || 
-        c === 'United States' || 
-        c === 'États-Unis' || 
-        c === 'Etats-Unis'
-      );
-    }
-    
-    return COUNTRIES.filter(c => {
-      const normalizedCountry = c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      return normalizedCountry.includes(normalizedSearchTerm) || countryMatchesSearch(c, searchTerm);
-    }).slice(0, 10);
   };
 
   const handleLocationSelect = (location: string) => {
@@ -87,7 +51,9 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
           value={country}
           onChange={onCountryChange}
           onSelect={handleCountrySelect}
-          results={getFilteredCountries(country)}
+          results={COUNTRIES.filter(c => 
+            c.toLowerCase().includes(country.toLowerCase())
+          ).slice(0, 10)}
           renderItem={renderLocationItem}
           className="w-full"
           inputClassName="h-8 text-sm"

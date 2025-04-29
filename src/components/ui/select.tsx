@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown, ChevronUp, Search } from "lucide-react"
@@ -73,19 +72,12 @@ interface SelectContentProps extends React.ComponentPropsWithoutRef<typeof Selec
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   SelectContentProps
->(({ className, children, position = "popper", searchable = true, ...props }, ref) => {
+>(({ className, children, position = "popper", searchable = false, ...props }, ref) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   
   // Filter children based on search query
   const filteredChildren = React.useMemo(() => {
     if (!searchQuery || !searchable) return children;
-    
-    // Special case for USA/United States search
-    const isUsSearch = searchQuery.toLowerCase().includes('us') || 
-                      searchQuery.toLowerCase().includes('usa') || 
-                      searchQuery.toLowerCase().includes('etats') || 
-                      searchQuery.toLowerCase().includes('états') || 
-                      searchQuery.toLowerCase().includes('unis');
     
     return React.Children.map(children, (child) => {
       if (!React.isValidElement(child)) return child;
@@ -96,18 +88,7 @@ const SelectContent = React.forwardRef<
           if (!React.isValidElement(groupChild)) return false;
           
           const itemText = groupChild.props.children?.toString().toLowerCase() || '';
-          // Special handling for USA variants
-          if (isUsSearch && (itemText.includes('usa') || 
-                             itemText.includes('united states') || 
-                             itemText.includes('états-unis') || 
-                             itemText.includes('etats-unis'))) {
-            return true;
-          }
-          
-          // Normalize text for accent-insensitive search
-          const normalizedItemText = itemText.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-          const normalizedSearchQuery = searchQuery.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-          return normalizedItemText.includes(normalizedSearchQuery);
+          return itemText.includes(searchQuery.toLowerCase());
         });
         
         if (filteredGroupChildren.length === 0) return null;
@@ -117,19 +98,7 @@ const SelectContent = React.forwardRef<
       // Handle SelectItem
       if (child.type === SelectItem || child.props.className?.includes('dropdown-menu-item')) {
         const itemText = child.props.children?.toString().toLowerCase() || '';
-        
-        // Special handling for USA variants
-        if (isUsSearch && (itemText.includes('usa') || 
-                           itemText.includes('united states') || 
-                           itemText.includes('états-unis') || 
-                           itemText.includes('etats-unis'))) {
-          return child;
-        }
-        
-        // Normalize text for accent-insensitive search
-        const normalizedItemText = itemText.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const normalizedSearchQuery = searchQuery.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return normalizedItemText.includes(normalizedSearchQuery) ? child : null;
+        return itemText.includes(searchQuery.toLowerCase()) ? child : null;
       }
       
       return child;
