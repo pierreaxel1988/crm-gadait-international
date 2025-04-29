@@ -149,31 +149,31 @@ const Reports = () => {
         {/* Removed duplicate ResponseTimeByAgentTable since it's already in the responseTime tab */}
         
         <Tabs defaultValue="performance" className="w-full">
-          <TabsList className="mb-6 grid grid-cols-3 md:flex md:flex-wrap w-full md:w-auto bg-gray-100/50 p-1 rounded-lg">
+          <TabsList className="mb-6 flex flex-wrap justify-center md:justify-start gap-1 p-1 rounded-xl bg-white border border-gray-200 shadow-sm">
             <TabsTrigger 
               value="performance" 
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 transition-all rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               <BarChart3 className="h-4 w-4" />
               <span>Performance</span>
             </TabsTrigger>
             <TabsTrigger 
               value="leads" 
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 transition-all rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               <ChartBar className="h-4 w-4" />
               <span>Leads</span>
             </TabsTrigger>
             <TabsTrigger 
               value="conversion" 
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 transition-all rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               <ChartPie className="h-4 w-4" />
               <span>Conversion</span>
             </TabsTrigger>
             <TabsTrigger 
               value="responseTime" 
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 transition-all rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               <Clock className="h-4 w-4" />
               <span>Temps de réponse</span>
