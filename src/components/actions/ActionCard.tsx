@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ActionItem } from '@/types/actionHistory';
 import { Card } from '@/components/ui/card';
@@ -86,16 +85,15 @@ const ActionCard: React.FC<ActionCardProps> = ({
     }
   };
 
-  const handleActionCardClick = (e: React.MouseEvent) => {
-    // Only navigate if the click wasn't on a button or action element
-    if (!(e.target as HTMLElement).closest('button')) {
-      onCardClick(action.leadId, e);
+  const handleCardClick = () => {
+    if (action.leadId) {
+      onCardClick(action.leadId, new MouseEvent('click'));
     }
   };
 
   return <Card 
     className={`p-4 transition-all cursor-pointer ${action.status === 'overdue' ? 'border-red-300 bg-[#FFDEE2]/30' : action.status === 'done' ? 'bg-gray-50/80 border-gray-200' : 'bg-[#F2FCE2]/40 border-green-100'}`} 
-    onClick={handleActionCardClick}
+    onClick={handleCardClick}
   >
     <div className="flex justify-between items-start mb-2">
       <div>

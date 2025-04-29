@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,6 @@ import TaskTypeIndicator from '@/components/kanban/card/TaskTypeIndicator';
 import { useNavigate } from 'react-router-dom';
 import ActionCard from './ActionCard';
 import LoadingScreen from '@/components/layout/LoadingScreen';
-import { eventCategories } from '@/contexts/CalendarContext';
 import { TaskType } from '@/components/kanban/KanbanCard';
 
 interface ActionsListProps {
@@ -24,11 +22,8 @@ interface ActionsListProps {
 const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkComplete, isMobile }) => {
   const navigate = useNavigate();
   
-  const handleCardClick = (leadId: string, e: React.MouseEvent) => {
-    // Only navigate if the click wasn't on a button or interactive element
-    if (!(e.target as HTMLElement).closest('button')) {
-      navigate(`/leads/${leadId}?tab=actions`);
-    }
+  const handleCardClick = (leadId: string) => {
+    navigate(`/leads/${leadId}?tab=actions`);
   };
   
   if (isLoading) {
@@ -250,7 +245,7 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
                     ? 'bg-gray-50/80 text-gray-600' 
                     : 'bg-[#F2FCE2]/20'
               }`}
-              onClick={(e) => handleCardClick(action.leadId, e)}
+              onClick={() => handleCardClick(action.leadId)}
             >
               <TableCell>{action.leadName}</TableCell>
               <TableCell>
