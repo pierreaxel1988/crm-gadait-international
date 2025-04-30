@@ -30,7 +30,7 @@ const LeadInfoTab: React.FC<LeadInfoTabProps> = ({ lead }) => {
         <div>
           <p className="text-sm text-gray-500">Date de création</p>
           <p className="font-medium">
-            {lead.created_at ? new Date(lead.created_at).toLocaleDateString('fr-FR') : 'Non disponible'}
+            {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString('fr-FR') : 'Non disponible'}
           </p>
         </div>
       </div>

@@ -26,11 +26,26 @@ export const useGmailConnection = (leadId: string) => {
   const [directRedirectAttempts, setDirectRedirectAttempts] = useState(0);
   const [windowObjectReady, setWindowObjectReady] = useState(false);
   const [cloudflareErrorDetected, setCloudflareErrorDetected] = useState(false);
+  const [lastTokenRefreshTime, setLastTokenRefreshTime] = useState<number>(0);
 
   // S'assurer que window est défini (important pour empêcher les erreurs SSR)
   useEffect(() => {
     setWindowObjectReady(typeof window !== 'undefined');
-  }, []);
+    
+    // Définir une tentative de rechargement automatique après 5 secondes si nous sommes dans une redirection
+    const autoReloadTimeout = setTimeout(() => {
+      const hasOauthParam = location.search.includes('oauth_success=true');
+      const redirectPending = localStorage.getItem('oauth_pending') === 'true';
+      const oauthSuccess = localStorage.getItem('oauth_success') === 'true';
+      
+      if ((hasOauthParam || oauthSuccess) && !isConnected && connectionAttemptCount === 0) {
+        console.log("Auto-refresh après redirection OAuth détectée");
+        setConnectionAttemptCount(1);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(autoReloadTimeout);
+  }, [location.search, isConnected, connectionAttemptCount]);
 
   // Fonction pour détecter automatiquement le succès d'authentification
   const detectAuthSuccess = useCallback(() => {
@@ -38,7 +53,7 @@ export const useGmailConnection = (leadId: string) => {
 
     // Vérifier les paramètres d'URL
     const params = new URLSearchParams(location.search);
-    const oauthSuccess = params.has('oauth_success');
+    const oauthSuccess = params.has('oauth_success') || params.get('oauth_success') === 'true';
     
     // Vérifier localStorage
     const storedSuccess = localStorage.getItem('oauth_success') === 'true';
@@ -198,6 +213,13 @@ export const useGmailConnection = (leadId: string) => {
   // Vérifier le statut de connexion Gmail
   useEffect(() => {
     if (!windowObjectReady) return;
+    
+    // Éviter les requêtes trop fréquentes
+    const now = Date.now();
+    if (now - lastTokenRefreshTime < 1000 && lastTokenRefreshTime > 0) {
+      return; // Éviter les appels trop fréquents
+    }
+    setLastTokenRefreshTime(now);
 
     async function checkEmailConnection() {
       if (!user) {
@@ -267,7 +289,7 @@ export const useGmailConnection = (leadId: string) => {
     }
     
     checkEmailConnection();
-  }, [user, leadId, connectionAttemptCount, detectAuthSuccess, isConnected, windowObjectReady]);
+  }, [user, leadId, connectionAttemptCount, detectAuthSuccess, isConnected, windowObjectReady, lastTokenRefreshTime]);
 
   // Fonction pour démarrer la connexion Gmail avec gestion améliorée des erreurs
   const connectGmail = useCallback(async () => {
@@ -369,61 +391,12 @@ export const useGmailConnection = (leadId: string) => {
             error: "Popup bloqué",
             helpMessage: "Veuillez autoriser les popups pour ce site dans les paramètres de votre navigateur et réessayer."
           });
-        }
-        
-        // Configurer un écouteur pour détecter le résultat dans localStorage
-        const intervalId = setInterval(() => {
-          // Vérifier si l'authentification a réussi ou échoué
-          if (localStorage.getItem('oauth_success') === 'true') {
-            clearInterval(intervalId);
-            console.log('Authentification OAuth réussie détectée');
-            
-            // Nettoyer les marqueurs
-            localStorage.removeItem('oauth_pending');
-            localStorage.removeItem('oauthRedirectTarget');
-            
-            // Mettre à jour l'interface
-            setIsConnected(true);
-            setConnectionError(null);
-            setDetailedErrorInfo(null);
-            
-            // Forcer une vérification de connexion
+        } else {
+          // Tenter automatiquement de vérifier si l'authentification a réussi après 5 secondes
+          setTimeout(() => {
             setConnectionAttemptCount(prev => prev + 1);
-          } 
-          else if (localStorage.getItem('oauth_connection_error') === 'true') {
-            clearInterval(intervalId);
-            console.log('Erreur OAuth détectée');
-            
-            // Nettoyer les marqueurs
-            localStorage.removeItem('oauth_pending');
-            
-            // Mettre à jour l'interface
-            setConnectionError("Une erreur s'est produite lors de l'authentification. Veuillez réessayer.");
-          }
-          else if (localStorage.getItem('oauth_cloudflare_error') === 'true') {
-            clearInterval(intervalId);
-            console.log('Erreur Cloudflare détectée');
-            
-            // Nettoyer les marqueurs
-            localStorage.removeItem('oauth_pending');
-            
-            // Mettre à jour l'interface
-            setCloudflareErrorDetected(true);
-          }
-        }, 1000);
-        
-        // Nettoyer l'intervalle après 5 minutes
-        setTimeout(() => {
-          clearInterval(intervalId);
-          
-          // Si toujours en attente, marquer comme échec
-          if (localStorage.getItem('oauth_pending') === 'true') {
-            console.log('Timeout de l\'authentification OAuth');
-            localStorage.removeItem('oauth_pending');
-            
-            setConnectionError("Le délai d'authentification a expiré. Veuillez réessayer.");
-          }
-        }, 300000); // 5 minutes
+          }, 5000);
+        }
         
       } catch (error) {
         console.error('Erreur lors de la fonction connectGmail:', error);

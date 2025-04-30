@@ -85,6 +85,16 @@ function renderHtmlResponse(options: {
           
           // Force direct navigation - most reliable approach
           window.location.href = redirectUrl;
+          
+          // Backup approach
+          setTimeout(() => {
+            window.location.replace(redirectUrl);
+          }, 100);
+          
+          // Final fallback
+          setTimeout(() => {
+            window.open(redirectUrl, '_self');
+          }, 500);
         } catch (e) {
           console.error("Redirect error:", e);
           // Fallback to basic redirect
@@ -222,6 +232,11 @@ serve(async (req) => {
             
             // Fix any potential issues with encoded parameters
             redirectUri = redirectUri.replace('?tab%3Demails', '?tab=emails');
+            
+            // Add oauth_success parameter to improve detection in the frontend
+            redirectUri = redirectUri.includes('?') 
+              ? `${redirectUri}&oauth_success=true` 
+              : `${redirectUri}?oauth_success=true`;
           }
         }
       } catch (e) {
