@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -35,52 +36,67 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isCommercial, setIsCommercial] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'commercial' | 'guest'>('guest');
 
+  // Helper function to check user role and set states
+  const checkAndSetUserRole = (currentUser: User | null) => {
+    if (!currentUser) {
+      setIsAdmin(false);
+      setIsCommercial(false);
+      setUserRole('guest');
+      return;
+    }
+
+    const userEmail = currentUser.email;
+    const adminEmails = [
+      'pierre@gadait-international.com',
+      'christelle@gadait-international.com',
+      'admin@gadait-international.com',
+      'chloe@gadait-international.com'
+    ];
+    
+    const commercialEmails = [
+      'jade@gadait-international.com',
+      'ophelie@gadait-international.com',
+      'jeanmarc@gadait-international.com',
+      'jacques@gadait-international.com',
+      'sharon@gadait-international.com',
+      'matthieu@gadait-international.com'
+    ];
+    
+    const isUserAdmin = adminEmails.includes(userEmail || '');
+    const isUserCommercial = commercialEmails.includes(userEmail || '');
+    
+    setIsAdmin(isUserAdmin);
+    setIsCommercial(isUserCommercial);
+    
+    if (isUserAdmin) {
+      setUserRole('admin');
+    } else if (isUserCommercial) {
+      setUserRole('commercial');
+    } else {
+      setUserRole('guest');
+    }
+  };
+
   useEffect(() => {
-    // Configuration explicite de Supabase pour assurer la persistance de session
+    // IMPORTANT: Fix for the auth state change listener issue
+    // Only use synchronous code in the onAuthStateChange callback
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       console.log('Auth state changed:', event, newSession?.user?.email);
       
+      // Only update state synchronously - NEVER return a promise here
       setSession(newSession);
       setUser(newSession?.user ?? null);
       
-      // Vérification du rôle utilisateur
+      // Check user role synchronously
       if (newSession?.user) {
-        const userEmail = newSession.user.email;
-        const adminEmails = [
-          'pierre@gadait-international.com',
-          'christelle@gadait-international.com',
-          'admin@gadait-international.com',
-          'chloe@gadait-international.com'
-        ];
-        
-        const commercialEmails = [
-          'jade@gadait-international.com',
-          'ophelie@gadait-international.com',
-          'jeanmarc@gadait-international.com',
-          'jacques@gadait-international.com',
-          'sharon@gadait-international.com',
-          'matthieu@gadait-international.com'
-        ];
-        
-        const isUserAdmin = adminEmails.includes(userEmail || '');
-        const isUserCommercial = commercialEmails.includes(userEmail || '');
-        
-        setIsAdmin(isUserAdmin);
-        setIsCommercial(isUserCommercial);
-        
-        if (isUserAdmin) {
-          setUserRole('admin');
-        } else if (isUserCommercial) {
-          setUserRole('commercial');
-        } else {
-          setUserRole('guest');
-        }
+        checkAndSetUserRole(newSession.user);
       } else {
         setIsAdmin(false);
         setIsCommercial(false);
         setUserRole('guest');
       }
       
+      // No longer loading
       setLoading(false);
     });
 
@@ -95,38 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(data.session?.user ?? null);
         
         // Vérification du rôle utilisateur
-        if (data.session?.user) {
-          const userEmail = data.session.user.email;
-          const adminEmails = [
-            'pierre@gadait-international.com',
-            'christelle@gadait-international.com',
-            'admin@gadait-international.com',
-            'chloe@gadait-international.com'
-          ];
-          
-          const commercialEmails = [
-            'jade@gadait-international.com',
-            'ophelie@gadait-international.com',
-            'jeanmarc@gadait-international.com',
-            'jacques@gadait-international.com',
-            'sharon@gadait-international.com',
-            'matthieu@gadait-international.com'
-          ];
-          
-          const isUserAdmin = adminEmails.includes(userEmail || '');
-          const isUserCommercial = commercialEmails.includes(userEmail || '');
-          
-          setIsAdmin(isUserAdmin);
-          setIsCommercial(isUserCommercial);
-          
-          if (isUserAdmin) {
-            setUserRole('admin');
-          } else if (isUserCommercial) {
-            setUserRole('commercial');
-          } else {
-            setUserRole('guest');
-          }
-        }
+        checkAndSetUserRole(data.session?.user ?? null);
       } catch (error) {
         console.error('Error getting initial session:', error);
       } finally {
