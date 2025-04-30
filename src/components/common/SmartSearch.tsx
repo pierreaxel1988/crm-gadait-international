@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -24,6 +23,7 @@ interface SmartSearchProps {
   clearButton?: boolean;
   autoFocus?: boolean;
   onBlur?: () => void;
+  onClear?: () => void; // Added onClear prop
 }
 
 const SmartSearch: React.FC<SmartSearchProps> = ({
@@ -42,7 +42,8 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
   searchIcon = true,
   clearButton = true,
   autoFocus = false,
-  onBlur
+  onBlur,
+  onClear
 }) => {
   const [inputValue, setInputValue] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
@@ -138,6 +139,10 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
     setIsOpen(false);
     if (inputRef.current) {
       inputRef.current.focus();
+    }
+    // Call onClear if provided
+    if (onClear) {
+      onClear();
     }
   };
 
