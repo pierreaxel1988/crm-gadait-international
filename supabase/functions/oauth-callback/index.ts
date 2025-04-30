@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1";
 
@@ -34,7 +33,7 @@ function renderHtmlResponse(options: {
     message,
     details,
     redirectUri,
-    redirectDelay = 10, // Reduced delay for faster redirection
+    redirectDelay = 2, // Reduced delay for faster redirection
     email,
     status = 200,
     isCloudflareError = false
@@ -42,14 +41,13 @@ function renderHtmlResponse(options: {
 
   const appUrl = redirectUri || 'https://gadait-international.com';
   
-  // Direct window.location redirection for better reliability
+  // NOUVELLE APPROCHE: Redirection simplifiée et plus robuste
   const redirectScript = redirectUri ? `
     <script>
-      // Function to safely redirect with multiple strategies
-      function safeRedirect() {
+      console.log("Starting robust redirect to: ${redirectUri}");
+      
+      function performRedirect() {
         try {
-          console.log("Starting redirect process to: ${redirectUri}");
-          
           // Store success/error flag for frontend detection
           ${isCloudflareError 
             ? 'localStorage.setItem(\'oauth_cloudflare_error\', \'true\');'
@@ -66,9 +64,14 @@ function renderHtmlResponse(options: {
             localStorage.setItem('oauth_email', '${email}');
           }
           
-          // Ensure URL is properly formatted
+          // Ensure URL is properly formatted and free of extra encodings
           let redirectUrl = "${redirectUri}";
-          redirectUrl = decodeURIComponent(redirectUrl);
+          try {
+            redirectUrl = decodeURIComponent(redirectUrl);
+            console.log("Decoded URL:", redirectUrl);
+          } catch (e) {
+            console.error("Error decoding URL:", e);
+          }
           
           // Ensure HTTPS
           redirectUrl = redirectUrl.replace('http://', 'https://');
@@ -78,56 +81,87 @@ function renderHtmlResponse(options: {
             redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + "oauth_success=true";
           }
           
-          // Add tab=emails parameter for leads pages if missing
-          if (redirectUrl.includes('/leads/') && !redirectUrl.includes('tab=emails')) {
-            redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + "tab=emails";
-          }
+          // Add application timestamp to force reload
+          redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + "_t=" + Date.now();
           
-          console.log("Redirecting to:", redirectUrl);
+          console.log("Final redirect URL:", redirectUrl);
           
-          // IMPORTANT: Use all available redirect methods for maximum reliability
-          
-          // Method 1: Direct location change (most reliable)
+          // IMPORTANT: Try multiple redirect methods
           window.location.href = redirectUrl;
           
-          // Method 2: Replace current history entry
+          // Backup method with slight delay
           setTimeout(() => {
             window.location.replace(redirectUrl);
-          }, 50);
-          
-          // Method 3: Open in same window
-          setTimeout(() => {
-            window.open(redirectUrl, '_self');
           }, 100);
           
-          // Method 4: Document write redirect (last resort)
+          // Last resort method
           setTimeout(() => {
-            document.write('<html><head><meta http-equiv="refresh" content="0;url=' + redirectUrl + '"></head><body>Redirecting...</body></html>');
-          }, 200);
+            document.location.href = redirectUrl;
+          }, 300);
         } catch (e) {
-          console.error("Redirect error:", e);
-          // Fallback
-          window.location.href = "${appUrl}";
+          console.error("Error during redirect:", e);
+          // Ultimate fallback
+          try {
+            window.location.href = "${appUrl}";
+          } catch (err) {
+            console.error("Even fallback redirect failed:", err);
+          }
         }
       }
       
-      // Multiple triggers to ensure redirection happens
-      document.addEventListener('DOMContentLoaded', safeRedirect);
-      window.onload = safeRedirect;
-      setTimeout(safeRedirect, ${redirectDelay});
+      // Execute redirect immediately
+      performRedirect();
       
-      // Try immediate redirect
-      safeRedirect();
+      // And also after DOMContentLoaded as a backup
+      document.addEventListener('DOMContentLoaded', performRedirect);
+      
+      // Set a timeout as final backup
+      setTimeout(performRedirect, ${redirectDelay * 1000});
+    </script>
+  ` : '';
+
+  // Notification de post-message pour les clients web qui utilisent cette méthode
+  const postMessageScript = redirectUri ? `
+    <script>
+      try {
+        // Essayer d'envoyer un message à toutes les fenêtres parent potentielles
+        if (window.opener) {
+          console.log("Sending postMessage to opener");
+          window.opener.postMessage({ 
+            type: 'OAUTH_SUCCESS', 
+            success: ${className === 'success'}, 
+            email: '${email || ''}',
+            redirectUrl: '${redirectUri}'
+          }, '*');
+        }
+        
+        window.parent.postMessage({ 
+          type: 'OAUTH_SUCCESS', 
+          success: ${className === 'success'}, 
+          email: '${email || ''}',
+          redirectUrl: '${redirectUri}'
+        }, '*');
+      } catch (e) {
+        console.error("Error sending postMessage:", e);
+      }
     </script>
   ` : '';
 
   // Manual redirection link as backup
   const manualRedirectButton = redirectUri ? `
     <div style="margin-top: 20px; text-align: center;">
-      <p>Si vous n'êtes pas redirigé automatiquement dans 3 secondes:</p>
-      <a href="${redirectUri}" style="display: inline-block; background: #3498db; color: white; padding: 15px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; margin-top: 10px;">
+      <p>Si vous n'êtes pas redirigé automatiquement dans quelques secondes:</p>
+      <a href="${redirectUri}" id="manual-redirect" style="display: inline-block; background: #3498db; color: white; padding: 15px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; margin-top: 10px;">
         Cliquez ici pour continuer
       </a>
+      <script>
+        // Auto-click the button after a short delay
+        setTimeout(() => {
+          try {
+            document.getElementById('manual-redirect').click();
+          } catch (e) {}
+        }, 1500);
+      </script>
     </div>
   ` : '';
 
@@ -170,6 +204,7 @@ function renderHtmlResponse(options: {
           }
         </style>
         ${redirectScript}
+        ${postMessageScript}
       </head>
       <body>
         <div class="container">
@@ -178,20 +213,7 @@ function renderHtmlResponse(options: {
           ${emailInfo}
           ${redirectUri ? `
             <div class="loader"></div>
-            <p>Redirection automatique vers l'application (<span id="count">3</span>)...</p>
-            <script>
-              var count = 3;
-              var counter = setInterval(timer, 1000);
-              function timer() {
-                count = count - 1;
-                if (count <= 0) {
-                  clearInterval(counter);
-                  document.getElementById("count").innerHTML = "0";
-                  return;
-                }
-                document.getElementById("count").innerHTML = count;
-              }
-            </script>
+            <p>Redirection automatique vers l'application...</p>
           ` : ''}
           ${manualRedirectButton}
           ${detailsSection}
@@ -283,7 +305,7 @@ serve(async (req) => {
         message: "Une erreur Cloudflare (1101) s'est produite lors de la tentative de connexion à Gmail. Cette erreur est souvent temporaire.",
         details: `CF Error Code: ${cfCode}, Status: ${cfStatusCode}, Reason: ${cfBrowserErrorReason || 'Unknown'}`,
         redirectUri: redirectUri,
-        redirectDelay: 3000,
+        redirectDelay: 3,
         status: 503,
         isCloudflareError: true
       });
@@ -301,7 +323,7 @@ serve(async (req) => {
         message: `Erreur: ${error}`,
         details: error_description,
         redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
-        redirectDelay: 3000,
+        redirectDelay: 3,
         status: 400
       });
     }
@@ -313,7 +335,7 @@ serve(async (req) => {
         heading: "Authentification échouée",
         message: "Code d'autorisation manquant.",
         redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
-        redirectDelay: 3000,
+        redirectDelay: 3,
         status: 400
       });
     }
@@ -349,7 +371,7 @@ serve(async (req) => {
             message: "Une erreur Cloudflare s'est produite lors de la tentative de connexion à Gmail. Cette erreur est souvent temporaire.",
             details: errorText,
             redirectUri: redirectUri,
-            redirectDelay: 3000,
+            redirectDelay: 3,
             status: 503,
             isCloudflareError: true
           });
@@ -362,7 +384,7 @@ serve(async (req) => {
           message: `Erreur lors de l'échange du code contre des tokens: ${tokenResponse.status}`,
           details: errorText,
           redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
-          redirectDelay: 3000,
+          redirectDelay: 3,
           status: 500
         });
       }
@@ -379,7 +401,7 @@ serve(async (req) => {
           message: `Erreur: ${tokenData.error}`,
           details: tokenData.error_description || JSON.stringify(tokenData),
           redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
-          redirectDelay: 3000,
+          redirectDelay: 3,
           status: 400
         });
       }
@@ -402,7 +424,7 @@ serve(async (req) => {
           message: "Impossible de récupérer les informations de l'utilisateur.",
           details: errorText,
           redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
-          redirectDelay: 3000,
+          redirectDelay: 3,
           status: 500
         });
       }
@@ -445,7 +467,7 @@ serve(async (req) => {
         message: "Vous avez connecté votre compte Gmail avec succès. Vous allez être redirigé vers l'application...",
         email: userInfo.email,
         redirectUri: redirectUri,
-        redirectDelay: 10 // Redirection très rapide pour une meilleure expérience utilisateur
+        redirectDelay: 1 // Redirection très rapide pour une meilleure expérience utilisateur
       });
     } catch (error) {
       console.error('Erreur lors du traitement du callback OAuth:', error);
@@ -459,7 +481,7 @@ serve(async (req) => {
           heading: "Erreur Cloudflare détectée",
           message: "Une erreur Cloudflare s'est produite lors de la tentative de connexion à Gmail. Cette erreur est souvent temporaire.",
           redirectUri: redirectUri,
-          redirectDelay: 3000,
+          redirectDelay: 3,
           status: 503,
           isCloudflareError: true
         });
@@ -471,7 +493,7 @@ serve(async (req) => {
         heading: "Erreur lors de l'authentification",
         message: `Une erreur s'est produite: ${(error as Error).message}`,
         redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
-        redirectDelay: 3000,
+        redirectDelay: 3,
         status: 500
       });
     }
@@ -486,7 +508,7 @@ serve(async (req) => {
       heading: "Erreur inattendue",
       message: `Une erreur inattendue s'est produite: ${(error as Error).message}`,
       redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
-      redirectDelay: 3000,
+      redirectDelay: 3,
       status: 500
     });
   }
