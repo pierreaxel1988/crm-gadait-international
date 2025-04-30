@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy } from 'react';
 import {
   BrowserRouter as Router,
@@ -19,7 +20,6 @@ const LeadImport = lazy(() => import('./pages/LeadImport'));
 const MobileLeadImport = lazy(() => import('./pages/MobileLeadImport'));
 const ActionsPage = lazy(() => import('./pages/Actions'));
 const Calendar = lazy(() => import('./pages/Calendar'));
-const Reports = lazy(() => import('./pages/Reports'));
 const Admin = lazy(() => import('./pages/Admin'));
 const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
 const Notifications = lazy(() => import('./pages/Notifications'));
@@ -78,11 +78,6 @@ function App() {
             <Route path="/import-lead" element={
               <ProtectedRoute adminOnly={true} commercialAllowed={false}>
                 <MobileLeadImport />
-              </ProtectedRoute>
-            } />
-            <Route path="/reports" element={
-              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
-                <Reports />
               </ProtectedRoute>
             } />
             <Route path="/admin" element={

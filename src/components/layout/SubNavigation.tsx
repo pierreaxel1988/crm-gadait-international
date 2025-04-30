@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
-import { MessageSquare, PieChart, Calendar, ListTodo, File, ClipboardList } from 'lucide-react';
+import { MessageSquare, Calendar, ListTodo, File, ClipboardList } from 'lucide-react';
 import { useBreakpoint } from '@/hooks/use-mobile';
 
 const SubNavigation = () => {
@@ -22,10 +22,6 @@ const SubNavigation = () => {
     name: 'Calendrier',
     path: '/calendar',
     icon: Calendar
-  }, {
-    name: 'Rapports',
-    path: '/reports',
-    icon: PieChart
   }, {
     name: 'Chat Gadait',
     path: '/chat-gadait',
