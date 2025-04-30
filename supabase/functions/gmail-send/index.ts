@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1";
 // Environment variables
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const GOOGLE_CLIENT_ID = '87876889304-5ee6ln0j3hjoh9hq4h604rjebomac9ua.apps.googleusercontent.com';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,6 +33,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Gmail-send function invoked');
+    
     // Get auth user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
@@ -45,6 +48,7 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     
     if (userError || !user) {
+      console.error('Invalid token:', userError);
       return new Response(JSON.stringify({ error: 'Invalid token' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
@@ -55,12 +59,15 @@ serve(async (req) => {
     const { to, subject, message, cc, bcc, leadId }: EmailRequest = await req.json();
     
     if (!to || !subject || !message || !leadId) {
+      console.error('Missing required parameters:', { to, subject, messageLength: message?.length, leadId });
       return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
+    console.log(`Sending email to ${to} for lead ${leadId}`);
+    
     // Get the user's Gmail credentials
     const { data: connectionData, error: connectionError } = await supabase
       .from('user_email_connections')
@@ -89,17 +96,30 @@ serve(async (req) => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          client_id: '87876889304-5ee6ln0j3hjoh9hq4h604rjebomac9ua.apps.googleusercontent.com',
+          client_id: GOOGLE_CLIENT_ID,
           client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET')!,
           refresh_token: connectionData.refresh_token,
           grant_type: 'refresh_token',
         }),
       });
       
+      if (!refreshResponse.ok) {
+        const errorText = await refreshResponse.text();
+        console.error('Failed to refresh token:', refreshResponse.status, errorText);
+        return new Response(JSON.stringify({ 
+          error: 'Failed to refresh token',
+          details: errorText,
+          status: refreshResponse.status
+        }), {
+          status: refreshResponse.status,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+      
       const refreshData = await refreshResponse.json();
       
       if (refreshData.error) {
-        console.error('Failed to refresh token:', refreshData);
+        console.error('Error in refresh token response:', refreshData);
         return new Response(JSON.stringify({ 
           error: 'Failed to refresh token',
           details: refreshData.error_description || refreshData.error
@@ -165,13 +185,13 @@ serve(async (req) => {
 
     if (!sendResponse.ok) {
       const errorData = await sendResponse.json();
-      console.error('Error sending email:', errorData);
+      console.error('Error sending email:', sendResponse.status, errorData);
       return new Response(JSON.stringify({ 
         error: 'Failed to send email',
         details: errorData.error?.message || 'Unknown error',
         status: sendResponse.status
       }), {
-        status: 500,
+        status: sendResponse.status,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }

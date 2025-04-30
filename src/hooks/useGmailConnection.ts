@@ -360,108 +360,73 @@ export const useGmailConnection = (leadId: string) => {
               description: "Veuillez compléter l'authentification dans l'onglet qui vient de s'ouvrir."
             });
           }
-          
-          // Définir un intervalle pour vérifier si l'onglet d'authentification est fermé
-          const checkInterval = setInterval(() => {
-            if (authWindow.closed) {
-              clearInterval(checkInterval);
-              
-              // Vérifier si nous avons un indicateur de succès dans localStorage
-              const isSuccess = localStorage.getItem('oauth_success') === 'true';
-              
-              if (isSuccess) {
-                console.log('Authentification réussie détectée (fenêtre fermée)');
-                // Augmenter le compteur de tentatives pour forcer une vérification
-                setConnectionAttemptCount(prev => prev + 1);
-                
-                // Mettre à jour immédiatement l'interface
-                setIsConnected(true);
-                setConnectionError(null);
-                setDetailedErrorInfo(null);
-                
-                // Afficher un toast de confirmation
-                toast({
-                  title: "Connexion réussie",
-                  description: "Votre compte Gmail a été connecté avec succès."
-                });
-              } else {
-                // Vérifier une dernière fois la connexion
-                setConnectionAttemptCount(prev => prev + 1);
-              }
-              
-              // Nettoyage
-              localStorage.removeItem('oauth_pending');
-            }
-          }, 1000);
-          
-          // Nettoyer l'intervalle après 2 minutes
-          setTimeout(() => {
-            clearInterval(checkInterval);
-          }, 120000);
-        } catch (windowError) {
-          console.error("Erreur lors de l'ouverture de la fenêtre d'authentification:", windowError);
-          // En cas d'erreur à l'ouverture de la fenêtre, essayer la redirection directe
-          window.location.href = data.authorizationUrl;
+        } catch (e) {
+          console.error("Erreur lors de l'ouverture de l'URL d'auth:", e);
+          setConnectionError(`Erreur lors de l'ouverture de la page d'authentification: ${(e as Error).message}`);
+          setDetailedErrorInfo({
+            error: e,
+            context: "Opening auth window"
+          });
         }
-      } catch (invokeError) {
-        console.error('Erreur lors de l\'invocation de la fonction gmail-auth:', invokeError);
-        setConnectionError(`Erreur d'invocation de la fonction: ${(invokeError as Error).message}`);
+      } catch (error) {
+        console.error('Erreur dans connectGmail:', error);
+        setConnectionError(`Une erreur est survenue: ${(error as Error).message}`);
         setDetailedErrorInfo({
-          error: invokeError,
-          context: "Try-catch block for function invocation"
+          error: error,
+          context: "Gmail connection process"
         });
-        
-        toast({
-          variant: "destructive",
-          title: "Erreur technique",
-          description: "Une erreur s'est produite lors de la connexion à Gmail."
-        });
+      } finally {
+        setIsConnecting(false);
       }
     } catch (error) {
-      console.error('Erreur dans connectGmail:', error);
-      setConnectionError(`Erreur: ${(error as Error).message}`);
-      setDetailedErrorInfo({
-        error: error,
-        context: "Main try-catch block"
-      });
-      
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de la connexion à Gmail."
-      });
-    } finally {
-      // Ne pas désactiver l'état de connexion immédiatement pour éviter les clics multiples
-      setTimeout(() => {
-        setIsConnecting(false);
-        // Nettoyer l'indicateur en attente s'il existe toujours
-        localStorage.removeItem('oauth_pending');
-      }, 3000);
+      console.error('Erreur inattendue dans connectGmail:', error);
+      setConnectionError(`Erreur inattendue: ${(error as Error).message}`);
+      setIsConnecting(false);
     }
-  }, [isConnecting, leadId, user, windowObjectReady]);
+  }, [isConnecting, windowObjectReady, leadId, user]);
 
   // Fonction pour réessayer la connexion
   const retryConnection = useCallback(() => {
-    if (!windowObjectReady) return;
-
     setConnectionAttemptCount(prev => prev + 1);
-    // Nettoyer les indicateurs s'ils existent toujours
-    localStorage.removeItem('oauth_pending');
-    localStorage.removeItem('oauth_connection_error');
-    
-    // Mettre à jour l'interface immédiatement
-    toast({
-      title: "Vérification en cours",
-      description: "Nous vérifions l'état de votre connexion Gmail..."
-    });
-  }, [windowObjectReady]);
+    setConnectionError(null);
+    setDetailedErrorInfo(null);
+    console.log('Réessai de vérification de connexion Gmail');
+  }, []);
 
-  // Fonction pour vérifier l'état de la fonction Edge Supabase
-  const checkSupabaseEdgeFunctionStatus = useCallback(() => {
-    if (windowObjectReady) {
-      window.open('https://status.supabase.com', '_blank');
+  // Fonction pour vérifier l'état des fonctions Edge Supabase
+  const checkSupabaseEdgeFunctionStatus = useCallback(async () => {
+    try {
+      setIsConnecting(true);
+      const { error } = await supabase.functions.invoke('oauth-callback', {
+        body: { action: 'status-check' }
+      });
+      
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erreur de fonction Edge",
+          description: `La fonction de callback OAuth n'est pas accessible: ${error.message}`
+        });
+        return false;
+      }
+      
+      toast({
+        title: "Fonction Edge disponible",
+        description: "La fonction de callback OAuth est accessible."
+      });
+      return true;
+    } catch (error) {
+      console.error('Erreur lors de la vérification du statut:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: `Impossible de vérifier le statut de la fonction: ${(error as Error).message}`
+      });
+      return false;
+    } finally {
+      setIsConnecting(false);
     }
-  }, [windowObjectReady]);
+  }, []);
 
   return {
     isConnected,

@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1";
 // Replace these with your actual values
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const GOOGLE_CLIENT_ID = '87876889304-5ee6ln0j3hjoh9hq4h604rjebomac9ua.apps.googleusercontent.com';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -50,6 +51,8 @@ serve(async (req) => {
       });
     }
     
+    console.log(`Syncing emails for lead ${leadId} with email ${leadEmail}`);
+    
     // Get the user's Gmail credentials
     const { data: connectionData, error: connectionError } = await supabase
       .from('user_email_connections')
@@ -58,7 +61,11 @@ serve(async (req) => {
       .single();
     
     if (connectionError || !connectionData) {
-      return new Response(JSON.stringify({ error: 'Gmail connection not found' }), {
+      console.error('Gmail connection not found:', connectionError?.message);
+      return new Response(JSON.stringify({ 
+        error: 'Gmail connection not found',
+        details: connectionError?.message
+      }), {
         status: 404,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
@@ -67,13 +74,14 @@ serve(async (req) => {
     // Check if the token is expired
     if (new Date(connectionData.token_expiry) < new Date()) {
       // Refresh the token
+      console.log('Access token expired, refreshing...');
       const refreshResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          client_id: '87876889304-jgq4aon6dia70esiul86hogss2l11e4d.apps.googleusercontent.com',
+          client_id: GOOGLE_CLIENT_ID,
           client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET')!,
           refresh_token: connectionData.refresh_token,
           grant_type: 'refresh_token',
@@ -83,7 +91,11 @@ serve(async (req) => {
       const refreshData = await refreshResponse.json();
       
       if (refreshData.error) {
-        return new Response(JSON.stringify({ error: 'Failed to refresh token' }), {
+        console.error('Failed to refresh token:', refreshData);
+        return new Response(JSON.stringify({ 
+          error: 'Failed to refresh token',
+          details: refreshData.error_description || refreshData.error
+        }), {
           status: 500,
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
         });
@@ -99,6 +111,7 @@ serve(async (req) => {
         .eq('id', connectionData.id);
       
       connectionData.access_token = refreshData.access_token;
+      console.log('Token refreshed successfully');
     }
     
     // Get existing email IDs to avoid duplicates
@@ -112,6 +125,8 @@ serve(async (req) => {
     // Search for emails related to this lead
     // Build the Gmail query - look for emails to or from the lead's email
     const query = `to:${leadEmail} OR from:${leadEmail}`;
+    console.log('Gmail search query:', query);
+    
     const searchResponse = await fetch(
       `https://www.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query)}`,
       {
@@ -121,20 +136,29 @@ serve(async (req) => {
       }
     );
     
-    const searchData = await searchResponse.json();
-    
-    if (searchData.error) {
-      return new Response(JSON.stringify({ error: 'Failed to search emails' }), {
-        status: 500,
+    if (!searchResponse.ok) {
+      const errorText = await searchResponse.text();
+      console.error('Gmail API search error:', searchResponse.status, errorText);
+      return new Response(JSON.stringify({ 
+        error: 'Failed to search emails',
+        details: errorText,
+        status: searchResponse.status
+      }), {
+        status: searchResponse.status,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
     
+    const searchData = await searchResponse.json();
+    
     if (!searchData.messages || searchData.messages.length === 0) {
+      console.log('No emails found for query:', query);
       return new Response(JSON.stringify({ message: 'No emails found', newEmails: 0 }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
+    
+    console.log(`Found ${searchData.messages.length} emails matching query`);
     
     // Process each message (limit to 10 for performance)
     const messagesToProcess = searchData.messages.slice(0, 10);
@@ -142,6 +166,7 @@ serve(async (req) => {
     
     for (const message of messagesToProcess) {
       if (existingIds.has(message.id)) {
+        console.log(`Skipping already imported email: ${message.id}`);
         continue; // Skip emails we already have
       }
       
@@ -155,12 +180,13 @@ serve(async (req) => {
         }
       );
       
-      const messageData = await messageResponse.json();
-      
-      if (messageData.error) {
-        console.error('Error fetching message:', messageData.error);
+      if (!messageResponse.ok) {
+        const errorText = await messageResponse.text();
+        console.error(`Error fetching message ${message.id}:`, messageResponse.status, errorText);
         continue;
       }
+      
+      const messageData = await messageResponse.json();
       
       // Extract relevant data from the message
       const headers = messageData.payload.headers;
@@ -199,6 +225,8 @@ serve(async (req) => {
         messageData.payload.parts.forEach(processMessageParts);
       }
       
+      console.log(`Processing email: ${subject} from ${from} to ${to}`);
+      
       // Store the email in the database
       const { error: insertError } = await supabase
         .from('lead_emails')
@@ -221,6 +249,7 @@ serve(async (req) => {
         continue;
       }
       
+      console.log(`Successfully imported email: ${message.id}`);
       newEmails++;
     }
     
@@ -236,7 +265,10 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Error in gmail-sync function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      stack: (error as Error).stack
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
