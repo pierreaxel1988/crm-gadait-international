@@ -7,7 +7,7 @@ import DashboardCard from '@/components/dashboard/DashboardCard';
 import ConversionRateCard from '@/components/reports/ConversionRateCard';
 import LeadSourceDistribution from '@/components/reports/LeadSourceDistribution';
 import LeadsPerAgentChart from '@/components/reports/LeadsPerAgentChart';
-import LeadsAgentsTable from '@/components/reports/LeadsAgentsTable';
+import TopAgentsTable from '@/components/reports/TopAgentsTable';
 import LeadsByPortalChart from '@/components/reports/LeadsByPortalChart';
 import { Period } from '@/components/reports/PeriodSelector';
 import { useLeadsAgentData, usePortalLeadsData } from '@/hooks/useReportsData';
@@ -215,10 +215,11 @@ const LeadsTabContent: React.FC<LeadsTabContentProps> = ({
               isLoading={isLoadingAgents} 
             />
           ) : (
-            <LeadsAgentsTable 
-              period={leadsPeriod} 
-              data={leadsAgentData || []} 
+            <TopAgentsTable 
+              agentData={leadsAgentData} 
               isLoading={isLoadingAgents} 
+              period={leadsPeriod} 
+              simplified={true}
             />
           )}
         </div>

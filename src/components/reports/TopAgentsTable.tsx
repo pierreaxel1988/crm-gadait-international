@@ -22,26 +22,39 @@ interface Agent {
 }
 
 interface TopAgentsTableProps {
-  agentData: Agent[];
+  agentData?: Agent[];
   isLoading: boolean;
   period?: string;
+  simplified?: boolean; // New prop to support simplified version for leads tab
+  className?: string;
 }
 
 const TopAgentsTable: React.FC<TopAgentsTableProps> = ({ 
-  agentData, 
+  agentData: providedAgentData, 
   isLoading: isLoadingProp,
-  period = 'mois'
+  period = 'mois',
+  simplified = false, // Default to full table
+  className = ''
 }) => {
   const [tablePeriod, setTablePeriod] = useState<Period>({ type: period === 'month' ? 'mois' : period === 'week' ? 'semaine' : period === 'year' ? 'annee' : 'mois' });
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'name' | 'leads' | 'sales' | 'value' | 'conversion' | null>('leads');
+  const [sortBy, setSortBy] = useState<'name' | 'leads' | 'sales' | 'value' | 'conversion' | null>(simplified ? 'leads' : 'leads');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const { teamMembers } = useTeamMembers();
   const [leadData, setLeadData] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch real lead data from Supabase
+  // Use provided agent data if available, otherwise fetch from Supabase
   useEffect(() => {
+    if (providedAgentData) {
+      setLeadData(providedAgentData.reduce((acc, agent) => {
+        acc[agent.name] = agent;
+        return acc;
+      }, {} as Record<string, any>));
+      setIsLoading(false);
+      return;
+    }
+    
     const fetchLeadData = async () => {
       setIsLoading(true);
       
@@ -131,7 +144,7 @@ const TopAgentsTable: React.FC<TopAgentsTableProps> = ({
     };
     
     fetchLeadData();
-  }, [teamMembers]);
+  }, [teamMembers, providedAgentData]);
   
   const commercialAgents = useMemo(() => {
     if (isLoading || !Object.keys(leadData).length) return [];
@@ -188,7 +201,64 @@ const TopAgentsTable: React.FC<TopAgentsTableProps> = ({
     setSearchTerm('');
   };
   
-  return (
+  // Render the table with or without a card wrapper based on simplified mode
+  return simplified ? (
+    <div className={`w-full space-y-4 ${className}`}>
+      <SearchInput
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onClearSearch={handleClearSearch}
+        disabled={isLoading}
+      />
+      
+      <div className="bg-white rounded-md border border-gray-200 shadow-sm overflow-hidden">
+        <Table>
+          <AgentsTableHeader 
+            onSort={handleSort}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            simplified={simplified}
+          />
+          <TableBody>
+            {isLoading ? (
+              // Display skeletons during loading
+              Array(5).fill(0).map((_, index) => (
+                <tr key={`skeleton-${index}`}>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-7 w-7 rounded-full" />
+                      <Skeleton className="h-6 w-[150px]" />
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <Skeleton className="h-6 w-[50px] ml-auto" />
+                  </td>
+                  <td className="p-4">
+                    <Skeleton className="h-6 w-[70px] ml-auto" />
+                  </td>
+                </tr>
+              ))
+            ) : filteredAndSortedAgents.length > 0 ? (
+              filteredAndSortedAgents.map((agent, index) => (
+                <AgentTableRow
+                  key={agent.name}
+                  agent={agent}
+                  simplified={simplified}
+                  isTopAgent={index === 0}
+                />
+              ))
+            ) : (
+              <tr>
+                <td colSpan={simplified ? 3 : 6} className="py-6 text-center text-gray-500">
+                  Aucun agent commercial trouvé
+                </td>
+              </tr>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  ) : (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
@@ -213,6 +283,7 @@ const TopAgentsTable: React.FC<TopAgentsTableProps> = ({
               onSort={handleSort}
               sortBy={sortBy}
               sortDirection={sortDirection}
+              simplified={simplified}
             />
             <TableBody>
               {isLoading ? (
@@ -241,7 +312,11 @@ const TopAgentsTable: React.FC<TopAgentsTableProps> = ({
                 ))
               ) : filteredAndSortedAgents.length > 0 ? (
                 filteredAndSortedAgents.map((agent) => (
-                  <AgentTableRow key={agent.name} agent={agent} />
+                  <AgentTableRow 
+                    key={agent.name} 
+                    agent={agent} 
+                    simplified={simplified} 
+                  />
                 ))
               ) : (
                 <tr>
