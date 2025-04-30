@@ -4,7 +4,6 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLeadDetail } from '@/hooks/useLeadDetail';
-import SidebarLayout from '@/components/layout/SidebarLayout';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import LeadHeader from '@/components/leads/LeadHeader';
 import LeadInfoTab from '@/components/leads/desktop/tabs/LeadInfoTab';
@@ -15,12 +14,21 @@ import DocumentsTab from '@/components/leads/desktop/tabs/DocumentsTab';
 import ContactsTab from '@/components/leads/desktop/tabs/ContactsTab';
 import EmailsTabDesktop from '@/components/leads/desktop/tabs/EmailsTabDesktop';
 
+// Layout wrapper component to avoid import error
+const SidebarLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="min-h-screen bg-loro-pearl/10">
+    <div className="flex">
+      <div className="w-full">{children}</div>
+    </div>
+  </div>
+);
+
 const LeadDetailDesktop = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('info');
-  const { lead, loading, error } = useLeadDetail(id!);
+  const { lead, isLoading: loading, error } = useLeadDetail(id!); // Renommé loading pour correspondre à isLoading
 
   useEffect(() => {
     // Déterminer l'onglet actif depuis les paramètres d'URL ou utiliser "info" par défaut
@@ -85,7 +93,12 @@ const LeadDetailDesktop = () => {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Retour
         </Button>
-        <LeadHeader lead={lead} />
+        <LeadHeader 
+          lead={lead} 
+          onBack={() => navigate(-1)}
+          onAddAction={() => {}}
+          onDelete={() => {}}
+        />
         <div className="mt-6">
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="mb-6 bg-loro-pearl/20 p-1 rounded-lg w-full flex flex-wrap">

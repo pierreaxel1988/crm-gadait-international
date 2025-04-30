@@ -25,6 +25,7 @@ function renderHtmlResponse(options: {
   redirectDelay?: number;
   email?: string;
   status?: number;
+  isCloudflareError?: boolean;
 }) {
   const {
     title,
@@ -35,7 +36,8 @@ function renderHtmlResponse(options: {
     redirectUri,
     redirectDelay = 100, // Very quick redirection
     email,
-    status = 200
+    status = 200,
+    isCloudflareError = false
   } = options;
 
   const appUrl = redirectUri || 'https://gadait-international.com';
@@ -48,10 +50,15 @@ function renderHtmlResponse(options: {
         try {
           console.log("Starting redirect process...");
           
-          // Store success flag in localStorage
-          localStorage.setItem('oauth_success', 'true');
+          // Store success or error flag in localStorage
+          ${isCloudflareError 
+            ? 'localStorage.setItem(\'oauth_cloudflare_error\', \'true\');'
+            : className === 'success' 
+              ? 'localStorage.setItem(\'oauth_success\', \'true\');'
+              : 'localStorage.setItem(\'oauth_connection_error\', \'true\');'
+          }
+          
           localStorage.removeItem('oauth_pending');
-          localStorage.removeItem('oauth_connection_error');
           
           if ('${email}') {
             localStorage.setItem('oauth_email', '${email}');
@@ -65,7 +72,7 @@ function renderHtmlResponse(options: {
           redirectUrl = redirectUrl.replace('http://', 'https://');
           
           // Fix URL parameters if needed
-          if (!redirectUrl.includes('oauth_success=')) {
+          if (!redirectUrl.includes('oauth_success=') && ${!isCloudflareError && className === 'success' ? 'true' : 'false'}) {
             redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + "oauth_success=true";
           }
           
@@ -222,6 +229,28 @@ serve(async (req) => {
       }
     }
     
+    // Check for Cloudflare error in the referrer or response headers
+    const cfCode = url.searchParams.get('cf_error_code');
+    const cfStatusCode = url.searchParams.get('cf_status_code');
+    const cfBrowserErrorReason = url.searchParams.get('cf_browser_error_reason');
+    const cloudflareError = cfCode === '1101' || cfStatusCode === '524';
+    
+    if (cloudflareError || (error && error.includes('cloudflare'))) {
+      console.error("Cloudflare error detected:", { cfCode, cfStatusCode, cfBrowserErrorReason });
+      
+      return renderHtmlResponse({
+        title: "Erreur Cloudflare",
+        className: "error",
+        heading: "Erreur Cloudflare détectée",
+        message: "Une erreur Cloudflare (1101) s'est produite lors de la tentative de connexion à Gmail. Cette erreur est souvent temporaire.",
+        details: `CF Error Code: ${cfCode}, Status: ${cfStatusCode}, Reason: ${cfBrowserErrorReason || 'Unknown'}`,
+        redirectUri: redirectUri,
+        redirectDelay: 3000,
+        status: 503,
+        isCloudflareError: true
+      });
+    }
+    
     // Check if there's an error parameter from Google
     if (error) {
       console.error("OAuth error from Google:", error);
@@ -272,6 +301,21 @@ serve(async (req) => {
       if (!tokenResponse.ok) {
         const errorText = await tokenResponse.text();
         console.error(`Error exchanging code for tokens: ${tokenResponse.status}`, errorText);
+        
+        // Vérifier s'il s'agit d'une erreur Cloudflare
+        if (errorText.includes('cloudflare') || tokenResponse.status === 524 || tokenResponse.status === 1101) {
+          return renderHtmlResponse({
+            title: "Erreur Cloudflare",
+            className: "error",
+            heading: "Erreur Cloudflare détectée",
+            message: "Une erreur Cloudflare s'est produite lors de la tentative de connexion à Gmail. Cette erreur est souvent temporaire.",
+            details: errorText,
+            redirectUri: redirectUri,
+            redirectDelay: 3000,
+            status: 503,
+            isCloudflareError: true
+          });
+        }
         
         return renderHtmlResponse({
           title: "Erreur",
@@ -367,6 +411,21 @@ serve(async (req) => {
       });
     } catch (error) {
       console.error('Error processing OAuth callback:', error);
+      
+      // Vérifier s'il s'agit d'une erreur Cloudflare dans la stack trace
+      if ((error as Error).message.includes('cloudflare') || 
+          (error as Error).stack?.includes('cloudflare')) {
+        return renderHtmlResponse({
+          title: "Erreur Cloudflare",
+          className: "error",
+          heading: "Erreur Cloudflare détectée",
+          message: "Une erreur Cloudflare s'est produite lors de la tentative de connexion à Gmail. Cette erreur est souvent temporaire.",
+          redirectUri: redirectUri,
+          redirectDelay: 3000,
+          status: 503,
+          isCloudflareError: true
+        });
+      }
       
       return renderHtmlResponse({
         title: "Erreur",

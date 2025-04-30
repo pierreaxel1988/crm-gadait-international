@@ -16,7 +16,11 @@ const corsHeaders = {
 };
 
 // Create a Supabase client with the admin key
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  auth: {
+    persistSession: false // Désactiver la persistance de session pour éviter les conflits
+  }
+});
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -138,56 +142,123 @@ serve(async (req) => {
       
       console.log("Exchanging code for tokens with state:", stateObj);
       
-      // Exchange the code for tokens
-      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          code,
-          client_id: GOOGLE_CLIENT_ID,
-          client_secret: GOOGLE_CLIENT_SECRET,
-          redirect_uri: REDIRECT_URI,
-          grant_type: 'authorization_code',
-        }),
-      });
+      try {
+        // Exchange the code for tokens with retry logic
+        let tokenResponse;
+        let tokenData;
+        let retryCount = 0;
+        const maxRetries = 2;
+        
+        while (retryCount <= maxRetries) {
+          try {
+            tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams({
+                code,
+                client_id: GOOGLE_CLIENT_ID,
+                client_secret: GOOGLE_CLIENT_SECRET,
+                redirect_uri: REDIRECT_URI,
+                grant_type: 'authorization_code',
+              }),
+            });
+            
+            if (!tokenResponse.ok) {
+              const errorText = await tokenResponse.text();
+              console.error(`Error exchanging code for tokens (attempt ${retryCount + 1}): ${tokenResponse.status}`, errorText);
+              
+              // Si c'est une erreur Cloudflare, attendre et réessayer
+              if (errorText.includes('cloudflare') || tokenResponse.status === 524 || tokenResponse.status === 1101) {
+                retryCount++;
+                if (retryCount <= maxRetries) {
+                  // Attendre avant de réessayer (backoff exponentiel)
+                  await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
+                  continue;
+                }
+              }
+              
+              throw new Error(`Error ${tokenResponse.status}: ${errorText}`);
+            }
+            
+            tokenData = await tokenResponse.json();
+            
+            if (tokenData.error) {
+              console.error(`Error in token response: ${tokenData.error}`, tokenData);
+              throw new Error(`Error in token response: ${tokenData.error}`);
+            }
+            
+            break; // Sortir de la boucle si réussi
+          } catch (e) {
+            retryCount++;
+            if (retryCount > maxRetries) throw e;
+            // Attendre avant de réessayer
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
+          }
+        }
       
-      const tokenData = await tokenResponse.json();
-      
-      if (tokenData.error) {
-        console.error(`Error exchanging code for tokens: ${tokenData.error}`, tokenData);
-        throw new Error(`Error exchanging code for tokens: ${tokenData.error}`);
-      }
-      
-      // Get user info to determine the Gmail address
-      const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
-        headers: {
-          'Authorization': `Bearer ${tokenData.access_token}`,
-        },
-      });
-      
-      const userInfo = await userInfoResponse.json();
-      
-      // Store the tokens in your database
-      const { error: storeError } = await supabase
-        .from('user_email_connections')
-        .upsert({
-          user_id: stateObj.userId,
-          email: userInfo.email,
-          access_token: tokenData.access_token,
-          refresh_token: tokenData.refresh_token,
-          token_expiry: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
+        // Get user info to determine the Gmail address
+        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
+          headers: {
+            'Authorization': `Bearer ${tokenData.access_token}`,
+          },
         });
-      
-      if (storeError) {
-        console.error(`Error storing tokens: ${storeError.message}`, storeError);
-        throw new Error(`Error storing tokens: ${storeError.message}`);
+        
+        if (!userInfoResponse.ok) {
+          const errorText = await userInfoResponse.text();
+          console.error(`Error fetching user info: ${userInfoResponse.status}`, errorText);
+          throw new Error(`Error fetching user info: ${errorText}`);
+        }
+        
+        const userInfo = await userInfoResponse.json();
+        
+        // Store the tokens in your database
+        const { error: storeError } = await supabase
+          .from('user_email_connections')
+          .upsert({
+            user_id: stateObj.userId,
+            email: userInfo.email,
+            access_token: tokenData.access_token,
+            refresh_token: tokenData.refresh_token,
+            token_expiry: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
+          });
+        
+        if (storeError) {
+          console.error(`Error storing tokens: ${storeError.message}`, storeError);
+          throw new Error(`Error storing tokens: ${storeError.message}`);
+        }
+        
+        return new Response(JSON.stringify({ success: true, redirectUri: stateObj.redirectUri }), {
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      } catch (exchangeError) {
+        // Vérifier si c'est une erreur Cloudflare
+        if (exchangeError.toString().includes('cloudflare') || 
+            exchangeError.toString().includes('524') || 
+            exchangeError.toString().includes('1101')) {
+          console.error('Cloudflare error during token exchange:', exchangeError);
+          return new Response(JSON.stringify({ 
+            error: 'Cloudflare error',
+            cloudflareError: true,
+            details: exchangeError.toString(),
+            redirectUri: stateObj?.redirectUri
+          }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders },
+          });
+        }
+        
+        console.error('Error during token exchange:', exchangeError);
+        return new Response(JSON.stringify({ 
+          error: exchangeError.toString(),
+          details: 'Error during token exchange process',
+          redirectUri: stateObj?.redirectUri
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
       }
-      
-      return new Response(JSON.stringify({ success: true, redirectUri: stateObj.redirectUri }), {
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      });
     }
     
     // Status check endpoint for health verification

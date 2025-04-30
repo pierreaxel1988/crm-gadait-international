@@ -25,6 +25,7 @@ export const useGmailConnection = (leadId: string) => {
   const [checkingConnection, setCheckingConnection] = useState(true);
   const [directRedirectAttempts, setDirectRedirectAttempts] = useState(0);
   const [windowObjectReady, setWindowObjectReady] = useState(false);
+  const [cloudflareErrorDetected, setCloudflareErrorDetected] = useState(false);
 
   // S'assurer que window est défini (important pour empêcher les erreurs SSR)
   useEffect(() => {
@@ -64,6 +65,7 @@ export const useGmailConnection = (leadId: string) => {
       setIsConnected(true);
       setConnectionError(null);
       setDetailedErrorInfo(null);
+      setCloudflareErrorDetected(false);
       
       // Si nous sommes sur l'onglet emails, nettoyer l'URL
       if (location.search.includes('tab=emails') && oauthSuccess) {
@@ -91,9 +93,24 @@ export const useGmailConnection = (leadId: string) => {
       
       return true;
     }
+
+    // Vérifier si une erreur Cloudflare a été détectée
+    const cloudflareError = localStorage.getItem('oauth_cloudflare_error') === 'true';
+    if (cloudflareError && !cloudflareErrorDetected) {
+      console.log('Erreur Cloudflare détectée dans localStorage');
+      localStorage.removeItem('oauth_cloudflare_error');
+      setCloudflareErrorDetected(true);
+      setConnectionError("Une erreur Cloudflare (1101) s'est produite lors de la tentative de connexion à Gmail. Cette erreur est souvent temporaire.");
+      
+      toast({
+        variant: "destructive",
+        title: "Erreur de connexion",
+        description: "Une erreur Cloudflare (1101) s'est produite. Veuillez réessayer dans quelques instants."
+      });
+    }
     
     return false;
-  }, [location.search, navigate, windowObjectReady]);
+  }, [location.search, navigate, windowObjectReady, cloudflareErrorDetected]);
 
   // Vérifier pour les redirections et le succès/échec d'authentification
   useEffect(() => {
@@ -227,6 +244,7 @@ export const useGmailConnection = (leadId: string) => {
           // Nettoyer tout indicateur d'erreur ou de redirection en attente
           localStorage.removeItem('oauth_pending');
           localStorage.removeItem('oauth_connection_error');
+          localStorage.removeItem('oauth_cloudflare_error');
         } else {
           console.log("Aucune connexion Gmail trouvée");
           setIsConnected(false);
@@ -251,7 +269,7 @@ export const useGmailConnection = (leadId: string) => {
     checkEmailConnection();
   }, [user, leadId, connectionAttemptCount, detectAuthSuccess, isConnected, windowObjectReady]);
 
-  // Fonction pour démarrer la connexion Gmail
+  // Fonction pour démarrer la connexion Gmail avec gestion améliorée des erreurs
   const connectGmail = useCallback(async () => {
     if (isConnecting || !windowObjectReady) return;
     
@@ -260,6 +278,7 @@ export const useGmailConnection = (leadId: string) => {
       setConnectionError(null);
       setDetailedErrorInfo(null);
       setGoogleAuthURL(null);
+      setCloudflareErrorDetected(false);
       
       console.log('Démarrage du processus de connexion Gmail pour le lead:', leadId);
       
@@ -282,6 +301,15 @@ export const useGmailConnection = (leadId: string) => {
       console.log('ID utilisateur:', user.id);
       
       try {
+        // Nettoyer tout état d'erreur/succès précédent
+        localStorage.removeItem('oauth_connection_error');
+        localStorage.removeItem('oauth_pending');
+        localStorage.removeItem('oauth_success');
+        localStorage.removeItem('oauth_cloudflare_error');
+        
+        // Ajouter un marqueur pour détecter si nous sommes en attente d'authentification
+        localStorage.setItem('oauth_pending', 'true');
+        
         // Appeler la fonction Edge Supabase pour obtenir l'URL d'authentification
         const { data, error } = await supabase.functions.invoke('gmail-auth', {
           body: {
@@ -318,113 +346,142 @@ export const useGmailConnection = (leadId: string) => {
           return;
         }
         
-        console.log('URL d\'autorisation reçue:', data.authorizationUrl.substring(0, 100) + '...');
-        setGoogleAuthURL(data.authorizationUrl);
-        
-        // Enregistrer l'URL actuelle pour la redirection après l'authentification
-        localStorage.setItem('gmailAuthRedirectFrom', window.location.href);
+        // Stocker la cible de redirection dans localStorage
         localStorage.setItem('oauthRedirectTarget', redirectUri);
         
-        // Définir un indicateur pour détecter les erreurs de redirection
-        localStorage.setItem('oauth_pending', 'true');
+        console.log('URL d\'autorisation générée:', data.authorizationUrl);
+        setGoogleAuthURL(data.authorizationUrl);
         
-        // Définir un délai pour vérifier si l'authentification a réussi
-        setTimeout(() => {
-          const isPending = localStorage.getItem('oauth_pending');
-          const isSuccess = localStorage.getItem('oauth_success');
-          
-          if (isPending === 'true' && isSuccess !== 'true') {
-            // Si toujours en attente après 30 secondes, supposer qu'il y a eu une erreur
-            localStorage.removeItem('oauth_pending');
-            localStorage.setItem('oauth_connection_error', 'true');
-            
-            // Forcer le rechargement pour afficher l'erreur
-            window.location.reload();
-          }
-        }, 30000);
+        // Ouvrir une nouvelle fenêtre pour l'authentification
+        const newWindow = window.open(data.authorizationUrl, '_blank', 'width=600,height=700');
         
-        // Ouvrir l'URL d'authentification
-        try {
-          // Essayer d'ouvrir dans un nouvel onglet d'abord
-          const authWindow = window.open(data.authorizationUrl, '_blank');
+        // Vérifier si la fenêtre s'est ouverte correctement
+        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+          console.error('Popup bloqué ou non ouvert');
+          toast({
+            variant: "destructive",
+            title: "Popup bloqué",
+            description: "Veuillez autoriser les popups pour ce site et réessayer."
+          });
           
-          // Vérifier si la fenêtre s'est bien ouverte
-          if (!authWindow) {
-            console.log("Impossible d'ouvrir un nouvel onglet, essai de redirection directe");
-            // Si l'ouverture d'un nouvel onglet a échoué, rediriger directement
-            window.location.href = data.authorizationUrl;
-            return; // Arrêter l'exécution car la page va se recharger
-          } else {
-            toast({
-              title: "Authentification en cours",
-              description: "Veuillez compléter l'authentification dans l'onglet qui vient de s'ouvrir."
-            });
-          }
-        } catch (e) {
-          console.error("Erreur lors de l'ouverture de l'URL d'auth:", e);
-          setConnectionError(`Erreur lors de l'ouverture de la page d'authentification: ${(e as Error).message}`);
+          setConnectionError("Impossible d'ouvrir la fenêtre d'authentification. Les popups sont peut-être bloqués.");
           setDetailedErrorInfo({
-            error: e,
-            context: "Opening auth window"
+            error: "Popup bloqué",
+            helpMessage: "Veuillez autoriser les popups pour ce site dans les paramètres de votre navigateur et réessayer."
           });
         }
+        
+        // Configurer un écouteur pour détecter le résultat dans localStorage
+        const intervalId = setInterval(() => {
+          // Vérifier si l'authentification a réussi ou échoué
+          if (localStorage.getItem('oauth_success') === 'true') {
+            clearInterval(intervalId);
+            console.log('Authentification OAuth réussie détectée');
+            
+            // Nettoyer les marqueurs
+            localStorage.removeItem('oauth_pending');
+            localStorage.removeItem('oauthRedirectTarget');
+            
+            // Mettre à jour l'interface
+            setIsConnected(true);
+            setConnectionError(null);
+            setDetailedErrorInfo(null);
+            
+            // Forcer une vérification de connexion
+            setConnectionAttemptCount(prev => prev + 1);
+          } 
+          else if (localStorage.getItem('oauth_connection_error') === 'true') {
+            clearInterval(intervalId);
+            console.log('Erreur OAuth détectée');
+            
+            // Nettoyer les marqueurs
+            localStorage.removeItem('oauth_pending');
+            
+            // Mettre à jour l'interface
+            setConnectionError("Une erreur s'est produite lors de l'authentification. Veuillez réessayer.");
+          }
+          else if (localStorage.getItem('oauth_cloudflare_error') === 'true') {
+            clearInterval(intervalId);
+            console.log('Erreur Cloudflare détectée');
+            
+            // Nettoyer les marqueurs
+            localStorage.removeItem('oauth_pending');
+            
+            // Mettre à jour l'interface
+            setCloudflareErrorDetected(true);
+          }
+        }, 1000);
+        
+        // Nettoyer l'intervalle après 5 minutes
+        setTimeout(() => {
+          clearInterval(intervalId);
+          
+          // Si toujours en attente, marquer comme échec
+          if (localStorage.getItem('oauth_pending') === 'true') {
+            console.log('Timeout de l\'authentification OAuth');
+            localStorage.removeItem('oauth_pending');
+            
+            setConnectionError("Le délai d'authentification a expiré. Veuillez réessayer.");
+          }
+        }, 300000); // 5 minutes
+        
       } catch (error) {
-        console.error('Erreur dans connectGmail:', error);
+        console.error('Erreur lors de la fonction connectGmail:', error);
         setConnectionError(`Une erreur est survenue: ${(error as Error).message}`);
-        setDetailedErrorInfo({
-          error: error,
-          context: "Gmail connection process"
+        
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: `Erreur lors de la connexion: ${(error as Error).message}`
         });
-      } finally {
-        setIsConnecting(false);
       }
-    } catch (error) {
-      console.error('Erreur inattendue dans connectGmail:', error);
-      setConnectionError(`Erreur inattendue: ${(error as Error).message}`);
+    } finally {
       setIsConnecting(false);
     }
   }, [isConnecting, windowObjectReady, leadId, user]);
 
   // Fonction pour réessayer la connexion
   const retryConnection = useCallback(() => {
-    setConnectionAttemptCount(prev => prev + 1);
+    console.log('Tentative de reconnexion');
+    
+    // Nettoyer les indicateurs d'erreur/succès
+    localStorage.removeItem('oauth_connection_error');
+    localStorage.removeItem('oauth_pending');
+    localStorage.removeItem('oauth_success');
+    localStorage.removeItem('oauth_cloudflare_error');
+    
+    // Réinitialiser les états d'erreur
     setConnectionError(null);
     setDetailedErrorInfo(null);
-    console.log('Réessai de vérification de connexion Gmail');
+    setCloudflareErrorDetected(false);
+    
+    // Forcer une vérification de connexion
+    setConnectionAttemptCount(prev => prev + 1);
+    
+    // Afficher un toast pour confirmer la tentative
+    toast({
+      title: "Vérification en cours",
+      description: "Vérification de la connexion Gmail..."
+    });
   }, []);
 
-  // Fonction pour vérifier l'état des fonctions Edge Supabase
+  // Fonction pour vérifier le statut de l'Edge Function
   const checkSupabaseEdgeFunctionStatus = useCallback(async () => {
     try {
-      setIsConnecting(true);
-      const { error } = await supabase.functions.invoke('oauth-callback', {
+      const { data, error } = await supabase.functions.invoke('gmail-auth', {
         body: { action: 'status-check' }
       });
       
       if (error) {
-        toast({
-          variant: "destructive",
-          title: "Erreur de fonction Edge",
-          description: `La fonction de callback OAuth n'est pas accessible: ${error.message}`
-        });
+        console.error('Erreur lors de la vérification du statut de la fonction Edge:', error);
         return false;
       }
       
-      toast({
-        title: "Fonction Edge disponible",
-        description: "La fonction de callback OAuth est accessible."
-      });
+      console.log('Statut de la fonction Edge:', data);
       return true;
-    } catch (error) {
-      console.error('Erreur lors de la vérification du statut:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: `Impossible de vérifier le statut de la fonction: ${(error as Error).message}`
-      });
+    } catch (e) {
+      console.error('Exception lors de la vérification du statut:', e);
       return false;
-    } finally {
-      setIsConnecting(false);
     }
   }, []);
 
@@ -439,6 +496,7 @@ export const useGmailConnection = (leadId: string) => {
     checkingConnection,
     connectGmail,
     retryConnection,
-    checkSupabaseEdgeFunctionStatus
+    checkSupabaseEdgeFunctionStatus,
+    cloudflareErrorDetected: cloudflareErrorDetected,
   };
 };

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLeadDetail } from '@/hooks/useLeadDetail';
 import { useGmailConnection } from '@/hooks/useGmailConnection';
@@ -11,7 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import EmailComposer from '../../../components/leads/mobile/tabs/EmailComposer';
+import EmailComposer from '../../mobile/tabs/EmailComposer';
 
 interface EmailsTabDesktopProps {
   leadId: string;
