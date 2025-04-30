@@ -19,6 +19,7 @@ const SearchInput = ({ searchTerm, onSearchChange, onClearSearch }: SearchInputP
       minChars={1}
       clearButton={true}
       searchIcon={true}
+      onClear={onClearSearch}
     />
   );
 };

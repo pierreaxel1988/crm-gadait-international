@@ -7,9 +7,10 @@ interface AgentsTableHeaderProps {
   onSort: (column: 'name' | 'leads' | 'sales' | 'value' | 'conversion') => void;
   sortBy: 'name' | 'leads' | 'sales' | 'value' | 'conversion' | null;
   sortDirection: 'asc' | 'desc';
+  simplified?: boolean;
 }
 
-const AgentsTableHeader = ({ onSort, sortBy, sortDirection }: AgentsTableHeaderProps) => {
+const AgentsTableHeader = ({ onSort, sortBy, sortDirection, simplified = false }: AgentsTableHeaderProps) => {
   const renderSortIcon = (column: 'name' | 'leads' | 'sales' | 'value' | 'conversion') => {
     if (sortBy !== column) return null;
     
@@ -17,6 +18,35 @@ const AgentsTableHeader = ({ onSort, sortBy, sortDirection }: AgentsTableHeaderP
       ? <ArrowUp className="ml-1 h-4 w-4 inline" /> 
       : <ArrowDown className="ml-1 h-4 w-4 inline" />;
   };
+  
+  // Simplified view for the LeadsTabContent
+  if (simplified) {
+    return (
+      <TableHeader>
+        <TableRow>
+          <TableHead 
+            className="w-[250px] cursor-pointer hover:bg-gray-50"
+            onClick={() => onSort('name')}
+          >
+            <div className="flex items-center">
+              Agent {renderSortIcon('name')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="text-right whitespace-nowrap cursor-pointer hover:bg-gray-50"
+            onClick={() => onSort('leads')}
+          >
+            <div className="flex items-center justify-end">
+              Leads {renderSortIcon('leads')}
+            </div>
+          </TableHead>
+          <TableHead className="text-right whitespace-nowrap">
+            Tendance
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+    );
+  }
   
   return (
     <TableHeader>
