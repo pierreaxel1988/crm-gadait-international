@@ -12,12 +12,10 @@ import {
 export function Toaster() {
   const { toasts } = useToast()
 
-  // Filter out any notifications - returning empty array disables all notifications
-  const filteredToasts = [];
-
+  // Use the actual toasts but set a shorter display duration
   return (
     <ToastProvider>
-      {filteredToasts.map(function ({ id, title, description, action, ...props }) {
+      {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
           <Toast key={id} {...props}>
             <div className="grid gap-1">

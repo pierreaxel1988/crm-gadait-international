@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useActionsData } from './useActionsData';
 import { format, isPast, isToday } from 'date-fns';
@@ -21,9 +20,10 @@ export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [processedActionIds, setProcessedActionIds] = useState<Set<string>>(new Set());
   const [systemNotificationsShown, setSystemNotificationsShown] = useState<boolean>(false);
+  const [notificationToastShown, setNotificationToastShown] = useState<boolean>(true); // Default to true to prevent initial toast
   const { actions, markActionComplete } = useActionsData();
   
-  // Load system notifications only once
+  // Load system notifications only once and don't show them by default
   useEffect(() => {
     if (!systemNotificationsShown) {
       const systemNotifications: Notification[] = [
@@ -31,7 +31,7 @@ export const useNotifications = () => {
           id: 'system-1',
           title: 'Bienvenue sur le CRM Gadait International',
           message: 'Découvrez les nouvelles fonctionnalités de la plateforme',
-          read: false,
+          read: true, // Mark as read by default
           timestamp: new Date(Date.now() - 30 * 60000),
           type: 'system'
         }
@@ -49,7 +49,7 @@ export const useNotifications = () => {
     }
   }, [systemNotificationsShown]);
   
-  // Process action notifications with deduplication
+  // Process action notifications with deduplication but limit frequency
   useEffect(() => {
     if (actions && actions.length > 0) {
       const today = new Date();
