@@ -6,12 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLeadDetail } from '@/hooks/useLeadDetail';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import LeadHeader from '@/components/leads/LeadHeader';
-import LeadInfoTab from '@/components/leads/desktop/tabs/LeadInfoTab';
-import ActionsTab from '@/components/leads/desktop/tabs/ActionsTab';
-import NotesTab from '@/components/leads/desktop/tabs/NotesTab';
-import PropertiesTab from '@/components/leads/desktop/tabs/PropertiesTab';
-import DocumentsTab from '@/components/leads/desktop/tabs/DocumentsTab';
-import ContactsTab from '@/components/leads/desktop/tabs/ContactsTab';
+
+// Import components from correct paths
+import LeadInfoTab from '@/components/leads/LeadInfoTab';
+import ActionsTab from '@/components/leads/ActionsTab';
+import NotesTab from '@/components/leads/NotesTab';
+import PropertiesTab from '@/components/leads/PropertiesTab';
+import DocumentsTab from '@/components/leads/DocumentsTab';
+import ContactsTab from '@/components/leads/ContactsTab';
 import EmailsTabDesktop from '@/components/leads/desktop/tabs/EmailsTabDesktop';
 
 // Layout wrapper component to avoid import error
@@ -28,7 +30,8 @@ const LeadDetailDesktop = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('info');
-  const { lead, isLoading: loading, error } = useLeadDetail(id!); // Renommé loading pour correspondre à isLoading
+  const { lead, isLoading: loading } = useLeadDetail(id!); // Fix here to avoid using error property
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Add local error state
 
   useEffect(() => {
     // Déterminer l'onglet actif depuis les paramètres d'URL ou utiliser "info" par défaut
@@ -54,7 +57,7 @@ const LeadDetailDesktop = () => {
     );
   }
 
-  if (error || !lead) {
+  if (errorMessage || !lead) {
     return (
       <SidebarLayout>
         <div className="p-6">
@@ -68,7 +71,7 @@ const LeadDetailDesktop = () => {
           </Button>
           <div className="flex flex-col items-center justify-center min-h-[50vh]">
             <p className="text-red-500 font-medium">
-              {error || "Ce lead n'existe pas ou vous n'avez pas les droits d'accès."}
+              {errorMessage || "Ce lead n'existe pas ou vous n'avez pas les droits d'accès."}
             </p>
             <Button 
               onClick={() => navigate('/leads')} 
