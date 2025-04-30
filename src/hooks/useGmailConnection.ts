@@ -27,25 +27,47 @@ export const useGmailConnection = (leadId: string) => {
   const [windowObjectReady, setWindowObjectReady] = useState(false);
   const [cloudflareErrorDetected, setCloudflareErrorDetected] = useState(false);
   const [lastTokenRefreshTime, setLastTokenRefreshTime] = useState<number>(0);
+  const [forceReconnect, setForceReconnect] = useState(false);
 
   // S'assurer que window est défini (important pour empêcher les erreurs SSR)
   useEffect(() => {
     setWindowObjectReady(typeof window !== 'undefined');
     
-    // Définir une tentative de rechargement automatique après 5 secondes si nous sommes dans une redirection
-    const autoReloadTimeout = setTimeout(() => {
-      const hasOauthParam = location.search.includes('oauth_success=true');
-      const redirectPending = localStorage.getItem('oauth_pending') === 'true';
-      const oauthSuccess = localStorage.getItem('oauth_success') === 'true';
+    // Auto-refresh immédiat si nous détectons des indicateurs de réussite OAuth
+    const checkForOAuthSuccess = () => {
+      const searchParams = new URLSearchParams(location.search);
+      const hasOAuthSuccess = searchParams.has('oauth_success') || localStorage.getItem('oauth_success') === 'true';
       
-      if ((hasOauthParam || oauthSuccess) && !isConnected && connectionAttemptCount === 0) {
-        console.log("Auto-refresh après redirection OAuth détectée");
-        setConnectionAttemptCount(1);
+      if (hasOAuthSuccess) {
+        console.log("Indicateur oauth_success détecté, forçage du rechargement immédiat");
+        setConnectionAttemptCount(prev => prev + 1);
+        setForceReconnect(true);
+        
+        // Si l'URL contient des paramètres OAuth, nettoyer l'URL
+        if (searchParams.has('oauth_success')) {
+          searchParams.delete('oauth_success');
+          const newSearch = searchParams.toString();
+          const newPath = `${location.pathname}${newSearch ? `?${newSearch}` : ''}`;
+          navigate(newPath, { replace: true });
+        }
       }
-    }, 5000);
+    };
     
-    return () => clearTimeout(autoReloadTimeout);
-  }, [location.search, isConnected, connectionAttemptCount]);
+    checkForOAuthSuccess();
+    
+    // Vérifier périodiquement les indicateurs de localStorage
+    const interval = setInterval(() => {
+      const oauthSuccess = localStorage.getItem('oauth_success') === 'true';
+      if (oauthSuccess && !isConnected) {
+        console.log("oauth_success détecté dans localStorage, forçage de la reconnexion");
+        localStorage.removeItem('oauth_success');
+        setForceReconnect(true);
+        setConnectionAttemptCount(prev => prev + 1);
+      }
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [location.search, navigate, isConnected]);
 
   // Fonction pour détecter automatiquement le succès d'authentification
   const detectAuthSuccess = useCallback(() => {
@@ -103,7 +125,9 @@ export const useGmailConnection = (leadId: string) => {
       // Afficher un toast de confirmation
       toast({
         title: "Connexion réussie",
-        description: "Votre compte Gmail a été connecté avec succès."
+        description: connectedEmail 
+          ? `Compte Gmail connecté: ${connectedEmail}` 
+          : "Connexion à Gmail réussie."
       });
       
       return true;
@@ -174,6 +198,7 @@ export const useGmailConnection = (leadId: string) => {
       
       // Forcer la vérification de connexion
       setConnectionAttemptCount(prev => prev + 1);
+      setForceReconnect(true);
       
       // Marquer la connexion comme réussie pour une mise à jour immédiate de l'interface
       setIsConnected(true);
@@ -206,6 +231,7 @@ export const useGmailConnection = (leadId: string) => {
       if (location.pathname.includes('/leads/') && location.search.includes('tab=emails')) {
         // Forcer immédiatement une vérification
         setConnectionAttemptCount(prev => prev + 1);
+        setForceReconnect(true);
       }
     }
   }, [directRedirectAttempts, location.pathname, location.search, windowObjectReady]);
@@ -216,7 +242,7 @@ export const useGmailConnection = (leadId: string) => {
     
     // Éviter les requêtes trop fréquentes
     const now = Date.now();
-    if (now - lastTokenRefreshTime < 1000 && lastTokenRefreshTime > 0) {
+    if (now - lastTokenRefreshTime < 1000 && lastTokenRefreshTime > 0 && !forceReconnect) {
       return; // Éviter les appels trop fréquents
     }
     setLastTokenRefreshTime(now);
@@ -259,6 +285,7 @@ export const useGmailConnection = (leadId: string) => {
           console.log("Connexion Gmail trouvée:", data.email);
           setIsConnected(true);
           setConnectedEmail((data as EmailConnection).email);
+          setForceReconnect(false);
           
           // Vérifier si nous avons un succès d'authentification pour mettre à jour l'interface
           detectAuthSuccess();
@@ -277,6 +304,7 @@ export const useGmailConnection = (leadId: string) => {
             // Si l'authentification a réussi mais qu'aucune connexion n'a été trouvée,
             // c'est probablement un problème de synchronisation, forçons un rechargement
             setConnectionAttemptCount(prev => prev + 1);
+            setForceReconnect(true);
           }
         }
       } catch (error) {
@@ -285,11 +313,12 @@ export const useGmailConnection = (leadId: string) => {
       } finally {
         setIsLoading(false);
         setCheckingConnection(false);
+        setForceReconnect(false);
       }
     }
     
     checkEmailConnection();
-  }, [user, leadId, connectionAttemptCount, detectAuthSuccess, isConnected, windowObjectReady, lastTokenRefreshTime]);
+  }, [user, leadId, connectionAttemptCount, detectAuthSuccess, isConnected, windowObjectReady, lastTokenRefreshTime, forceReconnect]);
 
   // Fonction pour démarrer la connexion Gmail avec gestion améliorée des erreurs
   const connectGmail = useCallback(async () => {
@@ -374,8 +403,12 @@ export const useGmailConnection = (leadId: string) => {
         console.log('URL d\'autorisation générée:', data.authorizationUrl);
         setGoogleAuthURL(data.authorizationUrl);
         
-        // Ouvrir une nouvelle fenêtre pour l'authentification
-        const newWindow = window.open(data.authorizationUrl, '_blank', 'width=600,height=700');
+        // Ouvrir une nouvelle fenêtre pour l'authentification avec des options de popup optimisées
+        const newWindow = window.open(
+          data.authorizationUrl, 
+          '_blank',
+          'width=600,height=700,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=50,top=50'
+        );
         
         // Vérifier si la fenêtre s'est ouverte correctement
         if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
@@ -392,10 +425,27 @@ export const useGmailConnection = (leadId: string) => {
             helpMessage: "Veuillez autoriser les popups pour ce site dans les paramètres de votre navigateur et réessayer."
           });
         } else {
-          // Tenter automatiquement de vérifier si l'authentification a réussi après 5 secondes
-          setTimeout(() => {
-            setConnectionAttemptCount(prev => prev + 1);
-          }, 5000);
+          // Tenter automatiquement de vérifier si l'authentification a réussi après 2, 5 et 10 secondes
+          const checkTimes = [2000, 5000, 10000];
+          checkTimes.forEach(time => {
+            setTimeout(() => {
+              if (!isConnected) {
+                setConnectionAttemptCount(prev => prev + 1);
+              }
+            }, time);
+          });
+          
+          // Surveillance de fermeture de la popup
+          const checkPopupClosed = setInterval(() => {
+            if (newWindow.closed) {
+              clearInterval(checkPopupClosed);
+              console.log("Popup fermée, vérification de l'état d'authentification");
+              setTimeout(() => {
+                setConnectionAttemptCount(prev => prev + 1);
+                setForceReconnect(true);
+              }, 1000);
+            }
+          }, 1000);
         }
         
       } catch (error) {
@@ -411,7 +461,7 @@ export const useGmailConnection = (leadId: string) => {
     } finally {
       setIsConnecting(false);
     }
-  }, [isConnecting, windowObjectReady, leadId, user]);
+  }, [isConnecting, windowObjectReady, leadId, user, isConnected]);
 
   // Fonction pour réessayer la connexion
   const retryConnection = useCallback(() => {
@@ -427,6 +477,7 @@ export const useGmailConnection = (leadId: string) => {
     setConnectionError(null);
     setDetailedErrorInfo(null);
     setCloudflareErrorDetected(false);
+    setForceReconnect(true);
     
     // Forcer une vérification de connexion
     setConnectionAttemptCount(prev => prev + 1);

@@ -2,18 +2,18 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1";
 
-// Replace these with your actual values
+// Remplacez ces valeurs par vos valeurs réelles
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const GOOGLE_CLIENT_ID = '87876889304-5ee6ln0j3hjoh9hq4h604rjebomac9ua.apps.googleusercontent.com';
 const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET')!;
 const REDIRECT_URI = Deno.env.get('OAUTH_REDIRECT_URI') || 'https://success.gadait-international.com/oauth/callback';
 
-// Create a Supabase client with the admin key
+// Créer un client Supabase avec la clé admin
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 /**
- * Render an HTML response for success or error cases
+ * Render a HTML response including auto-redirect script
  */
 function renderHtmlResponse(options: {
   title: string;
@@ -34,7 +34,7 @@ function renderHtmlResponse(options: {
     message,
     details,
     redirectUri,
-    redirectDelay = 100, // Very quick redirection
+    redirectDelay = 10, // Reduced delay for faster redirection
     email,
     status = 200,
     isCloudflareError = false
@@ -42,15 +42,15 @@ function renderHtmlResponse(options: {
 
   const appUrl = redirectUri || 'https://gadait-international.com';
   
-  // Script to handle redirection with improved reliability
+  // Direct window.location redirection for better reliability
   const redirectScript = redirectUri ? `
     <script>
-      // Function to safely redirect with multiple fallbacks
+      // Function to safely redirect with multiple strategies
       function safeRedirect() {
         try {
-          console.log("Starting redirect process...");
+          console.log("Starting redirect process to: ${redirectUri}");
           
-          // Store success or error flag in localStorage
+          // Store success/error flag for frontend detection
           ${isCloudflareError 
             ? 'localStorage.setItem(\'oauth_cloudflare_error\', \'true\');'
             : className === 'success' 
@@ -58,52 +58,62 @@ function renderHtmlResponse(options: {
               : 'localStorage.setItem(\'oauth_connection_error\', \'true\');'
           }
           
+          // Clean up pending state
           localStorage.removeItem('oauth_pending');
           
+          // Store email if available
           if ('${email}') {
             localStorage.setItem('oauth_email', '${email}');
           }
           
-          // Clean the redirectUrl
+          // Ensure URL is properly formatted
           let redirectUrl = "${redirectUri}";
           redirectUrl = decodeURIComponent(redirectUrl);
           
-          // Ensure we're using https
+          // Ensure HTTPS
           redirectUrl = redirectUrl.replace('http://', 'https://');
           
-          // Fix URL parameters if needed
+          // Add success parameter for improved detection
           if (!redirectUrl.includes('oauth_success=') && ${!isCloudflareError && className === 'success' ? 'true' : 'false'}) {
             redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + "oauth_success=true";
           }
           
-          // Add tab=emails parameter for leads pages if not already present
+          // Add tab=emails parameter for leads pages if missing
           if (redirectUrl.includes('/leads/') && !redirectUrl.includes('tab=emails')) {
             redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + "tab=emails";
           }
           
           console.log("Redirecting to:", redirectUrl);
           
-          // Force direct navigation - most reliable approach
+          // IMPORTANT: Use all available redirect methods for maximum reliability
+          
+          // Method 1: Direct location change (most reliable)
           window.location.href = redirectUrl;
           
-          // Backup approach
+          // Method 2: Replace current history entry
           setTimeout(() => {
             window.location.replace(redirectUrl);
-          }, 100);
+          }, 50);
           
-          // Final fallback
+          // Method 3: Open in same window
           setTimeout(() => {
             window.open(redirectUrl, '_self');
-          }, 500);
+          }, 100);
+          
+          // Method 4: Document write redirect (last resort)
+          setTimeout(() => {
+            document.write('<html><head><meta http-equiv="refresh" content="0;url=' + redirectUrl + '"></head><body>Redirecting...</body></html>');
+          }, 200);
         } catch (e) {
           console.error("Redirect error:", e);
-          // Fallback to basic redirect
+          // Fallback
           window.location.href = "${appUrl}";
         }
       }
       
       // Multiple triggers to ensure redirection happens
       document.addEventListener('DOMContentLoaded', safeRedirect);
+      window.onload = safeRedirect;
       setTimeout(safeRedirect, ${redirectDelay});
       
       // Try immediate redirect
@@ -111,12 +121,12 @@ function renderHtmlResponse(options: {
     </script>
   ` : '';
 
-  // Fallback link for manual redirection
+  // Manual redirection link as backup
   const manualRedirectButton = redirectUri ? `
     <div style="margin-top: 20px; text-align: center;">
-      <p>Si vous n'êtes pas redirigé automatiquement :</p>
+      <p>Si vous n'êtes pas redirigé automatiquement dans 3 secondes:</p>
       <a href="${redirectUri}" style="display: inline-block; background: #3498db; color: white; padding: 15px 30px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; margin-top: 10px;">
-        Cliquez ici pour revenir à l'application
+        Cliquez ici pour continuer
       </a>
     </div>
   ` : '';
@@ -137,7 +147,7 @@ function renderHtmlResponse(options: {
         <title>${title}</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="refresh" content="${redirectDelay/1000};url=${redirectUri}" />
+        <meta http-equiv="refresh" content="1;url=${redirectUri}" />
         <style>
           body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f9f9f9; padding: 20px; }
           .container { text-align: center; max-width: 600px; padding: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-radius: 8px; background: white; }
@@ -168,7 +178,20 @@ function renderHtmlResponse(options: {
           ${emailInfo}
           ${redirectUri ? `
             <div class="loader"></div>
-            <p>Redirection automatique vers l'application en cours...</p>
+            <p>Redirection automatique vers l'application (<span id="count">3</span>)...</p>
+            <script>
+              var count = 3;
+              var counter = setInterval(timer, 1000);
+              function timer() {
+                count = count - 1;
+                if (count <= 0) {
+                  clearInterval(counter);
+                  document.getElementById("count").innerHTML = "0";
+                  return;
+                }
+                document.getElementById("count").innerHTML = count;
+              }
+            </script>
           ` : ''}
           ${manualRedirectButton}
           ${detailsSection}
@@ -184,7 +207,7 @@ function renderHtmlResponse(options: {
 
 serve(async (req) => {
   try {
-    // Get the code and state from the URL
+    // Récupérer le code et l'état dans l'URL
     const url = new URL(req.url);
     const code = url.searchParams.get('code');
     const stateParam = url.searchParams.get('state');
@@ -197,7 +220,7 @@ serve(async (req) => {
       url: req.url
     });
     
-    // Extract state parameter to get the redirect URI regardless of error
+    // Extraire le paramètre state pour obtenir l'URI de redirection, quel que soit l'erreur
     let redirectUri = 'https://gadait-international.com/leads';
     let userId = '';
     
@@ -209,49 +232,49 @@ serve(async (req) => {
         
         console.log("Parsed state object:", { redirectUri, userId });
         
-        // Ensure the redirect URL is valid and properly formatted
+        // S'assurer que l'URL de redirection est valide et correctement formatée
         if (redirectUri) {
-          // First decode any potentially double-encoded URL
+          // Décoder une première fois toute URL potentiellement doublement encodée
           redirectUri = decodeURIComponent(redirectUri);
           
-          // Ensure using https for all URLs
+          // S'assurer d'utiliser https pour toutes les URL
           if (!redirectUri.startsWith('https://')) {
             redirectUri = redirectUri.replace('http://', 'https://');
           }
           
-          // Handle Lovable URLs specifically
+          // Traitement spécifique pour les URL Lovable
           if (redirectUri.includes('lovableproject.com') || redirectUri.includes('lovable.app')) {
-            console.log("Detected Lovable URL, ensuring proper formatting");
+            console.log("URL Lovable détectée, application du formatage approprié");
             
-            // Add tab=emails parameter if missing on leads pages
+            // Ajouter le paramètre tab=emails si manquant sur les pages leads
             if (redirectUri.includes('/leads/') && !redirectUri.includes('tab=emails')) {
               redirectUri = redirectUri.includes('?') 
                 ? `${redirectUri}&tab=emails` 
                 : `${redirectUri}?tab=emails`;
             }
             
-            // Fix any potential issues with encoded parameters
+            // Corriger tout problème potentiel avec les paramètres encodés
             redirectUri = redirectUri.replace('?tab%3Demails', '?tab=emails');
             
-            // Add oauth_success parameter to improve detection in the frontend
+            // Ajouter le paramètre oauth_success pour améliorer la détection dans le frontend
             redirectUri = redirectUri.includes('?') 
               ? `${redirectUri}&oauth_success=true` 
               : `${redirectUri}?oauth_success=true`;
           }
         }
       } catch (e) {
-        console.error('Error parsing state:', e);
+        console.error('Erreur de parsing du state:', e);
       }
     }
     
-    // Check for Cloudflare error in the referrer or response headers
+    // Vérifier les erreurs Cloudflare dans le référent ou les en-têtes de réponse
     const cfCode = url.searchParams.get('cf_error_code');
     const cfStatusCode = url.searchParams.get('cf_status_code');
     const cfBrowserErrorReason = url.searchParams.get('cf_browser_error_reason');
     const cloudflareError = cfCode === '1101' || cfStatusCode === '524';
     
     if (cloudflareError || (error && error.includes('cloudflare'))) {
-      console.error("Cloudflare error detected:", { cfCode, cfStatusCode, cfBrowserErrorReason });
+      console.error("Erreur Cloudflare détectée:", { cfCode, cfStatusCode, cfBrowserErrorReason });
       
       return renderHtmlResponse({
         title: "Erreur Cloudflare",
@@ -266,9 +289,9 @@ serve(async (req) => {
       });
     }
     
-    // Check if there's an error parameter from Google
+    // Vérifier s'il y a un paramètre d'erreur de Google
     if (error) {
-      console.error("OAuth error from Google:", error);
+      console.error("Erreur OAuth de Google:", error);
       const error_description = url.searchParams.get('error_description') || '';
       
       return renderHtmlResponse({
@@ -277,7 +300,7 @@ serve(async (req) => {
         heading: "Authentification échouée",
         message: `Erreur: ${error}`,
         details: error_description,
-        redirectUri: redirectUri, // Always redirect, even on error
+        redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
         redirectDelay: 3000,
         status: 400
       });
@@ -289,16 +312,16 @@ serve(async (req) => {
         className: "error",
         heading: "Authentification échouée",
         message: "Code d'autorisation manquant.",
-        redirectUri: redirectUri, // Always redirect, even on error
+        redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
         redirectDelay: 3000,
         status: 400
       });
     }
     
-    // If code exists, proceed with token exchange
+    // Si le code existe, procéder à l'échange de jetons
     try {
-      // Exchange code for tokens
-      console.log("Exchanging code for tokens...");
+      // Échanger le code contre des jetons
+      console.log("Échange du code contre des jetons...");
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: {
@@ -315,7 +338,7 @@ serve(async (req) => {
       
       if (!tokenResponse.ok) {
         const errorText = await tokenResponse.text();
-        console.error(`Error exchanging code for tokens: ${tokenResponse.status}`, errorText);
+        console.error(`Erreur d'échange de code contre des jetons: ${tokenResponse.status}`, errorText);
         
         // Vérifier s'il s'agit d'une erreur Cloudflare
         if (errorText.includes('cloudflare') || tokenResponse.status === 524 || tokenResponse.status === 1101) {
@@ -338,7 +361,7 @@ serve(async (req) => {
           heading: "Échec d'authentification",
           message: `Erreur lors de l'échange du code contre des tokens: ${tokenResponse.status}`,
           details: errorText,
-          redirectUri: redirectUri, // Always redirect, even on error
+          redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
           redirectDelay: 3000,
           status: 500
         });
@@ -347,7 +370,7 @@ serve(async (req) => {
       const tokenData = await tokenResponse.json();
       
       if (tokenData.error) {
-        console.error(`Error in token response: ${tokenData.error}`, tokenData);
+        console.error(`Erreur dans la réponse du jeton: ${tokenData.error}`, tokenData);
         
         return renderHtmlResponse({
           title: "Erreur",
@@ -355,13 +378,13 @@ serve(async (req) => {
           heading: "Échec d'authentification",
           message: `Erreur: ${tokenData.error}`,
           details: tokenData.error_description || JSON.stringify(tokenData),
-          redirectUri: redirectUri, // Always redirect, even on error
+          redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
           redirectDelay: 3000,
           status: 400
         });
       }
       
-      // Get user info to determine the Gmail address
+      // Obtenir les informations utilisateur pour déterminer l'adresse Gmail
       const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {
         headers: {
           'Authorization': `Bearer ${tokenData.access_token}`,
@@ -370,7 +393,7 @@ serve(async (req) => {
       
       if (!userInfoResponse.ok) {
         const errorText = await userInfoResponse.text();
-        console.error(`Error fetching user info: ${userInfoResponse.status}`, errorText);
+        console.error(`Erreur lors de la récupération des informations utilisateur: ${userInfoResponse.status}`, errorText);
         
         return renderHtmlResponse({
           title: "Erreur",
@@ -378,16 +401,16 @@ serve(async (req) => {
           heading: "Échec d'authentification",
           message: "Impossible de récupérer les informations de l'utilisateur.",
           details: errorText,
-          redirectUri: redirectUri, // Always redirect, even on error
+          redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
           redirectDelay: 3000,
           status: 500
         });
       }
       
       const userInfo = await userInfoResponse.json();
-      console.log("Retrieved user info:", userInfo.email);
+      console.log("Informations utilisateur récupérées:", userInfo.email);
       
-      // Store the tokens in the database
+      // Stocker les jetons dans la base de données
       if (userId) {
         try {
           const { error: storeError } = await supabase
@@ -401,31 +424,31 @@ serve(async (req) => {
             });
           
           if (storeError) {
-            console.error(`Error storing tokens: ${storeError.message}`, storeError);
+            console.error(`Erreur lors du stockage des jetons: ${storeError.message}`, storeError);
           } else {
-            console.log("Tokens stored successfully for user:", userId);
+            console.log("Jetons stockés avec succès pour l'utilisateur:", userId);
           }
         } catch (dbError) {
-          console.error("Database error:", dbError);
+          console.error("Erreur de base de données:", dbError);
         }
       } else {
-        console.error("No userId provided, skipping token storage");
+        console.error("Aucun userId fourni, stockage de jeton ignoré");
       }
       
-      console.log("Authentication successful. Redirecting to:", redirectUri);
+      console.log("Authentification réussie. Redirection vers:", redirectUri);
       
-      // Generate a success response with redirection
+      // Générer une réponse de succès avec redirection directe
       return renderHtmlResponse({
         title: "Succès",
         className: "success",
         heading: "Authentification réussie!",
-        message: "Vous avez connecté votre compte Gmail avec succès.",
+        message: "Vous avez connecté votre compte Gmail avec succès. Vous allez être redirigé vers l'application...",
         email: userInfo.email,
         redirectUri: redirectUri,
-        redirectDelay: 100 // Very quick redirection for better UX
+        redirectDelay: 10 // Redirection très rapide pour une meilleure expérience utilisateur
       });
     } catch (error) {
-      console.error('Error processing OAuth callback:', error);
+      console.error('Erreur lors du traitement du callback OAuth:', error);
       
       // Vérifier s'il s'agit d'une erreur Cloudflare dans la stack trace
       if ((error as Error).message.includes('cloudflare') || 
@@ -447,14 +470,14 @@ serve(async (req) => {
         className: "error",
         heading: "Erreur lors de l'authentification",
         message: `Une erreur s'est produite: ${(error as Error).message}`,
-        redirectUri: redirectUri, // Always redirect, even on error
+        redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
         redirectDelay: 3000,
         status: 500
       });
     }
   } catch (error) {
-    console.error('Unexpected error in oauth-callback:', error);
-    // In case of a catastrophic error, still try to redirect the user to the application
+    console.error('Erreur inattendue dans oauth-callback:', error);
+    // En cas d'erreur catastrophique, essayer tout de même de rediriger l'utilisateur vers l'application
     const redirectUri = 'https://gadait-international.com/leads';
     
     return renderHtmlResponse({
@@ -462,7 +485,7 @@ serve(async (req) => {
       className: "error",
       heading: "Erreur inattendue",
       message: `Une erreur inattendue s'est produite: ${(error as Error).message}`,
-      redirectUri: redirectUri, // Always redirect, even on error
+      redirectUri: redirectUri, // Toujours rediriger, même en cas d'erreur
       redirectDelay: 3000,
       status: 500
     });
