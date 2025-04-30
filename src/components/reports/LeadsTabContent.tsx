@@ -216,7 +216,13 @@ const LeadsTabContent: React.FC<LeadsTabContentProps> = ({
             />
           ) : (
             <TopAgentsTable 
-              agentData={leadsAgentData} 
+              agentData={leadsAgentData?.map(agent => ({
+                ...agent,
+                leads: agent[leadsPeriod] || agent.leads || 0,
+                sales: 0,
+                value: "€0",
+                conversion: 0
+              }))} 
               isLoading={isLoadingAgents} 
               period={leadsPeriod} 
               simplified={true}
