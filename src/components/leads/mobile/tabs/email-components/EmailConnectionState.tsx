@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Mail, RefreshCw, ExternalLink, CheckCircle, AlertCircle, RotateCw } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Mail, RefreshCw, CheckCircle, AlertCircle, RotateCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,10 +29,16 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
   const [forceReloadCount, setForceReloadCount] = React.useState<number>(0);
   const [showTechnicalDetails, setShowTechnicalDetails] = React.useState<boolean>(false);
   
-  React.useEffect(() => {
+  useEffect(() => {
+    // Clean up any lingering OAuth state indicators that might cause issues
+    const params = new URLSearchParams(window.location.search);
+    const haveOAuthSuccess = params.get('oauth_success') === 'true';
+    const haveCloudflareError = params.get('oauth_cloudflare_error') === 'true';
+    const haveConnectionError = params.get('oauth_connection_error') === 'true';
+    
     // Check if we're coming from callback page
     const referrer = document.referrer;
-    const haveState = new URLSearchParams(window.location.search).has('state');
+    const haveState = params.has('state');
     const havePending = localStorage.getItem('oauth_pending') === 'true';
     const haveRedirectTarget = localStorage.getItem('oauthRedirectTarget');
     
@@ -43,15 +49,23 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       )) ||
       havePending ||
       haveRedirectTarget ||
-      haveState
+      haveState ||
+      haveOAuthSuccess
     ) {
+      console.log("OAuth redirection detected, attempting automatic reconnection");
       setRedirectedFromCallback(true);
       
       // If we were redirected from callback page, automatically retry connection
       if (onRetryConnection) {
-        console.log("Detected redirect from OAuth, attempting automatic reconnection");
         const timer = setTimeout(() => {
+          console.log("Auto-retrying connection after redirect detection");
           onRetryConnection();
+          // If we had success indicator, force reload after retry
+          if (haveOAuthSuccess) {
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
         }, 500);
         return () => clearTimeout(timer);
       }
@@ -63,7 +77,7 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
     }, 5000);
     
     // Clean up error indicator after reading it
-    if (hadConnectionError) {
+    if (hadConnectionError || haveConnectionError) {
       localStorage.removeItem('oauth_connection_error');
       
       // Force automatic reload if there was a previous error
@@ -78,8 +92,15 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       }
     }
     
+    // Clean up cloudflare error indicator
+    if (haveCloudflareError) {
+      localStorage.removeItem('oauth_cloudflare_error');
+    }
+    
     // Clean up other OAuth indicators that might exist
-    localStorage.removeItem('oauth_pending');
+    if (!havePending) {
+      localStorage.removeItem('oauth_pending');
+    }
     
     return () => clearTimeout(redirectHelpTimer);
   }, [hadConnectionError, onRetryConnection, forceReloadCount]);
@@ -119,7 +140,7 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       localStorage.removeItem('oauth_success');
       localStorage.removeItem('oauth_cloudflare_error');
       
-      // If we had a redirection problem, try alternative method
+      // If we had a redirection problem, try force reload
       if (redirectedFromCallback || showRedirectHelp) {
         try {
           // Force a complete page reload
@@ -140,6 +161,7 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
     localStorage.removeItem('oauth_pending');
     localStorage.removeItem('oauth_success');
     localStorage.removeItem('oauth_cloudflare_error');
+    // Force a complete page reload
     window.location.reload();
   };
 
@@ -278,6 +300,8 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
               <li><strong>Référent:</strong> {document.referrer || 'Non disponible'}</li>
               <li><strong>oauth_pending:</strong> {localStorage.getItem('oauth_pending') || 'Non'}</li>
               <li><strong>redirectTarget:</strong> {localStorage.getItem('oauthRedirectTarget') || 'Non'}</li>
+              <li><strong>oauth_success:</strong> {localStorage.getItem('oauth_success') || 'Non'}</li>
+              <li><strong>Query params:</strong> {window.location.search || 'Aucun'}</li>
             </ul>
           </div>
         )}

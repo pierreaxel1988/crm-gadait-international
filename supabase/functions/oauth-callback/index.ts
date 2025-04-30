@@ -64,16 +64,28 @@ serve(async (req) => {
         <h1 style="color: #e11d48;">Erreur d'authentification</h1>
         <p>Une erreur s'est produite lors de l'authentification. Redirection en cours...</p>
         <script>
+          // Store error indicator in localStorage
           localStorage.setItem('oauth_connection_error', 'true');
-          window.addEventListener('DOMContentLoaded', () => {
-            window.location.href = "${redirectUrl}";
-          });
+          localStorage.removeItem('oauth_pending');
+          localStorage.removeItem('oauth_success');
+          localStorage.removeItem('oauth_cloudflare_error');
           
-          // Fallback if DOMContentLoaded doesn't trigger
+          // Try multiple redirection methods for reliability
+          try {
+            window.location.replace("${redirectUrl}");
+          } catch (e) {
+            console.error("Error redirecting:", e);
+            setTimeout(() => {
+              window.location.href = "${redirectUrl}";
+            }, 500);
+          }
+          
+          // Fallback if redirect fails
           setTimeout(() => {
             window.location.href = "${redirectUrl}";
-          }, 1000);
+          }, 1500);
         </script>
+        <meta http-equiv="refresh" content="2;url=${redirectUrl}" />
       </body>
       </html>
     `;
@@ -137,15 +149,26 @@ serve(async (req) => {
           <p>Une erreur Cloudflare s'est produite. Redirection en cours...</p>
           <script>
             localStorage.setItem('oauth_cloudflare_error', 'true');
-            window.addEventListener('DOMContentLoaded', () => {
-              window.location.href = "${redirectUrl}";
-            });
+            localStorage.removeItem('oauth_pending');
+            localStorage.removeItem('oauth_success');
+            localStorage.removeItem('oauth_connection_error');
             
-            // Fallback if DOMContentLoaded doesn't trigger
+            // Try multiple redirection methods for reliability
+            try {
+              window.location.replace("${redirectUrl}");
+            } catch (e) {
+              console.error("Error redirecting:", e);
+              setTimeout(() => {
+                window.location.href = "${redirectUrl}";
+              }, 500);
+            }
+            
+            // Fallback if redirect fails
             setTimeout(() => {
               window.location.href = "${redirectUrl}";
-            }, 1000);
+            }, 1500);
           </script>
+          <meta http-equiv="refresh" content="2;url=${redirectUrl}" />
         </body>
         </html>
       `;
@@ -156,7 +179,7 @@ serve(async (req) => {
     }
   }
   
-  // Add success parameter to URL
+  // Add success parameter to URL to indicate successful authentication
   const finalRedirectUrl = new URL(redirectUrl);
   if (success) {
     finalRedirectUrl.searchParams.set('oauth_success', 'true');
@@ -170,6 +193,7 @@ serve(async (req) => {
     <head>
       <title>Gmail Authentication Successful</title>
       <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta http-equiv="refresh" content="3;url=${redirectUrl}" />
       <style>
         body {
           font-family: system-ui, sans-serif;
@@ -221,6 +245,8 @@ serve(async (req) => {
           localStorage.removeItem('oauth_success');
         }
         localStorage.removeItem('oauth_pending');
+        localStorage.removeItem('oauth_cloudflare_error');
+        localStorage.removeItem('oauth_connection_error');
         
         // Method 2: Try to use postMessage to parent window
         try {
@@ -236,7 +262,7 @@ serve(async (req) => {
             // Close this window after sending the message
             setTimeout(() => {
               window.close();
-            }, 300);
+            }, 500);
           }
         } catch (e) {
           console.error("Error sending postMessage:", e);
@@ -247,16 +273,44 @@ serve(async (req) => {
         const redirectUrl = "${redirectUrl}";
         
         // Method 3a: Location replace
-        window.location.replace(redirectUrl);
+        try {
+          window.location.replace(redirectUrl);
+        } catch(e) {
+          console.error("Error during location.replace:", e);
+        }
         
         // Method 3b: Location href with delay as fallback
         setTimeout(() => {
           window.location.href = redirectUrl;
-        }, 200);
+        }, 500);
         
-        // Method 3c: Meta refresh as final fallback
-        document.head.insertAdjacentHTML('beforeend', 
-          '<meta http-equiv="refresh" content="1;url=' + redirectUrl + '" />');
+        // Method 3c: Meta refresh as final fallback - already added to head
+        
+        // Method 3d: Form submission as another fallback
+        const form = document.createElement('form');
+        form.style.display = 'none';
+        form.method = 'GET';
+        form.action = redirectUrl.split('?')[0];
+        
+        if (redirectUrl.includes('?')) {
+          const params = new URLSearchParams(redirectUrl.split('?')[1]);
+          params.forEach((value, key) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value;
+            form.appendChild(input);
+          });
+        }
+        
+        document.body.appendChild(form);
+        setTimeout(() => {
+          try {
+            form.submit();
+          } catch (e) {
+            console.error("Error submitting form:", e);
+          }
+        }, 1000);
       </script>
     </body>
     </html>

@@ -305,11 +305,56 @@ export const useGmailConnection = (leadId: string) => {
   }, [user, leadId, connectionAttemptCount, windowObjectReady, lastTokenRefreshTime, forceReconnect, checkEmailConnection]);
 
   // Function to manually force an auth check
-  const forceAuthCheck = useCallback(() => {
-    setForceReconnect(true);
-    setConnectionAttemptCount(prev => prev + 1);
-    checkEmailConnection(true);
-  }, [checkEmailConnection]);
+  const forceAuthCheck = async () => {
+    try {
+      console.log("Forcing authentication check...");
+      setCheckingConnection(true);
+      
+      // Clear previous connection status
+      setIsConnected(false);
+      setConnectionError(null);
+      setDetailedErrorInfo(null);
+      
+      // Check for authenticated user first
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        throw new Error("Utilisateur non connecté");
+      }
+      
+      // Get the current user ID from the session
+      const userId = session.user.id;
+      
+      // Query to check for existing email connections
+      const { data: connections, error: connectionsError } = await supabase
+        .from("user_email_connections")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+      
+      if (connectionsError) {
+        console.error("Error checking for email connections:", connectionsError);
+        throw new Error("Erreur lors de la vérification des connexions email");
+      }
+      
+      if (connections) {
+        console.log("Found existing Gmail connection");
+        setIsConnected(true);
+        setConnectedEmail(connections.email);
+        return true;
+      } else {
+        console.log("No Gmail connection found");
+        setIsConnected(false);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error during forced auth check:", error);
+      setConnectionError("Erreur lors de la vérification de l'authentification");
+      setDetailedErrorInfo(error.toString());
+      return false;
+    } finally {
+      setCheckingConnection(false);
+    }
+  };
 
   // Function to start Gmail connection with enhanced error handling
   const connectGmail = useCallback(async () => {

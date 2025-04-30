@@ -26,6 +26,7 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
   const [showRefreshAlert, setShowRefreshAlert] = useState(false);
   const [cloudflareError, setCloudflareError] = useState(false);
   const [initialAuthCheckComplete, setInitialAuthCheckComplete] = useState(false);
+  const [authCounter, setAuthCounter] = useState(0);
 
   // Observe URL parameters and localStorage for authentication indicators
   useEffect(() => {
@@ -39,7 +40,8 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
       urlOAuthSuccess: hasOAuthSuccess,
       urlStateParam: hasStateParam,
       storedSuccess,
-      cloudflareError: cloudflareErr
+      cloudflareError: cloudflareErr,
+      searchParams: location.search
     });
     
     if (hasOAuthSuccess || storedSuccess || hasStateParam) {
@@ -47,13 +49,17 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
       setShowRefreshAlert(true);
       
       if (storedSuccess) {
+        // Clear the success flag to prevent showing the alert on subsequent page loads
         localStorage.removeItem('oauth_success');
       }
       
-      toast({
-        title: "Authentification détectée",
-        description: "Vérification de la connexion Gmail..."
-      });
+      // Don't show a toast every time - it's annoying
+      if (!initialAuthCheckComplete) {
+        toast({
+          title: "Authentification détectée",
+          description: "Vérification de la connexion Gmail..."
+        });
+      }
     }
     
     if (cloudflareErr) {
@@ -63,7 +69,7 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
     }
     
     setInitialAuthCheckComplete(true);
-  }, [location.search]);
+  }, [location.search, initialAuthCheckComplete]);
 
   const {
     isConnected,
@@ -98,12 +104,36 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
 
   // Force connection check when auth success is detected
   useEffect(() => {
-    if ((initialAuthCheckComplete && showRefreshAlert) || 
-        (location.search && location.search.includes('oauth_success'))) {
-      console.log("Forcing auth check due to detected success indicators");
-      forceAuthCheck();
-    }
-  }, [initialAuthCheckComplete, showRefreshAlert, location.search, forceAuthCheck]);
+    const checkForAuthSuccess = () => {
+      const params = new URLSearchParams(location.search);
+      const hasOAuthSuccess = params.has('oauth_success') || params.get('oauth_success') === 'true';
+      const storedSuccess = localStorage.getItem('oauth_success') === 'true';
+      
+      if ((initialAuthCheckComplete && showRefreshAlert) || 
+          hasOAuthSuccess || storedSuccess) {
+        console.log("Forcing auth check due to detected success indicators");
+        // Clear the success indicator
+        localStorage.removeItem('oauth_success');
+        forceAuthCheck();
+        
+        // Increment our counter to track how many retries we've done
+        setAuthCounter(prev => prev + 1);
+        
+        // If we've tried more than once and still not connected, force a page reload
+        if (authCounter > 0) {
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        }
+      }
+    };
+    
+    checkForAuthSuccess();
+    
+    // Also set up a timer to check again after a delay
+    const timer = setTimeout(checkForAuthSuccess, 1000);
+    return () => clearTimeout(timer);
+  }, [initialAuthCheckComplete, showRefreshAlert, location.search, forceAuthCheck, authCounter]);
 
   const handleManualRefresh = () => {
     setShowRefreshAlert(false);
