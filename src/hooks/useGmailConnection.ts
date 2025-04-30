@@ -22,14 +22,12 @@ export const useGmailConnection = (leadId: string) => {
   const [detailedErrorInfo, setDetailedErrorInfo] = useState<any>(null);
   const [googleAuthURL, setGoogleAuthURL] = useState<string | null>(null);
   const [checkingConnection, setCheckingConnection] = useState(true);
-  const [directRedirectAttempts, setDirectRedirectAttempts] = useState(0);
   const [windowObjectReady, setWindowObjectReady] = useState(false);
   const [cloudflareErrorDetected, setCloudflareErrorDetected] = useState(false);
   const [lastTokenRefreshTime, setLastTokenRefreshTime] = useState<number>(0);
   const [forceReconnect, setForceReconnect] = useState(false);
   const [handledOAuthSuccess, setHandledOAuthSuccess] = useState(false);
-  const [maxRedirectAttempts, setMaxRedirectAttempts] = useState(3);
-
+  
   // Ensure window is defined (important to prevent SSR errors)
   useEffect(() => {
     setWindowObjectReady(typeof window !== 'undefined');
@@ -62,10 +60,8 @@ export const useGmailConnection = (leadId: string) => {
               : "Connexion à Gmail réussie."
           });
           
-          // Reload the page to ensure synchronization
-          setTimeout(() => {
-            window.location.reload();
-          }, 300);
+          // Force reload
+          forceAuthCheck();
         }
       }
     };
@@ -79,7 +75,7 @@ export const useGmailConnection = (leadId: string) => {
           console.log('OAuth success detected from storage event');
           setConnectionAttemptCount(prev => prev + 1);
           setForceReconnect(true);
-          setTimeout(() => window.location.reload(), 500);
+          forceAuthCheck();
         }
       });
     }
@@ -139,7 +135,6 @@ export const useGmailConnection = (leadId: string) => {
           setIsConnected(true);
         }
         
-        // Show confirmation toast
         toast({
           title: "Connexion détectée",
           description: "Finalisation de la connexion Gmail..."
@@ -160,10 +155,8 @@ export const useGmailConnection = (leadId: string) => {
           navigate(newUrl, { replace: true });
         }
         
-        // Force reload after a short delay
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
+        // Force auth check
+        forceAuthCheck();
         
         return true;
       }
@@ -204,154 +197,119 @@ export const useGmailConnection = (leadId: string) => {
     }
   }, [location.search, navigate, windowObjectReady, handledOAuthSuccess, cloudflareErrorDetected]);
 
-  // Check for OAuth redirect target in localStorage
-  useEffect(() => {
-    if (!windowObjectReady || handledOAuthSuccess) return;
-
-    const redirectTarget = localStorage.getItem('oauthRedirectTarget');
-    if (redirectTarget) {
-      console.log('Detected OAuth redirect with target:', redirectTarget);
-      
-      // Clean up localStorage
-      localStorage.removeItem('oauthRedirectTarget');
-      
-      // Force connection check
-      setConnectionAttemptCount(prev => prev + 1);
-      setForceReconnect(true);
-      setHandledOAuthSuccess(true);
-      
-      // Mark the connection as successful for immediate UI update
-      setIsConnected(true);
-      setConnectionError(null);
-      setDetailedErrorInfo(null);
+  // Check Gmail connection status
+  const checkEmailConnection = useCallback(async (force = false) => {
+    if (!user) {
+      console.log("No user logged in, unable to check Gmail connection");
       setIsLoading(false);
       setCheckingConnection(false);
-      
-      // Show confirmation toast
-      toast({
-        title: "Redirection détectée",
-        description: "Finalisation de l'authentification..."
-      });
-      
-      // Reload the page to ensure synchronization
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      return;
     }
-  }, [windowObjectReady, handledOAuthSuccess]);
-
-  // Check Gmail connection status
+    
+    try {
+      setCheckingConnection(true);
+      
+      if (!isConnected) {
+        setIsLoading(true);
+      }
+      
+      setConnectionError(null);
+      setDetailedErrorInfo(null);
+      
+      console.log("Checking Gmail connection for user:", user.id);
+      
+      // Check if the user already has a Gmail connection
+      const { data, error } = await supabase
+        .from('user_email_connections')
+        .select('email, id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error checking connection:', error);
+        setIsConnected(false);
+        setConnectionError(`Error checking connection: ${error.message}`);
+        return;
+      }
+      
+      if (data) {
+        console.log("Gmail connection found:", data.email);
+        setIsConnected(true);
+        setConnectedEmail((data as EmailConnection).email);
+        setForceReconnect(false);
+        
+        // Check if we have an authentication success to update the UI
+        if (windowObjectReady) {
+          const oauthSuccess = localStorage.getItem('oauth_success') === 'true';
+          const oauthEmail = localStorage.getItem('oauth_email');
+          
+          if (oauthSuccess) {
+            localStorage.removeItem('oauth_success');
+            
+            if (oauthEmail) {
+              localStorage.removeItem('oauth_email');
+              setConnectedEmail(oauthEmail);
+            }
+            
+            // Show confirmation toast for successful connection
+            toast({
+              title: "Connexion réussie",
+              description: oauthEmail 
+                ? `Compte Gmail connecté: ${oauthEmail}` 
+                : "Connexion à Gmail réussie."
+            });
+          }
+        }
+        
+        // Clean up any error or pending indicators
+        if (windowObjectReady) {
+          localStorage.removeItem('oauth_pending');
+          localStorage.removeItem('oauth_connection_error');
+          localStorage.removeItem('oauth_cloudflare_error');
+        }
+      } else {
+        console.log("No Gmail connection found");
+        setIsConnected(false);
+        
+        // Check again if authentication has succeeded
+        if (windowObjectReady) {
+          const isAuthenticated = localStorage.getItem('oauth_success') === 'true';
+          if (isAuthenticated) {
+            setConnectionAttemptCount(prev => prev + 1);
+            setForceReconnect(true);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in checkEmailConnection:', error);
+      setConnectionError(`An error occurred: ${(error as Error).message}`);
+    } finally {
+      setIsLoading(false);
+      setCheckingConnection(false);
+      setForceReconnect(false);
+    }
+  }, [user, isConnected, windowObjectReady]);
+  
+  // Check connection on initial load and when necessary
   useEffect(() => {
     if (!windowObjectReady) return;
     
     // Avoid too frequent requests
     const now = Date.now();
     if (now - lastTokenRefreshTime < 1000 && lastTokenRefreshTime > 0 && !forceReconnect) {
-      return; // Avoid too frequent calls
+      return;
     }
     setLastTokenRefreshTime(now);
 
-    async function checkEmailConnection() {
-      if (!user) {
-        console.log("No user logged in, unable to check Gmail connection");
-        setIsLoading(false);
-        setCheckingConnection(false);
-        return;
-      }
-      
-      try {
-        setCheckingConnection(true);
-        
-        if (!isConnected) {
-          setIsLoading(true);
-        }
-        
-        setConnectionError(null);
-        setDetailedErrorInfo(null);
-        
-        console.log("Checking Gmail connection for user:", user.id);
-        
-        // Check if the user already has a Gmail connection
-        const { data, error } = await supabase
-          .from('user_email_connections')
-          .select('email, id')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        
-        if (error) {
-          console.error('Error checking connection:', error);
-          setIsConnected(false);
-          setConnectionError(`Error checking connection: ${error.message}`);
-          return;
-        }
-        
-        if (data) {
-          console.log("Gmail connection found:", data.email);
-          setIsConnected(true);
-          setConnectedEmail((data as EmailConnection).email);
-          setForceReconnect(false);
-          
-          // Check if we have an authentication success to update the UI
-          if (windowObjectReady) {
-            const oauthSuccess = localStorage.getItem('oauth_success') === 'true';
-            const oauthEmail = localStorage.getItem('oauth_email');
-            
-            if (oauthSuccess) {
-              localStorage.removeItem('oauth_success');
-              
-              if (oauthEmail) {
-                localStorage.removeItem('oauth_email');
-                setConnectedEmail(oauthEmail);
-              }
-              
-              // Show confirmation toast for successful connection
-              toast({
-                title: "Connexion réussie",
-                description: oauthEmail 
-                  ? `Compte Gmail connecté: ${oauthEmail}` 
-                  : "Connexion à Gmail réussie."
-              });
-            }
-          }
-          
-          // Clean up any error or pending indicators
-          if (windowObjectReady) {
-            localStorage.removeItem('oauth_pending');
-            localStorage.removeItem('oauth_connection_error');
-            localStorage.removeItem('oauth_cloudflare_error');
-          }
-        } else {
-          console.log("No Gmail connection found");
-          setIsConnected(false);
-          
-          // Check again if authentication has succeeded
-          if (windowObjectReady) {
-            const isAuthenticated = localStorage.getItem('oauth_success') === 'true';
-            if (isAuthenticated) {
-              // If authentication succeeded but no connection was found,
-              // it's probably a synchronization issue, force a reload
-              setConnectionAttemptCount(prev => prev + 1);
-              setForceReconnect(true);
-              
-              // Wait a bit and reload
-              setTimeout(() => {
-                window.location.reload();
-              }, 1000);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error in checkEmailConnection:', error);
-        setConnectionError(`An error occurred: ${(error as Error).message}`);
-      } finally {
-        setIsLoading(false);
-        setCheckingConnection(false);
-        setForceReconnect(false);
-      }
-    }
-    
     checkEmailConnection();
-  }, [user, leadId, connectionAttemptCount, isConnected, windowObjectReady, lastTokenRefreshTime, forceReconnect]);
+  }, [user, leadId, connectionAttemptCount, windowObjectReady, lastTokenRefreshTime, forceReconnect, checkEmailConnection]);
+
+  // Function to manually force an auth check
+  const forceAuthCheck = useCallback(() => {
+    setForceReconnect(true);
+    setConnectionAttemptCount(prev => prev + 1);
+    checkEmailConnection(true);
+  }, [checkEmailConnection]);
 
   // Function to start Gmail connection with enhanced error handling
   const connectGmail = useCallback(async () => {
@@ -520,20 +478,8 @@ export const useGmailConnection = (leadId: string) => {
       });
     }
     
-    // After several retry attempts, try a page reload
-    if (maxRedirectAttempts <= 0) {
-      toast({
-        title: "Rechargement forcé",
-        description: "Tentative de récupération avec rechargement complet..."
-      });
-      
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    } else {
-      setMaxRedirectAttempts(prev => prev - 1);
-    }
-  }, [connectionError, windowObjectReady, maxRedirectAttempts]);
+    forceAuthCheck();
+  }, [connectionError, windowObjectReady, forceAuthCheck]);
 
   // Function to check status of Supabase Edge function
   const checkSupabaseEdgeFunctionStatus = useCallback(async () => {
@@ -565,6 +511,7 @@ export const useGmailConnection = (leadId: string) => {
     checkingConnection,
     connectGmail,
     retryConnection,
-    checkSupabaseEdgeFunctionStatus
+    checkSupabaseEdgeFunctionStatus,
+    forceAuthCheck
   };
 };

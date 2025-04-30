@@ -23,90 +23,47 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
 }) => {
   const { lead } = useLeadDetail(leadId);
   const location = useLocation();
-  const [forceReload, setForceReload] = useState(0);
   const [showRefreshAlert, setShowRefreshAlert] = useState(false);
   const [cloudflareError, setCloudflareError] = useState(false);
-  const [redirectCounter, setRedirectCounter] = useState(0);
   const [initialAuthCheckComplete, setInitialAuthCheckComplete] = useState(false);
 
   // Observe URL parameters and localStorage for authentication indicators
   useEffect(() => {
-    // Multiple detection methods for OAuth success
-    const checkAuthIndicators = () => {
-      const params = new URLSearchParams(location.search);
-      const hasOAuthSuccess = params.has('oauth_success');
-      const hasStateParam = params.has('state'); // Indicates redirect from OAuth
-      const storedSuccess = localStorage.getItem('oauth_success') === 'true';
-      const cloudflareErr = localStorage.getItem('oauth_cloudflare_error') === 'true';
+    const params = new URLSearchParams(location.search);
+    const hasOAuthSuccess = params.has('oauth_success');
+    const hasStateParam = params.has('state');
+    const storedSuccess = localStorage.getItem('oauth_success') === 'true';
+    const cloudflareErr = localStorage.getItem('oauth_cloudflare_error') === 'true';
+    
+    console.log("Checking auth indicators on mount:", {
+      urlOAuthSuccess: hasOAuthSuccess,
+      urlStateParam: hasStateParam,
+      storedSuccess,
+      cloudflareError: cloudflareErr
+    });
+    
+    if (hasOAuthSuccess || storedSuccess || hasStateParam) {
+      console.log("Auth success detected, showing refresh alert");
+      setShowRefreshAlert(true);
       
-      console.log("Checking auth indicators:", {
-        urlOAuthSuccess: hasOAuthSuccess,
-        urlStateParam: hasStateParam,
-        storedSuccess,
-        cloudflareError: cloudflareErr,
-        forceReload
+      if (storedSuccess) {
+        localStorage.removeItem('oauth_success');
+      }
+      
+      toast({
+        title: "Authentification détectée",
+        description: "Vérification de la connexion Gmail..."
       });
-      
-      if (hasOAuthSuccess || storedSuccess || hasStateParam) {
-        console.log("Auth success detected, forcing reload");
-        setForceReload(prev => prev + 1);
-        setShowRefreshAlert(true);
-        
-        if (storedSuccess) {
-          localStorage.removeItem('oauth_success');
-        }
-        
-        // Show confirmation toast
-        toast({
-          title: "Authentification réussie",
-          description: "Votre compte Gmail a été connecté avec succès."
-        });
-        
-        // Auto-hide refresh alert after 15 seconds
-        const timer = setTimeout(() => {
-          setShowRefreshAlert(false);
-        }, 15000);
-        
-        return () => clearTimeout(timer);
-      }
-      
-      if (cloudflareErr) {
-        console.log("Cloudflare error detected");
-        localStorage.removeItem('oauth_cloudflare_error');
-        setCloudflareError(true);
-      }
-    };
-    
-    checkAuthIndicators();
-    setInitialAuthCheckComplete(true);
-    
-    // Set up regular checks for a short period after component mount
-    const checkInterval = setInterval(checkAuthIndicators, 1000);
-    setTimeout(() => clearInterval(checkInterval), 10000);
-    
-    return () => clearInterval(checkInterval);
-  }, [location.search]);
-
-  // Check for redirects from callback page
-  useEffect(() => {
-    const referrer = document.referrer;
-    if (referrer && (
-      referrer.includes('oauth/callback') || 
-      referrer.includes('accounts.google.com')
-    )) {
-      console.log("Redirect detected from:", referrer);
-      setRedirectCounter(prev => prev + 1);
-      
-      // Force reload after authentication redirect
-      if (redirectCounter === 0) {
-        const timer = setTimeout(() => {
-          setForceReload(prev => prev + 1);
-          setShowRefreshAlert(true);
-        }, 1000);
-        return () => clearTimeout(timer);
-      }
     }
-  }, [redirectCounter]);
+    
+    if (cloudflareErr) {
+      console.log("Cloudflare error detected");
+      localStorage.removeItem('oauth_cloudflare_error');
+      setCloudflareError(true);
+    }
+    
+    setInitialAuthCheckComplete(true);
+  }, [location.search]);
 
   const {
     isConnected,
@@ -119,7 +76,8 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
     checkingConnection,
     connectGmail,
     retryConnection,
-    checkSupabaseEdgeFunctionStatus
+    checkSupabaseEdgeFunctionStatus,
+    forceAuthCheck
   } = useGmailConnection(leadId);
 
   const {
@@ -138,30 +96,16 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
     toggleSortOrder
   } = useEmailData(leadId, lead?.email, isConnected);
 
-  // For debugging
+  // Force connection check when auth success is detected
   useEffect(() => {
-    console.log("Gmail connection state:", { 
-      isConnected, 
-      isLoading, 
-      checkingConnection, 
-      connectedEmail,
-      hasConnectionError: !!connectionError,
-      forceReloadCounter: forceReload,
-      cloudflareError,
-      redirectCounter
-    });
-    
-    // If we detect a successful login or redirection, force a connection check
-    if ((initialAuthCheckComplete && (forceReload > 0 || redirectCounter > 0)) || 
+    if ((initialAuthCheckComplete && showRefreshAlert) || 
         (location.search && location.search.includes('oauth_success'))) {
-      retryConnection();
+      console.log("Forcing auth check due to detected success indicators");
+      forceAuthCheck();
     }
-  }, [isConnected, isLoading, checkingConnection, connectedEmail, connectionError, 
-      forceReload, cloudflareError, redirectCounter, location.search, initialAuthCheckComplete, 
-      retryConnection]);
+  }, [initialAuthCheckComplete, showRefreshAlert, location.search, forceAuthCheck]);
 
   const handleManualRefresh = () => {
-    setForceReload(prev => prev + 1);
     setShowRefreshAlert(false);
     setCloudflareError(false);
     
@@ -171,8 +115,11 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
     localStorage.removeItem('oauth_connection_error');
     localStorage.removeItem('oauth_cloudflare_error');
     
-    // Force a complete page reload
-    window.location.reload();
+    // Force connection check and reload
+    forceAuthCheck();
+    setTimeout(() => {
+      window.location.reload();
+    }, 300);
   };
 
   if (isLoading || checkingConnection) {
@@ -183,7 +130,7 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
           <Alert className="mt-4 bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-500" />
             <AlertDescription className="text-blue-700">
-              Connexion réussie ! Si les emails ne s'affichent pas automatiquement, veuillez rafraîchir.
+              Connexion détectée ! Vérification en cours...
               <Button 
                 onClick={handleManualRefresh} 
                 variant="outline" 
