@@ -27,58 +27,74 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
   const [showRefreshAlert, setShowRefreshAlert] = useState(false);
   const [cloudflareError, setCloudflareError] = useState(false);
   const [redirectCounter, setRedirectCounter] = useState(0);
+  const [initialAuthCheckComplete, setInitialAuthCheckComplete] = useState(false);
 
-  // Observer la présence de paramètres dans l'URL ou localStorage
+  // Observe URL parameters and localStorage for authentication indicators
   useEffect(() => {
-    // Vérifier le paramètre oauth_success dans l'URL
-    const params = new URLSearchParams(location.search);
-    if (params.has('oauth_success')) {
-      console.log("Paramètre oauth_success détecté dans l'URL, forçage du rechargement");
-      setForceReload(prev => prev + 1);
-      setShowRefreshAlert(true);
+    // Multiple detection methods for OAuth success
+    const checkAuthIndicators = () => {
+      const params = new URLSearchParams(location.search);
+      const hasOAuthSuccess = params.has('oauth_success');
+      const hasStateParam = params.has('state'); // Indicates redirect from OAuth
+      const storedSuccess = localStorage.getItem('oauth_success') === 'true';
+      const cloudflareErr = localStorage.getItem('oauth_cloudflare_error') === 'true';
       
-      // Auto-hide refresh alert after 15 seconds
-      const timer = setTimeout(() => {
-        setShowRefreshAlert(false);
-      }, 15000);
+      console.log("Checking auth indicators:", {
+        urlOAuthSuccess: hasOAuthSuccess,
+        urlStateParam: hasStateParam,
+        storedSuccess,
+        cloudflareError: cloudflareErr,
+        forceReload
+      });
       
-      return () => clearTimeout(timer);
-    }
+      if (hasOAuthSuccess || storedSuccess || hasStateParam) {
+        console.log("Auth success detected, forcing reload");
+        setForceReload(prev => prev + 1);
+        setShowRefreshAlert(true);
+        
+        if (storedSuccess) {
+          localStorage.removeItem('oauth_success');
+        }
+        
+        // Show confirmation toast
+        toast({
+          title: "Authentification réussie",
+          description: "Votre compte Gmail a été connecté avec succès."
+        });
+        
+        // Auto-hide refresh alert after 15 seconds
+        const timer = setTimeout(() => {
+          setShowRefreshAlert(false);
+        }, 15000);
+        
+        return () => clearTimeout(timer);
+      }
+      
+      if (cloudflareErr) {
+        console.log("Cloudflare error detected");
+        localStorage.removeItem('oauth_cloudflare_error');
+        setCloudflareError(true);
+      }
+    };
+    
+    checkAuthIndicators();
+    setInitialAuthCheckComplete(true);
+    
+    // Set up regular checks for a short period after component mount
+    const checkInterval = setInterval(checkAuthIndicators, 1000);
+    setTimeout(() => clearInterval(checkInterval), 10000);
+    
+    return () => clearInterval(checkInterval);
   }, [location.search]);
 
-  // Vérifier localStorage pour le drapeau de succès ou d'erreur OAuth
-  useEffect(() => {
-    const oauthSuccess = localStorage.getItem('oauth_success') === 'true';
-    const oauthError = localStorage.getItem('oauth_connection_error') === 'true';
-    
-    if (oauthSuccess) {
-      console.log("Succès OAuth détecté dans localStorage");
-      localStorage.removeItem('oauth_success');
-      setForceReload(prev => prev + 1);
-      setShowRefreshAlert(true);
-      
-      // Show confirmation toast
-      toast({
-        title: "Authentification réussie",
-        description: "Votre compte Gmail a été connecté avec succès."
-      });
-    }
-    
-    if (oauthError) {
-      console.log("Erreur OAuth détectée dans localStorage");
-      localStorage.removeItem('oauth_connection_error');
-      setCloudflareError(true);
-    }
-  }, []);
-
-  // Vérifier si nous avons été redirigés depuis la page de callback
+  // Check for redirects from callback page
   useEffect(() => {
     const referrer = document.referrer;
     if (referrer && (
       referrer.includes('oauth/callback') || 
       referrer.includes('accounts.google.com')
     )) {
-      console.log("Redirection détectée depuis:", referrer);
+      console.log("Redirect detected from:", referrer);
       setRedirectCounter(prev => prev + 1);
       
       // Force reload after authentication redirect
@@ -122,9 +138,9 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
     toggleSortOrder
   } = useEmailData(leadId, lead?.email, isConnected);
 
-  // Pour le débogage
+  // For debugging
   useEffect(() => {
-    console.log("État de connexion Gmail:", { 
+    console.log("Gmail connection state:", { 
       isConnected, 
       isLoading, 
       checkingConnection, 
@@ -134,26 +150,28 @@ const EmailsTab: React.FC<EmailsTabProps> = ({
       cloudflareError,
       redirectCounter
     });
-  }, [isConnected, isLoading, checkingConnection, connectedEmail, connectionError, forceReload, cloudflareError, redirectCounter]);
-
-  // Forcer la vérification de connexion lorsque forceReload change
-  useEffect(() => {
-    if (forceReload > 0) {
+    
+    // If we detect a successful login or redirection, force a connection check
+    if ((initialAuthCheckComplete && (forceReload > 0 || redirectCounter > 0)) || 
+        (location.search && location.search.includes('oauth_success'))) {
       retryConnection();
     }
-  }, [forceReload, retryConnection]);
+  }, [isConnected, isLoading, checkingConnection, connectedEmail, connectionError, 
+      forceReload, cloudflareError, redirectCounter, location.search, initialAuthCheckComplete, 
+      retryConnection]);
 
   const handleManualRefresh = () => {
     setForceReload(prev => prev + 1);
     setShowRefreshAlert(false);
     setCloudflareError(false);
     
-    // Efface tous les indicateurs OAuth
+    // Clear all OAuth indicators
     localStorage.removeItem('oauth_pending');
     localStorage.removeItem('oauth_success');
     localStorage.removeItem('oauth_connection_error');
+    localStorage.removeItem('oauth_cloudflare_error');
     
-    // Force un rechargement complet de la page
+    // Force a complete page reload
     window.location.reload();
   };
 

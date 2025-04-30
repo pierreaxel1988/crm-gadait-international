@@ -18,30 +18,38 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
 }) => {
   const { user } = useAuth();
   
-  // Vérifier s'il y a eu une erreur de connexion OAuth stockée dans localStorage
+  // Check for OAuth connection error stored in localStorage
   const [hadConnectionError, setHadConnectionError] = React.useState<boolean>(
     localStorage.getItem('oauth_connection_error') === 'true'
   );
   
-  // Vérifier si nous avons été redirigés depuis la page de callback
+  // Check if we were redirected from callback page
   const [redirectedFromCallback, setRedirectedFromCallback] = React.useState<boolean>(false);
   const [showRedirectHelp, setShowRedirectHelp] = React.useState<boolean>(false);
   const [forceReloadCount, setForceReloadCount] = React.useState<number>(0);
+  const [showTechnicalDetails, setShowTechnicalDetails] = React.useState<boolean>(false);
   
   React.useEffect(() => {
-    // Vérifier si nous venons de la page de callback
+    // Check if we're coming from callback page
     const referrer = document.referrer;
-    if (referrer && (
-      referrer.includes('oauth/callback') || 
-      referrer.includes('accounts.google.com') ||
-      localStorage.getItem('oauth_pending') === 'true' ||
-      localStorage.getItem('oauthRedirectTarget')
-    )) {
+    const haveState = new URLSearchParams(window.location.search).has('state');
+    const havePending = localStorage.getItem('oauth_pending') === 'true';
+    const haveRedirectTarget = localStorage.getItem('oauthRedirectTarget');
+    
+    if (
+      (referrer && (
+        referrer.includes('oauth/callback') || 
+        referrer.includes('accounts.google.com')
+      )) ||
+      havePending ||
+      haveRedirectTarget ||
+      haveState
+    ) {
       setRedirectedFromCallback(true);
       
-      // Si nous avons été redirigés depuis la page de callback, réessayer automatiquement la connexion
+      // If we were redirected from callback page, automatically retry connection
       if (onRetryConnection) {
-        console.log("Redirection détectée depuis Oauth, tentative de reconnexion automatique");
+        console.log("Detected redirect from OAuth, attempting automatic reconnection");
         const timer = setTimeout(() => {
           onRetryConnection();
         }, 500);
@@ -49,16 +57,16 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       }
     }
     
-    // Après 5 secondes, montrer l'aide de redirection si nécessaire
+    // After 5 seconds, show redirect help if needed
     const redirectHelpTimer = setTimeout(() => {
       setShowRedirectHelp(true);
     }, 5000);
     
-    // Nettoyer l'indicateur d'erreur après l'avoir lu
+    // Clean up error indicator after reading it
     if (hadConnectionError) {
       localStorage.removeItem('oauth_connection_error');
       
-      // Forcer un rechargement automatique en cas d'erreur précédente
+      // Force automatic reload if there was a previous error
       if (forceReloadCount === 0) {
         const reloadTimer = setTimeout(() => {
           setForceReloadCount(1);
@@ -70,7 +78,7 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
       }
     }
     
-    // Nettoyer les autres indicateurs OAuth qui pourraient exister
+    // Clean up other OAuth indicators that might exist
     localStorage.removeItem('oauth_pending');
     
     return () => clearTimeout(redirectHelpTimer);
@@ -79,43 +87,45 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
   const handleConnectClick = () => {
     console.log('Initiating Gmail connection...', {userId: user?.id});
     if (user) {
-      // Réinitialiser tout état d'erreur précédent
+      // Reset any previous error state
       localStorage.removeItem('oauth_connection_error');
       localStorage.removeItem('oauth_pending');
       localStorage.removeItem('oauth_success');
+      localStorage.removeItem('oauth_cloudflare_error');
       
-      // Ajouter un marqueur pour détecter si nous sommes en attente d'authentification
+      // Add marker to detect pending authentication
       localStorage.setItem('oauth_pending', 'true');
       
-      // Ajouter un timeout pour détecter les problèmes de redirection
+      // Add timeout to detect redirection problems
       setTimeout(() => {
         if (localStorage.getItem('oauth_pending') === 'true') {
-          // Si le processus est toujours en attente après 30 secondes, afficher une aide
+          // If process is still pending after 30 seconds, show help
           setShowRedirectHelp(true);
         }
       }, 30000);
       
       connectGmail();
     } else {
-      console.error('Erreur: Utilisateur non connecté');
-      alert('Vous devez être connecté pour utiliser cette fonctionnalité.');
+      console.error('Error: User not logged in');
+      alert('You must be logged in to use this feature.');
     }
   };
 
   const handleRetryConnection = () => {
     if (onRetryConnection) {
-      // Réinitialiser tout état d'erreur précédent
+      // Reset any previous error state
       localStorage.removeItem('oauth_connection_error');
       localStorage.removeItem('oauth_pending');
       localStorage.removeItem('oauth_success');
+      localStorage.removeItem('oauth_cloudflare_error');
       
-      // Si nous avons eu un problème de redirection, essayer une méthode alternative
+      // If we had a redirection problem, try alternative method
       if (redirectedFromCallback || showRedirectHelp) {
         try {
-          // Forcer un rechargement complet de la page
+          // Force a complete page reload
           window.location.reload();
         } catch (e) {
-          console.error("Erreur lors du rechargement:", e);
+          console.error("Error during reload:", e);
           onRetryConnection();
         }
       } else {
@@ -125,10 +135,11 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
   };
 
   const handleForceReload = () => {
-    // Nettoyer tous les indicateurs et forcer un rechargement
+    // Clear all indicators and force reload
     localStorage.removeItem('oauth_connection_error');
     localStorage.removeItem('oauth_pending');
     localStorage.removeItem('oauth_success');
+    localStorage.removeItem('oauth_cloudflare_error');
     window.location.reload();
   };
 
@@ -251,6 +262,25 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
           Un nouvel onglet va s'ouvrir pour l'authentification Google.
           Assurez-vous de terminer le processus et d'attendre la redirection automatique.
         </p>
+        
+        <button 
+          onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
+          className="text-blue-500 underline text-xs mt-4"
+        >
+          {showTechnicalDetails ? "Masquer" : "Afficher"} les informations techniques
+        </button>
+        
+        {showTechnicalDetails && (
+          <div className="text-left mt-2 bg-gray-50 p-3 rounded text-xs">
+            <p className="font-medium mb-1">Infos techniques:</p>
+            <ul className="space-y-1">
+              <li><strong>URL:</strong> {window.location.href}</li>
+              <li><strong>Référent:</strong> {document.referrer || 'Non disponible'}</li>
+              <li><strong>oauth_pending:</strong> {localStorage.getItem('oauth_pending') || 'Non'}</li>
+              <li><strong>redirectTarget:</strong> {localStorage.getItem('oauthRedirectTarget') || 'Non'}</li>
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

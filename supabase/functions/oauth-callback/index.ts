@@ -33,7 +33,7 @@ function renderHtmlResponse(options: {
     message,
     details,
     redirectUri,
-    redirectDelay = 2, // Reduced delay for faster redirection
+    redirectDelay = 0.5, // Ultra-short delay for fast redirection
     email,
     status = 200,
     isCloudflareError = false
@@ -41,7 +41,7 @@ function renderHtmlResponse(options: {
 
   const appUrl = redirectUri || 'https://gadait-international.com';
   
-  // NOUVELLE APPROCHE: Redirection simplifiée et plus robuste
+  // Optimized redirection script with multiple fallback methods
   const redirectScript = redirectUri ? `
     <script>
       console.log("Starting robust redirect to: ${redirectUri}");
@@ -76,28 +76,41 @@ function renderHtmlResponse(options: {
           // Ensure HTTPS
           redirectUrl = redirectUrl.replace('http://', 'https://');
           
-          // Add success parameter for improved detection
-          if (!redirectUrl.includes('oauth_success=') && ${!isCloudflareError && className === 'success' ? 'true' : 'false'}) {
+          // Always add oauth_success parameter for improved detection
+          if (${!isCloudflareError && className === 'success' ? 'true' : 'false'}) {
             redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + "oauth_success=true";
           }
           
-          // Add application timestamp to force reload
+          // Add timestamp to prevent caching issues
           redirectUrl += (redirectUrl.includes('?') ? '&' : '?') + "_t=" + Date.now();
           
           console.log("Final redirect URL:", redirectUrl);
           
-          // IMPORTANT: Try multiple redirect methods
+          // PRIORITY 1: Direct window.location.href (most reliable)
           window.location.href = redirectUrl;
           
-          // Backup method with slight delay
+          // PRIORITY 2: Indirect form submit (works around some security restrictions)
+          setTimeout(() => {
+            try {
+              const form = document.createElement('form');
+              form.method = 'GET';
+              form.action = redirectUrl;
+              document.body.appendChild(form);
+              form.submit();
+            } catch (e) {
+              console.error("Form redirect failed:", e);
+            }
+          }, 150);
+          
+          // PRIORITY 3: window.location.replace (fallback)
           setTimeout(() => {
             window.location.replace(redirectUrl);
-          }, 100);
-          
-          // Last resort method
-          setTimeout(() => {
-            document.location.href = redirectUrl;
           }, 300);
+          
+          // PRIORITY 4: Last resort
+          setTimeout(() => {
+            document.location = new URL(redirectUrl);
+          }, 450);
         } catch (e) {
           console.error("Error during redirect:", e);
           // Ultimate fallback
@@ -116,38 +129,87 @@ function renderHtmlResponse(options: {
       document.addEventListener('DOMContentLoaded', performRedirect);
       
       // Set a timeout as final backup
-      setTimeout(performRedirect, ${redirectDelay * 1000});
+      setTimeout(performRedirect, 500);
     </script>
   ` : '';
 
-  // Notification de post-message pour les clients web qui utilisent cette méthode
+  // Enhanced postMessage script with more comprehensive targeting
   const postMessageScript = redirectUri ? `
     <script>
       try {
-        // Essayer d'envoyer un message à toutes les fenêtres parent potentielles
-        if (window.opener) {
-          console.log("Sending postMessage to opener");
-          window.opener.postMessage({ 
-            type: 'OAUTH_SUCCESS', 
-            success: ${className === 'success'}, 
-            email: '${email || ''}',
-            redirectUrl: '${redirectUri}'
-          }, '*');
+        // Define the message payload
+        const messageData = {
+          type: 'OAUTH_SUCCESS',
+          success: ${className === 'success'},
+          email: '${email || ''}',
+          redirectUri: '${redirectUri}',
+          timestamp: Date.now()
+        };
+        
+        console.log("Attempting postMessage with data:", messageData);
+        
+        // Try to send to multiple possible parent windows
+        function broadcastMessage() {
+          // Method 1: Send to opener if available
+          if (window.opener) {
+            console.log("Sending postMessage to opener");
+            window.opener.postMessage(messageData, '*');
+          }
+          
+          // Method 2: Send to parent window
+          if (window.parent && window.parent !== window) {
+            console.log("Sending postMessage to parent");
+            window.parent.postMessage(messageData, '*');
+          }
+          
+          // Method 3: Broadcast to all parent ancestors
+          try {
+            let currentWindow = window;
+            let parentWindow = window.parent;
+            let level = 0;
+            
+            // Try to reach all nested parents
+            while (parentWindow && parentWindow !== currentWindow && level < 5) {
+              console.log("Sending postMessage to parent level " + level);
+              parentWindow.postMessage(messageData, '*');
+              currentWindow = parentWindow;
+              parentWindow = currentWindow.parent;
+              level++;
+            }
+          } catch (e) {
+            console.error("Error in parent traversal:", e);
+          }
+          
+          // Method 4: Broadcast to all possible origins
+          const potentialOrigins = [
+            'https://gadait-international.com',
+            'https://lovableproject.com',
+            'https://lovable.app',
+            '*'
+          ];
+          
+          potentialOrigins.forEach(origin => {
+            try {
+              if (window.opener) window.opener.postMessage(messageData, origin);
+              if (window.parent && window.parent !== window) window.parent.postMessage(messageData, origin);
+            } catch (e) {
+              // Ignore errors from cross-origin restrictions
+            }
+          });
         }
         
-        window.parent.postMessage({ 
-          type: 'OAUTH_SUCCESS', 
-          success: ${className === 'success'}, 
-          email: '${email || ''}',
-          redirectUrl: '${redirectUri}'
-        }, '*');
+        // Try multiple times for better chances of success
+        broadcastMessage();
+        setTimeout(broadcastMessage, 200);
+        setTimeout(broadcastMessage, 500);
+        
       } catch (e) {
-        console.error("Error sending postMessage:", e);
+        console.error("Error in postMessage broadcasting:", e);
       }
     </script>
   ` : '';
 
-  // Manual redirection link as backup
+  // Enhanced manual redirect button with auto-click
   const manualRedirectButton = redirectUri ? `
     <div style="margin-top: 20px; text-align: center;">
       <p>Si vous n'êtes pas redirigé automatiquement dans quelques secondes:</p>
@@ -160,7 +222,7 @@ function renderHtmlResponse(options: {
           try {
             document.getElementById('manual-redirect').click();
           } catch (e) {}
-        }, 1500);
+        }, 1000);
       </script>
     </div>
   ` : '';
