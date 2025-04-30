@@ -7,126 +7,29 @@ import DashboardCard from '@/components/dashboard/DashboardCard';
 import ConversionRateCard from '@/components/reports/ConversionRateCard';
 import LeadSourceDistribution from '@/components/reports/LeadSourceDistribution';
 import LeadsPerAgentChart from '@/components/reports/LeadsPerAgentChart';
-import TopAgentsTable from '@/components/reports/TopAgentsTable';
+import LeadsAgentsTable from '@/components/reports/LeadsAgentsTable';
 import LeadsByPortalChart from '@/components/reports/LeadsByPortalChart';
 import { Period } from '@/components/reports/PeriodSelector';
-import { useLeadsAgentData, usePortalLeadsData } from '@/hooks/useReportsData';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 
-interface LeadsTabContentProps {
-  leadsData: { name: string; value: number; count: number }[];
-  isLoading: boolean;
-  period: string;
-}
-
-const LeadsTabContent: React.FC<LeadsTabContentProps> = ({ 
-  leadsData, 
-  isLoading,
-  period 
-}) => {
+const LeadsTabContent: React.FC = () => {
   const [leadsPeriod, setLeadsPeriod] = useState<'semaine' | 'mois' | 'annee'>('mois');
   const [displayMode, setDisplayMode] = useState<'chart' | 'table'>('chart');
-  const [periodState, setPeriodState] = useState<Period>({ type: 'mois' });
-
-  // Récupérer les données de leads par agent
-  const { data: leadsAgentData, isLoading: isLoadingAgents } = useLeadsAgentData(leadsPeriod);
-  
-  // Récupérer les données de leads par portail
-  const { data: portalData, isLoading: isLoadingPortals } = usePortalLeadsData(period);
-  
-  // Fetch lead metrics
-  const { data: leadMetrics, isLoading: isLoadingMetrics } = useQuery({
-    queryKey: ['lead-metrics', period],
-    queryFn: async () => {
-      // Define the time period
-      const now = new Date();
-      let startDate = new Date();
-      let previousStartDate = new Date();
-      
-      if (period === 'week') {
-        startDate.setDate(now.getDate() - 7);
-        previousStartDate.setDate(now.getDate() - 14);
-      } else if (period === 'month') {
-        startDate.setMonth(now.getMonth() - 1);
-        previousStartDate.setMonth(now.getMonth() - 2);
-      } else if (period === 'quarter') {
-        startDate.setMonth(now.getMonth() - 3);
-        previousStartDate.setMonth(now.getMonth() - 6);
-      } else if (period === 'year') {
-        startDate.setFullYear(now.getFullYear() - 1);
-        previousStartDate.setFullYear(now.getFullYear() - 2);
-      }
-      
-      // Current period leads count
-      const { count: currentLeadsCount } = await supabase
-        .from('leads')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', startDate.toISOString());
-      
-      // Previous period leads count
-      const { count: previousLeadsCount } = await supabase
-        .from('leads')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', previousStartDate.toISOString())
-        .lt('created_at', startDate.toISOString());
-      
-      // Calculate change
-      const leadsChange = previousLeadsCount ? 
-        Math.round(((currentLeadsCount - previousLeadsCount) / previousLeadsCount) * 100) : 0;
-      
-      // Calculate qualification rate (leads that moved past the "Nouveau" status)
-      const { count: qualifiedLeadsCount } = await supabase
-        .from('leads')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', startDate.toISOString())
-        .not('status', 'eq', 'Nouveau');
-      
-      const qualificationRate = currentLeadsCount ?
-        Math.round((qualifiedLeadsCount / currentLeadsCount) * 100) : 0;
-      
-      // Calculate previous qualification rate
-      const { count: previousQualifiedLeadsCount } = await supabase
-        .from('leads')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', previousStartDate.toISOString())
-        .lt('created_at', startDate.toISOString())
-        .not('status', 'eq', 'Nouveau');
-      
-      const previousQualificationRate = previousLeadsCount ?
-        Math.round((previousQualifiedLeadsCount / previousLeadsCount) * 100) : 0;
-      
-      const qualificationChange = previousQualificationRate ?
-        qualificationRate - previousQualificationRate : 0;
-      
-      return {
-        totalLeads: currentLeadsCount || 0,
-        leadsChange,
-        qualificationRate: qualificationRate || 0,
-        qualificationChange,
-        costPerLead: 45, // This is an example value, could be calculated from actual marketing spend
-        costChange: -12 // This is an example value
-      };
-    },
-    staleTime: 5 * 60 * 1000 // 5 minutes
-  });
+  const [period, setPeriod] = useState<Period>({ type: 'mois' });
   
   return (
     <div className="grid grid-cols-1 gap-6 h-full min-h-[calc(100vh-250px)]">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <ConversionRateCard 
           title="Nouveaux leads" 
-          value={leadMetrics?.totalLeads || 0} 
-          change={leadMetrics?.leadsChange || 0} 
+          value={124} 
+          change={8} 
           period="vs dernier mois"
-          isLoading={isLoadingMetrics}
         />
         <ConversionRateCard 
           title="Taux de qualification" 
-          value={`${leadMetrics?.qualificationRate || 0}%`} 
-          change={leadMetrics?.qualificationChange || 0} 
+          value="62%" 
+          change={4} 
           period="vs dernier mois"
-          isLoading={isLoadingMetrics}
         />
         <ConversionRateCard 
           title="Coût par lead" 
@@ -134,7 +37,6 @@ const LeadsTabContent: React.FC<LeadsTabContentProps> = ({
           change={-12} 
           period="vs dernier mois"
           inverse
-          isLoading={isLoadingMetrics}
         />
       </div>
       
@@ -143,10 +45,9 @@ const LeadsTabContent: React.FC<LeadsTabContentProps> = ({
           title="Origine des leads" 
           subtitle="Distribution par source d'acquisition" 
           icon={<Filter className="h-5 w-5" />}
-          isLoading={isLoading}
         >
           <div className="h-[400px] flex items-center justify-center">
-            <LeadSourceDistribution isLeadSources data={leadsData} />
+            <LeadSourceDistribution isLeadSources />
           </div>
         </DashboardCard>
         
@@ -154,10 +55,9 @@ const LeadsTabContent: React.FC<LeadsTabContentProps> = ({
           title="Leads par portail immobilier" 
           subtitle="Distribution des leads par portail" 
           icon={<PieChart className="h-5 w-5" />}
-          isLoading={isLoadingPortals}
         >
           <div className="h-[400px] flex items-center justify-center">
-            <LeadsByPortalChart data={portalData || []} />
+            <LeadsByPortalChart period={period} />
           </div>
         </DashboardCard>
       </div>
@@ -166,7 +66,6 @@ const LeadsTabContent: React.FC<LeadsTabContentProps> = ({
         title="Leads par commercial" 
         subtitle="Nombre de leads par agent commercial"
         icon={<Users className="h-5 w-5" />}
-        isLoading={isLoadingAgents}
         action={
           <div className="flex items-center space-x-3">
             <ToggleGroup 
@@ -209,24 +108,9 @@ const LeadsTabContent: React.FC<LeadsTabContentProps> = ({
       >
         <div className="flex-1 w-full h-full min-h-[500px]">
           {displayMode === 'chart' ? (
-            <LeadsPerAgentChart 
-              period={leadsPeriod} 
-              data={leadsAgentData || []} 
-              isLoading={isLoadingAgents} 
-            />
+            <LeadsPerAgentChart period={leadsPeriod} />
           ) : (
-            <TopAgentsTable 
-              agentData={leadsAgentData?.map(agent => ({
-                ...agent,
-                leads: agent[leadsPeriod] || agent.leads || 0,
-                sales: 0,
-                value: "€0",
-                conversion: 0
-              }))} 
-              isLoading={isLoadingAgents} 
-              period={leadsPeriod} 
-              simplified={true}
-            />
+            <LeadsAgentsTable period={leadsPeriod} />
           )}
         </div>
       </DashboardCard>

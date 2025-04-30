@@ -6,22 +6,19 @@ import ConversionRateCard from '@/components/reports/ConversionRateCard';
 import SalesPerformanceChart from '@/components/reports/SalesPerformanceChart';
 import LeadSourceDistribution from '@/components/reports/LeadSourceDistribution';
 import TopAgentsTable from '@/components/reports/TopAgentsTable';
-import { useAgentPerformanceData } from '@/hooks/useReportsData';
 
-interface PerformanceTabContentProps {
-  performanceData: { name: string; total: number }[];
-  isLoading: boolean;
-  period: string;
-}
+// Données mockées pour le graphique des ventes
+const salesData = [
+  { name: 'Jan', total: 250000 },
+  { name: 'Feb', total: 420000 },
+  { name: 'Mar', total: 380000 },
+  { name: 'Apr', total: 520000 },
+  { name: 'May', total: 350000 },
+  { name: 'Jun', total: 620000 },
+  { name: 'Jul', total: 780000 },
+];
 
-const PerformanceTabContent: React.FC<PerformanceTabContentProps> = ({ 
-  performanceData, 
-  isLoading,
-  period
-}) => {
-  // Récupérer les données de performance des agents
-  const { data: agentData, isLoading: isLoadingAgents } = useAgentPerformanceData(period);
-  
+const PerformanceTabContent: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -51,19 +48,14 @@ const PerformanceTabContent: React.FC<PerformanceTabContentProps> = ({
         subtitle="Montant total des ventes par mois" 
         icon={<BarChart3 className="h-5 w-5" />}
         className="h-[400px] lg:h-[500px]"
-        isLoading={isLoading}
       >
         <div className="h-full w-full pt-2">
-          <SalesPerformanceChart data={performanceData} />
+          <SalesPerformanceChart data={salesData} />
         </div>
       </DashboardCard>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TopAgentsTable 
-          agentData={agentData || []}
-          isLoading={isLoadingAgents}
-          period={period}
-        />
+        <TopAgentsTable />
         
         <DashboardCard 
           title="Distribution par type de propriété" 

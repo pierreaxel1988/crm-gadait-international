@@ -3,30 +3,30 @@ import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, Sector } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Period } from './PeriodSelector';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface LeadsByPortalChartProps {
-  data: { name: string; value: number; count: number }[];
-  isLoading?: boolean;
+  period: Period;
 }
 
-const LeadsByPortalChart = ({ data, isLoading = false }: LeadsByPortalChartProps) => {
+const LeadsByPortalChart = ({ period }: LeadsByPortalChartProps) => {
   const isMobile = useIsMobile();
   const [activeIndex, setActiveIndex] = React.useState<number | undefined>(undefined);
   
-  // Palette de couleurs élégante pour les portails immobiliers (enrichie)
-  const COLORS = [
-    '#1f77b4', // Bleu SeLoger
-    '#ff7f0e', // Orange LeBonCoin
-    '#2ca02c', // Vert Meilleurs Agents
-    '#d62728', // Rouge Propriétés Le Figaro
-    '#9467bd', // Violet Belles demeures
-    '#8c564b', // Marron Barnes
-    '#e377c2', // Rose Sotheby's
-    '#7f7f7f', // Gris Particulier à Particulier
-    '#bcbd22', // Chartreuse Century 21
-    '#17becf'  // Bleu clair Se Loger Prestige
-  ];
+  // Données mockées pour les leads par portail immobilier avec nombres absolus
+  const data = useMemo(() => {
+    // Dans une vraie application, ces données viendraient de l'API
+    // en fonction de la période sélectionnée
+    return [
+      { name: 'Idealista', value: 28, count: 62 },
+      { name: 'Le Figaro', value: 22, count: 49 },
+      { name: 'Properstar', value: 18, count: 40 },
+      { name: 'Property Cloud', value: 15, count: 33 },
+      { name: "L'express Property", value: 17, count: 37 },
+    ];
+  }, [period]);
+  
+  // Palette de couleurs élégante pour les portails immobiliers
+  const COLORS = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2'];
   
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);
@@ -91,24 +91,6 @@ const LeadsByPortalChart = ({ data, isLoading = false }: LeadsByPortalChartProps
     }
     return null;
   };
-  
-  // Si en chargement, afficher un skeleton
-  if (isLoading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <Skeleton className="h-[300px] w-[300px] rounded-full" />
-      </div>
-    );
-  }
-  
-  // Si pas de données, afficher un message
-  if (data.length === 0) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <p className="text-gray-500">Aucune donnée disponible</p>
-      </div>
-    );
-  }
   
   return (
     <div className="w-full h-full flex items-center justify-center">
