@@ -14,14 +14,15 @@ interface ActionsTabProps {
 }
 
 const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
-  const { lead, fetchLead, handleDataChange } = useLeadDetail(leadId);
+  const { lead, fetchLead } = useLeadDetail(leadId);
   const [isLoading, setIsLoading] = useState(false);
   const [processingActionIds, setProcessingActionIds] = useState<string[]>([]);
   
   // Fetch lead data when component mounts or leadId changes
   useEffect(() => {
     if (leadId) {
-      fetchLead();
+      setIsLoading(true);
+      fetchLead().finally(() => setIsLoading(false));
     }
   }, [leadId, fetchLead]);
   
@@ -37,7 +38,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           : a
       ) || [];
       
-      // Update directly using Supabase client for more reliable operation
+      // Direct Supabase update to avoid http_post function issues
       const { error } = await supabase
         .from('leads')
         .update({
@@ -80,7 +81,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         action.id !== actionId
       ) || [];
       
-      // Use direct Supabase update for reliable synchronization
+      // Direct Supabase update to avoid http_post function issues
       const { error } = await supabase
         .from('leads')
         .update({
