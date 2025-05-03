@@ -37,7 +37,8 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     const newAction: ActionHistory = {
       id: crypto.randomUUID(),
       ...action,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      actionType: action.actionType || 'Note'
     };
     
     // Add the new action to the history

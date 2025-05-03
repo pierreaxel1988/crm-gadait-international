@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ActionItem, ActionStatus } from '@/types/actionHistory';
+import { ActionHistory, ActionItem, ActionStatus } from '@/types/actionHistory';
 import { isPast, isToday } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';

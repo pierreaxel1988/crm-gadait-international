@@ -41,7 +41,16 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       }
       
       if (lead && Array.isArray(lead.action_history)) {
-        setActionHistory(lead.action_history);
+        // Ensure each item in action_history conforms to ActionHistory type
+        const parsedActions: ActionHistory[] = lead.action_history.map((item: any) => ({
+          id: item.id || crypto.randomUUID(),
+          actionType: item.actionType || 'Note',
+          createdAt: item.createdAt || new Date().toISOString(),
+          scheduledDate: item.scheduledDate || new Date().toISOString(),
+          completedDate: item.completedDate,
+          notes: item.notes
+        }));
+        setActionHistory(parsedActions);
       } else {
         setActionHistory([]);
       }
@@ -78,7 +87,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       }
       
       // Update the action in the action history
-      const updatedActionHistory = lead.action_history.map(a => {
+      const updatedActionHistory = lead.action_history.map((a: any) => {
         if (a.id === action.id) {
           return {
             ...a,
@@ -99,7 +108,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       }
       
       // Refresh the actions list
-      setActionHistory(updatedActionHistory);
+      await fetchLeadActions();
       
       toast({
         title: "Action complétée",
