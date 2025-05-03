@@ -52,6 +52,7 @@ export interface ExtendedKanbanItem extends KanbanItem {
   furnished?: boolean;
   furniture_included_in_price?: boolean;
   furniture_price?: string;
+  email_envoye?: boolean;
 }
 
 interface KanbanColumn {
@@ -205,7 +206,8 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
               fees: lead.fees || '',
               furnished: lead.furnished || false,
               furniture_included_in_price: lead.furniture_included_in_price || false,
-              furniture_price: lead.furniture_price || ''
+              furniture_price: lead.furniture_price || '',
+              email_envoye: lead.email_envoye || false
             }));
           }
         }
@@ -255,7 +257,8 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
             preferredLanguage: lead.preferred_language,
             furnished: lead.furnished,
             furniture_included_in_price: lead.furniture_included_in_price,
-            furniture_price: lead.furniture_price
+            furniture_price: lead.furniture_price,
+            email_envoye: lead.email_envoye || false
           };
         });
         
