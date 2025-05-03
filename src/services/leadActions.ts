@@ -33,12 +33,14 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       actionHistory = [];
     }
     
-    // Create a new action with ID and createdAt
-    const newAction: ActionHistory = {
+    // Create a new action with ID and createdAt - as a plain object compatible with JSON
+    const newAction = {
       id: crypto.randomUUID(),
-      ...action,
+      actionType: action.actionType || 'Note',
       createdAt: new Date().toISOString(),
-      actionType: action.actionType || 'Note'
+      scheduledDate: action.scheduledDate,
+      completedDate: action.completedDate,
+      notes: action.notes
     };
     
     // Add the new action to the history
