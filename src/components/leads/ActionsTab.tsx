@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Calendar } from 'lucide-react';
@@ -28,9 +29,21 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
   const fetchLeadActions = async () => {
     try {
       setIsLoading(true);
-      const lead = await getLead(leadId);
-      if (lead) {
-        setActionHistory(lead.actionHistory || []);
+      const { data: lead, error } = await supabase
+        .from('leads')
+        .select('action_history')
+        .eq('id', leadId)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching lead actions:", error);
+        throw error;
+      }
+      
+      if (lead && Array.isArray(lead.action_history)) {
+        setActionHistory(lead.action_history);
+      } else {
+        setActionHistory([]);
       }
     } catch (error) {
       console.error("Error fetching lead actions:", error);
@@ -49,9 +62,13 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     
     try {
       // Get the current lead data
-      const lead = await getLead(leadId);
+      const { data: lead, error: fetchError } = await supabase
+        .from('leads')
+        .select('action_history')
+        .eq('id', leadId)
+        .single();
       
-      if (!lead || !lead.actionHistory) {
+      if (fetchError || !lead || !Array.isArray(lead.action_history)) {
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -61,7 +78,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       }
       
       // Update the action in the action history
-      const updatedActionHistory = lead.actionHistory.map(a => {
+      const updatedActionHistory = lead.action_history.map(a => {
         if (a.id === action.id) {
           return {
             ...a,
@@ -72,17 +89,17 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       });
       
       // Update the lead in the database
-      const { data, error } = await supabase
+      const { error: updateError } = await supabase
         .from('leads')
         .update({ action_history: updatedActionHistory })
         .eq('id', leadId);
       
-      if (error) {
-        throw error;
+      if (updateError) {
+        throw updateError;
       }
       
       // Refresh the actions list
-      fetchLeadActions();
+      setActionHistory(updatedActionHistory);
       
       toast({
         title: "Action complétée",
