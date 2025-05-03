@@ -37,7 +37,11 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     let scheduledDate = null;
     if (action.scheduledDate !== undefined && action.scheduledDate !== null) {
       try {
-        if (typeof action.scheduledDate === 'object' && '_type' in action.scheduledDate && action.scheduledDate._type === 'undefined') {
+        // First check if it's an object and has the _type property before accessing it
+        if (typeof action.scheduledDate === 'object' && 
+            action.scheduledDate !== null && 
+            '_type' in action.scheduledDate && 
+            action.scheduledDate._type === 'undefined') {
           console.warn('Invalid scheduledDate object detected:', action.scheduledDate);
         } else {
           // Try to parse into a valid date
@@ -57,7 +61,11 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     let completedDate = null;
     if (action.completedDate !== undefined && action.completedDate !== null) {
       try {
-        if (typeof action.completedDate === 'object' && '_type' in action.completedDate && action.completedDate._type === 'undefined') {
+        // First check if it's an object and has the _type property before accessing it
+        if (typeof action.completedDate === 'object' && 
+            action.completedDate !== null && 
+            '_type' in action.completedDate && 
+            action.completedDate._type === 'undefined') {
           console.warn('Invalid completedDate object detected:', action.completedDate);
         } else {
           // Try to parse into a valid date
