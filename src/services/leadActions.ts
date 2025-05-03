@@ -33,7 +33,7 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       actionHistory = [];
     }
     
-    // Create a new action with ID and createdAt - as a plain object compatible with JSON
+    // Create a new action as a plain object that's compatible with Supabase JSON
     const newAction = {
       id: crypto.randomUUID(),
       actionType: action.actionType || 'Note',
@@ -57,13 +57,15 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     }
     
     // Update the lead with the new action in history
+    // Désactiver temporairement le mise à jour d'email_envoye
     const { data: updatedLead, error: updateError } = await supabase
       .from('leads')
       .update({
         action_history: actionHistory,
         last_contacted_at: currentDate,
         task_type: taskType,
-        next_follow_up_date: nextFollowUpDate
+        next_follow_up_date: nextFollowUpDate,
+        email_envoye: false // Forcer à false pour désactiver le déclenchement automatique d'emails
       })
       .eq('id', leadId)
       .select('*')
