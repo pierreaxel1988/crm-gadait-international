@@ -27,7 +27,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           : a
       ) || [];
       
-      handleDataChange({
+      await handleDataChange({
         ...lead,
         actionHistory: updatedActionHistory,
         lastContactedAt: new Date().toISOString()
@@ -55,7 +55,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         action.id !== actionId
       ) || [];
       
-      handleDataChange({
+      await handleDataChange({
         ...lead,
         actionHistory: updatedActionHistory
       });
