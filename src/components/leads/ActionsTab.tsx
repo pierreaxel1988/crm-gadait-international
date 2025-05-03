@@ -29,6 +29,8 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
   const fetchLeadActions = async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching actions for lead ID:', leadId);
+      
       const { data: lead, error } = await supabase
         .from('leads')
         .select('action_history')
@@ -70,6 +72,8 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     if (!action.id) return;
     
     try {
+      console.log('Marking action as complete for lead ID:', leadId);
+      
       // Get the current lead data
       const { data: lead, error: fetchError } = await supabase
         .from('leads')
@@ -100,7 +104,10 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       // Update the lead in the database
       const { error: updateError } = await supabase
         .from('leads')
-        .update({ action_history: updatedActionHistory })
+        .update({ 
+          action_history: updatedActionHistory,
+          email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
+        })
         .eq('id', leadId);
       
       if (updateError) {

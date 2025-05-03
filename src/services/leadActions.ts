@@ -56,6 +56,9 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       nextFollowUpDate = null;
     }
     
+    console.log(`Updating lead ${leadId} with new action:`, newAction);
+    console.log('Action history now contains:', actionHistory.length, 'items');
+    
     // Update the lead with the new action in history
     // Désactiver temporairement le mise à jour d'email_envoye
     const { data: updatedLead, error: updateError } = await supabase
