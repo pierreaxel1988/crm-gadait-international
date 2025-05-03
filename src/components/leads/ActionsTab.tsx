@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Calendar } from 'lucide-react';
@@ -44,49 +43,21 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       
       if (lead && Array.isArray(lead.action_history)) {
         // Ensure each item in action_history conforms to ActionHistory type
-        const parsedActions: ActionHistory[] = lead.action_history.map((item: any) => ({
-          id: item.id || crypto.randomUUID(),
-          actionType: item.actionType || 'Note',
-          createdAt: item.createdAt || new Date().toISOString(),
-          scheduledDate: item.scheduledDate || new Date().toISOString(),
-          completedDate: item.completedDate,
-          notes: item.notes
-        }));
-        
-        // Validation supplémentaire pour les dates
-        const validatedActions = parsedActions.map(action => {
-          // Vérifier scheduledDate
-          if (action.scheduledDate) {
-            try {
-              const date = new Date(action.scheduledDate);
-              if (isNaN(date.getTime())) {
-                console.warn(`Invalid scheduledDate detected for action ${action.id}:`, action.scheduledDate);
-                action.scheduledDate = new Date().toISOString(); // Fallback à la date actuelle
-              }
-            } catch (err) {
-              console.error(`Error validating scheduledDate for action ${action.id}:`, err);
-              action.scheduledDate = new Date().toISOString();
-            }
-          }
+        const parsedActions: ActionHistory[] = lead.action_history.map((item: any) => {
+          // Validate and safeguard for any missing or invalid properties
+          const validatedAction: ActionHistory = {
+            id: item.id || crypto.randomUUID(),
+            actionType: item.actionType || 'Note',
+            createdAt: validateDateString(item.createdAt) || new Date().toISOString(),
+            scheduledDate: validateDateString(item.scheduledDate) || new Date().toISOString(),
+            completedDate: validateDateString(item.completedDate),
+            notes: item.notes
+          };
           
-          // Vérifier completedDate si présent
-          if (action.completedDate) {
-            try {
-              const date = new Date(action.completedDate);
-              if (isNaN(date.getTime())) {
-                console.warn(`Invalid completedDate detected for action ${action.id}:`, action.completedDate);
-                action.completedDate = undefined; // Retirer une date de complétion invalide
-              }
-            } catch (err) {
-              console.error(`Error validating completedDate for action ${action.id}:`, err);
-              action.completedDate = undefined;
-            }
-          }
-          
-          return action;
+          return validatedAction;
         });
         
-        setActionHistory(validatedActions);
+        setActionHistory(parsedActions);
       } else {
         setActionHistory([]);
       }
@@ -99,6 +70,19 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Helper function to validate date strings
+  const validateDateString = (dateStr?: string): string | undefined => {
+    if (!dateStr) return undefined;
+    
+    try {
+      const date = new Date(dateStr);
+      return !isNaN(date.getTime()) ? date.toISOString() : undefined;
+    } catch (err) {
+      console.warn('Invalid date:', dateStr, err);
+      return undefined;
     }
   };
 

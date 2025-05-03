@@ -51,11 +51,41 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
   useEffect(() => {
     if (initialActionHistory) {
-      setActionHistory(initialActionHistory);
+      const validatedActions = validateActionHistory(initialActionHistory);
+      setActionHistory(validatedActions);
     } else {
       fetchLeadData();
     }
   }, [leadId, initialActionHistory]);
+
+  const validateActionHistory = (actions: ActionHistory[]): ActionHistory[] => {
+    return actions.map(action => {
+      // Ensure all required fields are present and valid
+      const validatedAction: ActionHistory = {
+        id: action.id || crypto.randomUUID(),
+        actionType: action.actionType || 'Note', 
+        createdAt: validateDateString(action.createdAt) || new Date().toISOString(),
+        scheduledDate: validateDateString(action.scheduledDate) || new Date().toISOString(),
+        completedDate: validateDateString(action.completedDate),
+        notes: action.notes
+      };
+      
+      return validatedAction;
+    });
+  };
+
+  // Helper function to validate date strings and convert to ISO format if valid
+  const validateDateString = (dateStr?: string): string | undefined => {
+    if (!dateStr) return undefined;
+    
+    try {
+      const date = new Date(dateStr);
+      return !isNaN(date.getTime()) ? date.toISOString() : undefined;
+    } catch (err) {
+      console.warn('Invalid date:', dateStr, err);
+      return undefined;
+    }
+  };
 
   const fetchLeadData = async () => {
     if (!leadId) return;
@@ -65,7 +95,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       const fetchedLead = await getLead(leadId);
       if (fetchedLead) {
         setLead(fetchedLead);
-        setActionHistory(fetchedLead.actionHistory || []);
+        const validatedActions = validateActionHistory(fetchedLead.actionHistory || []);
+        setActionHistory(validatedActions);
       }
     } catch (error) {
       console.error("Error fetching lead data:", error);
@@ -95,7 +126,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         
         const updatedLead = await updateLead({
           ...currentLead,
-          actionHistory: updatedActionHistory
+          actionHistory: updatedActionHistory,
+          email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
         });
         
         if (updatedLead) {

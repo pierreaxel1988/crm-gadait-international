@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -60,6 +61,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
       try {
         let scheduledDateTime = undefined;
         if (actionDate) {
+          // Create a valid date object from the selected date and time
           const [hours, minutes] = actionTime.split(':').map(part => parseInt(part, 10));
           const dateTime = new Date(actionDate);
           dateTime.setHours(hours, minutes);
@@ -69,14 +71,26 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
         // Check for duplicates before adding
         if (scheduledDateTime && lead.actionHistory) {
           const isDuplicate = lead.actionHistory.some(action => {
-            const actionDate = new Date(action.scheduledDate);
-            const newDate = new Date(scheduledDateTime!);
-            return action.actionType === selectedAction && 
-                  actionDate.getFullYear() === newDate.getFullYear() &&
-                  actionDate.getMonth() === newDate.getMonth() &&
-                  actionDate.getDate() === newDate.getDate() &&
-                  actionDate.getHours() === newDate.getHours() &&
-                  actionDate.getMinutes() === newDate.getMinutes();
+            if (!action.scheduledDate) return false;
+            
+            try {
+              const actionDate = new Date(action.scheduledDate);
+              const newDate = new Date(scheduledDateTime);
+              
+              if (isNaN(actionDate.getTime()) || isNaN(newDate.getTime())) {
+                return false;
+              }
+              
+              return action.actionType === selectedAction && 
+                    actionDate.getFullYear() === newDate.getFullYear() &&
+                    actionDate.getMonth() === newDate.getMonth() &&
+                    actionDate.getDate() === newDate.getDate() &&
+                    actionDate.getHours() === newDate.getHours() &&
+                    actionDate.getMinutes() === newDate.getMinutes();
+            } catch (error) {
+              console.error("Error comparing dates:", error);
+              return false;
+            }
           });
           
           if (isDuplicate) {

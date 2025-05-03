@@ -41,10 +41,10 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
         if (typeof action.scheduledDate === 'object') {
           // Make sure it's not null before checking properties
           if (action.scheduledDate !== null) {
-            // Only try to access properties if we know it's not null
-            const hasTypeProperty = '_type' in action.scheduledDate;
-            // Only check value if property exists
-            if (hasTypeProperty && action.scheduledDate._type === 'undefined') {
+            // Using type assertion to tell TypeScript we checked it's not null
+            const actionDate = action.scheduledDate as object;
+            // Check if _type property exists safely
+            if ('_type' in actionDate && (actionDate as any)._type === 'undefined') {
               console.warn('Invalid scheduledDate object detected:', action.scheduledDate);
             }
           }
@@ -70,10 +70,10 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
         if (typeof action.completedDate === 'object') {
           // Make sure it's not null before checking properties
           if (action.completedDate !== null) {
-            // Only try to access properties if we know it's not null
-            const hasTypeProperty = '_type' in action.completedDate;
-            // Only check value if property exists
-            if (hasTypeProperty && action.completedDate._type === 'undefined') {
+            // Using type assertion to tell TypeScript we checked it's not null
+            const actionDate = action.completedDate as object;
+            // Check if _type property exists safely
+            if ('_type' in actionDate && (actionDate as any)._type === 'undefined') {
               console.warn('Invalid completedDate object detected:', action.completedDate);
             }
           }
