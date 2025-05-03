@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
@@ -130,7 +129,7 @@ export function useLeadDetail(id: string | undefined) {
     };
   }, [lead, hasChanges, autoSaveEnabled]);
 
-  const handleDataChange = (data: Partial<LeadDetailed>) => {
+  const handleDataChange = async (data: Partial<LeadDetailed>) => {
     if (!lead) return;
     
     console.log("Updating lead data:", data);
@@ -170,6 +169,31 @@ export function useLeadDetail(id: string | undefined) {
     });
     
     setHasChanges(true);
+    
+    // If auto-save is enabled, return a promise that resolves when the save is complete
+    if (autoSaveEnabled) {
+      return new Promise((resolve, reject) => {
+        // Clear any existing timeout
+        if (autoSaveTimer) {
+          clearTimeout(autoSaveTimer);
+        }
+        
+        // Set a new timeout
+        const timer = setTimeout(async () => {
+          try {
+            await handleSave(true);
+            resolve(lead);
+          } catch (error) {
+            console.error("Error in handleDataChange auto-save:", error);
+            reject(error);
+          }
+        }, 500);
+        
+        setAutoSaveTimer(timer);
+      });
+    }
+    
+    return Promise.resolve(lead);
   };
 
   const getFormattedPhoneForCall = () => {

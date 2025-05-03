@@ -16,11 +16,14 @@ interface ActionsTabProps {
 const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
   const { lead, fetchLead, handleDataChange } = useLeadDetail(leadId);
   const [isLoading, setIsLoading] = useState(false);
+  const [processingActionIds, setProcessingActionIds] = useState<string[]>([]);
   
   const handleMarkComplete = async (action: ActionHistory) => {
     if (!lead) return;
     
     try {
+      setProcessingActionIds(prev => [...prev, action.id]);
+      
       const updatedActionHistory = lead.actionHistory?.map(a => 
         a.id === action.id 
           ? { ...a, completedDate: new Date().toISOString() } 
@@ -44,6 +47,8 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         title: "Erreur",
         description: "Impossible de marquer l'action comme terminée"
       });
+    } finally {
+      setProcessingActionIds(prev => prev.filter(id => id !== action.id));
     }
   };
   
@@ -51,6 +56,8 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     if (!lead) return;
     
     try {
+      setProcessingActionIds(prev => [...prev, actionId]);
+      
       const updatedActionHistory = lead.actionHistory?.filter(action => 
         action.id !== actionId
       ) || [];
@@ -71,6 +78,8 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         title: "Erreur",
         description: "Impossible de supprimer l'action"
       });
+    } finally {
+      setProcessingActionIds(prev => prev.filter(id => id !== actionId));
     }
   };
   
@@ -118,6 +127,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         <div className="space-y-3 mb-6">
           {pendingActions.map((action) => {
             const isOverdue = isActionOverdue(action.scheduledDate);
+            const isProcessing = processingActionIds.includes(action.id);
             
             return (
               <div 
@@ -150,17 +160,29 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
                       size="sm" 
                       className="bg-green-500 hover:bg-green-600"
                       onClick={() => handleMarkComplete(action)}
+                      disabled={isProcessing}
                     >
-                      <Check className="h-4 w-4 mr-1" />
-                      Terminer
+                      {isProcessing ? (
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      ) : (
+                        <>
+                          <Check className="h-4 w-4 mr-1" />
+                          Terminer
+                        </>
+                      )}
                     </Button>
                     <Button 
                       variant="outline" 
                       size="sm"
                       className="text-red-600 border-red-300 hover:bg-red-50"
                       onClick={() => handleDeleteAction(action.id)}
+                      disabled={isProcessing}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {isProcessing ? (
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -176,39 +198,48 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         <p className="text-gray-500 italic">Aucune action complétée</p>
       ) : (
         <div className="space-y-3">
-          {completedActions.map((action) => (
-            <div 
-              key={action.id} 
-              className="border rounded-lg p-3 bg-gray-50 opacity-75"
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-sm font-medium">
-                      {getActionTypeLabel(action.actionType)}
-                    </span>
-                    <div className="flex items-center text-green-600">
-                      <Check className="h-4 w-4 mr-1" />
-                      <span>
-                        {action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}
+          {completedActions.map((action) => {
+            const isProcessing = processingActionIds.includes(action.id);
+            
+            return (
+              <div 
+                key={action.id} 
+                className="border rounded-lg p-3 bg-gray-50 opacity-75"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-sm font-medium">
+                        {getActionTypeLabel(action.actionType)}
                       </span>
+                      <div className="flex items-center text-green-600">
+                        <Check className="h-4 w-4 mr-1" />
+                        <span>
+                          {action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}
+                        </span>
+                      </div>
                     </div>
+                    {action.notes && (
+                      <p className="mt-2 text-sm text-gray-700">{action.notes}</p>
+                    )}
                   </div>
-                  {action.notes && (
-                    <p className="mt-2 text-sm text-gray-700">{action.notes}</p>
-                  )}
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-red-500 hover:bg-red-50"
+                    onClick={() => handleDeleteAction(action.id)}
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? (
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="text-red-500 hover:bg-red-50"
-                  onClick={() => handleDeleteAction(action.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

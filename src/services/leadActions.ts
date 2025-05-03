@@ -8,10 +8,13 @@ import { toast } from "@/hooks/use-toast";
 
 export const addActionToLead = async (leadId: string, action: Omit<ActionHistory, 'id' | 'createdAt'>): Promise<LeadDetailed | undefined> => {
   try {
+    console.log("Adding action to lead:", { leadId, action });
+    
     // Get the lead first
     const lead = await getLead(leadId);
     
     if (!lead) {
+      console.error("Lead not found:", leadId);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -19,6 +22,8 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       });
       return undefined;
     }
+    
+    console.log("Lead found:", lead.name);
     
     // Ensure actionHistory is initialized
     if (!lead.actionHistory) {
@@ -33,6 +38,8 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     };
     
     const currentDate = new Date().toISOString();
+    
+    console.log("Created new action:", newAction);
     
     // Update the lead with the new action in history
     const updatedLead: LeadDetailed = {
@@ -54,20 +61,25 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     const result = await updateLead(updatedLead);
     
     if (!result) {
+      console.error('Failed to update lead with new action');
       throw new Error('Failed to update lead with new action');
     }
     
     // Verify action history was saved properly with direct query
-    const { data, error } = await supabase
-      .from('leads')
-      .select('action_history')
-      .eq('id', leadId)
-      .single();
-    
-    if (error) {
-      console.error('Error verifying action history:', error);
-    } else if (data) {
-      console.log('Action history verified in database:', data.action_history);
+    try {
+      const { data, error } = await supabase
+        .from('leads')
+        .select('action_history')
+        .eq('id', leadId)
+        .single();
+      
+      if (error) {
+        console.error('Error verifying action history:', error);
+      } else if (data) {
+        console.log('Action history verified in database:', data.action_history);
+      }
+    } catch (queryError) {
+      console.error('Error querying action history:', queryError);
     }
     
     return result;
