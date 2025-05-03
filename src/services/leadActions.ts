@@ -37,7 +37,7 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       createdAt: new Date().toISOString()
     };
     
-    // Fix for undefined scheduledDate
+    // Fix for undefined or object scheduledDate
     if (!newAction.scheduledDate || typeof newAction.scheduledDate === 'object') {
       newAction.scheduledDate = new Date().toISOString();
     }
@@ -62,8 +62,8 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       updatedActionHistory: updatedLead.actionHistory 
     });
     
-    // Update the lead directly using Supabase client to avoid http_post error
-    const { data, error } = await supabase
+    // Update the lead directly using Supabase client
+    const { error } = await supabase
       .from('leads')
       .update({
         action_history: updatedLead.actionHistory,

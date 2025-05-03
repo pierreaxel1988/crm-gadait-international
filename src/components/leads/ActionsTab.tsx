@@ -18,6 +18,13 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [processingActionIds, setProcessingActionIds] = useState<string[]>([]);
   
+  // Fetch lead data when component mounts or leadId changes
+  useEffect(() => {
+    if (leadId) {
+      fetchLead();
+    }
+  }, [leadId, fetchLead]);
+  
   const handleMarkComplete = async (action: ActionHistory) => {
     if (!lead) return;
     
@@ -62,10 +69,21 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         action.id !== actionId
       ) || [];
       
-      await handleDataChange({
-        ...lead,
-        actionHistory: updatedActionHistory
-      });
+      // Use direct Supabase update for reliable synchronization
+      const { error } = await supabase
+        .from('leads')
+        .update({
+          action_history: updatedActionHistory
+        })
+        .eq('id', lead.id);
+        
+      if (error) {
+        console.error("Error deleting action:", error);
+        throw error;
+      }
+      
+      // Update local state after successful database update
+      await fetchLead();
       
       toast({
         title: "Action supprimée",
