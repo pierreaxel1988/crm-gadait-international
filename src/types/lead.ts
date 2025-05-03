@@ -1,4 +1,3 @@
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -197,9 +196,6 @@ export interface LeadDetailed {
   furnished?: boolean;
   furniture_included_in_price?: boolean;
   furniture_price?: string;
-  
-  // Add the email_envoye field to track automated email status
-  email_envoye?: boolean;
 
   // Nouveaux champs pour le luxe immobilier
   bathrooms?: number;

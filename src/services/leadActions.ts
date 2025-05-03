@@ -8,13 +8,10 @@ import { toast } from "@/hooks/use-toast";
 
 export const addActionToLead = async (leadId: string, action: Omit<ActionHistory, 'id' | 'createdAt'>): Promise<LeadDetailed | undefined> => {
   try {
-    console.log("Adding action to lead:", { leadId, action });
-    
     // Get the lead first
     const lead = await getLead(leadId);
     
     if (!lead) {
-      console.error("Lead not found:", leadId);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -22,8 +19,6 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       });
       return undefined;
     }
-    
-    console.log("Lead found:", lead.name);
     
     // Ensure actionHistory is initialized
     if (!lead.actionHistory) {
@@ -37,20 +32,13 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       createdAt: new Date().toISOString()
     };
     
-    // Fix for undefined or object scheduledDate
-    if (!newAction.scheduledDate || typeof newAction.scheduledDate === 'object') {
-      newAction.scheduledDate = new Date().toISOString();
-    }
-    
     const currentDate = new Date().toISOString();
-    
-    console.log("Created new action:", newAction);
     
     // Update the lead with the new action in history
     const updatedLead: LeadDetailed = {
       ...lead,
       taskType: action.actionType as TaskType,
-      nextFollowUpDate: newAction.scheduledDate,
+      nextFollowUpDate: action.scheduledDate,
       lastContactedAt: currentDate,
       actionHistory: [...lead.actionHistory, newAction]
     };
@@ -62,29 +50,27 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       updatedActionHistory: updatedLead.actionHistory 
     });
     
-    // Direct Supabase update to avoid http_post function issues
+    // Update the lead in Supabase
+    const result = await updateLead(updatedLead);
+    
+    if (!result) {
+      throw new Error('Failed to update lead with new action');
+    }
+    
+    // Verify action history was saved properly with direct query
     const { data, error } = await supabase
       .from('leads')
-      .update({
-        action_history: updatedLead.actionHistory,
-        task_type: updatedLead.taskType,
-        next_follow_up_date: updatedLead.nextFollowUpDate,
-        last_contacted_at: updatedLead.lastContactedAt
-      })
+      .select('action_history')
       .eq('id', leadId)
-      .select()
       .single();
     
     if (error) {
-      console.error("Error updating lead with new action:", error);
-      throw error;
+      console.error('Error verifying action history:', error);
+    } else if (data) {
+      console.log('Action history verified in database:', data.action_history);
     }
     
-    console.log("Lead successfully updated with new action:", data);
-    
-    // Return the updated lead
-    return await getLead(leadId);
-    
+    return result;
   } catch (err) {
     console.error('Error adding action to lead:', err);
     toast({
