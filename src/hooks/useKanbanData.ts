@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -52,6 +53,8 @@ export interface ExtendedKanbanItem extends KanbanItem {
   furnished?: boolean;
   furniture_included_in_price?: boolean;
   furniture_price?: string;
+  // Ajout du champ email_envoye qui est désormais requis
+  email_envoye?: boolean;
 }
 
 interface KanbanColumn {
@@ -205,7 +208,8 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
               fees: lead.fees || '',
               furnished: lead.furnished || false,
               furniture_included_in_price: lead.furniture_included_in_price || false,
-              furniture_price: lead.furniture_price || ''
+              furniture_price: lead.furniture_price || '',
+              email_envoye: lead.email_envoye || false // Ajout de cette propriété
             }));
           }
         }
@@ -255,7 +259,8 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
             preferredLanguage: lead.preferred_language,
             furnished: lead.furnished,
             furniture_included_in_price: lead.furniture_included_in_price,
-            furniture_price: lead.furniture_price
+            furniture_price: lead.furniture_price,
+            email_envoye: lead.email_envoye || false // Ajout de cette propriété
           };
         });
         

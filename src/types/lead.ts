@@ -1,3 +1,4 @@
+
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -228,6 +229,8 @@ export interface LeadDetailed {
   wineStorageCapacity?: string;
   accessibility?: string;
   exposure?: string;
-
   mapCoordinates?: string;
+  
+  // Nouvel ajout pour compatibilité avec le champ email_envoye de la base de données
+  email_envoye?: boolean;
 }

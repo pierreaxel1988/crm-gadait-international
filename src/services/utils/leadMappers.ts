@@ -64,7 +64,7 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     desiredLocation: lead.desired_location,
     propertyType: lead.property_type,
     propertyTypes: lead.property_types,
-    bedrooms: bedrooms,
+    bedrooms: lead.bedrooms,
     views: lead.views,
     amenities: lead.amenities || [],
     purchaseTimeframe: lead.purchase_timeframe,
@@ -82,7 +82,7 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     pipeline_type: lead.pipeline_type,
     imported_at: lead.imported_at,
     integration_source: lead.integration_source,
-    actionHistory: actionHistory,
+    actionHistory: lead.action_history || [],
     livingArea: lead.living_area,
     external_id: lead.external_id,
     regions: lead.regions || [],
@@ -99,7 +99,8 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     parkingSpaces: lead.parking_spaces,
     constructionYear: lead.construction_year || '',
     yearlyTaxes: lead.yearly_taxes || '',
-    assets: lead.assets || []
+    assets: lead.assets || [],
+    email_envoye: lead.email_envoye || false // Ajout du champ email_envoye
   };
 };
 
@@ -172,8 +173,9 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     preferred_language: lead.preferredLanguage,
     living_area: lead.livingArea,
     external_id: lead.external_id,
-    action_history: actionHistoryForDb,
-    regions: lead.regions || []
+    action_history: lead.actionHistory,
+    regions: lead.regions || [],
+    email_envoye: lead.email_envoye || false // Ajout du champ email_envoye
   };
 };
 
