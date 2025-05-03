@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from 'react';
-import { LeadDetailed } from '@/types/lead';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { LeadDetailed } from "@/types/lead";
+import { TaskType } from "@/components/kanban/KanbanCard";
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { addActionToLead } from '@/services/leadActions';
@@ -92,7 +93,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
         
         const updatedLead = await addActionToLead(lead.id, {
           actionType: selectedAction,
-          scheduledDate: scheduledDateTime,
+          scheduledDate: scheduledDateTime || new Date().toISOString(), // Ensure we always have a date
           notes: actionNotes
         });
         

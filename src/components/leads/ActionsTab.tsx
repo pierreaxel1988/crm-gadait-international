@@ -37,11 +37,22 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           : a
       ) || [];
       
-      await handleDataChange({
-        ...lead,
-        actionHistory: updatedActionHistory,
-        lastContactedAt: new Date().toISOString()
-      });
+      // Update directly using Supabase client for more reliable operation
+      const { error } = await supabase
+        .from('leads')
+        .update({
+          action_history: updatedActionHistory,
+          last_contacted_at: new Date().toISOString()
+        })
+        .eq('id', lead.id);
+      
+      if (error) {
+        console.error("Error marking action complete:", error);
+        throw error;
+      }
+      
+      // Fetch the updated lead after successful update
+      await fetchLead();
       
       toast({
         title: "Action complétée",

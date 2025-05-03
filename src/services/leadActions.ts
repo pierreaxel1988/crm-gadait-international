@@ -50,7 +50,7 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     const updatedLead: LeadDetailed = {
       ...lead,
       taskType: action.actionType as TaskType,
-      nextFollowUpDate: newAction.scheduledDate, // Use the fixed scheduledDate
+      nextFollowUpDate: newAction.scheduledDate,
       lastContactedAt: currentDate,
       actionHistory: [...lead.actionHistory, newAction]
     };
@@ -62,24 +62,15 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       updatedActionHistory: updatedLead.actionHistory 
     });
     
-    // Update the lead directly using Supabase client
-    const { error } = await supabase
-      .from('leads')
-      .update({
-        action_history: updatedLead.actionHistory,
-        task_type: updatedLead.taskType,
-        next_follow_up_date: updatedLead.nextFollowUpDate,
-        last_contacted_at: updatedLead.lastContactedAt
-      })
-      .eq('id', leadId);
+    // Avoid the http_post function by using direct updateLead
+    const result = await updateLead(updatedLead);
     
-    if (error) {
-      console.error("Error updating lead with new action:", error);
-      throw error;
+    if (!result) {
+      throw new Error("Failed to update lead with new action");
     }
     
-    // After update, return the updated lead
-    return await getLead(leadId);
+    console.log("Lead successfully updated with new action");
+    return result;
     
   } catch (err) {
     console.error('Error adding action to lead:', err);
