@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -122,11 +123,19 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     if (!dateString) return 'Date non définie';
     
     try {
-      const dateObj = new Date(dateString);
-      if (!isValid(dateObj)) {
-        console.warn('Invalid date encountered:', dateString);
+      // Vérification supplémentaire pour les dates invalides
+      const timestamp = Date.parse(dateString);
+      if (isNaN(timestamp)) {
+        console.warn('Invalid date encountered (NaN timestamp):', dateString);
         return 'Date invalide';
       }
+      
+      const dateObj = new Date(dateString);
+      if (!isValid(dateObj)) {
+        console.warn('Invalid date encountered (isValid):', dateString);
+        return 'Date invalide';
+      }
+      
       return format(dateObj, formatStr);
     } catch (error) {
       console.error('Error formatting date:', error, dateString);
@@ -152,9 +161,20 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
   const sortedActions = [...actionHistory].sort((a, b) => {
     try {
-      // Vérifier si les dates sont valides avant de les comparer
-      const dateA = a.scheduledDate ? new Date(a.scheduledDate) : new Date();
-      const dateB = b.scheduledDate ? new Date(b.scheduledDate) : new Date();
+      if (!a.scheduledDate && !b.scheduledDate) return 0;
+      if (!a.scheduledDate) return 1;
+      if (!b.scheduledDate) return -1;
+      
+      // Vérification supplémentaire pour les dates invalides
+      const timestampA = Date.parse(a.scheduledDate);
+      const timestampB = Date.parse(b.scheduledDate);
+      
+      if (isNaN(timestampA) && isNaN(timestampB)) return 0;
+      if (isNaN(timestampA)) return 1;
+      if (isNaN(timestampB)) return -1;
+      
+      const dateA = new Date(timestampA);
+      const dateB = new Date(timestampB);
       
       if (!isValid(dateA) || !isValid(dateB)) {
         console.warn('Invalid date encountered during sorting', { a, b });
@@ -175,12 +195,18 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     if (!dateString) return false;
     
     try {
+      const timestamp = Date.parse(dateString);
+      if (isNaN(timestamp)) {
+        console.warn('Invalid date in isDatePast (NaN timestamp):', dateString);
+        return false;
+      }
+      
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const date = new Date(dateString);
       
       if (!isValid(date)) {
-        console.warn('Invalid date in isDatePast:', dateString);
+        console.warn('Invalid date in isDatePast (isValid):', dateString);
         return false;
       }
       

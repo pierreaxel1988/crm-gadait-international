@@ -33,18 +33,44 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       actionHistory = [];
     }
     
-    // Validate scheduledDate
-    let scheduledDate = action.scheduledDate;
-    if (scheduledDate && typeof scheduledDate === 'object' && scheduledDate._type === 'undefined') {
-      console.warn('Invalid scheduledDate object detected:', scheduledDate);
-      scheduledDate = null;
+    // Clean and validate scheduledDate
+    let scheduledDate = null;
+    if (action.scheduledDate) {
+      try {
+        if (typeof action.scheduledDate === 'object' && action.scheduledDate._type === 'undefined') {
+          console.warn('Invalid scheduledDate object detected:', action.scheduledDate);
+        } else {
+          // Try to parse into a valid date
+          const tempDate = new Date(action.scheduledDate);
+          if (!isNaN(tempDate.getTime())) {
+            scheduledDate = tempDate.toISOString();
+          } else {
+            console.warn('Invalid scheduledDate value:', action.scheduledDate);
+          }
+        }
+      } catch (err) {
+        console.warn('Error processing scheduledDate:', err);
+      }
     }
     
-    // Validate completedDate
-    let completedDate = action.completedDate;
-    if (completedDate && typeof completedDate === 'object' && completedDate._type === 'undefined') {
-      console.warn('Invalid completedDate object detected:', completedDate);
-      completedDate = null;
+    // Clean and validate completedDate
+    let completedDate = null;
+    if (action.completedDate) {
+      try {
+        if (typeof action.completedDate === 'object' && action.completedDate._type === 'undefined') {
+          console.warn('Invalid completedDate object detected:', action.completedDate);
+        } else {
+          // Try to parse into a valid date
+          const tempDate = new Date(action.completedDate);
+          if (!isNaN(tempDate.getTime())) {
+            completedDate = tempDate.toISOString();
+          } else {
+            console.warn('Invalid completedDate value:', action.completedDate);
+          }
+        }
+      } catch (err) {
+        console.warn('Error processing completedDate:', err);
+      }
     }
     
     // Create a new action as a plain object that's compatible with Supabase JSON
@@ -64,18 +90,16 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     const currentDate = new Date().toISOString();
     const taskType = action.actionType as TaskType;
     
-    // Fix for scheduledDate if it's undefined or invalid
-    let nextFollowUpDate = scheduledDate;
-    if (typeof nextFollowUpDate === 'undefined' || nextFollowUpDate === null || 
-        (typeof nextFollowUpDate === 'object' && nextFollowUpDate._type === 'undefined')) {
-      nextFollowUpDate = null;
+    // Fix for nextFollowUpDate based on scheduledDate
+    let nextFollowUpDate = null;
+    if (scheduledDate) {
+      nextFollowUpDate = scheduledDate;
     }
     
     console.log(`Updating lead ${leadId} with new action:`, newAction);
     console.log('Action history now contains:', actionHistory.length, 'items');
     
     // Update the lead with the new action in history
-    // Désactiver temporairement le mise à jour d'email_envoye
     const { data: updatedLead, error: updateError } = await supabase
       .from('leads')
       .update({

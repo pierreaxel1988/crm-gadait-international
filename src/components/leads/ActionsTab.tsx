@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Calendar } from 'lucide-react';
 import { ActionHistory } from '@/types/actionHistory';
-import { format, isPast } from 'date-fns';
+import { format, isPast, isValid } from 'date-fns';
 import { getLead } from '@/services/leadCore';
 import { toast } from '@/hooks/use-toast';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -52,7 +52,41 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           completedDate: item.completedDate,
           notes: item.notes
         }));
-        setActionHistory(parsedActions);
+        
+        // Validation supplémentaire pour les dates
+        const validatedActions = parsedActions.map(action => {
+          // Vérifier scheduledDate
+          if (action.scheduledDate) {
+            try {
+              const date = new Date(action.scheduledDate);
+              if (isNaN(date.getTime())) {
+                console.warn(`Invalid scheduledDate detected for action ${action.id}:`, action.scheduledDate);
+                action.scheduledDate = new Date().toISOString(); // Fallback à la date actuelle
+              }
+            } catch (err) {
+              console.error(`Error validating scheduledDate for action ${action.id}:`, err);
+              action.scheduledDate = new Date().toISOString();
+            }
+          }
+          
+          // Vérifier completedDate si présent
+          if (action.completedDate) {
+            try {
+              const date = new Date(action.completedDate);
+              if (isNaN(date.getTime())) {
+                console.warn(`Invalid completedDate detected for action ${action.id}:`, action.completedDate);
+                action.completedDate = undefined; // Retirer une date de complétion invalide
+              }
+            } catch (err) {
+              console.error(`Error validating completedDate for action ${action.id}:`, err);
+              action.completedDate = undefined;
+            }
+          }
+          
+          return action;
+        });
+        
+        setActionHistory(validatedActions);
       } else {
         setActionHistory([]);
       }
@@ -131,6 +165,29 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     }
   };
 
+  const formatDateSafely = (dateString?: string, formatStr: string = 'dd/MM/yyyy HH:mm') => {
+    if (!dateString) return 'Date non définie';
+    
+    try {
+      const timestamp = Date.parse(dateString);
+      if (isNaN(timestamp)) {
+        console.warn('Invalid date encountered (NaN timestamp):', dateString);
+        return 'Date invalide';
+      }
+      
+      const dateObj = new Date(dateString);
+      if (!isValid(dateObj)) {
+        console.warn('Invalid date encountered (isValid):', dateString);
+        return 'Date invalide';
+      }
+      
+      return format(dateObj, formatStr);
+    } catch (error) {
+      console.error('Error formatting date:', error, dateString);
+      return 'Date invalide';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg p-4 flex justify-center items-center h-40">
@@ -178,12 +235,12 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
                       <span className="font-semibold">{action.actionType}</span>
                       {action.scheduledDate && (
                         <p className="text-sm text-gray-600">
-                          Prévu pour: {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
+                          Prévu pour: {formatDateSafely(action.scheduledDate)}
                         </p>
                       )}
                       {action.completedDate && (
                         <p className="text-sm text-green-600">
-                          Complété le: {format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}
+                          Complété le: {formatDateSafely(action.completedDate)}
                         </p>
                       )}
                       {action.notes && (
