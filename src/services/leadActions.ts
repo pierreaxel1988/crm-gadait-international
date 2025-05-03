@@ -37,18 +37,19 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     let scheduledDate = null;
     if (action.scheduledDate !== undefined && action.scheduledDate !== null) {
       try {
-        // First check if it's an object
+        // Check if we're dealing with an object (potential special case)
         if (typeof action.scheduledDate === 'object') {
-          // Safe check - only access properties if the object is not null
+          // Make sure it's not null before checking properties
           if (action.scheduledDate !== null) {
-            // Now we can safely check if _type exists and its value
-            if ('_type' in action.scheduledDate && 
-                action.scheduledDate._type === 'undefined') {
+            // Only try to access properties if we know it's not null
+            const hasTypeProperty = '_type' in action.scheduledDate;
+            // Only check value if property exists
+            if (hasTypeProperty && action.scheduledDate._type === 'undefined') {
               console.warn('Invalid scheduledDate object detected:', action.scheduledDate);
             }
           }
         } else {
-          // Try to parse into a valid date
+          // It's not an object, so try to parse as date string
           const tempDate = new Date(action.scheduledDate);
           if (!isNaN(tempDate.getTime())) {
             scheduledDate = tempDate.toISOString();
@@ -65,18 +66,19 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     let completedDate = null;
     if (action.completedDate !== undefined && action.completedDate !== null) {
       try {
-        // First check if it's an object
+        // Check if we're dealing with an object (potential special case)
         if (typeof action.completedDate === 'object') {
-          // Safe check - only access properties if the object is not null
+          // Make sure it's not null before checking properties
           if (action.completedDate !== null) {
-            // Now we can safely check if _type exists and its value
-            if ('_type' in action.completedDate && 
-                action.completedDate._type === 'undefined') {
+            // Only try to access properties if we know it's not null
+            const hasTypeProperty = '_type' in action.completedDate;
+            // Only check value if property exists
+            if (hasTypeProperty && action.completedDate._type === 'undefined') {
               console.warn('Invalid completedDate object detected:', action.completedDate);
             }
           }
         } else {
-          // Try to parse into a valid date
+          // It's not an object, so try to parse as date string
           const tempDate = new Date(action.completedDate);
           if (!isNaN(tempDate.getTime())) {
             completedDate = tempDate.toISOString();
