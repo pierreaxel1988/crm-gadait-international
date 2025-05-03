@@ -57,19 +57,6 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       throw new Error('Failed to update lead with new action');
     }
     
-    // Verify action history was saved properly with direct query
-    const { data, error } = await supabase
-      .from('leads')
-      .select('action_history')
-      .eq('id', leadId)
-      .single();
-    
-    if (error) {
-      console.error('Error verifying action history:', error);
-    } else if (data) {
-      console.log('Action history verified in database:', data.action_history);
-    }
-    
     return result;
   } catch (err) {
     console.error('Error adding action to lead:', err);

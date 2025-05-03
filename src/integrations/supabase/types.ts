@@ -192,6 +192,7 @@ export type Database = {
           desired_location: string | null
           desired_price: string | null
           email: string | null
+          email_envoye: boolean | null
           energy_class: string | null
           equipment: string[] | null
           external_id: string | null
@@ -255,6 +256,7 @@ export type Database = {
           desired_location?: string | null
           desired_price?: string | null
           email?: string | null
+          email_envoye?: boolean | null
           energy_class?: string | null
           equipment?: string[] | null
           external_id?: string | null
@@ -318,6 +320,7 @@ export type Database = {
           desired_location?: string | null
           desired_price?: string | null
           email?: string | null
+          email_envoye?: boolean | null
           energy_class?: string | null
           equipment?: string[] | null
           external_id?: string | null
