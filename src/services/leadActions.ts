@@ -33,13 +33,27 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       actionHistory = [];
     }
     
+    // Validate scheduledDate
+    let scheduledDate = action.scheduledDate;
+    if (scheduledDate && typeof scheduledDate === 'object' && scheduledDate._type === 'undefined') {
+      console.warn('Invalid scheduledDate object detected:', scheduledDate);
+      scheduledDate = null;
+    }
+    
+    // Validate completedDate
+    let completedDate = action.completedDate;
+    if (completedDate && typeof completedDate === 'object' && completedDate._type === 'undefined') {
+      console.warn('Invalid completedDate object detected:', completedDate);
+      completedDate = null;
+    }
+    
     // Create a new action as a plain object that's compatible with Supabase JSON
     const newAction = {
       id: crypto.randomUUID(),
       actionType: action.actionType || 'Note',
       createdAt: new Date().toISOString(),
-      scheduledDate: action.scheduledDate,
-      completedDate: action.completedDate,
+      scheduledDate: scheduledDate,
+      completedDate: completedDate,
       notes: action.notes
     };
     
@@ -50,9 +64,10 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     const currentDate = new Date().toISOString();
     const taskType = action.actionType as TaskType;
     
-    // Fix for scheduledDate if it's undefined
-    let nextFollowUpDate = action.scheduledDate;
-    if (typeof nextFollowUpDate === 'undefined') {
+    // Fix for scheduledDate if it's undefined or invalid
+    let nextFollowUpDate = scheduledDate;
+    if (typeof nextFollowUpDate === 'undefined' || nextFollowUpDate === null || 
+        (typeof nextFollowUpDate === 'object' && nextFollowUpDate._type === 'undefined')) {
       nextFollowUpDate = null;
     }
     

@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
-import { format, isPast } from 'date-fns';
+import { format, isPast, isValid } from 'date-fns';
 import { Check, Clock, Calendar, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getLead } from '@/services/leadService';
@@ -118,6 +117,23 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     }
   };
 
+  // Fonction pour vérifier si une date est valide et la formater en conséquence
+  const formatDateSafely = (dateString?: string, formatStr: string = 'dd/MM/yyyy HH:mm') => {
+    if (!dateString) return 'Date non définie';
+    
+    try {
+      const dateObj = new Date(dateString);
+      if (!isValid(dateObj)) {
+        console.warn('Invalid date encountered:', dateString);
+        return 'Date invalide';
+      }
+      return format(dateObj, formatStr);
+    } catch (error) {
+      console.error('Error formatting date:', error, dateString);
+      return 'Date invalide';
+    }
+  };
+
   const getActionTypeIcon = (actionType: string) => {
     switch (actionType) {
       case 'Call': return <span className="bg-[#EBD5CE] text-[#D05A76] px-2 py-0.5 rounded-full text-xs font-futura">Appel</span>;
@@ -135,18 +151,45 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   };
 
   const sortedActions = [...actionHistory].sort((a, b) => {
-    return new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime();
+    try {
+      // Vérifier si les dates sont valides avant de les comparer
+      const dateA = a.scheduledDate ? new Date(a.scheduledDate) : new Date();
+      const dateB = b.scheduledDate ? new Date(b.scheduledDate) : new Date();
+      
+      if (!isValid(dateA) || !isValid(dateB)) {
+        console.warn('Invalid date encountered during sorting', { a, b });
+        return 0; // Maintenir l'ordre existant si une date est invalide
+      }
+      
+      return new Date(dateB.getTime()).getTime() - new Date(dateA.getTime()).getTime();
+    } catch (error) {
+      console.error('Error sorting actions:', error);
+      return 0;
+    }
   });
 
   const pendingActions = sortedActions.filter(action => !action.completedDate);
   const completedActions = sortedActions.filter(action => action.completedDate);
   
   const isDatePast = (dateString: string): boolean => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const date = new Date(dateString);
-    date.setHours(0, 0, 0, 0);
-    return date < today;
+    if (!dateString) return false;
+    
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const date = new Date(dateString);
+      
+      if (!isValid(date)) {
+        console.warn('Invalid date in isDatePast:', dateString);
+        return false;
+      }
+      
+      date.setHours(0, 0, 0, 0);
+      return date < today;
+    } catch (error) {
+      console.error('Error checking if date is past:', error);
+      return false;
+    }
   };
 
   const dynamicTopMargin = isHeaderMeasured 
@@ -177,7 +220,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       ) : (
         <div className="space-y-2">
           {pendingActions.map((action) => {
-            const isOverdue = isDatePast(action.scheduledDate);
+            const isOverdue = action.scheduledDate ? isDatePast(action.scheduledDate) : false;
             const isCallAction = action.actionType === 'Call';
             
             const bgColorClass = isOverdue 
@@ -214,7 +257,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                       <h4 className="font-futura text-sm">{action.actionType}</h4>
                       <div className="flex items-center text-xs text-gray-500">
                         <Clock className="h-2.5 w-2.5 mr-1" />
-                        {format(new Date(action.scheduledDate), 'dd/MM/yyyy HH:mm')}
+                        {action.scheduledDate ? formatDateSafely(action.scheduledDate) : 'Non programmée'}
                       </div>
                     </div>
                   </div>
@@ -269,7 +312,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                       <h4 className="font-futura text-sm text-gray-700">{action.actionType}</h4>
                       <div className="flex items-center text-xs text-gray-500">
                         <Check className="h-2.5 w-2.5 mr-1 text-green-500" />
-                        {action.completedDate && format(new Date(action.completedDate), 'dd/MM/yyyy HH:mm')}
+                        {action.completedDate ? formatDateSafely(action.completedDate) : 'Complété'}
                       </div>
                     </div>
                   </div>
