@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { TaskType } from '@/components/kanban/KanbanCard';

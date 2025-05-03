@@ -124,8 +124,7 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
         action_history: actionHistory,
         last_contacted_at: currentDate,
         task_type: taskType,
-        next_follow_up_date: nextFollowUpDate,
-        email_envoye: false // Forcer à false pour désactiver le déclenchement automatique d'emails
+        next_follow_up_date: nextFollowUpDate
       })
       .eq('id', leadId)
       .select('*')
