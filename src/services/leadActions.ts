@@ -37,6 +37,11 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       createdAt: new Date().toISOString()
     };
     
+    // Fix for undefined scheduledDate
+    if (!newAction.scheduledDate || typeof newAction.scheduledDate === 'object') {
+      newAction.scheduledDate = new Date().toISOString();
+    }
+    
     const currentDate = new Date().toISOString();
     
     console.log("Created new action:", newAction);
@@ -45,7 +50,7 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     const updatedLead: LeadDetailed = {
       ...lead,
       taskType: action.actionType as TaskType,
-      nextFollowUpDate: action.scheduledDate,
+      nextFollowUpDate: newAction.scheduledDate, // Use the fixed scheduledDate
       lastContactedAt: currentDate,
       actionHistory: [...lead.actionHistory, newAction]
     };
@@ -57,7 +62,7 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       updatedActionHistory: updatedLead.actionHistory 
     });
     
-    // Update the lead in database directly without relying on trigger functions
+    // Update the lead directly using Supabase client to avoid http_post error
     const { data, error } = await supabase
       .from('leads')
       .update({
@@ -66,38 +71,16 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
         next_follow_up_date: updatedLead.nextFollowUpDate,
         last_contacted_at: updatedLead.lastContactedAt
       })
-      .eq('id', leadId)
-      .select();
+      .eq('id', leadId);
     
     if (error) {
       console.error("Error updating lead with new action:", error);
       throw error;
     }
     
-    // Verify action history was saved properly with direct query
-    try {
-      const { data: verificationData, error: verificationError } = await supabase
-        .from('leads')
-        .select('action_history')
-        .eq('id', leadId)
-        .single();
-      
-      if (verificationError) {
-        console.error('Error verifying action history:', verificationError);
-      } else if (verificationData) {
-        console.log('Action history verified in database:', verificationData.action_history);
-      }
-    } catch (queryError) {
-      console.error('Error querying action history:', queryError);
-    }
+    // After update, return the updated lead
+    return await getLead(leadId);
     
-    // If data is returned from the update, return the mapped lead
-    if (data && data.length > 0) {
-      // We now need to call getLead again to get the fully updated lead
-      return await getLead(leadId);
-    }
-    
-    return updatedLead;
   } catch (err) {
     console.error('Error adding action to lead:', err);
     toast({
