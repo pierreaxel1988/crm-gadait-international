@@ -9,6 +9,7 @@ import { TaskType } from '@/components/kanban/KanbanCard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ActionsPanelMobile from './actions/ActionsPanelMobile';
 import { supabase } from "@/integrations/supabase/client";
+import { syncExistingActionsWithLeads } from '@/services/leadActions';
 
 interface ActionsTabProps {
   leadId: string;
@@ -17,13 +18,33 @@ interface ActionsTabProps {
 const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const isMobile = useIsMobile();
 
   useEffect(() => {
     if (leadId) {
-      fetchLeadActions();
+      // Synchroniser les actions avant de les charger
+      syncActions().then(() => {
+        fetchLeadActions();
+      });
     }
   }, [leadId]);
+
+  const syncActions = async () => {
+    if (!leadId) return;
+    
+    try {
+      setIsSyncing(true);
+      const success = await syncExistingActionsWithLeads(leadId);
+      if (success) {
+        console.log(`Actions du lead ${leadId} synchronisées avec succès`);
+      }
+    } catch (error) {
+      console.error(`Erreur lors de la synchronisation des actions pour le lead ${leadId}:`, error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const fetchLeadActions = async () => {
     try {
@@ -51,7 +72,8 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
             createdAt: validateDateString(item.createdAt) || new Date().toISOString(),
             scheduledDate: validateDateString(item.scheduledDate) || new Date().toISOString(),
             completedDate: validateDateString(item.completedDate),
-            notes: item.notes
+            notes: item.notes,
+            leadId: item.leadId || leadId // Assurer que chaque action a un leadId
           };
           
           return validatedAction;
@@ -113,7 +135,8 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         if (a.id === action.id) {
           return {
             ...a,
-            completedDate: new Date().toISOString()
+            completedDate: new Date().toISOString(),
+            leadId: a.leadId || leadId // Assurer que l'action a un leadId
           };
         }
         return a;
@@ -173,7 +196,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isSyncing) {
     return (
       <div className="bg-white rounded-lg p-4 flex justify-center items-center h-40">
         <div className="animate-spin h-6 w-6 border-3 border-chocolate-dark rounded-full border-t-transparent"></div>
@@ -183,18 +206,40 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
 
   if (isMobile) {
     return (
-      <ActionsPanelMobile 
-        leadId={leadId} 
-        onAddAction={fetchLeadActions} 
-        onMarkComplete={handleMarkComplete} 
-        actionHistory={actionHistory} 
-      />
+      <>
+        <div className="flex justify-end mb-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={syncActions}
+            className="text-xs flex items-center gap-1"
+          >
+            <RefreshCw className="h-3 w-3" /> Synchroniser
+          </Button>
+        </div>
+        <ActionsPanelMobile 
+          leadId={leadId} 
+          onAddAction={fetchLeadActions} 
+          onMarkComplete={handleMarkComplete} 
+          actionHistory={actionHistory} 
+        />
+      </>
     );
   }
 
   return (
     <div className="bg-white rounded-lg p-4">
-      <h2 className="text-xl font-bold mb-4">Actions pour le lead</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Actions pour le lead</h2>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={syncActions}
+          className="text-sm flex items-center gap-1"
+        >
+          <RefreshCw className="h-3.5 w-3.5" /> Synchroniser les actions
+        </Button>
+      </div>
       
       {actionHistory && actionHistory.length > 0 ? (
         <div className="space-y-4">

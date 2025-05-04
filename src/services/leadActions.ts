@@ -98,7 +98,8 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       createdAt: new Date().toISOString(),
       scheduledDate: scheduledDate,
       completedDate: completedDate,
-      notes: action.notes
+      notes: action.notes,
+      leadId: leadId // Ajout explicite de l'ID du lead à l'action pour assurer le lien
     };
     
     // Add the new action to the history
@@ -153,5 +154,68 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
       description: "Impossible d'ajouter l'action au lead."
     });
     return undefined;
+  }
+};
+
+// Nouvelle fonction pour synchroniser les actions existantes avec les leads
+export const syncExistingActionsWithLeads = async (leadId?: string): Promise<boolean> => {
+  try {
+    let query = supabase.from('leads').select('id, action_history');
+    
+    // Si un ID de lead spécifique est fourni, on ne synchronise que ce lead
+    if (leadId) {
+      query = query.eq('id', leadId);
+    }
+    
+    const { data: leads, error } = await query;
+    
+    if (error) {
+      console.error('Error fetching leads for sync:', error);
+      throw error;
+    }
+    
+    if (!leads || leads.length === 0) {
+      console.log('No leads found to sync actions');
+      return false;
+    }
+    
+    console.log(`Starting sync for ${leads.length} leads`);
+    
+    // Pour chaque lead, parcourir son historique d'actions et ajouter l'ID du lead si nécessaire
+    for (const lead of leads) {
+      if (!lead.action_history || !Array.isArray(lead.action_history) || lead.action_history.length === 0) {
+        continue; // Passer au lead suivant s'il n'a pas d'historique d'actions
+      }
+      
+      let needsUpdate = false;
+      const updatedActionHistory = lead.action_history.map(action => {
+        if (!action.leadId) {
+          needsUpdate = true;
+          return { ...action, leadId: lead.id };
+        }
+        return action;
+      });
+      
+      if (needsUpdate) {
+        const { error: updateError } = await supabase
+          .from('leads')
+          .update({ 
+            action_history: updatedActionHistory,
+            email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
+          })
+          .eq('id', lead.id);
+        
+        if (updateError) {
+          console.error(`Error updating actions for lead ${lead.id}:`, updateError);
+        } else {
+          console.log(`Successfully synced ${updatedActionHistory.length} actions for lead ${lead.id}`);
+        }
+      }
+    }
+    
+    return true;
+  } catch (err) {
+    console.error('Error synchronizing actions with leads:', err);
+    return false;
   }
 };

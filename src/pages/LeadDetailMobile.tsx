@@ -22,6 +22,7 @@ import NotesSection from '@/components/leads/form/mobile/NotesSection';
 import EmailsTab from '@/components/leads/mobile/tabs/EmailsTab';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
+import { syncExistingActionsWithLeads } from '@/services/leadActions';
 
 const LeadDetailMobile = () => {
   const {
@@ -75,6 +76,21 @@ const LeadDetailMobile = () => {
     rejectSuggestion
   } = useLeadActions(lead, setLead);
   
+  // Synchroniser les actions existantes avec les leads au chargement
+  useEffect(() => {
+    if (id) {
+      syncExistingActionsWithLeads(id)
+        .then(success => {
+          if (success) {
+            console.log(`Actions du lead ${id} synchronisées avec succès`);
+          }
+        })
+        .catch(error => {
+          console.error(`Erreur lors de la synchronisation des actions pour le lead ${id}:`, error);
+        });
+    }
+  }, [id]);
+  
   const handleBackClick = () => {
     navigate('/pipeline');
   };
@@ -91,7 +107,8 @@ const LeadDetailMobile = () => {
       const updatedActionHistory = lead.actionHistory.filter(action => action.id !== actionId);
       const updatedLead = {
         ...lead,
-        actionHistory: updatedActionHistory
+        actionHistory: updatedActionHistory,
+        email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
       };
       const result = await updateLead(updatedLead);
       if (result) {

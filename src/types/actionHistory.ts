@@ -8,6 +8,7 @@ export interface ActionHistory {
   scheduledDate: string;
   completedDate?: string;
   notes?: string;
+  leadId?: string; // Ajout du lien vers l'ID du lead
 }
 
 export type ActionStatus = 'todo' | 'overdue' | 'done';
