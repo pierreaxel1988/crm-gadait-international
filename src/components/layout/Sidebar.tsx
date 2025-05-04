@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { X, Upload, MessageSquare, ListTodo, Calendar, File, Settings, LayoutDashboard, Users, Code, Shield, ClipboardList } from 'lucide-react';
@@ -47,7 +48,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
     },
     {
       name: 'Chat Gadait',
-      path: '/chat-gadait',
+      path: '/chat',
       icon: MessageSquare,
       color: "text-emerald-600",
     },

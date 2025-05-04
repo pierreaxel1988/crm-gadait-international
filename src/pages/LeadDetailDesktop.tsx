@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLeadDetail } from '@/hooks/useLeadDetail';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import LeadHeader from '@/components/leads/LeadHeader';
+import ChatGadaitFloatingButton from '@/components/chat/ChatGadaitFloatingButton';
 
 // Import components from correct paths
 import LeadInfoTab from '@/components/leads/LeadInfoTab';
@@ -132,6 +133,9 @@ const LeadDetailDesktop = () => {
             </TabsContent>
           </Tabs>
         </div>
+        
+        {/* Add the ChatGadait floating button */}
+        <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />
       </div>
     </SidebarLayout>
   );

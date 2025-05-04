@@ -16,10 +16,32 @@ serve(async (req) => {
   }
 
   try {
-    const { message, type, content, propertyDetails, initialData, url } = await req.json();
+    const { message, type, content, propertyDetails, initialData, url, leadContext } = await req.json();
     
     let systemPrompt = "You are Chat Gadait, an AI assistant for a luxury real estate CRM. Be concise and helpful.";
     let userMessage = message;
+    
+    // If we have lead context, enhance the system prompt
+    if (leadContext) {
+      systemPrompt = `You are Chat Gadait, an AI assistant for a luxury real estate CRM.
+      You are currently assisting with a lead named ${leadContext.name}.
+      
+      Here's what we know about this lead:
+      - Email: ${leadContext.email || 'Not provided'}
+      - Phone: ${leadContext.phone || 'Not provided'}
+      - Source: ${leadContext.source || 'Unknown source'}
+      - Budget: ${leadContext.budget ? `${leadContext.budget} ${leadContext.currency || ''}` : 'Not specified'}
+      - Desired location: ${leadContext.desiredLocation || 'Not specified'}
+      - Country: ${leadContext.country || 'Not specified'}
+      - Property type preference: ${leadContext.propertyType || 'Not specified'}
+      - Purchase timeframe: ${leadContext.purchaseTimeframe || 'Not specified'}
+      - Status: ${leadContext.status || 'Not specified'}
+      - Pipeline type: ${leadContext.pipelineType || 'Not specified'}
+      
+      Provide helpful responses focusing on this lead's specific needs and details.
+      Suggest actions, follow-ups or insights that would be valuable given what we know.
+      Be concise but thorough. Use French language as this is a French luxury real estate CRM.`;
+    }
     
     // Handle different types of requests
     if (type === 'email-extract') {
@@ -98,6 +120,27 @@ serve(async (req) => {
       Focus on maintaining engagement while respecting the client's timeline and preferences.
       Provide specific, actionable suggestions.`;
       userMessage = content;
+    }
+    else if (type === 'suggest-properties') {
+      systemPrompt = `You are Chat Gadait, an AI assistant for a luxury real estate CRM.
+      Based on the lead information provided, suggest types of properties that might interest them.
+      Consider their budget, desired location, requirements and preferences.
+      Provide practical suggestions for properties to show them.`;
+      
+      if (leadContext) {
+        userMessage = `Based on what we know about ${leadContext.name}:
+        - Budget: ${leadContext.budget ? `${leadContext.budget} ${leadContext.currency || ''}` : 'Not specified'}
+        - Desired location: ${leadContext.desiredLocation || 'Not specified'}
+        - Country: ${leadContext.country || 'Not specified'}
+        - Property type preference: ${leadContext.propertyType || 'Not specified'}
+        - Purchase timeframe: ${leadContext.purchaseTimeframe || 'Not specified'}
+        - Bedrooms: ${leadContext.bedrooms || 'Not specified'}
+        - Bathrooms: ${leadContext.bathrooms || 'Not specified'}
+        
+        ${message || 'What properties should I recommend to them?'}`
+      } else {
+        userMessage = message;
+      }
     }
 
     console.log("Sending request to OpenAI with type:", type);

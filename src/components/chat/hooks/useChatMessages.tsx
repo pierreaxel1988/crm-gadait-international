@@ -1,81 +1,101 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
-import { Message } from '../types/chatTypes';
+import { LeadDetailed } from '@/types/lead';
 
-export const useChatMessages = () => {
+export type Message = {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant' | 'system';
+};
+
+export const useChatMessages = (leadData?: LeadDetailed) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([
-        {
-          id: '1',
-          role: 'assistant',
-          content: 'Bonjour! Je suis Chat Gadait, votre assistant IA pour la gestion des leads et des propriétés. Comment puis-je vous aider aujourd\'hui?',
-          timestamp: new Date()
-        }
-      ]);
-    }
-  }, []);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
-
+  const handleSendMessage = useCallback(async () => {
+    if (input.trim() === '') return;
+    
+    // Create user message
     const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
+      id: `user-${Date.now()}`,
       content: input,
-      timestamp: new Date()
+      role: 'user'
     };
-
-    setMessages(prev => [...prev, userMessage]);
+    
+    // Add user message to chat
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('chat-gadait', {
-        body: { message: input, type: 'chat' }
+      let payload = { 
+        message: input,
+        type: 'chat'
+      };
+      
+      // If leadData exists, include it in the payload
+      if (leadData) {
+        payload = { 
+          ...payload, 
+          leadContext: {
+            name: leadData.name,
+            email: leadData.email,
+            phone: leadData.phone,
+            source: leadData.source,
+            budget: leadData.budget,
+            currency: leadData.currency,
+            desiredLocation: leadData.desiredLocation,
+            country: leadData.country,
+            propertyType: leadData.propertyType,
+            assignedTo: leadData.assignedTo,
+            status: leadData.status,
+            pipelineType: leadData.pipelineType,
+            purchaseTimeframe: leadData.purchaseTimeframe,
+            bedrooms: leadData.bedrooms,
+            bathrooms: leadData.bathrooms
+          }
+        };
+      }
+      
+      const { data: responseData, error } = await supabase.functions.invoke('chat-gadait', {
+        body: payload
       });
 
-      if (error) {
-        throw new Error(error.message);
+      if (error) throw new Error(error.message);
+      
+      if (responseData) {
+        // Add assistant's response to chat
+        const assistantMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          content: responseData.response,
+          role: 'assistant'
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
       }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data.response,
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de communiquer avec Chat Gadait. Veuillez réessayer."
-      });
+      
+      // Add error message
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        content: "Je suis désolé, une erreur s'est produite. Veuillez réessayer.",
+        role: 'system'
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      
+      // Scroll to bottom after messages update
+      setTimeout(() => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
     }
-  };
+  }, [input, leadData]);
 
-  return {
-    messages,
-    input,
-    setInput,
-    isLoading,
-    messagesEndRef,
-    handleSendMessage
-  };
+  return { messages, setMessages, input, setInput, isLoading, messagesEndRef, handleSendMessage };
 };

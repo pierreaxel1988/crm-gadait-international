@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -23,6 +22,7 @@ import NotesSection from '@/components/leads/form/mobile/NotesSection';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { syncExistingActionsWithLeads } from '@/services/leadActions';
+import ChatGadaitFloatingButton from '@/components/chat/ChatGadaitFloatingButton';
 
 const LeadDetailMobile = () => {
   const {
@@ -178,7 +178,26 @@ const LeadDetailMobile = () => {
   return <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
       <div className="fixed top-0 left-0 right-0 z-40 w-full">
         <div className="bg-loro-sand pt-[env(safe-area-inset-top)]">
-          <LeadDetailHeader name={lead.name} createdAt={lead.createdAt} phone={getFormattedPhoneForCall()} email={lead.email} budget={lead.budget} currency={lead.currency} desiredLocation={lead.desiredLocation} country={lead.country} purchaseTimeframe={lead.purchaseTimeframe} onBackClick={handleBackClick} onSave={handleSaveWithIndicator} isSaving={isSaving} hasChanges={hasChanges} tags={lead.tags} onPhoneCall={handlePhoneCall} onWhatsAppClick={handleWhatsAppClick} onEmailClick={handleEmailClick} onCallComplete={() => {}} />
+          <LeadDetailHeader 
+            name={lead.name} 
+            createdAt={lead.createdAt} 
+            phone={getFormattedPhoneForCall()} 
+            email={lead.email} 
+            budget={lead.budget} 
+            currency={lead.currency} 
+            desiredLocation={lead.desiredLocation} 
+            country={lead.country} 
+            purchaseTimeframe={lead.purchaseTimeframe} 
+            onBackClick={handleBackClick} 
+            onSave={handleSaveWithIndicator} 
+            isSaving={isSaving} 
+            hasChanges={hasChanges} 
+            tags={lead.tags} 
+            onPhoneCall={handlePhoneCall} 
+            onWhatsAppClick={handleWhatsAppClick} 
+            onEmailClick={handleEmailClick} 
+            onCallComplete={() => {}} 
+          />
         </div>
         
         <div className="bg-white">
@@ -213,17 +232,46 @@ const LeadDetailMobile = () => {
         </Tabs>
       </ScrollArea>
       
-      <LeadDetailActionBar autoSaveEnabled={autoSaveEnabled} onAddAction={handleAddAction} lead={lead} hasChanges={hasChanges} isSaving={isSaving} onManualSave={handleSaveWithIndicator} actionSuggestions={actionSuggestions} />
+      <LeadDetailActionBar 
+        autoSaveEnabled={autoSaveEnabled} 
+        onAddAction={handleAddAction} 
+        lead={lead} 
+        hasChanges={hasChanges} 
+        isSaving={isSaving} 
+        onManualSave={handleSaveWithIndicator} 
+        actionSuggestions={actionSuggestions} 
+      />
 
-      {showSaveIndicator && <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
+      {showSaveIndicator && 
+        <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
           <CheckCircle className="h-5 w-5" />
-        </div>}
+        </div>
+      }
 
-      <ActionDialog isOpen={isActionDialogOpen} onClose={() => setIsActionDialogOpen(false)} selectedAction={selectedAction} setSelectedAction={setSelectedAction} actionDate={actionDate} setActionDate={setActionDate} actionTime={actionTime} setActionTime={setActionTime} actionNotes={actionNotes} setActionNotes={setActionNotes} onConfirm={handleActionConfirm} getActionTypeIcon={getActionTypeIcon} />
+      <ActionDialog 
+        isOpen={isActionDialogOpen} 
+        onClose={() => setIsActionDialogOpen(false)} 
+        selectedAction={selectedAction} 
+        setSelectedAction={setSelectedAction} 
+        actionDate={actionDate} 
+        setActionDate={setActionDate} 
+        actionTime={actionTime} 
+        setActionTime={setActionTime} 
+        actionNotes={actionNotes} 
+        setActionNotes={setActionNotes} 
+        onConfirm={handleActionConfirm} 
+        getActionTypeIcon={getActionTypeIcon} 
+      />
 
       {lead && <div className="fixed bottom-20 right-4 z-50">
           
-        </div>}
+      </div>}
+
+      {/* Add the ChatGadait floating button */}
+      <ChatGadaitFloatingButton 
+        leadData={lead} 
+        position="bottom-right" 
+      />
     </div>;
 };
 

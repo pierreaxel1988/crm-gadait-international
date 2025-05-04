@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useChatGadait } from './hooks/useChatGadait';
@@ -26,7 +27,7 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
     messagesEndRef,
     handleSendMessage,
     extractPropertyData
-  } = useChatGadait();
+  } = useChatGadait(leadData);
 
   // Handle escape key to close modal
   useEffect(() => {
