@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -115,9 +116,12 @@ const Auth = () => {
       </div>;
   }
   return <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80 px-4">
-      <div className="mb-8">
+      <div className="mb-8 relative">
         <div className="flex items-center justify-center">
-          <span className="font-futura text-3xl tracking-tight text-loro-navy uppercase">GADAIT.</span>
+          <span className="font-futura text-3xl tracking-tight text-loro-navy uppercase relative z-10 diamond-text">
+            GADAIT.
+            <span className="diamond-effect absolute inset-0 animate-pulse-soft"></span>
+          </span>
         </div>
       </div>
       
@@ -184,4 +188,55 @@ const Auth = () => {
       </Card>
     </div>;
 };
+
 export default Auth;
+
+<style jsx>{`
+  .diamond-text {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+  }
+  
+  .diamond-effect {
+    content: "";
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.8) 0%,
+      rgba(255, 255, 255, 0) 70%
+    );
+    filter: blur(8px);
+    opacity: 0.7;
+    z-index: -1;
+    transform: scale(1.1);
+    pointer-events: none;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -100% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
+  .diamond-text::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0) 20%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0) 80%
+    );
+    background-size: 200% 200%;
+    animation: shimmer 2s infinite;
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0.6;
+  }
+`}</style>
