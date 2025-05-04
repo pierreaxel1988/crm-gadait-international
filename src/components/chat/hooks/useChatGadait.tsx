@@ -112,7 +112,8 @@ export const useChatGadait = (leadData?: LeadDetailed, initialPrompt?: string) =
       
       // Using a timeout to allow the UI to update before sending the message
       setTimeout(() => {
-        chatProps.handleSendMessage(initialPrompt);
+        // Fix: Remove the parameter here, as handleSendMessage() might not expect an argument
+        chatProps.handleSendMessage();
       }, 100);
     }
   }, [initialPrompt, leadData, chatProps.messages.length]);
