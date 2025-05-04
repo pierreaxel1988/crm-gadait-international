@@ -14,7 +14,6 @@ import NotesTab from '@/components/leads/NotesTab';
 import PropertiesTab from '@/components/leads/PropertiesTab';
 import DocumentsTab from '@/components/leads/DocumentsTab';
 import ContactsTab from '@/components/leads/ContactsTab';
-import EmailsTabDesktop from '@/components/leads/desktop/tabs/EmailsTabDesktop';
 
 // Layout wrapper component to avoid import error
 const SidebarLayout = ({ children }: { children: React.ReactNode }) => (
@@ -111,7 +110,6 @@ const LeadDetailDesktop = () => {
               <TabsTrigger value="properties">Propriétés</TabsTrigger>
               <TabsTrigger value="documents">Documents</TabsTrigger>
               <TabsTrigger value="contacts">Contacts</TabsTrigger>
-              <TabsTrigger value="emails">Emails</TabsTrigger>
             </TabsList>
 
             <TabsContent value="info">
@@ -131,9 +129,6 @@ const LeadDetailDesktop = () => {
             </TabsContent>
             <TabsContent value="contacts">
               <ContactsTab leadId={lead.id} />
-            </TabsContent>
-            <TabsContent value="emails">
-              <EmailsTabDesktop leadId={lead.id} />
             </TabsContent>
           </Tabs>
         </div>

@@ -1,107 +1,85 @@
 
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { CircleDot } from 'lucide-react';
+import { Check, FileText, Info, Target, Activity, User } from 'lucide-react';
 
 interface LeadDetailTabsProps {
   defaultTab?: string;
   pendingActionsCount?: number;
 }
 
-const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
-  defaultTab = "criteria",
-  pendingActionsCount = 0
+const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({ 
+  defaultTab = 'info',
+  pendingActionsCount = 0 
 }) => {
-  const { id } = useParams<{ id: string }>();
-  const location = useLocation();
   const navigate = useNavigate();
-
-  const searchParams = new URLSearchParams(location.search);
-  const activeTab = searchParams.get('tab') || defaultTab;
+  const location = useLocation();
+  const currentTab = new URLSearchParams(location.search).get('tab') || defaultTab;
   
   const handleTabChange = (value: string) => {
-    const newSearchParams = new URLSearchParams(location.search);
-    newSearchParams.set('tab', value);
-    navigate(`/leads/${id}?${newSearchParams.toString()}`, {
-      replace: true
-    });
+    // Update URL with tab parameter
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('tab', value);
+    navigate(`${location.pathname}?${searchParams.toString()}`, { replace: true });
   };
-
+  
   return (
-    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="w-full grid grid-cols-6 bg-loro-50 border-t border-b border-loro-200/50 shadow-sm py-0.5">
-        <TabsTrigger 
-          value="info" 
-          className="py-1.5 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
-          data-[state=active]:bg-transparent 
-          data-[state=active]:text-chocolate-dark 
-          data-[state=active]:font-medium
-          data-[state=active]:border-b-2
-          data-[state=active]:border-chocolate-dark
-          data-[state=active]:shadow-none"
-        >
-          Général
-        </TabsTrigger>
+    <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full border-b border-loro-sand/10">
+      <TabsList className="grid grid-cols-5 w-full bg-white h-14 rounded-none px-1">
         <TabsTrigger 
           value="criteria" 
-          className="py-1.5 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
-          data-[state=active]:bg-transparent 
-          data-[state=active]:text-chocolate-dark 
-          data-[state=active]:font-medium
-          data-[state=active]:border-b-2
-          data-[state=active]:border-chocolate-dark
-          data-[state=active]:shadow-none"
+          className="data-[state=active]:bg-inherit data-[state=active]:border-b-2 data-[state=active]:border-loro-terracotta data-[state=active]:text-loro-chocolate font-medium rounded-none pt-1"
         >
-          Critères
+          <div className="flex flex-col items-center">
+            <Target className="h-4 w-4 mb-1" />
+            <span className="text-xs">Critères</span>
+          </div>
         </TabsTrigger>
+        
+        <TabsTrigger 
+          value="info" 
+          className="data-[state=active]:bg-inherit data-[state=active]:border-b-2 data-[state=active]:border-loro-terracotta data-[state=active]:text-loro-chocolate font-medium rounded-none pt-1"
+        >
+          <div className="flex flex-col items-center">
+            <Info className="h-4 w-4 mb-1" />
+            <span className="text-xs">Infos</span>
+          </div>
+        </TabsTrigger>
+        
         <TabsTrigger 
           value="status" 
-          className="py-1.5 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
-          data-[state=active]:bg-transparent 
-          data-[state=active]:text-chocolate-dark 
-          data-[state=active]:font-medium
-          data-[state=active]:border-b-2
-          data-[state=active]:border-chocolate-dark
-          data-[state=active]:shadow-none"
+          className="data-[state=active]:bg-inherit data-[state=active]:border-b-2 data-[state=active]:border-loro-terracotta data-[state=active]:text-loro-chocolate font-medium rounded-none pt-1"
         >
-          Statut
+          <div className="flex flex-col items-center">
+            <Check className="h-4 w-4 mb-1" />
+            <span className="text-xs">Statut</span>
+          </div>
         </TabsTrigger>
+        
         <TabsTrigger 
           value="notes" 
-          className="py-1.5 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
-          data-[state=active]:bg-transparent 
-          data-[state=active]:text-chocolate-dark 
-          data-[state=active]:font-medium
-          data-[state=active]:border-b-2
-          data-[state=active]:border-chocolate-dark
-          data-[state=active]:shadow-none"
+          className="data-[state=active]:bg-inherit data-[state=active]:border-b-2 data-[state=active]:border-loro-terracotta data-[state=active]:text-loro-chocolate font-medium rounded-none pt-1"
         >
-          Notes
+          <div className="flex flex-col items-center">
+            <FileText className="h-4 w-4 mb-1" />
+            <span className="text-xs">Notes</span>
+          </div>
         </TabsTrigger>
+        
         <TabsTrigger 
           value="actions" 
-          className="py-1.5 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 relative
-          data-[state=active]:bg-transparent 
-          data-[state=active]:text-chocolate-dark 
-          data-[state=active]:font-medium
-          data-[state=active]:border-b-2
-          data-[state=active]:border-chocolate-dark
-          data-[state=active]:shadow-none"
+          className="data-[state=active]:bg-inherit data-[state=active]:border-b-2 data-[state=active]:border-loro-terracotta data-[state=active]:text-loro-chocolate font-medium rounded-none pt-1 relative"
         >
-          Actions
-        </TabsTrigger>
-        <TabsTrigger 
-          value="emails" 
-          className="py-1.5 px-1 rounded-none text-xs text-loro-700 transition-all duration-200 
-          data-[state=active]:bg-transparent 
-          data-[state=active]:text-chocolate-dark 
-          data-[state=active]:font-medium
-          data-[state=active]:border-b-2
-          data-[state=active]:border-chocolate-dark
-          data-[state=active]:shadow-none"
-        >
-          Emails
+          <div className="flex flex-col items-center">
+            <Activity className="h-4 w-4 mb-1" />
+            <span className="text-xs">Actions</span>
+            {pendingActionsCount > 0 && (
+              <div className="absolute -top-1 -right-1 bg-loro-terracotta text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                {pendingActionsCount}
+              </div>
+            )}
+          </div>
         </TabsTrigger>
       </TabsList>
     </Tabs>
