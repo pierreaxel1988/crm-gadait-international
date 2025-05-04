@@ -129,14 +129,17 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
         email_envoye: false // Désactiver explicitement l'envoi d'email automatique
       })
       .eq('id', leadId)
-      .select('*')
-      .single();
+      .select('*');
     
     if (updateError) {
       console.error('Error updating lead with new action:', updateError);
       throw updateError;
     }
     
+    if (!updatedLead || updatedLead.length === 0) {
+      throw new Error('Lead not found after update');
+    }
+
     console.log('Successfully added action:', newAction);
     
     // Convert to LeadDetailed format

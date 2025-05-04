@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -127,7 +126,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         
         const updatedLead = await updateLead({
           ...currentLead,
-          actionHistory: updatedActionHistory
+          actionHistory: updatedActionHistory,
+          email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
         });
         
         if (updatedLead) {
