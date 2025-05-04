@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -5,7 +6,9 @@ import { format, isPast, isValid } from 'date-fns';
 import { LeadDetailed } from '@/types/lead';
 import { getLead, updateLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
-import { ActionDialog } from './ActionDialog';
+import ActionDialog from './ActionDialog';
+import { Calendar, Clock, Check, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ActionsPanelMobileProps {
   leadId: string;
