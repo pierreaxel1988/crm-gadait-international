@@ -41,7 +41,6 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
               isHovered ? "scale-110 shadow-xl bg-loro-500" : ""
             )}
             aria-label="Ouvrir Chat Gadait"
-            data-chatgadait-button
           >
             <MessageSquare 
               className={cn(
@@ -55,10 +54,10 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
       
       {/* Full screen chat using Sheet component */}
       <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
-        <SheetContent side="bottom" className="p-0 sm:p-0 h-[100dvh] w-full max-w-none" data-chatgadait-window>
+        <SheetContent side="bottom" className="p-0 sm:p-0 h-[100dvh] w-full max-w-none">
           <div className="h-full flex flex-col">
             <div className="border-b border-loro-sand/30 p-4 flex justify-between items-center bg-white">
-              <h2 className="text-base font-medium flex items-center">
+              <h2 className="text-lg font-medium flex items-center">
                 <MessageSquare className="h-5 w-5 mr-2 text-loro-hazel" />
                 {leadData ? `Chat Gadait - ${leadData.name}` : 'Chat Gadait'}
               </h2>

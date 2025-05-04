@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { MessageSquare, ArrowDown, Copy, Check, Sparkles } from 'lucide-react';
 import EnhancedInput from '../EnhancedInput';
@@ -131,41 +130,9 @@ const ChatTab: React.FC<ChatTabProps> = ({
   }, [messages]);
   
   // Fonction pour formater le contenu du message avec un meilleur espacement
-  const formatMessageContent = (content: string, role: string) => {
-    // Si c'est un message de l'assistant, essayer d'identifier et de mettre en évidence la question de suivi
-    if (role === 'assistant') {
-      // Chercher une question de suivi typique à la fin du message
-      const followUpPatterns = [
-        /Souhaitez-vous que je.*\?$/,
-        /Voulez-vous que je.*\?$/,
-        /Puis-je vous aider à.*\?$/,
-        /Avez-vous besoin.*\?$/,
-        /Préférez-vous que.*\?$/,
-        /Dois-je.*\?$/
-      ];
-      
-      // Vérifier chaque pattern
-      for (const pattern of followUpPatterns) {
-        const match = content.match(pattern);
-        if (match && match.index && match.index > content.length / 2) { // Si trouvé dans la deuxième moitié du texte
-          const followUp = match[0];
-          const beforeFollowUp = content.substring(0, match.index).trim();
-          
-          // Retourner du HTML avec le suivi mis en évidence
-          return `${beforeFollowUp}
-          
-<div class="follow-up-question mt-4 pt-3 border-t border-loro-sand/20">
-  <strong class="text-loro-hazel">${followUp}</strong>
-</div>`;
-        }
-      }
-    }
-    
-    // Continuer avec le formatage standard si aucun modèle de suivi n'est trouvé
-    let formattedContent = content;
-    
+  const formatMessageContent = (content: string) => {
     // Remplace les étoiles doubles par du texte en gras
-    formattedContent = formattedContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    let formattedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     
     // Ajoute un espacement après les numéros de sections (comme "1.", "2.", etc.)
     formattedContent = formattedContent.replace(/(\d+\.)\s*/g, '$1 ');
@@ -218,11 +185,11 @@ const ChatTab: React.FC<ChatTabProps> = ({
                 <Sparkles className="h-7 w-7 text-loro-hazel animate-pulse group-hover:text-loro-terracotta transition-colors duration-300" />
               </div>
               {leadData ? (
-                <h3 className="text-base font-medium text-loro-navy mb-5">
+                <h3 className="text-xl md:text-2xl font-medium text-loro-navy mb-5">
                   Comment puis-je vous aider avec {leadData.name}?
                 </h3>
               ) : (
-                <h3 className="text-base font-medium text-loro-navy mb-5">
+                <h3 className="text-xl md:text-2xl font-medium text-loro-navy mb-5">
                   Comment puis-je vous aider aujourd'hui?
                 </h3>
               )}
@@ -231,7 +198,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(prompt)}
-                    className="bg-white hover:bg-loro-pearl/20 text-left p-3.5 rounded-lg border border-loro-sand/30 shadow-sm hover:shadow transition-all text-loro-navy text-base hover:border-loro-hazel/40"
+                    className="bg-white hover:bg-loro-pearl/20 text-left p-3.5 rounded-lg border border-loro-sand/30 shadow-sm hover:shadow transition-all text-loro-navy text-sm hover:border-loro-hazel/40"
                   >
                     {prompt}
                   </button>
@@ -263,7 +230,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
                       <MessageSquare className="h-3 w-3 text-loro-hazel" />
                     )}
                   </div>
-                  <span className="text-base font-medium text-loro-navy/70 capitalize">
+                  <span className="text-xs font-medium text-loro-navy/70 capitalize">
                     {msg.role === 'assistant' ? 'Gadait' : 'Vous'}
                   </span>
                 </div>
@@ -277,43 +244,36 @@ const ChatTab: React.FC<ChatTabProps> = ({
                   }`}
                 >
                   <div 
-                    className="whitespace-pre-line text-base leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content, msg.role) }}
+                    className="whitespace-pre-line pr-7 text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content) }}
                   />
-                </div>
-
-                {/* Footer du message avec timestamp et bouton de copie */}
-                <div className={`flex items-center justify-between mt-1 w-full ${
-                  msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-                }`}>
-                  <span className="text-base text-gray-500">
-                    {msg.timestamp.toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </span>
                   
+                  {/* Bouton de copie */}
                   <button
-                    className={`p-1.5 rounded-md flex items-center gap-1.5 text-base ${
+                    className={`absolute top-2 right-2 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity ${
                       msg.role === 'user' 
-                        ? 'hover:bg-loro-hazel/10 text-loro-hazel/80' 
+                        ? 'hover:bg-white/10 text-white' 
                         : 'hover:bg-loro-navy/10 text-loro-navy/70'
-                    } transition-colors`}
+                    }`}
                     onClick={() => copyMessageContent(msg.id, msg.content)}
                     title="Copier le message"
                   >
                     {copiedMessageId === msg.id ? (
-                      <>
-                        <Check className="h-3.5 w-3.5" />
-                        <span className="text-base">Copié</span>
-                      </>
+                      <Check className="h-3.5 w-3.5" />
                     ) : (
-                      <>
-                        <Copy className="h-3.5 w-3.5" />
-                        <span className="text-base">Copier</span>
-                      </>
+                      <Copy className="h-3.5 w-3.5" />
                     )}
                   </button>
+                </div>
+                
+                {/* Horodatage */}
+                <div className={`text-[10px] text-gray-500 mt-1 ${
+                  msg.role === 'user' ? 'text-right' : 'text-left'
+                }`}>
+                  {msg.timestamp.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                 </div>
               </div>
             </div>
