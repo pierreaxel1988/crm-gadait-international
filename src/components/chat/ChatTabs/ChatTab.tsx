@@ -277,36 +277,43 @@ const ChatTab: React.FC<ChatTabProps> = ({
                   }`}
                 >
                   <div 
-                    className="whitespace-pre-line pr-7 text-base leading-relaxed"
+                    className="whitespace-pre-line text-base leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content, msg.role) }}
                   />
+                </div>
+
+                {/* Footer du message avec timestamp et bouton de copie */}
+                <div className={`flex items-center justify-between mt-1 w-full ${
+                  msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'
+                }`}>
+                  <span className="text-base text-gray-500">
+                    {msg.timestamp.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
                   
-                  {/* Bouton de copie */}
                   <button
-                    className={`absolute top-2 right-2 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity ${
+                    className={`p-1.5 rounded-md flex items-center gap-1.5 text-base ${
                       msg.role === 'user' 
-                        ? 'hover:bg-white/10 text-white' 
+                        ? 'hover:bg-loro-hazel/10 text-loro-hazel/80' 
                         : 'hover:bg-loro-navy/10 text-loro-navy/70'
-                    }`}
+                    } transition-colors`}
                     onClick={() => copyMessageContent(msg.id, msg.content)}
                     title="Copier le message"
                   >
                     {copiedMessageId === msg.id ? (
-                      <Check className="h-3.5 w-3.5" />
+                      <>
+                        <Check className="h-3.5 w-3.5" />
+                        <span className="text-base">Copié</span>
+                      </>
                     ) : (
-                      <Copy className="h-3.5 w-3.5" />
+                      <>
+                        <Copy className="h-3.5 w-3.5" />
+                        <span className="text-base">Copier</span>
+                      </>
                     )}
                   </button>
-                </div>
-                
-                {/* Horodatage */}
-                <div className={`text-base text-gray-500 mt-1 ${
-                  msg.role === 'user' ? 'text-right' : 'text-left'
-                }`}>
-                  {msg.timestamp.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
                 </div>
               </div>
             </div>
