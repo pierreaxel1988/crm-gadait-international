@@ -20,23 +20,12 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
     isLoading,
     activeTab,
     setActiveTab,
-    emailContent,
-    setEmailContent,
     propertyUrl,
     setPropertyUrl,
     extractedData,
     messagesEndRef,
     handleSendMessage,
-    extractEmailData,
-    extractPropertyData,
-    createLeadFromData,
-    selectedPipeline,
-    setSelectedPipeline,
-    selectedAgent,
-    setSelectedAgent,
-    teamMembers,
-    showAssignmentForm,
-    setShowAssignmentForm
+    extractPropertyData
   } = useChatGadait();
 
   // Handle escape key to close modal
@@ -62,22 +51,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
     messagesEndRef
   };
 
-  const emailTabProps = {
-    emailContent,
-    setEmailContent,
-    extractEmailData,
-    isLoading,
-    extractedData,
-    createLeadFromData,
-    selectedPipeline,
-    setSelectedPipeline,
-    selectedAgent,
-    setSelectedAgent,
-    teamMembers,
-    showAssignmentForm,
-    setShowAssignmentForm
-  };
-
   const propertyTabProps = {
     propertyUrl,
     setPropertyUrl,
@@ -99,7 +72,6 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           chatTabProps={chatTabProps}
-          emailTabProps={emailTabProps}
           propertyTabProps={propertyTabProps}
         />
       </div>
