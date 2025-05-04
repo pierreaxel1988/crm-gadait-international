@@ -85,12 +85,24 @@ const LeadDetailDesktop = () => {
     );
   }
 
-  // Déterminer si un prompt initial est nécessaire en fonction de l'onglet actif
+  // Générer un prompt initial en fonction de l'onglet actif
   const getInitialPromptForTab = () => {
-    if (activeTab === 'actions') {
-      return null; // Pas de prompt initial, le bouton dans ActionsTab s'en chargera
+    switch(activeTab) {
+      case 'info':
+        return "Analyse les informations générales de ce lead et suggère des améliorations";
+      case 'actions':
+        return "Suggère les actions prioritaires pour ce lead";
+      case 'notes':
+        return "Résume les notes importantes pour ce lead";
+      case 'properties':
+        return "Suggère des propriétés qui pourraient correspondre à ce lead";
+      case 'documents':
+        return "Analyse les documents manquants pour ce dossier";
+      case 'contacts':
+        return "Suggère comment améliorer la communication avec ce lead";
+      default:
+        return "Comment puis-je vous aider avec ce lead aujourd'hui?";
     }
-    return null;
   };
 
   return (
@@ -146,7 +158,7 @@ const LeadDetailDesktop = () => {
         <ChatGadaitFloatingButton 
           leadData={lead} 
           position="bottom-right"
-          initialPrompt={getInitialPromptForTab() || undefined}
+          initialPrompt={getInitialPromptForTab()}
         />
       </div>
     </SidebarLayout>

@@ -1,17 +1,16 @@
 
-import React, { useEffect, useState, useRef } from 'react';
-import { MessageSquare, ArrowDown, Copy, Check } from 'lucide-react';
-import EnhancedInput from '../EnhancedInput';
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Message } from '../types/chatTypes';
+import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ChatTabProps {
-  messages: Message[];
+  messages: any[];
   input: string;
   setInput: (input: string) => void;
   isLoading: boolean;
-  handleSendMessage: () => void;
+  handleSendMessage: (message?: string) => void;
   messagesEndRef: React.RefObject<HTMLDivElement>;
   suggestedPrompts?: string[];
 }
@@ -23,226 +22,137 @@ const ChatTab: React.FC<ChatTabProps> = ({
   isLoading,
   handleSendMessage,
   messagesEndRef,
-  suggestedPrompts = []
+  suggestedPrompts
 }) => {
-  const [showScrollButton, setShowScrollButton] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
-  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
-  const [isDraftingMessage, setIsDraftingMessage] = useState(false);
-  
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
-    }
-  };
-  
-  // Check if we should show the scroll button
-  const checkScrollPosition = () => {
-    const container = scrollContainerRef.current;
-    if (container) {
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      // Show button when user has scrolled up (not at bottom)
-      const isNotAtBottom = scrollHeight - scrollTop - clientHeight > 100;
-      setShowScrollButton(isNotAtBottom);
-    }
-  };
-  
-  // Function to scroll to bottom
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-  
-  // Automatically scroll to bottom when new messages are added
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages.length]);
-
-  // Detect if we're drafting a message based on latest message content
-  useEffect(() => {
-    if (messages.length > 0) {
-      const lastUserMessage = [...messages]
-        .reverse()
-        .find(msg => msg.role === 'user');
-      
-      // Check if the latest user message is asking to draft a message
-      if (lastUserMessage && 
-         (lastUserMessage.content.toLowerCase().includes('rédige') || 
-          lastUserMessage.content.toLowerCase().includes('écris') ||
-          lastUserMessage.content.toLowerCase().includes('draft') ||
-          lastUserMessage.content.toLowerCase().includes('message'))) {
-        setIsDraftingMessage(true);
-      } else {
-        setIsDraftingMessage(false);
+      if (input.trim()) {
+        handleSendMessage();
       }
     }
+  };
+
+  const handleSuggestedPromptClick = (prompt: string) => {
+    setInput(prompt);
+    setTimeout(() => {
+      handleSendMessage(prompt);
+      setShowSuggestions(false);
+    }, 100);
+  };
+
+  const adjustTextareaHeight = () => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 150)}px`;
+    }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [input]);
+
+  useEffect(() => {
+    // Show suggestions when:
+    // 1. There are no messages yet
+    // 2. Or the last message is from the system/assistant
+    setShowSuggestions(
+      messages.length === 0 || 
+      (messages.length > 0 && messages[messages.length - 1].role !== 'user')
+    );
   }, [messages]);
 
-  // Fonction pour formater le contenu du message avec un meilleur espacement
-  const formatMessageContent = (content: string) => {
-    // Remplace les étoiles doubles par du texte en gras
-    let formattedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
-    // Ajoute un espacement après les numéros de sections (comme "1.", "2.", etc.)
-    formattedContent = formattedContent.replace(/(\d+\.)\s*/g, '$1 ');
-    
-    // Ajoute un espacement après les points d'interrogation suivis d'un texte
-    formattedContent = formattedContent.replace(/\?(\w)/g, '? $1');
-    
-    // Améliore la structure des listes numérotées en ajoutant des sauts de ligne
-    formattedContent = formattedContent.replace(/(\d+\.)/g, '\n$1');
-    
-    // Retire les sauts de ligne au début du texte si présents
-    formattedContent = formattedContent.replace(/^\n/, '');
-    
-    return formattedContent;
-  };
-  
-  // Fonction pour choisir une suggestion
-  const handleSuggestionClick = (suggestion: string) => {
-    setSelectedSuggestion(suggestion);
-    setInput(suggestion);
-  };
-
-  // Fonction pour copier le contenu d'un message
-  const copyMessageContent = (messageId: string, content: string) => {
-    navigator.clipboard.writeText(content).then(() => {
-      setCopiedMessageId(messageId);
-      setTimeout(() => {
-        setCopiedMessageId(null);
-      }, 2000); // Reset after 2 seconds
-    });
-  };
-
   return (
-    <div className="flex-1 flex flex-col h-full">
-      {/* Conteneur principal des messages avec défilement */}
-      <div 
-        ref={scrollContainerRef}
-        onScroll={checkScrollPosition}
-        className="flex-1 overflow-y-auto no-scrollbar smooth-scroll px-4 md:px-8 lg:px-12"
-      >
-        {/* Section des messages */}
-        <div className="max-w-3xl mx-auto w-full pb-32 pt-4 space-y-4">
-          {/* Afficher les suggestions en début de conversation, style ChatGPT */}
-          {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-8">
-              <div className="rounded-full bg-loro-pearl/50 p-4 mb-6">
-                <MessageSquare className="h-8 w-8 text-loro-hazel" />
+    <div className="flex flex-col h-full relative">
+      <ScrollArea className="flex-grow p-4">
+        <div className="space-y-4">
+          {messages.length > 0 ? (
+            messages.map((message) => (
+              <div
+                key={message.id}
+                className={cn(
+                  "flex flex-col max-w-[80%] rounded-lg p-3",
+                  message.role === 'user' 
+                    ? "bg-loro-hazel/10 ml-auto text-loro-navy" 
+                    : "bg-loro-pearl mr-auto text-loro-navy"
+                )}
+              >
+                <p className="whitespace-pre-wrap">{message.content}</p>
+                <span className="text-xs opacity-50 ml-auto mt-1">
+                  {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                </span>
               </div>
-              <h3 className="text-xl font-medium text-loro-navy mb-6">Comment puis-je vous aider aujourd'hui?</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
+            ))
+          ) : (
+            <div className="text-center p-6 text-loro-navy/70">
+              <p className="mb-4">Comment puis-je vous aider aujourd'hui?</p>
+              {suggestedPrompts && suggestedPrompts.length > 0 && (
+                <div className="space-y-2">
+                  <p className="font-medium text-sm">Suggestions:</p>
+                  {suggestedPrompts.map((prompt, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      size="sm"
+                      className="bg-loro-sand/20 hover:bg-loro-sand/40 m-1 text-left justify-start h-auto py-2 px-3 text-sm"
+                      onClick={() => handleSuggestedPromptClick(prompt)}
+                    >
+                      {prompt}
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Show suggested prompts after messages if available */}
+          {messages.length > 0 && showSuggestions && suggestedPrompts && suggestedPrompts.length > 0 && (
+            <div className="pt-2 pb-4">
+              <p className="text-sm font-medium text-loro-navy/70 mb-2">Suggestions:</p>
+              <div className="flex flex-wrap gap-2">
                 {suggestedPrompts.map((prompt, index) => (
-                  <button
+                  <Button
                     key={index}
-                    onClick={() => handleSuggestionClick(prompt)}
-                    className="bg-white hover:bg-loro-pearl/30 text-left p-4 rounded-xl border border-loro-sand/30 shadow-sm hover:shadow transition-all text-loro-navy"
+                    variant="outline"
+                    size="sm"
+                    className="bg-loro-sand/20 hover:bg-loro-sand/40 text-left justify-start h-auto py-2 px-3 text-xs"
+                    onClick={() => handleSuggestedPromptClick(prompt)}
                   >
                     {prompt}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
           )}
           
-          {/* Liste des messages avec style ChatGPT */}
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${
-                msg.role === 'user' ? 'justify-end' : 'justify-start'
-              } w-full`}
-            >
-              <div className={`max-w-[85%] flex flex-col ${
-                msg.role === 'user' ? 'items-end' : 'items-start'
-              }`}>
-                {/* En-tête du message avec avatar et rôle */}
-                <div className={`flex items-center gap-2 mb-1 ${
-                  msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-                }`}>
-                  <div className={`h-6 w-6 rounded-full flex items-center justify-center 
-                    ${msg.role === 'user' ? 'bg-loro-hazel' : 'bg-loro-pearl'}`}>
-                    {msg.role === 'user' ? (
-                      <span className="text-sm text-white font-medium">U</span>
-                    ) : (
-                      <MessageSquare className="h-3 w-3 text-loro-hazel" />
-                    )}
-                  </div>
-                  <span className="text-xs font-medium text-loro-navy/70 capitalize">
-                    {msg.role === 'assistant' ? 'Gadait' : 'Vous'}
-                  </span>
-                </div>
-                
-                {/* Contenu du message */}
-                <div 
-                  className={`relative group rounded-lg px-4 py-3 ${
-                    msg.role === 'user' 
-                      ? 'bg-loro-hazel text-white rounded-tr-sm' 
-                      : 'bg-loro-pearl/40 text-loro-navy rounded-tl-sm'
-                  }`}
-                >
-                  <div 
-                    className="whitespace-pre-line pr-7"
-                    dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content) }}
-                  />
-                  
-                  {/* Bouton de copie */}
-                  <button
-                    className={`absolute top-2 right-2 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity ${
-                      msg.role === 'user' 
-                        ? 'hover:bg-white/10 text-white' 
-                        : 'hover:bg-loro-navy/10 text-loro-navy/70'
-                    }`}
-                    onClick={() => copyMessageContent(msg.id, msg.content)}
-                    title="Copier le message"
-                  >
-                    {copiedMessageId === msg.id ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-                
-                {/* Horodatage */}
-                <div className={`text-xs text-gray-500 mt-1 ${
-                  msg.role === 'user' ? 'text-right' : 'text-left'
-                }`}>
-                  {msg.timestamp.toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </div>
-              </div>
-            </div>
-          ))}
           <div ref={messagesEndRef} />
         </div>
-      </div>
+      </ScrollArea>
       
-      {/* Bouton de défilement vers le bas */}
-      {showScrollButton && (
-        <Button
-          className="fixed bottom-24 right-8 h-10 w-10 rounded-full bg-loro-hazel text-white shadow-md hover:bg-loro-hazel/90 z-10 transition-all duration-300"
-          onClick={scrollToBottom}
-          size="icon"
-        >
-          <ArrowDown className="h-5 w-5" />
-        </Button>
-      )}
-      
-      {/* Zone de saisie de texte */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent pt-10 pb-4 px-4 md:px-8 lg:px-12">
-        <div className="max-w-3xl mx-auto">
-          <EnhancedInput
-            input={input}
-            setInput={setInput}
-            placeholder={isDraftingMessage ? "Appuyez sur Enter pour copier le message rédigé..." : "Posez votre question..."}
-            isLoading={isLoading}
-            handleSend={handleSendMessage}
+      <div className="border-t border-loro-sand/30 p-3 bg-white sticky bottom-0">
+        <div className="flex items-end gap-2 rounded-md border border-loro-sand/50 bg-white">
+          <textarea
+            ref={inputRef}
+            className="flex-1 px-3 py-2 bg-transparent outline-none resize-none min-h-[48px] max-h-[150px]"
+            placeholder="Écrivez votre message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            rows={1}
           />
+          <Button 
+            type="submit" 
+            variant="ghost" 
+            size="icon"
+            disabled={isLoading || !input.trim()} 
+            onClick={() => handleSendMessage()}
+            className="mb-1 mr-1 h-8 w-8 hover:bg-loro-sand/20"
+          >
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
         </div>
       </div>
     </div>

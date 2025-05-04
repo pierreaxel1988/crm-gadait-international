@@ -11,7 +11,7 @@ export const useChatGadait = (leadData?: LeadDetailed, initialPrompt?: string) =
   const chatProps = useChatMessages(leadData);
   const propertyProps = usePropertyExtraction();
 
-  // Generate contextual suggestions based on lead data
+  // Generate contextual suggestions based on lead data and current tab
   const getContextualSuggestions = (lead?: LeadDetailed) => {
     if (!lead) {
       // Default suggestions when no lead data is available

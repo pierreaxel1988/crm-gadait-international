@@ -62,6 +62,9 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
               <h2 className="text-lg font-medium flex items-center">
                 <MessageSquare className="h-5 w-5 mr-2 text-loro-hazel" />
                 {leadData ? `Chat Gadait - ${leadData.name}` : 'Chat Gadait'}
+                {initialPrompt && <span className="ml-2 text-sm text-loro-navy/60 font-normal hidden sm:inline">
+                  {initialPrompt.length > 30 ? `${initialPrompt.substring(0, 30)}...` : initialPrompt}
+                </span>}
               </h2>
               <Button 
                 variant="ghost" 
