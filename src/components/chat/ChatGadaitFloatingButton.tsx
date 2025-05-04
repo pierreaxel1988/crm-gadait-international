@@ -4,6 +4,7 @@ import { MessageSquare, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ChatGadait from '@/components/chat/ChatGadait';
 import { LeadDetailed } from '@/types/lead';
+import { cn } from '@/lib/utils';
 
 interface ChatGadaitFloatingButtonProps {
   leadData?: LeadDetailed;
@@ -15,6 +16,7 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
   position = 'bottom-right'
 }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   
   const positionClasses = {
     'bottom-right': 'bottom-20 right-4',
@@ -29,11 +31,21 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
       {!isChatOpen && (
         <div className={`fixed z-50 ${positionClasses[position]}`}>
           <Button 
-            onClick={() => setIsChatOpen(true)} 
+            onClick={() => setIsChatOpen(true)}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             size="icon" 
-            className="rounded-full h-14 w-14 shadow-lg text-white transition-all duration-300 hover:scale-110 bg-loro-terracotta flex items-center justify-center"
+            className={cn(
+              "rounded-full h-14 w-14 shadow-lg text-white transition-all duration-300 bg-loro-terracotta flex items-center justify-center",
+              isHovered ? "scale-110 shadow-xl bg-loro-500" : ""
+            )}
           >
-            <MessageSquare className="h-6 w-6" />
+            <MessageSquare 
+              className={cn(
+                "h-6 w-6 transition-transform duration-300",
+                isHovered ? "rotate-12" : ""
+              )} 
+            />
           </Button>
         </div>
       )}
