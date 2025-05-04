@@ -176,23 +176,23 @@ const LeadDetailMobile = () => {
   if (!lead) return null;
   
   return <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
-      <div className="fixed top-0 left-0 right-0 z-40 w-full">
-        <div className="bg-loro-sand pt-[env(safe-area-inset-top)]">
+      <div className="fixed top-0 left-0 right-0 z-40 w-full bg-loro-sand">
+        <div className="pt-[env(safe-area-inset-top)]">
           <LeadDetailHeader 
-            name={lead.name} 
-            createdAt={lead.createdAt} 
+            name={lead?.name || ''} 
+            createdAt={lead?.createdAt} 
             phone={getFormattedPhoneForCall()} 
-            email={lead.email} 
-            budget={lead.budget} 
-            currency={lead.currency} 
-            desiredLocation={lead.desiredLocation} 
-            country={lead.country} 
-            purchaseTimeframe={lead.purchaseTimeframe} 
+            email={lead?.email} 
+            budget={lead?.budget} 
+            currency={lead?.currency} 
+            desiredLocation={lead?.desiredLocation} 
+            country={lead?.country} 
+            purchaseTimeframe={lead?.purchaseTimeframe} 
             onBackClick={handleBackClick} 
             onSave={handleSaveWithIndicator} 
             isSaving={isSaving} 
             hasChanges={hasChanges} 
-            tags={lead.tags} 
+            tags={lead?.tags} 
             onPhoneCall={handlePhoneCall} 
             onWhatsAppClick={handleWhatsAppClick} 
             onEmailClick={handleEmailClick} 
@@ -205,9 +205,9 @@ const LeadDetailMobile = () => {
         </div>
       </div>
       
-      <ScrollArea className="flex-1 overflow-y-auto pt-20 no-scrollbar">
+      <ScrollArea className="flex-1 overflow-y-auto pt-[120px] no-scrollbar">
         <Tabs value={activeTab} className="w-full h-full">
-          <div className="px-4 pb-36 h-full my-[70px]">
+          <div className="px-4 pb-36 h-full">
             <TabsContent value="info" className="mt-1 animate-[fade-in_0.2s_ease-out]">
               <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>

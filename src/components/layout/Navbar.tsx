@@ -22,7 +22,7 @@ const Navbar: React.FC<NavbarProps> = ({
     <nav className={cn(
       "sticky top-0 z-50 w-full bg-loro-white border-b border-loro-pearl transition-all duration-300"
     )}>
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 pt-[env(safe-area-inset-top)]">
         <div className="flex h-16 items-center justify-between">
           <Logo toggleSidebar={toggleSidebar} />
 
