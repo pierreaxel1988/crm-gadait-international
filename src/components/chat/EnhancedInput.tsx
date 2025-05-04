@@ -1,265 +1,152 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Paperclip, Send, Loader, MicOff } from 'lucide-react';
+import { SendHorizontal, Loader2, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger 
-} from '@/components/ui/tooltip';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 
 interface EnhancedInputProps {
   input: string;
   setInput: (input: string) => void;
-  placeholder: string;
-  isLoading: boolean;
+  placeholder?: string;
+  isLoading?: boolean;
   handleSend: () => void;
   onKeyDown?: (e: React.KeyboardEvent) => void;
+  className?: string;
+  suggestedPrompts?: string[];
 }
 
 const EnhancedInput: React.FC<EnhancedInputProps> = ({
   input,
   setInput,
-  placeholder,
-  isLoading,
+  placeholder = 'Type your message...',
+  isLoading = false,
   handleSend,
-  onKeyDown
+  onKeyDown,
+  className,
+  suggestedPrompts = []
 }) => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [rows, setRows] = useState(1);
+  const [showPrompts, setShowPrompts] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
-  // Fonction pour ajuster automatiquement la hauteur du textarea
+  const promptsRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      // Réinitialiser la hauteur pour bien mesurer le contenu
-      textarea.style.height = 'auto';
-      // Définir la hauteur basée sur le contenu (min 60px, max 200px)
-      const newHeight = Math.min(Math.max(textarea.scrollHeight, 60), 200);
-      textarea.style.height = `${newHeight}px`;
+    // Update rows based on content
+    if (textareaRef.current) {
+      const textareaLineHeight = 24; // approximate line height
+      const minRows = 1;
+      const maxRows = 5;
+      
+      const previousRows = textareaRef.current.rows;
+      textareaRef.current.rows = minRows; // Reset rows
+      
+      const currentRows = Math.min(
+        maxRows,
+        Math.max(
+          minRows,
+          Math.ceil(textareaRef.current.scrollHeight / textareaLineHeight)
+        )
+      );
+      
+      if (currentRows === previousRows) {
+        textareaRef.current.rows = currentRows;
+      }
+      
+      if (currentRows !== rows) {
+        setRows(currentRows);
+      }
     }
   }, [input]);
-  
-  // Fonction pour gérer la saisie vocale
-  const toggleVoiceRecording = async () => {
-    if (isRecording && mediaRecorder) {
-      mediaRecorder.stop();
-      setIsRecording(false);
-      return;
-    }
+
+  useEffect(() => {
+    // Close prompt suggestions when clicked outside
+    const handleClickOutside = (event: MouseEvent) => {
+      if (promptsRef.current && !promptsRef.current.contains(event.target as Node)) {
+        setShowPrompts(false);
+      }
+    };
     
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      setMediaRecorder(recorder);
-      
-      const audioChunks: BlobPart[] = [];
-      
-      recorder.addEventListener('dataavailable', (event) => {
-        audioChunks.push(event.data);
-      });
-      
-      recorder.addEventListener('stop', async () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        
-        // Conversion du blob en base64
-        const reader = new FileReader();
-        reader.readAsDataURL(audioBlob);
-        reader.onloadend = async () => {
-          const base64Audio = reader.result?.toString().split(',')[1];
-          
-          if (base64Audio) {
-            try {
-              toast.loading("Transcription en cours...");
-              
-              const { data, error } = await supabase.functions.invoke('voice-to-text', {
-                body: { audio: base64Audio }
-              });
-              
-              if (error) throw error;
-              
-              toast.dismiss();
-              toast.success("Transcription terminée");
-              
-              if (data.text) {
-                // Fix type error here - use concatenation instead of a function
-                setInput(input ? `${input} ${data.text}` : data.text);
-              }
-            } catch (error) {
-              toast.dismiss();
-              toast.error("Échec de la transcription", {
-                description: "Impossible de traiter l'audio. Veuillez réessayer."
-              });
-              console.error('Error transcribing audio:', error);
-            }
-          }
-        };
-        
-        // Arrêt des flux audio
-        stream.getTracks().forEach(track => track.stop());
-      });
-      
-      recorder.start();
-      setIsRecording(true);
-      toast.info("Enregistrement audio démarré", {
-        description: "Parlez clairement. Cliquez à nouveau sur le microphone pour arrêter."
-      });
-      
-    } catch (error) {
-      console.error('Error accessing microphone:', error);
-      toast.error("Accès au microphone refusé", {
-        description: "Veuillez autoriser l'accès au microphone pour utiliser cette fonctionnalité."
-      });
-    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [promptsRef]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
   };
-  
-  // Fonction pour gérer l'upload de fichiers
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    
-    // Vérifier la taille du fichier (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Fichier trop volumineux", {
-        description: "La taille maximale autorisée est de 10MB."
-      });
-      return;
-    }
-    
-    toast.loading(`Analyse du fichier ${file.name}...`);
-    
-    try {
-      // Convertir le fichier en base64
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      
-      reader.onloadend = async () => {
-        const base64File = reader.result?.toString().split(',')[1];
-        
-        if (base64File) {
-          const fileType = file.type;
-          const fileName = file.name;
-          
-          const { data, error } = await supabase.functions.invoke('analyze-document', {
-            body: { 
-              fileContent: base64File,
-              fileName: fileName,
-              fileType: fileType
-            }
-          });
-          
-          if (error) throw error;
-          
-          toast.dismiss();
-          toast.success("Analyse terminée");
-          
-          if (data.text) {
-            // Fix type error here - use a direct string assignment
-            const newValue = `${input ? input + '\n\n' : ''}Document analysé: ${fileName}\n${data.text}`;
-            setInput(newValue);
-          }
-        }
-      };
-    } catch (error) {
-      toast.dismiss();
-      toast.error("Échec de l'analyse du document", {
-        description: "Impossible d'analyser le document. Veuillez réessayer."
-      });
-      console.error('Error analyzing file:', error);
-    }
-    
-    // Réinitialiser l'input file
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+
+  const handleSelectPrompt = (prompt: string) => {
+    setInput(prompt);
+    setShowPrompts(false);
+    textareaRef.current?.focus();
   };
-  
+
   return (
-    <div className="relative border border-loro-sand rounded-md overflow-hidden">
-      <Textarea
-        ref={textareaRef}
-        className="resize-none pr-12 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[60px] max-h-[200px] overflow-y-auto font-futura"
-        placeholder={placeholder}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={onKeyDown}
-        disabled={isLoading}
-        style={{ height: 'auto' }}
-      />
-      
-      <div className="absolute right-2 bottom-2 flex items-center gap-2">
-        {/* Input file caché */}
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          accept="application/pdf,image/jpeg,image/png,image/jpg,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-          onChange={handleFileUpload}
+    <div className={cn('relative', className)}>
+      <div className="flex items-end border rounded-lg bg-white shadow-sm overflow-hidden">
+        <Textarea
+          ref={textareaRef}
+          value={input}
+          onChange={handleChange}
+          onKeyDown={onKeyDown}
+          placeholder={placeholder}
+          rows={rows}
+          className="flex-1 py-3 px-4 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none"
+          data-chatgadait-input
         />
         
-        {/* Bouton d'upload de fichier */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-full bg-loro-pearl hover:bg-loro-sand text-loro-navy font-futura"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isLoading}
-              >
-                <Paperclip className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="font-futura">Joindre un fichier</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        
-        {/* Bouton pour microphone */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className={`h-8 w-8 rounded-full ${
-                  isRecording ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-loro-pearl hover:bg-loro-sand text-loro-navy'
-                } font-futura`}
-                onClick={toggleVoiceRecording}
-                disabled={isLoading}
-              >
-                {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="font-futura">{isRecording ? "Arrêter l'enregistrement" : "Dicter un message"}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        
-        {/* Bouton d'envoi */}
-        <Button
-          size="icon"
-          className={`rounded-full h-8 w-8 ${input.trim() ? 'bg-loro-hazel hover:bg-loro-hazel/90' : 'bg-loro-sand/50'} font-futura`}
-          onClick={handleSend}
-          disabled={isLoading || !input.trim()}
-        >
-          {isLoading ? 
-            <Loader className="h-4 w-4 animate-spin" /> : 
-            <Send className="h-4 w-4" />
-          }
-        </Button>
+        <div className="p-2">
+          <Button
+            type="button"
+            size="icon"
+            disabled={isLoading || !input.trim()}
+            onClick={handleSend}
+            className="bg-loro-terracotta hover:bg-loro-terracotta/90 text-white rounded-full h-10 w-10"
+          >
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <SendHorizontal className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
       </div>
+      
+      {suggestedPrompts && suggestedPrompts.length > 0 && (
+        <div className="absolute bottom-full mb-2 right-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPrompts(!showPrompts)}
+            className="flex items-center gap-1 border-loro-pearl bg-white shadow-sm"
+          >
+            <span className="text-loro-chocolate">Suggestions</span>
+            <ChevronDown className={cn("h-4 w-4 transition-transform", showPrompts && "rotate-180")} />
+          </Button>
+          
+          {showPrompts && (
+            <div 
+              ref={promptsRef}
+              className="absolute right-0 bottom-full mb-2 w-[280px] bg-white rounded-lg border border-loro-pearl/50 shadow-md p-2 z-10"
+            >
+              <div className="text-xs text-muted-foreground mb-2 px-2">Sélectionnez une suggestion</div>
+              <div className="space-y-1 max-h-[200px] overflow-y-auto">
+                {suggestedPrompts.map((prompt, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSelectPrompt(prompt)}
+                    className="w-full text-left p-2 hover:bg-loro-pearl/20 rounded text-loro-chocolate text-sm"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

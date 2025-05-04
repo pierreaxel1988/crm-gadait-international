@@ -10,6 +10,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import ActionsPanelMobile from './actions/ActionsPanelMobile';
 import { supabase } from "@/integrations/supabase/client";
 import { syncExistingActionsWithLeads } from '@/services/leadActions';
+import ContextualSuggestions from './actions/ContextualSuggestions';
+import ChatGadaitFloatingButton from '@/components/chat/ChatGadaitFloatingButton';
+import { LeadDetailed, LeadStatus } from '@/types/lead';
 
 interface ActionsTabProps {
   leadId: string;
@@ -19,6 +22,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [lead, setLead] = useState<LeadDetailed | null>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -51,20 +55,22 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       setIsLoading(true);
       console.log('Fetching actions for lead ID:', leadId);
       
-      const { data: lead, error } = await supabase
+      const { data: fetchedLead, error } = await supabase
         .from('leads')
-        .select('action_history')
+        .select('*')
         .eq('id', leadId)
         .single();
       
       if (error) {
-        console.error("Error fetching lead actions:", error);
+        console.error("Error fetching lead:", error);
         throw error;
       }
       
-      if (lead && Array.isArray(lead.action_history)) {
+      setLead(fetchedLead);
+      
+      if (fetchedLead && Array.isArray(fetchedLead.action_history)) {
         // Ensure each item in action_history conforms to ActionHistory type
-        const parsedActions: ActionHistory[] = lead.action_history.map((item: any) => {
+        const parsedActions: ActionHistory[] = fetchedLead.action_history.map((item: any) => {
           // Validate and safeguard for any missing or invalid properties
           const validatedAction: ActionHistory = {
             id: item.id || crypto.randomUUID(),
@@ -196,6 +202,47 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     }
   };
 
+  const handleSuggestionClick = (suggestion: string) => {
+    if (lead) {
+      // Open the ChatGadait with the suggestion pre-filled
+      const chatWindow = document.querySelector('[data-chatgadait-window]');
+      
+      // If chat window is not open, we need to simulate opening it before populating
+      if (!chatWindow || chatWindow.classList.contains('hidden')) {
+        // Simulate click on chat button to open chat
+        const chatButton = document.querySelector('[data-chatgadait-button]');
+        if (chatButton instanceof HTMLElement) {
+          chatButton.click();
+          
+          // Wait a moment for the chat window to open
+          setTimeout(() => {
+            populateChatInput(suggestion);
+          }, 300);
+        }
+      } else {
+        populateChatInput(suggestion);
+      }
+    } else {
+      toast({
+        title: "Information manquante",
+        description: "Les détails du lead ne sont pas encore chargés."
+      });
+    }
+  };
+  
+  const populateChatInput = (text: string) => {
+    // Find the chat input and populate it
+    const chatInput = document.querySelector('[data-chatgadait-input]');
+    if (chatInput instanceof HTMLTextAreaElement) {
+      chatInput.value = text;
+      chatInput.focus();
+      
+      // Trigger input event to activate the send button
+      const inputEvent = new Event('input', { bubbles: true });
+      chatInput.dispatchEvent(inputEvent);
+    }
+  };
+
   if (isLoading || isSyncing) {
     return (
       <div className="bg-white rounded-lg p-4 flex justify-center items-center h-40">
@@ -217,13 +264,20 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
             <RefreshCw className="h-3 w-3" /> Synchroniser
           </Button>
         </div>
+        
+        {lead && (
+          <ContextualSuggestions 
+            status={lead.status as LeadStatus} 
+            onSuggestionClick={handleSuggestionClick} 
+          />
+        )}
+        
         <ActionsPanelMobile 
           leadId={leadId} 
           onAddAction={fetchLeadActions} 
           onMarkComplete={handleMarkComplete} 
           actionHistory={actionHistory} 
         />
-        {/* Le bouton ChatGadaitFloatingButton est maintenant géré au niveau des pages de détail */}
       </>
     );
   }
@@ -241,6 +295,13 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           <RefreshCw className="h-3.5 w-3.5" /> Synchroniser les actions
         </Button>
       </div>
+      
+      {lead && (
+        <ContextualSuggestions 
+          status={lead.status as LeadStatus} 
+          onSuggestionClick={handleSuggestionClick} 
+        />
+      )}
       
       {actionHistory && actionHistory.length > 0 ? (
         <div className="space-y-4">
