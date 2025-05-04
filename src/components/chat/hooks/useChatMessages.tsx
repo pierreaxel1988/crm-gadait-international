@@ -8,6 +8,7 @@ export const useChatMessages = (leadData?: LeadDetailed) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [input, setInput] = useState('');
+  const [suggestedPrompts, setSuggestedPrompts] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch messages from Supabase when leadData changes
@@ -188,5 +189,15 @@ export const useChatMessages = (leadData?: LeadDetailed) => {
     }
   }, [input, leadData]);
 
-  return { messages, setMessages, input, setInput, isLoading, messagesEndRef, handleSendMessage };
+  return { 
+    messages, 
+    setMessages, 
+    input, 
+    setInput, 
+    isLoading, 
+    messagesEndRef, 
+    handleSendMessage,
+    suggestedPrompts,
+    setSuggestedPrompts
+  };
 };

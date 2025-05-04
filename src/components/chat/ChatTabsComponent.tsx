@@ -1,15 +1,29 @@
 
 import React from 'react';
-import { MessageSquare, Home } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ChatTab from './ChatTabs/ChatTab';
 import PropertyTab from './ChatTabs/PropertyTab';
+import { MessageSquare, Building2 } from 'lucide-react';
 
 interface ChatTabsComponentProps {
   activeTab: string;
-  setActiveTab: (tab: string) => void;
-  chatTabProps: React.ComponentProps<typeof ChatTab>;
-  propertyTabProps: React.ComponentProps<typeof PropertyTab>;
+  setActiveTab: (value: string) => void;
+  chatTabProps: {
+    messages: any[];
+    input: string;
+    setInput: (input: string) => void;
+    isLoading: boolean;
+    handleSendMessage: () => void;
+    messagesEndRef: React.RefObject<HTMLDivElement>;
+    suggestedPrompts?: string[];
+  };
+  propertyTabProps: {
+    propertyUrl: string;
+    setPropertyUrl: (url: string) => void;
+    extractPropertyData: () => Promise<void>;
+    isLoading: boolean;
+    extractedData: any;
+  };
 }
 
 const ChatTabsComponent: React.FC<ChatTabsComponentProps> = ({
@@ -19,32 +33,46 @@ const ChatTabsComponent: React.FC<ChatTabsComponentProps> = ({
   propertyTabProps
 }) => {
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-      <div className="bg-loro-pearl/30 px-4 py-2 border-b border-loro-sand/20">
-        <TabsList className="grid grid-cols-2 w-full bg-loro-white/80 border border-loro-sand/30 rounded-md overflow-hidden">
-          <TabsTrigger 
-            value="chat" 
-            className="data-[state=active]:bg-loro-sand/10 data-[state=active]:text-loro-hazel font-medium transition-all duration-200"
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+      <div className="border-b border-loro-sand/30">
+        <TabsList className="h-12 w-full bg-transparent border-b border-loro-sand/10">
+          <TabsTrigger
+            value="chat"
+            className="flex-1 data-[state=active]:text-loro-hazel data-[state=active]:border-b-2 data-[state=active]:border-loro-hazel rounded-none"
           >
             <MessageSquare className="h-4 w-4 mr-2" />
             Chat
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="property"
-            className="data-[state=active]:bg-loro-sand/10 data-[state=active]:text-loro-hazel font-medium transition-all duration-200"
+            className="flex-1 data-[state=active]:text-loro-hazel data-[state=active]:border-b-2 data-[state=active]:border-loro-hazel rounded-none"
           >
-            <Home className="h-4 w-4 mr-2" />
-            Propriété
+            <Building2 className="h-4 w-4 mr-2" />
+            Propriétés
           </TabsTrigger>
         </TabsList>
       </div>
-      
-      <TabsContent value="chat" className="flex-1 flex flex-col overflow-hidden m-0 p-0">
-        <ChatTab {...chatTabProps} />
+
+      <TabsContent value="chat" className="h-full overflow-hidden pt-0 m-0">
+        <ChatTab
+          messages={chatTabProps.messages}
+          input={chatTabProps.input}
+          setInput={chatTabProps.setInput}
+          isLoading={chatTabProps.isLoading}
+          handleSendMessage={chatTabProps.handleSendMessage}
+          messagesEndRef={chatTabProps.messagesEndRef}
+          suggestedPrompts={chatTabProps.suggestedPrompts}
+        />
       </TabsContent>
-      
-      <TabsContent value="property" className="flex-1 flex flex-col overflow-hidden m-0 p-0">
-        <PropertyTab {...propertyTabProps} />
+
+      <TabsContent value="property" className="h-full overflow-hidden pt-0 m-0">
+        <PropertyTab
+          propertyUrl={propertyTabProps.propertyUrl}
+          setPropertyUrl={propertyTabProps.setPropertyUrl}
+          extractPropertyData={propertyTabProps.extractPropertyData}
+          isLoading={propertyTabProps.isLoading}
+          extractedData={propertyTabProps.extractedData}
+        />
       </TabsContent>
     </Tabs>
   );

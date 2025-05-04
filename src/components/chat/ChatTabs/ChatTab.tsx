@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { MessageSquare, ArrowDown } from 'lucide-react';
 import EnhancedInput from '../EnhancedInput';
@@ -12,6 +11,7 @@ interface ChatTabProps {
   isLoading: boolean;
   handleSendMessage: () => void;
   messagesEndRef: React.RefObject<HTMLDivElement>;
+  suggestedPrompts?: string[];
 }
 
 const ChatTab: React.FC<ChatTabProps> = ({
@@ -20,10 +20,18 @@ const ChatTab: React.FC<ChatTabProps> = ({
   setInput,
   isLoading,
   handleSendMessage,
-  messagesEndRef
+  messagesEndRef,
+  suggestedPrompts = [
+    "Suggère des actions de suivi pour ce lead",
+    "Rédige un email de relance professionnel",
+    "Quelles propriétés recommandes-tu pour ce client?",
+    "Analyse le potentiel d'achat de ce lead",
+    "Comment puis-je améliorer ma communication avec ce client?"
+  ]
 }) => {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -72,6 +80,12 @@ const ChatTab: React.FC<ChatTabProps> = ({
     
     return formattedContent;
   };
+  
+  // Fonction pour choisir une suggestion
+  const handleSuggestionClick = (suggestion: string) => {
+    setSelectedSuggestion(suggestion);
+    setInput(suggestion);
+  };
 
   return (
     <div className="flex-1 flex flex-col p-4 overflow-hidden">
@@ -80,6 +94,25 @@ const ChatTab: React.FC<ChatTabProps> = ({
         onScroll={checkScrollPosition}
         className="flex-1 mb-4 pr-4 overflow-y-auto no-scrollbar smooth-scroll"
       >
+        {/* Afficher les suggestions uniquement s'il n'y a pas encore de messages */}
+        {messages.length === 0 && (
+          <div className="mb-6 animate-[fade-in_0.5s_ease-out]">
+            <p className="text-loro-navy/70 text-sm mb-3">Suggestions de prompts:</p>
+            <div className="grid gap-2">
+              {suggestedPrompts.map((prompt, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSuggestionClick(prompt)}
+                  className={`text-left p-3 rounded-lg border border-loro-sand/50 hover:bg-loro-pearl/30 text-loro-navy transition-colors
+                   ${selectedSuggestion === prompt ? 'bg-loro-pearl border-loro-hazel/30' : 'bg-white'}`}
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        
         <div className="space-y-4 px-2">
           {messages.map((msg) => (
             <div

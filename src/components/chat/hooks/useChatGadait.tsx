@@ -11,6 +11,38 @@ export const useChatGadait = (leadData?: LeadDetailed) => {
   const chatProps = useChatMessages(leadData);
   const propertyProps = usePropertyExtraction();
 
+  // Generate contextual suggestions based on lead data
+  const getContextualSuggestions = (lead?: LeadDetailed) => {
+    if (!lead) return [];
+    
+    const suggestions: string[] = [];
+    
+    // Basic suggestions that are almost always relevant
+    suggestions.push(`Suggère des actions de suivi pour ${lead.name}`);
+    suggestions.push(`Rédige un email de relance pour ${lead.name}`);
+    
+    // Location-based suggestions
+    if (lead.desiredLocation) {
+      suggestions.push(`Quelles propriétés recommandes-tu à ${lead.location || 'ce client'} dans ${lead.desiredLocation}?`);
+    }
+    
+    // Budget-based suggestions
+    if (lead.budget) {
+      suggestions.push(`Analyse les options dans un budget de ${lead.budget} ${lead.currency || '€'}`);
+    }
+    
+    // Status-based suggestions
+    if (lead.status === 'Qualifié') {
+      suggestions.push(`Prépare une stratégie de présentation de propriétés pour ce client qualifié`);
+    } else if (lead.status === 'Nouveau') {
+      suggestions.push(`Comment qualifier davantage ce nouveau lead?`);
+    } else if (lead.status === 'Négociation') {
+      suggestions.push(`Conseils pour finaliser la négociation en cours`);
+    }
+    
+    return suggestions.slice(0, 5); // Limit to 5 suggestions
+  };
+
   // If we have leadData, send context to Supabase edge function for chat
   useEffect(() => {
     if (leadData && activeTab === 'chat' && chatProps.messages.length === 0) {
@@ -29,6 +61,12 @@ export const useChatGadait = (leadData?: LeadDetailed) => {
         }
         return prev;
       });
+      
+      // Update suggestions based on lead context
+      if (chatProps.setSuggestedPrompts) {
+        const contextualSuggestions = getContextualSuggestions(leadData);
+        chatProps.setSuggestedPrompts(contextualSuggestions);
+      }
     }
   }, [leadData, activeTab, chatProps.messages.length]);
   
@@ -40,6 +78,8 @@ export const useChatGadait = (leadData?: LeadDetailed) => {
     isLoading: chatProps.isLoading || propertyProps.isLoading,
     messagesEndRef: chatProps.messagesEndRef,
     handleSendMessage: chatProps.handleSendMessage,
+    suggestedPrompts: chatProps.suggestedPrompts || getContextualSuggestions(leadData),
+    setSuggestedPrompts: chatProps.setSuggestedPrompts,
     
     // Property tab props
     propertyUrl: propertyProps.propertyUrl,
