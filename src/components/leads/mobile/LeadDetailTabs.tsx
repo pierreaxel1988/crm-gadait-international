@@ -1,15 +1,12 @@
-
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Check, FileText, Info, Target, Activity } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-
 interface LeadDetailTabsProps {
   defaultTab?: string;
   pendingActionsCount?: number;
 }
-
 const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
   defaultTab = 'info',
   pendingActionsCount = 0
@@ -17,7 +14,6 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const currentTab = new URLSearchParams(location.search).get('tab') || defaultTab;
-
   const handleTabChange = (value: string) => {
     // Update URL with tab parameter
     const searchParams = new URLSearchParams(location.search);
@@ -26,12 +22,10 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
       replace: true
     });
   };
-
-  return (
-    <>
+  return <>
       <Separator className="bg-loro-pearl/60 h-[1px] w-full opacity-80" />
       <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full border-b border-loro-sand/10">
-        <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-100">
+        <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-terracotta">
           <TabsTrigger value="criteria" className="data-[state=active]:bg-inherit data-[state=active]:border-b-2 data-[state=active]:border-loro-terracotta data-[state=active]:text-loro-chocolate font-medium rounded-none pt-1">
             <div className="flex flex-col items-center">
               <Target className="h-4 w-4 mb-1" />
@@ -71,8 +65,6 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           </TabsTrigger>
         </TabsList>
       </Tabs>
-    </>
-  );
+    </>;
 };
-
 export default LeadDetailTabs;
