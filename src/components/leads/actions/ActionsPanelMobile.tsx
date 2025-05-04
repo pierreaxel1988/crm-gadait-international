@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
 import { format, isPast, isValid } from 'date-fns';
-import { Check, Clock, Calendar, Trash2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { getLead } from '@/services/leadService';
 import { LeadDetailed } from '@/types/lead';
+import { getLead, updateLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
-import { updateLead } from '@/services/leadUpdater';
+import { ActionDialog } from './ActionDialog';
 
 interface ActionsPanelMobileProps {
   leadId: string;
@@ -27,6 +25,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>(initialActionHistory || []);
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const measureHeader = () => {
@@ -145,6 +144,69 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       });
       
       fetchLeadData();
+    }
+  };
+
+  const handleCompleteAction = async (action: ActionHistory) => {
+    try {
+      setIsUpdating(true);
+      
+      if (!leadId) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "ID du lead manquant."
+        });
+        return;
+      }
+      
+      // Récupérer les données actuelles du lead
+      const currentLead = await getLead(leadId);
+      if (!currentLead || !currentLead.actionHistory) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Le lead n'a pas été trouvé ou n'a pas d'historique d'actions."
+        });
+        return;
+      }
+      
+      // Mettre à jour l'action correspondante
+      const updatedActionHistory = currentLead.actionHistory.map(a => {
+        if (a.id === action.id) {
+          return {
+            ...a,
+            completedDate: new Date().toISOString()
+          };
+        }
+        return a;
+      });
+      
+      // Mettre à jour le lead avec l'action complétée
+      // Important: Définir email_envoye à false pour éviter le déclenchement d'emails automatiques
+      const updatedLead = await updateLead({
+        ...currentLead,
+        actionHistory: updatedActionHistory,
+        email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
+      });
+      
+      if (updatedLead) {
+        onMarkComplete(action);
+        
+        toast({
+          title: "Action complétée",
+          description: "L'action a été marquée comme terminée."
+        });
+      }
+    } catch (error) {
+      console.error('Error completing action:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de compléter l'action."
+      });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -321,7 +383,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     variant="outline" 
                     size="sm" 
                     className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95"
-                    onClick={() => onMarkComplete(action)}
+                    onClick={() => handleCompleteAction(action)}
                   >
                     <Check className="h-3 w-3 mr-1" /> 
                     <span className="text-xs font-futura">Terminer</span>

@@ -118,13 +118,15 @@ export const addActionToLead = async (leadId: string, action: Omit<ActionHistory
     console.log('Action history now contains:', actionHistory.length, 'items');
     
     // Update the lead with the new action in history
+    // Important: Set email_envoye to false to prevent automatic email triggering
     const { data: updatedLead, error: updateError } = await supabase
       .from('leads')
       .update({
         action_history: actionHistory,
         last_contacted_at: currentDate,
         task_type: taskType,
-        next_follow_up_date: nextFollowUpDate
+        next_follow_up_date: nextFollowUpDate,
+        email_envoye: false // Désactiver explicitement l'envoi d'email automatique
       })
       .eq('id', leadId)
       .select('*')

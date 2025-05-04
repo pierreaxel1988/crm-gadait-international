@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Calendar } from 'lucide-react';
@@ -121,10 +120,12 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       });
       
       // Update the lead in the database
+      // Important: Set email_envoye to false to prevent automatic email triggering
       const { error: updateError } = await supabase
         .from('leads')
         .update({ 
-          action_history: updatedActionHistory
+          action_history: updatedActionHistory,
+          email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
         })
         .eq('id', leadId);
       
