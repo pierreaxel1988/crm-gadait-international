@@ -20,7 +20,7 @@ const AIActionCard: React.FC<AIActionCardProps> = ({ lead, onGenerateMessage }) 
     const location = lead.desiredLocation || lead.location || lead.country || 'votre région d\'intérêt';
     const propertyType = lead.propertyType || 
                         (lead.propertyTypes && lead.propertyTypes.length > 0 ? lead.propertyTypes.join(', ') : 'propriété');
-    const budget = lead.budget || lead.budget_min || '';
+    const budget = lead.budget || lead.budgetMin || '';
     const currency = lead.currency || '€';
     const url = lead.url || '';
     
