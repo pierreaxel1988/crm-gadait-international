@@ -39,6 +39,7 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
               "rounded-full h-14 w-14 shadow-lg text-white transition-all duration-300 bg-loro-terracotta flex items-center justify-center",
               isHovered ? "scale-110 shadow-xl bg-loro-500" : ""
             )}
+            aria-label="Ouvrir Chat Gadait"
           >
             <MessageSquare 
               className={cn(
@@ -53,13 +54,19 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
       {/* Chat Modal */}
       {isChatOpen && (
         <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[80vh] overflow-hidden flex flex-col">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[80vh] overflow-hidden flex flex-col relative">
             <div className="border-b border-loro-sand/30 p-4 flex justify-between items-center">
               <h2 className="text-lg font-medium flex items-center">
                 <MessageSquare className="h-5 w-5 mr-2 text-loro-hazel" />
                 {leadData ? `Chat Gadait - ${leadData.name}` : 'Chat Gadait'}
               </h2>
-              <Button variant="ghost" size="icon" onClick={() => setIsChatOpen(false)} className="hover:bg-loro-pearl/30">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsChatOpen(false)} 
+                className="hover:bg-loro-pearl/30"
+                aria-label="Fermer"
+              >
                 <X size={18} />
               </Button>
             </div>

@@ -123,6 +123,12 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  
+  /* Amélioration des défilements tactiles */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
 }
 
 .luxury-card {
