@@ -7,7 +7,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
-
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,7 +46,6 @@ const Auth = () => {
     };
     checkSession();
   }, [navigate, location, user]);
-  
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -95,7 +93,6 @@ const Auth = () => {
       setLoading(false);
     }
   };
-  
   const handleGoogleAuth = async () => {
     try {
       console.log('Démarrage authentification Google');
@@ -109,7 +106,6 @@ const Auth = () => {
       });
     }
   };
-  
   if (checkingSession) {
     return <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80">
         <div className="flex flex-col items-center">
@@ -119,12 +115,9 @@ const Auth = () => {
       </div>;
   }
   return <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80 px-4">
-      <div className="mb-8 relative">
+      <div className="mb-8">
         <div className="flex items-center justify-center">
-          <span className="font-futura text-3xl tracking-tight text-loro-navy uppercase relative z-10 diamond-text">
-            GADAIT.
-            <span className="diamond-effect absolute inset-0 animate-pulse-soft"></span>
-          </span>
+          <span className="font-futura text-3xl tracking-tight text-loro-navy uppercase">GADAIT.</span>
         </div>
       </div>
       
@@ -191,5 +184,4 @@ const Auth = () => {
       </Card>
     </div>;
 };
-
 export default Auth;
