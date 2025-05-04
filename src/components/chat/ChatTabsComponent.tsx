@@ -1,30 +1,18 @@
 
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MessageSquare, Building } from 'lucide-react';
 import ChatTab from './ChatTabs/ChatTab';
 import PropertyTab from './ChatTabs/PropertyTab';
-import { MessageSquare, Building2 } from 'lucide-react';
+import EmailTab from './ChatTabs/EmailTab';
 import { LeadDetailed } from '@/types/lead';
 
 interface ChatTabsComponentProps {
   activeTab: string;
-  setActiveTab: (value: string) => void;
-  chatTabProps: {
-    messages: any[];
-    input: string;
-    setInput: (input: string) => void;
-    isLoading: boolean;
-    handleSendMessage: () => void;
-    messagesEndRef: React.RefObject<HTMLDivElement>;
-    suggestedPrompts?: string[];
-  };
-  propertyTabProps: {
-    propertyUrl: string;
-    setPropertyUrl: (url: string) => void;
-    extractPropertyData: () => Promise<void>;
-    isLoading: boolean;
-    extractedData: any;
-  };
+  setActiveTab: (tab: string) => void;
+  chatTabProps: any;
+  propertyTabProps: any;
+  emailTabProps?: any;
   leadData?: LeadDetailed;
 }
 
@@ -33,51 +21,36 @@ const ChatTabsComponent: React.FC<ChatTabsComponentProps> = ({
   setActiveTab,
   chatTabProps,
   propertyTabProps,
+  emailTabProps,
   leadData
 }) => {
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col relative">
-      <div className="border-b border-loro-sand/30 sticky top-0 bg-white z-10">
-        <TabsList className="h-12 w-full bg-transparent">
-          <TabsTrigger
-            value="chat"
-            className="flex-1 data-[state=active]:text-loro-hazel data-[state=active]:border-b-2 data-[state=active]:border-loro-hazel rounded-none"
-          >
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Chat
-          </TabsTrigger>
-          <TabsTrigger
-            value="property"
-            className="flex-1 data-[state=active]:text-loro-hazel data-[state=active]:border-b-2 data-[state=active]:border-loro-hazel rounded-none"
-          >
-            <Building2 className="h-4 w-4 mr-2" />
-            Propriétés
-          </TabsTrigger>
-        </TabsList>
-      </div>
-
-      <TabsContent value="chat" className="h-full overflow-hidden pt-0 m-0 flex-1">
-        <ChatTab
-          messages={chatTabProps.messages}
-          input={chatTabProps.input}
-          setInput={chatTabProps.setInput}
-          isLoading={chatTabProps.isLoading}
-          handleSendMessage={chatTabProps.handleSendMessage}
-          messagesEndRef={chatTabProps.messagesEndRef}
-          suggestedPrompts={chatTabProps.suggestedPrompts}
-          leadData={leadData}
-        />
+    <Tabs
+      value={activeTab}
+      onValueChange={setActiveTab}
+      className="h-full flex flex-col"
+    >
+      <TabsList className="grid grid-cols-2 mx-4 my-2">
+        <TabsTrigger value="chat" className="flex items-center gap-2">
+          <MessageSquare className="h-4 w-4" />
+          <span className="text-base font-normal">Chat</span>
+        </TabsTrigger>
+        <TabsTrigger value="property" className="flex items-center gap-2">
+          <Building className="h-4 w-4" />
+          <span className="text-base font-normal">Propriétés</span>
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="chat" className="flex-1 overflow-hidden relative">
+        <ChatTab {...chatTabProps} leadData={leadData} />
       </TabsContent>
-
-      <TabsContent value="property" className="h-full overflow-hidden pt-0 m-0 flex-1">
-        <PropertyTab
-          propertyUrl={propertyTabProps.propertyUrl}
-          setPropertyUrl={propertyTabProps.setPropertyUrl}
-          extractPropertyData={propertyTabProps.extractPropertyData}
-          isLoading={propertyTabProps.isLoading}
-          extractedData={propertyTabProps.extractedData}
-        />
+      <TabsContent value="property" className="flex-1 overflow-hidden">
+        <PropertyTab {...propertyTabProps} />
       </TabsContent>
+      {emailTabProps && (
+        <TabsContent value="email" className="flex-1 overflow-hidden">
+          <EmailTab {...emailTabProps} />
+        </TabsContent>
+      )}
     </Tabs>
   );
 };

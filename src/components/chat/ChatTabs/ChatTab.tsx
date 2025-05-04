@@ -218,11 +218,11 @@ const ChatTab: React.FC<ChatTabProps> = ({
                 <Sparkles className="h-7 w-7 text-loro-hazel animate-pulse group-hover:text-loro-terracotta transition-colors duration-300" />
               </div>
               {leadData ? (
-                <h3 className="text-xl md:text-2xl font-medium text-loro-navy mb-5">
+                <h3 className="text-base font-medium text-loro-navy mb-5">
                   Comment puis-je vous aider avec {leadData.name}?
                 </h3>
               ) : (
-                <h3 className="text-xl md:text-2xl font-medium text-loro-navy mb-5">
+                <h3 className="text-base font-medium text-loro-navy mb-5">
                   Comment puis-je vous aider aujourd'hui?
                 </h3>
               )}
@@ -231,7 +231,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(prompt)}
-                    className="bg-white hover:bg-loro-pearl/20 text-left p-3.5 rounded-lg border border-loro-sand/30 shadow-sm hover:shadow transition-all text-loro-navy text-sm hover:border-loro-hazel/40"
+                    className="bg-white hover:bg-loro-pearl/20 text-left p-3.5 rounded-lg border border-loro-sand/30 shadow-sm hover:shadow transition-all text-loro-navy text-base hover:border-loro-hazel/40"
                   >
                     {prompt}
                   </button>
@@ -263,7 +263,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
                       <MessageSquare className="h-3 w-3 text-loro-hazel" />
                     )}
                   </div>
-                  <span className="text-xs font-medium text-loro-navy/70 capitalize">
+                  <span className="text-base font-medium text-loro-navy/70 capitalize">
                     {msg.role === 'assistant' ? 'Gadait' : 'Vous'}
                   </span>
                 </div>
@@ -277,7 +277,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
                   }`}
                 >
                   <div 
-                    className="whitespace-pre-line pr-7 text-sm leading-relaxed"
+                    className="whitespace-pre-line pr-7 text-base leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content, msg.role) }}
                   />
                   
@@ -300,7 +300,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
                 </div>
                 
                 {/* Horodatage */}
-                <div className={`text-[10px] text-gray-500 mt-1 ${
+                <div className={`text-base text-gray-500 mt-1 ${
                   msg.role === 'user' ? 'text-right' : 'text-left'
                 }`}>
                   {msg.timestamp.toLocaleTimeString([], {
