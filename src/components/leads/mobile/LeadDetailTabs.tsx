@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Check, FileText, Info, Target, Activity, User } from 'lucide-react';
+import { Check, FileText, Info, Target, Activity } from 'lucide-react';
 
 interface LeadDetailTabsProps {
   defaultTab?: string;
