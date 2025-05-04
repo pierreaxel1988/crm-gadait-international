@@ -56,7 +56,11 @@ const ChatTab: React.FC<ChatTabProps> = ({
 
   return (
     <div className="flex-1 flex flex-col p-4 overflow-hidden">
-      <ScrollArea className="flex-1 mb-4 pr-4" ref={scrollContainerRef} onScroll={checkScrollPosition}>
+      <div 
+        ref={scrollContainerRef}
+        onScroll={checkScrollPosition}
+        className="flex-1 mb-4 pr-4 overflow-y-auto no-scrollbar smooth-scroll"
+      >
         <div className="space-y-4 px-2">
           {messages.map((msg) => (
             <div
@@ -88,7 +92,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
           ))}
           <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
       
       {/* Scroll down button */}
       {showScrollButton && (
