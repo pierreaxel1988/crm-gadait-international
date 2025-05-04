@@ -138,7 +138,7 @@ const Auth = () => {
             <div className="space-y-2">
               <Input type="password" placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)} required className="luxury-input" />
             </div>
-            <Button type="submit" className="w-full bg-loro-hazel text-white hover:bg-loro-hazel/90" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full text-white bg-loro-terracotta">
               {loading ? 'Chargement...' : isSignUp ? 'Créer un compte' : 'Se connecter'}
             </Button>
           </form>
