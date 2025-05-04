@@ -32,11 +32,11 @@ export const useChatGadait = (leadData?: LeadDetailed) => {
     }
     
     // Status-based suggestions
-    if (lead.status === 'Qualifié') {
+    if (lead.status === 'Qualified') {
       suggestions.push(`Prépare une stratégie de présentation de propriétés pour ce client qualifié`);
-    } else if (lead.status === 'Nouveau') {
+    } else if (lead.status === 'New') {
       suggestions.push(`Comment qualifier davantage ce nouveau lead?`);
-    } else if (lead.status === 'Négociation') {
+    } else if (lead.status === 'Proposal') {
       suggestions.push(`Conseils pour finaliser la négociation en cours`);
     }
     
