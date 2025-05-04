@@ -2,7 +2,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { MessageSquare, ArrowDown } from 'lucide-react';
 import EnhancedInput from '../EnhancedInput';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Message } from '../types/chatTypes';
 
@@ -54,6 +53,26 @@ const ChatTab: React.FC<ChatTabProps> = ({
     scrollToBottom();
   }, [messages.length]);
 
+  // Fonction pour formater le contenu du message avec un meilleur espacement
+  const formatMessageContent = (content: string) => {
+    // Remplace les étoiles doubles par du texte en gras
+    let formattedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Ajoute un espacement après les numéros de sections (comme "1.", "2.", etc.)
+    formattedContent = formattedContent.replace(/(\d+\.)\s*/g, '$1 ');
+    
+    // Ajoute un espacement après les points d'interrogation suivis d'un texte
+    formattedContent = formattedContent.replace(/\?(\w)/g, '? $1');
+    
+    // Améliore la structure des listes numérotées en ajoutant des sauts de ligne
+    formattedContent = formattedContent.replace(/(\d+\.)/g, '\n$1');
+    
+    // Retire les sauts de ligne au début du texte si présents
+    formattedContent = formattedContent.replace(/^\n/, '');
+    
+    return formattedContent;
+  };
+
   return (
     <div className="flex-1 flex flex-col p-4 overflow-hidden">
       <div 
@@ -76,7 +95,10 @@ const ChatTab: React.FC<ChatTabProps> = ({
                     : 'bg-loro-pearl/50 text-loro-navy'
                 } shadow-sm`}
               >
-                {msg.content}
+                <div 
+                  className="whitespace-pre-line"
+                  dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content) }}
+                />
               </div>
               <div
                 className={`text-xs text-gray-500 mt-1 ${
