@@ -50,13 +50,20 @@ export const useGmailConnection = (leadId?: string) => {
         if (isTokenExpired) {
           console.log('Token Gmail expiré, essai de rafraîchissement automatique');
           try {
+            // Obtenir la session actuelle pour l'authentification
+            const sessionResult = await supabase.auth.getSession();
+            const accessToken = sessionResult.data.session?.access_token;
+            
+            if (!accessToken) {
+              throw new Error('Aucun token d\'accès disponible pour l\'authentification');
+            }
+            
             // Appeler la fonction Edge pour rafraîchir le token
             const refreshResponse = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gmail-auth`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                // Correction : utiliser la fonction getSession() au lieu d'accéder directement à session
-                'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+                'Authorization': `Bearer ${accessToken}`
               },
               body: JSON.stringify({ 
                 action: 'refresh',

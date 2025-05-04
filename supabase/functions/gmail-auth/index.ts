@@ -18,7 +18,8 @@ const corsHeaders = {
 // Create a Supabase client with the admin key
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: {
-    persistSession: false // Désactiver la persistance de session pour éviter les conflits
+    autoRefreshToken: false,
+    persistSession: false
   }
 });
 
@@ -30,7 +31,27 @@ serve(async (req) => {
 
   try {
     console.log("Requête reçue à la fonction gmail-auth");
-    const requestBody = await req.json();
+    
+    // Pour éviter les erreurs JSON vides
+    let requestBody;
+    try {
+      const text = await req.text();
+      if (!text || text.trim() === '') {
+        requestBody = {};
+      } else {
+        requestBody = JSON.parse(text);
+      }
+    } catch (e) {
+      console.error("Erreur de parsing du corps de la requête:", e);
+      return new Response(JSON.stringify({ 
+        error: 'Invalid request body',
+        details: 'Could not parse request body as JSON'
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
+    
     const { action, code, state, redirectUri, userId, refreshToken } = requestBody;
     
     // Log the request for debugging
@@ -93,9 +114,9 @@ serve(async (req) => {
       
       // Create a state object that includes redirect URI and user ID
       const stateObj = {
-        redirectUri: finalRedirectUri,
+        redirectUri: redirectUri || 'https://gadait-international.com/leads',
         userId: userId,
-        state: state
+        state: crypto.randomUUID()
       };
       
       console.log("Creating state object:", stateObj);
