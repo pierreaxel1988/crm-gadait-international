@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState, useRef } from 'react';
-import { MessageSquare, ArrowDown } from 'lucide-react';
+import { MessageSquare, ArrowDown, Copy, Check } from 'lucide-react';
 import EnhancedInput from '../EnhancedInput';
 import { Button } from '@/components/ui/button';
 import { Message } from '../types/chatTypes';
@@ -32,6 +33,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
   const [showScrollButton, setShowScrollButton] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -87,6 +89,16 @@ const ChatTab: React.FC<ChatTabProps> = ({
     setInput(suggestion);
   };
 
+  // Fonction pour copier le contenu d'un message
+  const copyMessageContent = (messageId: string, content: string) => {
+    navigator.clipboard.writeText(content).then(() => {
+      setCopiedMessageId(messageId);
+      setTimeout(() => {
+        setCopiedMessageId(null);
+      }, 2000); // Reset after 2 seconds
+    });
+  };
+
   return (
     <div className="flex-1 flex flex-col p-4 overflow-hidden">
       <div 
@@ -94,24 +106,22 @@ const ChatTab: React.FC<ChatTabProps> = ({
         onScroll={checkScrollPosition}
         className="flex-1 mb-4 pr-4 overflow-y-auto no-scrollbar smooth-scroll"
       >
-        {/* Afficher les suggestions uniquement s'il n'y a pas encore de messages */}
-        {messages.length === 0 && (
-          <div className="mb-6 animate-[fade-in_0.5s_ease-out]">
-            <p className="text-loro-navy/70 text-sm mb-3">Suggestions de prompts:</p>
-            <div className="grid gap-2">
-              {suggestedPrompts.map((prompt, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSuggestionClick(prompt)}
-                  className={`text-left p-3 rounded-lg border border-loro-sand/50 hover:bg-loro-pearl/30 text-loro-navy transition-colors
-                   ${selectedSuggestion === prompt ? 'bg-loro-pearl border-loro-hazel/30' : 'bg-white'}`}
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
+        {/* Afficher les suggestions même s'il y a des messages */}
+        <div className="mb-6 animate-[fade-in_0.5s_ease-out]">
+          <p className="text-loro-navy/70 text-sm mb-3">Suggestions de prompts:</p>
+          <div className="grid gap-2">
+            {suggestedPrompts.map((prompt, index) => (
+              <button
+                key={index}
+                onClick={() => handleSuggestionClick(prompt)}
+                className={`text-left p-3 rounded-lg border border-loro-sand/50 hover:bg-loro-pearl/30 text-loro-navy transition-colors
+                 ${selectedSuggestion === prompt ? 'bg-loro-pearl border-loro-hazel/30' : 'bg-white'}`}
+              >
+                {prompt}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
         
         <div className="space-y-4 px-2">
           {messages.map((msg) => (
@@ -122,16 +132,33 @@ const ChatTab: React.FC<ChatTabProps> = ({
               }`}
             >
               <div
-                className={`p-3 rounded-lg ${
+                className={`p-3 rounded-lg relative group ${
                   msg.role === 'user'
                     ? 'bg-loro-hazel text-white'
                     : 'bg-loro-pearl/50 text-loro-navy'
                 } shadow-sm`}
               >
                 <div 
-                  className="whitespace-pre-line"
+                  className="whitespace-pre-line pr-8" 
                   dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content) }}
                 />
+                
+                {/* Copy button */}
+                <Button
+                  variant="ghost" 
+                  size="icon"
+                  className={`absolute top-2 right-2 h-6 w-6 p-1 opacity-0 group-hover:opacity-100 transition-opacity ${
+                    msg.role === 'user' ? 'text-white hover:bg-loro-hazel/80' : 'text-loro-navy/70 hover:bg-loro-pearl'
+                  }`}
+                  onClick={() => copyMessageContent(msg.id, msg.content)}
+                  title="Copier le message"
+                >
+                  {copiedMessageId === msg.id ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
               <div
                 className={`text-xs text-gray-500 mt-1 ${
