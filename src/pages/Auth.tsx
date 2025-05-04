@@ -7,7 +7,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
-
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -124,7 +123,7 @@ const Auth = () => {
       
       <Card className="w-full max-w-md shadow-luxury">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="font-futura text-loro-terracotta font-medium text-2xl">
+          <CardTitle className="font-futura font-medium text-2xl text-loro-900">
             {isSignUp ? 'Créer un compte' : 'Connexion'}
           </CardTitle>
           <CardDescription className="font-futura text-chocolate-light text-sm font-light">
@@ -185,5 +184,4 @@ const Auth = () => {
       </Card>
     </div>;
 };
-
 export default Auth;
