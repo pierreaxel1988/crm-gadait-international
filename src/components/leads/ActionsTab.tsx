@@ -10,7 +10,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import ActionsPanelMobile from './actions/ActionsPanelMobile';
 import { supabase } from "@/integrations/supabase/client";
 import { syncExistingActionsWithLeads } from '@/services/leadActions';
-import ChatGadaitFloatingButton from '@/components/chat/ChatGadaitFloatingButton';
 
 interface ActionsTabProps {
   leadId: string;
@@ -224,7 +223,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           onMarkComplete={handleMarkComplete} 
           actionHistory={actionHistory} 
         />
-        {/* Note: The ChatGadaitFloatingButton is now handled in the LeadDetailMobile parent component */}
+        {/* Le bouton ChatGadaitFloatingButton est maintenant géré au niveau des pages de détail */}
       </>
     );
   }

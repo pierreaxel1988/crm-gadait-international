@@ -227,18 +227,20 @@ const LeadDetailMobile = () => {
             <TabsContent value="actions" className="mt-1 animate-[fade-in_0.2s_ease-out]">
               {actionSuggestions && actionSuggestions.length > 0 && <ActionSuggestions suggestions={actionSuggestions} onAccept={acceptSuggestion} onReject={rejectSuggestion} />}
               <ActionsPanelMobile leadId={lead.id} onAddAction={fetchLead} onMarkComplete={handleMarkComplete} actionHistory={lead.actionHistory || []} />
+              
+              {/* ChatGadait floating button - n'apparaît que dans l'onglet actions */}
+              {lead && (
+                <ChatGadaitFloatingButton 
+                  leadData={lead} 
+                  position="bottom-right" 
+                />
+              )}
             </TabsContent>
           </div>
         </Tabs>
       </ScrollArea>
       
-      {/* ChatGadait floating button - positioned above the action bar */}
-      {lead && (
-        <ChatGadaitFloatingButton 
-          leadData={lead} 
-          position="bottom-right" 
-        />
-      )}
+      {/* Suppression du bouton flottant global, maintenant uniquement affiché dans l'onglet actions */}
       
       <LeadDetailActionBar 
         autoSaveEnabled={autoSaveEnabled} 

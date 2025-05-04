@@ -118,6 +118,8 @@ const LeadDetailDesktop = () => {
             </TabsContent>
             <TabsContent value="actions">
               <ActionsTab leadId={lead.id} />
+              {/* ChatGadait floating button - uniquement dans l'onglet actions */}
+              <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />
             </TabsContent>
             <TabsContent value="notes">
               <NotesTab leadId={lead.id} />
@@ -133,9 +135,6 @@ const LeadDetailDesktop = () => {
             </TabsContent>
           </Tabs>
         </div>
-        
-        {/* Add the ChatGadait floating button */}
-        <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />
       </div>
     </SidebarLayout>
   );
