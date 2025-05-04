@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { MessageSquare, ArrowDown, Copy, Check } from 'lucide-react';
 import EnhancedInput from '../EnhancedInput';
@@ -111,7 +110,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
         {/* Section des messages */}
         <div className="max-w-3xl mx-auto w-full pb-32 pt-4 space-y-4">
           {/* Afficher les suggestions en début de conversation, style ChatGPT */}
-          {messages.length === 0 ? (
+          {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-8">
               <div className="rounded-full bg-loro-pearl/50 p-4 mb-6">
                 <MessageSquare className="h-8 w-8 text-loro-hazel" />
@@ -129,81 +128,79 @@ const ChatTab: React.FC<ChatTabProps> = ({
                 ))}
               </div>
             </div>
-          ) : (
-            <>
-              {/* Liste des messages avec style ChatGPT */}
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex ${
-                    msg.role === 'user' ? 'justify-end' : 'justify-start'
-                  } w-full`}
-                >
-                  <div className={`max-w-[85%] flex flex-col ${
-                    msg.role === 'user' ? 'items-end' : 'items-start'
-                  }`}>
-                    {/* En-tête du message avec avatar et rôle */}
-                    <div className={`flex items-center gap-2 mb-1 ${
-                      msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-                    }`}>
-                      <div className={`h-6 w-6 rounded-full flex items-center justify-center 
-                        ${msg.role === 'user' ? 'bg-loro-hazel' : 'bg-loro-pearl'}`}>
-                        {msg.role === 'user' ? (
-                          <span className="text-sm text-white font-medium">U</span>
-                        ) : (
-                          <MessageSquare className="h-3 w-3 text-loro-hazel" />
-                        )}
-                      </div>
-                      <span className="text-xs font-medium text-loro-navy/70 capitalize">
-                        {msg.role === 'assistant' ? 'Gadait' : 'Vous'}
-                      </span>
-                    </div>
-                    
-                    {/* Contenu du message */}
-                    <div 
-                      className={`relative group rounded-lg px-4 py-3 ${
-                        msg.role === 'user' 
-                          ? 'bg-loro-hazel text-white rounded-tr-sm' 
-                          : 'bg-loro-pearl/40 text-loro-navy rounded-tl-sm'
-                      }`}
-                    >
-                      <div 
-                        className="whitespace-pre-line pr-7"
-                        dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content) }}
-                      />
-                      
-                      {/* Bouton de copie */}
-                      <button
-                        className={`absolute top-2 right-2 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity ${
-                          msg.role === 'user' 
-                            ? 'hover:bg-white/10 text-white' 
-                            : 'hover:bg-loro-navy/10 text-loro-navy/70'
-                        }`}
-                        onClick={() => copyMessageContent(msg.id, msg.content)}
-                        title="Copier le message"
-                      >
-                        {copiedMessageId === msg.id ? (
-                          <Check className="h-4 w-4" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                    
-                    {/* Horodatage */}
-                    <div className={`text-xs text-gray-500 mt-1 ${
-                      msg.role === 'user' ? 'text-right' : 'text-left'
-                    }`}>
-                      {msg.timestamp.toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </>
           )}
+          
+          {/* Liste des messages avec style ChatGPT */}
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${
+                msg.role === 'user' ? 'justify-end' : 'justify-start'
+              } w-full`}
+            >
+              <div className={`max-w-[85%] flex flex-col ${
+                msg.role === 'user' ? 'items-end' : 'items-start'
+              }`}>
+                {/* En-tête du message avec avatar et rôle */}
+                <div className={`flex items-center gap-2 mb-1 ${
+                  msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'
+                }`}>
+                  <div className={`h-6 w-6 rounded-full flex items-center justify-center 
+                    ${msg.role === 'user' ? 'bg-loro-hazel' : 'bg-loro-pearl'}`}>
+                    {msg.role === 'user' ? (
+                      <span className="text-sm text-white font-medium">U</span>
+                    ) : (
+                      <MessageSquare className="h-3 w-3 text-loro-hazel" />
+                    )}
+                  </div>
+                  <span className="text-xs font-medium text-loro-navy/70 capitalize">
+                    {msg.role === 'assistant' ? 'Gadait' : 'Vous'}
+                  </span>
+                </div>
+                
+                {/* Contenu du message */}
+                <div 
+                  className={`relative group rounded-lg px-4 py-3 ${
+                    msg.role === 'user' 
+                      ? 'bg-loro-hazel text-white rounded-tr-sm' 
+                      : 'bg-loro-pearl/40 text-loro-navy rounded-tl-sm'
+                  }`}
+                >
+                  <div 
+                    className="whitespace-pre-line pr-7"
+                    dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content) }}
+                  />
+                  
+                  {/* Bouton de copie */}
+                  <button
+                    className={`absolute top-2 right-2 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity ${
+                      msg.role === 'user' 
+                        ? 'hover:bg-white/10 text-white' 
+                        : 'hover:bg-loro-navy/10 text-loro-navy/70'
+                    }`}
+                    onClick={() => copyMessageContent(msg.id, msg.content)}
+                    title="Copier le message"
+                  >
+                    {copiedMessageId === msg.id ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                
+                {/* Horodatage */}
+                <div className={`text-xs text-gray-500 mt-1 ${
+                  msg.role === 'user' ? 'text-right' : 'text-left'
+                }`}>
+                  {msg.timestamp.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </div>
+              </div>
+            </div>
+          ))}
           <div ref={messagesEndRef} />
         </div>
       </div>
