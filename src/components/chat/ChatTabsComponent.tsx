@@ -33,9 +33,9 @@ const ChatTabsComponent: React.FC<ChatTabsComponentProps> = ({
   propertyTabProps
 }) => {
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-      <div className="border-b border-loro-sand/30">
-        <TabsList className="h-12 w-full bg-transparent border-b border-loro-sand/10">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col relative">
+      <div className="border-b border-loro-sand/30 sticky top-0 bg-white z-10">
+        <TabsList className="h-12 w-full bg-transparent">
           <TabsTrigger
             value="chat"
             className="flex-1 data-[state=active]:text-loro-hazel data-[state=active]:border-b-2 data-[state=active]:border-loro-hazel rounded-none"
@@ -53,7 +53,7 @@ const ChatTabsComponent: React.FC<ChatTabsComponentProps> = ({
         </TabsList>
       </div>
 
-      <TabsContent value="chat" className="h-full overflow-hidden pt-0 m-0">
+      <TabsContent value="chat" className="h-full overflow-hidden pt-0 m-0 flex-1">
         <ChatTab
           messages={chatTabProps.messages}
           input={chatTabProps.input}
@@ -65,7 +65,7 @@ const ChatTabsComponent: React.FC<ChatTabsComponentProps> = ({
         />
       </TabsContent>
 
-      <TabsContent value="property" className="h-full overflow-hidden pt-0 m-0">
+      <TabsContent value="property" className="h-full overflow-hidden pt-0 m-0 flex-1">
         <PropertyTab
           propertyUrl={propertyTabProps.propertyUrl}
           setPropertyUrl={propertyTabProps.setPropertyUrl}
