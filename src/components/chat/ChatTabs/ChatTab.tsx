@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState, useRef } from 'react';
-import { MessageSquare, ArrowDown, Copy, Check } from 'lucide-react';
+import { MessageSquare, ArrowDown, Copy, Check, Sparkles } from 'lucide-react';
 import EnhancedInput from '../EnhancedInput';
 import { Button } from '@/components/ui/button';
 import { Message } from '../types/chatTypes';
@@ -181,25 +180,25 @@ const ChatTab: React.FC<ChatTabProps> = ({
         <div className="max-w-3xl mx-auto w-full pb-32 pt-4 space-y-6">
           {/* Afficher les suggestions même si un message système existe */}
           {(showSuggestions || hasOnlySystemMessage) && (
-            <div className="flex flex-col items-center justify-center py-8">
-              <div className="rounded-full bg-loro-pearl/50 p-3 mb-4">
-                <MessageSquare className="h-6 w-6 text-loro-hazel" />
+            <div className="flex flex-col items-center justify-center py-8 animate-fade-in">
+              <div className="rounded-full bg-gradient-to-r from-loro-hazel/40 to-loro-pearl/60 p-4 mb-5 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 group">
+                <Sparkles className="h-7 w-7 text-loro-hazel animate-pulse group-hover:text-loro-terracotta transition-colors duration-300" />
               </div>
               {leadData ? (
-                <h3 className="text-lg md:text-xl font-medium text-loro-navy mb-4">
+                <h3 className="text-xl md:text-2xl font-medium text-loro-navy mb-5">
                   Comment puis-je vous aider avec {leadData.name}?
                 </h3>
               ) : (
-                <h3 className="text-lg md:text-xl font-medium text-loro-navy mb-4">
+                <h3 className="text-xl md:text-2xl font-medium text-loro-navy mb-5">
                   Comment puis-je vous aider aujourd'hui?
                 </h3>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 w-full max-w-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
                 {contextualStarters.map((prompt, index) => (
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(prompt)}
-                    className="bg-white hover:bg-loro-pearl/20 text-left p-3 rounded-lg border border-loro-sand/20 shadow-sm hover:shadow transition-all text-loro-navy text-sm"
+                    className="bg-white hover:bg-loro-pearl/20 text-left p-3.5 rounded-lg border border-loro-sand/30 shadow-sm hover:shadow transition-all text-loro-navy text-sm hover:border-loro-hazel/40"
                   >
                     {prompt}
                   </button>

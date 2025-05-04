@@ -148,6 +148,11 @@
     transform: translateY(5px);
     animation: suggestionAppear 0.4s forwards;
   }
+  
+  /* Animation de pulse pour l'icône */
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
 }
 
 .luxury-card {
@@ -215,6 +220,15 @@
   100% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
   }
 }
 
