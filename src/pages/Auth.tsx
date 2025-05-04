@@ -177,7 +177,7 @@ const Auth = () => {
             </div>}
         </CardContent>
         <CardFooter className="text-center block">
-          <Button variant="link" onClick={() => setIsSignUp(!isSignUp)} className="text-loro-hazel hover:text-loro-hazel/90">
+          <Button variant="link" onClick={() => setIsSignUp(!isSignUp)} className="text-loro-terracotta">
             {isSignUp ? 'Déjà un compte ? Se connecter' : 'Créer un compte'}
           </Button>
         </CardFooter>
