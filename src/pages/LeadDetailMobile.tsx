@@ -36,7 +36,6 @@ const LeadDetailMobile = () => {
   const searchParams = new URLSearchParams(location.search);
   const activeTab = searchParams.get('tab') || 'criteria';
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
-  const [showMessageDrafting, setShowMessageDrafting] = useState(false);
   
   const {
     lead,
@@ -166,19 +165,6 @@ const LeadDetailMobile = () => {
     return lead.actionHistory.filter(action => !action.completedDate).length;
   };
   
-  // Nouveau gestionnaire pour ouvrir le chat avec la demande de rédaction
-  const handleDraftMessage = () => {
-    setShowMessageDrafting(true);
-  };
-
-  // Déterminer si un prompt initial est nécessaire en fonction de l'onglet actif
-  const getInitialPromptForTab = () => {
-    if (showMessageDrafting) {
-      return "rédige moi le prochain message";
-    }
-    return null;
-  };
-
   if (isLoading) {
     return <LoadingState isLoading={isLoading} />;
   }
@@ -239,16 +225,6 @@ const LeadDetailMobile = () => {
             </TabsContent>
             
             <TabsContent value="actions" className="mt-1 animate-[fade-in_0.2s_ease-out]">
-              <div className="flex justify-start mb-4">
-                <Button 
-                  onClick={handleDraftMessage} 
-                  variant="outline" 
-                  size="sm"
-                  className="text-xs flex items-center gap-1 bg-loro-hazel/20 hover:bg-loro-hazel/30 text-loro-hazel"
-                >
-                  Rédiger un message avec Gadait
-                </Button>
-              </div>
               {actionSuggestions && actionSuggestions.length > 0 && <ActionSuggestions suggestions={actionSuggestions} onAccept={acceptSuggestion} onReject={rejectSuggestion} />}
               <ActionsPanelMobile leadId={lead.id} onAddAction={fetchLead} onMarkComplete={handleMarkComplete} actionHistory={lead.actionHistory || []} />
             </TabsContent>
@@ -261,7 +237,6 @@ const LeadDetailMobile = () => {
         <ChatGadaitFloatingButton 
           leadData={lead} 
           position="bottom-right" 
-          initialPrompt={getInitialPromptForTab() || undefined}
         />
       )}
       

@@ -10,13 +10,11 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 interface ChatGadaitFloatingButtonProps {
   leadData?: LeadDetailed;
   position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
-  initialPrompt?: string;
 }
 
 const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
   leadData,
-  position = 'bottom-right',
-  initialPrompt
+  position = 'bottom-right'
 }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -62,9 +60,6 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
               <h2 className="text-lg font-medium flex items-center">
                 <MessageSquare className="h-5 w-5 mr-2 text-loro-hazel" />
                 {leadData ? `Chat Gadait - ${leadData.name}` : 'Chat Gadait'}
-                {initialPrompt && <span className="ml-2 text-sm text-loro-navy/60 font-normal hidden sm:inline">
-                  {initialPrompt.length > 30 ? `${initialPrompt.substring(0, 30)}...` : initialPrompt}
-                </span>}
               </h2>
               <Button 
                 variant="ghost" 
@@ -77,12 +72,7 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
               </Button>
             </div>
             <div className="flex-1 overflow-hidden">
-              <ChatGadait 
-                isOpen={true} 
-                onClose={() => setIsChatOpen(false)} 
-                leadData={leadData}
-                initialPrompt={initialPrompt}
-              />
+              <ChatGadait isOpen={true} onClose={() => setIsChatOpen(false)} leadData={leadData} />
             </div>
           </div>
         </SheetContent>
