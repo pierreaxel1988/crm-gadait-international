@@ -153,11 +153,29 @@
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
-  /* Animation fade-in avec légère montée pour le logo */
-  .logo-appear {
-    opacity: 0;
-    transform: translateY(20px);
-    animation: logoAppear 0.8s ease forwards;
+  /* Animation effet de brillance traversant pour le logo */
+  .logo-shine {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    animation: fadeIn 0.8s ease forwards;
+  }
+  
+  .logo-shine::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      to right, 
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: skewX(-25deg);
+    animation: shine 3s infinite ease-in-out;
   }
 }
 
@@ -198,22 +216,21 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(5px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
-@keyframes logoAppear {
+@keyframes shine {
   0% {
-    opacity: 0;
-    transform: translateY(20px);
+    left: -100%;
+  }
+  20% {
+    left: 100%;
   }
   100% {
-    opacity: 1;
-    transform: translateY(0);
+    left: 100%;
   }
 }
 
