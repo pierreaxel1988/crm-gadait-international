@@ -125,7 +125,7 @@ const Auth = () => {
       <Card className="w-full max-w-md shadow-luxury">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="font-futura text-loro-terracotta font-medium text-2xl">
-            {isSignUp ? 'Créer un compte' : 'Connexion'}
+            {isSignUp ? 'CRÉER UN COMPTE' : 'CONNEXION'}
           </CardTitle>
           <CardDescription className="font-futura text-chocolate-light text-sm font-light">
             {isSignUp ? 'Créez votre compte pour accéder à toutes les fonctionnalités' : 'Connectez-vous pour accéder à votre espace personnel'}
