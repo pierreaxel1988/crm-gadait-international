@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -117,7 +118,7 @@ const Auth = () => {
   return <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80 px-4">
       <div className="mb-8">
         <div className="flex items-center justify-center">
-          <span className="font-futura text-3xl tracking-tight text-loro-navy uppercase">GADAIT.</span>
+          <span className="font-futura text-3xl tracking-tight text-loro-navy uppercase logo-appear">GADAIT.</span>
         </div>
       </div>
       
@@ -184,4 +185,5 @@ const Auth = () => {
       </Card>
     </div>;
 };
+
 export default Auth;

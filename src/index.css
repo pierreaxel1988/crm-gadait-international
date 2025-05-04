@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -153,6 +152,13 @@
   .animate-pulse {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
+
+  /* Animation fade-in avec légère montée pour le logo */
+  .logo-appear {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: logoAppear 0.8s ease forwards;
+  }
 }
 
 .luxury-card {
@@ -195,6 +201,17 @@
     transform: translateY(5px);
   }
   to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes logoAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
