@@ -58,7 +58,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
             <div className="flex flex-col items-center">
               <Activity className="h-4 w-4 mb-1 text-loro-50" />
               <span className="text-xs text-loro-50">Actions</span>
-              {pendingActionsCount > 0 && <div className="absolute -top-1 -right-1 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs bg-loro-900 px-0 mx-[20px]">
+              {pendingActionsCount > 0 && <div className="absolute -top-1 -right-1 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs bg-loro-900 px-0 mx-[10px]">
                 {pendingActionsCount}
               </div>}
             </div>
