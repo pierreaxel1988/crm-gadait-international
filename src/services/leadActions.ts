@@ -188,7 +188,7 @@ export const syncExistingActionsWithLeads = async (leadId?: string): Promise<boo
       }
       
       let needsUpdate = false;
-      const updatedActionHistory = lead.action_history.map(action => {
+      const updatedActionHistory = lead.action_history.map((action: any) => {
         if (!action.leadId) {
           needsUpdate = true;
           return { ...action, leadId: lead.id };
