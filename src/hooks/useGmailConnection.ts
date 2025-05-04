@@ -55,7 +55,8 @@ export const useGmailConnection = (leadId?: string) => {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${supabase.auth.session()?.access_token}`
+                // Correction : utiliser la fonction getSession() au lieu d'accéder directement à session
+                'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
               },
               body: JSON.stringify({ 
                 action: 'refresh',
