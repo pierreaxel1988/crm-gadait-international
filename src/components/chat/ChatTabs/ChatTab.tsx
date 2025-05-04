@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { MessageSquare, ArrowDown, Copy, Check } from 'lucide-react';
 import EnhancedInput from '../EnhancedInput';
@@ -28,6 +29,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [isDraftingMessage, setIsDraftingMessage] = useState(false);
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -56,6 +58,26 @@ const ChatTab: React.FC<ChatTabProps> = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages.length]);
+
+  // Detect if we're drafting a message based on latest message content
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastUserMessage = [...messages]
+        .reverse()
+        .find(msg => msg.role === 'user');
+      
+      // Check if the latest user message is asking to draft a message
+      if (lastUserMessage && 
+         (lastUserMessage.content.toLowerCase().includes('rédige') || 
+          lastUserMessage.content.toLowerCase().includes('écris') ||
+          lastUserMessage.content.toLowerCase().includes('draft') ||
+          lastUserMessage.content.toLowerCase().includes('message'))) {
+        setIsDraftingMessage(true);
+      } else {
+        setIsDraftingMessage(false);
+      }
+    }
+  }, [messages]);
 
   // Fonction pour formater le contenu du message avec un meilleur espacement
   const formatMessageContent = (content: string) => {
@@ -216,7 +238,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
           <EnhancedInput
             input={input}
             setInput={setInput}
-            placeholder="Posez votre question..."
+            placeholder={isDraftingMessage ? "Appuyez sur Enter pour copier le message rédigé..." : "Posez votre question..."}
             isLoading={isLoading}
             handleSend={handleSendMessage}
             onKeyDown={handleKeyDown}

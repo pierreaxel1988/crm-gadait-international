@@ -5,7 +5,7 @@ import { usePropertyExtraction } from './usePropertyExtraction';
 import { LeadDetailed } from '@/types/lead';
 import { Message } from '../types/chatTypes';
 
-export const useChatGadait = (leadData?: LeadDetailed) => {
+export const useChatGadait = (leadData?: LeadDetailed, initialPrompt?: string) => {
   const [activeTab, setActiveTab] = useState('chat');
   
   const chatProps = useChatMessages(leadData);
@@ -96,6 +96,26 @@ export const useChatGadait = (leadData?: LeadDetailed) => {
       chatProps.setSuggestedPrompts(contextualSuggestions);
     }
   }, [leadData, activeTab, chatProps.messages.length]);
+
+  // Handle initialPrompt if provided (e.g. "redige moi le prochain message")
+  useEffect(() => {
+    if (initialPrompt && leadData && chatProps.messages.length <= 1) {
+      // Send the initial prompt automatically
+      const userMessage: Message = {
+        id: `user-initial-${Date.now()}`,
+        content: initialPrompt,
+        role: 'user',
+        timestamp: new Date()
+      };
+
+      chatProps.setMessages(prev => [...prev, userMessage]);
+      
+      // Using a timeout to allow the UI to update before sending the message
+      setTimeout(() => {
+        chatProps.handleSendMessage(initialPrompt);
+      }, 100);
+    }
+  }, [initialPrompt, leadData, chatProps.messages.length]);
   
   return {
     // Chat tab props

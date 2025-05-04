@@ -85,6 +85,14 @@ const LeadDetailDesktop = () => {
     );
   }
 
+  // Déterminer si un prompt initial est nécessaire en fonction de l'onglet actif
+  const getInitialPromptForTab = () => {
+    if (activeTab === 'actions') {
+      return null; // Pas de prompt initial, le bouton dans ActionsTab s'en chargera
+    }
+    return null;
+  };
+
   return (
     <SidebarLayout>
       <div className="p-6 max-w-7xl mx-auto">
@@ -134,8 +142,12 @@ const LeadDetailDesktop = () => {
           </Tabs>
         </div>
         
-        {/* Add the ChatGadait floating button */}
-        <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />
+        {/* Add the ChatGadait floating button with active tab information */}
+        <ChatGadaitFloatingButton 
+          leadData={lead} 
+          position="bottom-right"
+          initialPrompt={getInitialPromptForTab() || undefined}
+        />
       </div>
     </SidebarLayout>
   );

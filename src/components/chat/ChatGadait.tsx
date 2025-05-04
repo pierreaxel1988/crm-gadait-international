@@ -10,9 +10,15 @@ interface ChatGadaitProps {
   isOpen: boolean;
   onClose: () => void;
   leadData?: LeadDetailed;
+  initialPrompt?: string;
 }
 
-const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) => {
+const ChatGadait: React.FC<ChatGadaitProps> = ({ 
+  isOpen, 
+  onClose, 
+  leadData,
+  initialPrompt 
+}) => {
   const isMobile = useIsMobile();
   const {
     messages,
@@ -26,8 +32,9 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
     extractedData,
     messagesEndRef,
     handleSendMessage,
-    extractPropertyData
-  } = useChatGadait(leadData);
+    extractPropertyData,
+    suggestedPrompts
+  } = useChatGadait(leadData, initialPrompt);
 
   // Handle escape key to close modal
   useEffect(() => {
@@ -49,7 +56,8 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
     setInput,
     isLoading,
     handleSendMessage,
-    messagesEndRef
+    messagesEndRef,
+    suggestedPrompts
   };
 
   const propertyTabProps = {

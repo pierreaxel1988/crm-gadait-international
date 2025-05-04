@@ -10,11 +10,13 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 interface ChatGadaitFloatingButtonProps {
   leadData?: LeadDetailed;
   position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+  initialPrompt?: string;
 }
 
 const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
   leadData,
-  position = 'bottom-right'
+  position = 'bottom-right',
+  initialPrompt
 }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -72,7 +74,12 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
               </Button>
             </div>
             <div className="flex-1 overflow-hidden">
-              <ChatGadait isOpen={true} onClose={() => setIsChatOpen(false)} leadData={leadData} />
+              <ChatGadait 
+                isOpen={true} 
+                onClose={() => setIsChatOpen(false)} 
+                leadData={leadData}
+                initialPrompt={initialPrompt}
+              />
             </div>
           </div>
         </SheetContent>

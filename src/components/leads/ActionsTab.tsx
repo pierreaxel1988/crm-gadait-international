@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Calendar, RefreshCw } from 'lucide-react';
+import { Plus, Calendar, RefreshCw, Mail, MessageSquare } from 'lucide-react';
 import { ActionHistory } from '@/types/actionHistory';
 import { format, isPast, isValid } from 'date-fns';
 import { getLead } from '@/services/leadCore';
@@ -20,6 +20,8 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [lead, setLead] = useState<any>(null);
+  const [showGadaitPrompt, setShowGadaitPrompt] = useState(false);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -28,6 +30,25 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       syncActions().then(() => {
         fetchLeadActions();
       });
+    }
+  }, [leadId]);
+
+  useEffect(() => {
+    if (leadId) {
+      // Récupérer les données du lead pour les passer à ChatGadait
+      const fetchLeadDetails = async () => {
+        const { data } = await supabase
+          .from('leads')
+          .select('*')
+          .eq('id', leadId)
+          .single();
+        
+        if (data) {
+          setLead(data);
+        }
+      };
+      
+      fetchLeadDetails();
     }
   }, [leadId]);
 
@@ -197,6 +218,11 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     }
   };
 
+  // Handler pour ouvrir la fenêtre de Chat Gadait avec l'instruction de rédiger un message
+  const handleDraftMessageRequest = () => {
+    setShowGadaitPrompt(true);
+  };
+
   if (isLoading || isSyncing) {
     return (
       <div className="bg-white rounded-lg p-4 flex justify-center items-center h-40">
@@ -208,7 +234,15 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
   if (isMobile) {
     return (
       <>
-        <div className="flex justify-end mb-2">
+        <div className="flex justify-between mb-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleDraftMessageRequest}
+            className="text-xs flex items-center gap-1 bg-loro-hazel/20 hover:bg-loro-hazel/30 text-loro-hazel"
+          >
+            <MessageSquare className="h-3 w-3" /> Rédiger un message
+          </Button>
           <Button 
             variant="outline" 
             size="sm" 
@@ -224,7 +258,14 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           onMarkComplete={handleMarkComplete} 
           actionHistory={actionHistory} 
         />
-        {/* Note: The ChatGadaitFloatingButton is now handled in the LeadDetailMobile parent component */}
+        {/* Afficher le Chat Gadait avec prompt spécifique si demandé */}
+        {showGadaitPrompt && (
+          <ChatGadaitFloatingButton 
+            leadData={lead} 
+            position="bottom-right"
+            initialPrompt="rédige moi le prochain message"
+          />
+        )}
       </>
     );
   }
@@ -233,14 +274,23 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     <div className="bg-white rounded-lg p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Actions pour le lead</h2>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={syncActions}
-          className="text-sm flex items-center gap-1"
-        >
-          <RefreshCw className="h-3.5 w-3.5" /> Synchroniser les actions
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={handleDraftMessageRequest}
+            className="text-sm flex items-center gap-1 bg-loro-hazel/10 hover:bg-loro-hazel/20 text-loro-hazel"
+          >
+            <MessageSquare className="h-3.5 w-3.5" /> Rédiger un message avec Gadait
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={syncActions}
+            className="text-sm flex items-center gap-1"
+          >
+            <RefreshCw className="h-3.5 w-3.5" /> Synchroniser les actions
+          </Button>
+        </div>
       </div>
       
       {actionHistory && actionHistory.length > 0 ? (
@@ -299,6 +349,15 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         </div>
       ) : (
         <p className="text-gray-500">Aucune action disponible pour le moment.</p>
+      )}
+      
+      {/* Afficher le Chat Gadait avec prompt spécifique si demandé */}
+      {showGadaitPrompt && (
+        <ChatGadaitFloatingButton 
+          leadData={lead} 
+          position="bottom-right"
+          initialPrompt="rédige moi le prochain message"
+        />
       )}
     </div>
   );
