@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { MessageSquare, ArrowDown, Copy, Check } from 'lucide-react';
 import EnhancedInput from '../EnhancedInput';
@@ -23,13 +22,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
   isLoading,
   handleSendMessage,
   messagesEndRef,
-  suggestedPrompts = [
-    "Suggère des actions de suivi pour ce lead",
-    "Rédige un email de relance professionnel",
-    "Quelles propriétés recommandes-tu pour ce client?",
-    "Analyse le potentiel d'achat de ce lead",
-    "Comment puis-je améliorer ma communication avec ce client?"
-  ]
+  suggestedPrompts = []
 }) => {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -117,7 +110,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
                 <MessageSquare className="h-8 w-8 text-loro-hazel" />
               </div>
               <h3 className="text-xl font-medium text-loro-navy mb-6">Comment puis-je vous aider aujourd'hui?</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
                 {suggestedPrompts.map((prompt, index) => (
                   <button
                     key={index}
