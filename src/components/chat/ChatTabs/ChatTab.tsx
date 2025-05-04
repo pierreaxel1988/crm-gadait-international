@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { MessageSquare, ArrowDown, Copy, Check, Sparkles } from 'lucide-react';
 import EnhancedInput from '../EnhancedInput';
@@ -130,9 +131,41 @@ const ChatTab: React.FC<ChatTabProps> = ({
   }, [messages]);
   
   // Fonction pour formater le contenu du message avec un meilleur espacement
-  const formatMessageContent = (content: string) => {
+  const formatMessageContent = (content: string, role: string) => {
+    // Si c'est un message de l'assistant, essayer d'identifier et de mettre en évidence la question de suivi
+    if (role === 'assistant') {
+      // Chercher une question de suivi typique à la fin du message
+      const followUpPatterns = [
+        /Souhaitez-vous que je.*\?$/,
+        /Voulez-vous que je.*\?$/,
+        /Puis-je vous aider à.*\?$/,
+        /Avez-vous besoin.*\?$/,
+        /Préférez-vous que.*\?$/,
+        /Dois-je.*\?$/
+      ];
+      
+      // Vérifier chaque pattern
+      for (const pattern of followUpPatterns) {
+        const match = content.match(pattern);
+        if (match && match.index && match.index > content.length / 2) { // Si trouvé dans la deuxième moitié du texte
+          const followUp = match[0];
+          const beforeFollowUp = content.substring(0, match.index).trim();
+          
+          // Retourner du HTML avec le suivi mis en évidence
+          return `${beforeFollowUp}
+          
+<div class="follow-up-question mt-4 pt-3 border-t border-loro-sand/20">
+  <strong class="text-loro-hazel">${followUp}</strong>
+</div>`;
+        }
+      }
+    }
+    
+    // Continuer avec le formatage standard si aucun modèle de suivi n'est trouvé
+    let formattedContent = content;
+    
     // Remplace les étoiles doubles par du texte en gras
-    let formattedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    formattedContent = formattedContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     
     // Ajoute un espacement après les numéros de sections (comme "1.", "2.", etc.)
     formattedContent = formattedContent.replace(/(\d+\.)\s*/g, '$1 ');
@@ -245,7 +278,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
                 >
                   <div 
                     className="whitespace-pre-line pr-7 text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content) }}
+                    dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content, msg.role) }}
                   />
                   
                   {/* Bouton de copie */}
