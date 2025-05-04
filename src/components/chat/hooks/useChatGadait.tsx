@@ -17,14 +17,25 @@ export const useChatGadait = (leadData?: LeadDetailed) => {
     if (!lead) return [];
     
     const suggestions: string[] = [];
+    const name = lead.name || "ce client";
     
     // Basic suggestions that are almost always relevant
-    suggestions.push(`Suggère des actions de suivi pour ${lead.name}`);
-    suggestions.push(`Rédige un email de relance pour ${lead.name}`);
+    suggestions.push(`Suggère des actions de suivi pour ${name}`);
+    suggestions.push(`Rédige un email de relance pour ${name}`);
+    
+    // Starters based on lead status
+    if (lead.status === 'New') {
+      suggestions.push(`Rédige un premier mail pour ${name}`);
+      suggestions.push(`Comment qualifier davantage ${name}?`);
+      suggestions.push(`Suggère 3 questions pour qualifier ${name}`);
+    } else if (lead.status === 'Qualified') {
+      suggestions.push(`Rédige une proposition commerciale pour ${name}`);
+      suggestions.push(`Suggère des propriétés à montrer à ${name}`);
+    }
     
     // Location-based suggestions
     if (lead.desiredLocation) {
-      suggestions.push(`Quelles propriétés recommandes-tu à ${lead.location || 'ce client'} dans ${lead.desiredLocation}?`);
+      suggestions.push(`Quelles propriétés recommandes-tu à ${lead.name || 'ce client'} dans ${lead.desiredLocation}?`);
     }
     
     // Budget-based suggestions
@@ -32,16 +43,7 @@ export const useChatGadait = (leadData?: LeadDetailed) => {
       suggestions.push(`Analyse les options dans un budget de ${lead.budget} ${lead.currency || '€'}`);
     }
     
-    // Status-based suggestions
-    if (lead.status === 'Qualified') {
-      suggestions.push(`Prépare une stratégie de présentation de propriétés pour ce client qualifié`);
-    } else if (lead.status === 'New') {
-      suggestions.push(`Comment qualifier davantage ce nouveau lead?`);
-    } else if (lead.status === 'Proposal') {
-      suggestions.push(`Conseils pour finaliser la négociation en cours`);
-    }
-    
-    return suggestions.slice(0, 5); // Limit to 5 suggestions
+    return suggestions.slice(0, 6); // Limit to 6 suggestions
   };
 
   // If we have leadData, send context to Supabase edge function for chat

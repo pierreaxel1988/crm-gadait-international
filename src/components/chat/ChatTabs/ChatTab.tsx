@@ -32,6 +32,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -122,6 +123,13 @@ const ChatTab: React.FC<ChatTabProps> = ({
     scrollToBottom();
   }, [messages.length]);
 
+  // Contrôle l'affichage des suggestions
+  useEffect(() => {
+    // Ne masquer les suggestions que si un message utilisateur a été envoyé
+    const hasUserMessage = messages.some(msg => msg.role === 'user');
+    setShowSuggestions(!hasUserMessage);
+  }, [messages]);
+  
   // Fonction pour formater le contenu du message avec un meilleur espacement
   const formatMessageContent = (content: string) => {
     // Remplace les étoiles doubles par du texte en gras
@@ -158,6 +166,9 @@ const ChatTab: React.FC<ChatTabProps> = ({
     });
   };
 
+  // Check if we have a system welcome message only
+  const hasOnlySystemMessage = messages.length === 1 && messages[0].role === 'system';
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Conteneur principal des messages avec défilement */}
@@ -168,8 +179,8 @@ const ChatTab: React.FC<ChatTabProps> = ({
       >
         {/* Section des messages */}
         <div className="max-w-3xl mx-auto w-full pb-32 pt-4 space-y-4">
-          {/* Afficher les suggestions en début de conversation, style ChatGPT */}
-          {messages.length === 0 && (
+          {/* Afficher les suggestions même si un message système existe */}
+          {(showSuggestions || hasOnlySystemMessage) && (
             <div className="flex flex-col items-center justify-center py-8">
               <div className="rounded-full bg-loro-pearl/50 p-4 mb-6">
                 <MessageSquare className="h-8 w-8 text-loro-hazel" />
