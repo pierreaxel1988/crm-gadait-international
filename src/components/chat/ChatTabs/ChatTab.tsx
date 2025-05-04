@@ -178,28 +178,28 @@ const ChatTab: React.FC<ChatTabProps> = ({
         className="flex-1 overflow-y-auto no-scrollbar smooth-scroll px-4 md:px-8 lg:px-12"
       >
         {/* Section des messages */}
-        <div className="max-w-3xl mx-auto w-full pb-32 pt-4 space-y-4">
+        <div className="max-w-3xl mx-auto w-full pb-32 pt-4 space-y-6">
           {/* Afficher les suggestions même si un message système existe */}
           {(showSuggestions || hasOnlySystemMessage) && (
             <div className="flex flex-col items-center justify-center py-8">
-              <div className="rounded-full bg-loro-pearl/50 p-4 mb-6">
-                <MessageSquare className="h-8 w-8 text-loro-hazel" />
+              <div className="rounded-full bg-loro-pearl/50 p-3 mb-4">
+                <MessageSquare className="h-6 w-6 text-loro-hazel" />
               </div>
               {leadData ? (
-                <h3 className="text-xl font-medium text-loro-navy mb-6">
+                <h3 className="text-lg md:text-xl font-medium text-loro-navy mb-4">
                   Comment puis-je vous aider avec {leadData.name}?
                 </h3>
               ) : (
-                <h3 className="text-xl font-medium text-loro-navy mb-6">
+                <h3 className="text-lg md:text-xl font-medium text-loro-navy mb-4">
                   Comment puis-je vous aider aujourd'hui?
                 </h3>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 w-full max-w-2xl">
                 {contextualStarters.map((prompt, index) => (
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(prompt)}
-                    className="bg-white hover:bg-loro-pearl/30 text-left p-4 rounded-xl border border-loro-sand/30 shadow-sm hover:shadow transition-all text-loro-navy"
+                    className="bg-white hover:bg-loro-pearl/20 text-left p-3 rounded-lg border border-loro-sand/20 shadow-sm hover:shadow transition-all text-loro-navy text-sm"
                   >
                     {prompt}
                   </button>
@@ -216,7 +216,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
                 msg.role === 'user' ? 'justify-end' : 'justify-start'
               } w-full`}
             >
-              <div className={`max-w-[85%] flex flex-col ${
+              <div className={`max-w-[90%] md:max-w-[80%] flex flex-col ${
                 msg.role === 'user' ? 'items-end' : 'items-start'
               }`}>
                 {/* En-tête du message avec avatar et rôle */}
@@ -226,7 +226,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
                   <div className={`h-6 w-6 rounded-full flex items-center justify-center 
                     ${msg.role === 'user' ? 'bg-loro-hazel' : 'bg-loro-pearl'}`}>
                     {msg.role === 'user' ? (
-                      <span className="text-sm text-white font-medium">U</span>
+                      <span className="text-xs text-white font-medium">U</span>
                     ) : (
                       <MessageSquare className="h-3 w-3 text-loro-hazel" />
                     )}
@@ -241,11 +241,11 @@ const ChatTab: React.FC<ChatTabProps> = ({
                   className={`relative group rounded-lg px-4 py-3 ${
                     msg.role === 'user' 
                       ? 'bg-loro-hazel text-white rounded-tr-sm' 
-                      : 'bg-loro-pearl/40 text-loro-navy rounded-tl-sm'
+                      : 'bg-loro-pearl/30 text-loro-navy rounded-tl-sm'
                   }`}
                 >
                   <div 
-                    className="whitespace-pre-line pr-7"
+                    className="whitespace-pre-line pr-7 text-sm leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: formatMessageContent(msg.content) }}
                   />
                   
@@ -260,15 +260,15 @@ const ChatTab: React.FC<ChatTabProps> = ({
                     title="Copier le message"
                   >
                     {copiedMessageId === msg.id ? (
-                      <Check className="h-4 w-4" />
+                      <Check className="h-3.5 w-3.5" />
                     ) : (
-                      <Copy className="h-4 w-4" />
+                      <Copy className="h-3.5 w-3.5" />
                     )}
                   </button>
                 </div>
                 
                 {/* Horodatage */}
-                <div className={`text-xs text-gray-500 mt-1 ${
+                <div className={`text-[10px] text-gray-500 mt-1 ${
                   msg.role === 'user' ? 'text-right' : 'text-left'
                 }`}>
                   {msg.timestamp.toLocaleTimeString([], {
@@ -286,11 +286,11 @@ const ChatTab: React.FC<ChatTabProps> = ({
       {/* Bouton de défilement vers le bas */}
       {showScrollButton && (
         <Button
-          className="fixed bottom-24 right-8 h-10 w-10 rounded-full bg-loro-hazel text-white shadow-md hover:bg-loro-hazel/90 z-10 transition-all duration-300"
+          className="fixed bottom-24 right-8 h-9 w-9 rounded-full bg-loro-hazel text-white shadow-md hover:bg-loro-hazel/90 z-10 transition-all duration-300"
           onClick={scrollToBottom}
           size="icon"
         >
-          <ArrowDown className="h-5 w-5" />
+          <ArrowDown className="h-4 w-4" />
         </Button>
       )}
       
