@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useChatMessages } from './useChatMessages';
 import { usePropertyExtraction } from './usePropertyExtraction';
 import { LeadDetailed } from '@/types/lead';
+import { Message } from '../types/chatTypes';
 
 export const useChatGadait = (leadData?: LeadDetailed) => {
   const [activeTab, setActiveTab] = useState('chat');
@@ -14,10 +15,11 @@ export const useChatGadait = (leadData?: LeadDetailed) => {
   useEffect(() => {
     if (leadData && activeTab === 'chat') {
       // Add a welcome message about the lead context
-      const welcomeMessage = {
+      const welcomeMessage: Message = {
         id: `system-welcome-${Date.now()}`,
         content: `Je suis maintenant connecté au contexte du lead ${leadData.name}. Je peux vous aider avec des suggestions spécifiques pour ce lead.`,
-        role: 'system'
+        role: 'system',
+        timestamp: new Date()
       };
       
       chatProps.setMessages(prev => {

@@ -4,13 +4,7 @@ import { MessageSquare, ArrowDown } from 'lucide-react';
 import EnhancedInput from '../EnhancedInput';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
+import { Message } from '../types/chatTypes';
 
 interface ChatTabProps {
   messages: Message[];

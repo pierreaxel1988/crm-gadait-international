@@ -2,12 +2,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { LeadDetailed } from '@/types/lead';
-
-export type Message = {
-  id: string;
-  content: string;
-  role: 'user' | 'assistant' | 'system';
-};
+import { Message } from '../types/chatTypes';
 
 export const useChatMessages = (leadData?: LeadDetailed) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -18,11 +13,14 @@ export const useChatMessages = (leadData?: LeadDetailed) => {
   const handleSendMessage = useCallback(async () => {
     if (input.trim() === '') return;
     
+    const now = new Date();
+    
     // Create user message
     const userMessage: Message = {
       id: `user-${Date.now()}`,
       content: input,
-      role: 'user'
+      role: 'user',
+      timestamp: now
     };
     
     // Add user message to chat
@@ -31,7 +29,11 @@ export const useChatMessages = (leadData?: LeadDetailed) => {
     setIsLoading(true);
 
     try {
-      let payload = { 
+      let payload: { 
+        message: string; 
+        type: string;
+        leadContext?: any;
+      } = { 
         message: input,
         type: 'chat'
       };
@@ -71,7 +73,8 @@ export const useChatMessages = (leadData?: LeadDetailed) => {
         const assistantMessage: Message = {
           id: `assistant-${Date.now()}`,
           content: responseData.response,
-          role: 'assistant'
+          role: 'assistant',
+          timestamp: new Date()
         };
         setMessages((prev) => [...prev, assistantMessage]);
       }
@@ -82,7 +85,8 @@ export const useChatMessages = (leadData?: LeadDetailed) => {
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
         content: "Je suis désolé, une erreur s'est produite. Veuillez réessayer.",
-        role: 'system'
+        role: 'system',
+        timestamp: new Date()
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
