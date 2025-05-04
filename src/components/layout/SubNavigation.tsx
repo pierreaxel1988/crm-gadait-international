@@ -34,8 +34,8 @@ const SubNavigation = () => {
 
   // Mobile navigation with horizontal scrolling - icons only
   if (isMobile) {
-    return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-loro-50 shadow-sm w-full">
-        <div className="overflow-x-auto py-2">
+    return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
+        <div className="overflow-x-auto py-2 bg-loro-50">
           <div className="flex justify-between px-2 w-full">
             {navigationItems.map(item => <Link key={item.name} to={item.path} className={cn("flex items-center justify-center whitespace-nowrap rounded-md p-2 flex-1 mx-1 transition-transform hover:scale-110 duration-200", location.pathname === item.path ? "text-loro-terracotta bg-loro-white" : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70")}>
                 {item.icon && <item.icon className="h-5 w-5" />}
@@ -46,8 +46,8 @@ const SubNavigation = () => {
   }
 
   // Desktop and tablet navigation with text and better responsive behavior
-  return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-loro-50 shadow-sm w-full">
-      <div className="py-2">
+  return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
+      <div className="bg-loro-50 py-2">
         <div className="max-w-screen-xl mx-auto px-4">
           <NavigationMenu className="mx-auto flex justify-center w-full">
             <NavigationMenuList className={cn(
