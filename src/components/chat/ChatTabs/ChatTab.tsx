@@ -57,7 +57,10 @@ const ChatTab: React.FC<ChatTabProps> = ({
 
     // Starters based on lead status
     if (leadData.status === 'New') {
+      starters.push(`Rédige un premier mail pour ${name}`);
       starters.push(`Comment qualifier davantage ${name}?`);
+      starters.push(`Suggère 3 questions pour qualifier ${name}`);
+      starters.push(`Prépare un appel téléphonique avec ${name}`);
       starters.push(`Rédige un email de bienvenue pour ${name}`);
     } else if (leadData.status === 'Qualified') {
       starters.push(`Rédige une proposition commerciale pour ${name}`);
