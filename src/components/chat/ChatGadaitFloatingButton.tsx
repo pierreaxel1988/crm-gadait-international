@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import ChatGadait from '@/components/chat/ChatGadait';
 import { LeadDetailed } from '@/types/lead';
 import { cn } from '@/lib/utils';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 interface ChatGadaitFloatingButtonProps {
   leadData?: LeadDetailed;
@@ -51,11 +52,11 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
         </div>
       )}
       
-      {/* Chat Modal */}
-      {isChatOpen && (
-        <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[80vh] overflow-hidden flex flex-col relative">
-            <div className="border-b border-loro-sand/30 p-4 flex justify-between items-center">
+      {/* Full screen chat using Sheet component */}
+      <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <SheetContent side="bottom" className="p-0 sm:p-0 h-[100dvh] w-full max-w-none">
+          <div className="h-full flex flex-col">
+            <div className="border-b border-loro-sand/30 p-4 flex justify-between items-center bg-white">
               <h2 className="text-lg font-medium flex items-center">
                 <MessageSquare className="h-5 w-5 mr-2 text-loro-hazel" />
                 {leadData ? `Chat Gadait - ${leadData.name}` : 'Chat Gadait'}
@@ -74,8 +75,8 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
               <ChatGadait isOpen={true} onClose={() => setIsChatOpen(false)} leadData={leadData} />
             </div>
           </div>
-        </div>
-      )}
+        </SheetContent>
+      </Sheet>
     </>
   );
 };
