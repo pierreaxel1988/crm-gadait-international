@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Calendar, RefreshCw } from 'lucide-react';
@@ -15,6 +14,7 @@ import ContextualSuggestions from './actions/ContextualSuggestions';
 import ChatGadaitFloatingButton from '@/components/chat/ChatGadaitFloatingButton';
 import { LeadDetailed, LeadStatus } from '@/types/lead';
 import { mapToLeadDetailed } from '@/services/utils/leadMappers';
+import AIActionCard from './actions/AIActionCard';
 
 interface ActionsTabProps {
   leadId: string;
@@ -206,6 +206,35 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     }
   };
 
+  // Nouvelle fonction pour gérer l'ouverture du Chat Gadait avec un prompt personnalisé
+  const handleGenerateWelcomeMessage = (prompt: string) => {
+    if (lead) {
+      // Ouvre le ChatGadait avec le prompt prérempli
+      const chatWindow = document.querySelector('[data-chatgadait-window]');
+      
+      // Si la fenêtre de chat n'est pas ouverte, nous devons simuler son ouverture avant de la remplir
+      if (!chatWindow || chatWindow.classList.contains('hidden')) {
+        // Simuler un clic sur le bouton de chat pour ouvrir la fenêtre
+        const chatButton = document.querySelector('[data-chatgadait-button]');
+        if (chatButton instanceof HTMLElement) {
+          chatButton.click();
+          
+          // Attendre un moment pour que la fenêtre de chat s'ouvre
+          setTimeout(() => {
+            populateChatInput(prompt);
+          }, 300);
+        }
+      } else {
+        populateChatInput(prompt);
+      }
+    } else {
+      toast({
+        title: "Information manquante",
+        description: "Les détails du lead ne sont pas encore chargés."
+      });
+    }
+  };
+
   const handleSuggestionClick = (suggestion: string) => {
     if (lead) {
       // Open the ChatGadait with the suggestion pre-filled
@@ -269,6 +298,14 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           </Button>
         </div>
         
+        {/* Afficher la carte d'action IA pour les leads avec statut "New" */}
+        {lead && lead.status === 'New' && (
+          <AIActionCard 
+            lead={lead} 
+            onGenerateMessage={handleGenerateWelcomeMessage} 
+          />
+        )}
+        
         {lead && (
           <ContextualSuggestions 
             status={lead.status as LeadStatus} 
@@ -299,6 +336,14 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           <RefreshCw className="h-3.5 w-3.5" /> Synchroniser les actions
         </Button>
       </div>
+      
+      {/* Afficher la carte d'action IA pour les leads avec statut "New" */}
+      {lead && lead.status === 'New' && (
+        <AIActionCard 
+          lead={lead} 
+          onGenerateMessage={handleGenerateWelcomeMessage} 
+        />
+      )}
       
       {lead && (
         <ContextualSuggestions 
