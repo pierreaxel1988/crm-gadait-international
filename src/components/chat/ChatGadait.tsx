@@ -74,6 +74,7 @@ const ChatGadait: React.FC<ChatGadaitProps> = ({ isOpen, onClose, leadData }) =>
           setActiveTab={setActiveTab}
           chatTabProps={chatTabProps}
           propertyTabProps={propertyTabProps}
+          leadData={leadData}
         />
       </div>
     </div>

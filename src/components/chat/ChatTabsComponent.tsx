@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ChatTab from './ChatTabs/ChatTab';
 import PropertyTab from './ChatTabs/PropertyTab';
 import { MessageSquare, Building2 } from 'lucide-react';
+import { LeadDetailed } from '@/types/lead';
 
 interface ChatTabsComponentProps {
   activeTab: string;
@@ -24,13 +25,15 @@ interface ChatTabsComponentProps {
     isLoading: boolean;
     extractedData: any;
   };
+  leadData?: LeadDetailed;
 }
 
 const ChatTabsComponent: React.FC<ChatTabsComponentProps> = ({
   activeTab,
   setActiveTab,
   chatTabProps,
-  propertyTabProps
+  propertyTabProps,
+  leadData
 }) => {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col relative">
@@ -62,6 +65,7 @@ const ChatTabsComponent: React.FC<ChatTabsComponentProps> = ({
           handleSendMessage={chatTabProps.handleSendMessage}
           messagesEndRef={chatTabProps.messagesEndRef}
           suggestedPrompts={chatTabProps.suggestedPrompts}
+          leadData={leadData}
         />
       </TabsContent>
 

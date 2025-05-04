@@ -5,6 +5,7 @@ import EnhancedInput from '../EnhancedInput';
 import { Button } from '@/components/ui/button';
 import { Message } from '../types/chatTypes';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { LeadDetailed } from '@/types/lead';
 
 interface ChatTabProps {
   messages: Message[];
@@ -14,6 +15,7 @@ interface ChatTabProps {
   handleSendMessage: () => void;
   messagesEndRef: React.RefObject<HTMLDivElement>;
   suggestedPrompts?: string[];
+  leadData?: LeadDetailed;
 }
 
 const ChatTab: React.FC<ChatTabProps> = ({
@@ -23,13 +25,8 @@ const ChatTab: React.FC<ChatTabProps> = ({
   isLoading,
   handleSendMessage,
   messagesEndRef,
-  suggestedPrompts = [
-    "Suggère des actions de suivi pour ce lead",
-    "Rédige un email de relance professionnel",
-    "Quelles propriétés recommandes-tu pour ce client?",
-    "Analyse le potentiel d'achat de ce lead",
-    "Comment puis-je améliorer ma communication avec ce client?"
-  ]
+  suggestedPrompts,
+  leadData
 }) => {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -42,6 +39,64 @@ const ChatTab: React.FC<ChatTabProps> = ({
       handleSendMessage();
     }
   };
+  
+  // Generate contextual starters based on lead data
+  const getContextualStarters = () => {
+    if (!leadData) {
+      return suggestedPrompts || [
+        "Suggère des actions de suivi pour ce lead",
+        "Rédige un email de relance professionnel",
+        "Quelles propriétés recommandes-tu pour ce client?",
+        "Analyse le potentiel d'achat de ce lead",
+        "Comment puis-je améliorer ma communication avec ce client?"
+      ];
+    }
+
+    const starters: string[] = [];
+    const name = leadData.name || "ce client";
+
+    // Starters based on lead status
+    if (leadData.status === 'New') {
+      starters.push(`Comment qualifier davantage ${name}?`);
+      starters.push(`Rédige un email de bienvenue pour ${name}`);
+    } else if (leadData.status === 'Qualified') {
+      starters.push(`Rédige une proposition commerciale pour ${name}`);
+      starters.push(`Suggère des propriétés à montrer à ${name}`);
+    } else if (leadData.status === 'Proposal') {
+      starters.push(`Comment convaincre ${name} de finaliser l'achat?`);
+      starters.push(`Rédige un email de relance pour ${name} concernant la proposition`);
+    } else if (leadData.status === 'Lost') {
+      starters.push(`Comment réengager ${name} après avoir perdu l'opportunité?`);
+    }
+
+    // Starters based on property preferences
+    if (leadData.desiredLocation) {
+      starters.push(`Quelles sont les tendances du marché à ${leadData.desiredLocation}?`);
+    }
+
+    if (leadData.budget) {
+      starters.push(`Analyse les options dans un budget de ${leadData.budget} ${leadData.currency || '€'}`);
+    }
+    
+    // Starters based on property type
+    if (leadData.propertyType || (leadData.propertyTypes && leadData.propertyTypes.length > 0)) {
+      const propertyType = leadData.propertyType || (leadData.propertyTypes && leadData.propertyTypes[0]);
+      starters.push(`Quels sont les avantages d'investir dans un(e) ${propertyType}?`);
+    }
+
+    // Additional contextual starters
+    if (leadData.source) {
+      starters.push(`Comment optimiser le suivi pour les leads venant de ${leadData.source}?`);
+    }
+
+    starters.push(`Résume les informations clés sur ${name}`);
+    starters.push(`Suggère les prochaines étapes pour ${name}`);
+    starters.push(`Rédige un email personnalisé pour ${name}`);
+
+    return starters.slice(0, 6); // Limit to 6 suggestions
+  };
+
+  const contextualStarters = getContextualStarters();
   
   // Check if we should show the scroll button
   const checkScrollPosition = () => {
@@ -116,9 +171,17 @@ const ChatTab: React.FC<ChatTabProps> = ({
               <div className="rounded-full bg-loro-pearl/50 p-4 mb-6">
                 <MessageSquare className="h-8 w-8 text-loro-hazel" />
               </div>
-              <h3 className="text-xl font-medium text-loro-navy mb-6">Comment puis-je vous aider aujourd'hui?</h3>
+              {leadData ? (
+                <h3 className="text-xl font-medium text-loro-navy mb-6">
+                  Comment puis-je vous aider avec {leadData.name}?
+                </h3>
+              ) : (
+                <h3 className="text-xl font-medium text-loro-navy mb-6">
+                  Comment puis-je vous aider aujourd'hui?
+                </h3>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
-                {suggestedPrompts.map((prompt, index) => (
+                {contextualStarters.map((prompt, index) => (
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(prompt)}

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useChatMessages } from './useChatMessages';
 import { usePropertyExtraction } from './usePropertyExtraction';
 import { LeadDetailed } from '@/types/lead';
@@ -10,6 +10,7 @@ export const useChatGadait = (leadData?: LeadDetailed) => {
   
   const chatProps = useChatMessages(leadData);
   const propertyProps = usePropertyExtraction();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Generate contextual suggestions based on lead data
   const getContextualSuggestions = (lead?: LeadDetailed) => {
@@ -76,7 +77,7 @@ export const useChatGadait = (leadData?: LeadDetailed) => {
     input: chatProps.input,
     setInput: chatProps.setInput,
     isLoading: chatProps.isLoading || propertyProps.isLoading,
-    messagesEndRef: chatProps.messagesEndRef,
+    messagesEndRef,
     handleSendMessage: chatProps.handleSendMessage,
     suggestedPrompts: chatProps.suggestedPrompts || getContextualSuggestions(leadData),
     setSuggestedPrompts: chatProps.setSuggestedPrompts,
