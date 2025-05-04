@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { LeadDetailed } from '@/types/lead';
-import { ExternalLink } from 'lucide-react';
 
 interface LeadInfoTabProps {
   lead: LeadDetailed;
@@ -28,21 +27,6 @@ const LeadInfoTab: React.FC<LeadInfoTabProps> = ({ lead }) => {
           <p className="text-sm text-gray-500">Origine</p>
           <p className="font-medium">{lead.source || 'Non spécifiée'}</p>
         </div>
-        {lead.url && (
-          <div>
-            <p className="text-sm text-gray-500">Lien de l'annonce</p>
-            <p className="font-medium">
-              <a 
-                href={lead.url} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex items-center text-blue-600 hover:underline"
-              >
-                {lead.url.substring(0, 50)}{lead.url.length > 50 ? '...' : ''} <ExternalLink className="ml-1 h-3.5 w-3.5" />
-              </a>
-            </p>
-          </div>
-        )}
         <div>
           <p className="text-sm text-gray-500">Date de création</p>
           <p className="font-medium">

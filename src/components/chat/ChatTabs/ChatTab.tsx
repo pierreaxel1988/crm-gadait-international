@@ -58,12 +58,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
 
     // Starters based on lead status
     if (leadData.status === 'New') {
-      // Si l'URL est disponible, inclure une suggestion avec le lien
-      if (leadData.url) {
-        starters.push(`Rédige un premier mail pour ${name} concernant cette annonce: ${leadData.url}`);
-      } else {
-        starters.push(`Rédige un premier mail pour ${name}`);
-      }
+      starters.push(`Rédige un premier mail pour ${name}`);
       starters.push(`Comment qualifier davantage ${name}?`);
       starters.push(`Suggère 3 questions pour qualifier ${name}`);
       starters.push(`Prépare un appel téléphonique avec ${name}`);
