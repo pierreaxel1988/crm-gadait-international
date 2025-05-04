@@ -47,6 +47,7 @@ const Auth = () => {
     };
     checkSession();
   }, [navigate, location, user]);
+  
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -94,6 +95,7 @@ const Auth = () => {
       setLoading(false);
     }
   };
+  
   const handleGoogleAuth = async () => {
     try {
       console.log('Démarrage authentification Google');
@@ -107,6 +109,7 @@ const Auth = () => {
       });
     }
   };
+  
   if (checkingSession) {
     return <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80">
         <div className="flex flex-col items-center">
@@ -190,53 +193,3 @@ const Auth = () => {
 };
 
 export default Auth;
-
-<style jsx>{`
-  .diamond-text {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-    transition: all 0.3s ease;
-  }
-  
-  .diamond-effect {
-    content: "";
-    background: radial-gradient(
-      circle,
-      rgba(255, 255, 255, 0.8) 0%,
-      rgba(255, 255, 255, 0) 70%
-    );
-    filter: blur(8px);
-    opacity: 0.7;
-    z-index: -1;
-    transform: scale(1.1);
-    pointer-events: none;
-  }
-  
-  @keyframes shimmer {
-    0% {
-      background-position: -100% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
-  }
-  
-  .diamond-text::before {
-    content: "";
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0) 20%,
-      rgba(255, 255, 255, 0.4) 50%,
-      rgba(255, 255, 255, 0) 80%
-    );
-    background-size: 200% 200%;
-    animation: shimmer 2s infinite;
-    border-radius: 50%;
-    z-index: -1;
-    opacity: 0.6;
-  }
-`}</style>
