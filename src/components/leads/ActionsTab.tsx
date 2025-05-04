@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Calendar, RefreshCw } from 'lucide-react';
@@ -13,6 +14,7 @@ import { syncExistingActionsWithLeads } from '@/services/leadActions';
 import ContextualSuggestions from './actions/ContextualSuggestions';
 import ChatGadaitFloatingButton from '@/components/chat/ChatGadaitFloatingButton';
 import { LeadDetailed, LeadStatus } from '@/types/lead';
+import { mapToLeadDetailed } from '@/services/utils/leadMappers';
 
 interface ActionsTabProps {
   leadId: string;
@@ -66,11 +68,13 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         throw error;
       }
       
-      setLead(fetchedLead);
+      // Use the mapToLeadDetailed utility to convert the database format to our LeadDetailed type
+      const mappedLead = mapToLeadDetailed(fetchedLead);
+      setLead(mappedLead);
       
-      if (fetchedLead && Array.isArray(fetchedLead.action_history)) {
+      if (mappedLead && Array.isArray(mappedLead.actionHistory)) {
         // Ensure each item in action_history conforms to ActionHistory type
-        const parsedActions: ActionHistory[] = fetchedLead.action_history.map((item: any) => {
+        const parsedActions: ActionHistory[] = mappedLead.actionHistory.map((item: any) => {
           // Validate and safeguard for any missing or invalid properties
           const validatedAction: ActionHistory = {
             id: item.id || crypto.randomUUID(),
