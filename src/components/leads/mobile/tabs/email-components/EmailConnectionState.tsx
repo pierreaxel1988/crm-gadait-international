@@ -30,138 +30,130 @@ const EmailConnectionState: React.FC<EmailConnectionStateProps> = ({
   const [showTechnicalDetails, setShowTechnicalDetails] = React.useState<boolean>(false);
   
   useEffect(() => {
-    // Clean up any lingering OAuth state indicators that might cause issues
+    // Vérifiez si un indicateur d'authentification existe dans l'URL ou localStorage
     const params = new URLSearchParams(window.location.search);
     const haveOAuthSuccess = params.get('oauth_success') === 'true';
     const haveCloudflareError = params.get('oauth_cloudflare_error') === 'true';
     const haveConnectionError = params.get('oauth_connection_error') === 'true';
-    
-    // Check if we're coming from callback page
-    const referrer = document.referrer;
-    const haveState = params.has('state');
     const havePending = localStorage.getItem('oauth_pending') === 'true';
-    const haveRedirectTarget = localStorage.getItem('oauthRedirectTarget');
+    const haveState = params.has('state');
     
+    console.log('Vérification des indicateurs OAuth:', {
+      haveOAuthSuccess,
+      haveCloudflareError, 
+      haveConnectionError,
+      havePending,
+      haveState,
+      url: window.location.href
+    });
+    
+    // Vérifier si nous venons d'une redirection OAuth
+    const referrer = document.referrer;
     if (
       (referrer && (
         referrer.includes('oauth/callback') || 
         referrer.includes('accounts.google.com')
       )) ||
-      havePending ||
-      haveRedirectTarget ||
       haveState ||
-      haveOAuthSuccess
+      haveOAuthSuccess ||
+      havePending
     ) {
-      console.log("OAuth redirection detected, attempting automatic reconnection");
+      console.log("Redirection OAuth détectée");
       setRedirectedFromCallback(true);
       
-      // If we were redirected from callback page, automatically retry connection
+      // Si nous venons d'une redirection, essayer automatiquement la connexion
       if (onRetryConnection) {
-        const timer = setTimeout(() => {
-          console.log("Auto-retrying connection after redirect detection");
+        console.log("Tentative automatique de reconnexion après redirection OAuth");
+        setTimeout(() => {
           onRetryConnection();
-          // If we had success indicator, force reload after retry
-          if (haveOAuthSuccess) {
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
-          }
         }, 500);
-        return () => clearTimeout(timer);
       }
     }
     
-    // After 5 seconds, show redirect help if needed
-    const redirectHelpTimer = setTimeout(() => {
-      setShowRedirectHelp(true);
-    }, 5000);
-    
-    // Clean up error indicator after reading it
-    if (hadConnectionError || haveConnectionError) {
+    // Si nous avons eu une erreur de connexion ou Cloudflare
+    if (hadConnectionError || haveConnectionError || haveCloudflareError) {
       localStorage.removeItem('oauth_connection_error');
+      localStorage.removeItem('oauth_cloudflare_error');
       
-      // Force automatic reload if there was a previous error
       if (forceReloadCount === 0) {
-        const reloadTimer = setTimeout(() => {
+        console.log("Erreur de connexion détectée, tentative automatique de reconnexion");
+        setTimeout(() => {
           setForceReloadCount(1);
           if (onRetryConnection) {
             onRetryConnection();
           }
         }, 1000);
-        return () => clearTimeout(reloadTimer);
       }
     }
     
-    // Clean up cloudflare error indicator
-    if (haveCloudflareError) {
-      localStorage.removeItem('oauth_cloudflare_error');
-    }
+    // Afficher l'aide à la redirection après un délai
+    const timer = setTimeout(() => {
+      if (redirectedFromCallback || havePending) {
+        setShowRedirectHelp(true);
+      }
+    }, 5000);
     
-    // Clean up other OAuth indicators that might exist
-    if (!havePending) {
-      localStorage.removeItem('oauth_pending');
-    }
-    
-    return () => clearTimeout(redirectHelpTimer);
-  }, [hadConnectionError, onRetryConnection, forceReloadCount]);
+    return () => clearTimeout(timer);
+  }, [hadConnectionError, onRetryConnection, forceReloadCount, redirectedFromCallback]);
   
   const handleConnectClick = () => {
-    console.log('Initiating Gmail connection...', {userId: user?.id});
+    console.log('Initiation de la connexion Gmail...', {userId: user?.id});
     if (user) {
-      // Reset any previous error state
+      // Réinitialiser les indicateurs d'erreur précédents
       localStorage.removeItem('oauth_connection_error');
       localStorage.removeItem('oauth_pending');
       localStorage.removeItem('oauth_success');
       localStorage.removeItem('oauth_cloudflare_error');
       
-      // Add marker to detect pending authentication
+      // Ajouter un marqueur pour détecter l'authentification en attente
       localStorage.setItem('oauth_pending', 'true');
       
-      // Add timeout to detect redirection problems
+      // Ajouter un timeout pour détecter les problèmes de redirection
       setTimeout(() => {
         if (localStorage.getItem('oauth_pending') === 'true') {
-          // If process is still pending after 30 seconds, show help
+          console.log("OAuth toujours en attente après 30 secondes, afficher l'aide");
           setShowRedirectHelp(true);
         }
       }, 30000);
       
       connectGmail();
     } else {
-      console.error('Error: User not logged in');
-      alert('You must be logged in to use this feature.');
+      console.error('Erreur: Utilisateur non connecté');
+      alert('Vous devez être connecté pour utiliser cette fonctionnalité.');
     }
   };
 
   const handleRetryConnection = () => {
     if (onRetryConnection) {
-      // Reset any previous error state
+      // Réinitialiser les indicateurs d'erreur précédents
       localStorage.removeItem('oauth_connection_error');
       localStorage.removeItem('oauth_pending');
       localStorage.removeItem('oauth_success');
       localStorage.removeItem('oauth_cloudflare_error');
       
-      // If we had a redirection problem, try force reload
+      // Si nous avons eu un problème de redirection, forcer le rechargement
       if (redirectedFromCallback || showRedirectHelp) {
+        console.log("Tentative de résolution par rechargement complet");
         try {
-          // Force a complete page reload
           window.location.reload();
         } catch (e) {
-          console.error("Error during reload:", e);
+          console.error("Erreur lors du rechargement:", e);
           onRetryConnection();
         }
       } else {
+        console.log("Tentative de reconnexion simple");
         onRetryConnection();
       }
     }
   };
 
   const handleForceReload = () => {
-    // Clear all indicators and force reload
+    console.log("Forçage du rechargement complet de la page");
+    // Nettoyer tous les indicateurs et forcer le rechargement
     localStorage.removeItem('oauth_connection_error');
     localStorage.removeItem('oauth_pending');
     localStorage.removeItem('oauth_success');
     localStorage.removeItem('oauth_cloudflare_error');
-    // Force a complete page reload
     window.location.reload();
   };
 
