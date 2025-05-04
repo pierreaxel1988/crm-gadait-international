@@ -17,8 +17,8 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
   const [isChatOpen, setIsChatOpen] = useState(false);
   
   const positionClasses = {
-    'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4',
+    'bottom-right': 'bottom-20 right-4',
+    'bottom-left': 'bottom-20 left-4',
     'top-right': 'top-20 right-4',
     'top-left': 'top-20 left-4'
   };
@@ -27,11 +27,11 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
     <>
       {/* Floating Button */}
       {!isChatOpen && (
-        <div className={`fixed z-40 ${positionClasses[position]}`}>
+        <div className={`fixed z-50 ${positionClasses[position]}`}>
           <Button 
             onClick={() => setIsChatOpen(true)} 
             size="lg"
-            className="rounded-full h-14 w-14 shadow-lg bg-loro-hazel hover:bg-loro-terracotta text-white"
+            className="rounded-full h-14 w-14 shadow-lg bg-loro-hazel hover:bg-loro-terracotta text-white transition-all duration-200 hover:scale-110"
           >
             <MessageSquare size={24} />
           </Button>

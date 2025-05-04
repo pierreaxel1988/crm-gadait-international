@@ -232,6 +232,14 @@ const LeadDetailMobile = () => {
         </Tabs>
       </ScrollArea>
       
+      {/* ChatGadait floating button - positioned above the action bar */}
+      {lead && (
+        <ChatGadaitFloatingButton 
+          leadData={lead} 
+          position="bottom-right" 
+        />
+      )}
+      
       <LeadDetailActionBar 
         autoSaveEnabled={autoSaveEnabled} 
         onAddAction={handleAddAction} 
@@ -261,16 +269,6 @@ const LeadDetailMobile = () => {
         setActionNotes={setActionNotes} 
         onConfirm={handleActionConfirm} 
         getActionTypeIcon={getActionTypeIcon} 
-      />
-
-      {lead && <div className="fixed bottom-20 right-4 z-50">
-          
-      </div>}
-
-      {/* Add the ChatGadait floating button */}
-      <ChatGadaitFloatingButton 
-        leadData={lead} 
-        position="bottom-right" 
       />
     </div>;
 };
