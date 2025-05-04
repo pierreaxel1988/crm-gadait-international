@@ -13,8 +13,8 @@ export const useChatGadait = (leadData?: LeadDetailed) => {
 
   // If we have leadData, send context to Supabase edge function for chat
   useEffect(() => {
-    if (leadData && activeTab === 'chat') {
-      // Add a welcome message about the lead context
+    if (leadData && activeTab === 'chat' && chatProps.messages.length === 0) {
+      // Add a welcome message about the lead context only if there are no messages yet
       const welcomeMessage: Message = {
         id: `system-welcome-${Date.now()}`,
         content: `Je suis maintenant connecté au contexte du lead ${leadData.name}. Je peux vous aider avec des suggestions spécifiques pour ce lead.`,
@@ -30,7 +30,7 @@ export const useChatGadait = (leadData?: LeadDetailed) => {
         return prev;
       });
     }
-  }, [leadData, activeTab]);
+  }, [leadData, activeTab, chatProps.messages.length]);
   
   return {
     // Chat tab props
