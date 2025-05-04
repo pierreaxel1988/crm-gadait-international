@@ -65,7 +65,7 @@ const ChatTab: React.FC<ChatTabProps> = ({
     } else if (leadData.status === 'Proposal') {
       starters.push(`Comment convaincre ${name} de finaliser l'achat?`);
       starters.push(`Rédige un email de relance pour ${name} concernant la proposition`);
-    } else if (leadData.status === 'Lost') {
+    } else if (leadData.status === 'Perdu') {
       starters.push(`Comment réengager ${name} après avoir perdu l'opportunité?`);
     }
 
