@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import ActionDialog from './ActionDialog';
 import { Calendar, Clock, Check, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ActionsPanelMobileProps {
   leadId: string;
@@ -28,6 +29,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const measureHeader = () => {
@@ -327,7 +329,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
   return (
     <div 
-      className="space-y-3 pt-4"
+      className={cn(
+        "space-y-3",
+        isMobile ? "pt-4" : "pt-4 px-[100px]"
+      )}
       style={{ marginTop: dynamicTopMargin }}
     >
       <div className="flex justify-between items-center mb-4">
