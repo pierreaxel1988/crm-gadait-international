@@ -61,7 +61,7 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
         )} 
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 p-4 border-b">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 p-4 border-b rounded-t-lg">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">
               {!selectedAction ? "Nouvelle action" : `Planifier ${selectedAction}`}
@@ -110,7 +110,7 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent 
-                    className="w-auto p-0" 
+                    className="w-auto p-0 rounded-md" 
                     align="start"
                   >
                     <Calendar
@@ -147,20 +147,20 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
           )}
         </div>
         
-        <div className="p-4 border-t bg-gray-50 dark:bg-gray-800 sticky bottom-0">
+        <div className="p-4 border-t bg-gray-50 dark:bg-gray-800 sticky bottom-0 rounded-b-lg">
           {selectedAction ? (
             <div className="flex gap-3">
               <CustomButton 
                 variant="outline" 
                 onClick={() => setSelectedAction(null)}
-                className="flex-1 flex justify-center"
+                className="flex-1 flex justify-center rounded-md"
               >
                 Retour
               </CustomButton>
               <CustomButton 
                 variant="chocolate" 
                 onClick={handleConfirmClick}
-                className="flex-1 flex justify-center"
+                className="flex-1 flex justify-center rounded-md"
                 type="button"
                 aria-label="Confirmer l'action"
               >
@@ -171,7 +171,7 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
             <CustomButton 
               variant="outline" 
               onClick={onClose}
-              className="w-full"
+              className="w-full rounded-md"
             >
               Annuler
             </CustomButton>
@@ -199,7 +199,7 @@ const ActionTypeSelector: React.FC<{ onSelect: (action: TaskType) => void }> = (
               variant="outline"
               onClick={() => onSelect(actionType as TaskType)} 
               className={cn(
-                "justify-center text-center py-2 text-sm h-auto",
+                "justify-center text-center py-2 text-sm h-auto rounded-md",
                 "text-zinc-800 font-normal border-zinc-200"
               )}
             >

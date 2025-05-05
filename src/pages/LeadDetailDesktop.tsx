@@ -75,7 +75,7 @@ const LeadDetailDesktop = () => {
             </p>
             <Button 
               onClick={() => navigate('/leads')} 
-              className="mt-4 bg-loro-terracotta hover:bg-loro-terracotta/90"
+              className="mt-4 bg-loro-terracotta hover:bg-loro-terracotta/90 rounded-md"
             >
               Retour à la liste des leads
             </Button>
@@ -92,11 +92,11 @@ const LeadDetailDesktop = () => {
 
   return (
     <SidebarLayout>
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="px-[100px] py-6 max-w-7xl mx-auto">
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
-          className="mb-6 text-loro-terracotta"
+          className="mb-6 text-loro-terracotta rounded-md"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Retour
@@ -112,11 +112,11 @@ const LeadDetailDesktop = () => {
             <TabsList className="mb-6 bg-loro-pearl/20 p-1 rounded-lg w-full flex flex-wrap">
               <TabsTrigger 
                 value="info"
-                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative rounded-md"
               >Informations</TabsTrigger>
               <TabsTrigger 
                 value="actions"
-                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative rounded-md"
               >
                 Actions
                 {pendingActions > 0 && (
@@ -127,40 +127,40 @@ const LeadDetailDesktop = () => {
               </TabsTrigger>
               <TabsTrigger 
                 value="notes"
-                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative rounded-md"
               >Notes</TabsTrigger>
               <TabsTrigger 
                 value="properties"
-                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative rounded-md"
               >Propriétés</TabsTrigger>
               <TabsTrigger 
                 value="documents"
-                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative rounded-md"
               >Documents</TabsTrigger>
               <TabsTrigger 
                 value="contacts"
-                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative rounded-md"
               >Contacts</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="info">
+            <TabsContent value="info" className="rounded-lg overflow-hidden">
               <LeadInfoTab lead={lead} />
             </TabsContent>
-            <TabsContent value="actions">
+            <TabsContent value="actions" className="rounded-lg overflow-hidden">
               <ActionsTab leadId={lead.id} />
               {/* ChatGadait floating button - uniquement dans l'onglet actions */}
               <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />
             </TabsContent>
-            <TabsContent value="notes">
+            <TabsContent value="notes" className="rounded-lg overflow-hidden">
               <NotesTab leadId={lead.id} />
             </TabsContent>
-            <TabsContent value="properties">
+            <TabsContent value="properties" className="rounded-lg overflow-hidden">
               <PropertiesTab leadId={lead.id} lead={lead} />
             </TabsContent>
-            <TabsContent value="documents">
+            <TabsContent value="documents" className="rounded-lg overflow-hidden">
               <DocumentsTab leadId={lead.id} />
             </TabsContent>
-            <TabsContent value="contacts">
+            <TabsContent value="contacts" className="rounded-lg overflow-hidden">
               <ContactsTab leadId={lead.id} />
             </TabsContent>
           </Tabs>
