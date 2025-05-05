@@ -6,13 +6,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, Bath, Building, Compass, Camera, Car, Fan, Bed, Sofa, Clock, DoorClosed, Star, Settings, FileText } from 'lucide-react';
+import { MapPin, Bath, Building, Compass, Camera, Car, Fan, Bed, Sofa, Clock, DoorClosed, Star, Settings, FileText, ChevronDown } from 'lucide-react';
 import { getIcon, AllowedIconName } from '@/utils/icons';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import MultiSelectButtons from '../../form/MultiSelectButtons';
 import FormInput from '../../form/FormInput';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
+import { cn } from '@/lib/utils';
 
 interface SearchCriteriaSectionProps {
   lead: LeadDetailed;
@@ -149,6 +150,48 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({
     </div>;
 };
 
+// Create a reusable styled select component
+const StyledSelect: React.FC<{
+  id: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  className?: string;
+  options: Array<{value: string; label: string}>;
+  placeholder?: string;
+  icon?: React.ReactNode;
+}> = ({ id, value, onChange, className, options, placeholder, icon }) => {
+  return (
+    <div className="relative">
+      {icon && (
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+          {icon}
+        </div>
+      )}
+      <select
+        id={id}
+        value={value}
+        onChange={onChange}
+        className={cn(
+          "w-full appearance-none bg-white px-4 py-2.5 pr-10 rounded-lg border border-gray-200 shadow-sm",
+          "focus:outline-none focus:ring-2 focus:ring-chocolate-dark focus:border-transparent",
+          "text-gray-800 font-futura transition duration-200 ease-in-out",
+          "hover:border-gray-300 hover:shadow-md",
+          icon && "pl-10",
+          className
+        )}
+      >
+        {placeholder && <option value="">{placeholder}</option>}
+        {options.map(option => (
+          <option key={option.value} value={option.value}>{option.label}</option>
+        ))}
+      </select>
+      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+        <ChevronDown className="h-4 w-4 text-gray-500" />
+      </div>
+    </div>
+  );
+};
+
 const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
   lead,
   onDataChange
@@ -162,22 +205,26 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
   return <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="country" className="text-sm">Pays</Label>
-        <select id="country" value={lead.country || ''} onChange={e => onDataChange({
-        country: e.target.value
-      })} className="w-full p-2 border border-gray-300 rounded font-futura">
-          <option value="">Sélectionner un pays</option>
-          <option value="France">France</option>
-          <option value="Spain">Espagne</option>
-          <option value="Portugal">Portugal</option>
-          <option value="Italy">Italie</option>
-          <option value="Switzerland">Suisse</option>
-          <option value="Monaco">Monaco</option>
-          <option value="Mauritius">Île Maurice</option>
-          <option value="United States">United States</option>
-          <option value="Etats-Unis">Etats-Unis</option>
-          <option value="Grèce">Grèce</option>
-          <option value="UAE">Émirats Arabes Unis</option>
-        </select>
+        <StyledSelect
+          id="country"
+          value={lead.country || ''}
+          onChange={e => onDataChange({ country: e.target.value })}
+          placeholder="Sélectionner un pays"
+          options={[
+            { value: "France", label: "France" },
+            { value: "Spain", label: "Espagne" },
+            { value: "Portugal", label: "Portugal" },
+            { value: "Italy", label: "Italie" },
+            { value: "Switzerland", label: "Suisse" },
+            { value: "Monaco", label: "Monaco" },
+            { value: "Mauritius", label: "Île Maurice" },
+            { value: "United States", label: "United States" },
+            { value: "Etats-Unis", label: "Etats-Unis" },
+            { value: "Grèce", label: "Grèce" },
+            { value: "UAE", label: "Émirats Arabes Unis" }
+          ]}
+          icon={<MapPin className="h-4 w-4" />}
+        />
       </div>
 
       <div className="space-y-2">
@@ -272,22 +319,26 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({
           
           <div className="space-y-2">
             <Label htmlFor="propertyType" className="text-sm">Type de bien</Label>
-            <select id="propertyType" value={lead.propertyType || ''} onChange={e => onDataChange({
-            propertyType: e.target.value
-          })} className="w-full p-2 border border-gray-300 rounded font-futura">
-              <option value="">Sélectionner un type</option>
-              <option value="Villa">Villa</option>
-              <option value="Appartement">Appartement</option>
-              <option value="Penthouse">Penthouse</option>
-              <option value="Maison">Maison</option>
-              <option value="Duplex">Duplex</option>
-              <option value="Chalet">Chalet</option>
-              <option value="Terrain">Terrain</option>
-              <option value="Manoir">Manoir</option>
-              <option value="Maison de ville">Maison de ville</option>
-              <option value="Château">Château</option>
-              <option value="Local commercial">Local commercial</option>
-            </select>
+            <StyledSelect
+              id="propertyType"
+              value={lead.propertyType || ''}
+              onChange={e => onDataChange({ propertyType: e.target.value })}
+              placeholder="Sélectionner un type"
+              options={[
+                { value: "Villa", label: "Villa" },
+                { value: "Appartement", label: "Appartement" },
+                { value: "Penthouse", label: "Penthouse" },
+                { value: "Maison", label: "Maison" },
+                { value: "Duplex", label: "Duplex" },
+                { value: "Chalet", label: "Chalet" },
+                { value: "Terrain", label: "Terrain" },
+                { value: "Manoir", label: "Manoir" },
+                { value: "Maison de ville", label: "Maison de ville" },
+                { value: "Château", label: "Château" },
+                { value: "Local commercial", label: "Local commercial" }
+              ]}
+              icon={<Building className="h-4 w-4" />}
+            />
           </div>
           
           <div className="space-y-2">
@@ -299,16 +350,20 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="propertyState" className="text-sm">État général</Label>
-            <select id="propertyState" value={lead.propertyState || ''} onChange={e => onDataChange({
-            propertyState: e.target.value as PropertyState
-          })} className="w-full p-2 border border-gray-300 rounded font-futura">
-              <option value="">Sélectionner un état</option>
-              <option value="Neuf">Neuf</option>
-              <option value="Bon état">Bon état</option>
-              <option value="À rafraîchir">À rafraîchir</option>
-              <option value="À rénover">À rénover</option>
-              <option value="À reconstruire">À reconstruire</option>
-            </select>
+            <StyledSelect
+              id="propertyState"
+              value={lead.propertyState || ''}
+              onChange={e => onDataChange({ propertyState: e.target.value as PropertyState })}
+              placeholder="Sélectionner un état"
+              options={[
+                { value: "Neuf", label: "Neuf" },
+                { value: "Bon état", label: "Bon état" },
+                { value: "À rafraîchir", label: "À rafraîchir" },
+                { value: "À rénover", label: "À rénover" },
+                { value: "À reconstruire", label: "À reconstruire" }
+              ]}
+              icon={<Settings className="h-4 w-4" />}
+            />
           </div>
 
           <div className="space-y-2">
