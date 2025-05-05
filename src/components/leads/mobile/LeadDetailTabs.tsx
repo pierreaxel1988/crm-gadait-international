@@ -27,50 +27,52 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
     });
   };
 
-  return <>
+  return (
+    <>
       <Separator className="bg-loro-pearl/60 h-[1px] w-full opacity-80" />
       <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full border-b border-loro-sand/10">
-        <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-terracotta">
-          <TabsTrigger value="criteria" className="data-[state=active]:bg-transparent data-[state=active]:text-loro-900 font-medium rounded-none pt-1">
+        <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-100">
+          <TabsTrigger value="criteria" className="data-[state=active]:bg-inherit data-[state=active]:border-b-2 data-[state=active]:border-loro-terracotta data-[state=active]:text-loro-chocolate font-medium rounded-none pt-1">
             <div className="flex flex-col items-center">
-              <Target className="h-4 w-4 mb-1 text-loro-50 data-[state=active]:text-loro-900" />
-              <span className="text-xs text-loro-50 data-[state=active]:text-loro-900">Critères</span>
+              <Target className="h-4 w-4 mb-1" />
+              <span className="text-xs">Critères</span>
             </div>
           </TabsTrigger>
           
-          <TabsTrigger value="info" className="data-[state=active]:bg-transparent data-[state=active]:text-loro-900 font-medium rounded-none pt-1">
+          <TabsTrigger value="info" className="data-[state=active]:bg-inherit data-[state=active]:border-b-2 data-[state=active]:border-loro-terracotta data-[state=active]:text-loro-chocolate font-medium rounded-none pt-1">
             <div className="flex flex-col items-center">
-              <Info className="h-4 w-4 mb-1 text-loro-50 data-[state=active]:text-loro-900" />
-              <span className="text-xs text-loro-50 data-[state=active]:text-loro-900">Infos</span>
+              <Info className="h-4 w-4 mb-1" />
+              <span className="text-xs">Infos</span>
             </div>
           </TabsTrigger>
           
-          <TabsTrigger value="status" className="data-[state=active]:bg-transparent data-[state=active]:text-loro-900 font-medium rounded-none pt-1">
+          <TabsTrigger value="status" className="data-[state=active]:bg-inherit data-[state=active]:border-b-2 data-[state=active]:border-loro-terracotta data-[state=active]:text-loro-chocolate font-medium rounded-none pt-1">
             <div className="flex flex-col items-center">
-              <Check className="h-4 w-4 mb-1 text-loro-50 data-[state=active]:text-loro-900" />
-              <span className="text-xs text-loro-50 data-[state=active]:text-loro-900">Statut</span>
+              <Check className="h-4 w-4 mb-1" />
+              <span className="text-xs">Statut</span>
             </div>
           </TabsTrigger>
           
-          <TabsTrigger value="notes" className="data-[state=active]:bg-transparent data-[state=active]:text-loro-900 font-medium rounded-none pt-1">
+          <TabsTrigger value="notes" className="data-[state=active]:bg-inherit data-[state=active]:border-b-2 data-[state=active]:border-loro-terracotta data-[state=active]:text-loro-chocolate font-medium rounded-none pt-1">
             <div className="flex flex-col items-center">
-              <FileText className="h-4 w-4 mb-1 text-loro-50 data-[state=active]:text-loro-900" />
-              <span className="text-xs text-loro-50 data-[state=active]:text-loro-900">Notes</span>
+              <FileText className="h-4 w-4 mb-1" />
+              <span className="text-xs">Notes</span>
             </div>
           </TabsTrigger>
           
-          <TabsTrigger value="actions" className="data-[state=active]:bg-transparent data-[state=active]:text-loro-900 font-medium rounded-none pt-1 relative">
+          <TabsTrigger value="actions" className="data-[state=active]:bg-inherit data-[state=active]:border-b-2 data-[state=active]:border-loro-terracotta data-[state=active]:text-loro-chocolate font-medium rounded-none pt-1 relative">
             <div className="flex flex-col items-center">
-              <Activity className="h-4 w-4 mb-1 text-loro-50 data-[state=active]:text-loro-900" />
-              <span className="text-xs text-loro-50 data-[state=active]:text-loro-900">Actions</span>
-              {pendingActionsCount > 0 && <div className="absolute -top-1 -right-1 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs bg-loro-900 px-0 mx-[10px]">
+              <Activity className="h-4 w-4 mb-1" />
+              <span className="text-xs">Actions</span>
+              {pendingActionsCount > 0 && <div className="absolute -top-1 -right-1 bg-loro-terracotta text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                 {pendingActionsCount}
               </div>}
             </div>
           </TabsTrigger>
         </TabsList>
       </Tabs>
-    </>;
+    </>
+  );
 };
 
 export default LeadDetailTabs;
