@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -34,6 +35,9 @@
     --ring: 215 20.2% 65.1%;
  
     --radius: 0.5rem;
+    
+    /* Couleur du header immersif */
+    --immersive-header: 212 60% 14%;
   }
  
   .dark {
@@ -111,6 +115,8 @@
   }
   body {
     @apply bg-background text-foreground font-futura;
+    /* Styles pour gérer le padding en haut pour le header immersif */
+    padding-top: env(safe-area-inset-top);
   }
 }
 
@@ -132,6 +138,21 @@
   /* Préservation des espaces blancs pour le texte formaté */
   .whitespace-pre-line {
     white-space: pre-line;
+  }
+  
+  /* Styles pour le header immersif */
+  .immersive-header {
+    background-color: #0A2540;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top);
+    z-index: 50;
+  }
+  
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
   }
   
   /* Animation pour les messages de chat */
