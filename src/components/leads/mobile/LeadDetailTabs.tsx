@@ -66,7 +66,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           </TabsTrigger>
         </TabsList>
       </Tabs>
-      <div className="h-[0.5px] w-full bg-gradient-to-r from-loro-sand/30 via-loro-terracotta/40 to-loro-sand/30 shadow-sm bg-loro-terracotta"></div>
+      <div className="overflow-x-auto bg-loro-50 py-px"></div>
     </>;
 };
 export default LeadDetailTabs;
