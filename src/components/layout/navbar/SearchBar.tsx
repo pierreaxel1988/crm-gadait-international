@@ -9,10 +9,7 @@ const SearchBar = () => {
   
   return (
     <button className="rounded-md p-1.5 transition-colors duration-200">
-      <Search className={cn(
-        "h-5 w-5",
-        isMobile ? "text-white" : "text-loro-navy"
-      )} />
+      <Search className="h-5 w-5 text-white" />
     </button>
   );
 };

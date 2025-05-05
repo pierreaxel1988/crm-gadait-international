@@ -9,10 +9,7 @@ const ThemeToggle = () => {
   
   return (
     <button className="rounded-md p-1.5 transition-colors duration-200">
-      <Moon className={cn(
-        "h-5 w-5",
-        isMobile ? "text-white" : "text-loro-navy"
-      )} />
+      <Moon className="h-5 w-5 text-white" />
     </button>
   );
 };
