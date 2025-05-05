@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Check, FileText, Info, Target, Activity } from 'lucide-react';
+import { Check, FileText, Info, Target, Activity, Mail } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface LeadDetailTabsProps {
@@ -27,7 +27,8 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
     });
   };
   
-  return <>
+  return (
+    <>
       <Separator className="bg-loro-pearl/60 h-[0.5px] w-full opacity-80" />
       <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full border-b border-loro-sand/10">
         <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-sand">
@@ -63,14 +64,17 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
             <div className="flex flex-col items-center">
               <Activity className="h-4 w-4 mb-1 data-[state=active]:text-loro-terracotta" />
               <span className="text-xs">Actions</span>
-              {pendingActionsCount > 0 && <div className="absolute -top-1 -right-1 bg-loro-terracotta text-white rounded-full w-5 h-5 flex items-center justify-center text-xs px-0 mx-[8px]">
-                {pendingActionsCount}
-              </div>}
+              {pendingActionsCount > 0 && (
+                <div className="absolute -top-1 -right-1 bg-loro-terracotta text-white rounded-full w-5 h-5 flex items-center justify-center text-xs px-0 mx-[8px]">
+                  {pendingActionsCount}
+                </div>
+              )}
             </div>
           </TabsTrigger>
         </TabsList>
       </Tabs>
-    </>;
+    </>
+  );
 };
 
 export default LeadDetailTabs;
