@@ -55,8 +55,8 @@ const LeadInfoTab: React.FC<LeadInfoTabProps> = ({ lead }) => {
             
             <InfoSection title="Détails du lead">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoItem label="Source" value={lead.leadSource} />
-                <InfoItem label="Commercial" value={lead.assignedToName || 'Non assigné'} />
+                <InfoItem label="Source" value={lead.source} />
+                <InfoItem label="Commercial" value={lead.assignedTo || 'Non assigné'} />
                 <InfoItem label="Créé le" value={formatDate(lead.createdAt)} />
                 <InfoItem label="Dernier contact" value={formatDate(lead.lastContactedAt)} />
                 <InfoItem label="Type de lead" value={lead.pipelineType || 'Non spécifié'} />
@@ -71,7 +71,7 @@ const LeadInfoTab: React.FC<LeadInfoTabProps> = ({ lead }) => {
             
             <InfoSection title="Commentaires supplémentaires">
               <p className="text-sm bg-loro-pearl/5 p-3 rounded-lg border border-loro-pearl/20 min-h-[100px] whitespace-pre-line">
-                {lead.additionalComments || 'Aucun commentaire disponible'}
+                {lead.internal_notes || 'Aucun commentaire disponible'}
               </p>
             </InfoSection>
           </div>
