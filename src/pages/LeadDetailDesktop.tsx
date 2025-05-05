@@ -86,7 +86,7 @@ const LeadDetailDesktop = () => {
   }
 
   // Calculer le nombre d'actions en attente
-  const pendingActions = lead.action_history?.filter(
+  const pendingActions = lead.actionHistory?.filter(
     action => !action.completedDate
   ).length || 0;
 
