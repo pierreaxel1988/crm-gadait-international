@@ -257,6 +257,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     }
   };
 
+  // Updated design with our modern UI
   return (
     <div className="space-y-8 bg-white/50 backdrop-blur-sm rounded-xl shadow-sm border border-loro-pearl/20 p-6 animate-[fade-in_0.3s_ease-out]">
       {/* Header with sync button */}
