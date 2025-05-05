@@ -1,34 +1,28 @@
 
 import React from 'react';
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface NotificationBadgeProps {
   count: number;
-  className?: string;
 }
 
-const NotificationBadge: React.FC<NotificationBadgeProps> = ({ count, className }) => {
+const NotificationBadge: React.FC<NotificationBadgeProps> = ({ count }) => {
+  const isMobile = useIsMobile();
+  
+  // If count is 0, don't show badge
+  if (count === 0) return null;
+  
+  // If count > 99, show 99+
   const displayCount = count > 99 ? '99+' : count.toString();
   
   return (
-    <span 
-      className={`
-        absolute -top-1.5 -right-1.5
-        min-w-[20px] h-5
-        px-1.5
-        rounded-full 
-        bg-gradient-to-br from-loro-terracotta to-loro-terracotta/90
-        text-loro-white 
-        flex items-center justify-center 
-        text-[10px] font-semibold
-        animate-pulse-soft
-        border border-loro-white
-        shadow-sm
-        select-none
-        transition-all duration-200
-        ${className || ''}
-      `}
-      aria-hidden="true"
-    >
+    <span className={cn(
+      "absolute -top-1 -right-1 rounded-full text-xs px-1 min-w-5 h-5 flex items-center justify-center font-medium",
+      isMobile 
+        ? "bg-loro-terracotta text-white" 
+        : "bg-loro-terracotta text-white"
+    )}>
       {displayCount}
     </span>
   );

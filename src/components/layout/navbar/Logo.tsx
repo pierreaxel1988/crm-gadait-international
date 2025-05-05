@@ -21,21 +21,24 @@ const Logo: React.FC<LogoProps> = ({ toggleSidebar }) => {
       <button 
         onClick={toggleSidebar} 
         aria-label="Toggle menu" 
-        className="mr-2 rounded-md p-2 transition-colors duration-200 px-0 py-0 text-loro-navy my-0"
+        className={cn(
+          "mr-2 rounded-md p-2 transition-colors duration-200 px-0 py-0 my-0",
+          isMobile ? "text-white" : "text-loro-navy"
+        )}
       >
         <Menu size={isMobile ? 18 : 20} />
       </button>
       <Link to="/" className="flex items-center">
         <Shield 
           className={cn(
-            "text-loro-hazel mr-2", 
-            isMobile ? "h-4 w-4" : "h-5 w-5"
+            "mr-2", 
+            isMobile ? "text-white h-4 w-4" : "text-loro-hazel h-5 w-5"
           )} 
         />
         <span 
           className={cn(
-            "font-futura tracking-tight text-loro-navy uppercase", 
-            isMobile ? "text-base" : "text-sm"
+            "font-futura tracking-tight uppercase", 
+            isMobile ? "text-white text-base" : "text-loro-navy text-sm"
           )}
         >
           {isMobile ? "GADAIT." : "GADAIT. INTERNATIONAL"}

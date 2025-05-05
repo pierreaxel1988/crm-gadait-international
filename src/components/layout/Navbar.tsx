@@ -26,8 +26,8 @@ const Navbar: React.FC<NavbarProps> = ({
     <>
       {isMobile && <ImmersiveHeaderOverlay />}
       <nav className={cn(
-        "sticky top-0 z-40 w-full bg-loro-white border-b border-loro-pearl transition-all duration-300",
-        isMobile && "bg-[#0A2540] text-white"
+        "sticky top-0 z-40 w-full border-b border-loro-pearl transition-all duration-300",
+        isMobile ? "bg-[#0A2540] text-white" : "bg-loro-white"
       )}>
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6">
           <div className={cn(
@@ -36,7 +36,10 @@ const Navbar: React.FC<NavbarProps> = ({
           )}>
             <Logo toggleSidebar={toggleSidebar} />
 
-            <div className="flex items-center space-x-2 md:space-x-4">
+            <div className={cn(
+              "flex items-center space-x-2 md:space-x-4",
+              isMobile && "text-white"
+            )}>
               <SearchBar />
               <ThemeToggle />
               <NotificationsDropdown />

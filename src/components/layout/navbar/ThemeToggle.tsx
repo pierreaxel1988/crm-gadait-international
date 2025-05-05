@@ -1,28 +1,18 @@
 
-import React, { useState } from 'react';
-import { Moon, Sun } from 'lucide-react';
+import React from 'react';
+import { Moon } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
-const ThemeToggle: React.FC = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+const ThemeToggle = () => {
   const isMobile = useIsMobile();
-
-  const toggleDarkMode = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    document.documentElement.classList.toggle('dark', newMode);
-  };
-
+  
   return (
-    <button 
-      onClick={toggleDarkMode} 
-      className="rounded-md p-1 md:p-2 text-loro-navy hover:text-loro-hazel transition-colors duration-200"
-    >
-      {isDarkMode ? (
-        <Sun size={isMobile ? 18 : 20} />
-      ) : (
-        <Moon size={isMobile ? 18 : 20} />
-      )}
+    <button className="rounded-md p-1.5 transition-colors duration-200">
+      <Moon className={cn(
+        "h-5 w-5",
+        isMobile ? "text-white" : "text-loro-navy"
+      )} />
     </button>
   );
 };
