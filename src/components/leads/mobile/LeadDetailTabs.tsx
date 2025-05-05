@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Check, FileText, Info, Target, Activity, Mail } from 'lucide-react';
+import { Check, FileText, Info, Target, Activity } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface LeadDetailTabsProps {
@@ -34,7 +34,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
         <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-50">
           <TabsTrigger 
             value="criteria" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 text-loro-navy"
+            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-transparent text-loro-navy"
           >
             <div className="flex flex-col items-center">
               <Target className="h-4 w-4 mb-1" />
@@ -44,7 +44,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           
           <TabsTrigger 
             value="info" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 text-loro-navy"
+            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-transparent text-loro-navy"
           >
             <div className="flex flex-col items-center">
               <Info className="h-4 w-4 mb-1" />
@@ -54,7 +54,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           
           <TabsTrigger 
             value="status" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 text-loro-navy"
+            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-transparent text-loro-navy"
           >
             <div className="flex flex-col items-center">
               <Check className="h-4 w-4 mb-1" />
@@ -64,7 +64,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           
           <TabsTrigger 
             value="notes" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 text-loro-navy"
+            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-transparent text-loro-navy"
           >
             <div className="flex flex-col items-center">
               <FileText className="h-4 w-4 mb-1" />
@@ -74,7 +74,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           
           <TabsTrigger 
             value="actions" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 relative text-loro-navy"
+            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-transparent relative text-loro-navy"
           >
             <div className="flex flex-col items-center">
               <Activity className="h-4 w-4 mb-1" />
