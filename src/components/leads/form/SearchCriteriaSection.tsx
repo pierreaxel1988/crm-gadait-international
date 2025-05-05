@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, MauritiusRegion } from '@/types/lead';
 import FormSection from './FormSection';
@@ -69,36 +68,17 @@ const SearchCriteriaSection = ({
   };
   
   return (
-    <FormSection title="Critères de Recherche" action={
-      <span className="text-xs text-loro-hazel/70 font-futuraLight">
-        Informations importantes pour optimiser la recherche
-      </span>
-    }>
+    <FormSection title="Critères de Recherche">
       <ScrollArea className="h-[calc(100vh-350px)] pr-4">
         <div className="space-y-6">
           <Tabs defaultValue="property" className="w-full">
-            <TabsList className="w-full mb-4 grid grid-cols-3 bg-loro-pearl/10 rounded-lg p-0.5">
-              <TabsTrigger 
-                value="property" 
-                className="data-[state=active]:bg-white data-[state=active]:text-loro-hazel data-[state=active]:shadow-sm rounded-md text-sm font-futura"
-              >
-                Propriété
-              </TabsTrigger>
-              <TabsTrigger 
-                value="purchase" 
-                className="data-[state=active]:bg-white data-[state=active]:text-loro-hazel data-[state=active]:shadow-sm rounded-md text-sm font-futura"
-              >
-                Achat
-              </TabsTrigger>
-              <TabsTrigger 
-                value="buyer" 
-                className="data-[state=active]:bg-white data-[state=active]:text-loro-hazel data-[state=active]:shadow-sm rounded-md text-sm font-futura"
-              >
-                Acheteur
-              </TabsTrigger>
+            <TabsList className="w-full mb-4 grid grid-cols-3">
+              <TabsTrigger value="property">Propriété</TabsTrigger>
+              <TabsTrigger value="purchase">Achat</TabsTrigger>
+              <TabsTrigger value="buyer">Acheteur</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="property" className="space-y-6 animate-fade-in">
+            <TabsContent value="property" className="space-y-6">
               <PropertyDetailsSection
                 formData={{
                   propertyTypes: formData.propertyTypes as PropertyType[],
@@ -130,10 +110,8 @@ const SearchCriteriaSection = ({
                 }}
               />
               {formData.country === 'Mauritius' && (
-                <div className="space-y-2 p-3 bg-gradient-to-br from-loro-pearl/5 to-loro-pearl/20 rounded-xl border border-loro-pearl/10 transition-all duration-300 hover:shadow-sm">
-                  <Label className="text-sm flex items-center gap-1.5 text-loro-hazel font-medium">
-                    <span className="text-loro-hazel/80">Régions souhaitées</span>
-                  </Label>
+                <div className="space-y-2">
+                  <Label className="text-sm">Régions souhaitées</Label>
                   <MultiSelectButtons 
                     options={MAURITIUS_REGIONS} 
                     selectedValues={formData.regions || []} 
@@ -145,22 +123,21 @@ const SearchCriteriaSection = ({
                         handleMultiSelectToggle('regions', region as MauritiusRegion);
                       }
                     }} 
-                    className="gap-2"
                   />
                 </div>
               )}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-3 p-3 bg-gradient-to-br from-loro-pearl/5 to-loro-pearl/20 rounded-xl border border-loro-pearl/10 transition-all duration-300 hover:shadow-sm">
-                  <Label className="text-sm flex items-center gap-2 text-loro-hazel font-medium">
-                    <MapPin className="h-3.5 w-3.5 text-loro-hazel/80" />
-                    <span>Pin Location</span>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Pin Location
                   </Label>
                   <Input
                     name="mapCoordinates"
                     value={formData.mapCoordinates || ''}
                     onChange={handleInputChange}
                     placeholder="Collez le lien Google Maps ici"
-                    className="font-futura h-9 shadow-sm transition-all duration-200 focus:ring-1 focus:ring-loro-hazel/30"
+                    className="font-futura"
                   />
                   <p className="text-xs text-muted-foreground">
                     Copiez-collez le lien Google Maps de la propriété
@@ -169,7 +146,7 @@ const SearchCriteriaSection = ({
               </div>
             </TabsContent>
             
-            <TabsContent value="purchase" className="space-y-6 py-2 animate-fade-in">
+            <TabsContent value="purchase" className="space-y-6 py-2">
               <PurchaseDetailsSection
                 formData={formData}
                 handleInputChange={handleInputChange}
@@ -180,7 +157,7 @@ const SearchCriteriaSection = ({
               />
             </TabsContent>
             
-            <TabsContent value="buyer" className="space-y-6 py-2 animate-fade-in">
+            <TabsContent value="buyer" className="space-y-6 py-2">
               <BuyerInfoSection
                 formData={formData}
                 handleInputChange={handleInputChange}

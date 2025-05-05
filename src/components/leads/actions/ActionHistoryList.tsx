@@ -81,16 +81,16 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
         {sortedDates.map((dateString) => (
           <div key={dateString} className="animate-[fade-in_0.4s_ease-out]">
             <div className="flex items-center gap-2 mb-2.5 sticky top-0 bg-white py-1">
-              <div className={`${isMobile ? 'h-5 w-5' : 'h-5 w-5'} rounded-full bg-loro-pearl/30 flex items-center justify-center`}>
-                <Calendar className={`${isMobile ? 'h-3 w-3' : 'h-3 w-3'} text-loro-navy/70`} />
+              <div className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} rounded-full bg-loro-pearl/30 flex items-center justify-center`}>
+                <Calendar className={`${isMobile ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-loro-navy/70`} />
               </div>
-              <h3 className={`${isMobile ? 'text-xs' : 'text-xs'} font-futura text-loro-navy/80 tracking-wide`}>
+              <h3 className={`${isMobile ? 'text-xs' : 'text-sm'} font-futura text-loro-navy/80 tracking-wide`}>
                 {getFormattedDate(dateString)}
               </h3>
               <Separator className="flex-1 bg-loro-pearl/30" />
             </div>
             
-            <div className={`space-y-2 pl-${isMobile ? '3' : '3'} border-l border-loro-pearl/20`}>
+            <div className={`space-y-2 pl-${isMobile ? '3' : '4'} border-l border-loro-pearl/20`}>
               {groupedActions[dateString].map((action) => {
                 // Determine if action is overdue (past date and not completed)
                 const isOverdue = isDatePast(action.scheduledDate) && !action.completedDate;
@@ -99,7 +99,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                   <Card 
                     key={action.id} 
                     className={cn(
-                      "relative overflow-hidden transition-all duration-300 rounded-xl border shadow-sm hover:shadow-md",
+                      "relative overflow-hidden transition-all duration-300 rounded-lg border shadow-sm",
                       action.completedDate 
                         ? "border-loro-pearl/30 bg-[#F1F0FB]" // Soft gray for completed actions
                         : isOverdue
@@ -110,7 +110,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                     {/* Dot on timeline */}
                     <div 
                       className={cn(
-                        "absolute -left-[6px] top-1/2 transform -translate-y-1/2 h-3 w-3 rounded-full border-2 border-white",
+                        "absolute -left-[10px] top-1/2 transform -translate-y-1/2 h-4 w-4 rounded-full border-2 border-white",
                         action.completedDate 
                           ? "bg-green-500" 
                           : isOverdue
@@ -119,10 +119,10 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                       )}
                     />
                     
-                    <div className={`${isMobile ? 'p-2.5' : 'p-2.5'}`}>
+                    <div className={`${isMobile ? 'p-2.5' : 'p-3'}`}>
                       <div className="flex justify-between items-start gap-2">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2.5">
                             <div className={cn(
                               `${isMobile ? 'p-1.5' : 'p-1.5'} rounded-md`,
                               action.completedDate 
@@ -140,7 +140,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                                   : isOverdue
                                     ? 'text-rose-800'
                                     : 'text-loro-navy/80'
-                              } font-futura ${isMobile ? 'text-xs' : 'text-xs'}`}>
+                              } font-futura ${isMobile ? 'text-xs' : 'text-sm'}`}>
                                 {action.actionType}
                               </span>
                               <div className="flex items-center gap-1 text-xs text-loro-navy/50 mt-0.5 font-futuraLight">
@@ -157,7 +157,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                           </div>
                           
                           {action.notes && (
-                            <p className={`${isMobile ? 'text-xs mt-1.5 p-2' : 'text-xs mt-1.5 p-2'} ${
+                            <p className={`${isMobile ? 'text-xs mt-1.5 p-2' : 'text-sm mt-2 p-2.5'} ${
                               action.completedDate 
                                 ? 'bg-white rounded-md font-futuraLight text-gray-500 border border-loro-pearl/20' 
                                 : isOverdue
@@ -174,7 +174,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
                             variant="outline"
                             size="sm"
                             onClick={() => onMarkComplete(action.id)}
-                            className={`${isMobile ? 'text-[10px] px-2 py-0.5 h-6' : 'text-xs px-2 py-0.5 h-6'} flex items-center gap-1 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 rounded-full font-futura`}
+                            className={`${isMobile ? 'text-[10px] px-2 py-0.5 h-6' : 'text-xs px-2.5 py-1 h-7'} flex items-center gap-1 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 rounded-full font-futura`}
                           >
                             <Check className={`${isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'}`} /> Terminer
                           </Button>

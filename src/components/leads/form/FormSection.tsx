@@ -9,9 +9,9 @@ interface FormSectionProps {
 
 const FormSection = ({ title, children, action }: FormSectionProps) => {
   return (
-    <div className="space-y-4 bg-white rounded-xl shadow-sm border border-loro-pearl/20 p-5">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-sm font-futura uppercase tracking-wider text-loro-hazel pb-2 border-b border-loro-pearl/30">{title}</h2>
+        <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">{title}</h2>
         {action && <div>{action}</div>}
       </div>
       {children}

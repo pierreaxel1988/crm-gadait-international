@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LeadForm from '@/components/leads/LeadForm';
@@ -15,9 +14,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import CustomButton from '@/components/ui/CustomButton';
 import FloatingActionButtons from '@/components/ui/FloatingActionButtons';
 import { cn } from '@/lib/utils';
-import Container from '@/components/ui/container';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 const LeadEdit = () => {
   const { id } = useParams<{ id: string }>();
@@ -173,145 +169,133 @@ const LeadEdit = () => {
   
   return (
     <div className="p-3 md:p-6 space-y-1 pb-24 md:pb-6">
-      <Container>
-        <LeadHeader 
-          lead={lead} 
-          onBack={handleBackClick} 
-          onAddAction={handleAddAction} 
-          onDelete={handleDelete}
-          onSave={handleSaveClick}
-          isSaving={isSaving}
-          hasChanges={hasChanges}
-        />
+      <LeadHeader 
+        lead={lead} 
+        onBack={handleBackClick} 
+        onAddAction={handleAddAction} 
+        onDelete={handleDelete}
+        onSave={handleSaveClick}
+        isSaving={isSaving}
+        hasChanges={hasChanges}
+      />
 
-        <Tabs 
-          value={activeTab} 
-          onValueChange={setActiveTab} 
-          className="w-full"
-        >
-          <TabsList className={cn(
-            "w-full bg-background border-b flex sticky z-10 mt-0",
-            isMobile ? "overflow-x-auto no-scrollbar top-[60px] px-0" : "top-[105px]"
-          )}>
-            <TabsTrigger 
-              value="general" 
-              className={cn(
-                "py-1.5 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
-                isMobile ? "px-2 text-xs" : "px-3 text-sm"
-              )}
-            >
-              Général
-            </TabsTrigger>
-            <TabsTrigger 
-              value="criteria" 
-              className={cn(
-                "py-1.5 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
-                isMobile ? "px-2 text-xs" : "px-3 text-sm"
-              )}
-            >
-              Critères
-            </TabsTrigger>
-            <TabsTrigger 
-              value="status" 
-              className={cn(
-                "py-1.5 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
-                isMobile ? "px-2 text-xs" : "px-3 text-sm"
-              )}
-            >
-              Statut
-            </TabsTrigger>
-            <TabsTrigger 
-              value="actions" 
-              className={cn(
-                "py-1.5 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
-                isMobile ? "px-2 text-xs" : "px-3 text-sm"
-              )}
-            >
-              Actions
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="general" className="mt-0 md:mt-1 pb-16 animate-fade-in">
-            <LeadForm 
-              lead={lead} 
-              onSubmit={handleSubmit}
-              onChange={handleDataChange}
-              onCancel={() => navigate('/pipeline')} 
-              activeTab="general"
-              isSubmitting={isSaving}
-              hideSubmitButton={true}
-            />
-          </TabsContent>
-          
-          <TabsContent value="criteria" className="mt-0 md:mt-1 pb-16 animate-fade-in">
-            <LeadForm 
-              lead={lead} 
-              onSubmit={handleSubmit}
-              onChange={handleDataChange}
-              onCancel={() => navigate('/pipeline')} 
-              activeTab="criteria"
-              isSubmitting={isSaving}
-              hideSubmitButton={true}
-            />
-          </TabsContent>
-          
-          <TabsContent value="status" className="mt-0 md:mt-1 pb-16 animate-fade-in">
-            <LeadForm 
-              lead={lead} 
-              onSubmit={handleSubmit}
-              onChange={handleDataChange}
-              onCancel={() => navigate('/pipeline')} 
-              activeTab="status"
-              isSubmitting={isSaving}
-              hideSubmitButton={true}
-            />
-          </TabsContent>
-          
-          <TabsContent value="actions" className="mt-0 md:mt-1 pb-16 animate-fade-in">
-            {lead && (
-              <ActionsPanel 
-                lead={lead}
-                getActionTypeIcon={getActionTypeIcon}
-                onMarkComplete={markActionComplete}
-                onAddAction={handleAddAction}
-              />
+      <Tabs 
+        value={activeTab} 
+        onValueChange={setActiveTab} 
+        className="w-full"
+      >
+        <TabsList className={cn(
+          "w-full bg-background border-b flex sticky z-10 mt-0",
+          isMobile ? "overflow-x-auto no-scrollbar top-[60px] px-0" : "top-[105px]"
+        )}>
+          <TabsTrigger 
+            value="general" 
+            className={cn(
+              "py-1.5 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
+              isMobile ? "px-2 text-xs" : "px-3 text-sm"
             )}
-          </TabsContent>
-        </Tabs>
-
-        <ActionDialog
-          isOpen={isActionDialogOpen}
-          onClose={() => setIsActionDialogOpen(false)}
-          selectedAction={selectedAction}
-          setSelectedAction={setSelectedAction}
-          actionDate={actionDate}
-          setActionDate={setActionDate}
-          actionTime={actionTime}
-          setActionTime={setActionTime}
-          actionNotes={actionNotes}
-          setActionNotes={setActionNotes}
-          onConfirm={handleActionConfirm}
-          getActionTypeIcon={getActionTypeIcon}
-        />
-        
-        {/* Floating Action Button - Desktop Only */}
-        {!isMobile && lead && (
-          <Button
-            onClick={handleAddAction}
-            className="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-loro-terracotta hover:bg-loro-terracotta/90 text-white shadow-lg"
           >
-            <Plus className="h-5 w-5" />
-          </Button>
-        )}
-
-        {lead && isMobile && (
-          <FloatingActionButtons 
-            onAddAction={handleAddAction} 
-            phoneNumber={lead.phone} 
-            email={lead.email} 
+            Général
+          </TabsTrigger>
+          <TabsTrigger 
+            value="criteria" 
+            className={cn(
+              "py-1.5 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
+              isMobile ? "px-2 text-xs" : "px-3 text-sm"
+            )}
+          >
+            Critères
+          </TabsTrigger>
+          <TabsTrigger 
+            value="status" 
+            className={cn(
+              "py-1.5 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
+              isMobile ? "px-2 text-xs" : "px-3 text-sm"
+            )}
+          >
+            Statut
+          </TabsTrigger>
+          <TabsTrigger 
+            value="actions" 
+            className={cn(
+              "py-1.5 data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark data-[state=active]:shadow-none rounded-none whitespace-nowrap",
+              isMobile ? "px-2 text-xs" : "px-3 text-sm"
+            )}
+          >
+            Actions
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="general" className="mt-0 md:mt-1 pb-16">
+          <LeadForm 
+            lead={lead} 
+            onSubmit={handleSubmit}
+            onChange={handleDataChange}
+            onCancel={() => navigate('/pipeline')} 
+            activeTab="general"
+            isSubmitting={isSaving}
+            hideSubmitButton={true}
           />
-        )}
-      </Container>
+        </TabsContent>
+        
+        <TabsContent value="criteria" className="mt-0 md:mt-1 pb-16">
+          <LeadForm 
+            lead={lead} 
+            onSubmit={handleSubmit}
+            onChange={handleDataChange}
+            onCancel={() => navigate('/pipeline')} 
+            activeTab="criteria"
+            isSubmitting={isSaving}
+            hideSubmitButton={true}
+          />
+        </TabsContent>
+        
+        <TabsContent value="status" className="mt-0 md:mt-1 pb-16">
+          <LeadForm 
+            lead={lead} 
+            onSubmit={handleSubmit}
+            onChange={handleDataChange}
+            onCancel={() => navigate('/pipeline')} 
+            activeTab="status"
+            isSubmitting={isSaving}
+            hideSubmitButton={true}
+          />
+        </TabsContent>
+        
+        <TabsContent value="actions" className="mt-0 md:mt-1 pb-16">
+          {lead && (
+            <ActionsPanel 
+              lead={lead}
+              getActionTypeIcon={getActionTypeIcon}
+              onMarkComplete={markActionComplete}
+              onAddAction={handleAddAction}
+            />
+          )}
+        </TabsContent>
+      </Tabs>
+
+      <ActionDialog
+        isOpen={isActionDialogOpen}
+        onClose={() => setIsActionDialogOpen(false)}
+        selectedAction={selectedAction}
+        setSelectedAction={setSelectedAction}
+        actionDate={actionDate}
+        setActionDate={setActionDate}
+        actionTime={actionTime}
+        setActionTime={setActionTime}
+        actionNotes={actionNotes}
+        setActionNotes={setActionNotes}
+        onConfirm={handleActionConfirm}
+        getActionTypeIcon={getActionTypeIcon}
+      />
+
+      {lead && (
+        <FloatingActionButtons 
+          onAddAction={handleAddAction} 
+          phoneNumber={lead.phone} 
+          email={lead.email} 
+        />
+      )}
     </div>
   );
 };
