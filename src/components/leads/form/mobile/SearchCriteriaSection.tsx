@@ -761,7 +761,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
           <Label htmlFor="country" className="text-sm font-medium">Pays recherché</Label>
           <select id="country" value={lead.country || ''} onChange={e => onDataChange({
           country: e.target.value
-        })} className="w-full p-2 border border-gray-300 rounded font-futura">
+        })} className="w-full p-2 border border-gray-200 rounded-lg font-futura bg-white">
             <option value="">Sélectionner un pays</option>
             <option value="France">France</option>
             <option value="Spain">Espagne</option>
@@ -838,7 +838,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             <Label htmlFor="purchaseTimeframe" className="text-sm font-medium">Délai d'acquisition</Label>
             <select id="purchaseTimeframe" value={lead.purchaseTimeframe || ''} onChange={e => onDataChange({
               purchaseTimeframe: e.target.value as PurchaseTimeframe
-            })} className="w-full p-2 border border-gray-300 rounded font-futura">
+            })} className="w-full p-2.5 border border-gray-200 rounded-lg font-futura bg-white appearance-none">
               <option value="">Sélectionner</option>
               <option value="Immédiat">Immédiat</option>
               <option value="1-3 mois">1-3 mois</option>
@@ -854,7 +854,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             <Label htmlFor="financingMethod" className="text-sm font-medium">Mode de financement</Label>
             <select id="financingMethod" value={lead.financingMethod || ''} onChange={e => onDataChange({
               financingMethod: e.target.value as FinancingMethod
-            })} className="w-full p-2 border border-gray-300 rounded font-futura">
+            })} className="w-full p-2.5 border border-gray-200 rounded-lg font-futura bg-white appearance-none">
               <option value="">Sélectionner</option>
               <option value="Cash">Cash</option>
               <option value="Crédit">Crédit</option>
@@ -868,7 +868,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             <Label htmlFor="propertyUse" className="text-sm font-medium">Utilisation prévue</Label>
             <select id="propertyUse" value={lead.propertyUse || ''} onChange={e => onDataChange({
               propertyUse: e.target.value as PropertyUse
-            })} className="w-full p-2 border border-gray-300 rounded font-futura">
+            })} className="w-full p-2.5 border border-gray-200 rounded-lg font-futura bg-white appearance-none">
               <option value="">Sélectionner</option>
               <option value="Résidence principale">Résidence principale</option>
               <option value="Résidence secondaire">Résidence secondaire</option>
