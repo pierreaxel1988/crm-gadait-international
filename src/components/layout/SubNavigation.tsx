@@ -34,7 +34,7 @@ const SubNavigation = () => {
 
   // Mobile navigation with horizontal scrolling - icons only
   if (isMobile) {
-    return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
+    return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-[#F5F5F0] shadow-sm">
         <div className="overflow-x-auto py-2 bg-loro-50">
           <div className="flex justify-between px-2 w-full">
             {navigationItems.map(item => <Link key={item.name} to={item.path} className={cn("flex items-center justify-center whitespace-nowrap rounded-md p-2 flex-1 mx-1 transition-transform hover:scale-110 duration-200", location.pathname === item.path ? "text-loro-terracotta bg-loro-white" : "text-loro-navy hover:text-loro-terracotta hover:bg-loro-white/70")}>
