@@ -761,7 +761,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
           <Label htmlFor="country" className="text-sm font-medium">Pays recherché</Label>
           <select id="country" value={lead.country || ''} onChange={e => onDataChange({
           country: e.target.value
-        })} className="w-full p-2 border border-gray-200 rounded-lg font-futura bg-white">
+        })} className="w-full p-2.5 border border-gray-200 rounded-lg font-futura bg-white">
             <option value="">Sélectionner un pays</option>
             <option value="France">France</option>
             <option value="Spain">Espagne</option>
