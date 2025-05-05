@@ -105,12 +105,30 @@ const LeadDetailDesktop = () => {
         <div className="mt-6">
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="mb-6 bg-loro-pearl/20 p-1 rounded-lg w-full flex flex-wrap">
-              <TabsTrigger value="info">Informations</TabsTrigger>
-              <TabsTrigger value="actions">Actions</TabsTrigger>
-              <TabsTrigger value="notes">Notes</TabsTrigger>
-              <TabsTrigger value="properties">Propriétés</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
-              <TabsTrigger value="contacts">Contacts</TabsTrigger>
+              <TabsTrigger 
+                value="info"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+              >Informations</TabsTrigger>
+              <TabsTrigger 
+                value="actions"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+              >Actions</TabsTrigger>
+              <TabsTrigger 
+                value="notes"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+              >Notes</TabsTrigger>
+              <TabsTrigger 
+                value="properties"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+              >Propriétés</TabsTrigger>
+              <TabsTrigger 
+                value="documents"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+              >Documents</TabsTrigger>
+              <TabsTrigger 
+                value="contacts"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+              >Contacts</TabsTrigger>
             </TabsList>
 
             <TabsContent value="info">

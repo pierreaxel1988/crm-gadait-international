@@ -50,8 +50,8 @@ const SubNavigation = () => {
       </div>;
   }
 
-  // Desktop and tablet navigation with text and better responsive behavior
-  return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-white shadow-sm">
+  // Desktop navigation with text and better responsive behavior
+  return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-loro-50 shadow-sm">
       <div className="bg-loro-50 py-2">
         <div className="max-w-screen-xl mx-auto px-4">
           <NavigationMenu className="mx-auto flex justify-center w-full">
