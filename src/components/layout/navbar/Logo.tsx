@@ -23,7 +23,7 @@ const Logo: React.FC<LogoProps> = ({ toggleSidebar }) => {
         aria-label="Toggle menu" 
         className={cn(
           "mr-2 rounded-md p-2 transition-colors duration-200 px-0 py-0 my-0",
-          isMobile ? "text-white" : "text-loro-navy"
+          isMobile ? "text-white" : "text-white"
         )}
       >
         <Menu size={isMobile ? 18 : 20} />
@@ -32,16 +32,16 @@ const Logo: React.FC<LogoProps> = ({ toggleSidebar }) => {
         <Shield 
           className={cn(
             "mr-2", 
-            isMobile ? "text-white h-4 w-4" : "text-loro-hazel h-5 w-5"
+            isMobile ? "text-white h-4 w-4" : "text-white h-5 w-5"
           )} 
         />
         <span 
           className={cn(
             "font-futura tracking-tight uppercase", 
-            isMobile ? "text-white text-base" : "text-loro-navy text-sm"
+            "text-white text-base"
           )}
         >
-          {isMobile ? "GADAIT." : "GADAIT. INTERNATIONAL"}
+          GADAIT.
         </span>
         {userRole === 'admin' && <AdminBadgeWrapper />}
         {userRole === 'commercial' && <CommercialBadgeWrapper />}
