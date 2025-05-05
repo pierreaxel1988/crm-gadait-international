@@ -14,26 +14,21 @@ import FormInput from '../../form/FormInput';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 import { cn } from '@/lib/utils';
-
 interface SearchCriteriaSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
-
 const SearchCriteriaSection = ({
   lead,
   onDataChange
 }: SearchCriteriaSectionProps) => {
   const [activeTab, setActiveTab] = useState('budget');
-  
   const handleLocationChange = (location: string) => {
     onDataChange({
       desiredLocation: location
     });
   };
-
-  return (
-    <div className="space-y-4">
+  return <div className="space-y-4">
       <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Critères de la Propriété</h2>
       
       {lead.pipelineType === 'owners' ? <div className="space-y-4">
@@ -59,15 +54,12 @@ const SearchCriteriaSection = ({
         </div> : <ScrollArea className="h-[calc(100vh-270px)]">
           <BuyerCriteriaSection lead={lead} onDataChange={onDataChange} />
         </ScrollArea>}
-    </div>
-  );
+    </div>;
 };
-
 interface OwnerPriceFieldsProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
-
 const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({
   lead,
   onDataChange
@@ -156,42 +148,34 @@ const StyledSelect: React.FC<{
   value: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   className?: string;
-  options: Array<{value: string; label: string}>;
+  options: Array<{
+    value: string;
+    label: string;
+  }>;
   placeholder?: string;
   icon?: React.ReactNode;
-}> = ({ id, value, onChange, className, options, placeholder, icon }) => {
-  return (
-    <div className="relative">
-      {icon && (
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+}> = ({
+  id,
+  value,
+  onChange,
+  className,
+  options,
+  placeholder,
+  icon
+}) => {
+  return <div className="relative">
+      {icon && <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
           {icon}
-        </div>
-      )}
-      <select
-        id={id}
-        value={value}
-        onChange={onChange}
-        className={cn(
-          "w-full appearance-none bg-white px-4 py-2.5 pr-10 rounded-lg border border-gray-200 shadow-sm",
-          "focus:outline-none focus:ring-2 focus:ring-chocolate-dark focus:border-transparent",
-          "text-gray-800 font-futura transition duration-200 ease-in-out",
-          "hover:border-gray-300 hover:shadow-md",
-          icon && "pl-10",
-          className
-        )}
-      >
+        </div>}
+      <select id={id} value={value} onChange={onChange} className={cn("w-full appearance-none bg-white px-4 py-2.5 pr-10 rounded-lg border border-gray-200 shadow-sm", "focus:outline-none focus:ring-2 focus:ring-chocolate-dark focus:border-transparent", "text-gray-800 font-futura transition duration-200 ease-in-out", "hover:border-gray-300 hover:shadow-md", icon && "pl-10", className)}>
         {placeholder && <option value="">{placeholder}</option>}
-        {options.map(option => (
-          <option key={option.value} value={option.value}>{option.label}</option>
-        ))}
+        {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
       </select>
       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
         <ChevronDown className="h-4 w-4 text-gray-500" />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
   lead,
   onDataChange
@@ -201,51 +185,56 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
       desiredLocation: location
     });
   };
-  
   return <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="country" className="text-sm">Pays</Label>
-        <StyledSelect
-          id="country"
-          value={lead.country || ''}
-          onChange={e => onDataChange({ country: e.target.value })}
-          placeholder="Sélectionner un pays"
-          options={[
-            { value: "France", label: "France" },
-            { value: "Spain", label: "Espagne" },
-            { value: "Portugal", label: "Portugal" },
-            { value: "Italy", label: "Italie" },
-            { value: "Switzerland", label: "Suisse" },
-            { value: "Monaco", label: "Monaco" },
-            { value: "Mauritius", label: "Île Maurice" },
-            { value: "United States", label: "United States" },
-            { value: "Etats-Unis", label: "Etats-Unis" },
-            { value: "Grèce", label: "Grèce" },
-            { value: "UAE", label: "Émirats Arabes Unis" }
-          ]}
-          icon={<MapPin className="h-4 w-4" />}
-        />
+        <StyledSelect id="country" value={lead.country || ''} onChange={e => onDataChange({
+        country: e.target.value
+      })} placeholder="Sélectionner un pays" options={[{
+        value: "France",
+        label: "France"
+      }, {
+        value: "Spain",
+        label: "Espagne"
+      }, {
+        value: "Portugal",
+        label: "Portugal"
+      }, {
+        value: "Italy",
+        label: "Italie"
+      }, {
+        value: "Switzerland",
+        label: "Suisse"
+      }, {
+        value: "Monaco",
+        label: "Monaco"
+      }, {
+        value: "Mauritius",
+        label: "Île Maurice"
+      }, {
+        value: "United States",
+        label: "United States"
+      }, {
+        value: "Etats-Unis",
+        label: "Etats-Unis"
+      }, {
+        value: "Grèce",
+        label: "Grèce"
+      }, {
+        value: "UAE",
+        label: "Émirats Arabes Unis"
+      }]} icon={<MapPin className="h-4 w-4" />} />
       </div>
 
       <div className="space-y-2">
-        <LocationFilter 
-          location={lead.desiredLocation || ''} 
-          onLocationChange={handleLocationChange}
-          country={lead.country}
-        />
+        <LocationFilter location={lead.desiredLocation || ''} onLocationChange={handleLocationChange} country={lead.country} />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="location" className="text-sm">Adresse</Label>
-        <Input 
-          id="location" 
-          value={lead.location || ''} 
-          onChange={e => onDataChange({
-            location: e.target.value
-          })} 
-          placeholder="Ex : 123 Avenue des Champs-Élysées" 
-          className="w-full font-futura" 
-        />
+        <Input id="location" value={lead.location || ''} onChange={e => onDataChange({
+        location: e.target.value
+      })} placeholder="Ex : 123 Avenue des Champs-Élysées" className="w-full font-futura" />
       </div>
 
       <div className="space-y-2">
@@ -253,22 +242,15 @@ const OwnerLocationSection: React.FC<OwnerPriceFieldsProps> = ({
           <MapPin className="h-4 w-4" />
           Pin Location
         </Label>
-        <Input
-          name="mapCoordinates"
-          value={lead.mapCoordinates || ''}
-          onChange={e => onDataChange({
-            mapCoordinates: e.target.value
-          })}
-          placeholder="Collez le lien Google Maps ici"
-          className="w-full font-futura"
-        />
+        <Input name="mapCoordinates" value={lead.mapCoordinates || ''} onChange={e => onDataChange({
+        mapCoordinates: e.target.value
+      })} placeholder="Collez le lien Google Maps ici" className="w-full font-futura" />
         <p className="text-xs text-muted-foreground">
           Copiez-collez le lien Google Maps de la propriété
         </p>
       </div>
     </div>;
 };
-
 const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({
   lead,
   onDataChange
@@ -319,26 +301,42 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({
           
           <div className="space-y-2">
             <Label htmlFor="propertyType" className="text-sm">Type de bien</Label>
-            <StyledSelect
-              id="propertyType"
-              value={lead.propertyType || ''}
-              onChange={e => onDataChange({ propertyType: e.target.value })}
-              placeholder="Sélectionner un type"
-              options={[
-                { value: "Villa", label: "Villa" },
-                { value: "Appartement", label: "Appartement" },
-                { value: "Penthouse", label: "Penthouse" },
-                { value: "Maison", label: "Maison" },
-                { value: "Duplex", label: "Duplex" },
-                { value: "Chalet", label: "Chalet" },
-                { value: "Terrain", label: "Terrain" },
-                { value: "Manoir", label: "Manoir" },
-                { value: "Maison de ville", label: "Maison de ville" },
-                { value: "Château", label: "Château" },
-                { value: "Local commercial", label: "Local commercial" }
-              ]}
-              icon={<Building className="h-4 w-4" />}
-            />
+            <StyledSelect id="propertyType" value={lead.propertyType || ''} onChange={e => onDataChange({
+            propertyType: e.target.value
+          })} placeholder="Sélectionner un type" options={[{
+            value: "Villa",
+            label: "Villa"
+          }, {
+            value: "Appartement",
+            label: "Appartement"
+          }, {
+            value: "Penthouse",
+            label: "Penthouse"
+          }, {
+            value: "Maison",
+            label: "Maison"
+          }, {
+            value: "Duplex",
+            label: "Duplex"
+          }, {
+            value: "Chalet",
+            label: "Chalet"
+          }, {
+            value: "Terrain",
+            label: "Terrain"
+          }, {
+            value: "Manoir",
+            label: "Manoir"
+          }, {
+            value: "Maison de ville",
+            label: "Maison de ville"
+          }, {
+            value: "Château",
+            label: "Château"
+          }, {
+            value: "Local commercial",
+            label: "Local commercial"
+          }]} icon={<Building className="h-4 w-4" />} />
           </div>
           
           <div className="space-y-2">
@@ -350,20 +348,24 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="propertyState" className="text-sm">État général</Label>
-            <StyledSelect
-              id="propertyState"
-              value={lead.propertyState || ''}
-              onChange={e => onDataChange({ propertyState: e.target.value as PropertyState })}
-              placeholder="Sélectionner un état"
-              options={[
-                { value: "Neuf", label: "Neuf" },
-                { value: "Bon état", label: "Bon état" },
-                { value: "À rafraîchir", label: "À rafraîchir" },
-                { value: "À rénover", label: "À rénover" },
-                { value: "À reconstruire", label: "À reconstruire" }
-              ]}
-              icon={<Settings className="h-4 w-4" />}
-            />
+            <StyledSelect id="propertyState" value={lead.propertyState || ''} onChange={e => onDataChange({
+            propertyState: e.target.value as PropertyState
+          })} placeholder="Sélectionner un état" options={[{
+            value: "Neuf",
+            label: "Neuf"
+          }, {
+            value: "Bon état",
+            label: "Bon état"
+          }, {
+            value: "À rafraîchir",
+            label: "À rafraîchir"
+          }, {
+            value: "À rénover",
+            label: "À rénover"
+          }, {
+            value: "À reconstruire",
+            label: "À reconstruire"
+          }]} icon={<Settings className="h-4 w-4" />} />
           </div>
 
           <div className="space-y-2">
@@ -672,12 +674,10 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({
       </div>
     </div>;
 };
-
 interface BuyerCriteriaSectionProps {
   lead: LeadDetailed;
   onDataChange: (data: Partial<LeadDetailed>) => void;
 }
-
 const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
   lead,
   onDataChange
@@ -689,7 +689,6 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
       propertyTypes: updatedTypes as PropertyType[]
     });
   };
-  
   const handleBedroomToggle = (value: string) => {
     const numValue = value === "8+" ? 8 : parseInt(value);
     const currentBedrooms = Array.isArray(lead.bedrooms) ? [...lead.bedrooms] : lead.bedrooms ? [lead.bedrooms] : [];
@@ -698,7 +697,6 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
       bedrooms: newBedrooms.length ? newBedrooms : undefined
     });
   };
-  
   const handleViewToggle = (view: string) => {
     const currentViews = lead.views || [];
     const updatedViews = currentViews.includes(view) ? currentViews.filter(v => v !== view) : [...currentViews, view];
@@ -706,7 +704,6 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
       views: updatedViews as ViewType[]
     });
   };
-  
   const handleAmenityToggle = (amenity: string) => {
     const currentAmenities = lead.amenities || [];
     const updatedAmenities = currentAmenities.includes(amenity) ? currentAmenities.filter(a => a !== amenity) : [...currentAmenities, amenity];
@@ -714,7 +711,6 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
       amenities: updatedAmenities
     });
   };
-  
   const handleBudgetChange = (type: 'min' | 'max', value: string) => {
     if (type === 'min') {
       onDataChange({
@@ -726,19 +722,16 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
       });
     }
   };
-  
   const handleCurrencyChange = (value: string) => {
     onDataChange({
       currency: value as Currency
     });
   };
-  
   const handleLocationChange = (location: string) => {
     onDataChange({
       desiredLocation: location
     });
   };
-  
   const getSelectedBedrooms = () => {
     if (!lead.bedrooms) return [];
     if (Array.isArray(lead.bedrooms)) {
@@ -749,12 +742,10 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
     const value = lead.bedrooms;
     return [value >= 8 ? "8+" : value.toString()];
   };
-  
   const propertyTypesList: PropertyType[] = ["Villa", "Appartement", "Penthouse", "Maison", "Duplex", "Chalet", "Terrain", "Manoir", "Maison de ville", "Château", "Local commercial", "Commercial", "Hotel", "Vignoble", "Autres"];
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
   const viewTypesList: ViewType[] = ["Mer", "Montagne", "Golf", "Autres"];
   const amenitiesList = ["Piscine", "Terrasse", "Balcon", "Jardin", "Parking", "Ascenseur", "Sécurité", "Climatisation"];
-  
   return <div className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
@@ -778,11 +769,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
         </div>
 
         <div className="space-y-2">
-          <LocationFilter 
-            location={lead.desiredLocation || ''} 
-            onLocationChange={handleLocationChange}
-            country={lead.country}
-          />
+          <LocationFilter location={lead.desiredLocation || ''} onLocationChange={handleLocationChange} country={lead.country} />
         </div>
 
         <div className="pt-2">
@@ -837,8 +824,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
           <div className="space-y-2">
             <Label htmlFor="purchaseTimeframe" className="text-sm font-medium">Délai d'acquisition</Label>
             <select id="purchaseTimeframe" value={lead.purchaseTimeframe || ''} onChange={e => onDataChange({
-              purchaseTimeframe: e.target.value as PurchaseTimeframe
-            })} className="w-full p-2 border border-gray-300 rounded font-futura">
+            purchaseTimeframe: e.target.value as PurchaseTimeframe
+          })} className=" font-futura bg-white rounded-md">
               <option value="">Sélectionner</option>
               <option value="Immédiat">Immédiat</option>
               <option value="1-3 mois">1-3 mois</option>
@@ -853,8 +840,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
           <div className="space-y-2">
             <Label htmlFor="financingMethod" className="text-sm font-medium">Mode de financement</Label>
             <select id="financingMethod" value={lead.financingMethod || ''} onChange={e => onDataChange({
-              financingMethod: e.target.value as FinancingMethod
-            })} className="w-full p-2 border border-gray-300 rounded font-futura">
+            financingMethod: e.target.value as FinancingMethod
+          })} className="w-full p-2 border border-gray-300 rounded font-futura">
               <option value="">Sélectionner</option>
               <option value="Cash">Cash</option>
               <option value="Crédit">Crédit</option>
@@ -867,8 +854,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
           <div className="space-y-2">
             <Label htmlFor="propertyUse" className="text-sm font-medium">Utilisation prévue</Label>
             <select id="propertyUse" value={lead.propertyUse || ''} onChange={e => onDataChange({
-              propertyUse: e.target.value as PropertyUse
-            })} className="w-full p-2 border border-gray-300 rounded font-futura">
+            propertyUse: e.target.value as PropertyUse
+          })} className="w-full p-2 border border-gray-300 rounded font-futura">
               <option value="">Sélectionner</option>
               <option value="Résidence principale">Résidence principale</option>
               <option value="Résidence secondaire">Résidence secondaire</option>
@@ -879,5 +866,4 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
       </div>
     </div>;
 };
-
 export default SearchCriteriaSection;
