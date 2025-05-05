@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { LeadDetailed } from '@/types/lead';
 import { ActionSuggestion } from '@/services/noteAnalysisService';
 import { toast } from '@/hooks/use-toast';
+
 interface LeadDetailActionBarProps {
   autoSaveEnabled: boolean;
   onAddAction: () => void;
@@ -14,6 +15,7 @@ interface LeadDetailActionBarProps {
   onManualSave?: () => void;
   actionSuggestions?: ActionSuggestion[];
 }
+
 const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   autoSaveEnabled,
   onAddAction,
@@ -28,6 +30,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   const [showSuggestionsBadge, setShowSuggestionsBadge] = useState<boolean>(false);
   const [pendingActionsCount, setPendingActionsCount] = useState<number>(0);
   const [notificationShown, setNotificationShown] = useState<boolean>(false);
+
   useEffect(() => {
     if (lead?.actionHistory) {
       const now = new Date();
@@ -47,9 +50,11 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
       }
     }
   }, [lead?.actionHistory, notificationShown]);
+
   useEffect(() => {
     setShowSuggestionsBadge(actionSuggestions && actionSuggestions.length > 0);
   }, [actionSuggestions]);
+
   const handleActionsClick = () => {
     const searchParams = new URLSearchParams(location.search);
     searchParams.set('tab', 'actions');
@@ -57,12 +62,15 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
       replace: true
     });
   };
+
   const handleNavigateToActions = () => {
     navigate('/actions');
   };
+
   const searchParams = new URLSearchParams(location.search);
   const currentTab = searchParams.get('tab');
   const isActionsTab = currentTab === 'actions';
+
   return <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex justify-center items-center transition-all animate-[slide-in_0.3s_ease-out] z-50">
       <div className="flex gap-3 w-full justify-between items-center">
         <div className="flex items-center gap-2">
@@ -78,10 +86,11 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               Toutes les actions
             </Button>}
         </div>
-        <Button onClick={onAddAction} size="sm" type="button" aria-label="Ajouter une nouvelle action" className="bg-chocolate-dark hover:bg-chocolate-light transition-all duration-200 active:scale-95 font-futura tracking-wide rounded-sm">
+        <Button onClick={onAddAction} size="sm" type="button" aria-label="Ajouter une nouvelle action" className="bg-chocolate-dark hover:bg-chocolate-light transition-all duration-200 active:scale-95 font-futura tracking-wide rounded-sm border border-loro-terracotta/50">
           Nouvelle action
         </Button>
       </div>
     </div>;
 };
+
 export default LeadDetailActionBar;
