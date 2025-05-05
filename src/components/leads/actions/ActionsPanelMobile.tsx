@@ -31,6 +31,27 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const isMobile = useIsMobile();
 
+  // Get the layout configuration based on viewport
+  const getLayoutConfig = () => {
+    if (isMobile) {
+      return {
+        containerClass: "pt-4",
+        actionCardClass: "p-2",
+        titleClass: "text-sm",
+        spacing: "space-y-3"
+      };
+    } else {
+      return {
+        containerClass: "pt-6 px-[100px]",
+        actionCardClass: "p-3",
+        titleClass: "text-base",
+        spacing: "space-y-4"
+      };
+    }
+  };
+
+  const layoutConfig = getLayoutConfig();
+
   useEffect(() => {
     const measureHeader = () => {
       const headerElement = document.querySelector('.bg-loro-sand');
@@ -330,21 +351,30 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   return (
     <div 
       className={cn(
-        "space-y-3",
-        isMobile ? "pt-4" : "pt-4 px-[100px]"
+        layoutConfig.spacing,
+        layoutConfig.containerClass
       )}
       style={{ marginTop: dynamicTopMargin }}
     >
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b">Actions en attente</h3>
+        <h3 className={cn(
+          "font-futura uppercase tracking-wider text-gray-800 pb-2 border-b",
+          isMobile ? "text-sm" : "text-base"
+        )}>Actions en attente</h3>
       </div>
 
       {pendingActions.length === 0 ? (
-        <div className="text-center py-5 border rounded-md bg-gray-50 animate-[fade-in_0.3s_ease-out]">
+        <div className={cn(
+          "text-center py-5 border rounded-md bg-gray-50 animate-[fade-in_0.3s_ease-out]",
+          isMobile ? "" : "max-w-3xl mx-auto"
+        )}>
           <p className="text-muted-foreground text-xs font-futura">Aucune action en attente</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className={cn(
+          "space-y-2", 
+          isMobile ? "" : "max-w-3xl mx-auto"
+        )}>
           {pendingActions.map((action) => {
             const isOverdue = action.scheduledDate ? isDatePast(action.scheduledDate) : false;
             const isCallAction = action.actionType === 'Call';
@@ -372,7 +402,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             return (
               <div 
                 key={action.id} 
-                className={`border rounded-md p-2 shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${bgColorClass} relative`}
+                className={cn(
+                  `border rounded-md shadow-sm transition-all duration-200 animate-[fade-in_0.3s_ease-out] ${bgColorClass} relative`,
+                  layoutConfig.actionCardClass
+                )}
               >
                 <div className="flex justify-between items-start mb-1">
                   <div className="flex items-center gap-1.5">
@@ -380,7 +413,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                       <Calendar className="h-3 w-3" />
                     </div>
                     <div>
-                      <h4 className="font-futura text-sm">{action.actionType}</h4>
+                      <h4 className={cn(
+                        "font-futura",
+                        isMobile ? "text-sm" : "text-base"
+                      )}>{action.actionType}</h4>
                       <div className="flex items-center text-xs text-gray-500">
                         <Clock className="h-2.5 w-2.5 mr-1" />
                         {action.scheduledDate ? formatDateSafely(action.scheduledDate) : 'Non programmée'}
@@ -390,15 +426,21 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="h-6 px-1.5 border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95"
+                    className={cn(
+                      "border-green-500 text-green-600 hover:bg-green-50 transition-all duration-200 active:scale-95",
+                      isMobile ? "h-6 px-1.5" : "h-8 px-3"
+                    )}
                     onClick={() => handleCompleteAction(action)}
                   >
-                    <Check className="h-3 w-3 mr-1" /> 
-                    <span className="text-xs font-futura">Terminer</span>
+                    <Check className={cn(isMobile ? "h-3 w-3 mr-1" : "h-4 w-4 mr-1.5")} /> 
+                    <span className={cn(isMobile ? "text-xs" : "text-sm", "font-futura")}>Terminer</span>
                   </Button>
                 </div>
                 {action.notes && (
-                  <div className={`text-xs p-1.5 rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${notesBgClass}`}>
+                  <div className={cn(
+                    `rounded-md mt-1.5 animate-[fade-in_0.2s_ease-out] ${notesBgClass}`,
+                    isMobile ? "text-xs p-1.5" : "text-sm p-2.5"
+                  )}>
                     {action.notes}
                   </div>
                 )}
@@ -419,14 +461,20 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       
       {completedActions.length > 0 && (
         <>
-          <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3">Historique des actions</h3>
-          <div className="space-y-2">
+          <h3 className={cn(
+            "font-futura uppercase tracking-wider text-gray-800 mt-6 mb-3",
+            isMobile ? "text-sm" : "text-base"
+          )}>Historique des actions</h3>
+          <div className={cn(
+            "space-y-2",
+            isMobile ? "" : "max-w-3xl mx-auto"
+          )}>
             {completedActions.map((action) => (
               <div 
                 key={action.id} 
                 className={cn(
-                  "border rounded-md p-2 bg-[#F1F0FB] transition-all duration-200 animate-[fade-in_0.3s_ease-out]",
-                  "opacity-80 relative"
+                  "border rounded-md bg-[#F1F0FB] transition-all duration-200 animate-[fade-in_0.3s_ease-out] opacity-80 relative",
+                  layoutConfig.actionCardClass
                 )}
               >
                 <div className="flex justify-between items-start mb-1">
@@ -435,7 +483,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                       <Check className="h-3 w-3" />
                     </div>
                     <div>
-                      <h4 className="font-futura text-sm text-gray-700">{action.actionType}</h4>
+                      <h4 className={cn(
+                        "font-futura text-gray-700",
+                        isMobile ? "text-sm" : "text-base"
+                      )}>{action.actionType}</h4>
                       <div className="flex items-center text-xs text-gray-500">
                         <Check className="h-2.5 w-2.5 mr-1 text-green-500" />
                         {action.completedDate ? formatDateSafely(action.completedDate) : 'Complété'}
@@ -444,7 +495,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   </div>
                 </div>
                 {action.notes && (
-                  <div className="text-xs bg-white p-1.5 rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out] border border-gray-100">
+                  <div className={cn(
+                    "bg-white rounded-md mt-1.5 text-gray-600 animate-[fade-in_0.2s_ease-out] border border-gray-100",
+                    isMobile ? "text-xs p-1.5" : "text-sm p-2.5"
+                  )}>
                     {action.notes}
                   </div>
                 )}
