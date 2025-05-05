@@ -23,7 +23,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
     });
   };
   return <>
-      <Separator className="bg-loro-pearl/60 h-[1px] w-full opacity-80" />
+      <Separator className="overflow-x-auto py-2 bg-loro-50" />
       <div className="h-[0.5px] w-full bg-gradient-to-r from-loro-sand/30 via-loro-terracotta/40 to-loro-sand/30 shadow-sm bg-loro-terracotta"></div>
       <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full border-b border-loro-sand/10">
         <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-50-overflow-x-auto py-2 bg-loro-50">
