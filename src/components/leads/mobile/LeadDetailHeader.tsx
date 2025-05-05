@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
@@ -140,27 +141,27 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   };
 
   const headerClasses = isMobile
-    ? "flex items-center justify-between p-3 w-full bg-loro-50"
+    ? "flex items-center justify-between p-3 w-full bg-[#0A2540] text-white"
     : "flex items-center justify-between p-3 w-full bg-loro-50";
 
   return <div className={headerClasses}>
       <div className="flex items-center gap-2 flex-1">
-        <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-loro-900 hover:bg-transparent transition-transform hover:scale-110 duration-200 flex-shrink-0">
+        <Button variant="ghost" size="icon" onClick={onBackClick} className="p-2 text-white hover:bg-transparent transition-transform hover:scale-110 duration-200 flex-shrink-0">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="truncate">
-          <h1 className="text-lg font-futura leading-tight truncate max-w-[180px] sm:max-w-[300px] md:max-w-[500px]">{name}</h1>
+          <h1 className="text-lg font-futura leading-tight truncate max-w-[180px] sm:max-w-[300px] md:max-w-[500px] text-white">{name}</h1>
           <p className="text-xs text-loro-terracotta">
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
           <div className="flex flex-wrap gap-2 mt-1 max-w-[250px] sm:max-w-[350px] md:max-w-[450px]">
-            {budget && <span className="text-xs bg-[#F5F3EE] px-2 py-1 rounded-xl border border-zinc-200">
+            {budget && <span className="text-xs bg-[#F5F3EE] px-2 py-1 rounded-xl border border-zinc-200 text-zinc-800">
                 {formatBudget(budget, currency)}
               </span>}
-            {desiredLocation && <span className="text-xs bg-[#EBD5CE] px-2 py-1 rounded-xl">
+            {desiredLocation && <span className="text-xs bg-[#EBD5CE] px-2 py-1 rounded-xl text-zinc-800">
                 {desiredLocation}
               </span>}
-            {country && <span className="text-xs bg-[#F3E9D6] px-2 py-1 rounded-xl border border-zinc-200">
+            {country && <span className="text-xs bg-[#F3E9D6] px-2 py-1 rounded-xl border border-zinc-200 text-zinc-800">
                 {country}
               </span>}
           </div>
@@ -170,12 +171,12 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
         <div className="flex items-center gap-2">
           {phone && <>
               <button onClick={handlePhoneClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Appeler">
-                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                <div className="bg-white/20 h-full w-full flex items-center justify-center text-white text-lg font-medium rounded-full">
                   <Phone className="h-4 w-4" />
                 </div>
               </button>
               <button onClick={handleWhatsAppClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="WhatsApp">
-                <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+                <div className="bg-white/20 h-full w-full flex items-center justify-center text-white text-lg font-medium rounded-full">
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
                     className="h-4 w-4"
@@ -188,7 +189,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
               </button>
             </>}
           {email && <button onClick={handleEmailClick} className="h-8 w-8 flex items-center justify-center rounded-full border border-white transition-transform hover:scale-110 duration-200" aria-label="Email">
-              <div className="bg-loro-sand/20 h-full w-full flex items-center justify-center text-zinc-900 text-lg font-medium rounded-full">
+              <div className="bg-white/20 h-full w-full flex items-center justify-center text-white text-lg font-medium rounded-full">
                 <Mail className="h-4 w-4" />
               </div>
             </button>}

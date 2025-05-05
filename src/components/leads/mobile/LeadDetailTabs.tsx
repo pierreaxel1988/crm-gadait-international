@@ -30,7 +30,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
   return <>
       <Separator className="bg-loro-pearl/60 h-[0.5px] w-full opacity-80" />
       <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full border-b border-loro-sand/10">
-        <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-50">
+        <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-sand">
           <TabsTrigger value="criteria" className="data-[state=active]:bg-loro-white data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1">
             <div className="flex flex-col items-center">
               <Target className="h-4 w-4 mb-1 data-[state=active]:text-loro-terracotta" />

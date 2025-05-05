@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -177,7 +178,7 @@ const LeadDetailMobile = () => {
   
   return <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
       <div className="fixed top-0 left-0 right-0 z-40 w-full">
-        <div className="bg-loro-sand pt-[env(safe-area-inset-top)]">
+        <div className="bg-[#0A2540] pt-[env(safe-area-inset-top)]">
           <LeadDetailHeader 
             name={lead.name} 
             createdAt={lead.createdAt} 
