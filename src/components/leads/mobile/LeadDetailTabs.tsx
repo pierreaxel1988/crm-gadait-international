@@ -1,12 +1,15 @@
+
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Check, FileText, Info, Target, Activity } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+
 interface LeadDetailTabsProps {
   defaultTab?: string;
   pendingActionsCount?: number;
 }
+
 const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
   defaultTab = 'info',
   pendingActionsCount = 0
@@ -14,6 +17,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const currentTab = new URLSearchParams(location.search).get('tab') || defaultTab;
+  
   const handleTabChange = (value: string) => {
     // Update URL with tab parameter
     const searchParams = new URLSearchParams(location.search);
@@ -22,9 +26,10 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
       replace: true
     });
   };
+  
   return <>
       <Separator className="bg-loro-pearl/60 h-[1px] w-full opacity-80" />
-      <div className="h-[6px] w-full bg-gradient-to-r from-loro-sand/30 via-loro-terracotta/40 to-loro-sand/30 shadow-sm bg-loro-terracotta"></div>
+      <div className="h-[3px] w-full bg-gradient-to-r from-loro-sand/30 via-loro-terracotta/40 to-loro-sand/30 shadow-sm bg-loro-terracotta"></div>
       <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full border-b border-loro-sand/10">
         <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-50">
           <TabsTrigger value="criteria" className="data-[state=active]:bg-loro-white data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1">
@@ -66,7 +71,8 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           </TabsTrigger>
         </TabsList>
       </Tabs>
-      <div className="h-[6px] w-full bg-gradient-to-r from-loro-sand/30 via-loro-terracotta/40 to-loro-sand/30 shadow-sm bg-loro-terracotta"></div>
+      <div className="h-[3px] w-full bg-gradient-to-r from-loro-sand/30 via-loro-terracotta/40 to-loro-sand/30 shadow-sm bg-loro-terracotta"></div>
     </>;
 };
+
 export default LeadDetailTabs;
