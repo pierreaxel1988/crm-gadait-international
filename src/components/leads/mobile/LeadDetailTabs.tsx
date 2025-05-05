@@ -29,7 +29,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
   
   return <>
       <Separator className="bg-loro-pearl/60 h-[1px] w-full opacity-80" />
-      <div className="h-[3px] w-full bg-gradient-to-r from-loro-sand/30 via-loro-terracotta/40 to-loro-sand/30 shadow-sm bg-loro-terracotta"></div>
+      <div className="h-[1px] w-full bg-gradient-to-r from-loro-sand/30 via-loro-terracotta/40 to-loro-sand/30 shadow-sm bg-loro-terracotta"></div>
       <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full border-b border-loro-sand/10">
         <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-50">
           <TabsTrigger value="criteria" className="data-[state=active]:bg-loro-white data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1">
@@ -71,7 +71,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           </TabsTrigger>
         </TabsList>
       </Tabs>
-      <div className="h-[3px] w-full bg-gradient-to-r from-loro-sand/30 via-loro-terracotta/40 to-loro-sand/30 shadow-sm bg-loro-terracotta"></div>
+      <div className="h-[1px] w-full bg-gradient-to-r from-loro-sand/30 via-loro-terracotta/40 to-loro-sand/30 shadow-sm bg-loro-terracotta"></div>
     </>;
 };
 
