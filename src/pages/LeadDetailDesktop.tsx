@@ -85,6 +85,11 @@ const LeadDetailDesktop = () => {
     );
   }
 
+  // Calculer le nombre d'actions en attente
+  const pendingActions = lead.action_history?.filter(
+    action => !action.completedDate
+  ).length || 0;
+
   return (
     <SidebarLayout>
       <div className="p-6 max-w-7xl mx-auto">
@@ -112,7 +117,14 @@ const LeadDetailDesktop = () => {
               <TabsTrigger 
                 value="actions"
                 className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
-              >Actions</TabsTrigger>
+              >
+                Actions
+                {pendingActions > 0 && (
+                  <div className="absolute -top-2 -right-1 bg-loro-terracotta text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                    {pendingActions}
+                  </div>
+                )}
+              </TabsTrigger>
               <TabsTrigger 
                 value="notes"
                 className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
