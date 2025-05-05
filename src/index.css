@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -207,6 +208,28 @@
     transform: skewX(-25deg);
     animation: shine 3s infinite ease-in-out;
   }
+  
+  /* Effet d'indicateur de navigation élégant */
+  .tab-indicator {
+    position: relative;
+  }
+  
+  .tab-indicator::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background-color: currentColor;
+    border-radius: 9999px;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .tab-indicator[data-state="active"]::after {
+    transform: scaleX(1);
+  }
 }
 
 .luxury-card {
@@ -293,6 +316,16 @@
   }
   50% {
     opacity: 0.6;
+  }
+}
+
+/* Animation de l'indicateur d'onglet */
+@keyframes tabIndicator {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }
 

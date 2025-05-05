@@ -38,17 +38,17 @@ const ChatTabsComponent: React.FC<ChatTabsComponentProps> = ({
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col relative">
       <div className="border-b border-loro-sand/30 sticky top-0 bg-white z-10">
-        <TabsList className="h-12 w-full bg-transparent">
+        <TabsList className="h-12 w-full bg-transparent relative">
           <TabsTrigger
             value="chat"
-            className="flex-1 data-[state=active]:text-loro-hazel data-[state=active]:border-b-2 data-[state=active]:border-loro-hazel rounded-none"
+            className="flex-1 data-[state=active]:text-loro-hazel data-[state=active]:border-b-0 data-[state=active]:border-loro-hazel rounded-none data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-[10%] data-[state=active]:after:w-[80%] data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-hazel data-[state=active]:after:rounded-full"
           >
             <MessageSquare className="h-4 w-4 mr-2" />
             Chat
           </TabsTrigger>
           <TabsTrigger
             value="property"
-            className="flex-1 data-[state=active]:text-loro-hazel data-[state=active]:border-b-2 data-[state=active]:border-loro-hazel rounded-none"
+            className="flex-1 data-[state=active]:text-loro-hazel data-[state=active]:border-b-0 data-[state=active]:border-loro-hazel rounded-none data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-[10%] data-[state=active]:after:w-[80%] data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-hazel data-[state=active]:after:rounded-full"
           >
             <Building2 className="h-4 w-4 mr-2" />
             Propriétés
