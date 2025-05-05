@@ -27,12 +27,12 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
   
   if (!actionHistory || actionHistory.length === 0) {
     return (
-      <div className="text-center py-4 px-3 animate-[fade-in_0.4s_ease-out] bg-loro-pearl/5 rounded-lg border border-loro-pearl/20">
-        <div className="mx-auto h-10 w-10 rounded-full bg-loro-pearl/30 flex items-center justify-center mb-3">
-          <AlertCircle className="h-5 w-5 text-loro-navy/60" />
+      <div className="text-center py-8 px-3 animate-[fade-in_0.4s_ease-out] bg-white rounded-lg border border-gray-100 shadow-sm">
+        <div className="mx-auto h-14 w-14 rounded-full bg-gray-50 flex items-center justify-center mb-3">
+          <AlertCircle className="h-7 w-7 text-loro-navy/40" />
         </div>
         <p className="text-loro-navy font-futura text-base tracking-wide">Aucune action dans l'historique</p>
-        <p className="text-xs text-loro-navy/60 font-futuraLight mt-1">Les actions terminées apparaîtront ici</p>
+        <p className="text-sm text-loro-navy/60 font-futuraLight mt-1">Les actions terminées apparaîtront ici</p>
       </div>
     );
   }
@@ -62,7 +62,7 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
     } else if (isYesterday(date)) {
       return "Hier";
     } else {
-      return format(date, 'dd/MM/yyyy', { locale: fr });
+      return format(date, 'dd MMMM yyyy', { locale: fr });
     }
   };
   
@@ -77,111 +77,132 @@ const ActionHistoryList: React.FC<ActionHistoryListProps> = ({
 
   return (
     <ScrollArea className="h-[calc(100vh-280px)]">
-      <div className="space-y-5 pr-3">
-        {sortedDates.map((dateString) => (
-          <div key={dateString} className="animate-[fade-in_0.4s_ease-out]">
-            <div className="flex items-center gap-2 mb-2.5 sticky top-0 bg-white py-1">
-              <div className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} rounded-full bg-loro-pearl/30 flex items-center justify-center`}>
-                <Calendar className={`${isMobile ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-loro-navy/70`} />
+      <div className="space-y-8 pr-3">
+        {sortedDates.map((dateString, dateIndex) => (
+          <div key={dateString} className={`animate-[fade-in_0.${dateIndex + 3}s_ease-out]`}>
+            <div className="flex items-center gap-2 mb-4 sticky top-0 bg-white py-2 z-10">
+              <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                <Calendar className="h-4 w-4 text-loro-navy/70" />
               </div>
-              <h3 className={`${isMobile ? 'text-xs' : 'text-sm'} font-futura text-loro-navy/80 tracking-wide`}>
+              <h3 className="text-base font-medium text-loro-navy tracking-wide">
                 {getFormattedDate(dateString)}
               </h3>
-              <Separator className="flex-1 bg-loro-pearl/30" />
+              <Separator className="flex-1 bg-gray-200" />
             </div>
             
-            <div className={`space-y-2 pl-${isMobile ? '3' : '4'} border-l border-loro-pearl/20`}>
-              {groupedActions[dateString].map((action) => {
+            <div className="space-y-4 pl-6 border-l-2 border-gray-200">
+              {groupedActions[dateString].map((action, actionIndex) => {
                 // Determine if action is overdue (past date and not completed)
                 const isOverdue = isDatePast(action.scheduledDate) && !action.completedDate;
                 
                 return (
-                  <Card 
+                  <div 
                     key={action.id} 
                     className={cn(
-                      "relative overflow-hidden transition-all duration-300 rounded-lg border shadow-sm",
-                      action.completedDate 
-                        ? "border-loro-pearl/30 bg-[#F1F0FB]" // Soft gray for completed actions
-                        : isOverdue
-                          ? "border-pink-200 bg-[#FFDEE2]/30" // Soft pink for overdue
-                          : "border-green-100 bg-[#F2FCE2]/40" // Soft green for upcoming
+                      "relative transition-all duration-300 hover:translate-x-1",
+                      "transform-gpu animate-[fade-in_0.6s_ease-out]",
+                      actionIndex % 2 === 0 ? "animate-delay-100" : "animate-delay-200"
                     )}
+                    style={{animationDelay: `${actionIndex * 0.1}s`}}
                   >
-                    {/* Dot on timeline */}
+                    {/* Timeline dot */}
                     <div 
                       className={cn(
-                        "absolute -left-[10px] top-1/2 transform -translate-y-1/2 h-4 w-4 rounded-full border-2 border-white",
+                        "absolute -left-[25px] top-4 h-5 w-5 rounded-full border-4 border-white",
                         action.completedDate 
                           ? "bg-green-500" 
                           : isOverdue
                             ? "bg-red-400"
-                            : "bg-green-300"
+                            : "bg-blue-400"
                       )}
                     />
                     
-                    <div className={`${isMobile ? 'p-2.5' : 'p-3'}`}>
-                      <div className="flex justify-between items-start gap-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2.5">
-                            <div className={cn(
-                              `${isMobile ? 'p-1.5' : 'p-1.5'} rounded-md`,
-                              action.completedDate 
-                                ? "bg-green-50" 
-                                : isOverdue
-                                  ? "bg-rose-50"
-                                  : "bg-green-50"
-                            )}>
-                              {getActionTypeIcon(action.actionType as TaskType)}
-                            </div>
-                            <div>
-                              <span className={`${
+                    <Card 
+                      className={cn(
+                        "overflow-hidden transition-all duration-300 hover:shadow-md",
+                        action.completedDate 
+                          ? "border-green-100 bg-green-50/40" 
+                          : isOverdue
+                            ? "border-red-100 bg-red-50/40"
+                            : "border-blue-100 bg-blue-50/40"
+                      )}
+                    >
+                      <div className={`p-4`}>
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                `p-2 rounded-md`,
                                 action.completedDate 
-                                  ? 'text-gray-600' 
+                                  ? "bg-green-100" 
                                   : isOverdue
-                                    ? 'text-rose-800'
-                                    : 'text-loro-navy/80'
-                              } font-futura ${isMobile ? 'text-xs' : 'text-sm'}`}>
-                                {action.actionType}
-                              </span>
-                              <div className="flex items-center gap-1 text-xs text-loro-navy/50 mt-0.5 font-futuraLight">
-                                {action.completedDate ? (
-                                  <Check className="h-3 w-3 text-green-500" />
-                                ) : (
-                                  <Clock className={`h-3 w-3 ${isOverdue ? 'text-red-400' : 'text-loro-navy/40'}`} />
-                                )}
-                                <span>
-                                  {format(new Date(action.completedDate || action.scheduledDate), 'HH:mm', { locale: fr })}
+                                    ? "bg-red-100"
+                                    : "bg-blue-100"
+                              )}>
+                                {getActionTypeIcon(action.actionType as TaskType)}
+                              </div>
+                              <div>
+                                <span className={`${
+                                  action.completedDate 
+                                    ? 'text-green-800' 
+                                    : isOverdue
+                                      ? 'text-red-800'
+                                      : 'text-blue-800'
+                                } font-medium text-base`}>
+                                  {action.actionType}
                                 </span>
+                                <div className="flex items-center gap-1.5 text-sm mt-0.5">
+                                  {action.completedDate ? (
+                                    <>
+                                      <Check className="h-3.5 w-3.5 text-green-600" />
+                                      <span className="text-green-700">
+                                        Terminé à {format(new Date(action.completedDate), 'HH:mm', { locale: fr })}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Clock className={`h-3.5 w-3.5 ${isOverdue ? 'text-red-500' : 'text-blue-500'}`} />
+                                      <span className={isOverdue ? 'text-red-700' : 'text-blue-700'}>
+                                        {isOverdue ? 'En retard depuis ' : 'Prévu pour '} 
+                                        {format(new Date(action.scheduledDate), 'HH:mm', { locale: fr })}
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
                               </div>
                             </div>
+                            
+                            {action.notes && (
+                              <p className={`text-sm mt-3 p-3 rounded-md font-light leading-relaxed ${
+                                action.completedDate 
+                                  ? 'bg-white text-gray-700 border border-green-100' 
+                                  : isOverdue
+                                    ? 'bg-white text-gray-700 border border-red-100'
+                                    : 'bg-white text-gray-700 border border-blue-100'
+                              }`}>
+                                {action.notes}
+                              </p>
+                            )}
                           </div>
                           
-                          {action.notes && (
-                            <p className={`${isMobile ? 'text-xs mt-1.5 p-2' : 'text-sm mt-2 p-2.5'} ${
-                              action.completedDate 
-                                ? 'bg-white rounded-md font-futuraLight text-gray-500 border border-loro-pearl/20' 
-                                : isOverdue
-                                  ? 'bg-[#FFF0F2] rounded-md font-futuraLight text-rose-800 border border-pink-100'
-                                  : 'bg-[#F7FEF1] rounded-md font-futuraLight text-green-800 border border-green-100'
-                            }`}>
-                              {action.notes}
-                            </p>
+                          {!action.completedDate && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => onMarkComplete(action.id)}
+                              className={`text-xs px-3 py-1 h-8 flex items-center gap-1 ${
+                                isOverdue 
+                                  ? 'border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800' 
+                                  : 'border-blue-300 text-blue-700 hover:bg-blue-50 hover:text-blue-800'
+                              } rounded-full`}
+                            >
+                              <Check className="h-3.5 w-3.5" /> Terminer
+                            </Button>
                           )}
                         </div>
-                        
-                        {!action.completedDate && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onMarkComplete(action.id)}
-                            className={`${isMobile ? 'text-[10px] px-2 py-0.5 h-6' : 'text-xs px-2.5 py-1 h-7'} flex items-center gap-1 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 rounded-full font-futura`}
-                          >
-                            <Check className={`${isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'}`} /> Terminer
-                          </Button>
-                        )}
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </div>
                 );
               })}
             </div>

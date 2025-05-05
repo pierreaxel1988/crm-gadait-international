@@ -109,60 +109,72 @@ const LeadDetailDesktop = () => {
         />
         <div className="mt-6">
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="mb-6 bg-loro-pearl/20 p-1 rounded-lg w-full flex flex-wrap">
+            <TabsList className="mb-6 bg-white shadow-sm p-1.5 rounded-xl w-full flex flex-wrap">
               <TabsTrigger 
                 value="info"
-                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
-              >Informations</TabsTrigger>
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:bg-loro-pearl/10 rounded-lg transition-all duration-300 data-[state=active]:shadow-sm relative px-4 py-2"
+              >
+                Informations
+              </TabsTrigger>
               <TabsTrigger 
                 value="actions"
-                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:bg-loro-pearl/10 rounded-lg transition-all duration-300 data-[state=active]:shadow-sm relative px-4 py-2"
               >
                 Actions
                 {pendingActions > 0 && (
-                  <div className="absolute -top-2 -right-1 bg-loro-terracotta text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                  <div className="absolute -top-2 -right-1 bg-loro-terracotta text-white rounded-full w-5 h-5 flex items-center justify-center text-xs animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]">
                     {pendingActions}
                   </div>
                 )}
               </TabsTrigger>
               <TabsTrigger 
                 value="notes"
-                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
-              >Notes</TabsTrigger>
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:bg-loro-pearl/10 rounded-lg transition-all duration-300 data-[state=active]:shadow-sm relative px-4 py-2"
+              >
+                Notes
+              </TabsTrigger>
               <TabsTrigger 
                 value="properties"
-                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
-              >Propriétés</TabsTrigger>
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:bg-loro-pearl/10 rounded-lg transition-all duration-300 data-[state=active]:shadow-sm relative px-4 py-2"
+              >
+                Propriétés
+              </TabsTrigger>
               <TabsTrigger 
                 value="documents"
-                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
-              >Documents</TabsTrigger>
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:bg-loro-pearl/10 rounded-lg transition-all duration-300 data-[state=active]:shadow-sm relative px-4 py-2"
+              >
+                Documents
+              </TabsTrigger>
               <TabsTrigger 
                 value="contacts"
-                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative"
-              >Contacts</TabsTrigger>
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:bg-loro-pearl/10 rounded-lg transition-all duration-300 data-[state=active]:shadow-sm relative px-4 py-2"
+              >
+                Contacts
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="info">
-              <LeadInfoTab lead={lead} />
-            </TabsContent>
-            <TabsContent value="actions">
-              <ActionsTab leadId={lead.id} />
-              {/* ChatGadait floating button - uniquement dans l'onglet actions */}
-              <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />
-            </TabsContent>
-            <TabsContent value="notes">
-              <NotesTab leadId={lead.id} />
-            </TabsContent>
-            <TabsContent value="properties">
-              <PropertiesTab leadId={lead.id} lead={lead} />
-            </TabsContent>
-            <TabsContent value="documents">
-              <DocumentsTab leadId={lead.id} />
-            </TabsContent>
-            <TabsContent value="contacts">
-              <ContactsTab leadId={lead.id} />
-            </TabsContent>
+            <div className="transition-all duration-300 animate-[fade-in_0.4s_ease-out]">
+              <TabsContent value="info">
+                <LeadInfoTab lead={lead} />
+              </TabsContent>
+              <TabsContent value="actions">
+                <ActionsTab leadId={lead.id} />
+                {/* ChatGadait floating button - uniquement dans l'onglet actions */}
+                <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />
+              </TabsContent>
+              <TabsContent value="notes">
+                <NotesTab leadId={lead.id} />
+              </TabsContent>
+              <TabsContent value="properties">
+                <PropertiesTab leadId={lead.id} lead={lead} />
+              </TabsContent>
+              <TabsContent value="documents">
+                <DocumentsTab leadId={lead.id} />
+              </TabsContent>
+              <TabsContent value="contacts">
+                <ContactsTab leadId={lead.id} />
+              </TabsContent>
+            </div>
           </Tabs>
         </div>
       </div>

@@ -1,15 +1,19 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Calendar, RefreshCw } from 'lucide-react';
+import { Plus, Calendar, RefreshCw, Clock, CheckCheck, History } from 'lucide-react';
 import { ActionHistory } from '@/types/actionHistory';
 import { format, isPast, isValid } from 'date-fns';
-import { getLead } from '@/services/leadCore';
+import { fr } from 'date-fns/locale';
 import { toast } from '@/hooks/use-toast';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ActionsPanelMobile from './actions/ActionsPanelMobile';
 import { supabase } from "@/integrations/supabase/client";
 import { syncExistingActionsWithLeads } from '@/services/leadActions';
+import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 interface ActionsTabProps {
   leadId: string;
@@ -198,7 +202,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
 
   if (isLoading || isSyncing) {
     return (
-      <div className="bg-white rounded-lg p-4 flex justify-center items-center h-40">
+      <div className="bg-white/70 backdrop-blur-sm rounded-lg p-4 flex justify-center items-center h-40">
         <div className="animate-spin h-6 w-6 border-3 border-chocolate-dark rounded-full border-t-transparent"></div>
       </div>
     );
@@ -228,77 +232,219 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     );
   }
 
+  const pendingActions = actionHistory?.filter(action => !action.completedDate) || [];
+  const completedActions = actionHistory?.filter(action => action.completedDate) || [];
+
+  // Function to get the appropriate style for action type badge
+  const getActionTypeBadgeStyle = (actionType: string) => {
+    switch(actionType) {
+      case 'Call': 
+        return 'bg-[#FFF0F5] text-[#D05A76] border-pink-200';
+      case 'Visites': 
+        return 'bg-[#F3F0FF] text-purple-700 border-purple-200';
+      case 'Follow up': 
+        return 'bg-[#FFF4E6] text-amber-700 border-amber-200';
+      case 'Compromis': 
+        return 'bg-[#FFFAEB] text-amber-800 border-amber-200';
+      case 'Acte de vente': 
+        return 'bg-[#FEF2F2] text-red-700 border-red-200';
+      case 'Estimation': 
+        return 'bg-[#F0FFF4] text-emerald-700 border-emerald-200';
+      case 'Propositions': 
+        return 'bg-[#F0F7FF] text-blue-700 border-blue-200';
+      default: 
+        return 'bg-[#F6F6F7] text-gray-700 border-gray-200';
+    }
+  };
+
   return (
-    <div className="bg-white rounded-lg p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Actions pour le lead</h2>
+    <div className="space-y-8 bg-white/50 backdrop-blur-sm rounded-xl shadow-sm border border-loro-pearl/20 p-6 animate-[fade-in_0.3s_ease-out]">
+      {/* Header with sync button */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-futura text-loro-navy tracking-tight">Actions</h2>
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="sm" 
           onClick={syncActions}
-          className="text-sm flex items-center gap-1"
+          className="text-loro-navy/70 hover:text-loro-navy font-futura flex items-center gap-1.5"
         >
-          <RefreshCw className="h-3.5 w-3.5" /> Synchroniser les actions
+          <RefreshCw className="h-4 w-4" /> 
+          <span className="tracking-wide">Synchroniser</span>
         </Button>
       </div>
       
-      {actionHistory && actionHistory.length > 0 ? (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Historique des actions</h3>
-          <div className="space-y-2">
-            {actionHistory.map((action) => {
-              const isPastAction = action.scheduledDate ? isPast(new Date(action.scheduledDate)) : false;
-              const isCompleted = !!action.completedDate;
-              
-              return (
-                <div 
-                  key={action.id} 
-                  className={`p-3 rounded-md border ${
-                    isCompleted 
-                      ? 'bg-green-50 border-green-200' 
-                      : isPastAction 
-                        ? 'bg-red-50 border-red-200' 
-                        : 'bg-blue-50 border-blue-200'
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="font-semibold">{action.actionType}</span>
-                      {action.scheduledDate && (
-                        <p className="text-sm text-gray-600">
-                          Prévu pour: {formatDateSafely(action.scheduledDate)}
-                        </p>
-                      )}
-                      {action.completedDate && (
-                        <p className="text-sm text-green-600">
-                          Complété le: {formatDateSafely(action.completedDate)}
-                        </p>
-                      )}
-                      {action.notes && (
-                        <p className="text-sm mt-1 p-2 bg-white rounded border border-gray-100">
-                          {action.notes}
-                        </p>
-                      )}
-                    </div>
-                    {!isCompleted && (
+      {/* Pending Actions Section */}
+      <Card className="overflow-hidden border-0 shadow-md bg-white rounded-xl transition-all duration-300 hover:shadow-lg">
+        <div className="bg-gradient-to-r from-loro-terracotta/90 to-loro-terracotta p-4">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+              <Clock className="h-4 w-4 text-white" />
+            </div>
+            <h3 className="text-white font-futura tracking-wide text-lg">Actions en attente</h3>
+          </div>
+        </div>
+        
+        <div className="p-5">
+          {pendingActions.length === 0 ? (
+            <div className="text-center p-8 bg-loro-pearl/5 rounded-lg">
+              <p className="text-loro-navy/60 font-futuraLight">Aucune action en attente</p>
+              <Button 
+                onClick={() => {}} 
+                className="mt-4 bg-loro-terracotta hover:bg-loro-terracotta/90 font-futura flex items-center gap-2 rounded-full"
+              >
+                <Plus className="h-4 w-4" /> 
+                <span className="tracking-wide">Créer une action</span>
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {pendingActions.map((action) => {
+                const isPastAction = action.scheduledDate ? isPast(new Date(action.scheduledDate)) : false;
+                
+                return (
+                  <div 
+                    key={action.id} 
+                    className={cn(
+                      "p-4 rounded-lg border transition-all duration-300 hover:shadow-md group",
+                      isPastAction 
+                        ? "bg-red-50/80 border-red-200" 
+                        : "bg-blue-50/40 border-blue-200"
+                    )}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <span className={cn(
+                            "px-3 py-1 rounded-full text-sm border font-medium inline-flex items-center gap-1.5",
+                            getActionTypeBadgeStyle(action.actionType)
+                          )}>
+                            {action.actionType}
+                          </span>
+                          
+                          {isPastAction && (
+                            <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs border border-red-200">
+                              En retard
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-4 w-4 text-loro-navy/70" />
+                          <span className="text-loro-navy font-futuraLight">
+                            {formatDateSafely(action.scheduledDate, 'dd MMM yyyy à HH:mm')}
+                          </span>
+                        </div>
+                        
+                        {action.notes && (
+                          <p className="text-sm mt-1 p-3 bg-white rounded-lg border border-loro-pearl/30 text-loro-navy/80">
+                            {action.notes}
+                          </p>
+                        )}
+                      </div>
+                      
                       <Button 
                         size="sm" 
                         onClick={() => handleMarkComplete(action)}
                         variant="outline"
-                        className="ml-2"
+                        className="ml-2 opacity-80 group-hover:opacity-100 transition-opacity border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800 rounded-full font-futura tracking-wide"
                       >
-                        Marquer comme terminé
+                        <CheckCheck className="h-4 w-4 mr-1.5" />
+                        Terminer
                       </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </Card>
+      
+      {/* Completed Actions Section */}
+      <Card className="overflow-hidden border-0 shadow-md bg-white rounded-xl transition-all duration-300 hover:shadow-lg">
+        <div className="bg-gradient-to-r from-loro-navy/90 to-loro-navy p-4">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+              <History className="h-4 w-4 text-white" />
+            </div>
+            <h3 className="text-white font-futura tracking-wide text-lg">Historique des actions</h3>
+          </div>
+        </div>
+        
+        <div className="max-h-[400px] overflow-y-auto p-5 scrollbar-none">
+          {completedActions.length === 0 ? (
+            <div className="text-center p-8 bg-loro-pearl/5 rounded-lg">
+              <p className="text-loro-navy/60 font-futuraLight">Aucune action complétée dans l'historique</p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {completedActions.map((action, index) => (
+                <div 
+                  key={action.id}
+                  className={cn(
+                    "relative p-4 border-l-2 border-green-400 ml-3 animate-[fade-in_0.4s_ease-out]",
+                    index !== completedActions.length - 1 && "pb-6"
+                  )}
+                >
+                  {/* Timeline dot */}
+                  <div className="absolute -left-[9px] top-5 h-4 w-4 rounded-full bg-green-400 ring-4 ring-white"></div>
+                  
+                  {/* Timeline vertical line continuing to next item */}
+                  {index !== completedActions.length - 1 && (
+                    <div className="absolute left-[-2px] top-9 bottom-0 w-0.5 bg-gray-200"></div>
+                  )}
+                  
+                  <div className="pl-2">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className={cn(
+                        "px-3 py-1 rounded-full text-sm border font-medium inline-flex items-center gap-1.5",
+                        getActionTypeBadgeStyle(action.actionType)
+                      )}>
+                        {action.actionType}
+                      </span>
+                      
+                      <span className="text-green-700 flex items-center gap-1 bg-green-50 px-2 py-0.5 rounded-full text-xs border border-green-200">
+                        <CheckCheck className="h-3 w-3" /> Terminé
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1.5 text-sm text-loro-navy/70 mb-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span className="font-futuraLight">
+                        Complétée le {formatDateSafely(action.completedDate, 'dd MMM yyyy à HH:mm')}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1.5 text-sm text-loro-navy/70">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span className="font-futuraLight">
+                        Prévue pour {formatDateSafely(action.scheduledDate, 'dd MMM yyyy à HH:mm')}
+                      </span>
+                    </div>
+                    
+                    {action.notes && (
+                      <p className="text-sm mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100 text-gray-600">
+                        {action.notes}
+                      </p>
                     )}
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
-      ) : (
-        <p className="text-gray-500">Aucune action disponible pour le moment.</p>
-      )}
+      </Card>
+      
+      {/* Add new action button */}
+      <div className="flex justify-end pt-2">
+        <Button 
+          onClick={() => {}} 
+          className="bg-loro-terracotta hover:bg-loro-terracotta/90 shadow-lg hover:shadow-xl transition-all duration-300 font-futura flex items-center gap-2 rounded-full"
+        >
+          <Plus className="h-4 w-4" /> 
+          <span className="tracking-wide">Nouvelle action</span>
+        </Button>
+      </div>
     </div>
   );
 };
