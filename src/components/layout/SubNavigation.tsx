@@ -40,7 +40,7 @@ const SubNavigation = () => {
             {navigationItems.map(item => <Link key={item.name} to={item.path} className={cn(
               "flex items-center justify-center whitespace-nowrap rounded-md p-2 flex-1 mx-1 transition-transform hover:scale-110 duration-200 bg-loro-50 relative", 
               location.pathname === item.path 
-                ? "text-loro-terracotta after:content-[''] after:absolute after:bottom-[-8px] after:left-[10%] after:w-[80%] after:h-[2px] after:bg-loro-terracotta after:rounded-full" 
+                ? "text-loro-terracotta after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-[2px] after:bg-loro-terracotta" 
                 : "text-loro-navy hover:text-loro-terracotta"
             )}>
                 {item.icon && <item.icon className="h-5 w-5" />}
@@ -66,7 +66,7 @@ const SubNavigation = () => {
                       "flex items-center justify-center rounded-md transition-transform hover:scale-110 duration-200 bg-loro-50 relative",
                       isTablet ? "px-2 py-2" : "px-3 py-2",
                       location.pathname === item.path 
-                        ? "text-loro-terracotta font-medium after:content-[''] after:absolute after:bottom-[-8px] after:left-[10%] after:w-[80%] after:h-[2px] after:bg-loro-terracotta after:rounded-full" 
+                        ? "text-loro-terracotta font-medium after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-[2px] after:bg-loro-terracotta" 
                         : "text-loro-navy hover:text-loro-terracotta"
                     )}
                   >
