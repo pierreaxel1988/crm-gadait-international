@@ -13,7 +13,7 @@ const TagList = ({ tags }: TagListProps) => {
   const firstTag = tags[0];
   
   return (
-    <TagBadge key={firstTag} tag={firstTag} className="text-xs py-0.5 px-2 font-futura tracking-wide" />
+    <TagBadge key={firstTag} tag={firstTag} className="text-xs py-0.5 px-2 font-futura tracking-wide rounded-md" />
   );
 };
 

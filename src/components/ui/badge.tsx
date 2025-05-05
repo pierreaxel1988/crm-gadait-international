@@ -23,10 +23,15 @@ const badgeVariants = cva(
         normal: "font-normal",
         semibold: "font-semibold",
       },
+      size: {
+        default: "text-xs px-2.5 py-0.5",
+        sm: "text-[10px] px-2 py-0.5",
+      }
     },
     defaultVariants: {
       variant: "default",
       weight: "semibold",
+      size: "default",
     },
   }
 )
@@ -35,9 +40,9 @@ export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {}
 
-function Badge({ className, variant, weight, ...props }: BadgeProps) {
+function Badge({ className, variant, weight, size, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant, weight }), className)} {...props} />
+    <div className={cn(badgeVariants({ variant, weight, size }), className)} {...props} />
   )
 }
 

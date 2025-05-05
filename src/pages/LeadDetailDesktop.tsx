@@ -7,6 +7,7 @@ import { useLeadDetail } from '@/hooks/useLeadDetail';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import LeadHeader from '@/components/leads/LeadHeader';
 import ChatGadaitFloatingButton from '@/components/chat/ChatGadaitFloatingButton';
+import Container from '@/components/ui/container';
 
 // Import components from correct paths
 import LeadInfoTab from '@/components/leads/LeadInfoTab';
@@ -60,27 +61,29 @@ const LeadDetailDesktop = () => {
   if (errorMessage || !lead) {
     return (
       <SidebarLayout>
-        <div className="p-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="mb-6 text-loro-terracotta"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Retour
-          </Button>
-          <div className="flex flex-col items-center justify-center min-h-[50vh]">
-            <p className="text-red-500 font-medium">
-              {errorMessage || "Ce lead n'existe pas ou vous n'avez pas les droits d'accès."}
-            </p>
-            <Button 
-              onClick={() => navigate('/leads')} 
-              className="mt-4 bg-loro-terracotta hover:bg-loro-terracotta/90"
+        <Container>
+          <div className="py-6">
+            <Button
+              variant="ghost"
+              onClick={() => navigate(-1)}
+              className="mb-6 text-loro-terracotta"
             >
-              Retour à la liste des leads
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Retour
             </Button>
+            <div className="flex flex-col items-center justify-center min-h-[50vh]">
+              <p className="text-red-500 font-medium">
+                {errorMessage || "Ce lead n'existe pas ou vous n'avez pas les droits d'accès."}
+              </p>
+              <Button 
+                onClick={() => navigate('/leads')} 
+                className="mt-4 bg-loro-terracotta hover:bg-loro-terracotta/90"
+              >
+                Retour à la liste des leads
+              </Button>
+            </div>
           </div>
-        </div>
+        </Container>
       </SidebarLayout>
     );
   }
@@ -92,7 +95,7 @@ const LeadDetailDesktop = () => {
 
   return (
     <SidebarLayout>
-      <div className="p-6 max-w-7xl mx-auto">
+      <Container className="py-6">
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
@@ -143,29 +146,29 @@ const LeadDetailDesktop = () => {
               >Contacts</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="info">
+            <TabsContent value="info" className="animate-fade-in">
               <LeadInfoTab lead={lead} />
             </TabsContent>
-            <TabsContent value="actions">
+            <TabsContent value="actions" className="animate-fade-in">
               <ActionsTab leadId={lead.id} />
               {/* ChatGadait floating button - uniquement dans l'onglet actions */}
               <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />
             </TabsContent>
-            <TabsContent value="notes">
+            <TabsContent value="notes" className="animate-fade-in">
               <NotesTab leadId={lead.id} />
             </TabsContent>
-            <TabsContent value="properties">
+            <TabsContent value="properties" className="animate-fade-in">
               <PropertiesTab leadId={lead.id} lead={lead} />
             </TabsContent>
-            <TabsContent value="documents">
+            <TabsContent value="documents" className="animate-fade-in">
               <DocumentsTab leadId={lead.id} />
             </TabsContent>
-            <TabsContent value="contacts">
+            <TabsContent value="contacts" className="animate-fade-in">
               <ContactsTab leadId={lead.id} />
             </TabsContent>
           </Tabs>
         </div>
-      </div>
+      </Container>
     </SidebarLayout>
   );
 };
