@@ -66,7 +66,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
   return <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex justify-center items-center transition-all animate-[slide-in_0.3s_ease-out] z-50">
       <div className="flex gap-3 w-full justify-between items-center">
         <div className="flex items-center gap-2">
-          {!isActionsTab && <Button variant="outline" size="sm" onClick={handleActionsClick} className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide flex items-center gap-2 border-loro-navy/30 bg-loro-50 text-loro-navy">
+          {!isActionsTab && <Button variant="outline" size="sm" onClick={handleActionsClick} className="px-4 transition-all duration-200 active:scale-95 font-futura tracking-wide flex items-center gap-2 border-loro-navy/30 text-loro-navy bg-loro-white">
               <History className="h-4 w-4 text-loro-navy" />
               Actions
               {(showSuggestionsBadge || pendingActionsCount > 0) && <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[#FFDEE2] text-loro-terracotta text-[10px] ml-1">
