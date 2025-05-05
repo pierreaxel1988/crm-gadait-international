@@ -121,7 +121,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               onClick={handleActionsClick}
             >
               <History className={cn(layoutConfig.iconSize, "text-loro-navy")} />
-              Actions
+              <span className={isMobile ? "" : "font-medium"}>Actions</span>
               {(showSuggestionsBadge || pendingActionsCount > 0) && (
                 <div className={cn(
                   "flex items-center justify-center rounded-full bg-[#FFDEE2] text-loro-terracotta ml-1",
@@ -145,7 +145,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               )}
               onClick={handleNavigateToActions}
             >
-              Toutes les actions
+              <span className={isMobile ? "" : "font-medium"}>Toutes les actions</span>
             </Button>
           )}
         </div>
@@ -159,7 +159,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
           type="button" 
           aria-label="Ajouter une nouvelle action"
         >
-          Nouvelle action
+          {isMobile ? "Nouvelle action" : "Nouvelle action"}
         </Button>
       </div>
     </div>

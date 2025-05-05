@@ -7,6 +7,7 @@ import { useLeadDetail } from '@/hooks/useLeadDetail';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import LeadHeader from '@/components/leads/LeadHeader';
 import ChatGadaitFloatingButton from '@/components/chat/ChatGadaitFloatingButton';
+import LeadDetailActionBar from '@/components/leads/mobile/LeadDetailActionBar';
 
 // Import components from correct paths
 import LeadInfoTab from '@/components/leads/LeadInfoTab';
@@ -32,6 +33,7 @@ const LeadDetailDesktop = () => {
   const [activeTab, setActiveTab] = useState('info');
   const { lead, isLoading: loading } = useLeadDetail(id!); // Fix here to avoid using error property
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Add local error state
+  const [showActionDialog, setShowActionDialog] = useState(false);
 
   useEffect(() => {
     // Déterminer l'onglet actif depuis les paramètres d'URL ou utiliser "info" par défaut
@@ -44,6 +46,10 @@ const LeadDetailDesktop = () => {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     setSearchParams({ tab: value });
+  };
+
+  const handleAddAction = () => {
+    setShowActionDialog(true);
   };
 
   if (loading) {
@@ -92,7 +98,7 @@ const LeadDetailDesktop = () => {
 
   return (
     <SidebarLayout>
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6 pb-24 max-w-7xl mx-auto">
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
@@ -104,7 +110,7 @@ const LeadDetailDesktop = () => {
         <LeadHeader 
           lead={lead} 
           onBack={() => navigate(-1)}
-          onAddAction={() => {}}
+          onAddAction={handleAddAction}
           onDelete={() => {}}
         />
         <div className="mt-6">
@@ -166,6 +172,14 @@ const LeadDetailDesktop = () => {
           </Tabs>
         </div>
       </div>
+
+      {/* Action bar at the bottom of the screen */}
+      <LeadDetailActionBar
+        autoSaveEnabled={true}
+        onAddAction={handleAddAction}
+        lead={lead}
+        actionSuggestions={[]}
+      />
     </SidebarLayout>
   );
 };
