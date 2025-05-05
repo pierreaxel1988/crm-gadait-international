@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Phone, Mail } from 'lucide-react';
@@ -140,9 +139,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const headerClasses = isMobile
-    ? "flex items-center justify-between p-3 w-full bg-[#0A2540] text-white"
-    : "flex items-center justify-between p-3 w-full bg-loro-50";
+  const headerClasses = "flex items-center justify-between p-3 w-full bg-[#0A2540] text-white";
 
   return <div className={headerClasses}>
       <div className="flex items-center gap-2 flex-1">
