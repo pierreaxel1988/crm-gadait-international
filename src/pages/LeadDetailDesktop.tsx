@@ -7,6 +7,7 @@ import { useLeadDetail } from '@/hooks/useLeadDetail';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import LeadHeader from '@/components/leads/LeadHeader';
 import ChatGadaitFloatingButton from '@/components/chat/ChatGadaitFloatingButton';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Import components from correct paths
 import LeadInfoTab from '@/components/leads/LeadInfoTab';
@@ -32,6 +33,7 @@ const LeadDetailDesktop = () => {
   const [activeTab, setActiveTab] = useState('info');
   const { lead, isLoading: loading } = useLeadDetail(id!); // Fix here to avoid using error property
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Add local error state
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Déterminer l'onglet actif depuis les paramètres d'URL ou utiliser "info" par défaut
@@ -90,9 +92,11 @@ const LeadDetailDesktop = () => {
     action => !action.completedDate
   ).length || 0;
 
+  const contentPadding = isMobile ? "p-6" : "p-6 px-[100px]";
+
   return (
     <SidebarLayout>
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className={`max-w-7xl mx-auto ${contentPadding}`}>
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
@@ -143,26 +147,28 @@ const LeadDetailDesktop = () => {
               >Contacts</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="info">
-              <LeadInfoTab lead={lead} />
-            </TabsContent>
-            <TabsContent value="actions">
-              <ActionsTab leadId={lead.id} />
-              {/* ChatGadait floating button - uniquement dans l'onglet actions */}
-              <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />
-            </TabsContent>
-            <TabsContent value="notes">
-              <NotesTab leadId={lead.id} />
-            </TabsContent>
-            <TabsContent value="properties">
-              <PropertiesTab leadId={lead.id} lead={lead} />
-            </TabsContent>
-            <TabsContent value="documents">
-              <DocumentsTab leadId={lead.id} />
-            </TabsContent>
-            <TabsContent value="contacts">
-              <ContactsTab leadId={lead.id} />
-            </TabsContent>
+            <div className={isMobile ? "" : "px-[100px]"}>
+              <TabsContent value="info">
+                <LeadInfoTab lead={lead} />
+              </TabsContent>
+              <TabsContent value="actions">
+                <ActionsTab leadId={lead.id} />
+                {/* ChatGadait floating button - uniquement dans l'onglet actions */}
+                <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />
+              </TabsContent>
+              <TabsContent value="notes">
+                <NotesTab leadId={lead.id} />
+              </TabsContent>
+              <TabsContent value="properties">
+                <PropertiesTab leadId={lead.id} lead={lead} />
+              </TabsContent>
+              <TabsContent value="documents">
+                <DocumentsTab leadId={lead.id} />
+              </TabsContent>
+              <TabsContent value="contacts">
+                <ContactsTab leadId={lead.id} />
+              </TabsContent>
+            </div>
           </Tabs>
         </div>
       </div>
