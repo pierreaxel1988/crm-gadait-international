@@ -78,7 +78,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
               Toutes les actions
             </Button>}
         </div>
-        <Button onClick={onAddAction} size="sm" type="button" aria-label="Ajouter une nouvelle action" className="transition-all duration-200 active:scale-95 font-futura tracking-wide rounded-sm border border-loro-terracotta/50 bg-loro-text">
+        <Button onClick={onAddAction} size="sm" type="button" aria-label="Ajouter une nouvelle action" className="transition-all duration-200 active:scale-95 font-futura tracking-wide rounded-sm border border-loro-terracotta/50 bg-[#0A2540] text-white">
           Nouvelle action
         </Button>
       </div>
