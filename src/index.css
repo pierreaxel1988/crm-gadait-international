@@ -140,6 +140,16 @@
   }
   
   /* Styles pour le header immersif */
+  .immersive-header-overlay {
+    background-color: #0A2540;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top);
+    z-index: 50;
+  }
+  
   .immersive-header {
     background-color: #0A2540;
     position: fixed;
