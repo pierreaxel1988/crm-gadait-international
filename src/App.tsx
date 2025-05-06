@@ -24,6 +24,7 @@ const Admin = lazy(() => import('./pages/Admin'));
 const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const ChatGadaitPage = lazy(() => import('./pages/ChatGadaitPage'));
+const PropertiesPage = lazy(() => import('./pages/Properties')); // Importer la nouvelle page
 
 function App() {
   return (
@@ -72,6 +73,12 @@ function App() {
             <Route path="/chat" element={
               <ProtectedRoute commercialAllowed={true}>
                 <ChatGadaitPage />
+              </ProtectedRoute>
+            } />
+            {/* Nouvelle route pour les propriétés */}
+            <Route path="/properties" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <PropertiesPage />
               </ProtectedRoute>
             } />
             
