@@ -16,6 +16,13 @@ const BROWSE_AI_API_KEY = "c359de7f-64c3-4d74-a815-72fc3bc77790:444d7cb6-a51c-4a
 
 // Fonction pour extraire le prix et la localisation
 function extractPriceAndLocation(priceLocationString: string) {
+  if (!priceLocationString) {
+    console.log("priceLocationString est vide ou null");
+    return { price: null, numericPrice: null, currency: "EUR", location: null };
+  }
+  
+  console.log("Analyse de la chaîne:", priceLocationString);
+  
   // Format attendu: "€1,600,000 Tamarin, Mauritius"
   // Capturer la partie prix avec une expression régulière plus précise
   const priceMatch = priceLocationString.match(/[€$£]([\d,]+)/);
@@ -36,6 +43,10 @@ function extractPriceAndLocation(priceLocationString: string) {
     if (currencySymbol === "£") currency = "GBP";
     else if (currencySymbol === "$") currency = "USD";
     else if (currencySymbol === "€") currency = "EUR";
+    
+    console.log(`Prix extrait: ${price}, devise: ${currency}`);
+  } else {
+    console.log("Aucun prix trouvé dans la chaîne");
   }
   
   // Extraire la localisation (tout ce qui suit le prix et un espace)
@@ -43,9 +54,11 @@ function extractPriceAndLocation(priceLocationString: string) {
     // Prendre tout ce qui suit le prix avec symbole monétaire
     const pricePartLength = priceMatch[0].length + priceMatch.index;
     location = priceLocationString.substring(pricePartLength).trim();
+    console.log(`Localisation extraite: ${location}`);
   } else {
     // Si pas de prix trouvé, prendre toute la chaîne comme localisation
     location = priceLocationString.trim();
+    console.log(`Localisation par défaut: ${location}`);
   }
   
   return { price, numericPrice, currency, location };
@@ -71,7 +84,8 @@ async function createNewBrowseAITask() {
     });
     
     if (!response.ok) {
-      throw new Error(`Erreur API Browse AI: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Erreur API Browse AI (${response.status}): ${errorText}`);
     }
     
     const data = await response.json();
@@ -104,7 +118,8 @@ async function fetchPropertiesFromBrowseAI() {
     });
     
     if (!response.ok) {
-      throw new Error(`Erreur API Browse AI: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Erreur API Browse AI (${response.status}): ${errorText}`);
     }
     
     const data = await response.json();
@@ -131,11 +146,13 @@ async function fetchPropertiesFromBrowseAI() {
       
       if (monitorResponse.ok) {
         const monitorData = await monitorResponse.json();
-        console.log(`${monitorData.monitors?.length || 0} moniteurs trouvés`);
+        console.log("Données moniteur reçues:", JSON.stringify(monitorData, null, 2));
         
-        // FIX: Vérifier que monitors est un tableau avant d'utiliser find
-        const monitors = monitorData.monitors || [];
+        // Vérifier que monitors.items est un tableau avant d'utiliser find
+        const monitors = monitorData.monitors?.items || [];
         if (Array.isArray(monitors)) {
+          console.log(`${monitors.length} moniteurs trouvés`);
+          
           // Trouver le moniteur "Daily Property Monitor" s'il existe
           const dailyMonitor = monitors.find((monitor: any) => 
             monitor.name === "Daily Property Monitor" || 
@@ -164,12 +181,14 @@ async function fetchPropertiesFromBrowseAI() {
                 console.log(`${successfulMonitorTasks.length} tâches réussies trouvées dans le moniteur`);
                 return successfulMonitorTasks[0];
               }
+            } else {
+              console.log("Erreur lors de la récupération des tâches du moniteur:", await monitorTasksResponse.text());
             }
           } else {
             console.log("Aucun moniteur Daily Property Monitor trouvé");
           }
         } else {
-          console.log("La propriété 'monitors' n'est pas un tableau:", monitorData);
+          console.log("Le moniteur n'a pas de tableau items:", monitorData);
         }
       } else {
         console.log("Erreur lors de la récupération des moniteurs:", await monitorResponse.text());
@@ -204,15 +223,42 @@ async function fetchTaskResult(taskId: string) {
     });
     
     if (!response.ok) {
-      throw new Error(`Erreur API Browse AI: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Erreur API Browse AI (${response.status}) pour la tâche ${taskId}: ${errorText}`);
     }
     
     const data = await response.json();
+    console.log(`Détails de la tâche ${taskId} récupérés avec succès`);
     return data.task;
   } catch (error) {
-    console.error("Erreur lors de la récupération du détail de la tâche:", error);
+    console.error(`Erreur lors de la récupération du détail de la tâche ${taskId}:`, error);
     throw error;
   }
+}
+
+// Détermine le type de propriété (vente ou location)
+function determinePropertyType(title: string, propertyType: string, priceInfo: string): 'sale' | 'rental' {
+  // Par défaut, considérer comme une vente
+  let type: 'sale' | 'rental' = 'sale';
+  
+  // Vérifier dans le titre
+  const titleLower = title?.toLowerCase() || '';
+  const propertyTypeLower = propertyType?.toLowerCase() || '';
+  const priceInfoLower = priceInfo?.toLowerCase() || '';
+  
+  // Mots-clés qui pourraient indiquer une location
+  const rentalKeywords = ['rent', 'rental', 'location', 'to let', 'for let', 'monthly', 'per month', '/month', '/mo'];
+  
+  // Vérifier si l'un des mots-clés de location est présent
+  for (const keyword of rentalKeywords) {
+    if (titleLower.includes(keyword) || propertyTypeLower.includes(keyword) || priceInfoLower.includes(keyword)) {
+      type = 'rental';
+      break;
+    }
+  }
+  
+  console.log(`Type de propriété déterminé: ${type} pour "${title}"`);
+  return type;
 }
 
 // Fonction améliorée pour traiter et importer les propriétés
@@ -221,11 +267,12 @@ async function processAndImportProperties(taskResult: any, supabase: any) {
   
   // Vérifier si les données sont disponibles
   if (!taskResult.capturedLists || !taskResult.capturedLists.properties) {
+    console.error("Structure des données invalide:", taskResult);
     throw new Error("Aucune propriété trouvée dans les résultats de la tâche");
   }
   
   const properties = taskResult.capturedLists.properties;
-  console.log(`${properties.length} propriétés trouvées`);
+  console.log(`${properties.length} propriétés trouvées dans les résultats`);
   
   const stats = {
     total: properties.length,
@@ -234,39 +281,76 @@ async function processAndImportProperties(taskResult: any, supabase: any) {
     failed: 0,
   };
   
+  // Debug: afficher les 2 premières propriétés pour vérifier la structure
+  if (properties.length > 0) {
+    console.log("Exemple de propriété 1:", JSON.stringify(properties[0], null, 2));
+    if (properties.length > 1) {
+      console.log("Exemple de propriété 2:", JSON.stringify(properties[1], null, 2));
+    }
+  }
+  
   // Traiter chaque propriété
   for (const property of properties) {
     try {
+      console.log(`Traitement de la propriété: ${property.title || 'Sans titre'}`);
+      
+      // Vérifier les données essentielles
+      if (!property.property_url) {
+        console.warn("URL manquante pour une propriété, ignorée");
+        stats.failed++;
+        continue;
+      }
+      
       // Extraire le prix et la localisation avec la fonction améliorée
       const { price, numericPrice, currency, location } = extractPriceAndLocation(property.price_and_location || "");
+      
+      // Déterminer si c'est une vente ou une location
+      const propertyType = determinePropertyType(property.title, property.property_type, property.price_and_location || "");
       
       // Préparer les données de la propriété avec champs séparés
       const propertyData = {
         external_id: property.property_url, // Utiliser l'URL comme ID externe
-        title: property.title,
-        property_type: property.property_type,
+        title: property.title || "Propriété sans titre",
+        property_type: property.property_type || "Non spécifié",
         bedrooms: parseInt(property.bedrooms) || null,
-        area: parseFloat(property.surface.replace(/[^\d.]/g, "")) || null,
-        area_unit: property.surface.includes("m²") ? "m²" : "ft²",
+        area: parseFloat((property.surface || "").replace(/[^\d.]/g, "")) || null,
+        area_unit: (property.surface || "").includes("m²") ? "m²" : "ft²",
         price: price, // Prix en tant que nombre
         currency, // Devise séparée
         location, // Localisation séparée
         country: "Mauritius",
         url: property.property_url,
         images: property.images?.split(",").map((url: string) => url.trim()) || [],
-        description: property.title, // Utiliser le titre comme description par défaut
+        description: property.description || property.title || "",
         updated_at: new Date().toISOString(),
+        listing_type: propertyType, // 'sale' ou 'rental'
       };
       
+      console.log(`Données préparées pour ${propertyData.title}:`, JSON.stringify({
+        external_id: propertyData.external_id.substring(0, 30) + "...",
+        title: propertyData.title,
+        price: propertyData.price,
+        currency: propertyData.currency,
+        bedrooms: propertyData.bedrooms,
+        area: propertyData.area,
+        listing_type: propertyData.listing_type
+      }, null, 2));
+      
       // Vérifier si la propriété existe déjà
-      const { data: existingProperty } = await supabase
+      const { data: existingProperty, error: selectError } = await supabase
         .from("properties")
-        .select("id, external_id")
+        .select("id, external_id, updated_at")
         .eq("external_id", property.property_url)
         .maybeSingle();
         
+      if (selectError) {
+        console.error("Erreur lors de la vérification de l'existence de la propriété:", selectError);
+        throw selectError;
+      }
+        
       if (existingProperty) {
         // Mettre à jour la propriété existante
+        console.log(`Mise à jour de la propriété existante: ${existingProperty.id}`);
         const { error } = await supabase
           .from("properties")
           .update(propertyData)
@@ -277,8 +361,10 @@ async function processAndImportProperties(taskResult: any, supabase: any) {
           throw error;
         }
         stats.updated++;
+        console.log(`Propriété mise à jour avec succès: ${property.title}`);
       } else {
         // Créer une nouvelle propriété
+        console.log(`Création d'une nouvelle propriété: ${property.title}`);
         const { error } = await supabase
           .from("properties")
           .insert(propertyData);
@@ -288,16 +374,15 @@ async function processAndImportProperties(taskResult: any, supabase: any) {
           throw error;
         }
         stats.created++;
+        console.log(`Nouvelle propriété créée avec succès: ${property.title}`);
       }
-      
-      // Log de réussite
-      console.log(`Propriété traitée avec succès: ${property.title}`);
     } catch (error) {
       console.error(`Erreur lors du traitement de la propriété:`, error);
       stats.failed++;
     }
   }
   
+  console.log("Stats finales:", stats);
   return stats;
 }
 
@@ -325,6 +410,7 @@ serve(async (req: Request) => {
       throw new Error("Impossible d'obtenir une tâche valide de Browse AI");
     }
     
+    // Récupérer le détail de la tâche
     const taskResult = await fetchTaskResult(latestTask.id);
     
     // Vérifier que le résultat de la tâche est valide
