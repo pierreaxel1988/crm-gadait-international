@@ -463,14 +463,30 @@ async function processAndImportProperties(taskResult: any, supabase: any) {
       // Déterminer si c'est une vente ou une location
       const propertyType = determinePropertyType(property.title, property.property_type, property.price_and_location || "");
       
+      // Extraire la surface si disponible
+      let area = null;
+      let area_unit = "m²";
+      
+      if (property.surface) {
+        const areaMatch = property.surface.match(/(\d+(?:\.\d+)?)/);
+        if (areaMatch && areaMatch[1]) {
+          area = parseFloat(areaMatch[1]);
+          // Déterminer l'unité de surface
+          if (property.surface.includes("ft") || property.surface.includes("sq.ft") || property.surface.includes("sq ft")) {
+            area_unit = "ft²";
+          }
+        }
+      }
+      
       // Préparer les données de la propriété avec champs séparés
       const propertyData = {
         external_id: property.property_url, // Utiliser l'URL comme ID externe
         title: property.title || "Propriété sans titre",
         property_type: property.property_type || "Non spécifié",
         bedrooms: parseInt(property.bedrooms) || null,
-        area: parseFloat((property.surface || "").replace(/[^\d.]/g, "")) || null,
-        area_unit: (property.surface || "").includes("m²") ? "m²" : "ft²",
+        bathrooms: parseInt(property.bathrooms) || null,
+        area: area,
+        area_unit: area_unit,
         price: price, // Prix en tant que nombre
         currency, // Devise séparée
         location, // Localisation séparée
@@ -488,6 +504,7 @@ async function processAndImportProperties(taskResult: any, supabase: any) {
         price: propertyData.price,
         currency: propertyData.currency,
         bedrooms: propertyData.bedrooms,
+        bathrooms: propertyData.bathrooms,
         area: propertyData.area,
         listing_type: propertyData.listing_type
       }, null, 2));
