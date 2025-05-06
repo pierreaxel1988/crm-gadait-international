@@ -1,12 +1,12 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, MapPin, BedDouble, Home, ArrowRight, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { format, isToday } from 'date-fns';
+import { isToday } from 'date-fns';
 
 interface PropertiesTabProps {
   leadId: string;

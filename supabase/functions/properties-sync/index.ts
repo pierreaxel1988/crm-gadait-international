@@ -14,19 +14,41 @@ const BROWSE_AI_TEAM_ID = "c84929d4-c872-49d9-9f40-789f05d9a406";
 const BROWSE_AI_ROBOT_ID = "eba52f1e-266e-4fd1-b34f-3cc2e02ca1ef";
 const BROWSE_AI_API_KEY = "c359de7f-64c3-4d74-a815-72fc3bc77790:444d7cb6-a51c-4a7b-a1d4-59a2ce389111";
 
-// Fonction pour extraire le prix et la localisation
+// Nouvelle fonction améliorée pour extraire le prix et la localisation
 function extractPriceAndLocation(priceLocationString: string) {
   // Format attendu: "€1,600,000 Tamarin, Mauritius"
-  const priceMatch = priceLocationString.match(/[€$£][\d,]+/);
-  const price = priceMatch ? priceMatch[0] : null;
+  // Capturer la partie prix avec une expression régulière plus précise
+  const priceMatch = priceLocationString.match(/[€$£]([\d,]+)/);
   
-  // Extraire la localisation (tout ce qui suit le prix et un espace)
-  let location = null;
-  if (priceMatch && priceMatch.index !== undefined) {
-    location = priceLocationString.substring(priceMatch.index + priceMatch[0].length).trim();
+  // Initialiser les variables
+  let price: number | null = null;
+  let numericPrice: string | null = null;
+  let currency = "EUR"; // Devise par défaut
+  let location: string | null = null;
+  
+  // Extraire le prix si trouvé
+  if (priceMatch && priceMatch[1]) {
+    numericPrice = priceMatch[1].replace(/,/g, "");
+    price = parseFloat(numericPrice);
+    
+    // Identifier la devise
+    const currencySymbol = priceLocationString.charAt(0);
+    if (currencySymbol === "£") currency = "GBP";
+    else if (currencySymbol === "$") currency = "USD";
+    else if (currencySymbol === "€") currency = "EUR";
   }
   
-  return { price, location };
+  // Extraire la localisation (tout ce qui suit le prix et un espace)
+  if (priceMatch && priceMatch.index !== undefined) {
+    // Prendre tout ce qui suit le prix avec symbole monétaire
+    const pricePartLength = priceMatch[0].length + priceMatch.index;
+    location = priceLocationString.substring(pricePartLength).trim();
+  } else {
+    // Si pas de prix trouvé, prendre toute la chaîne comme localisation
+    location = priceLocationString.trim();
+  }
+  
+  return { price, numericPrice, currency, location };
 }
 
 // Fonction pour récupérer les données depuis Browse AI
@@ -96,7 +118,7 @@ async function fetchTaskResult(taskId: string) {
   }
 }
 
-// Fonction pour traiter et importer les propriétés
+// Fonction améliorée pour traiter et importer les propriétés
 async function processAndImportProperties(taskResult: any, supabase: any) {
   console.log("Traitement et importation des propriétés...");
   
@@ -118,62 +140,51 @@ async function processAndImportProperties(taskResult: any, supabase: any) {
   // Traiter chaque propriété
   for (const property of properties) {
     try {
-      // Extraire le prix et la localisation
-      const { price, location } = extractPriceAndLocation(property.price_and_location || "");
+      // Extraire le prix et la localisation avec la fonction améliorée
+      const { price, numericPrice, currency, location } = extractPriceAndLocation(property.price_and_location || "");
       
-      // Convertir le prix en nombre (enlever les symboles de devise et les virgules)
-      let numericPrice = null;
-      if (price) {
-        const currencySymbol = price.charAt(0);
-        let currency = "EUR";
-        if (currencySymbol === "£") currency = "GBP";
-        else if (currencySymbol === "$") currency = "USD";
+      // Préparer les données de la propriété avec champs séparés
+      const propertyData = {
+        external_id: property.property_url, // Utiliser l'URL comme ID externe
+        title: property.title,
+        property_type: property.property_type,
+        bedrooms: parseInt(property.bedrooms) || null,
+        area: parseFloat(property.surface.replace(/[^\d.]/g, "")) || null,
+        area_unit: property.surface.includes("m²") ? "m²" : "ft²",
+        price: price, // Prix en tant que nombre
+        currency, // Devise séparée
+        location, // Localisation séparée
+        country: "Mauritius",
+        url: property.property_url,
+        images: property.images?.split(",").map((url: string) => url.trim()) || [],
+        description: property.title, // Utiliser le titre comme description par défaut
+        updated_at: new Date().toISOString(),
+      };
+      
+      // Vérifier si la propriété existe déjà
+      const { data: existingProperty } = await supabase
+        .from("properties")
+        .select("id, external_id")
+        .eq("external_id", property.property_url)
+        .maybeSingle();
         
-        numericPrice = parseFloat(price.substring(1).replace(/,/g, ""));
-        
-        // Préparer les données de la propriété
-        const propertyData = {
-          external_id: property.property_url, // Utiliser l'URL comme ID externe
-          title: property.title,
-          property_type: property.property_type,
-          bedrooms: parseInt(property.bedrooms) || null,
-          area: parseFloat(property.surface.replace(/[^\d.]/g, "")) || null,
-          area_unit: property.surface.includes("m²") ? "m²" : "ft²",
-          price: numericPrice,
-          currency,
-          location,
-          country: "Mauritius",
-          url: property.property_url,
-          images: property.images?.split(",").map((url: string) => url.trim()) || [],
-          description: property.title, // Utiliser le titre comme description par défaut
-          updated_at: new Date().toISOString(),
-        };
-        
-        // Vérifier si la propriété existe déjà
-        const { data: existingProperty } = await supabase
+      if (existingProperty) {
+        // Mettre à jour la propriété existante
+        const { error } = await supabase
           .from("properties")
-          .select("id, external_id")
-          .eq("external_id", property.property_url)
-          .maybeSingle();
+          .update(propertyData)
+          .eq("id", existingProperty.id);
           
-        if (existingProperty) {
-          // Mettre à jour la propriété existante
-          const { error } = await supabase
-            .from("properties")
-            .update(propertyData)
-            .eq("id", existingProperty.id);
-            
-          if (error) throw error;
-          stats.updated++;
-        } else {
-          // Créer une nouvelle propriété
-          const { error } = await supabase
-            .from("properties")
-            .insert(propertyData);
-            
-          if (error) throw error;
-          stats.created++;
-        }
+        if (error) throw error;
+        stats.updated++;
+      } else {
+        // Créer une nouvelle propriété
+        const { error } = await supabase
+          .from("properties")
+          .insert(propertyData);
+          
+        if (error) throw error;
+        stats.created++;
       }
     } catch (error) {
       console.error(`Erreur lors du traitement de la propriété:`, error);
@@ -203,7 +214,7 @@ serve(async (req: Request) => {
     const latestTask = await fetchPropertiesFromBrowseAI();
     const taskResult = await fetchTaskResult(latestTask.id);
     
-    // Traiter et importer les propriétés
+    // Traiter et importer les propriétés avec la fonction améliorée
     const stats = await processAndImportProperties(taskResult, supabase);
     
     // Enregistrer les statistiques d'importation
