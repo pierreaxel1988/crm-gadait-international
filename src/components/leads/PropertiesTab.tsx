@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, MapPin, BedDouble, Home, ArrowRight, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { format, isToday } from 'date-fns';
 
 interface PropertiesTabProps {
   leadId: string;
@@ -25,6 +26,8 @@ interface Property {
   country: string | null;
   url: string | null;
   images: string[];
+  created_at: string;
+  updated_at: string;
 }
 
 const formatPrice = (price: number | null, currency: string) => {
@@ -140,6 +143,12 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
     }
   };
 
+  // Vérifier si une date est aujourd'hui
+  const isUpdatedToday = (dateString: string) => {
+    if (!dateString) return false;
+    return isToday(new Date(dateString));
+  };
+
   return (
     <div className="bg-white rounded-lg p-4">
       <div className="flex justify-between items-center mb-4">
@@ -184,6 +193,13 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                     <Home className="w-12 h-12 text-gray-400" />
+                  </div>
+                )}
+                
+                {/* Badge pour les propriétés mises à jour aujourd'hui */}
+                {isUpdatedToday(property.updated_at) && (
+                  <div className="absolute top-2 right-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
+                    🔁 Mis à jour aujourd'hui
                   </div>
                 )}
               </div>
