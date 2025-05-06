@@ -42,6 +42,7 @@ const PropertiesPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
   // Charger les propriétés au chargement de la page
   useEffect(() => {
@@ -128,6 +129,30 @@ const PropertiesPage = () => {
     return isToday(new Date(dateString));
   };
 
+  // Nouvelle fonction pour gérer les erreurs d'image
+  const handleImageError = (propertyId: string) => {
+    setImageErrors(prev => ({
+      ...prev,
+      [propertyId]: true
+    }));
+  };
+
+  // Nouvelle fonction pour obtenir l'URL de l'image
+  const getPropertyImage = (property: Property) => {
+    // Si l'image a déjà échoué, utiliser directement le placeholder
+    if (imageErrors[property.id]) {
+      return '/placeholder.svg';
+    }
+    
+    // Si la propriété a des images valides, utiliser la première
+    if (property.images && property.images.length > 0 && property.images[0]) {
+      return property.images[0];
+    }
+    
+    // Sinon, utiliser le placeholder par défaut
+    return '/placeholder.svg';
+  };
+
   return (
     <>
       <Navbar />
@@ -182,21 +207,12 @@ const PropertiesPage = () => {
               {properties.map((property) => (
                 <Card key={property.id} className="overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
                   <div className="aspect-video w-full relative">
-                    {property.images && property.images.length > 0 ? (
-                      <img
-                        src={property.images[0]}
-                        alt={property.title}
-                        className="object-cover w-full h-full"
-                        onError={(e) => {
-                          // Fallback en cas d'erreur de chargement d'image
-                          (e.target as HTMLImageElement).src = '/placeholder.svg';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <Home className="w-12 h-12 text-gray-400" />
-                      </div>
-                    )}
+                    <img
+                      src={getPropertyImage(property)}
+                      alt={property.title}
+                      className="object-cover w-full h-full"
+                      onError={() => handleImageError(property.id)}
+                    />
                     
                     {/* Badge pour les propriétés mises à jour aujourd'hui */}
                     {isUpdatedToday(property.updated_at) && (
