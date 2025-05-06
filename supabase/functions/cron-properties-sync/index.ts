@@ -23,6 +23,8 @@ serve(async (req: Request) => {
   }
   
   try {
+    console.log("Démarrage de la synchronisation quotidienne des propriétés...");
+    
     // Initialiser le client Supabase
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
@@ -36,10 +38,12 @@ serve(async (req: Request) => {
     });
     
     if (!response.ok) {
-      throw new Error(`Erreur lors de l'appel à properties-sync: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Erreur lors de l'appel à properties-sync: ${response.status} ${response.statusText} - ${errorText}`);
     }
     
     const result = await response.json();
+    console.log("Résultat de la synchronisation:", result);
     
     // Enregistrer l'exécution du cron job
     await supabase
@@ -52,6 +56,8 @@ serve(async (req: Request) => {
         total_count: result.stats?.total || 0,
         import_date: new Date().toISOString(),
       });
+    
+    console.log("Enregistrement des statistiques terminé");
     
     // Retourner la réponse
     return new Response(

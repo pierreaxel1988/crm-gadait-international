@@ -133,36 +133,46 @@ async function fetchPropertiesFromBrowseAI() {
         const monitorData = await monitorResponse.json();
         console.log(`${monitorData.monitors?.length || 0} moniteurs trouvés`);
         
-        // Trouver le moniteur "Daily Property Monitor" s'il existe
-        const dailyMonitor = monitorData.monitors?.find((monitor: any) => 
-          monitor.name === "Daily Property Monitor" || 
-          monitor.name.toLowerCase().includes("daily") ||
-          monitor.name.toLowerCase().includes("property")
-        );
-        
-        if (dailyMonitor) {
-          console.log(`Moniteur trouvé: ${dailyMonitor.name}, récupération de la dernière exécution...`);
+        // FIX: Vérifier que monitors est un tableau avant d'utiliser find
+        const monitors = monitorData.monitors || [];
+        if (Array.isArray(monitors)) {
+          // Trouver le moniteur "Daily Property Monitor" s'il existe
+          const dailyMonitor = monitors.find((monitor: any) => 
+            monitor.name === "Daily Property Monitor" || 
+            monitor.name.toLowerCase().includes("daily") ||
+            monitor.name.toLowerCase().includes("property")
+          );
           
-          // Récupérer les tâches du moniteur
-          const monitorTasksUrl = `https://api.browse.ai/v2/robots/${BROWSE_AI_ROBOT_ID}/monitors/${dailyMonitor.id}/tasks`;
-          const monitorTasksResponse = await fetch(monitorTasksUrl, {
-            method: "GET",
-            headers: {
-              "Authorization": `Bearer ${BROWSE_AI_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-          });
-          
-          if (monitorTasksResponse.ok) {
-            const monitorTasksData = await monitorTasksResponse.json();
-            const successfulMonitorTasks = monitorTasksData.tasks?.filter((task: any) => task.state === "processed") || [];
+          if (dailyMonitor) {
+            console.log(`Moniteur trouvé: ${dailyMonitor.name}, récupération de la dernière exécution...`);
             
-            if (successfulMonitorTasks.length > 0) {
-              console.log(`${successfulMonitorTasks.length} tâches réussies trouvées dans le moniteur`);
-              return successfulMonitorTasks[0];
+            // Récupérer les tâches du moniteur
+            const monitorTasksUrl = `https://api.browse.ai/v2/robots/${BROWSE_AI_ROBOT_ID}/monitors/${dailyMonitor.id}/tasks`;
+            const monitorTasksResponse = await fetch(monitorTasksUrl, {
+              method: "GET",
+              headers: {
+                "Authorization": `Bearer ${BROWSE_AI_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+            });
+            
+            if (monitorTasksResponse.ok) {
+              const monitorTasksData = await monitorTasksResponse.json();
+              const successfulMonitorTasks = monitorTasksData.tasks?.filter((task: any) => task.state === "processed") || [];
+              
+              if (successfulMonitorTasks.length > 0) {
+                console.log(`${successfulMonitorTasks.length} tâches réussies trouvées dans le moniteur`);
+                return successfulMonitorTasks[0];
+              }
             }
+          } else {
+            console.log("Aucun moniteur Daily Property Monitor trouvé");
           }
+        } else {
+          console.log("La propriété 'monitors' n'est pas un tableau:", monitorData);
         }
+      } else {
+        console.log("Erreur lors de la récupération des moniteurs:", await monitorResponse.text());
       }
       
       // Si nous n'avons pas trouvé de moniteur avec des tâches réussies, utiliser la tâche manuelle créée
@@ -170,6 +180,7 @@ async function fetchPropertiesFromBrowseAI() {
     }
     
     const latestTask = successfulTasks[0];
+    console.log(`Dernière tâche réussie trouvée: ${latestTask.id} (${latestTask.state})`);
     return latestTask;
   } catch (error) {
     console.error("Erreur lors de la récupération des données Browse AI:", error);
@@ -261,7 +272,10 @@ async function processAndImportProperties(taskResult: any, supabase: any) {
           .update(propertyData)
           .eq("id", existingProperty.id);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Erreur lors de la mise à jour de la propriété:", error);
+          throw error;
+        }
         stats.updated++;
       } else {
         // Créer une nouvelle propriété
@@ -269,9 +283,15 @@ async function processAndImportProperties(taskResult: any, supabase: any) {
           .from("properties")
           .insert(propertyData);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Erreur lors de l'insertion de la propriété:", error);
+          throw error;
+        }
         stats.created++;
       }
+      
+      // Log de réussite
+      console.log(`Propriété traitée avec succès: ${property.title}`);
     } catch (error) {
       console.error(`Erreur lors du traitement de la propriété:`, error);
       stats.failed++;
@@ -293,6 +313,8 @@ serve(async (req: Request) => {
   }
   
   try {
+    console.log("Début de la synchronisation des propriétés...");
+    
     // Initialiser le client Supabase
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
@@ -304,6 +326,13 @@ serve(async (req: Request) => {
     }
     
     const taskResult = await fetchTaskResult(latestTask.id);
+    
+    // Vérifier que le résultat de la tâche est valide
+    if (!taskResult) {
+      throw new Error(`Aucun résultat trouvé pour la tâche ${latestTask.id}`);
+    }
+    
+    console.log("Résultat de la tâche récupéré, traitement des propriétés...");
     
     // Traiter et importer les propriétés avec la fonction améliorée
     const stats = await processAndImportProperties(taskResult, supabase);
@@ -319,6 +348,8 @@ serve(async (req: Request) => {
         total_count: stats.total,
         import_date: new Date().toISOString(),
       });
+      
+    console.log("Synchronisation terminée avec succès:", stats);
       
     // Retourner la réponse
     return new Response(
