@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -9,10 +8,22 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 };
 
-// Configuration Browse AI
+// Configuration Browse AI - Using hardcoded values for now
+// In production, consider using environment variables instead
 const BROWSE_AI_TEAM_ID = "c84929d4-c872-49d9-9f40-789f05d9a406";
 const BROWSE_AI_ROBOT_ID = "eba52f1e-266e-4fd1-b34f-3cc2e02ca1ef";
 const BROWSE_AI_API_KEY = "c359de7f-64c3-4d74-a815-72fc3bc77790:444d7cb6-a51c-4a7b-a1d4-59a2ce389111";
+
+// Fonction pour valider l'API key
+function validateApiKey(apiKey) {
+  if (!apiKey) {
+    console.error("BROWSE_AI_API_KEY n'est pas définie");
+    return false;
+  }
+  
+  console.log(`Utilisation de l'API key (premiers 10 caractères): ${apiKey.substring(0, 10)}...`);
+  return true;
+}
 
 // Fonction pour extraire le prix et la localisation
 function extractPriceAndLocation(priceLocationString: string) {
@@ -68,9 +79,15 @@ function extractPriceAndLocation(priceLocationString: string) {
 async function createNewBrowseAITask() {
   console.log("Création d'une nouvelle tâche Browse AI...");
   
+  if (!validateApiKey(BROWSE_AI_API_KEY)) {
+    throw new Error("Clé API Browse AI invalide ou absente");
+  }
+  
   const url = `https://api.browse.ai/v2/robots/${BROWSE_AI_ROBOT_ID}/tasks`;
   
   try {
+    console.log("Appel API Browse AI avec URL:", url);
+    
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -102,6 +119,10 @@ async function createNewBrowseAITask() {
 // Fonction pour récupérer les données depuis Browse AI
 async function fetchPropertiesFromBrowseAI() {
   console.log("Récupération des données depuis Browse AI...");
+  
+  if (!validateApiKey(BROWSE_AI_API_KEY)) {
+    throw new Error("Clé API Browse AI invalide ou absente");
+  }
   
   const url = `https://api.browse.ai/v2/robots/${BROWSE_AI_ROBOT_ID}/tasks`;
   const params = new URLSearchParams({
@@ -138,6 +159,9 @@ async function fetchPropertiesFromBrowseAI() {
         state: t.state, 
         status: t.status 
       })));
+      
+      // Log complet des tâches pour une analyse détaillée (première tâche seulement pour éviter de surcharger les logs)
+      console.log("All monitor tasks (première tâche):", JSON.stringify(data.tasks[0], null, 2));
     } else {
       console.log("Aucune tâche disponible dans la réponse");
       console.log("Structure de la réponse:", Object.keys(data));
@@ -156,7 +180,7 @@ async function fetchPropertiesFromBrowseAI() {
       task.status === "completed"
     ) || [];
     
-    console.log(`${successfulTasks.length} tâches réussies trouvées`);
+    console.log(`${successfulTasks.length} tâches réussies trouvées avec des critères élargis`);
     
     if (successfulTasks.length === 0) {
       console.log("Aucune tâche réussie trouvée, création d'une nouvelle tâche...");
