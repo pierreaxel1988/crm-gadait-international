@@ -85,6 +85,7 @@ async function createNewBrowseAITask() {
     
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`Erreur API Browse AI (${response.status}): ${errorText}`);
       throw new Error(`Erreur API Browse AI (${response.status}): ${errorText}`);
     }
     
@@ -109,6 +110,10 @@ async function fetchPropertiesFromBrowseAI() {
   });
   
   try {
+    // Afficher l'URL complète pour le débogage
+    console.log(`URL de requête: ${url}?${params}`);
+    console.log(`Clé API utilisée (masquée): ${BROWSE_AI_API_KEY.substring(0, 10)}...`);
+    
     const response = await fetch(`${url}?${params}`, {
       method: "GET",
       headers: {
@@ -119,6 +124,7 @@ async function fetchPropertiesFromBrowseAI() {
     
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`Erreur API Browse AI (${response.status}): ${errorText}`);
       throw new Error(`Erreur API Browse AI (${response.status}): ${errorText}`);
     }
     
@@ -132,6 +138,11 @@ async function fetchPropertiesFromBrowseAI() {
         state: t.state, 
         status: t.status 
       })));
+    } else {
+      console.log("Aucune tâche disponible dans la réponse");
+      console.log("Structure de la réponse:", Object.keys(data));
+      // Afficher un échantillon de la réponse pour débogage
+      console.log("Aperçu de la réponse:", JSON.stringify(data).substring(0, 500) + "...");
     }
     
     // Récupérer la dernière tâche réussie avec un filtrage plus flexible
@@ -139,6 +150,7 @@ async function fetchPropertiesFromBrowseAI() {
       task.state === "processed" || 
       task.state === "succeeded" ||
       task.state === "finished" ||
+      task.state === "completed" ||
       task.status === "finished" ||
       task.status === "succeeded" ||
       task.status === "completed"
@@ -148,13 +160,16 @@ async function fetchPropertiesFromBrowseAI() {
     
     if (successfulTasks.length === 0) {
       console.log("Aucune tâche réussie trouvée, création d'une nouvelle tâche...");
+      
       // Si aucune tâche réussie n'est trouvée, créer une nouvelle tâche
       const newTask = await createNewBrowseAITask();
       
       // Attendre un peu et vérifier si nous avons des données de moniteur Daily disponibles
-      // Cette partie est facultative car la nouvelle tâche peut prendre du temps à s'exécuter
       console.log("Recherche de données de moniteur Daily disponibles...");
       const monitorUrl = `https://api.browse.ai/v2/robots/${BROWSE_AI_ROBOT_ID}/monitors`;
+      
+      console.log(`URL du moniteur: ${monitorUrl}`);
+      
       const monitorResponse = await fetch(monitorUrl, {
         method: "GET",
         headers: {
@@ -168,13 +183,13 @@ async function fetchPropertiesFromBrowseAI() {
         console.log("Données moniteur reçues:", JSON.stringify(monitorData, null, 2));
         
         // Vérifier que monitors.items est un tableau avant d'utiliser find
-        const monitors = monitorData.monitors?.items || [];
-        if (Array.isArray(monitors)) {
-          console.log(`${monitors.length} moniteurs trouvés`);
+        if (monitorData.monitors?.items && Array.isArray(monitorData.monitors.items)) {
+          console.log(`${monitorData.monitors.items.length} moniteurs trouvés`);
           
           // Trouver le moniteur "Daily Property Monitor" s'il existe
-          const dailyMonitor = monitors.find((monitor: any) => 
+          const dailyMonitor = monitorData.monitors.items.find((monitor: any) => 
             monitor.name === "Daily Property Monitor" || 
+            monitor.name === "Daily Property Monitort monitor" ||
             monitor.name.toLowerCase().includes("daily") ||
             monitor.name.toLowerCase().includes("property")
           );
@@ -184,47 +199,67 @@ async function fetchPropertiesFromBrowseAI() {
             
             // Récupérer les tâches du moniteur
             const monitorTasksUrl = `https://api.browse.ai/v2/robots/${BROWSE_AI_ROBOT_ID}/monitors/${dailyMonitor.id}/tasks`;
-            const monitorTasksResponse = await fetch(monitorTasksUrl, {
-              method: "GET",
-              headers: {
-                "Authorization": `Bearer ${BROWSE_AI_API_KEY}`,
-                "Content-Type": "application/json",
-              },
-            });
             
-            if (monitorTasksResponse.ok) {
-              const monitorTasksData = await monitorTasksResponse.json();
+            console.log(`URL des tâches du moniteur: ${monitorTasksUrl}`);
+            
+            try {
+              const monitorTasksResponse = await fetch(monitorTasksUrl, {
+                method: "GET",
+                headers: {
+                  "Authorization": `Bearer ${BROWSE_AI_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+              });
               
-              // Afficher toutes les tâches du moniteur pour analyse
-              console.log("All monitor tasks:", JSON.stringify(monitorTasksData.tasks, null, 2));
-              
-              // Filtrage plus flexible pour les tâches réussies du moniteur
-              const successfulMonitorTasks = monitorTasksData.tasks?.filter((task: any) => 
-                task.state === "processed" || 
-                task.state === "succeeded" ||
-                task.state === "finished" ||
-                task.status === "finished" ||
-                task.status === "succeeded" ||
-                task.status === "completed"
-              ) || [];
-              
-              if (successfulMonitorTasks.length > 0) {
-                console.log(`${successfulMonitorTasks.length} tâches réussies trouvées dans le moniteur`);
-                return successfulMonitorTasks[0];
+              if (monitorTasksResponse.ok) {
+                const monitorTasksData = await monitorTasksResponse.json();
+                
+                // Afficher toutes les tâches du moniteur pour analyse
+                console.log("Nombre de tâches du moniteur:", monitorTasksData.tasks?.length || 0);
+                if (monitorTasksData.tasks?.length > 0) {
+                  console.log("All monitor tasks:", JSON.stringify(monitorTasksData.tasks.map((t: any) => ({
+                    id: t.id,
+                    state: t.state,
+                    status: t.status,
+                    createdAt: t.createdAt
+                  })), null, 2));
+                  
+                  // Filtrage plus flexible pour les tâches réussies du moniteur
+                  const successfulMonitorTasks = monitorTasksData.tasks?.filter((task: any) => 
+                    task.state === "processed" || 
+                    task.state === "succeeded" ||
+                    task.state === "finished" ||
+                    task.state === "completed" ||
+                    task.status === "finished" ||
+                    task.status === "succeeded" ||
+                    task.status === "completed"
+                  ) || [];
+                  
+                  if (successfulMonitorTasks.length > 0) {
+                    console.log(`${successfulMonitorTasks.length} tâches réussies trouvées dans le moniteur`);
+                    return successfulMonitorTasks[0];
+                  } else {
+                    console.log("Aucune tâche réussie trouvée dans le moniteur avec les critères élargis");
+                  }
+                } else {
+                  console.log("Aucune tâche trouvée pour ce moniteur");
+                }
               } else {
-                console.log("Aucune tâche réussie trouvée dans le moniteur avec les critères élargis");
+                const errorText = await monitorTasksResponse.text();
+                console.log(`Erreur lors de la récupération des tâches du moniteur: ${errorText}`);
               }
-            } else {
-              console.log("Erreur lors de la récupération des tâches du moniteur:", await monitorTasksResponse.text());
+            } catch (error) {
+              console.error("Exception lors de la récupération des tâches du moniteur:", error);
             }
           } else {
             console.log("Aucun moniteur Daily Property Monitor trouvé");
           }
         } else {
-          console.log("Le moniteur n'a pas de tableau items:", monitorData);
+          console.log("Le moniteur n'a pas de tableau items ou items n'est pas un tableau:", monitorData);
         }
       } else {
-        console.log("Erreur lors de la récupération des moniteurs:", await monitorResponse.text());
+        const errorText = await monitorResponse.text();
+        console.log(`Erreur lors de la récupération des moniteurs: ${errorText}`);
       }
       
       // Si nous n'avons pas trouvé de moniteur avec des tâches réussies, utiliser la tâche manuelle créée
@@ -262,6 +297,40 @@ async function fetchTaskResult(taskId: string) {
     
     const data = await response.json();
     console.log(`Détails de la tâche ${taskId} récupérés avec succès`);
+    
+    // Déboguer la structure de la réponse
+    console.log("Structure de la réponse task:", Object.keys(data));
+    if (data.task) {
+      console.log("Structure de data.task:", Object.keys(data.task));
+      if (data.task.capturedLists) {
+        console.log("capturedLists disponible avec les listes:", Object.keys(data.task.capturedLists));
+        if (data.task.capturedLists.properties) {
+          console.log(`${data.task.capturedLists.properties.length} propriétés trouvées dans capturedLists.properties`);
+        } else {
+          console.log("Pas de propriétés dans capturedLists");
+        }
+      } else if (data.task.captures) {
+        console.log("captures disponible avec:", Object.keys(data.task.captures));
+        // Vérifier si les propriétés sont stockées dans data.task.captures.lists
+        if (data.task.captures.lists) {
+          console.log("Lists disponibles dans captures:", Object.keys(data.task.captures.lists));
+          // Parcourir les listes pour trouver celle qui contient les propriétés
+          for (const listKey of Object.keys(data.task.captures.lists)) {
+            console.log(`Liste ${listKey} contient ${data.task.captures.lists[listKey].length} éléments`);
+            // Adapter le code pour travailler avec la structure trouvée
+            if (data.task.captures.lists[listKey].length > 0) {
+              // Créer une structure compatible avec le reste du code
+              data.task.capturedLists = {
+                properties: data.task.captures.lists[listKey]
+              };
+              console.log(`Structure capturedLists recréée à partir de captures.lists.${listKey}`);
+              break;
+            }
+          }
+        }
+      }
+    }
+    
     return data.task;
   } catch (error) {
     console.error(`Erreur lors de la récupération du détail de la tâche ${taskId}:`, error);
@@ -306,20 +375,34 @@ async function processAndImportProperties(taskResult: any, supabase: any) {
   
   console.log("Structure de taskResult:", Object.keys(taskResult));
   
-  // Vérifier si les données sont disponibles
-  if (!taskResult.capturedLists) {
-    console.error("taskResult ne contient pas de capturedLists");
-    console.log("Contenu de taskResult:", JSON.stringify(taskResult, null, 2));
-    throw new Error("Structure des données invalide: capturedLists manquant");
+  // Adaptation flexible pour gérer différentes structures de données
+  let properties = [];
+  
+  // Chercher les propriétés dans différents chemins possibles
+  if (taskResult.capturedLists && taskResult.capturedLists.properties) {
+    properties = taskResult.capturedLists.properties;
+    console.log(`${properties.length} propriétés trouvées dans capturedLists.properties`);
+  } else if (taskResult.captures && taskResult.captures.lists) {
+    // Parcourir les listes pour trouver celle qui contient les propriétés
+    for (const listKey of Object.keys(taskResult.captures.lists)) {
+      const listItems = taskResult.captures.lists[listKey];
+      if (Array.isArray(listItems) && listItems.length > 0) {
+        properties = listItems;
+        console.log(`${properties.length} propriétés trouvées dans captures.lists.${listKey}`);
+        break;
+      }
+    }
+  } else {
+    console.error("Structure des données non reconnue");
+    console.log("Contenu de taskResult:", JSON.stringify(taskResult, null, 2).substring(0, 1000) + "...");
+    throw new Error("Structure des données invalide: impossible de trouver les propriétés");
   }
   
-  if (!taskResult.capturedLists.properties) {
-    console.error("taskResult.capturedLists ne contient pas de properties");
-    console.log("Contenu de capturedLists:", JSON.stringify(taskResult.capturedLists, null, 2));
-    throw new Error("Structure des données invalide: pas de propriétés trouvées");
+  if (properties.length === 0) {
+    console.error("Aucune propriété trouvée dans les données");
+    throw new Error("Aucune propriété trouvée dans les résultats");
   }
   
-  const properties = taskResult.capturedLists.properties;
   console.log(`${properties.length} propriétés trouvées dans les résultats`);
   
   const stats = {
