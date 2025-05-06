@@ -4,7 +4,7 @@ project_id = "hxqoqkfnhbpwzkjgukrc"
 [api]
 enabled = true
 port = 54321
-schemas = []
+schemas = ["public", "storage"]
 
 [db]
 port = 54322
@@ -15,27 +15,14 @@ port = 54323
 [inbucket]
 port = 54324
 
-[auth]
-port = 54325
+[storage]
 enabled = true
 
-[storage]
-port = 54326
+[auth]
 enabled = true
 
 [realtime]
-port = 54327
 enabled = true
 
-[functions]
-[functions.gmail-auth]
-verify_jwt = true
-
-[functions.oauth-callback]
+[functions.properties-sync]
 verify_jwt = false
-
-[functions.gmail-send]
-verify_jwt = true
-
-[functions.gmail-sync]
-verify_jwt = true
