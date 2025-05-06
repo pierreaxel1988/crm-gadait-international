@@ -14,7 +14,7 @@ const BROWSE_AI_TEAM_ID = "c84929d4-c872-49d9-9f40-789f05d9a406";
 const BROWSE_AI_ROBOT_ID = "eba52f1e-266e-4fd1-b34f-3cc2e02ca1ef";
 const BROWSE_AI_API_KEY = "c359de7f-64c3-4d74-a815-72fc3bc77790:444d7cb6-a51c-4a7b-a1d4-59a2ce389111";
 
-// Nouvelle fonction améliorée pour extraire le prix et la localisation
+// Fonction pour extraire le prix et la localisation
 function extractPriceAndLocation(priceLocationString: string) {
   // Format attendu: "€1,600,000 Tamarin, Mauritius"
   // Capturer la partie prix avec une expression régulière plus précise
@@ -51,6 +51,39 @@ function extractPriceAndLocation(priceLocationString: string) {
   return { price, numericPrice, currency, location };
 }
 
+// Fonction pour créer une nouvelle tâche Browse AI
+async function createNewBrowseAITask() {
+  console.log("Création d'une nouvelle tâche Browse AI...");
+  
+  const url = `https://api.browse.ai/v2/robots/${BROWSE_AI_ROBOT_ID}/tasks`;
+  
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${BROWSE_AI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        originUrl: "https://the-private-collection.com/en/search/buy/Mauritius/",
+        mauritius_listings_limit: "337"
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erreur API Browse AI: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    console.log(`Nouvelle tâche créée avec l'ID: ${data.task?.id || 'inconnu'}`);
+    
+    return data.task;
+  } catch (error) {
+    console.error("Erreur lors de la création d'une tâche Browse AI:", error);
+    throw error;
+  }
+}
+
 // Fonction pour récupérer les données depuis Browse AI
 async function fetchPropertiesFromBrowseAI() {
   console.log("Récupération des données depuis Browse AI...");
@@ -80,7 +113,60 @@ async function fetchPropertiesFromBrowseAI() {
     // Récupérer la dernière tâche réussie
     const successfulTasks = data.tasks?.filter((task: any) => task.state === "processed") || [];
     if (successfulTasks.length === 0) {
-      throw new Error("Aucune tâche réussie trouvée");
+      console.log("Aucune tâche réussie trouvée, création d'une nouvelle tâche...");
+      // Si aucune tâche réussie n'est trouvée, créer une nouvelle tâche
+      const newTask = await createNewBrowseAITask();
+      
+      // Attendre un peu et vérifier si nous avons des données de moniteur Daily disponibles
+      // Cette partie est facultative car la nouvelle tâche peut prendre du temps à s'exécuter
+      console.log("Recherche de données de moniteur Daily disponibles...");
+      const monitorUrl = `https://api.browse.ai/v2/robots/${BROWSE_AI_ROBOT_ID}/monitors`;
+      const monitorResponse = await fetch(monitorUrl, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${BROWSE_AI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (monitorResponse.ok) {
+        const monitorData = await monitorResponse.json();
+        console.log(`${monitorData.monitors?.length || 0} moniteurs trouvés`);
+        
+        // Trouver le moniteur "Daily Property Monitor" s'il existe
+        const dailyMonitor = monitorData.monitors?.find((monitor: any) => 
+          monitor.name === "Daily Property Monitor" || 
+          monitor.name.toLowerCase().includes("daily") ||
+          monitor.name.toLowerCase().includes("property")
+        );
+        
+        if (dailyMonitor) {
+          console.log(`Moniteur trouvé: ${dailyMonitor.name}, récupération de la dernière exécution...`);
+          
+          // Récupérer les tâches du moniteur
+          const monitorTasksUrl = `https://api.browse.ai/v2/robots/${BROWSE_AI_ROBOT_ID}/monitors/${dailyMonitor.id}/tasks`;
+          const monitorTasksResponse = await fetch(monitorTasksUrl, {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${BROWSE_AI_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+          });
+          
+          if (monitorTasksResponse.ok) {
+            const monitorTasksData = await monitorTasksResponse.json();
+            const successfulMonitorTasks = monitorTasksData.tasks?.filter((task: any) => task.state === "processed") || [];
+            
+            if (successfulMonitorTasks.length > 0) {
+              console.log(`${successfulMonitorTasks.length} tâches réussies trouvées dans le moniteur`);
+              return successfulMonitorTasks[0];
+            }
+          }
+        }
+      }
+      
+      // Si nous n'avons pas trouvé de moniteur avec des tâches réussies, utiliser la tâche manuelle créée
+      return newTask;
     }
     
     const latestTask = successfulTasks[0];
@@ -210,8 +296,13 @@ serve(async (req: Request) => {
     // Initialiser le client Supabase
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
-    // Récupérer les données depuis Browse AI
+    // Récupérer les données depuis Browse AI, avec création d'une nouvelle tâche si nécessaire
     const latestTask = await fetchPropertiesFromBrowseAI();
+    
+    if (!latestTask || !latestTask.id) {
+      throw new Error("Impossible d'obtenir une tâche valide de Browse AI");
+    }
+    
     const taskResult = await fetchTaskResult(latestTask.id);
     
     // Traiter et importer les propriétés avec la fonction améliorée

@@ -41,6 +41,7 @@ const PropertiesPage = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [syncStatus, setSyncStatus] = useState<string | null>(null);
 
   // Charger les propriétés au chargement de la page
   useEffect(() => {
@@ -51,6 +52,7 @@ const PropertiesPage = () => {
   const loadProperties = async () => {
     setIsLoading(true);
     try {
+      console.log("Chargement des propriétés depuis Supabase...");
       const { data, error } = await supabase
         .from('properties')
         .select('*')
@@ -58,6 +60,7 @@ const PropertiesPage = () => {
       
       if (error) throw error;
       
+      console.log(`${data?.length || 0} propriétés récupérées`);
       setProperties(data || []);
     } catch (error) {
       console.error("Erreur lors du chargement des propriétés:", error);
@@ -74,11 +77,13 @@ const PropertiesPage = () => {
   // Fonction pour actualiser manuellement les données
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    setSyncStatus("Synchronisation en cours...");
     try {
       // Récupérer le token de session
       const { data: { session } } = await supabase.auth.getSession();
       const accessToken = session?.access_token;
       
+      console.log("Appel de la fonction de synchronisation...");
       const response = await fetch('https://hxqoqkfnhbpwzkjgukrc.supabase.co/functions/v1/properties-sync', {
         method: 'POST',
         headers: {
@@ -88,8 +93,10 @@ const PropertiesPage = () => {
       });
       
       const result = await response.json();
+      console.log("Résultat de la synchronisation:", result);
       
       if (result.success) {
+        setSyncStatus(`Succès: ${result.message}`);
         toast({
           title: "Synchronisation réussie",
           description: result.message
@@ -98,6 +105,7 @@ const PropertiesPage = () => {
         // Recharger les propriétés
         loadProperties();
       } else {
+        setSyncStatus(`Erreur: ${result.message}`);
         throw new Error(result.message);
       }
     } catch (error) {
@@ -109,6 +117,8 @@ const PropertiesPage = () => {
       });
     } finally {
       setIsRefreshing(false);
+      // Cacher le statut de synchronisation après un délai
+      setTimeout(() => setSyncStatus(null), 5000);
     }
   };
 
@@ -149,6 +159,12 @@ const PropertiesPage = () => {
               </Button>
             </div>
           </div>
+          
+          {syncStatus && (
+            <div className={`mb-4 p-3 rounded ${syncStatus.startsWith('Erreur') ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'}`}>
+              {syncStatus}
+            </div>
+          )}
           
           {isLoading ? (
             <div className="flex justify-center py-12">
@@ -230,7 +246,7 @@ const PropertiesPage = () => {
                         variant="outline" 
                         size="sm"
                         className="flex items-center gap-1 border-loro-navy/30 text-loro-navy"
-                        onClick={() => window.open(property.url || '', '_blank')}
+                        onClick={() => property.url && window.open(property.url, '_blank')}
                       >
                         Voir <ExternalLink className="w-3.5 h-3.5 ml-1" />
                       </Button>
