@@ -103,11 +103,15 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
+      // Fix: Get the session token using the correct method
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      
       const response = await fetch('https://hxqoqkfnhbpwzkjgukrc.supabase.co/functions/v1/properties-sync', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.auth.session()?.access_token}`
+          'Authorization': `Bearer ${accessToken}`
         },
       });
       
