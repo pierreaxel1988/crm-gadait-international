@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
@@ -156,34 +155,46 @@ const PropertiesPage = () => {
     loadFilterOptions();
   }, []);
 
-  // Foncion pour charger les options de filtres
+  // Fonction pour charger les options de filtres
   const loadFilterOptions = async () => {
     try {
-      const { data: countries } = await supabase
+      // Pour les pays - utiliser une sélection distincte
+      const { data: countriesData, error: countriesError } = await supabase
         .from('Gadait_Listings_Buy')
         .select('country')
-        .not('country', 'is', null)
-        .order('country')
-        .distinct();
+        .not('country', 'is', null);
+        
+      if (countriesError) throw countriesError;
+      
+      // Filtrer manuellement pour obtenir des valeurs uniques
+      const uniqueCountries = [...new Set(countriesData.map(item => item.country))].sort();
 
-      const { data: cities } = await supabase
+      // Pour les villes - utiliser une sélection distincte
+      const { data: citiesData, error: citiesError } = await supabase
         .from('Gadait_Listings_Buy')
         .select('city')
-        .not('city', 'is', null)
-        .order('city')
-        .distinct();
+        .not('city', 'is', null);
+        
+      if (citiesError) throw citiesError;
+      
+      // Filtrer manuellement pour obtenir des valeurs uniques
+      const uniqueCities = [...new Set(citiesData.map(item => item.city))].sort();
 
-      const { data: propertyTypes } = await supabase
+      // Pour les types de propriété - utiliser une sélection distincte
+      const { data: propertyTypesData, error: propertyTypesError } = await supabase
         .from('Gadait_Listings_Buy')
         .select('Property Type')
-        .not('Property Type', 'is', null)
-        .order('Property Type')
-        .distinct();
+        .not('Property Type', 'is', null);
+        
+      if (propertyTypesError) throw propertyTypesError;
+      
+      // Filtrer manuellement pour obtenir des valeurs uniques
+      const uniquePropertyTypes = [...new Set(propertyTypesData.map(item => item["Property Type"]))].sort();
 
       setAvailableFilters({
-        countries: countries?.map(c => c.country).filter(Boolean) as string[] || [],
-        cities: cities?.map(c => c.city).filter(Boolean) as string[] || [],
-        propertyTypes: propertyTypes?.map(p => p["Property Type"]).filter(Boolean) as string[] || [],
+        countries: uniqueCountries.filter(Boolean) as string[],
+        cities: uniqueCities.filter(Boolean) as string[],
+        propertyTypes: uniquePropertyTypes.filter(Boolean) as string[],
       });
     } catch (error) {
       console.error("Erreur lors du chargement des options de filtre:", error);
