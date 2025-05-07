@@ -47,6 +47,8 @@ interface SortOptions {
   field: 'price' | 'position';
   direction: 'asc' | 'desc';
 }
+
+// Helper function to format the price
 const formatPrice = (price: string | null) => {
   if (!price) return "Prix sur demande";
 
@@ -78,6 +80,7 @@ const extractNumericPrice = (priceString: string | null): number => {
   const numPrice = parseFloat(cleanPrice.replace(',', '.'));
   return isNaN(numPrice) ? 0 : numPrice;
 };
+
 const PropertiesPage = () => {
   const [properties, setProperties] = useState<GadaitProperty[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -526,7 +529,7 @@ const PropertiesPage = () => {
                   <div className="py-4 space-y-6">
                     {/* Filtre par pays */}
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Pays</h4>
+                      <h4 className="text-sm font-normal mb-2">Pays</h4>
                       <Select value={filters.country || ""} onValueChange={value => {
                       setFilters(prev => ({
                         ...prev,
@@ -546,7 +549,7 @@ const PropertiesPage = () => {
                     
                     {/* Filtre par ville */}
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Ville</h4>
+                      <h4 className="text-sm font-normal mb-2">Ville</h4>
                       <Select value={filters.city || ""} onValueChange={value => {
                       setFilters(prev => ({
                         ...prev,
@@ -566,7 +569,7 @@ const PropertiesPage = () => {
                     
                     {/* Filtre par type de propriété */}
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Type de bien</h4>
+                      <h4 className="text-sm font-normal mb-2">Type de bien</h4>
                       <Select value={filters.propertyType || ""} onValueChange={value => {
                       setFilters(prev => ({
                         ...prev,
@@ -586,7 +589,7 @@ const PropertiesPage = () => {
                     
                     {/* Filtre par nombre de chambres */}
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Chambres (minimum)</h4>
+                      <h4 className="text-sm font-normal mb-2">Chambres (minimum)</h4>
                       <Select value={filters.bedrooms?.toString() || ""} onValueChange={value => {
                       setFilters(prev => ({
                         ...prev,
@@ -610,7 +613,7 @@ const PropertiesPage = () => {
                     
                     {/* Filtre par budget */}
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Budget</h4>
+                      <h4 className="text-sm font-normal mb-2">Budget</h4>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <Input type="text" placeholder="Prix min" value={filters.minPrice || ""} onChange={e => setFilters(prev => ({
@@ -636,7 +639,7 @@ const PropertiesPage = () => {
                       }));
                       setCurrentPage(1);
                     }} />
-                        <label htmlFor="favoris" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        <label htmlFor="favoris" className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                           Afficher uniquement mes favoris
                         </label>
                       </div>}
@@ -814,7 +817,7 @@ const PropertiesPage = () => {
                   <CardContent className={`p-4 ${viewMode === 'list' ? 'md:flex md:justify-between md:items-start' : ''}`}>
                     <div className={`${viewMode === 'list' ? 'md:w-1/2 lg:w-2/3' : ''}`}>
                       <div className="flex items-center mb-2">
-                        <h3 className="text-lg font-semibold line-clamp-2">{property.Title || "Propriété sans titre"}</h3>
+                        <h3 className="text-lg font-normal line-clamp-2">{property.Title || "Propriété sans titre"}</h3>
                         {favorites.includes(property.Position) && <Star className="h-4 w-4 text-amber-500 ml-2" />}
                       </div>
                       
