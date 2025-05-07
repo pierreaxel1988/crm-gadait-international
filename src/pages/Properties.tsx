@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -19,6 +20,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { toast } from '@/hooks/use-toast';
+import ActionButtons from '@/components/pipeline/filters/ActionButtons';
 
 interface Property {
   Position: number;
@@ -76,7 +78,6 @@ const Properties: React.FC = () => {
     bedrooms: null,
     favoritesOnly: false
   });
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [favoriteProperties, setFavoriteProperties] = useState<Set<number>>(new Set());
 
   // Function to process Select option data to ensure non-empty values
@@ -117,7 +118,15 @@ const Properties: React.FC = () => {
       // Apply favorite filter
       if (filters.favoritesOnly) {
         const favoritesArray = Array.from(favoriteProperties);
-        query = query.in('Position', favoritesArray);
+        if (favoritesArray.length > 0) {
+          query = query.in('Position', favoritesArray);
+        } else {
+          // If no favorites but filter is on, return no results
+          setProperties([]);
+          setTotalProperties(0);
+          setLoading(false);
+          return;
+        }
       }
       
       // Apply pagination
@@ -147,6 +156,12 @@ const Properties: React.FC = () => {
           return numericPrice >= minPriceValue && numericPrice <= maxPriceValue;
         });
       }
+      
+      // Mark favorites
+      filteredProperties = filteredProperties.map(property => ({
+        ...property,
+        isFavorite: favoriteProperties.has(property.Position)
+      }));
       
       setProperties(filteredProperties);
       
@@ -227,7 +242,7 @@ const Properties: React.FC = () => {
   useEffect(() => {
     loadProperties();
     loadFilterOptions();
-  }, [currentPage, filters]);
+  }, [currentPage]);
 
   // Function to extract numeric price from string
   const extractNumericPrice = (price: string | null): number => {
@@ -267,20 +282,18 @@ const Properties: React.FC = () => {
   };
 
   // Handler to apply filters
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     setCurrentPage(1);
     loadProperties();
     toast({
       title: "Filtres appliqués",
-      description: `${activeFiltersCount} filtres actifs`,
+      description: `${activeFiltersCount()} filtres actifs`,
       duration: 2000
     });
-  };
+  }, [filters]);
 
   // Calculate total pages
-  const calculateTotalPages = () => {
-    return Math.ceil(totalProperties / itemsPerPage);
-  };
+  const totalPages = Math.ceil(totalProperties / itemsPerPage);
 
   // Handle page change
   const handlePageChange = (page: number) => {
@@ -328,7 +341,7 @@ const Properties: React.FC = () => {
                   <Select
                     value={filters.country || ""}
                     onValueChange={(value) => {
-                      setFilters(prev => ({ ...prev, country: value || null }));
+                      setFilters(prev => ({ ...prev, country: value === "placeholder" ? null : value }));
                     }}
                   >
                     <SelectTrigger>
@@ -349,7 +362,7 @@ const Properties: React.FC = () => {
                   <Select
                     value={filters.city || ""}
                     onValueChange={(value) => {
-                      setFilters(prev => ({ ...prev, city: value || null }));
+                      setFilters(prev => ({ ...prev, city: value === "placeholder" ? null : value }));
                     }}
                   >
                     <SelectTrigger>
@@ -370,7 +383,7 @@ const Properties: React.FC = () => {
                   <Select
                     value={filters.propertyType || ""}
                     onValueChange={(value) => {
-                      setFilters(prev => ({ ...prev, propertyType: value || null }));
+                      setFilters(prev => ({ ...prev, propertyType: value === "placeholder" ? null : value }));
                     }}
                   >
                     <SelectTrigger>
@@ -391,7 +404,7 @@ const Properties: React.FC = () => {
                   <Select
                     value={filters.bedrooms?.toString() || ""}
                     onValueChange={(value) => {
-                      setFilters(prev => ({ ...prev, bedrooms: value ? parseInt(value) : null }));
+                      setFilters(prev => ({ ...prev, bedrooms: value === "placeholder" ? null : parseInt(value) }));
                     }}
                   >
                     <SelectTrigger>
@@ -449,26 +462,19 @@ const Properties: React.FC = () => {
                   </label>
                 </div>
               </div>
-            
-            <SheetFooter className="sm:justify-start gap-2 mt-4">
-              <Button variant="default" onClick={() => {
-                applyFilters();
-                setSheetOpen(false);
-              }}>
-                Appliquer les filtres
-              </Button>
-              <Button variant="outline" onClick={() => {
-                resetFilters();
-                loadProperties();
-              }}>
-                Réinitialiser
-              </Button>
-              <SheetClose asChild>
-                <Button variant="ghost">Fermer</Button>
-              </SheetClose>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
+              
+              <ActionButtons
+                onClear={resetFilters}
+                onApply={applyFilters}
+              />
+              
+              <div className="mt-4">
+                <SheetClose>
+                  <Button variant="ghost" className="w-full">Fermer</Button>
+                </SheetClose>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 
@@ -554,28 +560,62 @@ const Properties: React.FC = () => {
         <div className="mt-8">
           <Pagination>
             <PaginationContent>
-              <PaginationPrevious
-                href="#"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              />
-              {Array.from({ length: calculateTotalPages() }, (_, i) => i + 1).map(page => (
-                <PaginationItem key={page} active={currentPage === page}>
-                  <PaginationLink
-                    href="#"
-                    onClick={() => handlePageChange(page)}
-                    isCurrent={currentPage === page}
-                    aria-label={`Go to page ${page}`}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationNext
-                href="#"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === calculateTotalPages()}
-              />
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) handlePageChange(currentPage - 1);
+                  }}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                // Show first page, last page, current page and one page before and after current page
+                let pageNum: number | null = null;
+                
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  const pages = [currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2];
+                  pageNum = pages[i];
+                }
+                
+                if (pageNum === null || pageNum < 1 || pageNum > totalPages) {
+                  return null;
+                }
+                
+                return (
+                  <PaginationItem key={pageNum}>
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(pageNum as number);
+                      }}
+                      isActive={currentPage === pageNum}
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                  }}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
             </PaginationContent>
           </Pagination>
         </div>
