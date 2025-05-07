@@ -92,6 +92,7 @@ const PropertiesPage = () => {
         .from('Gadait_Listings_Buy')
         .select('Position', { count: 'exact', head: true });
       
+      console.log("Nombre total de propriétés:", countResponse.count);
       setTotalProperties(countResponse.count || 0);
       
       // Récupérer les propriétés pour la page actuelle
@@ -101,9 +102,12 @@ const PropertiesPage = () => {
         .range((currentPage - 1) * propertiesPerPage, currentPage * propertiesPerPage - 1)
         .order('Position', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Erreur lors de la récupération des propriétés:", error);
+        throw error;
+      }
       
-      console.log(`${data?.length || 0} propriétés récupérées`);
+      console.log(`${data?.length || 0} propriétés récupérées:`, data);
       setProperties(data || []);
     } catch (error) {
       console.error("Erreur lors du chargement des propriétés:", error);
