@@ -1,3 +1,4 @@
+
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -37,7 +38,6 @@ export const applyFiltersToColumns = (
     if (filters.assignedTo) {
       filteredItems = filteredItems.filter(item => {
         // Check if the item has an assignedTo property that matches the filter
-        // This can be either the name or the ID
         if (typeof item.assignedTo === 'string') {
           return item.assignedTo === filters.assignedTo || 
                  item.assignedToId === filters.assignedTo;
@@ -51,7 +51,7 @@ export const applyFiltersToColumns = (
       filteredItems = filteredItems.filter(item => {
         if (!item.budget) return false;
         
-        // Extraction des chiffres du budget en ignorant les caractères de formatage
+        // Extract numeric values from budget string, ignoring formatting characters
         const numericBudget = extractNumericValue(item.budget);
         const min = filters.minBudget ? extractNumericValue(filters.minBudget) : 0;
         const max = filters.maxBudget ? extractNumericValue(filters.maxBudget) : Infinity;
@@ -88,11 +88,11 @@ export const applyFiltersToColumns = (
   });
 };
 
-// Fonction utilitaire pour extraire la valeur numérique d'une chaîne de budget formatée
+// Utility function to extract numeric value from a formatted budget string
 export const extractNumericValue = (formattedValue: string): number => {
-  // Enlever tous les caractères non numériques
+  // Remove all non-numeric characters
   const numericString = formattedValue.replace(/[^\d]/g, '');
   
-  // Convertir en nombre ou retourner 0 si vide
+  // Convert to number or return 0 if empty
   return numericString ? parseInt(numericString) : 0;
 };
