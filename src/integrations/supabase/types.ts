@@ -25,6 +25,8 @@ export type Database = {
           Bedrooms: number | null
           city: string | null
           country: string | null
+          is_exclusive: boolean | null
+          is_new: boolean | null
           "Main Image": string | null
           Position: number
           price: string | null
@@ -49,6 +51,8 @@ export type Database = {
           Bedrooms?: number | null
           city?: string | null
           country?: string | null
+          is_exclusive?: boolean | null
+          is_new?: boolean | null
           "Main Image"?: string | null
           Position: number
           price?: string | null
@@ -73,6 +77,8 @@ export type Database = {
           Bedrooms?: number | null
           city?: string | null
           country?: string | null
+          is_exclusive?: boolean | null
+          is_new?: boolean | null
           "Main Image"?: string | null
           Position?: number
           price?: string | null
@@ -861,6 +867,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_favorites: {
+        Row: {
+          created_at: string
+          id: string
+          property_position: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_position: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_position?: number
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
