@@ -165,7 +165,7 @@ const PropertiesPage = () => {
     }
   };
 
-  // Nouvelle fonction pour gérer les erreurs d'image
+  // Fonction pour gérer les erreurs d'image
   const handleImageError = (propertyPosition: number) => {
     setImageErrors(prev => ({
       ...prev,

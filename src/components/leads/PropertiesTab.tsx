@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, MapPin, BedDouble, Home, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { isToday } from 'date-fns';
 
 interface PropertiesTabProps {
   leadId: string;
@@ -168,7 +167,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
     }
   };
 
-  // Nouvelle fonction pour gérer les erreurs d'image
+  // Fonction pour gérer les erreurs d'image
   const handleImageError = (propertyPosition: number) => {
     setImageErrors(prev => ({
       ...prev,
