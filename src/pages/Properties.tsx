@@ -5,59 +5,101 @@ import SubNavigation from '@/components/layout/SubNavigation';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, BedDouble, Home, ArrowRight, Loader2, Filter } from 'lucide-react';
+import { 
+  ExternalLink, 
+  MapPin, 
+  BedDouble, 
+  Home, 
+  Loader2, 
+  Filter, 
+  ArrowRight,
+  ArrowLeft,
+  Heart,
+  Grid3x3,
+  LayoutList
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { isToday } from 'date-fns';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
-interface Property {
-  id: string;
-  title: string;
-  property_type: string;
-  bedrooms: number | null;
-  area: number | null;
-  area_unit: string;
-  price: number | null;
-  currency: string;
-  location: string | null;
+interface GadaitProperty {
+  Position: number;
+  Title: string;
+  price: string | null;
+  "Property Type": string | null;
+  Bedrooms: number | null;
+  Area: string | null;
   country: string | null;
-  url: string | null;
-  images: string[];
-  created_at: string;
-  updated_at: string;
+  city: string | null;
+  "Property Link": string | null;
+  "Main Image": string | null;
+  "Secondary Image": string | null;
+  "Additional Image 1": string | null;
+  "Additional Image 2": string | null;
+  "Additional Image 3": string | null;
+  "Additional Image 4": string | null;
+  "Additional Image 5": string | null;
 }
 
-const formatPrice = (price: number | null, currency: string) => {
+const formatPrice = (price: string | null) => {
   if (!price) return "Prix sur demande";
   
-  const currencySymbol = 
-    currency === 'EUR' ? '€' :
-    currency === 'USD' ? '$' : 
-    currency === 'GBP' ? '£' : '';
+  // Si le prix contient déjà un symbole de devise, le retourner tel quel
+  if (price.includes('€') || price.includes('$') || price.includes('£')) {
+    return price;
+  }
+  
+  // Essayer de convertir le prix en nombre et le formater
+  try {
+    // Nettoyer le prix en supprimant tout sauf les chiffres
+    const cleanPrice = price.replace(/[^\d.,-]/g, '');
+    const numPrice = parseFloat(cleanPrice.replace(',', '.'));
     
-  return `${currencySymbol}${price.toLocaleString('fr-FR')}`;
+    if (isNaN(numPrice)) {
+      return price; // Si la conversion échoue, retourner le prix original
+    }
+    
+    // Par défaut, utiliser l'euro comme devise
+    return `€${numPrice.toLocaleString('fr-FR')}`;
+  } catch (e) {
+    return price; // En cas d'erreur, retourner le prix original
+  }
 };
 
 const PropertiesPage = () => {
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<GadaitProperty[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
-  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalProperties, setTotalProperties] = useState<number>(0);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const propertiesPerPage = 9;
 
   // Charger les propriétés au chargement de la page
   useEffect(() => {
     loadProperties();
-  }, []);
+  }, [currentPage]);
   
   // Fonction pour charger les propriétés
   const loadProperties = async () => {
     setIsLoading(true);
     try {
-      console.log("Chargement des propriétés depuis Supabase...");
+      console.log("Chargement des propriétés depuis Supabase (table Gadait_Listings_Buy)...");
+      
+      // Récupérer d'abord le nombre total de propriétés pour la pagination
+      const countResponse = await supabase
+        .from('Gadait_Listings_Buy')
+        .select('Position', { count: 'exact', head: true });
+      
+      setTotalProperties(countResponse.count || 0);
+      
+      // Récupérer les propriétés pour la page actuelle
       const { data, error } = await supabase
-        .from('properties')
+        .from('Gadait_Listings_Buy')
         .select('*')
-        .order('created_at', { ascending: false });
+        .range((currentPage - 1) * propertiesPerPage, currentPage * propertiesPerPage - 1)
+        .order('Position', { ascending: true });
       
       if (error) throw error;
       
@@ -123,34 +165,92 @@ const PropertiesPage = () => {
     }
   };
 
-  // Vérifier si une date est aujourd'hui
-  const isUpdatedToday = (dateString: string) => {
-    if (!dateString) return false;
-    return isToday(new Date(dateString));
-  };
-
   // Nouvelle fonction pour gérer les erreurs d'image
-  const handleImageError = (propertyId: string) => {
+  const handleImageError = (propertyPosition: number) => {
     setImageErrors(prev => ({
       ...prev,
-      [propertyId]: true
+      [propertyPosition]: true
     }));
   };
 
-  // Nouvelle fonction pour obtenir l'URL de l'image
-  const getPropertyImage = (property: Property) => {
+  // Fonction pour obtenir l'image d'une propriété
+  const getPropertyImage = (property: GadaitProperty) => {
     // Si l'image a déjà échoué, utiliser directement le placeholder
-    if (imageErrors[property.id]) {
+    if (imageErrors[property.Position]) {
       return '/placeholder.svg';
     }
     
-    // Si la propriété a des images valides, utiliser la première
-    if (property.images && property.images.length > 0 && property.images[0]) {
-      return property.images[0];
+    // Essayer d'utiliser l'image principale
+    if (property["Main Image"]) {
+      return property["Main Image"];
+    }
+    
+    // Sinon essayer l'image secondaire
+    if (property["Secondary Image"]) {
+      return property["Secondary Image"];
+    }
+    
+    // Essayer les images additionnelles dans l'ordre
+    const additionalImages = [
+      property["Additional Image 1"],
+      property["Additional Image 2"],
+      property["Additional Image 3"],
+      property["Additional Image 4"],
+      property["Additional Image 5"],
+    ];
+    
+    for (const img of additionalImages) {
+      if (img) return img;
     }
     
     // Sinon, utiliser le placeholder par défaut
     return '/placeholder.svg';
+  };
+
+  // Calculer le nombre total de pages
+  const totalPages = Math.ceil(totalProperties / propertiesPerPage);
+  
+  // Générer les numéros de page pour la pagination
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5; // Nombre maximum de pages visibles dans la pagination
+    
+    if (totalPages <= maxVisiblePages) {
+      // Afficher toutes les pages si leur nombre est inférieur au maximum
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      // Calculer quelles pages afficher
+      const halfVisiblePages = Math.floor(maxVisiblePages / 2);
+      
+      if (currentPage <= halfVisiblePages + 1) {
+        // On est proche du début
+        for (let i = 1; i <= maxVisiblePages - 1; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      } else if (currentPage >= totalPages - halfVisiblePages) {
+        // On est proche de la fin
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = totalPages - (maxVisiblePages - 2); i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        // On est au milieu
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      }
+    }
+    
+    return pageNumbers;
   };
 
   return (
@@ -159,13 +259,25 @@ const PropertiesPage = () => {
       <SubNavigation />
       <div className="p-4 md:p-6 bg-white min-h-screen">
         <div className="max-w-screen-xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-loro-navy">Propriétés</h1>
-            <div className="flex gap-2">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-loro-navy">Propriétés de luxe à vendre</h1>
+              <p className="text-gray-500 mt-1">{totalProperties} propriétés trouvées</p>
+            </div>
+            <div className="flex gap-2 mt-4 md:mt-0">
               <Button 
                 variant="outline" 
                 size="sm"
-                className="hidden md:flex items-center gap-2 text-loro-navy border-loro-navy/30"
+                className="flex items-center gap-2 text-loro-navy border-loro-navy/30"
+                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+              >
+                {viewMode === 'grid' ? <LayoutList className="h-4 w-4" /> : <Grid3x3 className="h-4 w-4" />}
+                {viewMode === 'grid' ? 'Vue liste' : 'Vue grille'}
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex items-center gap-2 text-loro-navy border-loro-navy/30"
               >
                 <Filter className="h-4 w-4" />
                 Filtrer
@@ -203,74 +315,113 @@ const PropertiesPage = () => {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
               {properties.map((property) => (
-                <Card key={property.id} className="overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="aspect-video w-full relative">
+                <Card key={property.Position} className="overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className={`${viewMode === 'grid' ? 'aspect-video' : 'aspect-[3/1]'} w-full relative`}>
                     <img
                       src={getPropertyImage(property)}
-                      alt={property.title}
+                      alt={property.Title || "Propriété"}
                       className="object-cover w-full h-full"
-                      onError={() => handleImageError(property.id)}
+                      onError={() => handleImageError(property.Position)}
                     />
-                    
-                    {/* Badge pour les propriétés mises à jour aujourd'hui */}
-                    {isUpdatedToday(property.updated_at) && (
-                      <div className="absolute top-2 right-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
-                        🔁 Mis à jour aujourd'hui
+                    <button className="absolute top-2 right-2 bg-white/80 rounded-full p-2 hover:bg-white transition-colors">
+                      <Heart className="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors" />
+                    </button>
+                    {property["Property Type"] && (
+                      <div className="absolute bottom-2 left-2 bg-loro-navy/80 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        {property["Property Type"]}
                       </div>
                     )}
                   </div>
                   
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <h3 className="text-lg font-semibold line-clamp-1">{property.title}</h3>
-                      <div className="text-lg font-bold text-loro-terracotta">
-                        {formatPrice(property.price, property.currency)}
+                  <CardContent className={`p-4 ${viewMode === 'list' ? 'md:flex md:justify-between md:items-start' : ''}`}>
+                    <div className={`${viewMode === 'list' ? 'md:w-1/2 lg:w-2/3' : ''}`}>
+                      <h3 className="text-lg font-semibold line-clamp-2 mb-2">{property.Title || "Propriété sans titre"}</h3>
+                      
+                      <div className="flex items-center text-sm text-gray-500 mb-3">
+                        <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                        <span>{property.city || property.country || 'Emplacement non spécifié'}</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 text-sm">
+                        {property["Property Type"] && (
+                          <div className="flex items-center">
+                            <Home className="w-4 h-4 mr-1 text-loro-navy flex-shrink-0" />
+                            <span>{property["Property Type"]}</span>
+                          </div>
+                        )}
+                        
+                        {property.Bedrooms !== null && (
+                          <div className="flex items-center">
+                            <BedDouble className="w-4 h-4 mr-1 text-loro-navy flex-shrink-0" />
+                            <span>{property.Bedrooms} ch.</span>
+                          </div>
+                        )}
+                        
+                        {property.Area && (
+                          <div className="flex items-center">
+                            <span>{property.Area}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     
-                    <div className="flex items-center text-sm text-gray-500 mt-1">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      <span>{property.location || property.country || 'Maurice'}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-4 mt-3 text-sm">
-                      {property.property_type && (
-                        <div className="flex items-center">
-                          <Home className="w-4 h-4 mr-1 text-loro-navy" />
-                          <span>{property.property_type}</span>
-                        </div>
-                      )}
+                    <div className={`mt-4 ${viewMode === 'list' ? 'md:mt-0 md:w-1/2 lg:w-1/3 md:flex md:flex-col md:items-end' : ''}`}>
+                      <div className={`${viewMode === 'list' ? 'text-right' : ''} text-lg font-bold text-loro-terracotta mb-2`}>
+                        {formatPrice(property.price)}
+                      </div>
                       
-                      {property.bedrooms !== null && (
-                        <div className="flex items-center">
-                          <BedDouble className="w-4 h-4 mr-1 text-loro-navy" />
-                          <span>{property.bedrooms} ch.</span>
-                        </div>
-                      )}
-                      
-                      {property.area !== null && (
-                        <div>
-                          {property.area} {property.area_unit}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="mt-4 flex justify-end">
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="flex items-center gap-1 border-loro-navy/30 text-loro-navy"
-                        onClick={() => property.url && window.open(property.url, '_blank')}
+                        className={`${viewMode === 'list' ? 'ml-auto' : ''} flex items-center gap-1 border-loro-navy/30 text-loro-navy`}
+                        onClick={() => property["Property Link"] && window.open(property["Property Link"], '_blank')}
                       >
-                        Voir <ExternalLink className="w-3.5 h-3.5 ml-1" />
+                        Voir la propriété <ExternalLink className="w-3.5 h-3.5 ml-1" />
                       </Button>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
+          )}
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Pagination className="mt-8">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                
+                {getPageNumbers().map((page, index) => (
+                  <PaginationItem key={index}>
+                    {page === '...' ? (
+                      <span className="px-4 py-2">...</span>
+                    ) : (
+                      <PaginationLink
+                        isActive={page === currentPage}
+                        onClick={() => typeof page === 'number' && setCurrentPage(page)}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           )}
         </div>
       </div>

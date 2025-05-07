@@ -9,6 +9,81 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      Gadait_Listings_Buy: {
+        Row: {
+          "Additional Image 1": string | null
+          "Additional Image 10": string | null
+          "Additional Image 2": string | null
+          "Additional Image 3": string | null
+          "Additional Image 4": string | null
+          "Additional Image 5": string | null
+          "Additional Image 6": string | null
+          "Additional Image 7": string | null
+          "Additional Image 8": string | null
+          "Additional Image 9": string | null
+          Area: string | null
+          Bedrooms: number | null
+          city: string | null
+          country: string | null
+          "Main Image": string | null
+          Position: number
+          price: string | null
+          "Price and Location": string | null
+          "Property Link": string | null
+          "Property Type": string | null
+          "Secondary Image": string | null
+          Title: string | null
+        }
+        Insert: {
+          "Additional Image 1"?: string | null
+          "Additional Image 10"?: string | null
+          "Additional Image 2"?: string | null
+          "Additional Image 3"?: string | null
+          "Additional Image 4"?: string | null
+          "Additional Image 5"?: string | null
+          "Additional Image 6"?: string | null
+          "Additional Image 7"?: string | null
+          "Additional Image 8"?: string | null
+          "Additional Image 9"?: string | null
+          Area?: string | null
+          Bedrooms?: number | null
+          city?: string | null
+          country?: string | null
+          "Main Image"?: string | null
+          Position: number
+          price?: string | null
+          "Price and Location"?: string | null
+          "Property Link"?: string | null
+          "Property Type"?: string | null
+          "Secondary Image"?: string | null
+          Title?: string | null
+        }
+        Update: {
+          "Additional Image 1"?: string | null
+          "Additional Image 10"?: string | null
+          "Additional Image 2"?: string | null
+          "Additional Image 3"?: string | null
+          "Additional Image 4"?: string | null
+          "Additional Image 5"?: string | null
+          "Additional Image 6"?: string | null
+          "Additional Image 7"?: string | null
+          "Additional Image 8"?: string | null
+          "Additional Image 9"?: string | null
+          Area?: string | null
+          Bedrooms?: number | null
+          city?: string | null
+          country?: string | null
+          "Main Image"?: string | null
+          Position?: number
+          price?: string | null
+          "Price and Location"?: string | null
+          "Property Link"?: string | null
+          "Property Type"?: string | null
+          "Secondary Image"?: string | null
+          Title?: string | null
+        }
+        Relationships: []
+      }
       import_statistics: {
         Row: {
           created_at: string
