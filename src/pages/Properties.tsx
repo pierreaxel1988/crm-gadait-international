@@ -352,20 +352,26 @@ const PropertiesPage = () => {
       
       console.log(`${data?.length || 0} propriétés récupérées sur ${count} total`);
       setTotalProperties(count || 0);
-      setProperties(data || []);
-
+      
+      // Initialiser le tableau de données
+      let filteredProperties = data || [];
+      
       // Appliquer les filtres de prix côté client (car stockés comme texte)
       if (filters.minPrice || filters.maxPrice) {
-        const filteredByPrice = (data || []).filter(property => {
+        filteredProperties = filteredProperties.filter(property => {
           const numericPrice = extractNumericPrice(property.price);
           const minPriceValue = filters.minPrice ? parseFloat(filters.minPrice) : 0;
           const maxPriceValue = filters.maxPrice ? parseFloat(filters.maxPrice) : Infinity;
           
           return numericPrice >= minPriceValue && numericPrice <= maxPriceValue;
         });
-        
-        setProperties(filteredByPrice);
-        setTotalProperties(filteredByPrice.length);
+      }
+      
+      setProperties(filteredProperties);
+      
+      // Pour la précision dans l'affichage du nombre total si les filtres de prix sont appliqués
+      if (filters.minPrice || filters.maxPrice) {
+        setTotalProperties(filteredProperties.length);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des propriétés:", error);
@@ -475,6 +481,22 @@ const PropertiesPage = () => {
       favoritesOnly: false
     });
     setCurrentPage(1);
+    toast({
+      title: "Filtres réinitialisés",
+      description: "Tous les filtres ont été supprimés",
+      duration: 2000
+    });
+  };
+
+  // Handler pour appliquer les filtres
+  const applyFilters = () => {
+    setCurrentPage(1);
+    loadProperties();
+    toast({
+      title: "Filtres appliqués",
+      description: `${activeFiltersCount} filtres actifs`,
+      duration: 2000
+    });
   };
 
   // Calculer le nombre total de pages
@@ -580,7 +602,6 @@ const PropertiesPage = () => {
                         value={filters.country || ""}
                         onValueChange={(value) => {
                           setFilters(prev => ({ ...prev, country: value || null }));
-                          setCurrentPage(1);
                         }}
                       >
                         <SelectTrigger>
@@ -602,7 +623,6 @@ const PropertiesPage = () => {
                         value={filters.city || ""}
                         onValueChange={(value) => {
                           setFilters(prev => ({ ...prev, city: value || null }));
-                          setCurrentPage(1);
                         }}
                       >
                         <SelectTrigger>
@@ -624,7 +644,6 @@ const PropertiesPage = () => {
                         value={filters.propertyType || ""}
                         onValueChange={(value) => {
                           setFilters(prev => ({ ...prev, propertyType: value || null }));
-                          setCurrentPage(1);
                         }}
                       >
                         <SelectTrigger>
@@ -646,7 +665,6 @@ const PropertiesPage = () => {
                         value={filters.bedrooms?.toString() || ""}
                         onValueChange={(value) => {
                           setFilters(prev => ({ ...prev, bedrooms: value ? parseInt(value) : null }));
-                          setCurrentPage(1);
                         }}
                       >
                         <SelectTrigger>
@@ -694,7 +712,6 @@ const PropertiesPage = () => {
                           checked={filters.favoritesOnly}
                           onCheckedChange={(checked) => {
                             setFilters(prev => ({ ...prev, favoritesOnly: Boolean(checked) }));
-                            setCurrentPage(1);
                           }}
                         />
                         <label htmlFor="favoris" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -706,13 +723,17 @@ const PropertiesPage = () => {
                   
                   <SheetFooter className="sm:justify-start gap-2 mt-4">
                     <Button variant="default" onClick={() => {
-                      resetFilters();
-                      setCurrentPage(1);
+                      applyFilters();
                     }}>
-                      Réinitialiser les filtres
+                      Appliquer les filtres
+                    </Button>
+                    <Button variant="outline" onClick={() => {
+                      resetFilters();
+                    }}>
+                      Réinitialiser
                     </Button>
                     <SheetClose asChild>
-                      <Button variant="outline">Fermer</Button>
+                      <Button variant="ghost">Fermer</Button>
                     </SheetClose>
                   </SheetFooter>
                 </SheetContent>
