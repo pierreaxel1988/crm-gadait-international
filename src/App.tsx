@@ -24,7 +24,8 @@ const Admin = lazy(() => import('./pages/Admin'));
 const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const ChatGadaitPage = lazy(() => import('./pages/ChatGadaitPage'));
-const PropertiesPage = lazy(() => import('./pages/Properties')); // Importer la nouvelle page
+const PropertiesPage = lazy(() => import('./pages/Properties'));
+const PropertyAdmin = lazy(() => import('./pages/PropertyAdmin')); // Nouvelle page d'admin des propriétés
 
 function App() {
   return (
@@ -79,6 +80,13 @@ function App() {
             <Route path="/properties" element={
               <ProtectedRoute commercialAllowed={true}>
                 <PropertiesPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Nouvelle route pour l'administration des propriétés */}
+            <Route path="/property-admin" element={
+              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+                <PropertyAdmin />
               </ProtectedRoute>
             } />
             
