@@ -117,7 +117,7 @@ async function syncPropertiesFromUrl(supabase: any, baseUrl: string) {
         body: JSON.stringify({
           url: baseUrl,
           page,
-          debug: false
+          debug: true // Activer le mode debug pour voir plus de détails
         }),
       });
       

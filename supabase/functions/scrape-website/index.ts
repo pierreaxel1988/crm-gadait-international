@@ -56,6 +56,11 @@ serve(async (req) => {
     
     console.log(`Utilisation du User-Agent: ${userAgent.substring(0, 30)}...`);
     
+    // Ajouter un délai aléatoire avant la requête pour éviter les blocages
+    const delay = Math.floor(Math.random() * 2000) + 1000;
+    await new Promise(resolve => setTimeout(resolve, delay));
+    console.log(`Délai de ${delay}ms avant la requête`);
+    
     // Faire la requête avec le user agent choisi
     const response = await fetch(targetUrl, {
       headers: {
@@ -140,7 +145,11 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       '.property-listing',
       '.card',
       '.property-box',
-      '.property-container'
+      '.property-container',
+      '.property-grid-wrapper article',
+      'div[class*="property-grid"] > article',
+      'main article',
+      '[class*="property-list"] > *'
     ];
     
     console.log("Recherche de sélecteurs possibles pour les propriétés:");
@@ -154,6 +163,12 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
     $('body > *').slice(0, 5).each((i, el) => {
       console.log(`- Element ${i}: ${$(el).prop('tagName')} avec class="${$(el).attr('class')}"`);
     });
+
+    // Analyser la structure du main
+    console.log("Structure du main:");
+    $('main > *').slice(0, 10).each((i, el) => {
+      console.log(`- Main child ${i}: ${$(el).prop('tagName')} avec class="${$(el).attr('class')}"`);
+    });
   }
   
   // Essayer différents sélecteurs pour les cartes de propriété
@@ -163,7 +178,13 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
     '.listing-item',
     '.property',
     '.property-listing',
-    '.card'
+    '.card',
+    // Nouveaux sélecteurs basés sur la structure actuelle
+    '.property-grid-wrapper article',
+    'div[class*="property-grid"] > article',
+    'main article',
+    '[class*="property-list"] > *',
+    'div[class*="property"] > div'
   ];
   
   let propertyCards = $();
@@ -196,6 +217,24 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       console.log(`Trouvé ${genericContainers.length} éléments génériques qui ressemblent à des propriétés`);
       propertyCards = genericContainers;
     }
+
+    // Si toujours aucun résultat, essayer avec des sélecteurs directs
+    if (propertyCards.length === 0) {
+      console.log("Essai de sélecteurs directs pour le site actuel...");
+      
+      // Recherche directe d'articles qui contiennent des prix et des images
+      propertyCards = $('article:has(img)');
+      console.log(`Trouvé ${propertyCards.length} articles avec images`);
+      
+      if (propertyCards.length === 0) {
+        // Dernière tentative: chercher des éléments avec des attributs de prix
+        propertyCards = $('*:contains("€"):has(img)').filter(function() {
+          const text = $(this).text();
+          return /\d+,\d+/.test(text) || /€\d+/.test(text);
+        });
+        console.log(`Dernière tentative: ${propertyCards.length} éléments contenant des prix et images`);
+      }
+    }
   }
   
   console.log(`Nombre final de cartes de propriété trouvées: ${propertyCards.length}`);
@@ -214,7 +253,7 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
     
     // Rechercher des termes liés à l'immobilier dans la page
     const pageText = $('body').text();
-    const realEstateTerms = ['property', 'villa', 'apartment', 'house', 'bedroom', 'bathroom', 'price', 'sqm', 'm²'];
+    const realEstateTerms = ['property', 'villa', 'apartment', 'house', 'bedroom', 'bathroom', 'price', 'sqm', 'm²', '€'];
     console.log("Termes immobiliers trouvés dans la page:");
     realEstateTerms.forEach(term => {
       if (pageText.toLowerCase().includes(term.toLowerCase())) {
@@ -238,14 +277,29 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       const card = $(element);
       
       // Extraire les informations de base
-      const titleElement = card.find('.property-title h5, .title h5, h5, .card-title, [class*="title"]').first();
-      const title = titleElement.text().trim();
+      const titleElement = card.find('h2, h3, h4, h5, .title, [class*="title"]').first();
+      const title = titleElement.text().trim() || card.find('*:contains("Villa"), *:contains("Apartment")').first().text().trim();
       
-      const priceElement = card.find('.property-price .price-tag, .price, [class*="price"], .cost, .value').first();
-      const price = priceElement.text().trim();
+      // Extraire le prix (adapter aux formats €X,XXX,XXX)
+      const priceElement = card.find('.price, [class*="price"], *:contains("€")').first();
+      let price = priceElement.text().trim();
+      if (!price) {
+        const priceMatch = card.text().match(/€[0-9,. ]+/);
+        if (priceMatch) price = priceMatch[0].trim();
+      }
       
       // Extraire les détails de localisation
       let location = card.find('.property-location, .location, [class*="location"], .address, [class*="address"]').first().text().trim();
+      if (!location) {
+        // Essayer d'autres sélecteurs pour la localisation
+        const locationElements = card.find('p, span, div').filter(function() {
+          const text = $(this).text().trim();
+          return text.includes('Mauritius') || text.includes('Morocco') || text.includes('Spain');
+        });
+        if (locationElements.length > 0) {
+          location = locationElements.first().text().trim();
+        }
+      }
       
       // Extraire le pays
       let country = "Mauritius"; // Par défaut
@@ -270,6 +324,11 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       // Essayer différents attributs d'image
       mainImage = imgElement.attr('src') || imgElement.attr('data-src') || imgElement.attr('data-lazy-src') || '';
       
+      // Vérifier également srcset
+      if (!mainImage && imgElement.attr('srcset')) {
+        mainImage = imgElement.attr('srcset').split(' ')[0];
+      }
+      
       // Si l'image est relative, la convertir en absolue
       if (mainImage && !mainImage.startsWith('http')) {
         mainImage = `https://the-private-collection.com${mainImage.startsWith('/') ? '' : '/'}${mainImage}`;
@@ -293,7 +352,8 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
         '.features .feature', 
         '.details .detail',
         '[class*="features"] [class*="item"]',
-        '[class*="detail"]'
+        '[class*="detail"]',
+        '[class*="meta"]'
       ];
       
       let featureElements = $();
@@ -442,7 +502,9 @@ function extractPagination(html: string) {
       '.pager',
       '[class*="pagination"]',
       '[class*="paging"]',
-      'ul.page-numbers'
+      'ul.page-numbers',
+      '.nav-pagination',
+      'nav ul'
     ];
     
     let paginationContainer = $();
