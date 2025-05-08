@@ -17,7 +17,7 @@ serve(async (req) => {
   try {
     // Récupérer les données de la requête
     const requestData = await req.json();
-    const url = requestData.url || "https://the-private-collection.com/en/search/buy/";
+    const url = requestData.url || "https://the-private-collection.com/en/search/";
     const debug = requestData.debug || false;
     const country = requestData.country || null;
     const region = requestData.region || null;
@@ -39,18 +39,22 @@ serve(async (req) => {
       targetUrl += `?page=${page}`;
     }
 
+    console.log(`URL cible finale: ${targetUrl}`);
+
     // Liste des user-agents pour rotation
     const userAgents = [
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
       "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
     ];
     
     // Choisir un user agent aléatoire
     const userAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
     
-    console.log(`Utilisation du User-Agent: ${userAgent.substring(0, 20)}...`);
+    console.log(`Utilisation du User-Agent: ${userAgent.substring(0, 30)}...`);
     
     // Faire la requête avec le user agent choisi
     const response = await fetch(targetUrl, {
@@ -74,11 +78,7 @@ serve(async (req) => {
 
     const html = await response.text();
     console.log(`HTML récupéré avec succès (${html.length} caractères)`);
-
-    // En mode debug, renvoyer un extrait du HTML
-    if (debug) {
-      console.log(`Premiers 500 caractères du HTML: ${html.substring(0, 500)}`);
-    }
+    console.log(`Premiers 300 caractères du HTML: ${html.substring(0, 300).replace(/\n/g, ' ')}`);
 
     // Analyser le HTML pour extraire les propriétés
     const result = extractPropertiesFromPrivateCollection(html, debug);
@@ -125,10 +125,80 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
   const $ = cheerio.load(html);
   const properties = [];
   
-  // Sélecteur optimisé pour les cartes de propriété sur The Private Collection
-  const propertyCards = $('.property-item');
+  // Afficher les 3 premiers nœuds qui pourraient contenir des informations de propriétés
+  if (debug) {
+    console.log("Structure HTML de base de la page:");
+    console.log("body classes:", $('body').attr('class'));
+    console.log("main sections:", $('main > *').length);
+    
+    // Recherche d'éléments qui pourraient contenir des propriétés
+    const possibleContainers = [
+      '.property-item', 
+      '.property-card',
+      '.listing-item',
+      '.property',
+      '.property-listing',
+      '.card',
+      '.property-box',
+      '.property-container'
+    ];
+    
+    console.log("Recherche de sélecteurs possibles pour les propriétés:");
+    possibleContainers.forEach(selector => {
+      const count = $(selector).length;
+      console.log(`- ${selector}: ${count} éléments trouvés`);
+    });
+    
+    // Analyser la structure de la page pour aider à déterminer les bons sélecteurs
+    console.log("Structure générale de la page:");
+    $('body > *').slice(0, 5).each((i, el) => {
+      console.log(`- Element ${i}: ${$(el).prop('tagName')} avec class="${$(el).attr('class')}"`);
+    });
+  }
   
-  console.log(`Nombre de cartes de propriété trouvées: ${propertyCards.length}`);
+  // Essayer différents sélecteurs pour les cartes de propriété
+  const propertySelectors = [
+    '.property-item',
+    '.property-card',
+    '.listing-item',
+    '.property',
+    '.property-listing',
+    '.card'
+  ];
+  
+  let propertyCards = $();
+  for (const selector of propertySelectors) {
+    const elements = $(selector);
+    if (elements.length > 0) {
+      console.log(`Utilisation du sélecteur "${selector}" - ${elements.length} éléments trouvés`);
+      propertyCards = elements;
+      break;
+    }
+  }
+  
+  if (propertyCards.length === 0) {
+    console.log("Aucun sélecteur standard n'a fonctionné. Recherche d'éléments avec des attributs communs...");
+    
+    // Recherche plus générique basée sur des attributs/classes communs
+    const genericContainers = $('[class*="property"], [class*="listing"], [class*="card"]').filter(function() {
+      // Filtrer uniquement les éléments qui semblent être des cartes de propriété
+      const html = $(this).html();
+      return html && (
+        html.includes('price') || 
+        html.includes('€') || 
+        html.includes('$') || 
+        html.includes('bed') || 
+        html.includes('bath')
+      );
+    });
+    
+    if (genericContainers.length > 0) {
+      console.log(`Trouvé ${genericContainers.length} éléments génériques qui ressemblent à des propriétés`);
+      propertyCards = genericContainers;
+    }
+  }
+  
+  console.log(`Nombre final de cartes de propriété trouvées: ${propertyCards.length}`);
   
   if (propertyCards.length === 0 && debug) {
     // En mode debug, si aucune propriété n'est trouvée, essayer de comprendre pourquoi
@@ -141,6 +211,26 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       }
     });
     console.log([...classes].join(', '));
+    
+    // Rechercher des termes liés à l'immobilier dans la page
+    const pageText = $('body').text();
+    const realEstateTerms = ['property', 'villa', 'apartment', 'house', 'bedroom', 'bathroom', 'price', 'sqm', 'm²'];
+    console.log("Termes immobiliers trouvés dans la page:");
+    realEstateTerms.forEach(term => {
+      if (pageText.toLowerCase().includes(term.toLowerCase())) {
+        console.log(`- "${term}" trouvé`);
+      } else {
+        console.log(`- "${term}" NON trouvé`);
+      }
+    });
+    
+    // Vérifier si nous avons une page d'erreur ou de redirection
+    if (pageText.toLowerCase().includes('404') || pageText.toLowerCase().includes('not found')) {
+      console.log("Il s'agit probablement d'une page d'erreur 404");
+    }
+    if (pageText.toLowerCase().includes('redirect') || pageText.toLowerCase().includes('redirected')) {
+      console.log("Il s'agit probablement d'une page de redirection");
+    }
   }
   
   propertyCards.each((index, element) => {
@@ -148,12 +238,14 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       const card = $(element);
       
       // Extraire les informations de base
-      const title = card.find('.property-title h5').text().trim();
-      const priceElement = card.find('.property-price .price-tag');
+      const titleElement = card.find('.property-title h5, .title h5, h5, .card-title, [class*="title"]').first();
+      const title = titleElement.text().trim();
+      
+      const priceElement = card.find('.property-price .price-tag, .price, [class*="price"], .cost, .value').first();
       const price = priceElement.text().trim();
       
       // Extraire les détails de localisation
-      let location = card.find('.property-location').text().trim();
+      let location = card.find('.property-location, .location, [class*="location"], .address, [class*="address"]').first().text().trim();
       
       // Extraire le pays
       let country = "Mauritius"; // Par défaut
@@ -173,7 +265,7 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       
       // Extraire les images
       let mainImage = "";
-      const imgElement = card.find('.property-thumbnail img');
+      const imgElement = card.find('img').first();
       
       // Essayer différents attributs d'image
       mainImage = imgElement.attr('src') || imgElement.attr('data-src') || imgElement.attr('data-lazy-src') || '';
@@ -195,28 +287,68 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       let bathrooms = null;
       let area = "";
       
-      card.find('.property-features .feature-item').each((_, featElement) => {
+      // Rechercher des features dans différents formats possibles
+      const featureSelectors = [
+        '.property-features .feature-item', 
+        '.features .feature', 
+        '.details .detail',
+        '[class*="features"] [class*="item"]',
+        '[class*="detail"]'
+      ];
+      
+      let featureElements = $();
+      for (const selector of featureSelectors) {
+        const elements = card.find(selector);
+        if (elements.length > 0) {
+          featureElements = elements;
+          break;
+        }
+      }
+      
+      featureElements.each((_, featElement) => {
         const feat = $(featElement);
         const text = feat.text().trim();
         
-        if (text.includes('bed') || text.includes('Bed')) {
+        if (text.toLowerCase().includes('bed') || feat.find('[class*="bed"]').length > 0) {
           const bedroomsMatch = text.match(/(\d+)/);
           if (bedroomsMatch) {
             bedrooms = parseInt(bedroomsMatch[1]);
           }
-        } else if (text.includes('bath') || text.includes('Bath')) {
+        } else if (text.toLowerCase().includes('bath') || feat.find('[class*="bath"]').length > 0) {
           const bathroomsMatch = text.match(/(\d+)/);
           if (bathroomsMatch) {
             bathrooms = parseInt(bathroomsMatch[1]);
           }
-        } else if (text.includes('m²') || text.includes('sqm')) {
+        } else if (text.includes('m²') || text.includes('sqm') || feat.find('[class*="area"]').length > 0) {
           area = text;
         }
       });
       
+      // Si on n'a pas trouvé de features spécifiques, essayer de les extraire du texte général
+      if (bedrooms === null) {
+        const bedroomMatch = card.text().match(/(\d+)\s*(?:bed|bedroom|chambres?)/i);
+        if (bedroomMatch) {
+          bedrooms = parseInt(bedroomMatch[1]);
+        }
+      }
+      
+      if (bathrooms === null) {
+        const bathroomMatch = card.text().match(/(\d+)\s*(?:bath|bathroom|salle de bain)/i);
+        if (bathroomMatch) {
+          bathrooms = parseInt(bathroomMatch[1]);
+        }
+      }
+      
+      if (!area) {
+        const areaMatch = card.text().match(/(\d+)\s*(?:m²|sqm|square meters)/i);
+        if (areaMatch) {
+          area = areaMatch[0];
+        }
+      }
+      
       // Extraire le type de propriété
       let propertyType = "";
-      const tagElement = card.find('.property-tag');
+      const tagElement = card.find('.property-tag, .tag, .type, [class*="tag"], [class*="type"]').first();
       if (tagElement.length > 0) {
         propertyType = tagElement.text().trim();
       } else {
@@ -234,15 +366,37 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       }
 
       // Vérifier si la propriété est marquée comme exclusive
-      const isExclusive = card.find('.ribbon.exclusive').length > 0;
+      const isExclusive = card.find('.ribbon.exclusive, .exclusive, [class*="exclusive"]').length > 0 
+                          || title.toLowerCase().includes('exclusive');
       
       // Vérifier si la propriété est marquée comme nouvelle
-      const isNew = card.find('.ribbon.new').length > 0;
+      const isNew = card.find('.ribbon.new, .new, [class*="new"]').length > 0 
+                    || title.toLowerCase().includes('new');
+      
+      // Log détaillé des informations extraites en mode debug
+      if (debug) {
+        console.log(`
+          Propriété #${index + 1}:
+          - Titre: ${title}
+          - Prix: ${price}
+          - Localisation: ${location}
+          - Pays: ${country}
+          - Ville: ${city}
+          - Chambres: ${bedrooms}
+          - Salles de bain: ${bathrooms}
+          - Surface: ${area}
+          - Type: ${propertyType}
+          - Lien: ${propertyLink}
+          - Image: ${mainImage}
+          - Exclusive: ${isExclusive}
+          - Nouvelle: ${isNew}
+        `);
+      }
       
       // Créer l'objet de propriété pour correspondre à la structure Gadait_Listings_Buy
       const property = {
         "Position": index + 1,
-        "Title": title,
+        "Title": title || `Property #${index + 1}`,
         "Main Image": mainImage,
         "Secondary Image": null,
         "Additional Image 1": null,
@@ -281,27 +435,71 @@ function extractPagination(html: string) {
   const $ = cheerio.load(html);
   
   try {
-    // Sélecteur pour la pagination sur The Private Collection
-    const paginationContainer = $('.pagination');
+    // Essayer différents sélecteurs pour la pagination
+    const paginationSelectors = [
+      '.pagination',
+      '.nav-links',
+      '.pager',
+      '[class*="pagination"]',
+      '[class*="paging"]',
+      'ul.page-numbers'
+    ];
+    
+    let paginationContainer = $();
+    for (const selector of paginationSelectors) {
+      const elements = $(selector);
+      if (elements.length > 0) {
+        console.log(`Sélecteur de pagination trouvé: ${selector}`);
+        paginationContainer = elements;
+        break;
+      }
+    }
     
     if (paginationContainer.length === 0) {
+      console.log("Aucun élément de pagination trouvé");
       return null;
     }
     
     // Trouver la page active
-    const currentPage = parseInt(paginationContainer.find('.page-item.active .page-link').text()) || 1;
+    let currentPage = 1;
+    const activeSelectors = ['.active', '.current', '.selected', '[aria-current="page"]'];
+    
+    for (const selector of activeSelectors) {
+      const activeElement = paginationContainer.find(selector);
+      if (activeElement.length > 0) {
+        currentPage = parseInt(activeElement.text()) || 1;
+        break;
+      }
+    }
     
     // Trouver le nombre total de pages
     let totalPages = 1;
     
     // Parcourir tous les liens de pagination pour trouver la dernière page
-    paginationContainer.find('.page-item .page-link').each((_, el) => {
+    paginationContainer.find('a, span').each((_, el) => {
       const pageText = $(el).text().trim();
       const pageNumber = parseInt(pageText);
       if (!isNaN(pageNumber) && pageNumber > totalPages) {
         totalPages = pageNumber;
       }
     });
+    
+    // Chercher aussi des indicateurs de dernière page
+    const lastPageLink = paginationContainer.find('a:contains("Last"), a:contains("»"), a:contains("Dernière")');
+    if (lastPageLink.length > 0) {
+      const href = lastPageLink.attr('href');
+      if (href) {
+        const match = href.match(/page=(\d+)/);
+        if (match && match[1]) {
+          const lastPage = parseInt(match[1]);
+          if (lastPage > totalPages) {
+            totalPages = lastPage;
+          }
+        }
+      }
+    }
+    
+    console.log(`Pagination: page actuelle ${currentPage}, total ${totalPages} pages`);
     
     return {
       currentPage,
