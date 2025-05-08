@@ -28,32 +28,70 @@ serve(async (req: Request) => {
     // Initialiser le client Supabase
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
-    // Appeler la fonction de synchronisation des propriétés
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/properties-sync`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-        "Content-Type": "application/json",
+    // Définir les pays et régions à synchroniser
+    const countries = [
+      { 
+        name: "Mauritius",
+        regions: [] // Synchroniser tout le pays sans spécifier de région
       },
-    });
+      // Ajouter d'autres pays selon les besoins
+      // { name: "Spain", regions: ["Marbella", "Ibiza"] }
+    ];
     
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Erreur lors de l'appel à properties-sync: ${response.status} ${response.statusText} - ${errorText}`);
+    let totalStats = {
+      created: 0,
+      updated: 0,
+      failed: 0,
+      total: 0
+    };
+    
+    // Synchroniser chaque pays
+    for (const country of countries) {
+      try {
+        console.log(`Synchronisation du pays: ${country.name}`);
+        
+        // Appeler notre fonction de synchronisation des propriétés
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/properties-sync`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            country: country.name,
+            regions: country.regions
+          }),
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Erreur lors de l'appel à properties-sync pour ${country.name}: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+        
+        const result = await response.json();
+        console.log(`Résultat de la synchronisation pour ${country.name}:`, result);
+        
+        // Agréger les statistiques
+        if (result.stats) {
+          totalStats.created += result.stats.created || 0;
+          totalStats.updated += result.stats.updated || 0;
+          totalStats.failed += result.stats.failed || 0;
+          totalStats.total += result.stats.total || 0;
+        }
+      } catch (error) {
+        console.error(`Erreur lors de la synchronisation du pays ${country.name}:`, error);
+      }
     }
-    
-    const result = await response.json();
-    console.log("Résultat de la synchronisation:", result);
     
     // Enregistrer l'exécution du cron job
     await supabase
       .from("import_statistics")
       .insert({
         source_type: "Cron - Daily Properties Sync",
-        imported_count: result.stats?.created || 0,
-        updated_count: result.stats?.updated || 0,
-        error_count: result.stats?.failed || 0,
-        total_count: result.stats?.total || 0,
+        imported_count: totalStats.created || 0,
+        updated_count: totalStats.updated || 0,
+        error_count: totalStats.failed || 0,
+        total_count: totalStats.total || 0,
         import_date: new Date().toISOString(),
       });
     
@@ -64,7 +102,7 @@ serve(async (req: Request) => {
       JSON.stringify({
         success: true,
         message: "Synchronisation quotidienne des propriétés terminée",
-        details: result,
+        details: totalStats,
       }),
       { 
         headers: { ...corsHeaders, "Content-Type": "application/json" },
