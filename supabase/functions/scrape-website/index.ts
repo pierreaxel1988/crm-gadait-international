@@ -23,7 +23,7 @@ serve(async (req) => {
     const region = requestData.region || null;
     const page = requestData.page || 1;
 
-    console.log(`Scraping de l'URL: ${url} (pays: ${country || 'tous'}, région: ${region || 'toutes'}, page: ${page})`);
+    console.log(`Scraping de l'URL: ${url} (page: ${page})`);
 
     // Construire l'URL avec les paramètres
     let targetUrl = url;
@@ -120,13 +120,13 @@ serve(async (req) => {
   }
 });
 
-// Nouvelle fonction spécifique pour extraire les propriétés de The Private Collection
+// Fonction spécifique pour extraire les propriétés de The Private Collection
 function extractPropertiesFromPrivateCollection(html: string, debug = false) {
   const $ = cheerio.load(html);
   const properties = [];
   
-  // Sélecteur pour les cartes de propriété sur The Private Collection
-  const propertyCards = $('.card--wide, .property-card, .listing-card, article');
+  // Sélecteur optimisé pour les cartes de propriété sur The Private Collection
+  const propertyCards = $('.property-item');
   
   console.log(`Nombre de cartes de propriété trouvées: ${propertyCards.length}`);
   
@@ -148,16 +148,12 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       const card = $(element);
       
       // Extraire les informations de base
-      const title = card.find('.card__title, .property-title, h2, h3').first().text().trim();
-      const priceElement = card.find('.card__price, .property-price, .price').first();
+      const title = card.find('.property-title h5').text().trim();
+      const priceElement = card.find('.property-price .price-tag');
       const price = priceElement.text().trim();
       
       // Extraire les détails de localisation
-      let location = card.find('.card__location, .property-location, .location').first().text().trim();
-      if (!location) {
-        // Si pas de classe spécifique, chercher dans les métadonnées
-        location = card.find('[itemprop="addressLocality"], [data-location]').first().text().trim();
-      }
+      let location = card.find('.property-location').text().trim();
       
       // Extraire le pays
       let country = "Mauritius"; // Par défaut
@@ -176,7 +172,16 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       }
       
       // Extraire les images
-      const mainImage = card.find('img').attr('src') || card.find('img').attr('data-src') || '';
+      let mainImage = "";
+      const imgElement = card.find('.property-thumbnail img');
+      
+      // Essayer différents attributs d'image
+      mainImage = imgElement.attr('src') || imgElement.attr('data-src') || imgElement.attr('data-lazy-src') || '';
+      
+      // Si l'image est relative, la convertir en absolue
+      if (mainImage && !mainImage.startsWith('http')) {
+        mainImage = `https://the-private-collection.com${mainImage.startsWith('/') ? '' : '/'}${mainImage}`;
+      }
       
       // Extraire le lien vers la propriété
       let propertyLink = card.find('a').attr('href') || '';
@@ -185,28 +190,35 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
         propertyLink = `https://the-private-collection.com${propertyLink.startsWith('/') ? '' : '/'}${propertyLink}`;
       }
       
-      // Extraire le nombre de chambres
+      // Extraire les caractéristiques de la propriété
       let bedrooms = null;
-      const bedroomsText = card.find('.card__rooms, .bedrooms, [data-bedrooms]').first().text().trim();
-      if (bedroomsText) {
-        const bedroomsMatch = bedroomsText.match(/(\d+)/);
-        if (bedroomsMatch) {
-          bedrooms = parseInt(bedroomsMatch[1]);
-        }
-      }
-      
-      // Extraire la surface
+      let bathrooms = null;
       let area = "";
-      const areaText = card.find('.card__area, .area, [data-area]').first().text().trim();
-      if (areaText) {
-        area = areaText;
-      }
+      
+      card.find('.property-features .feature-item').each((_, featElement) => {
+        const feat = $(featElement);
+        const text = feat.text().trim();
+        
+        if (text.includes('bed') || text.includes('Bed')) {
+          const bedroomsMatch = text.match(/(\d+)/);
+          if (bedroomsMatch) {
+            bedrooms = parseInt(bedroomsMatch[1]);
+          }
+        } else if (text.includes('bath') || text.includes('Bath')) {
+          const bathroomsMatch = text.match(/(\d+)/);
+          if (bathroomsMatch) {
+            bathrooms = parseInt(bathroomsMatch[1]);
+          }
+        } else if (text.includes('m²') || text.includes('sqm')) {
+          area = text;
+        }
+      });
       
       // Extraire le type de propriété
       let propertyType = "";
-      const typeText = card.find('.card__type, .property-type, [data-type]').first().text().trim();
-      if (typeText) {
-        propertyType = typeText;
+      const tagElement = card.find('.property-tag');
+      if (tagElement.length > 0) {
+        propertyType = tagElement.text().trim();
       } else {
         // Essayer de déterminer le type à partir du titre
         const titleLower = title.toLowerCase();
@@ -220,6 +232,12 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
           propertyType = "Penthouse";
         }
       }
+
+      // Vérifier si la propriété est marquée comme exclusive
+      const isExclusive = card.find('.ribbon.exclusive').length > 0;
+      
+      // Vérifier si la propriété est marquée comme nouvelle
+      const isNew = card.find('.ribbon.new').length > 0;
       
       // Créer l'objet de propriété pour correspondre à la structure Gadait_Listings_Buy
       const property = {
@@ -245,8 +263,8 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
         "country": country,
         "city": city,
         "Property Link": propertyLink,
-        "is_exclusive": false,
-        "is_new": false
+        "is_exclusive": isExclusive,
+        "is_new": isNew
       };
       
       properties.push(property);
@@ -263,45 +281,27 @@ function extractPagination(html: string) {
   const $ = cheerio.load(html);
   
   try {
-    // Sélecteur commun pour la pagination
-    const paginationContainer = $('.pagination, .pager, nav[aria-label="Pagination"]').first();
+    // Sélecteur pour la pagination sur The Private Collection
+    const paginationContainer = $('.pagination');
     
     if (paginationContainer.length === 0) {
       return null;
     }
     
     // Trouver la page active
-    const currentPage = parseInt(paginationContainer.find('.active, .current, [aria-current="page"]').first().text()) || 1;
+    const currentPage = parseInt(paginationContainer.find('.page-item.active .page-link').text()) || 1;
     
     // Trouver le nombre total de pages
     let totalPages = 1;
     
-    // Méthode 1: Chercher le dernier lien de pagination (souvent le nombre total de pages)
-    const lastPageLink = paginationContainer.find('a').last();
-    if (lastPageLink.length) {
-      const href = lastPageLink.attr('href') || '';
-      const pageMatch = href.match(/page=(\d+)/);
-      if (pageMatch) {
-        totalPages = parseInt(pageMatch[1]);
-      } else {
-        // Si pas de paramètre page, essayer de prendre le texte du lien
-        const pageNumber = parseInt(lastPageLink.text());
-        if (!isNaN(pageNumber)) {
-          totalPages = pageNumber;
-        }
+    // Parcourir tous les liens de pagination pour trouver la dernière page
+    paginationContainer.find('.page-item .page-link').each((_, el) => {
+      const pageText = $(el).text().trim();
+      const pageNumber = parseInt(pageText);
+      if (!isNaN(pageNumber) && pageNumber > totalPages) {
+        totalPages = pageNumber;
       }
-    }
-    
-    // Méthode 2: Chercher tous les liens et prendre la valeur maximum
-    if (totalPages === 1) {
-      paginationContainer.find('a').each((_, el) => {
-        const pageText = $(el).text().trim();
-        const pageNumber = parseInt(pageText);
-        if (!isNaN(pageNumber) && pageNumber > totalPages) {
-          totalPages = pageNumber;
-        }
-      });
-    }
+    });
     
     return {
       currentPage,

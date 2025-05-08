@@ -25,13 +25,14 @@ serve(async (req: Request) => {
     
     // Récupérer les paramètres de la requête
     const params = await req.json().catch(() => ({}));
-    const country = params.country || "Mauritius";
+    const url = params.url || "https://the-private-collection.com/en/search/buy/";
+    const country = params.country || null;
     const regions = params.regions || [];
     
     // Initialiser le client Supabase
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
-    console.log(`Synchronisation pour le pays: ${country}`);
+    console.log(`Synchronisation pour l'URL: ${url}`);
     
     // Stats globales
     const globalStats = {
@@ -41,31 +42,17 @@ serve(async (req: Request) => {
       failed: 0,
     };
     
-    // Si des régions spécifiques sont demandées, les synchroniser une par une
-    if (regions.length > 0) {
-      for (const region of regions) {
-        console.log(`Synchronisation de la région: ${region}`);
-        const regionStats = await syncPropertiesForRegion(supabase, country, region);
-        
-        // Agréger les statistiques
-        globalStats.total += regionStats.total;
-        globalStats.created += regionStats.created;
-        globalStats.updated += regionStats.updated;
-        globalStats.failed += regionStats.failed;
-      }
-    } else {
-      // Sinon, synchroniser tout le pays
-      const countryStats = await syncPropertiesForRegion(supabase, country);
-      
-      // Utiliser les statistiques du pays
-      Object.assign(globalStats, countryStats);
-    }
+    // Effectuer la synchronisation pour l'URL spécifiée
+    const syncStats = await syncPropertiesFromUrl(supabase, url);
+    
+    // Agréger les statistiques
+    Object.assign(globalStats, syncStats);
     
     // Enregistrer les statistiques d'importation
     await supabase
       .from("import_statistics")
       .insert({
-        source_type: `Custom Scraper - ${country} Properties`,
+        source_type: "Custom Scraper - The Private Collection",
         imported_count: globalStats.created,
         updated_count: globalStats.updated,
         error_count: globalStats.failed,
@@ -104,8 +91,8 @@ serve(async (req: Request) => {
   }
 });
 
-// Fonction pour synchroniser les propriétés d'une région spécifique
-async function syncPropertiesForRegion(supabase, country, region = null) {
+// Fonction pour synchroniser les propriétés d'une URL spécifique
+async function syncPropertiesFromUrl(supabase: any, baseUrl: string) {
   const stats = {
     total: 0,
     created: 0,
@@ -118,7 +105,7 @@ async function syncPropertiesForRegion(supabase, country, region = null) {
     let hasMorePages = true;
     
     while (hasMorePages) {
-      console.log(`Scraping de la page ${page} pour ${country}${region ? ' - ' + region : ''}`);
+      console.log(`Scraping de la page ${page} pour ${baseUrl}`);
       
       // Appeler notre propre fonction de scraping
       const scrapeResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/scrape-website`, {
@@ -128,10 +115,9 @@ async function syncPropertiesForRegion(supabase, country, region = null) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          url: "https://the-private-collection.com/en/search/buy/",
-          country,
-          region,
+          url: baseUrl,
           page,
+          debug: false
         }),
       });
       
@@ -226,35 +212,7 @@ async function syncPropertiesForRegion(supabase, country, region = null) {
     
     return stats;
   } catch (error) {
-    console.error(`Erreur lors de la synchronisation de la région ${region || 'default'} du pays ${country}:`, error);
+    console.error(`Erreur lors de la synchronisation de l'URL ${baseUrl}:`, error);
     throw error;
   }
-}
-
-// Fonction pour extraire le prix et la localisation d'une chaîne combinée
-function extractPriceAndLocation(priceLocationString: string) {
-  if (!priceLocationString) {
-    return { price: null, location: null };
-  }
-  
-  // Format attendu: "€1,600,000 Tamarin, Mauritius"
-  const priceMatch = priceLocationString.match(/[€$£]([\d,]+)/);
-  
-  let price = null;
-  let location = null;
-  
-  if (priceMatch && priceMatch[0]) {
-    price = priceMatch[0];
-    
-    // Extraire la localisation (tout ce qui suit le prix)
-    const priceIndex = priceLocationString.indexOf(price);
-    if (priceIndex !== -1) {
-      location = priceLocationString.substring(priceIndex + price.length).trim();
-    }
-  } else {
-    // Si pas de prix trouvé, considérer toute la chaîne comme localisation
-    location = priceLocationString.trim();
-  }
-  
-  return { price, location };
 }
