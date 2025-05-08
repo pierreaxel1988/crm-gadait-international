@@ -25,7 +25,7 @@ serve(async (req: Request) => {
     
     // Récupérer les paramètres de la requête
     const params = await req.json().catch(() => ({}));
-    const url = params.url || "https://the-private-collection.com/en/search/buy/";
+    const url = params.url || "https://the-private-collection.com/en/search/";
     const country = params.country || null;
     const regions = params.regions || [];
     

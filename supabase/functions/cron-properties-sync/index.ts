@@ -29,7 +29,7 @@ serve(async (req: Request) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
     // Définir l'URL et les régions à synchroniser - maintenant sans filtre de pays
-    const targetUrl = "https://the-private-collection.com/en/search/buy/";
+    const targetUrl = "https://the-private-collection.com/en/search/";
     
     let totalStats = {
       created: 0,
