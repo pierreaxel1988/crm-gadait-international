@@ -493,6 +493,7 @@ const PropertiesPage = () => {
     return count;
   }, [filters]);
   return (
+    <>
       <Navbar />
       <SubNavigation />
       <div className="p-4 md:p-6 bg-white min-h-screen">
@@ -878,7 +879,8 @@ const PropertiesPage = () => {
             </Pagination>}
         </div>
       </div>
-    );
+    </>
+  );
 };
 
 export default PropertiesPage;
