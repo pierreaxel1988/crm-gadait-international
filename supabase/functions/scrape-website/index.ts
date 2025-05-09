@@ -73,7 +73,8 @@ serve(async (req) => {
         "Sec-Fetch-Mode": "navigate",
         "Sec-Fetch-Site": "none",
         "Sec-Fetch-User": "?1",
-        "Upgrade-Insecure-Requests": "1"
+        "Upgrade-Insecure-Requests": "1",
+        "Referer": "https://www.google.com/"
       },
     });
 
@@ -83,7 +84,10 @@ serve(async (req) => {
 
     const html = await response.text();
     console.log(`HTML récupéré avec succès (${html.length} caractères)`);
-    console.log(`Premiers 300 caractères du HTML: ${html.substring(0, 300).replace(/\n/g, ' ')}`);
+    
+    if (debug) {
+      console.log(`Premiers 300 caractères du HTML: ${html.substring(0, 300).replace(/\n/g, ' ')}`);
+    }
 
     // Analyser le HTML pour extraire les propriétés
     const result = extractPropertiesFromPrivateCollection(html, debug);
@@ -130,7 +134,7 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
   const $ = cheerio.load(html);
   const properties = [];
   
-  // Afficher les 3 premiers nœuds qui pourraient contenir des informations de propriétés
+  // Afficher les informations de debug si demandé
   if (debug) {
     console.log("Structure HTML de base de la page:");
     console.log("body classes:", $('body').attr('class'));
@@ -149,7 +153,11 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       '.property-grid-wrapper article',
       'div[class*="property-grid"] > article',
       'main article',
-      '[class*="property-list"] > *'
+      '[class*="property-list"] > *',
+      'article.property-card',
+      'div.property-grid article',
+      '.featured-properties .property',
+      '.search-results .result-item'
     ];
     
     console.log("Recherche de sélecteurs possibles pour les propriétés:");
@@ -158,89 +166,109 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       console.log(`- ${selector}: ${count} éléments trouvés`);
     });
     
-    // Analyser la structure de la page pour aider à déterminer les bons sélecteurs
+    // Analyser la structure de la page
     console.log("Structure générale de la page:");
     $('body > *').slice(0, 5).each((i, el) => {
       console.log(`- Element ${i}: ${$(el).prop('tagName')} avec class="${$(el).attr('class')}"`);
     });
 
-    // Analyser la structure du main
     console.log("Structure du main:");
     $('main > *').slice(0, 10).each((i, el) => {
       console.log(`- Main child ${i}: ${$(el).prop('tagName')} avec class="${$(el).attr('class')}"`);
     });
   }
   
-  // Essayer différents sélecteurs pour les cartes de propriété
-  const propertySelectors = [
-    '.property-item',
-    '.property-card',
-    '.listing-item',
-    '.property',
-    '.property-listing',
-    '.card',
-    // Nouveaux sélecteurs basés sur la structure actuelle
-    '.property-grid-wrapper article',
-    'div[class*="property-grid"] > article',
-    'main article',
-    '[class*="property-list"] > *',
-    'div[class*="property"] > div'
-  ];
+  // Essayer de nouvelles méthodes pour trouver les propriétés
+  // 1. Sélecteurs spécifiques pour The Private Collection
+  let propertyCards = $('.datocms-gallery-grid .gatsby-image-wrapper');
   
-  let propertyCards = $();
-  for (const selector of propertySelectors) {
-    const elements = $(selector);
-    if (elements.length > 0) {
-      console.log(`Utilisation du sélecteur "${selector}" - ${elements.length} éléments trouvés`);
-      propertyCards = elements;
-      break;
-    }
-  }
-  
-  if (propertyCards.length === 0) {
-    console.log("Aucun sélecteur standard n'a fonctionné. Recherche d'éléments avec des attributs communs...");
-    
-    // Recherche plus générique basée sur des attributs/classes communs
-    const genericContainers = $('[class*="property"], [class*="listing"], [class*="card"]').filter(function() {
-      // Filtrer uniquement les éléments qui semblent être des cartes de propriété
-      const html = $(this).html();
-      return html && (
-        html.includes('price') || 
-        html.includes('€') || 
-        html.includes('$') || 
-        html.includes('bed') || 
-        html.includes('bath')
-      );
+  if (propertyCards.length > 0) {
+    console.log(`Found ${propertyCards.length} properties using datocms gallery selector`);
+  } else {
+    // 2. Recherche de cartes de propriétés basées sur des critères génériques
+    propertyCards = $('article, .card, [class*="property"], [class*="listing"]').filter(function() {
+      // Filtrer pour les éléments qui ont une image et un texte avec un prix ou un emplacement
+      const hasImage = $(this).find('img').length > 0;
+      const text = $(this).text();
+      const hasPriceOrLocation = /price|€|\$|location|address/i.test(text);
+      return hasImage && hasPriceOrLocation;
     });
     
-    if (genericContainers.length > 0) {
-      console.log(`Trouvé ${genericContainers.length} éléments génériques qui ressemblent à des propriétés`);
-      propertyCards = genericContainers;
-    }
+    console.log(`Found ${propertyCards.length} properties using generic filter criteria`);
+  }
 
-    // Si toujours aucun résultat, essayer avec des sélecteurs directs
-    if (propertyCards.length === 0) {
-      console.log("Essai de sélecteurs directs pour le site actuel...");
+  // 3. Rechercher directement les liens vers les pages de propriétés
+  if (propertyCards.length === 0) {
+    const propertyLinks = $('a[href*="property"], a[href*="villa"], a[href*="apartment"]');
+    console.log(`Found ${propertyLinks.length} property links`);
+    
+    propertyLinks.each((index, element) => {
+      const link = $(element);
+      const href = link.attr('href');
+      const title = link.text().trim() || link.attr('title') || `Property ${index + 1}`;
+      const img = link.find('img').first();
+      const imgSrc = img.attr('src') || img.attr('data-src');
       
-      // Recherche directe d'articles qui contiennent des prix et des images
-      propertyCards = $('article:has(img)');
-      console.log(`Trouvé ${propertyCards.length} articles avec images`);
+      // Extraire des informations basiques
+      const card = link.closest('div, article');
+      const priceText = card.find('[class*="price"]').text() || '€ Price on request';
+      const locationText = card.find('[class*="location"]').text() || 'Mauritius';
       
-      if (propertyCards.length === 0) {
-        // Dernière tentative: chercher des éléments avec des attributs de prix
-        propertyCards = $('*:contains("€"):has(img)').filter(function() {
-          const text = $(this).text();
-          return /\d+,\d+/.test(text) || /€\d+/.test(text);
-        });
-        console.log(`Dernière tentative: ${propertyCards.length} éléments contenant des prix et images`);
-      }
-    }
+      // Créer une entrée de propriété avec les informations disponibles
+      properties.push({
+        "Position": index + 1,
+        "Title": title,
+        "Property Type": "Villa", // Valeur par défaut
+        "Area": "Not specified",
+        "Bedrooms": 0,
+        "price": priceText,
+        "Price and Location": `${priceText} · ${locationText}`,
+        "Property Link": href.startsWith('http') ? href : `https://the-private-collection.com${href.startsWith('/') ? '' : '/'}${href}`,
+        "Main Image": imgSrc ? (imgSrc.startsWith('http') ? imgSrc : `https://the-private-collection.com${imgSrc.startsWith('/') ? '' : '/'}${imgSrc}`) : null,
+        "city": locationText.split(',')[0] || 'Not specified',
+        "country": "Mauritius",
+        "is_new": false,
+        "is_exclusive": false
+      });
+    });
   }
   
-  console.log(`Nombre final de cartes de propriété trouvées: ${propertyCards.length}`);
+  // Si aucune méthode n'a fonctionné, essayer de parcourir tous les liens
+  if (properties.length === 0) {
+    console.log("Trying more aggressive extraction methods");
+    
+    // Analyser toute la page à la recherche d'images et de liens
+    $('a').each((index, element) => {
+      const link = $(element);
+      const href = link.attr('href');
+      
+      // Filtrer uniquement les liens qui semblent être des propriétés
+      if (href && (href.includes('property') || href.includes('villa') || href.includes('apartment') || href.includes('house'))) {
+        const title = link.text().trim() || `Property ${index + 1}`;
+        const img = link.find('img').first();
+        const imgSrc = img.attr('src') || img.attr('data-src');
+        
+        properties.push({
+          "Position": index + 1,
+          "Title": title,
+          "Property Type": "Villa",
+          "Area": "Not specified",
+          "Bedrooms": 0,
+          "price": "Price on request",
+          "Price and Location": `Price on request · Mauritius`,
+          "Property Link": href.startsWith('http') ? href : `https://the-private-collection.com${href.startsWith('/') ? '' : '/'}${href}`,
+          "Main Image": imgSrc ? (imgSrc.startsWith('http') ? imgSrc : `https://the-private-collection.com${imgSrc.startsWith('/') ? '' : '/'}${imgSrc}`) : null,
+          "city": "Not specified",
+          "country": "Mauritius",
+          "is_new": false,
+          "is_exclusive": false
+        });
+      }
+    });
+  }
   
-  if (propertyCards.length === 0 && debug) {
-    // En mode debug, si aucune propriété n'est trouvée, essayer de comprendre pourquoi
+  // Si toujours aucun résultat, journaliser le problème pour débogage futur
+  if (properties.length === 0 && debug) {
     console.log("Aucune propriété trouvée. Voici les classes trouvées dans la page:");
     const classes = new Set();
     $('*').each((_, el) => {
@@ -272,257 +300,6 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
     }
   }
   
-  propertyCards.each((index, element) => {
-    try {
-      const card = $(element);
-      
-      // TITRE - Extraction améliorée avec fallbacks
-      const titleElement = card.find('h2, h3, h4, h5, .title, [class*="title"]').first();
-      const title = titleElement.text().trim() || card.find('*:contains("Villa"), *:contains("Apartment")').first().text().trim();
-      
-      // PRIX - Format standardisé avec symbole €
-      const priceElement = card.find('.price, [class*="price"], *:contains("€")').first();
-      let price = priceElement.text().trim();
-      if (!price) {
-        const priceMatch = card.text().match(/€[0-9,. ]+/);
-        if (priceMatch) price = priceMatch[0].trim();
-      }
-      price = price.replace(/\s+/g, '');
-      if (!price.includes('€')) price = `€${price}`;
-      
-      // LOCALISATION - Détection améliorée avec liste de lieux à Maurice
-      let location = card.find('.property-location, .location, [class*="location"], .address, [class*="address"]').first().text().trim();
-      if (!location) {
-        const locationKeywords = ['Rivière Noire', 'Mont Calme', 'Mont Mascal', 'Belle Mare'];
-        for (const keyword of locationKeywords) {
-          if (card.text().includes(keyword)) {
-            location = keyword;
-            break;
-          }
-        }
-      }
-      
-      // PAYS & VILLE - Identification précise des villes à Maurice
-      let country = "Mauritius"; // Par défaut
-      const countryMatch = location.match(/(Mauritius|Morocco|Spain|Portugal|France)/i);
-      if (countryMatch) {
-        country = countryMatch[0];
-      }
-      
-      // Détection de la ville
-      let city = "";
-      const commonCities = ['Rivière Noire', 'Black River', 'Grand Baie', 'Tamarin', 'Mont Calme', 'Mont Mascal'];
-      for (const cityName of commonCities) {
-        if (card.text().includes(cityName)) {
-          city = cityName;
-          break;
-        }
-      }
-      
-      // Si pas de ville trouvée mais une location, essayer de l'extraire
-      if (!city && location) {
-        const cityParts = location.split(',');
-        if (cityParts.length > 1) {
-          city = cityParts[0].trim();
-        } else if (location && !location.includes(country)) {
-          city = location;
-        }
-      }
-      
-      // EXTRACTION MULTIPLE D'IMAGES - Principale + additionnelles
-      let mainImage = "";
-      const imgElements = card.find('img');
-      
-      if (imgElements.length > 0) {
-        // Image principale
-        const firstImg = imgElements.first();
-        mainImage = firstImg.attr('src') || firstImg.attr('data-src') || firstImg.attr('data-lazy-src') || '';
-        
-        // Vérifier également srcset
-        if (!mainImage && firstImg.attr('srcset')) {
-          mainImage = firstImg.attr('srcset').split(' ')[0];
-        }
-        
-        // Si l'image est relative, la convertir en absolue
-        if (mainImage && !mainImage.startsWith('http')) {
-          mainImage = `https://the-private-collection.com${mainImage.startsWith('/') ? '' : '/'}${mainImage}`;
-        }
-      }
-      
-      // Images additionnelles (jusqu'à 10)
-      const additionalImages = [];
-      imgElements.slice(1).each((i, img) => {
-        let imgSrc = $(img).attr('src') || $(img).attr('data-src') || $(img).attr('data-lazy-src') || '';
-        
-        // Vérifier également srcset
-        if (!imgSrc && $(img).attr('srcset')) {
-          imgSrc = $(img).attr('srcset').split(' ')[0];
-        }
-        
-        if (imgSrc && !imgSrc.startsWith('http')) {
-          imgSrc = `https://the-private-collection.com${imgSrc.startsWith('/') ? '' : '/'}${imgSrc}`;
-        }
-        
-        if (imgSrc) additionalImages.push(imgSrc);
-      });
-      
-      // EXTRACTION DU LIEN VERS LA PROPRIÉTÉ
-      let propertyLink = card.find('a').attr('href') || '';
-      if (propertyLink && !propertyLink.startsWith('http')) {
-        // Convertir les liens relatifs en absolus
-        propertyLink = `https://the-private-collection.com${propertyLink.startsWith('/') ? '' : '/'}${propertyLink}`;
-      }
-      
-      // CARACTÉRISTIQUES DE LA PROPRIÉTÉ - Extraction plus précise
-      let bedrooms = null;
-      let bathrooms = null;
-      let area = "";
-      
-      // Rechercher des features dans différents formats possibles
-      const featureSelectors = [
-        '.property-features .feature-item', 
-        '.features .feature', 
-        '.details .detail',
-        '[class*="features"] [class*="item"]',
-        '[class*="detail"]',
-        '[class*="meta"]'
-      ];
-      
-      let featureElements = $();
-      for (const selector of featureSelectors) {
-        const elements = card.find(selector);
-        if (elements.length > 0) {
-          featureElements = elements;
-          break;
-        }
-      }
-      
-      featureElements.each((_, featElement) => {
-        const feat = $(featElement);
-        const text = feat.text().trim();
-        
-        if (text.toLowerCase().includes('bed') || feat.find('[class*="bed"]').length > 0) {
-          const bedroomsMatch = text.match(/(\d+)/);
-          if (bedroomsMatch) {
-            bedrooms = parseInt(bedroomsMatch[1]);
-          }
-        } else if (text.toLowerCase().includes('bath') || feat.find('[class*="bath"]').length > 0) {
-          const bathroomsMatch = text.match(/(\d+)/);
-          if (bathroomsMatch) {
-            bathrooms = parseInt(bathroomsMatch[1]);
-          }
-        } else if (text.includes('m²') || text.includes('sqm') || feat.find('[class*="area"]').length > 0) {
-          area = text;
-        }
-      });
-      
-      // Si on n'a pas trouvé de features spécifiques, essayer de les extraire du texte général
-      if (bedrooms === null) {
-        const bedroomMatch = card.text().match(/(\d+)\s*(?:bed|bedroom|chambres?)/i);
-        if (bedroomMatch) {
-          bedrooms = parseInt(bedroomMatch[1]);
-        }
-      }
-      
-      if (bathrooms === null) {
-        const bathroomMatch = card.text().match(/(\d+)\s*(?:bath|bathroom|salle de bain)/i);
-        if (bathroomMatch) {
-          bathrooms = parseInt(bathroomMatch[1]);
-        }
-      }
-      
-      if (!area) {
-        const areaMatch = card.text().match(/(\d+(?:\.\d+)?)\s*(?:m²|sqm|square meters)/i);
-        if (areaMatch) {
-          area = `${areaMatch[1]} m²`;
-        }
-      }
-      
-      // TYPE DE PROPRIÉTÉ - Détection plus robuste
-      let propertyType = "";
-      const typeElement = card.find('.property-tag, .tag, .type, [class*="tag"], [class*="type"]').first();
-      if (typeElement.length > 0) {
-        propertyType = typeElement.text().trim();
-      } else {
-        // Essayer de déterminer le type à partir du titre
-        const titleLower = title.toLowerCase();
-        if (titleLower.includes('villa')) {
-          propertyType = "Villa";
-        } else if (titleLower.includes('apartment')) {
-          propertyType = "Apartment";
-        } else if (titleLower.includes('house')) {
-          propertyType = "House";
-        } else if (titleLower.includes('penthouse')) {
-          propertyType = "Penthouse";
-        } else {
-          propertyType = "Villa"; // Type par défaut
-        }
-      }
-
-      // PROPRIÉTÉS EXCLUSIVES & NOUVELLES - Détection améliorée
-      const isExclusive = card.find('.ribbon.exclusive, .exclusive, [class*="exclusive"]').length > 0 || 
-                          title.toLowerCase().includes('exclusive') ||
-                          card.text().toLowerCase().includes('exclusive listing');
-      
-      const isNew = card.find('.ribbon.new, .new, [class*="new"]').length > 0 || 
-                    title.toLowerCase().includes('new') ||
-                    card.text().toLowerCase().includes('new listing');
-      
-      // Log détaillé des informations extraites en mode debug
-      if (debug) {
-        console.log(`
-          Propriété #${index + 1}:
-          - Titre: ${title}
-          - Prix: ${price}
-          - Localisation: ${location}
-          - Pays: ${country}
-          - Ville: ${city}
-          - Chambres: ${bedrooms}
-          - Salles de bain: ${bathrooms}
-          - Surface: ${area}
-          - Type: ${propertyType}
-          - Lien: ${propertyLink}
-          - Image principale: ${mainImage}
-          - Images additionnelles: ${additionalImages.length}
-          - Exclusive: ${isExclusive}
-          - Nouvelle: ${isNew}
-        `);
-      }
-      
-      // Créer l'objet de propriété pour correspondre à la structure Gadait_Listings_Buy
-      const property = {
-        "Position": index + 1,
-        "Title": title || `Property #${index + 1}`,
-        "Main Image": mainImage,
-        "Secondary Image": additionalImages[0] || null,
-        "Additional Image 1": additionalImages[1] || null,
-        "Additional Image 2": additionalImages[2] || null,
-        "Additional Image 3": additionalImages[3] || null,
-        "Additional Image 4": additionalImages[4] || null,
-        "Additional Image 5": additionalImages[5] || null,
-        "Additional Image 6": additionalImages[6] || null,
-        "Additional Image 7": additionalImages[7] || null,
-        "Additional Image 8": additionalImages[8] || null,
-        "Additional Image 9": additionalImages[9] || null,
-        "Additional Image 10": additionalImages[10] || null,
-        "Price and Location": `${price} ${location}`,
-        "price": price,
-        "Property Type": propertyType,
-        "Bedrooms": bedrooms || 0,
-        "Area": area || "0 m²",
-        "country": country,
-        "city": city || "Unknown",
-        "Property Link": propertyLink,
-        "is_exclusive": isExclusive,
-        "is_new": isNew
-      };
-      
-      properties.push(property);
-    } catch (error) {
-      console.error(`Erreur lors de l'extraction de la propriété ${index}:`, error);
-    }
-  });
-  
   return { properties };
 }
 
@@ -540,7 +317,8 @@ function extractPagination(html: string) {
       '[class*="paging"]',
       'ul.page-numbers',
       '.nav-pagination',
-      'nav ul'
+      'nav ul',
+      '.page-navigation'
     ];
     
     let paginationContainer = $();
@@ -553,9 +331,10 @@ function extractPagination(html: string) {
       }
     }
     
+    // Si aucun élément de pagination n'est trouvé, supposer qu'il y a une seule page
     if (paginationContainer.length === 0) {
       console.log("Aucun élément de pagination trouvé");
-      return null;
+      return { currentPage: 1, totalPages: 1, hasNextPage: false, hasPrevPage: false };
     }
     
     // Trouver la page active
@@ -597,6 +376,11 @@ function extractPagination(html: string) {
       }
     }
     
+    // Si aucune page n'est trouvée, supposer qu'il y a au moins 10 pages
+    if (totalPages <= 1) {
+      totalPages = 10;
+    }
+    
     console.log(`Pagination: page actuelle ${currentPage}, total ${totalPages} pages`);
     
     return {
@@ -607,6 +391,6 @@ function extractPagination(html: string) {
     };
   } catch (error) {
     console.error("Erreur lors de l'extraction de la pagination:", error);
-    return null;
+    return { currentPage: 1, totalPages: 10, hasNextPage: true, hasPrevPage: false };
   }
 }

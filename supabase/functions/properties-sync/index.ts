@@ -43,7 +43,8 @@ serve(async (req: Request) => {
     };
     
     // Effectuer la synchronisation pour l'URL spécifiée
-    const syncStats = await syncPropertiesFromUrl(supabase, url);
+    const maxPagesToScrape = 20; // Limiter le nombre de pages à scraper pour éviter les problèmes
+    const syncStats = await syncPropertiesFromUrl(supabase, url, maxPagesToScrape);
     
     // Agréger les statistiques
     Object.assign(globalStats, syncStats);
@@ -92,7 +93,7 @@ serve(async (req: Request) => {
 });
 
 // Fonction pour synchroniser les propriétés d'une URL spécifique
-async function syncPropertiesFromUrl(supabase: any, baseUrl: string) {
+async function syncPropertiesFromUrl(supabase: any, baseUrl: string, maxPages: number = 20) {
   const stats = {
     total: 0,
     created: 0,
@@ -104,8 +105,13 @@ async function syncPropertiesFromUrl(supabase: any, baseUrl: string) {
     let page = 1;
     let hasMorePages = true;
     
-    while (hasMorePages) {
+    while (hasMorePages && page <= maxPages) {
       console.log(`Scraping de la page ${page} pour ${baseUrl}`);
+      
+      // Ajouter un délai entre les requêtes pour éviter les blocages
+      if (page > 1) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
       
       // Appeler notre propre fonction de scraping
       const scrapeResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/scrape-website`, {
@@ -123,6 +129,14 @@ async function syncPropertiesFromUrl(supabase: any, baseUrl: string) {
       
       if (!scrapeResponse.ok) {
         const errorText = await scrapeResponse.text();
+        console.error(`Erreur lors du scraping (${scrapeResponse.status}): ${errorText}`);
+        
+        // Si c'est une erreur 429 (Too Many Requests), attendez plus longtemps avant de réessayer
+        if (scrapeResponse.status === 429) {
+          await new Promise(resolve => setTimeout(resolve, 10000)); // Attendre 10 secondes
+          continue; // Réessayer la même page
+        }
+        
         throw new Error(`Erreur lors du scraping (${scrapeResponse.status}): ${errorText}`);
       }
       
@@ -135,10 +149,22 @@ async function syncPropertiesFromUrl(supabase: any, baseUrl: string) {
       const properties = scrapeResult.properties;
       console.log(`${properties.length} propriétés trouvées sur la page ${page}`);
       
+      if (properties.length === 0) {
+        console.log("Aucune propriété trouvée sur cette page, fin du scraping");
+        break;
+      }
+      
       // Traiter chaque propriété
       for (const property of properties) {
         try {
           stats.total++;
+          
+          // S'assurer que la propriété a un lien (URL) unique
+          if (!property["Property Link"]) {
+            console.log("Propriété sans lien, ignorée");
+            stats.failed++;
+            continue;
+          }
           
           // Vérifier si la propriété existe déjà (par URL)
           const { data: existingProperty, error: selectError } = await supabase
