@@ -276,72 +276,104 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
     try {
       const card = $(element);
       
-      // Extraire les informations de base
+      // TITRE - Extraction améliorée avec fallbacks
       const titleElement = card.find('h2, h3, h4, h5, .title, [class*="title"]').first();
       const title = titleElement.text().trim() || card.find('*:contains("Villa"), *:contains("Apartment")').first().text().trim();
       
-      // Extraire le prix (adapter aux formats €X,XXX,XXX)
+      // PRIX - Format standardisé avec symbole €
       const priceElement = card.find('.price, [class*="price"], *:contains("€")').first();
       let price = priceElement.text().trim();
       if (!price) {
         const priceMatch = card.text().match(/€[0-9,. ]+/);
         if (priceMatch) price = priceMatch[0].trim();
       }
+      price = price.replace(/\s+/g, '');
+      if (!price.includes('€')) price = `€${price}`;
       
-      // Extraire les détails de localisation
+      // LOCALISATION - Détection améliorée avec liste de lieux à Maurice
       let location = card.find('.property-location, .location, [class*="location"], .address, [class*="address"]').first().text().trim();
       if (!location) {
-        // Essayer d'autres sélecteurs pour la localisation
-        const locationElements = card.find('p, span, div').filter(function() {
-          const text = $(this).text().trim();
-          return text.includes('Mauritius') || text.includes('Morocco') || text.includes('Spain');
-        });
-        if (locationElements.length > 0) {
-          location = locationElements.first().text().trim();
+        const locationKeywords = ['Rivière Noire', 'Mont Calme', 'Mont Mascal', 'Belle Mare'];
+        for (const keyword of locationKeywords) {
+          if (card.text().includes(keyword)) {
+            location = keyword;
+            break;
+          }
         }
       }
       
-      // Extraire le pays
+      // PAYS & VILLE - Identification précise des villes à Maurice
       let country = "Mauritius"; // Par défaut
       const countryMatch = location.match(/(Mauritius|Morocco|Spain|Portugal|France)/i);
       if (countryMatch) {
         country = countryMatch[0];
       }
       
-      // Extraire la ville
+      // Détection de la ville
       let city = "";
-      const cityParts = location.split(',');
-      if (cityParts.length > 1) {
-        city = cityParts[0].trim();
-      } else if (location && !location.includes(country)) {
-        city = location;
+      const commonCities = ['Rivière Noire', 'Black River', 'Grand Baie', 'Tamarin', 'Mont Calme', 'Mont Mascal'];
+      for (const cityName of commonCities) {
+        if (card.text().includes(cityName)) {
+          city = cityName;
+          break;
+        }
       }
       
-      // Extraire les images
+      // Si pas de ville trouvée mais une location, essayer de l'extraire
+      if (!city && location) {
+        const cityParts = location.split(',');
+        if (cityParts.length > 1) {
+          city = cityParts[0].trim();
+        } else if (location && !location.includes(country)) {
+          city = location;
+        }
+      }
+      
+      // EXTRACTION MULTIPLE D'IMAGES - Principale + additionnelles
       let mainImage = "";
-      const imgElement = card.find('img').first();
+      const imgElements = card.find('img');
       
-      // Essayer différents attributs d'image
-      mainImage = imgElement.attr('src') || imgElement.attr('data-src') || imgElement.attr('data-lazy-src') || '';
-      
-      // Vérifier également srcset
-      if (!mainImage && imgElement.attr('srcset')) {
-        mainImage = imgElement.attr('srcset').split(' ')[0];
+      if (imgElements.length > 0) {
+        // Image principale
+        const firstImg = imgElements.first();
+        mainImage = firstImg.attr('src') || firstImg.attr('data-src') || firstImg.attr('data-lazy-src') || '';
+        
+        // Vérifier également srcset
+        if (!mainImage && firstImg.attr('srcset')) {
+          mainImage = firstImg.attr('srcset').split(' ')[0];
+        }
+        
+        // Si l'image est relative, la convertir en absolue
+        if (mainImage && !mainImage.startsWith('http')) {
+          mainImage = `https://the-private-collection.com${mainImage.startsWith('/') ? '' : '/'}${mainImage}`;
+        }
       }
       
-      // Si l'image est relative, la convertir en absolue
-      if (mainImage && !mainImage.startsWith('http')) {
-        mainImage = `https://the-private-collection.com${mainImage.startsWith('/') ? '' : '/'}${mainImage}`;
-      }
+      // Images additionnelles (jusqu'à 10)
+      const additionalImages = [];
+      imgElements.slice(1).each((i, img) => {
+        let imgSrc = $(img).attr('src') || $(img).attr('data-src') || $(img).attr('data-lazy-src') || '';
+        
+        // Vérifier également srcset
+        if (!imgSrc && $(img).attr('srcset')) {
+          imgSrc = $(img).attr('srcset').split(' ')[0];
+        }
+        
+        if (imgSrc && !imgSrc.startsWith('http')) {
+          imgSrc = `https://the-private-collection.com${imgSrc.startsWith('/') ? '' : '/'}${imgSrc}`;
+        }
+        
+        if (imgSrc) additionalImages.push(imgSrc);
+      });
       
-      // Extraire le lien vers la propriété
+      // EXTRACTION DU LIEN VERS LA PROPRIÉTÉ
       let propertyLink = card.find('a').attr('href') || '';
       if (propertyLink && !propertyLink.startsWith('http')) {
         // Convertir les liens relatifs en absolus
         propertyLink = `https://the-private-collection.com${propertyLink.startsWith('/') ? '' : '/'}${propertyLink}`;
       }
       
-      // Extraire les caractéristiques de la propriété
+      // CARACTÉRISTIQUES DE LA PROPRIÉTÉ - Extraction plus précise
       let bedrooms = null;
       let bathrooms = null;
       let area = "";
@@ -400,17 +432,17 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
       }
       
       if (!area) {
-        const areaMatch = card.text().match(/(\d+)\s*(?:m²|sqm|square meters)/i);
+        const areaMatch = card.text().match(/(\d+(?:\.\d+)?)\s*(?:m²|sqm|square meters)/i);
         if (areaMatch) {
-          area = areaMatch[0];
+          area = `${areaMatch[1]} m²`;
         }
       }
       
-      // Extraire le type de propriété
+      // TYPE DE PROPRIÉTÉ - Détection plus robuste
       let propertyType = "";
-      const tagElement = card.find('.property-tag, .tag, .type, [class*="tag"], [class*="type"]').first();
-      if (tagElement.length > 0) {
-        propertyType = tagElement.text().trim();
+      const typeElement = card.find('.property-tag, .tag, .type, [class*="tag"], [class*="type"]').first();
+      if (typeElement.length > 0) {
+        propertyType = typeElement.text().trim();
       } else {
         // Essayer de déterminer le type à partir du titre
         const titleLower = title.toLowerCase();
@@ -422,16 +454,19 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
           propertyType = "House";
         } else if (titleLower.includes('penthouse')) {
           propertyType = "Penthouse";
+        } else {
+          propertyType = "Villa"; // Type par défaut
         }
       }
 
-      // Vérifier si la propriété est marquée comme exclusive
-      const isExclusive = card.find('.ribbon.exclusive, .exclusive, [class*="exclusive"]').length > 0 
-                          || title.toLowerCase().includes('exclusive');
+      // PROPRIÉTÉS EXCLUSIVES & NOUVELLES - Détection améliorée
+      const isExclusive = card.find('.ribbon.exclusive, .exclusive, [class*="exclusive"]').length > 0 || 
+                          title.toLowerCase().includes('exclusive') ||
+                          card.text().toLowerCase().includes('exclusive listing');
       
-      // Vérifier si la propriété est marquée comme nouvelle
-      const isNew = card.find('.ribbon.new, .new, [class*="new"]').length > 0 
-                    || title.toLowerCase().includes('new');
+      const isNew = card.find('.ribbon.new, .new, [class*="new"]').length > 0 || 
+                    title.toLowerCase().includes('new') ||
+                    card.text().toLowerCase().includes('new listing');
       
       // Log détaillé des informations extraites en mode debug
       if (debug) {
@@ -447,7 +482,8 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
           - Surface: ${area}
           - Type: ${propertyType}
           - Lien: ${propertyLink}
-          - Image: ${mainImage}
+          - Image principale: ${mainImage}
+          - Images additionnelles: ${additionalImages.length}
           - Exclusive: ${isExclusive}
           - Nouvelle: ${isNew}
         `);
@@ -458,24 +494,24 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
         "Position": index + 1,
         "Title": title || `Property #${index + 1}`,
         "Main Image": mainImage,
-        "Secondary Image": null,
-        "Additional Image 1": null,
-        "Additional Image 2": null,
-        "Additional Image 3": null,
-        "Additional Image 4": null,
-        "Additional Image 5": null,
-        "Additional Image 6": null,
-        "Additional Image 7": null,
-        "Additional Image 8": null,
-        "Additional Image 9": null,
-        "Additional Image 10": null,
+        "Secondary Image": additionalImages[0] || null,
+        "Additional Image 1": additionalImages[1] || null,
+        "Additional Image 2": additionalImages[2] || null,
+        "Additional Image 3": additionalImages[3] || null,
+        "Additional Image 4": additionalImages[4] || null,
+        "Additional Image 5": additionalImages[5] || null,
+        "Additional Image 6": additionalImages[6] || null,
+        "Additional Image 7": additionalImages[7] || null,
+        "Additional Image 8": additionalImages[8] || null,
+        "Additional Image 9": additionalImages[9] || null,
+        "Additional Image 10": additionalImages[10] || null,
         "Price and Location": `${price} ${location}`,
         "price": price,
         "Property Type": propertyType,
-        "Bedrooms": bedrooms,
-        "Area": area,
+        "Bedrooms": bedrooms || 0,
+        "Area": area || "0 m²",
         "country": country,
-        "city": city,
+        "city": city || "Unknown",
         "Property Link": propertyLink,
         "is_exclusive": isExclusive,
         "is_new": isNew
