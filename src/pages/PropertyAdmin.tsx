@@ -138,22 +138,33 @@ const PropertyAdmin = () => {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <DashboardCard 
               title="Propriétés importées" 
-              value={importStats[0]?.imported_count?.toString() || "0"} 
               subtitle="Dernière synchronisation" 
               icon={<Download className="h-5 w-5" />}
-            />
+            >
+              <div className="text-2xl font-semibold">
+                {importStats[0]?.imported_count?.toString() || "0"}
+              </div>
+            </DashboardCard>
+            
             <DashboardCard 
               title="Propriétés mises à jour" 
-              value={importStats[0]?.updated_count?.toString() || "0"} 
               subtitle="Dernière synchronisation" 
               icon={<RefreshCw className="h-5 w-5" />} 
-            />
+            >
+              <div className="text-2xl font-semibold">
+                {importStats[0]?.updated_count?.toString() || "0"}
+              </div>
+            </DashboardCard>
+            
             <DashboardCard 
               title="Dernière mise à jour" 
-              value={importStats[0] ? formatDate(importStats[0].import_date).split(' ')[0] : "Jamais"} 
               subtitle={importStats[0] ? formatDate(importStats[0].import_date).split(' ')[1] : ""}
               icon={<Settings className="h-5 w-5" />}
-            />
+            >
+              <div className="text-2xl font-semibold">
+                {importStats[0] ? formatDate(importStats[0].import_date).split(' ')[0] : "Jamais"}
+              </div>
+            </DashboardCard>
           </div>
 
           {chartData.length > 0 && (
