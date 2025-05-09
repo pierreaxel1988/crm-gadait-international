@@ -29,6 +29,8 @@ interface GadaitProperty {
   "Additional Image 3": string | null;
   "Additional Image 4": string | null;
   "Additional Image 5": string | null;
+  is_new: boolean | null;
+  is_exclusive: boolean | null;
 }
 
 const formatPrice = (price: string | null) => {
@@ -62,6 +64,9 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const propertiesPerPage = 20;
 
   // Charger les propriétés correspondant aux critères du lead
   useEffect(() => {
@@ -71,8 +76,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
         console.log("Chargement des propriétés pour le lead:", leadId);
         let query = supabase
           .from('Gadait_Listings_Buy')
-          .select('*')
-          .order('Position', { ascending: true });
+          .select('*', { count: 'exact' });
         
         // Filtrage par pays si spécifié
         if (lead.country) {
@@ -96,14 +100,23 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
           }
         }
         
-        // Limiter à 20 résultats
-        query = query.limit(20);
+        // Calculer la plage pour la pagination
+        const from = (currentPage - 1) * propertiesPerPage;
+        const to = from + propertiesPerPage - 1;
         
-        const { data, error } = await query;
+        // Ajouter la pagination à la requête
+        query = query.range(from, to).order('Position', { ascending: true });
+        
+        const { data, error, count } = await query;
         
         if (error) throw error;
         
-        console.log(`${data?.length || 0} propriétés trouvées pour le lead`);
+        if (count !== null) {
+          setTotalCount(count);
+          console.log(`Total de ${count} propriétés trouvées pour le lead`);
+        }
+        
+        console.log(`${data?.length || 0} propriétés chargées sur cette page`);
         setProperties(data || []);
       } catch (error) {
         console.error("Erreur lors du chargement des propriétés:", error);
@@ -118,7 +131,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
     };
     
     loadProperties();
-  }, [lead, leadId]);
+  }, [lead, leadId, currentPage]);
   
   // Fonction pour actualiser manuellement les données
   const handleRefresh = async () => {
@@ -148,6 +161,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
         });
         
         // Recharger les propriétés
+        setCurrentPage(1); // Revenir à la première page
         window.location.reload();
       } else {
         setSyncStatus(`Erreur: ${result.message}`);
@@ -209,22 +223,37 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
     return '/placeholder.svg';
   };
 
+  // Calculer le nombre total de pages
+  const totalPages = Math.ceil(totalCount / propertiesPerPage);
+
+  // Fonction pour changer de page
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Propriétés</h2>
-        <Button 
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1"
-        >
-          {isRefreshing ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-1" />
-          ) : null}
-          Synchroniser
-        </Button>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">
+            {totalCount} propriétés trouvées - Page {currentPage} sur {totalPages}
+          </span>
+          <Button 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1"
+          >
+            {isRefreshing ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-1" />
+            ) : null}
+            Synchroniser
+          </Button>
+        </div>
       </div>
       
       {syncStatus && (
@@ -256,6 +285,18 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
                 {property["Property Type"] && (
                   <div className="absolute bottom-2 left-2 bg-loro-navy/80 text-white px-3 py-1 rounded-full text-xs font-medium">
                     {property["Property Type"]}
+                  </div>
+                )}
+                
+                {property.is_exclusive && (
+                  <div className="absolute top-2 right-2 bg-amber-500/80 text-white px-3 py-1 rounded-full text-xs font-medium">
+                    Exclusivité
+                  </div>
+                )}
+                
+                {property.is_new && (
+                  <div className="absolute top-2 left-2 bg-loro-terracotta/80 text-white px-3 py-1 rounded-full text-xs font-medium">
+                    Nouveau
                   </div>
                 )}
               </div>
@@ -308,6 +349,35 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+      
+      {/* Pagination simple */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              &lt; Précédent
+            </Button>
+            
+            <span className="mx-2">
+              Page {currentPage} sur {totalPages}
+            </span>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Suivant &gt;
+            </Button>
+          </div>
         </div>
       )}
     </div>

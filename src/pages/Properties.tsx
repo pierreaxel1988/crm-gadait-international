@@ -324,7 +324,7 @@ const PropertiesPage = () => {
           return numericPrice >= minPriceValue && numericPrice <= maxPriceValue;
         });
         setProperties(filteredByPrice);
-        setTotalProperties(filteredByPrice.length);
+        // Note: On ne met pas à jour setTotalProperties ici car cela fausserait la pagination
       }
     } catch (error) {
       console.error("Erreur lors du chargement des propriétés:", error);
