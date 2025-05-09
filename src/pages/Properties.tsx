@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
+
 interface GadaitProperty {
   Position: number;
   Title: string;
@@ -154,15 +155,16 @@ const PropertiesPage = () => {
       // Filtrer manuellement pour obtenir des valeurs uniques
       const uniqueCities = [...new Set(citiesData.map(item => item.city))].sort();
 
-      // Pour les types de propriété - utiliser une sélection distincte
+      // Pour les types de propriété - utiliser une sélection distincte avec le nom de colonne correct
       const {
         data: propertyTypesData,
         error: propertyTypesError
-      } = await supabase.from('Gadait_Listings_Buy').select('Property Type').not('Property Type', 'is', null);
+      } = await supabase.from('Gadait_Listings_Buy').select('"Property Type"').not('Property Type', 'is', null);
       if (propertyTypesError) throw propertyTypesError;
 
       // Filtrer manuellement pour obtenir des valeurs uniques
       const uniquePropertyTypes = [...new Set(propertyTypesData.map(item => item["Property Type"]))].sort();
+      
       setAvailableFilters({
         countries: uniqueCountries.filter(Boolean) as string[],
         cities: uniqueCities.filter(Boolean) as string[],
@@ -273,7 +275,7 @@ const PropertiesPage = () => {
         query = query.eq('city', filters.city);
       }
       if (filters.propertyType) {
-        query = query.eq('Property Type', filters.propertyType);
+        query = query.eq('Property Type', filters.propertyType); // Correction ici: 'Property Type' au lieu de 'propertyType'
       }
       if (filters.bedrooms && filters.bedrooms > 0) {
         query = query.gte('Bedrooms', filters.bedrooms);
@@ -490,7 +492,7 @@ const PropertiesPage = () => {
     if (filters.favoritesOnly) count++;
     return count;
   }, [filters]);
-  return <>
+  return (
       <Navbar />
       <SubNavigation />
       <div className="p-4 md:p-6 bg-white min-h-screen">
@@ -700,49 +702,49 @@ const PropertiesPage = () => {
           {activeFiltersCount > 0 && <div className="mb-4 flex flex-wrap gap-2 items-center">
               <span className="text-sm text-gray-500">Filtres actifs:</span>
               
-              {filters.country && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy/20 border-0" onClick={() => setFilters(prev => ({
+              {filters.country && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy border-0" onClick={() => setFilters(prev => ({
             ...prev,
             country: null
           }))}>
                   Pays: {filters.country} <CircleX className="ml-1 h-3 w-3" />
                 </Badge>}
               
-              {filters.city && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy/20 border-0" onClick={() => setFilters(prev => ({
+              {filters.city && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy border-0" onClick={() => setFilters(prev => ({
             ...prev,
             city: null
           }))}>
                   Ville: {filters.city} <CircleX className="ml-1 h-3 w-3" />
                 </Badge>}
               
-              {filters.propertyType && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy/20 border-0" onClick={() => setFilters(prev => ({
+              {filters.propertyType && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy border-0" onClick={() => setFilters(prev => ({
             ...prev,
             propertyType: null
           }))}>
                   Type: {filters.propertyType} <CircleX className="ml-1 h-3 w-3" />
                 </Badge>}
               
-              {filters.bedrooms && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy/20 border-0" onClick={() => setFilters(prev => ({
+              {filters.bedrooms && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy border-0" onClick={() => setFilters(prev => ({
             ...prev,
             bedrooms: null
           }))}>
                   {filters.bedrooms}+ chambres <CircleX className="ml-1 h-3 w-3" />
                 </Badge>}
               
-              {filters.minPrice && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy/20 border-0" onClick={() => setFilters(prev => ({
+              {filters.minPrice && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy border-0" onClick={() => setFilters(prev => ({
             ...prev,
             minPrice: null
           }))}>
                   Min: {filters.minPrice}€ <CircleX className="ml-1 h-3 w-3" />
                 </Badge>}
               
-              {filters.maxPrice && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy/20 border-0" onClick={() => setFilters(prev => ({
+              {filters.maxPrice && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy border-0" onClick={() => setFilters(prev => ({
             ...prev,
             maxPrice: null
           }))}>
                   Max: {filters.maxPrice}€ <CircleX className="ml-1 h-3 w-3" />
                 </Badge>}
               
-              {filters.favoritesOnly && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy/20 border-0" onClick={() => setFilters(prev => ({
+              {filters.favoritesOnly && <Badge className="bg-loro-navy/10 text-loro-navy hover:bg-loro-navy border-0" onClick={() => setFilters(prev => ({
             ...prev,
             favoritesOnly: false
           }))}>
@@ -876,6 +878,7 @@ const PropertiesPage = () => {
             </Pagination>}
         </div>
       </div>
-    </>;
+    );
 };
+
 export default PropertiesPage;
