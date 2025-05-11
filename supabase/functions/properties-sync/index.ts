@@ -159,33 +159,40 @@ async function syncPropertiesFromUrl(supabase: any, baseUrl: string, maxPages: n
         try {
           stats.total++;
           
-          // S'assurer que la propriété a un lien (URL) unique
-          if (!property["Property Link"]) {
-            console.log("Propriété sans lien, ignorée");
+          // S'assurer que la propriété a un identifiant unique (URL ou titre)
+          const uniqueIdentifier = property["Property Link"] || property["Title"];
+          
+          if (!uniqueIdentifier) {
+            console.log("Propriété sans identifiant unique, ignorée");
             stats.failed++;
             continue;
           }
           
-          // Vérifier si la propriété existe déjà (par URL)
-          const { data: existingProperty, error: selectError } = await supabase
-            .from("Gadait_Listings_Buy")
-            .select("Position")
-            .eq("Property Link", property["Property Link"])
-            .maybeSingle();
-            
+          // Vérifier si la propriété existe déjà (par URL, puis par titre si pas d'URL)
+          let query = supabase.from("Gadait_Listings_Buy").select("Position");
+          
+          if (property["Property Link"]) {
+            query = query.eq("Property Link", property["Property Link"]);
+          } else {
+            query = query.eq("Title", property["Title"]);
+          }
+          
+          const { data: existingProperty, error: selectError } = await query.maybeSingle();
+          
           if (selectError) {
             console.error("Erreur lors de la vérification de l'existence de la propriété:", selectError);
             stats.failed++;
             continue;
           }
-            
+          
           if (existingProperty) {
             // Mettre à jour la propriété existante (garder Position inchangée)
-            const updateProperty = { ...property, Position: existingProperty.Position };
-            
             const { error } = await supabase
               .from("Gadait_Listings_Buy")
-              .update(updateProperty)
+              .update({
+                ...property,
+                Position: existingProperty.Position
+              })
               .eq("Position", existingProperty.Position);
               
             if (error) {

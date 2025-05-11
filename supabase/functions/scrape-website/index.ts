@@ -134,170 +134,315 @@ function extractPropertiesFromPrivateCollection(html: string, debug = false) {
   const $ = cheerio.load(html);
   const properties = [];
   
-  // Afficher les informations de debug si demandé
+  // Mode debug - afficher la structure HTML pour comprendre le problème
   if (debug) {
-    console.log("Structure HTML de base de la page:");
-    console.log("body classes:", $('body').attr('class'));
-    console.log("main sections:", $('main > *').length);
-    
-    // Recherche d'éléments qui pourraient contenir des propriétés
-    const possibleContainers = [
-      '.property-item', 
-      '.property-card',
-      '.listing-item',
-      '.property',
-      '.property-listing',
-      '.card',
-      '.property-box',
-      '.property-container',
-      '.property-grid-wrapper article',
-      'div[class*="property-grid"] > article',
-      'main article',
-      '[class*="property-list"] > *',
-      'article.property-card',
-      'div.property-grid article',
-      '.featured-properties .property',
-      '.search-results .result-item'
-    ];
-    
-    console.log("Recherche de sélecteurs possibles pour les propriétés:");
-    possibleContainers.forEach(selector => {
-      const count = $(selector).length;
-      console.log(`- ${selector}: ${count} éléments trouvés`);
-    });
-    
-    // Analyser la structure de la page
-    console.log("Structure générale de la page:");
-    $('body > *').slice(0, 5).each((i, el) => {
-      console.log(`- Element ${i}: ${$(el).prop('tagName')} avec class="${$(el).attr('class')}"`);
-    });
-
-    console.log("Structure du main:");
-    $('main > *').slice(0, 10).each((i, el) => {
-      console.log(`- Main child ${i}: ${$(el).prop('tagName')} avec class="${$(el).attr('class')}"`);
-    });
+    console.log("DEBUT DEBUG - Structure HTML de base :");
+    console.log("Titre de la page :", $('title').text());
+    console.log("Nombre total d'articles :", $('article').length);
+    console.log("Nombre total de divs :", $('div').length);
+    console.log("Classes disponibles dans la page :", 
+      [...new Set($('*').map((_, el) => $(el).attr('class')).get().filter(c => c).join(' ').split(' '))].join(', '));
   }
   
-  // Essayer de nouvelles méthodes pour trouver les propriétés
-  // 1. Sélecteurs spécifiques pour The Private Collection
-  let propertyCards = $('.datocms-gallery-grid .gatsby-image-wrapper');
+  // Essayer plusieurs sélecteurs possibles pour les cartes de propriété
+  const possibleSelectors = [
+    '.property-item',
+    '.property-card',
+    '.listing-item',
+    'article',
+    '.card',
+    'div[class*="property"]',
+    'div[class*="listing"]',
+    '.gatsby-image-wrapper',
+    '.datocms-gallery-grid .gatsby-image-wrapper',
+    '[class*="estate"] article',
+    '[class*="property"] article'
+  ];
   
-  if (propertyCards.length > 0) {
-    console.log(`Found ${propertyCards.length} properties using datocms gallery selector`);
-  } else {
-    // 2. Recherche de cartes de propriétés basées sur des critères génériques
-    propertyCards = $('article, .card, [class*="property"], [class*="listing"]').filter(function() {
-      // Filtrer pour les éléments qui ont une image et un texte avec un prix ou un emplacement
-      const hasImage = $(this).find('img').length > 0;
-      const text = $(this).text();
-      const hasPriceOrLocation = /price|€|\$|location|address/i.test(text);
-      return hasImage && hasPriceOrLocation;
-    });
-    
-    console.log(`Found ${propertyCards.length} properties using generic filter criteria`);
+  let propertyCards = $();
+  let usedSelector = '';
+  
+  for (const selector of possibleSelectors) {
+    const cards = $(selector);
+    if (cards.length > 0) {
+      propertyCards = cards;
+      usedSelector = selector;
+      break;
+    }
   }
-
-  // 3. Rechercher directement les liens vers les pages de propriétés
+  
+  console.log(`Sélecteur utilisé: "${usedSelector}" - ${propertyCards.length} cartes trouvées`);
+  
+  // Si aucun sélecteur n'a fonctionné, chercher des éléments avec des prix
   if (propertyCards.length === 0) {
-    const propertyLinks = $('a[href*="property"], a[href*="villa"], a[href*="apartment"]');
-    console.log(`Found ${propertyLinks.length} property links`);
+    console.log("Aucun sélecteur standard n'a fonctionné, recherche par contenu...");
+    propertyCards = $('*').filter(function() {
+      const text = $(this).text();
+      return text.includes('€') && $(this).find('img').length > 0;
+    });
+    console.log(`Trouvé ${propertyCards.length} éléments contenant des prix et des images`);
+  }
+  
+  // Si toujours rien trouvé, chercher des liens qui ressemblent à des propriétés
+  if (propertyCards.length === 0) {
+    console.log("Recherche des liens vers des propriétés...");
+    const propertyLinks = $('a[href*="property"], a[href*="villa"], a[href*="apartment"], a[href*="estate"]');
+    console.log(`Trouvé ${propertyLinks.length} liens qui semblent être des propriétés`);
     
     propertyLinks.each((index, element) => {
-      const link = $(element);
-      const href = link.attr('href');
-      const title = link.text().trim() || link.attr('title') || `Property ${index + 1}`;
-      const img = link.find('img').first();
-      const imgSrc = img.attr('src') || img.attr('data-src');
-      
-      // Extraire des informations basiques
-      const card = link.closest('div, article');
-      const priceText = card.find('[class*="price"]').text() || '€ Price on request';
-      const locationText = card.find('[class*="location"]').text() || 'Mauritius';
-      
-      // Créer une entrée de propriété avec les informations disponibles
-      properties.push({
-        "Position": index + 1,
-        "Title": title,
-        "Property Type": "Villa", // Valeur par défaut
-        "Area": "Not specified",
-        "Bedrooms": 0,
-        "price": priceText,
-        "Price and Location": `${priceText} · ${locationText}`,
-        "Property Link": href.startsWith('http') ? href : `https://the-private-collection.com${href.startsWith('/') ? '' : '/'}${href}`,
-        "Main Image": imgSrc ? (imgSrc.startsWith('http') ? imgSrc : `https://the-private-collection.com${imgSrc.startsWith('/') ? '' : '/'}${imgSrc}`) : null,
-        "city": locationText.split(',')[0] || 'Not specified',
-        "country": "Mauritius",
-        "is_new": false,
-        "is_exclusive": false
-      });
-    });
-  }
-  
-  // Si aucune méthode n'a fonctionné, essayer de parcourir tous les liens
-  if (properties.length === 0) {
-    console.log("Trying more aggressive extraction methods");
-    
-    // Analyser toute la page à la recherche d'images et de liens
-    $('a').each((index, element) => {
-      const link = $(element);
-      const href = link.attr('href');
-      
-      // Filtrer uniquement les liens qui semblent être des propriétés
-      if (href && (href.includes('property') || href.includes('villa') || href.includes('apartment') || href.includes('house'))) {
-        const title = link.text().trim() || `Property ${index + 1}`;
-        const img = link.find('img').first();
-        const imgSrc = img.attr('src') || img.attr('data-src');
+      try {
+        const link = $(element);
+        const href = link.attr('href');
+        if (!href) return;
         
-        properties.push({
+        const title = link.text().trim() || link.attr('title') || `Property ${index + 1}`;
+        let mainImage = '';
+        const img = link.find('img').first();
+        if (img.length) {
+          mainImage = img.attr('src') || img.attr('data-src') || img.attr('data-lazy-src') || '';
+        }
+        
+        // Convertir l'URL en absolue si nécessaire
+        let propertyLink = href;
+        if (!propertyLink.startsWith('http')) {
+          propertyLink = `https://the-private-collection.com${propertyLink.startsWith('/') ? '' : '/'}${propertyLink}`;
+        }
+        
+        // Convertir l'image en URL absolue si nécessaire
+        if (mainImage && !mainImage.startsWith('http')) {
+          mainImage = `https://the-private-collection.com${mainImage.startsWith('/') ? '' : '/'}${mainImage}`;
+        }
+        
+        const property = {
           "Position": index + 1,
-          "Title": title,
-          "Property Type": "Villa",
-          "Area": "Not specified",
-          "Bedrooms": 0,
+          "Title": title || `Property #${index + 1}`,
+          "Main Image": mainImage || "",
+          "Secondary Image": null,
+          "Additional Image 1": null,
+          "Additional Image 2": null,
+          "Additional Image 3": null,
+          "Additional Image 4": null,
+          "Additional Image 5": null,
+          "Additional Image 6": null,
+          "Additional Image 7": null,
+          "Additional Image 8": null,
+          "Additional Image 9": null,
+          "Additional Image 10": null,
+          "Price and Location": "Price on request · Mauritius",
           "price": "Price on request",
-          "Price and Location": `Price on request · Mauritius`,
-          "Property Link": href.startsWith('http') ? href : `https://the-private-collection.com${href.startsWith('/') ? '' : '/'}${href}`,
-          "Main Image": imgSrc ? (imgSrc.startsWith('http') ? imgSrc : `https://the-private-collection.com${imgSrc.startsWith('/') ? '' : '/'}${imgSrc}`) : null,
-          "city": "Not specified",
+          "Property Type": "Villa",
+          "Bedrooms": 0,
+          "Area": "Not specified",
           "country": "Mauritius",
-          "is_new": false,
-          "is_exclusive": false
-        });
+          "city": "Unknown",
+          "Property Link": propertyLink,
+          "is_exclusive": false,
+          "is_new": false
+        };
+        
+        properties.push(property);
+      } catch (error) {
+        console.error(`Erreur lors de l'extraction du lien ${index}:`, error);
+      }
+    });
+  } else {
+    // Traiter les cartes de propriété trouvées
+    propertyCards.each((index, element) => {
+      try {
+        const card = $(element);
+        
+        // Extraction du titre - multiples approches
+        let title = "";
+        const titleSelectors = [
+          '.property-title h5',
+          '.property-title',
+          'h2', 'h3', 'h4', 'h5',
+          '.title', '.heading',
+          '[class*="title"]'
+        ];
+        
+        for (const selector of titleSelectors) {
+          const titleEl = card.find(selector).first();
+          if (titleEl.length) {
+            title = titleEl.text().trim();
+            if (title) break;
+          }
+        }
+        
+        // Fallback pour le titre
+        if (!title) {
+          title = card.text().split('\n')[0].trim() || `Property #${index + 1}`;
+        }
+        
+        // Extraction du prix - multiples approches
+        let price = "";
+        const priceSelectors = [
+          '.property-price .price-tag',
+          '.property-price',
+          '.price',
+          '.cost',
+          '[class*="price"]'
+        ];
+        
+        for (const selector of priceSelectors) {
+          const priceEl = card.find(selector).first();
+          if (priceEl.length) {
+            price = priceEl.text().trim();
+            if (price) break;
+          }
+        }
+        
+        // Si pas de prix trouvé, chercher dans le texte avec €
+        if (!price) {
+          const priceMatch = card.text().match(/€[0-9,. ]+|[0-9,. ]+€/);
+          if (priceMatch) {
+            price = priceMatch[0].trim();
+          } else {
+            price = "Price on request";
+          }
+        }
+        
+        // Extraction de la localisation
+        let location = "";
+        const locationSelectors = [
+          '.property-location',
+          '.location',
+          '.address',
+          '[class*="location"]',
+          '[class*="address"]'
+        ];
+        
+        for (const selector of locationSelectors) {
+          const locEl = card.find(selector).first();
+          if (locEl.length) {
+            location = locEl.text().trim();
+            if (location) break;
+          }
+        }
+        
+        // Extraction du pays et de la ville
+        let country = "Mauritius";
+        let city = "";
+        
+        // Chercher des noms de villes communes à Maurice
+        const mauritiusCities = [
+          'Rivière Noire', 'Black River', 'Grand Baie', 'Flic en Flac',
+          'Tamarin', 'Mont Calme', 'Mont Mascal', 'Belle Mare', 
+          'Trou aux Biches', 'Port Louis', 'Quatre Bornes', 'Trou d\'Eau Douce'
+        ];
+        
+        for (const cityName of mauritiusCities) {
+          if (card.text().includes(cityName) || location.includes(cityName)) {
+            city = cityName;
+            break;
+          }
+        }
+        
+        // Extraction des images
+        let mainImage = "";
+        const imgSelectors = [
+          'img',
+          'img.lazy',
+          '.gatsby-image-wrapper img',
+          '[class*="image"] img',
+          '[data-src]'
+        ];
+        
+        for (const selector of imgSelectors) {
+          const imgEl = card.find(selector).first();
+          if (imgEl.length) {
+            mainImage = imgEl.attr('src') || imgEl.attr('data-src') || imgEl.attr('data-lazy-src') || '';
+            if (mainImage) break;
+          }
+        }
+        
+        // Convertir l'image en URL absolue si nécessaire
+        if (mainImage && !mainImage.startsWith('http')) {
+          mainImage = `https://the-private-collection.com${mainImage.startsWith('/') ? '' : '/'}${mainImage}`;
+        }
+        
+        // Extraction des caractéristiques
+        let bedrooms = null;
+        let bathrooms = null;
+        let area = "";
+        
+        // Chercher dans le texte général
+        const bedroomMatch = card.text().match(/(\d+)\s*(?:bed|bedroom|chambre)/i);
+        if (bedroomMatch) bedrooms = parseInt(bedroomMatch[1]);
+        
+        const areaMatch = card.text().match(/(\d+(?:\.\d+)?)\s*(?:m²|sqm)/i);
+        if (areaMatch) area = `${areaMatch[1]} m²`;
+        
+        // Extraction du type de propriété
+        let propertyType = "Villa"; // Par défaut
+        
+        if (title) {
+          const titleLower = title.toLowerCase();
+          if (titleLower.includes('apartment')) propertyType = "Apartment";
+          else if (titleLower.includes('house')) propertyType = "House";
+          else if (titleLower.includes('penthouse')) propertyType = "Penthouse";
+          else if (titleLower.includes('condo')) propertyType = "Condo";
+        }
+        
+        // Extraction du lien
+        let propertyLink = card.find('a').attr('href') || '';
+        if (!propertyLink) {
+          const parentLink = card.closest('a');
+          if (parentLink.length) {
+            propertyLink = parentLink.attr('href') || '';
+          }
+        }
+        
+        if (propertyLink && !propertyLink.startsWith('http')) {
+          propertyLink = `https://the-private-collection.com${propertyLink.startsWith('/') ? '' : '/'}${propertyLink}`;
+        }
+        
+        // Propriétés exclusive/nouvelle
+        const isExclusive = card.find('.exclusive, [class*="exclusive"]').length > 0 || 
+                           title.toLowerCase().includes('exclusive');
+        const isNew = card.find('.new, [class*="new"]').length > 0 || 
+                     title.toLowerCase().includes('new');
+        
+        // Créer l'objet propriété
+        const property = {
+          "Position": index + 1,
+          "Title": title || `Property #${index + 1}`,
+          "Main Image": mainImage || "",
+          "Secondary Image": null,
+          "Additional Image 1": null,
+          "Additional Image 2": null,
+          "Additional Image 3": null,
+          "Additional Image 4": null,
+          "Additional Image 5": null,
+          "Additional Image 6": null,
+          "Additional Image 7": null,
+          "Additional Image 8": null,
+          "Additional Image 9": null,
+          "Additional Image 10": null,
+          "Price and Location": `${price} · ${location || 'Mauritius'}`.trim(),
+          "price": price || "Price on request",
+          "Property Type": propertyType,
+          "Bedrooms": bedrooms || 0,
+          "Area": area || "Not specified",
+          "country": country,
+          "city": city || "Unknown",
+          "Property Link": propertyLink || "",
+          "is_exclusive": isExclusive,
+          "is_new": isNew
+        };
+        
+        properties.push(property);
+      } catch (error) {
+        console.error(`Erreur lors de l'extraction de la propriété ${index}:`, error);
       }
     });
   }
   
-  // Si toujours aucun résultat, journaliser le problème pour débogage futur
+  // Si toujours aucune propriété trouvée, enregistrer plus de détails pour le débogage
   if (properties.length === 0 && debug) {
-    console.log("Aucune propriété trouvée. Voici les classes trouvées dans la page:");
-    const classes = new Set();
-    $('*').each((_, el) => {
-      const className = $(el).attr('class');
-      if (className) {
-        className.split(' ').forEach(c => classes.add(c.trim()));
-      }
-    });
-    console.log([...classes].join(', '));
-    
-    // Rechercher des termes liés à l'immobilier dans la page
-    const pageText = $('body').text();
-    const realEstateTerms = ['property', 'villa', 'apartment', 'house', 'bedroom', 'bathroom', 'price', 'sqm', 'm²', '€'];
-    console.log("Termes immobiliers trouvés dans la page:");
-    realEstateTerms.forEach(term => {
-      if (pageText.toLowerCase().includes(term.toLowerCase())) {
-        console.log(`- "${term}" trouvé`);
-      } else {
-        console.log(`- "${term}" NON trouvé`);
-      }
-    });
-    
-    // Vérifier si nous avons une page d'erreur ou de redirection
-    if (pageText.toLowerCase().includes('404') || pageText.toLowerCase().includes('not found')) {
-      console.log("Il s'agit probablement d'une page d'erreur 404");
-    }
-    if (pageText.toLowerCase().includes('redirect') || pageText.toLowerCase().includes('redirected')) {
-      console.log("Il s'agit probablement d'une page de redirection");
-    }
+    console.log("Aucune propriété trouvée après toutes les tentatives.");
+    console.log("Contenu HTML complet de la page:");
+    console.log(html.substring(0, 5000) + "...[tronqué]");
   }
   
   return { properties };

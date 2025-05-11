@@ -28,8 +28,11 @@ serve(async (req: Request) => {
     // Initialiser le client Supabase
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
-    // Définir l'URL et les régions à synchroniser - maintenant sans filtre de pays
-    const targetUrl = "https://the-private-collection.com/en/search/";
+    // Définir les URLs à synchroniser - plusieurs sources possibles
+    const urlsToSync = [
+      "https://the-private-collection.com/en/search/",
+      // Ajoutez d'autres URLs ici si nécessaire
+    ];
     
     let totalStats = {
       created: 0,
@@ -38,40 +41,39 @@ serve(async (req: Request) => {
       total: 0
     };
     
-    // Synchroniser toutes les propriétés de la page principale
-    try {
-      console.log(`Synchronisation des propriétés depuis: ${targetUrl}`);
-      
-      // Appeler notre fonction de synchronisation des propriétés
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/properties-sync`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: targetUrl,
-          // Ne pas spécifier de pays ou région pour obtenir toutes les propriétés
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Erreur lors de l'appel à properties-sync: ${response.status} ${response.statusText} - ${errorText}`);
+    // Synchroniser chaque URL configurée
+    for (const targetUrl of urlsToSync) {
+      try {
+        console.log(`Synchronisation des propriétés depuis: ${targetUrl}`);
+        
+        // Appeler notre fonction de synchronisation des propriétés
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/properties-sync`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url: targetUrl }),
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Erreur lors de l'appel à properties-sync: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+        
+        const result = await response.json();
+        console.log(`Résultat de la synchronisation:`, result);
+        
+        // Agréger les statistiques
+        if (result.stats) {
+          totalStats.created += result.stats.created || 0;
+          totalStats.updated += result.stats.updated || 0;
+          totalStats.failed += result.stats.failed || 0;
+          totalStats.total += result.stats.total || 0;
+        }
+      } catch (error) {
+        console.error(`Erreur lors de la synchronisation de ${targetUrl}:`, error);
       }
-      
-      const result = await response.json();
-      console.log(`Résultat de la synchronisation:`, result);
-      
-      // Agréger les statistiques
-      if (result.stats) {
-        totalStats.created += result.stats.created || 0;
-        totalStats.updated += result.stats.updated || 0;
-        totalStats.failed += result.stats.failed || 0;
-        totalStats.total += result.stats.total || 0;
-      }
-    } catch (error) {
-      console.error(`Erreur lors de la synchronisation:`, error);
     }
     
     // Enregistrer l'exécution du cron job
@@ -92,7 +94,7 @@ serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Synchronisation des propriétés The Private Collection terminée",
+        message: "Synchronisation des propriétés terminée avec succès",
         details: totalStats,
       }),
       { 
