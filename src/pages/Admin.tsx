@@ -37,47 +37,81 @@ const Admin = () => {
     <>
       <Navbar />
       <SubNavigation />
-      <div className="p-6 lg:p-10 space-y-8 max-w-[1920px] mx-auto">
+      <div className="p-6 lg:p-10 space-y-8 max-w-[1920px] mx-auto bg-loro-50">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-futura">Administration</h1>
-            <p className="text-muted-foreground mt-1">Gérez les données et paramètres de votre application.</p>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-futura text-loro-hazel">Administration</h1>
+            <p className="text-loro-navy mt-1">Gérez les données et paramètres de votre application.</p>
           </div>
         </div>
 
         <Tabs defaultValue="chart-data" className="w-full">
-          <TabsList className="mb-8">
-            <TabsTrigger value="chart-data" className="">Données du graphique</TabsTrigger>
-            <TabsTrigger value="settings">Paramètres</TabsTrigger>
-            <TabsTrigger value="users">Utilisateurs</TabsTrigger>
+          <TabsList className="mb-8 bg-loro-pearl border-loro-sand">
+            <TabsTrigger 
+              value="chart-data" 
+              className="data-[state=active]:bg-loro-hazel data-[state=active]:text-white"
+            >
+              Données du graphique
+            </TabsTrigger>
+            <TabsTrigger 
+              value="settings"
+              className="data-[state=active]:bg-loro-hazel data-[state=active]:text-white"
+            >
+              Paramètres
+            </TabsTrigger>
+            <TabsTrigger 
+              value="users"
+              className="data-[state=active]:bg-loro-hazel data-[state=active]:text-white"
+            >
+              Utilisateurs
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="chart-data" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <DashboardCard title="Modifier les données" subtitle="Configurez les valeurs pour le graphique d'acquisition de leads" className="h-full">
+              <DashboardCard 
+                title="Modifier les données" 
+                subtitle="Configurez les valeurs pour le graphique d'acquisition de leads" 
+                className="h-full bg-white border-loro-pearl"
+              >
                 <div className="h-full pt-4">
                   <ChartDataForm initialData={initialChartData} />
                 </div>
               </DashboardCard>
               
-              <DashboardCard title="Aperçu" subtitle="Visualisez les modifications en temps réel" icon={<BarChart3 className="h-5 w-5" />} className="h-full">
+              <DashboardCard 
+                title="Aperçu" 
+                subtitle="Visualisez les modifications en temps réel" 
+                icon={<BarChart3 className="h-5 w-5 text-loro-hazel" />} 
+                className="h-full bg-white border-loro-pearl"
+              >
                 <div className="flex items-center justify-center h-full">
-                  <p className="text-muted-foreground">L'aperçu sera implémenté prochainement</p>
+                  <p className="text-loro-navy">L'aperçu sera implémenté prochainement</p>
                 </div>
               </DashboardCard>
             </div>
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
-            <DashboardCard title="Paramètres généraux" subtitle="Configurez les paramètres de l'application" icon={<Settings2 className="h-5 w-5" />}>
+            <DashboardCard 
+              title="Paramètres généraux" 
+              subtitle="Configurez les paramètres de l'application" 
+              icon={<Settings2 className="h-5 w-5 text-loro-hazel" />}
+              className="bg-white border-loro-pearl"
+            >
               <div className="p-6">
-                <p className="text-muted-foreground">Les paramètres seront disponibles prochainement</p>
+                <p className="text-loro-navy">Les paramètres seront disponibles prochainement</p>
               </div>
             </DashboardCard>
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
-            <DashboardCard title="Gestion des utilisateurs" subtitle="Ajoutez, modifiez ou supprimez des utilisateurs" icon={<Users className="h-5 w-5" />}>
+            <DashboardCard 
+              title="Gestion des utilisateurs" 
+              subtitle="Ajoutez, modifiez ou supprimez des utilisateurs" 
+              icon={<Users className="h-5 w-5 text-loro-hazel" />}
+              className="bg-white border-loro-pearl"
+            >
               <UsersManagement />
             </DashboardCard>
           </TabsContent>
