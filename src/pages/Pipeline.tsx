@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
 import MobilePipelineView from '@/components/pipeline/MobilePipelineView';
@@ -10,6 +10,9 @@ import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import ComponentLoader from '@/components/common/ComponentLoader';
 import { toast } from '@/hooks/use-toast';
+import { usePipelineData } from '@/hooks/usePipelineData';
+import { PipelineType } from '@/types/lead';
+import { checkSupabaseConnection } from '@/integrations/supabase/client';
 
 const Pipeline = () => {
   const isMobile = useIsMobile();
@@ -17,41 +20,46 @@ const Pipeline = () => {
   const { 
     activeTab,
     setActiveTab,
-    refreshTrigger,
-    isRefreshing,
     searchTerm,
     setSearchTerm,
     filtersOpen,
     toggleFilters,
     filters,
     setFilters,
-    teamMembers,
     activeFiltersCount,
     isFilterActive,
-    handleRefresh,
     handleClearFilters,
-    getAllColumns,
-    updateAgentFilter
   } = usePipelineState();
 
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
 
-  const selectedAgentName = useMemo(() => {
-    if (!selectedAgent) return null;
-    const agent = teamMembers.find(member => member.id === selectedAgent);
-    return agent ? agent.name : null;
-  }, [selectedAgent, teamMembers]);
-
+  // Check Supabase connection on initial load
   useEffect(() => {
-    if (selectedAgent !== filters.assignedTo) {
-      updateAgentFilter(selectedAgent);
-    }
-  }, [selectedAgent, filters.assignedTo, updateAgentFilter]);
-
-  useEffect(() => {
-    handleRefresh();
+    const checkConnection = async () => {
+      const isConnected = await checkSupabaseConnection();
+      if (!isConnected) {
+        toast({
+          title: "Erreur de connexion",
+          description: "Impossible de se connecter à la base de données. Veuillez vérifier votre connexion internet et recharger la page.",
+          variant: "destructive"
+        });
+      }
+    };
+    
+    checkConnection();
   }, []);
 
+  // Update agent filter when selected agent changes
+  useEffect(() => {
+    if (selectedAgent !== filters.assignedTo) {
+      setFilters(prev => ({
+        ...prev,
+        assignedTo: selectedAgent
+      }));
+    }
+  }, [selectedAgent, filters.assignedTo, setFilters]);
+
+  // Listen for agent selection changes from other components
   useEffect(() => {
     const handleAgentSelectionChange = (e: CustomEvent) => {
       const newAgent = e.detail.selectedAgent;
@@ -66,19 +74,63 @@ const Pipeline = () => {
     };
   }, [selectedAgent, handleAgentChange]);
 
+  // Use the new optimized hook for fetching pipeline data
+  const {
+    columns,
+    teamMembers,
+    isLoading,
+    isError,
+    isConnectionError,
+    refetch
+  } = usePipelineData(activeTab as PipelineType, filters, searchTerm);
+
   const handleClearAllFilters = () => {
     window.dispatchEvent(new Event('filters-cleared'));
     handleClearFilters();
   };
+
+  const handleRefresh = () => {
+    refetch();
+  };
   
-  // Try catch to prevent any runtime errors
+  // Unified error handling
+  if (isConnectionError) {
+    return (
+      <>
+        <Navbar />
+        <SubNavigation />
+        <div className="p-3 md:p-6 bg-white min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold mb-2">Erreur de connexion</h2>
+            <p className="text-gray-600 mb-4">Impossible de se connecter à la base de données.</p>
+            <button 
+              className="px-4 py-2 bg-zinc-900 text-white rounded-md hover:bg-zinc-800"
+              onClick={() => window.location.reload()}
+            >
+              Recharger la page
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+  
+  if (isError) {
+    toast({
+      title: "Erreur de chargement",
+      description: "Une erreur s'est produite lors du chargement des leads.",
+      variant: "destructive"
+    });
+    return <LoadingScreen />;
+  }
+  
   try {
     return (
       <>
         <Navbar />
         <SubNavigation />
         <div className="p-3 md:p-6 bg-white min-h-screen">
-          <ComponentLoader isLoading={isRefreshing}>
+          <ComponentLoader isLoading={isLoading}>
             {isMobile ? (
               <MobilePipelineView
                 activeTab={activeTab}
@@ -91,9 +143,9 @@ const Pipeline = () => {
                 filters={filters}
                 onFilterChange={setFilters}
                 onClearFilters={handleClearAllFilters}
-                columns={getAllColumns()}
+                columns={columns}
                 handleRefresh={handleRefresh}
-                isRefreshing={isRefreshing}
+                isRefreshing={isLoading}
                 isFilterActive={isFilterActive}
                 teamMembers={teamMembers}
               />
@@ -109,9 +161,9 @@ const Pipeline = () => {
                 filters={filters}
                 onFilterChange={setFilters}
                 onClearFilters={handleClearAllFilters}
-                columns={getAllColumns()}
+                columns={columns}
                 handleRefresh={handleRefresh}
-                isRefreshing={isRefreshing}
+                isRefreshing={isLoading}
                 isFilterActive={isFilterActive}
                 teamMembers={teamMembers}
               />
