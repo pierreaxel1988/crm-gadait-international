@@ -35,19 +35,16 @@ const KanbanBoard = ({
 }: KanbanBoardProps) => {
   const isMobile = useIsMobile();
   
-  // Log information for debugging
   console.log('===== KANBAN BOARD =====');
   console.log(`Pipeline Type: ${pipelineType}`);
   console.log(`Number of columns: ${columns.length}`);
   
-  // Only log column information if there are columns (avoid errors)
   if (columns.length > 0) {
     console.log('Columns:', columns.map(c => `${c.title} (${c.status}): ${c.items?.length || 0} leads`).join(', '));
   }
   
   const { handleDrop } = useKanbanDragDrop(() => {});
   
-  // Memoize columns to prevent unnecessary re-renders
   const memoizedColumns = useMemo(() => {
     console.log("Memoizing columns:", columns);
     return columns.map(col => {
@@ -105,7 +102,7 @@ const KanbanBoard = ({
               items={column.items || []}
               className={cn(
                 "flex-1 min-w-[240px]",
-                isMobile && "min-w-[250px]" // Slightly narrower columns on mobile
+                isMobile && "min-w-[250px]"
               )}
               onDrop={handleDrop}
               pipelineType={pipelineType}

@@ -25,13 +25,18 @@ export default defineConfig(({ mode }) => ({
     commonjsOptions: {
       include: ['node_modules/**'],
     },
-    chunkSizeWarningLimit: 1200,
+    chunkSizeWarningLimit: 2000, // Augmenté pour éviter les avertissements
     rollupOptions: {
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-ui': ['@/components/ui'],
-          'vendor-utils': ['date-fns', 'clsx', 'tailwind-merge']
+          'vendor-utils': ['date-fns', 'clsx', 'tailwind-merge'],
+          'pipeline': [
+            '@/components/pipeline/PipelineHeader', 
+            '@/components/pipeline/PipelineFilters',
+            '@/components/pipeline/PipelineSearchBar'
+          ]
         }
       }
     }
