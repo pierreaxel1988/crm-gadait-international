@@ -28,8 +28,8 @@ interface KanbanBoardProps {
 const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipelineType, isLoading = false }: KanbanBoardProps) => {
   const isMobile = useIsMobile();
   
-  // Using a simple version of handleDrop to break potential circular references
-  const { handleDrop } = useKanbanDragDrop(() => {});
+  // Corrigé: Ne pas passer d'argument à useKanbanDragDrop
+  const { handleDrop } = useKanbanDragDrop();
   
   // Memoize columns to prevent unnecessary re-renders
   const memoizedColumns = useMemo(() => {

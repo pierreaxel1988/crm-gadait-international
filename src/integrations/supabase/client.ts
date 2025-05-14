@@ -10,7 +10,7 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-// Create a robust client with better error handling
+// Corrigé: Suppression du spread operator incorrect et ajout d'une meilleure gestion des erreurs
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     persistSession: true,
@@ -19,8 +19,8 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   },
   global: {
     fetch: (...args) => {
-      return fetch(...args).catch(error => {
-        console.error('Supabase fetch error:', error);
+      return fetch(args[0], args[1]).catch(error => {
+        console.error('Erreur de connexion Supabase:', error);
         toast({
           title: "Erreur de connexion",
           description: "Échec de connexion à la base de données. Veuillez vérifier votre connexion et réessayer.",
@@ -40,7 +40,7 @@ export const checkSupabaseConnection = async () => {
     if (error) throw error;
     return true;
   } catch (error) {
-    console.error('Database connection error:', error);
+    console.error('Erreur de connexion à la base de données:', error);
     return false;
   }
 };
