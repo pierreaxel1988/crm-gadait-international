@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
+// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -19,26 +20,6 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'date-fns']
-  },
-  build: {
-    commonjsOptions: {
-      include: ['node_modules/**'],
-    },
-    chunkSizeWarningLimit: 2000, // Augmenté pour éviter les avertissements
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['@/components/ui'],
-          'vendor-utils': ['date-fns', 'clsx', 'tailwind-merge'],
-          'pipeline': [
-            '@/components/pipeline/PipelineHeader', 
-            '@/components/pipeline/PipelineFilters',
-            '@/components/pipeline/PipelineSearchBar'
-          ]
-        }
-      }
-    }
+    include: ['react', 'react-dom', 'react-router-dom']
   }
 }));

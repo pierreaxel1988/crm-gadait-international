@@ -25,29 +25,27 @@ interface KanbanBoardProps {
   isLoading?: boolean;
 }
 
-const KanbanBoard = ({ 
-  columns, 
-  className, 
-  filters, 
-  refreshTrigger = 0, 
-  pipelineType, 
-  isLoading = false 
-}: KanbanBoardProps) => {
+const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipelineType, isLoading = false }: KanbanBoardProps) => {
   const isMobile = useIsMobile();
   
+  // Log information for debugging
   console.log('===== KANBAN BOARD =====');
   console.log(`Pipeline Type: ${pipelineType}`);
   console.log(`Number of columns: ${columns.length}`);
   
+  // Only log column information if there are columns (avoid errors)
   if (columns.length > 0) {
     console.log('Columns:', columns.map(c => `${c.title} (${c.status}): ${c.items?.length || 0} leads`).join(', '));
   }
   
   const { handleDrop } = useKanbanDragDrop(() => {});
   
+  // Memoize columns to prevent unnecessary re-renders and compute task status
   const memoizedColumns = useMemo(() => {
     console.log("Memoizing columns:", columns);
+    // Ensure all columns have an items array even if it's empty and add computed properties
     return columns.map(col => {
+      // Ajouter des propriétés calculées pour chaque élément
       const itemsWithStatus = (col.items || []).map(item => {
         let isTaskOverdue = false;
         let isTaskToday = false;
@@ -65,6 +63,7 @@ const KanbanBoard = ({
         };
       });
       
+      // Sort items within each column by priority
       const sortedItems = sortLeadsByPriority(itemsWithStatus, 'priority');
       
       return {
@@ -73,7 +72,10 @@ const KanbanBoard = ({
         pipelineType: col.pipelineType || pipelineType
       };
     });
-  }, [columns, pipelineType]);
+  }, [
+    columns,
+    pipelineType
+  ]);
   
   if (isLoading) {
     return (
@@ -102,7 +104,7 @@ const KanbanBoard = ({
               items={column.items || []}
               className={cn(
                 "flex-1 min-w-[240px]",
-                isMobile && "min-w-[250px]"
+                isMobile && "min-w-[250px]" // Slightly narrower columns on mobile
               )}
               onDrop={handleDrop}
               pipelineType={pipelineType}
