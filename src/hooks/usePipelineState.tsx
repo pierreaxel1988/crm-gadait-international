@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
@@ -43,27 +44,38 @@ export function usePipelineState() {
     }));
   }, []);
 
-  useEffect(() => {
-    handleRefresh();
-  }, []);
-
+  // Update URL when active tab changes
   useEffect(() => {
     navigate(`/pipeline?tab=${activeTab}`, { replace: true });
-    handleRefresh();
+    // Removed automatic refresh trigger here to prevent loop
   }, [activeTab, navigate]);
 
+  // Sync tab from URL when it changes
   useEffect(() => {
     if (tabFromUrl === 'rental' || tabFromUrl === 'purchase' || tabFromUrl === "owners") {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
 
+  // Only refresh when filters change and refreshTrigger is already incremented
   useEffect(() => {
     if (refreshTrigger > 0) {
-      handleRefresh();
+      // This will prevent infinite loops but still allow filter changes to trigger refreshes
+      const fetchData = async () => {
+        setIsRefreshing(true);
+        try {
+          // Time delay to ensure UI shows loading state
+          await new Promise(resolve => setTimeout(resolve, 300));
+        } finally {
+          setIsRefreshing(false);
+        }
+      };
+      
+      fetchData();
     }
-  }, [filters]);
+  }, [filters, refreshTrigger]);
 
+  // Fetch team members once
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
@@ -122,6 +134,9 @@ export function usePipelineState() {
   };
 
   const handleRefresh = () => {
+    // Prevent refresh if already refreshing
+    if (isRefreshing) return;
+    
     setIsRefreshing(true);
     setRefreshTrigger(prev => prev + 1);
     
