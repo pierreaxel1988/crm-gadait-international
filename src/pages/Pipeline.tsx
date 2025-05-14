@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
@@ -8,7 +9,7 @@ import SubNavigation from '@/components/layout/SubNavigation';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import ComponentLoader from '@/components/common/ComponentLoader';
-import { reassignJadeLeads, reassignJeanMarcLeads, reassignSharonLeads } from '@/services/leadService';
+import { toast } from '@/hooks/use-toast';
 
 const Pipeline = () => {
   const isMobile = useIsMobile();
@@ -52,22 +53,6 @@ const Pipeline = () => {
   }, []);
 
   useEffect(() => {
-    const fixLeadsAssignment = async () => {
-      try {
-        console.log("Running lead reassignment for Jade, Jean Marc, and Sharon...");
-        await reassignJadeLeads();
-        await reassignJeanMarcLeads();
-        await reassignSharonLeads();
-        console.log("Lead reassignments completed successfully");
-      } catch (error) {
-        console.error('Error fixing lead assignments:', error);
-      }
-    };
-
-    fixLeadsAssignment();
-  }, []);
-
-  useEffect(() => {
     const handleAgentSelectionChange = (e: CustomEvent) => {
       const newAgent = e.detail.selectedAgent;
       if (newAgent !== selectedAgent) {
@@ -85,54 +70,65 @@ const Pipeline = () => {
     window.dispatchEvent(new Event('filters-cleared'));
     handleClearFilters();
   };
-
-  return (
-    <>
-      <Navbar />
-      <SubNavigation />
-      <div className="p-3 md:p-6 bg-white min-h-screen">
-        <ComponentLoader isLoading={isRefreshing}>
-          {isMobile ? (
-            <MobilePipelineView
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              filtersOpen={filtersOpen}
-              toggleFilters={toggleFilters}
-              activeFiltersCount={activeFiltersCount}
-              filters={filters}
-              onFilterChange={setFilters}
-              onClearFilters={handleClearAllFilters}
-              columns={getAllColumns()}
-              handleRefresh={handleRefresh}
-              isRefreshing={isRefreshing}
-              isFilterActive={isFilterActive}
-              teamMembers={teamMembers}
-            />
-          ) : (
-            <DesktopPipelineView
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              filtersOpen={filtersOpen}
-              toggleFilters={toggleFilters}
-              activeFiltersCount={activeFiltersCount}
-              filters={filters}
-              onFilterChange={setFilters}
-              onClearFilters={handleClearAllFilters}
-              columns={getAllColumns()}
-              handleRefresh={handleRefresh}
-              isRefreshing={isRefreshing}
-              isFilterActive={isFilterActive}
-              teamMembers={teamMembers}
-            />
-          )}
-        </ComponentLoader>
-      </div>
-    </>
-  );
+  
+  // Try catch to prevent any runtime errors
+  try {
+    return (
+      <>
+        <Navbar />
+        <SubNavigation />
+        <div className="p-3 md:p-6 bg-white min-h-screen">
+          <ComponentLoader isLoading={isRefreshing}>
+            {isMobile ? (
+              <MobilePipelineView
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                filtersOpen={filtersOpen}
+                toggleFilters={toggleFilters}
+                activeFiltersCount={activeFiltersCount}
+                filters={filters}
+                onFilterChange={setFilters}
+                onClearFilters={handleClearAllFilters}
+                columns={getAllColumns()}
+                handleRefresh={handleRefresh}
+                isRefreshing={isRefreshing}
+                isFilterActive={isFilterActive}
+                teamMembers={teamMembers}
+              />
+            ) : (
+              <DesktopPipelineView
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                filtersOpen={filtersOpen}
+                toggleFilters={toggleFilters}
+                activeFiltersCount={activeFiltersCount}
+                filters={filters}
+                onFilterChange={setFilters}
+                onClearFilters={handleClearAllFilters}
+                columns={getAllColumns()}
+                handleRefresh={handleRefresh}
+                isRefreshing={isRefreshing}
+                isFilterActive={isFilterActive}
+                teamMembers={teamMembers}
+              />
+            )}
+          </ComponentLoader>
+        </div>
+      </>
+    );
+  } catch (error) {
+    console.error('Error rendering Pipeline:', error);
+    toast({
+      title: "Erreur de chargement",
+      description: "Une erreur s'est produite lors du chargement de la page Pipeline.",
+      variant: "destructive"
+    });
+    return <LoadingScreen />;
+  }
 };
 
 export default Pipeline;

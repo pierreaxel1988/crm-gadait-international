@@ -4,17 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
-import { ExtendedKanbanItem } from './useKanbanData';
-import { updateLead, getLead } from '@/services/leadService';
-import { PipelineType } from '@/types/lead';
 
 export const useKanbanDragDrop = (
-  setLoadedColumns: React.Dispatch<React.SetStateAction<{
-    title: string;
-    status: LeadStatus;
-    items: ExtendedKanbanItem[];
-    pipelineType?: PipelineType;
-  }[]>>
+  setLoadedColumns: React.Dispatch<React.SetStateAction<any[]>>
 ) => {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -53,49 +45,15 @@ export const useKanbanDragDrop = (
         return newColumns;
       });
       
-      // Get the full lead
-      const fullLead = await getLead(item.id);
-      
-      if (!fullLead) {
-        console.error('Lead not found:', item.id);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de trouver les détails du lead."
-        });
-        return;
-      }
-      
-      // Add an action to the lead's history for the status change
+      // Get the current date for history
       const currentDate = new Date().toISOString();
-      const actionHistory = [...(fullLead.actionHistory || [])];
       
-      // Add status change to action history
-      actionHistory.push({
-        id: crypto.randomUUID(),
-        actionType: 'Status Change',
-        notes: `Status changed from ${item.status} to ${newStatus}`,
-        createdAt: currentDate
-      });
-      
-      // Update the lead status and action history
-      const updatedLead = {
-        ...fullLead,
-        status: newStatus,
-        lastContactedAt: currentDate,
-        actionHistory: actionHistory
-      };
-      
-      // Save the changes using our service
-      await updateLead(updatedLead);
-      
-      // Also update directly in Supabase as a backup measure
+      // Update the lead status in Supabase
       const { error } = await supabase
         .from('leads')
         .update({ 
           status: newStatus,
           last_contacted_at: currentDate,
-          action_history: actionHistory
         })
         .eq('id', item.id);
         
@@ -115,7 +73,7 @@ export const useKanbanDragDrop = (
       });
       
     } catch (error) {
-      console.error('Unexpected error:', error);
+      console.error('Error in handleDrop:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
