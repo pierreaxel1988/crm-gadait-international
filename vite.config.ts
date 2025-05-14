@@ -4,7 +4,6 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -20,7 +19,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom']
+    include: ['react', 'react-dom', 'react-router-dom', 'date-fns']
   },
   build: {
     commonjsOptions: {
@@ -30,15 +29,22 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Put React and related packages in a separate chunk
+          // Placer React et les packages associés dans un chunk séparé
           if (id.includes('node_modules/react') || 
               id.includes('node_modules/react-dom') || 
               id.includes('node_modules/react-router-dom')) {
             return 'vendor-react';
           }
-          // Put shadcn/ui components in a separate chunk
+          // Placer les composants shadcn/ui dans un chunk séparé
           if (id.includes('@/components/ui/')) {
             return 'vendor-ui';
+          }
+          // Séparer les pages
+          if (id.includes('/pages/Pipeline') || id.includes('/components/pipeline/')) {
+            return 'pipeline';
+          }
+          if (id.includes('/pages/Leads') || id.includes('/components/leads/')) {
+            return 'leads';
           }
         }
       }
