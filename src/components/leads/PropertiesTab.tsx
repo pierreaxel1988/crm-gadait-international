@@ -6,46 +6,62 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, MapPin, BedDouble, Home, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { isToday } from 'date-fns';
 
 interface PropertiesTabProps {
   leadId: string;
   lead: LeadDetailed;
 }
 
-interface Property {
-  id: string;
-  title: string;
-  property_type: string;
-  bedrooms: number | null;
-  area: number | null;
-  area_unit: string;
-  price: number | null;
-  currency: string;
-  location: string | null;
+interface GadaitProperty {
+  Position: number;
+  Title: string;
+  price: string | null;
+  "Property Type": string | null;
+  Bedrooms: number | null;
+  Area: string | null;
   country: string | null;
-  url: string | null;
-  images: string[];
-  created_at: string;
-  updated_at: string;
+  city: string | null;
+  "Property Link": string | null;
+  "Main Image": string | null;
+  "Secondary Image": string | null;
+  "Additional Image 1": string | null;
+  "Additional Image 2": string | null;
+  "Additional Image 3": string | null;
+  "Additional Image 4": string | null;
+  "Additional Image 5": string | null;
 }
 
-const formatPrice = (price: number | null, currency: string) => {
+const formatPrice = (price: string | null) => {
   if (!price) return "Prix sur demande";
   
-  const currencySymbol = 
-    currency === 'EUR' ? '€' :
-    currency === 'USD' ? '$' : 
-    currency === 'GBP' ? '£' : '';
+  // Si le prix contient déjà un symbole de devise, le retourner tel quel
+  if (price.includes('€') || price.includes('$') || price.includes('£')) {
+    return price;
+  }
+  
+  // Essayer de convertir le prix en nombre et le formater
+  try {
+    // Nettoyer le prix en supprimant tout sauf les chiffres
+    const cleanPrice = price.replace(/[^\d.,-]/g, '');
+    const numPrice = parseFloat(cleanPrice.replace(',', '.'));
     
-  return `${currencySymbol}${price.toLocaleString('fr-FR')}`;
+    if (isNaN(numPrice)) {
+      return price; // Si la conversion échoue, retourner le prix original
+    }
+    
+    // Par défaut, utiliser l'euro comme devise
+    return `€${numPrice.toLocaleString('fr-FR')}`;
+  } catch (e) {
+    return price; // En cas d'erreur, retourner le prix original
+  }
 };
 
 const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<GadaitProperty[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 
   // Charger les propriétés correspondant aux critères du lead
   useEffect(() => {
@@ -54,9 +70,9 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
       try {
         console.log("Chargement des propriétés pour le lead:", leadId);
         let query = supabase
-          .from('properties')
+          .from('Gadait_Listings_Buy')
           .select('*')
-          .order('created_at', { ascending: false });
+          .order('Position', { ascending: true });
         
         // Filtrage par pays si spécifié
         if (lead.country) {
@@ -66,9 +82,8 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
         // Filtrage par type de propriété si spécifié
         if (lead.propertyTypes && lead.propertyTypes.length > 0) {
           // Chercher si l'un des types de propriété du lead correspond
-          query = query.or(
-            lead.propertyTypes.map(type => `property_type.ilike.%${type}%`).join(',')
-          );
+          const propertyTypeConditions = lead.propertyTypes.map(type => `"Property Type".ilike.%${type}%`);
+          query = query.or(propertyTypeConditions.join(','));
         }
         
         // Filtrage par nombre de chambres si spécifié
@@ -77,7 +92,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
           if (bedroomFilters.length > 0) {
             // Pour les chambres, on prend les propriétés qui ont au moins le nombre minimum spécifié
             const minBedrooms = Math.min(...bedroomFilters.filter(b => typeof b === 'number') as number[]);
-            query = query.gte('bedrooms', minBedrooms);
+            query = query.gte('Bedrooms', minBedrooms);
           }
         }
         
@@ -110,7 +125,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
     setIsRefreshing(true);
     setSyncStatus("Synchronisation en cours...");
     try {
-      // Fix: Get the session token using the correct method
+      // Get the session token using the correct method
       const { data: { session } } = await supabase.auth.getSession();
       const accessToken = session?.access_token;
       
@@ -152,10 +167,46 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
     }
   };
 
-  // Vérifier si une date est aujourd'hui
-  const isUpdatedToday = (dateString: string) => {
-    if (!dateString) return false;
-    return isToday(new Date(dateString));
+  // Fonction pour gérer les erreurs d'image
+  const handleImageError = (propertyPosition: number) => {
+    setImageErrors(prev => ({
+      ...prev,
+      [propertyPosition]: true
+    }));
+  };
+
+  // Fonction pour obtenir l'image d'une propriété
+  const getPropertyImage = (property: GadaitProperty) => {
+    // Si l'image a déjà échoué, utiliser directement le placeholder
+    if (imageErrors[property.Position]) {
+      return '/placeholder.svg';
+    }
+    
+    // Essayer d'utiliser l'image principale
+    if (property["Main Image"]) {
+      return property["Main Image"];
+    }
+    
+    // Sinon essayer l'image secondaire
+    if (property["Secondary Image"]) {
+      return property["Secondary Image"];
+    }
+    
+    // Essayer les images additionnelles dans l'ordre
+    const additionalImages = [
+      property["Additional Image 1"],
+      property["Additional Image 2"],
+      property["Additional Image 3"],
+      property["Additional Image 4"],
+      property["Additional Image 5"],
+    ];
+    
+    for (const img of additionalImages) {
+      if (img) return img;
+    }
+    
+    // Sinon, utiliser le placeholder par défaut
+    return '/placeholder.svg';
   };
 
   return (
@@ -193,63 +244,53 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {properties.map((property) => (
-            <Card key={property.id} className="overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
+            <Card key={property.Position} className="overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
               <div className="aspect-video w-full relative">
-                {property.images && property.images.length > 0 ? (
-                  <img
-                    src={property.images[0]}
-                    alt={property.title}
-                    className="object-cover w-full h-full"
-                    onError={(e) => {
-                      // Fallback en cas d'erreur de chargement d'image
-                      (e.target as HTMLImageElement).src = '/placeholder.svg';
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                    <Home className="w-12 h-12 text-gray-400" />
-                  </div>
-                )}
+                <img
+                  src={getPropertyImage(property)}
+                  alt={property.Title || "Propriété"}
+                  className="object-cover w-full h-full"
+                  onError={() => handleImageError(property.Position)}
+                />
                 
-                {/* Badge pour les propriétés mises à jour aujourd'hui */}
-                {isUpdatedToday(property.updated_at) && (
-                  <div className="absolute top-2 right-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
-                    🔁 Mis à jour aujourd'hui
+                {property["Property Type"] && (
+                  <div className="absolute bottom-2 left-2 bg-loro-navy/80 text-white px-3 py-1 rounded-full text-xs font-medium">
+                    {property["Property Type"]}
                   </div>
                 )}
               </div>
               
               <CardContent className="p-4">
                 <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-semibold line-clamp-1">{property.title}</h3>
+                  <h3 className="text-lg font-semibold line-clamp-1">{property.Title || "Propriété sans titre"}</h3>
                   <div className="text-lg font-bold text-loro-terracotta">
-                    {formatPrice(property.price, property.currency)}
+                    {formatPrice(property.price)}
                   </div>
                 </div>
                 
                 <div className="flex items-center text-sm text-gray-500 mt-1">
                   <MapPin className="w-4 h-4 mr-1" />
-                  <span>{property.location || property.country || 'Maurice'}</span>
+                  <span>{property.city || property.country || 'Non spécifié'}</span>
                 </div>
                 
                 <div className="flex items-center gap-4 mt-3 text-sm">
-                  {property.property_type && (
+                  {property["Property Type"] && (
                     <div className="flex items-center">
                       <Home className="w-4 h-4 mr-1 text-loro-navy" />
-                      <span>{property.property_type}</span>
+                      <span>{property["Property Type"]}</span>
                     </div>
                   )}
                   
-                  {property.bedrooms !== null && (
+                  {property.Bedrooms !== null && (
                     <div className="flex items-center">
                       <BedDouble className="w-4 h-4 mr-1 text-loro-navy" />
-                      <span>{property.bedrooms} ch.</span>
+                      <span>{property.Bedrooms} ch.</span>
                     </div>
                   )}
                   
-                  {property.area !== null && (
+                  {property.Area && (
                     <div>
-                      {property.area} {property.area_unit}
+                      {property.Area}
                     </div>
                   )}
                 </div>
@@ -259,7 +300,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
                     variant="outline" 
                     size="sm"
                     className="flex items-center gap-1 border-loro-navy/30 text-loro-navy"
-                    onClick={() => property.url && window.open(property.url, '_blank')}
+                    onClick={() => property["Property Link"] && window.open(property["Property Link"], '_blank')}
                   >
                     Voir <ExternalLink className="w-3.5 h-3.5 ml-1" />
                   </Button>

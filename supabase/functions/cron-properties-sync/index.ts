@@ -23,37 +23,66 @@ serve(async (req: Request) => {
   }
   
   try {
-    console.log("Démarrage de la synchronisation quotidienne des propriétés...");
+    console.log("Démarrage de la synchronisation des propriétés...");
     
     // Initialiser le client Supabase
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
-    // Appeler la fonction de synchronisation des propriétés
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/properties-sync`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-        "Content-Type": "application/json",
-      },
-    });
+    // Définir l'URL et les régions à synchroniser - maintenant sans filtre de pays
+    const targetUrl = "https://the-private-collection.com/en/search/";
     
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Erreur lors de l'appel à properties-sync: ${response.status} ${response.statusText} - ${errorText}`);
+    let totalStats = {
+      created: 0,
+      updated: 0,
+      failed: 0,
+      total: 0
+    };
+    
+    // Synchroniser toutes les propriétés de la page principale
+    try {
+      console.log(`Synchronisation des propriétés depuis: ${targetUrl}`);
+      
+      // Appeler notre fonction de synchronisation des propriétés
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/properties-sync`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: targetUrl,
+          // Ne pas spécifier de pays ou région pour obtenir toutes les propriétés
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erreur lors de l'appel à properties-sync: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+      
+      const result = await response.json();
+      console.log(`Résultat de la synchronisation:`, result);
+      
+      // Agréger les statistiques
+      if (result.stats) {
+        totalStats.created += result.stats.created || 0;
+        totalStats.updated += result.stats.updated || 0;
+        totalStats.failed += result.stats.failed || 0;
+        totalStats.total += result.stats.total || 0;
+      }
+    } catch (error) {
+      console.error(`Erreur lors de la synchronisation:`, error);
     }
-    
-    const result = await response.json();
-    console.log("Résultat de la synchronisation:", result);
     
     // Enregistrer l'exécution du cron job
     await supabase
       .from("import_statistics")
       .insert({
-        source_type: "Cron - Daily Properties Sync",
-        imported_count: result.stats?.created || 0,
-        updated_count: result.stats?.updated || 0,
-        error_count: result.stats?.failed || 0,
-        total_count: result.stats?.total || 0,
+        source_type: "Cron - The Private Collection Sync",
+        imported_count: totalStats.created || 0,
+        updated_count: totalStats.updated || 0,
+        error_count: totalStats.failed || 0,
+        total_count: totalStats.total || 0,
         import_date: new Date().toISOString(),
       });
     
@@ -63,8 +92,8 @@ serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Synchronisation quotidienne des propriétés terminée",
-        details: result,
+        message: "Synchronisation des propriétés The Private Collection terminée",
+        details: totalStats,
       }),
       { 
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -72,12 +101,12 @@ serve(async (req: Request) => {
       },
     );
   } catch (error) {
-    console.error("Erreur lors de la synchronisation quotidienne:", error);
+    console.error("Erreur lors de la synchronisation:", error);
     
     return new Response(
       JSON.stringify({
         success: false,
-        message: `Erreur lors de la synchronisation quotidienne: ${error.message}`,
+        message: `Erreur lors de la synchronisation: ${error.message}`,
         error: error.stack,
       }),
       { 

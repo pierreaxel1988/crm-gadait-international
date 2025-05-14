@@ -167,6 +167,24 @@ export const usePropertyExtraction = () => {
       if (locationMatches && locationMatches[0]) {
         data.location = locationMatches[0].charAt(0).toUpperCase() + locationMatches[0].slice(1);
       }
+    } else if (url.includes('the-private-collection')) {
+      // Données spécifiques pour The Private Collection
+      data.source = 'The Private Collection';
+      
+      // Tenter d'identifier le pays dans l'URL
+      const countryMatch = url.match(/\/mauritius\/|\/morocco\/|\/spain\/|\/portugal\/|\/france\//i);
+      if (countryMatch) {
+        const country = countryMatch[0].replace(/\//g, '');
+        data.country = country.charAt(0).toUpperCase() + country.slice(1).toLowerCase();
+      } else {
+        data.country = "Mauritius"; // Par défaut pour The Private Collection
+      }
+      
+      // Extraire une référence possible de l'URL
+      const refMatch = url.match(/\/property\/([a-zA-Z0-9-]+)/);
+      if (refMatch && refMatch[1]) {
+        data.reference = refMatch[1];
+      }
     }
     
     return data;
@@ -178,32 +196,35 @@ export const usePropertyExtraction = () => {
     
     const isIdealista = url.includes('idealista');
     const isFigaro = url.includes('lefigaro');
+    const isPrivateCollection = url.includes('the-private-collection');
     
     const standardizedData: any = {
       url: url
     };
 
     // Déterminer le pays
-    if (data.Country) {
-      standardizedData.country = data.Country;
+    if (data.country) {
+      standardizedData.country = data.country;
     } else if (isIdealista) {
       standardizedData.country = url.includes('.es') ? 'Spain' : 
                               url.includes('.pt') ? 'Portugal' : 
                               url.includes('.it') ? 'Italy' : 'Spain';
     } else if (isFigaro) {
       standardizedData.country = 'France';
+    } else if (isPrivateCollection) {
+      standardizedData.country = 'Mauritius'; // Par défaut pour The Private Collection
     }
 
     // Standardisation des propriétés courantes
-    standardizedData.title = data.title || null;
-    standardizedData.propertyType = normalizePropertyType(data.Property_type || '');
-    standardizedData.location = data.Location || '';
-    standardizedData.price = data.Price || '';
-    standardizedData.bedrooms = data.Number_of_bedrooms || '';
-    standardizedData.bathrooms = data.Number_of_bathrooms || '';
-    standardizedData.area = data.Size_or_area || '';
-    standardizedData.reference = data.Property_reference || '';
-    standardizedData.description = data.Description || '';
+    standardizedData.title = data.Title || data.title || null;
+    standardizedData.propertyType = normalizePropertyType(data.Property_Type || data["Property Type"] || '');
+    standardizedData.location = data.Location || data.location || data.city || '';
+    standardizedData.price = data.price || data.Price || '';
+    standardizedData.bedrooms = data.Number_of_bedrooms || data.Bedrooms || '';
+    standardizedData.bathrooms = data.Number_of_bathrooms || data.bathrooms || '';
+    standardizedData.area = data.Size_or_area || data.Area || '';
+    standardizedData.reference = data.Property_reference || data.reference || '';
+    standardizedData.description = data.Description || data.description || '';
     
     // Devise
     standardizedData.currency = data.Currency || 'EUR';
