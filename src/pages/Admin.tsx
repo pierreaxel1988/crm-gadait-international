@@ -40,7 +40,7 @@ const Admin = () => {
       <div className="p-6 lg:p-10 space-y-8 max-w-[1920px] mx-auto bg-loro-50">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-futura text-loro-hazel">Administration</h1>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-futura text-loro-terracotta">Administration</h1>
             <p className="text-loro-navy mt-1">Gérez les données et paramètres de votre application.</p>
           </div>
         </div>
