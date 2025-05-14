@@ -7,6 +7,7 @@ import { BarChart3, Settings2, Users } from 'lucide-react';
 import UsersManagement from '@/components/admin/UsersManagement';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
+import { toast } from 'sonner';
 
 // Données mockées initiales pour le graphique
 const initialChartData = [{
