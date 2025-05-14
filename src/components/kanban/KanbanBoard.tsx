@@ -25,7 +25,14 @@ interface KanbanBoardProps {
   isLoading?: boolean;
 }
 
-const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipelineType, isLoading = false }: KanbanBoardProps) => {
+const KanbanBoard = ({ 
+  columns, 
+  className, 
+  filters, 
+  refreshTrigger = 0, 
+  pipelineType, 
+  isLoading = false 
+}: KanbanBoardProps) => {
   const isMobile = useIsMobile();
   
   // Log information for debugging
