@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
@@ -48,12 +47,11 @@ const Pipeline = () => {
     }
   }, [selectedAgent, filters.assignedTo, updateAgentFilter]);
 
-  // Only trigger initial refresh once when component mounts
   useEffect(() => {
-    // Initial data load
     handleRefresh();
-    
-    // Fix lead assignments only once on initial load
+  }, []);
+
+  useEffect(() => {
     const fixLeadsAssignment = async () => {
       try {
         console.log("Running lead reassignment for Jade, Jean Marc, and Sharon...");
@@ -69,7 +67,6 @@ const Pipeline = () => {
     fixLeadsAssignment();
   }, []);
 
-  // Set up event listener for agent selection changes
   useEffect(() => {
     const handleAgentSelectionChange = (e: CustomEvent) => {
       const newAgent = e.detail.selectedAgent;

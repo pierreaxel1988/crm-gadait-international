@@ -15,54 +15,39 @@ serve(async (req) => {
   }
 
   try {
-    // Récupérer les données de la requête
+    // Récupérer l'URL à partir de la requête
     const requestData = await req.json();
-    const url = requestData.url || "https://the-private-collection.com/en/search/";
+    const url = requestData.url;
     const debug = requestData.debug || false;
-    const country = requestData.country || null;
-    const region = requestData.region || null;
-    const page = requestData.page || 1;
 
-    console.log(`Scraping de l'URL: ${url} (page: ${page})`);
-
-    // Construire l'URL avec les paramètres
-    let targetUrl = url;
-    if (country) {
-      targetUrl += `${country}/`;
-      if (region) {
-        targetUrl += `${region}/`;
-      }
-    }
-    
-    // Ajouter le paramètre de page si nécessaire
-    if (page > 1) {
-      targetUrl += `?page=${page}`;
+    if (!url) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "URL manquante dans la requête",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
-    console.log(`URL cible finale: ${targetUrl}`);
+    console.log(`Tentative d'extraction des données depuis: ${url}`);
 
-    // Liste des user-agents pour rotation
+    // Faire une requête à l'URL avec plusieurs user-agents différents pour contourner les protections
     const userAgents = [
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
       "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0",
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
     ];
     
     // Choisir un user agent aléatoire
     const userAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
     
-    console.log(`Utilisation du User-Agent: ${userAgent.substring(0, 30)}...`);
-    
-    // Ajouter un délai aléatoire avant la requête pour éviter les blocages
-    const delay = Math.floor(Math.random() * 2000) + 1000;
-    await new Promise(resolve => setTimeout(resolve, delay));
-    console.log(`Délai de ${delay}ms avant la requête`);
-    
     // Faire la requête avec le user agent choisi
-    const response = await fetch(targetUrl, {
+    const response = await fetch(url, {
       headers: {
         "User-Agent": userAgent,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
@@ -73,39 +58,31 @@ serve(async (req) => {
         "Sec-Fetch-Mode": "navigate",
         "Sec-Fetch-Site": "none",
         "Sec-Fetch-User": "?1",
-        "Upgrade-Insecure-Requests": "1",
-        "Referer": "https://www.google.com/"
+        "Upgrade-Insecure-Requests": "1"
       },
     });
 
     if (!response.ok) {
-      throw new Error(`Erreur lors de la récupération du site: ${response.status} ${response.statusText}`);
+      throw new Error(`Erreur lors de la récupération du site: ${response.status}`);
     }
 
     const html = await response.text();
     console.log(`HTML récupéré avec succès (${html.length} caractères)`);
-    
+
+    // En mode debug, renvoyer un extrait du HTML
     if (debug) {
-      console.log(`Premiers 300 caractères du HTML: ${html.substring(0, 300).replace(/\n/g, ' ')}`);
+      console.log(`Premiers 500 caractères du HTML: ${html.substring(0, 500)}`);
     }
 
     // Analyser le HTML pour extraire les propriétés
-    const result = extractPropertiesFromPrivateCollection(html, debug);
-    
-    // Vérifier s'il y a une pagination et retourner l'information
-    const pagination = extractPagination(html);
-    
-    console.log(`${result.properties.length} propriétés extraites`);
-    if (pagination) {
-      console.log(`Pagination: page actuelle ${pagination.currentPage}, total ${pagination.totalPages} pages`);
-    }
+    const properties = extractProperties(url, html, debug);
+    console.log(`${properties.length} propriétés extraites`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `${result.properties.length} propriétés extraites avec succès`,
-        properties: result.properties,
-        pagination,
+        message: `${properties.length} propriétés extraites avec succès`,
+        properties,
         htmlSize: html.length,
       }),
       {
@@ -129,413 +106,807 @@ serve(async (req) => {
   }
 });
 
-// Fonction spécifique pour extraire les propriétés de The Private Collection
-function extractPropertiesFromPrivateCollection(html: string, debug = false) {
+function extractProperties(url: string, html: string, debug = false) {
   const $ = cheerio.load(html);
   const properties = [];
   
-  // Mode debug - afficher la structure HTML pour comprendre le problème
-  if (debug) {
-    console.log("DEBUT DEBUG - Structure HTML de base :");
-    console.log("Titre de la page :", $('title').text());
-    console.log("Nombre total d'articles :", $('article').length);
-    console.log("Nombre total de divs :", $('div').length);
-    console.log("Classes disponibles dans la page :", 
-      [...new Set($('*').map((_, el) => $(el).attr('class')).get().filter(c => c).join(' ').split(' '))].join(', '));
-  }
-  
-  // Essayer plusieurs sélecteurs possibles pour les cartes de propriété
-  const possibleSelectors = [
-    '.property-item',
-    '.property-card',
-    '.listing-item',
-    'article',
-    '.card',
-    'div[class*="property"]',
-    'div[class*="listing"]',
-    '.gatsby-image-wrapper',
-    '.datocms-gallery-grid .gatsby-image-wrapper',
-    '[class*="estate"] article',
-    '[class*="property"] article'
-  ];
-  
-  let propertyCards = $();
-  let usedSelector = '';
-  
-  for (const selector of possibleSelectors) {
-    const cards = $(selector);
-    if (cards.length > 0) {
-      propertyCards = cards;
-      usedSelector = selector;
-      break;
-    }
-  }
-  
-  console.log(`Sélecteur utilisé: "${usedSelector}" - ${propertyCards.length} cartes trouvées`);
-  
-  // Si aucun sélecteur n'a fonctionné, chercher des éléments avec des prix
-  if (propertyCards.length === 0) {
-    console.log("Aucun sélecteur standard n'a fonctionné, recherche par contenu...");
-    propertyCards = $('*').filter(function() {
-      const text = $(this).text();
-      return text.includes('€') && $(this).find('img').length > 0;
-    });
-    console.log(`Trouvé ${propertyCards.length} éléments contenant des prix et des images`);
-  }
-  
-  // Si toujours rien trouvé, chercher des liens qui ressemblent à des propriétés
-  if (propertyCards.length === 0) {
-    console.log("Recherche des liens vers des propriétés...");
-    const propertyLinks = $('a[href*="property"], a[href*="villa"], a[href*="apartment"], a[href*="estate"]');
-    console.log(`Trouvé ${propertyLinks.length} liens qui semblent être des propriétés`);
+  // Détection du site web
+  if (url.includes("idealista.com") || url.includes("idealista.es")) {
+    console.log("Site détecté: Idealista");
     
-    propertyLinks.each((index, element) => {
-      try {
-        const link = $(element);
-        const href = link.attr('href');
-        if (!href) return;
-        
-        const title = link.text().trim() || link.attr('title') || `Property ${index + 1}`;
-        let mainImage = '';
-        const img = link.find('img').first();
-        if (img.length) {
-          mainImage = img.attr('src') || img.attr('data-src') || img.attr('data-lazy-src') || '';
+    // Extraction améliorée pour les pages de détail Idealista
+    // Titre et type de propriété
+    let title = "";
+    const titleSelectors = [
+      "h1.main-info__title", 
+      "h1.title", 
+      "span[data-testid='title']",
+      "h1.container-title",
+      "h1.property-title",
+      "h1"
+    ];
+    
+    for (const selector of titleSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        title = element.text().trim();
+        if (title) break;
+      }
+    }
+    
+    if (debug) {
+      console.log(`Titre trouvé: "${title}"`);
+    }
+    
+    let propertyType = "";
+    
+    // Chercher les mots clés dans le titre pour le type de propriété
+    const titleLower = title.toLowerCase();
+    if (titleLower.includes("villa") || titleLower.includes("chalet") || titleLower.includes("luxury")) {
+      propertyType = "Villa";
+    } else if (titleLower.includes("piso") || titleLower.includes("apartamento") || titleLower.includes("flat") || titleLower.includes("apartment")) {
+      propertyType = "Appartement";
+    } else if (titleLower.includes("casa") || titleLower.includes("house")) {
+      propertyType = "Maison";
+    } else if (titleLower.includes("penthouse") || titleLower.includes("ático") || titleLower.includes("atico")) {
+      propertyType = "Penthouse";
+    } else {
+      // Si on ne peut pas déterminer à partir du titre, chercher dans d'autres éléments
+      const breadcrumbs = $(".breadcrumb, .bread-crumb, nav.breadcrumbs, .re-Breadcrumb");
+      if (breadcrumbs.length) {
+        const breadcrumbText = breadcrumbs.text().toLowerCase();
+        if (breadcrumbText.includes("villa") || breadcrumbText.includes("chalet")) {
+          propertyType = "Villa";
+        } else if (breadcrumbText.includes("piso") || breadcrumbText.includes("apartamento")) {
+          propertyType = "Appartement";
+        } else if (breadcrumbText.includes("casa")) {
+          propertyType = "Maison";
+        } else if (breadcrumbText.includes("penthouse") || breadcrumbText.includes("atico")) {
+          propertyType = "Penthouse";
         }
-        
-        // Convertir l'URL en absolue si nécessaire
-        let propertyLink = href;
-        if (!propertyLink.startsWith('http')) {
-          propertyLink = `https://the-private-collection.com${propertyLink.startsWith('/') ? '' : '/'}${propertyLink}`;
+      }
+    }
+    
+    // Essayer une autre approche si toujours pas de type
+    if (!propertyType) {
+      const metaDescription = $('meta[name="description"]').attr('content') || '';
+      if (metaDescription.toLowerCase().includes('villa') || metaDescription.toLowerCase().includes('chalet')) {
+        propertyType = "Villa";
+      } else if (metaDescription.toLowerCase().includes('piso') || metaDescription.toLowerCase().includes('apartamento')) {
+        propertyType = "Appartement";
+      } else if (metaDescription.toLowerCase().includes('casa')) {
+        propertyType = "Maison";
+      }
+    }
+    
+    // Par défaut pour les URLs de Marbella ou les propriétés de luxe
+    if (!propertyType && (url.toLowerCase().includes('marbella') || url.toLowerCase().includes('luxury'))) {
+      propertyType = "Villa";
+    }
+    
+    if (debug) {
+      console.log(`Type de propriété détecté: "${propertyType}"`);
+    }
+    
+    // Prix - chercher dans de multiples sélecteurs
+    let price = "";
+    const priceSelectors = [
+      "span.price", 
+      ".info-data-price", 
+      ".price", 
+      "[data-testid='price']",
+      ".re-DetailHeader-price",
+      "span[itemprop='price']",
+      "div.price-container"
+    ];
+    
+    for (const selector of priceSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        price = element.text().trim();
+        if (price) break;
+      }
+    }
+    
+    if (!price) {
+      // Chercher le prix dans tout élément contenant "€"
+      $("p, span, div").each((_, el) => {
+        const text = $(el).text().trim();
+        if (text.includes("€")) {
+          const priceMatch = text.match(/[\d\.]{1,3}(?:\.?\d{3})*(?:,\d+)?\s*€/);
+          if (priceMatch) {
+            price = priceMatch[0];
+            return false; // Break the loop
+          }
         }
-        
-        // Convertir l'image en URL absolue si nécessaire
-        if (mainImage && !mainImage.startsWith('http')) {
-          mainImage = `https://the-private-collection.com${mainImage.startsWith('/') ? '' : '/'}${mainImage}`;
+      });
+    }
+    
+    if (debug) {
+      console.log(`Prix trouvé: "${price}"`);
+    }
+    
+    // Localisation - chercher dans de multiples sélecteurs
+    let location = "";
+    const locationSelectors = [
+      ".main-info__title-minor", 
+      ".location", 
+      "address", 
+      "[data-testid='mapTitle']", 
+      ".property-location",
+      ".re-DetailMap-address",
+      "span[itemprop='address']",
+      ".address"
+    ];
+    
+    for (const selector of locationSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        location = element.text().trim();
+        if (location) break;
+      }
+    }
+    
+    // Si toujours pas de localisation, essayer d'autres méthodes
+    if (!location) {
+      // Vérifier les métadonnées
+      const metaLocation = $('meta[property="og:locality"], meta[name="geo.placename"]').attr('content');
+      if (metaLocation) location = metaLocation;
+    }
+    
+    // Si toujours pas de localisation, extraire de l'URL
+    if (!location) {
+      const urlParts = url.toLowerCase().split('/');
+      for (const part of urlParts) {
+        if (['marbella', 'madrid', 'barcelona', 'valencia', 'malaga', 'sevilla', 'ibiza'].includes(part)) {
+          location = part.charAt(0).toUpperCase() + part.slice(1);
+          break;
         }
-        
-        const property = {
-          "Position": index + 1,
-          "Title": title || `Property #${index + 1}`,
-          "Main Image": mainImage || "",
-          "Secondary Image": null,
-          "Additional Image 1": null,
-          "Additional Image 2": null,
-          "Additional Image 3": null,
-          "Additional Image 4": null,
-          "Additional Image 5": null,
-          "Additional Image 6": null,
-          "Additional Image 7": null,
-          "Additional Image 8": null,
-          "Additional Image 9": null,
-          "Additional Image 10": null,
-          "Price and Location": "Price on request · Mauritius",
-          "price": "Price on request",
-          "Property Type": "Villa",
-          "Bedrooms": 0,
-          "Area": "Not specified",
-          "country": "Mauritius",
-          "city": "Unknown",
-          "Property Link": propertyLink,
-          "is_exclusive": false,
-          "is_new": false
-        };
-        
-        properties.push(property);
-      } catch (error) {
-        console.error(`Erreur lors de l'extraction du lien ${index}:`, error);
+      }
+    }
+    
+    if (debug) {
+      console.log(`Localisation trouvée: "${location}"`);
+    }
+    
+    // Description - chercher dans de multiples sélecteurs
+    let description = "";
+    const descriptionSelectors = [
+      ".comment", 
+      "[itemprop='description']", 
+      ".adCommentsLanguage", 
+      ".detail-description", 
+      ".description",
+      ".re-DetailDescription",
+      "div[data-testid='description']",
+      "p.description"
+    ];
+    
+    for (const selector of descriptionSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        description = element.text().trim();
+        if (description) break;
+      }
+    }
+    
+    if (debug) {
+      console.log(`Description trouvée: ${description ? "Oui" : "Non"}`);
+    }
+    
+    // Référence - chercher dans de multiples sélecteurs et patterns
+    let reference = "";
+    
+    // Essayer de trouver un élément contenant la référence
+    $("p, span, div, small").each((_, el) => {
+      const text = $(el).text().trim();
+      const refMatch = text.match(/\b(?:ref|reference|referencia|código|codigo|id)[\.:]?\s*(\w+[\d]+\w*)/i);
+      if (refMatch && refMatch[1]) {
+        reference = refMatch[1];
+        return false; // Break the loop
       }
     });
-  } else {
-    // Traiter les cartes de propriété trouvées
-    propertyCards.each((index, element) => {
-      try {
-        const card = $(element);
-        
-        // Extraction du titre - multiples approches
-        let title = "";
-        const titleSelectors = [
-          '.property-title h5',
-          '.property-title',
-          'h2', 'h3', 'h4', 'h5',
-          '.title', '.heading',
-          '[class*="title"]'
-        ];
-        
-        for (const selector of titleSelectors) {
-          const titleEl = card.find(selector).first();
-          if (titleEl.length) {
-            title = titleEl.text().trim();
-            if (title) break;
-          }
-        }
-        
-        // Fallback pour le titre
-        if (!title) {
-          title = card.text().split('\n')[0].trim() || `Property #${index + 1}`;
-        }
-        
-        // Extraction du prix - multiples approches
-        let price = "";
-        const priceSelectors = [
-          '.property-price .price-tag',
-          '.property-price',
-          '.price',
-          '.cost',
-          '[class*="price"]'
-        ];
-        
-        for (const selector of priceSelectors) {
-          const priceEl = card.find(selector).first();
-          if (priceEl.length) {
-            price = priceEl.text().trim();
-            if (price) break;
-          }
-        }
-        
-        // Si pas de prix trouvé, chercher dans le texte avec €
-        if (!price) {
-          const priceMatch = card.text().match(/€[0-9,. ]+|[0-9,. ]+€/);
-          if (priceMatch) {
-            price = priceMatch[0].trim();
-          } else {
-            price = "Price on request";
-          }
-        }
-        
-        // Extraction de la localisation
-        let location = "";
-        const locationSelectors = [
-          '.property-location',
-          '.location',
-          '.address',
-          '[class*="location"]',
-          '[class*="address"]'
-        ];
-        
-        for (const selector of locationSelectors) {
-          const locEl = card.find(selector).first();
-          if (locEl.length) {
-            location = locEl.text().trim();
-            if (location) break;
-          }
-        }
-        
-        // Extraction du pays et de la ville
-        let country = "Mauritius";
-        let city = "";
-        
-        // Chercher des noms de villes communes à Maurice
-        const mauritiusCities = [
-          'Rivière Noire', 'Black River', 'Grand Baie', 'Flic en Flac',
-          'Tamarin', 'Mont Calme', 'Mont Mascal', 'Belle Mare', 
-          'Trou aux Biches', 'Port Louis', 'Quatre Bornes', 'Trou d\'Eau Douce'
-        ];
-        
-        for (const cityName of mauritiusCities) {
-          if (card.text().includes(cityName) || location.includes(cityName)) {
-            city = cityName;
+    
+    // Si pas de référence trouvée, extraire de l'URL
+    if (!reference) {
+      const refMatch = url.match(/\/(\d{6,})/);
+      if (refMatch) reference = refMatch[1];
+    }
+    
+    if (debug) {
+      console.log(`Référence trouvée: "${reference}"`);
+    }
+    
+    // Caractéristiques : chambres, salles de bain, surface
+    let bedrooms = "";
+    let bathrooms = "";
+    let area = "";
+    
+    // Approche 1: Rechercher dans les détails spécifiques
+    const featureSelectors = [
+      ".detail-info li", 
+      ".details-property-feature li", 
+      ".details-property li", 
+      ".property-features li", 
+      "[data-testid='feature']",
+      ".re-DetailFeatures li",
+      ".features-container li",
+      ".specs li"
+    ];
+    
+    let detailItems = $();
+    for (const selector of featureSelectors) {
+      const elements = $(selector);
+      if (elements.length) {
+        detailItems = elements;
+        break;
+      }
+    }
+    
+    detailItems.each((_, el) => {
+      const text = $(el).text().trim().toLowerCase();
+      
+      // Chambres
+      if (text.includes("hab") || text.includes("dorm") || text.includes("bedroom") || text.includes("dormitorio")) {
+        const match = text.match(/(\d+)/);
+        if (match) bedrooms = match[1];
+      }
+      
+      // Salles de bain
+      else if (text.includes("baño") || text.includes("bathroom") || text.includes("bath")) {
+        const match = text.match(/(\d+)/);
+        if (match) bathrooms = match[1];
+      }
+      
+      // Surface
+      else if (text.includes("m²") || text.includes("metros") || text.includes("superficie")) {
+        const match = text.match(/(\d+[\d\.,]*)?\s*m²/i);
+        if (match) area = match[0];
+      }
+    });
+    
+    // Approche 2: Chercher des éléments spécifiques
+    if (!bedrooms) {
+      const bedroomSelectors = [
+        ".re-DetailHeader-features .re-DetailHeader-featuresItem:nth-child(1)",
+        "[data-testid='rooms']",
+        "span.rooms"
+      ];
+      
+      for (const selector of bedroomSelectors) {
+        const element = $(selector).first();
+        if (element.length) {
+          const text = element.text().trim();
+          const match = text.match(/(\d+)/);
+          if (match) {
+            bedrooms = match[1];
             break;
           }
         }
-        
-        // Extraction des images
-        let mainImage = "";
-        const imgSelectors = [
-          'img',
-          'img.lazy',
-          '.gatsby-image-wrapper img',
-          '[class*="image"] img',
-          '[data-src]'
-        ];
-        
-        for (const selector of imgSelectors) {
-          const imgEl = card.find(selector).first();
-          if (imgEl.length) {
-            mainImage = imgEl.attr('src') || imgEl.attr('data-src') || imgEl.attr('data-lazy-src') || '';
-            if (mainImage) break;
+      }
+    }
+    
+    if (!bathrooms) {
+      const bathroomSelectors = [
+        ".re-DetailHeader-features .re-DetailHeader-featuresItem:nth-child(2)",
+        "[data-testid='bathrooms']",
+        "span.bathrooms"
+      ];
+      
+      for (const selector of bathroomSelectors) {
+        const element = $(selector).first();
+        if (element.length) {
+          const text = element.text().trim();
+          const match = text.match(/(\d+)/);
+          if (match) {
+            bathrooms = match[1];
+            break;
           }
         }
-        
-        // Convertir l'image en URL absolue si nécessaire
-        if (mainImage && !mainImage.startsWith('http')) {
-          mainImage = `https://the-private-collection.com${mainImage.startsWith('/') ? '' : '/'}${mainImage}`;
-        }
-        
-        // Extraction des caractéristiques
-        let bedrooms = null;
-        let bathrooms = null;
-        let area = "";
-        
-        // Chercher dans le texte général
-        const bedroomMatch = card.text().match(/(\d+)\s*(?:bed|bedroom|chambre)/i);
-        if (bedroomMatch) bedrooms = parseInt(bedroomMatch[1]);
-        
-        const areaMatch = card.text().match(/(\d+(?:\.\d+)?)\s*(?:m²|sqm)/i);
-        if (areaMatch) area = `${areaMatch[1]} m²`;
-        
-        // Extraction du type de propriété
-        let propertyType = "Villa"; // Par défaut
-        
-        if (title) {
-          const titleLower = title.toLowerCase();
-          if (titleLower.includes('apartment')) propertyType = "Apartment";
-          else if (titleLower.includes('house')) propertyType = "House";
-          else if (titleLower.includes('penthouse')) propertyType = "Penthouse";
-          else if (titleLower.includes('condo')) propertyType = "Condo";
-        }
-        
-        // Extraction du lien
-        let propertyLink = card.find('a').attr('href') || '';
-        if (!propertyLink) {
-          const parentLink = card.closest('a');
-          if (parentLink.length) {
-            propertyLink = parentLink.attr('href') || '';
+      }
+    }
+    
+    if (!area) {
+      const areaSelectors = [
+        ".re-DetailHeader-features .re-DetailHeader-featuresItem:nth-child(3)",
+        "[data-testid='area']",
+        "span.area"
+      ];
+      
+      for (const selector of areaSelectors) {
+        const element = $(selector).first();
+        if (element.length) {
+          const text = element.text().trim();
+          const match = text.match(/(\d+[\d\.,]*)?\s*m²/i);
+          if (match) {
+            area = match[0];
+            break;
           }
         }
-        
-        if (propertyLink && !propertyLink.startsWith('http')) {
-          propertyLink = `https://the-private-collection.com${propertyLink.startsWith('/') ? '' : '/'}${propertyLink}`;
+      }
+    }
+    
+    // Approche 3: Si toujours pas trouvé, chercher dans le titre ou la description
+    if (!bedrooms && title) {
+      const titleMatch = title.match(/(\d+)\s*(hab|dorm|bedroom|dormitorio)/i);
+      if (titleMatch) bedrooms = titleMatch[1];
+    }
+    
+    if (!bedrooms && description) {
+      const descMatch = description.match(/(\d+)\s*(hab|dorm|bedroom|dormitorio)/i);
+      if (descMatch) bedrooms = descMatch[1];
+    }
+    
+    if (debug) {
+      console.log(`Chambres trouvées: "${bedrooms}"`);
+      console.log(`Salles de bain trouvées: "${bathrooms}"`);
+      console.log(`Surface trouvée: "${area}"`);
+    }
+    
+    // Extraire les amenities
+    const amenities: string[] = [];
+    
+    // Parcourir tous les éléments qui pourraient contenir des aménités
+    const amenitySelectors = [
+      ".details-property-feature-one li", 
+      ".details-property-feature-two li", 
+      ".details-property li", 
+      ".feature-container li", 
+      ".property-features li", 
+      "[data-testid='feature']",
+      ".re-DetailFeatures-feature",
+      ".amenities li"
+    ];
+    
+    for (const selector of amenitySelectors) {
+      $(selector).each((_, el) => {
+        const feature = $(el).text().trim();
+        if (feature && 
+            !feature.includes("m²") && 
+            !feature.includes("hab") && 
+            !feature.includes("baño") && 
+            !amenities.includes(feature)) {
+          amenities.push(feature);
         }
+      });
+    }
+    
+    if (debug) {
+      console.log(`Amenities trouvées: ${amenities.length > 0 ? amenities.join(", ") : "Aucune"}`);
+    }
+    
+    // Extraire l'image principale
+    let image = "";
+    const imageSelectors = [
+      ".detail-image",
+      "img[itemprop='image']",
+      ".gallery img",
+      ".main-multimedia img",
+      ".media-container img",
+      ".bigPhotos img",
+      ".re-DetailMosaicPhoto img",
+      "picture img",
+      "img.main-image"
+    ];
+    
+    for (const selector of imageSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        image = element.attr("src") || element.attr("data-src") || "";
+        if (image) break;
+      }
+    }
+    
+    if (!image) {
+      // Essayer d'extraire du contenu du style background-image
+      $("[style*='background-image']").each((_, el) => {
+        const style = $(el).attr("style") || "";
+        const match = style.match(/background-image:\s*url\(['"]?([^'"]+)['"]?\)/i);
+        if (match) {
+          image = match[1];
+          return false;
+        }
+      });
+    }
+    
+    if (debug) {
+      console.log(`Image trouvée: ${image ? "Oui" : "Non"}`);
+    }
+    
+    // Si nous avons au moins un titre ou une localisation, on considère que c'est une propriété valide
+    if (title || location || price) {
+      // Le pays sera l'Espagne pour Idealista par défaut
+      const country = "Spain";
+      
+      const property = {
+        title: title || "Villa de luxe",
+        Property_type: propertyType || "Villa",
+        Price: price || "Prix sur demande",
+        Currency: "EUR",
+        Location: location || "Espagne",
+        Country: country,
+        Number_of_bedrooms: bedrooms || "4",
+        Number_of_bathrooms: bathrooms || "3",
+        Size_or_area: area || "",
+        Property_reference: reference || url.split('/').pop() || "REF-IDEALISTA",
+        Description: description || "Propriété en Espagne",
+        Key_features_and_amenities: amenities.length > 0 ? amenities : [],
+        url,
+        image,
+      };
+      
+      properties.push(property);
+    }
+  } else if (url.includes("lefigaro.fr") || url.includes("properties.lefigaro.com")) {
+    console.log("Site détecté: Le Figaro Propriétés");
+    
+    // Extraction pour une page de détail Le Figaro
+    let title = "";
+    const titleSelectors = ["h1.product-title", "h1.title-product", "h1.property-title", "h1"];
+    
+    for (const selector of titleSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        title = element.text().trim();
+        if (title) break;
+      }
+    }
+    
+    let price = "";
+    const priceSelectors = [".product-price", ".price-product", "[data-price]", ".price", "span.price"];
+    
+    for (const selector of priceSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        price = element.text().trim();
+        if (price) break;
+      }
+    }
+    
+    let location = "";
+    const locationSelectors = [".product-location", ".location-product", ".location", "span.location"];
+    
+    for (const selector of locationSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        location = element.text().trim();
+        if (location) break;
+      }
+    }
+    
+    let description = "";
+    const descriptionSelectors = [".product-description", ".description", ".description-product", "div.description"];
+    
+    for (const selector of descriptionSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        description = element.text().trim();
+        if (description) break;
+      }
+    }
+    
+    // Extraire les caractéristiques
+    let bedrooms = "";
+    let bathrooms = "";
+    let area = "";
+    let reference = "";
+    
+    // Chercher la référence
+    const refSelectors = ["[data-ref]", ".ref", ".reference", ".product-reference"];
+    
+    for (const selector of refSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        reference = element.text().trim() || element.attr("data-ref") || "";
+        if (reference) {
+          reference = reference.replace(/[rR][eE][fF]\s*:?\s*/i, "").trim();
+          break;
+        }
+      }
+    }
+    
+    if (!reference) {
+      // Essayer d'extraire la référence de l'URL
+      const urlMatch = url.match(/\/([a-zA-Z0-9-]+)\/?$/);
+      if (urlMatch) {
+        reference = urlMatch[1];
+      }
+    }
+    
+    // Chercher les caractéristiques dans divers sélecteurs
+    const featureSelectors = [".product-features li", ".features li", ".characteristics li", ".specs li", ".details li"];
+    
+    let featureElements = $();
+    for (const selector of featureSelectors) {
+      const elements = $(selector);
+      if (elements.length) {
+        featureElements = elements;
+        break;
+      }
+    }
+    
+    featureElements.each((_, el) => {
+      const text = $(el).text().trim().toLowerCase();
+      
+      if (text.includes("chambre") || text.includes("bedroom")) {
+        const match = text.match(/(\d+)/);
+        if (match) bedrooms = match[1];
+      } else if (text.includes("salle de bain") || text.includes("bathroom")) {
+        const match = text.match(/(\d+)/);
+        if (match) bathrooms = match[1];
+      } else if (text.includes("surface") || text.includes("area") || text.includes("m²")) {
+        const match = text.match(/(\d+[\d\s,.]*)/);
+        if (match) area = match[1].trim();
+      }
+    });
+    
+    // Pour les éléments data-spécifiques
+    bedrooms = bedrooms || $("[data-rooms]").attr("data-rooms") || "";
+    bathrooms = bathrooms || $("[data-bathrooms]").attr("data-bathrooms") || "";
+    area = area || $("[data-area]").attr("data-area") || "";
+    
+    // Extraire l'image
+    let image = "";
+    const imageSelectors = [".product-image img", ".carousel img", ".gallery img", "img.main-image"];
+    
+    for (const selector of imageSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        image = element.attr("src") || element.attr("data-src") || "";
+        if (image) break;
+      }
+    }
+    
+    // Si nous avons trouvé au moins un titre, on considère que c'est une propriété valide
+    if (title || location || price) {
+      const property = {
+        title: title || "Propriété en France",
+        Property_type: "Villa",
+        Price: price || "Prix sur demande",
+        Currency: "EUR",
+        Location: location || "France",
+        Country: "France",
+        Number_of_bedrooms: bedrooms || "",
+        Number_of_bathrooms: bathrooms || "",
+        Size_or_area: area || "",
+        Property_reference: reference || "REF-FIGARO",
+        Description: description || "",
+        Key_features_and_amenities: [],
+        url,
+        image,
+      };
+      
+      properties.push(property);
+    } else {
+      // Fallback pour la liste des propriétés
+      $(".property-item, .product-item, .listing-item").each((index, element) => {
+        const item = $(element);
         
-        // Propriétés exclusive/nouvelle
-        const isExclusive = card.find('.exclusive, [class*="exclusive"]').length > 0 || 
-                           title.toLowerCase().includes('exclusive');
-        const isNew = card.find('.new, [class*="new"]').length > 0 || 
-                     title.toLowerCase().includes('new');
-        
-        // Créer l'objet propriété
         const property = {
-          "Position": index + 1,
-          "Title": title || `Property #${index + 1}`,
-          "Main Image": mainImage || "",
-          "Secondary Image": null,
-          "Additional Image 1": null,
-          "Additional Image 2": null,
-          "Additional Image 3": null,
-          "Additional Image 4": null,
-          "Additional Image 5": null,
-          "Additional Image 6": null,
-          "Additional Image 7": null,
-          "Additional Image 8": null,
-          "Additional Image 9": null,
-          "Additional Image 10": null,
-          "Price and Location": `${price} · ${location || 'Mauritius'}`.trim(),
-          "price": price || "Price on request",
-          "Property Type": propertyType,
-          "Bedrooms": bedrooms || 0,
-          "Area": area || "Not specified",
-          "country": country,
-          "city": city || "Unknown",
-          "Property Link": propertyLink || "",
-          "is_exclusive": isExclusive,
-          "is_new": isNew
+          title: item.find(".property-title, .product-title, .title").text().trim() || "Propriété en France",
+          Property_type: "Villa",
+          Price: item.find(".property-price, .product-price, .price").text().trim() || "Prix sur demande",
+          Currency: "EUR",
+          Location: item.find(".property-location, .product-location, .location").text().trim() || "France",
+          Country: "France",
+          Description: item.find(".property-description, .product-description, .description").text().trim() || "",
+          Property_reference: item.find(".property-reference, .product-reference, .reference").text().trim() || 
+                    item.attr("data-ref") || 
+                    `LF-${index + 1}`,
+          url: item.find("a").attr("href") || "",
+          image: item.find("img").attr("src") || "",
         };
         
         properties.push(property);
-      } catch (error) {
-        console.error(`Erreur lors de l'extraction de la propriété ${index}:`, error);
-      }
-    });
-  }
-  
-  // Si toujours aucune propriété trouvée, enregistrer plus de détails pour le débogage
-  if (properties.length === 0 && debug) {
-    console.log("Aucune propriété trouvée après toutes les tentatives.");
-    console.log("Contenu HTML complet de la page:");
-    console.log(html.substring(0, 5000) + "...[tronqué]");
-  }
-  
-  return { properties };
-}
-
-// Fonction pour extraire les informations de pagination
-function extractPagination(html: string) {
-  const $ = cheerio.load(html);
-  
-  try {
-    // Essayer différents sélecteurs pour la pagination
-    const paginationSelectors = [
-      '.pagination',
-      '.nav-links',
-      '.pager',
-      '[class*="pagination"]',
-      '[class*="paging"]',
-      'ul.page-numbers',
-      '.nav-pagination',
-      'nav ul',
-      '.page-navigation'
-    ];
+      });
+    }
+  } else {
+    // Extraction générique pour d'autres sites immobiliers
+    console.log("Site non spécifiquement supporté, tentative d'extraction générique");
     
-    let paginationContainer = $();
-    for (const selector of paginationSelectors) {
+    // D'abord essayer de voir si c'est une page de détail
+    let title = "";
+    const titleSelectors = ["h1", ".property-title", ".listing-title", "h1.title"];
+    
+    for (const selector of titleSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        title = element.text().trim();
+        if (title) break;
+      }
+    }
+    
+    let price = "";
+    const priceSelectors = [".price", "[data-price]", ".property-price", "span.price"];
+    
+    for (const selector of priceSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        price = element.text().trim();
+        if (price) break;
+      }
+    }
+    
+    let location = "";
+    const locationSelectors = [".location", ".address", ".property-location", "span.location", "address"];
+    
+    for (const selector of locationSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        location = element.text().trim();
+        if (location) break;
+      }
+    }
+    
+    let description = "";
+    const descriptionSelectors = [".description", ".property-description", "article p", "div.description"];
+    
+    for (const selector of descriptionSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        description = element.text().trim();
+        if (description) break;
+      }
+    }
+    
+    // Référence
+    let reference = "";
+    const refSelectors = [".reference", ".ref", "[data-ref]"];
+    
+    for (const selector of refSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        reference = element.text().trim() || element.attr("data-ref") || "";
+        if (reference) break;
+      }
+    }
+    
+    if (!reference) {
+      // Essayer d'extraire la référence de l'URL
+      const urlMatch = url.match(/\/([a-zA-Z0-9-]+)\/?$/);
+      if (urlMatch) {
+        reference = urlMatch[1];
+      }
+    }
+    
+    // Caractéristiques
+    let bedrooms = "";
+    let bathrooms = "";
+    let area = "";
+    
+    const featureSelectors = [".features li", ".specifications li", ".details li", ".property-details li"];
+    
+    let featureElements = $();
+    for (const selector of featureSelectors) {
       const elements = $(selector);
-      if (elements.length > 0) {
-        console.log(`Sélecteur de pagination trouvé: ${selector}`);
-        paginationContainer = elements;
+      if (elements.length) {
+        featureElements = elements;
         break;
       }
     }
     
-    // Si aucun élément de pagination n'est trouvé, supposer qu'il y a une seule page
-    if (paginationContainer.length === 0) {
-      console.log("Aucun élément de pagination trouvé");
-      return { currentPage: 1, totalPages: 1, hasNextPage: false, hasPrevPage: false };
-    }
-    
-    // Trouver la page active
-    let currentPage = 1;
-    const activeSelectors = ['.active', '.current', '.selected', '[aria-current="page"]'];
-    
-    for (const selector of activeSelectors) {
-      const activeElement = paginationContainer.find(selector);
-      if (activeElement.length > 0) {
-        currentPage = parseInt(activeElement.text()) || 1;
-        break;
-      }
-    }
-    
-    // Trouver le nombre total de pages
-    let totalPages = 1;
-    
-    // Parcourir tous les liens de pagination pour trouver la dernière page
-    paginationContainer.find('a, span').each((_, el) => {
-      const pageText = $(el).text().trim();
-      const pageNumber = parseInt(pageText);
-      if (!isNaN(pageNumber) && pageNumber > totalPages) {
-        totalPages = pageNumber;
+    featureElements.each((_, el) => {
+      const text = $(el).text().trim().toLowerCase();
+      
+      if (text.includes("chambre") || text.includes("bedroom") || text.includes("room")) {
+        const match = text.match(/(\d+)/);
+        if (match) bedrooms = match[1];
+      } else if (text.includes("salle de bain") || text.includes("bathroom") || text.includes("bath")) {
+        const match = text.match(/(\d+)/);
+        if (match) bathrooms = match[1];
+      } else if (text.includes("surface") || text.includes("area") || text.includes("m²") || text.includes("sqm")) {
+        const match = text.match(/(\d+[\d\s,.]*)/);
+        if (match) area = match[1].trim();
       }
     });
     
-    // Chercher aussi des indicateurs de dernière page
-    const lastPageLink = paginationContainer.find('a:contains("Last"), a:contains("»"), a:contains("Dernière")');
-    if (lastPageLink.length > 0) {
-      const href = lastPageLink.attr('href');
-      if (href) {
-        const match = href.match(/page=(\d+)/);
-        if (match && match[1]) {
-          const lastPage = parseInt(match[1]);
-          if (lastPage > totalPages) {
-            totalPages = lastPage;
-          }
-        }
+    // Image
+    let image = "";
+    const imageSelectors = ["img.main-image", ".carousel img", ".gallery img", ".property-image img", ".listing-image img"];
+    
+    for (const selector of imageSelectors) {
+      const element = $(selector).first();
+      if (element.length) {
+        image = element.attr("src") || element.attr("data-src") || "";
+        if (image) break;
       }
     }
     
-    // Si aucune page n'est trouvée, supposer qu'il y a au moins 10 pages
-    if (totalPages <= 1) {
-      totalPages = 10;
+    if (title && (price || description)) {
+      // C'est probablement une page de détail
+      const property = {
+        title: title || "Propriété immobilière",
+        Property_type: "",
+        Price: price || "Prix sur demande",
+        Location: location || "",
+        Country: "",
+        Number_of_bedrooms: bedrooms || "",
+        Number_of_bathrooms: bathrooms || "",
+        Size_or_area: area || "",
+        Property_reference: reference || url.split('/').pop() || "REF-1",
+        Description: description || "",
+        Key_features_and_amenities: [],
+        url,
+        image: image || "",
+      };
+      
+      properties.push(property);
+    } else {
+      // Tentative d'extraction basée sur des motifs communs d'annonces immobilières
+      $("div[class*='property'], div[class*='listing'], div[class*='estate'], div[class*='real'], article, .card").each((index, element) => {
+        const item = $(element);
+        
+        // Vérifier si c'est probablement une annonce immobilière
+        const itemText = item.text();
+        const hasPrice = itemText.match(/(\$|€|£|USD|EUR)\s?[\d,.]+|[\d,.]+\s?(\$|€|£|USD|EUR)/i);
+        const hasArea = itemText.match(/\d+\s?(m²|m2|sq\.m|square meter|ft²|sqft)/i);
+        
+        if (hasPrice || hasArea) {
+          // Extraire tous les textes pour analyse
+          const allText = item.text().trim();
+          
+          // Essayer de déduire le prix
+          let price = "";
+          const priceMatch = allText.match(/(\$|€|£|USD|EUR)\s?[\d,.]+|[\d,.]+\s?(\$|€|£|USD|EUR)/i);
+          if (priceMatch) {
+            price = priceMatch[0].trim();
+          }
+          
+          // Essayer de déduire la localisation
+          let location = "";
+          const locationElem = item.find("[class*='location'], [class*='address'], [class*='city'], address");
+          if (locationElem.length) {
+            location = locationElem.first().text().trim();
+          }
+          
+          // Extraire le titre et la description
+          let title = "";
+          const titleElem = item.find("h1, h2, h3, h4, [class*='title']");
+          if (titleElem.length) {
+            title = titleElem.first().text().trim();
+          }
+          
+          let description = "";
+          const descElem = item.find("p, [class*='description'], [class*='excerpt']");
+          if (descElem.length) {
+            description = descElem.first().text().trim();
+          }
+          
+          // Extraire l'URL de l'image principale
+          let image = "";
+          const imgElem = item.find("img");
+          if (imgElem.length) {
+            image = imgElem.first().attr("src") || "";
+          }
+          
+          // Extraire l'URL de l'annonce
+          let propertyUrl = "";
+          const linkElem = item.find("a");
+          if (linkElem.length) {
+            propertyUrl = linkElem.first().attr("href") || "";
+            
+            // Convertir en URL absolue si nécessaire
+            if (propertyUrl && !propertyUrl.startsWith("http")) {
+              const urlObj = new URL(url);
+              propertyUrl = `${urlObj.origin}${propertyUrl.startsWith("/") ? "" : "/"}${propertyUrl}`;
+            }
+          }
+          
+          const property = {
+            title: title || "Propriété immobilière",
+            Price: price || "Prix sur demande",
+            Location: location || "",
+            Description: description || "",
+            Property_reference: `GEN-${index + 1}`,
+            url: propertyUrl || url,
+            image: image,
+          };
+          
+          properties.push(property);
+        }
+      });
     }
-    
-    console.log(`Pagination: page actuelle ${currentPage}, total ${totalPages} pages`);
-    
-    return {
-      currentPage,
-      totalPages,
-      hasNextPage: currentPage < totalPages,
-      hasPrevPage: currentPage > 1
-    };
-  } catch (error) {
-    console.error("Erreur lors de l'extraction de la pagination:", error);
-    return { currentPage: 1, totalPages: 10, hasNextPage: true, hasPrevPage: false };
   }
+  
+  return properties;
 }

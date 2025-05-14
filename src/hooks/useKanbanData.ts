@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -74,21 +75,11 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
   const [isLoading, setIsLoading] = useState(true);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(GUARANTEED_TEAM_MEMBERS);
   const { isCommercial, user } = useAuth();
-  
-  // Add a ref to track if data is currently being loaded to prevent multiple simultaneous loads
-  const isLoadingRef = useRef(false);
 
   useEffect(() => {
-    // Skip if a fetch is already in progress
-    if (isLoadingRef.current) return;
-    
     const fetchLeads = async () => {
       try {
-        // Set loading flags
         setIsLoading(true);
-        isLoadingRef.current = true;
-        
-        console.log(`useKanbanData: Fetching leads for ${pipelineType} pipeline (trigger: ${refreshTrigger})`);
         
         // Ensure we have all guaranteed team members
         const allTeamMembers = [...GUARANTEED_TEAM_MEMBERS];
@@ -109,6 +100,7 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
         }
         
         if (teamMembersData) {
+          console.log("Loaded team members:", teamMembersData);
           setTeamMembers(teamMembersData);
         }
         
@@ -118,7 +110,10 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
           const currentTeamMember = teamMembersData?.find(tm => tm.email === user.email);
           
           if (currentTeamMember) {
+            console.log("Filtering leads for team member:", currentTeamMember.id, currentTeamMember.name);
             query = query.eq('assigned_to', currentTeamMember.id);
+          } else {
+            console.warn("Commercial user not found in team_members table:", user.email);
           }
         }
         
@@ -149,6 +144,8 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
           }
           
           if (localLeads && localLeads.length > 0) {
+            console.log("Found local leads:", localLeads.length);
+            
             allLeads = localLeads.map(lead => ({
               id: lead.id,
               name: lead.name,
@@ -220,10 +217,11 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
         if (!allLeads || allLeads.length === 0) {
           console.log("No leads found in database or locally");
           setLoadedColumns(columns.map(col => ({ ...col, items: [] })));
+          setIsLoading(false);
           return;
         }
         
-        console.log(`Retrieved ${allLeads.length} leads total`);
+        console.log(`Retrieved leads: ${allLeads.length}`);
         
         const mappedLeads = allLeads.map(lead => {
           const assignedTeamMember = allTeamMembers.find(tm => tm.id === lead.assigned_to);
@@ -270,6 +268,7 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
         
         const filteredByPipelineType = mappedLeads.filter(lead => {
           const leadType = lead.pipelineType || lead.pipeline_type;
+          console.log(`Lead ${lead.id} (${lead.name}) has pipeline type: ${leadType}`);
           return leadType === pipelineType;
         });
         
@@ -277,6 +276,8 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
         
         const updatedColumns = columns.map(column => {
           const columnItems = filteredByPipelineType.filter(lead => lead.status === column.status);
+          
+          console.log(`Column ${column.title} (${column.status}): ${columnItems.length} leads`);
           
           return {
             ...column,
@@ -294,21 +295,12 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
           description: "Une erreur est survenue lors du chargement des données."
         });
       } finally {
-        // Delay setting isLoading to false to ensure UI shows loading state for a minimum time
-        setTimeout(() => {
-          setIsLoading(false);
-          isLoadingRef.current = false;
-        }, 300);
+        setIsLoading(false);
       }
     };
 
     fetchLeads();
-    
-    // Add cleanup function to ensure loading state is reset if component unmounts
-    return () => {
-      isLoadingRef.current = false;
-    };
-  }, [refreshTrigger, pipelineType, isCommercial, user]);
+  }, [refreshTrigger, columns, pipelineType, isCommercial, user]);
 
   return { loadedColumns, setLoadedColumns, isLoading, teamMembers };
 };

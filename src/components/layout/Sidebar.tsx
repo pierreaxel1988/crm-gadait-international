@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { X, Upload, MessageSquare, ListTodo, Calendar, File, Settings, LayoutDashboard, Users, Code, Shield, ClipboardList, ChartBar } from 'lucide-react';
+import { X, Upload, MessageSquare, ListTodo, Calendar, File, Settings, LayoutDashboard, Users, Code, Shield, ClipboardList } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -19,12 +19,10 @@ interface NavigationItem {
   icon?: React.ComponentType<any>;
   isPrimary?: boolean;
   color?: string;
-  adminOnly?: boolean;
 }
 
 const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
   const isMobile = useIsMobile();
-  const { isAdmin } = require('@/hooks/useAuth').useAuth();
 
   const navigationItems: NavigationItem[] = [
     {
@@ -60,12 +58,6 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
       icon: File,
     },
     {
-      name: 'Property Admin',
-      path: '/property-admin',
-      icon: ChartBar,
-      adminOnly: true,
-    },
-    {
       name: 'Leads',
       path: '/leads',
       icon: Users,
@@ -74,7 +66,6 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
       name: 'Import Leads',
       path: '/lead-import',
       icon: Upload,
-      adminOnly: true,
     },
     {
       name: 'API',
@@ -85,7 +76,6 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
       name: 'Admin',
       path: '/admin',
       icon: Shield,
-      adminOnly: true,
     },
     {
       name: 'Settings',
@@ -121,35 +111,28 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }: SidebarProps) => {
           
           <nav className="flex-1 px-10 py-16">
             <ul className="space-y-7 font-futura">
-              {navigationItems.map((item) => {
-                // Ne pas afficher les éléments réservés aux admins pour les non-admins
-                if (item.adminOnly && !isAdmin) {
-                  return null;
-                }
-                
-                return (
-                  <li key={item.name}>
-                    <NavLink
-                      to={item.path}
-                      className={({ isActive }) =>
-                        cn(
-                          'block transition-all duration-200 text-base leading-[22px] flex items-center',
-                          item.isPrimary 
-                            ? 'text-loro-terracotta font-times text-2xl mb-12 tracking-wide' 
-                            : 'text-times-text font-futura text-[26px] leading-[28px] font-normal',
-                          isActive
-                            ? item.isPrimary ? 'text-loro-terracotta' : 'text-loro-terracotta'
-                            : item.isPrimary ? 'text-loro-terracotta' : 'hover:text-loro-terracotta hover:font-timesItalic'
-                        )
-                      }
-                      onClick={isMobile ? onClose : undefined}
-                    >
-                      {item.icon && <item.icon className={cn("mr-2 h-5 w-5", item.color)} />}
-                      {item.name}
-                    </NavLink>
-                  </li>
-                )
-              })}
+              {navigationItems.map((item) => (
+                <li key={item.name}>
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) =>
+                      cn(
+                        'block transition-all duration-200 text-base leading-[22px] flex items-center',
+                        item.isPrimary 
+                          ? 'text-loro-terracotta font-times text-2xl mb-12 tracking-wide' 
+                          : 'text-times-text font-futura text-[26px] leading-[28px] font-normal',
+                        isActive
+                          ? item.isPrimary ? 'text-loro-terracotta' : 'text-loro-terracotta'
+                          : item.isPrimary ? 'text-loro-terracotta' : 'hover:text-loro-terracotta hover:font-timesItalic'
+                      )
+                    }
+                    onClick={isMobile ? onClose : undefined}
+                  >
+                    {item.icon && <item.icon className={cn("mr-2 h-5 w-5", item.color)} />}
+                    {item.name}
+                  </NavLink>
+                </li>
+              ))}
             </ul>
           </nav>
         </div>

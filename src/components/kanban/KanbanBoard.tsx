@@ -28,33 +28,24 @@ interface KanbanBoardProps {
 const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipelineType, isLoading = false }: KanbanBoardProps) => {
   const isMobile = useIsMobile();
   
-  // Use more specific log references to help with debugging
-  console.log('KanbanBoard rendering', {
-    pipelineType,
-    columnsCount: columns.length,
-    isLoading
-  });
+  // Log information for debugging
+  console.log('===== KANBAN BOARD =====');
+  console.log(`Pipeline Type: ${pipelineType}`);
+  console.log(`Number of columns: ${columns.length}`);
   
-  // Avoid unneeded logging in production
-  if (process.env.NODE_ENV !== 'production') {
-    // Only log column information if there are columns (avoid errors)
-    if (columns.length > 0) {
-      console.log('Columns summary:', columns.map(c => `${c.title} (${c.status}): ${c.items?.length || 0} leads`).join(', '));
-    }
+  // Only log column information if there are columns (avoid errors)
+  if (columns.length > 0) {
+    console.log('Columns:', columns.map(c => `${c.title} (${c.status}): ${c.items?.length || 0} leads`).join(', '));
   }
   
   const { handleDrop } = useKanbanDragDrop(() => {});
   
   // Memoize columns to prevent unnecessary re-renders and compute task status
   const memoizedColumns = useMemo(() => {
-    // Avoid unnecessary recalculation by checking if we have valid columns
-    if (!columns || columns.length === 0) {
-      return [];
-    }
-    
+    console.log("Memoizing columns:", columns);
     // Ensure all columns have an items array even if it's empty and add computed properties
     return columns.map(col => {
-      // Add computed properties for each item
+      // Ajouter des propriétés calculées pour chaque élément
       const itemsWithStatus = (col.items || []).map(item => {
         let isTaskOverdue = false;
         let isTaskToday = false;
@@ -84,7 +75,6 @@ const KanbanBoard = ({ columns, className, filters, refreshTrigger = 0, pipeline
   }, [
     columns,
     pipelineType
-    // Removed refreshTrigger from dependencies as it's not used in the function
   ]);
   
   if (isLoading) {
