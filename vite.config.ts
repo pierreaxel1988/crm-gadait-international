@@ -28,24 +28,10 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Placer React et les packages associés dans un chunk séparé
-          if (id.includes('node_modules/react') || 
-              id.includes('node_modules/react-dom') || 
-              id.includes('node_modules/react-router-dom')) {
-            return 'vendor-react';
-          }
-          // Placer les composants shadcn/ui dans un chunk séparé
-          if (id.includes('@/components/ui/')) {
-            return 'vendor-ui';
-          }
-          // Séparer les pages
-          if (id.includes('/pages/Pipeline') || id.includes('/components/pipeline/')) {
-            return 'pipeline';
-          }
-          if (id.includes('/pages/Leads') || id.includes('/components/leads/')) {
-            return 'leads';
-          }
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': ['@/components/ui'],
+          'vendor-utils': ['date-fns', 'clsx', 'tailwind-merge']
         }
       }
     }

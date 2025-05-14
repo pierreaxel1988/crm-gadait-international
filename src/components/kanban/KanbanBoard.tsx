@@ -47,12 +47,10 @@ const KanbanBoard = ({
   
   const { handleDrop } = useKanbanDragDrop(() => {});
   
-  // Memoize columns to prevent unnecessary re-renders and compute task status
+  // Memoize columns to prevent unnecessary re-renders
   const memoizedColumns = useMemo(() => {
     console.log("Memoizing columns:", columns);
-    // Ensure all columns have an items array even if it's empty and add computed properties
     return columns.map(col => {
-      // Ajouter des propriétés calculées pour chaque élément
       const itemsWithStatus = (col.items || []).map(item => {
         let isTaskOverdue = false;
         let isTaskToday = false;
@@ -70,7 +68,6 @@ const KanbanBoard = ({
         };
       });
       
-      // Sort items within each column by priority
       const sortedItems = sortLeadsByPriority(itemsWithStatus, 'priority');
       
       return {
@@ -79,10 +76,7 @@ const KanbanBoard = ({
         pipelineType: col.pipelineType || pipelineType
       };
     });
-  }, [
-    columns,
-    pipelineType
-  ]);
+  }, [columns, pipelineType]);
   
   if (isLoading) {
     return (
