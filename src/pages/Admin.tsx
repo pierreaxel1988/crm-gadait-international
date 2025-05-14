@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChartDataForm from '@/components/admin/ChartDataForm';
@@ -33,14 +32,14 @@ const Admin = () => {
   return <div className="p-6 lg:p-10 space-y-8 max-w-[1920px] mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-futura">Administration</h1>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-futuraMd">Administration</h1>
           <p className="text-muted-foreground mt-1">Gérez les données et paramètres de votre application.</p>
         </div>
       </div>
 
       <Tabs defaultValue="chart-data" className="w-full">
         <TabsList className="mb-8">
-          <TabsTrigger value="chart-data">Données du graphique</TabsTrigger>
+          <TabsTrigger value="chart-data" className="">Données du graphique</TabsTrigger>
           <TabsTrigger value="settings">Paramètres</TabsTrigger>
           <TabsTrigger value="users">Utilisateurs</TabsTrigger>
         </TabsList>
