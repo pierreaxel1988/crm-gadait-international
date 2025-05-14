@@ -8,7 +8,7 @@ export const AdminBadge = () => {
   
   return (
     <Badge className={`
-      text-[#8B6F4E] 
+      text-loro-terracotta 
       border-0 
       ${isMobile ? 'px-3 py-0.5 text-xs' : 'px-3 py-0.5 text-xs'} 
       rounded-full 

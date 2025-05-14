@@ -49,19 +49,19 @@ const Admin = () => {
           <TabsList className="mb-8 bg-loro-pearl border-loro-sand">
             <TabsTrigger 
               value="chart-data" 
-              className="data-[state=active]:bg-loro-hazel data-[state=active]:text-white"
+              className="data-[state=active]:bg-loro-terracotta data-[state=active]:text-white"
             >
               Données du graphique
             </TabsTrigger>
             <TabsTrigger 
               value="settings"
-              className="data-[state=active]:bg-loro-hazel data-[state=active]:text-white"
+              className="data-[state=active]:bg-loro-terracotta data-[state=active]:text-white"
             >
               Paramètres
             </TabsTrigger>
             <TabsTrigger 
               value="users"
-              className="data-[state=active]:bg-loro-hazel data-[state=active]:text-white"
+              className="data-[state=active]:bg-loro-terracotta data-[state=active]:text-white"
             >
               Utilisateurs
             </TabsTrigger>
@@ -82,7 +82,7 @@ const Admin = () => {
               <DashboardCard 
                 title="Aperçu" 
                 subtitle="Visualisez les modifications en temps réel" 
-                icon={<BarChart3 className="h-5 w-5 text-loro-hazel" />} 
+                icon={<BarChart3 className="h-5 w-5 text-loro-terracotta" />} 
                 className="h-full bg-white border-loro-pearl"
               >
                 <div className="flex items-center justify-center h-full">
@@ -96,7 +96,7 @@ const Admin = () => {
             <DashboardCard 
               title="Paramètres généraux" 
               subtitle="Configurez les paramètres de l'application" 
-              icon={<Settings2 className="h-5 w-5 text-loro-hazel" />}
+              icon={<Settings2 className="h-5 w-5 text-loro-terracotta" />}
               className="bg-white border-loro-pearl"
             >
               <div className="p-6">
@@ -109,7 +109,7 @@ const Admin = () => {
             <DashboardCard 
               title="Gestion des utilisateurs" 
               subtitle="Ajoutez, modifiez ou supprimez des utilisateurs" 
-              icon={<Users className="h-5 w-5 text-loro-hazel" />}
+              icon={<Users className="h-5 w-5 text-loro-terracotta" />}
               className="bg-white border-loro-pearl"
             >
               <UsersManagement />
