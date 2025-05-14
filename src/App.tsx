@@ -23,8 +23,8 @@ const Admin = lazy(() => import('./pages/Admin'));
 const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const ChatGadaitPage = lazy(() => import('./pages/ChatGadaitPage'));
-const PropertiesPage = lazy(() => import('./pages/Properties')); // Importer la nouvelle page
-const Profile = lazy(() => import('./pages/Profile')); // Ajouter l'import pour la nouvelle page Profile
+const PropertiesPage = lazy(() => import('./pages/Properties')); 
+const Profile = lazy(() => import('./pages/Profile'));
 
 function App() {
   return (
@@ -75,6 +75,7 @@ function App() {
                 <ChatGadaitPage />
               </ProtectedRoute>
             } />
+            
             {/* Nouvelle route pour les propriétés */}
             <Route path="/properties" element={
               <ProtectedRoute commercialAllowed={true}>
