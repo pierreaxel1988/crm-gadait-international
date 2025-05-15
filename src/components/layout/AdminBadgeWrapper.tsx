@@ -1,14 +1,14 @@
 
-import React, { memo } from 'react';
+import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { AdminBadge } from '@/components/ui/admin-badge';
 
-// Use memo to prevent unnecessary re-renders
-const AdminBadgeWrapper: React.FC = memo(() => {
+const AdminBadgeWrapper: React.FC = () => {
   const { isAdmin } = useAuth();
-  return isAdmin ? <AdminBadge /> : null;
-});
 
-AdminBadgeWrapper.displayName = 'AdminBadgeWrapper';
+  if (!isAdmin) return null;
+  
+  return <AdminBadge />;
+};
 
 export default AdminBadgeWrapper;

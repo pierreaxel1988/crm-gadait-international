@@ -41,14 +41,14 @@ const ChatTabsComponent: React.FC<ChatTabsComponentProps> = ({
         <TabsList className="h-12 w-full bg-transparent relative">
           <TabsTrigger
             value="chat"
-            className="flex-1 data-[state=active]:text-loro-terracotta rounded-none relative data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta"
+            className="flex-1 data-[state=active]:text-loro-hazel rounded-none relative data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-hazel"
           >
             <MessageSquare className="h-4 w-4 mr-2" />
             Chat
           </TabsTrigger>
           <TabsTrigger
             value="property"
-            className="flex-1 data-[state=active]:text-loro-terracotta rounded-none relative data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta"
+            className="flex-1 data-[state=active]:text-loro-hazel rounded-none relative data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-hazel"
           >
             <Building2 className="h-4 w-4 mr-2" />
             Propriétés
