@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -65,7 +66,11 @@ const Notifications = () => {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold">Notifications</h1>
           {notifications.some(n => !n.read) && (
-            <Button variant="ghost" onClick={markAllAsRead} className="text-loro-hazel">
+            <Button 
+              variant="outline" 
+              onClick={markAllAsRead} 
+              className="text-loro-hazel hover:bg-loro-pearl/10"
+            >
               Tout marquer comme lu
             </Button>
           )}
@@ -85,24 +90,26 @@ const Notifications = () => {
           </TabsList>
         </Tabs>
 
-        <div className="space-y-1">
+        <div className="space-y-2">
           {filteredNotifications.length > 0 ? (
             filteredNotifications.map(notification => (
               <div 
                 key={notification.id}
-                className={`p-4 rounded-lg border ${notification.read ? 'bg-white' : 'bg-loro-pearl/10'} cursor-pointer`}
+                className={`p-4 rounded-lg border ${notification.read ? 'bg-white' : 'bg-loro-pearl/10'} hover:bg-gray-50 transition-colors cursor-pointer shadow-sm`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 mt-1">
-                    {getActionIcon(notification.actionType)}
+                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                      {getActionIcon(notification.actionType)}
+                    </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                       <h4 className="text-sm font-medium text-loro-navy line-clamp-1">
                         {notification.title}
                       </h4>
-                      <span className="text-xs text-gray-500 ml-2">
+                      <span className="text-xs text-gray-500 ml-2 bg-gray-50 px-2 py-0.5 rounded">
                         {formatTime(notification.timestamp)}
                       </span>
                     </div>
@@ -113,7 +120,7 @@ const Notifications = () => {
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="mt-2 h-8 text-loro-hazel hover:text-loro-navy"
+                        className="mt-2 h-8 text-loro-hazel hover:text-loro-navy hover:bg-gray-100"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCompleteAction(notification);
@@ -128,7 +135,7 @@ const Notifications = () => {
               </div>
             ))
           ) : (
-            <div className="text-center py-12">
+            <div className="text-center py-12 bg-white rounded-lg border shadow-sm">
               <Bell className="mx-auto h-12 w-12 text-gray-300 mb-4" />
               <p className="text-gray-500">Aucune notification {filter !== 'all' ? 'dans cette catégorie' : ''}</p>
             </div>
