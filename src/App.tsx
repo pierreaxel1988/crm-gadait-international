@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy } from 'react';
 import {
   BrowserRouter as Router,
@@ -9,9 +8,9 @@ import {
 import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from '@/components/ui/toaster';
 import LoadingScreen from './components/layout/LoadingScreen';
+import Auth from './pages/Auth'; // Import Auth directly instead of lazy loading
 
-// Lazy load all pages to use suspense
-const Auth = lazy(() => import('./pages/Auth'));
+// Lazy load all pages except Auth to use suspense
 const Pipeline = lazy(() => import('./pages/Pipeline'));
 const LeadsPage = lazy(() => import('./pages/Leads'));
 const LeadDetail = lazy(() => import('./pages/LeadDetailMobile'));
@@ -33,7 +32,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/pipeline" />} />
             
-            {/* Route d'authentification */}
+            {/* Route d'authentification - Auth component loaded directly */}
             <Route path="/auth" element={<Auth />} />
             
             {/* Routes accessibles à tous */}
