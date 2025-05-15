@@ -13,9 +13,14 @@ import { toast } from '@/hooks/use-toast';
 import { usePipelineData } from '@/hooks/usePipelineData';
 import { PipelineType } from '@/types/lead';
 import { checkSupabaseConnection } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Pipeline = () => {
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
+  
+  // Vérifions si le QueryClient est disponible
+  const isQueryClientAvailable = !!queryClient;
   
   const { 
     activeTab,
@@ -74,7 +79,54 @@ const Pipeline = () => {
     };
   }, [selectedAgent, handleAgentChange]);
 
-  // Use the new optimized hook for fetching pipeline data
+  // Si QueryClient n'est pas disponible, afficher un chargement
+  if (!isQueryClientAvailable) {
+    console.warn("QueryClient n'est pas encore disponible");
+    return (
+      <>
+        <Navbar />
+        <SubNavigation />
+        <div className="p-3 md:p-6 bg-white min-h-screen">
+          <LoadingScreen />
+        </div>
+      </>
+    );
+  }
+
+  // Utiliser try-catch pour gérer les erreurs potentielles lors de l'appel du hook usePipelineData
+  let pipelineData;
+  try {
+    // Use the new optimized hook for fetching pipeline data
+    pipelineData = usePipelineData(activeTab as PipelineType, filters, searchTerm);
+  } catch (error) {
+    console.error("Erreur dans usePipelineData:", error);
+    
+    toast({
+      title: "Erreur de chargement",
+      description: "Une erreur s'est produite lors du chargement des données. Réessayez dans quelques instants.",
+      variant: "destructive"
+    });
+    
+    return (
+      <>
+        <Navbar />
+        <SubNavigation />
+        <div className="p-3 md:p-6 bg-white min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold mb-2">Erreur de chargement</h2>
+            <p className="text-gray-600 mb-4">Impossible de charger les données du pipeline.</p>
+            <button 
+              className="px-4 py-2 bg-zinc-900 text-white rounded-md hover:bg-zinc-800"
+              onClick={() => window.location.reload()}
+            >
+              Recharger la page
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   const {
     columns,
     teamMembers,
@@ -82,7 +134,7 @@ const Pipeline = () => {
     isError,
     isConnectionError,
     refetch
-  } = usePipelineData(activeTab as PipelineType, filters, searchTerm);
+  } = pipelineData;
 
   const handleClearAllFilters = () => {
     window.dispatchEvent(new Event('filters-cleared'));

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -5,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { PipelineType } from '@/types/lead';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const usePipelineData = (
   pipelineType: PipelineType = 'purchase',
@@ -14,6 +15,22 @@ export const usePipelineData = (
 ) => {
   const { isCommercial, user } = useAuth();
   const [isConnectionError, setIsConnectionError] = useState(false);
+  
+  // Vérifier que le QueryClient est disponible
+  const queryClient = useQueryClient();
+  
+  if (typeof window !== 'undefined' && !queryClient) {
+    console.warn("QueryClient non disponible. Retournant des données par défaut.");
+    return {
+      columns: generateColumns(pipelineType),
+      teamMembers: [],
+      isLoading: false,
+      isError: false,
+      isConnectionError: false,
+      error: null,
+      refetch: () => Promise.resolve()
+    };
+  }
 
   // Build query params for database
   const queryParams = useMemo(() => {
@@ -211,7 +228,9 @@ export const usePipelineData = (
           });
         }
       }
-    }
+    },
+    // Ajouter enabled pour éviter l'exécution si queryClient n'est pas prêt
+    enabled: !!queryClient
   });
 
   // Generate empty columns based on pipeline type
