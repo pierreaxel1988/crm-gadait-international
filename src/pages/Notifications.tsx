@@ -64,12 +64,12 @@ const Notifications = () => {
       <Navbar />
       <div className="container mx-auto px-4 py-6 max-w-3xl">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Notifications</h1>
+          <h1 className="text-2xl font-semibold text-loro-navy">Notifications</h1>
           {notifications.some(n => !n.read) && (
             <Button 
               variant="outline" 
               onClick={markAllAsRead} 
-              className="text-loro-hazel hover:bg-loro-pearl/10"
+              className="text-loro-hazel hover:bg-loro-pearl/10 border-loro-hazel"
             >
               Tout marquer comme lu
             </Button>
@@ -77,14 +77,14 @@ const Notifications = () => {
         </div>
 
         <Tabs value={filter} onValueChange={(value) => setFilter(value as typeof filter)} className="mb-6">
-          <TabsList className="w-full bg-gray-100 p-0.5 rounded-xl h-11">
-            <TabsTrigger value="all" className="flex-1">
+          <TabsList className="w-full bg-loro-pearl/30 p-0.5 rounded-xl h-11">
+            <TabsTrigger value="all" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-hazel">
               Toutes
             </TabsTrigger>
-            <TabsTrigger value="unread" className="flex-1">
+            <TabsTrigger value="unread" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-hazel">
               Non lues
             </TabsTrigger>
-            <TabsTrigger value="read" className="flex-1">
+            <TabsTrigger value="read" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-hazel">
               Lues
             </TabsTrigger>
           </TabsList>
@@ -95,12 +95,12 @@ const Notifications = () => {
             filteredNotifications.map(notification => (
               <div 
                 key={notification.id}
-                className={`p-4 rounded-lg border ${notification.read ? 'bg-white' : 'bg-loro-pearl/10'} hover:bg-gray-50 transition-colors cursor-pointer shadow-sm`}
+                className={`p-4 rounded-lg border ${notification.read ? 'bg-white' : 'bg-loro-pearl/10 border-loro-sand/30'} hover:bg-loro-pearl/5 transition-colors cursor-pointer shadow-luxury`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 mt-1">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-loro-pearl flex items-center justify-center">
                       {getActionIcon(notification.actionType)}
                     </div>
                   </div>
@@ -109,18 +109,18 @@ const Notifications = () => {
                       <h4 className="text-sm font-medium text-loro-navy line-clamp-1">
                         {notification.title}
                       </h4>
-                      <span className="text-xs text-gray-500 ml-2 bg-gray-50 px-2 py-0.5 rounded">
+                      <span className="text-xs text-loro-hazel ml-2 bg-loro-pearl/30 px-2 py-0.5 rounded">
                         {formatTime(notification.timestamp)}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-loro-navy/80 mt-1">
                       {notification.message}
                     </p>
                     {notification.type === 'action' && (
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="mt-2 h-8 text-loro-hazel hover:text-loro-navy hover:bg-gray-100"
+                        className="mt-2 h-8 text-loro-hazel hover:text-loro-navy hover:bg-loro-pearl/20"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCompleteAction(notification);
@@ -135,9 +135,9 @@ const Notifications = () => {
               </div>
             ))
           ) : (
-            <div className="text-center py-12 bg-white rounded-lg border shadow-sm">
-              <Bell className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-              <p className="text-gray-500">Aucune notification {filter !== 'all' ? 'dans cette catégorie' : ''}</p>
+            <div className="text-center py-12 bg-white rounded-lg border border-loro-pearl shadow-luxury">
+              <Bell className="mx-auto h-12 w-12 text-loro-sand mb-4" />
+              <p className="text-loro-navy/70">Aucune notification {filter !== 'all' ? 'dans cette catégorie' : ''}</p>
             </div>
           )}
         </div>

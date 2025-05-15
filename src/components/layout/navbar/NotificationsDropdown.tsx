@@ -63,14 +63,14 @@ const NotificationsDropdown = () => {
       </PopoverTrigger>
       <PopoverContent 
         ref={popoverRef}
-        className="w-80 p-0 bg-white rounded-lg shadow-lg" 
+        className="w-80 p-0 bg-white rounded-lg shadow-luxury" 
         align="end" 
         sideOffset={5}
       >
-        <div className="py-2 px-3 border-b border-gray-100 flex justify-between items-center">
-          <h3 className="font-medium">Notifications</h3>
+        <div className="py-2 px-3 border-b border-loro-pearl flex justify-between items-center">
+          <h3 className="font-medium text-loro-navy">Notifications</h3>
           {unreadCount > 0 && (
-            <span className="text-xs bg-loro-pearl/20 text-loro-navy px-2 py-0.5 rounded-full">
+            <span className="text-xs bg-loro-pearl/30 text-loro-hazel px-2 py-0.5 rounded-full">
               {unreadCount} non {unreadCount > 1 ? 'lues' : 'lue'}
             </span>
           )}
@@ -81,18 +81,18 @@ const NotificationsDropdown = () => {
             recentNotifications.map(notification => (
               <div
                 key={notification.id}
-                className={`p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${!notification.read ? 'bg-loro-pearl/5' : ''}`}
+                className={`p-3 border-b border-loro-pearl/50 cursor-pointer hover:bg-loro-pearl/5 transition-colors ${!notification.read ? 'bg-loro-pearl/10' : ''}`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex justify-between items-start">
                   <h4 className="text-sm font-medium text-loro-navy line-clamp-1">
                     {notification.title}
                   </h4>
-                  <span className="text-xs text-gray-500 ml-2">
+                  <span className="text-xs text-loro-hazel ml-2">
                     {formatTime(notification.timestamp)}
                   </span>
                 </div>
-                <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                <p className="text-xs text-loro-navy/70 mt-1 line-clamp-2">
                   {notification.message}
                 </p>
               </div>
@@ -100,19 +100,19 @@ const NotificationsDropdown = () => {
           ) : (
             <div className="py-6 text-center">
               <AspectRatio ratio={1/1} className="w-12 mx-auto mb-2">
-                <div className="h-full w-full flex items-center justify-center bg-gray-100 rounded-full">
-                  <Bell className="h-6 w-6 text-gray-400" />
+                <div className="h-full w-full flex items-center justify-center bg-loro-pearl/30 rounded-full">
+                  <Bell className="h-6 w-6 text-loro-sand" />
                 </div>
               </AspectRatio>
-              <p className="text-sm text-gray-500">Pas de notifications</p>
+              <p className="text-sm text-loro-navy/70">Pas de notifications</p>
             </div>
           )}
         </div>
         
-        <div className="p-2 border-t border-gray-100">
+        <div className="p-2 border-t border-loro-pearl">
           <Button 
             variant="outline" 
-            className="w-full text-sm"
+            className="w-full text-sm text-loro-hazel border-loro-hazel hover:bg-loro-pearl/10"
             onClick={() => {
               setOpen(false);
               navigate('/notifications');

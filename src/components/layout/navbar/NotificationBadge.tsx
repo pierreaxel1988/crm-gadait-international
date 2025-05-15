@@ -20,8 +20,8 @@ const NotificationBadge: React.FC<NotificationBadgeProps> = ({ count }) => {
     <span className={cn(
       "absolute -top-1 -right-1 rounded-full text-xs px-1 min-w-5 h-5 flex items-center justify-center font-medium",
       isMobile 
-        ? "bg-loro-terracotta text-white" 
-        : "bg-loro-terracotta text-white"
+        ? "bg-loro-hazel text-white" 
+        : "bg-loro-hazel text-white"
     )}>
       {displayCount}
     </span>
