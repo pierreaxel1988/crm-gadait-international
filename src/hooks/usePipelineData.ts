@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -199,7 +198,20 @@ export const usePipelineData = (
     },
     retry: 2,
     retryDelay: 1000,
-    staleTime: 60000 // 1 minute
+    staleTime: 60000, // 1 minute
+    meta: {
+      errorHandler: (error: Error) => {
+        // Handle error in the meta object instead of using onError
+        if (error.message.includes('Load failed')) {
+          setIsConnectionError(true);
+          toast({
+            title: "Erreur de connexion",
+            description: "Impossible de se connecter à Supabase. Veuillez vérifier votre connexion internet.",
+            variant: "destructive",
+          });
+        }
+      }
+    }
   });
 
   // Generate empty columns based on pipeline type
