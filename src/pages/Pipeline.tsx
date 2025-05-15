@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
 import MobilePipelineView from '@/components/pipeline/MobilePipelineView';
@@ -12,9 +12,7 @@ import ComponentLoader from '@/components/common/ComponentLoader';
 import { toast } from '@/hooks/use-toast';
 import { usePipelineData } from '@/hooks/usePipelineData';
 import { PipelineType } from '@/types/lead';
-import { checkSupabaseConnection, isOfflineMode, setOfflineMode } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { WifiOff, RefreshCw } from 'lucide-react';
+import { checkSupabaseConnection } from '@/integrations/supabase/client';
 
 const Pipeline = () => {
   const isMobile = useIsMobile();
@@ -39,10 +37,10 @@ const Pipeline = () => {
   useEffect(() => {
     const checkConnection = async () => {
       const isConnected = await checkSupabaseConnection();
-      if (!isConnected && !isOfflineMode) {
+      if (!isConnected) {
         toast({
-          title: "Mode hors ligne activé",
-          description: "L'application fonctionne maintenant en mode hors ligne car la connexion à la base de données a échoué.",
+          title: "Erreur de connexion",
+          description: "Impossible de se connecter à la base de données. Veuillez vérifier votre connexion internet et recharger la page.",
           variant: "destructive"
         });
       }
@@ -76,16 +74,14 @@ const Pipeline = () => {
     };
   }, [selectedAgent, handleAgentChange]);
 
-  // Use the optimized hook for fetching pipeline data
+  // Use the new optimized hook for fetching pipeline data
   const {
     columns,
     teamMembers,
     isLoading,
     isError,
     isConnectionError,
-    isOfflineMode: pipelineOfflineMode,
-    refetch,
-    toggleOfflineMode
+    refetch
   } = usePipelineData(activeTab as PipelineType, filters, searchTerm);
 
   const handleClearAllFilters = () => {
@@ -94,41 +90,39 @@ const Pipeline = () => {
   };
 
   const handleRefresh = () => {
-    if (isOfflineMode) {
-      // Tenter de rétablir la connexion
-      setOfflineMode(false);
-      setTimeout(() => {
-        refetch();
-      }, 300);
-    } else {
-      refetch();
-    }
+    refetch();
   };
   
-  // Composant pour afficher le mode hors ligne
-  const OfflineModeAlert = () => (
-    <div className="bg-orange-50 border-l-4 border-orange-400 p-4 mb-4">
-      <div className="flex items-center">
-        <WifiOff className="h-5 w-5 text-orange-500 mr-2" />
-        <div>
-          <p className="text-sm font-medium text-orange-800">
-            Mode hors ligne actif
-          </p>
-          <p className="text-xs text-orange-700 mt-1">
-            Certaines fonctionnalités sont limitées et vous visualisez des données de démonstration.
-          </p>
+  // Unified error handling
+  if (isConnectionError) {
+    return (
+      <>
+        <Navbar />
+        <SubNavigation />
+        <div className="p-3 md:p-6 bg-white min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold mb-2">Erreur de connexion</h2>
+            <p className="text-gray-600 mb-4">Impossible de se connecter à la base de données.</p>
+            <button 
+              className="px-4 py-2 bg-zinc-900 text-white rounded-md hover:bg-zinc-800"
+              onClick={() => window.location.reload()}
+            >
+              Recharger la page
+            </button>
+          </div>
         </div>
-        <Button 
-          onClick={handleRefresh} 
-          size="sm" 
-          variant="outline" 
-          className="ml-auto text-xs bg-orange-50 border-orange-200 hover:bg-orange-100 text-orange-800"
-        >
-          <RefreshCw className="h-3 w-3 mr-1" /> Reconnecter
-        </Button>
-      </div>
-    </div>
-  );
+      </>
+    );
+  }
+  
+  if (isError) {
+    toast({
+      title: "Erreur de chargement",
+      description: "Une erreur s'est produite lors du chargement des leads.",
+      variant: "destructive"
+    });
+    return <LoadingScreen />;
+  }
   
   try {
     return (
@@ -136,9 +130,7 @@ const Pipeline = () => {
         <Navbar />
         <SubNavigation />
         <div className="p-3 md:p-6 bg-white min-h-screen">
-          {isOfflineMode && <OfflineModeAlert />}
-          
-          <ComponentLoader isLoading={isLoading && !isOfflineMode}>
+          <ComponentLoader isLoading={isLoading}>
             {isMobile ? (
               <MobilePipelineView
                 activeTab={activeTab}

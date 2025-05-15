@@ -1,34 +1,12 @@
+
 import { useState, useEffect, useMemo } from 'react';
-import { supabase, isOfflineMode, setOfflineMode } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { PipelineType } from '@/types/lead';
 import { FilterOptions } from '@/components/pipeline/PipelineFilters';
 import { useQuery } from '@tanstack/react-query';
-
-// Données de démonstration pour le mode hors ligne
-const offlineLeadData = {
-  columns: [
-    { title: 'Nouveaux', status: 'New' as LeadStatus, items: [
-      { id: 'offline-1', name: 'Client Hors Ligne 1', status: 'New', tags: ['hors-ligne'], assignedTo: null, email: 'exemple@mail.com', createdAt: new Date().toISOString() }
-    ] },
-    { title: 'Contactés', status: 'Contacted' as LeadStatus, items: [
-      { id: 'offline-2', name: 'Client Hors Ligne 2', status: 'Contacted', tags: ['urgent', 'hors-ligne'], assignedTo: null, email: 'exemple2@mail.com', createdAt: new Date().toISOString() }
-    ] },
-    { title: 'Qualifiés', status: 'Qualified' as LeadStatus, items: [] },
-    { title: 'Propositions', status: 'Proposal' as LeadStatus, items: [] },
-    { title: 'Visites en cours', status: 'Visit' as LeadStatus, items: [] },
-    { title: 'Offre en cours', status: 'Offer' as LeadStatus, items: [] },
-    { title: 'Dépôt reçu', status: 'Deposit' as LeadStatus, items: [] },
-    { title: 'Signature finale', status: 'Signed' as LeadStatus, items: [] },
-    { title: 'Conclus', status: 'Gagné' as LeadStatus, items: [] },
-    { title: 'Perdu', status: 'Perdu' as LeadStatus, items: [] }
-  ],
-  teamMembers: [
-    { id: 'offline-team-1', name: 'Agent Hors Ligne' }
-  ]
-};
 
 export const usePipelineData = (
   pipelineType: PipelineType = 'purchase',
@@ -71,46 +49,7 @@ export const usePipelineData = (
     return params;
   }, [pipelineType, filters, searchTerm, isCommercial, user]);
 
-  // Fonction pour générer les colonnes vides
-  const generateColumns = (pipelineType: PipelineType) => {
-    if (pipelineType === "owners") {
-      return [
-        { title: 'Premier contact', status: 'New' as LeadStatus, items: [] },
-        { title: 'Rendez-vous programmé', status: 'Contacted' as LeadStatus, items: [] },
-        { title: 'Visite effectuée', status: 'Qualified' as LeadStatus, items: [] },
-        { title: 'Mandat en négociation', status: 'Proposal' as LeadStatus, items: [] },
-        { title: 'Mandat signé', status: 'Signed' as LeadStatus, items: [] },
-        { title: 'Bien en commercialisation', status: 'Visit' as LeadStatus, items: [] },
-        { title: 'Offre reçue', status: 'Offer' as LeadStatus, items: [] },
-        { title: 'Compromis signé', status: 'Deposit' as LeadStatus, items: [] },
-        { title: 'Vente finalisée', status: 'Gagné' as LeadStatus, items: [] },
-        { title: 'Perdu/Annulé', status: 'Perdu' as LeadStatus, items: [] }
-      ].map(col => ({
-        ...col,
-        items: [],
-        pipelineType: "owners" as PipelineType
-      }));
-    }
-    
-    return [
-      { title: 'Nouveaux', status: 'New' as LeadStatus, items: [] },
-      { title: 'Contactés', status: 'Contacted' as LeadStatus, items: [] },
-      { title: 'Qualifiés', status: 'Qualified' as LeadStatus, items: [] },
-      { title: 'Propositions', status: 'Proposal' as LeadStatus, items: [] },
-      { title: 'Visites en cours', status: 'Visit' as LeadStatus, items: [] },
-      { title: 'Offre en cours', status: 'Offer' as LeadStatus, items: [] },
-      { title: 'Dépôt reçu', status: 'Deposit' as LeadStatus, items: [] },
-      { title: 'Signature finale', status: 'Signed' as LeadStatus, items: [] },
-      { title: 'Conclus', status: 'Gagné' as LeadStatus, items: [] },
-      { title: 'Perdu', status: 'Perdu' as LeadStatus, items: [] }
-    ].map(col => ({
-      ...col,
-      items: [],
-      pipelineType: pipelineType as PipelineType
-    }));
-  };
-
-  // Utiliser React Query pour la gestion des données avec mode hors ligne
+  // Fetch pipeline data with React Query
   const {
     data: pipelineData,
     isLoading,
@@ -118,20 +57,8 @@ export const usePipelineData = (
     error,
     refetch
   } = useQuery({
-    queryKey: ['pipelineData', queryParams, isOfflineMode],
+    queryKey: ['pipelineData', queryParams],
     queryFn: async () => {
-      // Si mode hors ligne, retourner les données de démonstration
-      if (isOfflineMode) {
-        console.log('Chargement des données en mode hors ligne');
-        return {
-          columns: offlineLeadData.columns.map(col => ({
-            ...col,
-            pipelineType
-          })),
-          teamMembers: offlineLeadData.teamMembers
-        };
-      }
-      
       try {
         setIsConnectionError(false);
         
@@ -266,29 +193,61 @@ export const usePipelineData = (
         console.error('Error fetching pipeline data:', error);
         if (error instanceof Error && error.message.includes('Load failed')) {
           setIsConnectionError(true);
-          setOfflineMode(true);
         }
         throw error;
       }
     },
-    retry: 1,
+    retry: 2,
     retryDelay: 1000,
-    staleTime: 60000, // 1 minute
-    // En cas d'erreur, passer automatiquement en mode hors ligne
-    onError: () => {
-      setOfflineMode(true);
-    }
+    staleTime: 60000 // 1 minute
   });
+
+  // Generate empty columns based on pipeline type
+  const generateColumns = (pipelineType: PipelineType) => {
+    if (pipelineType === "owners") {
+      return [
+        { title: 'Premier contact', status: 'New' as LeadStatus, items: [] },
+        { title: 'Rendez-vous programmé', status: 'Contacted' as LeadStatus, items: [] },
+        { title: 'Visite effectuée', status: 'Qualified' as LeadStatus, items: [] },
+        { title: 'Mandat en négociation', status: 'Proposal' as LeadStatus, items: [] },
+        { title: 'Mandat signé', status: 'Signed' as LeadStatus, items: [] },
+        { title: 'Bien en commercialisation', status: 'Visit' as LeadStatus, items: [] },
+        { title: 'Offre reçue', status: 'Offer' as LeadStatus, items: [] },
+        { title: 'Compromis signé', status: 'Deposit' as LeadStatus, items: [] },
+        { title: 'Vente finalisée', status: 'Gagné' as LeadStatus, items: [] },
+        { title: 'Perdu/Annulé', status: 'Perdu' as LeadStatus, items: [] }
+      ].map(col => ({
+        ...col,
+        items: [],
+        pipelineType: "owners" as PipelineType
+      }));
+    }
+    
+    return [
+      { title: 'Nouveaux', status: 'New' as LeadStatus, items: [] },
+      { title: 'Contactés', status: 'Contacted' as LeadStatus, items: [] },
+      { title: 'Qualifiés', status: 'Qualified' as LeadStatus, items: [] },
+      { title: 'Propositions', status: 'Proposal' as LeadStatus, items: [] },
+      { title: 'Visites en cours', status: 'Visit' as LeadStatus, items: [] },
+      { title: 'Offre en cours', status: 'Offer' as LeadStatus, items: [] },
+      { title: 'Dépôt reçu', status: 'Deposit' as LeadStatus, items: [] },
+      { title: 'Signature finale', status: 'Signed' as LeadStatus, items: [] },
+      { title: 'Conclus', status: 'Gagné' as LeadStatus, items: [] },
+      { title: 'Perdu', status: 'Perdu' as LeadStatus, items: [] }
+    ].map(col => ({
+      ...col,
+      items: [],
+      pipelineType: pipelineType as PipelineType
+    }));
+  };
 
   return {
     columns: pipelineData?.columns || generateColumns(pipelineType),
-    teamMembers: pipelineData?.teamMembers || offlineLeadData.teamMembers,
+    teamMembers: pipelineData?.teamMembers || [],
     isLoading,
     isError,
     isConnectionError,
-    isOfflineMode,
     error,
-    refetch,
-    toggleOfflineMode: () => setOfflineMode(!isOfflineMode)
+    refetch
   };
 };
