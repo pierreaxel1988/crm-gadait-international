@@ -12,7 +12,6 @@ import {
 export function Toaster() {
   const { toasts } = useToast()
 
-  // Use the actual toasts but set a shorter display duration
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, ...props }) {

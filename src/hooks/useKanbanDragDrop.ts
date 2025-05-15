@@ -1,42 +1,52 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
-import { ExtendedKanbanItem } from './useKanbanData';
-import { updateLead, getLead } from '@/services/leadService';
-import { PipelineType } from '@/types/lead';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-export const useKanbanDragDrop = (
-  setLoadedColumns: React.Dispatch<React.SetStateAction<{
-    title: string;
-    status: LeadStatus;
-    items: ExtendedKanbanItem[];
-    pipelineType?: PipelineType;
-  }[]>>
-) => {
+export const useKanbanDragDrop = () => {
   const [isDragging, setIsDragging] = useState(false);
+  const queryClient = useQueryClient();
 
-  // Handle dropping a lead to change its status
-  const handleDrop = async (item: KanbanItem, newStatus: LeadStatus) => {
-    // If the status hasn't changed, do nothing
-    if (item.status === newStatus) return;
-    
-    try {
-      // First update the UI for immediate feedback
-      setLoadedColumns(prev => {
+  // Create a mutation for updating lead status
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ item, newStatus }: { item: KanbanItem; newStatus: LeadStatus }) => {
+      // Get the current date for history
+      const currentDate = new Date().toISOString();
+      
+      // Update the lead status in Supabase
+      const { data, error } = await supabase
+        .from('leads')
+        .update({ 
+          status: newStatus,
+          last_contacted_at: currentDate,
+        })
+        .eq('id', item.id)
+        .select();
+        
+      if (error) {
+        console.error('Error updating lead status in Supabase:', error);
+        throw error;
+      }
+      
+      return { item, newStatus, data };
+    },
+    onMutate: async ({ item, newStatus }) => {
+      // Optimistically update the UI
+      await queryClient.cancelQueries({ queryKey: ['pipelineData'] });
+
+      // Get previous data
+      const previousData = queryClient.getQueryData(['pipelineData']);
+
+      // Optimistically update the data
+      queryClient.setQueryData(['pipelineData'], (oldData: any) => {
         // Create a deep copy of the columns
-        const newColumns = [...prev];
+        const newData = { ...oldData };
+        const newColumns = [...newData.columns];
         
         // Find the item to move
-        const itemToMove = newColumns
-          .flatMap(col => col.items)
-          .find(i => i.id === item.id);
-          
-        if (!itemToMove) return prev;
-        
-        // Remove the item from its current column
         const sourceColumn = newColumns.find(col => col.status === item.status);
         if (sourceColumn) {
           sourceColumn.items = sourceColumn.items.filter(i => i.id !== item.id);
@@ -46,83 +56,47 @@ export const useKanbanDragDrop = (
         const targetColumn = newColumns.find(col => col.status === newStatus);
         if (targetColumn) {
           // Update the item's status
-          const updatedItem = { ...itemToMove, status: newStatus };
+          const updatedItem = { ...item, status: newStatus };
           targetColumn.items.push(updatedItem);
         }
         
-        return newColumns;
+        return { ...newData, columns: newColumns };
       });
-      
-      // Get the full lead
-      const fullLead = await getLead(item.id);
-      
-      if (!fullLead) {
-        console.error('Lead not found:', item.id);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de trouver les détails du lead."
-        });
-        return;
+
+      return { previousData };
+    },
+    onError: (err, { item }, context) => {
+      // Roll back to the previous state if there's an error
+      if (context?.previousData) {
+        queryClient.setQueryData(['pipelineData'], context.previousData);
       }
       
-      // Add an action to the lead's history for the status change
-      const currentDate = new Date().toISOString();
-      const actionHistory = [...(fullLead.actionHistory || [])];
-      
-      // Add status change to action history
-      actionHistory.push({
-        id: crypto.randomUUID(),
-        actionType: 'Status Change',
-        notes: `Status changed from ${item.status} to ${newStatus}`,
-        createdAt: currentDate
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: `Échec de la mise à jour du statut du lead ${item.name}.`,
       });
-      
-      // Update the lead status and action history
-      const updatedLead = {
-        ...fullLead,
-        status: newStatus,
-        lastContactedAt: currentDate,
-        actionHistory: actionHistory
-      };
-      
-      // Save the changes using our service
-      await updateLead(updatedLead);
-      
-      // Also update directly in Supabase as a backup measure
-      const { error } = await supabase
-        .from('leads')
-        .update({ 
-          status: newStatus,
-          last_contacted_at: currentDate,
-          action_history: actionHistory
-        })
-        .eq('id', item.id);
-        
-      if (error) {
-        console.error('Error updating lead status in Supabase:', error);
-        toast({
-          variant: "default",
-          title: "Synchronisation",
-          description: "Le statut a été mis à jour localement, mais la synchronisation complète a échoué."
-        });
-        return;
-      }
-      
+    },
+    onSuccess: ({ item, newStatus }) => {
       toast({
         title: "Lead mis à jour",
         description: `Le statut du lead ${item.name} a été changé en ${newStatus}.`
       });
-      
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la mise à jour du lead."
-      });
+    },
+    onSettled: () => {
+      // Refetch the pipeline data to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['pipelineData'] });
     }
-  };
+  });
+
+  // Handle dropping a lead to change its status
+  const handleDrop = useCallback((item: KanbanItem, newStatus: LeadStatus) => {
+    // If the status hasn't changed, do nothing
+    if (item.status === newStatus) return;
+    
+    // Update the status using the mutation
+    updateStatusMutation.mutate({ item, newStatus });
+  }, [updateStatusMutation]);
 
   return { isDragging, setIsDragging, handleDrop };
 };
