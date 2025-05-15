@@ -78,6 +78,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    console.log('AuthProvider - Setting up auth listeners');
+    
     // IMPORTANT: Fix for the auth state change listener issue
     // Only use synchronous code in the onAuthStateChange callback
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
@@ -122,6 +124,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     getInitialSession();
 
     return () => {
+      console.log('Unsubscribing from auth state change events');
       subscription.unsubscribe();
     };
   }, []);
@@ -133,6 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log('Signed out successfully');
     } catch (error) {
       console.error('Error signing out:', error);
+      throw error;
     }
   };
 

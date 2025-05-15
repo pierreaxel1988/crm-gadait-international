@@ -33,6 +33,9 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/pipeline" />} />
             
+            {/* Route d'authentification */}
+            <Route path="/auth" element={<Auth />} />
+            
             {/* Routes accessibles à tous */}
             <Route path="/pipeline" element={
               <ProtectedRoute commercialAllowed={true}>
@@ -92,8 +95,8 @@ function App() {
               </ProtectedRoute>
             } />
             
-            {/* Route d'authentification */}
-            <Route path="/auth" element={<Auth />} />
+            {/* Fallback pour les routes non trouvées */}
+            <Route path="*" element={<Navigate to="/pipeline" replace />} />
           </Routes>
           <Toaster />
         </Suspense>

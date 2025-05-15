@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,28 +16,27 @@ const Auth = () => {
   const [checkingSession, setCheckingSession] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  const {
-    toast
-  } = useToast();
-  const {
-    signInWithGoogle,
-    user
-  } = useAuth();
+  const { toast } = useToast();
+  const { signInWithGoogle, user } = useAuth();
+
+  // Extraire le paramètre redirectTo de l'URL
+  const getRedirectPath = () => {
+    const params = new URLSearchParams(location.search);
+    const redirectTo = params.get('redirectTo');
+    return redirectTo ? decodeURIComponent(redirectTo) : '/pipeline';
+  };
 
   // Vérifier si l'utilisateur est déjà connecté
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const {
-          data
-        } = await supabase.auth.getSession();
+        const { data } = await supabase.auth.getSession();
         console.log('Session check on Auth page:', data.session?.user?.email);
+        
         if (data.session) {
-          // Récupérer le paramètre de redirection s'il existe
-          const params = new URLSearchParams(location.search);
-          const redirectTo = params.get('redirectTo') || '/';
-          console.log('Utilisateur déjà connecté, redirection vers:', redirectTo);
-          navigate(redirectTo);
+          const redirectPath = getRedirectPath();
+          console.log('Utilisateur déjà connecté, redirection vers:', redirectPath);
+          navigate(redirectPath);
         }
       } catch (error) {
         console.error('Erreur lors de la vérification de session:', error);
@@ -44,28 +44,41 @@ const Auth = () => {
         setCheckingSession(false);
       }
     };
+    
     checkSession();
-  }, [navigate, location, user]);
+  }, [navigate, location]);
+
+  // Vérifier à nouveau si l'utilisateur est connecté quand l'état user change
+  useEffect(() => {
+    if (user) {
+      const redirectPath = getRedirectPath();
+      console.log('Utilisateur connecté (via useAuth), redirection vers:', redirectPath);
+      navigate(redirectPath);
+    }
+  }, [user, navigate]);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       console.log(`Tentative de ${isSignUp ? 'création de compte' : 'connexion'} pour:`, email);
-      const {
-        error,
-        data
-      } = isSignUp ? await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth`
-        }
-      }) : await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      const { error, data } = isSignUp 
+        ? await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/auth`
+            }
+          }) 
+        : await supabase.auth.signInWithPassword({
+            email,
+            password
+          });
+          
       if (error) throw error;
+      
       console.log('Résultat auth:', data);
+      
       if (isSignUp) {
         toast({
           title: "Compte créé avec succès",
@@ -76,11 +89,9 @@ const Auth = () => {
           title: "Connexion réussie",
           description: "Bienvenue sur votre espace personnel"
         });
-
-        // Récupérer le paramètre de redirection s'il existe
-        const params = new URLSearchParams(location.search);
-        const redirectTo = params.get('redirectTo') || '/';
-        navigate(redirectTo);
+        
+        const redirectPath = getRedirectPath();
+        navigate(redirectPath);
       }
     } catch (error: any) {
       console.error('Erreur auth:', error);
@@ -93,6 +104,7 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
   const handleGoogleAuth = async () => {
     try {
       console.log('Démarrage authentification Google');
@@ -106,15 +118,20 @@ const Auth = () => {
       });
     }
   };
+
   if (checkingSession) {
-    return <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80">
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80">
         <div className="flex flex-col items-center">
           <Loader2 className="h-8 w-8 animate-spin text-loro-hazel mb-4" />
           <p className="text-loro-chocolate">Vérification de votre session...</p>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80 px-4">
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-loro-white/80 px-4">
       <div className="mb-8">
         <div className="flex items-center justify-center">
           <span className="font-futura text-3xl tracking-tight text-loro-navy uppercase logo-shine">GADAIT.</span>
@@ -182,6 +199,8 @@ const Auth = () => {
           </Button>
         </CardFooter>
       </Card>
-    </div>;
+    </div>
+  );
 };
+
 export default Auth;
