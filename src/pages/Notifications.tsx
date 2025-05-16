@@ -63,8 +63,8 @@ const Notifications = () => {
   return (
     <>
       <Navbar />
-      <div className="bg-[#0A2540] text-white py-6">
-        <div className="container mx-auto px-4 max-w-3xl">
+      <div className="bg-[#0A2540] text-white py-4 mb-4">
+        <div className="container mx-auto px-4 max-w-4xl">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-semibold">Notifications</h1>
             {notifications.some(n => !n.read) && (
@@ -80,7 +80,7 @@ const Notifications = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 max-w-3xl bg-loro-white">
+      <div className="container mx-auto px-4 pb-6 max-w-4xl">
         <Tabs value={filter} onValueChange={(value) => setFilter(value as typeof filter)} className="mb-6">
           <TabsList className="w-full bg-loro-pearl/30 p-0.5 rounded-xl h-11">
             <TabsTrigger value="all" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-hazel">
@@ -100,7 +100,7 @@ const Notifications = () => {
             filteredNotifications.map(notification => (
               <Card 
                 key={notification.id}
-                className={`p-4 border ${notification.read ? 'bg-white' : 'bg-[#F0F4F8] border-loro-sand/20'} hover:bg-loro-pearl/5 transition-colors cursor-pointer shadow-luxury`}
+                className={`p-4 border ${notification.read ? 'bg-white' : 'bg-[#F0F4F8]'} hover:bg-loro-pearl/5 transition-colors cursor-pointer shadow-luxury`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-start gap-3">
