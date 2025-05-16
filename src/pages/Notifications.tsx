@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
+import SubNavigation from '@/components/layout/SubNavigation';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bell, Calendar, CheckCheck } from 'lucide-react';
 import { format } from 'date-fns';
@@ -62,6 +63,7 @@ const Notifications = () => {
   return (
     <>
       <Navbar />
+      <SubNavigation />
       <div className="bg-loro-white py-6">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="flex items-center justify-between mb-6">
