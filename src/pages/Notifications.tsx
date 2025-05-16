@@ -113,7 +113,7 @@ const Notifications = () => {
                         <h4 className="text-sm font-medium text-loro-navy line-clamp-1">
                           {notification.title}
                         </h4>
-                        <span className="text-xs text-loro-terracotta ml-2 bg-loro-pearl/30 px-2 py-0.5 rounded">
+                        <span className="text-xs text-loro-terracotta ml-2 border border-loro-terracotta bg-transparent rounded-full px-2 py-0.5">
                           {formatTime(notification.timestamp)}
                         </span>
                       </div>
