@@ -63,20 +63,24 @@ const Notifications = () => {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto px-4 py-6 max-w-3xl">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-loro-navy">Notifications</h1>
-          {notifications.some(n => !n.read) && (
-            <Button 
-              variant="outline" 
-              onClick={markAllAsRead} 
-              className="text-loro-hazel border-loro-hazel hover:bg-loro-pearl/10"
-            >
-              Tout marquer comme lu
-            </Button>
-          )}
+      <div className="bg-[#0A2540] text-white py-6">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-semibold">Notifications</h1>
+            {notifications.some(n => !n.read) && (
+              <Button 
+                variant="outline" 
+                onClick={markAllAsRead} 
+                className="text-white border-white/30 hover:bg-white/10"
+              >
+                Tout marquer comme lu
+              </Button>
+            )}
+          </div>
         </div>
+      </div>
 
+      <div className="container mx-auto px-4 py-6 max-w-3xl bg-loro-white">
         <Tabs value={filter} onValueChange={(value) => setFilter(value as typeof filter)} className="mb-6">
           <TabsList className="w-full bg-loro-pearl/30 p-0.5 rounded-xl h-11">
             <TabsTrigger value="all" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-hazel">
@@ -96,7 +100,7 @@ const Notifications = () => {
             filteredNotifications.map(notification => (
               <Card 
                 key={notification.id}
-                className={`p-4 border ${notification.read ? 'bg-white' : 'bg-loro-pearl/5 border-loro-sand/20'} hover:bg-loro-pearl/5 transition-colors cursor-pointer shadow-luxury`}
+                className={`p-4 border ${notification.read ? 'bg-white' : 'bg-[#F0F4F8] border-loro-sand/20'} hover:bg-loro-pearl/5 transition-colors cursor-pointer shadow-luxury`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-start gap-3">

@@ -68,10 +68,10 @@ const NotificationsDropdown = () => {
         align="end" 
         sideOffset={5}
       >
-        <div className="py-2 px-3 border-b border-loro-pearl flex justify-between items-center">
-          <h3 className="font-medium text-loro-navy">Notifications</h3>
+        <div className="py-2 px-3 bg-[#0A2540] text-white border-b border-white/10 flex justify-between items-center">
+          <h3 className="font-medium">Notifications</h3>
           {unreadCount > 0 && (
-            <span className="text-xs bg-loro-pearl/30 text-loro-hazel px-2 py-0.5 rounded-full">
+            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full">
               {unreadCount} non {unreadCount > 1 ? 'lues' : 'lue'}
             </span>
           )}
@@ -82,7 +82,7 @@ const NotificationsDropdown = () => {
             recentNotifications.map(notification => (
               <div
                 key={notification.id}
-                className={`p-3 border-b border-loro-pearl/30 cursor-pointer hover:bg-loro-pearl/5 transition-colors ${!notification.read ? 'bg-loro-pearl/10' : ''}`}
+                className={`p-3 border-b border-loro-pearl/30 cursor-pointer hover:bg-loro-pearl/5 transition-colors ${!notification.read ? 'bg-[#F0F4F8]' : ''}`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex justify-between items-start">
