@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -64,11 +63,11 @@ const NotificationsDropdown = () => {
       </PopoverTrigger>
       <PopoverContent 
         ref={popoverRef}
-        className="w-80 p-0 bg-white rounded-lg shadow-luxury" 
+        className="w-80 p-0 bg-loro-white rounded-lg shadow-luxury" 
         align="end" 
         sideOffset={5}
       >
-        <div className="py-2 px-3 bg-[#0A2540] text-white border-b border-white/10 flex justify-between items-center">
+        <div className="py-2 px-3 bg-loro-hazel text-white border-b border-loro-sand/20 flex justify-between items-center">
           <h3 className="font-medium">Notifications</h3>
           {unreadCount > 0 && (
             <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full">
@@ -82,7 +81,7 @@ const NotificationsDropdown = () => {
             recentNotifications.map(notification => (
               <div
                 key={notification.id}
-                className={`p-3 border-b border-loro-pearl/30 cursor-pointer hover:bg-loro-pearl/5 transition-colors ${!notification.read ? 'bg-[#F0F4F8]' : ''}`}
+                className={`p-3 border-b border-loro-pearl/30 cursor-pointer hover:bg-loro-pearl/5 transition-colors ${!notification.read ? 'bg-loro-pearl/20' : ''}`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex justify-between items-start">
