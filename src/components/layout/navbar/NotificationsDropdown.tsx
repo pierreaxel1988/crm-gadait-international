@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -67,7 +68,7 @@ const NotificationsDropdown = () => {
         align="end" 
         sideOffset={5}
       >
-        <div className="py-2 px-3 bg-loro-hazel text-white border-b border-loro-sand/20 flex justify-between items-center">
+        <div className="py-2 px-3 bg-loro-terracotta text-white border-b border-loro-sand/20 flex justify-between items-center">
           <h3 className="font-medium">Notifications</h3>
           {unreadCount > 0 && (
             <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full">
@@ -88,7 +89,7 @@ const NotificationsDropdown = () => {
                   <h4 className="text-sm font-medium text-loro-navy line-clamp-1">
                     {notification.title}
                   </h4>
-                  <span className="text-xs text-loro-hazel ml-2">
+                  <span className="text-xs text-loro-terracotta ml-2">
                     {formatTime(notification.timestamp)}
                   </span>
                 </div>
@@ -112,7 +113,7 @@ const NotificationsDropdown = () => {
         <div className="p-2 border-t border-loro-pearl">
           <Button 
             variant="outline" 
-            className="w-full text-sm text-loro-hazel border-loro-hazel hover:bg-loro-pearl/10"
+            className="w-full text-sm text-loro-terracotta border-loro-terracotta hover:bg-loro-pearl/10"
             onClick={() => {
               setOpen(false);
               navigate('/notifications');

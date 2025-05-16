@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
@@ -21,9 +22,9 @@ const Notifications = () => {
       case 'call':
       case 'email':
       case 'followup':
-        return <Calendar size={16} className="text-loro-hazel" />;
+        return <Calendar size={16} className="text-loro-terracotta" />;
       default:
-        return <Bell size={16} className="text-loro-hazel" />;
+        return <Bell size={16} className="text-loro-terracotta" />;
     }
   };
 
@@ -72,7 +73,7 @@ const Notifications = () => {
               <Button 
                 variant="outline" 
                 onClick={markAllAsRead} 
-                className="text-loro-hazel border-loro-hazel hover:bg-loro-pearl/20"
+                className="text-loro-terracotta border-loro-terracotta hover:bg-loro-pearl/20"
               >
                 Tout marquer comme lu
               </Button>
@@ -81,13 +82,13 @@ const Notifications = () => {
           
           <Tabs value={filter} onValueChange={(value) => setFilter(value as typeof filter)} className="mb-6">
             <TabsList className="w-full bg-loro-pearl/30 p-0.5 rounded-xl h-11">
-              <TabsTrigger value="all" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-hazel">
+              <TabsTrigger value="all" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-terracotta">
                 Toutes
               </TabsTrigger>
-              <TabsTrigger value="unread" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-hazel">
+              <TabsTrigger value="unread" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-terracotta">
                 Non lues
               </TabsTrigger>
-              <TabsTrigger value="read" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-hazel">
+              <TabsTrigger value="read" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-terracotta">
                 Lues
               </TabsTrigger>
             </TabsList>
@@ -112,7 +113,7 @@ const Notifications = () => {
                         <h4 className="text-sm font-medium text-loro-navy line-clamp-1">
                           {notification.title}
                         </h4>
-                        <span className="text-xs text-loro-hazel ml-2 bg-loro-pearl/30 px-2 py-0.5 rounded">
+                        <span className="text-xs text-loro-terracotta ml-2 bg-loro-pearl/30 px-2 py-0.5 rounded">
                           {formatTime(notification.timestamp)}
                         </span>
                       </div>
@@ -123,7 +124,7 @@ const Notifications = () => {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="mt-2 h-8 text-loro-hazel hover:text-loro-navy hover:bg-loro-pearl/20"
+                          className="mt-2 h-8 text-loro-terracotta hover:text-loro-navy hover:bg-loro-pearl/20"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleCompleteAction(notification);
