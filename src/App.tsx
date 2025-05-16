@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy } from 'react';
 import {
   BrowserRouter as Router,
@@ -8,10 +9,10 @@ import {
 import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from '@/components/ui/toaster';
 import LoadingScreen from './components/layout/LoadingScreen';
-import Auth from './pages/Auth'; // Import Auth directly instead of lazy loading
+import Auth from './pages/Auth'; // Import Auth directly
+import Pipeline from './pages/Pipeline'; // Import Pipeline directly instead of lazy loading
 
-// Lazy load all pages except Auth to use suspense
-const Pipeline = lazy(() => import('./pages/Pipeline'));
+// Lazy load other pages to use suspense
 const LeadsPage = lazy(() => import('./pages/Leads'));
 const LeadDetail = lazy(() => import('./pages/LeadDetailMobile'));
 const LeadNew = lazy(() => import('./pages/LeadNew'));
