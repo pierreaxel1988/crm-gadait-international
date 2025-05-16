@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Card } from '@/components/ui/card';
 
 const NotificationsDropdown = () => {
   const isMobile = useIsMobile();
@@ -81,7 +82,7 @@ const NotificationsDropdown = () => {
             recentNotifications.map(notification => (
               <div
                 key={notification.id}
-                className={`p-3 border-b border-loro-pearl/50 cursor-pointer hover:bg-loro-pearl/5 transition-colors ${!notification.read ? 'bg-loro-pearl/10' : ''}`}
+                className={`p-3 border-b border-loro-pearl/30 cursor-pointer hover:bg-loro-pearl/5 transition-colors ${!notification.read ? 'bg-loro-pearl/10' : ''}`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex justify-between items-start">

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useNotifications } from '@/hooks/useNotifications';
+import { Card } from '@/components/ui/card';
 
 const Notifications = () => {
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
@@ -20,9 +21,9 @@ const Notifications = () => {
       case 'call':
       case 'email':
       case 'followup':
-        return <Calendar size={16} className="text-gray-500" />;
+        return <Calendar size={16} className="text-loro-hazel" />;
       default:
-        return <Bell size={16} className="text-gray-500" />;
+        return <Bell size={16} className="text-loro-hazel" />;
     }
   };
 
@@ -69,7 +70,7 @@ const Notifications = () => {
             <Button 
               variant="outline" 
               onClick={markAllAsRead} 
-              className="text-loro-hazel hover:bg-loro-pearl/10 border-loro-hazel"
+              className="text-loro-hazel border-loro-hazel hover:bg-loro-pearl/10"
             >
               Tout marquer comme lu
             </Button>
@@ -90,17 +91,17 @@ const Notifications = () => {
           </TabsList>
         </Tabs>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {filteredNotifications.length > 0 ? (
             filteredNotifications.map(notification => (
-              <div 
+              <Card 
                 key={notification.id}
-                className={`p-4 rounded-lg border ${notification.read ? 'bg-white' : 'bg-loro-pearl/10 border-loro-sand/30'} hover:bg-loro-pearl/5 transition-colors cursor-pointer shadow-luxury`}
+                className={`p-4 border ${notification.read ? 'bg-white' : 'bg-loro-pearl/5 border-loro-sand/20'} hover:bg-loro-pearl/5 transition-colors cursor-pointer shadow-luxury`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 mt-1">
-                    <div className="w-8 h-8 rounded-full bg-loro-pearl flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-loro-pearl/50 flex items-center justify-center">
                       {getActionIcon(notification.actionType)}
                     </div>
                   </div>
@@ -132,13 +133,13 @@ const Notifications = () => {
                     )}
                   </div>
                 </div>
-              </div>
+              </Card>
             ))
           ) : (
-            <div className="text-center py-12 bg-white rounded-lg border border-loro-pearl shadow-luxury">
+            <Card className="text-center py-12 bg-white border border-loro-pearl shadow-luxury">
               <Bell className="mx-auto h-12 w-12 text-loro-sand mb-4" />
               <p className="text-loro-navy/70">Aucune notification {filter !== 'all' ? 'dans cette catégorie' : ''}</p>
-            </div>
+            </Card>
           )}
         </div>
       </div>
