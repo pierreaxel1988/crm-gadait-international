@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { User, Settings, LogOut, Users } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -7,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+
 const UserMenu = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ const UserMenu = () => {
     isAdmin
   } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -25,18 +28,21 @@ const UserMenu = () => {
       toast.error('Erreur lors de la déconnexion');
     }
   };
+
   const handleSettingsClick = () => {
     navigate('/settings');
   };
+
   const handleUsersManagementClick = () => {
     navigate('/admin');
   };
+
   return <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
-              <button className="rounded-md p-1.5">
+              <button className="rounded-md p-1.5 transition-transform duration-200 hover:scale-110">
                 <User className="h-5 w-5 text-white" />
               </button>
             </DropdownMenuTrigger>
@@ -65,4 +71,5 @@ const UserMenu = () => {
       </DropdownMenuContent>
     </DropdownMenu>;
 };
+
 export default UserMenu;
