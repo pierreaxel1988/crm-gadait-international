@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -67,7 +68,7 @@ const NotificationsDropdown = () => {
           
         </Tooltip>
         <PopoverContent ref={popoverRef} className="w-[calc(100vw-24px)] md:w-84 p-0 bg-loro-white rounded-lg shadow-luxury border-0" align={isMobile ? "center" : "end"} sideOffset={isMobile ? 15 : 10} side={isMobile ? "bottom" : undefined}>
-          <div className="py-2.5 px-4 bg-gradient-to-r from-loro-terracotta to-loro-hazel text-white rounded-t-lg flex justify-between items-center">
+          <div className="py-2.5 px-4 bg-loro-terracotta text-white rounded-t-lg flex justify-between items-center">
             <h3 className="font-futura tracking-wide">Notifications</h3>
             {unreadCount > 0 && <span className="text-xs bg-white/20 text-white px-2.5 py-1 rounded-full backdrop-blur-sm">
                 {unreadCount} non {unreadCount > 1 ? 'lues' : 'lue'}
