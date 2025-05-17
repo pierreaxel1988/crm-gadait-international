@@ -73,7 +73,7 @@ const Notifications = () => {
               <Button 
                 variant="outline" 
                 onClick={markAllAsRead} 
-                className="text-loro-terracotta border-loro-terracotta hover:bg-loro-pearl/20"
+                className="text-loro-terracotta border-loro-terracotta/70 hover:bg-loro-pearl/20 transition-all duration-200"
               >
                 Tout marquer comme lu
               </Button>
@@ -82,29 +82,29 @@ const Notifications = () => {
           
           <Tabs value={filter} onValueChange={(value) => setFilter(value as typeof filter)} className="mb-6">
             <TabsList className="w-full bg-loro-pearl/30 p-0.5 rounded-xl h-11">
-              <TabsTrigger value="all" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-terracotta">
+              <TabsTrigger value="all" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-terracotta data-[state=active]:shadow-luxury">
                 Toutes
               </TabsTrigger>
-              <TabsTrigger value="unread" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-terracotta">
+              <TabsTrigger value="unread" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-terracotta data-[state=active]:shadow-luxury">
                 Non lues
               </TabsTrigger>
-              <TabsTrigger value="read" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-terracotta">
+              <TabsTrigger value="read" className="flex-1 text-loro-navy data-[state=active]:bg-white data-[state=active]:text-loro-terracotta data-[state=active]:shadow-luxury">
                 Lues
               </TabsTrigger>
             </TabsList>
           </Tabs>
 
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             {filteredNotifications.length > 0 ? (
               filteredNotifications.map(notification => (
                 <Card 
                   key={notification.id}
-                  className={`p-4 ${notification.read ? 'bg-white' : 'bg-loro-pearl/20'} hover:bg-loro-pearl/10 transition-colors cursor-pointer border border-loro-pearl/50 shadow-luxury`}
+                  className={`p-4 ${notification.read ? 'bg-white' : 'bg-loro-pearl/10'} hover:bg-loro-pearl/5 transition-all duration-200 cursor-pointer border border-loro-pearl/30 hover:border-loro-pearl/50 shadow-luxury`}
                   onClick={() => handleNotificationClick(notification)}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 mt-1">
-                      <div className="w-8 h-8 rounded-full bg-loro-pearl/50 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-full bg-loro-pearl/30 flex items-center justify-center">
                         {getActionIcon(notification.actionType)}
                       </div>
                     </div>
@@ -113,24 +113,24 @@ const Notifications = () => {
                         <h4 className="text-sm font-medium text-loro-navy line-clamp-1">
                           {notification.title}
                         </h4>
-                        <span className="text-xs text-loro-terracotta ml-2 border border-loro-terracotta bg-transparent rounded-full px-2 py-0.5">
+                        <span className="text-xs text-loro-terracotta ml-2 border border-loro-terracotta bg-transparent rounded-full px-2.5 py-0.5">
                           {formatTime(notification.timestamp)}
                         </span>
                       </div>
-                      <p className="text-sm text-loro-navy/80 mt-1">
+                      <p className="text-sm text-loro-navy/80 mt-1.5">
                         {notification.message}
                       </p>
                       {notification.type === 'action' && (
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="mt-2 h-8 text-loro-terracotta hover:text-loro-navy hover:bg-loro-pearl/20"
+                          className="mt-2.5 h-8 text-loro-terracotta hover:text-loro-navy hover:bg-loro-pearl/20 transition-colors duration-200"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleCompleteAction(notification);
                           }}
                         >
-                          <CheckCheck className="w-4 h-4 mr-1" />
+                          <CheckCheck className="w-4 h-4 mr-1.5" />
                           Marquer comme terminée
                         </Button>
                       )}
@@ -139,9 +139,9 @@ const Notifications = () => {
                 </Card>
               ))
             ) : (
-              <Card className="text-center py-12 bg-white border border-loro-pearl/30 shadow-luxury">
-                <Bell className="mx-auto h-12 w-12 text-loro-sand mb-4" />
-                <p className="text-loro-navy/70">Aucune notification {filter !== 'all' ? 'dans cette catégorie' : ''}</p>
+              <Card className="text-center py-14 bg-white border border-loro-pearl/20 shadow-luxury">
+                <Bell className="mx-auto h-14 w-14 text-loro-sand mb-4 opacity-70" />
+                <p className="text-loro-navy/70 font-futuraLight">Aucune notification {filter !== 'all' ? 'dans cette catégorie' : ''}</p>
               </Card>
             )}
           </div>

@@ -13,6 +13,7 @@ import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Card } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const NotificationsDropdown = () => {
   const isMobile = useIsMobile();
@@ -55,75 +56,84 @@ const NotificationsDropdown = () => {
   const recentNotifications = notifications.slice(0, 5);
   
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button className="rounded-md p-1.5 transition-colors duration-200 relative hover:bg-white/10">
-          <Bell className="h-5 w-5 text-white" />
-          <NotificationBadge count={unreadCount || 0} />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent 
-        ref={popoverRef}
-        className="w-80 p-0 bg-loro-white rounded-lg shadow-luxury" 
-        align="end" 
-        sideOffset={5}
-      >
-        <div className="py-2 px-3 bg-loro-terracotta text-white border-b border-loro-sand/20 flex justify-between items-center">
-          <h3 className="font-medium">Notifications</h3>
-          {unreadCount > 0 && (
-            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full">
-              {unreadCount} non {unreadCount > 1 ? 'lues' : 'lue'}
-            </span>
-          )}
-        </div>
-        
-        <div className="max-h-[300px] overflow-y-auto">
-          {recentNotifications.length > 0 ? (
-            recentNotifications.map(notification => (
-              <div
-                key={notification.id}
-                className={`p-3 border-b border-loro-pearl/30 cursor-pointer hover:bg-loro-pearl/5 transition-colors ${!notification.read ? 'bg-loro-pearl/20' : ''}`}
-                onClick={() => handleNotificationClick(notification)}
-              >
-                <div className="flex justify-between items-start">
-                  <h4 className="text-sm font-medium text-loro-navy line-clamp-1">
-                    {notification.title}
-                  </h4>
-                  <span className="text-xs text-loro-terracotta ml-2 border border-loro-terracotta bg-transparent rounded-full px-2 py-0.5">
-                    {formatTime(notification.timestamp)}
-                  </span>
+    <TooltipProvider>
+      <Popover open={open} onOpenChange={setOpen}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <button className="rounded-md p-1.5 transition-colors duration-300 relative hover:bg-white/20">
+                <Bell className="h-5 w-5 text-white" />
+                <NotificationBadge count={unreadCount || 0} />
+              </button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent className="text-xs font-futuraLight">
+            Notifications
+          </TooltipContent>
+        </Tooltip>
+        <PopoverContent 
+          ref={popoverRef}
+          className="w-84 p-0 bg-loro-white rounded-lg shadow-luxury border-0" 
+          align="end" 
+          sideOffset={10}
+        >
+          <div className="py-2.5 px-4 bg-gradient-to-r from-loro-terracotta to-loro-hazel text-white rounded-t-lg flex justify-between items-center">
+            <h3 className="font-futura tracking-wide">Notifications</h3>
+            {unreadCount > 0 && (
+              <span className="text-xs bg-white/20 text-white px-2.5 py-1 rounded-full backdrop-blur-sm">
+                {unreadCount} non {unreadCount > 1 ? 'lues' : 'lue'}
+              </span>
+            )}
+          </div>
+          
+          <div className="max-h-[350px] overflow-y-auto">
+            {recentNotifications.length > 0 ? (
+              recentNotifications.map(notification => (
+                <div
+                  key={notification.id}
+                  className={`p-3.5 border-b border-loro-pearl/50 cursor-pointer hover:bg-loro-pearl/10 transition-all duration-200 ${!notification.read ? 'bg-loro-pearl/10' : ''}`}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <div className="flex justify-between items-start">
+                    <h4 className="text-sm font-medium text-loro-navy line-clamp-1">
+                      {notification.title}
+                    </h4>
+                    <span className="text-xs text-loro-terracotta ml-2 border border-loro-terracotta bg-transparent rounded-full px-2.5 py-0.5">
+                      {formatTime(notification.timestamp)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-loro-navy/80 mt-1.5 line-clamp-2">
+                    {notification.message}
+                  </p>
                 </div>
-                <p className="text-xs text-loro-navy/70 mt-1 line-clamp-2">
-                  {notification.message}
-                </p>
+              ))
+            ) : (
+              <div className="py-8 text-center">
+                <AspectRatio ratio={1/1} className="w-14 mx-auto mb-3">
+                  <div className="h-full w-full flex items-center justify-center bg-loro-pearl/40 rounded-full">
+                    <Bell className="h-6 w-6 text-loro-sand" />
+                  </div>
+                </AspectRatio>
+                <p className="text-sm text-loro-navy/70 font-futuraLight">Pas de notifications</p>
               </div>
-            ))
-          ) : (
-            <div className="py-6 text-center">
-              <AspectRatio ratio={1/1} className="w-12 mx-auto mb-2">
-                <div className="h-full w-full flex items-center justify-center bg-loro-pearl/30 rounded-full">
-                  <Bell className="h-6 w-6 text-loro-sand" />
-                </div>
-              </AspectRatio>
-              <p className="text-sm text-loro-navy/70">Pas de notifications</p>
-            </div>
-          )}
-        </div>
-        
-        <div className="p-2 border-t border-loro-pearl">
-          <Button 
-            variant="outline" 
-            className="w-full text-sm text-loro-terracotta border-loro-terracotta hover:bg-loro-pearl/10"
-            onClick={() => {
-              setOpen(false);
-              navigate('/notifications');
-            }}
-          >
-            Voir toutes les notifications
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
+            )}
+          </div>
+          
+          <div className="p-3 border-t border-loro-pearl bg-loro-pearl/5">
+            <Button 
+              variant="outline" 
+              className="w-full text-sm text-loro-terracotta border-loro-terracotta/70 hover:bg-loro-pearl/20 transition-all duration-200"
+              onClick={() => {
+                setOpen(false);
+                navigate('/notifications');
+              }}
+            >
+              Voir toutes les notifications
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </TooltipProvider>
   );
 };
 
