@@ -52,7 +52,7 @@ const UserMenu = () => {
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
               <button 
-                className="rounded-md p-1.5 transition-colors duration-200 hover:bg-white/10"
+                className="rounded-md p-1.5"
               >
                 <User className="h-5 w-5 text-white" />
               </button>
