@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Command } from 'cmdk';
 import {
   CommandDialog,
   CommandEmpty,
@@ -22,7 +21,7 @@ type GlobalSearchProps = {
 
 type PropertyResult = {
   id: string;
-  name?: string;
+  title?: string;
   reference?: string;
   price?: number;
   location?: string;
@@ -81,18 +80,31 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onOpenChange }) => {
       try {
         const { data, error } = await supabase
           .from('properties')
-          .select('id, name, reference, price, location, type')
-          .or(`name.ilike.%${searchQuery}%, reference.ilike.%${searchQuery}%, location.ilike.%${searchQuery}%`)
+          .select('id, title, price, location, property_type, reference')
+          .or(`title.ilike.%${searchQuery}%, reference.ilike.%${searchQuery}%, location.ilike.%${searchQuery}%`)
           .limit(5);
 
         if (error) {
           console.error('Error searching properties:', error);
+          setAllResults(prev => ({ ...prev, properties: [] }));
           return;
         }
 
-        setAllResults(prev => ({ ...prev, properties: data || [] }));
+        if (data) {
+          const formattedProperties: PropertyResult[] = data.map(prop => ({
+            id: prop.id,
+            title: prop.title,
+            reference: prop.reference,
+            price: prop.price,
+            location: prop.location,
+            type: prop.property_type
+          }));
+          
+          setAllResults(prev => ({ ...prev, properties: formattedProperties }));
+        }
       } catch (error) {
         console.error('Error in property search:', error);
+        setAllResults(prev => ({ ...prev, properties: [] }));
       } finally {
         setIsLoadingProperties(false);
       }
@@ -222,7 +234,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onOpenChange }) => {
                   </div>
                   <div className="flex flex-col overflow-hidden">
                     <span className="font-medium">
-                      {property.reference || property.name || 'Propriété sans nom'}
+                      {property.reference || property.title || 'Propriété sans nom'}
                     </span>
                     <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mt-1">
                       {property.location && (

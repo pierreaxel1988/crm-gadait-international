@@ -74,7 +74,6 @@ export function useLeadSearch(initialSearchTerm: string = '', options: SearchOpt
             preferred_language,
             property_reference,
             created_at,
-            updated_at,
             tags,
             budget
           `)
@@ -144,7 +143,6 @@ export function useLeadSearch(initialSearchTerm: string = '', options: SearchOpt
             preferredLanguage: lead.preferred_language,
             propertyReference: lead.property_reference,
             createdAt: lead.created_at,
-            updatedAt: lead.updated_at,
             tags: lead.tags,
             budget: lead.budget
           }));
