@@ -7,7 +7,6 @@ import ImmersiveHeaderOverlay from './ImmersiveHeaderOverlay';
 // Import newly created components
 import Logo from './navbar/Logo';
 import SearchBar from './navbar/SearchBar';
-import ThemeToggle from './navbar/ThemeToggle';
 import NotificationsDropdown from './navbar/NotificationsDropdown';
 import UserMenu from './navbar/UserMenu';
 
@@ -38,7 +37,6 @@ const Navbar: React.FC<NavbarProps> = ({
 
             <div className="flex items-center space-x-2 md:space-x-4 text-white">
               <SearchBar />
-              <ThemeToggle />
               <NotificationsDropdown />
               <UserMenu />
             </div>
