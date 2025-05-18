@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -15,7 +15,7 @@ const SearchBar = () => {
   };
 
   // Effect to handle keyboard shortcut (Ctrl+K or Cmd+K)
-  React.useEffect(() => {
+  useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || e.key === '/') {
         e.preventDefault();
