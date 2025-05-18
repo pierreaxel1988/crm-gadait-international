@@ -40,7 +40,7 @@ export function useLeadSearch(initialSearchTerm: string = '') {
 
   useEffect(() => {
     const searchLeads = async () => {
-      // Reduced minimum search length to 1 character
+      // Allow search with just 1 character
       if (!debouncedSearchTerm || debouncedSearchTerm.length < 1) {
         setResults([]);
         return;
@@ -49,30 +49,30 @@ export function useLeadSearch(initialSearchTerm: string = '') {
       setIsLoading(true);
       
       try {
-        // Diviser les termes de recherche en mots pour rechercher prénom/nom séparément
+        // Split search terms into words to search for first/last name separately
         const searchTerms = debouncedSearchTerm.split(' ').filter(term => term.length > 0);
         
-        // Utiliser uniquement les colonnes qui existent dans la base de données
+        // Use only columns that exist in the database
         let query = supabase
           .from('leads')
           .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget')
           .order('created_at', { ascending: false })
-          .limit(20); // Increased limit for more results
+          .limit(30); // Increased limit for more results
         
-        // Construction de la clause OR pour la recherche
+        // Build OR conditions for the search
         let orConditions = [];
         
-        // Recherche par email - même avec peu de caractères
+        // Search by email - even with few characters
         orConditions.push(`email.ilike.%${debouncedSearchTerm}%`);
         
-        // Recherche par téléphone - même avec peu de caractères
+        // Search by phone - even with few characters
         orConditions.push(`phone.ilike.%${debouncedSearchTerm}%`);
         
-        // Recherche par nom complet
+        // Search by full name
         orConditions.push(`name.ilike.%${debouncedSearchTerm}%`);
         
-        // Si nous avons plusieurs termes, rechercher individuellement pour chaque partie du nom
-        // même avec seulement 1 caractère
+        // If we have multiple terms, search individually for each part of the name
+        // even with just 1 character
         if (searchTerms.length > 1) {
           for (const term of searchTerms) {
             if (term.length >= 1) {
@@ -80,8 +80,11 @@ export function useLeadSearch(initialSearchTerm: string = '') {
             }
           }
         }
+
+        // Add property reference search
+        orConditions.push(`property_reference.ilike.%${debouncedSearchTerm}%`);
         
-        // Appliquer les conditions OR à la requête
+        // Apply the OR conditions to the query
         const { data, error } = await query.or(orConditions.join(','));
 
         if (error) {
@@ -119,20 +122,20 @@ export function useLeadSearch(initialSearchTerm: string = '') {
     searchLeads();
   }, [debouncedSearchTerm]);
 
-  // Fonction pour rechercher des propriétés
+  // Function to search properties
   const searchProperties = async (term: string): Promise<PropertyResult[]> => {
-    // Reduced minimum search length to 1 character
+    // Allow search with just 1 character
     if (!term || term.length < 1) {
       return [];
     }
 
     try {
-      // Utiliser les colonnes qui existent dans la table properties
+      // Use columns that exist in the properties table
       const { data, error } = await supabase
         .from('properties')
         .select('id, title, price, location, property_type, external_id')
         .or(`title.ilike.%${term}%, location.ilike.%${term}%, external_id.ilike.%${term}%`)
-        .limit(10);
+        .limit(15);
 
       if (error) {
         console.error('Error searching properties:', error);

@@ -35,7 +35,7 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
   // Search for properties when the query changes
   useEffect(() => {
     const fetchPropertyResults = async () => {
-      // Reduced minimum search length to 1 character
+      // Search with just 1 character
       if (query.length >= 1) {
         try {
           const propertyResults = await searchProperties(query);
@@ -103,7 +103,7 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
     setRecentSearches(updatedRecent);
     localStorage.setItem('recentSearches', JSON.stringify(updatedRecent));
     
-    // Navigate to property detail page (assuming a route exists)
+    // Navigate to property detail page
     navigate(`/properties/${property.id}`);
     onOpenChange(false);
   };
