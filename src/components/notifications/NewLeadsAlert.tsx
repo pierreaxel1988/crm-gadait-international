@@ -155,7 +155,7 @@ export const NewLeadsAlert = () => {
                   })}
                     </p>
                   </div>
-                  <Button variant="default" size="sm" onClick={() => handleViewLead(lead.id)} className="garde le meme format que les tags dans la page /action c'est plus coherent ">
+                  <Button variant="default" size="sm" onClick={() => handleViewLead(lead.id)} className="design loro piana please ">
                     <span className="bg-white rounded-full p-1 mr-1 flex items-center justify-center">
                       <Phone className="h-3 w-3 text-green-600 group-hover:scale-110 transition-transform" strokeWidth={2.5} />
                     </span>
