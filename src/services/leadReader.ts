@@ -143,3 +143,5 @@ export const getLead = async (id: string): Promise<LeadDetailed | null> => {
     throw error;
   }
 };
+
+export { convertToSimpleLead } from "./utils/leadMappers";

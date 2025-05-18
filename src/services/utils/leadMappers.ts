@@ -179,18 +179,23 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
   };
 };
 
-export const convertToSimpleLead = (lead: LeadDetailed) => {
+// Ensure the convertToSimpleLead function is exported
+export const convertToSimpleLead = (lead: any) => {
   return {
-    id: lead.id,
+    id: lead.id || '',
     name: lead.name || '',
     email: lead.email || '',
     phone: lead.phone || '',
     status: lead.status || 'New',
-    source: lead.source || undefined,
-    createdAt: lead.createdAt || new Date().toISOString(),
-    budget: lead.budget || undefined,
-    location: lead.location || undefined,
-    tags: lead.tags || []
+    tags: lead.tags || [],
+    created_at: lead.createdAt || lead.created_at || new Date().toISOString(),
+    last_contacted_at: lead.lastContactedAt || lead.last_contacted_at || null,
+    assignedTo: lead.assignedTo || lead.assigned_to || null,
+    location: lead.location || '',
+    desiredLocation: lead.desiredLocation || lead.desired_location || '',
+    budget: lead.budget || '',
+    currency: lead.currency || 'EUR',
+    propertyType: lead.propertyType || lead.property_type || '',
   };
 };
 

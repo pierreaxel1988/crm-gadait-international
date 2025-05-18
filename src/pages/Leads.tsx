@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -17,6 +18,11 @@ import LeadsSearchBar from '@/components/leads/LeadsSearchBar';
 import StatusFilter from '@/components/leads/filters/StatusFilter';
 import TagsFilter from '@/components/leads/filters/TagsFilter';
 import SelectedTagsList from '@/components/leads/filters/SelectedTagsList';
+
+// Import required types and functions
+import { LeadStatus } from '@/components/common/StatusBadge';
+import { LeadTag } from '@/components/common/TagBadge';
+import { getLeads, convertToSimpleLead } from '@/services/leadReader';
 
 const Leads = () => {
   const [searchTerm, setSearchTerm] = useState('');
