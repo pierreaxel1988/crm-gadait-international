@@ -1,29 +1,33 @@
 
 import React from 'react';
+import Navbar from '@/components/layout/Navbar';
+import SubNavigation from '@/components/layout/SubNavigation';
+import { useIsMobile } from '@/hooks/use-mobile';
 import StatsSection from '@/components/dashboard/StatsSection';
 import ActivitySection from '@/components/dashboard/ActivitySection';
 import ImportedLeadsSection from '@/components/dashboard/ImportedLeadsSection';
-import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import NewLeadsAlert from '@/components/notifications/NewLeadsAlert';
 
 const Index = () => {
-  const { user, isAdmin } = useAuth();
+  const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-futura text-loro-navy">Tableau de bord</h1>
-        <p className="text-chocolate-dark font-futuraLight">
-          Bienvenue dans votre espace de gestion immobilière de luxe
-          {isAdmin && " (Accès Administrateur)"}
-        </p>
+    <>
+      <Navbar />
+      <SubNavigation />
+      <NewLeadsAlert />
+      <div className="p-3 md:p-6 bg-white min-h-screen">
+        <div className="grid gap-6">
+          <StatsSection />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ActivitySection />
+            <ImportedLeadsSection />
+          </div>
+        </div>
       </div>
-      
-      <StatsSection />
-      
-      <ActivitySection />
-
-      {user && <ImportedLeadsSection />}
-    </div>
+    </>
   );
 };
 

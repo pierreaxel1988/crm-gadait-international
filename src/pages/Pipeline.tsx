@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePipelineState } from '@/hooks/usePipelineState';
@@ -9,6 +10,7 @@ import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import ComponentLoader from '@/components/common/ComponentLoader';
 import { reassignJadeLeads, reassignJeanMarcLeads, reassignSharonLeads } from '@/services/leadService';
+import NewLeadsAlert from '@/components/notifications/NewLeadsAlert';
 
 const Pipeline = () => {
   const isMobile = useIsMobile();
@@ -90,6 +92,7 @@ const Pipeline = () => {
     <>
       <Navbar />
       <SubNavigation />
+      <NewLeadsAlert />
       <div className="p-3 md:p-6 bg-white min-h-screen">
         <ComponentLoader isLoading={isRefreshing}>
           {isMobile ? (

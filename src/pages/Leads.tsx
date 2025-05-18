@@ -1,18 +1,22 @@
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getLeads, convertToSimpleLead } from '@/services/leadService';
-import { toast } from '@/hooks/use-toast';
-import { LeadStatus } from '@/components/common/StatusBadge';
-import { LeadTag } from '@/components/common/TagBadge';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import Navbar from '@/components/layout/Navbar';
+import SubNavigation from '@/components/layout/SubNavigation';
+import LeadsHeader from '@/components/leads/LeadsHeader';
+import LeadsList from '@/components/leads/LeadsList';
+import ImportedLeadsPanel from '@/components/leads/ImportedLeadsPanel';
+import { supabase } from '@/integrations/supabase/client';
+import { useSelectedAgent } from '@/hooks/useSelectedAgent';
+import { useToast } from '@/hooks/use-toast';
+import { FilterX } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import NewLeadsAlert from '@/components/notifications/NewLeadsAlert';
 
 // Import our new components
-import LeadsHeader from '@/components/leads/LeadsHeader';
 import LeadsSearchBar from '@/components/leads/LeadsSearchBar';
 import StatusFilter from '@/components/leads/filters/StatusFilter';
 import TagsFilter from '@/components/leads/filters/TagsFilter';
 import SelectedTagsList from '@/components/leads/filters/SelectedTagsList';
-import LeadsList from '@/components/leads/LeadsList';
 
 const Leads = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,7 +25,11 @@ const Leads = () => {
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [showTagsDropdown, setShowTagsDropdown] = useState(false);
   const [leads, setLeads] = useState<any[]>([]);
+  const [importedLeadsView, setImportedLeadsView] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { selectedAgent } = useSelectedAgent();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchLeads = async () => {
@@ -96,45 +104,50 @@ const Leads = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-      <LeadsHeader onNewLead={handleNewLead} />
+    <>
+      <Navbar />
+      <SubNavigation />
+      <NewLeadsAlert />
+      <div className={`p-3 md:p-6 bg-white min-h-screen ${importedLeadsView ? 'overflow-hidden' : ''}`}>
+        <LeadsHeader onNewLead={handleNewLead} />
 
-      <div className="flex flex-col gap-4">
-        <LeadsSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        <div className="flex flex-col gap-4">
+          <LeadsSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
-        <div className="flex flex-col sm:flex-row gap-2 md:gap-4">
-          <StatusFilter 
-            selectedStatus={selectedStatus}
-            setSelectedStatus={setSelectedStatus}
-            showStatusDropdown={showStatusDropdown}
-            setShowStatusDropdown={setShowStatusDropdown}
-            setShowTagsDropdown={setShowTagsDropdown}
-          />
+          <div className="flex flex-col sm:flex-row gap-2 md:gap-4">
+            <StatusFilter 
+              selectedStatus={selectedStatus}
+              setSelectedStatus={setSelectedStatus}
+              showStatusDropdown={showStatusDropdown}
+              setShowStatusDropdown={setShowStatusDropdown}
+              setShowTagsDropdown={setShowTagsDropdown}
+            />
 
-          <TagsFilter 
-            selectedTags={selectedTags}
-            toggleTag={toggleTag}
-            showTagsDropdown={showTagsDropdown}
-            setShowTagsDropdown={setShowTagsDropdown}
-            setShowStatusDropdown={setShowStatusDropdown}
+            <TagsFilter 
+              selectedTags={selectedTags}
+              toggleTag={toggleTag}
+              showTagsDropdown={showTagsDropdown}
+              setShowTagsDropdown={setShowTagsDropdown}
+              setShowStatusDropdown={setShowStatusDropdown}
+            />
+          </div>
+        </div>
+
+        <SelectedTagsList 
+          selectedTags={selectedTags}
+          toggleTag={toggleTag}
+          clearAllTags={clearAllTags}
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <LeadsList 
+            leads={filteredLeads.map(lead => convertToSimpleLead(lead))}
+            handleContactLead={handleContactLead}
+            clearFilters={clearFilters}
           />
         </div>
       </div>
-
-      <SelectedTagsList 
-        selectedTags={selectedTags}
-        toggleTag={toggleTag}
-        clearAllTags={clearAllTags}
-      />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        <LeadsList 
-          leads={filteredLeads.map(lead => convertToSimpleLead(lead))}
-          handleContactLead={handleContactLead}
-          clearFilters={clearFilters}
-        />
-      </div>
-    </div>
+    </>
   );
 };
 
