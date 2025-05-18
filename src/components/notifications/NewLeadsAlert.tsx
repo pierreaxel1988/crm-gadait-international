@@ -5,11 +5,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+
 interface NewLead {
   id: string;
   name: string;
   created_at: string;
 }
+
 export const NewLeadsAlert = () => {
   const [visible, setVisible] = useState(false);
   const [newLeads, setNewLeads] = useState<NewLead[]>([]);
@@ -100,7 +102,7 @@ export const NewLeadsAlert = () => {
             </span>
             Nouveaux leads à traiter immédiatement
           </h3>
-          <button onClick={handleDismiss} className="text-gray-500 hover:text-gray-700">
+          <button onClick={handleDismiss} className="text-gray-500 hover:text-gray-700 transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -111,7 +113,7 @@ export const NewLeadsAlert = () => {
           </p>
           
           <div className="space-y-3 max-h-60 overflow-auto">
-            {newLeads.map(lead => <div key={lead.id} className="border rounded-md p-3 bg-gray-50">
+            {newLeads.map(lead => <div key={lead.id} className="border rounded-md p-3 bg-gray-50 hover:bg-gray-100 transition-colors">
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="font-medium">{lead.name}</p>
@@ -125,19 +127,29 @@ export const NewLeadsAlert = () => {
                   })}
                     </p>
                   </div>
-                  <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1" onClick={() => handleViewLead(lead.id)}>
-                    <Phone className="h-3 w-3" />
-                    Contacter
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="bg-gradient-to-r from-loro-hazel to-loro-terracotta hover:from-loro-hazel/90 hover:to-loro-terracotta/90 text-white flex items-center gap-1.5 shadow-md transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5" 
+                    onClick={() => handleViewLead(lead.id)}
+                  >
+                    <div className="bg-white/20 rounded-full p-0.5">
+                      <Phone className="h-3 w-3" strokeWidth={2.5} />
+                    </div>
+                    <span>Contacter</span>
                   </Button>
                 </div>
               </div>)}
           </div>
           
           <div className="mt-4 flex justify-end gap-2">
-            <Button variant="outline" onClick={handleDismiss}>
+            <Button variant="outline" onClick={handleDismiss} className="border-loro-hazel text-loro-hazel hover:bg-loro-hazel/10 transition-colors duration-300">
               Masquer
             </Button>
-            <Button onClick={() => navigate('/pipeline')} className="bg-loro-terracotta">
+            <Button 
+              onClick={() => navigate('/pipeline')} 
+              className="bg-loro-terracotta hover:bg-loro-terracotta/90 shadow-sm transition-all duration-300 hover:shadow-md"
+            >
               Voir le pipeline
             </Button>
           </div>
@@ -145,4 +157,5 @@ export const NewLeadsAlert = () => {
       </div>
     </div>;
 };
+
 export default NewLeadsAlert;
