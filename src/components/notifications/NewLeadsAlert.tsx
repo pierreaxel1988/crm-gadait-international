@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { X, Phone, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -174,13 +173,13 @@ export const NewLeadsAlert = () => {
                   <Button 
                     variant="default" 
                     size="sm" 
-                    className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-md hover:shadow-lg transition-all flex items-center gap-1 group" 
+                    className="bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full px-4 py-2 shadow-md hover:shadow-lg transition-all flex items-center gap-1 group" 
                     onClick={() => handleViewLead(lead.id)}
                   >
-                    <span className="bg-white rounded-full p-1 mr-1 flex items-center justify-center">
-                      <Phone className="h-3 w-3 text-green-600 group-hover:scale-110 transition-transform" strokeWidth={2.5} />
+                    <span className="bg-white rounded-full p-1 flex items-center justify-center">
+                      <Phone className="h-3 w-3 text-[#25D366] group-hover:text-[#128C7E] transition-colors" strokeWidth={3} />
                     </span>
-                    Contacter
+                    <span className="font-medium">Contacter</span>
                   </Button>
                 </div>
               </div>)}
@@ -190,13 +189,13 @@ export const NewLeadsAlert = () => {
             <Button 
               variant="outline" 
               onClick={handleDismiss}
-              className="border-gray-300 hover:bg-gray-100 transition-colors"
+              className="border-gray-300 hover:bg-gray-100 transition-colors rounded-full px-4"
             >
               Masquer
             </Button>
             <Button 
               onClick={() => navigate('/pipeline')} 
-              className="bg-loro-terracotta hover:bg-loro-terracotta/90 transition-colors"
+              className="bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full px-4 transition-colors shadow-md hover:shadow-lg"
             >
               Voir le pipeline
             </Button>
