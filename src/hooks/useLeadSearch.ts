@@ -18,6 +18,18 @@ export interface SearchResult {
   taxResidence?: string;
   preferredLanguage?: string;
   propertyReference?: string;
+  createdAt?: string;
+  tags?: string[];
+  budget?: string; // Changed from number to string to match database
+}
+
+export interface PropertyResult {
+  id: string;
+  title: string;
+  price?: number | string;
+  location?: string;
+  property_type?: string;
+  external_id?: string; // Using external_id instead of reference
 }
 
 export function useLeadSearch(initialSearchTerm: string = '') {
@@ -42,7 +54,7 @@ export function useLeadSearch(initialSearchTerm: string = '') {
         // Use only columns that we know exist in the database
         let query = supabase
           .from('leads')
-          .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source')
+          .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget')
           .order('created_at', { ascending: false })
           .limit(10);
         
@@ -84,6 +96,12 @@ export function useLeadSearch(initialSearchTerm: string = '') {
             pipelineType: lead.pipeline_type,
             nationality: lead.nationality,
             source: lead.source,
+            taxResidence: lead.tax_residence,
+            preferredLanguage: lead.preferred_language,
+            propertyReference: lead.property_reference,
+            createdAt: lead.created_at,
+            tags: lead.tags,
+            budget: lead.budget // Keep as string
           }));
           
           setResults(formattedResults);
@@ -99,10 +117,43 @@ export function useLeadSearch(initialSearchTerm: string = '') {
     searchLeads();
   }, [debouncedSearchTerm]);
 
+  // Function to search properties
+  const searchProperties = async (term: string): Promise<PropertyResult[]> => {
+    if (!term || term.length < 2) {
+      return [];
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('id, title, price, location, property_type, external_id')
+        .or(`title.ilike.%${term}%, location.ilike.%${term}%`)
+        .limit(10);
+
+      if (error) {
+        console.error('Error searching properties:', error);
+        return [];
+      }
+
+      return (data || []).map(property => ({
+        id: property.id,
+        title: property.title,
+        price: property.price,
+        location: property.location,
+        property_type: property.property_type,
+        external_id: property.external_id
+      }));
+    } catch (error) {
+      console.error('Unexpected error during property search:', error);
+      return [];
+    }
+  };
+
   return {
     searchTerm,
     setSearchTerm,
     results,
-    isLoading
+    isLoading,
+    searchProperties
   };
 }
