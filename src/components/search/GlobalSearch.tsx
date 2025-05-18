@@ -35,7 +35,8 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
   // Search for properties when the query changes
   useEffect(() => {
     const fetchPropertyResults = async () => {
-      if (query.length >= 2) {
+      // Reduced minimum search length to 1 character
+      if (query.length >= 1) {
         try {
           const propertyResults = await searchProperties(query);
           setAllResults(prev => ({
@@ -114,6 +115,7 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
           placeholder="Rechercher des leads, propriétés..." 
           value={query} 
           onValueChange={setQuery} 
+          autoFocus
         />
         <CommandList>
           <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
@@ -184,7 +186,7 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
             </CommandGroup>
           )}
 
-          {query.length < 2 && allResults.recentSearches.length > 0 && (
+          {query.length < 1 && allResults.recentSearches.length > 0 && (
             <CommandGroup heading="Recherches récentes">
               {allResults.recentSearches.map(item => (
                 <CommandItem

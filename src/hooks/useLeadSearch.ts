@@ -20,7 +20,7 @@ export interface SearchResult {
   propertyReference?: string;
   createdAt?: string;
   tags?: string[];
-  budget?: string; // Changé en string pour correspondre à la structure de la base de données
+  budget?: string;
 }
 
 export interface PropertyResult {
@@ -29,7 +29,7 @@ export interface PropertyResult {
   price?: number | string;
   location?: string;
   property_type?: string;
-  external_id?: string; // Utilisation de external_id au lieu de reference
+  external_id?: string;
 }
 
 export function useLeadSearch(initialSearchTerm: string = '') {
@@ -40,7 +40,8 @@ export function useLeadSearch(initialSearchTerm: string = '') {
 
   useEffect(() => {
     const searchLeads = async () => {
-      if (!debouncedSearchTerm || debouncedSearchTerm.length < 2) {
+      // Reduced minimum search length to 1 character
+      if (!debouncedSearchTerm || debouncedSearchTerm.length < 1) {
         setResults([]);
         return;
       }
@@ -56,24 +57,25 @@ export function useLeadSearch(initialSearchTerm: string = '') {
           .from('leads')
           .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget')
           .order('created_at', { ascending: false })
-          .limit(10);
+          .limit(20); // Increased limit for more results
         
         // Construction de la clause OR pour la recherche
         let orConditions = [];
         
-        // Recherche par email
+        // Recherche par email - même avec peu de caractères
         orConditions.push(`email.ilike.%${debouncedSearchTerm}%`);
         
-        // Recherche par téléphone
+        // Recherche par téléphone - même avec peu de caractères
         orConditions.push(`phone.ilike.%${debouncedSearchTerm}%`);
         
         // Recherche par nom complet
         orConditions.push(`name.ilike.%${debouncedSearchTerm}%`);
         
         // Si nous avons plusieurs termes, rechercher individuellement pour chaque partie du nom
+        // même avec seulement 1 caractère
         if (searchTerms.length > 1) {
           for (const term of searchTerms) {
-            if (term.length >= 2) {
+            if (term.length >= 1) {
               orConditions.push(`name.ilike.%${term}%`);
             }
           }
@@ -101,7 +103,7 @@ export function useLeadSearch(initialSearchTerm: string = '') {
             propertyReference: lead.property_reference,
             createdAt: lead.created_at,
             tags: lead.tags,
-            budget: lead.budget // Gardé comme string pour correspondre à la structure de la base
+            budget: lead.budget
           }));
           
           setResults(formattedResults);
@@ -119,7 +121,8 @@ export function useLeadSearch(initialSearchTerm: string = '') {
 
   // Fonction pour rechercher des propriétés
   const searchProperties = async (term: string): Promise<PropertyResult[]> => {
-    if (!term || term.length < 2) {
+    // Reduced minimum search length to 1 character
+    if (!term || term.length < 1) {
       return [];
     }
 
