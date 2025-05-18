@@ -48,7 +48,7 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
   };
   
   const handleSelectLead = (lead: SearchResult) => {
-    navigate(`/leads/${lead.id}?tab=overview`);
+    navigate(`/leads/${lead.id}?tab=actions`);
   };
 
   const renderLeadItem = (lead: SearchResult) => (

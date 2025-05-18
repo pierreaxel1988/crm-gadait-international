@@ -32,7 +32,7 @@ const LeadsSearchBar: React.FC<LeadsSearchBarProps> = ({
   const displayIsLoading = propIsLoading || isLoading;
 
   const handleSelectLead = (lead: any) => {
-    navigate(`/leads/${lead.id}?tab=overview`);
+    navigate(`/leads/${lead.id}?tab=actions`);
   };
 
   const renderLeadItem = (lead: any) => (

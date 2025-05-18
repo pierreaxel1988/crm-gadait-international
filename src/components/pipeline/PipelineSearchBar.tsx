@@ -21,7 +21,7 @@ const PipelineSearchBar: React.FC<PipelineSearchBarProps> = ({
   const { results, isLoading } = useLeadSearch(searchTerm);
 
   const handleSelectLead = (lead: SearchResult) => {
-    navigate(`/leads/${lead.id}?tab=overview`);
+    navigate(`/leads/${lead.id}?tab=actions`);
   };
 
   const renderLeadItem = (lead: SearchResult) => (

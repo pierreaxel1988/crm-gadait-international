@@ -87,8 +87,8 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
     setRecentSearches(updatedRecent);
     localStorage.setItem('recentSearches', JSON.stringify(updatedRecent));
     
-    // Navigate to lead detail page
-    navigate(`/leads/${lead.id}?tab=overview`);
+    // Navigate to lead detail page with actions tab
+    navigate(`/leads/${lead.id}?tab=actions`);
     onOpenChange(false);
   };
 
