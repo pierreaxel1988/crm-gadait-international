@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { X, Phone, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -6,27 +5,27 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-
 interface NewLead {
   id: string;
   name: string;
   created_at: string;
 }
-
 export const NewLeadsAlert = () => {
   const [visible, setVisible] = useState(false);
   const [newLeads, setNewLeads] = useState<NewLead[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastShown, setLastShown] = useState(0);
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  
+  const {
+    toast
+  } = useToast();
   const NOTIFICATION_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
   const fetchNewLeads = async () => {
     if (!user) return;
-    
     setLoading(true);
     try {
       // First, find the team member ID of the current user
@@ -34,13 +33,11 @@ export const NewLeadsAlert = () => {
         data: teamMemberData,
         error: teamMemberError
       } = await supabase.from('team_members').select('id').eq('email', user.email).single();
-      
       if (teamMemberError) {
         console.error('Error fetching team member:', teamMemberError);
         setLoading(false);
         return;
       }
-      
       if (!teamMemberData) {
         console.log('No team member found for the current user');
         setLoading(false);
@@ -54,18 +51,16 @@ export const NewLeadsAlert = () => {
       } = await supabase.from('leads').select('id, name, created_at').eq('assigned_to', teamMemberData.id).eq('status', 'New').order('created_at', {
         ascending: false
       });
-      
       if (leadsError) {
         console.error('Error fetching leads:', leadsError);
         setLoading(false);
         return;
       }
-      
       setNewLeads(leadsData || []);
-      
+
       // Only show notification if there are leads and it's time to show the notification again
       const currentTime = Date.now();
-      if ((leadsData && leadsData.length > 0) && (currentTime - lastShown >= NOTIFICATION_INTERVAL)) {
+      if (leadsData && leadsData.length > 0 && currentTime - lastShown >= NOTIFICATION_INTERVAL) {
         setVisible(true);
         setLastShown(currentTime);
       }
@@ -90,51 +85,40 @@ export const NewLeadsAlert = () => {
         fetchNewLeads();
       }
     }, NOTIFICATION_INTERVAL);
-
     return () => clearInterval(interval);
   }, [user, lastShown]);
 
   // Set up a subscription for real-time updates
   useEffect(() => {
     if (!user) return;
-    
-    const channel = supabase.channel('new-leads-changes')
-      .on('postgres_changes', 
-        {
-          event: '*',
-          schema: 'public',
-          table: 'leads',
-          filter: `status=eq.New`
-        }, 
-        payload => {
-          console.log('Change received!', payload);
-          fetchNewLeads();
-        })
-      .subscribe();
-      
+    const channel = supabase.channel('new-leads-changes').on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'leads',
+      filter: `status=eq.New`
+    }, payload => {
+      console.log('Change received!', payload);
+      fetchNewLeads();
+    }).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, [user]);
-
   const handleDismiss = () => {
     setVisible(false);
     // Update last shown time so it will show again after the interval
     setLastShown(Date.now() - NOTIFICATION_INTERVAL + 2 * 60 * 1000); // Show again in 2 minutes
-    
+
     toast({
       title: "Notification masquée",
       description: `Vous pouvez toujours voir les nouveaux leads dans la colonne "Nouveaux" du pipeline.`
     });
   };
-
   const handleViewLead = (leadId: string) => {
     navigate(`/leads/${leadId}?tab=actions`);
     setVisible(false);
   };
-
   if (!visible || loading || newLeads.length === 0) return null;
-
   return <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden animate-in fade-in-0 slide-in-from-top-5 duration-300">
         <div className="px-4 py-3 bg-gradient-to-r from-red-50 to-red-100 border-b border-red-100 flex justify-between items-center">
@@ -163,20 +147,15 @@ export const NewLeadsAlert = () => {
                     <p className="font-medium">{lead.name}</p>
                     <p className="text-xs text-gray-500">
                       Créé le {new Date(lead.created_at).toLocaleDateString('fr-FR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                     </p>
                   </div>
-                  <Button 
-                    variant="default" 
-                    size="sm" 
-                    className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-md hover:shadow-lg transition-all flex items-center gap-1 group" 
-                    onClick={() => handleViewLead(lead.id)}
-                  >
+                  <Button variant="default" size="sm" onClick={() => handleViewLead(lead.id)} className="garde le meme format que les tags dans la page /action c'est plus coherent ">
                     <span className="bg-white rounded-full p-1 mr-1 flex items-center justify-center">
                       <Phone className="h-3 w-3 text-green-600 group-hover:scale-110 transition-transform" strokeWidth={2.5} />
                     </span>
@@ -187,17 +166,10 @@ export const NewLeadsAlert = () => {
           </div>
           
           <div className="mt-4 flex justify-end gap-2">
-            <Button 
-              variant="outline" 
-              onClick={handleDismiss}
-              className="border-gray-300 hover:bg-gray-100 transition-colors"
-            >
+            <Button variant="outline" onClick={handleDismiss} className="border-gray-300 hover:bg-gray-100 transition-colors">
               Masquer
             </Button>
-            <Button 
-              onClick={() => navigate('/pipeline')} 
-              className="bg-loro-terracotta hover:bg-loro-terracotta/90 transition-colors"
-            >
+            <Button onClick={() => navigate('/pipeline')} className="bg-loro-terracotta hover:bg-loro-terracotta/90 transition-colors">
               Voir le pipeline
             </Button>
           </div>
@@ -205,5 +177,4 @@ export const NewLeadsAlert = () => {
       </div>
     </div>;
 };
-
 export default NewLeadsAlert;
