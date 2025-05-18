@@ -36,12 +36,21 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
   useEffect(() => {
     const fetchPropertyResults = async () => {
       if (query.length >= 2) {
-        const propertyResults = await searchProperties(query);
-        setAllResults(prev => ({
-          ...prev,
-          properties: propertyResults,
-          leads: leadResults
-        }));
+        try {
+          const propertyResults = await searchProperties(query);
+          setAllResults(prev => ({
+            ...prev,
+            properties: propertyResults,
+            leads: leadResults
+          }));
+        } catch (error) {
+          console.error("Error fetching property results:", error);
+          setAllResults(prev => ({
+            ...prev,
+            properties: [],
+            leads: leadResults
+          }));
+        }
       } else {
         setAllResults(prev => ({
           ...prev,

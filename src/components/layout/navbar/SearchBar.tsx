@@ -2,10 +2,8 @@
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import GlobalSearch from '@/components/search/GlobalSearch';
-import { useNavigate } from 'react-router-dom';
 
 const SearchBar = () => {
   const isMobile = useIsMobile();

@@ -20,7 +20,7 @@ export interface SearchResult {
   propertyReference?: string;
   createdAt?: string;
   tags?: string[];
-  budget?: string; // Changed from number to string to match database
+  budget?: string; // Changé en string pour correspondre à la structure de la base de données
 }
 
 export interface PropertyResult {
@@ -29,7 +29,7 @@ export interface PropertyResult {
   price?: number | string;
   location?: string;
   property_type?: string;
-  external_id?: string; // Using external_id instead of reference
+  external_id?: string; // Utilisation de external_id au lieu de reference
 }
 
 export function useLeadSearch(initialSearchTerm: string = '') {
@@ -51,7 +51,7 @@ export function useLeadSearch(initialSearchTerm: string = '') {
         // Diviser les termes de recherche en mots pour rechercher prénom/nom séparément
         const searchTerms = debouncedSearchTerm.split(' ').filter(term => term.length > 0);
         
-        // Use only columns that we know exist in the database
+        // Utiliser uniquement les colonnes qui existent dans la base de données
         let query = supabase
           .from('leads')
           .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget')
@@ -101,7 +101,7 @@ export function useLeadSearch(initialSearchTerm: string = '') {
             propertyReference: lead.property_reference,
             createdAt: lead.created_at,
             tags: lead.tags,
-            budget: lead.budget // Keep as string
+            budget: lead.budget // Gardé comme string pour correspondre à la structure de la base
           }));
           
           setResults(formattedResults);
@@ -117,17 +117,18 @@ export function useLeadSearch(initialSearchTerm: string = '') {
     searchLeads();
   }, [debouncedSearchTerm]);
 
-  // Function to search properties
+  // Fonction pour rechercher des propriétés
   const searchProperties = async (term: string): Promise<PropertyResult[]> => {
     if (!term || term.length < 2) {
       return [];
     }
 
     try {
+      // Utiliser les colonnes qui existent dans la table properties
       const { data, error } = await supabase
         .from('properties')
         .select('id, title, price, location, property_type, external_id')
-        .or(`title.ilike.%${term}%, location.ilike.%${term}%`)
+        .or(`title.ilike.%${term}%, location.ilike.%${term}%, external_id.ilike.%${term}%`)
         .limit(10);
 
       if (error) {
