@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -22,7 +21,7 @@ import SelectedTagsList from '@/components/leads/filters/SelectedTagsList';
 // Import required types and functions
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
-import { getLeads, convertToSimpleLead } from '@/services/leadReader';
+import { getLeads, convertToSimpleLead } from '@/services/leadCore';
 
 const Leads = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -109,6 +108,9 @@ const Leads = () => {
     setSelectedTags([]);
   };
 
+  // Map each lead through the convertToSimpleLead function to ensure proper property naming
+  const simplifiedLeads = filteredLeads.map(lead => convertToSimpleLead(lead));
+
   return (
     <>
       <Navbar />
@@ -147,7 +149,7 @@ const Leads = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           <LeadsList 
-            leads={filteredLeads.map(lead => convertToSimpleLead(lead))}
+            leads={simplifiedLeads}
             handleContactLead={handleContactLead}
             clearFilters={clearFilters}
           />
