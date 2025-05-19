@@ -13,7 +13,7 @@ const LeadNewHeader: React.FC<LeadNewHeaderProps> = ({
       </CustomButton>
       <div>
         <h1 className="text-2xl md:text-3xl font-futura text-loro-text">Nouveau Lead</h1>
-        <p className="text-chocolate-dark font-futuraLight">Ajouter un nouveau lead dans le système</p>
+        <p className="font-futuraLight text-loro-900">Ajouter un nouveau lead dans le système</p>
       </div>
     </div>;
 };
