@@ -159,7 +159,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
           <Button 
             type="submit" 
             disabled={isSubmitting}
-            className="relative bg-loro-navy hover:bg-loro-navy/90"
+            className="relative bg-chocolate-dark hover:bg-chocolate-light"
           >
             {isSubmitting ? 'Sauvegarde en cours...' : (lead ? 'Sauvegarder' : 'Créer')}
             {isSubmitting && (

@@ -17,7 +17,7 @@ const LeadFormWrapper: React.FC<LeadFormWrapperProps> = ({
   isSubmitting
 }) => {
   return (
-    <div className="bg-white rounded-md shadow-md p-6 border-loro-sand">
+    <div className="luxury-card p-6 border-loro-sand">
       <LeadForm 
         onSubmit={onSubmit} 
         onCancel={onCancel}
