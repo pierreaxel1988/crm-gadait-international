@@ -13,13 +13,13 @@ const LeadNewHeader: React.FC<LeadNewHeaderProps> = ({ onBack }) => {
       <CustomButton 
         variant="outline" 
         onClick={onBack}
-        className="w-auto p-2 rounded border-chocolate-light text-chocolate-dark hover:bg-chocolate-light/10"
+        className="w-auto p-2 rounded border-loro-pearl bg-loro-navy/50 text-loro-white hover:bg-loro-navy/40"
       >
         <ArrowLeft className="h-4 w-4" />
       </CustomButton>
       <div>
-        <h1 className="text-2xl md:text-3xl font-futura text-loro-navy">Nouveau Lead</h1>
-        <p className="text-chocolate-dark font-futuraLight">Ajouter un nouveau lead dans le système</p>
+        <h1 className="text-2xl md:text-3xl font-futura text-loro-white">Nouveau Lead</h1>
+        <p className="text-loro-pearl font-futuraLight">Ajouter un nouveau lead dans le système</p>
       </div>
     </div>
   );

@@ -25,7 +25,7 @@ const LeadNew = () => {
   } = useLeadCreation();
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="bg-loro-navy min-h-screen p-4 md:p-6 space-y-6">
       <LeadNewHeader onBack={() => navigate(-1)} />
 
       {error && <LeadErrorAlert error={error} />}

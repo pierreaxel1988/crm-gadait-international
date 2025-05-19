@@ -1,102 +1,96 @@
 
 import React from 'react';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PipelineType, LeadStatus } from '@/types/lead';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
-import { LeadStatus, PipelineType } from '@/types/lead';
-import { getStatusesForPipeline } from '@/utils/pipelineUtils';
 
 interface AdminAssignmentSectionProps {
   pipelineType: PipelineType;
   leadStatus: LeadStatus;
-  assignedAgent?: string;
+  assignedAgent: string | undefined;
   availableStatuses: LeadStatus[];
-  onPipelineTypeChange: (type: PipelineType) => void;
-  onStatusChange: (status: LeadStatus) => void;
-  onAgentChange: (agentId: string | undefined) => void;
+  onPipelineTypeChange: (value: PipelineType) => void;
+  onStatusChange: (value: LeadStatus) => void;
+  onAgentChange: (value: string | undefined) => void;
 }
 
 const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
   pipelineType,
   leadStatus,
   assignedAgent,
+  availableStatuses,
   onPipelineTypeChange,
   onStatusChange,
   onAgentChange
 }) => {
-  // Get the correct statuses based on the current pipeline type
-  const availableStatuses = getStatusesForPipeline(pipelineType);
-
-  // Status label mapping based on pipeline type
-  const getStatusLabel = (status: LeadStatus): string => {
-    if (pipelineType === 'owners') {
-      const ownerStatusLabels: Record<LeadStatus, string> = {
-        'New': 'Premier contact',
-        'Contacted': 'Rendez-vous programmé',
-        'Qualified': 'Visite effectuée',
-        'Proposal': 'Mandat en négociation',
-        'Visit': 'Bien en commercialisation',
-        'Offre': 'Offre reçue',
-        'Deposit': 'Compromis signé',
-        'Signed': 'Mandat signé',
-        'Gagné': 'Vente finalisée',
-        'Perdu': 'Perdu/Annulé'
-      };
-      return ownerStatusLabels[status] || status;
-    }
-    return status;
-  };
-
   return (
-    <div className="space-y-4 bg-white border rounded-lg p-4">
-      <div className="space-y-2">
-        <Label>Type de pipeline</Label>
-        <RadioGroup 
-          value={pipelineType} 
-          onValueChange={(value: PipelineType) => onPipelineTypeChange(value)}
-          className="flex space-x-4"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="purchase" id="purchase" />
-            <Label htmlFor="purchase" className="cursor-pointer">Achat</Label>
+    <div className="bg-white rounded-md shadow-md p-6">
+      <h2 className="text-lg font-futura mb-4 text-loro-navy">Options administrateur</h2>
+      
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-sm font-futura">Type de pipeline</label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className={`px-4 py-2 rounded-md font-futura text-sm ${
+                pipelineType === 'purchase' 
+                  ? 'bg-loro-navy text-white' 
+                  : 'bg-white text-loro-navy border border-loro-pearl'
+              }`}
+              onClick={() => onPipelineTypeChange('purchase')}
+            >
+              Achat
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 rounded-md font-futura text-sm ${
+                pipelineType === 'rental' 
+                  ? 'bg-loro-navy text-white' 
+                  : 'bg-white text-loro-navy border border-loro-pearl'
+              }`}
+              onClick={() => onPipelineTypeChange('rental')}
+            >
+              Location
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 rounded-md font-futura text-sm ${
+                pipelineType === 'seller' 
+                  ? 'bg-loro-navy text-white' 
+                  : 'bg-white text-loro-navy border border-loro-pearl'
+              }`}
+              onClick={() => onPipelineTypeChange('seller')}
+            >
+              Propriétaires
+            </button>
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="rental" id="rental" />
-            <Label htmlFor="rental" className="cursor-pointer">Location</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="owners" id="owners" />
-            <Label htmlFor="owners" className="cursor-pointer">Propriétaires</Label>
-          </div>
-        </RadioGroup>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Statut du lead</Label>
-        <Select 
-          value={leadStatus} 
-          onValueChange={(value: LeadStatus) => onStatusChange(value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Sélectionner un statut" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableStatuses.map(status => (
-              <SelectItem key={status} value={status}>
-                {getStatusLabel(status)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Attribuer à un agent</Label>
-        <TeamMemberSelect
-          value={assignedAgent}
-          onChange={onAgentChange}
-        />
+        </div>
+        
+        <div className="space-y-2">
+          <label className="text-sm font-futura">Statut du lead</label>
+          <Select value={leadStatus} onValueChange={onStatusChange}>
+            <SelectTrigger className="w-full font-futura">
+              <SelectValue placeholder="Sélectionner un statut" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableStatuses.map(status => (
+                <SelectItem key={status} value={status} className="font-futura">
+                  {status}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <label className="text-sm font-futura">Attribuer à un agent</label>
+          <TeamMemberSelect
+            selectedMemberId={assignedAgent}
+            onSelectMember={onAgentChange}
+            placeholder="Sélectionner un agent"
+          />
+        </div>
       </div>
     </div>
   );
