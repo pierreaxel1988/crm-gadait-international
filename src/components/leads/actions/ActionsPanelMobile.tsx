@@ -254,37 +254,30 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     }
   };
 
-  // Update the sorting function to sort by scheduledDate in descending order (newest first)
+  // Fix: Correctly sort actions by date, newest at top
   const sortedActions = [...actionHistory].sort((a, b) => {
     try {
       if (!a.scheduledDate && !b.scheduledDate) return 0;
       if (!a.scheduledDate) return 1;
       if (!b.scheduledDate) return -1;
       
-      // Vérification supplémentaire pour les dates invalides
-      const timestampA = Date.parse(a.scheduledDate);
-      const timestampB = Date.parse(b.scheduledDate);
+      // Parse dates safely
+      const dateA = new Date(a.scheduledDate);
+      const dateB = new Date(b.scheduledDate);
       
-      if (isNaN(timestampA) && isNaN(timestampB)) return 0;
-      if (isNaN(timestampA)) return 1;
-      if (isNaN(timestampB)) return -1;
-      
-      const dateA = new Date(timestampA);
-      const dateB = new Date(timestampB);
-      
+      // Perform validation checks
       if (!isValid(dateA) || !isValid(dateB)) {
         console.warn('Invalid date encountered during sorting', { a, b });
-        return 0; // Maintenir l'ordre existant si une date est invalide
+        return 0;
       }
       
-      // Changed from dateB - dateA to dateA - dateB to reverse the order
-      // Most recent dates (newer) will now appear first
-      return new Date(dateA.getTime()).getTime() - new Date(dateB.getTime()).getTime();
+      // Return most recent first (B - A for descending order)
+      return dateB.getTime() - dateA.getTime();
     } catch (error) {
       console.error('Error sorting actions:', error);
       return 0;
     }
-  }).reverse(); // Added reverse() to make sure newest appears first
+  });
 
   const pendingActions = sortedActions.filter(action => !action.completedDate);
   const completedActions = sortedActions.filter(action => action.completedDate);
