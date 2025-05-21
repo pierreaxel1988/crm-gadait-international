@@ -7,6 +7,7 @@ import DesktopPipelineView from '@/components/pipeline/DesktopPipelineView';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
+import LoadingScreen from '@/components/layout/LoadingScreen';
 import ComponentLoader from '@/components/common/ComponentLoader';
 import { reassignJadeLeads, reassignJeanMarcLeads, reassignSharonLeads } from '@/services/leadService';
 import NewLeadsAlert from '@/components/notifications/NewLeadsAlert';
@@ -92,7 +93,7 @@ const Pipeline = () => {
       <Navbar />
       <SubNavigation />
       <NewLeadsAlert />
-      <div className="min-h-screen bg-white">
+      <div className="p-3 md:p-6 bg-white min-h-screen">
         <ComponentLoader isLoading={isRefreshing}>
           {isMobile ? (
             <MobilePipelineView
