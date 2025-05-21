@@ -96,48 +96,46 @@ const Pipeline = () => {
         <NewLeadsAlert />
       </div>
       
-      <div className="p-4 md:p-6 bg-white min-h-screen pt-[144px]">
-        <div className="max-w-7xl mx-auto">
-          <ComponentLoader isLoading={isRefreshing}>
-            {isMobile ? (
-              <MobilePipelineView
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                filtersOpen={filtersOpen}
-                toggleFilters={toggleFilters}
-                activeFiltersCount={activeFiltersCount}
-                filters={filters}
-                onFilterChange={setFilters}
-                onClearFilters={handleClearAllFilters}
-                columns={getAllColumns()}
-                handleRefresh={handleRefresh}
-                isRefreshing={isRefreshing}
-                isFilterActive={isFilterActive}
-                teamMembers={teamMembers}
-              />
-            ) : (
-              <DesktopPipelineView
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                filtersOpen={filtersOpen}
-                toggleFilters={toggleFilters}
-                activeFiltersCount={activeFiltersCount}
-                filters={filters}
-                onFilterChange={setFilters}
-                onClearFilters={handleClearAllFilters}
-                columns={getAllColumns()}
-                handleRefresh={handleRefresh}
-                isRefreshing={isRefreshing}
-                isFilterActive={isFilterActive}
-                teamMembers={teamMembers}
-              />
-            )}
-          </ComponentLoader>
-        </div>
+      <div className="pt-[144px] bg-white min-h-screen">
+        <ComponentLoader isLoading={isRefreshing}>
+          {isMobile ? (
+            <MobilePipelineView
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filtersOpen={filtersOpen}
+              toggleFilters={toggleFilters}
+              activeFiltersCount={activeFiltersCount}
+              filters={filters}
+              onFilterChange={setFilters}
+              onClearFilters={handleClearAllFilters}
+              columns={getAllColumns()}
+              handleRefresh={handleRefresh}
+              isRefreshing={isRefreshing}
+              isFilterActive={isFilterActive}
+              teamMembers={teamMembers}
+            />
+          ) : (
+            <DesktopPipelineView
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filtersOpen={filtersOpen}
+              toggleFilters={toggleFilters}
+              activeFiltersCount={activeFiltersCount}
+              filters={filters}
+              onFilterChange={setFilters}
+              onClearFilters={handleClearAllFilters}
+              columns={getAllColumns()}
+              handleRefresh={handleRefresh}
+              isRefreshing={isRefreshing}
+              isFilterActive={isFilterActive}
+              teamMembers={teamMembers}
+            />
+          )}
+        </ComponentLoader>
       </div>
     </div>
   );
