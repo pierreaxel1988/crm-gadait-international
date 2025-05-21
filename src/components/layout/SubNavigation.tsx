@@ -29,7 +29,8 @@ const SubNavigation = () => {
     name: 'Chat Gadait',
     path: '/chat-gadait',
     icon: MessageSquare,
-    showNotification: location.pathname !== '/notifications' && unreadCount > 0
+    // Removing the notification badge from Chat Gadait
+    showNotification: false
   }, {
     name: 'Propriétés',
     path: '/properties',
