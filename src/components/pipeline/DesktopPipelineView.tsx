@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -12,6 +13,7 @@ import LeadsList from './components/LeadsList';
 import AddLeadButton from './components/AddLeadButton';
 import { DesktopPipelineViewProps, SortBy } from './types/pipelineTypes';
 import { PipelineType } from '@/types/lead';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const statusTranslations: Record<string, string> = {
   'New': 'Nouveaux',
@@ -107,8 +109,9 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   const totalLeadCount = leadsByStatus.length;
 
   return (
-    <div className="flex flex-col">
-      <div className="sticky top-[64px] z-20 bg-white pb-4 border-b space-y-4">
+    <div className="flex flex-col h-full">
+      {/* Fixed header section */}
+      <div className="fixed top-[128px] left-0 right-0 z-20 bg-white pb-4 border-b px-6">
         <PipelineHeader
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -165,20 +168,27 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
             </TabsList>
           </Tabs>
         </div>
+        
+        <SortingControls 
+          sortBy={sortBy} 
+          onSortChange={setSortBy} 
+        />
       </div>
       
-      <SortingControls 
-        sortBy={sortBy} 
-        onSortChange={setSortBy} 
-      />
-      
-      <LeadsList 
-        leads={sortedLeads}
-        isLoading={isLoading}
-        onLeadClick={handleLeadClick}
-        onAddLead={handleAddLead}
-        teamMembers={teamMembers}
-      />
+      {/* Scrollable content area with padding to account for fixed header */}
+      <div className="mt-[270px] flex-1">
+        <ScrollArea className="h-[calc(100vh-270px)]">
+          <div className="px-6">
+            <LeadsList 
+              leads={sortedLeads}
+              isLoading={isLoading}
+              onLeadClick={handleLeadClick}
+              onAddLead={handleAddLead}
+              teamMembers={teamMembers}
+            />
+          </div>
+        </ScrollArea>
+      </div>
       
       <AddLeadButton onClick={handleAddLead} />
       

@@ -16,6 +16,8 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
     // If a country is selected, only show locations from that country
     const locations = country ? getLocationsByCountry(country) : getAllLocations();
     
+    if (!searchTerm) return [];
+    
     return locations
       .filter(loc => 
         loc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
