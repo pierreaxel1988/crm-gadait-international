@@ -34,7 +34,7 @@ const SubNavigation = () => {
 
   // Mobile navigation with horizontal scrolling - icons only
   if (isMobile) {
-    return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-loro-50 shadow-sm">
+    return <div className="w-full border-b border-loro-pearl bg-loro-50 shadow-sm">
         <div className="overflow-x-auto py-2 bg-loro-50">
           <div className="flex justify-between px-2 w-full">
             {navigationItems.map(item => <Link key={item.name} to={item.path} className={cn(
@@ -50,9 +50,9 @@ const SubNavigation = () => {
       </div>;
   }
 
-  // Desktop navigation with text and better responsive behavior - make it fixed when scrolling
-  return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-loro-50 shadow-sm">
-      <div className="bg-loro-50 py-2 sticky top-16 z-40">
+  // Desktop navigation with text and better responsive behavior
+  return <div className="w-full border-b border-loro-pearl bg-loro-50 shadow-sm">
+      <div className="bg-loro-50 py-2">
         <div className="max-w-screen-xl mx-auto px-4">
           <NavigationMenu className="mx-auto flex justify-center w-full">
             <NavigationMenuList className={cn(

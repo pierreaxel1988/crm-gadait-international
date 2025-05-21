@@ -108,7 +108,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
 
   return (
     <div className="flex flex-col">
-      <div className="sticky top-[64px] z-20 bg-white pb-4 border-b space-y-4">
+      <div className="sticky top-0 z-20 bg-white pb-4 border-b space-y-4">
         <PipelineHeader
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -172,13 +172,15 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         onSortChange={setSortBy} 
       />
       
-      <LeadsList 
-        leads={sortedLeads}
-        isLoading={isLoading}
-        onLeadClick={handleLeadClick}
-        onAddLead={handleAddLead}
-        teamMembers={teamMembers}
-      />
+      <div className="overflow-y-auto">
+        <LeadsList 
+          leads={sortedLeads}
+          isLoading={isLoading}
+          onLeadClick={handleLeadClick}
+          onAddLead={handleAddLead}
+          teamMembers={teamMembers}
+        />
+      </div>
       
       <AddLeadButton onClick={handleAddLead} />
       

@@ -89,11 +89,14 @@ const Pipeline = () => {
   };
 
   return (
-    <>
-      <Navbar />
-      <SubNavigation />
-      <NewLeadsAlert />
-      <div className="p-3 md:p-6 bg-white min-h-screen">
+    <div className="flex flex-col min-h-screen">
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <Navbar />
+        <SubNavigation />
+        <NewLeadsAlert />
+      </div>
+      
+      <div className="pt-[144px] bg-white min-h-screen">
         <ComponentLoader isLoading={isRefreshing}>
           {isMobile ? (
             <MobilePipelineView
@@ -134,7 +137,7 @@ const Pipeline = () => {
           )}
         </ComponentLoader>
       </div>
-    </>
+    </div>
   );
 };
 

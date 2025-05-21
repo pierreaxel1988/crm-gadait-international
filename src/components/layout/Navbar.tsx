@@ -25,7 +25,7 @@ const Navbar: React.FC<NavbarProps> = ({
     <>
       <ImmersiveHeaderOverlay />
       <nav className={cn(
-        "sticky top-0 z-40 w-full border-b border-loro-pearl transition-all duration-300",
+        "w-full border-b border-loro-pearl transition-all duration-300",
         "bg-[#0A2540] text-white"
       )}>
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6">
