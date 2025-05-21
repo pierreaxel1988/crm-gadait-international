@@ -111,6 +111,10 @@ export function useLeadSearch(initialSearchTerm: string = '') {
             orConditions.push(`name.ilike.%${searchTerms[1]}%${searchTerms[0]}%`);
           }
           
+          // Add searches for each term separately and with no spaces (for names like hernando vergara)
+          orConditions.push(`name.ilike.%${searchTerms.join('')}%`); // Search without spaces
+          orConditions.push(`name.ilike.%${searchTerms.join('%')}%`); // Search with any characters between terms
+
           // Add searches for each term separately
           for (const term of searchTerms) {
             if (term.length >= 1) {
@@ -151,12 +155,19 @@ export function useLeadSearch(initialSearchTerm: string = '') {
               score += 25;
             }
             
-            // If multi-word search, check if all terms are included
+            // Special handling for multi-word searches to improve matching
             if (searchTerms.length > 1) {
+              // Check if all terms are included in any order (even if not adjacent)
               const allTermsIncluded = searchTerms.every(term => 
                 nameLower.includes(term.toLowerCase())
               );
               if (allTermsIncluded) score += 40;
+              
+              // Give higher scores to names that include search terms in sequence
+              const sequentialTerms = searchTerms.join('.*');
+              if (new RegExp(sequentialTerms, 'i').test(nameLower)) {
+                score += 30;
+              }
             }
             
             return {

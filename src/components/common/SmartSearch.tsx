@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -152,8 +152,8 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
   }, [onSelect]);
 
   const handleInputBlur = useCallback(() => {
+    // Use a short delay to allow clicks on list items to be detected
     if (onBlur) {
-      // Use a short delay to allow clicks on list items to be detected
       setTimeout(() => {
         onBlur();
       }, 200);
