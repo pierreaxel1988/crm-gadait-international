@@ -4,7 +4,7 @@ import { SortingControlsProps, SortBy } from '../types/pipelineTypes';
 
 const SortingControls: React.FC<SortingControlsProps> = ({ sortBy, onSortChange }) => {
   return (
-    <div className="flex flex-wrap gap-3 items-center justify-between bg-gray-50 rounded-lg p-3 mb-4 border border-gray-200 shadow-sm">
+    <div className="flex flex-wrap gap-3 items-center justify-between bg-gray-50 rounded-lg p-3 mb-4">
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-gray-700">Trier par:</span>
         <div className="flex space-x-2">
