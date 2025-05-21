@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { useActionsData } from './useActionsData';
 import { format, isPast, isToday } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useAuth } from '@/hooks/useAuth';
+import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 
 export interface Notification {
   id: string;
@@ -25,6 +25,7 @@ export const useNotifications = () => {
   const [notificationToastShown, setNotificationToastShown] = useState<boolean>(true); // Default to true to prevent initial toast
   const { actions, markActionComplete } = useActionsData();
   const { user, isAdmin, isCommercial, userRole } = useAuth();
+  const { selectedAgent } = useSelectedAgent();
   
   // Load system notifications only once and don't show them by default
   useEffect(() => {
@@ -72,6 +73,15 @@ export const useNotifications = () => {
           // This is a simple check - in production you might want to map emails to assignedToName more robustly
           const isAssignedToCurrentUser = userEmail && action.assignedToName.toLowerCase().includes(userEmail.split('@')[0].toLowerCase());
           if (!isAssignedToCurrentUser) return false;
+        }
+        
+        // For admin users with a selected agent (from the pipeline filter)
+        if (isAdmin && selectedAgent && action.assignedToName) {
+          // Find the team member name for comparison
+          // We need to check if the action is assigned to the selected agent
+          // This comparison is simplified - in production you'd want a more robust method
+          const teamMemberMatchesAction = selectedAgent && action.assignedTo === selectedAgent;
+          if (!teamMemberMatchesAction) return false;
         }
         
         const isActionToday = isToday(scheduledDate);
@@ -124,7 +134,7 @@ export const useNotifications = () => {
         setNotifications(prev => [...actionNotifications, ...prev]);
       }
     }
-  }, [actions, processedActionIds, isCommercial, user]);
+  }, [actions, processedActionIds, isCommercial, user, isAdmin, selectedAgent]);
   
   const markAsRead = (id: string) => {
     setNotifications(notifications.map(notification => 
