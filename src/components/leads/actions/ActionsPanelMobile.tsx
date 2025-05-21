@@ -254,6 +254,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     }
   };
 
+  // Update the sorting function to sort by scheduledDate in descending order (newest first)
   const sortedActions = [...actionHistory].sort((a, b) => {
     try {
       if (!a.scheduledDate && !b.scheduledDate) return 0;
@@ -276,12 +277,14 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         return 0; // Maintenir l'ordre existant si une date est invalide
       }
       
-      return new Date(dateB.getTime()).getTime() - new Date(dateA.getTime()).getTime();
+      // Changed from dateB - dateA to dateA - dateB to reverse the order
+      // Most recent dates (newer) will now appear first
+      return new Date(dateA.getTime()).getTime() - new Date(dateB.getTime()).getTime();
     } catch (error) {
       console.error('Error sorting actions:', error);
       return 0;
     }
-  });
+  }).reverse(); // Added reverse() to make sure newest appears first
 
   const pendingActions = sortedActions.filter(action => !action.completedDate);
   const completedActions = sortedActions.filter(action => action.completedDate);
