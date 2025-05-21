@@ -5,10 +5,13 @@ import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { MessageSquare, Calendar, ListTodo, File, ClipboardList } from 'lucide-react';
 import { useBreakpoint } from '@/hooks/use-mobile';
+import { useNotifications } from '@/hooks/useNotifications';
+import NotificationBadge from './navbar/NotificationBadge';
 
 const SubNavigation = () => {
   const location = useLocation();
   const { isMobile, isTablet, isDesktop } = useBreakpoint();
+  const { unreadCount } = useNotifications();
   
   const navigationItems = [{
     name: 'Pipeline',
@@ -25,7 +28,8 @@ const SubNavigation = () => {
   }, {
     name: 'Chat Gadait',
     path: '/chat-gadait',
-    icon: MessageSquare
+    icon: MessageSquare,
+    showNotification: location.pathname !== '/notifications' && unreadCount > 0
   }, {
     name: 'Propriétés',
     path: '/properties',
@@ -44,6 +48,7 @@ const SubNavigation = () => {
                 : "text-loro-navy hover:text-loro-terracotta"
             )}>
                 {item.icon && <item.icon className="h-5 w-5" />}
+                {item.showNotification && <NotificationBadge count={unreadCount} />}
               </Link>)}
           </div>
         </div>
@@ -72,6 +77,7 @@ const SubNavigation = () => {
                   >
                     {item.icon && <item.icon className="h-5 w-5 mr-2" />}
                     <span className={cn("font-medium", isTablet ? "text-xs" : "text-sm")}>{item.name}</span>
+                    {item.showNotification && <NotificationBadge count={unreadCount} />}
                   </Link>
                 </NavigationMenuItem>)}
             </NavigationMenuList>

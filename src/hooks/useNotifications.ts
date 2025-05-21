@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { useActionsData } from './useActionsData';
 import { format, isPast, isToday } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface Notification {
   id: string;
@@ -22,6 +24,7 @@ export const useNotifications = () => {
   const [systemNotificationsShown, setSystemNotificationsShown] = useState<boolean>(false);
   const [notificationToastShown, setNotificationToastShown] = useState<boolean>(true); // Default to true to prevent initial toast
   const { actions, markActionComplete } = useActionsData();
+  const { user, isAdmin, isCommercial, userRole } = useAuth();
   
   // Load system notifications only once and don't show them by default
   useEffect(() => {
@@ -61,6 +64,15 @@ export const useNotifications = () => {
         
         const scheduledDate = action.scheduledDate ? new Date(action.scheduledDate) : null;
         if (!scheduledDate) return false;
+        
+        // For commercial users, only show their own actions
+        if (isCommercial && user && action.assignedToName) {
+          const userEmail = user.email?.toLowerCase();
+          // Check if the action is assigned to the current user
+          // This is a simple check - in production you might want to map emails to assignedToName more robustly
+          const isAssignedToCurrentUser = userEmail && action.assignedToName.toLowerCase().includes(userEmail.split('@')[0].toLowerCase());
+          if (!isAssignedToCurrentUser) return false;
+        }
         
         const isActionToday = isToday(scheduledDate);
         const isActionOverdue = isPast(scheduledDate) && !isToday(scheduledDate);
@@ -112,7 +124,7 @@ export const useNotifications = () => {
         setNotifications(prev => [...actionNotifications, ...prev]);
       }
     }
-  }, [actions, processedActionIds]);
+  }, [actions, processedActionIds, isCommercial, user]);
   
   const markAsRead = (id: string) => {
     setNotifications(notifications.map(notification => 

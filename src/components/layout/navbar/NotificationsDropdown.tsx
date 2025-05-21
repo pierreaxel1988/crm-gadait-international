@@ -5,10 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import NotificationBadge from './NotificationBadge';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useAuth } from '@/hooks/useAuth';
 
 const NotificationsDropdown = () => {
   const navigate = useNavigate();
   const { unreadCount } = useNotifications();
+  const { user, isAdmin, isCommercial } = useAuth();
 
   const handleNotificationClick = () => {
     navigate('/notifications');
