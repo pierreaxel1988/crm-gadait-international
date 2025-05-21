@@ -19,62 +19,46 @@ interface SearchResults {
 const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const { searchTerm, setSearchTerm, results: leadResults, searchProperties } = useLeadSearch();
+  // Séparons la logique de recherche et d'affichage
+  const { searchProperties } = useLeadSearch();
+  const [leadResults, setLeadResults] = useState<SearchResult[]>([]);
+  const [propertyResults, setPropertyResults] = useState<PropertyResult[]>([]);
   const [recentSearches, setRecentSearches] = useState<SearchResult[]>([]);
-  const [allResults, setAllResults] = useState<SearchResults>({
-    leads: [],
-    properties: [],
-    recentSearches: []
-  });
   
-  // Update the search term when the query changes
+  // Utilisez un hook personnalisé pour rechercher les leads
+  const { results, isLoading } = useLeadSearch(query);
+  
+  // Mettre à jour les résultats quand results change
   useEffect(() => {
-    setSearchTerm(query);
-  }, [query, setSearchTerm]);
+    setLeadResults(results);
+  }, [results]);
 
-  // Search for properties when the query changes
+  // Effet pour rechercher les propriétés lorsque la requête change
   useEffect(() => {
     const fetchPropertyResults = async () => {
-      // Search with just 1 character
       if (query.length >= 1) {
         try {
-          const propertyResults = await searchProperties(query);
-          setAllResults(prev => ({
-            ...prev,
-            properties: propertyResults,
-            leads: leadResults
-          }));
+          const results = await searchProperties(query);
+          setPropertyResults(results);
         } catch (error) {
           console.error("Error fetching property results:", error);
-          setAllResults(prev => ({
-            ...prev,
-            properties: [],
-            leads: leadResults
-          }));
+          setPropertyResults([]);
         }
       } else {
-        setAllResults(prev => ({
-          ...prev,
-          properties: [],
-          leads: []
-        }));
+        setPropertyResults([]);
       }
     };
 
     fetchPropertyResults();
-  }, [query, leadResults, searchProperties]);
+  }, [query, searchProperties]);
 
-  // Load recent searches from localStorage when component mounts
+  // Charger les recherches récentes depuis localStorage au montage
   useEffect(() => {
     const saved = localStorage.getItem('recentSearches');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         setRecentSearches(parsed);
-        setAllResults(prev => ({
-          ...prev,
-          recentSearches: parsed
-        }));
       } catch (e) {
         console.error('Error parsing recent searches:', e);
       }
@@ -82,18 +66,18 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
   }, []);
 
   const handleSelectLead = (lead: SearchResult) => {
-    // Add to recent searches
+    // Ajouter aux recherches récentes
     const updatedRecent = [lead, ...recentSearches.filter(item => item.id !== lead.id)].slice(0, 5);
     setRecentSearches(updatedRecent);
     localStorage.setItem('recentSearches', JSON.stringify(updatedRecent));
     
-    // Navigate to lead detail page with actions tab
+    // Naviguer vers la page détaillée du lead
     navigate(`/leads/${lead.id}?tab=actions`);
     onOpenChange(false);
   };
 
   const handleSelectProperty = (property: PropertyResult) => {
-    // Add to recent searches
+    // Ajouter aux recherches récentes
     const propertyAsLead: SearchResult = {
       id: property.id,
       name: property.title,
@@ -103,7 +87,7 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
     setRecentSearches(updatedRecent);
     localStorage.setItem('recentSearches', JSON.stringify(updatedRecent));
     
-    // Navigate to property detail page
+    // Naviguer vers la page détaillée de la propriété
     navigate(`/properties/${property.id}`);
     onOpenChange(false);
   };
@@ -120,9 +104,9 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
         <CommandList>
           <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
 
-          {allResults.leads.length > 0 && (
+          {leadResults.length > 0 && (
             <CommandGroup heading="Leads">
-              {allResults.leads.map(lead => (
+              {leadResults.map(lead => (
                 <CommandItem
                   key={lead.id}
                   onSelect={() => handleSelectLead(lead)}
@@ -163,9 +147,9 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
             </CommandGroup>
           )}
 
-          {allResults.properties.length > 0 && (
+          {propertyResults.length > 0 && (
             <CommandGroup heading="Propriétés">
-              {allResults.properties.map(property => (
+              {propertyResults.map(property => (
                 <CommandItem
                   key={property.id}
                   onSelect={() => handleSelectProperty(property)}
@@ -186,9 +170,9 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
             </CommandGroup>
           )}
 
-          {query.length < 1 && allResults.recentSearches.length > 0 && (
+          {query.length < 1 && recentSearches.length > 0 && (
             <CommandGroup heading="Recherches récentes">
-              {allResults.recentSearches.map(item => (
+              {recentSearches.map(item => (
                 <CommandItem
                   key={item.id}
                   onSelect={() => handleSelectLead(item)}

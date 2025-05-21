@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -155,6 +156,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
 
   const handleInputBlur = () => {
     if (onBlur) {
+      // Utiliser un court délai pour permettre aux clics sur les éléments de la liste d'être détectés
       setTimeout(() => {
         onBlur();
       }, 200);
