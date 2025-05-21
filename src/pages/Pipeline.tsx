@@ -10,6 +10,7 @@ import LoadingScreen from '@/components/layout/LoadingScreen';
 import ComponentLoader from '@/components/common/ComponentLoader';
 import { reassignJadeLeads, reassignJeanMarcLeads, reassignSharonLeads } from '@/services/leadService';
 import NewLeadsAlert from '@/components/notifications/NewLeadsAlert';
+
 const Pipeline = () => {
   const isMobile = useIsMobile();
   const {
@@ -85,11 +86,12 @@ const Pipeline = () => {
         <NewLeadsAlert />
       </div>
       
-      <div className="pt-[144px] bg-white min-h-screen px-[35px]">
+      <div className={`pt-[144px] bg-white min-h-screen ${isMobile ? '' : 'px-[35px]'}`}>
         <ComponentLoader isLoading={isRefreshing}>
           {isMobile ? <MobilePipelineView activeTab={activeTab} setActiveTab={setActiveTab} searchTerm={searchTerm} setSearchTerm={setSearchTerm} filtersOpen={filtersOpen} toggleFilters={toggleFilters} activeFiltersCount={activeFiltersCount} filters={filters} onFilterChange={setFilters} onClearFilters={handleClearAllFilters} columns={getAllColumns()} handleRefresh={handleRefresh} isRefreshing={isRefreshing} isFilterActive={isFilterActive} teamMembers={teamMembers} /> : <DesktopPipelineView activeTab={activeTab} setActiveTab={setActiveTab} searchTerm={searchTerm} setSearchTerm={setSearchTerm} filtersOpen={filtersOpen} toggleFilters={toggleFilters} activeFiltersCount={activeFiltersCount} filters={filters} onFilterChange={setFilters} onClearFilters={handleClearAllFilters} columns={getAllColumns()} handleRefresh={handleRefresh} isRefreshing={isRefreshing} isFilterActive={isFilterActive} teamMembers={teamMembers} />}
         </ComponentLoader>
       </div>
     </div>;
 };
+
 export default Pipeline;
