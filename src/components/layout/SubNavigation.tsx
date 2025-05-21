@@ -3,15 +3,12 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
-import { MessageSquare, Calendar, ListTodo, File, ClipboardList, Bell } from 'lucide-react';
+import { MessageSquare, Calendar, ListTodo, File, ClipboardList } from 'lucide-react';
 import { useBreakpoint } from '@/hooks/use-mobile';
-import { useNotifications } from '@/hooks/useNotifications';
-import NotificationBadge from './navbar/NotificationBadge';
 
 const SubNavigation = () => {
   const location = useLocation();
   const { isMobile, isTablet, isDesktop } = useBreakpoint();
-  const { unreadCount } = useNotifications();
   
   const navigationItems = [{
     name: 'Pipeline',
@@ -30,11 +27,6 @@ const SubNavigation = () => {
     path: '/chat-gadait',
     icon: MessageSquare
   }, {
-    name: 'Notifications',
-    path: '/notifications',
-    icon: Bell,
-    badge: true
-  }, {
     name: 'Propriétés',
     path: '/properties',
     icon: File
@@ -52,7 +44,6 @@ const SubNavigation = () => {
                 : "text-loro-navy hover:text-loro-terracotta"
             )}>
                 {item.icon && <item.icon className="h-5 w-5" />}
-                {item.badge && <NotificationBadge count={unreadCount} />}
               </Link>)}
           </div>
         </div>
@@ -79,13 +70,8 @@ const SubNavigation = () => {
                         : "text-loro-navy hover:text-loro-terracotta"
                     )}
                   >
-                    <div className="relative">
-                      {item.icon && <item.icon className="h-5 w-5 mr-2" />}
-                      {item.badge && <NotificationBadge count={unreadCount} />}
-                    </div>
-                    <span className={cn("font-medium", isTablet ? "text-xs" : "text-sm")}>
-                      {item.name}
-                    </span>
+                    {item.icon && <item.icon className="h-5 w-5 mr-2" />}
+                    <span className={cn("font-medium", isTablet ? "text-xs" : "text-sm")}>{item.name}</span>
                   </Link>
                 </NavigationMenuItem>)}
             </NavigationMenuList>
