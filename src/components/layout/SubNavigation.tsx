@@ -50,9 +50,9 @@ const SubNavigation = () => {
       </div>;
   }
 
-  // Desktop navigation with text and better responsive behavior
+  // Desktop navigation with text and better responsive behavior - make it fixed when scrolling
   return <div className="sticky top-16 z-40 border-b border-loro-pearl bg-loro-50 shadow-sm">
-      <div className="bg-loro-50 py-2">
+      <div className="bg-loro-50 py-2 sticky top-16 z-40">
         <div className="max-w-screen-xl mx-auto px-4">
           <NavigationMenu className="mx-auto flex justify-center w-full">
             <NavigationMenuList className={cn(
