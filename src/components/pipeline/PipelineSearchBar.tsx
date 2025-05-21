@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLeadSearch, SearchResult } from '@/hooks/useLeadSearch';
 import SmartSearch from '@/components/common/SmartSearch';
@@ -20,11 +20,11 @@ const PipelineSearchBar: React.FC<PipelineSearchBarProps> = ({
   const navigate = useNavigate();
   const { results, isLoading } = useLeadSearch(searchTerm);
 
-  const handleSelectLead = (lead: SearchResult) => {
+  const handleSelectLead = useCallback((lead: SearchResult) => {
     navigate(`/leads/${lead.id}?tab=actions`);
-  };
+  }, [navigate]);
 
-  const renderLeadItem = (lead: SearchResult) => (
+  const renderLeadItem = useCallback((lead: SearchResult) => (
     <div className="flex flex-col">
       <div className="font-medium">{lead.name}</div>
       <div className="flex text-xs text-muted-foreground gap-2 flex-wrap">
@@ -42,7 +42,13 @@ const PipelineSearchBar: React.FC<PipelineSearchBarProps> = ({
         )}
       </div>
     </div>
-  );
+  ), []);
+
+  const handleClearSearch = useCallback(() => {
+    if (onRefresh) {
+      setTimeout(onRefresh, 100);
+    }
+  }, [onRefresh]);
 
   return (
     <SmartSearch
@@ -57,9 +63,10 @@ const PipelineSearchBar: React.FC<PipelineSearchBarProps> = ({
       inputClassName="pl-9 pr-12 bg-gray-100 border-0"
       emptyMessage="Aucun résultat trouvé"
       loadingMessage="Recherche en cours..."
-      minChars={1} // Reduced to 1 character to start searching immediately
+      minChars={1} // Reduced to 1 character for immediate search
       searchIcon={true}
       clearButton={true}
+      onClear={handleClearSearch}
     />
   );
 };

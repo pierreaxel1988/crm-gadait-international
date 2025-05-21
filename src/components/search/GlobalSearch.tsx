@@ -1,57 +1,26 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CommandDialog, CommandInput, CommandList, CommandEmpty, Command, CommandGroup, CommandItem } from '@/components/ui/command';
 import { useLeadSearch, PropertyResult, SearchResult } from '@/hooks/useLeadSearch';
-import { Search, User, Building, Clock, Mail, Phone, Tag } from 'lucide-react';
+import { Search, User, Building, Clock } from 'lucide-react';
 
 interface GlobalSearchProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-interface SearchResults {
-  leads: SearchResult[];
-  properties: PropertyResult[];
-  recentSearches: SearchResult[];
-}
-
 const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  // Séparons la logique de recherche et d'affichage
-  const { searchProperties } = useLeadSearch();
-  const [leadResults, setLeadResults] = useState<SearchResult[]>([]);
+  const { results: leadResults, isLoading: isLeadsLoading, searchProperties } = useLeadSearch(query);
   const [propertyResults, setPropertyResults] = useState<PropertyResult[]>([]);
+  const [isPropertiesLoading, setIsPropertiesLoading] = useState(false);
   const [recentSearches, setRecentSearches] = useState<SearchResult[]>([]);
   
-  // Utilisez un hook personnalisé pour rechercher les leads
-  const { results, isLoading } = useLeadSearch(query);
+  // Référence pour suivre si le composant est monté
+  const isMounted = useRef(true);
   
-  // Mettre à jour les résultats quand results change
-  useEffect(() => {
-    setLeadResults(results);
-  }, [results]);
-
-  // Effet pour rechercher les propriétés lorsque la requête change
-  useEffect(() => {
-    const fetchPropertyResults = async () => {
-      if (query.length >= 1) {
-        try {
-          const results = await searchProperties(query);
-          setPropertyResults(results);
-        } catch (error) {
-          console.error("Error fetching property results:", error);
-          setPropertyResults([]);
-        }
-      } else {
-        setPropertyResults([]);
-      }
-    };
-
-    fetchPropertyResults();
-  }, [query, searchProperties]);
-
   // Charger les recherches récentes depuis localStorage au montage
   useEffect(() => {
     const saved = localStorage.getItem('recentSearches');
@@ -63,7 +32,41 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
         console.error('Error parsing recent searches:', e);
       }
     }
+    
+    // Cleanup function
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
+
+  // Effet pour rechercher les propriétés lorsque la requête change
+  useEffect(() => {
+    const fetchPropertyResults = async () => {
+      if (query.length >= 1) {
+        setIsPropertiesLoading(true);
+        try {
+          const results = await searchProperties(query);
+          // Vérifier que le composant est toujours monté avant de mettre à jour l'état
+          if (isMounted.current) {
+            setPropertyResults(results);
+          }
+        } catch (error) {
+          console.error("Error fetching property results:", error);
+          if (isMounted.current) {
+            setPropertyResults([]);
+          }
+        } finally {
+          if (isMounted.current) {
+            setIsPropertiesLoading(false);
+          }
+        }
+      } else {
+        setPropertyResults([]);
+      }
+    };
+
+    fetchPropertyResults();
+  }, [query, searchProperties]);
 
   const handleSelectLead = (lead: SearchResult) => {
     // Ajouter aux recherches récentes
@@ -124,20 +127,12 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
                       )}
                       {lead.email && (
                         <span className="flex items-center gap-0.5">
-                          <Mail className="h-3 w-3" />
                           {lead.email}
                         </span>
                       )}
                       {lead.phone && (
                         <span className="flex items-center gap-0.5">
-                          <Phone className="h-3 w-3" />
                           {lead.phone}
-                        </span>
-                      )}
-                      {lead.tags && lead.tags.length > 0 && (
-                        <span className="flex items-center gap-0.5">
-                          <Tag className="h-3 w-3" />
-                          {lead.tags.join(', ')}
                         </span>
                       )}
                     </div>

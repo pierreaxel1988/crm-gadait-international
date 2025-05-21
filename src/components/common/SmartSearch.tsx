@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ interface SmartSearchProps {
   clearButton?: boolean;
   autoFocus?: boolean;
   onBlur?: () => void;
-  onClear?: () => void; // Added onClear prop
+  onClear?: () => void;
 }
 
 const SmartSearch: React.FC<SmartSearchProps> = ({
@@ -52,29 +52,27 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const debouncedValue = useDebounce(inputValue, 300);
-
-  // Synchroniser la valeur externe avec l'état interne
+  
+  // Sync external value with internal state, but only when they differ
   useEffect(() => {
-    setInputValue(value);
+    if (value !== inputValue) {
+      setInputValue(value);
+    }
   }, [value]);
 
-  // Transmettre la valeur débounced au parent
+  // Debounce input changes to parent
   useEffect(() => {
     if (debouncedValue !== value) {
       onChange(debouncedValue);
     }
   }, [debouncedValue, onChange, value]);
 
-  // Gérer l'ouverture et la fermeture du dropdown
+  // Handle dropdown open/close based on input length
   useEffect(() => {
-    if (debouncedValue.length >= minChars) {
-      setIsOpen(true);
-    } else {
-      setIsOpen(false);
-    }
-  }, [debouncedValue, minChars]);
+    setIsOpen(inputValue.length >= minChars);
+  }, [inputValue, minChars]);
 
-  // Détecter les clics en dehors pour fermer le dropdown
+  // Click outside handler
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -94,11 +92,11 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
     };
   }, [onBlur]);
 
-  // Navigation au clavier dans les résultats
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  // Keyboard navigation handler
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!isOpen) return;
     
-    // Flèche bas - sélectionner l'élément suivant
+    // Arrow down - select next item
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setSelectedIndex(prev => 
@@ -106,13 +104,13 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
       );
     }
     
-    // Flèche haut - sélectionner l'élément précédent
+    // Arrow up - select previous item
     else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setSelectedIndex(prev => prev > 0 ? prev - 1 : 0);
     }
     
-    // Entrée - sélectionner l'élément actuel
+    // Enter - select current item
     else if (e.key === 'Enter' && selectedIndex >= 0) {
       e.preventDefault();
       if (results[selectedIndex] && onSelect) {
@@ -121,47 +119,46 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
       }
     }
     
-    // Escape - fermer le dropdown
+    // Escape - close dropdown
     else if (e.key === 'Escape') {
       e.preventDefault();
       setIsOpen(false);
       if (onBlur) onBlur();
     }
-  };
+  }, [isOpen, results, selectedIndex, onSelect, onBlur]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
     setSelectedIndex(-1);
-  };
+  }, []);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setInputValue('');
     onChange('');
     setIsOpen(false);
     if (inputRef.current) {
       inputRef.current.focus();
     }
-    // Call onClear if provided
     if (onClear) {
       onClear();
     }
-  };
+  }, [onChange, onClear]);
 
-  const handleItemClick = (item: any) => {
+  const handleItemClick = useCallback((item: any) => {
     if (onSelect) {
       onSelect(item);
     }
     setIsOpen(false);
-  };
+  }, [onSelect]);
 
-  const handleInputBlur = () => {
+  const handleInputBlur = useCallback(() => {
     if (onBlur) {
-      // Utiliser un court délai pour permettre aux clics sur les éléments de la liste d'être détectés
+      // Use a short delay to allow clicks on list items to be detected
       setTimeout(() => {
         onBlur();
       }, 200);
     }
-  };
+  }, [onBlur]);
 
   return (
     <div className={cn("relative w-full", className)}>
