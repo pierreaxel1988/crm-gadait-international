@@ -26,7 +26,7 @@ const Navbar: React.FC<NavbarProps> = ({
       <ImmersiveHeaderOverlay />
       <nav className={cn(
         "w-full border-b border-loro-pearl transition-all duration-300",
-        "bg-[#0A2540] text-white"
+        "bg-[#002868] text-white"
       )}>
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6">
           <div className={cn(
