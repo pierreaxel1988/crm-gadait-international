@@ -80,115 +80,44 @@ export function useLeadSearch(initialSearchTerm: string = '') {
       setIsLoading(true);
       
       try {
-        const searchLowerCase = debouncedSearchTerm.toLowerCase().trim();
+        const searchTerm = debouncedSearchTerm.trim();
+        console.log('Searching for:', searchTerm);
         
-        let query = supabase
+        // Construire une requête qui recherche dans tous les champs pertinents
+        const { data, error } = await supabase
           .from('leads')
           .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget')
-          .order('created_at', { ascending: false });
-        
-        // Build comprehensive OR conditions for search
-        let orConditions = [];
-        
-        // Name search - exact, starts with, and contains
-        orConditions.push(`name.ilike.%${debouncedSearchTerm}%`);
-        
-        // Email search - exact and partial matches
-        orConditions.push(`email.ilike.%${debouncedSearchTerm}%`);
-        
-        // Phone search - remove any formatting and search
-        const cleanPhone = debouncedSearchTerm.replace(/[\s\-\(\)\+]/g, '');
-        if (cleanPhone.length > 0) {
-          orConditions.push(`phone.ilike.%${cleanPhone}%`);
-        }
-        
-        // Property reference search
-        orConditions.push(`property_reference.ilike.%${debouncedSearchTerm}%`);
-        
-        // Split search terms for better name matching
-        const searchTerms = debouncedSearchTerm.split(' ').filter(term => term.length > 0);
-        
-        if (searchTerms.length > 1) {
-          // Multi-word searches - try different combinations
-          orConditions.push(`name.ilike.%${searchTerms.join('%')}%`);
-          orConditions.push(`name.ilike.%${searchTerms.reverse().join('%')}%`);
-          
-          // Individual term searches
-          searchTerms.forEach(term => {
-            if (term.length >= 2) {
-              orConditions.push(`name.ilike.%${term}%`);
-            }
-          });
-        }
-        
-        console.log('Search conditions:', orConditions);
-        
-        const { data, error } = await query
-          .or(orConditions.join(','))
+          .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,property_reference.ilike.%${searchTerm}%`)
+          .order('created_at', { ascending: false })
           .limit(50);
 
         if (error) {
           console.error('Error searching leads:', error);
           setResults([]);
         } else if (data) {
-          console.log(`Search results for "${debouncedSearchTerm}":`, data.length);
+          console.log(`Found ${data.length} results for "${searchTerm}"`);
           
-          // Score results for better relevance
-          const scoredResults = data.map(lead => {
-            let score = 0;
-            const nameLower = (lead.name || '').toLowerCase();
-            const emailLower = (lead.email || '').toLowerCase();
-            const phoneLower = (lead.phone || '').toLowerCase();
-            
-            // Exact matches get highest priority
-            if (nameLower === searchLowerCase) score += 100;
-            if (emailLower === searchLowerCase) score += 100;
-            if (phoneLower === searchLowerCase) score += 100;
-            
-            // Starts with matches
-            if (nameLower.startsWith(searchLowerCase)) score += 80;
-            if (emailLower.startsWith(searchLowerCase)) score += 80;
-            if (phoneLower.startsWith(searchLowerCase)) score += 80;
-            
-            // Contains matches
-            if (nameLower.includes(searchLowerCase)) score += 50;
-            if (emailLower.includes(searchLowerCase)) score += 50;
-            if (phoneLower.includes(searchLowerCase)) score += 50;
-            
-            // Bonus for multi-word name matches
-            if (searchTerms.length > 1) {
-              const allTermsInName = searchTerms.every(term => 
-                nameLower.includes(term.toLowerCase())
-              );
-              if (allTermsInName) score += 60;
-            }
-            
-            return {
-              score,
-              lead: {
-                id: lead.id,
-                name: lead.name,
-                email: lead.email,
-                phone: lead.phone,
-                status: lead.status,
-                desiredLocation: lead.desired_location,
-                pipelineType: lead.pipeline_type,
-                nationality: lead.nationality,
-                source: lead.source,
-                taxResidence: lead.tax_residence,
-                preferredLanguage: lead.preferred_language,
-                propertyReference: lead.property_reference,
-                createdAt: lead.created_at,
-                tags: lead.tags,
-                budget: lead.budget
-              }
-            };
-          });
+          // Transformer les résultats
+          const formattedResults = data.map(lead => ({
+            id: lead.id,
+            name: lead.name,
+            email: lead.email,
+            phone: lead.phone,
+            status: lead.status,
+            desiredLocation: lead.desired_location,
+            pipelineType: lead.pipeline_type,
+            nationality: lead.nationality,
+            source: lead.source,
+            taxResidence: lead.tax_residence,
+            preferredLanguage: lead.preferred_language,
+            propertyReference: lead.property_reference,
+            createdAt: lead.created_at,
+            tags: lead.tags,
+            budget: lead.budget
+          }));
           
-          // Sort by score and return results
-          const formattedResults = scoredResults
-            .sort((a, b) => b.score - a.score)
-            .map(item => item.lead);
+          // Log pour debug
+          console.log('Formatted results:', formattedResults);
           
           setResults(formattedResults);
         }
