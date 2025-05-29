@@ -80,56 +80,52 @@ export function useLeadSearch(initialSearchTerm: string = '') {
       setIsLoading(true);
       
       try {
-        // Split search terms into words for better matching
-        const searchTerms = debouncedSearchTerm.split(' ').filter(term => term.length > 0);
-        const searchLowerCase = debouncedSearchTerm.toLowerCase();
+        const searchLowerCase = debouncedSearchTerm.toLowerCase().trim();
         
         let query = supabase
           .from('leads')
           .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget')
           .order('created_at', { ascending: false });
         
-        // Build OR conditions for the search with better matching
+        // Build comprehensive OR conditions for search
         let orConditions = [];
         
-        // Full name search with ilike
+        // Name search - exact, starts with, and contains
         orConditions.push(`name.ilike.%${debouncedSearchTerm}%`);
         
-        // Email and phone searches
-        if (debouncedSearchTerm.includes('@') || /^\S+@\S+$/.test(debouncedSearchTerm)) {
-          orConditions.push(`email.ilike.%${debouncedSearchTerm}%`);
-        } else {
-          orConditions.push(`email.ilike.%${debouncedSearchTerm}%`);
-          orConditions.push(`phone.ilike.%${debouncedSearchTerm}%`);
-        }
+        // Email search - exact and partial matches
+        orConditions.push(`email.ilike.%${debouncedSearchTerm}%`);
         
-        // Handle multi-word searches better
-        if (searchTerms.length > 1) {
-          // For multi-word searches like "first last", try both combinations
-          if (searchTerms.length === 2) {
-            orConditions.push(`name.ilike.%${searchTerms[0]}%${searchTerms[1]}%`);
-            orConditions.push(`name.ilike.%${searchTerms[1]}%${searchTerms[0]}%`);
-          }
-          
-          // Add searches for each term separately and with no spaces (for names like hernando vergara)
-          orConditions.push(`name.ilike.%${searchTerms.join('')}%`); // Search without spaces
-          orConditions.push(`name.ilike.%${searchTerms.join('%')}%`); // Search with any characters between terms
-
-          // Add searches for each term separately
-          for (const term of searchTerms) {
-            if (term.length >= 1) {
-              orConditions.push(`name.ilike.%${term}%`);
-            }
-          }
+        // Phone search - remove any formatting and search
+        const cleanPhone = debouncedSearchTerm.replace(/[\s\-\(\)\+]/g, '');
+        if (cleanPhone.length > 0) {
+          orConditions.push(`phone.ilike.%${cleanPhone}%`);
         }
         
         // Property reference search
         orConditions.push(`property_reference.ilike.%${debouncedSearchTerm}%`);
         
-        // Apply the OR conditions and add limit
+        // Split search terms for better name matching
+        const searchTerms = debouncedSearchTerm.split(' ').filter(term => term.length > 0);
+        
+        if (searchTerms.length > 1) {
+          // Multi-word searches - try different combinations
+          orConditions.push(`name.ilike.%${searchTerms.join('%')}%`);
+          orConditions.push(`name.ilike.%${searchTerms.reverse().join('%')}%`);
+          
+          // Individual term searches
+          searchTerms.forEach(term => {
+            if (term.length >= 2) {
+              orConditions.push(`name.ilike.%${term}%`);
+            }
+          });
+        }
+        
+        console.log('Search conditions:', orConditions);
+        
         const { data, error } = await query
           .or(orConditions.join(','))
-          .limit(40);  // Increased limit for better results
+          .limit(50);
 
         if (error) {
           console.error('Error searching leads:', error);
@@ -137,37 +133,34 @@ export function useLeadSearch(initialSearchTerm: string = '') {
         } else if (data) {
           console.log(`Search results for "${debouncedSearchTerm}":`, data.length);
           
-          // Additional scoring for better relevance
+          // Score results for better relevance
           const scoredResults = data.map(lead => {
             let score = 0;
             const nameLower = (lead.name || '').toLowerCase();
+            const emailLower = (lead.email || '').toLowerCase();
+            const phoneLower = (lead.phone || '').toLowerCase();
             
-            // Exact match gets highest score
-            if (nameLower === searchLowerCase) {
-              score += 100;
-            }
-            // Name starts with search term
-            else if (nameLower.startsWith(searchLowerCase)) {
-              score += 50;
-            }
-            // Name includes search term
-            else if (nameLower.includes(searchLowerCase)) {
-              score += 25;
-            }
+            // Exact matches get highest priority
+            if (nameLower === searchLowerCase) score += 100;
+            if (emailLower === searchLowerCase) score += 100;
+            if (phoneLower === searchLowerCase) score += 100;
             
-            // Special handling for multi-word searches to improve matching
+            // Starts with matches
+            if (nameLower.startsWith(searchLowerCase)) score += 80;
+            if (emailLower.startsWith(searchLowerCase)) score += 80;
+            if (phoneLower.startsWith(searchLowerCase)) score += 80;
+            
+            // Contains matches
+            if (nameLower.includes(searchLowerCase)) score += 50;
+            if (emailLower.includes(searchLowerCase)) score += 50;
+            if (phoneLower.includes(searchLowerCase)) score += 50;
+            
+            // Bonus for multi-word name matches
             if (searchTerms.length > 1) {
-              // Check if all terms are included in any order (even if not adjacent)
-              const allTermsIncluded = searchTerms.every(term => 
+              const allTermsInName = searchTerms.every(term => 
                 nameLower.includes(term.toLowerCase())
               );
-              if (allTermsIncluded) score += 40;
-              
-              // Give higher scores to names that include search terms in sequence
-              const sequentialTerms = searchTerms.join('.*');
-              if (new RegExp(sequentialTerms, 'i').test(nameLower)) {
-                score += 30;
-              }
+              if (allTermsInName) score += 60;
             }
             
             return {
@@ -192,7 +185,7 @@ export function useLeadSearch(initialSearchTerm: string = '') {
             };
           });
           
-          // Sort by score and map back to original format
+          // Sort by score and return results
           const formattedResults = scoredResults
             .sort((a, b) => b.score - a.score)
             .map(item => item.lead);
