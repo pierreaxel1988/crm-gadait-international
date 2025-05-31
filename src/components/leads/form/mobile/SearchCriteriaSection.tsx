@@ -97,16 +97,21 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({
 
       <div className="space-y-2">
         <Label htmlFor="currency" className="text-sm">Devise</Label>
-        <select id="currency" value={lead.currency || 'EUR'} onChange={e => onDataChange({
-        currency: e.target.value as Currency
-      })} className="w-full p-2 border border-gray-300 rounded font-futura">
-          <option value="EUR">EUR (€)</option>
-          <option value="USD">USD ($)</option>
-          <option value="GBP">GBP (£)</option>
-          <option value="CHF">CHF (Fr)</option>
-          <option value="AED">AED (د.إ)</option>
-          <option value="MUR">MUR (₨)</option>
-        </select>
+        <StyledSelect
+          id="currency"
+          value={lead.currency || 'EUR'}
+          onChange={e => onDataChange({
+            currency: e.target.value as Currency
+          })}
+          options={[
+            { value: "EUR", label: "EUR (€)" },
+            { value: "USD", label: "USD ($)" },
+            { value: "GBP", label: "GBP (£)" },
+            { value: "CHF", label: "CHF (Fr)" },
+            { value: "AED", label: "AED (د.إ)" },
+            { value: "MUR", label: "MUR (₨)" }
+          ]}
+        />
       </div>
 
       <div className="space-y-2">
@@ -416,15 +421,20 @@ const OwnerPropertySection: React.FC<OwnerPriceFieldsProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="exposure" className="text-sm">Exposition/Luminosité</Label>
-            <select id="exposure" value={lead.exposure || ''} onChange={e => onDataChange({
-            exposure: e.target.value
-          })} className="w-full p-2 border border-gray-300 rounded font-futura">
-              <option value="">Sélectionner</option>
-              <option value="Très lumineux">Très lumineux</option>
-              <option value="Lumineux">Lumineux</option>
-              <option value="Peu lumineux">Peu lumineux</option>
-              <option value="Sombre">Sombre</option>
-            </select>
+            <StyledSelect
+              id="exposure"
+              value={lead.exposure || ''}
+              onChange={e => onDataChange({
+                exposure: e.target.value
+              })}
+              placeholder="Sélectionner"
+              options={[
+                { value: "Très lumineux", label: "Très lumineux" },
+                { value: "Lumineux", label: "Lumineux" },
+                { value: "Peu lumineux", label: "Peu lumineux" },
+                { value: "Sombre", label: "Sombre" }
+              ]}
+            />
           </div>
 
           <div className="space-y-2">
@@ -759,22 +769,27 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="country" className="text-sm font-medium">Pays recherché</Label>
-          <select id="country" value={lead.country || ''} onChange={e => onDataChange({
-          country: e.target.value
-        })} className="w-full p-2.5 border border-gray-200 rounded-lg font-futura bg-white">
-            <option value="">Sélectionner un pays</option>
-            <option value="France">France</option>
-            <option value="Spain">Espagne</option>
-            <option value="Portugal">Portugal</option>
-            <option value="Italy">Italie</option>
-            <option value="Switzerland">Suisse</option>
-            <option value="Monaco">Monaco</option>
-            <option value="United States">United States</option>
-            <option value="Etats-Unis">Etats-Unis</option>
-            <option value="Grèce">Grèce</option>
-            <option value="Mauritius">Île Maurice</option>
-            <option value="UAE">Émirats Arabes Unis</option>
-          </select>
+          <StyledSelect
+            id="country"
+            value={lead.country || ''}
+            onChange={e => onDataChange({
+              country: e.target.value
+            })}
+            placeholder="Sélectionner un pays"
+            options={[
+              { value: "France", label: "France" },
+              { value: "Spain", label: "Espagne" },
+              { value: "Portugal", label: "Portugal" },
+              { value: "Italy", label: "Italie" },
+              { value: "Switzerland", label: "Suisse" },
+              { value: "Monaco", label: "Monaco" },
+              { value: "United States", label: "United States" },
+              { value: "Etats-Unis", label: "Etats-Unis" },
+              { value: "Grèce", label: "Grèce" },
+              { value: "Mauritius", label: "Île Maurice" },
+              { value: "UAE", label: "Émirats Arabes Unis" }
+            ]}
+          />
         </div>
 
         <div className="space-y-2">
@@ -836,44 +851,59 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
         <div className="pt-2">
           <div className="space-y-2">
             <Label htmlFor="purchaseTimeframe" className="text-sm font-medium">Délai d'acquisition</Label>
-            <select id="purchaseTimeframe" value={lead.purchaseTimeframe || ''} onChange={e => onDataChange({
-              purchaseTimeframe: e.target.value as PurchaseTimeframe
-            })} className="w-full p-2.5 border border-gray-200 rounded-lg font-futura bg-white appearance-none">
-              <option value="">Sélectionner</option>
-              <option value="Immédiat">Immédiat</option>
-              <option value="1-3 mois">1-3 mois</option>
-              <option value="3-6 mois">3-6 mois</option>
-              <option value="6-12 mois">6-12 mois</option>
-              <option value="+12 mois">+12 mois</option>
-            </select>
+            <StyledSelect
+              id="purchaseTimeframe"
+              value={lead.purchaseTimeframe || ''}
+              onChange={e => onDataChange({
+                purchaseTimeframe: e.target.value as PurchaseTimeframe
+              })}
+              placeholder="Sélectionner"
+              options={[
+                { value: "Immédiat", label: "Immédiat" },
+                { value: "1-3 mois", label: "1-3 mois" },
+                { value: "3-6 mois", label: "3-6 mois" },
+                { value: "6-12 mois", label: "6-12 mois" },
+                { value: "+12 mois", label: "+12 mois" }
+              ]}
+            />
           </div>
         </div>
 
         <div className="pt-2">
           <div className="space-y-2">
             <Label htmlFor="financingMethod" className="text-sm font-medium">Mode de financement</Label>
-            <select id="financingMethod" value={lead.financingMethod || ''} onChange={e => onDataChange({
-              financingMethod: e.target.value as FinancingMethod
-            })} className="w-full p-2.5 border border-gray-200 rounded-lg font-futura bg-white appearance-none">
-              <option value="">Sélectionner</option>
-              <option value="Cash">Cash</option>
-              <option value="Crédit">Crédit</option>
-              <option value="Mixte">Mixte</option>
-            </select>
+            <StyledSelect
+              id="financingMethod"
+              value={lead.financingMethod || ''}
+              onChange={e => onDataChange({
+                financingMethod: e.target.value as FinancingMethod
+              })}
+              placeholder="Sélectionner"
+              options={[
+                { value: "Cash", label: "Cash" },
+                { value: "Crédit", label: "Crédit" },
+                { value: "Mixte", label: "Mixte" }
+              ]}
+            />
           </div>
         </div>
 
         <div className="pt-2">
           <div className="space-y-2">
             <Label htmlFor="propertyUse" className="text-sm font-medium">Utilisation prévue</Label>
-            <select id="propertyUse" value={lead.propertyUse || ''} onChange={e => onDataChange({
-              propertyUse: e.target.value as PropertyUse
-            })} className="w-full p-2.5 border border-gray-200 rounded-lg font-futura bg-white appearance-none">
-              <option value="">Sélectionner</option>
-              <option value="Résidence principale">Résidence principale</option>
-              <option value="Résidence secondaire">Résidence secondaire</option>
-              <option value="Investissement">Investissement</option>
-            </select>
+            <StyledSelect
+              id="propertyUse"
+              value={lead.propertyUse || ''}
+              onChange={e => onDataChange({
+                propertyUse: e.target.value as PropertyUse
+              })}
+              placeholder="Sélectionner"
+              options={[
+                { value: "Résidence principale", label: "Résidence principale" },
+                { value: "Résidence secondaire", label: "Résidence secondaire" },
+                { value: "Investissement", label: "Investissement" }
+              ]}
+            />
           </div>
         </div>
       </div>
