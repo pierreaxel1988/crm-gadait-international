@@ -3,7 +3,7 @@ import React from 'react';
 import { LeadDetailed, Currency, PropertyType, ViewType, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Camera, MapPin, Home, Bed, Compass, Building, Clock, CreditCard, Star } from 'lucide-react';
+import { Camera, MapPin, Home, Bed, Compass, Building, Clock, CreditCard, Star, Waves, Mountain, TreePine, MoreHorizontal } from 'lucide-react';
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import StyledSelect from './StyledSelect';
@@ -73,6 +73,21 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
     }
     const value = lead.bedrooms;
     return [value >= 8 ? "8+" : value.toString()];
+  };
+
+  const getViewIcon = (view: ViewType) => {
+    switch (view) {
+      case "Mer":
+        return Waves;
+      case "Montagne":
+        return Mountain;
+      case "Golf":
+        return TreePine;
+      case "Autres":
+        return MoreHorizontal;
+      default:
+        return Compass;
+    }
   };
   
   const propertyTypesList: PropertyType[] = ["Villa", "Appartement", "Penthouse", "Maison", "Duplex", "Chalet", "Terrain", "Manoir", "Maison de ville", "Château", "Local commercial", "Commercial", "Hotel", "Vignoble", "Autres"];
@@ -191,20 +206,23 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             Vue souhaitée
           </h4>
           <div className="grid grid-cols-2 gap-2">
-            {viewTypesList.map(view => (
-              <button
-                key={view}
-                onClick={() => handleViewToggle(view)}
-                className={`flex items-center justify-center gap-2 p-2 rounded text-sm ${
-                  (lead.views || []).includes(view)
-                    ? 'bg-chocolate-dark text-white'
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                }`}
-              >
-                <Compass className="h-4 w-4" />
-                {view}
-              </button>
-            ))}
+            {viewTypesList.map(view => {
+              const IconComponent = getViewIcon(view);
+              return (
+                <button
+                  key={view}
+                  onClick={() => handleViewToggle(view)}
+                  className={`flex items-center justify-center gap-2 p-2 rounded text-sm ${
+                    (lead.views || []).includes(view)
+                      ? 'bg-chocolate-dark text-white'
+                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                  }`}
+                >
+                  <IconComponent className="h-4 w-4" />
+                  {view}
+                </button>
+              );
+            })}
           </div>
         </div>
 
