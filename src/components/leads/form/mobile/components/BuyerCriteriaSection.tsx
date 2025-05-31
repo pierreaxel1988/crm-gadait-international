@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { LeadDetailed, Currency, PropertyType, ViewType, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Camera, MapPin, Home, Bed, Compass, Building, Clock, CreditCard, Star, Waves, Mountain, TreePine, MoreHorizontal } from 'lucide-react';
+import { Camera, MapPin, Home, Bed, Compass, Building, Clock, CreditCard, Star, Waves, Mountain, TreePine, MoreHorizontal, Droplets, DoorClosed, Car, Shield, Snowflake } from 'lucide-react';
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import StyledSelect from './StyledSelect';
@@ -87,6 +86,29 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
         return MoreHorizontal;
       default:
         return Compass;
+    }
+  };
+
+  const getAmenityIcon = (amenity: string) => {
+    switch (amenity) {
+      case "Piscine":
+        return Droplets;
+      case "Terrasse":
+        return Building;
+      case "Balcon":
+        return DoorClosed;
+      case "Jardin":
+        return TreePine;
+      case "Parking":
+        return Car;
+      case "Ascenseur":
+        return Building;
+      case "Sécurité":
+        return Shield;
+      case "Climatisation":
+        return Snowflake;
+      default:
+        return Star;
     }
   };
   
@@ -232,19 +254,23 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             Commodités souhaitées
           </h4>
           <div className="grid grid-cols-2 gap-2">
-            {amenitiesList.map(amenity => (
-              <button
-                key={amenity}
-                onClick={() => handleAmenityToggle(amenity)}
-                className={`flex items-center justify-center gap-2 p-2 rounded text-sm ${
-                  (lead.amenities || []).includes(amenity)
-                    ? 'bg-chocolate-dark text-white'
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                }`}
-              >
-                {amenity}
-              </button>
-            ))}
+            {amenitiesList.map(amenity => {
+              const IconComponent = getAmenityIcon(amenity);
+              return (
+                <button
+                  key={amenity}
+                  onClick={() => handleAmenityToggle(amenity)}
+                  className={`flex items-center justify-center gap-2 p-2 rounded text-sm ${
+                    (lead.amenities || []).includes(amenity)
+                      ? 'bg-chocolate-dark text-white'
+                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                  }`}
+                >
+                  <IconComponent className="h-4 w-4" />
+                  {amenity}
+                </button>
+              );
+            })}
           </div>
         </div>
 
