@@ -2,7 +2,7 @@ import React from 'react';
 import { LeadDetailed, Currency, PropertyType, ViewType, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Camera, MapPin, Home, Bed, Compass, Building, Clock, CreditCard, Star, Waves, Mountain, TreePine, MoreHorizontal, Droplets, DoorClosed, Car, Shield, Snowflake } from 'lucide-react';
+import { Camera, MapPin, Home, Bed, Compass, Building, Clock, CreditCard, Star, Waves, Mountain, TreePine, MoreHorizontal, Droplets, DoorClosed, Car, Shield, Snowflake, Crown, Building2, Warehouse, Hotel, Grape } from 'lucide-react';
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import StyledSelect from './StyledSelect';
@@ -72,6 +72,43 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
     }
     const value = lead.bedrooms;
     return [value >= 8 ? "8+" : value.toString()];
+  };
+
+  const getPropertyTypeIcon = (type: PropertyType) => {
+    switch (type) {
+      case "Villa":
+        return Home;
+      case "Appartement":
+        return Building;
+      case "Penthouse":
+        return Crown;
+      case "Maison":
+        return Home;
+      case "Duplex":
+        return Building2;
+      case "Chalet":
+        return Mountain;
+      case "Terrain":
+        return TreePine;
+      case "Manoir":
+        return Crown;
+      case "Maison de ville":
+        return Building2;
+      case "Château":
+        return Crown;
+      case "Local commercial":
+        return Warehouse;
+      case "Commercial":
+        return Building;
+      case "Hotel":
+        return Hotel;
+      case "Vignoble":
+        return Grape;
+      case "Autres":
+        return MoreHorizontal;
+      default:
+        return Home;
+    }
   };
 
   const getViewIcon = (view: ViewType) => {
@@ -170,19 +207,23 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             Type de propriété
           </h4>
           <div className="grid grid-cols-2 gap-2">
-            {propertyTypesList.map(type => (
-              <button
-                key={type}
-                onClick={() => handlePropertyTypeChange(type)}
-                className={`flex items-center justify-center p-2 rounded text-sm ${
-                  (lead.propertyTypes || []).includes(type)
-                    ? 'bg-chocolate-dark text-white'
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                }`}
-              >
-                {type}
-              </button>
-            ))}
+            {propertyTypesList.map(type => {
+              const IconComponent = getPropertyTypeIcon(type);
+              return (
+                <button
+                  key={type}
+                  onClick={() => handlePropertyTypeChange(type)}
+                  className={`flex items-center justify-center gap-2 p-2 rounded text-sm ${
+                    (lead.propertyTypes || []).includes(type)
+                      ? 'bg-chocolate-dark text-white'
+                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                  }`}
+                >
+                  <IconComponent className="h-4 w-4" />
+                  {type}
+                </button>
+              );
+            })}
           </div>
         </div>
 
