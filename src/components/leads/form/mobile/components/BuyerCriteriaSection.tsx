@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { LeadDetailed, Currency, PropertyType, ViewType, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Camera } from 'lucide-react';
+import { Camera, MapPin, Home, Bed, Compass, Building, Clock, CreditCard, Star } from 'lucide-react';
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import StyledSelect from './StyledSelect';
@@ -83,7 +84,10 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
     <div className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="country" className="text-sm font-medium">Pays recherché</Label>
+          <Label htmlFor="country" className="text-sm font-medium flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-loro-terracotta" />
+            Pays recherché
+          </Label>
           <StyledSelect
             id="country"
             value={lead.country || ''}
@@ -124,7 +128,10 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
         </div>
 
         <div className="space-y-2 pt-2">
-          <h4 className="text-sm font-medium mb-2">Type de propriété</h4>
+          <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+            <Building className="h-4 w-4 text-loro-terracotta" />
+            Type de propriété
+          </h4>
           <div className="grid grid-cols-2 gap-2">
             {propertyTypesList.map(type => (
               <button
@@ -143,7 +150,10 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
         </div>
 
         <div className="space-y-2 pt-2">
-          <h4 className="text-sm font-medium mb-2">Nombre de chambres</h4>
+          <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+            <Bed className="h-4 w-4 text-loro-terracotta" />
+            Nombre de chambres
+          </h4>
           <div className="grid grid-cols-4 gap-2">
             {bedroomOptions.map(option => (
               <button
@@ -162,7 +172,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="livingArea" className="text-sm font-medium">
+          <Label htmlFor="livingArea" className="text-sm font-medium flex items-center gap-2">
+            <Home className="h-4 w-4 text-loro-terracotta" />
             Surface habitable (m²)
           </Label>
           <Input
@@ -175,7 +186,10 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
         </div>
 
         <div className="space-y-2 pt-2">
-          <h4 className="text-sm font-medium mb-2">Vue souhaitée</h4>
+          <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+            <Camera className="h-4 w-4 text-loro-terracotta" />
+            Vue souhaitée
+          </h4>
           <div className="grid grid-cols-2 gap-2">
             {viewTypesList.map(view => (
               <button
@@ -187,7 +201,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
                     : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                 }`}
               >
-                <Camera className="h-4 w-4" />
+                <Compass className="h-4 w-4" />
                 {view}
               </button>
             ))}
@@ -195,7 +209,10 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
         </div>
 
         <div className="space-y-2 pt-2">
-          <h4 className="text-sm font-medium mb-2">Commodités souhaitées</h4>
+          <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+            <Star className="h-4 w-4 text-loro-terracotta" />
+            Commodités souhaitées
+          </h4>
           <div className="grid grid-cols-2 gap-2">
             {amenitiesList.map(amenity => (
               <button
@@ -215,7 +232,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
 
         <div className="pt-2">
           <div className="space-y-2">
-            <Label htmlFor="purchaseTimeframe" className="text-sm font-medium">
+            <Label htmlFor="purchaseTimeframe" className="text-sm font-medium flex items-center gap-2">
+              <Clock className="h-4 w-4 text-loro-terracotta" />
               Délai d'acquisition
             </Label>
             <StyledSelect
@@ -240,7 +258,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
 
         <div className="pt-2">
           <div className="space-y-2">
-            <Label htmlFor="financingMethod" className="text-sm font-medium">
+            <Label htmlFor="financingMethod" className="text-sm font-medium flex items-center gap-2">
+              <CreditCard className="h-4 w-4 text-loro-terracotta" />
               Mode de financement
             </Label>
             <StyledSelect
@@ -263,7 +282,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
 
         <div className="pt-2">
           <div className="space-y-2">
-            <Label htmlFor="propertyUse" className="text-sm font-medium">
+            <Label htmlFor="propertyUse" className="text-sm font-medium flex items-center gap-2">
+              <Home className="h-4 w-4 text-loro-terracotta" />
               Utilisation prévue
             </Label>
             <StyledSelect
