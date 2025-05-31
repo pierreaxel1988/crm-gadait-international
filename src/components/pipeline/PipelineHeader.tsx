@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { useNavigate } from 'react-router-dom';
 import ActiveFiltersList from './filters/ActiveFiltersList';
 import PipelineSearchBar from './PipelineSearchBar';
+import { cn } from '@/lib/utils';
 
 interface PipelineHeaderProps {
   searchTerm: string;

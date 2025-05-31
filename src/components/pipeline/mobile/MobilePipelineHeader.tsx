@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { SlidersHorizontal, RefreshCcw, PlusCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import ActiveFiltersList from '../filters/ActiveFiltersList';
 import SmartSearch from '@/components/common/SmartSearch';
 import { useLeadSearch, SearchResult } from '@/hooks/useLeadSearch';
+import { cn } from '@/lib/utils';
 
 interface MobilePipelineHeaderProps {
   searchTerm: string;
