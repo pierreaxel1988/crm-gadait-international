@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,6 @@ import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { useNavigate } from 'react-router-dom';
 import ActiveFiltersList from './filters/ActiveFiltersList';
 import PipelineSearchBar from './PipelineSearchBar';
-import { cn } from '@/lib/utils';
 
 interface PipelineHeaderProps {
   searchTerm: string;
@@ -54,15 +54,15 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   };
 
   return (
-    <div className="mb-6 bg-[#0A2540] text-white p-4 rounded-lg">
+    <div className="mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="tracking-tight text-xl font-medium text-white">Pipeline</h1>
+        <h1 className="tracking-tight text-xl font-medium text-zinc-900">Pipeline</h1>
         <div className="flex items-center gap-2">
           {activeFilters > 0 && (
             <Button 
               variant="outline" 
               size="icon" 
-              className="h-10 w-10 border-white/20 text-white hover:bg-white/10" 
+              className="h-10 w-10" 
               onClick={onClearFilters}
               title="Effacer tous les filtres"
             >
@@ -72,7 +72,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
           <Button 
             variant="outline" 
             size="icon" 
-            className="h-10 w-10 border-white/20 text-white hover:bg-white/10" 
+            className="h-10 w-10" 
             onClick={() => navigate('/import-lead')}
           >
             <PlusCircle className="h-5 w-5" />
@@ -81,7 +81,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
             <Button 
               variant="outline" 
               size="icon" 
-              className="h-10 w-10 border-white/20 text-white hover:bg-white/10" 
+              className="h-10 w-10" 
               onClick={handleRefresh}
               disabled={isRefreshing}
             >
@@ -89,20 +89,15 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
             </Button>
           )}
           <Button 
-            variant={activeFilters > 0 ? "secondary" : "outline"} 
+            variant={activeFilters > 0 ? "default" : "outline"} 
             size="sm" 
             onClick={onToggleFilters} 
-            className={cn(
-              "h-10 px-4 relative font-medium",
-              activeFilters > 0 
-                ? "bg-white text-[#0A2540] hover:bg-white/90"
-                : "border-white/20 text-white hover:bg-white/10"
-            )}
+            className="h-10 px-4 relative font-medium"
           >
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             Filtres
             {activeFilters > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#0A2540] text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+              <span className="absolute -top-1 -right-1 bg-white text-primary rounded-full h-5 w-5 flex items-center justify-center text-xs">
                 {activeFilters}
               </span>
             )}
@@ -121,15 +116,13 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
 
       {/* Display active filters */}
       {activeFilters > 0 && (
-        <div className="mt-4">
-          <ActiveFiltersList
-            filters={filters}
-            onFilterChange={onFilterChange}
-            onClearFilters={onClearFilters}
-            getTeamMemberName={getTeamMemberName}
-            isFilterActive={isFilterActive}
-          />
-        </div>
+        <ActiveFiltersList
+          filters={filters}
+          onFilterChange={onFilterChange}
+          onClearFilters={onClearFilters}
+          getTeamMemberName={getTeamMemberName}
+          isFilterActive={isFilterActive}
+        />
       )}
 
       {/* Filters panel - only shown when filtersOpen is true */}

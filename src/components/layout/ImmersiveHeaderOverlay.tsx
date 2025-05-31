@@ -9,7 +9,7 @@ interface ImmersiveHeaderOverlayProps {
 const ImmersiveHeaderOverlay: React.FC<ImmersiveHeaderOverlayProps> = ({ className }) => {
   return (
     <div className={cn(
-      "absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#0A2540]/20 to-transparent pointer-events-none z-30",
+      "absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#002868]/20 to-transparent pointer-events-none z-30",
       className
     )}></div>
   );

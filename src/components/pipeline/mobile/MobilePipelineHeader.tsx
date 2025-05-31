@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SlidersHorizontal, RefreshCcw, PlusCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import ActiveFiltersList from '../filters/ActiveFiltersList';
 import SmartSearch from '@/components/common/SmartSearch';
 import { useLeadSearch, SearchResult } from '@/hooks/useLeadSearch';
-import { cn } from '@/lib/utils';
 
 interface MobilePipelineHeaderProps {
   searchTerm: string;
@@ -72,43 +72,33 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
   );
   
   return (
-    <div className="space-y-3 bg-[#0A2540] text-white p-3 rounded-lg">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h1 className="tracking-tight text-base font-medium text-white">Pipeline</h1>
+        <h1 className="tracking-tight text-base font-medium">Pipeline</h1>
         <div className="flex items-center gap-2">
           {activeFiltersCount > 0 && (
             <Button 
               variant="outline" 
               size="icon" 
-              className="h-9 w-9 border-white/20 text-white hover:bg-white/10" 
+              className="h-9 w-9" 
               onClick={onClearFilters}
             >
               <X className="h-4 w-4" />
             </Button>
           )}
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="h-9 w-9 border-white/20 text-white hover:bg-white/10" 
-            onClick={() => navigate('/import-lead')}
-          >
+          <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => navigate('/import-lead')}>
             <PlusCircle className="h-4 w-4" />
           </Button>
           <Button 
-            variant={activeFiltersCount > 0 ? "secondary" : "outline"} 
+            variant={activeFiltersCount > 0 ? "default" : "outline"} 
             size="sm" 
             onClick={toggleFilters} 
-            className={cn(
-              "h-9 relative font-normal text-sm",
-              activeFiltersCount > 0 
-                ? "bg-white text-[#0A2540] hover:bg-white/90"
-                : "border-white/20 text-white hover:bg-white/10"
-            )}
+            className="h-9 relative font-normal text-sm"
           >
             <SlidersHorizontal className="h-4 w-4 mr-1" />
             Filtres
             {activeFiltersCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#0A2540] text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+              <span className="absolute -top-1 -right-1 bg-white text-primary rounded-full h-5 w-5 flex items-center justify-center text-xs">
                 {activeFiltersCount}
               </span>
             )}
@@ -126,7 +116,7 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
           results={results}
           isLoading={isLoading}
           renderItem={renderLeadItem}
-          inputClassName="pl-9 pr-16 bg-white/10 border-white/20 text-white placeholder:text-white/70"
+          inputClassName="pl-9 pr-16 bg-gray-100 border-0"
           emptyMessage="Aucun résultat trouvé"
           loadingMessage="Recherche en cours..."
           minChars={1}
@@ -137,7 +127,7 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
         <Button 
           variant="ghost" 
           size="icon" 
-          className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 text-white hover:bg-white/10" 
+          className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7" 
           onClick={handleRefresh} 
           disabled={isRefreshing}
         >
