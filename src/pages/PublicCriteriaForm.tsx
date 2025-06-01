@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -67,8 +68,7 @@ const PublicCriteriaForm = () => {
           nationality: result.lead.nationality || '',
           taxResidence: result.lead.tax_residence || '',
           preferredLanguage: result.lead.preferred_language || '',
-          regions: result.lead.regions || [],
-          url: result.lead.url || ''
+          regions: result.lead.regions || []
         });
       } catch (error) {
         console.error('Error loading public criteria form:', error);
@@ -127,8 +127,7 @@ const PublicCriteriaForm = () => {
         nationality: formData.nationality,
         tax_residence: formData.taxResidence,
         preferred_language: formData.preferredLanguage,
-        regions: formData.regions,
-        url: formData.url
+        regions: formData.regions
       };
       
       console.log('Data being sent to API:', submitData);
@@ -279,20 +278,6 @@ const PublicCriteriaForm = () => {
                 onDataChange={handleDataChange}
                 isPublicForm={true}
               />
-
-              {/* URL de la propriété */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm">URL de la propriété</Label>
-                  <Input
-                    name="url"
-                    value={formData.url || ''}
-                    onChange={(e) => handleDataChange({ url: e.target.value })}
-                    placeholder="Lien vers l'annonce de la propriété"
-                    className="font-futura"
-                  />
-                </div>
-              </div>
 
               {/* Bouton de soumission */}
               <div className="text-center pt-6">
