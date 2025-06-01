@@ -175,7 +175,7 @@ const PublicCriteriaForm = () => {
     });
   };
 
-  // Composant pour les boutons de sélection multiple avec design original
+  // Composant pour les boutons de sélection multiple avec design simplifié
   const SelectionButton = ({ 
     icon: Icon, 
     label, 
@@ -190,13 +190,13 @@ const PublicCriteriaForm = () => {
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-3 rounded-lg border text-sm font-medium transition-all ${
+      className={`flex items-center justify-center px-3 py-2 rounded-md border text-xs font-medium transition-all ${
         isSelected 
-          ? 'bg-loro-navy text-white border-loro-navy' 
-          : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+          ? 'bg-blue-600 text-white border-blue-600' 
+          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
       }`}
     >
-      {Icon && <Icon className="h-4 w-4" />}
+      {Icon && <Icon className="h-3 w-3 mr-1" />}
       <span>{label}</span>
     </button>
   );
@@ -214,9 +214,9 @@ const PublicCriteriaForm = () => {
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center justify-center w-12 h-12 rounded-lg font-semibold text-sm transition-all ${
+      className={`flex items-center justify-center w-10 h-10 rounded-md font-medium text-xs transition-all ${
         isSelected 
-          ? 'bg-loro-navy text-white' 
+          ? 'bg-blue-600 text-white' 
           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
       }`}
     >
@@ -228,8 +228,8 @@ const PublicCriteriaForm = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-loro-terracotta" />
-          <p className="text-loro-navy text-sm">Chargement...</p>
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-700 text-sm">Chargement...</p>
         </div>
       </div>
     );
@@ -241,11 +241,11 @@ const PublicCriteriaForm = () => {
         <Card className="w-full max-w-md">
           <CardContent className="text-center p-8">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-xl font-bold text-loro-navy mb-4">Merci !</h1>
-            <p className="text-loro-navy/70 text-sm mb-6">
+            <h1 className="text-xl font-semibold text-gray-900 mb-4">Merci !</h1>
+            <p className="text-gray-600 text-sm mb-6">
               Vos critères de recherche ont été enregistrés avec succès. Notre équipe va maintenant pouvoir vous proposer des propriétés correspondant parfaitement à vos attentes.
             </p>
-            <p className="text-xs text-loro-navy/60">
+            <p className="text-xs text-gray-500">
               Nous vous contacterons très prochainement avec une sélection personnalisée.
             </p>
           </CardContent>
@@ -298,106 +298,94 @@ const PublicCriteriaForm = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-4">
-      <div className="max-w-3xl mx-auto">
-        <Card className="bg-white shadow-sm">
-          <CardHeader className="text-center border-b border-gray-200 py-6">
-            <CardTitle className="text-lg font-semibold text-loro-navy mb-2">
-              CRITÈRES DE LA PROPRIÉTÉ
+    <div className="min-h-screen bg-white py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        <Card className="bg-white shadow-sm border border-gray-200">
+          <CardHeader className="text-center border-b border-gray-200 py-8">
+            <CardTitle className="text-xl font-medium text-gray-900 mb-3">
+              Critères de la Propriété
             </CardTitle>
-            <p className="text-loro-navy/70 text-sm">
+            <p className="text-gray-600 text-sm max-w-2xl mx-auto">
               Bonjour {leadData?.name}, merci de remplir vos critères de recherche pour que nous puissions vous proposer les meilleures propriétés.
             </p>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-8">
               
-              {/* Pays recherché */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-4">
-                  <MapPin className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Pays recherché</h3>
+              {/* Pays et Localisation */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-900">Pays recherché</Label>
+                  <select
+                    value={formData.country}
+                    onChange={(e) => handleInputChange('country', e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md text-sm"
+                  >
+                    <option value="">Sélectionner un pays</option>
+                    {countries.map((country) => (
+                      <option key={country.code} value={country.name}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <select
-                  value={formData.country}
-                  onChange={(e) => handleInputChange('country', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-loro-terracotta focus:border-transparent text-sm"
-                >
-                  <option value="">Sélectionner un pays</option>
-                  {countries.map((country) => (
-                    <option key={country.code} value={country.name}>
-                      {country.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
-              {/* Localisation */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-4">
-                  <MapPin className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Localisation</h3>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-900">Localisation</Label>
+                  <Input
+                    value={formData.desired_location}
+                    onChange={(e) => handleInputChange('desired_location', e.target.value)}
+                    placeholder="Ville, région..."
+                    className="w-full p-3 text-sm"
+                  />
                 </div>
-                <Input
-                  value={formData.desired_location}
-                  onChange={(e) => handleInputChange('desired_location', e.target.value)}
-                  placeholder="Ville, région..."
-                  className="w-full p-3 text-sm border-gray-300 focus:ring-loro-terracotta focus:border-loro-terracotta"
-                />
               </div>
 
               {/* Budget */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="text-loro-terracotta text-lg font-bold">€</div>
-                  <h3 className="text-sm font-semibold text-gray-800">Budget</h3>
-                </div>
+                <Label className="text-sm font-medium text-gray-900">Budget</Label>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <Label className="text-gray-600 mb-1 block text-xs">Min</Label>
+                    <Label className="text-xs text-gray-600 mb-2 block">Budget min</Label>
                     <Input
                       value={formData.budget_min}
                       onChange={(e) => handleInputChange('budget_min', e.target.value)}
                       placeholder="Min"
-                      className="w-full p-3 text-sm border-gray-300"
+                      className="w-full p-3 text-sm"
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-600 mb-1 block text-xs">Max</Label>
+                    <Label className="text-xs text-gray-600 mb-2 block">Budget max</Label>
                     <Input
                       value={formData.budget}
                       onChange={(e) => handleInputChange('budget', e.target.value)}
-                      placeholder="9000000"
-                      className="w-full p-3 text-sm border-gray-300"
+                      placeholder="Max"
+                      className="w-full p-3 text-sm"
                     />
                   </div>
-                </div>
-
-                <div>
-                  <Label className="text-gray-600 mb-1 block text-xs">Devise</Label>
-                  <select
-                    value={formData.currency}
-                    onChange={(e) => handleInputChange('currency', e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
-                  >
-                    <option value="EUR">Euro (€)</option>
-                    <option value="USD">USD ($)</option>
-                    <option value="GBP">GBP (£)</option>
-                    <option value="CHF">CHF</option>
-                    <option value="AED">AED</option>
-                    <option value="MUR">MUR</option>
-                  </select>
+                  <div>
+                    <Label className="text-xs text-gray-600 mb-2 block">Devise</Label>
+                    <select
+                      value={formData.currency}
+                      onChange={(e) => handleInputChange('currency', e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-md text-sm"
+                    >
+                      <option value="EUR">Euro (€)</option>
+                      <option value="USD">USD ($)</option>
+                      <option value="GBP">GBP (£)</option>
+                      <option value="CHF">CHF</option>
+                      <option value="AED">AED</option>
+                      <option value="MUR">MUR</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
               {/* Type de propriété */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Building className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Type de propriété</h3>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <Label className="text-sm font-medium text-gray-900">Type de propriété</Label>
+                <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
                   {propertyTypeOptions.map((option) => (
                     <SelectionButton
                       key={option.value}
@@ -412,10 +400,7 @@ const PublicCriteriaForm = () => {
 
               {/* Nombre de chambres */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Bed className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Nombre de chambres</h3>
-                </div>
+                <Label className="text-sm font-medium text-gray-900">Nombre de chambres</Label>
                 <div className="flex flex-wrap gap-2">
                   {bedroomOptions.map((number) => (
                     <NumberButton
@@ -428,27 +413,33 @@ const PublicCriteriaForm = () => {
                 </div>
               </div>
 
-              {/* Surface habitable */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-4">
-                  <Home className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Surface habitable (m²)</h3>
+              {/* Surface habitable et Surface terrain */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-900">Surface habitable (m²)</Label>
+                  <Input
+                    value={formData.living_area}
+                    onChange={(e) => handleInputChange('living_area', e.target.value)}
+                    placeholder="Ex: 120"
+                    className="w-full p-3 text-sm"
+                  />
                 </div>
-                <Input
-                  value={formData.living_area}
-                  onChange={(e) => handleInputChange('living_area', e.target.value)}
-                  placeholder="Ex: 120"
-                  className="w-full p-3 text-sm border-gray-300"
-                />
+
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-900">Surface terrain (m²)</Label>
+                  <Input
+                    value={formData.land_area}
+                    onChange={(e) => handleInputChange('land_area', e.target.value)}
+                    placeholder="Ex: 500"
+                    className="w-full p-3 text-sm"
+                  />
+                </div>
               </div>
 
               {/* Vue souhaitée */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Eye className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Vue souhaitée</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
+                <Label className="text-sm font-medium text-gray-900">Vue souhaitée</Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {viewOptions.map((option) => (
                     <SelectionButton
                       key={option.value}
@@ -462,11 +453,8 @@ const PublicCriteriaForm = () => {
 
               {/* Commodités souhaitées */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Star className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Commodités souhaitées</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
+                <Label className="text-sm font-medium text-gray-900">Commodités souhaitées</Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {amenityOptions.map((option) => (
                     <SelectionButton
                       key={option.value}
@@ -480,14 +468,11 @@ const PublicCriteriaForm = () => {
 
               {/* Délai d'acquisition */}
               <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-4">
-                  <Clock className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Délai d'acquisition</h3>
-                </div>
+                <Label className="text-sm font-medium text-gray-900">Délai d'acquisition</Label>
                 <select
                   value={formData.purchase_timeframe}
                   onChange={(e) => handleInputChange('purchase_timeframe', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                  className="w-full p-3 border border-gray-300 rounded-md text-sm"
                 >
                   <option value="">Sélectionner</option>
                   <option value="Moins de trois mois">Moins de trois mois</option>
@@ -497,14 +482,11 @@ const PublicCriteriaForm = () => {
 
               {/* Mode de financement */}
               <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-4">
-                  <CreditCard className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Mode de financement</h3>
-                </div>
+                <Label className="text-sm font-medium text-gray-900">Mode de financement</Label>
                 <select
                   value={formData.financing_method}
                   onChange={(e) => handleInputChange('financing_method', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                  className="w-full p-3 border border-gray-300 rounded-md text-sm"
                 >
                   <option value="">Sélectionner</option>
                   <option value="Cash">Cash</option>
@@ -514,14 +496,11 @@ const PublicCriteriaForm = () => {
 
               {/* Utilisation prévue */}
               <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-4">
-                  <Target className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Utilisation prévue</h3>
-                </div>
+                <Label className="text-sm font-medium text-gray-900">Utilisation prévue</Label>
                 <select
                   value={formData.property_use}
                   onChange={(e) => handleInputChange('property_use', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                  className="w-full p-3 border border-gray-300 rounded-md text-sm"
                 >
                   <option value="">Sélectionner</option>
                   <option value="Investissement locatif">Investissement locatif</option>
@@ -530,37 +509,37 @@ const PublicCriteriaForm = () => {
               </div>
 
               {/* Informations personnelles */}
-              <div className="space-y-6 border-t pt-6">
-                <h2 className="text-base font-semibold text-gray-800 mb-4">Informations personnelles</h2>
+              <div className="space-y-6 border-t pt-8">
+                <h3 className="text-base font-medium text-gray-900">Informations personnelles</h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label className="text-gray-800 mb-1 block font-medium text-xs">Pays de résidence</Label>
+                    <Label className="text-sm font-medium text-gray-900 mb-2 block">Pays de résidence</Label>
                     <Input
                       value={formData.tax_residence}
                       onChange={(e) => handleInputChange('tax_residence', e.target.value)}
-                      placeholder="Netherlands"
-                      className="w-full p-3 text-sm border-gray-300"
+                      placeholder="Ex: France"
+                      className="w-full p-3 text-sm"
                     />
                   </div>
                   
                   <div>
-                    <Label className="text-gray-800 mb-1 block font-medium text-xs">Nationalité</Label>
+                    <Label className="text-sm font-medium text-gray-900 mb-2 block">Nationalité</Label>
                     <Input
                       value={formData.nationality}
                       onChange={(e) => handleInputChange('nationality', e.target.value)}
-                      placeholder="Néerlandais"
-                      className="w-full p-3 text-sm border-gray-300"
+                      placeholder="Ex: Française"
+                      className="w-full p-3 text-sm"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-gray-800 mb-1 block font-medium text-xs">Langue préférée</Label>
+                  <Label className="text-sm font-medium text-gray-900 mb-2 block">Langue préférée</Label>
                   <select
                     value={formData.preferred_language}
                     onChange={(e) => handleInputChange('preferred_language', e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    className="w-full p-3 border border-gray-300 rounded-md text-sm"
                   >
                     <option value="">Sélectionner une langue</option>
                     {languageOptions.map((language) => (
@@ -572,12 +551,40 @@ const PublicCriteriaForm = () => {
                 </div>
               </div>
 
+              {/* Pin location */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Pin Location
+                </Label>
+                <Input
+                  value={formData.mapCoordinates}
+                  onChange={(e) => handleInputChange('mapCoordinates', e.target.value)}
+                  placeholder="Collez le lien Google Maps ici"
+                  className="w-full p-3 text-sm"
+                />
+                <p className="text-xs text-gray-500">
+                  Copiez-collez le lien Google Maps de la propriété
+                </p>
+              </div>
+
+              {/* URL de propriété */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-900">URL de propriété</Label>
+                <Input
+                  value={formData.url}
+                  onChange={(e) => handleInputChange('url', e.target.value)}
+                  placeholder="https://exemple.com/propriete"
+                  className="w-full p-3 text-sm"
+                />
+              </div>
+
               {/* Bouton de soumission */}
-              <div className="text-center pt-6">
+              <div className="text-center pt-8">
                 <Button
                   type="submit"
                   disabled={submitting}
-                  className="bg-loro-navy hover:bg-loro-navy/90 text-white px-8 py-3 rounded-lg text-sm font-medium min-w-[180px]"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md text-sm font-medium min-w-[200px]"
                 >
                   {submitting ? (
                     <>
