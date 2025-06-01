@@ -1,3 +1,4 @@
+
 import { TaskType } from '@/components/kanban/KanbanCard';
 
 export type LeadStatus =
@@ -67,6 +68,60 @@ export type PropertyState =
   | "À rénover"
   | "À reconstruire";
 
+// Types additionnels nécessaires pour la compatibilité
+export type LeadSource = 
+  | 'Website'
+  | 'Referral'
+  | 'Social Media'
+  | 'Advertisement'
+  | 'Direct Contact'
+  | 'Other';
+
+export type Country = string;
+
+export type Currency = 'EUR' | 'USD' | 'GBP' | 'CHF' | 'MUR';
+
+export type ViewType = 
+  | 'Sea view'
+  | 'Mountain view'
+  | 'Garden view'
+  | 'City view'
+  | 'Pool view';
+
+export type Amenity = 
+  | 'Pool'
+  | 'Gym'
+  | 'Parking'
+  | 'Garden'
+  | 'Terrace'
+  | 'Balcony';
+
+export type PurchaseTimeframe = 
+  | 'Immediately'
+  | 'Within 3 months'
+  | 'Within 6 months'
+  | 'Within 1 year'
+  | 'No rush';
+
+export type FinancingMethod = 
+  | 'Cash'
+  | 'Mortgage'
+  | 'Mixed'
+  | 'Other';
+
+export type PropertyUse = 
+  | 'Primary residence'
+  | 'Secondary residence'
+  | 'Investment'
+  | 'Commercial';
+
+export type MauritiusRegion = 
+  | 'North'
+  | 'South'
+  | 'East'
+  | 'West'
+  | 'Central';
+
 export interface LeadDetailed {
   id: string;
   name: string;
@@ -114,7 +169,8 @@ export interface LeadDetailed {
   landArea?: string;
   orientation?: string[];
   email_envoye?: boolean;
-  raw_data?: any; // Ajout de la propriété raw_data
+  raw_data?: any;
+  mapCoordinates?: { lat: number; lng: number };
   
   // Additional property fields for owners pipeline
   constructionYear?: string;
