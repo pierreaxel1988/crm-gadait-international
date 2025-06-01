@@ -18,21 +18,7 @@ export type PropertyType =
   | 'Apartment'
   | 'House'
   | 'Land'
-  | 'Other'
-  | 'Appartement'
-  | 'Penthouse'
-  | 'Maison'
-  | 'Duplex'
-  | 'Chalet'
-  | 'Terrain'
-  | 'Manoir'
-  | 'Maison de ville'
-  | 'Château'
-  | 'Local commercial'
-  | 'Commercial'
-  | 'Hotel'
-  | 'Vignoble'
-  | 'Autres';
+  | 'Other';
 
 export type PipelineType =
   | 'purchase'
@@ -140,12 +126,7 @@ export type PurchaseTimeframe =
   | 'Within 3 months'
   | 'Within 6 months'
   | 'Within 1 year'
-  | 'No rush'
-  | 'Immédiat'
-  | '1-3 mois'
-  | '3-6 mois'
-  | '6-12 mois'
-  | '+12 mois';
+  | 'No rush';
 
 export type FinancingMethod = 
   | 'Cash'
@@ -178,7 +159,7 @@ export interface LeadDetailed {
   phoneCountryCodeDisplay?: string;
   location: string;
   status: LeadStatus;
-  tags: LeadTag[];
+  tags: string[];
   createdAt: string;
   lastContactedAt?: string;
   assignedTo?: string;
@@ -186,16 +167,16 @@ export interface LeadDetailed {
   propertyReference?: string;
   budget?: string;
   budgetMin?: string;
-  currency?: Currency;
+  currency?: string;
   desiredLocation?: string;
   propertyType?: PropertyType;
   propertyTypes?: PropertyType[];
   bedrooms?: number | number[];
-  views?: ViewType[];
-  amenities?: Amenity[];
-  purchaseTimeframe?: PurchaseTimeframe;
-  financingMethod?: FinancingMethod;
-  propertyUse?: PropertyUse;
+  views?: string[];
+  amenities?: string[];
+  purchaseTimeframe?: string;
+  financingMethod?: string;
+  propertyUse?: string;
   nationality?: string;
   taxResidence?: string;
   preferredLanguage?: string;
@@ -216,7 +197,7 @@ export interface LeadDetailed {
   orientation?: string[];
   email_envoye?: boolean;
   raw_data?: any;
-  mapCoordinates?: { lat: number; lng: number } | string;
+  mapCoordinates?: { lat: number; lng: number };
   
   // Additional property fields for owners pipeline
   constructionYear?: string;
@@ -261,13 +242,6 @@ export interface LeadDetailed {
   hasWineStorage?: boolean;
   wineStorageCapacity?: string;
   accessibility?: string;
-  
-  // Additional fields for owners
-  desired_price?: string;
-  fees?: string;
-  furnished?: boolean;
-  furniture_price?: string;
-  furniture_included_in_price?: boolean;
 }
 
 export interface ActionHistory {
