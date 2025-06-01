@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -88,6 +87,21 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
         return MoreHorizontal;
       default:
         return Home;
+    }
+  };
+
+  const getViewTypeIcon = (type: ViewType) => {
+    switch (type) {
+      case "Mer":
+        return Eye;
+      case "Montagne":
+        return Mountain;
+      case "Golf":
+        return TreePine;
+      case "Autres":
+        return MoreHorizontal;
+      default:
+        return Eye;
     }
   };
 
@@ -287,12 +301,27 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
           <Eye className="h-4 w-4 text-loro-terracotta" />
           Vue souhaitée
         </Label>
-        <MultiSelectButtons
-          options={viewTypesList}
-          selectedValues={formData.views || []}
-          onToggle={(value) => handleMultiSelectToggle('views', value)}
-          className="grid grid-cols-2 gap-2"
-        />
+        <div className="grid grid-cols-2 gap-2">
+          {viewTypesList.map(view => {
+            const IconComponent = getViewTypeIcon(view);
+            const isSelected = (formData.views || []).includes(view);
+            return (
+              <button
+                key={view}
+                type="button"
+                onClick={() => handleMultiSelectToggle('views', view)}
+                className={`flex items-center justify-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${
+                  isSelected
+                    ? 'bg-loro-navy text-white' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <IconComponent className="h-4 w-4" />
+                {view}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Commodités souhaitées */}
