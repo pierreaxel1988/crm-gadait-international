@@ -1,84 +1,30 @@
+import { TaskType } from '@/components/kanban/KanbanCard';
 
-export type LeadSource = 
-  | "Site web" 
-  | "Réseaux sociaux" 
-  | "Portails immobiliers" 
-  | "Network" 
-  | "Repeaters" 
-  | "Recommandations"
-  | "Apporteur d'affaire"
-  | "Idealista"
-  | "Le Figaro"
-  | "Properstar"
-  | "Property Cloud"
-  | "L'express Property"
-  | "James Edition"
-  | "Annonce"
-  | "Email"
-  | "Téléphone"
-  | "Autre"
-  | "Recommendation";
+export type LeadStatus =
+  | 'New'
+  | 'Contacted'
+  | 'Qualified'
+  | 'Proposal'
+  | 'Visit'
+  | 'Offre'
+  | 'Deposit'
+  | 'Signed'
+  | 'Gagné'
+  | 'Perdu';
 
-export type PropertyType = 
-  | "Villa" 
-  | "Appartement" 
-  | "Penthouse" 
-  | "Maison"
-  | "Duplex"
-  | "Chalet"
-  | "Terrain" 
-  | "Manoir"
-  | "Maison de ville"
-  | "Château"
-  | "Local commercial"
-  | "Commercial" 
-  | "Hotel" 
-  | "Vignoble" 
-  | "Autres";
+export type PropertyType =
+  | 'Villa'
+  | 'Apartment'
+  | 'House'
+  | 'Land'
+  | 'Other';
 
-export type Country = string;
+export type PipelineType =
+  | 'purchase'
+  | 'rental'
+  | 'owners';
 
-export type ViewType = 
-  | "Mer" 
-  | "Montagne" 
-  | "Golf" 
-  | "Autres";
-
-export type Amenity = string;
-
-export type PurchaseTimeframe = 
-  | "Immédiat" 
-  | "1-3 mois" 
-  | "3-6 mois" 
-  | "6-12 mois" 
-  | "+12 mois";
-  
-export type FinancingMethod = 
-  | "Cash" 
-  | "Crédit" 
-  | "Mixte";
-
-export type PropertyUse = 
-  | "Résidence principale" 
-  | "Résidence secondaire" 
-  | "Investissement";
-
-export type PipelineType = 
-  | "purchase" 
-  | "rental"
-  | "owners"; // Ajout du pipeline propriétaires
-
-export type Currency =
-  | "EUR"
-  | "USD"
-  | "GBP"
-  | "CHF"
-  | "AED"
-  | "MUR";
-
-export type MauritiusRegion = 'North' | 'South' | 'West' | 'East';
-
-export type AssetType = 
+export type AssetType =
   | "Vue mer"
   | "Vue panoramique"
   | "Bord de mer"
@@ -95,7 +41,7 @@ export type AssetType =
   | "Proche gare"
   | "Proche golf";
 
-export type Equipment = 
+export type Equipment =
   | "Piscine"
   | "Ascenseur"
   | "Garage & Parking"
@@ -117,37 +63,31 @@ export type Equipment =
 export type PropertyState =
   | "Neuf"
   | "Bon état"
-  | "À rafraîchir" 
+  | "À rafraîchir"
   | "À rénover"
   | "À reconstruire";
-
-import { LeadStatus } from "@/components/common/StatusBadge";
-import { LeadTag } from "@/components/common/TagBadge";
-import { TaskType } from "@/components/kanban/KanbanCard";
-
-export type { LeadStatus, LeadTag, TaskType };
 
 export interface LeadDetailed {
   id: string;
   name: string;
-  salutation?: 'M.' | 'Mme';  // New field for "Civilité"
-  email?: string;
-  phone?: string;
+  salutation?: string;
+  email: string;
+  phone: string;
   phoneCountryCode?: string;
   phoneCountryCodeDisplay?: string;
-  location?: string;
+  location: string;
   status: LeadStatus;
-  tags?: LeadTag[];
+  tags: string[];
   createdAt: string;
   lastContactedAt?: string;
   assignedTo?: string;
-  source?: LeadSource;
+  source?: string;
   propertyReference?: string;
   budget?: string;
   budgetMin?: string;
-  currency?: Currency;
+  currency?: string;
   desiredLocation?: string;
-  propertyType?: string;
+  propertyType?: PropertyType;
   propertyTypes?: PropertyType[];
   bedrooms?: number | number[];
   views?: string[];
@@ -156,56 +96,42 @@ export interface LeadDetailed {
   financingMethod?: string;
   propertyUse?: string;
   nationality?: string;
+  taxResidence?: string;
   preferredLanguage?: string;
   taskType?: TaskType;
-  notes?: string;
-  internal_notes?: string; 
+  notes: string;
   nextFollowUpDate?: string;
-  country?: Country;
+  country?: string;
   url?: string;
   pipelineType?: PipelineType;
   pipeline_type?: PipelineType;
-  taxResidence?: string;
-  regions?: MauritiusRegion[];
-  
   imported_at?: string;
   integration_source?: string;
-  actionHistory?: any[];
+  actionHistory?: ActionHistory[];
   livingArea?: string;
   external_id?: string;
-  
-  // Property details for owners
+  regions?: string[];
   landArea?: string;
-  constructionYear?: string;
-  renovationNeeded?: string;
-  propertyDescription?: string;
-  keyFeatures?: string[];
-  condoFees?: string;
-  facilities?: string[];
+  orientation?: string[];
+  email_envoye?: boolean;
+  raw_data?: any; // Ajout de la propriété raw_data
   
-  // Additional owner-specific fields
+  // Additional property fields for owners pipeline
+  constructionYear?: string;
   parkingSpaces?: number;
   floors?: number;
-  orientation?: string[];
   energyClass?: string;
   yearlyTaxes?: string;
-  
-  // Add the assets field
-  assets?: AssetType[];
-  
-  // Add the equipment field
+  propertyDescription?: string;
+  keyFeatures?: string[];
   equipment?: Equipment[];
-  
-  // Nouveaux champs pour les propriétaires
-  desired_price?: string;
-  fees?: string;
-  furnished?: boolean;
-  furniture_included_in_price?: boolean;
-  furniture_price?: string;
-
-  // Nouveaux champs pour le luxe immobilier
+  condoFees?: string;
+  facilities?: string[];
+  renovationNeeded?: string;
+  assets?: AssetType[];
   bathrooms?: number;
   propertyState?: PropertyState;
+  exposure?: string;
   hasTerrace?: boolean;
   hasBalcony?: boolean;
   hasGarden?: boolean;
@@ -233,9 +159,13 @@ export interface LeadDetailed {
   hasWineStorage?: boolean;
   wineStorageCapacity?: string;
   accessibility?: string;
-  exposure?: string;
-  mapCoordinates?: string;
-  
-  // Nouvel ajout pour compatibilité avec le champ email_envoye de la base de données
-  email_envoye?: boolean;
+}
+
+export interface ActionHistory {
+  id: string;
+  actionType: TaskType;
+  createdAt: string;
+  scheduledDate: string;
+  completedDate?: string;
+  notes: string;
 }
