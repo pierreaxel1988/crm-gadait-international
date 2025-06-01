@@ -1,3 +1,4 @@
+
 import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -25,21 +26,34 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     actionHistory = [];
   }
 
-  // Handle bedrooms conversion from database - ensure it's always an array
+  // Handle bedrooms conversion from database - prioritize raw_data for multiple selections
   let bedrooms: number[] = [];
+  
+  // First check raw_data for multiple bedroom selections
   if (lead.raw_data && lead.raw_data.bedroom_values) {
-    // If we have stored bedroom values in raw_data, use those (for multiple selections)
     try {
-      const parsedBedrooms = JSON.parse(lead.raw_data.bedroom_values);
-      bedrooms = Array.isArray(parsedBedrooms) ? parsedBedrooms : [parsedBedrooms];
+      const parsedBedrooms = typeof lead.raw_data.bedroom_values === 'string' 
+        ? JSON.parse(lead.raw_data.bedroom_values)
+        : lead.raw_data.bedroom_values;
+      
+      if (Array.isArray(parsedBedrooms)) {
+        bedrooms = parsedBedrooms;
+      } else {
+        bedrooms = [parsedBedrooms];
+      }
+      console.log('Loaded bedrooms from raw_data:', bedrooms);
     } catch (e) {
-      console.error('Error parsing bedroom_values:', e);
-      bedrooms = lead.bedrooms ? [lead.bedrooms] : [];
+      console.error('Error parsing bedroom_values from raw_data:', e);
+      // Fallback to single bedroom value
+      if (lead.bedrooms !== null && lead.bedrooms !== undefined) {
+        bedrooms = [lead.bedrooms];
+      }
     }
   } else if (Array.isArray(lead.bedrooms)) {
+    // Handle if bedrooms is already an array (shouldn't happen in current schema but for safety)
     bedrooms = lead.bedrooms;
   } else if (lead.bedrooms !== null && lead.bedrooms !== undefined) {
-    // Convert single value to array for consistency in UI
+    // Single bedroom value
     bedrooms = [lead.bedrooms];
   }
 
@@ -65,7 +79,7 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     desiredLocation: lead.desired_location,
     propertyType: lead.property_type,
     propertyTypes: lead.property_types,
-    bedrooms: bedrooms, // Always an array now
+    bedrooms: bedrooms, // Always an array now, with data from raw_data when multiple
     views: lead.views,
     amenities: lead.amenities || [],
     purchaseTimeframe: lead.purchase_timeframe,
@@ -94,19 +108,30 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
 };
 
 export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
-  // Handle bedroom data for database storage
+  // Handle bedroom data for database storage with proper raw_data synchronization
   let bedroomsForDb = null;
+  let rawData: any = lead.raw_data ? { ...lead.raw_data } : {};
+  
   if (Array.isArray(lead.bedrooms)) {
-    // If only one bedroom is selected, store as a single integer
     if (lead.bedrooms.length === 1) {
+      // Single bedroom selection - store in bedrooms column only
       bedroomsForDb = lead.bedrooms[0];
+      // Remove bedroom_values from raw_data if it exists (single selection doesn't need it)
+      delete rawData.bedroom_values;
     } else if (lead.bedrooms.length > 1) {
-      // Store the first value for now, we'll handle multiple in raw_data
+      // Multiple bedroom selections - store first value in bedrooms column and all values in raw_data
       bedroomsForDb = lead.bedrooms[0];
+      rawData.bedroom_values = JSON.stringify(lead.bedrooms);
+      console.log('Storing multiple bedrooms in raw_data:', lead.bedrooms);
+    } else {
+      // Empty array - clear both
+      bedroomsForDb = null;
+      delete rawData.bedroom_values;
     }
   } else if (lead.bedrooms !== undefined && lead.bedrooms !== null) {
-    // Handle non-array value
+    // Handle non-array value (shouldn't happen but for safety)
     bedroomsForDb = Array.isArray(lead.bedrooms) ? lead.bedrooms[0] : lead.bedrooms;
+    delete rawData.bedroom_values;
   }
   
   // Ensure action history is properly formatted
@@ -121,13 +146,6 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
       actionType: action.actionType || 'Note'
     }));
   }
-  
-  // Store multiple bedroom values in raw_data for perfect synchronization
-  const rawData = {
-    ...(lead.bedrooms && Array.isArray(lead.bedrooms) && lead.bedrooms.length > 1 ? {
-      bedroom_values: JSON.stringify(lead.bedrooms)
-    } : {})
-  };
   
   return {
     id: lead.id,
