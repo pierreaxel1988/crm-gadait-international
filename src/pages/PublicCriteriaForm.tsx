@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import { LeadDetailed } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { countryToFlag } from '@/utils/countryUtils';
-import { ALL_COUNTRIES } from '@/utils/countries';
+import { useCountriesFromDatabase } from '@/hooks/useCountriesFromDatabase';
 
 const PublicCriteriaForm = () => {
   const { token } = useParams<{ token: string }>();
@@ -23,6 +24,8 @@ const PublicCriteriaForm = () => {
   const [formData, setFormData] = useState<Partial<LeadDetailed>>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+
+  const { countries, loading: countriesLoading } = useCountriesFromDatabase();
 
   useEffect(() => {
     const loadData = async () => {
@@ -86,10 +89,10 @@ const PublicCriteriaForm = () => {
   }, [token, navigate]);
 
   const filteredCountries = searchTerm
-    ? ALL_COUNTRIES.filter(country => 
+    ? countries.filter(country => 
         country.toLowerCase().includes(searchTerm.toLowerCase())
       )
-    : ALL_COUNTRIES;
+    : countries;
 
   const handleCountrySelect = (country: string) => {
     setFormData(prev => ({
@@ -158,7 +161,7 @@ const PublicCriteriaForm = () => {
     }));
   };
 
-  if (loading) {
+  if (loading || countriesLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

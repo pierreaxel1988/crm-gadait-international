@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, MauritiusRegion } from '@/types/lead';
 import FormSection from './FormSection';
@@ -12,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import MultiSelectButtons from '../../leads/form/MultiSelectButtons';
 import { MapPin, Search, ChevronDown, X } from 'lucide-react';
 import { countryToFlag } from '@/utils/countryUtils';
-import { ALL_COUNTRIES } from '@/utils/countries';
+import { useCountriesFromDatabase } from '@/hooks/useCountriesFromDatabase';
 
 interface SearchCriteriaSectionProps {
   formData: LeadDetailed;
@@ -53,6 +54,8 @@ const SearchCriteriaSection = ({
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const countryDropdownRef = useRef<HTMLDivElement>(null);
 
+  const { countries: dbCountries, loading: countriesLoading } = useCountriesFromDatabase();
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
@@ -87,10 +90,10 @@ const SearchCriteriaSection = ({
   };
 
   const filteredCountries = searchTerm
-    ? ALL_COUNTRIES.filter(country => 
+    ? dbCountries.filter(country => 
         country.toLowerCase().includes(searchTerm.toLowerCase())
       )
-    : ALL_COUNTRIES;
+    : dbCountries;
 
   const handleCountrySelect = (country: string) => {
     const event = {
@@ -103,6 +106,10 @@ const SearchCriteriaSection = ({
     setIsCountryDropdownOpen(false);
     setSearchTerm('');
   };
+
+  if (countriesLoading) {
+    return <div className="text-center p-4">Chargement des pays...</div>;
+  }
   
   return (
     <FormSection title="Critères de Recherche">

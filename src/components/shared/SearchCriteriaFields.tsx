@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -7,7 +8,7 @@ import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import RadioSelectButtons from '@/components/leads/form/RadioSelectButtons';
 import { countryToFlag } from '@/utils/countryUtils';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
-import { ALL_COUNTRIES } from '@/utils/countries';
+import { useCountriesFromDatabase } from '@/hooks/useCountriesFromDatabase';
 
 interface SearchCriteriaFieldsProps {
   formData: Partial<LeadDetailed>;
@@ -27,6 +28,8 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
   const countryDropdownRef = useRef<HTMLDivElement>(null);
   const taxResidenceDropdownRef = useRef<HTMLDivElement>(null);
   const nationalityDropdownRef = useRef<HTMLDivElement>(null);
+
+  const { countries, loading } = useCountriesFromDatabase();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -83,10 +86,10 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
   };
 
   const filteredCountries = searchTerm
-    ? ALL_COUNTRIES.filter(country => 
+    ? countries.filter(country => 
         country.toLowerCase().includes(searchTerm.toLowerCase())
       )
-    : ALL_COUNTRIES;
+    : countries;
 
   const handleCountrySelect = (country: string) => {
     const event = {
@@ -244,6 +247,10 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
     'Français', 'English', 'Deutsch', 'Italiano', 'Español', 
     'العربية', '中文', 'Русский'
   ];
+
+  if (loading) {
+    return <div className="text-center p-4">Chargement des pays...</div>;
+  }
 
   return (
     <div className="space-y-6">
