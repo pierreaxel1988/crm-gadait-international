@@ -9,10 +9,10 @@ import {
 import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from '@/components/ui/toaster';
 import LoadingScreen from './components/layout/LoadingScreen';
-import Auth from './pages/Auth'; // Import Auth directly
-import Pipeline from './pages/Pipeline'; // Import Pipeline directly instead of lazy loading
+import Auth from './pages/Auth';
+import Pipeline from './pages/Pipeline';
 
-// Lazy load other pages to use suspense
+// Lazy load pages
 const LeadsPage = lazy(() => import('./pages/Leads'));
 const LeadDetail = lazy(() => import('./pages/LeadDetailMobile'));
 const LeadNew = lazy(() => import('./pages/LeadNew'));
@@ -24,6 +24,7 @@ const Admin = lazy(() => import('./pages/Admin'));
 const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const ChatGadaitPage = lazy(() => import('./pages/ChatGadaitPage'));
+const PublicCriteriaForm = lazy(() => import('./pages/PublicCriteriaForm'));
 
 function App() {
   return (
@@ -33,10 +34,13 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/pipeline" />} />
             
-            {/* Route d'authentification - Auth component loaded directly */}
+            {/* Route publique pour les critères - SANS PROTECTION */}
+            <Route path="/public-criteria/:token" element={<PublicCriteriaForm />} />
+            
+            {/* Route d'authentification */}
             <Route path="/auth" element={<Auth />} />
             
-            {/* Routes accessibles à tous */}
+            {/* Routes protégées */}
             <Route path="/pipeline" element={
               <ProtectedRoute commercialAllowed={true}>
                 <Pipeline />
@@ -78,7 +82,7 @@ function App() {
               </ProtectedRoute>
             } />
             
-            {/* Routes réservées aux administrateurs */}
+            {/* Routes admin */}
             <Route path="/leads/import" element={
               <ProtectedRoute adminOnly={true} commercialAllowed={false}>
                 <LeadImport />
@@ -95,7 +99,7 @@ function App() {
               </ProtectedRoute>
             } />
             
-            {/* Fallback pour les routes non trouvées */}
+            {/* Fallback */}
             <Route path="*" element={<Navigate to="/pipeline" replace />} />
           </Routes>
           <Toaster />

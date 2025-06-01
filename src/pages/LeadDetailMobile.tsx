@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -20,6 +19,7 @@ import StatusSection from '@/components/leads/form/mobile/StatusSection';
 import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSection';
 import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
 import NotesSection from '@/components/leads/form/mobile/NotesSection';
+import PublicCriteriaLinkManager from '@/components/leads/PublicCriteriaLinkManager';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { syncExistingActionsWithLeads } from '@/services/leadActions';
@@ -224,12 +224,15 @@ const LeadDetailMobile = () => {
             <TabsContent value="notes" className="mt-1 animate-[fade-in_0.2s_ease-out]">
               <NotesSection lead={lead} onDataChange={handleDataChange} />
             </TabsContent>
+
+            <TabsContent value="share" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+              <PublicCriteriaLinkManager leadId={lead.id} leadName={lead.name} />
+            </TabsContent>
             
             <TabsContent value="actions" className="mt-1 animate-[fade-in_0.2s_ease-out]">
               {actionSuggestions && actionSuggestions.length > 0 && <ActionSuggestions suggestions={actionSuggestions} onAccept={acceptSuggestion} onReject={rejectSuggestion} />}
               <ActionsPanelMobile leadId={lead.id} onAddAction={fetchLead} onMarkComplete={handleMarkComplete} actionHistory={lead.actionHistory || []} />
               
-              {/* ChatGadait floating button - n'apparaît que dans l'onglet actions */}
               {lead && (
                 <ChatGadaitFloatingButton 
                   leadData={lead} 
@@ -240,8 +243,6 @@ const LeadDetailMobile = () => {
           </div>
         </Tabs>
       </ScrollArea>
-      
-      {/* Suppression du bouton flottant global, maintenant uniquement affiché dans l'onglet actions */}
       
       <LeadDetailActionBar 
         autoSaveEnabled={autoSaveEnabled} 

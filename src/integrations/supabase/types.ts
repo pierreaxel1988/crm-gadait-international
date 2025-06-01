@@ -797,6 +797,54 @@ export type Database = {
           },
         ]
       }
+      public_criteria_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          filled_at: string | null
+          id: string
+          is_active: boolean
+          lead_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          filled_at?: string | null
+          id?: string
+          is_active?: boolean
+          lead_id: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          filled_at?: string | null
+          id?: string
+          is_active?: boolean
+          lead_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_criteria_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_criteria_links_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           created_at: string
