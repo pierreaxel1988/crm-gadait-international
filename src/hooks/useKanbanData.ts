@@ -4,10 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import { PipelineType } from '@/types/lead';
-import { LeadTag } from '@/components/common/LeadTag';
+import { LeadTag } from '@/components/common/TagBadge';
 
 export interface ExtendedKanbanItem extends KanbanItem {
   pipelineType?: PipelineType;
+  purchaseTimeframe?: string;
 }
 
 export const useKanbanData = () => {
@@ -50,29 +51,32 @@ export const useKanbanData = () => {
         budget: lead.budget,
         desiredLocation: lead.desired_location,
         country: lead.country,
-        bedrooms: lead.bedrooms,
+        bedrooms: Array.isArray(lead.bedrooms) ? lead.bedrooms[0] : lead.bedrooms,
         createdAt: lead.created_at,
         importedAt: lead.imported_at,
         nextFollowUpDate: lead.next_follow_up_date,
         purchaseTimeframe: lead.purchase_timeframe
       }));
 
-      // Group items by status
+      // Group items by status with valid LeadStatus values
       const statuses: LeadStatus[] = [
         'New',
         'Contacted',
         'Qualified',
         'Proposal',
-        'Negotiation',
-        'Closed Won',
-        'Closed Lost'
+        'Visit',
+        'Offre',
+        'Deposit',
+        'Signed',
+        'Gagné',
+        'Perdu'
       ];
 
       const columns = statuses.map(status => ({
         title: status,
         status,
         items: kanbanItems.filter(item => item.status === status),
-        pipelineType: 'Vente' as PipelineType
+        pipelineType: 'purchase' as PipelineType
       }));
 
       setLoadedColumns(columns);

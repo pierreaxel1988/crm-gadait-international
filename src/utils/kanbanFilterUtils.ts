@@ -54,11 +54,14 @@ export const filterByTags = (items: ExtendedKanbanItem[], tags?: string[]) => {
   
   return items.filter(item => 
     tags.some(tag => 
-      item.tags?.some(itemTag => 
-        typeof itemTag === 'string' 
-          ? itemTag.toLowerCase().includes(tag.toLowerCase())
-          : itemTag.name.toLowerCase().includes(tag.toLowerCase())
-      )
+      item.tags?.some(itemTag => {
+        if (typeof itemTag === 'string') {
+          return itemTag.toLowerCase().includes(tag.toLowerCase());
+        } else if (itemTag && typeof itemTag === 'object' && 'name' in itemTag) {
+          return itemTag.name.toLowerCase().includes(tag.toLowerCase());
+        }
+        return false;
+      })
     )
   );
 };
@@ -77,5 +80,59 @@ export const sortItemsByDate = (items: ExtendedKanbanItem[], ascending = false) 
     const dateB = new Date(b.createdAt || 0).getTime();
     
     return ascending ? dateA - dateB : dateB - dateA;
+  });
+};
+
+// Add the missing applyFiltersToColumns function
+export const applyFiltersToColumns = (
+  columns: Array<{
+    title: string;
+    status: any;
+    items: ExtendedKanbanItem[];
+    pipelineType?: any;
+  }>,
+  filters: any
+) => {
+  return columns.map(column => {
+    let filteredItems = column.items;
+    
+    // Apply budget filter
+    if (filters.minBudget || filters.maxBudget) {
+      filteredItems = filterByBudget(
+        filteredItems, 
+        filters.minBudget ? parseFloat(filters.minBudget) : undefined,
+        filters.maxBudget ? parseFloat(filters.maxBudget) : undefined
+      );
+    }
+    
+    // Apply property type filter
+    if (filters.propertyType) {
+      filteredItems = filterByPropertyType(filteredItems, filters.propertyType);
+    }
+    
+    // Apply location filter
+    if (filters.location) {
+      filteredItems = filterByLocation(filteredItems, filters.location);
+    }
+    
+    // Apply agent filter
+    if (filters.assignedTo) {
+      filteredItems = filterByAgent(filteredItems, filters.assignedTo);
+    }
+    
+    // Apply tags filter
+    if (filters.tags && filters.tags.length > 0) {
+      filteredItems = filterByTags(filteredItems, filters.tags);
+    }
+    
+    // Apply timeframe filter
+    if (filters.purchaseTimeframe) {
+      filteredItems = filterByTimeframe(filteredItems, filters.purchaseTimeframe);
+    }
+    
+    return {
+      ...column,
+      items: filteredItems
+    };
   });
 };
