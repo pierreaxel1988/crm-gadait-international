@@ -24,8 +24,6 @@ const Admin = lazy(() => import('./pages/Admin'));
 const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const ChatGadaitPage = lazy(() => import('./pages/ChatGadaitPage'));
-const PublicCriteriaForm = lazy(() => import('./pages/PublicCriteriaForm'));
-const CriteriaConfirmation = lazy(() => import('./pages/CriteriaConfirmation'));
 
 function App() {
   return (
@@ -37,10 +35,6 @@ function App() {
             
             {/* Route d'authentification - Auth component loaded directly */}
             <Route path="/auth" element={<Auth />} />
-            
-            {/* Routes publiques pour les critères */}
-            <Route path="/criteria/:leadId" element={<PublicCriteriaForm />} />
-            <Route path="/criteria-confirmation/:leadId" element={<CriteriaConfirmation />} />
             
             {/* Routes accessibles à tous */}
             <Route path="/pipeline" element={

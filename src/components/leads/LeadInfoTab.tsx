@@ -4,7 +4,6 @@ import { LeadDetailed } from '@/types/lead';
 
 interface LeadInfoTabProps {
   lead: LeadDetailed;
-  onLeadUpdate: (updatedLead: LeadDetailed) => void;
 }
 
 const LeadInfoTab: React.FC<LeadInfoTabProps> = ({ lead }) => {

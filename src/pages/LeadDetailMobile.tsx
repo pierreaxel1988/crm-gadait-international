@@ -202,12 +202,7 @@ const LeadDetailMobile = () => {
         </div>
         
         <div className="bg-loro-50">
-          <LeadDetailTabs 
-            lead={lead}
-            onLeadUpdate={setLead}
-            defaultTab={activeTab} 
-            pendingActionsCount={getPendingActionsCount()} 
-          />
+          <LeadDetailTabs defaultTab={activeTab} pendingActionsCount={getPendingActionsCount()} />
         </div>
       </div>
       
