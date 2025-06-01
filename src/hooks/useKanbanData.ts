@@ -11,7 +11,7 @@ export interface ExtendedKanbanItem extends KanbanItem {
   purchaseTimeframe?: string;
 }
 
-export const useKanbanData = () => {
+export const useKanbanData = (columns?: any[], refreshTrigger?: number, activeTab?: PipelineType) => {
   const [loadedColumns, setLoadedColumns] = useState<{
     title: string;
     status: LeadStatus;
@@ -43,11 +43,7 @@ export const useKanbanData = () => {
         name: lead.name || 'Lead sans nom',
         email: lead.email || '',
         phone: lead.phone,
-        tags: (lead.tags || []).map((tag: string): LeadTag => ({ 
-          id: tag, 
-          name: tag, 
-          color: 'default' as const 
-        })),
+        tags: (lead.tags || []).map((tag: string): LeadTag => tag as LeadTag),
         assignedTo: lead.assigned_to,
         status: lead.status as LeadStatus,
         pipelineType: lead.pipeline_type as PipelineType,
@@ -94,7 +90,7 @@ export const useKanbanData = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [refreshTrigger]);
 
   return {
     loadedColumns,
