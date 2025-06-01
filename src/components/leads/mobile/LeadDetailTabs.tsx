@@ -2,23 +2,27 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LeadDetailed } from '@/types/lead';
-import { LeadInfoTab } from '@/components/leads/LeadInfoTab';
-import { ActionsTab } from '@/components/leads/ActionsTab';
-import { NotesTab } from '@/components/leads/NotesTab';
-import { EmailsTab } from './tabs/EmailsTab';
+import LeadInfoTab from '@/components/leads/LeadInfoTab';
+import ActionsTab from '@/components/leads/ActionsTab';
+import NotesTab from '@/components/leads/NotesTab';
+import EmailsTab from './tabs/EmailsTab';
 import PublicCriteriaTab from '../PublicCriteriaTab';
 
 interface LeadDetailTabsProps {
   lead: LeadDetailed;
   onLeadUpdate: (updatedLead: LeadDetailed) => void;
+  defaultTab?: string;
+  pendingActionsCount?: number;
 }
 
-export const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
+const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
   lead,
-  onLeadUpdate
+  onLeadUpdate,
+  defaultTab = "info",
+  pendingActionsCount = 0
 }) => {
   return (
-    <Tabs defaultValue="info" className="w-full">
+    <Tabs defaultValue={defaultTab} className="w-full">
       <TabsList className="grid w-full grid-cols-5 bg-gray-100">
         <TabsTrigger value="info" className="text-xs">Info</TabsTrigger>
         <TabsTrigger value="actions" className="text-xs">Actions</TabsTrigger>
@@ -49,3 +53,5 @@ export const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
     </Tabs>
   );
 };
+
+export default LeadDetailTabs;

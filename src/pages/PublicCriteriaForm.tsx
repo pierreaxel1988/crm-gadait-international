@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { LeadDetailed, PropertyType, ViewType, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency } from '@/types/lead';
+import { LeadDetailed, PropertyType, ViewType, Currency } from '@/types/lead';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -53,21 +52,41 @@ const PublicCriteriaForm = () => {
       if (error) throw error;
 
       if (data) {
-        setLead(data);
-        // Pré-remplir le formulaire avec les données existantes
-        setFormData({
-          country: data.country || '',
-          desiredLocation: data.desired_location || '',
-          budgetMin: data.budget_min || '',
-          budget: data.budget || '',
-          currency: data.currency || 'EUR',
+        // Map database fields to LeadDetailed interface
+        const leadData: LeadDetailed = {
+          ...data,
+          createdAt: data.created_at,
+          lastContactedAt: data.last_contacted_at,
+          desiredLocation: data.desired_location,
+          budgetMin: data.budget_min,
           propertyTypes: data.property_types || [],
-          bedrooms: Array.isArray(data.bedrooms) ? data.bedrooms : data.bedrooms ? [data.bedrooms] : [],
-          views: data.views || [],
-          amenities: data.amenities || [],
-          purchaseTimeframe: data.purchase_timeframe || '',
-          financingMethod: data.financing_method || '',
-          propertyUse: data.property_use || ''
+          propertyType: data.property_type,
+          livingArea: data.living_area,
+          condoFees: data.condo_fees,
+          purchaseTimeframe: data.purchase_timeframe,
+          financingMethod: data.financing_method,
+          propertyUse: data.property_use,
+          nextFollowUpDate: data.next_follow_up_date,
+          pipelineType: data.pipeline_type,
+          actionHistory: data.action_history || []
+        };
+
+        setLead(leadData);
+        
+        // Pre-fill form with existing data
+        setFormData({
+          country: leadData.country || '',
+          desiredLocation: leadData.desiredLocation || '',
+          budgetMin: leadData.budgetMin || '',
+          budget: leadData.budget || '',
+          currency: (leadData.currency as Currency) || 'EUR',
+          propertyTypes: (leadData.propertyTypes as PropertyType[]) || [],
+          bedrooms: Array.isArray(leadData.bedrooms) ? leadData.bedrooms : leadData.bedrooms ? [leadData.bedrooms] : [],
+          views: (leadData.views as ViewType[]) || [],
+          amenities: leadData.amenities || [],
+          purchaseTimeframe: leadData.purchaseTimeframe || '',
+          financingMethod: leadData.financingMethod || '',
+          propertyUse: leadData.propertyUse || ''
         });
       }
     } catch (error) {
@@ -140,13 +159,13 @@ const PublicCriteriaForm = () => {
         budget: formData.budget,
         currency: formData.currency,
         property_types: formData.propertyTypes,
-        bedrooms: formData.bedrooms.length === 1 ? formData.bedrooms[0] : formData.bedrooms,
+        bedrooms: formData.bedrooms.length === 1 ? formData.bedrooms[0] : formData.bedrooms[0] || null,
         views: formData.views,
         amenities: formData.amenities,
         purchase_timeframe: formData.purchaseTimeframe,
         financing_method: formData.financingMethod,
         property_use: formData.propertyUse,
-        status: 'Qualifié' // Mettre à jour le statut du lead
+        status: 'Qualifié'
       };
 
       const { error } = await supabase
@@ -161,7 +180,6 @@ const PublicCriteriaForm = () => {
         description: "Vos critères de recherche ont été mis à jour avec succès.",
       });
 
-      // Rediriger vers une page de confirmation
       navigate(`/criteria-confirmation/${leadId}`);
 
     } catch (error) {
