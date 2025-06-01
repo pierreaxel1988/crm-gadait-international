@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { LeadDetailed, PropertyType, ViewType, Currency, PipelineType } from '@/types/lead';
+import { LeadDetailed, PropertyType, ViewType, Currency, PipelineType, LeadStatus, LeadTag, LeadSource, MauritiusRegion, AssetType, Equipment } from '@/types/lead';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -52,22 +53,22 @@ const PublicCriteriaForm = () => {
       if (error) throw error;
 
       if (data) {
-        // Map database fields to LeadDetailed interface
+        // Map database fields to LeadDetailed interface with proper type casting
         const leadData: LeadDetailed = {
           id: data.id,
           name: data.name,
-          salutation: data.salutation,
+          salutation: (data.salutation === 'M.' || data.salutation === 'Mme') ? data.salutation : undefined,
           email: data.email,
           phone: data.phone,
           phoneCountryCode: data.phone_country_code,
           phoneCountryCodeDisplay: data.phone_country_code_display,
           location: data.location,
-          status: data.status,
-          tags: Array.isArray(data.tags) ? data.tags : [],
+          status: (data.status || 'Nouveau') as LeadStatus,
+          tags: Array.isArray(data.tags) ? data.tags as LeadTag[] : [],
           createdAt: data.created_at,
           lastContactedAt: data.last_contacted_at,
           assignedTo: data.assigned_to,
-          source: data.source,
+          source: data.source as LeadSource,
           propertyReference: data.property_reference,
           budget: data.budget,
           budgetMin: data.budget_min,
@@ -88,21 +89,21 @@ const PublicCriteriaForm = () => {
           nationality: data.nationality,
           preferredLanguage: data.preferred_language,
           notes: data.notes,
-          internal_notes: data.internal_notes,
+          internal_notes: data.notes, // Map to notes since internal_notes doesn't exist in DB
           nextFollowUpDate: data.next_follow_up_date,
           country: data.country,
           url: data.url,
           pipelineType: (data.pipeline_type as PipelineType) || 'purchase',
           pipeline_type: (data.pipeline_type as PipelineType) || 'purchase',
           taxResidence: data.tax_residence,
-          regions: Array.isArray(data.regions) ? data.regions : [],
+          regions: Array.isArray(data.regions) ? data.regions as MauritiusRegion[] : [],
           imported_at: data.imported_at,
           integration_source: data.integration_source,
           actionHistory: Array.isArray(data.action_history) ? data.action_history : [],
           livingArea: data.living_area,
           external_id: data.external_id,
           landArea: data.land_area,
-          constructionYear: data.construction_year,
+          constructionYear: data.construction_year || '', // Provide default if not exists
           renovationNeeded: data.renovation_needed,
           propertyDescription: data.property_description,
           keyFeatures: Array.isArray(data.key_features) ? data.key_features : [],
@@ -113,8 +114,8 @@ const PublicCriteriaForm = () => {
           orientation: Array.isArray(data.orientation) ? data.orientation : [],
           energyClass: data.energy_class,
           yearlyTaxes: data.yearly_taxes,
-          assets: Array.isArray(data.assets) ? data.assets : [],
-          equipment: Array.isArray(data.equipment) ? data.equipment : [],
+          assets: Array.isArray(data.assets) ? data.assets as AssetType[] : [],
+          equipment: Array.isArray(data.equipment) ? data.equipment as Equipment[] : [],
           desired_price: data.desired_price,
           fees: data.fees,
           furnished: data.furnished,

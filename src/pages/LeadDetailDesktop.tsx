@@ -30,8 +30,8 @@ const LeadDetailDesktop = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('info');
-  const { lead, isLoading: loading } = useLeadDetail(id!); // Fix here to avoid using error property
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Add local error state
+  const { lead, isLoading: loading, handleDataChange } = useLeadDetail(id!);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     // Déterminer l'onglet actif depuis les paramètres d'URL ou utiliser "info" par défaut
@@ -44,6 +44,12 @@ const LeadDetailDesktop = () => {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     setSearchParams({ tab: value });
+  };
+
+  const handleLeadUpdate = (updatedLead: any) => {
+    if (handleDataChange) {
+      handleDataChange(updatedLead);
+    }
   };
 
   if (loading) {
@@ -144,15 +150,15 @@ const LeadDetailDesktop = () => {
             </TabsList>
 
             <TabsContent value="info" className="rounded-lg overflow-hidden">
-              <LeadInfoTab lead={lead} />
+              <LeadInfoTab lead={lead} onLeadUpdate={handleLeadUpdate} />
             </TabsContent>
             <TabsContent value="actions" className="rounded-lg overflow-hidden">
-              <ActionsTab leadId={lead.id} />
+              <ActionsTab lead={lead} onLeadUpdate={handleLeadUpdate} />
               {/* ChatGadait floating button - uniquement dans l'onglet actions */}
               <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />
             </TabsContent>
             <TabsContent value="notes" className="rounded-lg overflow-hidden">
-              <NotesTab leadId={lead.id} />
+              <NotesTab lead={lead} onLeadUpdate={handleLeadUpdate} />
             </TabsContent>
             <TabsContent value="properties" className="rounded-lg overflow-hidden">
               <PropertiesTab leadId={lead.id} lead={lead} />
