@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { countryToFlag } from '@/utils/countryUtils';
 
-// Complete list of countries from around the world
+// Liste complète des pays du monde
 const ALL_COUNTRIES: string[] = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", 
   "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", 
@@ -315,6 +316,7 @@ const PublicCriteriaForm = () => {
                 )}
               </div>
 
+              {/* Autres critères de recherche */}
               <SearchCriteriaFields
                 formData={formData}
                 onDataChange={handleDataChange}
