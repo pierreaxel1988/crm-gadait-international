@@ -1,13 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { MapPin, Home, Building, Bed, Eye, Star, Clock, CreditCard, Target, Crown, Building2, Mountain, TreePine, MoreHorizontal, Warehouse, Hotel, Grape, Waves, Compass, Droplets, Wind, Car, Shield, ArrowUp, Search, ChevronDown, X } from 'lucide-react';
+import { MapPin, Home, Building, Bed, Eye, Star, Clock, CreditCard, Target, Crown, Building2, Mountain, TreePine, MoreHorizontal, Warehouse, Hotel, Grape, Waves, Compass, Droplets, Wind, Car, Shield, ArrowUp } from 'lucide-react';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import RadioSelectButtons from '@/components/leads/form/RadioSelectButtons';
 import { countries } from '@/utils/countries';
-import { countryToFlag } from '@/utils/countryUtils';
-import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 
 interface SearchCriteriaFieldsProps {
   formData: Partial<LeadDetailed>;
@@ -15,66 +13,11 @@ interface SearchCriteriaFieldsProps {
   isPublicForm?: boolean;
 }
 
-// Complete list of countries from around the world
-const ALL_COUNTRIES: string[] = [
-  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", 
-  "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", 
-  "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", 
-  "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", 
-  "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", 
-  "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", 
-  "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", 
-  "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", 
-  "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", 
-  "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", 
-  "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea, North", "Korea, South", "Kosovo", "Kuwait", 
-  "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", 
-  "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", 
-  "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", 
-  "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", 
-  "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Panama", 
-  "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", 
-  "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", 
-  "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", 
-  "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", 
-  "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", 
-  "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", 
-  "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", 
-  "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-];
-
 const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
   formData,
   onDataChange,
   isPublicForm = false
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
-  const [isTaxResidenceDropdownOpen, setIsTaxResidenceDropdownOpen] = useState(false);
-  const [isNationalityDropdownOpen, setIsNationalityDropdownOpen] = useState(false);
-  const countryDropdownRef = useRef<HTMLDivElement>(null);
-  const taxResidenceDropdownRef = useRef<HTMLDivElement>(null);
-  const nationalityDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
-        setIsCountryDropdownOpen(false);
-      }
-      if (taxResidenceDropdownRef.current && !taxResidenceDropdownRef.current.contains(event.target as Node)) {
-        setIsTaxResidenceDropdownOpen(false);
-      }
-      if (nationalityDropdownRef.current && !nationalityDropdownRef.current.contains(event.target as Node)) {
-        setIsNationalityDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     onDataChange({ [name]: value });
@@ -108,62 +51,6 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
     }
     const value = formData.bedrooms;
     return [value >= 8 ? "8+" : value.toString()];
-  };
-
-  const filteredCountries = searchTerm
-    ? ALL_COUNTRIES.filter(country => 
-        country.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : ALL_COUNTRIES;
-
-  const handleCountrySelect = (country: string) => {
-    const event = {
-      target: {
-        name: 'country',
-        value: country
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    handleInputChange(event);
-    setIsCountryDropdownOpen(false);
-    setSearchTerm('');
-  };
-
-  const handleTaxResidenceSelect = (country: string) => {
-    const event = {
-      target: {
-        name: 'taxResidence',
-        value: country
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    handleInputChange(event);
-    setIsTaxResidenceDropdownOpen(false);
-    setSearchTerm('');
-
-    // Auto-suggest nationality if not already set
-    if (!formData.nationality) {
-      const nationality = deriveNationalityFromCountry(country);
-      if (nationality) {
-        const nationalityEvent = {
-          target: {
-            name: 'nationality',
-            value: nationality
-          }
-        } as React.ChangeEvent<HTMLInputElement>;
-        handleInputChange(nationalityEvent);
-      }
-    }
-  };
-
-  const handleNationalitySelect = (nationality: string) => {
-    const event = {
-      target: {
-        name: 'nationality',
-        value: nationality
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    handleInputChange(event);
-    setIsNationalityDropdownOpen(false);
-    setSearchTerm('');
   };
 
   const getPropertyTypeIcon = (type: PropertyType) => {
@@ -276,74 +163,24 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
   return (
     <div className="space-y-6">
       {/* Pays recherché */}
-      <div className="space-y-3" ref={countryDropdownRef}>
+      <div className="space-y-3">
         <Label className="text-sm font-medium flex items-center gap-2">
           <MapPin className="h-4 w-4 text-loro-terracotta" />
           Pays recherché
         </Label>
-        <div 
-          className="flex items-center justify-between px-3 py-2 h-10 w-full border border-gray-300 rounded-lg bg-background text-sm cursor-pointer focus:ring-2 focus:ring-loro-terracotta focus:border-transparent"
-          onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+        <select
+          name="country"
+          value={formData.country || ''}
+          onChange={handleInputChange}
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-loro-terracotta focus:border-transparent text-sm"
         >
-          {formData.country ? (
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{countryToFlag(formData.country)}</span>
-              <span>{formData.country}</span>
-            </div>
-          ) : (
-            <span className="text-muted-foreground">Sélectionner un pays</span>
-          )}
-          <ChevronDown className={`h-4 w-4 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
-        </div>
-        
-        {isCountryDropdownOpen && (
-          <div className="absolute z-50 mt-1 w-full bg-background border rounded-md shadow-lg">
-            <div className="sticky top-0 p-2 bg-background border-b">
-              <div className="relative">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Rechercher un pays..."
-                  className="pl-8 h-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                  autoFocus
-                />
-                {searchTerm && (
-                  <button
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSearchTerm('');
-                    }}
-                  >
-                    <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                  </button>
-                )}
-              </div>
-            </div>
-            
-            <div className="max-h-60 overflow-auto p-1">
-              {filteredCountries.map(country => (
-                <div
-                  key={country}
-                  className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${formData.country === country ? 'bg-accent/50' : ''}`}
-                  onClick={() => handleCountrySelect(country)}
-                >
-                  <span className="text-lg mr-2">{countryToFlag(country)}</span>
-                  <span>{country}</span>
-                </div>
-              ))}
-              
-              {filteredCountries.length === 0 && (
-                <div className="px-4 py-2 text-sm text-muted-foreground">
-                  Aucun résultat
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+          <option value="">Sélectionner un pays</option>
+          {countries.map((country) => (
+            <option key={country.code} value={country.name}>
+              {country.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Localisation */}
@@ -584,143 +421,26 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
           <h2 className="text-base font-semibold text-gray-800 mb-4">Informations personnelles</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Pays de résidence */}
-            <div className="space-y-2" ref={taxResidenceDropdownRef}>
+            <div>
               <Label className="text-gray-800 mb-1 block font-medium text-xs">Pays de résidence</Label>
-              <div 
-                className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer"
-                onClick={() => setIsTaxResidenceDropdownOpen(!isTaxResidenceDropdownOpen)}
-              >
-                {formData.taxResidence ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{countryToFlag(formData.taxResidence)}</span>
-                    <span>{formData.taxResidence}</span>
-                  </div>
-                ) : (
-                  <span className="text-muted-foreground">Sélectionner un pays</span>
-                )}
-                <ChevronDown className={`h-4 w-4 transition-transform ${isTaxResidenceDropdownOpen ? 'rotate-180' : ''}`} />
-              </div>
-              
-              {isTaxResidenceDropdownOpen && (
-                <div className="absolute z-50 mt-1 w-full bg-background border rounded-md shadow-lg">
-                  <div className="sticky top-0 p-2 bg-background border-b">
-                    <div className="relative">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="text"
-                        placeholder="Rechercher un pays..."
-                        className="pl-8 h-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        autoFocus
-                      />
-                      {searchTerm && (
-                        <button
-                          className="absolute right-2 top-1/2 -translate-y-1/2"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSearchTerm('');
-                          }}
-                        >
-                          <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="max-h-60 overflow-auto p-1">
-                    {filteredCountries.map(country => (
-                      <div
-                        key={country}
-                        className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${formData.taxResidence === country ? 'bg-accent/50' : ''}`}
-                        onClick={() => handleTaxResidenceSelect(country)}
-                      >
-                        <span className="text-lg mr-2">{countryToFlag(country)}</span>
-                        <span>{country}</span>
-                      </div>
-                    ))}
-                    
-                    {filteredCountries.length === 0 && (
-                      <div className="px-4 py-2 text-sm text-muted-foreground">
-                        Aucun résultat
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              <Input
+                name="taxResidence"
+                value={formData.taxResidence || ''}
+                onChange={handleInputChange}
+                placeholder="Pays de résidence"
+                className="w-full p-3 text-sm border-gray-300"
+              />
             </div>
             
-            {/* Nationalité */}
-            <div className="space-y-2" ref={nationalityDropdownRef}>
+            <div>
               <Label className="text-gray-800 mb-1 block font-medium text-xs">Nationalité</Label>
-              <div 
-                className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer"
-                onClick={() => setIsNationalityDropdownOpen(!isNationalityDropdownOpen)}
-              >
-                {formData.nationality ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{countryToFlag(formData.nationality)}</span>
-                    <span>{formData.nationality}</span>
-                  </div>
-                ) : (
-                  <span className="text-muted-foreground">Sélectionner une nationalité</span>
-                )}
-                <ChevronDown className={`h-4 w-4 transition-transform ${isNationalityDropdownOpen ? 'rotate-180' : ''}`} />
-              </div>
-              
-              {isNationalityDropdownOpen && (
-                <div className="absolute z-50 mt-1 w-full bg-background border rounded-md shadow-lg">
-                  <div className="sticky top-0 p-2 bg-background border-b">
-                    <div className="relative">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="text"
-                        placeholder="Rechercher une nationalité..."
-                        className="pl-8 h-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        autoFocus
-                      />
-                      {searchTerm && (
-                        <button
-                          className="absolute right-2 top-1/2 -translate-y-1/2"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSearchTerm('');
-                          }}
-                        >
-                          <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="max-h-60 overflow-auto p-1">
-                    {filteredCountries.map(country => {
-                      const nationality = deriveNationalityFromCountry(country) || country;
-                      return (
-                        <div
-                          key={`${country}-${nationality}`}
-                          className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${formData.nationality === nationality ? 'bg-accent/50' : ''}`}
-                          onClick={() => handleNationalitySelect(nationality)}
-                        >
-                          <span className="text-lg mr-2">{countryToFlag(country)}</span>
-                          <span>{nationality}</span>
-                        </div>
-                      );
-                    })}
-                    
-                    {filteredCountries.length === 0 && (
-                      <div className="px-4 py-2 text-sm text-muted-foreground">
-                        Aucun résultat
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              <Input
+                name="nationality"
+                value={formData.nationality || ''}
+                onChange={handleInputChange}
+                placeholder="Nationalité"
+                className="w-full p-3 text-sm border-gray-300"
+              />
             </div>
           </div>
 
