@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed, Currency } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -422,7 +423,8 @@ const GeneralInfoSection = ({ lead, onDataChange }: GeneralInfoSectionProps) => 
             value={Array.isArray(lead.tags) ? lead.tags.join(', ') : ''}
             onChange={(e) => {
               const tagsArray = e.target.value.split(',').map(tag => tag.trim()).filter(Boolean);
-              onDataChange({ tags: tagsArray });
+              // Cast to any to avoid TypeScript error since tags can be custom strings
+              onDataChange({ tags: tagsArray as any });
             }}
             placeholder="Tag1, Tag2, Tag3..."
             className="w-full p-3 text-sm"
