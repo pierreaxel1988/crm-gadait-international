@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -110,7 +109,7 @@ const PublicCriteriaForm = () => {
     console.log('Submitting form data:', formData);
     setSubmitting(true);
     try {
-      // Map form data to database structure for perfect synchronization
+      // Map form data to exact database structure for perfect synchronization
       const submitData = {
         country: formData.country,
         desired_location: formData.desiredLocation,
@@ -130,7 +129,6 @@ const PublicCriteriaForm = () => {
         tax_residence: formData.taxResidence,
         preferred_language: formData.preferredLanguage,
         regions: formData.regions,
-        mapCoordinates: formData.mapCoordinates,
         url: formData.url
       };
       
