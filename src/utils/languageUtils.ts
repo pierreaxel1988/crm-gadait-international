@@ -20,7 +20,12 @@ export const translations = {
     errorTitle: "Erreur",
     invalidLink: "Ce lien n'est pas valide ou a expiré.",
     loadError: "Impossible de charger le formulaire.",
-    saveError: "Une erreur est survenue lors de l'enregistrement."
+    saveError: "Une erreur est survenue lors de l'enregistrement.",
+    // Email template
+    emailSubject: "Complétez vos critères de recherche immobilière",
+    emailTemplate: "Afin de mieux vous accompagner dans votre recherche immobilière, pourriez-vous prendre quelques minutes pour remplir vos critères de recherche via ce lien sécurisé :",
+    // WhatsApp template
+    whatsappTemplate: "Pour vous proposer les meilleures propriétés, pourriez-vous remplir vos critères de recherche ici :"
   },
   en: {
     headerTitle: "PROPERTY CRITERIA",
@@ -41,7 +46,12 @@ export const translations = {
     errorTitle: "Error",
     invalidLink: "This link is invalid or has expired.",
     loadError: "Unable to load the form.",
-    saveError: "An error occurred while saving."
+    saveError: "An error occurred while saving.",
+    // Email template
+    emailSubject: "Complete your property search criteria",
+    emailTemplate: "To better assist you in your property search, could you please take a few minutes to fill in your search criteria via this secure link:",
+    // WhatsApp template
+    whatsappTemplate: "To offer you the best properties, could you please fill in your search criteria here:"
   }
 };
 
@@ -86,4 +96,33 @@ export const detectLanguageFromData = (leadData: any): 'fr' | 'en' => {
 
 export const getTranslation = (lang: 'fr' | 'en', key: string): string => {
   return translations[lang][key as keyof typeof translations.fr] || translations.fr[key as keyof typeof translations.fr];
+};
+
+// Helper function to generate email template based on language
+export const generateEmailTemplate = (leadData: any, publicUrl: string): { subject: string; body: string } => {
+  const language = detectLanguageFromData(leadData);
+  const name = leadData?.name || '';
+  
+  const subject = getTranslation(language, 'emailSubject');
+  const greeting = `${getTranslation(language, 'greeting')} ${name},`;
+  const message = getTranslation(language, 'emailTemplate');
+  
+  const body = `${greeting}\n\n${message}\n\n${publicUrl}`;
+  
+  return { subject, body };
+};
+
+// Helper function to generate WhatsApp template based on language
+export const generateWhatsAppTemplate = (leadData: any, publicUrl: string): string => {
+  const language = detectLanguageFromData(leadData);
+  const name = leadData?.name || '';
+  
+  const greeting = `${getTranslation(language, 'greeting')} ${name} !`;
+  const message = getTranslation(language, 'whatsappTemplate');
+  
+  if (language === 'en') {
+    return `${greeting} ${message} ${publicUrl}`;
+  }
+  
+  return `${greeting} 👋\n\n${message} ${publicUrl}`;
 };

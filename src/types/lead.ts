@@ -140,7 +140,12 @@ export type PurchaseTimeframe =
   | 'Within 3 months'
   | 'Within 6 months'
   | 'Within 1 year'
-  | 'No rush';
+  | 'No rush'
+  | 'Immédiat'
+  | '1-3 mois'
+  | '3-6 mois'
+  | '6-12 mois'
+  | '+12 mois';
 
 export type FinancingMethod = 
   | 'Cash'
@@ -173,7 +178,7 @@ export interface LeadDetailed {
   phoneCountryCodeDisplay?: string;
   location: string;
   status: LeadStatus;
-  tags: string[];
+  tags: LeadTag[];
   createdAt: string;
   lastContactedAt?: string;
   assignedTo?: string;
@@ -181,16 +186,16 @@ export interface LeadDetailed {
   propertyReference?: string;
   budget?: string;
   budgetMin?: string;
-  currency?: string;
+  currency?: Currency;
   desiredLocation?: string;
   propertyType?: PropertyType;
   propertyTypes?: PropertyType[];
   bedrooms?: number | number[];
-  views?: string[];
-  amenities?: string[];
-  purchaseTimeframe?: string;
-  financingMethod?: string;
-  propertyUse?: string;
+  views?: ViewType[];
+  amenities?: Amenity[];
+  purchaseTimeframe?: PurchaseTimeframe;
+  financingMethod?: FinancingMethod;
+  propertyUse?: PropertyUse;
   nationality?: string;
   taxResidence?: string;
   preferredLanguage?: string;
