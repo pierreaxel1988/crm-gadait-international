@@ -1,671 +1,510 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency } from '@/types/lead';
+import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { MapPin, Home, Building, Bed, Eye, Star, Clock, CreditCard, Target, Crown, Building2, Mountain, TreePine, MoreHorizontal, Warehouse, Hotel, Grape, Waves, Compass, Droplets, Wind, Car, Shield, ArrowUp, Search, ChevronDown, X } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { X, Euro, DollarSign, PoundSterling } from 'lucide-react';
+import { LeadDetailed, Currency } from '@/types/lead';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
-import RadioSelectButtons from '@/components/leads/form/RadioSelectButtons';
-import { countryToFlag } from '@/utils/countryUtils';
-import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
-import { useCountriesFromDatabase } from '@/hooks/useCountriesFromDatabase';
+import { Button } from '@/components/ui/button';
+import { getTranslation } from '@/utils/languageUtils';
 
 interface SearchCriteriaFieldsProps {
   formData: Partial<LeadDetailed>;
   onDataChange: (data: Partial<LeadDetailed>) => void;
   isPublicForm?: boolean;
+  language?: 'fr' | 'en';
 }
 
-const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
-  formData,
-  onDataChange,
-  isPublicForm = false
-}) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
-  const [isTaxResidenceDropdownOpen, setIsTaxResidenceDropdownOpen] = useState(false);
-  const [isNationalityDropdownOpen, setIsNationalityDropdownOpen] = useState(false);
-  const countryDropdownRef = useRef<HTMLDivElement>(null);
-  const taxResidenceDropdownRef = useRef<HTMLDivElement>(null);
-  const nationalityDropdownRef = useRef<HTMLDivElement>(null);
-
-  const { countries, loading } = useCountriesFromDatabase();
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
-        setIsCountryDropdownOpen(false);
-      }
-      if (taxResidenceDropdownRef.current && !taxResidenceDropdownRef.current.contains(event.target as Node)) {
-        setIsTaxResidenceDropdownOpen(false);
-      }
-      if (nationalityDropdownRef.current && !nationalityDropdownRef.current.contains(event.target as Node)) {
-        setIsNationalityDropdownOpen(false);
+const SearchCriteriaFields = ({ formData, onDataChange, isPublicForm = false, language = 'fr' }: SearchCriteriaFieldsProps) => {
+  // Translations for form fields
+  const t = (key: string) => {
+    const translations = {
+      fr: {
+        desiredLocation: "Localisation souhaitée",
+        budget: "Budget maximum",
+        budgetMin: "Budget minimum", 
+        propertyType: "Type de propriété",
+        bedrooms: "Nombre de chambres",
+        livingArea: "Surface habitable (m²)",
+        landArea: "Surface terrain (m²)",
+        views: "Vues",
+        amenities: "Équipements",
+        purchaseTimeframe: "Délai d'achat",
+        financingMethod: "Mode de financement",
+        propertyUse: "Usage du bien",
+        nationality: "Nationalité",
+        taxResidence: "Résidence fiscale",
+        preferredLanguage: "Langue préférée",
+        regions: "Régions (Maurice)",
+        immediately: "Immédiatement",
+        within3months: "Dans les 3 mois",
+        within6months: "Dans les 6 mois", 
+        within1year: "Dans l'année",
+        norush: "Pas pressé",
+        cash: "Comptant",
+        mortgage: "Crédit",
+        mixed: "Mixte",
+        other: "Autre",
+        primary: "Résidence principale",
+        secondary: "Résidence secondaire",
+        investment: "Investissement",
+        commercial: "Commercial",
+        french: "Français",
+        english: "Anglais",
+        german: "Allemand",
+        italian: "Italien",
+        spanish: "Espagnol",
+        north: "Nord",
+        south: "Sud",
+        east: "Est",
+        west: "Ouest",
+        central: "Centre"
+      },
+      en: {
+        desiredLocation: "Desired location",
+        budget: "Maximum budget",
+        budgetMin: "Minimum budget",
+        propertyType: "Property type", 
+        bedrooms: "Number of bedrooms",
+        livingArea: "Living area (m²)",
+        landArea: "Land area (m²)",
+        views: "Views",
+        amenities: "Amenities",
+        purchaseTimeframe: "Purchase timeframe",
+        financingMethod: "Financing method",
+        propertyUse: "Property use",
+        nationality: "Nationality",
+        taxResidence: "Tax residence",
+        preferredLanguage: "Preferred language",
+        regions: "Regions (Mauritius)",
+        immediately: "Immediately",
+        within3months: "Within 3 months",
+        within6months: "Within 6 months",
+        within1year: "Within 1 year", 
+        norush: "No rush",
+        cash: "Cash",
+        mortgage: "Mortgage",
+        mixed: "Mixed",
+        other: "Other",
+        primary: "Primary residence",
+        secondary: "Secondary residence", 
+        investment: "Investment",
+        commercial: "Commercial",
+        french: "French",
+        english: "English",
+        german: "German",
+        italian: "Italian",
+        spanish: "Spanish",
+        north: "North",
+        south: "South",
+        east: "East",
+        west: "West",
+        central: "Central"
       }
     };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    onDataChange({ [name]: value });
+    
+    return translations[language][key as keyof typeof translations.fr] || key;
   };
 
-  const handleMultiSelectToggle = <T extends string>(field: keyof LeadDetailed, value: T) => {
-    const currentValues = (formData[field] as T[]) || [];
-    const newValues = currentValues.includes(value)
-      ? currentValues.filter(v => v !== value)
-      : [...currentValues, value];
-    onDataChange({ [field]: newValues });
-  };
+  const propertyTypes = language === 'en' ? [
+    'Villa', 'Apartment', 'House', 'Land', 'Other'
+  ] : [
+    'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Chalet', 'Terrain', 
+    'Manoir', 'Maison de ville', 'Château', 'Local commercial', 'Commercial', 
+    'Hotel', 'Vignoble', 'Autres'
+  ];
 
-  const handleBedroomToggle = (value: string) => {
-    const numValue = value === "8+" ? 8 : parseInt(value);
-    const currentBedrooms = Array.isArray(formData.bedrooms) 
-      ? [...formData.bedrooms] 
-      : formData.bedrooms 
-      ? [formData.bedrooms] 
-      : [];
-    const newBedrooms = currentBedrooms.includes(numValue)
-      ? currentBedrooms.filter(b => b !== numValue)
-      : [...currentBedrooms, numValue];
-    onDataChange({ bedrooms: newBedrooms.length ? newBedrooms : undefined });
-  };
+  const bedroomOptions = ['1', '2', '3', '4', '5', '6+'];
+  
+  const viewOptions = language === 'en' ? 
+    ['Sea view', 'Mountain view', 'Garden view', 'City view', 'Pool view'] :
+    ['Mer', 'Montagne', 'Golf', 'Autres'];
+    
+  const amenityOptions = language === 'en' ?
+    ['Pool', 'Gym', 'Parking', 'Garden', 'Terrace', 'Balcony'] :
+    ['Piscine', 'Terrasse', 'Jardin'];
 
-  const getSelectedBedrooms = () => {
-    if (!formData.bedrooms) return [];
-    if (Array.isArray(formData.bedrooms)) {
-      return formData.bedrooms.map(num => num >= 8 ? "8+" : num.toString());
-    }
-    const value = formData.bedrooms;
-    return [value >= 8 ? "8+" : value.toString()];
-  };
+  const mauritiusRegions = ['North', 'South', 'East', 'West', 'Central'];
 
-  const filteredCountries = searchTerm
-    ? countries.filter(country => 
-        country.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : countries;
+  const currencies: Currency[] = ['EUR', 'USD', 'GBP', 'CHF', 'MUR', 'AED'];
 
-  const handleCountrySelect = (country: string) => {
-    const event = {
-      target: {
-        name: 'country',
-        value: country
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    handleInputChange(event);
-    setIsCountryDropdownOpen(false);
-    setSearchTerm('');
-  };
-
-  const handleTaxResidenceSelect = (country: string) => {
-    const event = {
-      target: {
-        name: 'taxResidence',
-        value: country
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    handleInputChange(event);
-    setIsTaxResidenceDropdownOpen(false);
-    setSearchTerm('');
-
-    // Auto-suggest nationality if not already set
-    if (!formData.nationality) {
-      const nationality = deriveNationalityFromCountry(country);
-      if (nationality) {
-        const nationalityEvent = {
-          target: {
-            name: 'nationality',
-            value: nationality
-          }
-        } as React.ChangeEvent<HTMLInputElement>;
-        handleInputChange(nationalityEvent);
-      }
+  const getCurrencyIcon = (currency: Currency) => {
+    switch (currency) {
+      case 'EUR': return <Euro className="h-4 w-4" />;
+      case 'USD': return <DollarSign className="h-4 w-4" />;
+      case 'GBP': return <PoundSterling className="h-4 w-4" />;
+      default: return <span className="text-xs font-medium">{currency}</span>;
     }
   };
 
-  const handleNationalitySelect = (nationality: string) => {
-    const event = {
-      target: {
-        name: 'nationality',
-        value: nationality
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    handleInputChange(event);
-    setIsNationalityDropdownOpen(false);
-    setSearchTerm('');
+  const handlePropertyTypeToggle = (type: string) => {
+    const currentTypes = formData.propertyTypes || [];
+    const newTypes = currentTypes.includes(type as any)
+      ? currentTypes.filter(t => t !== type)
+      : [...currentTypes, type as any];
+    
+    onDataChange({ propertyTypes: newTypes });
   };
 
-  const getPropertyTypeIcon = (type: PropertyType) => {
-    switch (type) {
-      case "Villa":
-        return Home;
-      case "Appartement":
-        return Building;
-      case "Penthouse":
-        return Crown;
-      case "Maison":
-        return Home;
-      case "Duplex":
-        return Building2;
-      case "Chalet":
-        return Mountain;
-      case "Terrain":
-        return TreePine;
-      case "Manoir":
-        return Crown;
-      case "Maison de ville":
-        return Building2;
-      case "Château":
-        return Crown;
-      case "Local commercial":
-        return Warehouse;
-      case "Commercial":
-        return Building;
-      case "Hotel":
-        return Hotel;
-      case "Vignoble":
-        return Grape;
-      case "Autres":
-        return MoreHorizontal;
-      default:
-        return Home;
-    }
+  const handleBedroomToggle = (bedroom: string) => {
+    const currentBedrooms = Array.isArray(formData.bedrooms) ? formData.bedrooms : [];
+    const bedroomValue = bedroom === '6+' ? 6 : parseInt(bedroom);
+    
+    const newBedrooms = currentBedrooms.includes(bedroomValue)
+      ? currentBedrooms.filter(b => b !== bedroomValue)
+      : [...currentBedrooms, bedroomValue];
+    
+    console.log('Bedroom toggle in SearchCriteriaFields:', { bedroom, bedroomValue, currentBedrooms, newBedrooms });
+    onDataChange({ bedrooms: newBedrooms });
   };
 
-  const getViewTypeIcon = (type: ViewType) => {
-    switch (type) {
-      case "Mer":
-        return Waves;
-      case "Montagne":
-        return Mountain;
-      case "Golf":
-        return TreePine;
-      case "Autres":
-        return MoreHorizontal;
-      default:
-        return Compass;
-    }
+  const handleViewToggle = (view: string) => {
+    const currentViews = formData.views || [];
+    const newViews = currentViews.includes(view)
+      ? currentViews.filter(v => v !== view)
+      : [...currentViews, view];
+    
+    onDataChange({ views: newViews });
   };
 
-  const getAmenityIcon = (amenity: Amenity) => {
-    switch (amenity) {
-      case "Piscine":
-        return Droplets;
-      case "Terrasse":
-        return Home;
-      case "Balcon":
-        return Building;
-      case "Jardin":
-        return TreePine;
-      case "Parking":
-        return Car;
-      case "Ascenseur":
-        return ArrowUp;
-      case "Sécurité":
-        return Shield;
-      case "Climatisation":
-        return Wind;
-      default:
-        return Star;
-    }
+  const handleAmenityToggle = (amenity: string) => {
+    const currentAmenities = formData.amenities || [];
+    const newAmenities = currentAmenities.includes(amenity)
+      ? currentAmenities.filter(a => a !== amenity)
+      : [...currentAmenities, amenity];
+    
+    onDataChange({ amenities: newAmenities });
   };
 
-  const propertyTypesList: PropertyType[] = [
-    "Villa", "Appartement", "Penthouse", "Maison", "Duplex", "Chalet", 
-    "Terrain", "Manoir", "Maison de ville", "Château", "Local commercial", 
-    "Commercial", "Hotel", "Vignoble", "Autres"
-  ];
-
-  const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
-
-  const viewTypesList: ViewType[] = ["Mer", "Montagne", "Golf", "Autres"];
-
-  const amenitiesList: Amenity[] = [
-    "Piscine", "Terrasse", "Balcon", "Jardin", "Parking", 
-    "Ascenseur", "Sécurité", "Climatisation"
-  ];
-
-  const purchaseTimeframes: PurchaseTimeframe[] = [
-    "Immédiat", "1-3 mois", "3-6 mois", "6-12 mois", "+12 mois"
-  ];
-
-  const financingMethods: FinancingMethod[] = ["Cash", "Crédit", "Mixte"];
-
-  const propertyUses: PropertyUse[] = [
-    "Résidence principale", "Résidence secondaire", "Investissement"
-  ];
-
-  const currencies: Currency[] = ["EUR", "USD", "GBP", "CHF", "AED", "MUR"];
-
-  const languageOptions = [
-    'Français', 'English', 'Deutsch', 'Italiano', 'Español', 
-    'العربية', '中文', 'Русский'
-  ];
-
-  if (loading) {
-    return <div className="text-center p-4">Chargement des pays...</div>;
-  }
+  const handleRegionToggle = (region: string) => {
+    const currentRegions = formData.regions || [];
+    const newRegions = currentRegions.includes(region)
+      ? currentRegions.filter(r => r !== region)
+      : [...currentRegions, region];
+    
+    onDataChange({ regions: newRegions });
+  };
 
   return (
     <div className="space-y-6">
-      {/* Localisation */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-loro-terracotta" />
-          Localisation
+      {/* Localisation souhaitée */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-loro-navy">
+          {t('desiredLocation')}
         </Label>
         <Input
-          name="desiredLocation"
           value={formData.desiredLocation || ''}
-          onChange={handleInputChange}
-          placeholder="Ville, région..."
-          className="w-full p-3 text-sm border-gray-300 focus:ring-loro-terracotta focus:border-loro-terracotta"
+          onChange={(e) => onDataChange({ desiredLocation: e.target.value })}
+          placeholder={language === 'en' ? "City, region, or specific area" : "Ville, région ou zone spécifique"}
+          className="border-loro-sand/30 focus:border-loro-terracotta"
         />
       </div>
 
       {/* Budget */}
-      <div className="space-y-4">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <div className="text-loro-terracotta text-lg font-bold">€</div>
-          Budget
-        </Label>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <Label className="text-gray-600 mb-1 block text-xs">Min</Label>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-loro-navy">
+            {t('budgetMin')}
+          </Label>
+          <div className="relative">
             <Input
-              name="budgetMin"
+              type="text"
               value={formData.budgetMin || ''}
-              onChange={handleInputChange}
-              placeholder="Min"
-              className="w-full p-3 text-sm border-gray-300"
+              onChange={(e) => onDataChange({ budgetMin: e.target.value })}
+              placeholder="500 000"
+              className="border-loro-sand/30 focus:border-loro-terracotta pr-12"
             />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-loro-hazel">
+              {getCurrencyIcon(formData.currency as Currency || 'EUR')}
+            </div>
           </div>
-          <div>
-            <Label className="text-gray-600 mb-1 block text-xs">Max</Label>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-loro-navy">
+            {t('budget')}
+          </Label>
+          <div className="relative">
             <Input
-              name="budget"
+              type="text"
               value={formData.budget || ''}
-              onChange={handleInputChange}
-              placeholder="Max"
-              className="w-full p-3 text-sm border-gray-300"
+              onChange={(e) => onDataChange({ budget: e.target.value })}
+              placeholder="1 000 000"
+              className="border-loro-sand/30 focus:border-loro-terracotta pr-12"
             />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-loro-hazel">
+              {getCurrencyIcon(formData.currency as Currency || 'EUR')}
+            </div>
           </div>
         </div>
 
-        <div>
-          <Label className="text-gray-600 mb-1 block text-xs">Devise</Label>
-          <select
-            name="currency"
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-loro-navy">
+            {language === 'en' ? 'Currency' : 'Devise'}
+          </Label>
+          <Select
             value={formData.currency || 'EUR'}
-            onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+            onValueChange={(value) => onDataChange({ currency: value as Currency })}
           >
-            {currencies.map(currency => (
-              <option key={currency} value={currency}>
-                {currency === 'EUR' && 'Euro (€)'}
-                {currency === 'USD' && 'USD ($)'}
-                {currency === 'GBP' && 'GBP (£)'}
-                {currency === 'CHF' && 'CHF'}
-                {currency === 'AED' && 'AED'}
-                {currency === 'MUR' && 'MUR'}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="border-loro-sand/30 focus:border-loro-terracotta">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {currencies.map(currency => (
+                <SelectItem key={currency} value={currency}>
+                  <div className="flex items-center gap-2">
+                    {getCurrencyIcon(currency)}
+                    <span>{currency}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       {/* Type de propriété */}
-      <div className="space-y-4">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <Building className="h-4 w-4 text-loro-terracotta" />
-          Type de propriété
+      <div className="space-y-3">
+        <Label className="text-sm font-medium text-loro-navy">
+          {t('propertyType')}
         </Label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {propertyTypesList.map(type => {
-            const IconComponent = getPropertyTypeIcon(type);
-            const isSelected = (formData.propertyTypes || []).includes(type);
-            return (
-              <button
-                key={type}
-                type="button"
-                onClick={() => handleMultiSelectToggle('propertyTypes', type)}
-                className={`flex items-center justify-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${
-                  isSelected
-                    ? 'bg-loro-navy text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <IconComponent className="h-4 w-4" />
-                {type}
-              </button>
-            );
-          })}
-        </div>
+        <MultiSelectButtons
+          options={propertyTypes as any}
+          selectedValues={formData.propertyTypes || []}
+          onToggle={handlePropertyTypeToggle}
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2"
+        />
       </div>
 
       {/* Nombre de chambres */}
-      <div className="space-y-4">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <Bed className="h-4 w-4 text-loro-terracotta" />
-          Nombre de chambres
-        </Label>
-        <div className="flex flex-wrap gap-2">
-          {bedroomOptions.map((number) => (
-            <button
-              key={number}
-              type="button"
-              onClick={() => handleBedroomToggle(number)}
-              className={`flex items-center justify-center w-12 h-12 rounded-lg font-semibold text-sm transition-all ${
-                getSelectedBedrooms().includes(number)
-                  ? 'bg-loro-navy text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {number}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Surface habitable */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <Home className="h-4 w-4 text-loro-terracotta" />
-          Surface habitable (m²)
+        <Label className="text-sm font-medium text-loro-navy">
+          {t('bedrooms')}
         </Label>
-        <Input
-          name="livingArea"
-          value={formData.livingArea || ''}
-          onChange={handleInputChange}
-          placeholder="Ex: 120"
-          className="w-full p-3 text-sm border-gray-300"
-        />
-      </div>
-
-      {/* Terrain (m²) */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <TreePine className="h-4 w-4 text-loro-terracotta" />
-          Terrain (m²)
-        </Label>
-        <Input
-          name="landArea"
-          value={formData.landArea || ''}
-          onChange={handleInputChange}
-          placeholder="Ex: 500"
-          className="w-full p-3 text-sm border-gray-300"
-        />
-      </div>
-
-      {/* Vue souhaitée */}
-      <div className="space-y-4">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <Eye className="h-4 w-4 text-loro-terracotta" />
-          Vue souhaitée
-        </Label>
-        <div className="grid grid-cols-2 gap-2">
-          {viewTypesList.map(view => {
-            const IconComponent = getViewTypeIcon(view);
-            const isSelected = (formData.views || []).includes(view);
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+          {bedroomOptions.map(bedroom => {
+            const bedroomValue = bedroom === '6+' ? 6 : parseInt(bedroom);
+            const isSelected = Array.isArray(formData.bedrooms) && formData.bedrooms.includes(bedroomValue);
+            
             return (
-              <button
-                key={view}
+              <Button
+                key={bedroom}
                 type="button"
-                onClick={() => handleMultiSelectToggle('views', view)}
-                className={`flex items-center justify-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${
+                variant="outline"
+                size="sm"
+                onClick={() => handleBedroomToggle(bedroom)}
+                className={`h-10 transition-all duration-200 ${
                   isSelected
-                    ? 'bg-loro-navy text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-loro-hazel text-white border-loro-hazel hover:bg-loro-hazel/90'
+                    : 'bg-white text-loro-navy border-loro-sand hover:bg-loro-pearl/20 hover:border-loro-hazel'
                 }`}
               >
-                <IconComponent className="h-4 w-4" />
-                {view}
-              </button>
+                {bedroom}
+              </Button>
             );
           })}
         </div>
       </div>
 
-      {/* Commodités souhaitées */}
-      <div className="space-y-4">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <Star className="h-4 w-4 text-loro-terracotta" />
-          Commodités souhaitées
-        </Label>
-        <div className="grid grid-cols-2 gap-2">
-          {amenitiesList.map(amenity => {
-            const IconComponent = getAmenityIcon(amenity);
-            const isSelected = (formData.amenities || []).includes(amenity);
-            return (
-              <button
-                key={amenity}
-                type="button"
-                onClick={() => handleMultiSelectToggle('amenities', amenity)}
-                className={`flex items-center justify-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${
-                  isSelected
-                    ? 'bg-loro-navy text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <IconComponent className="h-4 w-4" />
-                {amenity}
-              </button>
-            );
-          })}
+      {/* Surfaces */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-loro-navy">
+            {t('livingArea')}
+          </Label>
+          <Input
+            type="text"
+            value={formData.livingArea || ''}
+            onChange={(e) => onDataChange({ livingArea: e.target.value })}
+            placeholder="150"
+            className="border-loro-sand/30 focus:border-loro-terracotta"
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-loro-navy">
+            {t('landArea')}
+          </Label>
+          <Input
+            type="text"
+            value={formData.landArea || ''}
+            onChange={(e) => onDataChange({ landArea: e.target.value })}
+            placeholder="500"
+            className="border-loro-sand/30 focus:border-loro-terracotta"
+          />
         </div>
       </div>
 
-      {/* Délai d'acquisition */}
+      {/* Vues */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <Clock className="h-4 w-4 text-loro-terracotta" />
-          Délai d'acquisition
+        <Label className="text-sm font-medium text-loro-navy">
+          {t('views')}
         </Label>
-        <RadioSelectButtons
-          options={purchaseTimeframes}
-          selectedValue={formData.purchaseTimeframe}
-          onSelect={(value) => onDataChange({ purchaseTimeframe: value })}
+        <MultiSelectButtons
+          options={viewOptions as any}
+          selectedValues={formData.views || []}
+          onToggle={handleViewToggle}
+          className="grid grid-cols-2 md:grid-cols-3 gap-2"
         />
+      </div>
+
+      {/* Équipements */}
+      <div className="space-y-3">
+        <Label className="text-sm font-medium text-loro-navy">
+          {t('amenities')}
+        </Label>
+        <MultiSelectButtons
+          options={amenityOptions as any}
+          selectedValues={formData.amenities || []}
+          onToggle={handleAmenityToggle}
+          className="grid grid-cols-2 md:grid-cols-3 gap-2"
+        />
+      </div>
+
+      {/* Délai d'achat */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-loro-navy">
+          {t('purchaseTimeframe')}
+        </Label>
+        <Select
+          value={formData.purchaseTimeframe || ''}
+          onValueChange={(value) => onDataChange({ purchaseTimeframe: value })}
+        >
+          <SelectTrigger className="border-loro-sand/30 focus:border-loro-terracotta">
+            <SelectValue placeholder={language === 'en' ? "Select timeframe" : "Sélectionner un délai"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Immediately">{t('immediately')}</SelectItem>
+            <SelectItem value="Within 3 months">{t('within3months')}</SelectItem>
+            <SelectItem value="Within 6 months">{t('within6months')}</SelectItem>
+            <SelectItem value="Within 1 year">{t('within1year')}</SelectItem>
+            <SelectItem value="No rush">{t('norush')}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Mode de financement */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <CreditCard className="h-4 w-4 text-loro-terracotta" />
-          Mode de financement
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-loro-navy">
+          {t('financingMethod')}
         </Label>
-        <RadioSelectButtons
-          options={financingMethods}
-          selectedValue={formData.financingMethod}
-          onSelect={(value) => onDataChange({ financingMethod: value })}
+        <Select
+          value={formData.financingMethod || ''}
+          onValueChange={(value) => onDataChange({ financingMethod: value })}
+        >
+          <SelectTrigger className="border-loro-sand/30 focus:border-loro-terracotta">
+            <SelectValue placeholder={language === 'en' ? "Select financing method" : "Sélectionner un mode de financement"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Cash">{t('cash')}</SelectItem>
+            <SelectItem value="Mortgage">{t('mortgage')}</SelectItem>
+            <SelectItem value="Mixed">{t('mixed')}</SelectItem>
+            <SelectItem value="Other">{t('other')}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Usage du bien */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-loro-navy">
+          {t('propertyUse')}
+        </Label>
+        <Select
+          value={formData.propertyUse || ''}
+          onValueChange={(value) => onDataChange({ propertyUse: value })}
+        >
+          <SelectTrigger className="border-loro-sand/30 focus:border-loro-terracotta">
+            <SelectValue placeholder={language === 'en' ? "Select property use" : "Sélectionner l'usage du bien"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Primary residence">{t('primary')}</SelectItem>
+            <SelectItem value="Secondary residence">{t('secondary')}</SelectItem>
+            <SelectItem value="Investment">{t('investment')}</SelectItem>
+            <SelectItem value="Commercial">{t('commercial')}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Nationalité */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-loro-navy">
+          {t('nationality')}
+        </Label>
+        <Input
+          value={formData.nationality || ''}
+          onChange={(e) => onDataChange({ nationality: e.target.value })}
+          placeholder={language === 'en' ? "Nationality" : "Nationalité"}
+          className="border-loro-sand/30 focus:border-loro-terracotta"
         />
       </div>
 
-      {/* Utilisation prévue */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <Target className="h-4 w-4 text-loro-terracotta" />
-          Utilisation prévue
+      {/* Résidence fiscale */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-loro-navy">
+          {t('taxResidence')}
         </Label>
-        <RadioSelectButtons
-          options={propertyUses}
-          selectedValue={formData.propertyUse}
-          onSelect={(value) => onDataChange({ propertyUse: value })}
+        <Input
+          value={formData.taxResidence || ''}
+          onChange={(e) => onDataChange({ taxResidence: e.target.value })}
+          placeholder={language === 'en' ? "Tax residence" : "Résidence fiscale"}
+          className="border-loro-sand/30 focus:border-loro-terracotta"
         />
       </div>
 
-      {/* Informations personnelles - uniquement pour le formulaire public */}
-      {isPublicForm && (
-        <div className="space-y-6 border-t pt-6">
-          <h2 className="text-base font-semibold text-gray-800 mb-4">Informations personnelles</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Pays de résidence */}
-            <div className="space-y-2" ref={taxResidenceDropdownRef}>
-              <Label className="text-gray-800 mb-1 block font-medium text-xs">Pays de résidence</Label>
-              <div 
-                className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer"
-                onClick={() => setIsTaxResidenceDropdownOpen(!isTaxResidenceDropdownOpen)}
-              >
-                {formData.taxResidence ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{countryToFlag(formData.taxResidence)}</span>
-                    <span>{formData.taxResidence}</span>
-                  </div>
-                ) : (
-                  <span className="text-muted-foreground">Sélectionner un pays</span>
-                )}
-                <ChevronDown className={`h-4 w-4 transition-transform ${isTaxResidenceDropdownOpen ? 'rotate-180' : ''}`} />
-              </div>
-              
-              {isTaxResidenceDropdownOpen && (
-                <div className="absolute z-50 mt-1 w-full bg-background border rounded-md shadow-lg">
-                  <div className="sticky top-0 p-2 bg-background border-b">
-                    <div className="relative">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="text"
-                        placeholder="Rechercher un pays..."
-                        className="pl-8 h-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        autoFocus
-                      />
-                      {searchTerm && (
-                        <button
-                          className="absolute right-2 top-1/2 -translate-y-1/2"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSearchTerm('');
-                          }}
-                        >
-                          <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="max-h-60 overflow-auto p-1">
-                    {filteredCountries.map(country => (
-                      <div
-                        key={country}
-                        className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${formData.taxResidence === country ? 'bg-accent/50' : ''}`}
-                        onClick={() => handleTaxResidenceSelect(country)}
-                      >
-                        <span className="text-lg mr-2">{countryToFlag(country)}</span>
-                        <span>{country}</span>
-                      </div>
-                    ))}
-                    
-                    {filteredCountries.length === 0 && (
-                      <div className="px-4 py-2 text-sm text-muted-foreground">
-                        Aucun résultat
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Nationalité */}
-            <div className="space-y-2" ref={nationalityDropdownRef}>
-              <Label className="text-gray-800 mb-1 block font-medium text-xs">Nationalité</Label>
-              <div 
-                className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer"
-                onClick={() => setIsNationalityDropdownOpen(!isNationalityDropdownOpen)}
-              >
-                {formData.nationality ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{countryToFlag(formData.nationality)}</span>
-                    <span>{formData.nationality}</span>
-                  </div>
-                ) : (
-                  <span className="text-muted-foreground">Sélectionner une nationalité</span>
-                )}
-                <ChevronDown className={`h-4 w-4 transition-transform ${isNationalityDropdownOpen ? 'rotate-180' : ''}`} />
-              </div>
-              
-              {isNationalityDropdownOpen && (
-                <div className="absolute z-50 mt-1 w-full bg-background border rounded-md shadow-lg">
-                  <div className="sticky top-0 p-2 bg-background border-b">
-                    <div className="relative">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        type="text"
-                        placeholder="Rechercher une nationalité..."
-                        className="pl-8 h-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                        autoFocus
-                      />
-                      {searchTerm && (
-                        <button
-                          className="absolute right-2 top-1/2 -translate-y-1/2"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSearchTerm('');
-                          }}
-                        >
-                          <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="max-h-60 overflow-auto p-1">
-                    {filteredCountries.map(country => {
-                      const nationality = deriveNationalityFromCountry(country) || country;
-                      return (
-                        <div
-                          key={`${country}-${nationality}`}
-                          className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${formData.nationality === nationality ? 'bg-accent/50' : ''}`}
-                          onClick={() => handleNationalitySelect(nationality)}
-                        >
-                          <span className="text-lg mr-2">{countryToFlag(country)}</span>
-                          <span>{nationality}</span>
-                        </div>
-                      );
-                    })}
-                    
-                    {filteredCountries.length === 0 && (
-                      <div className="px-4 py-2 text-sm text-muted-foreground">
-                        Aucun résultat
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+      {/* Langue préférée */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-loro-navy">
+          {t('preferredLanguage')}
+        </Label>
+        <Select
+          value={formData.preferredLanguage || ''}
+          onValueChange={(value) => onDataChange({ preferredLanguage: value })}
+        >
+          <SelectTrigger className="border-loro-sand/30 focus:border-loro-terracotta">
+            <SelectValue placeholder={language === 'en' ? "Select preferred language" : "Sélectionner une langue"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Français">{t('french')}</SelectItem>
+            <SelectItem value="English">{t('english')}</SelectItem>
+            <SelectItem value="Deutsch">{t('german')}</SelectItem>
+            <SelectItem value="Italiano">{t('italian')}</SelectItem>
+            <SelectItem value="Español">{t('spanish')}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-          {/* Langue préférée */}
-          <div className="space-y-2">
-            <Label className="text-gray-800 mb-1 block font-medium text-xs">Langue préférée</Label>
-            <select
-              name="preferredLanguage"
-              value={formData.preferredLanguage || ''}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-lg text-sm"
-            >
-              <option value="">Sélectionner une langue</option>
-              {languageOptions.map(language => (
-                <option key={language} value={language}>
-                  {language}
-                </option>
-              ))}
-            </select>
+      {/* Régions Maurice */}
+      {formData.country === 'Maurice' || formData.country === 'Mauritius' ? (
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-loro-navy">
+            {t('regions')}
+          </Label>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {mauritiusRegions.map(region => {
+              const isSelected = formData.regions?.includes(region) || false;
+              
+              return (
+                <Button
+                  key={region}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleRegionToggle(region)}
+                  className={`h-10 transition-all duration-200 ${
+                    isSelected
+                      ? 'bg-loro-hazel text-white border-loro-hazel hover:bg-loro-hazel/90'
+                      : 'bg-white text-loro-navy border-loro-sand hover:bg-loro-pearl/20 hover:border-loro-hazel'
+                  }`}
+                >
+                  {t(region.toLowerCase())}
+                </Button>
+              );
+            })}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

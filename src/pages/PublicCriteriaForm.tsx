@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { countryToFlag } from '@/utils/countryUtils';
 import { useCountriesFromDatabase } from '@/hooks/useCountriesFromDatabase';
+import { detectLanguageFromData, getTranslation } from '@/utils/languageUtils';
 
 const PublicCriteriaForm = () => {
   const { token } = useParams<{ token: string }>();
@@ -24,6 +26,7 @@ const PublicCriteriaForm = () => {
   const [formData, setFormData] = useState<Partial<LeadDetailed>>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [language, setLanguage] = useState<'fr' | 'en'>('fr');
 
   const { countries, loading: countriesLoading } = useCountriesFromDatabase();
 
@@ -39,8 +42,8 @@ const PublicCriteriaForm = () => {
         if (!result) {
           toast({
             variant: "destructive",
-            title: "Lien invalide",
-            description: "Ce lien n'est pas valide ou a expiré."
+            title: getTranslation(language, 'errorTitle'),
+            description: getTranslation(language, 'invalidLink')
           });
           navigate('/');
           return;
@@ -48,6 +51,10 @@ const PublicCriteriaForm = () => {
 
         setLinkData(result.link);
         setLeadData(result.lead);
+
+        // Detect language from lead data
+        const detectedLang = detectLanguageFromData(result.lead);
+        setLanguage(detectedLang);
 
         // Handle bedrooms data properly - prioritize raw_data
         let bedroomsData: number[] = [];
@@ -103,8 +110,8 @@ const PublicCriteriaForm = () => {
         console.error('Error loading public criteria form:', error);
         toast({
           variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger le formulaire."
+          title: getTranslation(language, 'errorTitle'),
+          description: getTranslation(language, 'loadError')
         });
         navigate('/');
       } finally {
@@ -114,6 +121,14 @@ const PublicCriteriaForm = () => {
 
     loadData();
   }, [token, navigate]);
+
+  // Update language when it changes
+  useEffect(() => {
+    if (leadData) {
+      const detectedLang = detectLanguageFromData(leadData);
+      setLanguage(detectedLang);
+    }
+  }, [leadData]);
 
   const filteredCountries = searchTerm
     ? countries.filter(country => 
@@ -186,15 +201,15 @@ const PublicCriteriaForm = () => {
       await updateLeadCriteriaFromPublicForm(token, submitData);
       setSubmitted(true);
       toast({
-        title: "Critères enregistrés",
-        description: "Vos critères de recherche ont été enregistrés avec succès."
+        title: getTranslation(language, 'savedTitle'),
+        description: getTranslation(language, 'savedDescription')
       });
     } catch (error) {
       console.error('Error submitting criteria:', error);
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'enregistrement."
+        title: getTranslation(language, 'errorTitle'),
+        description: getTranslation(language, 'saveError')
       });
     } finally {
       setSubmitting(false);
@@ -216,7 +231,7 @@ const PublicCriteriaForm = () => {
         <div className="flex items-center justify-center pt-20">
           <div className="text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-loro-terracotta" />
-            <p className="text-loro-navy text-sm">Chargement...</p>
+            <p className="text-loro-navy text-sm">{getTranslation(language, 'loading')}</p>
           </div>
         </div>
       </div>
@@ -231,12 +246,12 @@ const PublicCriteriaForm = () => {
           <Card className="w-full max-w-md">
             <CardContent className="text-center p-8">
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h1 className="text-xl font-bold text-loro-navy mb-4">Merci !</h1>
+              <h1 className="text-xl font-bold text-loro-navy mb-4">{getTranslation(language, 'thankYou')}</h1>
               <p className="text-loro-navy/70 text-sm mb-6">
-                Vos critères de recherche ont été enregistrés avec succès. Notre équipe va maintenant pouvoir vous proposer des propriétés correspondant parfaitement à vos attentes.
+                {getTranslation(language, 'successMessage')}
               </p>
               <p className="text-xs text-loro-navy/60">
-                Nous vous contacterons très prochainement avec une sélection personnalisée.
+                {getTranslation(language, 'contactSoon')}
               </p>
             </CardContent>
           </Card>
@@ -253,10 +268,10 @@ const PublicCriteriaForm = () => {
           <Card className="bg-white shadow-sm">
             <CardHeader className="text-center border-b border-gray-200 py-6">
               <CardTitle className="text-lg font-semibold text-loro-navy mb-2">
-                CRITÈRES DE LA PROPRIÉTÉ
+                {getTranslation(language, 'headerTitle')}
               </CardTitle>
               <p className="text-loro-navy/70 text-sm">
-                Bonjour {leadData?.name}, merci de remplir vos critères de recherche pour que nous puissions vous proposer les meilleures propriétés.
+                {getTranslation(language, 'greeting')} {leadData?.name}, {getTranslation(language, 'headerSubtitle')}
               </p>
             </CardHeader>
             <CardContent className="p-6">
@@ -265,7 +280,7 @@ const PublicCriteriaForm = () => {
                 <div className="space-y-3">
                   <Label className="text-sm font-medium flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-loro-terracotta" />
-                    Pays recherché
+                    {getTranslation(language, 'countryLabel')}
                   </Label>
                   <div 
                     className="flex items-center justify-between px-3 py-2 h-10 w-full border border-gray-300 rounded-lg bg-background text-sm cursor-pointer focus:ring-2 focus:ring-loro-terracotta focus:border-transparent"
@@ -277,7 +292,7 @@ const PublicCriteriaForm = () => {
                         <span>{formData.country}</span>
                       </div>
                     ) : (
-                      <span className="text-muted-foreground">Sélectionner un pays</span>
+                      <span className="text-muted-foreground">{getTranslation(language, 'selectCountry')}</span>
                     )}
                     <ChevronDown className={`h-4 w-4 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
                   </div>
@@ -289,7 +304,7 @@ const PublicCriteriaForm = () => {
                           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             type="text"
-                            placeholder="Rechercher un pays..."
+                            placeholder={getTranslation(language, 'searchCountry')}
                             className="pl-8 h-8"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -324,7 +339,7 @@ const PublicCriteriaForm = () => {
                         
                         {filteredCountries.length === 0 && (
                           <div className="px-4 py-2 text-sm text-muted-foreground">
-                            Aucun résultat
+                            {getTranslation(language, 'noResults')}
                           </div>
                         )}
                       </div>
@@ -337,6 +352,7 @@ const PublicCriteriaForm = () => {
                   formData={formData}
                   onDataChange={handleDataChange}
                   isPublicForm={true}
+                  language={language}
                 />
 
                 {/* Bouton de soumission */}
@@ -349,10 +365,10 @@ const PublicCriteriaForm = () => {
                     {submitting ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        Enregistrement...
+                        {getTranslation(language, 'saving')}
                       </>
                     ) : (
-                      'Enregistrer mes critères'
+                      getTranslation(language, 'saveButton')
                     )}
                   </Button>
                 </div>

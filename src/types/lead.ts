@@ -18,7 +18,21 @@ export type PropertyType =
   | 'Apartment'
   | 'House'
   | 'Land'
-  | 'Other';
+  | 'Other'
+  | 'Appartement'
+  | 'Penthouse'
+  | 'Maison'
+  | 'Duplex'
+  | 'Chalet'
+  | 'Terrain'
+  | 'Manoir'
+  | 'Maison de ville'
+  | 'Château'
+  | 'Local commercial'
+  | 'Commercial'
+  | 'Hotel'
+  | 'Vignoble'
+  | 'Autres';
 
 export type PipelineType =
   | 'purchase'
@@ -197,7 +211,7 @@ export interface LeadDetailed {
   orientation?: string[];
   email_envoye?: boolean;
   raw_data?: any;
-  mapCoordinates?: { lat: number; lng: number };
+  mapCoordinates?: { lat: number; lng: number } | string;
   
   // Additional property fields for owners pipeline
   constructionYear?: string;
@@ -242,6 +256,13 @@ export interface LeadDetailed {
   hasWineStorage?: boolean;
   wineStorageCapacity?: string;
   accessibility?: string;
+  
+  // Additional fields for owners
+  desired_price?: string;
+  fees?: string;
+  furnished?: boolean;
+  furniture_price?: string;
+  furniture_included_in_price?: boolean;
 }
 
 export interface ActionHistory {
