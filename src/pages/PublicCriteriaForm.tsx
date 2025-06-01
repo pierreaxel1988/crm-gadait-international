@@ -123,6 +123,35 @@ const PublicCriteriaForm = () => {
     }));
   };
 
+  // Gestion spécifique pour MultiSelectButtons
+  const handleMultiSelectToggle = (field: string, value: string) => {
+    setFormData(prev => {
+      const currentValues = prev[field as keyof typeof prev] as string[];
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter(v => v !== value)
+        : [...currentValues, value];
+      return {
+        ...prev,
+        [field]: newValues
+      };
+    });
+  };
+
+  // Gestion spécifique pour les chambres (numbers)
+  const handleBedroomToggle = (value: string) => {
+    const numValue = parseInt(value);
+    setFormData(prev => {
+      const currentValues = prev.bedrooms;
+      const newValues = currentValues.includes(numValue)
+        ? currentValues.filter(v => v !== numValue)
+        : [...currentValues, numValue];
+      return {
+        ...prev,
+        bedrooms: newValues
+      };
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-loro-pearl/10 flex items-center justify-center">
@@ -158,7 +187,7 @@ const PublicCriteriaForm = () => {
     'Appartement', 'Villa', 'Maison', 'Penthouse', 'Terrain', 'Bureau', 'Commerce', 'Entrepôt'
   ];
 
-  const bedroomOptions = [1, 2, 3, 4, 5];
+  const bedroomOptions = ['1', '2', '3', '4', '5'];
 
   const viewOptions = [
     'Mer', 'Montagne', 'Golf', 'Jardin', 'Ville'
@@ -276,8 +305,8 @@ const PublicCriteriaForm = () => {
                 <h3 className="text-lg font-semibold text-loro-navy">Type de propriété</h3>
                 <MultiSelectButtons
                   options={propertyTypeOptions}
-                  value={formData.property_types}
-                  onChange={(value) => handleInputChange('property_types', value)}
+                  selectedValues={formData.property_types}
+                  onToggle={(value) => handleMultiSelectToggle('property_types', value)}
                   className="grid grid-cols-2 md:grid-cols-4 gap-2"
                 />
               </div>
@@ -287,8 +316,8 @@ const PublicCriteriaForm = () => {
                 <h3 className="text-lg font-semibold text-loro-navy">Nombre de chambres</h3>
                 <MultiSelectButtons
                   options={bedroomOptions}
-                  value={formData.bedrooms}
-                  onChange={(value) => handleInputChange('bedrooms', value)}
+                  selectedValues={formData.bedrooms.map(String)}
+                  onToggle={handleBedroomToggle}
                   className="grid grid-cols-2 md:grid-cols-5 gap-2"
                 />
               </div>
@@ -312,8 +341,8 @@ const PublicCriteriaForm = () => {
                 <h3 className="text-lg font-semibold text-loro-navy">Vue souhaitée</h3>
                 <MultiSelectButtons
                   options={viewOptions}
-                  value={formData.views}
-                  onChange={(value) => handleInputChange('views', value)}
+                  selectedValues={formData.views}
+                  onToggle={(value) => handleMultiSelectToggle('views', value)}
                   className="grid grid-cols-2 md:grid-cols-5 gap-2"
                 />
               </div>
@@ -323,8 +352,8 @@ const PublicCriteriaForm = () => {
                 <h3 className="text-lg font-semibold text-loro-navy">Commodités souhaitées</h3>
                 <MultiSelectButtons
                   options={amenityOptions}
-                  value={formData.amenities}
-                  onChange={(value) => handleInputChange('amenities', value)}
+                  selectedValues={formData.amenities}
+                  onToggle={(value) => handleMultiSelectToggle('amenities', value)}
                   className="grid grid-cols-2 md:grid-cols-4 gap-2"
                 />
               </div>
@@ -335,8 +364,8 @@ const PublicCriteriaForm = () => {
                   <h3 className="text-lg font-semibold text-loro-navy">Délai d'acquisition</h3>
                   <RadioSelectButtons
                     options={purchaseTimeframeOptions}
-                    value={formData.purchase_timeframe}
-                    onChange={(value) => handleInputChange('purchase_timeframe', value)}
+                    selectedValue={formData.purchase_timeframe}
+                    onSelect={(value) => handleInputChange('purchase_timeframe', value)}
                   />
                 </div>
 
@@ -344,8 +373,8 @@ const PublicCriteriaForm = () => {
                   <h3 className="text-lg font-semibold text-loro-navy">Mode de financement</h3>
                   <RadioSelectButtons
                     options={financingOptions}
-                    value={formData.financing_method}
-                    onChange={(value) => handleInputChange('financing_method', value)}
+                    selectedValue={formData.financing_method}
+                    onSelect={(value) => handleInputChange('financing_method', value)}
                   />
                 </div>
               </div>
@@ -355,8 +384,8 @@ const PublicCriteriaForm = () => {
                 <h3 className="text-lg font-semibold text-loro-navy">Utilisation prévue</h3>
                 <RadioSelectButtons
                   options={propertyUseOptions}
-                  value={formData.property_use}
-                  onChange={(value) => handleInputChange('property_use', value)}
+                  selectedValue={formData.property_use}
+                  onSelect={(value) => handleInputChange('property_use', value)}
                 />
               </div>
 
