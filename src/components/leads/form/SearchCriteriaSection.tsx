@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, MauritiusRegion } from '@/types/lead';
 import FormSection from './FormSection';
@@ -136,7 +135,7 @@ const SearchCriteriaSection = ({
     <FormSection title="Critères de Recherche">
       <ScrollArea className="h-[calc(100vh-350px)] pr-4">
         <div className="space-y-6">
-          {/* Pays recherché */}
+          {/* Pays recherché avec dropdown personnalisé */}
           <div className="space-y-3" ref={countryDropdownRef}>
             <Label className="text-sm font-medium flex items-center gap-2">
               <MapPin className="h-4 w-4 text-loro-terracotta" />
