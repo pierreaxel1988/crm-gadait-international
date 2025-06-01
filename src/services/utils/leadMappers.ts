@@ -87,20 +87,8 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     livingArea: lead.living_area,
     external_id: lead.external_id,
     regions: lead.regions || [],
-    facilities: lead.facilities || [],
-    keyFeatures: lead.key_features || [],
-    propertyDescription: lead.property_description || '',
-    renovationNeeded: lead.renovation_needed || '',
-    condoFees: lead.condo_fees || '',
-    energyClass: lead.energy_class || '',
-    equipment: lead.equipment || [],
-    floors: lead.floors,
     landArea: lead.land_area || '',
     orientation: lead.orientation || [],
-    parkingSpaces: lead.parking_spaces,
-    constructionYear: lead.construction_year || '',
-    yearlyTaxes: lead.yearly_taxes || '',
-    assets: lead.assets || [],
     email_envoye: lead.email_envoye || false
   };
 };
@@ -184,7 +172,9 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     action_history: lead.actionHistory,
     regions: lead.regions || [],
     raw_data: Object.keys(rawData).length > 0 ? rawData : null,
-    email_envoye: lead.email_envoye || false
+    email_envoye: lead.email_envoye || false,
+    land_area: lead.landArea,
+    orientation: lead.orientation || []
   };
 };
 

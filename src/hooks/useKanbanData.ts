@@ -43,11 +43,15 @@ export const useKanbanData = () => {
         name: lead.name || 'Lead sans nom',
         email: lead.email || '',
         phone: lead.phone,
-        tags: (lead.tags || []).map((tag: string): LeadTag => ({ id: tag, name: tag, color: 'default' })),
+        tags: (lead.tags || []).map((tag: string): LeadTag => ({ 
+          id: tag, 
+          name: tag, 
+          color: 'default' as const 
+        })),
         assignedTo: lead.assigned_to,
         status: lead.status as LeadStatus,
         pipelineType: lead.pipeline_type as PipelineType,
-        propertyType: lead.property_types?.[0],
+        propertyType: lead.property_type,
         budget: lead.budget,
         desiredLocation: lead.desired_location,
         country: lead.country,

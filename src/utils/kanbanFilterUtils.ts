@@ -58,7 +58,7 @@ export const filterByTags = (items: ExtendedKanbanItem[], tags?: string[]) => {
         if (typeof itemTag === 'string') {
           return itemTag.toLowerCase().includes(tag.toLowerCase());
         } else if (itemTag && typeof itemTag === 'object' && 'name' in itemTag) {
-          return itemTag.name.toLowerCase().includes(tag.toLowerCase());
+          return (itemTag as any).name.toLowerCase().includes(tag.toLowerCase());
         }
         return false;
       })
