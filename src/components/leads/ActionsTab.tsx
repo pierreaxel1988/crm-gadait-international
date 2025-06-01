@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Calendar, RefreshCw } from 'lucide-react';
@@ -10,37 +11,39 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import ActionsPanelMobile from './actions/ActionsPanelMobile';
 import { supabase } from "@/integrations/supabase/client";
 import { syncExistingActionsWithLeads } from '@/services/leadActions';
+import { LeadDetailed } from '@/types/lead';
 
 interface ActionsTabProps {
-  leadId: string;
+  lead: LeadDetailed;
+  onLeadUpdate: (updatedLead: LeadDetailed) => void;
 }
 
-const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
+const ActionsTab: React.FC<ActionsTabProps> = ({ lead, onLeadUpdate }) => {
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    if (leadId) {
+    if (lead.id) {
       // Synchroniser les actions avant de les charger
       syncActions().then(() => {
         fetchLeadActions();
       });
     }
-  }, [leadId]);
+  }, [lead.id]);
 
   const syncActions = async () => {
-    if (!leadId) return;
+    if (!lead.id) return;
     
     try {
       setIsSyncing(true);
-      const success = await syncExistingActionsWithLeads(leadId);
+      const success = await syncExistingActionsWithLeads(lead.id);
       if (success) {
-        console.log(`Actions du lead ${leadId} synchronisées avec succès`);
+        console.log(`Actions du lead ${lead.id} synchronisées avec succès`);
       }
     } catch (error) {
-      console.error(`Erreur lors de la synchronisation des actions pour le lead ${leadId}:`, error);
+      console.error(`Erreur lors de la synchronisation des actions pour le lead ${lead.id}:`, error);
     } finally {
       setIsSyncing(false);
     }
@@ -49,12 +52,12 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
   const fetchLeadActions = async () => {
     try {
       setIsLoading(true);
-      console.log('Fetching actions for lead ID:', leadId);
+      console.log('Fetching actions for lead ID:', lead.id);
       
-      const { data: lead, error } = await supabase
+      const { data: leadData, error } = await supabase
         .from('leads')
         .select('action_history')
-        .eq('id', leadId)
+        .eq('id', lead.id)
         .single();
       
       if (error) {
@@ -62,9 +65,9 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         throw error;
       }
       
-      if (lead && Array.isArray(lead.action_history)) {
+      if (leadData && Array.isArray(leadData.action_history)) {
         // Ensure each item in action_history conforms to ActionHistory type
-        const parsedActions: ActionHistory[] = lead.action_history.map((item: any) => {
+        const parsedActions: ActionHistory[] = leadData.action_history.map((item: any) => {
           // Validate and safeguard for any missing or invalid properties
           const validatedAction: ActionHistory = {
             id: item.id || crypto.randomUUID(),
@@ -73,7 +76,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
             scheduledDate: validateDateString(item.scheduledDate) || new Date().toISOString(),
             completedDate: validateDateString(item.completedDate),
             notes: item.notes,
-            leadId: item.leadId || leadId // Assurer que chaque action a un leadId
+            leadId: item.leadId || lead.id // Assurer que chaque action a un leadId
           };
           
           return validatedAction;
@@ -112,16 +115,16 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     if (!action.id) return;
     
     try {
-      console.log('Marking action as complete for lead ID:', leadId);
+      console.log('Marking action as complete for lead ID:', lead.id);
       
       // Get the current lead data
-      const { data: lead, error: fetchError } = await supabase
+      const { data: leadData, error: fetchError } = await supabase
         .from('leads')
         .select('action_history')
-        .eq('id', leadId)
+        .eq('id', lead.id)
         .single();
       
-      if (fetchError || !lead || !Array.isArray(lead.action_history)) {
+      if (fetchError || !leadData || !Array.isArray(leadData.action_history)) {
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -131,12 +134,12 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       }
       
       // Update the action in the action history
-      const updatedActionHistory = lead.action_history.map((a: any) => {
+      const updatedActionHistory = leadData.action_history.map((a: any) => {
         if (a.id === action.id) {
           return {
             ...a,
             completedDate: new Date().toISOString(),
-            leadId: a.leadId || leadId // Assurer que l'action a un leadId
+            leadId: a.leadId || lead.id // Assurer que l'action a un leadId
           };
         }
         return a;
@@ -150,7 +153,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           action_history: updatedActionHistory,
           email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
         })
-        .eq('id', leadId);
+        .eq('id', lead.id);
       
       if (updateError) {
         throw updateError;
@@ -218,7 +221,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           </Button>
         </div>
         <ActionsPanelMobile 
-          leadId={leadId} 
+          leadId={lead.id} 
           onAddAction={fetchLeadActions} 
           onMarkComplete={handleMarkComplete} 
           actionHistory={actionHistory} 

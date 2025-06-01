@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { LeadDetailed, PropertyType, ViewType, Currency } from '@/types/lead';
+import { LeadDetailed, PropertyType, ViewType, Currency, PipelineType } from '@/types/lead';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -54,21 +54,73 @@ const PublicCriteriaForm = () => {
       if (data) {
         // Map database fields to LeadDetailed interface
         const leadData: LeadDetailed = {
-          ...data,
+          id: data.id,
+          name: data.name,
+          salutation: data.salutation,
+          email: data.email,
+          phone: data.phone,
+          phoneCountryCode: data.phone_country_code,
+          phoneCountryCodeDisplay: data.phone_country_code_display,
+          location: data.location,
+          status: data.status,
+          tags: Array.isArray(data.tags) ? data.tags : [],
           createdAt: data.created_at,
           lastContactedAt: data.last_contacted_at,
-          desiredLocation: data.desired_location,
+          assignedTo: data.assigned_to,
+          source: data.source,
+          propertyReference: data.property_reference,
+          budget: data.budget,
           budgetMin: data.budget_min,
-          propertyTypes: data.property_types || [],
+          currency: data.currency as Currency,
+          desiredLocation: data.desired_location,
           propertyType: data.property_type,
-          livingArea: data.living_area,
-          condoFees: data.condo_fees,
+          propertyTypes: Array.isArray(data.property_types) ? data.property_types.filter((type): type is PropertyType => 
+            ['Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Chalet', 'Terrain', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 'Commercial', 'Hotel', 'Vignoble', 'Autres'].includes(type)
+          ) : [],
+          bedrooms: data.bedrooms,
+          views: Array.isArray(data.views) ? data.views.filter((view): view is ViewType => 
+            ['Mer', 'Montagne', 'Golf', 'Autres'].includes(view)
+          ) : [],
+          amenities: Array.isArray(data.amenities) ? data.amenities : [],
           purchaseTimeframe: data.purchase_timeframe,
           financingMethod: data.financing_method,
           propertyUse: data.property_use,
+          nationality: data.nationality,
+          preferredLanguage: data.preferred_language,
+          notes: data.notes,
+          internal_notes: data.internal_notes,
           nextFollowUpDate: data.next_follow_up_date,
-          pipelineType: data.pipeline_type,
-          actionHistory: data.action_history || []
+          country: data.country,
+          url: data.url,
+          pipelineType: (data.pipeline_type as PipelineType) || 'purchase',
+          pipeline_type: (data.pipeline_type as PipelineType) || 'purchase',
+          taxResidence: data.tax_residence,
+          regions: Array.isArray(data.regions) ? data.regions : [],
+          imported_at: data.imported_at,
+          integration_source: data.integration_source,
+          actionHistory: Array.isArray(data.action_history) ? data.action_history : [],
+          livingArea: data.living_area,
+          external_id: data.external_id,
+          landArea: data.land_area,
+          constructionYear: data.construction_year,
+          renovationNeeded: data.renovation_needed,
+          propertyDescription: data.property_description,
+          keyFeatures: Array.isArray(data.key_features) ? data.key_features : [],
+          condoFees: data.condo_fees,
+          facilities: Array.isArray(data.facilities) ? data.facilities : [],
+          parkingSpaces: data.parking_spaces,
+          floors: data.floors,
+          orientation: Array.isArray(data.orientation) ? data.orientation : [],
+          energyClass: data.energy_class,
+          yearlyTaxes: data.yearly_taxes,
+          assets: Array.isArray(data.assets) ? data.assets : [],
+          equipment: Array.isArray(data.equipment) ? data.equipment : [],
+          desired_price: data.desired_price,
+          fees: data.fees,
+          furnished: data.furnished,
+          furniture_included_in_price: data.furniture_included_in_price,
+          furniture_price: data.furniture_price,
+          email_envoye: data.email_envoye
         };
 
         setLead(leadData);
@@ -79,10 +131,10 @@ const PublicCriteriaForm = () => {
           desiredLocation: leadData.desiredLocation || '',
           budgetMin: leadData.budgetMin || '',
           budget: leadData.budget || '',
-          currency: (leadData.currency as Currency) || 'EUR',
-          propertyTypes: (leadData.propertyTypes as PropertyType[]) || [],
+          currency: leadData.currency || 'EUR',
+          propertyTypes: leadData.propertyTypes || [],
           bedrooms: Array.isArray(leadData.bedrooms) ? leadData.bedrooms : leadData.bedrooms ? [leadData.bedrooms] : [],
-          views: (leadData.views as ViewType[]) || [],
+          views: leadData.views || [],
           amenities: leadData.amenities || [],
           purchaseTimeframe: leadData.purchaseTimeframe || '',
           financingMethod: leadData.financingMethod || '',
@@ -159,7 +211,7 @@ const PublicCriteriaForm = () => {
         budget: formData.budget,
         currency: formData.currency,
         property_types: formData.propertyTypes,
-        bedrooms: formData.bedrooms.length === 1 ? formData.bedrooms[0] : formData.bedrooms[0] || null,
+        bedrooms: formData.bedrooms.length === 1 ? formData.bedrooms[0] : null,
         views: formData.views,
         amenities: formData.amenities,
         purchase_timeframe: formData.purchaseTimeframe,
