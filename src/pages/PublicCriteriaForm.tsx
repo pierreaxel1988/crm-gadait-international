@@ -68,7 +68,6 @@ const PublicCriteriaForm = () => {
           taxResidence: result.lead.tax_residence || '',
           preferredLanguage: result.lead.preferred_language || '',
           regions: result.lead.regions || [],
-          mapCoordinates: result.lead.mapCoordinates || '',
           url: result.lead.url || ''
         });
       } catch (error) {
@@ -280,26 +279,6 @@ const PublicCriteriaForm = () => {
                 onDataChange={handleDataChange}
                 isPublicForm={true}
               />
-
-              {/* Pin Location - URL de la propriété */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    Pin Location
-                  </Label>
-                  <Input
-                    name="mapCoordinates"
-                    value={formData.mapCoordinates || ''}
-                    onChange={(e) => handleDataChange({ mapCoordinates: e.target.value })}
-                    placeholder="Collez le lien Google Maps ici"
-                    className="font-futura"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Copiez-collez le lien Google Maps de la propriété
-                  </p>
-                </div>
-              </div>
 
               {/* URL de la propriété */}
               <div className="space-y-4">
