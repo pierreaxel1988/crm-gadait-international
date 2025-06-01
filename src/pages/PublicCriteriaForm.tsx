@@ -4,12 +4,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle, MapPin, Home, Building, Crown, Mountain, TreePine, Crown as ChateauIcon, Store, Hotel, Grape, MoreHorizontal, Bed, Eye, Star, Clock, CreditCard, Target } from 'lucide-react';
+import { Loader2, CheckCircle } from 'lucide-react';
 import { getPublicCriteriaLink, updateLeadCriteriaFromPublicForm } from '@/services/publicCriteriaService';
-import { countries } from '@/utils/countries';
-import { locationsByCountry } from '@/utils/locationsByCountry';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import SearchCriteriaFields from '@/components/shared/SearchCriteriaFields';
+import { LeadDetailed } from '@/types/lead';
 
 const PublicCriteriaForm = () => {
   const { token } = useParams<{ token: string }>();
@@ -19,43 +17,7 @@ const PublicCriteriaForm = () => {
   const [submitted, setSubmitted] = useState(false);
   const [linkData, setLinkData] = useState<any>(null);
   const [leadData, setLeadData] = useState<any>(null);
-
-  // États du formulaire
-  const [formData, setFormData] = useState({
-    // Localisation
-    country: '',
-    desired_location: '',
-    
-    // Budget
-    budget_min: '',
-    budget: '',
-    currency: 'EUR',
-    
-    // Propriété
-    property_types: [] as string[],
-    bedrooms: [] as string[],
-    living_area: '',
-    land_area: '',
-    views: [] as string[],
-    amenities: [] as string[],
-    
-    // Détails d'achat
-    purchase_timeframe: '',
-    financing_method: '',
-    property_use: '',
-    
-    // Informations acheteur
-    nationality: '',
-    tax_residence: '',
-    preferred_language: '',
-    regions: [] as string[],
-    
-    // Pin location
-    mapCoordinates: '',
-    
-    // URL de propriété
-    url: ''
-  });
+  const [formData, setFormData] = useState<Partial<LeadDetailed>>({});
 
   useEffect(() => {
     const loadData = async () => {
@@ -82,26 +44,26 @@ const PublicCriteriaForm = () => {
         // Préremplir le formulaire avec les données existantes
         setFormData({
           country: result.lead.country || '',
-          desired_location: result.lead.desired_location || '',
-          budget_min: result.lead.budget_min || '',
+          desiredLocation: result.lead.desired_location || '',
+          budgetMin: result.lead.budget_min || '',
           budget: result.lead.budget || '',
           currency: result.lead.currency || 'EUR',
-          property_types: result.lead.property_types || [],
+          propertyTypes: result.lead.property_types || [],
           bedrooms: Array.isArray(result.lead.bedrooms) 
-            ? result.lead.bedrooms.map((b: number) => b >= 8 ? "8+" : b.toString())
+            ? result.lead.bedrooms
             : result.lead.bedrooms 
-            ? [result.lead.bedrooms >= 8 ? "8+" : result.lead.bedrooms.toString()]
+            ? [result.lead.bedrooms]
             : [],
-          living_area: result.lead.living_area || '',
-          land_area: result.lead.land_area || '',
+          livingArea: result.lead.living_area || '',
+          landArea: result.lead.land_area || '',
           views: result.lead.views || [],
           amenities: result.lead.amenities || [],
-          purchase_timeframe: result.lead.purchase_timeframe || '',
-          financing_method: result.lead.financing_method || '',
-          property_use: result.lead.property_use || '',
+          purchaseTimeframe: result.lead.purchase_timeframe || '',
+          financingMethod: result.lead.financing_method || '',
+          propertyUse: result.lead.property_use || '',
           nationality: result.lead.nationality || '',
-          tax_residence: result.lead.tax_residence || '',
-          preferred_language: result.lead.preferred_language || '',
+          taxResidence: result.lead.tax_residence || '',
+          preferredLanguage: result.lead.preferred_language || '',
           regions: result.lead.regions || [],
           mapCoordinates: result.lead.mapCoordinates || '',
           url: result.lead.url || ''
@@ -128,12 +90,28 @@ const PublicCriteriaForm = () => {
 
     setSubmitting(true);
     try {
-      // Convertir les chambres string[] vers number[] pour le backend
-      const bedroomsNumbers = formData.bedrooms.map(b => b === "8+" ? 8 : parseInt(b)).filter(b => !isNaN(b));
-      
+      // Convertir les données pour correspondre à l'API
       const submitData = {
-        ...formData,
-        bedrooms: bedroomsNumbers
+        country: formData.country,
+        desired_location: formData.desiredLocation,
+        budget_min: formData.budgetMin,
+        budget: formData.budget,
+        currency: formData.currency,
+        property_types: formData.propertyTypes,
+        bedrooms: formData.bedrooms,
+        living_area: formData.livingArea,
+        land_area: formData.landArea,
+        views: formData.views,
+        amenities: formData.amenities,
+        purchase_timeframe: formData.purchaseTimeframe,
+        financing_method: formData.financingMethod,
+        property_use: formData.propertyUse,
+        nationality: formData.nationality,
+        tax_residence: formData.taxResidence,
+        preferred_language: formData.preferredLanguage,
+        regions: formData.regions,
+        mapCoordinates: formData.mapCoordinates,
+        url: formData.url
       };
       
       await updateLeadCriteriaFromPublicForm(token, submitData);
@@ -154,75 +132,12 @@ const PublicCriteriaForm = () => {
     }
   };
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleDataChange = (data: Partial<LeadDetailed>) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      ...data
     }));
   };
-
-  // Gestion spécifique pour les boutons de sélection multiple
-  const handleMultiSelectToggle = (field: string, value: string) => {
-    setFormData(prev => {
-      const currentValues = prev[field as keyof typeof prev] as string[];
-      const newValues = currentValues.includes(value)
-        ? currentValues.filter(v => v !== value)
-        : [...currentValues, value];
-      return {
-        ...prev,
-        [field]: newValues
-      };
-    });
-  };
-
-  // Composant pour les boutons de sélection multiple avec design original
-  const SelectionButton = ({ 
-    icon: Icon, 
-    label, 
-    isSelected, 
-    onClick 
-  }: { 
-    icon?: React.ComponentType<any>, 
-    label: string, 
-    isSelected: boolean, 
-    onClick: () => void 
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-3 rounded-lg border text-sm font-medium transition-all ${
-        isSelected 
-          ? 'bg-loro-navy text-white border-loro-navy' 
-          : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-      }`}
-    >
-      {Icon && <Icon className="h-4 w-4" />}
-      <span>{label}</span>
-    </button>
-  );
-
-  // Composant pour les boutons numériques (chambres)
-  const NumberButton = ({ 
-    number, 
-    isSelected, 
-    onClick 
-  }: { 
-    number: string, 
-    isSelected: boolean, 
-    onClick: () => void 
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex items-center justify-center w-12 h-12 rounded-lg font-semibold text-sm transition-all ${
-        isSelected 
-          ? 'bg-loro-navy text-white' 
-          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-      }`}
-    >
-      {number}
-    </button>
-  );
 
   if (loading) {
     return (
@@ -254,49 +169,6 @@ const PublicCriteriaForm = () => {
     );
   }
 
-  // Options pour les composants
-  const propertyTypeOptions = [
-    { value: 'Villa', icon: Home, label: 'Villa' },
-    { value: 'Appartement', icon: Building, label: 'Appartement' },
-    { value: 'Penthouse', icon: Crown, label: 'Penthouse' },
-    { value: 'Maison', icon: Home, label: 'Maison' },
-    { value: 'Duplex', icon: Building, label: 'Duplex' },
-    { value: 'Chalet', icon: Mountain, label: 'Chalet' },
-    { value: 'Terrain', icon: TreePine, label: 'Terrain' },
-    { value: 'Manoir', icon: Crown, label: 'Manoir' },
-    { value: 'Maison de ville', icon: Building, label: 'Maison de ville' },
-    { value: 'Château', icon: ChateauIcon, label: 'Château' },
-    { value: 'Local commercial', icon: Store, label: 'Local commercial' },
-    { value: 'Commercial', icon: Building, label: 'Commercial' },
-    { value: 'Hotel', icon: Hotel, label: 'Hotel' },
-    { value: 'Vignoble', icon: Grape, label: 'Vignoble' },
-    { value: 'Autres', icon: MoreHorizontal, label: 'Autres' }
-  ];
-
-  const bedroomOptions = ['1', '2', '3', '4', '5', '6', '7', '8+'];
-
-  const viewOptions = [
-    { value: 'Mer', label: 'Mer' },
-    { value: 'Montagne', label: 'Montagne' },
-    { value: 'Golf', label: 'Golf' },
-    { value: 'Autres', label: 'Autres' }
-  ];
-
-  const amenityOptions = [
-    { value: 'Piscine', label: 'Piscine' },
-    { value: 'Terrasse', label: 'Terrasse' },
-    { value: 'Balcon', label: 'Balcon' },
-    { value: 'Jardin', label: 'Jardin' },
-    { value: 'Parking', label: 'Parking' },
-    { value: 'Ascenseur', label: 'Ascenseur' },
-    { value: 'Sécurité', label: 'Sécurité' },
-    { value: 'Climatisation', label: 'Climatisation' }
-  ];
-
-  const languageOptions = [
-    'Français', 'English', 'Deutsch', 'Italiano', 'Español', 'العربية', '中文', 'Русский'
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4">
       <div className="max-w-3xl mx-auto">
@@ -311,266 +183,11 @@ const PublicCriteriaForm = () => {
           </CardHeader>
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-8">
-              
-              {/* Pays recherché */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-4">
-                  <MapPin className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Pays recherché</h3>
-                </div>
-                <select
-                  value={formData.country}
-                  onChange={(e) => handleInputChange('country', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-loro-terracotta focus:border-transparent text-sm"
-                >
-                  <option value="">Sélectionner un pays</option>
-                  {countries.map((country) => (
-                    <option key={country.code} value={country.name}>
-                      {country.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Localisation */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-4">
-                  <MapPin className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Localisation</h3>
-                </div>
-                <Input
-                  value={formData.desired_location}
-                  onChange={(e) => handleInputChange('desired_location', e.target.value)}
-                  placeholder="Ville, région..."
-                  className="w-full p-3 text-sm border-gray-300 focus:ring-loro-terracotta focus:border-loro-terracotta"
-                />
-              </div>
-
-              {/* Budget */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="text-loro-terracotta text-lg font-bold">€</div>
-                  <h3 className="text-sm font-semibold text-gray-800">Budget</h3>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-gray-600 mb-1 block text-xs">Min</Label>
-                    <Input
-                      value={formData.budget_min}
-                      onChange={(e) => handleInputChange('budget_min', e.target.value)}
-                      placeholder="Min"
-                      className="w-full p-3 text-sm border-gray-300"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-gray-600 mb-1 block text-xs">Max</Label>
-                    <Input
-                      value={formData.budget}
-                      onChange={(e) => handleInputChange('budget', e.target.value)}
-                      placeholder="9000000"
-                      className="w-full p-3 text-sm border-gray-300"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-gray-600 mb-1 block text-xs">Devise</Label>
-                  <select
-                    value={formData.currency}
-                    onChange={(e) => handleInputChange('currency', e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
-                  >
-                    <option value="EUR">Euro (€)</option>
-                    <option value="USD">USD ($)</option>
-                    <option value="GBP">GBP (£)</option>
-                    <option value="CHF">CHF</option>
-                    <option value="AED">AED</option>
-                    <option value="MUR">MUR</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Type de propriété */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Building className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Type de propriété</h3>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {propertyTypeOptions.map((option) => (
-                    <SelectionButton
-                      key={option.value}
-                      icon={option.icon}
-                      label={option.label}
-                      isSelected={formData.property_types.includes(option.value)}
-                      onClick={() => handleMultiSelectToggle('property_types', option.value)}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Nombre de chambres */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Bed className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Nombre de chambres</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {bedroomOptions.map((number) => (
-                    <NumberButton
-                      key={number}
-                      number={number}
-                      isSelected={formData.bedrooms.includes(number)}
-                      onClick={() => handleMultiSelectToggle('bedrooms', number)}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Surface habitable */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-4">
-                  <Home className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Surface habitable (m²)</h3>
-                </div>
-                <Input
-                  value={formData.living_area}
-                  onChange={(e) => handleInputChange('living_area', e.target.value)}
-                  placeholder="Ex: 120"
-                  className="w-full p-3 text-sm border-gray-300"
-                />
-              </div>
-
-              {/* Vue souhaitée */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Eye className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Vue souhaitée</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {viewOptions.map((option) => (
-                    <SelectionButton
-                      key={option.value}
-                      label={option.label}
-                      isSelected={formData.views.includes(option.value)}
-                      onClick={() => handleMultiSelectToggle('views', option.value)}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Commodités souhaitées */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Star className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Commodités souhaitées</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {amenityOptions.map((option) => (
-                    <SelectionButton
-                      key={option.value}
-                      label={option.label}
-                      isSelected={formData.amenities.includes(option.value)}
-                      onClick={() => handleMultiSelectToggle('amenities', option.value)}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Délai d'acquisition */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-4">
-                  <Clock className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Délai d'acquisition</h3>
-                </div>
-                <select
-                  value={formData.purchase_timeframe}
-                  onChange={(e) => handleInputChange('purchase_timeframe', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg text-sm"
-                >
-                  <option value="">Sélectionner</option>
-                  <option value="Moins de trois mois">Moins de trois mois</option>
-                  <option value="Plus de trois mois">Plus de trois mois</option>
-                </select>
-              </div>
-
-              {/* Mode de financement */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-4">
-                  <CreditCard className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Mode de financement</h3>
-                </div>
-                <select
-                  value={formData.financing_method}
-                  onChange={(e) => handleInputChange('financing_method', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg text-sm"
-                >
-                  <option value="">Sélectionner</option>
-                  <option value="Cash">Cash</option>
-                  <option value="Prêt bancaire">Prêt bancaire</option>
-                </select>
-              </div>
-
-              {/* Utilisation prévue */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-4">
-                  <Target className="h-4 w-4 text-loro-terracotta" />
-                  <h3 className="text-sm font-semibold text-gray-800">Utilisation prévue</h3>
-                </div>
-                <select
-                  value={formData.property_use}
-                  onChange={(e) => handleInputChange('property_use', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg text-sm"
-                >
-                  <option value="">Sélectionner</option>
-                  <option value="Investissement locatif">Investissement locatif</option>
-                  <option value="Résidence principale">Résidence principale</option>
-                </select>
-              </div>
-
-              {/* Informations personnelles */}
-              <div className="space-y-6 border-t pt-6">
-                <h2 className="text-base font-semibold text-gray-800 mb-4">Informations personnelles</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-gray-800 mb-1 block font-medium text-xs">Pays de résidence</Label>
-                    <Input
-                      value={formData.tax_residence}
-                      onChange={(e) => handleInputChange('tax_residence', e.target.value)}
-                      placeholder="Netherlands"
-                      className="w-full p-3 text-sm border-gray-300"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label className="text-gray-800 mb-1 block font-medium text-xs">Nationalité</Label>
-                    <Input
-                      value={formData.nationality}
-                      onChange={(e) => handleInputChange('nationality', e.target.value)}
-                      placeholder="Néerlandais"
-                      className="w-full p-3 text-sm border-gray-300"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-gray-800 mb-1 block font-medium text-xs">Langue préférée</Label>
-                  <select
-                    value={formData.preferred_language}
-                    onChange={(e) => handleInputChange('preferred_language', e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
-                  >
-                    <option value="">Sélectionner une langue</option>
-                    {languageOptions.map((language) => (
-                      <option key={language} value={language}>
-                        {language}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              <SearchCriteriaFields
+                formData={formData}
+                onDataChange={handleDataChange}
+                isPublicForm={true}
+              />
 
               {/* Bouton de soumission */}
               <div className="text-center pt-6">
