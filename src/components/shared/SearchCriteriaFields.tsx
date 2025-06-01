@@ -2,7 +2,7 @@ import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { MapPin, Home, Building, Bed, Eye, Star, Clock, CreditCard, Target, Crown, Building2, Mountain, TreePine, MoreHorizontal, Warehouse, Hotel, Grape } from 'lucide-react';
+import { MapPin, Home, Building, Bed, Eye, Star, Clock, CreditCard, Target, Crown, Building2, Mountain, TreePine, MoreHorizontal, Warehouse, Hotel, Grape, Waves, Compass } from 'lucide-react';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import RadioSelectButtons from '@/components/leads/form/RadioSelectButtons';
 import { countries } from '@/utils/countries';
@@ -93,7 +93,7 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
   const getViewTypeIcon = (type: ViewType) => {
     switch (type) {
       case "Mer":
-        return Eye;
+        return Waves;
       case "Montagne":
         return Mountain;
       case "Golf":
@@ -101,7 +101,7 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
       case "Autres":
         return MoreHorizontal;
       default:
-        return Eye;
+        return Compass;
     }
   };
 
