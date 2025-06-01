@@ -2,7 +2,7 @@ import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { MapPin, Home, Building, Bed, Eye, Star, Clock, CreditCard, Target, Crown, Building2, Mountain, TreePine, MoreHorizontal, Warehouse, Hotel, Grape, Waves, Compass } from 'lucide-react';
+import { MapPin, Home, Building, Bed, Eye, Star, Clock, CreditCard, Target, Crown, Building2, Mountain, TreePine, MoreHorizontal, Warehouse, Hotel, Grape, Waves, Compass, Droplets, Wind, Car, Shield, ArrowUp } from 'lucide-react';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import RadioSelectButtons from '@/components/leads/form/RadioSelectButtons';
 import { countries } from '@/utils/countries';
@@ -102,6 +102,29 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
         return MoreHorizontal;
       default:
         return Compass;
+    }
+  };
+
+  const getAmenityIcon = (amenity: Amenity) => {
+    switch (amenity) {
+      case "Piscine":
+        return Droplets;
+      case "Terrasse":
+        return Home;
+      case "Balcon":
+        return Building;
+      case "Jardin":
+        return TreePine;
+      case "Parking":
+        return Car;
+      case "Ascenseur":
+        return ArrowUp;
+      case "Sécurité":
+        return Shield;
+      case "Climatisation":
+        return Wind;
+      default:
+        return Star;
     }
   };
 
@@ -330,12 +353,27 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
           <Star className="h-4 w-4 text-loro-terracotta" />
           Commodités souhaitées
         </Label>
-        <MultiSelectButtons
-          options={amenitiesList}
-          selectedValues={formData.amenities || []}
-          onToggle={(value) => handleMultiSelectToggle('amenities', value)}
-          className="grid grid-cols-2 gap-2"
-        />
+        <div className="grid grid-cols-2 gap-2">
+          {amenitiesList.map(amenity => {
+            const IconComponent = getAmenityIcon(amenity);
+            const isSelected = (formData.amenities || []).includes(amenity);
+            return (
+              <button
+                key={amenity}
+                type="button"
+                onClick={() => handleMultiSelectToggle('amenities', amenity)}
+                className={`flex items-center justify-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${
+                  isSelected
+                    ? 'bg-loro-navy text-white' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <IconComponent className="h-4 w-4" />
+                {amenity}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Délai d'acquisition */}
