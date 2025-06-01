@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -87,7 +88,7 @@ const PublicCriteriaForm = () => {
         setLinkData(result.link);
         setLeadData(result.lead);
 
-        // Préremplir le formulaire avec les données existantes
+        // Utiliser exactement la même structure que LeadDetailed pour assurer la synchronisation
         setFormData({
           country: result.lead.country || '',
           desiredLocation: result.lead.desired_location || '',
@@ -95,11 +96,7 @@ const PublicCriteriaForm = () => {
           budget: result.lead.budget || '',
           currency: result.lead.currency || 'EUR',
           propertyTypes: result.lead.property_types || [],
-          bedrooms: Array.isArray(result.lead.bedrooms) 
-            ? result.lead.bedrooms
-            : result.lead.bedrooms 
-            ? [result.lead.bedrooms]
-            : [],
+          bedrooms: result.lead.bedrooms || [],
           livingArea: result.lead.living_area || '',
           landArea: result.lead.land_area || '',
           views: result.lead.views || [],
@@ -152,7 +149,8 @@ const PublicCriteriaForm = () => {
     console.log('Submitting form data:', formData);
     setSubmitting(true);
     try {
-      // Convertir les données pour correspondre à l'API
+      // Utiliser directement la structure formData sans conversion
+      // pour assurer la synchronisation avec la page des critères
       const submitData = {
         country: formData.country,
         desired_location: formData.desiredLocation,
@@ -318,7 +316,7 @@ const PublicCriteriaForm = () => {
                 )}
               </div>
 
-              {/* Autres critères de recherche */}
+              {/* Utiliser SearchCriteriaFields pour assurer la synchronisation */}
               <SearchCriteriaFields
                 formData={formData}
                 onDataChange={handleDataChange}
