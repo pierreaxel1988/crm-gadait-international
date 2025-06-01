@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,11 +6,12 @@ import { toast } from '@/hooks/use-toast';
 import { Loader2, CheckCircle, MapPin, Home, Building, Crown, Mountain, TreePine, Crown as ChateauIcon, Store, Hotel, Grape, MoreHorizontal, Bed, Eye, Star, Clock, CreditCard, Target } from 'lucide-react';
 import { getPublicCriteriaLink, updateLeadCriteriaFromPublicForm } from '@/services/publicCriteriaService';
 import { countries } from '@/utils/countries';
-import { locationsByCountry } from '@/utils/locationsByCountry';
+import { getAllLocations, getLocationsByCountry } from '@/utils/locationsByCountry';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { format } from 'date-fns';
 import { formatBudget } from '@/services/utils/leadMappers';
+import SmartSearch from '@/components/common/SmartSearch';
 
 const PublicCriteriaForm = () => {
   const { token } = useParams<{ token: string }>();
@@ -176,6 +176,32 @@ const PublicCriteriaForm = () => {
       };
     });
   };
+
+  // Fonction pour obtenir les localisations filtrées
+  const getFilteredLocations = (searchTerm: string) => {
+    if (!formData.country) {
+      return getAllLocations()
+        .filter(loc => loc.toLowerCase().includes(searchTerm.toLowerCase()))
+        .slice(0, 10);
+    }
+    return getLocationsByCountry(formData.country)
+      .filter(loc => loc.toLowerCase().includes(searchTerm.toLowerCase()))
+      .slice(0, 10);
+  };
+
+  const handleLocationSelect = (location: string) => {
+    handleInputChange('desired_location', location);
+  };
+
+  const handleCountrySelect = (country: string) => {
+    handleInputChange('country', country);
+    // Réinitialiser la localisation quand on change de pays
+    handleInputChange('desired_location', '');
+  };
+
+  const renderLocationItem = (location: string) => (
+    <div className="text-sm py-1">{location}</div>
+  );
 
   // Composant pour les boutons de sélection multiple avec design original
   const SelectionButton = ({ 
@@ -368,18 +394,21 @@ const PublicCriteriaForm = () => {
                     <MapPin className="h-4 w-4 text-loro-terracotta" />
                     <h3 className="text-sm font-semibold text-gray-800">Pays recherché</h3>
                   </div>
-                  <select
+                  <SmartSearch
+                    placeholder="Sélectionner un pays..."
                     value={formData.country}
-                    onChange={(e) => handleInputChange('country', e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-loro-terracotta focus:border-transparent text-sm"
-                  >
-                    <option value="">Sélectionner un pays</option>
-                    {countries.map((country) => (
-                      <option key={country.code} value={country.name}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(value) => handleInputChange('country', value)}
+                    onSelect={handleCountrySelect}
+                    results={countries.map(c => c.name).filter(c => 
+                      c.toLowerCase().includes(formData.country.toLowerCase())
+                    ).slice(0, 10)}
+                    renderItem={renderLocationItem}
+                    className="w-full"
+                    inputClassName="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-loro-terracotta focus:border-transparent text-sm"
+                    minChars={0}
+                    searchIcon={true}
+                    clearButton={true}
+                  />
                 </div>
 
                 {/* Localisation */}
@@ -388,11 +417,18 @@ const PublicCriteriaForm = () => {
                     <MapPin className="h-4 w-4 text-loro-terracotta" />
                     <h3 className="text-sm font-semibold text-gray-800">Localisation</h3>
                   </div>
-                  <Input
-                    value={formData.desired_location}
-                    onChange={(e) => handleInputChange('desired_location', e.target.value)}
+                  <SmartSearch
                     placeholder="Ville, région..."
-                    className="w-full p-3 text-sm border-gray-300 focus:ring-loro-terracotta focus:border-loro-terracotta"
+                    value={formData.desired_location}
+                    onChange={(value) => handleInputChange('desired_location', value)}
+                    onSelect={handleLocationSelect}
+                    results={getFilteredLocations(formData.desired_location)}
+                    renderItem={renderLocationItem}
+                    className="w-full"
+                    inputClassName="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-loro-terracotta focus:border-transparent text-sm"
+                    minChars={1}
+                    searchIcon={true}
+                    clearButton={true}
                   />
                 </div>
 
