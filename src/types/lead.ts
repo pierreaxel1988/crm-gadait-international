@@ -68,25 +68,47 @@ export type PropertyState =
   | "À rénover"
   | "À reconstruire";
 
-// Types additionnels nécessaires pour la compatibilité
+// Types for compatibility
 export type LeadSource = 
   | 'Website'
   | 'Referral'
   | 'Social Media'
   | 'Advertisement'
   | 'Direct Contact'
-  | 'Other';
+  | 'Other'
+  | 'Site web'
+  | 'Réseaux sociaux'
+  | 'Portails immobiliers'
+  | 'Network'
+  | 'Repeaters'
+  | 'Recommandations'
+  | 'Apporteur d\'affaire'
+  | 'Idealista'
+  | 'Le Figaro'
+  | 'Properstar'
+  | 'Property Cloud'
+  | 'L\'express Property'
+  | 'James Edition'
+  | 'Annonce'
+  | 'Email'
+  | 'Téléphone'
+  | 'Autre'
+  | 'Recommendation';
 
 export type Country = string;
 
-export type Currency = 'EUR' | 'USD' | 'GBP' | 'CHF' | 'MUR';
+export type Currency = 'EUR' | 'USD' | 'GBP' | 'CHF' | 'MUR' | 'AED';
 
 export type ViewType = 
   | 'Sea view'
   | 'Mountain view'
   | 'Garden view'
   | 'City view'
-  | 'Pool view';
+  | 'Pool view'
+  | 'Mer'
+  | 'Montagne'
+  | 'Golf'
+  | 'Autres';
 
 export type Amenity = 
   | 'Pool'
@@ -94,7 +116,10 @@ export type Amenity =
   | 'Parking'
   | 'Garden'
   | 'Terrace'
-  | 'Balcony';
+  | 'Balcony'
+  | 'Piscine'
+  | 'Terrasse'
+  | 'Jardin';
 
 export type PurchaseTimeframe = 
   | 'Immediately'
@@ -121,6 +146,8 @@ export type MauritiusRegion =
   | 'East'
   | 'West'
   | 'Central';
+
+export type LeadTag = string;
 
 export interface LeadDetailed {
   id: string;

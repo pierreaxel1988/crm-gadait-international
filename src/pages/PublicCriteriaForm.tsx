@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -49,6 +48,35 @@ const PublicCriteriaForm = () => {
         setLinkData(result.link);
         setLeadData(result.lead);
 
+        // Handle bedrooms data properly - prioritize raw_data
+        let bedroomsData: number[] = [];
+        
+        // First check raw_data for multiple bedroom selections
+        if (result.lead.raw_data && result.lead.raw_data.bedroom_values) {
+          try {
+            const parsedBedrooms = typeof result.lead.raw_data.bedroom_values === 'string' 
+              ? JSON.parse(result.lead.raw_data.bedroom_values)
+              : result.lead.raw_data.bedroom_values;
+            
+            if (Array.isArray(parsedBedrooms)) {
+              bedroomsData = parsedBedrooms;
+            } else {
+              bedroomsData = [parsedBedrooms];
+            }
+            console.log('Loaded bedrooms from raw_data in PublicCriteriaForm:', bedroomsData);
+          } catch (e) {
+            console.error('Error parsing bedroom_values from raw_data:', e);
+            // Fallback to single bedroom value
+            if (result.lead.bedrooms !== null && result.lead.bedrooms !== undefined) {
+              bedroomsData = [result.lead.bedrooms];
+            }
+          }
+        } else if (Array.isArray(result.lead.bedrooms)) {
+          bedroomsData = result.lead.bedrooms;
+        } else if (result.lead.bedrooms !== null && result.lead.bedrooms !== undefined) {
+          bedroomsData = [result.lead.bedrooms];
+        }
+
         // Map database fields to form data structure for perfect synchronization
         setFormData({
           country: result.lead.country || '',
@@ -57,7 +85,7 @@ const PublicCriteriaForm = () => {
           budget: result.lead.budget || '',
           currency: result.lead.currency || 'EUR',
           propertyTypes: result.lead.property_types || [],
-          bedrooms: result.lead.bedrooms || [],
+          bedrooms: bedroomsData, // Always use the processed array
           livingArea: result.lead.living_area || '',
           landArea: result.lead.land_area || '',
           views: result.lead.views || [],
@@ -108,6 +136,28 @@ const PublicCriteriaForm = () => {
     console.log('Submitting form data:', formData);
     setSubmitting(true);
     try {
+      // Handle bedroom data for submission with proper raw_data synchronization
+      let bedroomsForDb = null;
+      let rawDataUpdate: any = {};
+      
+      if (Array.isArray(formData.bedrooms)) {
+        if (formData.bedrooms.length === 1) {
+          // Single bedroom selection - store in bedrooms column only
+          bedroomsForDb = formData.bedrooms[0];
+          // Remove bedroom_values from raw_data if it exists (single selection doesn't need it)
+          rawDataUpdate.bedroom_values = null;
+        } else if (formData.bedrooms.length > 1) {
+          // Multiple bedroom selections - store first value in bedrooms column and all values in raw_data
+          bedroomsForDb = formData.bedrooms[0];
+          rawDataUpdate.bedroom_values = JSON.stringify(formData.bedrooms);
+          console.log('Storing multiple bedrooms in raw_data for public form:', formData.bedrooms);
+        } else {
+          // Empty array - clear both
+          bedroomsForDb = null;
+          rawDataUpdate.bedroom_values = null;
+        }
+      }
+
       // Map form data to exact database structure for perfect synchronization
       const submitData = {
         country: formData.country,
@@ -116,7 +166,7 @@ const PublicCriteriaForm = () => {
         budget: formData.budget,
         currency: formData.currency,
         property_types: formData.propertyTypes,
-        bedrooms: formData.bedrooms,
+        bedrooms: bedroomsForDb,
         living_area: formData.livingArea,
         land_area: formData.landArea,
         views: formData.views,
@@ -127,7 +177,8 @@ const PublicCriteriaForm = () => {
         nationality: formData.nationality,
         tax_residence: formData.taxResidence,
         preferred_language: formData.preferredLanguage,
-        regions: formData.regions
+        regions: formData.regions,
+        raw_data: Object.keys(rawDataUpdate).length > 0 ? rawDataUpdate : null
       };
       
       console.log('Data being sent to API:', submitData);
@@ -150,7 +201,7 @@ const PublicCriteriaForm = () => {
   };
 
   const handleDataChange = (data: Partial<LeadDetailed>) => {
-    console.log('Data changed:', data);
+    console.log('Data changed in PublicCriteriaForm:', data);
     setFormData(prev => ({
       ...prev,
       ...data

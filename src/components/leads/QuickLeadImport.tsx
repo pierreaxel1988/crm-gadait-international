@@ -1,286 +1,232 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Check, X, ExternalLink, Flag, Phone } from 'lucide-react';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import FormInput from './form/FormInput';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useNavigate } from 'react-router-dom';
 import { createLead } from '@/services/leadCore';
 import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from "@/components/common/StatusBadge";
 import { LeadTag } from "@/components/common/TagBadge";
-import { usePropertyExtraction } from '@/components/chat/hooks/usePropertyExtraction';
-import { Country } from '@/types/lead';
-import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
-import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
+import { PropertyType, PipelineType } from '@/types/lead';
 
-interface QuickLeadImportProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
-}
-
-const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ isOpen, onClose, onSuccess }) => {
+const QuickLeadImport = () => {
   const navigate = useNavigate();
-  const [leadName, setLeadName] = useState('');
-  const [leadEmail, setLeadEmail] = useState('');
-  const [leadPhone, setLeadPhone] = useState('');
-  const [leadPhoneCode, setLeadPhoneCode] = useState('+33');
-  const [leadCountry, setLeadCountry] = useState<Country | ''>('');
-  const [leadNationality, setLeadNationality] = useState('');
-  
-  const {
-    propertyUrl,
-    setPropertyUrl,
-    isLoading,
-    extractedData,
-    extractPropertyData,
-    resetExtraction
-  } = usePropertyExtraction();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    location: '',
+    propertyReference: '',
+    budget: '',
+    desiredLocation: '',
+    propertyType: '',
+    bedrooms: '',
+    nationality: '',
+    country: '',
+    notes: '',
+    url: '',
+    pipelineType: 'purchase' as PipelineType
+  });
 
-  const availableCountries = Object.keys(LOCATIONS_BY_COUNTRY) as Country[];
-  
-  const getCountryFlag = (country: string): string => {
-    const countryToFlag: Record<string, string> = {
-      'Croatia': '🇭🇷',
-      'France': '🇫🇷',
-      'Greece': '🇬🇷',
-      'Maldives': '🇲🇻',
-      'Mauritius': '🇲🇺',
-      'Portugal': '🇵🇹',
-      'Seychelles': '🇸🇨',
-      'Spain': '🇪🇸',
-      'Switzerland': '🇨🇭',
-      'United Arab Emirates': '🇦🇪',
-      'United Kingdom': '🇬🇧',
-      'United States': '🇺🇸'
-    };
-    
-    return countryToFlag[country] || '';
-  };
-  
-  useEffect(() => {
-    if (leadCountry && !leadNationality) {
-      const nationality = deriveNationalityFromCountry(leadCountry);
-      if (nationality) {
-        setLeadNationality(nationality);
-      }
-    }
-  }, [leadCountry, leadNationality]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleExtractUrl = () => {
-    if (propertyUrl) {
-      extractPropertyData();
-    } else {
-      toast({
-        variant: "destructive",
-        title: "URL manquante",
-        description: "Veuillez entrer l'URL de la propriété."
-      });
-    }
+  const handleInputChange = (field: string) => (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  const handleImport = async () => {
-    if (!leadName || !leadEmail) {
-      toast({
-        variant: "destructive",
-        title: "Données manquantes",
-        description: "Le nom et l'email sont requis."
-      });
-      return;
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      const formattedPhone = leadPhone ? `${leadPhoneCode} ${leadPhone}` : '';
-      
       const newLeadData = {
-        name: leadName,
-        email: leadEmail,
-        phone: formattedPhone,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        location: formData.location || formData.country || '',
         status: "New" as LeadStatus,
-        tags: ["Imported"] as LeadTag[],
-        propertyReference: extractedData?.reference || "",
-        budget: extractedData?.price || "",
-        desiredLocation: extractedData?.location || "",
-        propertyType: extractedData?.propertyType || "",
-        bedrooms: extractedData?.bedrooms ? parseInt(extractedData.bedrooms.toString()) : undefined,
-        nationality: leadNationality,
-        country: (leadCountry as Country) || undefined,
-        notes: `Intéressé par l'annonce: ${propertyUrl}`,
-        url: propertyUrl,
-        pipelineType: "purchase" as "purchase" | "rental"
+        tags: ["Manual Import"] as LeadTag[],
+        propertyReference: formData.propertyReference,
+        budget: formData.budget,
+        desiredLocation: formData.desiredLocation,
+        propertyType: formData.propertyType as PropertyType,
+        bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : undefined,
+        nationality: formData.nationality,
+        country: formData.country,
+        notes: formData.notes,
+        url: formData.url,
+        pipelineType: formData.pipelineType
       };
 
       const createdLead = await createLead(newLeadData);
-      
+
       toast({
         title: "Lead créé",
-        description: "Un nouveau lead a été créé avec les informations fournies."
+        description: "Le lead a été créé avec succès."
       });
 
-      setLeadName('');
-      setLeadEmail('');
-      setLeadPhone('');
-      setLeadPhoneCode('+33');
-      setLeadCountry('');
-      setLeadNationality('');
-      setPropertyUrl('');
-      resetExtraction();
-      
-      onClose();
-      
-      if (onSuccess) onSuccess();
-      
       navigate(`/leads/${createdLead.id}`);
     } catch (error) {
-      console.error('Erreur lors de la création du lead:', error);
+      console.error('Error creating lead:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Impossible de créer le lead."
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleCancel = () => {
-    setLeadName('');
-    setLeadEmail('');
-    setLeadPhone('');
-    setLeadPhoneCode('+33');
-    setLeadCountry('');
-    setLeadNationality('');
-    setPropertyUrl('');
-    resetExtraction();
-    onClose();
-  };
-
-  const handlePhoneCodeChange = (code: string) => {
-    setLeadPhoneCode(code);
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Import Rapide de Lead</DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4 py-4">
-          <FormInput
-            label="Nom"
-            name="name"
-            value={leadName}
-            onChange={(e) => setLeadName(e.target.value)}
-            required
-          />
-          
-          <FormInput
-            label="Email"
-            name="email"
-            type="email"
-            value={leadEmail}
-            onChange={(e) => setLeadEmail(e.target.value)}
-            required
-          />
-          
-          <FormInput
-            label="Téléphone"
-            name="phone"
-            type="tel-with-code"
-            value={leadPhone}
-            onChange={(e) => setLeadPhone(e.target.value)}
-            icon={Phone}
-            countryCode={leadPhoneCode}
-            onCountryCodeChange={handlePhoneCodeChange}
-          />
-          
-          <FormInput
-            label="Pays"
-            name="country"
-            type="select"
-            value={leadCountry}
-            onChange={(e) => setLeadCountry(e.target.value as Country)}
-            icon={Flag}
-            options={availableCountries.map(country => ({ 
-              value: country, 
-              label: `${getCountryFlag(country)} ${country}` 
-            }))}
-            placeholder="Sélectionner un pays d'origine"
-          />
-          
-          <FormInput
-            label="Nationalité"
-            name="nationality"
-            type="select"
-            value={leadNationality}
-            onChange={(e) => setLeadNationality(e.target.value)}
-            icon={Flag}
-            options={availableCountries.map(country => ({ 
-              value: country, 
-              label: `${getCountryFlag(country)} ${country}` 
-            }))}
-            placeholder="Nationalité du client"
-          />
-          
-          <div className="space-y-2">
-            <FormInput
-              label="URL de la propriété"
-              name="url"
-              value={propertyUrl}
-              onChange={(e) => setPropertyUrl(e.target.value)}
-              icon={ExternalLink}
-            />
-            
-            <div className="flex justify-end">
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
-                onClick={handleExtractUrl}
-                disabled={isLoading || !propertyUrl}
-                className="text-xs font-futura"
-              >
-                {isLoading ? "Extraction..." : "Extraire les données"}
-              </Button>
+    <div className="max-w-2xl mx-auto p-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Import rapide de lead</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Nom *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name')(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email')(e.target.value)}
+                />
+              </div>
             </div>
-          </div>
-          
-          {extractedData && (
-            <div className="border border-gray-200 rounded-md p-3 mt-2 text-sm space-y-1 font-futura">
-              <h4 className="font-semibold mb-2">Données extraites:</h4>
-              {extractedData.title && <p><span className="font-medium">Titre:</span> {extractedData.title}</p>}
-              {extractedData.price && <p><span className="font-medium">Prix:</span> {extractedData.price}</p>}
-              {extractedData.location && <p><span className="font-medium">Localisation:</span> {extractedData.location}</p>}
-              {extractedData.propertyType && <p><span className="font-medium">Type:</span> {extractedData.propertyType}</p>}
-              {extractedData.bedrooms && <p><span className="font-medium">Chambres:</span> {extractedData.bedrooms}</p>}
-              {extractedData.reference && <p><span className="font-medium">Référence:</span> {extractedData.reference}</p>}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="phone">Téléphone</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone')(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="country">Pays</Label>
+                <Input
+                  id="country"
+                  value={formData.country}
+                  onChange={(e) => handleInputChange('country')(e.target.value)}
+                />
+              </div>
             </div>
-          )}
-        </div>
-        
-        <DialogFooter className="sm:justify-between">
-          <Button 
-            type="button" 
-            variant="outline"
-            onClick={handleCancel}
-            className="flex items-center gap-1 font-futura"
-          >
-            <X className="h-4 w-4" /> 
-            Annuler
-          </Button>
-          
-          <Button 
-            type="button" 
-            onClick={handleImport}
-            disabled={!leadName || !leadEmail}
-            className="flex items-center gap-1 font-futura"
-          >
-            <Check className="h-4 w-4" /> 
-            Importer
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+
+            <div>
+              <Label htmlFor="pipeline">Pipeline</Label>
+              <Select value={formData.pipelineType} onValueChange={handleInputChange('pipelineType')}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner un pipeline" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="purchase">Achat</SelectItem>
+                  <SelectItem value="rental">Location</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="propertyType">Type de propriété</Label>
+                <Select value={formData.propertyType} onValueChange={handleInputChange('propertyType')}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Type de propriété" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Villa">Villa</SelectItem>
+                    <SelectItem value="Apartment">Appartement</SelectItem>
+                    <SelectItem value="House">Maison</SelectItem>
+                    <SelectItem value="Land">Terrain</SelectItem>
+                    <SelectItem value="Other">Autre</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="bedrooms">Chambres</Label>
+                <Input
+                  id="bedrooms"
+                  type="number"
+                  value={formData.bedrooms}
+                  onChange={(e) => handleInputChange('bedrooms')(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="budget">Budget</Label>
+              <Input
+                id="budget"
+                value={formData.budget}
+                onChange={(e) => handleInputChange('budget')(e.target.value)}
+                placeholder="Ex: 500000"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="desiredLocation">Localisation souhaitée</Label>
+              <Input
+                id="desiredLocation"
+                value={formData.desiredLocation}
+                onChange={(e) => handleInputChange('desiredLocation')(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="propertyReference">Référence propriété</Label>
+              <Input
+                id="propertyReference"
+                value={formData.propertyReference}
+                onChange={(e) => handleInputChange('propertyReference')(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="url">URL de l'annonce</Label>
+              <Input
+                id="url"
+                value={formData.url}
+                onChange={(e) => handleInputChange('url')(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                value={formData.notes}
+                onChange={(e) => handleInputChange('notes')(e.target.value)}
+                rows={4}
+              />
+            </div>
+
+            <Button type="submit" disabled={isSubmitting} className="w-full">
+              {isSubmitting ? 'Création...' : 'Créer le lead'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
