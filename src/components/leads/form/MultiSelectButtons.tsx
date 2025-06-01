@@ -1,51 +1,43 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import BaseSelectButtons from './BaseSelectButtons';
 
-interface MultiSelectButtonsProps<T> {
-  options: T[];
+interface MultiSelectButtonsProps<T extends string> {
+  options: readonly T[] | T[];
   selectedValues: T[];
-  onToggle: (value: T) => void;
-  className?: string;
-  buttonClassName?: string;
+  onChange?: (value: T) => void; // Make onChange optional
+  onToggle?: (value: T) => void; // Add back onToggle for backward compatibility
+  specialOption?: T;
+  className?: string; // Add className prop to be passed to BaseSelectButtons
 }
 
-const MultiSelectButtons = <T extends string | number>({
+const MultiSelectButtons = <T extends string>({
   options,
-  selectedValues,
+  selectedValues = [],
+  onChange,
   onToggle,
-  className = "flex flex-wrap gap-2",
-  buttonClassName
+  specialOption,
+  className,
 }: MultiSelectButtonsProps<T>) => {
+  const isSelected = (option: T) => selectedValues.includes(option);
+  
+  // Handle both onChange and onToggle patterns
+  const handleSelectOption = (value: T) => {
+    if (onToggle) {
+      onToggle(value);
+    } else if (onChange) {
+      onChange(value);
+    }
+  };
+  
   return (
-    <div className={className}>
-      {options.map((option) => {
-        const isSelected = selectedValues.includes(option);
-        return (
-          <Button
-            key={String(option)}
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => onToggle(option)}
-            data-selected={isSelected}
-            className={cn(
-              "transition-all duration-200",
-              buttonClassName || `
-                border-loro-sand/30 text-loro-navy hover:bg-loro-sand/20
-                ${isSelected 
-                  ? 'bg-loro-hazel text-white border-loro-hazel hover:bg-loro-hazel/90' 
-                  : 'bg-white hover:bg-loro-sand/10'
-                }
-              `
-            )}
-          >
-            {String(option)}
-          </Button>
-        );
-      })}
-    </div>
+    <BaseSelectButtons
+      options={[...options]} // Convert readonly array to regular array with spread
+      isSelected={isSelected}
+      onSelectOption={handleSelectOption}
+      specialOption={specialOption}
+      className={className}
+    />
   );
 };
 

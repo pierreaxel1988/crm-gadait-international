@@ -197,7 +197,7 @@ export interface LeadDetailed {
   orientation?: string[];
   email_envoye?: boolean;
   raw_data?: any;
-  mapCoordinates?: string | { lat: number; lng: number };
+  mapCoordinates?: { lat: number; lng: number };
   
   // Additional property fields for owners pipeline
   constructionYear?: string;
@@ -242,13 +242,6 @@ export interface LeadDetailed {
   hasWineStorage?: boolean;
   wineStorageCapacity?: string;
   accessibility?: string;
-  
-  // Additional fields for owner properties
-  desired_price?: string;
-  fees?: string;
-  furnished?: boolean;
-  furniture_price?: string;
-  furniture_included_in_price?: boolean;
 }
 
 export interface ActionHistory {
