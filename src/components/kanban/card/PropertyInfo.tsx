@@ -8,7 +8,7 @@ interface PropertyInfoProps {
   budget?: string;
   desiredLocation?: string;
   country?: string;
-  bedrooms?: number;
+  bedrooms?: number | number[];
   url?: string;
   onLinkClick: (e: React.MouseEvent) => void;
 }
@@ -43,11 +43,28 @@ const PropertyInfo = ({
     }).format(numericValue);
   };
 
+  // Format bedrooms for display
+  const formatBedrooms = (bedrooms?: number | number[]) => {
+    if (!bedrooms) return null;
+    
+    if (Array.isArray(bedrooms)) {
+      if (bedrooms.length === 1) {
+        return bedrooms[0];
+      } else if (bedrooms.length > 1) {
+        return `${Math.min(...bedrooms)}-${Math.max(...bedrooms)}`;
+      }
+    }
+    
+    return bedrooms;
+  };
+
   // Vérifier si le budget est valide pour l'affichage (non vide et non nul)
   const hasBudget = budget && budget.trim() !== '';
   
   // Vérifier si la localisation est valide pour l'affichage (non vide et non nulle)
   const hasLocation = desiredLocation && desiredLocation.trim() !== '';
+
+  const formattedBedrooms = formatBedrooms(bedrooms);
 
   return (
     <>
@@ -84,10 +101,10 @@ const PropertyInfo = ({
       )}
       
       {/* Nombre de chambres */}
-      {bedrooms && (
+      {formattedBedrooms && (
         <div className="mb-2 flex items-center text-xs">
           <BedDouble className="h-3.5 w-3.5 mr-1.5 text-indigo-500" />
-          <span className="text-gray-700">{bedrooms} chambre{bedrooms > 1 ? 's' : ''}</span>
+          <span className="text-gray-700">{formattedBedrooms} chambre{(typeof formattedBedrooms === 'number' && formattedBedrooms > 1) || (typeof formattedBedrooms === 'string') ? 's' : ''}</span>
         </div>
       )}
       

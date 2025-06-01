@@ -25,12 +25,13 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     actionHistory = [];
   }
 
-  // Handle bedrooms conversion from database
-  let bedrooms;
+  // Handle bedrooms conversion from database - ensure it's always an array
+  let bedrooms: number[] = [];
   if (lead.raw_data && lead.raw_data.bedroom_values) {
     // If we have stored bedroom values in raw_data, use those (for multiple selections)
     try {
-      bedrooms = JSON.parse(lead.raw_data.bedroom_values);
+      const parsedBedrooms = JSON.parse(lead.raw_data.bedroom_values);
+      bedrooms = Array.isArray(parsedBedrooms) ? parsedBedrooms : [parsedBedrooms];
     } catch (e) {
       console.error('Error parsing bedroom_values:', e);
       bedrooms = lead.bedrooms ? [lead.bedrooms] : [];
@@ -64,7 +65,7 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     desiredLocation: lead.desired_location,
     propertyType: lead.property_type,
     propertyTypes: lead.property_types,
-    bedrooms: lead.bedrooms,
+    bedrooms: bedrooms, // Always an array now
     views: lead.views,
     amenities: lead.amenities || [],
     purchaseTimeframe: lead.purchase_timeframe,
@@ -100,7 +101,7 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     constructionYear: lead.construction_year || '',
     yearlyTaxes: lead.yearly_taxes || '',
     assets: lead.assets || [],
-    email_envoye: lead.email_envoye || false // Ajout du champ email_envoye
+    email_envoye: lead.email_envoye || false
   };
 };
 
@@ -112,12 +113,12 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     if (lead.bedrooms.length === 1) {
       bedroomsForDb = lead.bedrooms[0];
     } else if (lead.bedrooms.length > 1) {
-      // Store the first value for now, we'll handle multiple in updateLead
-      bedroomsForDb = lead.bedrooms.length > 0 ? lead.bedrooms[0] : null;
+      // Store the first value for now, we'll handle multiple in raw_data
+      bedroomsForDb = lead.bedrooms[0];
     }
   } else if (lead.bedrooms !== undefined && lead.bedrooms !== null) {
     // Handle non-array value
-    bedroomsForDb = lead.bedrooms;
+    bedroomsForDb = Array.isArray(lead.bedrooms) ? lead.bedrooms[0] : lead.bedrooms;
   }
   
   // Ensure action history is properly formatted
@@ -132,6 +133,13 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
       actionType: action.actionType || 'Note'
     }));
   }
+  
+  // Store multiple bedroom values in raw_data for perfect synchronization
+  const rawData = {
+    ...(lead.bedrooms && Array.isArray(lead.bedrooms) && lead.bedrooms.length > 1 ? {
+      bedroom_values: JSON.stringify(lead.bedrooms)
+    } : {})
+  };
   
   return {
     id: lead.id,
@@ -175,7 +183,8 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     external_id: lead.external_id,
     action_history: lead.actionHistory,
     regions: lead.regions || [],
-    email_envoye: lead.email_envoye || false // Ajout du champ email_envoye
+    raw_data: Object.keys(rawData).length > 0 ? rawData : null,
+    email_envoye: lead.email_envoye || false
   };
 };
 

@@ -1,98 +1,81 @@
-import { FilterOptions } from '@/components/pipeline/PipelineFilters';
+
 import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
-import { LeadStatus } from '@/components/common/StatusBadge';
-import { PropertyType, PurchaseTimeframe } from '@/types/lead';
 
-export const applyFiltersToColumns = (
-  columns: {
-    title: string;
-    status: LeadStatus;
-    items: ExtendedKanbanItem[];
-  }[],
-  filters: FilterOptions | undefined
-) => {
-  if (!filters) return columns;
+export const extractNumericValue = (value: string | null | undefined): number => {
+  if (!value) return 0;
+  
+  // Remove all non-numeric characters except decimal points
+  const numericString = value.toString().replace(/[^\d.]/g, '');
+  const numericValue = parseFloat(numericString);
+  
+  return isNaN(numericValue) ? 0 : numericValue;
+};
 
-  // Debug logging to check what filters are being applied
-  console.log("Applying filters:", JSON.stringify(filters, null, 2));
-
-  return columns.map(column => {
-    let filteredItems = column.items;
+export const filterByBudget = (items: ExtendedKanbanItem[], minBudget?: number, maxBudget?: number) => {
+  if (!minBudget && !maxBudget) return items;
+  
+  return items.filter(item => {
+    if (!item.budget) return false;
     
-    // Filter by status if status filter is applied
-    if (filters.status !== null) {
-      // This logic was incorrectly emptying columns that don't match the filter
-      // Instead, we need to filter the items in all columns and only keep items that match the status
-      filteredItems = filteredItems.filter(item => item.status === filters.status);
-    }
+    const itemBudget = extractNumericValue(item.budget);
     
-    // Filter by tags if any are selected
-    if (filters.tags.length > 0) {
-      filteredItems = filteredItems.filter(item => 
-        item.tags.some(tag => filters.tags.includes(tag))
-      );
-    }
+    if (minBudget && itemBudget < minBudget) return false;
+    if (maxBudget && itemBudget > maxBudget) return false;
     
-    // Filter by assignedTo
-    if (filters.assignedTo) {
-      filteredItems = filteredItems.filter(item => {
-        // Check if the item has an assignedTo property that matches the filter
-        // This can be either the name or the ID
-        if (typeof item.assignedTo === 'string') {
-          return item.assignedTo === filters.assignedTo || 
-                 item.assignedToId === filters.assignedTo;
-        }
-        return false;
-      });
-    }
-    
-    // Apply budget filters if provided
-    if (filters.minBudget || filters.maxBudget) {
-      filteredItems = filteredItems.filter(item => {
-        if (!item.budget) return false;
-        
-        // Extraction des chiffres du budget en ignorant les caractères de formatage
-        const numericBudget = extractNumericValue(item.budget);
-        const min = filters.minBudget ? extractNumericValue(filters.minBudget) : 0;
-        const max = filters.maxBudget ? extractNumericValue(filters.maxBudget) : Infinity;
-        
-        return numericBudget >= min && numericBudget <= max;
-      });
-    }
-    
-    // Filter by location
-    if (filters.location) {
-      filteredItems = filteredItems.filter(item => 
-        item.desiredLocation?.toLowerCase().includes(filters.location.toLowerCase())
-      );
-    }
-    
-    // Filter by purchase timeframe - fixed comparison
-    if (filters.purchaseTimeframe !== null) {
-      filteredItems = filteredItems.filter(item => 
-        item.purchaseTimeframe === filters.purchaseTimeframe
-      );
-    }
-    
-    // Filter by property type - fixed comparison
-    if (filters.propertyType !== null) {
-      filteredItems = filteredItems.filter(item => 
-        item.propertyType === filters.propertyType
-      );
-    }
-    
-    return {
-      ...column,
-      items: filteredItems
-    };
+    return true;
   });
 };
 
-// Fonction utilitaire pour extraire la valeur numérique d'une chaîne de budget formatée
-export const extractNumericValue = (formattedValue: string): number => {
-  // Enlever tous les caractères non numériques
-  const numericString = formattedValue.replace(/[^\d]/g, '');
+export const filterByPropertyType = (items: ExtendedKanbanItem[], propertyType?: string) => {
+  if (!propertyType) return items;
   
-  // Convertir en nombre ou retourner 0 si vide
-  return numericString ? parseInt(numericString) : 0;
+  return items.filter(item => 
+    item.propertyType?.toLowerCase().includes(propertyType.toLowerCase())
+  );
+};
+
+export const filterByLocation = (items: ExtendedKanbanItem[], location?: string) => {
+  if (!location) return items;
+  
+  return items.filter(item => 
+    item.desiredLocation?.toLowerCase().includes(location.toLowerCase()) ||
+    item.country?.toLowerCase().includes(location.toLowerCase())
+  );
+};
+
+export const filterByAgent = (items: ExtendedKanbanItem[], agentId?: string) => {
+  if (!agentId) return items;
+  
+  return items.filter(item => item.assignedTo === agentId);
+};
+
+export const filterByTags = (items: ExtendedKanbanItem[], tags?: string[]) => {
+  if (!tags || tags.length === 0) return items;
+  
+  return items.filter(item => 
+    tags.some(tag => 
+      item.tags?.some(itemTag => 
+        typeof itemTag === 'string' 
+          ? itemTag.toLowerCase().includes(tag.toLowerCase())
+          : itemTag.name.toLowerCase().includes(tag.toLowerCase())
+      )
+    )
+  );
+};
+
+export const filterByTimeframe = (items: ExtendedKanbanItem[], timeframe?: string) => {
+  if (!timeframe) return items;
+  
+  return items.filter(item => 
+    item.purchaseTimeframe?.toLowerCase().includes(timeframe.toLowerCase())
+  );
+};
+
+export const sortItemsByDate = (items: ExtendedKanbanItem[], ascending = false) => {
+  return [...items].sort((a, b) => {
+    const dateA = new Date(a.createdAt || 0).getTime();
+    const dateB = new Date(b.createdAt || 0).getTime();
+    
+    return ascending ? dateA - dateB : dateB - dateA;
+  });
 };

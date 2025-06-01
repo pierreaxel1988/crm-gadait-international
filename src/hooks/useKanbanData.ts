@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { KanbanItem } from '@/components/kanban/KanbanCard';
 import { PipelineType } from '@/types/lead';
+import { LeadTag } from '@/components/common/LeadTag';
 
 export interface ExtendedKanbanItem extends KanbanItem {
   pipelineType?: PipelineType;
@@ -41,7 +42,7 @@ export const useKanbanData = () => {
         name: lead.name || 'Lead sans nom',
         email: lead.email || '',
         phone: lead.phone,
-        tags: lead.tags || [],
+        tags: (lead.tags || []).map((tag: string): LeadTag => ({ id: tag, name: tag, color: 'default' })),
         assignedTo: lead.assigned_to,
         status: lead.status as LeadStatus,
         pipelineType: lead.pipeline_type as PipelineType,
@@ -49,22 +50,22 @@ export const useKanbanData = () => {
         budget: lead.budget,
         desiredLocation: lead.desired_location,
         country: lead.country,
-        bedrooms: lead.bedrooms?.[0],
+        bedrooms: lead.bedrooms,
         createdAt: lead.created_at,
         importedAt: lead.imported_at,
-        nextFollowUpDate: lead.next_follow_up_date
+        nextFollowUpDate: lead.next_follow_up_date,
+        purchaseTimeframe: lead.purchase_timeframe
       }));
 
       // Group items by status
       const statuses: LeadStatus[] = [
-        'Nouveau',
-        'Contact initial',
-        'Qualification',
-        'Présentation',
-        'Négociation',
-        'Compromis',
-        'Vendu/Loué',
-        'Perdu'
+        'New',
+        'Contacted',
+        'Qualified',
+        'Proposal',
+        'Negotiation',
+        'Closed Won',
+        'Closed Lost'
       ];
 
       const columns = statuses.map(status => ({
@@ -91,7 +92,9 @@ export const useKanbanData = () => {
     loadedColumns,
     setLoadedColumns,
     loading,
+    isLoading: loading,
     error,
-    refetch: loadData
+    refetch: loadData,
+    teamMembers: []
   };
 };
