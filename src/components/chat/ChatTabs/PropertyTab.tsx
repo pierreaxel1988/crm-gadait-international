@@ -46,7 +46,7 @@ const PropertyTab: React.FC<PropertyTabProps> = ({
         phone: "",
         location: extractedData.location || "",
         status: "New" as LeadStatus,
-        tags: ["Imported"] as LeadTag[],
+        tags: ["Imported"] as string[],
         propertyReference: extractedData.reference || "",
         budget: extractedData.price || "",
         desiredLocation: extractedData.location || "",

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,7 +51,7 @@ const QuickLeadImport = () => {
         phone: formData.phone,
         location: formData.location || formData.country || '',
         status: "New" as LeadStatus,
-        tags: ["Manual Import"] as LeadTag[],
+        tags: ["Manual Import"] as string[],
         propertyReference: formData.propertyReference,
         budget: formData.budget,
         desiredLocation: formData.desiredLocation,
@@ -124,11 +123,11 @@ const QuickLeadImport = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="country">Pays</Label>
+                <Label htmlFor="location">Localisation</Label>
                 <Input
-                  id="country"
-                  value={formData.country}
-                  onChange={(e) => handleInputChange('country')(e.target.value)}
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location')(e.target.value)}
                 />
               </div>
             </div>
