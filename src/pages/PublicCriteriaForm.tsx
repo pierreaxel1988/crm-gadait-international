@@ -129,7 +129,7 @@ const PublicCriteriaForm = () => {
         nationality: formData.nationality,
         tax_residence: formData.taxResidence,
         preferred_language: formData.preferredLanguage,
-        regions: formData.regions, // Mapper les régions correctement
+        regions: formData.regions,
         mapCoordinates: formData.mapCoordinates,
         url: formData.url
       };
