@@ -89,7 +89,7 @@ const ActiveFiltersList = ({
       
       {filters.purchaseTimeframe && (
         <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-          {filters.purchaseTimeframe === 'Moins de trois mois' ? '< 3 mois' : '> 3 mois'}
+          {filters.purchaseTimeframe}
           <button onClick={() => onFilterChange({...filters, purchaseTimeframe: null})}>
             <X className="h-3 w-3 ml-1" />
           </button>

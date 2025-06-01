@@ -11,7 +11,7 @@ interface TimeframeFilterProps {
 
 const TimeframeFilter = ({ purchaseTimeframe, onTimeframeChange }: TimeframeFilterProps) => {
   const timeframes: (PurchaseTimeframe | null)[] = [
-    null, 'Moins de trois mois', 'Plus de trois mois'
+    null, 'Immédiat', '1-3 mois', '3-6 mois', '6-12 mois', '+12 mois'
   ];
 
   return (
@@ -28,7 +28,7 @@ const TimeframeFilter = ({ purchaseTimeframe, onTimeframeChange }: TimeframeFilt
             className="text-xs"
             onClick={() => onTimeframeChange(timeframe)}
           >
-            {timeframe ? (timeframe === 'Moins de trois mois' ? '< 3 mois' : '> 3 mois') : 'Tous'}
+            {timeframe || 'Tous'}
           </Button>
         ))}
       </div>
