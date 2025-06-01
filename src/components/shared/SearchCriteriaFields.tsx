@@ -3,7 +3,7 @@ import React from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Currency } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { MapPin, Home, Building, Bed, Eye, Star, Clock, CreditCard, Target } from 'lucide-react';
+import { MapPin, Home, Building, Bed, Eye, Star, Clock, CreditCard, Target, Crown, Building2, Mountain, TreePine, MoreHorizontal, Warehouse, Hotel, Grape } from 'lucide-react';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import RadioSelectButtons from '@/components/leads/form/RadioSelectButtons';
 import { countries } from '@/utils/countries';
@@ -52,6 +52,43 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
     }
     const value = formData.bedrooms;
     return [value >= 8 ? "8+" : value.toString()];
+  };
+
+  const getPropertyTypeIcon = (type: PropertyType) => {
+    switch (type) {
+      case "Villa":
+        return Home;
+      case "Appartement":
+        return Building;
+      case "Penthouse":
+        return Crown;
+      case "Maison":
+        return Home;
+      case "Duplex":
+        return Building2;
+      case "Chalet":
+        return Mountain;
+      case "Terrain":
+        return TreePine;
+      case "Manoir":
+        return Crown;
+      case "Maison de ville":
+        return Building2;
+      case "Château":
+        return Crown;
+      case "Local commercial":
+        return Warehouse;
+      case "Commercial":
+        return Building;
+      case "Hotel":
+        return Hotel;
+      case "Vignoble":
+        return Grape;
+      case "Autres":
+        return MoreHorizontal;
+      default:
+        return Home;
+    }
   };
 
   const propertyTypesList: PropertyType[] = [
@@ -182,12 +219,27 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
           <Building className="h-4 w-4 text-loro-terracotta" />
           Type de propriété
         </Label>
-        <MultiSelectButtons
-          options={propertyTypesList}
-          selectedValues={formData.propertyTypes || []}
-          onToggle={(value) => handleMultiSelectToggle('propertyTypes', value)}
-          className="grid grid-cols-2 md:grid-cols-3 gap-2"
-        />
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {propertyTypesList.map(type => {
+            const IconComponent = getPropertyTypeIcon(type);
+            const isSelected = (formData.propertyTypes || []).includes(type);
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => handleMultiSelectToggle('propertyTypes', type)}
+                className={`flex items-center justify-center gap-2 p-3 rounded-lg text-sm font-medium transition-all ${
+                  isSelected
+                    ? 'bg-loro-navy text-white' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <IconComponent className="h-4 w-4" />
+                {type}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Nombre de chambres */}
