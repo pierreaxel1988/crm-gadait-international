@@ -190,14 +190,14 @@ const PublicCriteriaForm = () => {
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-3 p-4 rounded-lg border transition-all ${
+      className={`flex items-center gap-2 px-4 py-3 rounded-lg border text-sm font-medium transition-all ${
         isSelected 
           ? 'bg-loro-navy text-white border-loro-navy' 
           : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
       }`}
     >
-      {Icon && <Icon className="h-5 w-5" />}
-      <span className="font-medium">{label}</span>
+      {Icon && <Icon className="h-4 w-4" />}
+      <span>{label}</span>
     </button>
   );
 
@@ -214,7 +214,7 @@ const PublicCriteriaForm = () => {
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center justify-center w-16 h-16 rounded-lg font-bold text-lg transition-all ${
+      className={`flex items-center justify-center w-12 h-12 rounded-lg font-semibold text-sm transition-all ${
         isSelected 
           ? 'bg-loro-navy text-white' 
           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -229,7 +229,7 @@ const PublicCriteriaForm = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-loro-terracotta" />
-          <p className="text-loro-navy">Chargement...</p>
+          <p className="text-loro-navy text-sm">Chargement...</p>
         </div>
       </div>
     );
@@ -241,11 +241,11 @@ const PublicCriteriaForm = () => {
         <Card className="w-full max-w-md">
           <CardContent className="text-center p-8">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-loro-navy mb-4">Merci !</h1>
-            <p className="text-loro-navy/70 mb-6">
+            <h1 className="text-xl font-bold text-loro-navy mb-4">Merci !</h1>
+            <p className="text-loro-navy/70 text-sm mb-6">
               Vos critères de recherche ont été enregistrés avec succès. Notre équipe va maintenant pouvoir vous proposer des propriétés correspondant parfaitement à vos attentes.
             </p>
-            <p className="text-sm text-loro-navy/60">
+            <p className="text-xs text-loro-navy/60">
               Nous vous contacterons très prochainement avec une sélection personnalisée.
             </p>
           </CardContent>
@@ -298,30 +298,30 @@ const PublicCriteriaForm = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <Card className="bg-white shadow-lg">
-          <CardHeader className="text-center border-b border-gray-200">
-            <CardTitle className="text-2xl text-loro-navy mb-2">
+    <div className="min-h-screen bg-gray-50 py-6 px-4">
+      <div className="max-w-3xl mx-auto">
+        <Card className="bg-white shadow-sm">
+          <CardHeader className="text-center border-b border-gray-200 py-6">
+            <CardTitle className="text-lg font-semibold text-loro-navy mb-2">
               CRITÈRES DE LA PROPRIÉTÉ
             </CardTitle>
-            <p className="text-loro-navy/70">
+            <p className="text-loro-navy/70 text-sm">
               Bonjour {leadData?.name}, merci de remplir vos critères de recherche pour que nous puissions vous proposer les meilleures propriétés.
             </p>
           </CardHeader>
-          <CardContent className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-12">
+          <CardContent className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
               
               {/* Pays recherché */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 mb-6">
-                  <MapPin className="h-5 w-5 text-loro-terracotta" />
-                  <h3 className="text-lg font-semibold text-gray-800">Pays recherché</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-4">
+                  <MapPin className="h-4 w-4 text-loro-terracotta" />
+                  <h3 className="text-sm font-semibold text-gray-800">Pays recherché</h3>
                 </div>
                 <select
                   value={formData.country}
                   onChange={(e) => handleInputChange('country', e.target.value)}
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-loro-terracotta focus:border-transparent text-lg"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-loro-terracotta focus:border-transparent text-sm"
                 >
                   <option value="">Sélectionner un pays</option>
                   {countries.map((country) => (
@@ -333,53 +333,53 @@ const PublicCriteriaForm = () => {
               </div>
 
               {/* Localisation */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 mb-6">
-                  <MapPin className="h-5 w-5 text-loro-terracotta" />
-                  <h3 className="text-lg font-semibold text-gray-800">Localisation</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-4">
+                  <MapPin className="h-4 w-4 text-loro-terracotta" />
+                  <h3 className="text-sm font-semibold text-gray-800">Localisation</h3>
                 </div>
                 <Input
                   value={formData.desired_location}
                   onChange={(e) => handleInputChange('desired_location', e.target.value)}
                   placeholder="Ville, région..."
-                  className="w-full p-4 text-lg border-gray-300 focus:ring-loro-terracotta focus:border-loro-terracotta"
+                  className="w-full p-3 text-sm border-gray-300 focus:ring-loro-terracotta focus:border-loro-terracotta"
                 />
               </div>
 
               {/* Budget */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="text-loro-terracotta text-xl font-bold">$</div>
-                  <h3 className="text-lg font-semibold text-gray-800">Budget</h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="text-loro-terracotta text-lg font-bold">€</div>
+                  <h3 className="text-sm font-semibold text-gray-800">Budget</h3>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-gray-600 mb-2 block">Min</Label>
+                    <Label className="text-gray-600 mb-1 block text-xs">Min</Label>
                     <Input
                       value={formData.budget_min}
                       onChange={(e) => handleInputChange('budget_min', e.target.value)}
                       placeholder="Min"
-                      className="w-full p-4 text-lg border-gray-300"
+                      className="w-full p-3 text-sm border-gray-300"
                     />
                   </div>
                   <div>
-                    <Label className="text-gray-600 mb-2 block">Max</Label>
+                    <Label className="text-gray-600 mb-1 block text-xs">Max</Label>
                     <Input
                       value={formData.budget}
                       onChange={(e) => handleInputChange('budget', e.target.value)}
                       placeholder="9000000"
-                      className="w-full p-4 text-lg border-gray-300"
+                      className="w-full p-3 text-sm border-gray-300"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-gray-600 mb-2 block">Devise</Label>
+                  <Label className="text-gray-600 mb-1 block text-xs">Devise</Label>
                   <select
                     value={formData.currency}
                     onChange={(e) => handleInputChange('currency', e.target.value)}
-                    className="w-full p-4 border border-gray-300 rounded-lg text-lg"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                   >
                     <option value="EUR">Euro (€)</option>
                     <option value="USD">USD ($)</option>
@@ -392,12 +392,12 @@ const PublicCriteriaForm = () => {
               </div>
 
               {/* Type de propriété */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <Building className="h-5 w-5 text-loro-terracotta" />
-                  <h3 className="text-lg font-semibold text-gray-800">Type de propriété</h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Building className="h-4 w-4 text-loro-terracotta" />
+                  <h3 className="text-sm font-semibold text-gray-800">Type de propriété</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {propertyTypeOptions.map((option) => (
                     <SelectionButton
                       key={option.value}
@@ -411,12 +411,12 @@ const PublicCriteriaForm = () => {
               </div>
 
               {/* Nombre de chambres */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <Bed className="h-5 w-5 text-loro-terracotta" />
-                  <h3 className="text-lg font-semibold text-gray-800">Nombre de chambres</h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Bed className="h-4 w-4 text-loro-terracotta" />
+                  <h3 className="text-sm font-semibold text-gray-800">Nombre de chambres</h3>
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2">
                   {bedroomOptions.map((number) => (
                     <NumberButton
                       key={number}
@@ -429,26 +429,26 @@ const PublicCriteriaForm = () => {
               </div>
 
               {/* Surface habitable */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 mb-6">
-                  <Home className="h-5 w-5 text-loro-terracotta" />
-                  <h3 className="text-lg font-semibold text-gray-800">Surface habitable (m²)</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-4">
+                  <Home className="h-4 w-4 text-loro-terracotta" />
+                  <h3 className="text-sm font-semibold text-gray-800">Surface habitable (m²)</h3>
                 </div>
                 <Input
                   value={formData.living_area}
                   onChange={(e) => handleInputChange('living_area', e.target.value)}
                   placeholder="Ex: 120"
-                  className="w-full p-4 text-lg border-gray-300"
+                  className="w-full p-3 text-sm border-gray-300"
                 />
               </div>
 
               {/* Vue souhaitée */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <Eye className="h-5 w-5 text-loro-terracotta" />
-                  <h3 className="text-lg font-semibold text-gray-800">Vue souhaitée</h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Eye className="h-4 w-4 text-loro-terracotta" />
+                  <h3 className="text-sm font-semibold text-gray-800">Vue souhaitée</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   {viewOptions.map((option) => (
                     <SelectionButton
                       key={option.value}
@@ -461,12 +461,12 @@ const PublicCriteriaForm = () => {
               </div>
 
               {/* Commodités souhaitées */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <Star className="h-5 w-5 text-loro-terracotta" />
-                  <h3 className="text-lg font-semibold text-gray-800">Commodités souhaitées</h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Star className="h-4 w-4 text-loro-terracotta" />
+                  <h3 className="text-sm font-semibold text-gray-800">Commodités souhaitées</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   {amenityOptions.map((option) => (
                     <SelectionButton
                       key={option.value}
@@ -479,15 +479,15 @@ const PublicCriteriaForm = () => {
               </div>
 
               {/* Délai d'acquisition */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 mb-6">
-                  <Clock className="h-5 w-5 text-loro-terracotta" />
-                  <h3 className="text-lg font-semibold text-gray-800">Délai d'acquisition</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-4">
+                  <Clock className="h-4 w-4 text-loro-terracotta" />
+                  <h3 className="text-sm font-semibold text-gray-800">Délai d'acquisition</h3>
                 </div>
                 <select
                   value={formData.purchase_timeframe}
                   onChange={(e) => handleInputChange('purchase_timeframe', e.target.value)}
-                  className="w-full p-4 border border-gray-300 rounded-lg text-lg"
+                  className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                 >
                   <option value="">Sélectionner</option>
                   <option value="Moins de trois mois">Moins de trois mois</option>
@@ -496,15 +496,15 @@ const PublicCriteriaForm = () => {
               </div>
 
               {/* Mode de financement */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 mb-6">
-                  <CreditCard className="h-5 w-5 text-loro-terracotta" />
-                  <h3 className="text-lg font-semibold text-gray-800">Mode de financement</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-4">
+                  <CreditCard className="h-4 w-4 text-loro-terracotta" />
+                  <h3 className="text-sm font-semibold text-gray-800">Mode de financement</h3>
                 </div>
                 <select
                   value={formData.financing_method}
                   onChange={(e) => handleInputChange('financing_method', e.target.value)}
-                  className="w-full p-4 border border-gray-300 rounded-lg text-lg"
+                  className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                 >
                   <option value="">Sélectionner</option>
                   <option value="Cash">Cash</option>
@@ -513,15 +513,15 @@ const PublicCriteriaForm = () => {
               </div>
 
               {/* Utilisation prévue */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 mb-6">
-                  <Target className="h-5 w-5 text-loro-terracotta" />
-                  <h3 className="text-lg font-semibold text-gray-800">Utilisation prévue</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-4">
+                  <Target className="h-4 w-4 text-loro-terracotta" />
+                  <h3 className="text-sm font-semibold text-gray-800">Utilisation prévue</h3>
                 </div>
                 <select
                   value={formData.property_use}
                   onChange={(e) => handleInputChange('property_use', e.target.value)}
-                  className="w-full p-4 border border-gray-300 rounded-lg text-lg"
+                  className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                 >
                   <option value="">Sélectionner</option>
                   <option value="Investissement locatif">Investissement locatif</option>
@@ -530,37 +530,37 @@ const PublicCriteriaForm = () => {
               </div>
 
               {/* Informations personnelles */}
-              <div className="space-y-8 border-t pt-8">
-                <h2 className="text-xl font-semibold text-gray-800 mb-6">Informations personnelles</h2>
+              <div className="space-y-6 border-t pt-6">
+                <h2 className="text-base font-semibold text-gray-800 mb-4">Informations personnelles</h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-gray-800 mb-2 block font-medium">Pays de résidence</Label>
+                    <Label className="text-gray-800 mb-1 block font-medium text-xs">Pays de résidence</Label>
                     <Input
                       value={formData.tax_residence}
                       onChange={(e) => handleInputChange('tax_residence', e.target.value)}
                       placeholder="Netherlands"
-                      className="w-full p-4 text-lg border-gray-300"
+                      className="w-full p-3 text-sm border-gray-300"
                     />
                   </div>
                   
                   <div>
-                    <Label className="text-gray-800 mb-2 block font-medium">Nationalité</Label>
+                    <Label className="text-gray-800 mb-1 block font-medium text-xs">Nationalité</Label>
                     <Input
                       value={formData.nationality}
                       onChange={(e) => handleInputChange('nationality', e.target.value)}
                       placeholder="Néerlandais"
-                      className="w-full p-4 text-lg border-gray-300"
+                      className="w-full p-3 text-sm border-gray-300"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-gray-800 mb-2 block font-medium">Langue préférée</Label>
+                  <Label className="text-gray-800 mb-1 block font-medium text-xs">Langue préférée</Label>
                   <select
                     value={formData.preferred_language}
                     onChange={(e) => handleInputChange('preferred_language', e.target.value)}
-                    className="w-full p-4 border border-gray-300 rounded-lg text-lg"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                   >
                     <option value="">Sélectionner une langue</option>
                     {languageOptions.map((language) => (
@@ -573,15 +573,15 @@ const PublicCriteriaForm = () => {
               </div>
 
               {/* Bouton de soumission */}
-              <div className="text-center pt-8">
+              <div className="text-center pt-6">
                 <Button
                   type="submit"
                   disabled={submitting}
-                  className="bg-loro-navy hover:bg-loro-navy/90 text-white px-12 py-4 rounded-lg text-lg font-medium min-w-[200px]"
+                  className="bg-loro-navy hover:bg-loro-navy/90 text-white px-8 py-3 rounded-lg text-sm font-medium min-w-[180px]"
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       Enregistrement...
                     </>
                   ) : (
