@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { LeadDetailed, PropertyType, ViewType, Amenity, PurchaseTimeframe, FinancingMethod, PropertyUse, Country, MauritiusRegion } from '@/types/lead';
 import FormSection from './FormSection';
 import PropertyDetailsSection from './sections/PropertyDetailsSection';
@@ -10,7 +11,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import MultiSelectButtons from '../../leads/form/MultiSelectButtons';
-import { MapPin } from 'lucide-react';
+import { MapPin, Search, ChevronDown, X } from 'lucide-react';
+import { countryToFlag } from '@/utils/countryUtils';
 
 interface SearchCriteriaSectionProps {
   formData: LeadDetailed;
@@ -31,6 +33,34 @@ interface SearchCriteriaSectionProps {
 
 const MAURITIUS_REGIONS: MauritiusRegion[] = ['North', 'South', 'West', 'East'];
 
+// Complete list of countries from around the world
+const ALL_COUNTRIES: string[] = [
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", 
+  "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", 
+  "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", 
+  "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", 
+  "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", 
+  "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", 
+  "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", 
+  "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", 
+  "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", 
+  "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", 
+  "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea, North", "Korea, South", "Kosovo", "Kuwait", 
+  "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", 
+  "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", 
+  "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", 
+  "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", 
+  "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Panama", 
+  "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", 
+  "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", 
+  "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", 
+  "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", 
+  "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", 
+  "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", 
+  "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", 
+  "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+];
+
 const SearchCriteriaSection = ({
   formData,
   handleInputChange,
@@ -47,6 +77,23 @@ const SearchCriteriaSection = ({
   countries,
   handleCountryChange
 }: SearchCriteriaSectionProps) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const countryDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
+        setIsCountryDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const handleCountryChangeWithNationality = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     handleCountryChange(e);
     
@@ -66,11 +113,100 @@ const SearchCriteriaSection = ({
       }
     }
   };
+
+  const filteredCountries = searchTerm
+    ? ALL_COUNTRIES.filter(country => 
+        country.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : ALL_COUNTRIES;
+
+  const handleCountrySelect = (country: string) => {
+    const event = {
+      target: {
+        name: 'country',
+        value: country
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    handleCountryChangeWithNationality(event);
+    setIsCountryDropdownOpen(false);
+    setSearchTerm('');
+  };
   
   return (
     <FormSection title="Critères de Recherche">
       <ScrollArea className="h-[calc(100vh-350px)] pr-4">
         <div className="space-y-6">
+          {/* Pays recherché */}
+          <div className="space-y-3" ref={countryDropdownRef}>
+            <Label className="text-sm font-medium flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-loro-terracotta" />
+              Pays recherché
+            </Label>
+            <div 
+              className="flex items-center justify-between px-3 py-2 h-10 w-full border border-gray-300 rounded-lg bg-background text-sm cursor-pointer focus:ring-2 focus:ring-loro-terracotta focus:border-transparent"
+              onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+            >
+              {formData.country ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{countryToFlag(formData.country)}</span>
+                  <span>{formData.country}</span>
+                </div>
+              ) : (
+                <span className="text-muted-foreground">Sélectionner un pays</span>
+              )}
+              <ChevronDown className={`h-4 w-4 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
+            </div>
+            
+            {isCountryDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-full bg-background border rounded-md shadow-lg">
+                <div className="sticky top-0 p-2 bg-background border-b">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Rechercher un pays..."
+                      className="pl-8 h-8"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      autoFocus
+                    />
+                    {searchTerm && (
+                      <button
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSearchTerm('');
+                        }}
+                      >
+                        <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="max-h-60 overflow-auto p-1">
+                  {filteredCountries.map(country => (
+                    <div
+                      key={country}
+                      className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${formData.country === country ? 'bg-accent/50' : ''}`}
+                      onClick={() => handleCountrySelect(country)}
+                    >
+                      <span className="text-lg mr-2">{countryToFlag(country)}</span>
+                      <span>{country}</span>
+                    </div>
+                  ))}
+                  
+                  {filteredCountries.length === 0 && (
+                    <div className="px-4 py-2 text-sm text-muted-foreground">
+                      Aucun résultat
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           <Tabs defaultValue="property" className="w-full">
             <TabsList className="w-full mb-4 grid grid-cols-3">
               <TabsTrigger value="property">Propriété</TabsTrigger>
