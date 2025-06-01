@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -391,81 +392,85 @@ const PublicCriteriaForm = () => {
                 {/* Pays recherché */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-4">
-                    <MapPin className="h-4 w-4 text-loro-terracotta" />
-                    <h3 className="text-sm font-semibold text-gray-800">Pays recherché</h3>
+                    <MapPin className="h-5 w-5 text-loro-terracotta" />
+                    <h3 className="text-base font-semibold text-gray-800">Pays recherché</h3>
                   </div>
-                  <SmartSearch
-                    placeholder="Sélectionner un pays..."
-                    value={formData.country}
-                    onChange={(value) => handleInputChange('country', value)}
-                    onSelect={handleCountrySelect}
-                    results={countries.map(c => c.name).filter(c => 
-                      c.toLowerCase().includes(formData.country.toLowerCase())
-                    ).slice(0, 10)}
-                    renderItem={renderLocationItem}
-                    className="w-full"
-                    inputClassName="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-loro-terracotta focus:border-transparent text-sm"
-                    minChars={0}
-                    searchIcon={true}
-                    clearButton={true}
-                  />
+                  <div className="relative">
+                    <SmartSearch
+                      placeholder="Sélectionner un pays..."
+                      value={formData.country}
+                      onChange={(value) => handleInputChange('country', value)}
+                      onSelect={handleCountrySelect}
+                      results={countries.map(c => c.name).filter(c => 
+                        c.toLowerCase().includes(formData.country.toLowerCase())
+                      ).slice(0, 10)}
+                      renderItem={renderLocationItem}
+                      className="w-full"
+                      inputClassName="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-loro-terracotta focus:border-transparent text-base bg-white"
+                      minChars={0}
+                      searchIcon={false}
+                      clearButton={true}
+                    />
+                  </div>
                 </div>
 
                 {/* Localisation */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-4">
-                    <MapPin className="h-4 w-4 text-loro-terracotta" />
-                    <h3 className="text-sm font-semibold text-gray-800">Localisation</h3>
+                    <MapPin className="h-5 w-5 text-loro-terracotta" />
+                    <h3 className="text-base font-semibold text-gray-800">Localisation</h3>
                   </div>
-                  <SmartSearch
-                    placeholder="Ville, région..."
-                    value={formData.desired_location}
-                    onChange={(value) => handleInputChange('desired_location', value)}
-                    onSelect={handleLocationSelect}
-                    results={getFilteredLocations(formData.desired_location)}
-                    renderItem={renderLocationItem}
-                    className="w-full"
-                    inputClassName="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-loro-terracotta focus:border-transparent text-sm"
-                    minChars={1}
-                    searchIcon={true}
-                    clearButton={true}
-                  />
+                  <div className="relative">
+                    <SmartSearch
+                      placeholder="Ville, région..."
+                      value={formData.desired_location}
+                      onChange={(value) => handleInputChange('desired_location', value)}
+                      onSelect={handleLocationSelect}
+                      results={getFilteredLocations(formData.desired_location)}
+                      renderItem={renderLocationItem}
+                      className="w-full"
+                      inputClassName="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-loro-terracotta focus:border-transparent text-base bg-white"
+                      minChars={1}
+                      searchIcon={false}
+                      clearButton={true}
+                    />
+                  </div>
                 </div>
 
                 {/* Budget */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="text-loro-terracotta text-lg font-bold">€</div>
-                    <h3 className="text-sm font-semibold text-gray-800">Budget</h3>
+                    <h3 className="text-base font-semibold text-gray-800">Budget</h3>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-4">
                     <div>
-                      <Label className="text-gray-600 mb-1 block text-xs">Min</Label>
+                      <Label className="text-gray-700 mb-2 block font-medium">Min</Label>
                       <Input
                         value={formData.budget_min}
                         onChange={(e) => handleInputChange('budget_min', e.target.value)}
                         placeholder="Min"
-                        className="w-full p-3 text-sm border-gray-300"
+                        className="w-full px-4 py-4 text-base border-gray-300 rounded-xl"
                       />
                     </div>
                     <div>
-                      <Label className="text-gray-600 mb-1 block text-xs">Max</Label>
+                      <Label className="text-gray-700 mb-2 block font-medium">Max</Label>
                       <Input
                         value={formData.budget}
                         onChange={(e) => handleInputChange('budget', e.target.value)}
                         placeholder="9000000"
-                        className="w-full p-3 text-sm border-gray-300"
+                        className="w-full px-4 py-4 text-base border-gray-300 rounded-xl"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label className="text-gray-600 mb-1 block text-xs">Devise</Label>
+                    <Label className="text-gray-700 mb-2 block font-medium">Devise</Label>
                     <select
                       value={formData.currency}
                       onChange={(e) => handleInputChange('currency', e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                      className="w-full px-4 py-4 border border-gray-300 rounded-xl text-base bg-white"
                     >
                       <option value="EUR">Euro (€)</option>
                       <option value="USD">USD ($)</option>
