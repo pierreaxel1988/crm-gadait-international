@@ -47,16 +47,21 @@ export type ViewType =
 export type Amenity = string;
 
 export type PurchaseTimeframe = 
-  | "Moins de trois mois" 
-  | "Plus de trois mois";
+  | "Immédiat" 
+  | "1-3 mois" 
+  | "3-6 mois" 
+  | "6-12 mois" 
+  | "+12 mois";
   
 export type FinancingMethod = 
   | "Cash" 
-  | "Prêt bancaire";
+  | "Crédit" 
+  | "Mixte";
 
 export type PropertyUse = 
-  | "Investissement locatif" 
-  | "Résidence principale";
+  | "Résidence principale" 
+  | "Résidence secondaire" 
+  | "Investissement";
 
 export type PipelineType = 
   | "purchase" 
