@@ -4,7 +4,7 @@ import { Shield } from 'lucide-react';
 
 const PublicPageHeader = () => {
   return (
-    <header className="bg-loro-navy text-white shadow-sm">
+    <header className="bg-[#0A2540] text-white shadow-sm">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6">
         <div className="flex h-16 items-center justify-center">
           <div className="flex items-center">
