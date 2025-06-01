@@ -1,4 +1,3 @@
-
 // List of all countries in the world
 export const COUNTRIES = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", 
@@ -22,3 +21,6 @@ export const COUNTRIES = [
   "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", 
   "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
 ];
+
+// Export avec l'alias attendu pour la compatibilité
+export const countries = COUNTRIES.map(name => ({ name, code: name }));

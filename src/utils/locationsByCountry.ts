@@ -1,4 +1,3 @@
-
 // Map of countries to their major locations
 export const LOCATIONS_BY_COUNTRY: Record<string, string[]> = {
   'France': [
@@ -105,3 +104,6 @@ export const getLocationsByCountry = (country: string): string[] => {
   
   return LOCATIONS_BY_COUNTRY[country] || [];
 };
+
+// Export avec l'alias attendu pour la compatibilité
+export const locationsByCountry = LOCATIONS_BY_COUNTRY;

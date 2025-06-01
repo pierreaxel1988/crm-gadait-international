@@ -153,63 +153,31 @@ const PublicCriteriaForm = () => {
     );
   }
 
+  // Options formatées correctement pour les composants existants
   const propertyTypeOptions = [
-    { value: 'Appartement', label: 'Appartement', icon: '🏢' },
-    { value: 'Villa', label: 'Villa', icon: '🏡' },
-    { value: 'Maison', label: 'Maison', icon: '🏠' },
-    { value: 'Penthouse', label: 'Penthouse', icon: '🏙️' },
-    { value: 'Terrain', label: 'Terrain', icon: '🌳' },
-    { value: 'Bureau', label: 'Bureau', icon: '🏢' },
-    { value: 'Commerce', label: 'Commerce', icon: '🏪' },
-    { value: 'Entrepôt', label: 'Entrepôt', icon: '🏭' }
+    'Appartement', 'Villa', 'Maison', 'Penthouse', 'Terrain', 'Bureau', 'Commerce', 'Entrepôt'
   ];
 
-  const bedroomOptions = [
-    { value: 1, label: '1 chambre' },
-    { value: 2, label: '2 chambres' },
-    { value: 3, label: '3 chambres' },
-    { value: 4, label: '4 chambres' },
-    { value: 5, label: '5+ chambres' }
-  ];
+  const bedroomOptions = [1, 2, 3, 4, 5];
 
   const viewOptions = [
-    { value: 'Mer', label: 'Vue mer' },
-    { value: 'Montagne', label: 'Vue montagne' },
-    { value: 'Golf', label: 'Vue golf' },
-    { value: 'Jardin', label: 'Vue jardin' },
-    { value: 'Ville', label: 'Vue ville' }
+    'Mer', 'Montagne', 'Golf', 'Jardin', 'Ville'
   ];
 
   const amenityOptions = [
-    { value: 'Piscine', label: 'Piscine' },
-    { value: 'Parking', label: 'Parking' },
-    { value: 'Terrasse', label: 'Terrasse' },
-    { value: 'Balcon', label: 'Balcon' },
-    { value: 'Jardin', label: 'Jardin' },
-    { value: 'Climatisation', label: 'Climatisation' },
-    { value: 'Ascenseur', label: 'Ascenseur' },
-    { value: 'Sécurité', label: 'Sécurité 24h/24' }
+    'Piscine', 'Parking', 'Terrasse', 'Balcon', 'Jardin', 'Climatisation', 'Ascenseur', 'Sécurité'
   ];
 
   const purchaseTimeframeOptions = [
-    { value: 'Immédiatement', label: 'Immédiatement' },
-    { value: '1-3 mois', label: '1-3 mois' },
-    { value: '3-6 mois', label: '3-6 mois' },
-    { value: '6-12 mois', label: '6-12 mois' },
-    { value: 'Plus de 12 mois', label: 'Plus de 12 mois' }
+    'Immédiatement', '1-3 mois', '3-6 mois', '6-12 mois', 'Plus de 12 mois'
   ];
 
   const financingOptions = [
-    { value: 'Comptant', label: 'Paiement comptant' },
-    { value: 'Prêt bancaire', label: 'Prêt bancaire' },
-    { value: 'Mixte', label: 'Mixte (comptant + prêt)' }
+    'Comptant', 'Prêt bancaire', 'Mixte'
   ];
 
   const propertyUseOptions = [
-    { value: 'Résidence principale', label: 'Résidence principale' },
-    { value: 'Résidence secondaire', label: 'Résidence secondaire' },
-    { value: 'Investissement locatif', label: 'Investissement locatif' },
-    { value: 'Commercial', label: 'Usage commercial' }
+    'Résidence principale', 'Résidence secondaire', 'Investissement locatif', 'Commercial'
   ];
 
   return (
