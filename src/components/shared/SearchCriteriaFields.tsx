@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { MapPin, Home, Building, Bed, Eye, Star, Clock, CreditCard, Target, Crown, Building2, Mountain, TreePine, MoreHorizontal, Warehouse, Hotel, Grape, Waves, Compass, Droplets, Wind, Car, Shield, ArrowUp, Search, ChevronDown, X } from 'lucide-react';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import RadioSelectButtons from '@/components/leads/form/RadioSelectButtons';
-import { countries } from '@/utils/countries';
 import { countryToFlag } from '@/utils/countryUtils';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 
@@ -15,7 +14,7 @@ interface SearchCriteriaFieldsProps {
   isPublicForm?: boolean;
 }
 
-// Complete list of countries from around the world
+// Same country list as in SearchCriteriaSection.tsx for consistency
 const ALL_COUNTRIES: string[] = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", 
   "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", 
@@ -275,77 +274,6 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Pays recherché */}
-      <div className="space-y-3" ref={countryDropdownRef}>
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-loro-terracotta" />
-          Pays recherché
-        </Label>
-        <div 
-          className="flex items-center justify-between px-3 py-2 h-10 w-full border border-gray-300 rounded-lg bg-background text-sm cursor-pointer focus:ring-2 focus:ring-loro-terracotta focus:border-transparent"
-          onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-        >
-          {formData.country ? (
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{countryToFlag(formData.country)}</span>
-              <span>{formData.country}</span>
-            </div>
-          ) : (
-            <span className="text-muted-foreground">Sélectionner un pays</span>
-          )}
-          <ChevronDown className={`h-4 w-4 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
-        </div>
-        
-        {isCountryDropdownOpen && (
-          <div className="absolute z-50 mt-1 w-full bg-background border rounded-md shadow-lg">
-            <div className="sticky top-0 p-2 bg-background border-b">
-              <div className="relative">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Rechercher un pays..."
-                  className="pl-8 h-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                  autoFocus
-                />
-                {searchTerm && (
-                  <button
-                    className="absolute right-2 top-1/2 -translate-y-1/2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSearchTerm('');
-                    }}
-                  >
-                    <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                  </button>
-                )}
-              </div>
-            </div>
-            
-            <div className="max-h-60 overflow-auto p-1">
-              {filteredCountries.map(country => (
-                <div
-                  key={country}
-                  className={`flex items-center px-4 py-2 hover:bg-accent rounded-sm cursor-pointer ${formData.country === country ? 'bg-accent/50' : ''}`}
-                  onClick={() => handleCountrySelect(country)}
-                >
-                  <span className="text-lg mr-2">{countryToFlag(country)}</span>
-                  <span>{country}</span>
-                </div>
-              ))}
-              
-              {filteredCountries.length === 0 && (
-                <div className="px-4 py-2 text-sm text-muted-foreground">
-                  Aucun résultat
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
       {/* Localisation */}
       <div className="space-y-3">
         <Label className="text-sm font-medium flex items-center gap-2">
@@ -477,6 +405,21 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
           value={formData.livingArea || ''}
           onChange={handleInputChange}
           placeholder="Ex: 120"
+          className="w-full p-3 text-sm border-gray-300"
+        />
+      </div>
+
+      {/* Terrain (m²) */}
+      <div className="space-y-3">
+        <Label className="text-sm font-medium flex items-center gap-2">
+          <TreePine className="h-4 w-4 text-loro-terracotta" />
+          Terrain (m²)
+        </Label>
+        <Input
+          name="landArea"
+          value={formData.landArea || ''}
+          onChange={handleInputChange}
+          placeholder="Ex: 500"
           className="w-full p-3 text-sm border-gray-300"
         />
       </div>
@@ -724,7 +667,8 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
             </div>
           </div>
 
-          <div>
+          {/* Langue préférée */}
+          <div className="space-y-2">
             <Label className="text-gray-800 mb-1 block font-medium text-xs">Langue préférée</Label>
             <select
               name="preferredLanguage"
@@ -733,7 +677,7 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
               className="w-full p-3 border border-gray-300 rounded-lg text-sm"
             >
               <option value="">Sélectionner une langue</option>
-              {languageOptions.map((language) => (
+              {languageOptions.map(language => (
                 <option key={language} value={language}>
                   {language}
                 </option>

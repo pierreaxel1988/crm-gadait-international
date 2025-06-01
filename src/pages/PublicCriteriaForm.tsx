@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -51,20 +51,6 @@ const PublicCriteriaForm = () => {
   const [formData, setFormData] = useState<Partial<LeadDetailed>>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
-  const countryDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
-        setIsCountryDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -88,7 +74,7 @@ const PublicCriteriaForm = () => {
         setLinkData(result.link);
         setLeadData(result.lead);
 
-        // Utiliser exactement la même structure que LeadDetailed pour assurer la synchronisation
+        // Map database fields to form data structure for perfect synchronization
         setFormData({
           country: result.lead.country || '',
           desiredLocation: result.lead.desired_location || '',
@@ -149,8 +135,7 @@ const PublicCriteriaForm = () => {
     console.log('Submitting form data:', formData);
     setSubmitting(true);
     try {
-      // Utiliser directement la structure formData sans conversion
-      // pour assurer la synchronisation avec la page des critères
+      // Map form data to database structure for perfect synchronization
       const submitData = {
         country: formData.country,
         desired_location: formData.desiredLocation,
@@ -246,7 +231,7 @@ const PublicCriteriaForm = () => {
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Pays recherché avec dropdown personnalisé */}
-              <div className="space-y-3" ref={countryDropdownRef}>
+              <div className="space-y-3">
                 <Label className="text-sm font-medium flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-loro-terracotta" />
                   Pays recherché
@@ -316,12 +301,46 @@ const PublicCriteriaForm = () => {
                 )}
               </div>
 
-              {/* Utiliser SearchCriteriaFields pour assurer la synchronisation */}
+              {/* Utiliser SearchCriteriaFields pour assurer la synchronisation parfaite */}
               <SearchCriteriaFields
                 formData={formData}
                 onDataChange={handleDataChange}
                 isPublicForm={true}
               />
+
+              {/* Pin Location - URL de la propriété */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Pin Location
+                  </Label>
+                  <Input
+                    name="mapCoordinates"
+                    value={formData.mapCoordinates || ''}
+                    onChange={(e) => handleDataChange({ mapCoordinates: e.target.value })}
+                    placeholder="Collez le lien Google Maps ici"
+                    className="font-futura"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Copiez-collez le lien Google Maps de la propriété
+                  </p>
+                </div>
+              </div>
+
+              {/* URL de la propriété */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm">URL de la propriété</Label>
+                  <Input
+                    name="url"
+                    value={formData.url || ''}
+                    onChange={(e) => handleDataChange({ url: e.target.value })}
+                    placeholder="Lien vers l'annonce de la propriété"
+                    className="font-futura"
+                  />
+                </div>
+              </div>
 
               {/* Bouton de soumission */}
               <div className="text-center pt-6">
