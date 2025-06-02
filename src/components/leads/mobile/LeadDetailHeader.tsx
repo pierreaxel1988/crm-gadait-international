@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { MoreVertical, Edit, Trash2, Phone, Mail, MapPin } from 'lucide-react';
 import {
@@ -78,7 +79,7 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({ lead, onEdit, onDel
       window.open(mapsUrl, '_blank');
     } else {
       toast({
-        variant: "warning",
+        variant: "destructive",
         title: "Aucune adresse",
         description: "Aucune adresse n'est enregistrée pour ce lead."
       });

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
@@ -85,7 +86,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({ lead, onClose, 
       <div className="space-y-2">
         <Label htmlFor="actionType">Type d'action</Label>
         <Select
-          id="actionType"
           value={newAction.actionType}
           onValueChange={(value) => setNewAction(prev => ({ ...prev, actionType: value }))}
         >

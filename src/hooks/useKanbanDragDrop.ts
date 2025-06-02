@@ -95,7 +95,7 @@ export const useKanbanDragDrop = (
         .update({ 
           status: newStatus,
           last_contacted_at: currentDate,
-          action_history: actionHistory
+          action_history: actionHistory as any
         })
         .eq('id', item.id);
         

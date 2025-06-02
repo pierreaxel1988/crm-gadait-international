@@ -10,6 +10,7 @@ import {
 import { addActionToLead } from "./leadActions";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { TaskType } from "@/components/kanban/KanbanCard";
 
 // Important IDs
 const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
@@ -81,7 +82,7 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
       if (result.status === "New" && result.assignedTo) {
         // Ajouter une action de type "Call" pour qualifier le lead
         const qualificationAction = {
-          actionType: "Call",
+          actionType: "Call" as TaskType,
           scheduledDate: new Date().toISOString(),
           notes: "Qualification du lead : appeler le client pour comprendre ses besoins précis."
         };

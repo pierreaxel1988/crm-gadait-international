@@ -3,7 +3,7 @@ import { LeadDetailed, PropertyType } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Building, Bed, MapPin, TreePine, Home } from 'lucide-react';
-import StyledSelect from './StyledSelect';
+import StyledSelect from './mobile/components/StyledSelect';
 
 interface SearchCriteriaSectionProps {
   lead: LeadDetailed;

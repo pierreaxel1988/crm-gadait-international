@@ -1,4 +1,3 @@
-
 import { LeadDetailed } from "@/types/lead";
 import { ActionHistory } from "@/types/actionHistory";
 
@@ -110,6 +109,7 @@ const mockLeadsDetailed: LeadDetailed[] = [
     id: '4',
     name: 'Claire Simon',
     email: 'claire.simon@example.com',
+    phone: '+33 6 45 67 89 01',
     location: 'Cannes, France',
     status: 'Visit',
     tags: ['Hot'],
