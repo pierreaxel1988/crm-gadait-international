@@ -1,304 +1,219 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus, Calendar, RefreshCw } from 'lucide-react';
+import { LeadDetailed } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
-import { format, isPast, isValid } from 'date-fns';
-import { getLead } from '@/services/leadCore';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { CalendarIcon, CheckCircle, Circle, Plus, XCircle } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
+import { addActionToLead } from '@/services/leadService';
 import { TaskType } from '@/components/kanban/KanbanCard';
-import { useIsMobile } from '@/hooks/use-mobile';
-import ActionsPanelMobile from './actions/ActionsPanelMobile';
-import { supabase } from "@/integrations/supabase/client";
-import { syncExistingActionsWithLeads } from '@/services/leadActions';
 
 interface ActionsTabProps {
-  leadId: string;
+  lead: LeadDetailed;
+  onLeadUpdate: (lead: LeadDetailed) => void;
 }
 
-const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
-  const [actionHistory, setActionHistory] = useState<ActionHistory[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const isMobile = useIsMobile();
+const ActionsTab: React.FC<ActionsTabProps> = ({ lead, onLeadUpdate }) => {
+  const [newAction, setNewAction] = useState({
+    actionType: 'Note' as TaskType,
+    scheduledDate: new Date().toISOString(),
+    notes: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   useEffect(() => {
-    if (leadId) {
-      // Synchroniser les actions avant de les charger
-      syncActions().then(() => {
-        fetchLeadActions();
+    if (lead) {
+      setNewAction({
+        actionType: 'Note' as TaskType,
+        scheduledDate: new Date().toISOString(),
+        notes: ''
       });
     }
-  }, [leadId]);
+  }, [lead]);
 
-  const syncActions = async () => {
-    if (!leadId) return;
-    
-    try {
-      setIsSyncing(true);
-      const success = await syncExistingActionsWithLeads(leadId);
-      if (success) {
-        console.log(`Actions du lead ${leadId} synchronisées avec succès`);
-      }
-    } catch (error) {
-      console.error(`Erreur lors de la synchronisation des actions pour le lead ${leadId}:`, error);
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  const fetchLeadActions = async () => {
-    try {
-      setIsLoading(true);
-      console.log('Fetching actions for lead ID:', leadId);
-      
-      const { data: lead, error } = await supabase
-        .from('leads')
-        .select('action_history')
-        .eq('id', leadId)
-        .single();
-      
-      if (error) {
-        console.error("Error fetching lead actions:", error);
-        throw error;
-      }
-      
-      if (lead && Array.isArray(lead.action_history)) {
-        // Ensure each item in action_history conforms to ActionHistory type
-        const parsedActions: ActionHistory[] = lead.action_history.map((item: any) => {
-          // Validate and safeguard for any missing or invalid properties
-          const validatedAction: ActionHistory = {
-            id: item.id || crypto.randomUUID(),
-            actionType: item.actionType || 'Note',
-            createdAt: validateDateString(item.createdAt) || new Date().toISOString(),
-            scheduledDate: validateDateString(item.scheduledDate) || new Date().toISOString(),
-            completedDate: validateDateString(item.completedDate),
-            notes: item.notes,
-            leadId: item.leadId || leadId // Assurer que chaque action a un leadId
-          };
-          
-          return validatedAction;
-        });
-        
-        setActionHistory(parsedActions);
-      } else {
-        setActionHistory([]);
-      }
-    } catch (error) {
-      console.error("Error fetching lead actions:", error);
+  const handleAddAction = async () => {
+    if (!newAction.notes.trim()) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de charger les actions du lead."
+        description: "Veuillez saisir une description pour cette action."
       });
-    } finally {
-      setIsLoading(false);
+      return;
     }
-  };
 
-  // Helper function to validate date strings
-  const validateDateString = (dateStr?: string): string | undefined => {
-    if (!dateStr) return undefined;
+    setIsSubmitting(true);
     
     try {
-      const date = new Date(dateStr);
-      return !isNaN(date.getTime()) ? date.toISOString() : undefined;
-    } catch (err) {
-      console.warn('Invalid date:', dateStr, err);
-      return undefined;
-    }
-  };
+      const actionData = {
+        actionType: newAction.actionType,
+        scheduledDate: newAction.scheduledDate,
+        notes: newAction.notes
+      };
+      
+      const updatedLead = await addActionToLead(lead.id, actionData);
 
-  const handleMarkComplete = async (action: ActionHistory) => {
-    if (!action.id) return;
-    
-    try {
-      console.log('Marking action as complete for lead ID:', leadId);
-      
-      // Get the current lead data
-      const { data: lead, error: fetchError } = await supabase
-        .from('leads')
-        .select('action_history')
-        .eq('id', leadId)
-        .single();
-      
-      if (fetchError || !lead || !Array.isArray(lead.action_history)) {
+      if (updatedLead) {
+        toast({
+          title: "Action ajoutée",
+          description: "L'action a été ajoutée avec succès."
+        });
+        onLeadUpdate(updatedLead);
+        setNewAction({
+          actionType: 'Note' as TaskType,
+          scheduledDate: new Date().toISOString(),
+          notes: ''
+        });
+      } else {
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: "Lead introuvable ou historique d'actions inexistant."
+          description: "Impossible d'ajouter l'action."
         });
-        return;
       }
-      
-      // Update the action in the action history
-      const updatedActionHistory = lead.action_history.map((a: any) => {
-        if (a.id === action.id) {
-          return {
-            ...a,
-            completedDate: new Date().toISOString(),
-            leadId: a.leadId || leadId // Assurer que l'action a un leadId
-          };
-        }
-        return a;
-      });
-      
-      // Update the lead in the database
-      // Important: Set email_envoye to false to prevent automatic email triggering
-      const { error: updateError } = await supabase
-        .from('leads')
-        .update({ 
-          action_history: updatedActionHistory,
-          email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
-        })
-        .eq('id', leadId);
-      
-      if (updateError) {
-        throw updateError;
-      }
-      
-      // Refresh the actions list
-      await fetchLeadActions();
-      
-      toast({
-        title: "Action complétée",
-        description: "L'action a été marquée comme complétée."
-      });
     } catch (error) {
-      console.error("Error marking action as complete:", error);
+      console.error("Error adding action:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de marquer l'action comme complétée."
+        description: "Une erreur s'est produite lors de l'ajout de l'action."
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const formatDateSafely = (dateString?: string, formatStr: string = 'dd/MM/yyyy HH:mm') => {
-    if (!dateString) return 'Date non définie';
-    
-    try {
-      const timestamp = Date.parse(dateString);
-      if (isNaN(timestamp)) {
-        console.warn('Invalid date encountered (NaN timestamp):', dateString);
-        return 'Date invalide';
-      }
-      
-      const dateObj = new Date(dateString);
-      if (!isValid(dateObj)) {
-        console.warn('Invalid date encountered (isValid):', dateString);
-        return 'Date invalide';
-      }
-      
-      return format(dateObj, formatStr);
-    } catch (error) {
-      console.error('Error formatting date:', error, dateString);
-      return 'Date invalide';
+  const handleActionTypeChange = (value: TaskType) => {
+    setNewAction(prev => ({ ...prev, actionType: value }));
+  };
+
+  const handleScheduledDateChange = (date: Date | undefined) => {
+    if (date) {
+      setNewAction(prev => ({ ...prev, scheduledDate: date.toISOString() }));
     }
   };
 
-  if (isLoading || isSyncing) {
-    return (
-      <div className="bg-white rounded-lg p-4 flex justify-center items-center h-40">
-        <div className="animate-spin h-6 w-6 border-3 border-chocolate-dark rounded-full border-t-transparent"></div>
-      </div>
-    );
-  }
-
-  if (isMobile) {
-    return (
-      <>
-        <div className="flex justify-end mb-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={syncActions}
-            className="text-xs flex items-center gap-1"
-          >
-            <RefreshCw className="h-3 w-3" /> Synchroniser
-          </Button>
-        </div>
-        <ActionsPanelMobile 
-          leadId={leadId} 
-          onAddAction={fetchLeadActions} 
-          onMarkComplete={handleMarkComplete} 
-          actionHistory={actionHistory} 
-        />
-        {/* Le bouton ChatGadaitFloatingButton est maintenant géré au niveau des pages de détail */}
-      </>
-    );
-  }
+  const actionTypes: TaskType[] = [
+    'Call', 'Email', 'Meeting', 'Visit', 'Follow-up', 'Proposal', 'Contract', 'Closing', 'Other', 'Note', 'WhatsApp'
+  ];
 
   return (
-    <div className="bg-white rounded-lg p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Actions pour le lead</h2>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={syncActions}
-          className="text-sm flex items-center gap-1"
-        >
-          <RefreshCw className="h-3.5 w-3.5" /> Synchroniser les actions
-        </Button>
-      </div>
-      
-      {actionHistory && actionHistory.length > 0 ? (
-        <div className="space-y-4">
+    <div className="space-y-4">
+      {lead.actionHistory && lead.actionHistory.length > 0 ? (
+        <div className="space-y-2">
           <h3 className="text-lg font-semibold">Historique des actions</h3>
-          <div className="space-y-2">
-            {actionHistory.map((action) => {
-              const isPastAction = action.scheduledDate ? isPast(new Date(action.scheduledDate)) : false;
-              const isCompleted = !!action.completedDate;
-              
-              return (
-                <div 
-                  key={action.id} 
-                  className={`p-3 rounded-md border ${
-                    isCompleted 
-                      ? 'bg-green-50 border-green-200' 
-                      : isPastAction 
-                        ? 'bg-red-50 border-red-200' 
-                        : 'bg-blue-50 border-blue-200'
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="font-semibold">{action.actionType}</span>
-                      {action.scheduledDate && (
-                        <p className="text-sm text-gray-600">
-                          Prévu pour: {formatDateSafely(action.scheduledDate)}
-                        </p>
-                      )}
-                      {action.completedDate && (
-                        <p className="text-sm text-green-600">
-                          Complété le: {formatDateSafely(action.completedDate)}
-                        </p>
-                      )}
-                      {action.notes && (
-                        <p className="text-sm mt-1 p-2 bg-white rounded border border-gray-100">
-                          {action.notes}
-                        </p>
-                      )}
-                    </div>
-                    {!isCompleted && (
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleMarkComplete(action)}
-                        variant="outline"
-                        className="ml-2"
-                      >
-                        Marquer comme terminé
-                      </Button>
-                    )}
-                  </div>
+          <ul className="space-y-2">
+            {lead.actionHistory.map((action: ActionHistory) => (
+              <li key={action.id} className="border rounded-md p-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-medium">{action.actionType}</div>
+                  {action.completedDate ? (
+                    <CheckCircle className="text-green-500 h-4 w-4" />
+                  ) : (
+                    <Circle className="text-gray-400 h-4 w-4" />
+                  )}
                 </div>
-              );
-            })}
-          </div>
+                <div className="text-xs text-gray-500">
+                  Date prévue: {action.scheduledDate ? format(new Date(action.scheduledDate), 'dd/MM/yyyy') : 'Non définie'}
+                </div>
+                <div className="text-xs text-gray-500">
+                  Date de création: {action.createdAt ? format(new Date(action.createdAt), 'dd/MM/yyyy') : 'Non définie'}
+                </div>
+                {action.completedDate && (
+                  <div className="text-xs text-gray-500">
+                    Date de complétion: {format(new Date(action.completedDate), 'dd/MM/yyyy')}
+                  </div>
+                )}
+                <div className="text-sm">{action.notes}</div>
+              </li>
+            ))}
+          </ul>
         </div>
       ) : (
-        <p className="text-gray-500">Aucune action disponible pour le moment.</p>
+        <div className="text-sm text-gray-500">Aucune action enregistrée pour ce lead.</div>
       )}
+
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">Ajouter une action</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="actionType">Type d'action</Label>
+            <Select value={newAction.actionType} onValueChange={handleActionTypeChange}>
+              <SelectTrigger id="actionType" className="w-full font-futura">
+                <SelectValue placeholder="Sélectionner un type" />
+              </SelectTrigger>
+              <SelectContent>
+                {actionTypes.map(type => (
+                  <SelectItem key={type} value={type} className="font-futura">{type}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="scheduledDate">Date prévue</Label>
+            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !newAction.scheduledDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {newAction.scheduledDate ? (
+                    format(new Date(newAction.scheduledDate), "dd MMMM yyyy")
+                  ) : (
+                    <span>Choisir une date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={newAction.scheduledDate ? new Date(newAction.scheduledDate) : undefined}
+                  onSelect={handleScheduledDateChange}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="notes">Description</Label>
+          <Textarea
+            id="notes"
+            placeholder="Détails de l'action..."
+            value={newAction.notes}
+            onChange={(e) => setNewAction(prev => ({ ...prev, notes: e.target.value }))}
+            className="w-full font-futura"
+          />
+        </div>
+        <Button onClick={handleAddAction} disabled={isSubmitting} className="bg-chocolate-dark hover:bg-chocolate-light">
+          {isSubmitting ? (
+            <>
+              <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Ajout en cours...
+            </>
+          ) : (
+            <>
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter une action
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 };

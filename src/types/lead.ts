@@ -18,7 +18,21 @@ export type PropertyType =
   | 'Apartment'
   | 'House'
   | 'Land'
-  | 'Other';
+  | 'Other'
+  | 'Appartement'
+  | 'Penthouse'
+  | 'Maison'
+  | 'Duplex'
+  | 'Chalet'
+  | 'Terrain'
+  | 'Manoir'
+  | 'Maison de ville'
+  | 'Château'
+  | 'Local commercial'
+  | 'Commercial'
+  | 'Hotel'
+  | 'Vignoble'
+  | 'Autres';
 
 export type PipelineType =
   | 'purchase'
@@ -172,9 +186,9 @@ export interface ActionHistory {
   id: string;
   actionType: TaskType;
   createdAt: string;
-  scheduledDate: string;
+  scheduledDate?: string;
   completedDate?: string;
-  notes: string;
+  notes?: string;
 }
 
 export interface LeadDetailed {
@@ -270,4 +284,11 @@ export interface LeadDetailed {
   hasWineStorage?: boolean;
   wineStorageCapacity?: string;
   accessibility?: string;
+  
+  // Additional fields for owners pipeline pricing
+  desired_price?: string;
+  fees?: string;
+  furnished?: boolean;
+  furniture_included_in_price?: boolean;
+  furniture_price?: string;
 }

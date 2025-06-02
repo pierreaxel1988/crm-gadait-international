@@ -17,15 +17,18 @@ import TagList from './card/TagList';
 
 export type TaskType = 
   | 'Call'
-  | 'Visites'
-  | 'Compromis'
-  | 'Acte de vente'
-  | 'Contrat de Location'
-  | 'Propositions'
-  | 'Follow up'
-  | 'Estimation'
-  | 'Prospection'
-  | 'Admin';
+  | 'Email'
+  | 'Meeting'
+  | 'Visit'
+  | 'Follow-up'
+  | 'Proposal'
+  | 'Contract'
+  | 'Closing'
+  | 'Other'
+  | 'Creation'
+  | 'Status Change'
+  | 'Note'
+  | 'WhatsApp';
 
 export interface KanbanItem {
   id: string;

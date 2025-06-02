@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,8 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
-import { useLeadCreation } from '@/hooks/useLeadCreation';
+import { LeadDetailed, LeadStatus, PipelineType, PropertyType } from '@/types/lead';
+import { createLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Plus, X } from 'lucide-react';
 
@@ -35,7 +34,7 @@ const MobileQuickImport: React.FC<MobileQuickImportProps> = ({ onClose, onSucces
     livingArea: '',
   });
 
-  const { createLead, loading } = useLeadCreation();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

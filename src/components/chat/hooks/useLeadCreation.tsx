@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -94,7 +93,7 @@ export const useLeadCreation = () => {
       if (createdLead && createdLead.id) {
         // Ajouter une action de qualification
         const qualificationAction = {
-          actionType: "Call",
+          actionType: "Call" as TaskType,
           scheduledDate: new Date().toISOString(),
           notes: "Qualification du lead : appeler le client pour comprendre ses besoins précis suite à l'importation d'email."
         };

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { LeadDetailed, LeadStatus, PipelineType, PropertyType } from '@/types/lead';
-import { useLeadCreation } from '@/hooks/useLeadCreation';
+import { createLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Plus } from 'lucide-react';
 
@@ -34,7 +34,7 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ onSuccess }) => {
     livingArea: '',
   });
 
-  const { createLead, loading } = useLeadCreation();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,9 +48,11 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ onSuccess }) => {
       return;
     }
 
+    setLoading(true);
+
     const leadData = {
       ...formData,
-      tags: ['Manual Import'] as string[],
+      tags: ['Manual Import'],
       location: formData.location || 'Non spécifié',
     };
 
@@ -90,6 +92,8 @@ const QuickLeadImport: React.FC<QuickLeadImportProps> = ({ onSuccess }) => {
         title: "Erreur",
         description: "Impossible de créer le lead."
       });
+    } finally {
+      setLoading(false);
     }
   };
 
