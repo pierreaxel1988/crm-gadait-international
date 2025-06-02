@@ -11,8 +11,8 @@ import { toast } from '@/hooks/use-toast';
 import { Loader2, Plus, X } from 'lucide-react';
 
 interface MobileQuickImportProps {
-  onClose?: () => void;
-  onSuccess?: () => void;
+  onClose: () => void;
+  onSuccess: () => void;
 }
 
 const MobileQuickImport: React.FC<MobileQuickImportProps> = ({ onClose, onSuccess }) => {

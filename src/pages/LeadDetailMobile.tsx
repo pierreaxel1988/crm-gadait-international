@@ -180,24 +180,9 @@ const LeadDetailMobile = () => {
       <div className="fixed top-0 left-0 right-0 z-40 w-full">
         <div className="bg-[#051B30] pt-[env(safe-area-inset-top)]">
           <LeadDetailHeader 
-            name={lead.name} 
-            createdAt={lead.createdAt} 
-            phone={getFormattedPhoneForCall()} 
-            email={lead.email} 
-            budget={lead.budget} 
-            currency={lead.currency} 
-            desiredLocation={lead.desiredLocation} 
-            country={lead.country} 
-            purchaseTimeframe={lead.purchaseTimeframe} 
-            onBackClick={handleBackClick} 
-            onSave={handleSaveWithIndicator} 
-            isSaving={isSaving} 
-            hasChanges={hasChanges} 
-            tags={lead.tags} 
-            onPhoneCall={handlePhoneCall} 
-            onWhatsAppClick={handleWhatsAppClick} 
-            onEmailClick={handleEmailClick} 
-            onCallComplete={() => {}} 
+            lead={lead}
+            onEdit={() => {}}
+            onDelete={() => {}}
           />
         </div>
         
@@ -231,7 +216,7 @@ const LeadDetailMobile = () => {
             
             <TabsContent value="actions" className="mt-1 animate-[fade-in_0.2s_ease-out]">
               {actionSuggestions && actionSuggestions.length > 0 && <ActionSuggestions suggestions={actionSuggestions} onAccept={acceptSuggestion} onReject={rejectSuggestion} />}
-              <ActionsPanelMobile leadId={lead.id} onAddAction={fetchLead} onMarkComplete={handleMarkComplete} actionHistory={lead.actionHistory || []} />
+              <ActionsPanelMobile lead={lead} onAddAction={fetchLead} onMarkComplete={handleMarkComplete} actionHistory={lead.actionHistory || []} />
               
               {lead && (
                 <ChatGadaitFloatingButton 
