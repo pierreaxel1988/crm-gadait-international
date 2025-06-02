@@ -20,15 +20,24 @@ export type TaskType =
   | 'Email'
   | 'Meeting'
   | 'Visit'
+  | 'Visites'
   | 'Follow-up'
+  | 'Follow up'
   | 'Proposal'
+  | 'Propositions'
   | 'Contract'
+  | 'Compromis'
+  | 'Acte de vente'
+  | 'Contrat de Location'
   | 'Closing'
   | 'Other'
   | 'Creation'
   | 'Status Change'
   | 'Note'
-  | 'WhatsApp';
+  | 'WhatsApp'
+  | 'Estimation'
+  | 'Prospection'
+  | 'Admin';
 
 export interface KanbanItem {
   id: string;

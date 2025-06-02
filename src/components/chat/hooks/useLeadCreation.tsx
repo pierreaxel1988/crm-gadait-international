@@ -6,6 +6,7 @@ import { LeadDetailed } from '@/types/lead';
 import { ExtractedData } from '../types/chatTypes';
 import { supabase } from '@/integrations/supabase/client';
 import { addActionToLead } from '@/services/leadActions';
+import { TaskType } from '@/components/kanban/KanbanCard';
 
 export const useLeadCreation = () => {
   const [selectedPipeline, setSelectedPipeline] = useState<'purchase' | 'rental'>('purchase');
