@@ -119,26 +119,45 @@ export type Amenity =
   | 'Balcony'
   | 'Piscine'
   | 'Terrasse'
-  | 'Jardin';
+  | 'Jardin'
+  | 'Garage'
+  | 'Sécurité'
+  | 'Balcon'
+  | 'Ascenseur'
+  | 'Climatisation';
 
 export type PurchaseTimeframe = 
   | 'Immediately'
   | 'Within 3 months'
   | 'Within 6 months'
   | 'Within 1 year'
-  | 'No rush';
+  | 'No rush'
+  | 'Immédiat'
+  | '1-3 mois'
+  | '3-6 mois'
+  | '6-12 mois'
+  | '+12 mois'
+  | 'Moins de trois mois'
+  | 'Plus de trois mois';
 
 export type FinancingMethod = 
   | 'Cash'
   | 'Mortgage'
   | 'Mixed'
-  | 'Other';
+  | 'Other'
+  | 'Crédit'
+  | 'Mixte'
+  | 'Prêt bancaire';
 
 export type PropertyUse = 
   | 'Primary residence'
   | 'Secondary residence'
   | 'Investment'
-  | 'Commercial';
+  | 'Commercial'
+  | 'Résidence principale'
+  | 'Résidence secondaire'
+  | 'Investissement'
+  | 'Investissement locatif';
 
 export type MauritiusRegion = 
   | 'North'
@@ -149,6 +168,15 @@ export type MauritiusRegion =
 
 export type LeadTag = string;
 
+export interface ActionHistory {
+  id: string;
+  actionType: TaskType;
+  createdAt: string;
+  scheduledDate: string;
+  completedDate?: string;
+  notes: string;
+}
+
 export interface LeadDetailed {
   id: string;
   name: string;
@@ -157,7 +185,7 @@ export interface LeadDetailed {
   phone: string;
   phoneCountryCode?: string;
   phoneCountryCodeDisplay?: string;
-  location: string;
+  location?: string;
   status: LeadStatus;
   tags: string[];
   createdAt: string;
@@ -181,7 +209,7 @@ export interface LeadDetailed {
   taxResidence?: string;
   preferredLanguage?: string;
   taskType?: TaskType;
-  notes: string;
+  notes?: string;
   nextFollowUpDate?: string;
   country?: string;
   url?: string;
@@ -197,7 +225,7 @@ export interface LeadDetailed {
   orientation?: string[];
   email_envoye?: boolean;
   raw_data?: any;
-  mapCoordinates?: { lat: number; lng: number };
+  mapCoordinates?: { lat: number; lng: number } | string;
   
   // Additional property fields for owners pipeline
   constructionYear?: string;
@@ -242,13 +270,4 @@ export interface LeadDetailed {
   hasWineStorage?: boolean;
   wineStorageCapacity?: string;
   accessibility?: string;
-}
-
-export interface ActionHistory {
-  id: string;
-  actionType: TaskType;
-  createdAt: string;
-  scheduledDate: string;
-  completedDate?: string;
-  notes: string;
 }

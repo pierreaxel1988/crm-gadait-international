@@ -19,6 +19,16 @@ const OwnerLocationSection: React.FC<OwnerLocationSectionProps> = ({
   const handleLocationChange = (location: string) => {
     onDataChange({ desiredLocation: location });
   };
+
+  const handleMapCoordinatesChange = (value: string) => {
+    onDataChange({ mapCoordinates: value });
+  };
+
+  const getMapCoordinatesValue = () => {
+    if (!lead.mapCoordinates) return '';
+    if (typeof lead.mapCoordinates === 'string') return lead.mapCoordinates;
+    return `${lead.mapCoordinates.lat}, ${lead.mapCoordinates.lng}`;
+  };
   
   return (
     <div className="space-y-4">
@@ -72,8 +82,8 @@ const OwnerLocationSection: React.FC<OwnerLocationSectionProps> = ({
         </Label>
         <Input
           name="mapCoordinates"
-          value={lead.mapCoordinates || ''}
-          onChange={e => onDataChange({ mapCoordinates: e.target.value })}
+          value={getMapCoordinatesValue()}
+          onChange={(e) => handleMapCoordinatesChange(e.target.value)}
           placeholder="Collez le lien Google Maps ici"
           className="w-full font-futura"
         />
