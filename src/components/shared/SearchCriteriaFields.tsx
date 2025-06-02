@@ -211,8 +211,6 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
         return Shield;
       case "Climatisation":
         return Wind;
-      case "Garage":
-        return Car;
       default:
         return Star;
     }
@@ -230,7 +228,7 @@ const SearchCriteriaFields: React.FC<SearchCriteriaFieldsProps> = ({
 
   const amenitiesList: Amenity[] = [
     "Piscine", "Terrasse", "Balcon", "Jardin", "Parking", 
-    "Ascenseur", "Sécurité", "Climatisation", "Garage"
+    "Ascenseur", "Sécurité", "Climatisation"
   ];
 
   const purchaseTimeframes: PurchaseTimeframe[] = [

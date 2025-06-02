@@ -1,8 +1,15 @@
 
 import { TaskType } from '@/components/kanban/KanbanCard';
 
-// Re-export ActionHistory from lead.ts to maintain compatibility
-export type { ActionHistory } from './lead';
+export interface ActionHistory {
+  id: string;
+  actionType: string;
+  createdAt: string;
+  scheduledDate: string;
+  completedDate?: string;
+  notes?: string;
+  leadId?: string; // Ajout du lien vers l'ID du lead
+}
 
 export type ActionStatus = 'todo' | 'overdue' | 'done';
 

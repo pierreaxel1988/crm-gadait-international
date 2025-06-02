@@ -1,276 +1,173 @@
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useLeadActions } from '@/hooks/useLeadActions';
-import ActionDialog from '@/components/leads/actions/ActionDialog';
-import ActionsTab from '@/components/leads/actions/ActionsTab';
-import ActionSuggestions from '@/components/leads/actions/ActionSuggestions';
-import { CheckCircle, RefreshCw } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { updateLead } from '@/services/leadService';
-import LeadDetailHeader from '@/components/leads/LeadDetailHeader';
-import { LoadingState, NotFoundState } from '@/components/leads/LeadDetailErrorStates';
-import { useLeadDetail } from '@/hooks/useLeadDetail';
-import StatusSection from '@/components/leads/form/StatusSection';
-import GeneralInfoSection from '@/components/leads/form/GeneralInfoSection';
-import SearchCriteriaSection from '@/components/leads/form/SearchCriteriaSection';
-import NotesSection from '@/components/leads/form/NotesSection';
-import PublicCriteriaLinkManager from '@/components/leads/PublicCriteriaLinkManager';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { syncExistingActionsWithLeads } from '@/services/leadActions';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useLeadDetail } from '@/hooks/useLeadDetail';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import LeadHeader from '@/components/leads/LeadHeader';
 import ChatGadaitFloatingButton from '@/components/chat/ChatGadaitFloatingButton';
 
+// Import components from correct paths
+import LeadInfoTab from '@/components/leads/LeadInfoTab';
+import ActionsTab from '@/components/leads/ActionsTab';
+import NotesTab from '@/components/leads/NotesTab';
+import PropertiesTab from '@/components/leads/PropertiesTab';
+import DocumentsTab from '@/components/leads/DocumentsTab';
+import ContactsTab from '@/components/leads/ContactsTab';
+
+// Layout wrapper component to avoid import error
+const SidebarLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="min-h-screen bg-loro-pearl/10">
+    <div className="flex">
+      <div className="w-full">{children}</div>
+    </div>
+  </div>
+);
+
 const LeadDetailDesktop = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [showSaveIndicator, setShowSaveIndicator] = useState(false);
-  
-  const {
-    lead,
-    setLead,
-    isLoading,
-    isSaving,
-    hasChanges,
-    autoSaveEnabled,
-    setAutoSaveEnabled,
-    handleSave,
-    handleDataChange,
-    fetchLead,
-    getFormattedPhoneForCall,
-    getFormattedPhoneForWhatsApp,
-    startCallTracking,
-    endCallTracking,
-    formatDuration,
-    handleReassignToJacques
-  } = useLeadDetail(id);
-  
-  const {
-    isActionDialogOpen,
-    setIsActionDialogOpen,
-    selectedAction,
-    setSelectedAction,
-    actionDate,
-    setActionDate,
-    actionTime,
-    setActionTime,
-    actionNotes,
-    setActionNotes,
-    handleAddAction,
-    handleActionConfirm,
-    markActionComplete,
-    getActionTypeIcon,
-    actionSuggestions,
-    acceptSuggestion,
-    rejectSuggestion
-  } = useLeadActions(lead, setLead);
-  
-  // Synchroniser les actions existantes avec les leads au chargement
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState('info');
+  const { lead, isLoading: loading } = useLeadDetail(id!); // Fix here to avoid using error property
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Add local error state
+
   useEffect(() => {
-    if (id) {
-      syncExistingActionsWithLeads(id)
-        .then(success => {
-          if (success) {
-            console.log(`Actions du lead ${id} synchronisées avec succès`);
-          }
-        })
-        .catch(error => {
-          console.error(`Erreur lors de la synchronisation des actions pour le lead ${id}:`, error);
-        });
+    // Déterminer l'onglet actif depuis les paramètres d'URL ou utiliser "info" par défaut
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
     }
-  }, [id]);
-  
-  const handleBackClick = () => {
-    navigate('/pipeline');
+  }, [searchParams]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setSearchParams({ tab: value });
   };
-  
-  const handleMarkComplete = (action) => {
-    if (action && action.id) {
-      markActionComplete(action.id);
-    }
-  };
-  
-  const handleDeleteAction = async (actionId) => {
-    if (!lead) return;
-    try {
-      const updatedActionHistory = lead.actionHistory.filter(action => action.id !== actionId);
-      const updatedLead = {
-        ...lead,
-        actionHistory: updatedActionHistory,
-        email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
-      };
-      const result = await updateLead(updatedLead);
-      if (result) {
-        setLead(result);
-        toast({
-          title: "Action supprimée",
-          description: "L'action a été supprimée avec succès"
-        });
-      }
-    } catch (error) {
-      console.error("Error deleting action:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de supprimer l'action"
-      });
-    }
-  };
-  
-  const handleSaveWithIndicator = async () => {
-    await handleSave();
-    setShowSaveIndicator(true);
-    setTimeout(() => setShowSaveIndicator(false), 2000);
-  };
-  
-  const handlePhoneCall = (e) => {
-    e.preventDefault();
-    console.log("Phone call initiated");
-    startCallTracking('phone');
-  };
-  
-  const handleWhatsAppClick = (e) => {
-    e.preventDefault();
-    console.log("WhatsApp initiated");
-    startCallTracking('whatsapp');
-  };
-  
-  const handleEmailClick = (e) => {
-    e.preventDefault();
-    if (lead?.email) {
-      window.location.href = `mailto:${lead.email}`;
-    }
-  };
-  
-  const handleCallComplete = (duration) => {
-    console.log("Call completed with duration:", duration);
-    if (lead) {
-      endCallTracking(duration);
-    }
-  };
-  
-  const getPendingActionsCount = () => {
-    if (!lead?.actionHistory) return 0;
-    return lead.actionHistory.filter(action => !action.completedDate).length;
-  };
-  
-  if (isLoading) {
-    return <LoadingState isLoading={isLoading} />;
+
+  if (loading) {
+    return (
+      <SidebarLayout>
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <Loader2 className="h-10 w-10 animate-spin text-loro-hazel" />
+          <p className="mt-4 text-loro-navy">Chargement des détails du lead...</p>
+        </div>
+      </SidebarLayout>
+    );
   }
-  
-  if (!lead && id) {
-    return <NotFoundState show={!lead && !!id} id={id} />;
-  }
-  
-  if (!lead) return null;
-  
-  return <div className="flex h-screen bg-white dark:bg-loro-night">
-      <div className="w-64 border-r border-gray-200 dark:border-gray-700">
-        <div className="px-6 py-4">
-          <Button variant="ghost" onClick={handleBackClick}>
-            Retour au Pipeline
+
+  if (errorMessage || !lead) {
+    return (
+      <SidebarLayout>
+        <div className="p-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate(-1)}
+            className="mb-6 text-loro-terracotta"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Retour
           </Button>
-        </div>
-        
-        <ScrollArea className="h-[calc(100vh-100px)] pb-8">
-          <div className="px-6 py-4">
-            <LeadDetailHeader 
-              name={lead.name} 
-              createdAt={lead.createdAt} 
-              phone={getFormattedPhoneForCall()} 
-              email={lead.email} 
-              budget={lead.budget} 
-              currency={lead.currency} 
-              desiredLocation={lead.desiredLocation} 
-              country={lead.country} 
-              purchaseTimeframe={lead.purchaseTimeframe} 
-              onSave={handleSaveWithIndicator} 
-              isSaving={isSaving} 
-              hasChanges={hasChanges} 
-              tags={lead.tags} 
-              onPhoneCall={handlePhoneCall} 
-              onWhatsAppClick={handleWhatsAppClick} 
-              onEmailClick={handleEmailClick} 
-              onCallComplete={() => {}} 
-            />
+          <div className="flex flex-col items-center justify-center min-h-[50vh]">
+            <p className="text-red-500 font-medium">
+              {errorMessage || "Ce lead n'existe pas ou vous n'avez pas les droits d'accès."}
+            </p>
+            <Button 
+              onClick={() => navigate('/leads')} 
+              className="mt-4 bg-loro-terracotta hover:bg-loro-terracotta/90 rounded-md"
+            >
+              Retour à la liste des leads
+            </Button>
           </div>
-          
-          <Tabs defaultValue="criteria" className="flex flex-col h-full">
-            <TabsList className="flex-1">
-              <TabsTrigger value="info" className="data-[state=active]:bg-muted/50">
-                Informations
-              </TabsTrigger>
-              <TabsTrigger value="criteria" className="data-[state=active]:bg-muted/50">
-                Critères
-              </TabsTrigger>
-              <TabsTrigger value="status" className="data-[state=active]:bg-muted/50">
-                Statut
-              </TabsTrigger>
-              <TabsTrigger value="notes" className="data-[state=active]:bg-muted/50">
-                Notes
-              </TabsTrigger>
-              <TabsTrigger value="share" className="data-[state=active]:bg-muted/50">
-                Partager
-              </TabsTrigger>
-              <TabsTrigger value="actions" className="data-[state=active]:bg-muted/50">
-                Actions ({getPendingActionsCount()})
-              </TabsTrigger>
-            </TabsList>
-            
-            <div className="flex-1 p-6">
-              <TabsContent value="info" className="flex-1 overflow-hidden">
-                <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
-              </TabsContent>
-              
-              <TabsContent value="criteria" className="flex-1 overflow-hidden">
-                <SearchCriteriaSection lead={lead} onDataChange={handleDataChange} />
-              </TabsContent>
-              
-              <TabsContent value="status" className="flex-1 overflow-hidden">
-                <StatusSection lead={lead} onDataChange={handleDataChange} />
-              </TabsContent>
-              
-              <TabsContent value="notes" className="flex-1 overflow-hidden">
-                <NotesSection lead={lead} onDataChange={handleDataChange} />
-              </TabsContent>
-
-              <TabsContent value="share" className="flex-1 overflow-hidden">
-                <PublicCriteriaLinkManager leadId={lead.id} leadName={lead.name} />
-              </TabsContent>
-              
-              <TabsContent value="actions" className="flex-1 overflow-hidden">
-                <ActionsTab lead={lead} />
-              </TabsContent>
-            </div>
-          </Tabs>
-        </ScrollArea>
-      </div>
-
-      {showSaveIndicator && 
-        <div className="fixed top-4 right-4 bg-green-500 text-white p-2 rounded-md shadow-md animate-[fade-in_0.3s_ease-out]">
-          <CheckCircle className="h-5 w-5" />
         </div>
-      }
+      </SidebarLayout>
+    );
+  }
 
-      <ActionDialog 
-        isOpen={isActionDialogOpen} 
-        onClose={() => setIsActionDialogOpen(false)} 
-        selectedAction={selectedAction} 
-        setSelectedAction={setSelectedAction} 
-        actionDate={actionDate} 
-        setActionDate={setActionDate} 
-        actionTime={actionTime} 
-        setActionTime={setActionTime} 
-        actionNotes={actionNotes} 
-        setActionNotes={setActionNotes} 
-        onConfirm={handleActionConfirm} 
-        getActionTypeIcon={getActionTypeIcon} 
-      />
-    </div>;
+  // Calculer le nombre d'actions en attente
+  const pendingActions = lead.actionHistory?.filter(
+    action => !action.completedDate
+  ).length || 0;
+
+  return (
+    <SidebarLayout>
+      <div className="px-[100px] py-6 max-w-7xl mx-auto">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="mb-6 text-loro-terracotta rounded-md"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Retour
+        </Button>
+        <LeadHeader 
+          lead={lead} 
+          onBack={() => navigate(-1)}
+          onAddAction={() => {}}
+          onDelete={() => {}}
+        />
+        <div className="mt-6">
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
+            <TabsList className="mb-6 bg-loro-pearl/20 p-1 rounded-lg w-full flex flex-wrap">
+              <TabsTrigger 
+                value="info"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative rounded-md"
+              >Informations</TabsTrigger>
+              <TabsTrigger 
+                value="actions"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative rounded-md"
+              >
+                Actions
+                {pendingActions > 0 && (
+                  <div className="absolute -top-2 -right-1 bg-loro-terracotta text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                    {pendingActions}
+                  </div>
+                )}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="notes"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative rounded-md"
+              >Notes</TabsTrigger>
+              <TabsTrigger 
+                value="properties"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative rounded-md"
+              >Propriétés</TabsTrigger>
+              <TabsTrigger 
+                value="documents"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative rounded-md"
+              >Documents</TabsTrigger>
+              <TabsTrigger 
+                value="contacts"
+                className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta relative rounded-md"
+              >Contacts</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="info" className="rounded-lg overflow-hidden">
+              <LeadInfoTab lead={lead} />
+            </TabsContent>
+            <TabsContent value="actions" className="rounded-lg overflow-hidden">
+              <ActionsTab leadId={lead.id} />
+              {/* ChatGadait floating button - uniquement dans l'onglet actions */}
+              <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />
+            </TabsContent>
+            <TabsContent value="notes" className="rounded-lg overflow-hidden">
+              <NotesTab leadId={lead.id} />
+            </TabsContent>
+            <TabsContent value="properties" className="rounded-lg overflow-hidden">
+              <PropertiesTab leadId={lead.id} lead={lead} />
+            </TabsContent>
+            <TabsContent value="documents" className="rounded-lg overflow-hidden">
+              <DocumentsTab leadId={lead.id} />
+            </TabsContent>
+            <TabsContent value="contacts" className="rounded-lg overflow-hidden">
+              <ContactsTab leadId={lead.id} />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </SidebarLayout>
+  );
 };
 
 export default LeadDetailDesktop;

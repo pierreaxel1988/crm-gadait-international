@@ -1,3 +1,4 @@
+
 import { LeadDetailed } from "@/types/lead";
 import { ActionHistory } from "@/types/actionHistory";
 
@@ -74,7 +75,6 @@ const mockLeadsDetailed: LeadDetailed[] = [
     nationality: 'France',
     taxResidence: 'France',
     taskType: 'Call',
-    notes: '',
   },
   {
     id: '3',
@@ -109,7 +109,6 @@ const mockLeadsDetailed: LeadDetailed[] = [
     id: '4',
     name: 'Claire Simon',
     email: 'claire.simon@example.com',
-    phone: '+33 6 45 67 89 01',
     location: 'Cannes, France',
     status: 'Visit',
     tags: ['Hot'],
@@ -187,7 +186,6 @@ const mockLeadsDetailed: LeadDetailed[] = [
     nationality: 'France',
     taxResidence: 'France',
     taskType: 'Admin',
-    notes: '',
   },
   {
     id: '7',
@@ -205,7 +203,6 @@ const mockLeadsDetailed: LeadDetailed[] = [
     external_id: 'idx-123456',
     imported_at: new Date().toISOString(),
     taskType: 'Call',
-    notes: '',
   },
   {
     id: '8',
@@ -223,7 +220,6 @@ const mockLeadsDetailed: LeadDetailed[] = [
     external_id: 'fg-789123',
     imported_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     taskType: 'Follow up',
-    notes: '',
   },
   {
     id: '9',

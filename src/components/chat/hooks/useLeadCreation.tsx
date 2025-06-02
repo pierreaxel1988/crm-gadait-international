@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -6,7 +7,6 @@ import { LeadDetailed } from '@/types/lead';
 import { ExtractedData } from '../types/chatTypes';
 import { supabase } from '@/integrations/supabase/client';
 import { addActionToLead } from '@/services/leadActions';
-import { TaskType } from '@/components/kanban/KanbanCard';
 
 export const useLeadCreation = () => {
   const [selectedPipeline, setSelectedPipeline] = useState<'purchase' | 'rental'>('purchase');
@@ -94,7 +94,7 @@ export const useLeadCreation = () => {
       if (createdLead && createdLead.id) {
         // Ajouter une action de qualification
         const qualificationAction = {
-          actionType: "Call" as TaskType,
+          actionType: "Call",
           scheduledDate: new Date().toISOString(),
           notes: "Qualification du lead : appeler le client pour comprendre ses besoins précis suite à l'importation d'email."
         };
