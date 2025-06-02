@@ -57,7 +57,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   const {
     loadedColumns,
     isLoading,
-  } = useKanbanData();
+  } = useKanbanData(columns, 0, activeTab as PipelineType);
 
   const filteredColumns = filters 
     ? applyFiltersToColumns(loadedColumns.filter(column => 

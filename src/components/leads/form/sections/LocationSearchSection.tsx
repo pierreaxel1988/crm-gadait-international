@@ -2,7 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import SmartSearch from '@/components/common/SmartSearch';
-import { useCountriesFromDatabase } from '@/hooks/useCountriesFromDatabase';
+import { COUNTRIES } from '@/utils/countries';
 import { getAllLocations, getLocationsByCountry } from '@/utils/locationsByCountry';
 import { MapPin } from 'lucide-react';
 
@@ -19,8 +19,6 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
   onCountryChange,
   onLocationChange,
 }) => {
-  const { countries, loading } = useCountriesFromDatabase();
-
   const getFilteredLocations = (searchTerm: string) => {
     if (!country) {
       return getAllLocations()
@@ -44,10 +42,6 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
     <div className="text-sm py-1">{location}</div>
   );
 
-  if (loading) {
-    return <div className="text-center p-4">Chargement des pays...</div>;
-  }
-
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -57,7 +51,7 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
           value={country}
           onChange={onCountryChange}
           onSelect={handleCountrySelect}
-          results={countries.filter(c => 
+          results={COUNTRIES.filter(c => 
             c.toLowerCase().includes(country.toLowerCase())
           ).slice(0, 10)}
           renderItem={renderLocationItem}

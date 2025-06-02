@@ -1,4 +1,3 @@
-
 import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { TaskType } from '@/components/kanban/KanbanCard';
@@ -26,34 +25,20 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     actionHistory = [];
   }
 
-  // Handle bedrooms conversion from database - prioritize raw_data for multiple selections
-  let bedrooms: number[] = [];
-  
-  // First check raw_data for multiple bedroom selections
+  // Handle bedrooms conversion from database
+  let bedrooms;
   if (lead.raw_data && lead.raw_data.bedroom_values) {
+    // If we have stored bedroom values in raw_data, use those (for multiple selections)
     try {
-      const parsedBedrooms = typeof lead.raw_data.bedroom_values === 'string' 
-        ? JSON.parse(lead.raw_data.bedroom_values)
-        : lead.raw_data.bedroom_values;
-      
-      if (Array.isArray(parsedBedrooms)) {
-        bedrooms = parsedBedrooms;
-      } else {
-        bedrooms = [parsedBedrooms];
-      }
-      console.log('Loaded bedrooms from raw_data:', bedrooms);
+      bedrooms = JSON.parse(lead.raw_data.bedroom_values);
     } catch (e) {
-      console.error('Error parsing bedroom_values from raw_data:', e);
-      // Fallback to single bedroom value
-      if (lead.bedrooms !== null && lead.bedrooms !== undefined) {
-        bedrooms = [lead.bedrooms];
-      }
+      console.error('Error parsing bedroom_values:', e);
+      bedrooms = lead.bedrooms ? [lead.bedrooms] : [];
     }
   } else if (Array.isArray(lead.bedrooms)) {
-    // Handle if bedrooms is already an array (shouldn't happen in current schema but for safety)
     bedrooms = lead.bedrooms;
   } else if (lead.bedrooms !== null && lead.bedrooms !== undefined) {
-    // Single bedroom value
+    // Convert single value to array for consistency in UI
     bedrooms = [lead.bedrooms];
   }
 
@@ -79,7 +64,7 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     desiredLocation: lead.desired_location,
     propertyType: lead.property_type,
     propertyTypes: lead.property_types,
-    bedrooms: bedrooms, // Always an array now, with data from raw_data when multiple
+    bedrooms: lead.bedrooms,
     views: lead.views,
     amenities: lead.amenities || [],
     purchaseTimeframe: lead.purchase_timeframe,
@@ -101,37 +86,38 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     livingArea: lead.living_area,
     external_id: lead.external_id,
     regions: lead.regions || [],
+    facilities: lead.facilities || [],
+    keyFeatures: lead.key_features || [],
+    propertyDescription: lead.property_description || '',
+    renovationNeeded: lead.renovation_needed || '',
+    condoFees: lead.condo_fees || '',
+    energyClass: lead.energy_class || '',
+    equipment: lead.equipment || [],
+    floors: lead.floors,
     landArea: lead.land_area || '',
     orientation: lead.orientation || [],
-    email_envoye: lead.email_envoye || false
+    parkingSpaces: lead.parking_spaces,
+    constructionYear: lead.construction_year || '',
+    yearlyTaxes: lead.yearly_taxes || '',
+    assets: lead.assets || [],
+    email_envoye: lead.email_envoye || false // Ajout du champ email_envoye
   };
 };
 
 export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
-  // Handle bedroom data for database storage with proper raw_data synchronization
+  // Handle bedroom data for database storage
   let bedroomsForDb = null;
-  let rawData: any = lead.raw_data ? { ...lead.raw_data } : {};
-  
   if (Array.isArray(lead.bedrooms)) {
+    // If only one bedroom is selected, store as a single integer
     if (lead.bedrooms.length === 1) {
-      // Single bedroom selection - store in bedrooms column only
       bedroomsForDb = lead.bedrooms[0];
-      // Remove bedroom_values from raw_data if it exists (single selection doesn't need it)
-      delete rawData.bedroom_values;
     } else if (lead.bedrooms.length > 1) {
-      // Multiple bedroom selections - store first value in bedrooms column and all values in raw_data
-      bedroomsForDb = lead.bedrooms[0];
-      rawData.bedroom_values = JSON.stringify(lead.bedrooms);
-      console.log('Storing multiple bedrooms in raw_data:', lead.bedrooms);
-    } else {
-      // Empty array - clear both
-      bedroomsForDb = null;
-      delete rawData.bedroom_values;
+      // Store the first value for now, we'll handle multiple in updateLead
+      bedroomsForDb = lead.bedrooms.length > 0 ? lead.bedrooms[0] : null;
     }
   } else if (lead.bedrooms !== undefined && lead.bedrooms !== null) {
-    // Handle non-array value (shouldn't happen but for safety)
-    bedroomsForDb = Array.isArray(lead.bedrooms) ? lead.bedrooms[0] : lead.bedrooms;
-    delete rawData.bedroom_values;
+    // Handle non-array value
+    bedroomsForDb = lead.bedrooms;
   }
   
   // Ensure action history is properly formatted
@@ -189,10 +175,7 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     external_id: lead.external_id,
     action_history: lead.actionHistory,
     regions: lead.regions || [],
-    raw_data: Object.keys(rawData).length > 0 ? rawData : null,
-    email_envoye: lead.email_envoye || false,
-    land_area: lead.landArea,
-    orientation: lead.orientation || []
+    email_envoye: lead.email_envoye || false // Ajout du champ email_envoye
   };
 };
 

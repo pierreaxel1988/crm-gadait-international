@@ -69,7 +69,6 @@ export const useLeadCreation = () => {
         name: extractedData.Name || extractedData.name || "",
         email: extractedData.Email || extractedData.email || "",
         phone: extractedData.Phone || extractedData.phone || "",
-        location: extractedData.Location || extractedData.location || "",
         source: extractedData.Source || extractedData.source || "Site web",
         budget: extractedData.Budget || extractedData.budget || "",
         propertyReference: extractedData.property_reference || extractedData.reference || extractedData["Property reference"] || "",

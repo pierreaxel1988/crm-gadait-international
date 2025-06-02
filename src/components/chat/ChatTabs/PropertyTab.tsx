@@ -44,7 +44,6 @@ const PropertyTab: React.FC<PropertyTabProps> = ({
         name: extractedData.title || "Prospect via annonce",
         email: "",
         phone: "",
-        location: extractedData.location || "",
         status: "New" as LeadStatus,
         tags: ["Imported"] as LeadTag[],
         propertyReference: extractedData.reference || "",
@@ -55,7 +54,7 @@ const PropertyTab: React.FC<PropertyTabProps> = ({
         nationality: "",
         notes: `Intéressé par l'annonce: ${propertyUrl}`,
         url: propertyUrl,
-        pipelineType: "purchase" as "purchase" | "rental"
+        pipelineType: "purchase" as "purchase" | "rental" // Use a valid union type
       };
 
       // Créer le lead

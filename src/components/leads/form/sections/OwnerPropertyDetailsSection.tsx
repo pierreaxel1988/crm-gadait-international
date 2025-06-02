@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LeadDetailed, AssetType, Equipment } from '@/types/lead';
 import FormInput from '../FormInput';
@@ -72,12 +73,6 @@ const OwnerPropertyDetailsSection = ({
     const newBedrooms = currentBedrooms.includes(numValue)
       ? currentBedrooms.filter(b => b !== numValue)
       : [...currentBedrooms, numValue];
-    
-    console.log('Bedroom selection changed:', {
-      previous: currentBedrooms,
-      new: newBedrooms,
-      willSyncToRawData: newBedrooms.length > 1
-    });
     
     const syntheticEvent = {
       target: {
@@ -160,11 +155,6 @@ const OwnerPropertyDetailsSection = ({
           onChange={handleBedroomChange}
           specialOption="8+"
         />
-        {Array.isArray(formData.bedrooms) && formData.bedrooms.length > 1 && (
-          <p className="text-xs text-gray-500 mt-1">
-            Sélections multiples synchronisées dans raw_data
-          </p>
-        )}
       </div>
 
       <div className="pt-2">

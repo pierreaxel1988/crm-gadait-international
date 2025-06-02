@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -47,7 +48,7 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
     loadedColumns,
     isLoading,
     teamMembers
-  } = useKanbanData();
+  } = useKanbanData(columns, 0, activeTab);
   
   const filteredColumns = filters 
     ? applyFiltersToColumns(loadedColumns.filter(column => 

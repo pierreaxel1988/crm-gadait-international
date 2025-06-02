@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Check, FileText, Info, Target, Activity, Link } from 'lucide-react';
+import { Check, FileText, Info, Target, Activity } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface LeadDetailTabsProps {
@@ -19,6 +19,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
   const currentTab = new URLSearchParams(location.search).get('tab') || defaultTab;
   
   const handleTabChange = (value: string) => {
+    // Update URL with tab parameter
     const searchParams = new URLSearchParams(location.search);
     searchParams.set('tab', value);
     navigate(`${location.pathname}?${searchParams.toString()}`, {
@@ -30,7 +31,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
     <>
       <Separator className="bg-loro-pearl/60 h-[0.5px] w-full opacity-80" />
       <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full border-b border-loro-pearl/20">
-        <TabsList className="grid grid-cols-6 w-full h-14 rounded-none px-1 bg-loro-50 relative">
+        <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-50 relative">
           <TabsTrigger 
             value="criteria" 
             className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
@@ -68,16 +69,6 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
             <div className="flex flex-col items-center">
               <FileText className="h-4 w-4 mb-1" />
               <span className="text-xs">Notes</span>
-            </div>
-          </TabsTrigger>
-
-          <TabsTrigger 
-            value="share" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
-          >
-            <div className="flex flex-col items-center">
-              <Link className="h-4 w-4 mb-1" />
-              <span className="text-xs">Partage</span>
             </div>
           </TabsTrigger>
           
