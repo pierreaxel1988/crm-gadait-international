@@ -559,6 +559,9 @@ export type Database = {
           email: string | null
           first_contact_date: string | null
           full_name: string
+          furnished: boolean | null
+          furniture_included_in_price: boolean | null
+          furniture_price: string | null
           id: string
           last_contact_date: string | null
           mandate_type: string | null
@@ -580,6 +583,9 @@ export type Database = {
           email?: string | null
           first_contact_date?: string | null
           full_name: string
+          furnished?: boolean | null
+          furniture_included_in_price?: boolean | null
+          furniture_price?: string | null
           id?: string
           last_contact_date?: string | null
           mandate_type?: string | null
@@ -601,6 +607,9 @@ export type Database = {
           email?: string | null
           first_contact_date?: string | null
           full_name?: string
+          furnished?: boolean | null
+          furniture_included_in_price?: boolean | null
+          furniture_price?: string | null
           id?: string
           last_contact_date?: string | null
           mandate_type?: string | null

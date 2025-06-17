@@ -100,7 +100,10 @@ export const mapToLeadDetailed = (lead: any): LeadDetailed => {
     constructionYear: lead.construction_year || '',
     yearlyTaxes: lead.yearly_taxes || '',
     assets: lead.assets || [],
-    email_envoye: lead.email_envoye || false // Ajout du champ email_envoye
+    // Nouveaux champs pour les propriétaires (maintenant dans la table owners)
+    desired_price: lead.desired_price || '',
+    fees: lead.fees || '',
+    email_envoye: lead.email_envoye || false
   };
 };
 
@@ -175,7 +178,10 @@ export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
     external_id: lead.external_id,
     action_history: lead.actionHistory,
     regions: lead.regions || [],
-    email_envoye: lead.email_envoye || false // Ajout du champ email_envoye
+    // Nouveaux champs pour les propriétaires (maintenant dans la table owners)
+    desired_price: lead.desired_price || '',
+    fees: lead.fees || '',
+    email_envoye: lead.email_envoye || false
   };
 };
 

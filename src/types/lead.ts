@@ -122,6 +122,33 @@ import { TaskType } from "@/components/kanban/KanbanCard";
 
 export type { LeadStatus, LeadTag, TaskType };
 
+// Nouveau type pour les propriétaires avec les champs mobilier
+export interface Owner {
+  id: string;
+  full_name: string;
+  email?: string;
+  phone?: string;
+  nationality?: string;
+  tax_residence?: string;
+  preferred_language?: string;
+  assigned_to?: string;
+  first_contact_date?: string;
+  contact_source?: string;
+  last_contact_date?: string;
+  relationship_status?: string;
+  mandate_type?: string;
+  next_action_date?: string;
+  specific_needs?: string;
+  attention_points?: string;
+  relationship_details?: string;
+  created_at: string;
+  updated_at: string;
+  // Nouveaux champs de mobilier
+  furnished?: boolean;
+  furniture_included_in_price?: boolean;
+  furniture_price?: string;
+}
+
 export interface LeadDetailed {
   id: string;
   name: string;
@@ -194,9 +221,6 @@ export interface LeadDetailed {
   // Nouveaux champs pour les propriétaires
   desired_price?: string;
   fees?: string;
-  furnished?: boolean;
-  furniture_included_in_price?: boolean;
-  furniture_price?: string;
 
   // Nouveaux champs pour le luxe immobilier
   bathrooms?: number;
