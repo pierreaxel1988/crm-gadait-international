@@ -39,7 +39,8 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({
         }
 
         if (data) {
-          setOwnerData(data);
+          // Type cast the data properly to match Owner interface
+          setOwnerData(data as Owner);
         }
       } catch (error) {
         console.error('Error in fetchOwnerData:', error);
