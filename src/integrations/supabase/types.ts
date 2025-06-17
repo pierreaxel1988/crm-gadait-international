@@ -552,6 +552,7 @@ export type Database = {
       }
       owners: {
         Row: {
+          action_history: Json | null
           assets: string[] | null
           assigned_to: string | null
           attention_points: string | null
@@ -566,6 +567,7 @@ export type Database = {
           desired_price: string | null
           email: string | null
           equipment: string[] | null
+          external_id: string | null
           fees: string | null
           first_contact_date: string | null
           full_name: string
@@ -573,26 +575,41 @@ export type Database = {
           furniture_included_in_price: boolean | null
           furniture_price: string | null
           id: string
+          imported_at: string | null
+          integration_source: string | null
+          internal_notes: string | null
           land_area: string | null
           last_contact_date: string | null
+          last_contacted_at: string | null
           living_area: string | null
           location: string | null
           mandate_type: string | null
           map_coordinates: string | null
           nationality: string | null
           next_action_date: string | null
+          next_follow_up_date: string | null
+          notes: string | null
           phone: string | null
           preferred_language: string | null
           property_description: string | null
+          property_reference: string | null
           property_state: string | null
           property_type: string | null
+          regions: string[] | null
           relationship_details: string | null
           relationship_status: string | null
+          salutation: string | null
+          source: string | null
           specific_needs: string | null
+          status: string | null
+          tags: string[] | null
+          task_type: string | null
           tax_residence: string | null
           updated_at: string
+          url: string | null
         }
         Insert: {
+          action_history?: Json | null
           assets?: string[] | null
           assigned_to?: string | null
           attention_points?: string | null
@@ -607,6 +624,7 @@ export type Database = {
           desired_price?: string | null
           email?: string | null
           equipment?: string[] | null
+          external_id?: string | null
           fees?: string | null
           first_contact_date?: string | null
           full_name: string
@@ -614,26 +632,41 @@ export type Database = {
           furniture_included_in_price?: boolean | null
           furniture_price?: string | null
           id?: string
+          imported_at?: string | null
+          integration_source?: string | null
+          internal_notes?: string | null
           land_area?: string | null
           last_contact_date?: string | null
+          last_contacted_at?: string | null
           living_area?: string | null
           location?: string | null
           mandate_type?: string | null
           map_coordinates?: string | null
           nationality?: string | null
           next_action_date?: string | null
+          next_follow_up_date?: string | null
+          notes?: string | null
           phone?: string | null
           preferred_language?: string | null
           property_description?: string | null
+          property_reference?: string | null
           property_state?: string | null
           property_type?: string | null
+          regions?: string[] | null
           relationship_details?: string | null
           relationship_status?: string | null
+          salutation?: string | null
+          source?: string | null
           specific_needs?: string | null
+          status?: string | null
+          tags?: string[] | null
+          task_type?: string | null
           tax_residence?: string | null
           updated_at?: string
+          url?: string | null
         }
         Update: {
+          action_history?: Json | null
           assets?: string[] | null
           assigned_to?: string | null
           attention_points?: string | null
@@ -648,6 +681,7 @@ export type Database = {
           desired_price?: string | null
           email?: string | null
           equipment?: string[] | null
+          external_id?: string | null
           fees?: string | null
           first_contact_date?: string | null
           full_name?: string
@@ -655,24 +689,38 @@ export type Database = {
           furniture_included_in_price?: boolean | null
           furniture_price?: string | null
           id?: string
+          imported_at?: string | null
+          integration_source?: string | null
+          internal_notes?: string | null
           land_area?: string | null
           last_contact_date?: string | null
+          last_contacted_at?: string | null
           living_area?: string | null
           location?: string | null
           mandate_type?: string | null
           map_coordinates?: string | null
           nationality?: string | null
           next_action_date?: string | null
+          next_follow_up_date?: string | null
+          notes?: string | null
           phone?: string | null
           preferred_language?: string | null
           property_description?: string | null
+          property_reference?: string | null
           property_state?: string | null
           property_type?: string | null
+          regions?: string[] | null
           relationship_details?: string | null
           relationship_status?: string | null
+          salutation?: string | null
+          source?: string | null
           specific_needs?: string | null
+          status?: string | null
+          tags?: string[] | null
+          task_type?: string | null
           tax_residence?: string | null
           updated_at?: string
+          url?: string | null
         }
         Relationships: [
           {

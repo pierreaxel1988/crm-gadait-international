@@ -1,3 +1,4 @@
+
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -121,7 +122,7 @@ import { TaskType } from "@/components/kanban/KanbanCard";
 
 export type { LeadStatus, LeadTag, TaskType };
 
-// Nouveau type pour les propriétaires avec tous les champs nécessaires
+// Interface mise à jour pour les propriétaires avec tous les champs nécessaires
 export interface Owner {
   id: string;
   full_name: string;
@@ -142,6 +143,30 @@ export interface Owner {
   relationship_details?: string;
   created_at: string;
   updated_at: string;
+  
+  // Nouveaux champs pour l'onglet "Infos"
+  salutation?: 'M.' | 'Mme';
+  source?: LeadSource;
+  property_reference?: string;
+  url?: string;
+  tags?: LeadTag[];
+  regions?: MauritiusRegion[];
+  last_contacted_at?: string;
+  integration_source?: string;
+  imported_at?: string;
+  external_id?: string;
+  
+  // Nouveaux champs pour l'onglet "Statut"
+  status?: string;
+  task_type?: TaskType;
+  next_follow_up_date?: string;
+  
+  // Nouveaux champs pour l'onglet "Notes"
+  notes?: string;
+  internal_notes?: string;
+  
+  // Nouveaux champs pour l'onglet "Actions"
+  action_history?: any[];
   
   // Champs de mobilier
   furnished?: boolean;

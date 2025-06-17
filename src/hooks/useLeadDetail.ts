@@ -80,6 +80,42 @@ export function useLeadDetail(id: string | undefined) {
         console.log("Converting 'jean-marc-perrissol' to proper UUID before save:", JEAN_MARC_ID);
       }
       
+      // Pour les propriétaires, sauvegarder aussi dans la table owners
+      if (lead.pipelineType === 'owners') {
+        const ownerUpdates = {
+          full_name: updatedLeadData.name,
+          email: updatedLeadData.email,
+          phone: updatedLeadData.phone,
+          nationality: updatedLeadData.nationality,
+          preferred_language: updatedLeadData.preferredLanguage,
+          assigned_to: updatedLeadData.assignedTo,
+          last_contacted_at: updatedLeadData.lastContactedAt,
+          source: updatedLeadData.source,
+          property_reference: updatedLeadData.propertyReference,
+          url: updatedLeadData.url,
+          tags: updatedLeadData.tags,
+          regions: updatedLeadData.regions,
+          notes: updatedLeadData.notes,
+          internal_notes: updatedLeadData.internal_notes,
+          action_history: updatedLeadData.actionHistory,
+          task_type: updatedLeadData.taskType,
+          next_follow_up_date: updatedLeadData.nextFollowUpDate,
+          salutation: updatedLeadData.salutation,
+          integration_source: updatedLeadData.integration_source,
+          imported_at: updatedLeadData.imported_at,
+          external_id: updatedLeadData.external_id,
+        };
+
+        const { error: ownerError } = await supabase
+          .from('owners')
+          .update(ownerUpdates)
+          .eq('id', lead.id);
+
+        if (ownerError) {
+          console.error("Error updating owner data:", ownerError);
+        }
+      }
+      
       const updatedLead = await updateLead({
         ...updatedLeadData,
         phoneCountryCode: updatedLeadData.phoneCountryCode || '+33',
