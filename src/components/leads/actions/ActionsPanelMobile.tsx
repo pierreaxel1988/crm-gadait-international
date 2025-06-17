@@ -124,6 +124,18 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         const updatedActionHistory = (currentLead.actionHistory || [])
           .filter(action => action.id !== actionId);
         
+        // Update both leads table and owners table if it's an owner pipeline
+        if (currentLead.pipelineType === 'owners') {
+          const { error: ownerError } = await supabase
+            .from('owners')
+            .update({ action_history: updatedActionHistory })
+            .eq('id', leadId);
+            
+          if (ownerError) {
+            console.error('Error updating owner action history:', ownerError);
+          }
+        }
+        
         const updatedLead = await updateLead({
           ...currentLead,
           actionHistory: updatedActionHistory,
@@ -184,6 +196,21 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         }
         return a;
       });
+      
+      // Update both leads table and owners table if it's an owner pipeline
+      if (currentLead.pipelineType === 'owners') {
+        const { error: ownerError } = await supabase
+          .from('owners')
+          .update({ 
+            action_history: updatedActionHistory,
+            last_contacted_at: new Date().toISOString()
+          })
+          .eq('id', leadId);
+          
+        if (ownerError) {
+          console.error('Error updating owner action history:', ownerError);
+        }
+      }
       
       // Mettre à jour le lead avec l'action complétée
       // Important: Définir email_envoye à false pour éviter le déclenchement d'emails automatiques

@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, Owner } from '@/types/lead';
-import { TaskType } from '@/components/kanban/KanbanCard';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
@@ -95,8 +94,17 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
     { value: "Perdu/Annulé", label: "Perdu/Annulé" }
   ];
 
-  const taskTypes: TaskType[] = [
-    "Call", "Email", "Meeting", "Visit", "Follow-up", "Document", "Other"
+  const taskTypes = [
+    { value: "Call", label: "Call" },
+    { value: "Visites", label: "Visites" },
+    { value: "Compromis", label: "Compromis" },
+    { value: "Acte de vente", label: "Acte de vente" },
+    { value: "Contrat de Location", label: "Contrat de Location" },
+    { value: "Propositions", label: "Propositions" },
+    { value: "Follow up", label: "Follow up" },
+    { value: "Estimation", label: "Estimation" },
+    { value: "Prospection", label: "Prospection" },
+    { value: "Admin", label: "Admin" }
   ];
 
   return (
@@ -126,9 +134,9 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
         <StyledSelect
           id="task_type"
           value={ownerData?.task_type || ''}
-          onChange={e => updateOwnerData({ task_type: e.target.value as TaskType })}
+          onChange={e => updateOwnerData({ task_type: e.target.value })}
           placeholder="Sélectionner un type de tâche"
-          options={taskTypes.map(type => ({ value: type, label: type }))}
+          options={taskTypes}
           disabled={loading}
         />
       </div>

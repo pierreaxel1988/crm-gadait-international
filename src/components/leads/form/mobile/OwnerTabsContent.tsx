@@ -7,7 +7,7 @@ import OwnerNotesSection from './components/OwnerNotesSection';
 import OwnerLocationSection from './components/OwnerLocationSection';
 import OwnerPriceFields from './components/OwnerPriceFields';
 import OwnerPropertySection from './components/OwnerPropertySection';
-import { ActionsPanelMobile } from '@/components/leads/actions/ActionsPanelMobile';
+import ActionsPanelMobile from '@/components/leads/actions/ActionsPanelMobile';
 
 interface OwnerTabsContentProps {
   activeTab: string;

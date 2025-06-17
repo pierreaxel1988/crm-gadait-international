@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
@@ -104,6 +103,32 @@ export function useLeadDetail(id: string | undefined) {
           integration_source: updatedLeadData.integration_source,
           imported_at: updatedLeadData.imported_at,
           external_id: updatedLeadData.external_id,
+          // Synchronize additional owner fields
+          desired_price: updatedLeadData.desired_price,
+          fees: updatedLeadData.fees,
+          currency: updatedLeadData.currency,
+          country: updatedLeadData.country,
+          location: updatedLeadData.location,
+          desired_location: updatedLeadData.desiredLocation,
+          map_coordinates: updatedLeadData.mapCoordinates,
+          property_type: updatedLeadData.propertyType,
+          bedrooms: updatedLeadData.bedrooms,
+          bathrooms: updatedLeadData.bathrooms,
+          living_area: updatedLeadData.livingArea,
+          land_area: updatedLeadData.landArea,
+          construction_year: updatedLeadData.constructionYear,
+          property_state: updatedLeadData.propertyState,
+          property_description: updatedLeadData.propertyDescription,
+          assets: updatedLeadData.assets,
+          equipment: updatedLeadData.equipment,
+          furnished: updatedLeadData.furnished,
+          furniture_included_in_price: updatedLeadData.furniture_included_in_price,
+          furniture_price: updatedLeadData.furniture_price,
+          status: updatedLeadData.status,
+          specific_needs: updatedLeadData.specific_needs,
+          attention_points: updatedLeadData.attention_points,
+          relationship_details: updatedLeadData.relationship_details,
+          updated_at: new Date().toISOString()
         };
 
         const { error: ownerError } = await supabase
@@ -113,6 +138,13 @@ export function useLeadDetail(id: string | undefined) {
 
         if (ownerError) {
           console.error("Error updating owner data:", ownerError);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de synchroniser les données propriétaire."
+          });
+        } else {
+          console.log("Owner data synchronized successfully");
         }
       }
       
