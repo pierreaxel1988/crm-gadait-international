@@ -119,7 +119,7 @@ const OwnerPropertySection: React.FC<OwnerPropertySectionProps> = ({
         <StyledSelect
           id="property_type"
           value={ownerData?.property_type || ''}
-          onChange={e => updateOwnerData({ property_type: e.target.value })}
+          onChange={e => updateOwnerData({ property_type: e.target.value as PropertyType })}
           placeholder="Sélectionner un type"
           options={propertyTypes.map(type => ({ value: type, label: type }))}
           disabled={loading}

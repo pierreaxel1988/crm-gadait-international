@@ -552,23 +552,40 @@ export type Database = {
       }
       owners: {
         Row: {
+          assets: string[] | null
           assigned_to: string | null
           attention_points: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          construction_year: string | null
           contact_source: string | null
+          country: string | null
           created_at: string
+          currency: string | null
+          desired_location: string | null
+          desired_price: string | null
           email: string | null
+          equipment: string[] | null
+          fees: string | null
           first_contact_date: string | null
           full_name: string
           furnished: boolean | null
           furniture_included_in_price: boolean | null
           furniture_price: string | null
           id: string
+          land_area: string | null
           last_contact_date: string | null
+          living_area: string | null
+          location: string | null
           mandate_type: string | null
+          map_coordinates: string | null
           nationality: string | null
           next_action_date: string | null
           phone: string | null
           preferred_language: string | null
+          property_description: string | null
+          property_state: string | null
+          property_type: string | null
           relationship_details: string | null
           relationship_status: string | null
           specific_needs: string | null
@@ -576,23 +593,40 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assets?: string[] | null
           assigned_to?: string | null
           attention_points?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          construction_year?: string | null
           contact_source?: string | null
+          country?: string | null
           created_at?: string
+          currency?: string | null
+          desired_location?: string | null
+          desired_price?: string | null
           email?: string | null
+          equipment?: string[] | null
+          fees?: string | null
           first_contact_date?: string | null
           full_name: string
           furnished?: boolean | null
           furniture_included_in_price?: boolean | null
           furniture_price?: string | null
           id?: string
+          land_area?: string | null
           last_contact_date?: string | null
+          living_area?: string | null
+          location?: string | null
           mandate_type?: string | null
+          map_coordinates?: string | null
           nationality?: string | null
           next_action_date?: string | null
           phone?: string | null
           preferred_language?: string | null
+          property_description?: string | null
+          property_state?: string | null
+          property_type?: string | null
           relationship_details?: string | null
           relationship_status?: string | null
           specific_needs?: string | null
@@ -600,23 +634,40 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assets?: string[] | null
           assigned_to?: string | null
           attention_points?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          construction_year?: string | null
           contact_source?: string | null
+          country?: string | null
           created_at?: string
+          currency?: string | null
+          desired_location?: string | null
+          desired_price?: string | null
           email?: string | null
+          equipment?: string[] | null
+          fees?: string | null
           first_contact_date?: string | null
           full_name?: string
           furnished?: boolean | null
           furniture_included_in_price?: boolean | null
           furniture_price?: string | null
           id?: string
+          land_area?: string | null
           last_contact_date?: string | null
+          living_area?: string | null
+          location?: string | null
           mandate_type?: string | null
+          map_coordinates?: string | null
           nationality?: string | null
           next_action_date?: string | null
           phone?: string | null
           preferred_language?: string | null
+          property_description?: string | null
+          property_state?: string | null
+          property_type?: string | null
           relationship_details?: string | null
           relationship_status?: string | null
           specific_needs?: string | null
