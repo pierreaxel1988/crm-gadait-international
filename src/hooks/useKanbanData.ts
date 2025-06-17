@@ -50,9 +50,6 @@ export interface ExtendedKanbanItem extends KanbanItem {
   // Ajout des nouveaux champs pour les propriétaires
   desired_price?: string;
   fees?: string;
-  furnished?: boolean;
-  furniture_included_in_price?: boolean;
-  furniture_price?: string;
   // Ajout du champ email_envoye qui est désormais requis
   email_envoye?: boolean;
 }
@@ -206,10 +203,7 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
               renovation_needed: lead.renovationNeeded || '',
               desired_price: lead.desired_price || '',
               fees: lead.fees || '',
-              furnished: lead.furnished || false,
-              furniture_included_in_price: lead.furniture_included_in_price || false,
-              furniture_price: lead.furniture_price || '',
-              email_envoye: lead.email_envoye || false // Ajout de cette propriété
+              email_envoye: lead.email_envoye || false
             }));
           }
         }
@@ -257,10 +251,7 @@ export const useKanbanData = (columns: KanbanColumn[], refreshTrigger: number = 
             phoneCountryCode: lead.phone_country_code,
             phoneCountryCodeDisplay: lead.phone_country_code_display,
             preferredLanguage: lead.preferred_language,
-            furnished: lead.furnished,
-            furniture_included_in_price: lead.furniture_included_in_price,
-            furniture_price: lead.furniture_price,
-            email_envoye: lead.email_envoye || false // Ajout de cette propriété
+            email_envoye: lead.email_envoye || false
           };
         });
         
