@@ -66,7 +66,7 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: "Impossible de mettre à jour les données du mobilier."
+          description: "Impossible de mettre à jour les données du prix."
         });
         return;
       }
@@ -74,7 +74,7 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({
       setOwnerData(prev => prev ? { ...prev, ...updates } : null);
       toast({
         title: "Succès",
-        description: "Données du mobilier mises à jour."
+        description: "Données du prix mises à jour."
       });
     } catch (error) {
       console.error('Error in updateOwnerData:', error);
@@ -87,11 +87,12 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({
         <Label htmlFor="desired_price" className="text-sm">Prix souhaité</Label>
         <Input 
           id="desired_price" 
-          value={lead.desired_price || ''} 
-          onChange={e => onDataChange({ desired_price: e.target.value })} 
+          value={ownerData?.desired_price || ''} 
+          onChange={e => updateOwnerData({ desired_price: e.target.value })} 
           placeholder="Ex : 450 000" 
           className="w-full font-futura" 
-          type="text" 
+          type="text"
+          disabled={loading}
         />
       </div>
 
@@ -99,11 +100,12 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({
         <Label htmlFor="fees" className="text-sm">Honoraires</Label>
         <Input 
           id="fees" 
-          value={lead.fees || ''} 
-          onChange={e => onDataChange({ fees: e.target.value })} 
+          value={ownerData?.fees || ''} 
+          onChange={e => updateOwnerData({ fees: e.target.value })} 
           placeholder="Ex : 5%" 
           className="w-full font-futura" 
-          type="text" 
+          type="text"
+          disabled={loading}
         />
       </div>
 
@@ -111,8 +113,8 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({
         <Label htmlFor="currency" className="text-sm">Devise</Label>
         <StyledSelect
           id="currency"
-          value={lead.currency || 'EUR'}
-          onChange={e => onDataChange({ currency: e.target.value as Currency })}
+          value={ownerData?.currency || 'EUR'}
+          onChange={e => updateOwnerData({ currency: e.target.value as Currency })}
           options={[
             { value: "EUR", label: "EUR (€)" },
             { value: "USD", label: "USD ($)" },
@@ -121,69 +123,66 @@ const OwnerPriceFields: React.FC<OwnerPriceFieldsProps> = ({
             { value: "AED", label: "AED (د.إ)" },
             { value: "MUR", label: "MUR (₨)" }
           ]}
+          disabled={loading}
         />
       </div>
 
-      {/* Section mobilier pour les propriétaires */}
-      {lead.pipelineType === 'owners' && (
+      {/* Section mobilier */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3 pt-2">
+          <Label htmlFor="furnished" className="text-sm">Meublé</Label>
+          <Switch 
+            id="furnished" 
+            checked={!!ownerData?.furnished} 
+            onCheckedChange={checked => {
+              const updates: Partial<Owner> = {
+                furnished: checked,
+                furniture_included_in_price: checked ? true : false,
+                furniture_price: checked ? ownerData?.furniture_price : undefined
+              };
+              updateOwnerData(updates);
+            }} 
+            disabled={loading}
+          />
+          <span className="ml-2 text-xs font-futura">
+            {ownerData?.furnished ? 'Oui' : 'Non'}
+          </span>
+        </div>
+      </div>
+
+      {ownerData?.furnished && (
         <>
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 pt-2">
-              <Label htmlFor="furnished" className="text-sm">Meublé</Label>
+          <div className="space-y-2 mt-2">
+            <Label htmlFor="furniture_included" className="text-sm">Mobilier inclus dans le prix</Label>
+            <div className="flex items-center gap-3">
               <Switch 
-                id="furnished" 
-                checked={!!ownerData?.furnished} 
-                onCheckedChange={checked => {
-                  const updates: Partial<Owner> = {
-                    furnished: checked,
-                    furniture_included_in_price: checked ? true : false,
-                    furniture_price: checked ? ownerData?.furniture_price : undefined
-                  };
-                  updateOwnerData(updates);
-                }} 
+                id="furniture_included" 
+                checked={!!ownerData?.furniture_included_in_price} 
+                onCheckedChange={checked => updateOwnerData({
+                  furniture_included_in_price: checked,
+                  furniture_price: checked ? undefined : ownerData?.furniture_price
+                })} 
                 disabled={loading}
               />
               <span className="ml-2 text-xs font-futura">
-                {ownerData?.furnished ? 'Oui' : 'Non'}
+                {ownerData?.furniture_included_in_price ? 'Oui' : 'Non'}
               </span>
             </div>
           </div>
 
-          {ownerData?.furnished && (
-            <>
-              <div className="space-y-2 mt-2">
-                <Label htmlFor="furniture_included" className="text-sm">Mobilier inclus dans le prix</Label>
-                <div className="flex items-center gap-3">
-                  <Switch 
-                    id="furniture_included" 
-                    checked={!!ownerData?.furniture_included_in_price} 
-                    onCheckedChange={checked => updateOwnerData({
-                      furniture_included_in_price: checked,
-                      furniture_price: checked ? undefined : ownerData?.furniture_price
-                    })} 
-                    disabled={loading}
-                  />
-                  <span className="ml-2 text-xs font-futura">
-                    {ownerData?.furniture_included_in_price ? 'Oui' : 'Non'}
-                  </span>
-                </div>
-              </div>
-
-              {!ownerData?.furniture_included_in_price && (
-                <div className="space-y-2 mt-2">
-                  <Label htmlFor="furniture_price" className="text-sm">Valorisation du mobilier</Label>
-                  <Input 
-                    id="furniture_price" 
-                    value={ownerData?.furniture_price || ''} 
-                    onChange={e => updateOwnerData({ furniture_price: e.target.value })} 
-                    placeholder="Ex : 45 000" 
-                    className="w-full font-futura" 
-                    type="text"
-                    disabled={loading}
-                  />
-                </div>
-              )}
-            </>
+          {!ownerData?.furniture_included_in_price && (
+            <div className="space-y-2 mt-2">
+              <Label htmlFor="furniture_price" className="text-sm">Valorisation du mobilier</Label>
+              <Input 
+                id="furniture_price" 
+                value={ownerData?.furniture_price || ''} 
+                onChange={e => updateOwnerData({ furniture_price: e.target.value })} 
+                placeholder="Ex : 45 000" 
+                className="w-full font-futura" 
+                type="text"
+                disabled={loading}
+              />
+            </div>
           )}
         </>
       )}

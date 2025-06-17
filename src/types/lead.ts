@@ -1,4 +1,3 @@
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -122,7 +121,7 @@ import { TaskType } from "@/components/kanban/KanbanCard";
 
 export type { LeadStatus, LeadTag, TaskType };
 
-// Nouveau type pour les propriétaires avec les champs mobilier
+// Nouveau type pour les propriétaires avec tous les champs nécessaires
 export interface Owner {
   id: string;
   full_name: string;
@@ -143,10 +142,34 @@ export interface Owner {
   relationship_details?: string;
   created_at: string;
   updated_at: string;
-  // Nouveaux champs de mobilier
+  
+  // Champs de mobilier
   furnished?: boolean;
   furniture_included_in_price?: boolean;
   furniture_price?: string;
+  
+  // Champs de prix
+  desired_price?: string;
+  fees?: string;
+  currency?: Currency;
+  
+  // Champs de localisation
+  country?: string;
+  location?: string;
+  desired_location?: string;
+  map_coordinates?: string;
+  
+  // Champs de propriété
+  property_type?: PropertyType;
+  bedrooms?: number;
+  bathrooms?: number;
+  living_area?: string;
+  land_area?: string;
+  construction_year?: string;
+  property_state?: PropertyState;
+  property_description?: string;
+  assets?: AssetType[];
+  equipment?: Equipment[];
 }
 
 export interface LeadDetailed {
