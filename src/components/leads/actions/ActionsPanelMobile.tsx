@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ActionHistory } from '@/types/actionHistory';
@@ -8,11 +9,12 @@ import { toast } from '@/hooks/use-toast';
 import ActionDialog from './ActionDialog';
 import { Calendar, Clock, Check, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ActionsPanelMobileProps {
   leadId: string;
-  onMarkComplete: (action: ActionHistory) => void;
-  onAddAction: () => void;
+  onMarkComplete?: (action: ActionHistory) => void;
+  onAddAction?: () => void;
   actionHistory?: ActionHistory[];
 }
 
@@ -124,7 +126,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         const updatedActionHistory = (currentLead.actionHistory || [])
           .filter(action => action.id !== actionId);
         
-        // Update both leads table and owners table if it's an owner pipeline
+        // Update only owners table if it's an owner pipeline
         if (currentLead.pipelineType === 'owners') {
           const { error: ownerError } = await supabase
             .from('owners')
@@ -133,21 +135,33 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             
           if (ownerError) {
             console.error('Error updating owner action history:', ownerError);
+            toast({
+              variant: "destructive",
+              title: "Erreur",
+              description: "Impossible de supprimer l'action"
+            });
+            return;
           }
-        }
-        
-        const updatedLead = await updateLead({
-          ...currentLead,
-          actionHistory: updatedActionHistory,
-          email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
-        });
-        
-        if (updatedLead) {
-          setLead(updatedLead);
+          
           toast({
             title: "Action supprimée",
             description: "L'action a été supprimée avec succès"
           });
+        } else {
+          // Update leads table for other pipeline types
+          const updatedLead = await updateLead({
+            ...currentLead,
+            actionHistory: updatedActionHistory,
+            email_envoye: false
+          });
+          
+          if (updatedLead) {
+            setLead(updatedLead);
+            toast({
+              title: "Action supprimée",
+              description: "L'action a été supprimée avec succès"
+            });
+          }
         }
       }
     } catch (error) {
@@ -175,7 +189,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         return;
       }
       
-      // Récupérer les données actuelles du lead
       const currentLead = await getLead(leadId);
       if (!currentLead || !currentLead.actionHistory) {
         toast({
@@ -186,7 +199,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         return;
       }
       
-      // Mettre à jour l'action correspondante
       const updatedActionHistory = currentLead.actionHistory.map(a => {
         if (a.id === action.id) {
           return {
@@ -197,7 +209,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         return a;
       });
       
-      // Update both leads table and owners table if it's an owner pipeline
+      // Update only owners table if it's an owner pipeline
       if (currentLead.pipelineType === 'owners') {
         const { error: ownerError } = await supabase
           .from('owners')
@@ -209,24 +221,40 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
           
         if (ownerError) {
           console.error('Error updating owner action history:', ownerError);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de compléter l'action."
+          });
+          return;
         }
-      }
-      
-      // Mettre à jour le lead avec l'action complétée
-      // Important: Définir email_envoye à false pour éviter le déclenchement d'emails automatiques
-      const updatedLead = await updateLead({
-        ...currentLead,
-        actionHistory: updatedActionHistory,
-        email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
-      });
-      
-      if (updatedLead) {
-        onMarkComplete(action);
+        
+        if (onMarkComplete) {
+          onMarkComplete(action);
+        }
         
         toast({
           title: "Action complétée",
           description: "L'action a été marquée comme terminée."
         });
+      } else {
+        // Update leads table for other pipeline types
+        const updatedLead = await updateLead({
+          ...currentLead,
+          actionHistory: updatedActionHistory,
+          email_envoye: false
+        });
+        
+        if (updatedLead) {
+          if (onMarkComplete) {
+            onMarkComplete(action);
+          }
+          
+          toast({
+            title: "Action complétée",
+            description: "L'action a été marquée comme terminée."
+          });
+        }
       }
     } catch (error) {
       console.error('Error completing action:', error);

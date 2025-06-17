@@ -61,7 +61,7 @@ export type PropertyUse =
 export type PipelineType = 
   | "purchase" 
   | "rental"
-  | "owners"; // Ajout du pipeline propriétaires
+  | "owners";
 
 export type Currency =
   | "EUR"
@@ -158,7 +158,7 @@ export interface Owner {
   
   // Nouveaux champs pour l'onglet "Statut"
   status?: string;
-  task_type?: TaskType;
+  task_type?: string;
   next_follow_up_date?: string;
   
   // Nouveaux champs pour l'onglet "Notes"
@@ -200,7 +200,7 @@ export interface Owner {
 export interface LeadDetailed {
   id: string;
   name: string;
-  salutation?: 'M.' | 'Mme';  // New field for "Civilité"
+  salutation?: 'M.' | 'Mme';
   email?: string;
   phone?: string;
   phoneCountryCode?: string;
@@ -302,6 +302,14 @@ export interface LeadDetailed {
   accessibility?: string;
   exposure?: string;
   mapCoordinates?: string;
+  
+  // Owner-specific fields from the owners table
+  furnished?: boolean;
+  furniture_included_in_price?: boolean;
+  furniture_price?: string;
+  specific_needs?: string;
+  attention_points?: string;
+  relationship_details?: string;
   
   // Nouvel ajout pour compatibilité avec le champ email_envoye de la base de données
   email_envoye?: boolean;

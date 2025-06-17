@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
@@ -79,7 +80,7 @@ export function useLeadDetail(id: string | undefined) {
         console.log("Converting 'jean-marc-perrissol' to proper UUID before save:", JEAN_MARC_ID);
       }
       
-      // Pour les propriétaires, sauvegarder aussi dans la table owners
+      // Pour les propriétaires, sauvegarder UNIQUEMENT dans la table owners
       if (lead.pipelineType === 'owners') {
         const ownerUpdates = {
           full_name: updatedLeadData.name,
@@ -112,7 +113,7 @@ export function useLeadDetail(id: string | undefined) {
           desired_location: updatedLeadData.desiredLocation,
           map_coordinates: updatedLeadData.mapCoordinates,
           property_type: updatedLeadData.propertyType,
-          bedrooms: updatedLeadData.bedrooms,
+          bedrooms: Array.isArray(updatedLeadData.bedrooms) ? updatedLeadData.bedrooms[0] : updatedLeadData.bedrooms,
           bathrooms: updatedLeadData.bathrooms,
           living_area: updatedLeadData.livingArea,
           land_area: updatedLeadData.landArea,
@@ -141,33 +142,44 @@ export function useLeadDetail(id: string | undefined) {
           toast({
             variant: "destructive",
             title: "Erreur",
-            description: "Impossible de synchroniser les données propriétaire."
+            description: "Impossible de sauvegarder les données propriétaire."
           });
-        } else {
-          console.log("Owner data synchronized successfully");
+          return;
         }
-      }
-      
-      const updatedLead = await updateLead({
-        ...updatedLeadData,
-        phoneCountryCode: updatedLeadData.phoneCountryCode || '+33',
-        phoneCountryCodeDisplay: updatedLeadData.phoneCountryCodeDisplay || '🇫🇷',
-        preferredLanguage: updatedLeadData.preferredLanguage || null
-      });
-      
-      if (updatedLead) {
+
+        console.log("Owner data saved successfully to owners table only");
+        
         if (!silent) {
           toast({
-            title: "Lead mis à jour",
+            title: "Propriétaire mis à jour",
             description: "Les modifications ont été enregistrées avec succès."
           });
         }
         
-        setLead(updatedLead);
         setHasChanges(false);
+      } else {
+        // Pour les autres types de leads, utiliser updateLead
+        const updatedLead = await updateLead({
+          ...updatedLeadData,
+          phoneCountryCode: updatedLeadData.phoneCountryCode || '+33',
+          phoneCountryCodeDisplay: updatedLeadData.phoneCountryCodeDisplay || '🇫🇷',
+          preferredLanguage: updatedLeadData.preferredLanguage || null
+        });
+        
+        if (updatedLead) {
+          if (!silent) {
+            toast({
+              title: "Lead mis à jour",
+              description: "Les modifications ont été enregistrées avec succès."
+            });
+          }
+          
+          setLead(updatedLead);
+          setHasChanges(false);
+        }
       }
     } catch (error) {
-      console.error("Error saving lead:", error);
+      console.error("Error saving:", error);
       toast({
         variant: "destructive",
         title: "Erreur",

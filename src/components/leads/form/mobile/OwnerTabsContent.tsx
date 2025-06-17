@@ -83,7 +83,13 @@ const OwnerTabsContent: React.FC<OwnerTabsContentProps> = ({
       case 'notes':
         return <OwnerNotesSection lead={lead} onDataChange={onDataChange} />;
       case 'actions':
-        return <ActionsPanelMobile leadId={lead.id} />;
+        return (
+          <ActionsPanelMobile 
+            leadId={lead.id}
+            onMarkComplete={() => {}}
+            onAddAction={() => {}}
+          />
+        );
       default:
         return <OwnerInfoSection lead={lead} onDataChange={onDataChange} />;
     }
