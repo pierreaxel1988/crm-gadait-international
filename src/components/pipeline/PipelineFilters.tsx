@@ -141,16 +141,23 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     </div>
   );
 
-  // For desktop, display as a regular div
+  // For desktop, display as a smooth scrolling panel with better performance
   if (!isMobile) {
     return (
-      <div className="bg-background border rounded-md shadow-sm">
-        {filtersContent}
+      <div className="bg-background border rounded-lg shadow-lg max-w-md">
+        <div className="sticky top-0 bg-background border-b px-4 py-3 rounded-t-lg z-10">
+          <h3 className="text-sm font-medium">Filtres</h3>
+        </div>
+        <ScrollArea className="h-[calc(100vh-200px)] max-h-[600px]">
+          <div className="px-4 pb-4">
+            {filtersContent}
+          </div>
+        </ScrollArea>
       </div>
     );
   }
 
-  // For mobile, display in a sheet/drawer with improved scrolling
+  // For mobile, display in a sheet/drawer
   return (
     <SheetContent side="right" className="w-full sm:max-w-md p-0 pt-12">
       <SheetHeader className="px-4 py-2 border-b">
