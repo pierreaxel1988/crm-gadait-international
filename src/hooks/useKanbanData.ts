@@ -31,6 +31,7 @@ export const useKanbanData = (
   const [data, setData] = useState<LeadDetailed[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [loadedColumns, setLoadedColumns] = useState<any[]>([]);
 
   // Fetch team members
   const fetchTeamMembers = useCallback(async () => {
@@ -106,6 +107,15 @@ export const useKanbanData = (
       const convertedData = rawData?.map(convertToSimpleLead) || [];
       setData(convertedData);
       
+      // Set columns for pipeline view
+      const columns = [
+        { title: 'Nouveau', status: 'new', items: convertedData.filter(lead => lead.status === 'new') },
+        { title: 'En cours', status: 'in_progress', items: convertedData.filter(lead => lead.status === 'in_progress') },
+        { title: 'Qualifié', status: 'qualified', items: convertedData.filter(lead => lead.status === 'qualified') },
+        { title: 'Fermé', status: 'closed', items: convertedData.filter(lead => lead.status === 'closed') }
+      ];
+      setLoadedColumns(columns);
+      
     } catch (error) {
       console.error('Error fetching leads:', error);
       toast({
@@ -130,6 +140,7 @@ export const useKanbanData = (
     data,
     isLoading,
     teamMembers,
+    loadedColumns,
     refetch: fetchData
   };
 };

@@ -88,6 +88,7 @@ const OwnerTabsContent: React.FC<OwnerTabsContentProps> = ({
             leadId={lead.id}
             onMarkComplete={() => {}}
             onAddAction={() => {}}
+            actionHistory={lead.actionHistory || []}
           />
         );
       default:

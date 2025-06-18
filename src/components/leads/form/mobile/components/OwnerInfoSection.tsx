@@ -55,6 +55,16 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
     "Néo-zélandaise", "Fidjienne", "Tonguienne", "Samoane", "Vanuatuaise"
   ];
 
+  const COUNTRIES = [
+    "France", "Monaco", "Switzerland", "Italy", "Spain", "Portugal", 
+    "United Kingdom", "Germany", "Belgium", "Netherlands", "Mauritius", "Dubai", "USA"
+  ];
+
+  const LANGUAGES = [
+    "Français", "English", "Español", "Deutsch", "Italiano", "Nederlands", 
+    "Português", "русский", "中文", "العربية", "हिन्दी", "日本語"
+  ];
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -111,6 +121,17 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="residenceCountry" className="text-sm">Pays de résidence</Label>
+        <StyledSelect
+          id="residenceCountry"
+          value={lead.residenceCountry || ''}
+          onChange={e => onDataChange({ residenceCountry: e.target.value })}
+          placeholder="Sélectionner un pays"
+          options={COUNTRIES.map(country => ({ value: country, label: country }))}
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
         <StyledSelect
           id="nationality"
@@ -118,6 +139,17 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
           onChange={e => onDataChange({ nationality: e.target.value })}
           placeholder="Sélectionner une nationalité"
           options={NATIONALITIES.map(nationality => ({ value: nationality, label: nationality }))}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="preferredLanguage" className="text-sm">Langue préférée</Label>
+        <StyledSelect
+          id="preferredLanguage"
+          value={lead.preferredLanguage || ''}
+          onChange={e => onDataChange({ preferredLanguage: e.target.value })}
+          placeholder="Sélectionner une langue"
+          options={LANGUAGES.map(language => ({ value: language, label: language }))}
         />
       </div>
 
