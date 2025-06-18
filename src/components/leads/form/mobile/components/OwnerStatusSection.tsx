@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, PipelineType } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -50,8 +49,7 @@ const LEAD_TAGS = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "
 
 const MANDATE_TYPES = [
   "Exclusif",
-  "Non exclusif", 
-  "Exclu"
+  "Non exclusif"
 ];
 
 interface OwnerStatusSectionProps {
