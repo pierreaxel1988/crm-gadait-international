@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -197,12 +198,11 @@ const LeadDetailMobile = () => {
             onWhatsAppClick={handleWhatsAppClick} 
             onEmailClick={handleEmailClick} 
             onCallComplete={() => {}} 
-            lead={lead}
           />
         </div>
         
         <div className="bg-loro-50">
-          <LeadDetailTabs activeTab={activeTab} pendingActionsCount={getPendingActionsCount()} />
+          <LeadDetailTabs defaultTab={activeTab} pendingActionsCount={getPendingActionsCount()} />
         </div>
       </div>
       
