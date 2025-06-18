@@ -1,3 +1,4 @@
+
 import { LeadDetailed } from "@/types/lead";
 
 // Important UUIDs for team members
@@ -80,7 +81,7 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
     desired_price: supabaseData.desired_price || '',
     fees: supabaseData.fees || '',
     relationship_status: supabaseData.relationship_status,
-    mandate_type: supabaseData.mandate_type, // Mapping correct pour mandate_type
+    mandate_type: supabaseData.mandate_type, // Ensure correct mapping
     specific_needs: supabaseData.specific_needs || '',
     attention_points: supabaseData.attention_points || '',
     relationship_details: supabaseData.relationship_details || '',
@@ -172,7 +173,7 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     desired_price: leadData.desired_price,
     fees: leadData.fees,
     relationship_status: leadData.relationship_status,
-    mandate_type: leadData.mandate_type, // Mapping correct pour mandate_type
+    mandate_type: leadData.mandate_type, // Ensure correct mapping to database
     specific_needs: leadData.specific_needs,
     attention_points: leadData.attention_points,
     relationship_details: leadData.relationship_details,
@@ -196,5 +197,40 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     
     // Google Drive link
     google_drive_link: leadData.google_drive_link
+  };
+};
+
+/**
+ * Formats budget for display
+ */
+export const formatBudget = (budget: string | undefined, currency: string = 'EUR'): string => {
+  if (!budget) return '';
+  
+  // Si le budget contient déjà une devise, le retourner tel quel
+  if (budget.includes('€') || budget.includes('$') || budget.includes('£')) {
+    return budget;
+  }
+  
+  // Sinon, ajouter la devise appropriée
+  const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : '£';
+  return `${budget} ${currencySymbol}`;
+};
+
+/**
+ * Converts a lead to a simplified format for lists
+ */
+export const convertToSimpleLead = (lead: LeadDetailed): any => {
+  return {
+    id: lead.id,
+    name: lead.name,
+    email: lead.email,
+    phone: lead.phone,
+    status: lead.status,
+    assignedTo: lead.assignedTo,
+    createdAt: lead.createdAt,
+    tags: lead.tags || [],
+    budget: lead.budget,
+    location: lead.desiredLocation || lead.location,
+    pipelineType: lead.pipelineType || 'purchase'
   };
 };

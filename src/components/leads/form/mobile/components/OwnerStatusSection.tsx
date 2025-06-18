@@ -87,6 +87,7 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
   }, []);
 
   const handleInputChange = (field: keyof LeadDetailed, value: any) => {
+    console.log(`Updating ${field} with value:`, value); // Debug log
     onDataChange({
       [field]: value
     } as Partial<LeadDetailed>);
@@ -168,6 +169,11 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
     }
   };
 
+  const handleMandateTypeChange = (value: string) => {
+    console.log('Mandate type changed to:', value); // Debug log
+    handleInputChange('mandate_type', value);
+  };
+
   const dynamicTopMargin = isHeaderMeasured 
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
@@ -238,7 +244,7 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
             </div>
             <Select 
               value={lead.mandate_type || ''} 
-              onValueChange={value => handleInputChange('mandate_type', value)}
+              onValueChange={handleMandateTypeChange}
             >
               <SelectTrigger id="mandate_type" className="w-full rounded-l-none font-futura">
                 <SelectValue placeholder="Sélectionner un type de mandat" />

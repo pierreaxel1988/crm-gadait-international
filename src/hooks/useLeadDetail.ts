@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
@@ -78,12 +79,16 @@ export function useLeadDetail(id: string | undefined) {
         console.log("Converting 'jean-marc-perrissol' to proper UUID before save:", JEAN_MARC_ID);
       }
       
+      // Log mandate_type before saving
+      console.log("Mandate type before save:", updatedLeadData.mandate_type);
+      
       // Utiliser updateLead pour tous les types de leads, y compris les propriétaires
       const updatedLead = await updateLead({
         ...updatedLeadData,
         phoneCountryCode: updatedLeadData.phoneCountryCode || '+33',
         phoneCountryCodeDisplay: updatedLeadData.phoneCountryCodeDisplay || '🇫🇷',
-        preferredLanguage: updatedLeadData.preferredLanguage || null
+        preferredLanguage: updatedLeadData.preferredLanguage || null,
+        mandate_type: updatedLeadData.mandate_type // Ensure mandate_type is included
       });
       
       if (updatedLead) {
@@ -94,6 +99,7 @@ export function useLeadDetail(id: string | undefined) {
           });
         }
         
+        console.log("Lead saved successfully with mandate_type:", updatedLead.mandate_type);
         setLead(updatedLead);
         setHasChanges(false);
       }
@@ -133,6 +139,14 @@ export function useLeadDetail(id: string | undefined) {
     if (!lead) return;
     
     console.log("Updating lead data:", data);
+    
+    // Special logging for mandate_type changes
+    if (data.mandate_type !== undefined) {
+      console.log("Mandate type change detected:", {
+        oldValue: lead.mandate_type,
+        newValue: data.mandate_type
+      });
+    }
     
     // Check for agent ID conversions
     if (data.assignedTo === 'jade-diouane') {
