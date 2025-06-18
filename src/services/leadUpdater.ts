@@ -6,7 +6,7 @@ import { mapToLeadDetailed, mapToSupabaseFormat } from "./utils/leadMappers";
 // Important UUIDs
 const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
 const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11";
-const SHARON_ID = "e564a874-2520-4167-bfa8-26d39f119470"; // Add Sharon's UUID
+const SHARON_ID = "e564a874-2520-4167-bfa8-26d39f119470";
 
 /**
  * Updates an existing lead in the database
@@ -28,7 +28,6 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     console.log("Preparing lead data for update:", supabaseLeadData);
     
     // Ensure phone-related fields are always explicitly included in the update
-    // Use nullish coalescing to avoid setting undefined values
     supabaseLeadData.phone_country_code = leadData.phoneCountryCode ?? null;
     supabaseLeadData.phone_country_code_display = leadData.phoneCountryCodeDisplay ?? null;
     
@@ -43,22 +42,24 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     // Ensure mandate_type is included in the update
     supabaseLeadData.mandate_type = leadData.mandate_type ?? null;
     
-    // Debug log for phone-related fields
-    console.log("Phone-related fields:", {
-      phoneCountryCode: leadData.phoneCountryCode,
-      phoneCountryCodeDisplay: leadData.phoneCountryCodeDisplay,
-      phone: leadData.phone
-    });
+    // Clean up fields that might cause issues - remove any fields that don't exist in the database
+    const cleanedData = { ...supabaseLeadData };
+    
+    // Remove problematic fields that might not exist in the database schema
+    delete cleanedData.energy_class;
+    delete cleanedData.yearly_taxes;
+    delete cleanedData.condo_fees;
+    delete cleanedData.facilities;
+    
+    // Handle parking_spaces and floors - convert objects to proper values
+    if (cleanedData.parking_spaces && typeof cleanedData.parking_spaces === 'object') {
+      cleanedData.parking_spaces = null;
+    }
+    if (cleanedData.floors && typeof cleanedData.floors === 'object') {
+      cleanedData.floors = null;
+    }
 
-    // Debug log for language field
-    console.log("Language field:", {
-      preferredLanguage: leadData.preferredLanguage
-    });
-
-    // Debug log for mandate_type field
-    console.log("Mandate type field:", {
-      mandate_type: leadData.mandate_type
-    });
+    console.log("Final cleaned data for update:", cleanedData);
     
     // Special handling for multiple bedroom selections
     const isMultipleBedroomsSelected = Array.isArray(leadData.bedrooms) && leadData.bedrooms.length > 1;
@@ -67,7 +68,7 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     
     if (isMultipleBedroomsSelected) {
       // First update everything except bedrooms
-      const { bedrooms, ...dataWithoutBedrooms } = supabaseLeadData;
+      const { bedrooms, ...dataWithoutBedrooms } = cleanedData;
       
       result = await supabase
         .from('leads')
@@ -99,7 +100,7 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
       // Standard update for simple cases
       result = await supabase
         .from('leads')
-        .update(supabaseLeadData)
+        .update(cleanedData)
         .eq('id', leadData.id)
         .select()
         .single();
@@ -110,7 +111,6 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
       }
     }
     
-    // Verify action history was saved properly
     console.log("Update response:", result.data);
     
     if (result.data) {
