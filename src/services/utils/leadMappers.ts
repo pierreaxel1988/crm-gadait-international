@@ -1,262 +1,200 @@
-import { LeadDetailed, LeadStatus, PropertyType } from '@/types/lead';
-import { ActionHistory } from '@/types/actionHistory';
-import { TaskType } from '@/components/kanban/KanbanCard';
+import { LeadDetailed } from "@/types/lead";
 
-export const mapToLeadDetailed = (lead: any): LeadDetailed => {
-  // Parse and validate action history
-  let actionHistory: ActionHistory[] = [];
-  try {
-    if (lead.action_history) {
-      // Handle both string and object formats
-      if (typeof lead.action_history === 'string') {
-        actionHistory = JSON.parse(lead.action_history);
-      } else {
-        actionHistory = lead.action_history;
-      }
-    }
+// Important UUIDs for team members
+const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
+const JEAN_MARC_ID = "af8e053c-8fae-4424-abaa-d79029fd8a11";
+const SHARON_ID = "e564a874-2520-4167-bfa8-26d39f119470";
+
+/**
+ * Maps a Supabase lead record to our LeadDetailed type
+ */
+export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
+  
+  const lead: LeadDetailed = {
+    id: supabaseData.id,
+    name: supabaseData.name || '',
+    salutation: supabaseData.salutation,
+    email: supabaseData.email || '',
+    phone: supabaseData.phone || '',
+    phoneCountryCode: supabaseData.phone_country_code,
+    phoneCountryCodeDisplay: supabaseData.phone_country_code_display,
+    location: supabaseData.location || '',
+    status: supabaseData.status,
+    tags: supabaseData.tags || [],
+    createdAt: supabaseData.created_at,
+    lastContactedAt: supabaseData.last_contacted_at,
+    assignedTo: supabaseData.assigned_to,
+    source: supabaseData.source,
+    propertyReference: supabaseData.property_reference || '',
+    budget: supabaseData.budget || '',
+    budgetMin: supabaseData.budget_min || '',
+    currency: supabaseData.currency || 'EUR',
+    desiredLocation: supabaseData.desired_location || '',
+    propertyType: supabaseData.property_type || '',
+    propertyTypes: supabaseData.property_types || [],
+    bedrooms: supabaseData.bedrooms,
+    views: supabaseData.views || [],
+    amenities: supabaseData.amenities || [],
+    purchaseTimeframe: supabaseData.purchase_timeframe,
+    financingMethod: supabaseData.financing_method,
+    propertyUse: supabaseData.property_use,
+    nationality: supabaseData.nationality || '',
+    preferredLanguage: supabaseData.preferred_language,
+    taskType: supabaseData.task_type,
+    notes: supabaseData.notes || '',
+    internal_notes: supabaseData.internal_notes || '',
+    nextFollowUpDate: supabaseData.next_follow_up_date,
+    country: supabaseData.country,
+    url: supabaseData.url || '',
+    pipelineType: supabaseData.pipeline_type || 'purchase',
+    pipeline_type: supabaseData.pipeline_type || 'purchase',
+    taxResidence: supabaseData.tax_residence,
+    regions: supabaseData.regions || [],
     
-    // Ensure it's an array
-    if (!Array.isArray(actionHistory)) {
-      actionHistory = [];
-      console.warn('Invalid action history format - reset to empty array');
-    }
-  } catch (error) {
-    console.error('Error parsing action_history:', error);
-    actionHistory = [];
-  }
-
-  // Handle bedrooms conversion from database
-  let bedrooms;
-  if (lead.raw_data && lead.raw_data.bedroom_values) {
-    // If we have stored bedroom values in raw_data, use those (for multiple selections)
-    try {
-      bedrooms = JSON.parse(lead.raw_data.bedroom_values);
-    } catch (e) {
-      console.error('Error parsing bedroom_values:', e);
-      bedrooms = lead.bedrooms ? [lead.bedrooms] : [];
-    }
-  } else if (Array.isArray(lead.bedrooms)) {
-    bedrooms = lead.bedrooms;
-  } else if (lead.bedrooms !== null && lead.bedrooms !== undefined) {
-    // Convert single value to array for consistency in UI
-    bedrooms = [lead.bedrooms];
-  }
-
-  return {
-    id: lead.id || '',
-    name: lead.name || '',
-    salutation: lead.salutation,
-    email: lead.email || '',
-    phone: lead.phone || '',
-    phoneCountryCode: lead.phone_country_code || '+33',
-    phoneCountryCodeDisplay: lead.phone_country_code_display || '🇫🇷',
-    location: lead.location || '',
-    status: lead.status || 'New',
-    tags: lead.tags || [],
-    createdAt: lead.created_at || new Date().toISOString(),
-    lastContactedAt: lead.last_contacted_at,
-    assignedTo: lead.assigned_to,
-    source: lead.source,
-    propertyReference: lead.property_reference,
-    budget: lead.budget,
-    budgetMin: lead.budget_min,
-    currency: lead.currency,
-    desiredLocation: lead.desired_location,
-    propertyType: lead.property_type,
-    propertyTypes: lead.property_types,
-    bedrooms: lead.bedrooms,
-    views: lead.views,
-    amenities: lead.amenities || [],
-    purchaseTimeframe: lead.purchase_timeframe,
-    financingMethod: lead.financing_method,
-    propertyUse: lead.property_use,
-    nationality: lead.nationality,
-    taxResidence: lead.tax_residence,
-    preferredLanguage: lead.preferred_language,
-    taskType: lead.task_type,
-    notes: lead.notes || '',
-    nextFollowUpDate: lead.next_follow_up_date,
-    country: lead.country,
-    url: lead.url,
-    pipelineType: lead.pipeline_type,
-    pipeline_type: lead.pipeline_type,
-    imported_at: lead.imported_at,
-    integration_source: lead.integration_source,
-    actionHistory: lead.action_history || [],
-    livingArea: lead.living_area,
-    external_id: lead.external_id,
-    regions: lead.regions || [],
-    facilities: lead.facilities || [],
-    keyFeatures: lead.key_features || [],
-    propertyDescription: lead.property_description || '',
-    renovationNeeded: lead.renovation_needed || '',
-    condoFees: lead.condo_fees || '',
-    energyClass: lead.energy_class || '',
-    equipment: lead.equipment || [],
-    floors: lead.floors,
-    landArea: lead.land_area || '',
-    orientation: lead.orientation || [],
-    parkingSpaces: lead.parking_spaces,
-    constructionYear: lead.construction_year || '',
-    yearlyTaxes: lead.yearly_taxes || '',
-    assets: lead.assets || [],
-    // Nouveaux champs pour les propriétaires (maintenant dans la table owners)
-    desired_price: lead.desired_price || '',
-    fees: lead.fees || '',
-    email_envoye: lead.email_envoye || false
-  };
-};
-
-export const mapToSupabaseFormat = (lead: LeadDetailed): any => {
-  // Handle bedroom data for database storage
-  let bedroomsForDb = null;
-  if (Array.isArray(lead.bedrooms)) {
-    // If only one bedroom is selected, store as a single integer
-    if (lead.bedrooms.length === 1) {
-      bedroomsForDb = lead.bedrooms[0];
-    } else if (lead.bedrooms.length > 1) {
-      // Store the first value for now, we'll handle multiple in updateLead
-      bedroomsForDb = lead.bedrooms.length > 0 ? lead.bedrooms[0] : null;
-    }
-  } else if (lead.bedrooms !== undefined && lead.bedrooms !== null) {
-    // Handle non-array value
-    bedroomsForDb = lead.bedrooms;
-  }
-  
-  // Ensure action history is properly formatted
-  let actionHistoryForDb = [];
-  if (Array.isArray(lead.actionHistory)) {
-    actionHistoryForDb = lead.actionHistory.map(action => ({
-      ...action,
-      // Ensure each action has all required fields
-      id: action.id || crypto.randomUUID(),
-      createdAt: action.createdAt || new Date().toISOString(),
-      scheduledDate: action.scheduledDate || new Date().toISOString(),
-      actionType: action.actionType || 'Note'
-    }));
-  }
-  
-  return {
-    id: lead.id,
-    name: lead.name,
-    salutation: lead.salutation,
-    email: lead.email,
-    phone: lead.phone,
-    phone_country_code: lead.phoneCountryCode,
-    phone_country_code_display: lead.phoneCountryCodeDisplay,
-    location: lead.location,
-    status: lead.status,
-    tags: lead.tags || [],
-    created_at: lead.createdAt,
-    last_contacted_at: lead.lastContactedAt,
-    assigned_to: lead.assignedTo,
-    source: lead.source,
-    property_reference: lead.propertyReference,
-    budget: lead.budget,
-    budget_min: lead.budgetMin,
-    currency: lead.currency || 'EUR',
-    desired_location: lead.desiredLocation,
-    property_type: lead.propertyType,
-    property_types: lead.propertyTypes || [],
-    bedrooms: bedroomsForDb,
-    views: lead.views || [],
-    amenities: lead.amenities || [],
-    purchase_timeframe: lead.purchaseTimeframe,
-    financing_method: lead.financingMethod,
-    property_use: lead.propertyUse,
-    nationality: lead.nationality,
-    task_type: lead.taskType,
-    notes: lead.notes,
-    next_follow_up_date: lead.nextFollowUpDate,
-    country: lead.country,
-    url: lead.url,
-    pipeline_type: lead.pipelineType || lead.pipeline_type,
-    integration_source: lead.integration_source,
-    tax_residence: lead.taxResidence,
-    preferred_language: lead.preferredLanguage,
-    living_area: lead.livingArea,
-    external_id: lead.external_id,
-    action_history: lead.actionHistory,
-    regions: lead.regions || [],
-    // Nouveaux champs pour les propriétaires (maintenant dans la table owners)
-    desired_price: lead.desired_price || '',
-    fees: lead.fees || '',
-    email_envoye: lead.email_envoye || false
-  };
-};
-
-// Ensure the convertToSimpleLead function is exported
-export const convertToSimpleLead = (lead: any) => {
-  return {
-    id: lead.id || '',
-    name: lead.name || '',
-    email: lead.email || '',
-    phone: lead.phone || '',
-    status: lead.status || 'New',
-    tags: lead.tags || [],
-    createdAt: lead.createdAt || lead.created_at || new Date().toISOString(),
-    lastContactedAt: lead.lastContactedAt || lead.last_contacted_at || null,
-    assignedTo: lead.assignedTo || lead.assigned_to || null,
-    location: lead.location || '',
-    desiredLocation: lead.desiredLocation || lead.desired_location || '',
-    budget: lead.budget || '',
-    currency: lead.currency || 'EUR',
-    propertyType: lead.propertyType || lead.property_type || '',
-  };
-};
-
-export const createEmptyAction = (): ActionHistory => {
-  return {
-    id: crypto.randomUUID(),
-    actionType: 'Call' as TaskType,
-    createdAt: new Date().toISOString(),
-    scheduledDate: new Date().toISOString(),
-    completedDate: undefined,
-    notes: '',
-  };
-};
-
-export const formatBudget = (min?: string | null, max?: string | null, currency?: string | null): string | undefined => {
-  if (!min && !max) return undefined;
-  
-  const formatValue = (value: string | null | undefined): string => {
-    if (!value) return '';
+    // Import related fields
+    imported_at: supabaseData.imported_at,
+    integration_source: supabaseData.integration_source,
+    actionHistory: supabaseData.action_history || [],
+    livingArea: supabaseData.living_area,
+    external_id: supabaseData.external_id,
     
-    // Remove non-numeric characters
-    const numericValue = value.replace(/[^\d]/g, '');
-    if (!numericValue) return '';
+    // Property details
+    landArea: supabaseData.land_area || '',
+    constructionYear: supabaseData.construction_year || '',
+    renovationNeeded: supabaseData.renovation_needed || '',
+    propertyDescription: supabaseData.property_description || '',
+    keyFeatures: supabaseData.key_features || [],
+    condoFees: supabaseData.condo_fees || '',
+    facilities: supabaseData.facilities || [],
     
-    // Format with commas or spaces for thousands
-    const currencyValue = parseInt(numericValue, 10);
-    if (currencyValue === null || isNaN(currencyValue)) return '';
-    return currencyValue.toLocaleString('fr-FR');
+    // Additional fields  
+    parkingSpaces: supabaseData.parking_spaces,
+    floors: supabaseData.floors,
+    orientation: supabaseData.orientation || [],
+    energyClass: supabaseData.energy_class || '',
+    yearlyTaxes: supabaseData.yearly_taxes || '',
+    assets: supabaseData.assets || [],
+    equipment: supabaseData.equipment || [],
+    
+    // Owner-specific fields
+    desired_price: supabaseData.desired_price || '',
+    fees: supabaseData.fees || '',
+    relationship_status: supabaseData.relationship_status,
+    mandate_type: supabaseData.mandate_type, // Mapping correct pour mandate_type
+    specific_needs: supabaseData.specific_needs || '',
+    attention_points: supabaseData.attention_points || '',
+    relationship_details: supabaseData.relationship_details || '',
+    first_contact_date: supabaseData.first_contact_date,
+    last_contact_date: supabaseData.last_contact_date,
+    next_action_date: supabaseData.next_action_date,
+    contact_source: supabaseData.contact_source,
+    
+    // Additional luxury real estate fields
+    bathrooms: supabaseData.bathrooms,
+    propertyState: supabaseData.property_state,
+    furnished: supabaseData.furnished || false,
+    furniture_included_in_price: supabaseData.furniture_included_in_price || false,
+    furniture_price: supabaseData.furniture_price || '',
+    
+    // Email related
+    email_envoye: supabaseData.email_envoye || false,
+    
+    // Google Drive link
+    google_drive_link: supabaseData.google_drive_link
   };
-  
-  const formattedMin = formatValue(min);
-  const formattedMax = formatValue(max);
-  const currencySymbol = currency || '€';
-  
-  if (formattedMin && formattedMax) {
-    return `${formattedMin} - ${formattedMax} ${currencySymbol}`;
-  } else if (formattedMin) {
-    return `${formattedMin} ${currencySymbol}`;
-  } else if (formattedMax) {
-    return `${formattedMax} ${currencySymbol}`;
-  }
-  
-  return undefined;
+
+  return lead;
 };
 
-export const formatLeadName = (firstName?: string, lastName?: string): string => {
-  if (!firstName && !lastName) return 'Client sans nom';
-  return `${firstName || ''} ${lastName || ''}`.trim();
-};
-
-export const getInitials = (firstName?: string, lastName?: string): string => {
-  if (!firstName && !lastName) return 'CL';
-  
-  const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : '';
-  const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
-  
-  return `${firstInitial}${lastInitial}` || 'CL';
+/**
+ * Maps a LeadDetailed object to Supabase format
+ */
+export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
+  return {
+    id: leadData.id,
+    name: leadData.name,
+    salutation: leadData.salutation,
+    email: leadData.email,
+    phone: leadData.phone,
+    phone_country_code: leadData.phoneCountryCode,
+    phone_country_code_display: leadData.phoneCountryCodeDisplay,
+    location: leadData.location,
+    status: leadData.status,
+    tags: leadData.tags,
+    last_contacted_at: leadData.lastContactedAt,
+    assigned_to: leadData.assignedTo,
+    source: leadData.source,
+    property_reference: leadData.propertyReference,
+    budget: leadData.budget,
+    budget_min: leadData.budgetMin,
+    currency: leadData.currency,
+    desired_location: leadData.desiredLocation,
+    property_type: leadData.propertyType,
+    property_types: leadData.propertyTypes,
+    bedrooms: leadData.bedrooms,
+    views: leadData.views,
+    amenities: leadData.amenities,
+    purchase_timeframe: leadData.purchaseTimeframe,
+    financing_method: leadData.financingMethod,
+    property_use: leadData.propertyUse,
+    nationality: leadData.nationality,
+    preferred_language: leadData.preferredLanguage,
+    task_type: leadData.taskType,
+    notes: leadData.notes,
+    internal_notes: leadData.internal_notes,
+    next_follow_up_date: leadData.nextFollowUpDate,
+    country: leadData.country,
+    url: leadData.url,
+    pipeline_type: leadData.pipelineType,
+    tax_residence: leadData.taxResidence,
+    regions: leadData.regions,
+    
+    // Property details
+    living_area: leadData.livingArea,
+    land_area: leadData.landArea,
+    construction_year: leadData.constructionYear,
+    renovation_needed: leadData.renovationNeeded,
+    property_description: leadData.propertyDescription,
+    key_features: leadData.keyFeatures,
+    condo_fees: leadData.condoFees,
+    facilities: leadData.facilities,
+    
+    // Additional fields
+    parking_spaces: leadData.parkingSpaces,
+    floors: leadData.floors,
+    orientation: leadData.orientation,
+    energy_class: leadData.energyClass,
+    yearly_taxes: leadData.yearlyTaxes,
+    assets: leadData.assets,
+    equipment: leadData.equipment,
+    
+    // Owner-specific fields
+    desired_price: leadData.desired_price,
+    fees: leadData.fees,
+    relationship_status: leadData.relationship_status,
+    mandate_type: leadData.mandate_type, // Mapping correct pour mandate_type
+    specific_needs: leadData.specific_needs,
+    attention_points: leadData.attention_points,
+    relationship_details: leadData.relationship_details,
+    first_contact_date: leadData.first_contact_date,
+    last_contact_date: leadData.last_contact_date,
+    next_action_date: leadData.next_action_date,
+    contact_source: leadData.contact_source,
+    
+    // Additional luxury fields
+    bathrooms: leadData.bathrooms,
+    property_state: leadData.propertyState,
+    furnished: leadData.furnished,
+    furniture_included_in_price: leadData.furniture_included_in_price,
+    furniture_price: leadData.furniture_price,
+    
+    // Action history
+    action_history: leadData.actionHistory,
+    
+    // Email related
+    email_envoye: leadData.email_envoye,
+    
+    // Google Drive link
+    google_drive_link: leadData.google_drive_link
+  };
 };
