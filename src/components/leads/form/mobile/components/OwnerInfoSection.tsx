@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LeadDetailed, LeadSource, MauritiusRegion } from '@/types/lead';
+import { LeadDetailed, LeadSource } from '@/types/lead';
 import { LeadTag } from '@/components/common/TagBadge';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -34,8 +34,6 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
   ];
 
   const LEAD_TAGS = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];
-
-  const MAURITIUS_REGIONS: MauritiusRegion[] = ['North', 'South', 'West', 'East'];
 
   return (
     <div className="space-y-4">
@@ -122,23 +120,6 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
           onToggle={handleTagToggle}
         />
       </div>
-
-      {lead.country === 'Mauritius' && (
-        <div className="space-y-2">
-          <Label className="text-sm">Régions (Île Maurice)</Label>
-          <MultiSelectButtons
-            options={MAURITIUS_REGIONS}
-            selectedValues={lead.regions || []}
-            onToggle={(region) => {
-              const currentRegions = lead.regions || [];
-              const updatedRegions = currentRegions.includes(region as MauritiusRegion)
-                ? currentRegions.filter(r => r !== region)
-                : [...currentRegions, region as MauritiusRegion];
-              onDataChange({ regions: updatedRegions });
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 };

@@ -69,22 +69,20 @@ const OwnerLocationSection: React.FC<OwnerLocationSectionProps> = ({
         />
       </div>
 
-      {lead.country === 'Mauritius' && (
-        <div className="space-y-2">
-          <Label className="text-sm">Régions (Île Maurice)</Label>
-          <MultiSelectButtons
-            options={MAURITIUS_REGIONS}
-            selectedValues={lead.regions || []}
-            onToggle={(region) => {
-              const currentRegions = lead.regions || [];
-              const updatedRegions = currentRegions.includes(region as MauritiusRegion)
-                ? currentRegions.filter(r => r !== region)
-                : [...currentRegions, region as MauritiusRegion];
-              onDataChange({ regions: updatedRegions });
-            }}
-          />
-        </div>
-      )}
+      <div className="space-y-2">
+        <Label className="text-sm">Régions (Île Maurice)</Label>
+        <MultiSelectButtons
+          options={MAURITIUS_REGIONS}
+          selectedValues={lead.regions || []}
+          onToggle={(region) => {
+            const currentRegions = lead.regions || [];
+            const updatedRegions = currentRegions.includes(region as MauritiusRegion)
+              ? currentRegions.filter(r => r !== region)
+              : [...currentRegions, region as MauritiusRegion];
+            onDataChange({ regions: updatedRegions });
+          }}
+        />
+      </div>
     </div>
   );
 };
