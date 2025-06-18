@@ -6,7 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Plus, Clock, CheckCircle, Trash2, Phone, MessageSquare, MapPin, FileText, Users, Handshake, Target } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { updateLead, convertToSimpleLead } from '@/services/leadService';
+import { updateLead } from '@/services/leadService';
+import { mapToLeadDetailed } from '@/services/utils/leadMappers';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -41,8 +42,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
       if (error) throw error;
       
-      // Convert database row to LeadDetailed format
-      const convertedLead = convertToSimpleLead(data);
+      // Convert database row to LeadDetailed format using mapToLeadDetailed
+      const convertedLead = mapToLeadDetailed(data);
       setLead(convertedLead);
     } catch (error) {
       console.error('Error fetching lead:', error);

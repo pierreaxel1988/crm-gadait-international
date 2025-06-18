@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { supabase } from '@/integrations/supabase/client';
-import { convertToSimpleLead } from '@/services/leadService';
+import { mapToLeadDetailed } from '@/services/utils/leadMappers';
 import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from '@/components/common/StatusBadge';
 
@@ -111,8 +111,8 @@ export const useKanbanData = (
         return;
       }
 
-      // Convert raw data to LeadDetailed format
-      const convertedData = rawData?.map(convertToSimpleLead) || [];
+      // Convert raw data to LeadDetailed format using mapToLeadDetailed
+      const convertedData = rawData?.map(mapToLeadDetailed) || [];
       setData(convertedData);
       
       // Set columns for pipeline view
