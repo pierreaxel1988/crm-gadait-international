@@ -1,4 +1,3 @@
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -195,6 +194,14 @@ export interface Owner {
   property_description?: string;
   assets?: AssetType[];
   equipment?: Equipment[];
+  
+  // Nouveaux champs d'optimisation
+  mandate_start_date?: string;
+  mandate_end_date?: string;
+  mandate_conditions?: string;
+  is_furniture_relevant?: boolean;
+  price_validation_status?: string;
+  last_price_update?: string;
 }
 
 export interface LeadDetailed {

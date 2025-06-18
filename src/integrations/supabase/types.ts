@@ -578,11 +578,16 @@ export type Database = {
           imported_at: string | null
           integration_source: string | null
           internal_notes: string | null
+          is_furniture_relevant: boolean | null
           land_area: string | null
           last_contact_date: string | null
           last_contacted_at: string | null
+          last_price_update: string | null
           living_area: string | null
           location: string | null
+          mandate_conditions: string | null
+          mandate_end_date: string | null
+          mandate_start_date: string | null
           mandate_type: string | null
           map_coordinates: string | null
           nationality: string | null
@@ -591,6 +596,7 @@ export type Database = {
           notes: string | null
           phone: string | null
           preferred_language: string | null
+          price_validation_status: string | null
           property_description: string | null
           property_reference: string | null
           property_state: string | null
@@ -635,11 +641,16 @@ export type Database = {
           imported_at?: string | null
           integration_source?: string | null
           internal_notes?: string | null
+          is_furniture_relevant?: boolean | null
           land_area?: string | null
           last_contact_date?: string | null
           last_contacted_at?: string | null
+          last_price_update?: string | null
           living_area?: string | null
           location?: string | null
+          mandate_conditions?: string | null
+          mandate_end_date?: string | null
+          mandate_start_date?: string | null
           mandate_type?: string | null
           map_coordinates?: string | null
           nationality?: string | null
@@ -648,6 +659,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           preferred_language?: string | null
+          price_validation_status?: string | null
           property_description?: string | null
           property_reference?: string | null
           property_state?: string | null
@@ -692,11 +704,16 @@ export type Database = {
           imported_at?: string | null
           integration_source?: string | null
           internal_notes?: string | null
+          is_furniture_relevant?: boolean | null
           land_area?: string | null
           last_contact_date?: string | null
           last_contacted_at?: string | null
+          last_price_update?: string | null
           living_area?: string | null
           location?: string | null
+          mandate_conditions?: string | null
+          mandate_end_date?: string | null
+          mandate_start_date?: string | null
           mandate_type?: string | null
           map_coordinates?: string | null
           nationality?: string | null
@@ -705,6 +722,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           preferred_language?: string | null
+          price_validation_status?: string | null
           property_description?: string | null
           property_reference?: string | null
           property_state?: string | null

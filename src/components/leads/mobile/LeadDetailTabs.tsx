@@ -1,94 +1,165 @@
-
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Check, FileText, Info, Target, Activity } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { LeadDetailed } from '@/types/lead';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Phone, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import LeadDetailTabsContent from './tabs/LeadDetailTabsContent';
+import OwnerTabsContent from '../form/mobile/OwnerTabsContent';
 
 interface LeadDetailTabsProps {
-  defaultTab?: string;
-  pendingActionsCount?: number;
+  lead: LeadDetailed;
+  onDataChange: (data: Partial<LeadDetailed>) => void;
+  onSave: () => void;
+  hasChanges: boolean;
+  isSaving: boolean;
+  getFormattedPhoneForCall: () => string;
+  getFormattedPhoneForWhatsApp: () => string;
+  startCallTracking: (type: 'phone' | 'whatsapp') => void;
 }
 
 const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
-  defaultTab = 'info',
-  pendingActionsCount = 0
+  lead,
+  onDataChange,
+  onSave,
+  hasChanges,
+  isSaving,
+  getFormattedPhoneForCall,
+  getFormattedPhoneForWhatsApp,
+  startCallTracking
 }) => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const currentTab = new URLSearchParams(location.search).get('tab') || defaultTab;
   
-  const handleTabChange = (value: string) => {
-    // Update URL with tab parameter
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('tab', value);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true
-    });
+  const handleCallClick = () => {
+    const phoneNumber = getFormattedPhoneForCall();
+    if (phoneNumber) {
+      startCallTracking('phone');
+      window.location.href = `tel:${phoneNumber}`;
+    }
   };
-  
+
+  const handleWhatsAppClick = () => {
+    const phoneNumber = getFormattedPhoneForWhatsApp();
+    if (phoneNumber) {
+      startCallTracking('whatsapp');
+      window.open(`https://wa.me/${phoneNumber}`, '_blank');
+    }
+  };
+
+  const getOwnerTabs = () => ['info', 'status', 'mandat', 'notes', 'actions'];
+  const getBuyerTabs = () => ['info', 'criteria', 'notes', 'emails', 'actions'];
+
+  const getTabLabel = (tab: string) => {
+    const labels: Record<string, string> = {
+      info: 'Infos',
+      status: 'Statut',
+      mandat: 'Mandat',
+      criteria: 'Critères',
+      notes: 'Notes',
+      emails: 'Emails',
+      actions: 'Actions'
+    };
+    return labels[tab] || tab;
+  };
+
+  const isOwnerPipeline = lead.pipelineType === 'owners';
+  const tabs = isOwnerPipeline ? getOwnerTabs() : getBuyerTabs();
+
   return (
-    <>
-      <Separator className="bg-loro-pearl/60 h-[0.5px] w-full opacity-80" />
-      <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full border-b border-loro-pearl/20">
-        <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-50 relative">
-          <TabsTrigger 
-            value="criteria" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
+    <div className="flex flex-col h-screen bg-white">
+      {/* Header */}
+      <div className="bg-loro-sand px-4 py-3 border-b sticky top-0 z-50">
+        <div className="flex items-center justify-between mb-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/pipeline')}
+            className="p-1 h-8 w-8"
           >
-            <div className="flex flex-col items-center">
-              <Target className="h-4 w-4 mb-1" />
-              <span className="text-xs">Critères</span>
-            </div>
-          </TabsTrigger>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           
-          <TabsTrigger 
-            value="info" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
-          >
-            <div className="flex flex-col items-center">
-              <Info className="h-4 w-4 mb-1" />
-              <span className="text-xs">Infos</span>
-            </div>
-          </TabsTrigger>
-          
-          <TabsTrigger 
-            value="status" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
-          >
-            <div className="flex flex-col items-center">
-              <Check className="h-4 w-4 mb-1" />
-              <span className="text-xs">Statut</span>
-            </div>
-          </TabsTrigger>
-          
-          <TabsTrigger 
-            value="notes" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
-          >
-            <div className="flex flex-col items-center">
-              <FileText className="h-4 w-4 mb-1" />
-              <span className="text-xs">Notes</span>
-            </div>
-          </TabsTrigger>
-          
-          <TabsTrigger 
-            value="actions" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 relative text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
-          >
-            <div className="flex flex-col items-center">
-              <Activity className="h-4 w-4 mb-1" />
-              <span className="text-xs">Actions</span>
-              {pendingActionsCount > 0 && (
-                <div className="absolute -top-1 -right-1 bg-loro-terracotta text-white rounded-full w-5 h-5 flex items-center justify-center text-xs px-0 mx-[8px]">
-                  {pendingActionsCount}
-                </div>
-              )}
-            </div>
-          </TabsTrigger>
+          <div className="flex items-center gap-2">
+            {lead.phone && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCallClick}
+                  className="h-8 px-2"
+                >
+                  <Phone className="h-3 w-3 mr-1" />
+                  <span className="text-xs">Appel</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleWhatsAppClick}
+                  className="h-8 px-2"
+                >
+                  <MessageSquare className="h-3 w-3 mr-1" />
+                  <span className="text-xs">WhatsApp</span>
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <h1 className="text-lg font-futura text-gray-900 truncate">{lead.name}</h1>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            {lead.email && <span className="truncate">{lead.email}</span>}
+            {lead.phone && <span>• {lead.phone}</span>}
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue={tabs[0]} className="flex-1 flex flex-col">
+        <TabsList className="grid grid-cols-5 bg-gray-50 m-0 h-12 rounded-none border-b">
+          {tabs.map((tab) => (
+            <TabsTrigger
+              key={tab}
+              value={tab}
+              className="text-xs font-futura data-[state=active]:bg-white data-[state=active]:border-b-2 data-[state=active]:border-chocolate-dark rounded-none h-full"
+            >
+              {getTabLabel(tab)}
+            </TabsTrigger>
+          ))}
         </TabsList>
+
+        {tabs.map((tab) => (
+          <TabsContent key={tab} value={tab} className="flex-1 m-0 p-4 overflow-y-auto">
+            {isOwnerPipeline ? (
+              <OwnerTabsContent
+                activeTab={tab}
+                lead={lead}
+                onDataChange={onDataChange}
+              />
+            ) : (
+              <LeadDetailTabsContent
+                activeTab={tab}
+                lead={lead}
+                onDataChange={onDataChange}
+              />
+            )}
+          </TabsContent>
+        ))}
       </Tabs>
-    </>
+
+      {/* Save Button */}
+      {hasChanges && (
+        <div className="p-4 border-t bg-white sticky bottom-0">
+          <Button
+            onClick={onSave}
+            disabled={isSaving}
+            className="w-full bg-chocolate-dark hover:bg-chocolate-dark/90 text-white font-futura"
+          >
+            {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 
