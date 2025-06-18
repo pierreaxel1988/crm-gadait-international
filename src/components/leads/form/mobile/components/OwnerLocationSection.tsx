@@ -3,7 +3,7 @@ import React from 'react';
 import { LeadDetailed, Country, MauritiusRegion } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ExternalLink, Hash, Globe, MapPin, Map } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import StyledSelect from './StyledSelect';
 import MultiSelectButtons from '../../MultiSelectButtons';
 
@@ -26,10 +26,7 @@ const OwnerLocationSection: React.FC<OwnerLocationSectionProps> = ({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="property_reference" className="text-sm flex items-center gap-2">
-          <Hash className="h-4 w-4 text-muted-foreground" />
-          Référence du bien
-        </Label>
+        <Label htmlFor="property_reference" className="text-sm">Référence du bien</Label>
         <Input 
           id="property_reference" 
           value={lead.propertyReference || ''} 
@@ -40,10 +37,7 @@ const OwnerLocationSection: React.FC<OwnerLocationSectionProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="url" className="text-sm flex items-center gap-2">
-          <ExternalLink className="h-4 w-4 text-muted-foreground" />
-          URL du bien
-        </Label>
+        <Label htmlFor="url" className="text-sm">URL du bien</Label>
         <Input 
           id="url" 
           type="url"
@@ -54,9 +48,10 @@ const OwnerLocationSection: React.FC<OwnerLocationSectionProps> = ({
         />
       </div>
 
+      {/* Champ Google Drive ajouté sous l'URL du bien */}
       <div className="space-y-2">
         <Label htmlFor="google_drive_link" className="text-sm flex items-center gap-2">
-          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+          <ExternalLink className="h-4 w-4" />
           Dossier Google Drive
         </Label>
         <Input
@@ -72,10 +67,7 @@ const OwnerLocationSection: React.FC<OwnerLocationSectionProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="country" className="text-sm flex items-center gap-2">
-          <Globe className="h-4 w-4 text-muted-foreground" />
-          Pays
-        </Label>
+        <Label htmlFor="country" className="text-sm">Pays</Label>
         <StyledSelect
           id="country"
           value={lead.country || ''}
@@ -86,10 +78,7 @@ const OwnerLocationSection: React.FC<OwnerLocationSectionProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="location" className="text-sm flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-muted-foreground" />
-          Localisation
-        </Label>
+        <Label htmlFor="location" className="text-sm">Localisation</Label>
         <Input 
           id="location" 
           value={lead.location || ''} 
@@ -100,10 +89,7 @@ const OwnerLocationSection: React.FC<OwnerLocationSectionProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label className="text-sm flex items-center gap-2">
-          <Map className="h-4 w-4 text-muted-foreground" />
-          Régions (Île Maurice)
-        </Label>
+        <Label className="text-sm">Régions (Île Maurice)</Label>
         <MultiSelectButtons
           options={MAURITIUS_REGIONS}
           selectedValues={lead.regions || []}

@@ -21,8 +21,7 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
     location: supabaseData.location || '',
     status: supabaseData.status,
     tags: supabaseData.tags || [],
-    createdAt: supabaseData.created_at || new Date().toISOString(),
-    updatedAt: supabaseData.updated_at || new Date().toISOString(),
+    createdAt: supabaseData.created_at,
     lastContactedAt: supabaseData.last_contacted_at,
     assignedTo: supabaseData.assigned_to,
     source: supabaseData.source,
@@ -232,95 +231,5 @@ export const convertToSimpleLead = (lead: LeadDetailed): any => {
     budget: lead.budget,
     location: lead.desiredLocation || lead.location,
     pipelineType: lead.pipelineType || 'purchase'
-  };
-};
-
-export const transformSupabaseToLead = (supabaseLead: any): LeadDetailed => {
-  return {
-    id: supabaseLead.id,
-    name: supabaseLead.name || '',
-    email: supabaseLead.email || '',
-    phone: supabaseLead.phone || '',
-    createdAt: supabaseLead.created_at || new Date().toISOString(),
-    updatedAt: supabaseLead.updated_at || new Date().toISOString(),
-    lastContactedAt: supabaseLead.last_contacted_at,
-    assignedTo: supabaseLead.assigned_to,
-    source: supabaseLead.source,
-    propertyReference: supabaseLead.property_reference || '',
-    budget: supabaseLead.budget || '',
-    budgetMin: supabaseLead.budget_min || '',
-    currency: supabaseLead.currency || 'EUR',
-    desiredLocation: supabaseLead.desired_location || '',
-    propertyType: supabaseLead.property_type || '',
-    propertyTypes: supabaseLead.property_types || [],
-    bedrooms: supabaseLead.bedrooms,
-    views: supabaseLead.views || [],
-    amenities: supabaseLead.amenities || [],
-    purchaseTimeframe: supabaseLead.purchase_timeframe,
-    financingMethod: supabaseLead.financing_method,
-    propertyUse: supabaseLead.property_use,
-    nationality: supabaseLead.nationality || '',
-    preferredLanguage: supabaseLead.preferred_language,
-    taskType: supabaseLead.task_type,
-    notes: supabaseLead.notes || '',
-    internal_notes: supabaseLead.internal_notes || '',
-    nextFollowUpDate: supabaseLead.next_follow_up_date,
-    country: supabaseLead.country,
-    url: supabaseLead.url || '',
-    pipelineType: supabaseLead.pipeline_type || 'purchase',
-    pipeline_type: supabaseLead.pipeline_type || 'purchase',
-    taxResidence: supabaseLead.tax_residence,
-    regions: supabaseLead.regions || [],
-    
-    // Import related fields
-    imported_at: supabaseLead.imported_at,
-    integration_source: supabaseLead.integration_source,
-    actionHistory: supabaseLead.action_history || [],
-    livingArea: supabaseLead.living_area,
-    external_id: supabaseLead.external_id,
-    
-    // Property details
-    landArea: supabaseLead.land_area || '',
-    constructionYear: supabaseLead.construction_year || '',
-    renovationNeeded: supabaseLead.renovation_needed || '',
-    propertyDescription: supabaseLead.property_description || '',
-    keyFeatures: supabaseLead.key_features || [],
-    condoFees: supabaseLead.condo_fees || '',
-    facilities: supabaseLead.facilities || [],
-    
-    // Additional fields  
-    parkingSpaces: supabaseLead.parking_spaces,
-    floors: supabaseLead.floors,
-    orientation: supabaseLead.orientation || [],
-    energyClass: supabaseLead.energy_class || '',
-    yearlyTaxes: supabaseLead.yearly_taxes || '',
-    assets: supabaseLead.assets || [],
-    equipment: supabaseLead.equipment || [],
-    
-    // Owner-specific fields
-    desired_price: supabaseLead.desired_price || '',
-    fees: supabaseLead.fees || '',
-    relationship_status: supabaseLead.relationship_status,
-    mandate_type: supabaseLead.mandate_type,
-    specific_needs: supabaseLead.specific_needs || '',
-    attention_points: supabaseLead.attention_points || '',
-    relationship_details: supabaseLead.relationship_details || '',
-    first_contact_date: supabaseLead.first_contact_date,
-    last_contact_date: supabaseLead.last_contact_date,
-    next_action_date: supabaseLead.next_action_date,
-    contact_source: supabaseLead.contact_source,
-    
-    // Additional luxury real estate fields
-    bathrooms: supabaseLead.bathrooms,
-    propertyState: supabaseLead.property_state,
-    furnished: supabaseLead.furnished || false,
-    furniture_included_in_price: supabaseLead.furniture_included_in_price || false,
-    furniture_price: supabaseLead.furniture_price || '',
-    
-    // Email related
-    email_envoye: supabaseLead.email_envoye || false,
-    
-    // Google Drive link
-    google_drive_link: supabaseLead.google_drive_link || ''
   };
 };
