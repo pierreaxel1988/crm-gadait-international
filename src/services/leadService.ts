@@ -1,12 +1,13 @@
+
 import { LeadDetailed } from "@/types/lead";
 import { 
   createLead as createLeadCore,
   getLeads,
   getLead,
   updateLead,
-  deleteLead,
-  convertToSimpleLead
+  deleteLead
 } from "./leadCore";
+import { convertToSimpleLead } from "./utils/leadMappers";
 import { addActionToLead } from "./leadActions";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -187,30 +188,6 @@ export const reassignSharonLeads = async () => {
     console.error('Error in reassignSharonLeads:', error);
     throw error;
   }
-};
-
-/**
- * Converts a lead to a simplified format for lists
- */
-export const convertToSimpleLead = (supabaseData: any): any => {
-  // Map the supabase data first to ensure all fields are properly converted
-  const mappedLead = mapToLeadDetailed(supabaseData);
-  
-  return {
-    id: mappedLead.id,
-    name: mappedLead.name,
-    email: mappedLead.email,
-    phone: mappedLead.phone,
-    status: mappedLead.status,
-    assignedTo: mappedLead.assignedTo,
-    createdAt: mappedLead.createdAt,
-    tags: mappedLead.tags || [],
-    budget: mappedLead.budget,
-    location: mappedLead.desiredLocation || mappedLead.location,
-    pipelineType: mappedLead.pipelineType || 'purchase',
-    // Add all other properties from mappedLead to ensure type compatibility
-    ...mappedLead
-  };
 };
 
 export { 
