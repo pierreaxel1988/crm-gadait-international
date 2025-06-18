@@ -3,6 +3,7 @@ import React from 'react';
 import { LeadDetailed, Country, MauritiusRegion } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { ExternalLink } from 'lucide-react';
 import StyledSelect from './StyledSelect';
 import MultiSelectButtons from '../../MultiSelectButtons';
 
@@ -45,6 +46,24 @@ const OwnerLocationSection: React.FC<OwnerLocationSectionProps> = ({
           placeholder="https://..." 
           className="w-full font-futura"
         />
+      </div>
+
+      {/* Champ Google Drive ajouté sous l'URL du bien */}
+      <div className="space-y-2">
+        <Label htmlFor="google_drive_link" className="text-sm flex items-center gap-2">
+          <ExternalLink className="h-4 w-4" />
+          Dossier Google Drive
+        </Label>
+        <Input
+          id="google_drive_link"
+          value={lead.google_drive_link || ''}
+          onChange={e => onDataChange({ google_drive_link: e.target.value })}
+          placeholder="Coller le lien Google Drive du dossier complet"
+          className="font-futura"
+        />
+        <p className="text-xs text-muted-foreground">
+          Lien vers le dossier Google Drive contenant tous les documents du propriétaire
+        </p>
       </div>
 
       <div className="space-y-2">

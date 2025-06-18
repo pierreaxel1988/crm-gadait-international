@@ -1,4 +1,3 @@
-
 import { LeadDetailed } from "@/types/lead";
 
 // Important UUIDs for team members
@@ -81,7 +80,7 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
     desired_price: supabaseData.desired_price || '',
     fees: supabaseData.fees || '',
     relationship_status: supabaseData.relationship_status,
-    mandate_type: supabaseData.mandate_type, // Ensure correct mapping
+    mandate_type: supabaseData.mandate_type,
     specific_needs: supabaseData.specific_needs || '',
     attention_points: supabaseData.attention_points || '',
     relationship_details: supabaseData.relationship_details || '',
@@ -101,7 +100,7 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
     email_envoye: supabaseData.email_envoye || false,
     
     // Google Drive link
-    google_drive_link: supabaseData.google_drive_link
+    google_drive_link: supabaseData.google_drive_link || ''
   };
 
   return lead;
@@ -173,7 +172,7 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     desired_price: leadData.desired_price,
     fees: leadData.fees,
     relationship_status: leadData.relationship_status,
-    mandate_type: leadData.mandate_type, // Ensure correct mapping to database
+    mandate_type: leadData.mandate_type,
     specific_needs: leadData.specific_needs,
     attention_points: leadData.attention_points,
     relationship_details: leadData.relationship_details,
@@ -196,7 +195,7 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     email_envoye: leadData.email_envoye,
     
     // Google Drive link
-    google_drive_link: leadData.google_drive_link
+    google_drive_link: leadData.google_drive_link || ''
   };
 };
 

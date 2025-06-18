@@ -39,8 +39,12 @@ const SearchCriteriaSection = ({
             
             <TabsContent value="budget" className="space-y-4">
               <OwnerPriceFields lead={lead} onDataChange={onDataChange} />
+            </TabsContent>
+            
+            <TabsContent value="location" className="space-y-4">
+              <OwnerLocationSection lead={lead} onDataChange={onDataChange} />
               
-              {/* Champ Google Drive */}
+              {/* Champ Google Drive ajouté ici sous l'URL du bien */}
               <div className="space-y-2">
                 <Label htmlFor="google_drive_link" className="text-sm flex items-center gap-2">
                   <ExternalLink className="h-4 w-4" />
@@ -57,10 +61,6 @@ const SearchCriteriaSection = ({
                   Lien vers le dossier Google Drive contenant tous les documents du propriétaire
                 </p>
               </div>
-            </TabsContent>
-            
-            <TabsContent value="location" className="space-y-4">
-              <OwnerLocationSection lead={lead} onDataChange={onDataChange} />
             </TabsContent>
             
             <TabsContent value="property" className="space-y-4">
