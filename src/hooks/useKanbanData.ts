@@ -61,10 +61,18 @@ export const useKanbanData = (
     try {
       setIsLoading(true);
       
+      console.log('=== FETCHING LEADS DATA ===');
+      console.log('Active tab:', activeTab);
+      console.log('Filters:', filters);
+      
       let query = supabase
         .from('leads')
-        .select('*')
-        .eq('pipeline_type', activeTab);
+        .select('*');
+
+      // Only filter by pipeline_type if it's explicitly set and not empty
+      if (activeTab && activeTab !== 'all') {
+        query = query.eq('pipeline_type', activeTab);
+      }
 
       // Apply filters
       if (filters.assignedTo) {
@@ -111,17 +119,62 @@ export const useKanbanData = (
         return;
       }
 
+      console.log('Raw data from Supabase:', rawData?.length || 0, 'leads');
+      
       // Convert raw data to LeadDetailed format using mapToLeadDetailed
       const convertedData = rawData?.map(mapToLeadDetailed) || [];
+      console.log('Converted data:', convertedData.length, 'leads');
+      
+      // Log some sample leads for debugging
+      if (convertedData.length > 0) {
+        console.log('Sample leads:');
+        convertedData.slice(0, 3).forEach((lead, index) => {
+          console.log(`Lead ${index + 1}:`, {
+            name: lead.name,
+            status: lead.status,
+            pipelineType: lead.pipelineType,
+            assignedTo: lead.assignedTo
+          });
+        });
+      }
+      
       setData(convertedData);
       
       // Set columns for pipeline view - using correct LeadStatus values
+      // Group leads by their actual status values, not just hardcoded ones
+      const statusGroups: Record<string, LeadDetailed[]> = {};
+      convertedData.forEach(lead => {
+        const status = lead.status || 'New';
+        if (!statusGroups[status]) {
+          statusGroups[status] = [];
+        }
+        statusGroups[status].push(lead);
+      });
+      
+      console.log('Status groups:', Object.keys(statusGroups).map(status => `${status}: ${statusGroups[status].length}`));
+      
+      // Create columns based on actual data
       const columns: KanbanColumn[] = [
-        { title: 'Nouveau', status: 'New' as LeadStatus, items: convertedData.filter(lead => lead.status === 'New'), pipelineType: activeTab },
-        { title: 'En cours', status: 'Contacted' as LeadStatus, items: convertedData.filter(lead => lead.status === 'Contacted'), pipelineType: activeTab },
-        { title: 'Qualifié', status: 'Qualified' as LeadStatus, items: convertedData.filter(lead => lead.status === 'Qualified'), pipelineType: activeTab },
-        { title: 'Fermé', status: 'Gagné' as LeadStatus, items: convertedData.filter(lead => lead.status === 'Gagné'), pipelineType: activeTab }
+        { title: 'Nouveau', status: 'New' as LeadStatus, items: statusGroups['New'] || [], pipelineType: activeTab },
+        { title: 'En cours', status: 'Contacted' as LeadStatus, items: statusGroups['Contacted'] || [], pipelineType: activeTab },
+        { title: 'Qualifié', status: 'Qualified' as LeadStatus, items: statusGroups['Qualified'] || [], pipelineType: activeTab },
+        { title: 'Fermé', status: 'Gagné' as LeadStatus, items: statusGroups['Gagné'] || [], pipelineType: activeTab }
       ];
+      
+      // Add any additional status columns that exist in the data but aren't in our standard columns
+      Object.keys(statusGroups).forEach(status => {
+        const existingColumn = columns.find(col => col.status === status);
+        if (!existingColumn && statusGroups[status].length > 0) {
+          columns.push({
+            title: status,
+            status: status as LeadStatus,
+            items: statusGroups[status],
+            pipelineType: activeTab
+          });
+        }
+      });
+      
+      console.log('Final columns:', columns.map(col => `${col.title}: ${col.items.length} leads`));
       setLoadedColumns(columns);
       
     } catch (error) {
