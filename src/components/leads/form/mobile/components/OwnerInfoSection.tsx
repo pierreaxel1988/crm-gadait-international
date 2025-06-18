@@ -35,6 +35,26 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
 
   const LEAD_TAGS = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];
 
+  const NATIONALITIES = [
+    "Française", "Britannique", "Allemande", "Italienne", "Espagnole", "Belge", 
+    "Suisse", "Américaine", "Canadienne", "Australienne", "Néerlandaise", 
+    "Portugaise", "Russe", "Japonaise", "Chinoise", "Indienne", "Brésilienne",
+    "Argentine", "Mexicaine", "Sud-africaine", "Égyptienne", "Marocaine", 
+    "Tunisienne", "Algérienne", "Mauricienne", "Seychelloise", "Maldivienne",
+    "Émirati", "Saoudienne", "Qatarie", "Koweïtienne", "Libanaise", "Jordanienne",
+    "Grecque", "Turque", "Norvégienne", "Suédoise", "Danoise", "Finlandaise",
+    "Polonaise", "Tchèque", "Hongroise", "Roumaine", "Bulgare", "Croate",
+    "Serbe", "Slovène", "Slovaque", "Estonienne", "Lettone", "Lituanienne",
+    "Ukrainienne", "Biélorusse", "Moldave", "Géorgienne", "Arménienne",
+    "Azerbaïdjanaise", "Kazakhe", "Ouzbèke", "Kirghize", "Tadjike", "Turkmène",
+    "Iranienne", "Irakienne", "Syrienne", "Afghane", "Pakistanaise", "Bangladaise",
+    "Sri-lankaise", "Népalaise", "Bhoutanaise", "Mongole", "Coréenne du Nord",
+    "Coréenne du Sud", "Thaïlandaise", "Vietnamienne", "Cambodgienne", "Laotienne",
+    "Birmane", "Malaisienne", "Singapourienne", "Indonésienne", "Philippine",
+    "Brunéienne", "Timor-Oriental", "Papouasie-Nouvelle-Guinée", "Australienne",
+    "Néo-zélandaise", "Fidjienne", "Tonguienne", "Samoane", "Vanuatuaise"
+  ];
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -92,12 +112,12 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
 
       <div className="space-y-2">
         <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
-        <Input 
-          id="nationality" 
-          value={lead.nationality || ''} 
-          onChange={e => onDataChange({ nationality: e.target.value })} 
-          placeholder="Ex : Française" 
-          className="w-full font-futura"
+        <StyledSelect
+          id="nationality"
+          value={lead.nationality || ''}
+          onChange={e => onDataChange({ nationality: e.target.value })}
+          placeholder="Sélectionner une nationalité"
+          options={NATIONALITIES.map(nationality => ({ value: nationality, label: nationality }))}
         />
       </div>
 

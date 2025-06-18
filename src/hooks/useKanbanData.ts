@@ -18,6 +18,11 @@ export interface KanbanFilters {
   searchTerm?: string;
 }
 
+export interface ExtendedKanbanItem extends LeadDetailed {
+  assignedToId?: string;
+  assignedTo?: string;
+}
+
 export const useKanbanData = (
   activeTab: string,
   refreshTrigger: number,
