@@ -221,7 +221,9 @@ const LeadDetailMobile = () => {
             createdAt={lead.createdAt} 
             phone={getFormattedPhoneForCall()} 
             email={lead.email} 
-            budget={lead.budget} 
+            budget={lead.budget}
+            desired_price={lead.desired_price}
+            pipelineType={lead.pipelineType}
             currency={lead.currency} 
             desiredLocation={lead.desiredLocation} 
             country={lead.country} 

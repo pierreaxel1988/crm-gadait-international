@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { ArrowLeft, Plus, Trash2, MapPin, Euro, Save, Loader2 } from 'lucide-react';
 import { LeadDetailed } from '@/types/lead';
 import CustomButton from '@/components/ui/CustomButton';
-import { formatBudget } from '@/services/utils/leadMappers';
 import { useIsMobile } from '@/hooks/use-mobile';
 import LeadTag from '@/components/common/LeadTag';
 
@@ -30,11 +28,30 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
 }) => {
   const isMobile = useIsMobile();
   
-  // Use the formatBudget utility function
-  const getBudgetDisplay = () => {
+  // Function to format price display based on lead type
+  const getPriceDisplay = () => {
     if (!lead) return null;
     
-    return formatBudget(lead.budgetMin, lead.budget, lead.currency);
+    let price = '';
+    const currency = lead.currency || 'EUR';
+    const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : currency;
+    
+    // For owner leads, use desired_price; for buyer leads, use budget
+    if (lead.pipelineType === 'owners') {
+      price = lead.desired_price || '';
+    } else {
+      price = lead.budget || '';
+    }
+    
+    if (!price) return null;
+    
+    // If price already contains currency symbol, return as is
+    if (price.includes('€') || price.includes('$') || price.includes('£')) {
+      return price;
+    }
+    
+    // Otherwise, add appropriate currency symbol
+    return `${price} ${currencySymbol}`;
   };
 
   // Get status colors for the lead
@@ -146,9 +163,9 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
             />
           )}
           
-          {lead.budget && (
+          {getPriceDisplay() && (
             <LeadTag 
-              label={getBudgetDisplay() || ''} 
+              label={getPriceDisplay() || ''} 
               bgColor="bg-[#F5F3EE]" 
               textColor="text-[#7A6C5D]" 
               className="font-futuraLight min-w-[100px] text-center" 

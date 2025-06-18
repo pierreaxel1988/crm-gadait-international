@@ -4,7 +4,6 @@ import { ArrowLeft, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import CustomButton from '@/components/ui/CustomButton';
 import TagBadge, { LeadTag } from '@/components/common/TagBadge';
-import { formatBudget } from '@/components/pipeline/mobile/utils/leadFormatUtils';
 import { Currency } from '@/types/lead';
 import { useAuth } from '@/hooks/useAuth';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -18,6 +17,8 @@ interface LeadDetailHeaderProps {
   phone?: string;
   email?: string;
   budget?: string;
+  desired_price?: string;
+  pipelineType?: string;
   currency?: Currency;
   desiredLocation?: string;
   country?: string;
@@ -39,6 +40,8 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   phone,
   email,
   budget,
+  desired_price,
+  pipelineType,
   currency,
   desiredLocation,
   country,
@@ -59,6 +62,29 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
   const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'completed' | 'failed'>('idle');
   const [callDuration, setCallDuration] = useState(0);
   const [callTimer, setCallTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // Function to format price display based on lead type
+  const formatPriceDisplay = (budget?: string, desired_price?: string, pipelineType?: string, currency?: Currency): string => {
+    const currencySymbol = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : currency === 'GBP' ? '£' : (currency || 'EUR');
+    
+    let price = '';
+    // For owner leads, use desired_price; for buyer leads, use budget
+    if (pipelineType === 'owners') {
+      price = desired_price || '';
+    } else {
+      price = budget || '';
+    }
+    
+    if (!price) return '';
+    
+    // If price already contains currency symbol, return as is
+    if (price.includes('€') || price.includes('$') || price.includes('£')) {
+      return price;
+    }
+    
+    // Otherwise, add appropriate currency symbol
+    return `${price} ${currencySymbol}`;
+  };
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -152,8 +178,8 @@ const LeadDetailHeader: React.FC<LeadDetailHeaderProps> = ({
             {createdAt && format(new Date(createdAt), 'dd/MM/yyyy')}
           </p>
           <div className="flex flex-wrap gap-2 mt-1 max-w-[250px] sm:max-w-[350px] md:max-w-[450px]">
-            {budget && <span className="text-xs bg-[#F5F3EE] px-2 py-1 rounded-xl border border-zinc-200 text-zinc-800">
-                {formatBudget(budget, currency)}
+            {(budget || desired_price) && <span className="text-xs bg-[#F5F3EE] px-2 py-1 rounded-xl border border-zinc-200 text-zinc-800">
+                {formatPriceDisplay(budget, desired_price, pipelineType, currency)}
               </span>}
             {desiredLocation && <span className="text-xs bg-[#EBD5CE] px-2 py-1 rounded-xl text-zinc-800">
                 {desiredLocation}
