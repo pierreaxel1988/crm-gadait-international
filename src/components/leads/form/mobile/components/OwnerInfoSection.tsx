@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import MultiSelectButtons from '../../MultiSelectButtons';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import FormInput from '../../FormInput';
+import { COUNTRIES } from '@/utils/countries';
 
 interface OwnerInfoSectionProps {
   lead: LeadDetailed;
@@ -53,11 +54,6 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
     "Birmane", "Malaisienne", "Singapourienne", "Indonésienne", "Philippine",
     "Brunéienne", "Timor-Oriental", "Papouasie-Nouvelle-Guinée", "Australienne",
     "Néo-zélandaise", "Fidjienne", "Tonguienne", "Samoane", "Vanuatuaise"
-  ];
-
-  const COUNTRIES = [
-    "France", "Monaco", "Switzerland", "Italy", "Spain", "Portugal", 
-    "United Kingdom", "Germany", "Belgium", "Netherlands", "Mauritius", "Dubai", "USA"
   ];
 
   const LANGUAGES = [
