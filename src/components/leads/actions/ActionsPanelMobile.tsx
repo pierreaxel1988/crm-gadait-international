@@ -157,11 +157,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-chocolate-dark">Actions</h3>
-        <Button onClick={onAddAction} size="sm" className="bg-chocolate-dark hover:bg-chocolate-dark/90">
-          <Plus className="h-4 w-4 mr-2" />
-          Nouvelle action
-        </Button>
+        <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Actions</h3>
       </div>
 
       {pendingActions.length > 0 && (
