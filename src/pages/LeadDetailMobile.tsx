@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -201,16 +202,7 @@ const LeadDetailMobile = () => {
         </div>
         
         <div className="bg-loro-50">
-          <LeadDetailTabs 
-            lead={lead}
-            onDataChange={handleDataChange}
-            onSave={handleSaveWithIndicator}
-            hasChanges={hasChanges}
-            isSaving={isSaving}
-            getFormattedPhoneForCall={getFormattedPhoneForCall}
-            getFormattedPhoneForWhatsApp={getFormattedPhoneForWhatsApp}
-            startCallTracking={startCallTracking}
-          />
+          <LeadDetailTabs defaultTab={activeTab} pendingActionsCount={getPendingActionsCount()} />
         </div>
       </div>
       

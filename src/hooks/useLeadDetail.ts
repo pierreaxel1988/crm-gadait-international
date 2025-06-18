@@ -129,12 +129,6 @@ export function useLeadDetail(id: string | undefined) {
           specific_needs: updatedLeadData.specific_needs,
           attention_points: updatedLeadData.attention_points,
           relationship_details: updatedLeadData.relationship_details,
-          // Nouveaux champs d'optimisation
-          is_furniture_relevant: updatedLeadData.is_furniture_relevant,
-          price_validation_status: 'pending',
-          last_price_update: updatedLeadData.desired_price || updatedLeadData.fees || updatedLeadData.furniture_price 
-            ? new Date().toISOString() 
-            : undefined,
           updated_at: new Date().toISOString()
         };
 

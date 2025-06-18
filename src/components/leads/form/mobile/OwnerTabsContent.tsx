@@ -1,12 +1,11 @@
 
 import React from 'react';
 import { LeadDetailed } from '@/types/lead';
-import OptimizedOwnerInfoSection from './components/OptimizedOwnerInfoSection';
-import OptimizedOwnerStatusSection from './components/OptimizedOwnerStatusSection';
-import OwnerMandateSection from './components/OwnerMandateSection';
+import OwnerInfoSection from './components/OwnerInfoSection';
+import OwnerStatusSection from './components/OwnerStatusSection';
 import OwnerNotesSection from './components/OwnerNotesSection';
 import OwnerLocationSection from './components/OwnerLocationSection';
-import OptimizedOwnerPriceFields from './components/OptimizedOwnerPriceFields';
+import OwnerPriceFields from './components/OwnerPriceFields';
 import OwnerPropertySection from './components/OwnerPropertySection';
 import ActionsPanelMobile from '@/components/leads/actions/ActionsPanelMobile';
 
@@ -53,22 +52,24 @@ const OwnerTabsContent: React.FC<OwnerTabsContentProps> = ({
       case 'info':
         return (
           <div className="space-y-6">
-            <OptimizedOwnerInfoSection lead={lead} onDataChange={onDataChange} />
-            
+            <div>
+              <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">
+                Informations personnelles
+              </h3>
+              <OwnerInfoSection lead={lead} onDataChange={onDataChange} />
+            </div>
             <div>
               <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">
                 Localisation
               </h3>
               <OwnerLocationSection lead={lead} onDataChange={onDataChange} />
             </div>
-            
             <div>
               <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">
                 Tarification
               </h3>
-              <OptimizedOwnerPriceFields lead={lead} onDataChange={onDataChange} />
+              <OwnerPriceFields lead={lead} onDataChange={onDataChange} />
             </div>
-            
             <div>
               <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">
                 Détails du bien
@@ -78,9 +79,7 @@ const OwnerTabsContent: React.FC<OwnerTabsContentProps> = ({
           </div>
         );
       case 'status':
-        return <OptimizedOwnerStatusSection lead={lead} onDataChange={onDataChange} />;
-      case 'mandat':
-        return <OwnerMandateSection lead={lead} onDataChange={onDataChange} />;
+        return <OwnerStatusSection lead={lead} onDataChange={onDataChange} />;
       case 'notes':
         return <OwnerNotesSection lead={lead} onDataChange={onDataChange} />;
       case 'actions':
@@ -92,18 +91,7 @@ const OwnerTabsContent: React.FC<OwnerTabsContentProps> = ({
           />
         );
       default:
-        return <OptimizedOwnerInfoSection lead={lead} onDataChange={onDataChange} />;
-    }
-  };
-
-  const getTabTitle = () => {
-    switch (activeTab) {
-      case 'info': return 'Informations';
-      case 'status': return 'Statut et Suivi';
-      case 'mandat': return 'Mandat';
-      case 'notes': return 'Notes';
-      case 'actions': return 'Actions';
-      default: return 'Informations';
+        return <OwnerInfoSection lead={lead} onDataChange={onDataChange} />;
     }
   };
 
@@ -114,7 +102,9 @@ const OwnerTabsContent: React.FC<OwnerTabsContentProps> = ({
     >
       {activeTab !== 'info' && (
         <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">
-          {getTabTitle()}
+          {activeTab === 'status' && 'Statut et Suivi'}
+          {activeTab === 'notes' && 'Notes'}
+          {activeTab === 'actions' && 'Actions'}
         </h2>
       )}
       {renderTabContent()}
