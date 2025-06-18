@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { LeadDetailed, LeadTag, PipelineType } from '@/types/lead';
+import { LeadDetailed } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Activity, Trash2, Phone, Home } from 'lucide-react';
+import { Activity, Trash2, Home } from 'lucide-react';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { deleteLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const OWNERS_STATUSES: LeadStatus[] = [
   "New",              // Premier contact
@@ -79,9 +78,9 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
   };
 
   const handleTagToggle = (tag: string) => {
-    const updatedTags = lead.tags?.includes(tag as LeadTag)
+    const updatedTags = lead.tags?.includes(tag as any)
       ? lead.tags.filter(t => t !== tag)
-      : [...(lead.tags || []), tag as LeadTag];
+      : [...(lead.tags || []), tag as any];
     
     handleInputChange('tags', updatedTags);
   };
