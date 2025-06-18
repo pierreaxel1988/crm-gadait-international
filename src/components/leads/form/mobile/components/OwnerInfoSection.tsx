@@ -4,7 +4,6 @@ import { LeadDetailed, LeadSource } from '@/types/lead';
 import { LeadTag } from '@/components/common/TagBadge';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import StyledSelect from './StyledSelect';
 import MultiSelectButtons from '../../MultiSelectButtons';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import FormInput from '../../FormInput';
@@ -133,49 +132,49 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
         showFlagsInDropdown={true}
       />
 
-      <div className="space-y-2">
-        <Label htmlFor="residenceCountry" className="text-sm">Pays de résidence</Label>
-        <StyledSelect
-          id="residenceCountry"
-          value={lead.residenceCountry || ''}
-          onChange={e => onDataChange({ residenceCountry: e.target.value })}
-          placeholder="Sélectionner un pays"
-          options={COUNTRIES.map(country => ({ value: country, label: country }))}
-        />
-      </div>
+      <FormInput
+        label="Pays de résidence"
+        name="residenceCountry"
+        type="select"
+        value={lead.residenceCountry || ''}
+        onChange={e => onDataChange({ residenceCountry: e.target.value })}
+        placeholder="Sélectionner un pays"
+        options={COUNTRIES.map(country => ({ value: country, label: country }))}
+        searchable={true}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
-        <StyledSelect
-          id="nationality"
-          value={lead.nationality || ''}
-          onChange={e => onDataChange({ nationality: e.target.value })}
-          placeholder="Sélectionner une nationalité"
-          options={NATIONALITIES.map(nationality => ({ value: nationality, label: nationality }))}
-        />
-      </div>
+      <FormInput
+        label="Nationalité"
+        name="nationality"
+        type="select"
+        value={lead.nationality || ''}
+        onChange={e => onDataChange({ nationality: e.target.value })}
+        placeholder="Sélectionner une nationalité"
+        options={NATIONALITIES.map(nationality => ({ value: nationality, label: nationality }))}
+        searchable={true}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="preferredLanguage" className="text-sm">Langue préférée</Label>
-        <StyledSelect
-          id="preferredLanguage"
-          value={lead.preferredLanguage || ''}
-          onChange={e => onDataChange({ preferredLanguage: e.target.value })}
-          placeholder="Sélectionner une langue"
-          options={LANGUAGES.map(language => ({ value: language, label: language }))}
-        />
-      </div>
+      <FormInput
+        label="Langue préférée"
+        name="preferredLanguage"
+        type="select"
+        value={lead.preferredLanguage || ''}
+        onChange={e => onDataChange({ preferredLanguage: e.target.value })}
+        placeholder="Sélectionner une langue"
+        options={LANGUAGES.map(language => ({ value: language, label: language }))}
+        searchable={true}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="source" className="text-sm">Source du contact</Label>
-        <StyledSelect
-          id="source"
-          value={lead.source || ''}
-          onChange={e => onDataChange({ source: e.target.value as LeadSource })}
-          placeholder="Sélectionner une source"
-          options={LEAD_SOURCES.map(source => ({ value: source, label: source }))}
-        />
-      </div>
+      <FormInput
+        label="Source du contact"
+        name="source"
+        type="select"
+        value={lead.source || ''}
+        onChange={e => onDataChange({ source: e.target.value as LeadSource })}
+        placeholder="Sélectionner une source"
+        options={LEAD_SOURCES.map(source => ({ value: source, label: source }))}
+        searchable={true}
+      />
 
       <div className="space-y-2">
         <Label className="text-sm">Tags</Label>

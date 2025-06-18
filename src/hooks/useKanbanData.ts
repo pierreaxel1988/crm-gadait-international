@@ -4,6 +4,7 @@ import { LeadDetailed } from '@/types/lead';
 import { supabase } from '@/integrations/supabase/client';
 import { convertToSimpleLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
+import { LeadStatus } from '@/components/common/StatusBadge';
 
 export interface KanbanFilters {
   assignedTo?: string;
@@ -25,8 +26,9 @@ export interface ExtendedKanbanItem extends LeadDetailed {
 
 export interface KanbanColumn {
   title: string;
-  status: string;
-  items: LeadDetailed[];
+  status: LeadStatus;
+  items: ExtendedKanbanItem[];
+  pipelineType?: string;
 }
 
 export const useKanbanData = (
@@ -115,10 +117,10 @@ export const useKanbanData = (
       
       // Set columns for pipeline view
       const columns: KanbanColumn[] = [
-        { title: 'Nouveau', status: 'new', items: convertedData.filter(lead => lead.status === 'new') },
-        { title: 'En cours', status: 'in_progress', items: convertedData.filter(lead => lead.status === 'in_progress') },
-        { title: 'Qualifié', status: 'qualified', items: convertedData.filter(lead => lead.status === 'qualified') },
-        { title: 'Fermé', status: 'closed', items: convertedData.filter(lead => lead.status === 'closed') }
+        { title: 'Nouveau', status: 'new' as LeadStatus, items: convertedData.filter(lead => lead.status === 'new'), pipelineType: activeTab },
+        { title: 'En cours', status: 'in_progress' as LeadStatus, items: convertedData.filter(lead => lead.status === 'in_progress'), pipelineType: activeTab },
+        { title: 'Qualifié', status: 'qualified' as LeadStatus, items: convertedData.filter(lead => lead.status === 'qualified'), pipelineType: activeTab },
+        { title: 'Fermé', status: 'closed' as LeadStatus, items: convertedData.filter(lead => lead.status === 'closed'), pipelineType: activeTab }
       ];
       setLoadedColumns(columns);
       
