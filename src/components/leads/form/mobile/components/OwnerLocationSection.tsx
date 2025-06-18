@@ -1,11 +1,10 @@
 
 import React from 'react';
-import { LeadDetailed } from '@/types/lead';
+import { LeadDetailed, Country, MauritiusRegion } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { MapPin } from 'lucide-react';
-import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 import StyledSelect from './StyledSelect';
+import MultiSelectButtons from '../../MultiSelectButtons';
 
 interface OwnerLocationSectionProps {
   lead: LeadDetailed;
@@ -16,71 +15,76 @@ const OwnerLocationSection: React.FC<OwnerLocationSectionProps> = ({
   lead,
   onDataChange
 }) => {
-  const handleLocationChange = (location: string) => {
-    onDataChange({ desiredLocation: location });
-  };
-  
+  const COUNTRIES: Country[] = [
+    "France", "Monaco", "Switzerland", "Italy", "Spain", "Portugal", 
+    "United Kingdom", "Germany", "Belgium", "Mauritius", "Dubai", "USA"
+  ];
+
+  const MAURITIUS_REGIONS: MauritiusRegion[] = ['North', 'South', 'West', 'East'];
+
   return (
     <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="property_reference" className="text-sm">Référence du bien</Label>
+        <Input 
+          id="property_reference" 
+          value={lead.propertyReference || ''} 
+          onChange={e => onDataChange({ propertyReference: e.target.value })} 
+          placeholder="Ex : REF-2024-001" 
+          className="w-full font-futura"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="url" className="text-sm">URL du bien</Label>
+        <Input 
+          id="url" 
+          type="url"
+          value={lead.url || ''} 
+          onChange={e => onDataChange({ url: e.target.value })} 
+          placeholder="https://..." 
+          className="w-full font-futura"
+        />
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="country" className="text-sm">Pays</Label>
         <StyledSelect
           id="country"
           value={lead.country || ''}
-          onChange={e => onDataChange({ country: e.target.value })}
+          onChange={e => onDataChange({ country: e.target.value as Country })}
           placeholder="Sélectionner un pays"
-          options={[
-            { value: "France", label: "France" },
-            { value: "Spain", label: "Espagne" },
-            { value: "Portugal", label: "Portugal" },
-            { value: "Italy", label: "Italie" },
-            { value: "Switzerland", label: "Suisse" },
-            { value: "Monaco", label: "Monaco" },
-            { value: "Mauritius", label: "Île Maurice" },
-            { value: "United States", label: "United States" },
-            { value: "Etats-Unis", label: "Etats-Unis" },
-            { value: "Grèce", label: "Grèce" },
-            { value: "UAE", label: "Émirats Arabes Unis" }
-          ]}
-          icon={<MapPin className="h-4 w-4" />}
+          options={COUNTRIES.map(country => ({ value: country, label: country }))}
         />
       </div>
 
       <div className="space-y-2">
-        <LocationFilter 
-          location={lead.desiredLocation || ''} 
-          onLocationChange={handleLocationChange}
-          country={lead.country}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="location" className="text-sm">Adresse</Label>
+        <Label htmlFor="location" className="text-sm">Localisation</Label>
         <Input 
           id="location" 
           value={lead.location || ''} 
           onChange={e => onDataChange({ location: e.target.value })} 
-          placeholder="Ex : 123 Avenue des Champs-Élysées" 
+          placeholder="Ville, région..." 
           className="w-full font-futura"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-sm flex items-center gap-2">
-          <MapPin className="h-4 w-4" />
-          Pin Location
-        </Label>
-        <Input
-          name="mapCoordinates"
-          value={lead.mapCoordinates || ''}
-          onChange={e => onDataChange({ mapCoordinates: e.target.value })}
-          placeholder="Collez le lien Google Maps ici"
-          className="w-full font-futura"
-        />
-        <p className="text-xs text-muted-foreground">
-          Copiez-collez le lien Google Maps de la propriété
-        </p>
-      </div>
+      {lead.country === 'Mauritius' && (
+        <div className="space-y-2">
+          <Label className="text-sm">Régions (Île Maurice)</Label>
+          <MultiSelectButtons
+            options={MAURITIUS_REGIONS}
+            selectedValues={lead.regions || []}
+            onToggle={(region) => {
+              const currentRegions = lead.regions || [];
+              const updatedRegions = currentRegions.includes(region as MauritiusRegion)
+                ? currentRegions.filter(r => r !== region)
+                : [...currentRegions, region as MauritiusRegion];
+              onDataChange({ regions: updatedRegions });
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

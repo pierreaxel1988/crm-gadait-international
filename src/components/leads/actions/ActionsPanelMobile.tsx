@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ActionHistory } from '@/types/actionHistory';
-import { LeadDetailed } from '@/types/lead';
+import { LeadDetailed, LeadStatus, LeadSource, Currency, TaskType, PipelineType, MauritiusRegion, AssetType, Equipment, PropertyState } from '@/types/lead';
+import { LeadTag } from '@/components/common/TagBadge';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Plus, Clock, CheckCircle, Trash2, Calendar, User, MessageSquare, Phone, Eye, FileText, Handshake, TrendingUp, Target, Users, MapPin } from 'lucide-react';
@@ -40,26 +41,25 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
       if (error) throw error;
       
-      // Convert database row to LeadDetailed format
+      // Convert database row to LeadDetailed format with proper type casting
       const convertedLead: LeadDetailed = {
         id: data.id,
         name: data.name,
         email: data.email,
         phone: data.phone,
-        status: data.status,
+        status: data.status as LeadStatus,
         createdAt: data.created_at,
         assignedTo: data.assigned_to,
-        tags: data.tags || [],
+        tags: (data.tags || []) as LeadTag[],
         lastContactedAt: data.last_contacted_at,
-        actionHistory: data.action_history || [],
-        // Add all other required fields with defaults
-        salutation: data.salutation,
+        actionHistory: (data.action_history || []) as ActionHistory[],
+        salutation: data.salutation as 'M.' | 'Mme',
         location: data.location,
-        source: data.source,
+        source: data.source as LeadSource,
         propertyReference: data.property_reference,
         budget: data.budget,
         budgetMin: data.budget_min,
-        currency: data.currency,
+        currency: data.currency as Currency,
         desiredLocation: data.desired_location,
         propertyType: data.property_type,
         bedrooms: data.bedrooms,
@@ -70,14 +70,14 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         propertyUse: data.property_use,
         nationality: data.nationality,
         preferredLanguage: data.preferred_language,
-        taskType: data.task_type,
+        taskType: data.task_type as TaskType,
         notes: data.notes,
         nextFollowUpDate: data.next_follow_up_date,
         country: data.country,
         url: data.url,
-        pipelineType: data.pipeline_type,
+        pipelineType: data.pipeline_type as PipelineType,
         taxResidence: data.tax_residence,
-        regions: data.regions || [],
+        regions: (data.regions || []) as MauritiusRegion[],
         imported_at: data.imported_at,
         integration_source: data.integration_source,
         livingArea: data.living_area,
@@ -85,8 +85,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         landArea: data.land_area,
         constructionYear: data.construction_year,
         propertyDescription: data.property_description,
-        assets: data.assets || [],
-        equipment: data.equipment || [],
+        assets: (data.assets || []) as AssetType[],
+        equipment: (data.equipment || []) as Equipment[],
         desired_price: data.desired_price,
         fees: data.fees,
         relationship_status: data.relationship_status,
@@ -99,7 +99,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         next_action_date: data.next_action_date,
         contact_source: data.contact_source,
         bathrooms: data.bathrooms,
-        propertyState: data.property_state,
+        propertyState: data.property_state as PropertyState,
         phoneCountryCode: data.phone_country_code,
         phoneCountryCodeDisplay: data.phone_country_code_display,
         furnished: data.furnished,

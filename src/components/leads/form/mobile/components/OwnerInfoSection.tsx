@@ -115,29 +115,6 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="property_reference" className="text-sm">Référence du bien</Label>
-        <Input 
-          id="property_reference" 
-          value={lead.propertyReference || ''} 
-          onChange={e => onDataChange({ propertyReference: e.target.value })} 
-          placeholder="Ex : REF-2024-001" 
-          className="w-full font-futura"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="url" className="text-sm">URL du bien</Label>
-        <Input 
-          id="url" 
-          type="url"
-          value={lead.url || ''} 
-          onChange={e => onDataChange({ url: e.target.value })} 
-          placeholder="https://..." 
-          className="w-full font-futura"
-        />
-      </div>
-
-      <div className="space-y-2">
         <Label className="text-sm">Tags</Label>
         <MultiSelectButtons
           options={LEAD_TAGS}
