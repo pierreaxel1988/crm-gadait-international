@@ -115,12 +115,12 @@ export const useKanbanData = (
       const convertedData = rawData?.map(mapToLeadDetailed) || [];
       setData(convertedData);
       
-      // Set columns for pipeline view
+      // Set columns for pipeline view - using correct LeadStatus values
       const columns: KanbanColumn[] = [
-        { title: 'Nouveau', status: 'new' as LeadStatus, items: convertedData.filter(lead => lead.status === 'new'), pipelineType: activeTab },
-        { title: 'En cours', status: 'in_progress' as LeadStatus, items: convertedData.filter(lead => lead.status === 'in_progress'), pipelineType: activeTab },
-        { title: 'Qualifié', status: 'qualified' as LeadStatus, items: convertedData.filter(lead => lead.status === 'qualified'), pipelineType: activeTab },
-        { title: 'Fermé', status: 'closed' as LeadStatus, items: convertedData.filter(lead => lead.status === 'closed'), pipelineType: activeTab }
+        { title: 'Nouveau', status: 'New' as LeadStatus, items: convertedData.filter(lead => lead.status === 'New'), pipelineType: activeTab },
+        { title: 'En cours', status: 'Contacted' as LeadStatus, items: convertedData.filter(lead => lead.status === 'Contacted'), pipelineType: activeTab },
+        { title: 'Qualifié', status: 'Qualified' as LeadStatus, items: convertedData.filter(lead => lead.status === 'Qualified'), pipelineType: activeTab },
+        { title: 'Fermé', status: 'Gagné' as LeadStatus, items: convertedData.filter(lead => lead.status === 'Gagné'), pipelineType: activeTab }
       ];
       setLoadedColumns(columns);
       
