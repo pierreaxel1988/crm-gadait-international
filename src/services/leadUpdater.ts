@@ -50,6 +50,7 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     delete cleanedData.yearly_taxes;
     delete cleanedData.condo_fees;
     delete cleanedData.facilities;
+    delete cleanedData.key_features; // Remove this field as it doesn't exist in database
     
     // Handle parking_spaces and floors - convert objects to proper values
     if (cleanedData.parking_spaces && typeof cleanedData.parking_spaces === 'object') {

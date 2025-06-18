@@ -63,7 +63,7 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
     constructionYear: supabaseData.construction_year || '',
     renovationNeeded: supabaseData.renovation_needed || '',
     propertyDescription: supabaseData.property_description || '',
-    keyFeatures: supabaseData.key_features || [],
+    // keyFeatures field removed as it doesn't exist in database
     
     // Additional fields  
     parkingSpaces: supabaseData.parking_spaces,
@@ -151,7 +151,7 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     construction_year: leadData.constructionYear,
     renovation_needed: leadData.renovationNeeded,
     property_description: leadData.propertyDescription,
-    key_features: leadData.keyFeatures,
+    // key_features field removed as it doesn't exist in database
     
     // Additional fields - only include fields that exist in the database
     parking_spaces: leadData.parkingSpaces,
