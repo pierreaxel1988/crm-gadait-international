@@ -189,6 +189,30 @@ export const reassignSharonLeads = async () => {
   }
 };
 
+/**
+ * Converts a lead to a simplified format for lists
+ */
+export const convertToSimpleLead = (supabaseData: any): any => {
+  // Map the supabase data first to ensure all fields are properly converted
+  const mappedLead = mapToLeadDetailed(supabaseData);
+  
+  return {
+    id: mappedLead.id,
+    name: mappedLead.name,
+    email: mappedLead.email,
+    phone: mappedLead.phone,
+    status: mappedLead.status,
+    assignedTo: mappedLead.assignedTo,
+    createdAt: mappedLead.createdAt,
+    tags: mappedLead.tags || [],
+    budget: mappedLead.budget,
+    location: mappedLead.desiredLocation || mappedLead.location,
+    pipelineType: mappedLead.pipelineType || 'purchase',
+    // Add all other properties from mappedLead to ensure type compatibility
+    ...mappedLead
+  };
+};
+
 export { 
   getLeads, 
   getLead, 
