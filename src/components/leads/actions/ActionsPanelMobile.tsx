@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ActionHistory } from '@/types/actionHistory';
 import { LeadDetailed } from '@/types/lead';
@@ -40,7 +39,78 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         .single();
 
       if (error) throw error;
-      setLead(data);
+      
+      // Convert database row to LeadDetailed format
+      const convertedLead: LeadDetailed = {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        status: data.status,
+        createdAt: data.created_at,
+        assignedTo: data.assigned_to,
+        tags: data.tags || [],
+        lastContactedAt: data.last_contacted_at,
+        actionHistory: data.action_history || [],
+        // Add all other required fields with defaults
+        salutation: data.salutation,
+        location: data.location,
+        source: data.source,
+        propertyReference: data.property_reference,
+        budget: data.budget,
+        budgetMin: data.budget_min,
+        currency: data.currency,
+        desiredLocation: data.desired_location,
+        propertyType: data.property_type,
+        bedrooms: data.bedrooms,
+        views: data.views || [],
+        amenities: data.amenities || [],
+        purchaseTimeframe: data.purchase_timeframe,
+        financingMethod: data.financing_method,
+        propertyUse: data.property_use,
+        nationality: data.nationality,
+        preferredLanguage: data.preferred_language,
+        taskType: data.task_type,
+        notes: data.notes,
+        nextFollowUpDate: data.next_follow_up_date,
+        country: data.country,
+        url: data.url,
+        pipelineType: data.pipeline_type,
+        taxResidence: data.tax_residence,
+        regions: data.regions || [],
+        imported_at: data.imported_at,
+        integration_source: data.integration_source,
+        livingArea: data.living_area,
+        external_id: data.external_id,
+        landArea: data.land_area,
+        constructionYear: data.construction_year,
+        propertyDescription: data.property_description,
+        assets: data.assets || [],
+        equipment: data.equipment || [],
+        desired_price: data.desired_price,
+        fees: data.fees,
+        relationship_status: data.relationship_status,
+        mandate_type: data.mandate_type,
+        specific_needs: data.specific_needs,
+        attention_points: data.attention_points,
+        relationship_details: data.relationship_details,
+        first_contact_date: data.first_contact_date,
+        last_contact_date: data.last_contact_date,
+        next_action_date: data.next_action_date,
+        contact_source: data.contact_source,
+        bathrooms: data.bathrooms,
+        propertyState: data.property_state,
+        phoneCountryCode: data.phone_country_code,
+        phoneCountryCodeDisplay: data.phone_country_code_display,
+        furnished: data.furnished,
+        furniture_included_in_price: data.furniture_included_in_price,
+        furniture_price: data.furniture_price,
+        internal_notes: data.internal_notes,
+        mapCoordinates: data.map_coordinates,
+        email_envoye: data.email_envoye
+      };
+      
+      setLead(convertedLead);
     } catch (error) {
       console.error('Error fetching lead:', error);
       toast({

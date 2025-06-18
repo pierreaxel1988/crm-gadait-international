@@ -94,7 +94,7 @@ const OwnerPropertySection: React.FC<OwnerPropertySectionProps> = ({
           <Input 
             id="bedrooms" 
             type="number"
-            value={lead.bedrooms || ''} 
+            value={typeof lead.bedrooms === 'number' ? lead.bedrooms.toString() : ''} 
             onChange={e => onDataChange({ bedrooms: parseInt(e.target.value) || 0 })} 
             placeholder="0" 
             className="w-full font-futura"
