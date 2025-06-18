@@ -4,7 +4,7 @@ import { ActionHistory } from '@/types/actionHistory';
 import { LeadDetailed } from '@/types/lead';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Plus, Clock, CheckCircle, Trash2, Phone, MessageSquare, MapPin, FileText, Users, Handshake, Target } from 'lucide-react';
+import { Clock, CheckCircle, Trash2, Phone, MessageSquare, MapPin, FileText, Users, Handshake, Target } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { updateLead, convertToSimpleLead } from '@/services/leadService';
 import { format } from 'date-fns';
@@ -75,7 +75,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       case 'Compromis':
         return <Handshake className="h-4 w-4" />;
       case 'Creation':
-        return <Plus className="h-4 w-4" />;
+        return <Target className="h-4 w-4" />;
       default:
         return <Target className="h-4 w-4" />;
     }
@@ -158,10 +158,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold text-chocolate-dark">Actions</h3>
-        <Button onClick={onAddAction} size="sm" className="bg-chocolate-dark hover:bg-chocolate-dark/90">
-          <Plus className="h-4 w-4 mr-2" />
-          Nouvelle action
-        </Button>
       </div>
 
       {pendingActions.length > 0 && (
@@ -252,7 +248,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         <div className="text-center py-8 text-gray-500">
           <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
           <p className="text-lg font-medium mb-2">Aucune action</p>
-          <p className="text-sm">Ajoutez votre première action pour ce lead</p>
+          <p className="text-sm">Aucune action disponible pour ce lead</p>
         </div>
       )}
     </div>
