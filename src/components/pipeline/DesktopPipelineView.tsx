@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -58,7 +57,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   const {
     loadedColumns,
     isLoading,
-  } = useKanbanData(columns, 0, activeTab as PipelineType);
+  } = useKanbanData(activeTab as PipelineType, 0, filters);
 
   const filteredColumns = filters 
     ? applyFiltersToColumns(loadedColumns.filter(column => 
