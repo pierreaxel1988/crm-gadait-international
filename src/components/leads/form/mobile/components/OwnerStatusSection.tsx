@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, PipelineType } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Activity, Trash2, Home } from 'lucide-react';
+import { Activity, Trash2, Home, FileText } from 'lucide-react';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,12 @@ const OWNERS_STATUSES: LeadStatus[] = [
 ];
 
 const LEAD_TAGS = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];
+
+const MANDATE_TYPES = [
+  "Exclusif",
+  "Non exclusif", 
+  "Exclu"
+];
 
 interface OwnerStatusSectionProps {
   lead: LeadDetailed;
@@ -218,6 +225,30 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
                 {getStatusesForPipeline(lead.pipelineType || 'purchase').map(status => (
                   <SelectItem key={status} value={status} className="font-futura">
                     {getStatusLabel(status)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="mandate_type" className="text-sm">Type de mandat</Label>
+          <div className="flex">
+            <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 border border-r-0 rounded-l-md bg-white">
+              <FileText className="h-4 w-4 text-gray-500" />
+            </div>
+            <Select 
+              value={lead.mandate_type || ''} 
+              onValueChange={value => handleInputChange('mandate_type', value)}
+            >
+              <SelectTrigger id="mandate_type" className="w-full rounded-l-none font-futura">
+                <SelectValue placeholder="Sélectionner un type de mandat" />
+              </SelectTrigger>
+              <SelectContent>
+                {MANDATE_TYPES.map(type => (
+                  <SelectItem key={type} value={type} className="font-futura">
+                    {type}
                   </SelectItem>
                 ))}
               </SelectContent>
