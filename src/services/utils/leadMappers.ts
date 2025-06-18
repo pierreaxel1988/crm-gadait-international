@@ -1,3 +1,4 @@
+
 import { LeadDetailed } from "@/types/lead";
 
 // Important UUIDs for team members
@@ -64,8 +65,6 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
     renovationNeeded: supabaseData.renovation_needed || '',
     propertyDescription: supabaseData.property_description || '',
     keyFeatures: supabaseData.key_features || [],
-    condoFees: supabaseData.condo_fees || '',
-    facilities: supabaseData.facilities || [],
     
     // Additional fields  
     parkingSpaces: supabaseData.parking_spaces,
@@ -156,8 +155,6 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     renovation_needed: leadData.renovationNeeded,
     property_description: leadData.propertyDescription,
     key_features: leadData.keyFeatures,
-    condo_fees: leadData.condoFees,
-    facilities: leadData.facilities,
     
     // Additional fields
     parking_spaces: leadData.parkingSpaces,
