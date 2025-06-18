@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { LeadDetailed } from '@/types/lead';
+import { LeadDetailed, PipelineType } from '@/types/lead';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,6 +20,17 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { deleteLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
+const PURCHASE_STATUSES: LeadStatus[] = [
+  "New", "Contacted", "Qualified", "Proposal", "Visit", 
+  "Offre", "Deposit", "Signed", "Gagné", "Perdu"
+];
+
+const RENTAL_STATUSES: LeadStatus[] = [
+  "New", "Contacted", "Qualified", "Visit", 
+  "Offre", "Deposit", "Signed", "Gagné", "Perdu"
+];
 
 const OWNERS_STATUSES: LeadStatus[] = [
   "New",              // Premier contact
@@ -85,6 +95,27 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
     handleInputChange('tags', updatedTags);
   };
 
+  const handlePipelineTypeChange = (value: PipelineType) => {
+    if (value === lead.pipelineType) return;
+    handleInputChange('pipelineType', value);
+    const currentStatus = lead.status;
+    let targetStatusList: LeadStatus[];
+    if (value === 'purchase') {
+      targetStatusList = PURCHASE_STATUSES;
+    } else if (value === 'rental') {
+      targetStatusList = RENTAL_STATUSES;
+    } else {
+      targetStatusList = OWNERS_STATUSES;
+    }
+    if (!targetStatusList.includes(currentStatus)) {
+      handleInputChange('status', 'New');
+      toast({
+        title: "Statut réinitialisé",
+        description: `Le statut a été réinitialisé à "New" car "${currentStatus}" n'est pas valide pour un dossier de ${value === 'purchase' ? 'achat' : value === 'rental' ? 'location' : 'propriétaires'}.`
+      });
+    }
+  };
+
   const handleDeleteLead = async () => {
     try {
       await deleteLead(lead.id);
@@ -104,19 +135,32 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
   };
 
   const getStatusLabel = (status: LeadStatus): string => {
-    const ownerStatusLabels: Record<LeadStatus, string> = {
-      'New': 'Premier contact',
-      'Contacted': 'Rendez-vous programmé',
-      'Qualified': 'Visite effectuée',
-      'Proposal': 'Mandat en négociation',
-      'Signed': 'Mandat signé',
-      'Visit': 'Bien en commercialisation',
-      'Offre': 'Offre reçue',
-      'Deposit': 'Compromis signé',
-      'Gagné': 'Vente finalisée',
-      'Perdu': 'Perdu/Annulé'
-    };
-    return ownerStatusLabels[status] || status;
+    if (lead.pipelineType === 'owners') {
+      const ownerStatusLabels: Record<LeadStatus, string> = {
+        'New': 'Premier contact',
+        'Contacted': 'Rendez-vous programmé',
+        'Qualified': 'Visite effectuée',
+        'Proposal': 'Mandat en négociation',
+        'Signed': 'Mandat signé',
+        'Visit': 'Bien en commercialisation',
+        'Offre': 'Offre reçue',
+        'Deposit': 'Compromis signé',
+        'Gagné': 'Vente finalisée',
+        'Perdu': 'Perdu/Annulé'
+      };
+      return ownerStatusLabels[status] || status;
+    }
+    return status;
+  };
+
+  const getStatusesForPipeline = (pipelineType: PipelineType): LeadStatus[] => {
+    if (pipelineType === 'rental') {
+      return RENTAL_STATUSES;
+    } else if (pipelineType === 'owners') {
+      return OWNERS_STATUSES;
+    } else {
+      return PURCHASE_STATUSES;
+    }
   };
 
   const dynamicTopMargin = isHeaderMeasured 
@@ -136,7 +180,24 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
             <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 mr-2">
               <Home className="h-4 w-4 text-gray-500" />
             </div>
-            <span className="text-sm font-futura text-gray-700">Propriétaires</span>
+            <RadioGroup 
+              value={lead.pipelineType || 'purchase'} 
+              onValueChange={(value) => handlePipelineTypeChange(value as PipelineType)}
+              className="flex space-x-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="purchase" id="purchase" />
+                <Label htmlFor="purchase" className="text-sm font-futura cursor-pointer">Achat</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="rental" id="rental" />
+                <Label htmlFor="rental" className="text-sm font-futura cursor-pointer">Location</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="owners" id="owners" />
+                <Label htmlFor="owners" className="text-sm font-futura cursor-pointer">Propriétaires</Label>
+              </div>
+            </RadioGroup>
           </div>
         </div>
 
@@ -154,7 +215,7 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
                 <SelectValue placeholder="Sélectionner un statut" />
               </SelectTrigger>
               <SelectContent>
-                {OWNERS_STATUSES.map(status => (
+                {getStatusesForPipeline(lead.pipelineType || 'purchase').map(status => (
                   <SelectItem key={status} value={status} className="font-futura">
                     {getStatusLabel(status)}
                   </SelectItem>
