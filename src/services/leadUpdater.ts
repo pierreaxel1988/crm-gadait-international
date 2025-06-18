@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { LeadDetailed } from "@/types/lead";
 import { mapToLeadDetailed, mapToSupabaseFormat } from "./utils/leadMappers";
@@ -39,6 +40,9 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     // Ensure preferred_language is included in the update
     supabaseLeadData.preferred_language = leadData.preferredLanguage ?? null;
     
+    // Ensure mandate_type is included in the update
+    supabaseLeadData.mandate_type = leadData.mandate_type ?? null;
+    
     // Debug log for phone-related fields
     console.log("Phone-related fields:", {
       phoneCountryCode: leadData.phoneCountryCode,
@@ -49,6 +53,11 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     // Debug log for language field
     console.log("Language field:", {
       preferredLanguage: leadData.preferredLanguage
+    });
+
+    // Debug log for mandate_type field
+    console.log("Mandate type field:", {
+      mandate_type: leadData.mandate_type
     });
     
     // Special handling for multiple bedroom selections
