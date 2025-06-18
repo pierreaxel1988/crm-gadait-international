@@ -23,7 +23,7 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
     { value: "Qualified", label: "Visite effectuée" },
     { value: "Proposal", label: "Mandat en négociation" },
     { value: "Visit", label: "Mandat signé" },
-    { value: "Offer", label: "Bien en commercialisation" },
+    { value: "Offre", label: "Bien en commercialisation" },
     { value: "Deposit", label: "Offre reçue" },
     { value: "Signed", label: "Compromis signé" },
     { value: "Gagné", label: "Vente finalisée" },
