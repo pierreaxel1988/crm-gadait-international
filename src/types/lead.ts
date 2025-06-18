@@ -318,6 +318,11 @@ export interface LeadDetailed {
   attention_points?: string;
   relationship_details?: string;
   
+  // Nouveaux champs d'optimisation
+  is_furniture_relevant?: boolean;
+  price_validation_status?: string;
+  last_price_update?: string;
+  
   // Nouvel ajout pour compatibilité avec le champ email_envoye de la base de données
   email_envoye?: boolean;
 }

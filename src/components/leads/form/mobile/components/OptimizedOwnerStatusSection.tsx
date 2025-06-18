@@ -41,8 +41,13 @@ const OptimizedOwnerStatusSection: React.FC<OptimizedOwnerStatusSectionProps> = 
         }
 
         if (data) {
-          setOwnerData(data as Owner);
-          checkRequiredFields(data);
+          // Safely cast salutation to the expected type
+          const safeData = {
+            ...data,
+            salutation: data.salutation === 'M.' || data.salutation === 'Mme' ? data.salutation : undefined
+          } as Owner;
+          setOwnerData(safeData);
+          checkRequiredFields(safeData);
         }
       } catch (error) {
         console.error('Error in fetchOwnerData:', error);

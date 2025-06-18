@@ -41,8 +41,13 @@ const OwnerMandateSection: React.FC<OwnerMandateSectionProps> = ({
         }
 
         if (data) {
-          setOwnerData(data as Owner);
-          setValidationResult(validateMandateFields(data));
+          // Safely cast salutation to the expected type
+          const safeData = {
+            ...data,
+            salutation: data.salutation === 'M.' || data.salutation === 'Mme' ? data.salutation : undefined
+          } as Owner;
+          setOwnerData(safeData);
+          setValidationResult(validateMandateFields(safeData));
         }
       } catch (error) {
         console.error('Error in fetchOwnerData:', error);
