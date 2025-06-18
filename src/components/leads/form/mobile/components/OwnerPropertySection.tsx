@@ -70,43 +70,43 @@ const OwnerPropertySection: React.FC<OwnerPropertySectionProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="living_area" className="text-sm flex items-center gap-2">
+        <Label htmlFor="surface_area" className="text-sm flex items-center gap-2">
           <Square className="h-4 w-4 text-muted-foreground" />
           Surface (m²)
         </Label>
         <Input 
-          id="living_area" 
+          id="surface_area" 
           type="number"
-          value={lead.livingArea || ''} 
-          onChange={e => onDataChange({ livingArea: parseInt(e.target.value) || 0 })} 
+          value={lead.surfaceArea || ''} 
+          onChange={e => onDataChange({ surfaceArea: parseInt(e.target.value) || 0 })} 
           placeholder="Ex: 120" 
           className="w-full font-futura"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="constructionYear" className="text-sm flex items-center gap-2">
+        <Label htmlFor="construction_year" className="text-sm flex items-center gap-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
           Année de construction
         </Label>
         <Input 
-          id="constructionYear" 
-          value={lead.constructionYear || ''} 
-          onChange={e => onDataChange({ constructionYear: e.target.value })} 
+          id="construction_year" 
+          value={lead.construction_year || ''} 
+          onChange={e => onDataChange({ construction_year: e.target.value })} 
           placeholder="Ex: 2020" 
           className="w-full font-futura"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="propertyDescription" className="text-sm flex items-center gap-2">
+        <Label htmlFor="property_description" className="text-sm flex items-center gap-2">
           <FileText className="h-4 w-4 text-muted-foreground" />
           Description du bien
         </Label>
         <Textarea 
-          id="propertyDescription" 
-          value={lead.propertyDescription || ''} 
-          onChange={e => onDataChange({ propertyDescription: e.target.value })} 
+          id="property_description" 
+          value={lead.property_description || ''} 
+          onChange={e => onDataChange({ property_description: e.target.value })} 
           placeholder="Description détaillée du bien..." 
           rows={3}
           className="w-full font-futura resize-none"

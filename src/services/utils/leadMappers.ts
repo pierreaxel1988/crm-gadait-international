@@ -1,4 +1,3 @@
-
 import { LeadDetailed } from "@/types/lead";
 
 // Important UUIDs for team members
@@ -23,6 +22,7 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
     status: supabaseData.status,
     tags: supabaseData.tags || [],
     createdAt: supabaseData.created_at || new Date().toISOString(),
+    updatedAt: supabaseData.updated_at || new Date().toISOString(),
     lastContactedAt: supabaseData.last_contacted_at,
     assignedTo: supabaseData.assigned_to,
     source: supabaseData.source,
@@ -242,6 +242,7 @@ export const transformSupabaseToLead = (supabaseLead: any): LeadDetailed => {
     email: supabaseLead.email || '',
     phone: supabaseLead.phone || '',
     createdAt: supabaseLead.created_at || new Date().toISOString(),
+    updatedAt: supabaseLead.updated_at || new Date().toISOString(),
     lastContactedAt: supabaseLead.last_contacted_at,
     assignedTo: supabaseLead.assigned_to,
     source: supabaseLead.source,

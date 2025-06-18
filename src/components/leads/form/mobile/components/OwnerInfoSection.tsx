@@ -90,7 +90,7 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
         <StyledSelect
           id="source"
           value={lead.source || ''}
-          onChange={e => onDataChange({ source: e.target.value as any })}
+          onChange={e => onDataChange({ source: e.target.value })}
           placeholder="Sélectionner une source"
           options={SOURCES.map(source => ({ value: source, label: source }))}
         />
