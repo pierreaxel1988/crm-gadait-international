@@ -23,6 +23,12 @@ export interface ExtendedKanbanItem extends LeadDetailed {
   assignedTo?: string;
 }
 
+export interface KanbanColumn {
+  title: string;
+  status: string;
+  items: LeadDetailed[];
+}
+
 export const useKanbanData = (
   activeTab: string,
   refreshTrigger: number,
@@ -31,7 +37,7 @@ export const useKanbanData = (
   const [data, setData] = useState<LeadDetailed[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
-  const [loadedColumns, setLoadedColumns] = useState<any[]>([]);
+  const [loadedColumns, setLoadedColumns] = useState<KanbanColumn[]>([]);
 
   // Fetch team members
   const fetchTeamMembers = useCallback(async () => {
@@ -108,7 +114,7 @@ export const useKanbanData = (
       setData(convertedData);
       
       // Set columns for pipeline view
-      const columns = [
+      const columns: KanbanColumn[] = [
         { title: 'Nouveau', status: 'new', items: convertedData.filter(lead => lead.status === 'new') },
         { title: 'En cours', status: 'in_progress', items: convertedData.filter(lead => lead.status === 'in_progress') },
         { title: 'Qualifié', status: 'qualified', items: convertedData.filter(lead => lead.status === 'qualified') },

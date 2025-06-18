@@ -1,4 +1,3 @@
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -162,6 +161,7 @@ export interface LeadDetailed {
   pipeline_type?: PipelineType;
   taxResidence?: string;
   regions?: MauritiusRegion[];
+  residenceCountry?: string;
   
   imported_at?: string;
   integration_source?: string;

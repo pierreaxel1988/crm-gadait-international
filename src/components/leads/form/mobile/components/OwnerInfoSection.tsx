@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import StyledSelect from './StyledSelect';
 import MultiSelectButtons from '../../MultiSelectButtons';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import FormInput from '../../FormInput';
 
 interface OwnerInfoSectionProps {
   lead: LeadDetailed;
@@ -108,17 +109,29 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="phone" className="text-sm">Téléphone</Label>
-        <Input 
-          id="phone" 
-          type="tel"
-          value={lead.phone || ''} 
-          onChange={e => onDataChange({ phone: e.target.value })} 
-          placeholder="+33 6 12 34 56 78" 
-          className="w-full font-futura"
-        />
-      </div>
+      <FormInput
+        label="Téléphone"
+        name="phone"
+        type="tel-with-code"
+        value={lead.phone || ''}
+        onChange={e => onDataChange({ phone: e.target.value })}
+        placeholder="Numéro de téléphone"
+        countryCode={lead.phoneCountryCode || '+33'}
+        countryCodeDisplay={lead.phoneCountryCodeDisplay || '🇫🇷'}
+        onCountryCodeChange={(code) => {
+          const flagMap: Record<string, string> = {
+            '+33': '🇫🇷', '+1': '🇺🇸', '+44': '🇬🇧', '+34': '🇪🇸', '+39': '🇮🇹',
+            '+41': '🇨🇭', '+49': '🇩🇪', '+32': '🇧🇪', '+31': '🇳🇱', '+351': '🇵🇹',
+            '+230': '🇲🇺', '+971': '🇦🇪'
+          };
+          onDataChange({ 
+            phoneCountryCode: code,
+            phoneCountryCodeDisplay: flagMap[code] || '🌍'
+          });
+        }}
+        searchable={true}
+        showFlagsInDropdown={true}
+      />
 
       <div className="space-y-2">
         <Label htmlFor="residenceCountry" className="text-sm">Pays de résidence</Label>
