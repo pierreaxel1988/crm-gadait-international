@@ -82,6 +82,17 @@ export function useLeadDetail(id: string | undefined) {
       // Log mandate_type before saving
       console.log("Mandate type before save:", updatedLeadData.mandate_type);
       
+      // Ensure all required fields are properly set for owners
+      if (updatedLeadData.pipelineType === 'owners') {
+        // Make sure propertyType is properly set
+        console.log("Saving owner lead with propertyType:", updatedLeadData.propertyType);
+        
+        // Ensure other owner-specific fields are handled
+        if (!updatedLeadData.relationship_status) {
+          updatedLeadData.relationship_status = 'Nouveau contact';
+        }
+      }
+      
       // Utiliser updateLead pour tous les types de leads, y compris les propriétaires
       const updatedLead = await updateLead({
         ...updatedLeadData,
@@ -99,7 +110,7 @@ export function useLeadDetail(id: string | undefined) {
           });
         }
         
-        console.log("Lead saved successfully with mandate_type:", updatedLead.mandate_type);
+        console.log("Lead saved successfully with propertyType:", updatedLead.propertyType);
         setLead(updatedLead);
         setHasChanges(false);
       }
@@ -108,7 +119,7 @@ export function useLeadDetail(id: string | undefined) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible d'enregistrer les modifications."
+        description: `Impossible d'enregistrer les modifications: ${error instanceof Error ? error.message : 'Erreur inconnue'}`
       });
     } finally {
       setIsSaving(false);
@@ -122,6 +133,7 @@ export function useLeadDetail(id: string | undefined) {
       }
       
       const timer = setTimeout(() => {
+        console.log("Auto-saving changes for lead:", lead.name, "propertyType:", lead.propertyType);
         handleSave(true);
       }, 2000);
       
@@ -139,6 +151,14 @@ export function useLeadDetail(id: string | undefined) {
     if (!lead) return;
     
     console.log("Updating lead data:", data);
+    
+    // Special logging for propertyType changes
+    if (data.propertyType !== undefined) {
+      console.log("PropertyType change detected:", {
+        oldValue: lead.propertyType,
+        newValue: data.propertyType
+      });
+    }
     
     // Special logging for mandate_type changes
     if (data.mandate_type !== undefined) {

@@ -59,6 +59,12 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
       cleanedData.floors = null;
     }
 
+    // Validate that required fields are properly set for property type updates
+    if (leadData.propertyType) {
+      console.log("Updating property type to:", leadData.propertyType);
+      cleanedData.property_type = leadData.propertyType;
+    }
+
     console.log("Final cleaned data for update:", cleanedData);
     
     // Special handling for multiple bedroom selections
@@ -79,7 +85,7 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
       
       if (result.error) {
         console.error("Error updating lead:", result.error);
-        throw result.error;
+        throw new Error(`Database update failed: ${result.error.message}`);
       }
       
       // Then use the update_lead_bedrooms function to handle complex bedroom values
@@ -107,7 +113,7 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
       
       if (result.error) {
         console.error("Error updating lead:", result.error);
-        throw result.error;
+        throw new Error(`Database update failed: ${result.error.message}`);
       }
     }
     
