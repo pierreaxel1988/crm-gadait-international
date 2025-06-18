@@ -169,12 +169,12 @@ const LeadDetailMobile = () => {
           <TabsContent value="info" className="mt-1 animate-[fade-in_0.2s_ease-out]">
             <div className="space-y-6">
               <OwnerInfoSection lead={lead} onDataChange={handleDataChange} />
-              <OwnerLocationSection lead={lead} onDataChange={handleDataChange} />
             </div>
           </TabsContent>
           
           <TabsContent value="criteria" className="mt-1 animate-[fade-in_0.2s_ease-out]">
             <div className="space-y-6">
+              <OwnerLocationSection lead={lead} onDataChange={handleDataChange} />
               <OwnerPropertySection lead={lead} onDataChange={handleDataChange} />
               <OwnerPriceFields lead={lead} onDataChange={handleDataChange} />
             </div>
