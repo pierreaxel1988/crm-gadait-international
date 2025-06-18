@@ -296,27 +296,44 @@ export type Database = {
         Row: {
           action_history: Json | null
           amenities: string[] | null
+          assets: string[] | null
           assigned_to: string | null
+          attention_points: string | null
+          bathrooms: number | null
           bedrooms: number | null
           budget: string | null
           budget_min: string | null
+          construction_year: string | null
+          contact_source: string | null
           country: string | null
           created_at: string
           currency: string | null
           desired_location: string | null
+          desired_price: string | null
           email: string | null
           email_envoye: boolean | null
+          equipment: string[] | null
           external_id: string | null
+          fees: string | null
           financing_method: string | null
+          first_contact_date: string | null
+          furnished: boolean | null
+          furniture_included_in_price: boolean | null
+          furniture_price: string | null
           id: string
           imported_at: string | null
           integration_source: string | null
+          internal_notes: string | null
           land_area: string | null
+          last_contact_date: string | null
           last_contacted_at: string | null
           living_area: string | null
           location: string | null
+          mandate_type: string | null
+          map_coordinates: string | null
           name: string
           nationality: string | null
+          next_action_date: string | null
           next_follow_up_date: string | null
           notes: string | null
           orientation: string[] | null
@@ -325,15 +342,20 @@ export type Database = {
           phone_country_code_display: string | null
           pipeline_type: string
           preferred_language: string | null
+          property_description: string | null
           property_reference: string | null
+          property_state: string | null
           property_type: string | null
           property_types: string[] | null
           property_use: string | null
           purchase_timeframe: string | null
           raw_data: Json | null
           regions: string[] | null
+          relationship_details: string | null
+          relationship_status: string | null
           salutation: string | null
           source: string | null
+          specific_needs: string | null
           status: string
           tags: string[] | null
           task_type: string | null
@@ -344,27 +366,44 @@ export type Database = {
         Insert: {
           action_history?: Json | null
           amenities?: string[] | null
+          assets?: string[] | null
           assigned_to?: string | null
+          attention_points?: string | null
+          bathrooms?: number | null
           bedrooms?: number | null
           budget?: string | null
           budget_min?: string | null
+          construction_year?: string | null
+          contact_source?: string | null
           country?: string | null
           created_at?: string
           currency?: string | null
           desired_location?: string | null
+          desired_price?: string | null
           email?: string | null
           email_envoye?: boolean | null
+          equipment?: string[] | null
           external_id?: string | null
+          fees?: string | null
           financing_method?: string | null
+          first_contact_date?: string | null
+          furnished?: boolean | null
+          furniture_included_in_price?: boolean | null
+          furniture_price?: string | null
           id?: string
           imported_at?: string | null
           integration_source?: string | null
+          internal_notes?: string | null
           land_area?: string | null
+          last_contact_date?: string | null
           last_contacted_at?: string | null
           living_area?: string | null
           location?: string | null
+          mandate_type?: string | null
+          map_coordinates?: string | null
           name: string
           nationality?: string | null
+          next_action_date?: string | null
           next_follow_up_date?: string | null
           notes?: string | null
           orientation?: string[] | null
@@ -373,15 +412,20 @@ export type Database = {
           phone_country_code_display?: string | null
           pipeline_type: string
           preferred_language?: string | null
+          property_description?: string | null
           property_reference?: string | null
+          property_state?: string | null
           property_type?: string | null
           property_types?: string[] | null
           property_use?: string | null
           purchase_timeframe?: string | null
           raw_data?: Json | null
           regions?: string[] | null
+          relationship_details?: string | null
+          relationship_status?: string | null
           salutation?: string | null
           source?: string | null
+          specific_needs?: string | null
           status: string
           tags?: string[] | null
           task_type?: string | null
@@ -392,27 +436,44 @@ export type Database = {
         Update: {
           action_history?: Json | null
           amenities?: string[] | null
+          assets?: string[] | null
           assigned_to?: string | null
+          attention_points?: string | null
+          bathrooms?: number | null
           bedrooms?: number | null
           budget?: string | null
           budget_min?: string | null
+          construction_year?: string | null
+          contact_source?: string | null
           country?: string | null
           created_at?: string
           currency?: string | null
           desired_location?: string | null
+          desired_price?: string | null
           email?: string | null
           email_envoye?: boolean | null
+          equipment?: string[] | null
           external_id?: string | null
+          fees?: string | null
           financing_method?: string | null
+          first_contact_date?: string | null
+          furnished?: boolean | null
+          furniture_included_in_price?: boolean | null
+          furniture_price?: string | null
           id?: string
           imported_at?: string | null
           integration_source?: string | null
+          internal_notes?: string | null
           land_area?: string | null
+          last_contact_date?: string | null
           last_contacted_at?: string | null
           living_area?: string | null
           location?: string | null
+          mandate_type?: string | null
+          map_coordinates?: string | null
           name?: string
           nationality?: string | null
+          next_action_date?: string | null
           next_follow_up_date?: string | null
           notes?: string | null
           orientation?: string[] | null
@@ -421,15 +482,20 @@ export type Database = {
           phone_country_code_display?: string | null
           pipeline_type?: string
           preferred_language?: string | null
+          property_description?: string | null
           property_reference?: string | null
+          property_state?: string | null
           property_type?: string | null
           property_types?: string[] | null
           property_use?: string | null
           purchase_timeframe?: string | null
           raw_data?: Json | null
           regions?: string[] | null
+          relationship_details?: string | null
+          relationship_status?: string | null
           salutation?: string | null
           source?: string | null
+          specific_needs?: string | null
           status?: string
           tags?: string[] | null
           task_type?: string | null
@@ -440,309 +506,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "leads_assigned_to_fkey"
-            columns: ["assigned_to"]
-            isOneToOne: false
-            referencedRelation: "team_members"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      owner_actions: {
-        Row: {
-          action_date: string
-          action_type: string
-          completed_by: string | null
-          completed_date: string | null
-          created_by: string | null
-          id: string
-          notes: string | null
-          owner_id: string
-          scheduled_date: string | null
-          status: string | null
-        }
-        Insert: {
-          action_date?: string
-          action_type: string
-          completed_by?: string | null
-          completed_date?: string | null
-          created_by?: string | null
-          id?: string
-          notes?: string | null
-          owner_id: string
-          scheduled_date?: string | null
-          status?: string | null
-        }
-        Update: {
-          action_date?: string
-          action_type?: string
-          completed_by?: string | null
-          completed_date?: string | null
-          created_by?: string | null
-          id?: string
-          notes?: string | null
-          owner_id?: string
-          scheduled_date?: string | null
-          status?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "owner_actions_completed_by_fkey"
-            columns: ["completed_by"]
-            isOneToOne: false
-            referencedRelation: "team_members"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_actions_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "team_members"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_actions_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "owners"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      owner_properties: {
-        Row: {
-          created_at: string
-          id: string
-          owner_id: string
-          property_id: string | null
-          property_reference: string | null
-          property_status: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          owner_id: string
-          property_id?: string | null
-          property_reference?: string | null
-          property_status?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          owner_id?: string
-          property_id?: string | null
-          property_reference?: string | null
-          property_status?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "owner_properties_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "owners"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_properties_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      owners: {
-        Row: {
-          action_history: Json | null
-          assets: string[] | null
-          assigned_to: string | null
-          attention_points: string | null
-          bathrooms: number | null
-          bedrooms: number | null
-          construction_year: string | null
-          contact_source: string | null
-          country: string | null
-          created_at: string
-          currency: string | null
-          desired_location: string | null
-          desired_price: string | null
-          email: string | null
-          equipment: string[] | null
-          external_id: string | null
-          fees: string | null
-          first_contact_date: string | null
-          full_name: string
-          furnished: boolean | null
-          furniture_included_in_price: boolean | null
-          furniture_price: string | null
-          id: string
-          imported_at: string | null
-          integration_source: string | null
-          internal_notes: string | null
-          is_furniture_relevant: boolean | null
-          land_area: string | null
-          last_contact_date: string | null
-          last_contacted_at: string | null
-          last_price_update: string | null
-          living_area: string | null
-          location: string | null
-          mandate_conditions: string | null
-          mandate_end_date: string | null
-          mandate_start_date: string | null
-          mandate_type: string | null
-          map_coordinates: string | null
-          nationality: string | null
-          next_action_date: string | null
-          next_follow_up_date: string | null
-          notes: string | null
-          phone: string | null
-          preferred_language: string | null
-          price_validation_status: string | null
-          property_description: string | null
-          property_reference: string | null
-          property_state: string | null
-          property_type: string | null
-          regions: string[] | null
-          relationship_details: string | null
-          relationship_status: string | null
-          salutation: string | null
-          source: string | null
-          specific_needs: string | null
-          status: string | null
-          tags: string[] | null
-          task_type: string | null
-          tax_residence: string | null
-          updated_at: string
-          url: string | null
-        }
-        Insert: {
-          action_history?: Json | null
-          assets?: string[] | null
-          assigned_to?: string | null
-          attention_points?: string | null
-          bathrooms?: number | null
-          bedrooms?: number | null
-          construction_year?: string | null
-          contact_source?: string | null
-          country?: string | null
-          created_at?: string
-          currency?: string | null
-          desired_location?: string | null
-          desired_price?: string | null
-          email?: string | null
-          equipment?: string[] | null
-          external_id?: string | null
-          fees?: string | null
-          first_contact_date?: string | null
-          full_name: string
-          furnished?: boolean | null
-          furniture_included_in_price?: boolean | null
-          furniture_price?: string | null
-          id?: string
-          imported_at?: string | null
-          integration_source?: string | null
-          internal_notes?: string | null
-          is_furniture_relevant?: boolean | null
-          land_area?: string | null
-          last_contact_date?: string | null
-          last_contacted_at?: string | null
-          last_price_update?: string | null
-          living_area?: string | null
-          location?: string | null
-          mandate_conditions?: string | null
-          mandate_end_date?: string | null
-          mandate_start_date?: string | null
-          mandate_type?: string | null
-          map_coordinates?: string | null
-          nationality?: string | null
-          next_action_date?: string | null
-          next_follow_up_date?: string | null
-          notes?: string | null
-          phone?: string | null
-          preferred_language?: string | null
-          price_validation_status?: string | null
-          property_description?: string | null
-          property_reference?: string | null
-          property_state?: string | null
-          property_type?: string | null
-          regions?: string[] | null
-          relationship_details?: string | null
-          relationship_status?: string | null
-          salutation?: string | null
-          source?: string | null
-          specific_needs?: string | null
-          status?: string | null
-          tags?: string[] | null
-          task_type?: string | null
-          tax_residence?: string | null
-          updated_at?: string
-          url?: string | null
-        }
-        Update: {
-          action_history?: Json | null
-          assets?: string[] | null
-          assigned_to?: string | null
-          attention_points?: string | null
-          bathrooms?: number | null
-          bedrooms?: number | null
-          construction_year?: string | null
-          contact_source?: string | null
-          country?: string | null
-          created_at?: string
-          currency?: string | null
-          desired_location?: string | null
-          desired_price?: string | null
-          email?: string | null
-          equipment?: string[] | null
-          external_id?: string | null
-          fees?: string | null
-          first_contact_date?: string | null
-          full_name?: string
-          furnished?: boolean | null
-          furniture_included_in_price?: boolean | null
-          furniture_price?: string | null
-          id?: string
-          imported_at?: string | null
-          integration_source?: string | null
-          internal_notes?: string | null
-          is_furniture_relevant?: boolean | null
-          land_area?: string | null
-          last_contact_date?: string | null
-          last_contacted_at?: string | null
-          last_price_update?: string | null
-          living_area?: string | null
-          location?: string | null
-          mandate_conditions?: string | null
-          mandate_end_date?: string | null
-          mandate_start_date?: string | null
-          mandate_type?: string | null
-          map_coordinates?: string | null
-          nationality?: string | null
-          next_action_date?: string | null
-          next_follow_up_date?: string | null
-          notes?: string | null
-          phone?: string | null
-          preferred_language?: string | null
-          price_validation_status?: string | null
-          property_description?: string | null
-          property_reference?: string | null
-          property_state?: string | null
-          property_type?: string | null
-          regions?: string[] | null
-          relationship_details?: string | null
-          relationship_status?: string | null
-          salutation?: string | null
-          source?: string | null
-          specific_needs?: string | null
-          status?: string | null
-          tags?: string[] | null
-          task_type?: string | null
-          tax_residence?: string | null
-          updated_at?: string
-          url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "owners_assigned_to_fkey"
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "team_members"

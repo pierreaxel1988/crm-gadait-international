@@ -122,81 +122,6 @@ import { TaskType } from "@/components/kanban/KanbanCard";
 
 export type { LeadStatus, LeadTag, TaskType };
 
-// Interface mise à jour pour les propriétaires avec tous les champs nécessaires
-export interface Owner {
-  id: string;
-  full_name: string;
-  email?: string;
-  phone?: string;
-  nationality?: string;
-  tax_residence?: string;
-  preferred_language?: string;
-  assigned_to?: string;
-  first_contact_date?: string;
-  contact_source?: string;
-  last_contact_date?: string;
-  relationship_status?: string;
-  mandate_type?: string;
-  next_action_date?: string;
-  specific_needs?: string;
-  attention_points?: string;
-  relationship_details?: string;
-  created_at: string;
-  updated_at: string;
-  
-  // Nouveaux champs pour l'onglet "Infos"
-  salutation?: 'M.' | 'Mme';
-  source?: LeadSource;
-  property_reference?: string;
-  url?: string;
-  tags?: LeadTag[];
-  regions?: MauritiusRegion[];
-  last_contacted_at?: string;
-  integration_source?: string;
-  imported_at?: string;
-  external_id?: string;
-  
-  // Nouveaux champs pour l'onglet "Statut"
-  status?: string;
-  task_type?: string;
-  next_follow_up_date?: string;
-  
-  // Nouveaux champs pour l'onglet "Notes"
-  notes?: string;
-  internal_notes?: string;
-  
-  // Nouveaux champs pour l'onglet "Actions"
-  action_history?: any[];
-  
-  // Champs de mobilier
-  furnished?: boolean;
-  furniture_included_in_price?: boolean;
-  furniture_price?: string;
-  
-  // Champs de prix
-  desired_price?: string;
-  fees?: string;
-  currency?: Currency;
-  
-  // Champs de localisation
-  country?: string;
-  location?: string;
-  desired_location?: string;
-  map_coordinates?: string;
-  
-  // Champs de propriété
-  property_type?: PropertyType;
-  bedrooms?: number;
-  bathrooms?: number;
-  living_area?: string;
-  land_area?: string;
-  construction_year?: string;
-  property_state?: PropertyState;
-  property_description?: string;
-  assets?: AssetType[];
-  equipment?: Equipment[];
-}
-
 export interface LeadDetailed {
   id: string;
   name: string;
@@ -266,9 +191,18 @@ export interface LeadDetailed {
   // Add the equipment field
   equipment?: Equipment[];
   
-  // Nouveaux champs pour les propriétaires
+  // Owner-specific fields - now unified in leads table
   desired_price?: string;
   fees?: string;
+  relationship_status?: string;
+  mandate_type?: string;
+  specific_needs?: string;
+  attention_points?: string;
+  relationship_details?: string;
+  first_contact_date?: string;
+  last_contact_date?: string;
+  next_action_date?: string;
+  contact_source?: string;
 
   // Nouveaux champs pour le luxe immobilier
   bathrooms?: number;
@@ -307,9 +241,6 @@ export interface LeadDetailed {
   furnished?: boolean;
   furniture_included_in_price?: boolean;
   furniture_price?: string;
-  specific_needs?: string;
-  attention_points?: string;
-  relationship_details?: string;
   
   // Nouvel ajout pour compatibilité avec le champ email_envoye de la base de données
   email_envoye?: boolean;
