@@ -1,10 +1,8 @@
 
 import React from 'react';
 import { LeadDetailed, LeadSource } from '@/types/lead';
-import { LeadTag } from '@/components/common/TagBadge';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import MultiSelectButtons from '../../MultiSelectButtons';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import FormInput from '../../FormInput';
 import { COUNTRIES } from '@/utils/countries';
@@ -18,23 +16,12 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
   lead,
   onDataChange
 }) => {
-  const handleTagToggle = (tag: string) => {
-    const currentTags = lead.tags || [];
-    const updatedTags = currentTags.includes(tag as LeadTag)
-      ? currentTags.filter(t => t !== tag)
-      : [...currentTags, tag as LeadTag];
-    
-    onDataChange({ tags: updatedTags });
-  };
-
   const LEAD_SOURCES: LeadSource[] = [
     "Site web", "Réseaux sociaux", "Portails immobiliers", "Network", 
     "Repeaters", "Recommandations", "Apporteur d'affaire", "Idealista",
     "Le Figaro", "Properstar", "Property Cloud", "L'express Property",
     "James Edition", "Annonce", "Email", "Téléphone", "Autre", "Recommendation"
   ];
-
-  const LEAD_TAGS = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"];
 
   const NATIONALITIES = [
     "Française", "Britannique", "Allemande", "Italienne", "Espagnole", "Belge", 
@@ -171,15 +158,6 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
         options={LEAD_SOURCES.map(source => ({ value: source, label: source }))}
         searchable={true}
       />
-
-      <div className="space-y-2">
-        <Label className="text-sm">Tags</Label>
-        <MultiSelectButtons
-          options={LEAD_TAGS}
-          selectedValues={lead.tags || []}
-          onToggle={handleTagToggle}
-        />
-      </div>
     </div>
   );
 };
