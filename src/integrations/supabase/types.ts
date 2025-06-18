@@ -320,6 +320,7 @@ export type Database = {
           furnished: boolean | null
           furniture_included_in_price: boolean | null
           furniture_price: string | null
+          google_drive_link: string | null
           id: string
           imported_at: string | null
           integration_source: string | null
@@ -390,6 +391,7 @@ export type Database = {
           furnished?: boolean | null
           furniture_included_in_price?: boolean | null
           furniture_price?: string | null
+          google_drive_link?: string | null
           id?: string
           imported_at?: string | null
           integration_source?: string | null
@@ -460,6 +462,7 @@ export type Database = {
           furnished?: boolean | null
           furniture_included_in_price?: boolean | null
           furniture_price?: string | null
+          google_drive_link?: string | null
           id?: string
           imported_at?: string | null
           integration_source?: string | null

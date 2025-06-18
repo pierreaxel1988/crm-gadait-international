@@ -244,4 +244,7 @@ export interface LeadDetailed {
   
   // Nouvel ajout pour compatibilité avec le champ email_envoye de la base de données
   email_envoye?: boolean;
+  
+  // Nouveau champ Google Drive
+  google_drive_link?: string;
 }
