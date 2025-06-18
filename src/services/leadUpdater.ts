@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { LeadDetailed } from "@/types/lead";
 import { mapToLeadDetailed, mapToSupabaseFormat } from "./utils/leadMappers";
@@ -27,30 +26,20 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
     const supabaseLeadData = mapToSupabaseFormat(leadData);
     console.log("Preparing lead data for update:", supabaseLeadData);
     
-    // Ensure phone-related fields are always explicitly included in the update
+    // Ensure all required fields are properly included in the update
     supabaseLeadData.phone_country_code = leadData.phoneCountryCode ?? null;
     supabaseLeadData.phone_country_code_display = leadData.phoneCountryCodeDisplay ?? null;
+    supabaseLeadData.preferred_language = leadData.preferredLanguage ?? null;
+    supabaseLeadData.mandate_type = leadData.mandate_type ?? null;
+    supabaseLeadData.map_coordinates = leadData.mapCoordinates ?? null;
     
     // Add pipeline_type field to ensure consistency
     if (leadData.pipelineType) {
       supabaseLeadData.pipeline_type = leadData.pipelineType;
     }
     
-    // Ensure preferred_language is included in the update
-    supabaseLeadData.preferred_language = leadData.preferredLanguage ?? null;
-    
-    // Ensure mandate_type is included in the update
-    supabaseLeadData.mandate_type = leadData.mandate_type ?? null;
-    
-    // Clean up fields that might cause issues - remove any fields that don't exist in the database
+    // Clean up any problematic fields - remove fields that don't exist in the database
     const cleanedData = { ...supabaseLeadData };
-    
-    // Remove problematic fields that might not exist in the database schema
-    delete cleanedData.energy_class;
-    delete cleanedData.yearly_taxes;
-    delete cleanedData.condo_fees;
-    delete cleanedData.facilities;
-    delete cleanedData.key_features; // Remove this field as it doesn't exist in database
     
     // Handle parking_spaces and floors - convert objects to proper values
     if (cleanedData.parking_spaces && typeof cleanedData.parking_spaces === 'object') {

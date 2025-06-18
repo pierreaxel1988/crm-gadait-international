@@ -63,7 +63,6 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
     constructionYear: supabaseData.construction_year || '',
     renovationNeeded: supabaseData.renovation_needed || '',
     propertyDescription: supabaseData.property_description || '',
-    // keyFeatures field removed as it doesn't exist in database
     
     // Additional fields  
     parkingSpaces: supabaseData.parking_spaces,
@@ -96,7 +95,13 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
     email_envoye: supabaseData.email_envoye || false,
     
     // Google Drive link
-    google_drive_link: supabaseData.google_drive_link || ''
+    google_drive_link: supabaseData.google_drive_link || '',
+    
+    // Map coordinates
+    mapCoordinates: supabaseData.map_coordinates || '',
+    
+    // Residence country field
+    residenceCountry: supabaseData.country || ''
   };
 
   return lead;
@@ -139,7 +144,7 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     notes: leadData.notes,
     internal_notes: leadData.internal_notes,
     next_follow_up_date: leadData.nextFollowUpDate,
-    country: leadData.country,
+    country: leadData.country || leadData.residenceCountry,
     url: leadData.url,
     pipeline_type: leadData.pipelineType,
     tax_residence: leadData.taxResidence,
@@ -151,7 +156,6 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     construction_year: leadData.constructionYear,
     renovation_needed: leadData.renovationNeeded,
     property_description: leadData.propertyDescription,
-    // key_features field removed as it doesn't exist in database
     
     // Additional fields - only include fields that exist in the database
     parking_spaces: leadData.parkingSpaces,
@@ -187,7 +191,10 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     email_envoye: leadData.email_envoye,
     
     // Google Drive link
-    google_drive_link: leadData.google_drive_link || ''
+    google_drive_link: leadData.google_drive_link || '',
+    
+    // Map coordinates
+    map_coordinates: leadData.mapCoordinates || ''
   };
 };
 

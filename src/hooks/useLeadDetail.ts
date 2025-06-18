@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
@@ -47,6 +46,7 @@ export function useLeadDetail(id: string | undefined) {
         
         setHasChanges(false);
       } catch (error) {
+        console.error("Error fetching lead:", error);
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -79,12 +79,24 @@ export function useLeadDetail(id: string | undefined) {
         console.log("Converting 'jean-marc-perrissol' to proper UUID before save:", JEAN_MARC_ID);
       }
       
-      // Log mandate_type before saving
-      console.log("Mandate type before save:", updatedLeadData.mandate_type);
+      console.log("Saving lead with all owner fields:", {
+        propertyType: updatedLeadData.propertyType,
+        mandate_type: updatedLeadData.mandate_type,
+        desired_price: updatedLeadData.desired_price,
+        fees: updatedLeadData.fees,
+        relationship_status: updatedLeadData.relationship_status,
+        specific_needs: updatedLeadData.specific_needs,
+        attention_points: updatedLeadData.attention_points,
+        relationship_details: updatedLeadData.relationship_details,
+        google_drive_link: updatedLeadData.google_drive_link,
+        map_coordinates: updatedLeadData.mapCoordinates,
+        furnished: updatedLeadData.furnished,
+        furniture_included_in_price: updatedLeadData.furniture_included_in_price,
+        furniture_price: updatedLeadData.furniture_price
+      });
       
       // Ensure all required fields are properly set for owners
       if (updatedLeadData.pipelineType === 'owners') {
-        // Make sure propertyType is properly set
         console.log("Saving owner lead with propertyType:", updatedLeadData.propertyType);
         
         // Ensure other owner-specific fields are handled
@@ -93,13 +105,14 @@ export function useLeadDetail(id: string | undefined) {
         }
       }
       
-      // Utiliser updateLead pour tous les types de leads, y compris les propriétaires
+      // Use updateLead for all lead types including owners
       const updatedLead = await updateLead({
         ...updatedLeadData,
         phoneCountryCode: updatedLeadData.phoneCountryCode || '+33',
         phoneCountryCodeDisplay: updatedLeadData.phoneCountryCodeDisplay || '🇫🇷',
         preferredLanguage: updatedLeadData.preferredLanguage || null,
-        mandate_type: updatedLeadData.mandate_type // Ensure mandate_type is included
+        mandate_type: updatedLeadData.mandate_type,
+        mapCoordinates: updatedLeadData.mapCoordinates || null
       });
       
       if (updatedLead) {
@@ -110,7 +123,7 @@ export function useLeadDetail(id: string | undefined) {
           });
         }
         
-        console.log("Lead saved successfully with propertyType:", updatedLead.propertyType);
+        console.log("Lead saved successfully with all fields:", updatedLead);
         setLead(updatedLead);
         setHasChanges(false);
       }
@@ -133,9 +146,18 @@ export function useLeadDetail(id: string | undefined) {
       }
       
       const timer = setTimeout(() => {
-        console.log("Auto-saving changes for lead:", lead.name, "propertyType:", lead.propertyType);
+        console.log("Auto-saving changes for lead:", lead.name);
+        console.log("Current lead data before auto-save:", {
+          propertyType: lead.propertyType,
+          mandate_type: lead.mandate_type,
+          desired_price: lead.desired_price,
+          fees: lead.fees,
+          relationship_status: lead.relationship_status,
+          google_drive_link: lead.google_drive_link,
+          mapCoordinates: lead.mapCoordinates
+        });
         handleSave(true);
-      }, 2000);
+      }, 1500); // Reduced timeout for faster auto-save
       
       setAutoSaveTimer(timer);
     }
@@ -152,7 +174,7 @@ export function useLeadDetail(id: string | undefined) {
     
     console.log("Updating lead data:", data);
     
-    // Special logging for propertyType changes
+    // Special logging for important owner fields
     if (data.propertyType !== undefined) {
       console.log("PropertyType change detected:", {
         oldValue: lead.propertyType,
@@ -160,11 +182,38 @@ export function useLeadDetail(id: string | undefined) {
       });
     }
     
-    // Special logging for mandate_type changes
     if (data.mandate_type !== undefined) {
       console.log("Mandate type change detected:", {
         oldValue: lead.mandate_type,
         newValue: data.mandate_type
+      });
+    }
+
+    if (data.desired_price !== undefined) {
+      console.log("Desired price change detected:", {
+        oldValue: lead.desired_price,
+        newValue: data.desired_price
+      });
+    }
+
+    if (data.fees !== undefined) {
+      console.log("Fees change detected:", {
+        oldValue: lead.fees,
+        newValue: data.fees
+      });
+    }
+
+    if (data.google_drive_link !== undefined) {
+      console.log("Google Drive link change detected:", {
+        oldValue: lead.google_drive_link,
+        newValue: data.google_drive_link
+      });
+    }
+
+    if (data.mapCoordinates !== undefined) {
+      console.log("Map coordinates change detected:", {
+        oldValue: lead.mapCoordinates,
+        newValue: data.mapCoordinates
       });
     }
     
@@ -181,23 +230,15 @@ export function useLeadDetail(id: string | undefined) {
       if (!prev) return prev;
       const updated = { ...prev, ...data };
       
-      if (data.phoneCountryCode || data.phoneCountryCodeDisplay || data.phone) {
-        console.log("Phone data change detected:", {
-          prevCode: prev.phoneCountryCode,
-          newCode: data.phoneCountryCode || prev.phoneCountryCode,
-          prevDisplay: prev.phoneCountryCodeDisplay,
-          newDisplay: data.phoneCountryCodeDisplay || prev.phoneCountryCodeDisplay,
-          prevPhone: prev.phone,
-          newPhone: data.phone || prev.phone
-        });
-      }
-      
-      if (data.preferredLanguage !== undefined) {
-        console.log("Language change detected:", {
-          prevLanguage: prev.preferredLanguage,
-          newLanguage: data.preferredLanguage
-        });
-      }
+      console.log("Updated lead state:", {
+        propertyType: updated.propertyType,
+        mandate_type: updated.mandate_type,
+        desired_price: updated.desired_price,
+        fees: updated.fees,
+        relationship_status: updated.relationship_status,
+        google_drive_link: updated.google_drive_link,
+        mapCoordinates: updated.mapCoordinates
+      });
       
       return updated;
     });
