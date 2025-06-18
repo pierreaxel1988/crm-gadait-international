@@ -1,10 +1,8 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { ActionHistory } from '@/types/actionHistory';
 import { getLead, updateLead } from '@/services/leadService';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 // Important UUIDs
 const JADE_ID = "acab847b-7ace-4681-989d-86f78549aa69";
@@ -80,103 +78,24 @@ export function useLeadDetail(id: string | undefined) {
         console.log("Converting 'jean-marc-perrissol' to proper UUID before save:", JEAN_MARC_ID);
       }
       
-      // Pour les propriétaires, sauvegarder UNIQUEMENT dans la table owners
-      if (lead.pipelineType === 'owners') {
-        const ownerUpdates = {
-          full_name: updatedLeadData.name,
-          email: updatedLeadData.email,
-          phone: updatedLeadData.phone,
-          nationality: updatedLeadData.nationality,
-          preferred_language: updatedLeadData.preferredLanguage,
-          assigned_to: updatedLeadData.assignedTo,
-          last_contacted_at: updatedLeadData.lastContactedAt,
-          source: updatedLeadData.source,
-          property_reference: updatedLeadData.propertyReference,
-          url: updatedLeadData.url,
-          tags: updatedLeadData.tags,
-          regions: updatedLeadData.regions,
-          notes: updatedLeadData.notes,
-          internal_notes: updatedLeadData.internal_notes,
-          action_history: updatedLeadData.actionHistory,
-          task_type: updatedLeadData.taskType,
-          next_follow_up_date: updatedLeadData.nextFollowUpDate,
-          salutation: updatedLeadData.salutation,
-          integration_source: updatedLeadData.integration_source,
-          imported_at: updatedLeadData.imported_at,
-          external_id: updatedLeadData.external_id,
-          // Synchronize additional owner fields
-          desired_price: updatedLeadData.desired_price,
-          fees: updatedLeadData.fees,
-          currency: updatedLeadData.currency,
-          country: updatedLeadData.country,
-          location: updatedLeadData.location,
-          desired_location: updatedLeadData.desiredLocation,
-          map_coordinates: updatedLeadData.mapCoordinates,
-          property_type: updatedLeadData.propertyType,
-          bedrooms: Array.isArray(updatedLeadData.bedrooms) ? updatedLeadData.bedrooms[0] : updatedLeadData.bedrooms,
-          bathrooms: updatedLeadData.bathrooms,
-          living_area: updatedLeadData.livingArea,
-          land_area: updatedLeadData.landArea,
-          construction_year: updatedLeadData.constructionYear,
-          property_state: updatedLeadData.propertyState,
-          property_description: updatedLeadData.propertyDescription,
-          assets: updatedLeadData.assets,
-          equipment: updatedLeadData.equipment,
-          furnished: updatedLeadData.furnished,
-          furniture_included_in_price: updatedLeadData.furniture_included_in_price,
-          furniture_price: updatedLeadData.furniture_price,
-          status: updatedLeadData.status,
-          specific_needs: updatedLeadData.specific_needs,
-          attention_points: updatedLeadData.attention_points,
-          relationship_details: updatedLeadData.relationship_details,
-          updated_at: new Date().toISOString()
-        };
-
-        const { error: ownerError } = await supabase
-          .from('owners')
-          .update(ownerUpdates)
-          .eq('id', lead.id);
-
-        if (ownerError) {
-          console.error("Error updating owner data:", ownerError);
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Impossible de sauvegarder les données propriétaire."
-          });
-          return;
-        }
-
-        console.log("Owner data saved successfully to owners table only");
-        
+      // Utiliser updateLead pour tous les types de leads, y compris les propriétaires
+      const updatedLead = await updateLead({
+        ...updatedLeadData,
+        phoneCountryCode: updatedLeadData.phoneCountryCode || '+33',
+        phoneCountryCodeDisplay: updatedLeadData.phoneCountryCodeDisplay || '🇫🇷',
+        preferredLanguage: updatedLeadData.preferredLanguage || null
+      });
+      
+      if (updatedLead) {
         if (!silent) {
           toast({
-            title: "Propriétaire mis à jour",
+            title: lead.pipelineType === 'owners' ? "Propriétaire mis à jour" : "Lead mis à jour",
             description: "Les modifications ont été enregistrées avec succès."
           });
         }
         
+        setLead(updatedLead);
         setHasChanges(false);
-      } else {
-        // Pour les autres types de leads, utiliser updateLead
-        const updatedLead = await updateLead({
-          ...updatedLeadData,
-          phoneCountryCode: updatedLeadData.phoneCountryCode || '+33',
-          phoneCountryCodeDisplay: updatedLeadData.phoneCountryCodeDisplay || '🇫🇷',
-          preferredLanguage: updatedLeadData.preferredLanguage || null
-        });
-        
-        if (updatedLead) {
-          if (!silent) {
-            toast({
-              title: "Lead mis à jour",
-              description: "Les modifications ont été enregistrées avec succès."
-            });
-          }
-          
-          setLead(updatedLead);
-          setHasChanges(false);
-        }
       }
     } catch (error) {
       console.error("Error saving:", error);
@@ -334,53 +253,33 @@ export function useLeadDetail(id: string | undefined) {
     }
   }, [lead?.actionHistory, hasShownPendingActionsToast]);
 
-  const fetchJacquesId = async () => {
+  const handleReassignToJacques = async () => {
+    if (!lead) return;
+
+    const jacquesId = JACQUES_ID;
+      
     try {
-      const { data, error } = await supabase
-        .from('team_members')
-        .select('id')
-        .ilike('name', '%jacques%')
-        .single();
-    
-    if (error) {
-      console.error('Error fetching Jacques ID:', error);
-      return null;
-    }
-    
-    return data?.id || null;
-  } catch (error) {
-    console.error('Unexpected error fetching Jacques ID:', error);
-    return null;
-  }
-};
-
-const handleReassignToJacques = async () => {
-  if (!lead) return;
-
-  const jacquesId = JACQUES_ID; // Using the constant
-    
-  try {
-    const updatedLead = await updateLead({
-      ...lead,
-      assignedTo: jacquesId
-    });
-    
-    if (updatedLead) {
-      setLead(updatedLead);
+      const updatedLead = await updateLead({
+        ...lead,
+        assignedTo: jacquesId
+      });
+      
+      if (updatedLead) {
+        setLead(updatedLead);
+        toast({
+          title: "Lead réassigné",
+          description: "Le lead a été réassigné à Jacques avec succès."
+        });
+      }
+    } catch (error) {
+      console.error("Error reassigning lead:", error);
       toast({
-        title: "Lead réassigné",
-        description: "Le lead a été réassigné à Jacques avec succès."
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de réassigner le lead à Jacques."
       });
     }
-  } catch (error) {
-    console.error("Error reassigning lead:", error);
-    toast({
-      variant: "destructive",
-      title: "Erreur",
-      description: "Impossible de réassigner le lead à Jacques."
-    });
-  }
-};
+  };
 
   return {
     lead,
@@ -417,47 +316,9 @@ const handleReassignToJacques = async () => {
       
       return fullPhone.replace(/\D/g, '');
     } : () => '',
-    startCallTracking: (type: 'phone' | 'whatsapp' = 'phone') => {
-      setIsCallTracking(true);
-      setCallStartTime(new Date());
-      setCallType(type);
-    },
-    endCallTracking: (callDuration: number) => {
-      if (!lead || !isCallTracking) return;
-      
-      const formatDuration = (seconds: number): string => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-      };
-      
-      const callAction: ActionHistory = {
-        id: crypto.randomUUID(),
-        actionType: 'Call',
-        notes: `${callType === 'whatsapp' ? 'WhatsApp' : 'Appel'} de ${formatDuration(callDuration)}`,
-        createdAt: callStartTime?.toISOString() || new Date().toISOString(),
-        scheduledDate: callStartTime?.toISOString() || new Date().toISOString(),
-        completedDate: new Date().toISOString()
-      };
-      
-      handleDataChange({
-        actionHistory: [...(lead.actionHistory || []), callAction],
-        lastContactedAt: new Date().toISOString()
-      });
-      
-      setIsCallTracking(false);
-      setCallStartTime(null);
-      
-      toast({
-        title: callType === 'whatsapp' ? "WhatsApp enregistré" : "Appel enregistré",
-        description: `Un ${callType === 'whatsapp' ? 'appel WhatsApp' : 'appel'} de ${formatDuration(callDuration)} a été enregistré.`
-      });
-    },
-    formatDuration: (seconds: number): string => {
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    },
+    startCallTracking,
+    endCallTracking,
+    formatDuration,
     handleReassignToJacques
   };
 }

@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { LeadDetailed } from '@/types/lead';
+import { LeadStatus } from '@/components/common/StatusBadge';
+import { TaskType } from '@/components/kanban/KanbanCard';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import StyledSelect from './StyledSelect';
@@ -15,20 +17,20 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
   lead,
   onDataChange
 }) => {
-  const ownerStatuses = [
-    { value: "Nouveau contact", label: "Nouveau contact" },
-    { value: "Rendez-vous programmé", label: "Rendez-vous programmé" },
-    { value: "Visite effectuée", label: "Visite effectuée" },
-    { value: "Mandat en négociation", label: "Mandat en négociation" },
-    { value: "Mandat signé", label: "Mandat signé" },
-    { value: "Bien en commercialisation", label: "Bien en commercialisation" },
-    { value: "Offre reçue", label: "Offre reçue" },
-    { value: "Compromis signé", label: "Compromis signé" },
-    { value: "Vente finalisée", label: "Vente finalisée" },
-    { value: "Perdu/Annulé", label: "Perdu/Annulé" }
+  const ownerStatuses: { value: LeadStatus; label: string }[] = [
+    { value: "New", label: "Nouveau contact" },
+    { value: "Contacted", label: "Rendez-vous programmé" },
+    { value: "Qualified", label: "Visite effectuée" },
+    { value: "Proposal", label: "Mandat en négociation" },
+    { value: "Visit", label: "Mandat signé" },
+    { value: "Offer", label: "Bien en commercialisation" },
+    { value: "Deposit", label: "Offre reçue" },
+    { value: "Signed", label: "Compromis signé" },
+    { value: "Gagné", label: "Vente finalisée" },
+    { value: "Perdu", label: "Perdu/Annulé" }
   ];
 
-  const taskTypes = [
+  const taskTypes: { value: TaskType; label: string }[] = [
     { value: "Call", label: "Call" },
     { value: "Visites", label: "Visites" },
     { value: "Compromis", label: "Compromis" },
@@ -47,8 +49,8 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
         <Label htmlFor="status" className="text-sm">Statut du propriétaire</Label>
         <StyledSelect
           id="status"
-          value={lead.status || 'Nouveau contact'}
-          onChange={e => onDataChange({ status: e.target.value })}
+          value={lead.status || 'New'}
+          onChange={e => onDataChange({ status: e.target.value as LeadStatus })}
           options={ownerStatuses}
         />
       </div>
@@ -67,7 +69,7 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({
         <StyledSelect
           id="task_type"
           value={lead.taskType || ''}
-          onChange={e => onDataChange({ taskType: e.target.value })}
+          onChange={e => onDataChange({ taskType: e.target.value as TaskType })}
           placeholder="Sélectionner un type de tâche"
           options={taskTypes}
         />

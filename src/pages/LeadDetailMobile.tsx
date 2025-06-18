@@ -8,7 +8,7 @@ import { useLeadActions } from '@/hooks/useLeadActions';
 import ActionDialog from '@/components/leads/actions/ActionDialog';
 import ActionsPanelMobile from '@/components/leads/actions/ActionsPanelMobile';
 import ActionSuggestions from '@/components/leads/actions/ActionSuggestions';
-import { CheckCircle, RefreshCw } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { updateLead } from '@/services/leadService';
 import LeadDetailHeader from '@/components/leads/mobile/LeadDetailHeader';
@@ -20,17 +20,17 @@ import StatusSection from '@/components/leads/form/mobile/StatusSection';
 import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSection';
 import SearchCriteriaSection from '@/components/leads/form/mobile/SearchCriteriaSection';
 import NotesSection from '@/components/leads/form/mobile/NotesSection';
+import OwnerInfoSection from '@/components/leads/form/mobile/components/OwnerInfoSection';
+import OwnerStatusSection from '@/components/leads/form/mobile/components/OwnerStatusSection';
+import OwnerLocationSection from '@/components/leads/form/mobile/components/OwnerLocationSection';
+import OwnerNotesSection from '@/components/leads/form/mobile/components/OwnerNotesSection';
+import OwnerPropertySection from '@/components/leads/form/mobile/components/OwnerPropertySection';
+import OwnerPriceFields from '@/components/leads/form/mobile/components/OwnerPriceFields';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Button } from '@/components/ui/button';
-import { syncExistingActionsWithLeads } from '@/services/leadActions';
 import ChatGadaitFloatingButton from '@/components/chat/ChatGadaitFloatingButton';
 
 const LeadDetailMobile = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string; }>();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -77,21 +77,6 @@ const LeadDetailMobile = () => {
     rejectSuggestion
   } = useLeadActions(lead, setLead);
   
-  // Synchroniser les actions existantes avec les leads au chargement
-  useEffect(() => {
-    if (id) {
-      syncExistingActionsWithLeads(id)
-        .then(success => {
-          if (success) {
-            console.log(`Actions du lead ${id} synchronisées avec succès`);
-          }
-        })
-        .catch(error => {
-          console.error(`Erreur lors de la synchronisation des actions pour le lead ${id}:`, error);
-        });
-    }
-  }, [id]);
-  
   const handleBackClick = () => {
     navigate('/pipeline');
   };
@@ -109,7 +94,7 @@ const LeadDetailMobile = () => {
       const updatedLead = {
         ...lead,
         actionHistory: updatedActionHistory,
-        email_envoye: false // S'assurer que l'email automatique ne soit pas déclenché
+        email_envoye: false
       };
       const result = await updateLead(updatedLead);
       if (result) {
@@ -175,8 +160,61 @@ const LeadDetailMobile = () => {
   }
   
   if (!lead) return null;
+
+  // Conditional rendering based on pipeline type
+  const renderTabContent = () => {
+    if (lead.pipelineType === 'owners') {
+      return (
+        <>
+          <TabsContent value="info" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+            <div className="space-y-6">
+              <OwnerInfoSection lead={lead} onDataChange={handleDataChange} />
+              <OwnerLocationSection lead={lead} onDataChange={handleDataChange} />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="criteria" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+            <div className="space-y-6">
+              <OwnerPropertySection lead={lead} onDataChange={handleDataChange} />
+              <OwnerPriceFields lead={lead} onDataChange={handleDataChange} />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="status" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+            <OwnerStatusSection lead={lead} onDataChange={handleDataChange} />
+          </TabsContent>
+          
+          <TabsContent value="notes" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+            <OwnerNotesSection lead={lead} onDataChange={handleDataChange} />
+          </TabsContent>
+        </>
+      );
+    }
+
+    // Default rendering for other pipeline types
+    return (
+      <>
+        <TabsContent value="info" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+          <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
+        </TabsContent>
+        
+        <TabsContent value="criteria" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+          <SearchCriteriaSection lead={lead} onDataChange={handleDataChange} />
+        </TabsContent>
+        
+        <TabsContent value="status" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+          <StatusSection lead={lead} onDataChange={handleDataChange} />
+        </TabsContent>
+        
+        <TabsContent value="notes" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+          <NotesSection lead={lead} onDataChange={handleDataChange} />
+        </TabsContent>
+      </>
+    );
+  };
   
-  return <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
+  return (
+    <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
       <div className="fixed top-0 left-0 right-0 z-40 w-full">
         <div className="bg-[#051B30] pt-[env(safe-area-inset-top)]">
           <LeadDetailHeader 
@@ -209,27 +247,23 @@ const LeadDetailMobile = () => {
       <ScrollArea className="flex-1 overflow-y-auto pt-20 no-scrollbar">
         <Tabs value={activeTab} className="w-full h-full">
           <div className="px-4 pb-36 h-full my-[70px]">
-            <TabsContent value="info" className="mt-1 animate-[fade-in_0.2s_ease-out]">
-              <GeneralInfoSection lead={lead} onDataChange={handleDataChange} />
-            </TabsContent>
-            
-            <TabsContent value="criteria" className="mt-1 animate-[fade-in_0.2s_ease-out]">
-              <SearchCriteriaSection lead={lead} onDataChange={handleDataChange} />
-            </TabsContent>
-            
-            <TabsContent value="status" className="mt-1 animate-[fade-in_0.2s_ease-out]">
-              <StatusSection lead={lead} onDataChange={handleDataChange} />
-            </TabsContent>
-            
-            <TabsContent value="notes" className="mt-1 animate-[fade-in_0.2s_ease-out]">
-              <NotesSection lead={lead} onDataChange={handleDataChange} />
-            </TabsContent>
+            {renderTabContent()}
             
             <TabsContent value="actions" className="mt-1 animate-[fade-in_0.2s_ease-out]">
-              {actionSuggestions && actionSuggestions.length > 0 && <ActionSuggestions suggestions={actionSuggestions} onAccept={acceptSuggestion} onReject={rejectSuggestion} />}
-              <ActionsPanelMobile leadId={lead.id} onAddAction={fetchLead} onMarkComplete={handleMarkComplete} actionHistory={lead.actionHistory || []} />
+              {actionSuggestions && actionSuggestions.length > 0 && 
+                <ActionSuggestions 
+                  suggestions={actionSuggestions} 
+                  onAccept={acceptSuggestion} 
+                  onReject={rejectSuggestion} 
+                />
+              }
+              <ActionsPanelMobile 
+                leadId={lead.id} 
+                onAddAction={fetchLead} 
+                onMarkComplete={handleMarkComplete} 
+                actionHistory={lead.actionHistory || []} 
+              />
               
-              {/* ChatGadait floating button - n'apparaît que dans l'onglet actions */}
               {lead && (
                 <ChatGadaitFloatingButton 
                   leadData={lead} 
@@ -240,8 +274,6 @@ const LeadDetailMobile = () => {
           </div>
         </Tabs>
       </ScrollArea>
-      
-      {/* Suppression du bouton flottant global, maintenant uniquement affiché dans l'onglet actions */}
       
       <LeadDetailActionBar 
         autoSaveEnabled={autoSaveEnabled} 
@@ -273,7 +305,8 @@ const LeadDetailMobile = () => {
         onConfirm={handleActionConfirm} 
         getActionTypeIcon={getActionTypeIcon} 
       />
-    </div>;
+    </div>
+  );
 };
 
 export default LeadDetailMobile;
