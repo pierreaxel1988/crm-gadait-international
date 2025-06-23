@@ -1,25 +1,20 @@
+
 import React, { useState, useEffect } from 'react';
-import { LeadDetailed, Status } from '@/types/lead';
-import { Input } from '@/components/ui/input';
+import { LeadDetailed, LeadStatus } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const STATUS_OPTIONS: Status[] = [
-  'Nouveau',
-  'Contacté',
-  'Planifié',
-  'Visite',
+const STATUS_OPTIONS: LeadStatus[] = [
+  'New',
+  'Contacted',
+  'Qualified',
+  'Proposal',
+  'Visit',
   'Offre',
-  'Sous compromis',
-  'Signé',
-  'Refusé',
-  'En attente',
-  'A rappeler',
-  'Faux numéro',
-  'Ne souhaite plus',
-  'Injoignable',
-  'Vendu',
-  'A archiver'
+  'Deposit',
+  'Signed',
+  'Gagné',
+  'Perdu'
 ];
 
 interface StatusSectionProps {
@@ -76,7 +71,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
           <Label htmlFor="status" className="text-sm">Statut</Label>
           <Select 
             value={lead.status || ''} 
-            onValueChange={(value) => handleInputChange('status', value as Status)}
+            onValueChange={(value) => handleInputChange('status', value as LeadStatus)}
           >
             <SelectTrigger id="status" className="w-full font-futura">
               <SelectValue placeholder="Sélectionner un statut" />
@@ -89,35 +84,6 @@ const StatusSection: React.FC<StatusSectionProps> = ({
               ))}
             </SelectContent>
           </Select>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="priority" className="text-sm">Priorité</Label>
-          <Select 
-            value={lead.priority || ''} 
-            onValueChange={(value) => handleInputChange('priority', value)}
-          >
-            <SelectTrigger id="priority" className="w-full font-futura">
-              <SelectValue placeholder="Sélectionner une priorité" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Haute" className="font-futura">Haute</SelectItem>
-              <SelectItem value="Moyenne" className="font-futura">Moyenne</SelectItem>
-              <SelectItem value="Basse" className="font-futura">Basse</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="probability" className="text-sm">Probabilité de succès (%)</Label>
-          <Input
-            id="probability"
-            type="number"
-            value={lead.probability || ''}
-            onChange={(e) => handleInputChange('probability', e.target.value)}
-            placeholder="Pourcentage de probabilité"
-            className="w-full font-futura"
-          />
         </div>
       </div>
     </div>
