@@ -1,3 +1,4 @@
+
 import { LeadDetailed } from "@/types/lead";
 
 // Important UUIDs for team members
@@ -101,7 +102,10 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
     mapCoordinates: supabaseData.map_coordinates || '',
     
     // Residence country field
-    residenceCountry: supabaseData.country || ''
+    residenceCountry: supabaseData.country || '',
+
+    // Renovation needed field
+    renovation_needed: supabaseData.renovation_needed || false
   };
 
   return lead;
@@ -154,7 +158,7 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     living_area: leadData.livingArea,
     land_area: leadData.landArea,
     construction_year: leadData.constructionYear,
-    renovation_needed: leadData.renovationNeeded,
+    renovation_needed: leadData.renovation_needed,
     property_description: leadData.propertyDescription,
     
     // Additional fields - only include fields that exist in the database

@@ -1,3 +1,4 @@
+
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -247,4 +248,7 @@ export interface LeadDetailed {
   
   // Nouveau champ Google Drive
   google_drive_link?: string;
+
+  // Nouveau champ pour indiquer si une rénovation est nécessaire (pour les propriétaires)
+  renovation_needed?: boolean;
 }

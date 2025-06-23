@@ -354,6 +354,7 @@ export type Database = {
           regions: string[] | null
           relationship_details: string | null
           relationship_status: string | null
+          renovation_needed: boolean | null
           salutation: string | null
           source: string | null
           specific_needs: string | null
@@ -425,6 +426,7 @@ export type Database = {
           regions?: string[] | null
           relationship_details?: string | null
           relationship_status?: string | null
+          renovation_needed?: boolean | null
           salutation?: string | null
           source?: string | null
           specific_needs?: string | null
@@ -496,6 +498,7 @@ export type Database = {
           regions?: string[] | null
           relationship_details?: string | null
           relationship_status?: string | null
+          renovation_needed?: boolean | null
           salutation?: string | null
           source?: string | null
           specific_needs?: string | null

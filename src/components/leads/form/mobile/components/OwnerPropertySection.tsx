@@ -4,6 +4,7 @@ import { LeadDetailed, PropertyType, AssetType, Equipment, PropertyState } from 
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import StyledSelect from './StyledSelect';
 import MultiSelectButtons from '../../MultiSelectButtons';
 
@@ -145,6 +146,20 @@ const OwnerPropertySection: React.FC<OwnerPropertySectionProps> = ({
           placeholder="Sélectionner l'état"
           options={propertyStates}
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="renovation_needed" className="text-sm">Rénovation nécessaire</Label>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="renovation_needed"
+            checked={lead.renovation_needed || false}
+            onCheckedChange={(checked) => onDataChange({ renovation_needed: checked })}
+          />
+          <Label htmlFor="renovation_needed" className="text-sm text-muted-foreground">
+            {lead.renovation_needed ? 'Oui, des travaux sont nécessaires' : 'Non, aucun travaux nécessaire'}
+          </Label>
+        </div>
       </div>
 
       <div className="space-y-2">
