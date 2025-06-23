@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -14,7 +15,7 @@ interface GeneralInfoSectionProps {
 const GeneralInfoSection = ({ lead, onDataChange }: GeneralInfoSectionProps) => {
   return (
     <div className="space-y-4">
-      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-6">
         Information Générale
       </h2>
       

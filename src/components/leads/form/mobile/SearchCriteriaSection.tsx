@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -23,7 +24,7 @@ const SearchCriteriaSection = ({
   
   return (
     <div className="space-y-4">
-      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-6">
         Critères de la Propriété
       </h2>
       
