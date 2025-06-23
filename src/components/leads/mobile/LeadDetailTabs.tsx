@@ -34,7 +34,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
         <TabsList className="grid grid-cols-5 w-full h-14 rounded-none px-1 bg-loro-50 relative">
           <TabsTrigger 
             value="criteria" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
+            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta"
           >
             <div className="flex flex-col items-center">
               <Target className="h-4 w-4 mb-1" />
@@ -44,7 +44,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           
           <TabsTrigger 
             value="info" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
+            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta"
           >
             <div className="flex flex-col items-center">
               <Info className="h-4 w-4 mb-1" />
@@ -54,7 +54,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           
           <TabsTrigger 
             value="status" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
+            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta"
           >
             <div className="flex flex-col items-center">
               <Check className="h-4 w-4 mb-1" />
@@ -64,7 +64,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           
           <TabsTrigger 
             value="notes" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
+            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta"
           >
             <div className="flex flex-col items-center">
               <FileText className="h-4 w-4 mb-1" />
@@ -74,7 +74,7 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           
           <TabsTrigger 
             value="actions" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 relative text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta"
+            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 relative text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta"
           >
             <div className="flex flex-col items-center">
               <Activity className="h-4 w-4 mb-1" />
