@@ -303,6 +303,7 @@ export type Database = {
           bedrooms: number | null
           budget: string | null
           budget_min: string | null
+          commission_ht: string | null
           construction_year: string | null
           contact_source: string | null
           country: string | null
@@ -375,6 +376,7 @@ export type Database = {
           bedrooms?: number | null
           budget?: string | null
           budget_min?: string | null
+          commission_ht?: string | null
           construction_year?: string | null
           contact_source?: string | null
           country?: string | null
@@ -447,6 +449,7 @@ export type Database = {
           bedrooms?: number | null
           budget?: string | null
           budget_min?: string | null
+          commission_ht?: string | null
           construction_year?: string | null
           contact_source?: string | null
           country?: string | null

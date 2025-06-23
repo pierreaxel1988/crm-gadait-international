@@ -75,6 +75,7 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
     // Owner-specific fields
     desired_price: supabaseData.desired_price || '',
     fees: supabaseData.fees || '',
+    commission_ht: supabaseData.commission_ht || '',
     relationship_status: supabaseData.relationship_status,
     mandate_type: supabaseData.mandate_type,
     specific_needs: supabaseData.specific_needs || '',
@@ -171,6 +172,7 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     // Owner-specific fields
     desired_price: leadData.desired_price,
     fees: leadData.fees,
+    commission_ht: leadData.commission_ht,
     relationship_status: leadData.relationship_status,
     mandate_type: leadData.mandate_type,
     specific_needs: leadData.specific_needs,

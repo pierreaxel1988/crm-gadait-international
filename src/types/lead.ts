@@ -195,6 +195,7 @@ export interface LeadDetailed {
   // Owner-specific fields - now unified in leads table
   desired_price?: string;
   fees?: string;
+  commission_ht?: string;
   relationship_status?: string;
   mandate_type?: string;
   specific_needs?: string;
