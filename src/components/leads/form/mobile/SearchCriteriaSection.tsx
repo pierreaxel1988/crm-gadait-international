@@ -1,7 +1,7 @@
+
 import React, { useState } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { ExternalLink } from 'lucide-react';
@@ -68,9 +68,7 @@ const SearchCriteriaSection = ({
           </Tabs>
         </div>
       ) : (
-        <ScrollArea className="h-[calc(100vh-270px)]">
-          <BuyerCriteriaSection lead={lead} onDataChange={onDataChange} />
-        </ScrollArea>
+        <BuyerCriteriaSection lead={lead} onDataChange={onDataChange} />
       )}
     </div>
   );
