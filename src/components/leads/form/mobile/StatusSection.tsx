@@ -3,6 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadStatus } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { LeadTag } from '@/components/common/TagBadge';
+import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
+import { format } from 'date-fns';
 
 const STATUS_OPTIONS: LeadStatus[] = [
   'New',
@@ -15,6 +21,16 @@ const STATUS_OPTIONS: LeadStatus[] = [
   'Signed',
   'Gagné',
   'Perdu'
+];
+
+const TAG_OPTIONS: LeadTag[] = [
+  "Vip", 
+  "Hot", 
+  "Serious", 
+  "Cold", 
+  "No response", 
+  "No phone", 
+  "Fake"
 ];
 
 interface StatusSectionProps {
@@ -55,9 +71,25 @@ const StatusSection: React.FC<StatusSectionProps> = ({
     } as Partial<LeadDetailed>);
   };
 
+  const handleTagToggle = (tag: LeadTag) => {
+    const updatedTags = lead.tags?.includes(tag)
+      ? lead.tags.filter(t => t !== tag)
+      : [...(lead.tags || []), tag];
+    
+    handleInputChange('tags', updatedTags);
+  };
+
   const dynamicTopMargin = isHeaderMeasured 
     ? `${Math.max(headerHeight + 8, 32)}px` 
     : 'calc(32px + 4rem)';
+
+  const formattedLastContact = lead.lastContactedAt 
+    ? format(new Date(lead.lastContactedAt), 'dd/MM/yyyy HH:mm')
+    : '';
+    
+  const formattedNextFollowUp = lead.nextFollowUpDate 
+    ? format(new Date(lead.nextFollowUpDate), 'dd/MM/yyyy HH:mm')
+    : '';
 
   return (
     <div 
@@ -84,6 +116,57 @@ const StatusSection: React.FC<StatusSectionProps> = ({
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm">Tags</Label>
+          <div className="flex flex-wrap gap-2">
+            {TAG_OPTIONS.map(tag => (
+              <Button
+                key={tag}
+                variant={lead.tags?.includes(tag) ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleTagToggle(tag)}
+                className="font-futura text-xs"
+              >
+                {tag}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm">Responsable du suivi</Label>
+          <TeamMemberSelect
+            value={lead.assignedTo}
+            onChange={(value) => handleInputChange('assignedTo', value || '')}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm">Date du dernier contact</Label>
+          <Input
+            value={formattedLastContact}
+            disabled
+            className="font-futura bg-gray-50"
+            placeholder="Mise à jour automatique lors d'une action"
+          />
+          <p className="text-xs text-muted-foreground">
+            Mise à jour automatique lors d'une action
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm">Prochain suivi prévu</Label>
+          <Input
+            value={formattedNextFollowUp}
+            disabled
+            className="font-futura bg-gray-50"
+            placeholder="Programmé automatiquement lors de la création d'une action"
+          />
+          <p className="text-xs text-muted-foreground">
+            Programmé automatiquement lors de la création d'une action
+          </p>
         </div>
       </div>
     </div>
