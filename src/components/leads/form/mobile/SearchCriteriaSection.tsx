@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
