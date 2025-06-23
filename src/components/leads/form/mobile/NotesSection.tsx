@@ -51,7 +51,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({
       className="space-y-5 pt-4" 
       style={{ marginTop: dynamicTopMargin }}
     >
-      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Notes</h2>
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-6">Notes</h2>
       
       <div className="space-y-2">
         <Label htmlFor="notes" className="text-sm">Notes générales</Label>

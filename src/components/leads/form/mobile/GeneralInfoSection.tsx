@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadSource } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -259,7 +258,6 @@ const ALL_COUNTRY_CODES = Object.entries(COUNTRY_TO_PHONE_CODE).map(([country, d
 
 const COMMON_COUNTRY_CODES = [
   { country: 'France', code: '+33', flag: '🇫🇷' },
-  { country: 'United Kingdom', code: '+44', flag: '🇬🇧' },
   { code: '+1', flag: '🇺🇸' },
   { country: 'Spain', code: '+34', flag: '🇪🇸' },
   { country: 'Italy', code: '+39', flag: '🇮🇹' },
@@ -412,7 +410,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
         marginTop: dynamicTopMargin,
       }}
     >
-      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">Information Générale</h2>
+      <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-6">Information Générale</h2>
       
       <ScrollArea className="h-[calc(100vh-150px)]">
         <div className="space-y-4 pb-20">

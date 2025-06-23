@@ -53,25 +53,25 @@ const OwnerTabsContent: React.FC<OwnerTabsContentProps> = ({
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">
+              <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-6">
                 Informations personnelles
               </h3>
               <OwnerInfoSection lead={lead} onDataChange={onDataChange} />
             </div>
             <div>
-              <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">
+              <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-6">
                 Localisation
               </h3>
               <OwnerLocationSection lead={lead} onDataChange={onDataChange} />
             </div>
             <div>
-              <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">
+              <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-6">
                 Tarification
               </h3>
               <OwnerPriceFields lead={lead} onDataChange={onDataChange} />
             </div>
             <div>
-              <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">
+              <h3 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-6">
                 Détails du bien
               </h3>
               <OwnerPropertySection lead={lead} onDataChange={onDataChange} />
@@ -102,7 +102,7 @@ const OwnerTabsContent: React.FC<OwnerTabsContentProps> = ({
       style={{ marginTop: dynamicTopMargin }}
     >
       {activeTab !== 'info' && (
-        <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-4">
+        <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-6">
           {activeTab === 'status' && 'Statut et Suivi'}
           {activeTab === 'notes' && 'Notes'}
           {activeTab === 'actions' && 'Actions'}
