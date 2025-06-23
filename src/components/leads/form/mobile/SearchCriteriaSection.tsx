@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -29,7 +30,7 @@ const SearchCriteriaSection = ({
       </h2>
       
       {lead.pipelineType === 'owners' ? (
-        <div className="space-y-4">
+        <div className="space-y-6">
           <Tabs defaultValue="budget" className="w-full" onValueChange={setActiveTab}>
             <TabsList className="w-full grid grid-cols-3 mb-4">
               <TabsTrigger value="budget">Prix</TabsTrigger>
@@ -78,3 +79,4 @@ const SearchCriteriaSection = ({
 };
 
 export default SearchCriteriaSection;
+
