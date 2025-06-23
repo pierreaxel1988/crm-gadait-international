@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ActionHistory } from '@/types/actionHistory';
@@ -225,7 +226,7 @@ const LeadDetailMobile = () => {
             desired_price={lead.desired_price}
             pipelineType={lead.pipelineType}
             currency={lead.currency} 
-            desiredLocation={lead.desiredLocation} 
+            desiredLocation={lead.pipelineType === 'owners' ? lead.location : lead.desiredLocation}
             country={lead.country} 
             purchaseTimeframe={lead.purchaseTimeframe} 
             onBackClick={handleBackClick} 
