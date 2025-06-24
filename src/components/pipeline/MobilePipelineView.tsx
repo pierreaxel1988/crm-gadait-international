@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobilePipelineHeader from './mobile/MobilePipelineHeader';
 import MobileColumnList from './mobile/MobileColumnList';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
+import PropertiesTabContent from './PropertiesTabContent';
 import { PipelineType } from '@/types/lead';
 import { SlidersHorizontal, ArrowDownAZ, Clock, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -29,7 +28,6 @@ const SubNavigation = () => {
     name: 'Chat Gadait',
     path: '/chat-gadait',
     icon: MessageSquare,
-    // Removing the notification badge from Chat Gadait
     showNotification: false
   }, {
     name: 'Propriétés',

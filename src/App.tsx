@@ -9,8 +9,9 @@ import {
 import { AuthProvider } from './hooks/useAuth';
 import { Toaster } from '@/components/ui/toaster';
 import LoadingScreen from './components/layout/LoadingScreen';
-import Auth from './pages/Auth'; // Import Auth directly
-import Pipeline from './pages/Pipeline'; // Import Pipeline directly instead of lazy loading
+import Auth from './pages/Auth';
+import Pipeline from './pages/Pipeline';
+import Properties from './pages/Properties';
 
 // Lazy load other pages to use suspense
 const LeadsPage = lazy(() => import('./pages/Leads'));
@@ -40,6 +41,11 @@ function App() {
             <Route path="/pipeline" element={
               <ProtectedRoute commercialAllowed={true}>
                 <Pipeline />
+              </ProtectedRoute>
+            } />
+            <Route path="/properties" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <Properties />
               </ProtectedRoute>
             } />
             <Route path="/leads" element={
