@@ -22,7 +22,7 @@ serve(async (req) => {
 
   try {
     const requestData = await req.json();
-    const url = requestData.url || "https://gadait-international.com/en/buy";
+    const url = requestData.url || "https://gadait-international.com/en/search/";
     const debug = requestData.debug || false;
 
     console.log(`Starting Gadait property extraction from: ${url}`);
@@ -105,136 +105,173 @@ async function extractGadaitProperties(baseUrl: string, html: string, debug = fa
   const $ = cheerio.load(html);
   const properties = [];
   
-  console.log("Début de l'extraction des propriétés Gadait");
+  console.log("Début de l'extraction des propriétés depuis la page de recherche Gadait");
   
-  // Look for property cards - try multiple possible selectors
+  // Sélecteurs spécifiques pour la page de recherche Gadait
   const propertySelectors = [
-    '.property-card',
-    '.listing-item',
     '.property-item',
-    '.product-card',
-    '[class*="property"]',
-    '[class*="listing"]',
-    'article',
-    '.card'
+    '.listing-card',
+    '.search-result-item',
+    '.property-card',
+    '.property-listing',
+    '.grid-item',
+    '[data-property]',
+    '.card.property',
+    '.result-item'
   ];
   
   let propertyElements = $();
+  
+  // Essayer de trouver les éléments de propriété avec différents sélecteurs
   for (const selector of propertySelectors) {
     const elements = $(selector);
     if (elements.length > 0) {
-      console.log(`Trouvé ${elements.length} éléments avec le sélecteur: ${selector}`);
+      console.log(`Trouvé ${elements.length} propriétés avec le sélecteur: ${selector}`);
       propertyElements = elements;
       break;
     }
   }
   
-  // If no specific property cards found, try to find individual links and content
+  // Si aucun sélecteur spécifique ne fonctionne, chercher des patterns plus génériques
   if (propertyElements.length === 0) {
-    console.log("Aucun élément de propriété trouvé avec les sélecteurs standard, recherche de liens...");
+    console.log("Recherche de patterns génériques pour les propriétés...");
     
-    // Look for links that might be property pages
-    $('a[href*="/property"], a[href*="/buy"], a[href*="/listing"]').each((index, element) => {
+    // Chercher des éléments contenant des liens vers des pages de propriétés
+    $('a[href*="/property"], a[href*="/listing"], a[href*="/buy"]').each((index, element) => {
       const $element = $(element);
       const href = $element.attr('href');
       
       if (href && !href.includes('#') && !href.includes('javascript:')) {
-        // Try to extract basic info from the link context
-        const linkText = $element.text().trim();
-        const parentElement = $element.parent();
-        
-        if (linkText.length > 5) { // Basic filter
-          properties.push(extractPropertyFromElement($element, baseUrl, $));
+        const parentCard = $element.closest('div, article, section').first();
+        if (parentCard.length && !propertyElements.is(parentCard[0])) {
+          propertyElements = propertyElements.add(parentCard);
         }
       }
     });
-  } else {
-    // Extract from found property elements
+    
+    console.log(`Trouvé ${propertyElements.length} éléments potentiels de propriétés`);
+  }
+  
+  // Extraire les données de chaque propriété trouvée
+  if (propertyElements.length > 0) {
     propertyElements.each((index, element) => {
-      const property = extractPropertyFromElement($(element), baseUrl, $);
-      if (property && property.title) {
-        properties.push(property);
+      try {
+        const property = extractPropertyFromElement($(element), baseUrl, $);
+        if (property && property.title && property.title.trim() !== "") {
+          properties.push(property);
+        }
+      } catch (error) {
+        console.error(`Erreur lors de l'extraction de la propriété ${index}:`, error);
       }
     });
   }
   
-  // If still no properties found, try a more generic approach
+  // Si toujours aucune propriété trouvée, essayer une approche plus large
   if (properties.length === 0) {
-    console.log("Recherche générique de contenu de propriétés...");
+    console.log("Recherche de contenu avec des prix pour identifier les propriétés...");
     
-    // Look for any elements containing price patterns (€, EUR, etc.)
     $("*").filter(function() {
       const text = $(this).text();
-      return text.match(/€[\d\s,.]+|[\d\s,.]+\s*€|EUR[\d\s,.]+|[\d\s,.]+\s*EUR/i);
+      return text.match(/€[\d\s,.]+|[\d\s,.]+\s*€|EUR[\d\s,.]+|[\d\s,.]+\s*EUR|\$[\d\s,.]+/i);
     }).each((index, element) => {
-      if (index < 20) { // Limit to avoid too many results
-        const $element = $(element);
-        const property = extractPropertyFromElement($element, baseUrl, $);
-        if (property && property.title && !properties.some(p => p.title === property.title)) {
-          properties.push(property);
+      if (index < 50) { // Limiter pour éviter trop de résultats
+        try {
+          const $element = $(element);
+          const property = extractPropertyFromElement($element, baseUrl, $);
+          if (property && property.title && !properties.some(p => p.title === property.title)) {
+            properties.push(property);
+          }
+        } catch (error) {
+          console.error(`Erreur lors de l'extraction générique ${index}:`, error);
         }
       }
     });
   }
   
   if (debug) {
-    console.log(`Propriétés extraites: ${JSON.stringify(properties, null, 2)}`);
+    console.log(`Propriétés extraites: ${JSON.stringify(properties.slice(0, 3), null, 2)}`);
   }
   
-  return properties;
+  return properties.filter(p => p && p.title && p.title.trim() !== "");
 }
 
 function extractPropertyFromElement($element, baseUrl: string, $: any) {
-  // Extract title
+  // Extraire le titre
   let title = "";
-  const titleSelectors = ['h1', 'h2', 'h3', '.title', '.property-title', '.listing-title'];
+  const titleSelectors = [
+    'h1', 'h2', 'h3', 'h4',
+    '.title', '.property-title', '.listing-title', '.card-title',
+    '[class*="title"]', '[class*="name"]'
+  ];
   
   for (const selector of titleSelectors) {
     const titleElement = $element.find(selector).first();
     if (titleElement.length) {
       title = titleElement.text().trim();
-      if (title) break;
+      if (title && title.length > 5) break;
     }
   }
   
   if (!title) {
-    title = $element.text().trim().split('\n')[0].substring(0, 100);
+    // Essayer de récupérer le titre depuis un lien
+    const linkElement = $element.find('a').first();
+    if (linkElement.length) {
+      title = linkElement.attr('title') || linkElement.text().trim();
+    }
   }
   
-  // Extract price
-  let price = "";
-  const priceSelectors = ['.price', '.property-price', '[class*="price"]'];
+  if (!title || title.length < 5) {
+    return null; // Skip if no meaningful title
+  }
+  
+  // Extraire le prix
+  let price = null;
+  let currency = "EUR";
+  const priceSelectors = [
+    '.price', '.property-price', '.listing-price', '.cost',
+    '[class*="price"]', '[class*="cost"]'
+  ];
   
   for (const selector of priceSelectors) {
     const priceElement = $element.find(selector).first();
     if (priceElement.length) {
-      price = priceElement.text().trim();
-      if (price) break;
+      const priceText = priceElement.text().trim();
+      const priceMatch = priceText.match(/([\d\s,.]+)/);
+      if (priceMatch) {
+        price = parseFloat(priceMatch[1].replace(/[\s,]/g, ''));
+        if (priceText.includes('$')) currency = "USD";
+        break;
+      }
     }
   }
   
   if (!price) {
-    // Look for price patterns in text
+    // Recherche de prix dans le texte général
     const text = $element.text();
-    const priceMatch = text.match(/€[\d\s,.]+|[\d\s,.]+\s*€|EUR[\d\s,.]+|[\d\s,.]+\s*EUR/i);
+    const priceMatch = text.match(/€\s*([\d\s,.]+)|(\d[\d\s,.]*)\s*€|\$\s*([\d\s,.]+)|(\d[\d\s,.]*)\s*\$/);
     if (priceMatch) {
-      price = priceMatch[0];
+      const numStr = priceMatch[1] || priceMatch[2] || priceMatch[3] || priceMatch[4];
+      price = parseFloat(numStr.replace(/[\s,]/g, ''));
+      currency = text.includes('$') ? "USD" : "EUR";
     }
   }
   
-  // Extract location
+  // Extraire la localisation
   let location = "";
-  const locationSelectors = ['.location', '.address', '.property-location', '[class*="location"]'];
+  const locationSelectors = [
+    '.location', '.address', '.place', '.city',
+    '[class*="location"]', '[class*="address"]', '[class*="place"]'
+  ];
   
   for (const selector of locationSelectors) {
     const locationElement = $element.find(selector).first();
     if (locationElement.length) {
       location = locationElement.text().trim();
-      if (location) break;
+      if (location && location.length > 2) break;
     }
   }
   
-  // Extract property URL
+  // Extraire l'URL de la propriété
   let propertyUrl = "";
   const linkElement = $element.find('a').first();
   if (linkElement.length) {
@@ -251,7 +288,7 @@ function extractPropertyFromElement($element, baseUrl: string, $: any) {
     }
   }
   
-  // Extract image
+  // Extraire l'image principale
   let mainImage = "";
   const imageElement = $element.find('img').first();
   if (imageElement.length) {
@@ -261,7 +298,7 @@ function extractPropertyFromElement($element, baseUrl: string, $: any) {
     }
   }
   
-  // Extract basic characteristics
+  // Extraire les caractéristiques de base
   const text = $element.text().toLowerCase();
   
   let bedrooms = null;
@@ -282,20 +319,20 @@ function extractPropertyFromElement($element, baseUrl: string, $: any) {
     area = parseFloat(areaMatch[1].replace(',', '.'));
   }
   
-  // Generate external ID from URL or title
+  // Générer un ID externe
   const external_id = propertyUrl ? 
     propertyUrl.split('/').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 
     title.replace(/[^a-zA-Z0-9]/g, '').substring(0, 50) :
-    title.replace(/[^a-zA-Z0-9]/g, '').substring(0, 50);
+    title.replace(/[^a-zA-Z0-9]/g, '').substring(0, 50) + '_' + Date.now();
   
   return {
     external_id,
     title: title || "Propriété Gadait",
     description: $element.text().trim().substring(0, 500) || "",
-    price: price ? parseFloat(price.replace(/[^0-9.]/g, '')) || null : null,
-    currency: "EUR",
+    price,
+    currency,
     location: location || "",
-    country: "Mauritius", // Default for Gadait
+    country: "Mauritius", // Default pour Gadait
     property_type: extractPropertyType(text),
     bedrooms,
     bathrooms,
@@ -359,7 +396,7 @@ async function storePropertiesInDatabase(properties: any[]): Promise<number> {
   
   for (const property of properties) {
     try {
-      // Check if property already exists
+      // Vérifier si la propriété existe déjà
       const { data: existing } = await supabase
         .from('gadait_properties')
         .select('id')
@@ -367,7 +404,7 @@ async function storePropertiesInDatabase(properties: any[]): Promise<number> {
         .single();
       
       if (existing) {
-        // Update existing property
+        // Mettre à jour la propriété existante
         const { error: updateError } = await supabase
           .from('gadait_properties')
           .update({
@@ -383,7 +420,7 @@ async function storePropertiesInDatabase(properties: any[]): Promise<number> {
           storedCount++;
         }
       } else {
-        // Insert new property
+        // Insérer une nouvelle propriété
         const { error: insertError } = await supabase
           .from('gadait_properties')
           .insert(property);

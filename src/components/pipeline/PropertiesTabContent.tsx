@@ -77,7 +77,7 @@ const PropertiesTabContent: React.FC = () => {
 
       const { data, error } = await supabase.functions.invoke('scrape-website', {
         body: {
-          url: 'https://gadait-international.com/en/buy',
+          url: 'https://gadait-international.com/en/search/',
           debug: false
         }
       });
