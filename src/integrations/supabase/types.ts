@@ -90,6 +90,84 @@ export type Database = {
         }
         Relationships: []
       }
+      gadait_properties: {
+        Row: {
+          amenities: string[] | null
+          area: number | null
+          area_unit: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          country: string | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          external_id: string | null
+          features: string[] | null
+          id: string
+          images: string[] | null
+          is_available: boolean | null
+          is_featured: boolean | null
+          location: string | null
+          main_image: string | null
+          price: number | null
+          property_type: string | null
+          scraped_at: string | null
+          title: string
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          amenities?: string[] | null
+          area?: number | null
+          area_unit?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          country?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          external_id?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          location?: string | null
+          main_image?: string | null
+          price?: number | null
+          property_type?: string | null
+          scraped_at?: string | null
+          title: string
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          amenities?: string[] | null
+          area?: number | null
+          area_unit?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          country?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          external_id?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          location?: string | null
+          main_image?: string | null
+          price?: number | null
+          property_type?: string | null
+          scraped_at?: string | null
+          title?: string
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       import_statistics: {
         Row: {
           created_at: string
