@@ -5,7 +5,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobilePipelineHeader from './mobile/MobilePipelineHeader';
 import MobileColumnList from './mobile/MobileColumnList';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
-import PropertiesTabContent from './PropertiesTabContent';
 import { PipelineType } from '@/types/lead';
 import { SlidersHorizontal, ArrowDownAZ, Clock, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -33,7 +32,6 @@ const pipelines = [
   { label: "Achat", value: "purchase" },
   { label: "Location", value: "rental" },
   { label: "Propriétaires", value: "owners" },
-  { label: "Propriétés", value: "properties" },
 ];
 
 const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
@@ -100,16 +98,12 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
 
       <div className="flex-1 overflow-y-auto bg-gray-50">
         <div className="px-3">
-          {activeTab === 'properties' ? (
-            <PropertiesTabContent />
-          ) : (
-            <MobileColumnList
-              columns={columns}
-              activeTab={activeTab as PipelineType}
-              searchTerm={searchTerm}
-              filters={filters}
-            />
-          )}
+          <MobileColumnList
+            columns={columns}
+            activeTab={activeTab as PipelineType}
+            searchTerm={searchTerm}
+            filters={filters}
+          />
         </div>
       </div>
 

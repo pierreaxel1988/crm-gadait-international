@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet } from '@/components/ui/sheet';
@@ -12,7 +13,6 @@ import LeadsList from './components/LeadsList';
 import AddLeadButton from './components/AddLeadButton';
 import { DesktopPipelineViewProps, SortBy } from './types/pipelineTypes';
 import { PipelineType } from '@/types/lead';
-import PropertiesTabContent from './PropertiesTabContent';
 
 const statusTranslations: Record<string, string> = {
   'New': 'Nouveaux',
@@ -53,7 +53,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     { label: "Achat", value: "purchase" },
     { label: "Location", value: "rental" },
     { label: "Propriétaires", value: "owners" },
-    { label: "Propriétés", value: "properties" },
   ];
 
   const {
@@ -107,76 +106,6 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   }, {} as Record<string, number>);
   
   const totalLeadCount = leadsByStatus.length;
-
-  // If we're on the properties tab, show properties content
-  if (activeTab === 'properties') {
-    return (
-      <div className="flex">
-        <div className={`flex-1 transition-all duration-300 ${filtersOpen ? 'mr-80' : ''}`}>
-          <div className="flex flex-col">
-            <div className="sticky top-0 z-20 bg-white pb-4 border-b space-y-4">
-              <PipelineHeader
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                onToggleFilters={toggleFilters}
-                filtersOpen={filtersOpen}
-                activeFilters={activeFiltersCount}
-                isFilterActive={isFilterActive}
-                filters={filters}
-                onFilterChange={onFilterChange}
-                onClearFilters={onClearFilters}
-                teamMembers={teamMembers}
-                handleRefresh={handleRefresh}
-                isRefreshing={isRefreshing}
-              />
-
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
-                <TabsList className="bg-gray-100 p-1 rounded-xl w-fit">
-                  {pipelines.map(pipeline => (
-                    <TabsTrigger
-                      key={pipeline.value}
-                      value={pipeline.value}
-                      className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-                    >
-                      {pipeline.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-            </div>
-            
-            <div className="overflow-y-auto p-4">
-              <PropertiesTabContent />
-            </div>
-          </div>
-        </div>
-
-        {filtersOpen && (
-          <div className="fixed right-0 top-0 h-full w-80 bg-white border-l shadow-xl z-30 pt-[144px]">
-            <PipelineFilters 
-              filters={filters}
-              onFilterChange={onFilterChange}
-              onClearFilters={onClearFilters}
-              assignedToOptions={teamMembers}
-              isFilterActive={isFilterActive}
-              isMobile={false}
-              onApplyFilters={() => {
-                handleRefresh();
-                toggleFilters();
-              }}
-            />
-          </div>
-        )}
-
-        {filtersOpen && (
-          <div 
-            className="fixed inset-0 bg-black/20 z-20"
-            onClick={toggleFilters}
-          />
-        )}
-      </div>
-    );
-  }
 
   return (
     <div className="flex">
