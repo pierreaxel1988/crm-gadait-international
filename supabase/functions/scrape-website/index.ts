@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
@@ -41,43 +40,48 @@ serve(async (req) => {
       );
     }
 
-    // Fetch the webpage with appropriate headers
-    const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+    // Try multiple URLs to find properties
+    const urlsToTry = [
+      url,
+      "https://gadait-international.com/en/properties/",
+      "https://gadait-international.com/properties/",
+      "https://gadait-international.com/en/buy/",
+      "https://gadait-international.com/buy/"
+    ];
+
+    let allProperties = [];
     
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": userAgent,
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Erreur lors de la récupération du site: ${response.status}`);
+    for (const testUrl of urlsToTry) {
+      console.log(`Tentative avec l'URL: ${testUrl}`);
+      
+      try {
+        const properties = await extractFromUrl(testUrl, debug);
+        if (properties.length > 0) {
+          console.log(`Trouvé ${properties.length} propriétés sur ${testUrl}`);
+          allProperties.push(...properties);
+          break; // Arrêter dès qu'on trouve des propriétés
+        }
+      } catch (error) {
+        console.log(`Erreur avec l'URL ${testUrl}:`, error.message);
+        continue;
+      }
     }
 
-    const html = await response.text();
-    console.log(`HTML récupéré avec succès (${html.length} caractères)`);
-
-    if (debug) {
-      console.log(`Premiers 500 caractères du HTML: ${html.substring(0, 500)}`);
+    // Si aucune propriété trouvée, essayer d'analyser le contenu plus en détail
+    if (allProperties.length === 0 && debug) {
+      console.log("Aucune propriété trouvée, analyse détaillée du contenu...");
+      await debugContentAnalysis(url);
     }
-
-    // Extract properties from the HTML
-    const properties = await extractGadaitProperties(url, html, debug);
-    console.log(`${properties.length} propriétés extraites`);
 
     // Store properties in database
-    const storedCount = await storePropertiesInDatabase(properties);
+    const storedCount = await storePropertiesInDatabase(allProperties);
     console.log(`${storedCount} propriétés stockées en base de données`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `${properties.length} propriétés extraites, ${storedCount} stockées en base`,
-        properties,
+        message: `${allProperties.length} propriétés extraites, ${storedCount} stockées en base`,
+        properties: allProperties,
         storedCount,
       }),
       {
@@ -101,108 +105,245 @@ serve(async (req) => {
   }
 });
 
+async function extractFromUrl(url: string, debug = false) {
+  const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+  
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": userAgent,
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.5",
+      "Cache-Control": "no-cache",
+      "Pragma": "no-cache",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erreur HTTP ${response.status} pour ${url}`);
+  }
+
+  const html = await response.text();
+  console.log(`HTML récupéré avec succès pour ${url} (${html.length} caractères)`);
+
+  if (debug) {
+    console.log(`Premiers 1000 caractères du HTML de ${url}: ${html.substring(0, 1000)}`);
+  }
+
+  return await extractGadaitProperties(url, html, debug);
+}
+
+async function debugContentAnalysis(url: string) {
+  try {
+    const response = await fetch(url);
+    const html = await response.text();
+    const $ = cheerio.load(html);
+    
+    console.log("=== ANALYSE DÉTAILLÉE DU CONTENU ===");
+    
+    // Rechercher tous les éléments qui pourraient contenir des propriétés
+    const potentialContainers = [
+      'div[class*="property"]',
+      'div[class*="listing"]',
+      'div[class*="card"]',
+      'div[class*="item"]',
+      'article',
+      '[data-testid]',
+      '.swiper-slide'
+    ];
+    
+    potentialContainers.forEach(selector => {
+      const elements = $(selector);
+      if (elements.length > 0) {
+        console.log(`Trouvé ${elements.length} éléments avec sélecteur: ${selector}`);
+      }
+    });
+    
+    // Rechercher des liens
+    const links = $('a[href]');
+    console.log(`Total de ${links.length} liens trouvés`);
+    
+    let propertyLinks = 0;
+    links.each((index, element) => {
+      const href = $(element).attr('href');
+      if (href && (
+        href.includes('/property') || 
+        href.includes('/buy') || 
+        href.includes('/listing') ||
+        href.includes('/real-estate')
+      )) {
+        propertyLinks++;
+        if (propertyLinks <= 5) { // Montrer seulement les 5 premiers
+          console.log(`Lien de propriété trouvé: ${href}`);
+        }
+      }
+    });
+    
+    console.log(`Total de ${propertyLinks} liens de propriétés potentiels`);
+    
+    // Rechercher des images
+    const images = $('img[src]');
+    console.log(`Total de ${images.length} images trouvées`);
+    
+    // Rechercher du texte contenant des prix
+    const textWithPrices = $('*:contains("€"), *:contains("EUR"), *:contains("$")');
+    console.log(`Éléments contenant des prix: ${textWithPrices.length}`);
+    
+    // Vérifier si c'est du contenu généré par JavaScript
+    const scripts = $('script[src]');
+    console.log(`Scripts externes: ${scripts.length}`);
+    
+    // Rechercher des indicateurs de contenu dynamique
+    const gatsbyIndicators = $('[data-gatsby], .gatsby-image-wrapper, [class*="gatsby"]');
+    console.log(`Indicateurs Gatsby trouvés: ${gatsbyIndicators.length}`);
+    
+    console.log("=== FIN ANALYSE DÉTAILLÉE ===");
+    
+  } catch (error) {
+    console.error("Erreur lors de l'analyse de débogage:", error);
+  }
+}
+
 async function extractGadaitProperties(baseUrl: string, html: string, debug = false) {
   const $ = cheerio.load(html);
   const properties = [];
   
-  console.log("Début de l'extraction des propriétés depuis la page Gadait avec les nouveaux sélecteurs");
+  console.log("Début de l'extraction des propriétés avec analyse approfondie");
   
-  // Sélecteurs spécifiques basés sur la structure HTML réelle de Gadait
-  const specificSelectors = [
-    '.swiper-slide',
-    '[data-testid="property-card"]',
-    '.property-item',
-    '.listing-item',
+  // Sélecteurs étendus et plus spécifiques
+  const allSelectors = [
+    // Sélecteurs Gatsby spécifiques
     '.gatsby-image-wrapper',
+    '[data-gatsby-image-wrapper]',
+    
+    // Sélecteurs de cartes de propriétés
+    '.property-card',
+    '.listing-card',
+    '.real-estate-card',
     '[class*="PropertyCard"]',
-    '[class*="property"]'
+    '[class*="ListingCard"]',
+    
+    // Sélecteurs génériques de cartes
+    '.card',
+    '[class*="card"]',
+    
+    // Sélecteurs de grille et slides
+    '.grid-item',
+    '.swiper-slide',
+    '.slide',
+    
+    // Sélecteurs par attributs data
+    '[data-testid*="property"]',
+    '[data-testid*="listing"]',
+    '[data-testid*="card"]',
+    
+    // Sélecteurs par structure
+    'article',
+    '.item',
+    '[class*="item"]'
   ];
   
   let propertyElements = $();
   
-  // Essayer de trouver les éléments de propriété avec les sélecteurs spécifiques
-  for (const selector of specificSelectors) {
+  // Essayer chaque sélecteur
+  for (const selector of allSelectors) {
     const elements = $(selector);
     if (elements.length > 0) {
-      console.log(`Trouvé ${elements.length} éléments avec le sélecteur: ${selector}`);
-      // Filtrer pour ne garder que les éléments qui semblent être des propriétés
+      console.log(`Sélecteur "${selector}": ${elements.length} éléments trouvés`);
+      
+      // Filtrer les éléments qui semblent être des propriétés
       elements.each((index, element) => {
         const $element = $(element);
-        // Vérifier si l'élément contient des indicateurs de propriété
-        if ($element.find('img').length > 0 || 
-            $element.find('a[href*="/property"]').length > 0 || 
-            $element.find('a[href*="/buy"]').length > 0 ||
-            $element.text().match(/€|EUR|\$|USD/)) {
+        const text = $element.text().toLowerCase();
+        
+        // Critères pour identifier une propriété
+        const hasPropertyIndicators = (
+          text.includes('€') || 
+          text.includes('eur') || 
+          text.includes('bedroom') || 
+          text.includes('bed') ||
+          text.includes('bath') ||
+          text.includes('m²') ||
+          text.includes('villa') ||
+          text.includes('apartment') ||
+          text.includes('house') ||
+          $element.find('img').length > 0 ||
+          $element.find('a[href*="property"]').length > 0 ||
+          $element.find('a[href*="buy"]').length > 0
+        );
+        
+        if (hasPropertyIndicators) {
           propertyElements = propertyElements.add(element);
-        }
-      });
-      
-      if (propertyElements.length > 0) {
-        console.log(`${propertyElements.length} éléments de propriété valides trouvés avec ${selector}`);
-        break;
-      }
-    }
-  }
-  
-  // Si aucun sélecteur spécifique ne fonctionne, essayer une approche plus large
-  if (propertyElements.length === 0) {
-    console.log("Recherche d'éléments avec des liens de propriétés...");
-    
-    // Chercher des liens vers des pages de propriétés
-    $('a[href*="/property"], a[href*="/buy"], a[href*="/listing"]').each((index, element) => {
-      const $link = $(element);
-      const href = $link.attr('href');
-      
-      if (href && !href.includes('#') && !href.includes('javascript:')) {
-        // Remonter dans la hiérarchie pour trouver le conteneur de la propriété
-        let propertyContainer = $link.closest('div, article, section, li').first();
-        
-        // Si le conteneur est trop petit, remonter encore
-        if (propertyContainer.length && propertyContainer.text().trim().length < 50) {
-          propertyContainer = propertyContainer.parent().closest('div, article, section').first();
-        }
-        
-        if (propertyContainer.length && !propertyElements.is(propertyContainer[0])) {
-          propertyElements = propertyElements.add(propertyContainer);
-        }
-      }
-    });
-    
-    console.log(`Trouvé ${propertyElements.length} conteneurs de propriétés via les liens`);
-  }
-  
-  // Extraire les données de chaque propriété trouvée
-  if (propertyElements.length > 0) {
-    propertyElements.each((index, element) => {
-      try {
-        if (debug && index < 3) {
-          console.log(`\n--- Extraction propriété ${index + 1} ---`);
-          console.log(`HTML: ${$(element).html()?.substring(0, 200)}...`);
-        }
-        
-        const property = extractPropertyFromElement($(element), baseUrl, $, debug);
-        if (property && property.title && property.title.trim() !== "" && property.title.length > 5) {
-          properties.push(property);
-          if (debug && index < 3) {
-            console.log(`Propriété extraite: ${JSON.stringify(property, null, 2)}`);
+          if (debug && propertyElements.length <= 3) {
+            console.log(`Élément de propriété potentiel trouvé avec "${selector}": ${text.substring(0, 100)}...`);
           }
         }
-      } catch (error) {
-        console.error(`Erreur lors de l'extraction de la propriété ${index}:`, error);
+      });
+    }
+  }
+  
+  console.log(`Total d'éléments de propriétés potentiels: ${propertyElements.length}`);
+  
+  // Si aucun élément trouvé, essayer une approche différente
+  if (propertyElements.length === 0) {
+    console.log("Aucun élément trouvé avec les sélecteurs, recherche par contenu...");
+    
+    // Rechercher par contenu de prix
+    const priceElements = $('*').filter(function() {
+      const text = $(this).text();
+      return text.match(/€\s*[\d\s,.]+|[\d\s,.]+\s*€|EUR\s*[\d\s,.]+/);
+    });
+    
+    console.log(`Éléments avec prix trouvés: ${priceElements.length}`);
+    
+    priceElements.each((index, element) => {
+      const $element = $(element);
+      // Remonter dans la hiérarchie pour trouver le conteneur parent
+      const container = $element.closest('div, article, section').first();
+      if (container.length && !propertyElements.is(container[0])) {
+        propertyElements = propertyElements.add(container);
       }
     });
   }
   
-  if (debug) {
-    console.log(`\nRésumé de l'extraction:`);
-    console.log(`- Éléments trouvés: ${propertyElements.length}`);
-    console.log(`- Propriétés valides extraites: ${properties.length}`);
-    if (properties.length > 0) {
-      console.log(`- Première propriété: ${properties[0].title}`);
-    }
-  }
+  console.log(`Éléments finaux pour extraction: ${propertyElements.length}`);
   
-  return properties.filter(p => p && p.title && p.title.trim() !== "" && p.title.length > 5);
+  // Extraire les données de chaque propriété
+  propertyElements.each((index, element) => {
+    try {
+      if (debug && index < 5) {
+        console.log(`\n--- Extraction propriété ${index + 1} ---`);
+      }
+      
+      const property = extractPropertyFromElement($(element), baseUrl, $, debug);
+      if (property && isValidProperty(property)) {
+        properties.push(property);
+        if (debug && index < 3) {
+          console.log(`Propriété valide extraite: ${property.title.substring(0, 50)}...`);
+        }
+      } else if (debug && index < 3) {
+        console.log(`Propriété rejetée (données insuffisantes)`);
+      }
+    } catch (error) {
+      console.error(`Erreur lors de l'extraction de la propriété ${index}:`, error);
+    }
+  });
+  
+  console.log(`Propriétés valides extraites: ${properties.length}`);
+  return properties;
+}
+
+function isValidProperty(property: any): boolean {
+  return (
+    property &&
+    property.title &&
+    property.title.trim().length > 5 &&
+    property.title.trim().length < 300 &&
+    property.external_id &&
+    property.url &&
+    !property.title.toLowerCase().includes('search') &&
+    !property.title.toLowerCase().includes('filter') &&
+    !property.title.toLowerCase().includes('menu')
+  );
 }
 
 function extractPropertyFromElement($element, baseUrl: string, $: any, debug = false) {
