@@ -72,34 +72,39 @@ const PropertiesTabContent: React.FC = () => {
       
       toast({
         title: "Synchronisation en cours...",
-        description: "Récupération des nouvelles propriétés depuis Gadait",
+        description: "Récupération des nouvelles propriétés depuis Gadait (mode debug activé)",
       });
+
+      console.log('Démarrage de la synchronisation avec mode debug activé');
 
       const { data, error } = await supabase.functions.invoke('scrape-website', {
         body: {
           url: 'https://gadait-international.com/en/search/',
-          debug: false
+          debug: true // Mode debug activé pour les logs détaillés
         }
       });
 
       if (error) {
+        console.error('Erreur lors de l\'appel de la fonction:', error);
         throw error;
       }
 
-      console.log('Résultat de la synchronisation:', data);
+      console.log('Réponse complète de la fonction:', data);
+      console.log('Nombre de propriétés extraites:', data?.properties?.length || 0);
+      console.log('Nombre de propriétés stockées:', data?.storedCount || 0);
 
       // Rafraîchir la liste des propriétés après la synchronisation
       await fetchGadaitProperties();
 
       toast({
         title: "Synchronisation réussie",
-        description: `${data?.storedCount || 0} propriétés synchronisées`,
+        description: `${data?.storedCount || 0} propriétés synchronisées (${data?.properties?.length || 0} extraites)`,
       });
     } catch (err) {
       console.error('Erreur lors de la synchronisation:', err);
       toast({
         title: "Erreur de synchronisation",
-        description: "Impossible de synchroniser les propriétés",
+        description: "Impossible de synchroniser les propriétés. Vérifiez les logs pour plus de détails.",
         variant: "destructive",
       });
     } finally {
