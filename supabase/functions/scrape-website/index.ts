@@ -105,60 +105,87 @@ async function extractGadaitProperties(baseUrl: string, html: string, debug = fa
   const $ = cheerio.load(html);
   const properties = [];
   
-  console.log("Début de l'extraction des propriétés depuis la page de recherche Gadait");
+  console.log("Début de l'extraction des propriétés depuis la page Gadait avec les nouveaux sélecteurs");
   
-  // Sélecteurs spécifiques pour la page de recherche Gadait
-  const propertySelectors = [
+  // Sélecteurs spécifiques basés sur la structure HTML réelle de Gadait
+  const specificSelectors = [
+    '.swiper-slide',
+    '[data-testid="property-card"]',
     '.property-item',
-    '.listing-card',
-    '.search-result-item',
-    '.property-card',
-    '.property-listing',
-    '.grid-item',
-    '[data-property]',
-    '.card.property',
-    '.result-item'
+    '.listing-item',
+    '.gatsby-image-wrapper',
+    '[class*="PropertyCard"]',
+    '[class*="property"]'
   ];
   
   let propertyElements = $();
   
-  // Essayer de trouver les éléments de propriété avec différents sélecteurs
-  for (const selector of propertySelectors) {
+  // Essayer de trouver les éléments de propriété avec les sélecteurs spécifiques
+  for (const selector of specificSelectors) {
     const elements = $(selector);
     if (elements.length > 0) {
-      console.log(`Trouvé ${elements.length} propriétés avec le sélecteur: ${selector}`);
-      propertyElements = elements;
-      break;
+      console.log(`Trouvé ${elements.length} éléments avec le sélecteur: ${selector}`);
+      // Filtrer pour ne garder que les éléments qui semblent être des propriétés
+      elements.each((index, element) => {
+        const $element = $(element);
+        // Vérifier si l'élément contient des indicateurs de propriété
+        if ($element.find('img').length > 0 || 
+            $element.find('a[href*="/property"]').length > 0 || 
+            $element.find('a[href*="/buy"]').length > 0 ||
+            $element.text().match(/€|EUR|\$|USD/)) {
+          propertyElements = propertyElements.add(element);
+        }
+      });
+      
+      if (propertyElements.length > 0) {
+        console.log(`${propertyElements.length} éléments de propriété valides trouvés avec ${selector}`);
+        break;
+      }
     }
   }
   
-  // Si aucun sélecteur spécifique ne fonctionne, chercher des patterns plus génériques
+  // Si aucun sélecteur spécifique ne fonctionne, essayer une approche plus large
   if (propertyElements.length === 0) {
-    console.log("Recherche de patterns génériques pour les propriétés...");
+    console.log("Recherche d'éléments avec des liens de propriétés...");
     
-    // Chercher des éléments contenant des liens vers des pages de propriétés
-    $('a[href*="/property"], a[href*="/listing"], a[href*="/buy"]').each((index, element) => {
-      const $element = $(element);
-      const href = $element.attr('href');
+    // Chercher des liens vers des pages de propriétés
+    $('a[href*="/property"], a[href*="/buy"], a[href*="/listing"]').each((index, element) => {
+      const $link = $(element);
+      const href = $link.attr('href');
       
       if (href && !href.includes('#') && !href.includes('javascript:')) {
-        const parentCard = $element.closest('div, article, section').first();
-        if (parentCard.length && !propertyElements.is(parentCard[0])) {
-          propertyElements = propertyElements.add(parentCard);
+        // Remonter dans la hiérarchie pour trouver le conteneur de la propriété
+        let propertyContainer = $link.closest('div, article, section, li').first();
+        
+        // Si le conteneur est trop petit, remonter encore
+        if (propertyContainer.length && propertyContainer.text().trim().length < 50) {
+          propertyContainer = propertyContainer.parent().closest('div, article, section').first();
+        }
+        
+        if (propertyContainer.length && !propertyElements.is(propertyContainer[0])) {
+          propertyElements = propertyElements.add(propertyContainer);
         }
       }
     });
     
-    console.log(`Trouvé ${propertyElements.length} éléments potentiels de propriétés`);
+    console.log(`Trouvé ${propertyElements.length} conteneurs de propriétés via les liens`);
   }
   
   // Extraire les données de chaque propriété trouvée
   if (propertyElements.length > 0) {
     propertyElements.each((index, element) => {
       try {
-        const property = extractPropertyFromElement($(element), baseUrl, $);
-        if (property && property.title && property.title.trim() !== "") {
+        if (debug && index < 3) {
+          console.log(`\n--- Extraction propriété ${index + 1} ---`);
+          console.log(`HTML: ${$(element).html()?.substring(0, 200)}...`);
+        }
+        
+        const property = extractPropertyFromElement($(element), baseUrl, $, debug);
+        if (property && property.title && property.title.trim() !== "" && property.title.length > 5) {
           properties.push(property);
+          if (debug && index < 3) {
+            console.log(`Propriété extraite: ${JSON.stringify(property, null, 2)}`);
+          }
         }
       } catch (error) {
         console.error(`Erreur lors de l'extraction de la propriété ${index}:`, error);
@@ -166,70 +193,72 @@ async function extractGadaitProperties(baseUrl: string, html: string, debug = fa
     });
   }
   
-  // Si toujours aucune propriété trouvée, essayer une approche plus large
-  if (properties.length === 0) {
-    console.log("Recherche de contenu avec des prix pour identifier les propriétés...");
-    
-    $("*").filter(function() {
-      const text = $(this).text();
-      return text.match(/€[\d\s,.]+|[\d\s,.]+\s*€|EUR[\d\s,.]+|[\d\s,.]+\s*EUR|\$[\d\s,.]+/i);
-    }).each((index, element) => {
-      if (index < 50) { // Limiter pour éviter trop de résultats
-        try {
-          const $element = $(element);
-          const property = extractPropertyFromElement($element, baseUrl, $);
-          if (property && property.title && !properties.some(p => p.title === property.title)) {
-            properties.push(property);
-          }
-        } catch (error) {
-          console.error(`Erreur lors de l'extraction générique ${index}:`, error);
-        }
-      }
-    });
-  }
-  
   if (debug) {
-    console.log(`Propriétés extraites: ${JSON.stringify(properties.slice(0, 3), null, 2)}`);
+    console.log(`\nRésumé de l'extraction:`);
+    console.log(`- Éléments trouvés: ${propertyElements.length}`);
+    console.log(`- Propriétés valides extraites: ${properties.length}`);
+    if (properties.length > 0) {
+      console.log(`- Première propriété: ${properties[0].title}`);
+    }
   }
   
-  return properties.filter(p => p && p.title && p.title.trim() !== "");
+  return properties.filter(p => p && p.title && p.title.trim() !== "" && p.title.length > 5);
 }
 
-function extractPropertyFromElement($element, baseUrl: string, $: any) {
-  // Extraire le titre
+function extractPropertyFromElement($element, baseUrl: string, $: any, debug = false) {
+  // Extraire le titre avec plus de priorité sur les vrais titres
   let title = "";
   const titleSelectors = [
-    'h1', 'h2', 'h3', 'h4',
+    'h1', 'h2', 'h3', 'h4', 'h5',
+    '[data-title]',
     '.title', '.property-title', '.listing-title', '.card-title',
-    '[class*="title"]', '[class*="name"]'
+    '.property-name', '.listing-name',
+    '[class*="title"]', '[class*="name"]', '[class*="heading"]'
   ];
   
   for (const selector of titleSelectors) {
     const titleElement = $element.find(selector).first();
     if (titleElement.length) {
-      title = titleElement.text().trim();
-      if (title && title.length > 5) break;
+      const candidateTitle = titleElement.text().trim();
+      if (candidateTitle && candidateTitle.length > 5 && candidateTitle.length < 200) {
+        title = candidateTitle;
+        if (debug) console.log(`Titre trouvé avec ${selector}: ${title}`);
+        break;
+      }
     }
   }
   
+  // Si pas de titre trouvé, essayer depuis les liens
   if (!title) {
-    // Essayer de récupérer le titre depuis un lien
     const linkElement = $element.find('a').first();
     if (linkElement.length) {
-      title = linkElement.attr('title') || linkElement.text().trim();
+      title = linkElement.attr('title') || linkElement.attr('aria-label') || linkElement.text().trim();
+      if (debug) console.log(`Titre depuis lien: ${title}`);
+    }
+  }
+  
+  // Dernier recours : prendre du texte significatif
+  if (!title || title.length < 5) {
+    const textContent = $element.text().trim();
+    const lines = textContent.split('\n').map(line => line.trim()).filter(line => line.length > 5);
+    if (lines.length > 0) {
+      title = lines[0].substring(0, 100);
+      if (debug) console.log(`Titre par défaut: ${title}`);
     }
   }
   
   if (!title || title.length < 5) {
-    return null; // Skip if no meaningful title
+    if (debug) console.log("Aucun titre valide trouvé, élément ignoré");
+    return null;
   }
   
-  // Extraire le prix
+  // Extraire le prix avec plus de précision
   let price = null;
   let currency = "EUR";
   const priceSelectors = [
-    '.price', '.property-price', '.listing-price', '.cost',
-    '[class*="price"]', '[class*="cost"]'
+    '[data-price]',
+    '.price', '.property-price', '.listing-price', '.cost', '.amount',
+    '[class*="price"]', '[class*="cost"]', '[class*="amount"]'
   ];
   
   for (const selector of priceSelectors) {
@@ -238,36 +267,62 @@ function extractPropertyFromElement($element, baseUrl: string, $: any) {
       const priceText = priceElement.text().trim();
       const priceMatch = priceText.match(/([\d\s,.]+)/);
       if (priceMatch) {
-        price = parseFloat(priceMatch[1].replace(/[\s,]/g, ''));
-        if (priceText.includes('$')) currency = "USD";
-        break;
+        const cleanPrice = priceMatch[1].replace(/[\s,]/g, '');
+        const numPrice = parseFloat(cleanPrice);
+        if (!isNaN(numPrice) && numPrice > 0) {
+          price = numPrice;
+          if (priceText.includes('$')) currency = "USD";
+          if (debug) console.log(`Prix trouvé avec ${selector}: ${price} ${currency}`);
+          break;
+        }
       }
     }
   }
   
+  // Recherche de prix dans le texte général si pas trouvé
   if (!price) {
-    // Recherche de prix dans le texte général
     const text = $element.text();
-    const priceMatch = text.match(/€\s*([\d\s,.]+)|(\d[\d\s,.]*)\s*€|\$\s*([\d\s,.]+)|(\d[\d\s,.]*)\s*\$/);
-    if (priceMatch) {
-      const numStr = priceMatch[1] || priceMatch[2] || priceMatch[3] || priceMatch[4];
-      price = parseFloat(numStr.replace(/[\s,]/g, ''));
-      currency = text.includes('$') ? "USD" : "EUR";
+    const pricePatterns = [
+      /€\s*([\d\s,.]+)/,
+      /([\d\s,.]+)\s*€/,
+      /EUR\s*([\d\s,.]+)/,
+      /([\d\s,.]+)\s*EUR/,
+      /\$\s*([\d\s,.]+)/,
+      /([\d\s,.]+)\s*\$/
+    ];
+    
+    for (const pattern of pricePatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        const cleanPrice = match[1].replace(/[\s,]/g, '');
+        const numPrice = parseFloat(cleanPrice);
+        if (!isNaN(numPrice) && numPrice > 10000) { // Prix minimum réaliste
+          price = numPrice;
+          currency = text.includes('$') ? "USD" : "EUR";
+          if (debug) console.log(`Prix trouvé dans le texte: ${price} ${currency}`);
+          break;
+        }
+      }
     }
   }
   
   // Extraire la localisation
   let location = "";
   const locationSelectors = [
-    '.location', '.address', '.place', '.city',
-    '[class*="location"]', '[class*="address"]', '[class*="place"]'
+    '[data-location]', '[data-address]',
+    '.location', '.address', '.place', '.city', '.area',
+    '[class*="location"]', '[class*="address"]', '[class*="place"]', '[class*="city"]'
   ];
   
   for (const selector of locationSelectors) {
     const locationElement = $element.find(selector).first();
     if (locationElement.length) {
-      location = locationElement.text().trim();
-      if (location && location.length > 2) break;
+      const candidateLocation = locationElement.text().trim();
+      if (candidateLocation && candidateLocation.length > 2 && candidateLocation.length < 100) {
+        location = candidateLocation;
+        if (debug) console.log(`Localisation trouvée: ${location}`);
+        break;
+      }
     }
   }
   
@@ -278,6 +333,7 @@ function extractPropertyFromElement($element, baseUrl: string, $: any) {
     const href = linkElement.attr('href');
     if (href) {
       propertyUrl = href.startsWith('http') ? href : new URL(href, baseUrl).toString();
+      if (debug) console.log(`URL trouvée: ${propertyUrl}`);
     }
   }
   
@@ -290,11 +346,23 @@ function extractPropertyFromElement($element, baseUrl: string, $: any) {
   
   // Extraire l'image principale
   let mainImage = "";
-  const imageElement = $element.find('img').first();
-  if (imageElement.length) {
-    const src = imageElement.attr('src') || imageElement.attr('data-src');
-    if (src) {
-      mainImage = src.startsWith('http') ? src : new URL(src, baseUrl).toString();
+  const imageSelectors = [
+    '.gatsby-image-wrapper img',
+    '[data-main-image]',
+    '[data-src]',
+    'img[src]',
+    'img[data-src]'
+  ];
+  
+  for (const selector of imageSelectors) {
+    const imageElement = $element.find(selector).first();
+    if (imageElement.length) {
+      const src = imageElement.attr('src') || imageElement.attr('data-src') || imageElement.attr('data-main-image');
+      if (src && !src.includes('placeholder') && !src.includes('loading')) {
+        mainImage = src.startsWith('http') ? src : new URL(src, baseUrl).toString();
+        if (debug) console.log(`Image trouvée: ${mainImage}`);
+        break;
+      }
     }
   }
   
@@ -302,30 +370,60 @@ function extractPropertyFromElement($element, baseUrl: string, $: any) {
   const text = $element.text().toLowerCase();
   
   let bedrooms = null;
-  const bedroomMatch = text.match(/(\d+)\s*(bed|chambre|room)/i);
-  if (bedroomMatch) {
-    bedrooms = parseInt(bedroomMatch[1]);
+  const bedroomPatterns = [
+    /(\d+)\s*(?:bed|bedroom|chambre|room)/i,
+    /bed(?:room)?s?\s*:?\s*(\d+)/i,
+    /(\d+)\s*br/i
+  ];
+  
+  for (const pattern of bedroomPatterns) {
+    const match = text.match(pattern);
+    if (match) {
+      bedrooms = parseInt(match[1]);
+      if (debug) console.log(`Chambres trouvées: ${bedrooms}`);
+      break;
+    }
   }
   
   let bathrooms = null;
-  const bathroomMatch = text.match(/(\d+)\s*(bath|salle de bain)/i);
-  if (bathroomMatch) {
-    bathrooms = parseInt(bathroomMatch[1]);
+  const bathroomPatterns = [
+    /(\d+)\s*(?:bath|bathroom|salle de bain)/i,
+    /bath(?:room)?s?\s*:?\s*(\d+)/i,
+    /(\d+)\s*ba/i
+  ];
+  
+  for (const pattern of bathroomPatterns) {
+    const match = text.match(pattern);
+    if (match) {
+      bathrooms = parseInt(match[1]);
+      if (debug) console.log(`Salles de bain trouvées: ${bathrooms}`);
+      break;
+    }
   }
   
   let area = null;
-  const areaMatch = text.match(/(\d+[\d,.]*)\s*m²/i);
-  if (areaMatch) {
-    area = parseFloat(areaMatch[1].replace(',', '.'));
+  const areaPatterns = [
+    /(\d+[\d,.]*)\s*m[²2]/i,
+    /(\d+[\d,.]*)\s*sq\s*m/i,
+    /area\s*:?\s*(\d+[\d,.]*)/i
+  ];
+  
+  for (const pattern of areaPatterns) {
+    const match = text.match(pattern);
+    if (match) {
+      area = parseFloat(match[1].replace(',', '.'));
+      if (debug) console.log(`Surface trouvée: ${area}m²`);
+      break;
+    }
   }
   
-  // Générer un ID externe
+  // Générer un ID externe plus robuste
   const external_id = propertyUrl ? 
-    propertyUrl.split('/').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 
-    title.replace(/[^a-zA-Z0-9]/g, '').substring(0, 50) :
-    title.replace(/[^a-zA-Z0-9]/g, '').substring(0, 50) + '_' + Date.now();
+    propertyUrl.split('/').filter(Boolean).pop()?.replace(/[^a-zA-Z0-9]/g, '') || 
+    'gadait-' + title.replace(/[^a-zA-Z0-9]/g, '').substring(0, 30) + '-' + Date.now() :
+    'gadait-' + title.replace(/[^a-zA-Z0-9]/g, '').substring(0, 30) + '-' + Date.now();
   
-  return {
+  const property = {
     external_id,
     title: title || "Propriété Gadait",
     description: $element.text().trim().substring(0, 500) || "",
@@ -346,6 +444,12 @@ function extractPropertyFromElement($element, baseUrl: string, $: any) {
     is_available: true,
     is_featured: false
   };
+  
+  if (debug) {
+    console.log(`Propriété créée: ${JSON.stringify(property, null, 2)}`);
+  }
+  
+  return property;
 }
 
 function extractPropertyType(text: string): string {
