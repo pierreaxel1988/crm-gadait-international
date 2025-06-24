@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Mail, Phone, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -116,7 +117,7 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full bg-loro-100 text-chocolate-dark border border-white hover:bg-loro-200 transition-colors"
+                    className="h-8 w-8 rounded-full bg-gradient-to-r from-loro-sand/20 to-loro-pearl/20 text-loro-navy border border-loro-sand/30 hover:bg-gradient-to-r hover:from-loro-sand/30 hover:to-loro-pearl/30 transition-all duration-200 hover:shadow-sm"
                     onClick={handlePhoneClick}
                   >
                     <Phone className="h-4 w-4" />
@@ -132,7 +133,7 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full bg-loro-100 text-chocolate-dark border border-white hover:bg-loro-200 transition-colors"
+                    className="h-8 w-8 rounded-full bg-gradient-to-r from-loro-sand/20 to-loro-pearl/20 text-loro-navy border border-loro-sand/30 hover:bg-gradient-to-r hover:from-loro-sand/30 hover:to-loro-pearl/30 transition-all duration-200 hover:shadow-sm"
                     onClick={handleWhatsAppClick}
                   >
                     <svg 
@@ -157,7 +158,7 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full bg-loro-100 text-chocolate-dark border border-white hover:bg-loro-200 transition-colors"
+                  className="h-8 w-8 rounded-full bg-gradient-to-r from-loro-sand/20 to-loro-pearl/20 text-loro-navy border border-loro-sand/30 hover:bg-gradient-to-r hover:from-loro-sand/30 hover:to-loro-pearl/30 transition-all duration-200 hover:shadow-sm"
                   onClick={handleEmailClick}
                 >
                   <Mail className="h-4 w-4" />
@@ -174,7 +175,7 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full bg-loro-100 text-chocolate-dark border border-white hover:bg-loro-200 transition-colors"
+                  className="h-8 w-8 rounded-full bg-gradient-to-r from-loro-sand/20 to-loro-pearl/20 text-loro-navy border border-loro-sand/30 hover:bg-gradient-to-r hover:from-loro-sand/30 hover:to-loro-pearl/30 transition-all duration-200 hover:shadow-sm"
                   onClick={handleAddAction}
                 >
                   <PlusCircle className="h-4 w-4" />
