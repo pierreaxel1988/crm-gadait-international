@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Home, Bath, Bed } from 'lucide-react';
+import { ExternalLink, MapPin, Home, Bath, Bed, RefreshCw, Download } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface GadaitProperty {
   id: string;
@@ -32,6 +33,7 @@ interface GadaitProperty {
 const PropertiesTabContent: React.FC = () => {
   const [properties, setProperties] = useState<GadaitProperty[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,6 +43,7 @@ const PropertiesTabContent: React.FC = () => {
   const fetchGadaitProperties = async () => {
     try {
       setLoading(true);
+      setError(null);
       const { data, error } = await supabase
         .from('gadait_properties')
         .select('*')
@@ -61,6 +64,47 @@ const PropertiesTabContent: React.FC = () => {
     }
   };
 
+  const handleSyncProperties = async () => {
+    try {
+      setSyncing(true);
+      
+      toast({
+        title: "Synchronisation en cours...",
+        description: "Récupération des nouvelles propriétés depuis Gadait",
+      });
+
+      const { data, error } = await supabase.functions.invoke('scrape-website', {
+        body: {
+          url: 'https://gadait-international.com/en/buy',
+          debug: false
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Résultat de la synchronisation:', data);
+
+      // Rafraîchir la liste des propriétés après la synchronisation
+      await fetchGadaitProperties();
+
+      toast({
+        title: "Synchronisation réussie",
+        description: `${data?.storedCount || 0} propriétés synchronisées`,
+      });
+    } catch (err) {
+      console.error('Erreur lors de la synchronisation:', err);
+      toast({
+        title: "Erreur de synchronisation",
+        description: "Impossible de synchroniser les propriétés",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const formatPrice = (price?: number, currency?: string) => {
     if (!price) return 'Prix sur demande';
     return `${price.toLocaleString()} ${currency || 'EUR'}`;
@@ -76,8 +120,12 @@ const PropertiesTabContent: React.FC = () => {
 
   if (error) {
     return (
-      <div className="text-center py-8 text-red-600">
-        {error}
+      <div className="text-center py-8">
+        <div className="text-red-600 mb-4">{error}</div>
+        <Button onClick={fetchGadaitProperties} variant="outline">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Réessayer
+        </Button>
       </div>
     );
   }
@@ -85,14 +133,50 @@ const PropertiesTabContent: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Propriétés Gadait</h2>
-        <Badge variant="secondary">{properties.length} propriétés</Badge>
+        <div>
+          <h2 className="text-xl font-bold">Propriétés Gadait</h2>
+          <p className="text-gray-600 mt-1">Synchronisation automatique toutes les heures</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">{properties.length} propriétés</Badge>
+          <Button 
+            onClick={handleSyncProperties}
+            disabled={syncing}
+            variant="outline"
+            size="sm"
+          >
+            {syncing ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Synchronisation...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Synchroniser
+              </>
+            )}
+          </Button>
+        </div>
       </div>
       
       {properties.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           <Home className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p>Aucune propriété disponible pour le moment.</p>
+          <p className="mb-4">Aucune propriété disponible pour le moment.</p>
+          <Button onClick={handleSyncProperties} disabled={syncing}>
+            {syncing ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Synchronisation en cours...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Synchroniser les propriétés
+              </>
+            )}
+          </Button>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -104,6 +188,9 @@ const PropertiesTabContent: React.FC = () => {
                     src={property.main_image}
                     alt={property.title}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
                   />
                   {property.is_featured && (
                     <Badge className="absolute top-2 left-2 bg-loro-navy">
