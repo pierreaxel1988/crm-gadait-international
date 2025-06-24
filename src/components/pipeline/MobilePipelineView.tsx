@@ -32,6 +32,7 @@ const pipelines = [
   { label: "Achat", value: "purchase" },
   { label: "Location", value: "rental" },
   { label: "Propriétaires", value: "owners" },
+  { label: "Propriétés", value: "properties" },
 ];
 
 const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
@@ -98,12 +99,16 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
 
       <div className="flex-1 overflow-y-auto bg-gray-50">
         <div className="px-3">
-          <MobileColumnList
-            columns={columns}
-            activeTab={activeTab as PipelineType}
-            searchTerm={searchTerm}
-            filters={filters}
-          />
+          {activeTab === 'properties' ? (
+            <PropertiesTabContent />
+          ) : (
+            <MobileColumnList
+              columns={columns}
+              activeTab={activeTab as PipelineType}
+              searchTerm={searchTerm}
+              filters={filters}
+            />
+          )}
         </div>
       </div>
 

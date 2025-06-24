@@ -41,14 +41,17 @@ const Pipeline = () => {
     const agent = teamMembers.find(member => member.id === selectedAgent);
     return agent ? agent.name : null;
   }, [selectedAgent, teamMembers]);
+  
   useEffect(() => {
     if (selectedAgent !== filters.assignedTo) {
       updateAgentFilter(selectedAgent);
     }
   }, [selectedAgent, filters.assignedTo, updateAgentFilter]);
+  
   useEffect(() => {
     handleRefresh();
   }, []);
+  
   useEffect(() => {
     const fixLeadsAssignment = async () => {
       try {
@@ -63,6 +66,7 @@ const Pipeline = () => {
     };
     fixLeadsAssignment();
   }, []);
+  
   useEffect(() => {
     const handleAgentSelectionChange = (e: CustomEvent) => {
       const newAgent = e.detail.selectedAgent;
@@ -75,10 +79,12 @@ const Pipeline = () => {
       window.removeEventListener('agent-selection-changed', handleAgentSelectionChange as EventListener);
     };
   }, [selectedAgent, handleAgentChange]);
+  
   const handleClearAllFilters = () => {
     window.dispatchEvent(new Event('filters-cleared'));
     handleClearFilters();
   };
+  
   return <div className="flex flex-col min-h-screen">
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navbar />
