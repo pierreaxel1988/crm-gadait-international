@@ -82,15 +82,29 @@ const PropertiesTabContent: React.FC = () => {
   useEffect(() => {
     let filtered = [...properties];
 
-    // Filtre de recherche
+    // Filtre de recherche amélioré pour inclure les références
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(property =>
-        property.title.toLowerCase().includes(term) ||
-        property.location?.toLowerCase().includes(term) ||
-        property.country?.toLowerCase().includes(term) ||
-        property.property_type?.toLowerCase().includes(term)
-      );
+      filtered = filtered.filter(property => {
+        // Recherche dans le titre
+        const titleMatch = property.title.toLowerCase().includes(term);
+        
+        // Recherche dans la localisation
+        const locationMatch = property.location?.toLowerCase().includes(term);
+        
+        // Recherche dans le pays
+        const countryMatch = property.country?.toLowerCase().includes(term);
+        
+        // Recherche dans le type de propriété
+        const typeMatch = property.property_type?.toLowerCase().includes(term);
+        
+        // Recherche dans la référence externe (si elle existe et n'est pas auto-générée)
+        const referenceMatch = property.external_id && 
+          !property.external_id.startsWith('datocms-') && 
+          property.external_id.toLowerCase().includes(term);
+        
+        return titleMatch || locationMatch || countryMatch || typeMatch || referenceMatch;
+      });
     }
 
     // Filtre par type de transaction

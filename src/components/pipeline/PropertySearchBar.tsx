@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, Hash } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -13,7 +13,7 @@ interface PropertySearchBarProps {
 const PropertySearchBar: React.FC<PropertySearchBarProps> = ({
   searchTerm,
   onSearchChange,
-  placeholder = "Rechercher une propriété..."
+  placeholder = "Rechercher par titre, localisation ou référence..."
 }) => {
   return (
     <div className="relative w-full max-w-md">
