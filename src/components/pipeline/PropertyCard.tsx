@@ -1,9 +1,10 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, LandPlot } from 'lucide-react';
+import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, LandPlot, ChevronLeft, ChevronRight } from 'lucide-react';
 import { countryToFlag } from '@/utils/countryUtils';
 
 interface PropertyCardProps {
@@ -22,15 +23,24 @@ interface PropertyCardProps {
     land_area?: number;
     land_area_unit?: string;
     main_image?: string;
+    images?: string[];
     url: string;
     is_featured?: boolean;
     external_id?: string;
   };
 }
+
 const PropertyCard: React.FC<PropertyCardProps> = ({
   property
 }) => {
   const navigate = useNavigate();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Combine main image with other images, filter out empty values
+  const allImages = property.main_image 
+    ? [property.main_image, ...(property.images || [])].filter(Boolean)
+    : (property.images || []).filter(Boolean);
+
   const formatPrice = (price?: number, currency?: string) => {
     if (!price) return 'Prix sur demande';
 
@@ -51,19 +61,39 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     // Sinon, afficher la référence telle quelle (qu'elle soit numérique ou textuelle)
     return property.external_id;
   };
+
   const displayReference = getDisplayReference();
+
   const handleCardClick = () => {
     navigate(`/properties/${property.id}`);
   };
+
   const handleExternalLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     window.open(property.url, '_blank');
   };
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (allImages.length > 1) {
+      setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+    }
+  };
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (allImages.length > 1) {
+      setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+    }
+  };
+
+  const currentImage = allImages[currentImageIndex] || property.main_image;
+
   return <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500 border-loro-pearl bg-loro-white cursor-pointer hover:-translate-y-1 rounded-xl" onClick={handleCardClick}>
       {/* Image avec aspect ratio plus haut */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        {property.main_image ? <>
-            <img src={property.main_image} alt={property.title} className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105" onError={e => {
+        {currentImage ? <>
+            <img src={currentImage} alt={property.title} className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105" onError={e => {
           (e.target as HTMLImageElement).style.display = 'none';
           (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
         }} />
@@ -74,6 +104,27 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             
             {/* Overlay gradient amélioré */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+            
+            {/* Zones de navigation pour les images */}
+            {allImages.length > 1 && (
+              <>
+                {/* Zone de clic gauche pour navigation précédente */}
+                <div 
+                  className="absolute left-0 top-0 bottom-0 w-1/4 z-40 cursor-pointer flex items-center justify-start pl-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  onClick={prevImage}
+                >
+                  <ChevronLeft className="h-6 w-6 text-white/70 hover:text-white transition-colors duration-200" />
+                </div>
+                
+                {/* Zone de clic droite pour navigation suivante */}
+                <div 
+                  className="absolute right-0 top-0 bottom-0 w-1/4 z-40 cursor-pointer flex items-center justify-end pr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  onClick={nextImage}
+                >
+                  <ChevronRight className="h-6 w-6 text-white/70 hover:text-white transition-colors duration-200" />
+                </div>
+              </>
+            )}
             
             {/* Badges repositionnés */}
             <div className="absolute top-4 left-4 flex gap-2">
@@ -92,6 +143,15 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                 {formatPrice(property.price, property.currency)}
               </Badge>
             </div>
+
+            {/* Indicateur du nombre d'images */}
+            {allImages.length > 1 && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2">
+                <Badge className="bg-black/50 text-white font-futura text-xs">
+                  {currentImageIndex + 1} / {allImages.length}
+                </Badge>
+              </div>
+            )}
 
             {/* Tags des caractéristiques en bas de l'image */}
             <div className="absolute bottom-4 left-4 flex gap-2 flex-wrap">
@@ -159,4 +219,5 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       </CardContent>
     </Card>;
 };
+
 export default PropertyCard;
