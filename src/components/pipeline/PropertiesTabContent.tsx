@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Home, Bath, Bed, RefreshCw, Database, Zap } from 'lucide-react';
+import { ExternalLink, MapPin, Home, Bath, Bed, RefreshCw, Database, Zap, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import PropertyCard from './PropertyCard';
 
@@ -36,6 +35,7 @@ const PropertiesTabContent: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [syncingDatoCms, setSyncingDatoCms] = useState(false);
   const [migrating, setMigrating] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -63,6 +63,46 @@ const PropertiesTabContent: React.FC = () => {
       setError('Erreur lors du chargement des propriétés');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleClearAllProperties = async () => {
+    try {
+      setClearing(true);
+      
+      toast({
+        title: "Suppression en cours...",
+        description: "Suppression de toutes les propriétés existantes",
+      });
+
+      console.log('Suppression de toutes les propriétés');
+
+      const { error } = await supabase
+        .from('gadait_properties')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+
+      if (error) {
+        console.error('Erreur lors de la suppression:', error);
+        throw error;
+      }
+
+      // Rafraîchir la liste des propriétés
+      await fetchGadaitProperties();
+
+      toast({
+        title: "Suppression réussie",
+        description: "Toutes les propriétés ont été supprimées",
+      });
+    } catch (err) {
+      console.error('Erreur lors de la suppression:', err);
+      toast({
+        title: "Erreur de suppression",
+        description: "Impossible de supprimer les propriétés",
+        variant: "destructive",
+      });
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -231,6 +271,24 @@ const PropertiesTabContent: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="secondary">{properties.length} propriétés</Badge>
+          <Button 
+            onClick={handleClearAllProperties}
+            disabled={clearing}
+            variant="destructive"
+            size="sm"
+          >
+            {clearing ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Suppression...
+              </>
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Supprimer tout
+              </>
+            )}
+          </Button>
           <Button 
             onClick={handleMigrateOldData}
             disabled={migrating}
