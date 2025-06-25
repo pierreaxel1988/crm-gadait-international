@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2 } from 'lucide-react';
+import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, TreePine } from 'lucide-react';
 import { countryToFlag } from '@/utils/countryUtils';
 
 interface PropertyCardProps {
@@ -20,6 +19,8 @@ interface PropertyCardProps {
     bathrooms?: number;
     area?: number;
     area_unit?: string;
+    land_area?: number;
+    land_area_unit?: string;
     main_image?: string;
     url: string;
     is_featured?: boolean;
@@ -110,7 +111,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </div>
 
             {/* Tags des caractéristiques en bas de l'image */}
-            <div className="absolute bottom-4 left-4 flex gap-2">
+            <div className="absolute bottom-4 left-4 flex gap-2 flex-wrap">
               <Badge variant="outline" className="bg-loro-white/90 text-loro-navy border-loro-pearl font-futura text-xs backdrop-blur-sm">
                 <Maximize2 className="h-3 w-3 mr-1" />
                 {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
@@ -123,6 +124,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                 <Bath className="h-3 w-3 mr-1" />
                 {property.bathrooms || 'N/A'}
               </Badge>
+              {property.land_area && (
+                <Badge variant="outline" className="bg-loro-white/90 text-loro-navy border-loro-pearl font-futura text-xs backdrop-blur-sm">
+                  <TreePine className="h-3 w-3 mr-1" />
+                  {property.land_area} {property.land_area_unit || 'm²'}
+                </Badge>
+              )}
             </div>
           </>
         ) : (
