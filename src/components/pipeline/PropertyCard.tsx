@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -143,7 +144,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       <CardContent className="p-5 space-y-4">
         {/* Titre et localisation condensés */}
         <div className="space-y-2">
-          <h3 className="font-futura text-lg text-loro-700 line-clamp-2 group-hover:text-loro-500 transition-colors duration-300 font-medium">
+          <h3 className="font-futura text-lg text-loro-navy line-clamp-2 group-hover:text-loro-500 transition-colors duration-300 font-medium">
             {property.title}
           </h3>
           
@@ -187,3 +188,4 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 };
 
 export default PropertyCard;
+
