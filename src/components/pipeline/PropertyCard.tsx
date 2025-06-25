@@ -107,13 +107,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
               )}
             </div>
             
-            {/* Prix en overlay minimaliste */}
-            <div className="absolute bottom-4 left-4 right-4">
-              <div className="bg-loro-white/90 backdrop-blur-sm rounded-md px-3 py-2 shadow-sm border border-loro-pearl/30">
-                <span className="text-lg font-semibold text-loro-navy font-futura">
-                  {formatPrice(property.price, property.currency)}
-                </span>
-              </div>
+            {/* Tag prix à droite */}
+            <div className="absolute top-4 right-4">
+              <Badge className="bg-loro-white/90 text-loro-navy border-loro-pearl font-futura shadow-sm backdrop-blur-sm">
+                {formatPrice(property.price, property.currency)}
+              </Badge>
             </div>
           </>
         ) : (
