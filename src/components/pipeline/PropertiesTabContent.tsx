@@ -1,12 +1,14 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Home, Bath, Bed, RefreshCw, Database, Zap, Trash2 } from 'lucide-react';
+import { ExternalLink, MapPin, Home, Bath, Bed, RefreshCw, Database, Zap, Trash2, Building2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import PropertyCard from './PropertyCard';
+import PropertySearchBar from './PropertySearchBar';
+import PropertyFilters from './PropertyFilters';
+import PropertySort, { SortOption } from './PropertySort';
+import PropertySkeleton from './PropertySkeleton';
 
 interface GadaitProperty {
   id: string;
@@ -33,15 +35,81 @@ interface GadaitProperty {
 
 const PropertiesTabContent: React.FC = () => {
   const [properties, setProperties] = useState<GadaitProperty[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<GadaitProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncingDatoCms, setSyncingDatoCms] = useState(false);
   const [migrating, setMigrating] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // États des filtres
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [currentSort, setCurrentSort] = useState<SortOption>('newest');
 
   useEffect(() => {
     fetchGadaitProperties();
   }, []);
+
+  // Filtrage et tri des propriétés
+  useEffect(() => {
+    let filtered = [...properties];
+
+    // Filtre de recherche
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(property =>
+        property.title.toLowerCase().includes(term) ||
+        property.location?.toLowerCase().includes(term) ||
+        property.country?.toLowerCase().includes(term) ||
+        property.property_type?.toLowerCase().includes(term)
+      );
+    }
+
+    // Filtre par type
+    if (selectedTypes.length > 0) {
+      filtered = filtered.filter(property =>
+        property.property_type && selectedTypes.includes(property.property_type)
+      );
+    }
+
+    // Filtre par localisation
+    if (selectedLocations.length > 0) {
+      filtered = filtered.filter(property =>
+        property.location && selectedLocations.some(loc =>
+          property.location?.toLowerCase().includes(loc.toLowerCase())
+        )
+      );
+    }
+
+    // Filtre par prix
+    filtered = filtered.filter(property => {
+      if (!property.price) return true;
+      return property.price >= priceRange[0] && property.price <= priceRange[1];
+    });
+
+    // Tri
+    filtered.sort((a, b) => {
+      switch (currentSort) {
+        case 'price-asc':
+          return (a.price || 0) - (b.price || 0);
+        case 'price-desc':
+          return (b.price || 0) - (a.price || 0);
+        case 'title-asc':
+          return a.title.localeCompare(b.title);
+        case 'oldest':
+          return a.id.localeCompare(b.id);
+        case 'newest':
+        default:
+          return b.id.localeCompare(a.id);
+      }
+    });
+
+    setFilteredProperties(filtered);
+  }, [properties, searchTerm, selectedTypes, selectedLocations, priceRange, currentSort]);
 
   const fetchGadaitProperties = async () => {
     try {
@@ -65,6 +133,14 @@ const PropertiesTabContent: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setSelectedTypes([]);
+    setSelectedLocations([]);
+    setPriceRange([0, 10000000]);
+    setCurrentSort('newest');
   };
 
   const handleClearAllProperties = async () => {
@@ -246,17 +322,34 @@ const PropertiesTabContent: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-loro-navy"></div>
+      <div className="space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-8 w-48 bg-loro-pearl rounded animate-pulse" />
+            <div className="h-4 w-64 bg-loro-pearl rounded animate-pulse" />
+          </div>
+          <div className="flex gap-2">
+            <div className="h-10 w-24 bg-loro-pearl rounded animate-pulse" />
+            <div className="h-10 w-32 bg-loro-pearl rounded animate-pulse" />
+          </div>
+        </div>
+        
+        {/* Grid skeleton */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <PropertySkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-8">
-        <div className="text-red-600 mb-4">{error}</div>
-        <Button onClick={fetchGadaitProperties} variant="outline">
+      <div className="text-center py-12">
+        <div className="text-red-600 mb-4 font-futura">{error}</div>
+        <Button onClick={fetchGadaitProperties} variant="outline" className="font-futura">
           <RefreshCw className="h-4 w-4 mr-2" />
           Réessayer
         </Button>
@@ -265,19 +358,37 @@ const PropertiesTabContent: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold">Propriétés Gadait</h2>
-          <p className="text-gray-600 mt-1">Synchronisation depuis l'API DatoCMS officielle</p>
+    <div className="space-y-6">
+      {/* En-tête moderne */}
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <Building2 className="h-8 w-8 text-loro-sand" />
+            <h2 className="text-2xl font-futura font-medium text-loro-navy">
+              Propriétés Gadait International
+            </h2>
+          </div>
+          <p className="text-loro-navy/70 font-futura">
+            Collection exclusive de propriétés de prestige synchronisées depuis DatoCMS
+          </p>
+          <div className="flex items-center gap-4 mt-3">
+            <Badge variant="outline" className="bg-loro-white border-loro-sand text-loro-navy font-futura">
+              {filteredProperties.length} propriétés affichées
+            </Badge>
+            <Badge variant="outline" className="bg-loro-white border-loro-pearl text-loro-navy/70 font-futura">
+              {properties.length} au total
+            </Badge>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary">{properties.length} propriétés</Badge>
+        
+        {/* Boutons d'action */}
+        <div className="flex items-center gap-3">
           <Button 
             onClick={handleClearAllProperties}
             disabled={clearing}
             variant="destructive"
             size="sm"
+            className="font-futura"
           >
             {clearing ? (
               <>
@@ -291,11 +402,13 @@ const PropertiesTabContent: React.FC = () => {
               </>
             )}
           </Button>
+          
           <Button 
             onClick={handleMigrateOldData}
             disabled={migrating}
             variant="outline"
             size="sm"
+            className="font-futura border-loro-pearl hover:bg-loro-white"
           >
             {migrating ? (
               <>
@@ -305,20 +418,21 @@ const PropertiesTabContent: React.FC = () => {
             ) : (
               <>
                 <Database className="h-4 w-4 mr-2" />
-                Importer données
+                Migrer données
               </>
             )}
           </Button>
+          
           <Button 
             onClick={handleSyncFromDatoCms}
             disabled={syncingDatoCms}
-            variant="default"
+            className="bg-loro-sand text-loro-navy hover:bg-loro-sand/90 font-futura"
             size="sm"
           >
             {syncingDatoCms ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Sync DatoCMS...
+                Synchronisation...
               </>
             ) : (
               <>
@@ -330,42 +444,106 @@ const PropertiesTabContent: React.FC = () => {
         </div>
       </div>
       
-      {properties.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          <Home className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p className="mb-4">Aucune propriété disponible pour le moment.</p>
-          <div className="flex gap-2 justify-center">
-            <Button onClick={handleMigrateOldData} disabled={migrating} variant="outline">
-              {migrating ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Migration en cours...
-                </>
-              ) : (
-                <>
-                  <Database className="h-4 w-4 mr-2" />
-                  Importer les données existantes
-                </>
-              )}
-            </Button>
-            <Button onClick={handleSyncFromDatoCms} disabled={syncingDatoCms}>
-              {syncingDatoCms ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Synchronisation DatoCMS...
-                </>
-              ) : (
-                <>
-                  <Zap className="h-4 w-4 mr-2" />
-                  Synchroniser depuis DatoCMS
-                </>
-              )}
-            </Button>
+      {/* Barre de recherche et filtres */}
+      <div className="space-y-4">
+        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+          <PropertySearchBar
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+          />
+          
+          <div className="flex items-center gap-4">
+            <PropertySort
+              currentSort={currentSort}
+              onSortChange={setCurrentSort}
+            />
           </div>
         </div>
+        
+        <PropertyFilters
+          priceRange={priceRange}
+          onPriceRangeChange={setPriceRange}
+          selectedTypes={selectedTypes}
+          onTypesChange={setSelectedTypes}
+          selectedLocations={selectedLocations}
+          onLocationsChange={setSelectedLocations}
+          isOpen={filtersOpen}
+          onToggle={() => setFiltersOpen(!filtersOpen)}
+          onClearFilters={clearAllFilters}
+        />
+      </div>
+      
+      {/* Contenu principal */}
+      {filteredProperties.length === 0 && !loading ? (
+        <div className="text-center py-16 bg-gradient-to-br from-loro-white to-loro-pearl rounded-lg">
+          <Building2 className="h-16 w-16 mx-auto mb-6 text-loro-navy/30" />
+          {properties.length === 0 ? (
+            <>
+              <h3 className="text-xl font-futura font-medium text-loro-navy mb-3">
+                Aucune propriété disponible
+              </h3>
+              <p className="text-loro-navy/70 font-futura mb-8 max-w-md mx-auto">
+                Commencez par synchroniser vos propriétés depuis DatoCMS ou migrer vos données existantes.
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Button 
+                  onClick={handleMigrateOldData} 
+                  disabled={migrating} 
+                  variant="outline"
+                  className="font-futura border-loro-pearl hover:bg-loro-white"
+                >
+                  {migrating ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Migration...
+                    </>
+                  ) : (
+                    <>
+                      <Database className="h-4 w-4 mr-2" />
+                      Migrer les données
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  onClick={handleSyncFromDatoCms} 
+                  disabled={syncingDatoCms}
+                  className="bg-loro-sand text-loro-navy hover:bg-loro-sand/90 font-futura"
+                >
+                  {syncingDatoCms ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Synchronisation...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Synchroniser DatoCMS
+                    </>
+                  )}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 className="text-xl font-futura font-medium text-loro-navy mb-3">
+                Aucune propriété trouvée
+              </h3>
+              <p className="text-loro-navy/70 font-futura mb-6">
+                Essayez de modifier vos critères de recherche ou d'effacer les filtres.
+              </p>
+              <Button 
+                onClick={clearAllFilters}
+                variant="outline"
+                className="font-futura border-loro-sand text-loro-navy hover:bg-loro-sand hover:text-loro-navy"
+              >
+                Effacer tous les filtres
+              </Button>
+            </>
+          )}
+        </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {properties.map((property) => (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-fade-in">
+          {filteredProperties.map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))}
         </div>
