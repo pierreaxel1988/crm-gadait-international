@@ -246,42 +246,39 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     .filter(Boolean)
     .join(', ');
 
-  // Utiliser le pays depuis DatoCMS, avec fallback si nécessaire
+  // Utiliser le pays depuis DatoCMS directement, sans fallback
   let country = countryFromDatoCms;
+  
+  // Seulement si aucun pays n'est défini dans DatoCMS, utiliser un fallback minimal
   if (!country) {
-    // Fallback seulement si aucun pays n'est défini dans DatoCMS
-    if (cityName) {
-      const cityLower = cityName.toLowerCase();
-      if (cityLower.includes('marbella') || cityLower.includes('málaga') || 
-          cityLower.includes('madrid') || cityLower.includes('barcelona')) {
-        country = "Spain";
-      } else if (cityLower.includes('cannes') || cityLower.includes('nice') ||
-                 cityLower.includes('antibes') || cityLower.includes('paris')) {
-        country = "France";
-      } else if (cityLower.includes('tamarin') || cityLower.includes('grand baie') ||
-                 cityLower.includes('port louis')) {
-        country = "Mauritius";
-      } else {
-        country = "Spain"; // Fallback par défaut
-      }
-    } else {
-      country = "Spain"; // Fallback par défaut
-    }
+    console.warn(`Aucun pays défini dans DatoCMS pour la propriété ${datoCmsProp.title} (ID: ${datoCmsProp.id})`);
+    country = "Non spécifié";
   }
 
-  // Récupérer la référence DatoCMS directement
+  // Récupérer la référence DatoCMS - s'assurer qu'elle existe et qu'elle n'est pas vide
   const datoCmsReference = datoCmsProp.reference;
   
-  console.log(`Propriété ${datoCmsProp.title}: Référence DatoCMS=${datoCmsReference}, Ville=${cityName}, Pays DatoCMS=${countryFromDatoCms}, Pays final=${country}`);
+  // Log détaillé pour le debugging
+  console.log(`Propriété ${datoCmsProp.title}:`);
+  console.log(`  - ID DatoCMS: ${datoCmsProp.id}`);
+  console.log(`  - Référence DatoCMS: "${datoCmsReference}"`);
+  console.log(`  - Ville: ${cityName}`);
+  console.log(`  - Pays DatoCMS: ${countryFromDatoCms}`);
+  console.log(`  - Pays final: ${country}`);
+
+  // Validation de la référence
+  if (!datoCmsReference || datoCmsReference.trim() === '') {
+    console.warn(`Référence manquante pour la propriété ${datoCmsProp.title} (ID: ${datoCmsProp.id})`);
+  }
 
   return {
-    external_id: datoCmsReference || `datocms-${datoCmsProp.id}`, // Utiliser la référence DatoCMS comme ID externe
+    external_id: datoCmsReference && datoCmsReference.trim() !== '' ? datoCmsReference.trim() : `datocms-${datoCmsProp.id}`,
     title: datoCmsProp.title || 'Propriété sans titre',
     description: datoCmsProp.description || '',
     price,
     currency,
     location: fullAddress || cityName,
-    country, // Utiliser le pays récupéré depuis DatoCMS
+    country, // Utiliser le pays récupéré depuis DatoCMS directement
     property_type: datoCmsProp.propertyType?.name || 'Propriété',
     bedrooms: datoCmsProp.bedrooms,
     bathrooms: datoCmsProp.bathrooms,
