@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash } from 'lucide-react';
+import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2 } from 'lucide-react';
 
 interface PropertyCardProps {
   property: {
@@ -94,64 +94,85 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
       </div>
       
       <CardContent className="p-5 space-y-4">
-        {/* Titre et localisation */}
+        {/* Caractéristiques principales en haut */}
+        <div className="grid grid-cols-4 gap-3 border-b border-loro-pearl pb-3">
+          {/* Type de propriété */}
+          <div className="flex flex-col items-center text-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg mb-1">
+              <Home className="h-4 w-4 text-loro-navy" />
+            </div>
+            <span className="text-xs text-loro-navy/70 font-futura">
+              {property.property_type || 'N/A'}
+            </span>
+          </div>
+          
+          {/* Surface */}
+          <div className="flex flex-col items-center text-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg mb-1">
+              <Maximize2 className="h-4 w-4 text-loro-navy" />
+            </div>
+            <span className="text-xs text-loro-navy/70 font-futura">
+              {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
+            </span>
+          </div>
+          
+          {/* Chambres */}
+          <div className="flex flex-col items-center text-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg mb-1">
+              <Bed className="h-4 w-4 text-loro-navy" />
+            </div>
+            <span className="text-xs text-loro-navy/70 font-futura">
+              {property.bedrooms || 'N/A'}
+            </span>
+          </div>
+          
+          {/* Salles de bain */}
+          <div className="flex flex-col items-center text-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg mb-1">
+              <Bath className="h-4 w-4 text-loro-navy" />
+            </div>
+            <span className="text-xs text-loro-navy/70 font-futura">
+              {property.bathrooms || 'N/A'}
+            </span>
+          </div>
+        </div>
+        
+        {/* Titre et prix */}
         <div>
           <h3 className="font-futura font-medium text-lg text-loro-navy line-clamp-2 mb-2 group-hover:text-loro-hazel transition-colors">
             {property.title}
           </h3>
+          
+          {/* Prix si pas déjà affiché en overlay */}
+          {!property.main_image && (
+            <div className="mb-3">
+              <span className="text-xl font-semibold text-loro-navy font-futura">
+                {formatPrice(property.price, property.currency)}
+              </span>
+            </div>
+          )}
           
           <div className="space-y-2">
             {/* Localisation principale */}
             <div className="flex items-center gap-1 text-sm text-loro-navy/70">
               <MapPin className="h-4 w-4 flex-shrink-0" />
               <span className="font-futura truncate">
-                {property.location || property.country || 'Localisation non spécifiée'}
+                {property.location && property.country 
+                  ? `${property.location}, ${property.country}`
+                  : property.location || property.country || 'Localisation non spécifiée'
+                }
               </span>
             </div>
             
-            {/* Informations supplémentaires : Pays et Référence */}
-            <div className="flex items-center gap-4 text-xs text-loro-navy/60">
-              {property.country && (
-                <div className="flex items-center gap-1">
-                  <Globe className="h-3 w-3 flex-shrink-0" />
-                  <span className="font-futura">{property.country}</span>
-                </div>
-              )}
-              {property.external_id && (
-                <div className="flex items-center gap-1">
-                  <Hash className="h-3 w-3 flex-shrink-0" />
-                  <span className="font-futura">Réf. {property.external_id}</span>
-                </div>
-              )}
-            </div>
+            {/* Informations supplémentaires : Référence */}
+            {property.external_id && (
+              <div className="flex items-center gap-1 text-xs text-loro-navy/60">
+                <Hash className="h-3 w-3 flex-shrink-0" />
+                <span className="font-futura">Réf. {property.external_id}</span>
+              </div>
+            )}
           </div>
         </div>
-        
-        {/* Caractéristiques */}
-        {(property.bedrooms || property.bathrooms || property.area) && (
-          <div className="flex items-center gap-6 text-sm text-loro-navy/80 border-t border-loro-pearl pt-3">
-            {property.bedrooms && (
-              <div className="flex items-center gap-1.5">
-                <Bed className="h-4 w-4" />
-                <span className="font-futura">{property.bedrooms}</span>
-              </div>
-            )}
-            {property.bathrooms && (
-              <div className="flex items-center gap-1.5">
-                <Bath className="h-4 w-4" />
-                <span className="font-futura">{property.bathrooms}</span>
-              </div>
-            )}
-            {property.area && (
-              <div className="flex items-center gap-1.5">
-                <Home className="h-4 w-4" />
-                <span className="font-futura">
-                  {property.area} {property.area_unit || 'm²'}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
         
         {/* CTA */}
         <Button
