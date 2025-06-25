@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,8 @@ interface PropertyCardProps {
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
+  const navigate = useNavigate();
+
   const formatPrice = (price?: number, currency?: string) => {
     if (!price) return 'Prix sur demande';
     
@@ -54,8 +57,20 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
 
   const displayReference = getDisplayReference();
 
+  const handleCardClick = () => {
+    navigate(`/properties/${property.id}`);
+  };
+
+  const handleExternalLinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.open(property.url, '_blank');
+  };
+
   return (
-    <Card className="group overflow-hidden hover:shadow-luxury-hover transition-all duration-300 border-loro-pearl bg-loro-white">
+    <Card 
+      className="group overflow-hidden hover:shadow-luxury-hover transition-all duration-300 border-loro-pearl bg-loro-white cursor-pointer"
+      onClick={handleCardClick}
+    >
       {/* Image avec overlay */}
       <div className="relative aspect-video overflow-hidden">
         {property.main_image ? (
@@ -193,10 +208,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
         <Button
           variant="outline"
           className="w-full h-10 font-futura border-loro-sand text-loro-navy hover:bg-loro-sand hover:text-loro-navy transition-all duration-200"
-          onClick={() => window.open(property.url, '_blank')}
+          onClick={handleExternalLinkClick}
         >
           <ExternalLink className="h-4 w-4 mr-2" />
-          Découvrir la propriété
+          Site Gadait
         </Button>
       </CardContent>
     </Card>

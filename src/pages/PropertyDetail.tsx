@@ -1,0 +1,348 @@
+
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useIsMobile } from '@/hooks/use-mobile';
+import Navbar from '@/components/layout/Navbar';
+import SubNavigation from '@/components/layout/SubNavigation';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, Phone, Mail } from 'lucide-react';
+import LoadingScreen from '@/components/layout/LoadingScreen';
+
+interface PropertyDetail {
+  id: string;
+  external_id?: string;
+  title: string;
+  description?: string;
+  price?: number;
+  currency?: string;
+  location?: string;
+  country?: string;
+  property_type?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  area?: number;
+  area_unit?: string;
+  main_image?: string;
+  images?: string[];
+  features?: string[];
+  amenities?: string[];
+  url: string;
+  is_featured?: boolean;
+}
+
+const PropertyDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const [property, setProperty] = useState<PropertyDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    fetchPropertyDetail();
+  }, [id]);
+
+  const fetchPropertyDetail = async () => {
+    if (!id) return;
+
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('gadait_properties')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Erreur lors du chargement de la propriété:', error);
+        return;
+      }
+
+      setProperty(data);
+    } catch (err) {
+      console.error('Erreur:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatPrice = (price?: number, currency?: string) => {
+    if (!price) return 'Prix sur demande';
+    
+    const formatted = price >= 1000000 
+      ? `${(price / 1000000).toFixed(1)}M` 
+      : price >= 1000 
+      ? `${(price / 1000).toFixed(0)}K` 
+      : price.toLocaleString();
+    
+    return `${formatted} ${currency || 'EUR'}`;
+  };
+
+  const getDisplayReference = () => {
+    if (!property?.external_id) return null;
+    if (property.external_id.startsWith('datocms-')) return null;
+    return property.external_id;
+  };
+
+  const allImages = property?.images ? [property.main_image, ...property.images].filter(Boolean) : [property?.main_image].filter(Boolean);
+  const displayReference = getDisplayReference();
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (!property) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <Navbar />
+          <SubNavigation />
+        </div>
+        <div className={`pt-[144px] bg-white min-h-screen ${isMobile ? 'px-4' : 'px-[35px]'}`}>
+          <div className="max-w-7xl mx-auto text-center py-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Propriété non trouvée</h1>
+            <Button onClick={() => navigate('/properties')} variant="outline">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour aux propriétés
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <Navbar />
+        <SubNavigation />
+      </div>
+      
+      <div className={`pt-[144px] bg-white min-h-screen ${isMobile ? 'px-4' : 'px-[35px]'}`}>
+        <div className="max-w-7xl mx-auto">
+          {/* Header avec bouton retour */}
+          <div className="mb-6">
+            <Button 
+              onClick={() => navigate('/properties')} 
+              variant="outline" 
+              className="mb-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour aux propriétés
+            </Button>
+            
+            <div className="flex items-start justify-between flex-wrap gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-loro-navy mb-2">{property.title}</h1>
+                <div className="flex items-center gap-2 text-loro-navy/70 mb-2">
+                  <MapPin className="h-5 w-5" />
+                  <span className="text-lg">{property.location || 'Localisation non spécifiée'}</span>
+                  {property.country && (
+                    <>
+                      <span>•</span>
+                      <Globe className="h-4 w-4" />
+                      <span>{property.country}</span>
+                    </>
+                  )}
+                </div>
+                {displayReference && (
+                  <div className="flex items-center gap-1 text-sm text-loro-navy/60">
+                    <Hash className="h-4 w-4" />
+                    <span>Référence {displayReference}</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="text-right">
+                <div className="text-3xl font-bold text-loro-navy mb-2">
+                  {formatPrice(property.price, property.currency)}
+                </div>
+                <div className="flex gap-2">
+                  {property.is_featured && (
+                    <Badge className="bg-loro-sand text-loro-navy">
+                      <Star className="h-3 w-3 mr-1" />
+                      Featured
+                    </Badge>
+                  )}
+                  {property.property_type && (
+                    <Badge variant="outline" className="border-loro-pearl text-loro-navy">
+                      {property.property_type}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Galerie photos */}
+            <div className="lg:col-span-2">
+              <Card className="overflow-hidden">
+                <CardContent className="p-0">
+                  {allImages.length > 0 ? (
+                    <div>
+                      <div className="aspect-video relative">
+                        <img
+                          src={allImages[currentImageIndex]}
+                          alt={property.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                      
+                      {allImages.length > 1 && (
+                        <div className="p-4">
+                          <div className="grid grid-cols-6 gap-2">
+                            {allImages.slice(0, 6).map((image, index) => (
+                              <button
+                                key={index}
+                                onClick={() => setCurrentImageIndex(index)}
+                                className={`aspect-square overflow-hidden rounded border-2 transition-all ${
+                                  currentImageIndex === index ? 'border-loro-sand' : 'border-gray-200'
+                                }`}
+                              >
+                                <img
+                                  src={image}
+                                  alt={`Photo ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </button>
+                            ))}
+                          </div>
+                          {allImages.length > 6 && (
+                            <p className="text-sm text-gray-500 mt-2 text-center">
+                              +{allImages.length - 6} photos supplémentaires
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="aspect-video bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
+                      <Home className="h-16 w-16 text-loro-navy/30" />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Description */}
+              {property.description && (
+                <Card className="mt-6">
+                  <CardContent className="p-6">
+                    <h2 className="text-xl font-semibold text-loro-navy mb-4">Description</h2>
+                    <div className="prose prose-gray max-w-none">
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                        {property.description}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Sidebar avec détails */}
+            <div className="space-y-6">
+              {/* Caractéristiques principales */}
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-semibold text-loro-navy mb-4">Caractéristiques</h2>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
+                      <Maximize2 className="h-6 w-6 text-loro-navy mx-auto mb-2" />
+                      <div className="text-sm text-loro-navy/60">Surface</div>
+                      <div className="font-semibold text-loro-navy">
+                        {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
+                      </div>
+                    </div>
+                    
+                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
+                      <Bed className="h-6 w-6 text-loro-navy mx-auto mb-2" />
+                      <div className="text-sm text-loro-navy/60">Chambres</div>
+                      <div className="font-semibold text-loro-navy">
+                        {property.bedrooms || 'N/A'}
+                      </div>
+                    </div>
+                    
+                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg col-span-2">
+                      <Bath className="h-6 w-6 text-loro-navy mx-auto mb-2" />
+                      <div className="text-sm text-loro-navy/60">Salles de bain</div>
+                      <div className="font-semibold text-loro-navy">
+                        {property.bathrooms || 'N/A'}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Équipements */}
+              {property.features && property.features.length > 0 && (
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="text-xl font-semibold text-loro-navy mb-4">Équipements</h2>
+                    <div className="flex flex-wrap gap-2">
+                      {property.features.map((feature, index) => (
+                        <Badge key={index} variant="secondary" className="bg-loro-pearl/50 text-loro-navy">
+                          {feature}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Commodités */}
+              {property.amenities && property.amenities.length > 0 && (
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="text-xl font-semibold text-loro-navy mb-4">Commodités</h2>
+                    <div className="flex flex-wrap gap-2">
+                      {property.amenities.map((amenity, index) => (
+                        <Badge key={index} variant="outline" className="border-loro-sand text-loro-navy">
+                          {amenity}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Actions */}
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  <Button
+                    className="w-full bg-loro-sand hover:bg-loro-hazel text-loro-navy"
+                    onClick={() => window.open(property.url, '_blank')}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Voir sur le site Gadait
+                  </Button>
+                  
+                  <div className="pt-4 border-t border-loro-pearl">
+                    <p className="text-sm text-loro-navy/60 mb-3">Intéressé par cette propriété ?</p>
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="flex-1" size="sm">
+                        <Phone className="h-4 w-4 mr-2" />
+                        Appeler
+                      </Button>
+                      <Button variant="outline" className="flex-1" size="sm">
+                        <Mail className="h-4 w-4 mr-2" />
+                        Email
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PropertyDetail;

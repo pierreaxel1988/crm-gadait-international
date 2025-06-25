@@ -12,6 +12,7 @@ import LoadingScreen from './components/layout/LoadingScreen';
 import Auth from './pages/Auth';
 import Pipeline from './pages/Pipeline';
 import Properties from './pages/Properties';
+import PropertyDetail from './pages/PropertyDetail';
 
 // Lazy load other pages to use suspense
 const LeadsPage = lazy(() => import('./pages/Leads'));
@@ -46,6 +47,11 @@ function App() {
             <Route path="/properties" element={
               <ProtectedRoute commercialAllowed={true}>
                 <Properties />
+              </ProtectedRoute>
+            } />
+            <Route path="/properties/:id" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <PropertyDetail />
               </ProtectedRoute>
             } />
             <Route path="/leads" element={
