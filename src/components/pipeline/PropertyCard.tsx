@@ -126,7 +126,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       <CardContent className="p-5 space-y-4">
         {/* Titre et localisation condensés */}
         <div className="space-y-2">
-          <h3 className="font-futura text-lg text-loro-navy line-clamp-2 group-hover:text-loro-terracotta transition-colors duration-300 font-medium">
+          <h3 className="font-futura text-lg text-loro-navy line-clamp-2 transition-colors duration-300 font-medium">
             {property.title}
           </h3>
           
