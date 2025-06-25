@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2 } from 'lucide-react';
+import { countryToFlag } from '@/utils/countryUtils';
 
 interface PropertyCardProps {
   property: {
@@ -138,7 +138,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
             
             {property.country && property.country !== 'Non spécifié' && (
               <Badge variant="outline" className="bg-loro-pearl/30 text-loro-navy border-loro-pearl font-futura text-xs">
-                <Globe className="h-3 w-3 mr-1" />
+                <span className="mr-1">{countryToFlag(property.country)}</span>
                 {property.country}
               </Badge>
             )}
