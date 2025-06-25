@@ -39,7 +39,9 @@ const LOCATIONS_BY_COUNTRY: Record<string, string[]> = {
   ],
   'Greece': [
     'Athens', 'Santorini', 'Mykonos', 'Crete', 'Rhodes', 'Corfu', 'Paros',
-    'Naxos', 'Zakynthos', 'Thessaloniki', 'Kos', 'Milos', 'Hydra', 'Aegina'
+    'Naxos', 'Zakynthos', 'Thessaloniki', 'Kos', 'Milos', 'Hydra', 'Aegina',
+    'Skiathos', 'Skopelos', 'Alonissos', 'Chania', 'Heraklion', 'Rethymno',
+    'Oia', 'Fira', 'Imerovigli', 'Kamari', 'Perissa', 'Akrotiri'
   ],
   'Maldives': [
     'Malé', 'Baa Atoll', 'North Malé Atoll', 'South Malé Atoll', 'Ari Atoll',
@@ -124,6 +126,14 @@ function findCountryByPattern(cityName: string): string | null {
       normalizedCity.includes('san ') || normalizedCity.includes('santa ')) {
     console.log(`🇪🇸 Spanish pattern detected: ${cityName} → Spain`);
     return 'Spain';
+  }
+  
+  // Greek patterns
+  if (normalizedCity.includes('santorini') || normalizedCity.includes('mykonos') || 
+      normalizedCity.includes('athens') || normalizedCity.includes('thessaloniki') ||
+      normalizedCity.includes('oia') || normalizedCity.includes('fira')) {
+    console.log(`🇬🇷 Greek pattern detected: ${cityName} → Greece`);
+    return 'Greece';
   }
   
   // Mauritian patterns (French names in tropical context)
