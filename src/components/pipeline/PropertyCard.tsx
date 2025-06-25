@@ -94,56 +94,67 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
       </div>
       
       <CardContent className="p-5 space-y-4">
-        {/* Caractéristiques principales en haut - Maintenant avec 5 colonnes incluant le pays */}
-        <div className="grid grid-cols-5 gap-2 border-b border-loro-pearl pb-3">
-          {/* Type de propriété */}
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg mb-1">
-              <Home className="h-4 w-4 text-loro-navy" />
+        {/* Informations principales - mise en page améliorée */}
+        <div className="space-y-3">
+          {/* Ligne 1: Localisation avec pays */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <MapPin className="h-4 w-4 text-loro-navy/70 flex-shrink-0" />
+              <span className="text-sm text-loro-navy/70 font-futura truncate">
+                {property.location || 'Localisation non spécifiée'}
+              </span>
             </div>
-            <span className="text-xs text-loro-navy/70 font-futura truncate">
-              {property.property_type || 'N/A'}
-            </span>
+            
+            {property.country && (
+              <div className="flex items-center gap-1 px-2 py-1 bg-loro-pearl/50 rounded-md">
+                <Globe className="h-3 w-3 text-loro-navy/70" />
+                <span className="text-xs text-loro-navy/70 font-futura whitespace-nowrap">
+                  {property.country}
+                </span>
+              </div>
+            )}
           </div>
           
-          {/* Pays */}
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg mb-1">
-              <Globe className="h-4 w-4 text-loro-navy" />
+          {/* Ligne 2: Caractéristiques principales en grille */}
+          <div className="grid grid-cols-3 gap-4 pt-2 border-t border-loro-pearl/50">
+            {/* Surface */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg">
+                <Maximize2 className="h-4 w-4 text-loro-navy" />
+              </div>
+              <div>
+                <span className="text-xs text-loro-navy/50 font-futura block">Surface</span>
+                <span className="text-sm text-loro-navy font-futura font-medium">
+                  {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
+                </span>
+              </div>
             </div>
-            <span className="text-xs text-loro-navy/70 font-futura truncate">
-              {property.country || 'N/A'}
-            </span>
-          </div>
-          
-          {/* Surface */}
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg mb-1">
-              <Maximize2 className="h-4 w-4 text-loro-navy" />
+            
+            {/* Chambres */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg">
+                <Bed className="h-4 w-4 text-loro-navy" />
+              </div>
+              <div>
+                <span className="text-xs text-loro-navy/50 font-futura block">Chambres</span>
+                <span className="text-sm text-loro-navy font-futura font-medium">
+                  {property.bedrooms || 'N/A'}
+                </span>
+              </div>
             </div>
-            <span className="text-xs text-loro-navy/70 font-futura">
-              {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
-            </span>
-          </div>
-          
-          {/* Chambres */}
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg mb-1">
-              <Bed className="h-4 w-4 text-loro-navy" />
+            
+            {/* Salles de bain */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg">
+                <Bath className="h-4 w-4 text-loro-navy" />
+              </div>
+              <div>
+                <span className="text-xs text-loro-navy/50 font-futura block">SdB</span>
+                <span className="text-sm text-loro-navy font-futura font-medium">
+                  {property.bathrooms || 'N/A'}
+                </span>
+              </div>
             </div>
-            <span className="text-xs text-loro-navy/70 font-futura">
-              {property.bedrooms || 'N/A'}
-            </span>
-          </div>
-          
-          {/* Salles de bain */}
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg mb-1">
-              <Bath className="h-4 w-4 text-loro-navy" />
-            </div>
-            <span className="text-xs text-loro-navy/70 font-futura">
-              {property.bathrooms || 'N/A'}
-            </span>
           </div>
         </div>
         
@@ -162,23 +173,13 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
             </div>
           )}
           
-          <div className="space-y-2">
-            {/* Localisation - Maintenant uniquement la ville/région */}
-            <div className="flex items-center gap-1 text-sm text-loro-navy/70">
-              <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span className="font-futura truncate">
-                {property.location || 'Localisation non spécifiée'}
-              </span>
+          {/* Informations supplémentaires : Référence */}
+          {property.external_id && (
+            <div className="flex items-center gap-1 text-xs text-loro-navy/60 mt-2">
+              <Hash className="h-3 w-3 flex-shrink-0" />
+              <span className="font-futura">Référence {property.external_id}</span>
             </div>
-            
-            {/* Informations supplémentaires : Référence */}
-            {property.external_id && (
-              <div className="flex items-center gap-1 text-xs text-loro-navy/60">
-                <Hash className="h-3 w-3 flex-shrink-0" />
-                <span className="font-futura">Référence {property.external_id}</span>
-              </div>
-            )}
-          </div>
+          )}
         </div>
         
         {/* CTA */}
