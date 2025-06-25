@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Home, Bath, Bed, RefreshCw, Database, Zap, Trash2, Building2 } from 'lucide-react';
+import { ExternalLink, MapPin, Home, Bath, Bed, RefreshCw, Database, Zap, Trash2, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import PropertyCard from './PropertyCard';
 import PropertySearchBar from './PropertySearchBar';
 import PropertyFilters from './PropertyFilters';
 import PropertySort, { SortOption } from './PropertySort';
 import PropertySkeleton from './PropertySkeleton';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
 interface GadaitProperty {
   id: string;
@@ -33,9 +34,13 @@ interface GadaitProperty {
   is_featured?: boolean;
 }
 
+const PROPERTIES_PER_PAGE = 24; // 24 propriétés par page (6x4 grid sur desktop)
+
 const PropertiesTabContent: React.FC = () => {
   const [properties, setProperties] = useState<GadaitProperty[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<GadaitProperty[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [syncingDatoCms, setSyncingDatoCms] = useState(false);
   const [migrating, setMigrating] = useState(false);
@@ -56,7 +61,24 @@ const PropertiesTabContent: React.FC = () => {
     fetchGadaitProperties();
   }, []);
 
-  // Filtrage et tri des propriétés
+  // Récupérer le total des propriétés pour la pagination
+  const fetchTotalCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('gadait_properties')
+        .select('*', { count: 'exact', head: true });
+
+      if (error) {
+        throw error;
+      }
+
+      setTotalCount(count || 0);
+    } catch (err) {
+      console.error('Erreur lors du comptage des propriétés:', err);
+    }
+  };
+
+  // Filtrage et tri des propriétés avec pagination
   useEffect(() => {
     let filtered = [...properties];
 
@@ -81,7 +103,6 @@ const PropertiesTabContent: React.FC = () => {
           return title.includes('location') || title.includes('louer') || title.includes('rent') ||
                  description.includes('location') || description.includes('louer') || description.includes('rent');
         } else if (transactionType === 'buy') {
-          // For buy, we exclude properties that seem to be for rent
           return !(title.includes('location') || title.includes('louer') || title.includes('rent') ||
                   description.includes('location') || description.includes('louer') || description.includes('rent'));
         }
@@ -106,7 +127,7 @@ const PropertiesTabContent: React.FC = () => {
       );
     }
 
-    // Filtre par localisation - recherche dans toutes les localisations sélectionnées
+    // Filtre par localisation
     if (selectedLocations.length > 0) {
       filtered = filtered.filter(property =>
         property.location && selectedLocations.some(loc =>
@@ -140,24 +161,38 @@ const PropertiesTabContent: React.FC = () => {
     });
 
     setFilteredProperties(filtered);
+    
+    // Réinitialiser à la page 1 si on change les filtres
+    if (currentPage > 1) {
+      setCurrentPage(1);
+    }
   }, [properties, searchTerm, selectedTypes, selectedLocations, selectedCountries, priceRange, currentSort, transactionType]);
 
   const fetchGadaitProperties = async () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // Récupérer d'abord le total
+      await fetchTotalCount();
+      
+      // Récupérer toutes les propriétés disponibles sans limite
       const { data, error } = await supabase
         .from('gadait_properties')
         .select('*')
-        .eq('is_available', true)
-        .order('created_at', { ascending: false })
-        .limit(50);
+        .order('created_at', { ascending: false });
 
       if (error) {
         throw error;
       }
 
-      setProperties(data || []);
+      console.log(`Récupéré ${data?.length || 0} propriétés depuis la base de données`);
+      
+      // Filtrer seulement les propriétés disponibles côté client
+      const availableProperties = (data || []).filter(property => property.is_available !== false);
+      console.log(`${availableProperties.length} propriétés disponibles après filtrage`);
+
+      setProperties(availableProperties);
     } catch (err) {
       console.error('Erreur lors du chargement des propriétés:', err);
       setError('Erreur lors du chargement des propriétés');
@@ -165,6 +200,12 @@ const PropertiesTabContent: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Calculer les propriétés à afficher pour la page actuelle
+  const startIndex = (currentPage - 1) * PROPERTIES_PER_PAGE;
+  const endIndex = startIndex + PROPERTIES_PER_PAGE;
+  const currentProperties = filteredProperties.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(filteredProperties.length / PROPERTIES_PER_PAGE);
 
   const clearAllFilters = () => {
     setSearchTerm('');
@@ -174,6 +215,7 @@ const PropertiesTabContent: React.FC = () => {
     setPriceRange([0, 10000000]);
     setTransactionType('all');
     setCurrentSort('newest');
+    setCurrentPage(1);
   };
 
   const handleClearAllProperties = async () => {
@@ -411,6 +453,9 @@ const PropertiesTabContent: React.FC = () => {
             <Badge variant="outline" className="bg-loro-white border-loro-pearl text-loro-navy/70 font-futura">
               {properties.length} au total
             </Badge>
+            <Badge variant="outline" className="bg-loro-white border-loro-pearl text-loro-navy/70 font-futura">
+              Page {currentPage} sur {totalPages}
+            </Badge>
             {transactionType !== 'all' && (
               <Badge variant="outline" className="bg-loro-sand border-loro-sand text-loro-navy font-futura">
                 {transactionType === 'buy' ? 'Achat' : 'Location'}
@@ -584,11 +629,68 @@ const PropertiesTabContent: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-fade-in">
-          {filteredProperties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
+        <>
+          {/* Grille des propriétés */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-fade-in">
+            {currentProperties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                  
+                  {/* Pages numérotées */}
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNumber;
+                    if (totalPages <= 5) {
+                      pageNumber = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNumber = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNumber = totalPages - 4 + i;
+                    } else {
+                      pageNumber = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(pageNumber)}
+                          isActive={currentPage === pageNumber}
+                          className="cursor-pointer"
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+              
+              {/* Informations de pagination */}
+              <div className="text-center text-sm text-loro-navy/60 font-futura mt-4">
+                Affichage de {startIndex + 1} à {Math.min(endIndex, filteredProperties.length)} sur {filteredProperties.length} propriétés
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
