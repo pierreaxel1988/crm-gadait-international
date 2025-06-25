@@ -106,11 +106,12 @@ const PropertiesTabContent: React.FC = () => {
       );
     }
 
-    // Filtre par localisation
+    // Filtre par localisation - recherche dans toutes les localisations sélectionnées
     if (selectedLocations.length > 0) {
       filtered = filtered.filter(property =>
         property.location && selectedLocations.some(loc =>
-          property.location?.toLowerCase().includes(loc.toLowerCase())
+          property.location?.toLowerCase().includes(loc.toLowerCase()) ||
+          loc.toLowerCase().includes(property.location?.toLowerCase() || '')
         )
       );
     }

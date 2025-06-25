@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Filter, SlidersHorizontal, X } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import PropertyCountryFilter from './PropertyCountryFilter';
+import LocationFilter from './filters/LocationFilter';
 
 interface PropertyFiltersProps {
   priceRange: [number, number];
@@ -25,10 +26,6 @@ interface PropertyFiltersProps {
 
 const propertyTypes = [
   'Villa', 'Appartement', 'Penthouse', 'Maison', 'Studio', 'Loft', 'Terrain'
-];
-
-const popularLocations = [
-  'Marbella', 'Cannes', 'Monaco', 'Saint-Tropez', 'Antibes', 'Nice', 'Málaga', 'Madrid'
 ];
 
 const PropertyFilters: React.FC<PropertyFiltersProps> = ({
@@ -58,12 +55,14 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
     }
   };
 
-  const toggleLocation = (location: string) => {
-    if (selectedLocations.includes(location)) {
-      onLocationsChange(selectedLocations.filter(l => l !== location));
-    } else {
+  const handleLocationSelect = (location: string) => {
+    if (!selectedLocations.includes(location)) {
       onLocationsChange([...selectedLocations, location]);
     }
+  };
+
+  const removeLocation = (location: string) => {
+    onLocationsChange(selectedLocations.filter(l => l !== location));
   };
 
   return (
@@ -156,25 +155,35 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
               onCountriesChange={onCountriesChange}
             />
 
-            {/* Localisation */}
+            {/* Localisation avec recherche intelligente */}
             <div>
               <h4 className="font-futura font-medium text-loro-navy mb-3">Localisation</h4>
-              <div className="flex flex-wrap gap-2">
-                {popularLocations.map((location) => (
-                  <Badge
-                    key={location}
-                    variant={selectedLocations.includes(location) ? "default" : "outline"}
-                    className={`cursor-pointer font-futura transition-all duration-200 ${
-                      selectedLocations.includes(location)
-                        ? 'bg-loro-sand text-loro-navy hover:bg-loro-sand/90'
-                        : 'border-loro-pearl text-loro-navy/70 hover:bg-loro-white hover:border-loro-sand'
-                    }`}
-                    onClick={() => toggleLocation(location)}
-                  >
-                    {location}
-                  </Badge>
-                ))}
+              
+              {/* Barre de recherche */}
+              <div className="mb-3">
+                <LocationFilter
+                  location=""
+                  onLocationChange={handleLocationSelect}
+                  country={selectedCountries.length === 1 ? selectedCountries[0] : undefined}
+                />
               </div>
+
+              {/* Affichage des localisations sélectionnées */}
+              {selectedLocations.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedLocations.map((location) => (
+                    <Badge
+                      key={location}
+                      variant="default"
+                      className="bg-loro-sand text-loro-navy hover:bg-loro-sand/90 font-futura cursor-pointer"
+                      onClick={() => removeLocation(location)}
+                    >
+                      {location}
+                      <X className="h-3 w-3 ml-1" />
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Gamme de prix */}
