@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { normalizePropertyType } from '../utils/propertyTypeUtils';
 
 export const usePropertyExtraction = () => {
@@ -25,64 +24,13 @@ export const usePropertyExtraction = () => {
 
     setIsLoading(true);
     try {
-      // Affichage d'un toast de chargement
+      // Pour l'instant, extraction de données basiques depuis l'URL
       toast({
         title: "Extraction en cours",
         description: "Analyse de l'annonce immobilière..."
       });
       
-      // Utiliser la fonction Supabase pour scraper le site web
-      const { data: scrapedData, error: scrapeError } = await supabase.functions.invoke('scrape-website', {
-        body: { 
-          url: propertyUrl,
-          debug: true  // Activer le mode debug pour plus d'informations
-        }
-      });
-
-      if (scrapeError) {
-        throw new Error(`Erreur lors du scraping: ${scrapeError.message}`);
-      }
-
-      console.log("Données scrapées complètes:", scrapedData);
-
-      // Extraire les données du premier élément de propriétés s'il existe
-      const propertyData = scrapedData && scrapedData.properties && scrapedData.properties.length > 0 
-        ? scrapedData.properties[0] 
-        : scrapedData;
-
-      console.log("Données de propriété extraites:", propertyData);
-
-      if (propertyData && Object.keys(propertyData).length > 0) {
-        // Standardiser les données
-        const standardizedData = standardizePropertyData(propertyData, propertyUrl);
-        console.log("Données standardisées:", standardizedData);
-        setExtractedData(standardizedData);
-        
-        toast({
-          title: "Données extraites avec succès",
-          description: "Les informations de l'annonce ont été récupérées."
-        });
-      } else {
-        // En cas d'échec d'extraction, essayons d'obtenir au moins des informations de base de l'URL
-        const basicData = extractBasicDataFromUrl(propertyUrl);
-        
-        toast({
-          variant: "default",
-          title: "Extraction limitée",
-          description: "Extraction de données de base à partir de l'URL."
-        });
-        
-        // Créer un objet de données minimal avec l'URL
-        setExtractedData({
-          title: "Annonce immobilière",
-          url: propertyUrl,
-          ...basicData
-        });
-      }
-    } catch (error) {
-      console.error("Error extracting property data:", error);
-      
-      // Même en cas d'erreur, essayons d'extraire des informations de base de l'URL
+      // Extraire des informations de base à partir de l'URL
       const basicData = extractBasicDataFromUrl(propertyUrl);
       
       if (Object.keys(basicData).length > 0) {
@@ -93,17 +41,29 @@ export const usePropertyExtraction = () => {
         });
         
         toast({
-          title: "Extraction partielle",
-          description: "Seules les informations basiques ont pu être extraites de l'URL."
+          title: "Extraction réussie",
+          description: "Les informations de base ont été extraites de l'URL."
         });
       } else {
-        toast({
-          variant: "destructive",
-          title: "Erreur d'extraction",
-          description: "Impossible d'extraire les données de cette annonce."
+        // Créer un objet de données minimal avec l'URL
+        setExtractedData({
+          title: "Annonce immobilière",
+          url: propertyUrl
         });
-        setExtractedData(null);
+        
+        toast({
+          title: "URL enregistrée",
+          description: "L'URL de l'annonce a été enregistrée."
+        });
       }
+    } catch (error) {
+      console.error("Error extracting property data:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur d'extraction",
+        description: "Impossible d'extraire les données de cette annonce."
+      });
+      setExtractedData(null);
     } finally {
       setIsLoading(false);
     }
@@ -167,6 +127,20 @@ export const usePropertyExtraction = () => {
       if (locationMatches && locationMatches[0]) {
         data.location = locationMatches[0].charAt(0).toUpperCase() + locationMatches[0].slice(1);
       }
+    } else if (url.includes('gadait-international')) {
+      data.source = 'Gadait International';
+      data.country = 'Mauritius';
+      
+      // Tenter d'extraire des informations depuis l'URL Gadait
+      const locationMatches = url.match(/riviere-noire|bel-ombre|grand-baie|tamarin/i);
+      if (locationMatches && locationMatches[0]) {
+        data.location = locationMatches[0].replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+      }
+      
+      const typeMatches = url.match(/villa|apartment|penthouse|house/i);
+      if (typeMatches && typeMatches[0]) {
+        data.propertyType = typeMatches[0];
+      }
     }
     
     return data;
@@ -178,6 +152,7 @@ export const usePropertyExtraction = () => {
     
     const isIdealista = url.includes('idealista');
     const isFigaro = url.includes('lefigaro');
+    const isGadait = url.includes('gadait-international');
     
     const standardizedData: any = {
       url: url
@@ -192,6 +167,8 @@ export const usePropertyExtraction = () => {
                               url.includes('.it') ? 'Italy' : 'Spain';
     } else if (isFigaro) {
       standardizedData.country = 'France';
+    } else if (isGadait) {
+      standardizedData.country = 'Mauritius';
     }
 
     // Standardisation des propriétés courantes
