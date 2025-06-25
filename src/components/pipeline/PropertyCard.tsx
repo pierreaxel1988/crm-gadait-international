@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Bed, Bath, Home, Star } from 'lucide-react';
+import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash } from 'lucide-react';
 
 interface PropertyCardProps {
   property: {
@@ -21,6 +21,7 @@ interface PropertyCardProps {
     main_image?: string;
     url: string;
     is_featured?: boolean;
+    external_id?: string;
   };
 }
 
@@ -99,11 +100,30 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
             {property.title}
           </h3>
           
-          <div className="flex items-center gap-1 text-sm text-loro-navy/70">
-            <MapPin className="h-4 w-4 flex-shrink-0" />
-            <span className="font-futura truncate">
-              {property.location || property.country || 'Localisation non spécifiée'}
-            </span>
+          <div className="space-y-2">
+            {/* Localisation principale */}
+            <div className="flex items-center gap-1 text-sm text-loro-navy/70">
+              <MapPin className="h-4 w-4 flex-shrink-0" />
+              <span className="font-futura truncate">
+                {property.location || property.country || 'Localisation non spécifiée'}
+              </span>
+            </div>
+            
+            {/* Informations supplémentaires : Pays et Référence */}
+            <div className="flex items-center gap-4 text-xs text-loro-navy/60">
+              {property.country && (
+                <div className="flex items-center gap-1">
+                  <Globe className="h-3 w-3 flex-shrink-0" />
+                  <span className="font-futura">{property.country}</span>
+                </div>
+              )}
+              {property.external_id && (
+                <div className="flex items-center gap-1">
+                  <Hash className="h-3 w-3 flex-shrink-0" />
+                  <span className="font-futura">Réf. {property.external_id}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         
