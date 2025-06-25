@@ -39,6 +39,21 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
     return `${formatted} ${currency || 'EUR'}`;
   };
 
+  // Fonction pour déterminer si on doit afficher la référence et comment
+  const getDisplayReference = () => {
+    if (!property.external_id) return null;
+    
+    // Si c'est une référence auto-générée (commence par 'datocms-'), ne pas l'afficher
+    if (property.external_id.startsWith('datocms-')) {
+      return null;
+    }
+    
+    // Sinon, afficher la référence telle quelle (qu'elle soit numérique ou textuelle)
+    return property.external_id;
+  };
+
+  const displayReference = getDisplayReference();
+
   return (
     <Card className="group overflow-hidden hover:shadow-luxury-hover transition-all duration-300 border-loro-pearl bg-loro-white">
       {/* Image avec overlay */}
@@ -165,11 +180,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
             </div>
           )}
           
-          {/* Informations supplémentaires : Référence DatoCMS */}
-          {property.external_id && property.external_id !== `datocms-${property.id}` && (
+          {/* Affichage de la référence DatoCMS si elle existe et n'est pas auto-générée */}
+          {displayReference && (
             <div className="flex items-center gap-1 text-xs text-loro-navy/60 mt-2">
               <Hash className="h-3 w-3 flex-shrink-0" />
-              <span className="font-futura">Référence {property.external_id}</span>
+              <span className="font-futura">Référence {displayReference}</span>
             </div>
           )}
         </div>

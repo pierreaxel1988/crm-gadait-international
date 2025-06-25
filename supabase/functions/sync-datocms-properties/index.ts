@@ -183,6 +183,17 @@ serve(async (req) => {
 
     console.log(`${convertedProperties.length} propriétés à synchroniser après filtrage`);
 
+    // Log détaillé des références pour diagnostic
+    console.log("=== DIAGNOSTIC DES RÉFÉRENCES ===");
+    const referenceSample = convertedProperties.slice(0, 5);
+    referenceSample.forEach((prop: any, index: number) => {
+      console.log(`Propriété ${index + 1}:`);
+      console.log(`  - Titre: ${prop.title}`);
+      console.log(`  - external_id final: "${prop.external_id}"`);
+      console.log(`  - Est auto-généré: ${prop.external_id?.startsWith('datocms-') ? 'OUI' : 'NON'}`);
+    });
+    console.log("=== FIN DIAGNOSTIC ===");
+
     // Stocker les propriétés dans la base de données
     const storedCount = await storePropertiesInDatabase(convertedProperties);
 
@@ -254,24 +265,31 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     datoCmsProp.title
   );
 
-  // Récupérer la référence DatoCMS
+  // Récupérer la référence DatoCMS - LOG DÉTAILLÉ
   const datoCmsReference = datoCmsProp.reference;
   
-  // Log détaillé pour le debugging
-  console.log(`Propriété ${datoCmsProp.title}:`);
-  console.log(`  - ID DatoCMS: ${datoCmsProp.id}`);
-  console.log(`  - Référence DatoCMS: "${datoCmsReference}"`);
-  console.log(`  - Ville: ${cityName}`);
-  console.log(`  - Pays DatoCMS: ${countryFromDatoCms}`);
-  console.log(`  - Pays final: ${country}`);
-
-  // Validation de la référence
-  if (!datoCmsReference || datoCmsReference.trim() === '') {
-    console.warn(`Référence manquante pour la propriété ${datoCmsProp.title} (ID: ${datoCmsProp.id})`);
+  console.log(`=== ANALYSE RÉFÉRENCE ===`);
+  console.log(`Propriété: ${datoCmsProp.title}`);
+  console.log(`ID DatoCMS: ${datoCmsProp.id}`);
+  console.log(`Référence brute: "${datoCmsReference}"`);
+  console.log(`Type: ${typeof datoCmsReference}`);
+  console.log(`Est vide/null: ${!datoCmsReference}`);
+  console.log(`Longueur: ${datoCmsReference?.length || 0}`);
+  
+  // Déterminer l'external_id final
+  let finalExternalId;
+  if (datoCmsReference && datoCmsReference.trim() !== '') {
+    finalExternalId = datoCmsReference.trim();
+    console.log(`✅ Utilisation référence DatoCMS: "${finalExternalId}"`);
+  } else {
+    finalExternalId = `datocms-${datoCmsProp.id}`;
+    console.log(`⚠️ Génération ID automatique: "${finalExternalId}"`);
   }
+  
+  console.log(`=== FIN ANALYSE ===`);
 
   return {
-    external_id: datoCmsReference && datoCmsReference.trim() !== '' ? datoCmsReference.trim() : `datocms-${datoCmsProp.id}`,
+    external_id: finalExternalId,
     title: datoCmsProp.title || 'Propriété sans titre',
     description: datoCmsProp.description || '',
     price,
