@@ -269,10 +269,13 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     }
   }
 
-  console.log(`Propriété ${datoCmsProp.title}: Ville=${cityName}, Pays DatoCMS=${countryFromDatoCms}, Pays final=${country}`);
+  // Récupérer la référence DatoCMS directement
+  const datoCmsReference = datoCmsProp.reference;
+  
+  console.log(`Propriété ${datoCmsProp.title}: Référence DatoCMS=${datoCmsReference}, Ville=${cityName}, Pays DatoCMS=${countryFromDatoCms}, Pays final=${country}`);
 
   return {
-    external_id: datoCmsProp.reference || `datocms-${datoCmsProp.id}`, // Utiliser le champ reference de DatoCMS
+    external_id: datoCmsReference || `datocms-${datoCmsProp.id}`, // Utiliser la référence DatoCMS comme ID externe
     title: datoCmsProp.title || 'Propriété sans titre',
     description: datoCmsProp.description || '',
     price,
