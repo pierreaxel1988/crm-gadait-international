@@ -105,55 +105,47 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
               </span>
             </div>
             
-            {property.country && (
-              <div className="flex items-center gap-1 px-2 py-1 bg-loro-pearl/50 rounded-md">
-                <Globe className="h-3 w-3 text-loro-navy/70" />
-                <span className="text-xs text-loro-navy/70 font-futura whitespace-nowrap">
-                  {property.country}
-                </span>
-              </div>
+            {property.country && property.country !== 'Non spécifié' && (
+              <Badge variant="outline" className="bg-loro-pearl/50 text-loro-navy border-loro-pearl font-futura">
+                <Globe className="h-3 w-3 mr-1" />
+                {property.country}
+              </Badge>
             )}
           </div>
           
-          {/* Ligne 2: Caractéristiques principales en grille */}
-          <div className="grid grid-cols-3 gap-4 pt-2 border-t border-loro-pearl/50">
+          {/* Ligne 2: Caractéristiques principales en grille 3 colonnes */}
+          <div className="grid grid-cols-3 gap-4 pt-3 border-t border-loro-pearl/50">
             {/* Surface */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex items-center justify-center w-10 h-10 bg-loro-pearl/30 rounded-full mb-2">
                 <Maximize2 className="h-4 w-4 text-loro-navy" />
               </div>
-              <div>
-                <span className="text-xs text-loro-navy/50 font-futura block">Surface</span>
-                <span className="text-sm text-loro-navy font-futura font-medium">
-                  {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
-                </span>
-              </div>
+              <span className="text-xs text-loro-navy/60 font-futura mb-1">Surface</span>
+              <span className="text-sm text-loro-navy font-futura font-medium">
+                {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
+              </span>
             </div>
             
             {/* Chambres */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex items-center justify-center w-10 h-10 bg-loro-pearl/30 rounded-full mb-2">
                 <Bed className="h-4 w-4 text-loro-navy" />
               </div>
-              <div>
-                <span className="text-xs text-loro-navy/50 font-futura block">Chambres</span>
-                <span className="text-sm text-loro-navy font-futura font-medium">
-                  {property.bedrooms || 'N/A'}
-                </span>
-              </div>
+              <span className="text-xs text-loro-navy/60 font-futura mb-1">Chambres</span>
+              <span className="text-sm text-loro-navy font-futura font-medium">
+                {property.bedrooms || 'N/A'}
+              </span>
             </div>
             
             {/* Salles de bain */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex items-center justify-center w-10 h-10 bg-loro-pearl/30 rounded-full mb-2">
                 <Bath className="h-4 w-4 text-loro-navy" />
               </div>
-              <div>
-                <span className="text-xs text-loro-navy/50 font-futura block">SdB</span>
-                <span className="text-sm text-loro-navy font-futura font-medium">
-                  {property.bathrooms || 'N/A'}
-                </span>
-              </div>
+              <span className="text-xs text-loro-navy/60 font-futura mb-1">Bains</span>
+              <span className="text-sm text-loro-navy font-futura font-medium">
+                {property.bathrooms || 'N/A'}
+              </span>
             </div>
           </div>
         </div>
@@ -173,8 +165,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
             </div>
           )}
           
-          {/* Informations supplémentaires : Référence */}
-          {property.external_id && (
+          {/* Informations supplémentaires : Référence DatoCMS */}
+          {property.external_id && property.external_id !== `datocms-${property.id}` && (
             <div className="flex items-center gap-1 text-xs text-loro-navy/60 mt-2">
               <Hash className="h-3 w-3 flex-shrink-0" />
               <span className="font-futura">Référence {property.external_id}</span>
