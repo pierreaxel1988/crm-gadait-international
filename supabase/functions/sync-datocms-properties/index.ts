@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 
@@ -37,112 +36,139 @@ serve(async (req) => {
 
     console.log("Démarrage de la synchronisation DatoCMS...");
 
-    // GraphQL query corrigée avec les vrais champs du schéma DatoCMS
-    const query = `
-      query GetAllProperties {
-        allProperties {
-          id
-          _updatedAt
-          _createdAt
-          title
-          description
-          price
-          priceFrom
-          hidePrice
-          surface
-          land
-          bedrooms
-          bathrooms
-          rooms
-          floors
-          constructionYear
-          address
-          postalCode
-          reference
-          slug
-          partnerUrl
-          virtualTour
-          gallery {
-            id
-            url
-            alt
-            title
-            width
-            height
+    // Fonction pour récupérer toutes les propriétés avec pagination
+    const getAllProperties = async () => {
+      let allProperties: any[] = [];
+      let hasMore = true;
+      let offset = 0;
+      const limit = 100; // DatoCMS limite généralement à 100 par requête
+
+      while (hasMore) {
+        console.log(`Récupération des propriétés ${offset} à ${offset + limit}...`);
+        
+        const query = `
+          query GetProperties($offset: IntType!, $limit: IntType!) {
+            allProperties(first: $limit, skip: $offset) {
+              id
+              _updatedAt
+              _createdAt
+              title
+              description
+              price
+              priceFrom
+              hidePrice
+              surface
+              land
+              bedrooms
+              bathrooms
+              rooms
+              floors
+              constructionYear
+              address
+              postalCode
+              reference
+              slug
+              partnerUrl
+              virtualTour
+              gallery {
+                id
+                url
+                alt
+                title
+                width
+                height
+              }
+              floorPlans {
+                id
+                url
+                alt
+                title
+              }
+              documents {
+                id
+                title
+              }
+              map {
+                latitude
+                longitude
+              }
+              city {
+                id
+                name
+              }
+              currency {
+                id
+                name
+                code
+              }
+              propertyType {
+                id
+                name
+              }
+              propertyStatus {
+                id
+                name
+              }
+              agent {
+                id
+                name
+                email
+                phone
+              }
+              amenities {
+                id
+                name
+              }
+              websiteHide
+              portalsHide
+              ownerName
+              ownerEmail
+              ownerPhone
+            }
           }
-          floorPlans {
-            id
-            url
-            alt
-            title
-          }
-          documents {
-            id
-            title
-          }
-          map {
-            latitude
-            longitude
-          }
-          city {
-            id
-            name
-          }
-          currency {
-            id
-            name
-            code
-          }
-          propertyType {
-            id
-            name
-          }
-          propertyStatus {
-            id
-            name
-          }
-          agent {
-            id
-            name
-            email
-            phone
-          }
-          amenities {
-            id
-            name
-          }
-          websiteHide
-          portalsHide
-          ownerName
-          ownerEmail
-          ownerPhone
+        `;
+
+        const response = await fetch('https://graphql.datocms.com/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${datoCmsToken}`,
+          },
+          body: JSON.stringify({ 
+            query,
+            variables: { offset, limit }
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erreur API DatoCMS: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.errors) {
+          console.error('Erreurs GraphQL:', data.errors);
+          throw new Error(`Erreurs GraphQL: ${data.errors.map((e: any) => e.message).join(', ')}`);
+        }
+
+        const properties = data.data.allProperties;
+        console.log(`Récupéré ${properties.length} propriétés dans cette page`);
+        
+        allProperties = allProperties.concat(properties);
+        
+        // Si on récupère moins que la limite, on a atteint la fin
+        if (properties.length < limit) {
+          hasMore = false;
+        } else {
+          offset += limit;
         }
       }
-    `;
 
-    // Appel à l'API DatoCMS
-    const response = await fetch('https://graphql.datocms.com/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${datoCmsToken}`,
-      },
-      body: JSON.stringify({ query }),
-    });
+      return allProperties;
+    };
 
-    if (!response.ok) {
-      throw new Error(`Erreur API DatoCMS: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    
-    if (data.errors) {
-      console.error('Erreurs GraphQL:', data.errors);
-      throw new Error(`Erreurs GraphQL: ${data.errors.map((e: any) => e.message).join(', ')}`);
-    }
-
-    const datoCmsProperties = data.data.allProperties;
-    console.log(`${datoCmsProperties.length} propriétés récupérées depuis DatoCMS`);
+    const datoCmsProperties = await getAllProperties();
+    console.log(`TOTAL: ${datoCmsProperties.length} propriétés récupérées depuis DatoCMS`);
 
     // Convertir les propriétés DatoCMS vers le format Supabase
     const convertedProperties = datoCmsProperties
@@ -260,57 +286,62 @@ async function storePropertiesInDatabase(properties: any[]): Promise<number> {
   
   let storedCount = 0;
   
-  for (const property of properties) {
-    try {
-      // Vérifier si la propriété existe déjà
-      const { data: existing } = await supabase
-        .from('gadait_properties')
-        .select('id, updated_at')
-        .eq('external_id', property.external_id)
-        .single();
-      
-      if (existing) {
-        // Vérifier si la propriété a été mise à jour
-        const existingUpdatedAt = new Date(existing.updated_at);
-        const newUpdatedAt = new Date(property.updated_at);
+  // Traiter par batch de 50 pour éviter les timeouts
+  const batchSize = 50;
+  for (let i = 0; i < properties.length; i += batchSize) {
+    const batch = properties.slice(i, i + batchSize);
+    console.log(`Traitement du batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(properties.length/batchSize)} (${batch.length} propriétés)`);
+    
+    for (const property of batch) {
+      try {
+        // Vérifier si la propriété existe déjà
+        const { data: existing } = await supabase
+          .from('gadait_properties')
+          .select('id, updated_at')
+          .eq('external_id', property.external_id)
+          .single();
         
-        if (newUpdatedAt > existingUpdatedAt) {
-          // Mettre à jour la propriété existante
-          const { error: updateError } = await supabase
-            .from('gadait_properties')
-            .update({
-              ...property,
-              scraped_at: new Date().toISOString()
-            })
-            .eq('external_id', property.external_id);
+        if (existing) {
+          // Vérifier si la propriété a été mise à jour
+          const existingUpdatedAt = new Date(existing.updated_at);
+          const newUpdatedAt = new Date(property.updated_at);
           
-          if (updateError) {
-            console.error(`Erreur lors de la mise à jour de la propriété ${property.external_id}:`, updateError);
-          } else {
-            console.log(`Propriété mise à jour: ${property.title}`);
-            storedCount++;
+          if (newUpdatedAt > existingUpdatedAt) {
+            // Mettre à jour la propriété existante
+            const { error: updateError } = await supabase
+              .from('gadait_properties')
+              .update({
+                ...property,
+                scraped_at: new Date().toISOString()
+              })
+              .eq('external_id', property.external_id);
+            
+            if (updateError) {
+              console.error(`Erreur lors de la mise à jour de la propriété ${property.external_id}:`, updateError);
+            } else {
+              console.log(`Propriété mise à jour: ${property.title}`);
+              storedCount++;
+            }
           }
         } else {
-          console.log(`Propriété ${property.title} déjà à jour`);
+          // Insérer une nouvelle propriété
+          const { error: insertError } = await supabase
+            .from('gadait_properties')
+            .insert({
+              ...property,
+              scraped_at: new Date().toISOString()
+            });
+          
+          if (insertError) {
+            console.error(`Erreur lors de l'insertion de la propriété ${property.external_id}:`, insertError);
+          } else {
+            console.log(`Nouvelle propriété insérée: ${property.title}`);
+            storedCount++;
+          }
         }
-      } else {
-        // Insérer une nouvelle propriété
-        const { error: insertError } = await supabase
-          .from('gadait_properties')
-          .insert({
-            ...property,
-            scraped_at: new Date().toISOString()
-          });
-        
-        if (insertError) {
-          console.error(`Erreur lors de l'insertion de la propriété ${property.external_id}:`, insertError);
-        } else {
-          console.log(`Nouvelle propriété insérée: ${property.title}`);
-          storedCount++;
-        }
+      } catch (error) {
+        console.error(`Erreur lors du traitement de la propriété ${property.external_id}:`, error);
       }
-    } catch (error) {
-      console.error(`Erreur lors du traitement de la propriété ${property.external_id}:`, error);
     }
   }
   
