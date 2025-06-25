@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Filter, SlidersHorizontal, X } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import PropertyCountryFilter from './PropertyCountryFilter';
 
 interface PropertyFiltersProps {
   priceRange: [number, number];
@@ -12,6 +14,8 @@ interface PropertyFiltersProps {
   onTypesChange: (types: string[]) => void;
   selectedLocations: string[];
   onLocationsChange: (locations: string[]) => void;
+  selectedCountries: string[];
+  onCountriesChange: (countries: string[]) => void;
   transactionType: 'all' | 'buy' | 'rent';
   onTransactionTypeChange: (type: 'all' | 'buy' | 'rent') => void;
   isOpen: boolean;
@@ -34,13 +38,15 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
   onTypesChange,
   selectedLocations,
   onLocationsChange,
+  selectedCountries,
+  onCountriesChange,
   transactionType,
   onTransactionTypeChange,
   isOpen,
   onToggle,
   onClearFilters
 }) => {
-  const activeFiltersCount = selectedTypes.length + selectedLocations.length + 
+  const activeFiltersCount = selectedTypes.length + selectedLocations.length + selectedCountries.length +
     (priceRange[0] > 0 || priceRange[1] < 10000000 ? 1 : 0) +
     (transactionType !== 'all' ? 1 : 0);
 
@@ -143,6 +149,12 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
                 ))}
               </div>
             </div>
+
+            {/* Pays */}
+            <PropertyCountryFilter
+              selectedCountries={selectedCountries}
+              onCountriesChange={onCountriesChange}
+            />
 
             {/* Localisation */}
             <div>

@@ -48,6 +48,7 @@ const PropertiesTabContent: React.FC = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [transactionType, setTransactionType] = useState<'all' | 'buy' | 'rent'>('all');
   const [currentSort, setCurrentSort] = useState<SortOption>('newest');
 
@@ -95,6 +96,16 @@ const PropertiesTabContent: React.FC = () => {
       );
     }
 
+    // Filtre par pays
+    if (selectedCountries.length > 0) {
+      filtered = filtered.filter(property =>
+        property.country && selectedCountries.some(country =>
+          property.country?.toLowerCase().includes(country.toLowerCase()) ||
+          country.toLowerCase().includes(property.country?.toLowerCase() || '')
+        )
+      );
+    }
+
     // Filtre par localisation
     if (selectedLocations.length > 0) {
       filtered = filtered.filter(property =>
@@ -128,7 +139,7 @@ const PropertiesTabContent: React.FC = () => {
     });
 
     setFilteredProperties(filtered);
-  }, [properties, searchTerm, selectedTypes, selectedLocations, priceRange, currentSort, transactionType]);
+  }, [properties, searchTerm, selectedTypes, selectedLocations, selectedCountries, priceRange, currentSort, transactionType]);
 
   const fetchGadaitProperties = async () => {
     try {
@@ -158,6 +169,7 @@ const PropertiesTabContent: React.FC = () => {
     setSearchTerm('');
     setSelectedTypes([]);
     setSelectedLocations([]);
+    setSelectedCountries([]);
     setPriceRange([0, 10000000]);
     setTransactionType('all');
     setCurrentSort('newest');
@@ -492,6 +504,8 @@ const PropertiesTabContent: React.FC = () => {
           onTypesChange={setSelectedTypes}
           selectedLocations={selectedLocations}
           onLocationsChange={setSelectedLocations}
+          selectedCountries={selectedCountries}
+          onCountriesChange={setSelectedCountries}
           transactionType={transactionType}
           onTransactionTypeChange={setTransactionType}
           isOpen={filtersOpen}
