@@ -107,10 +107,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
               )}
             </div>
             
-            {/* Prix en overlay repositionné */}
+            {/* Prix en overlay minimaliste */}
             <div className="absolute bottom-4 left-4 right-4">
-              <div className="bg-loro-white/95 backdrop-blur-sm rounded-lg px-4 py-3 shadow-xl">
-                <span className="text-xl font-bold text-loro-navy font-futura">
+              <div className="bg-loro-white/90 backdrop-blur-sm rounded-md px-3 py-2 shadow-sm border border-loro-pearl/30">
+                <span className="text-lg font-semibold text-loro-navy font-futura">
                   {formatPrice(property.price, property.currency)}
                 </span>
               </div>
