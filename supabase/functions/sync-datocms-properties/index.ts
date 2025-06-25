@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
+import { determineCountryIntelligently } from './cityToCountryUtils.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -246,16 +247,14 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     .filter(Boolean)
     .join(', ');
 
-  // Utiliser le pays depuis DatoCMS directement, sans fallback
-  let country = countryFromDatoCms;
-  
-  // Seulement si aucun pays n'est défini dans DatoCMS, utiliser un fallback minimal
-  if (!country) {
-    console.warn(`Aucun pays défini dans DatoCMS pour la propriété ${datoCmsProp.title} (ID: ${datoCmsProp.id})`);
-    country = "Non spécifié";
-  }
+  // Utiliser la nouvelle logique intelligente pour déterminer le pays
+  const country = determineCountryIntelligently(
+    countryFromDatoCms,
+    cityName,
+    datoCmsProp.title
+  );
 
-  // Récupérer la référence DatoCMS - s'assurer qu'elle existe et qu'elle n'est pas vide
+  // Récupérer la référence DatoCMS
   const datoCmsReference = datoCmsProp.reference;
   
   // Log détaillé pour le debugging
@@ -278,7 +277,7 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     price,
     currency,
     location: fullAddress || cityName,
-    country, // Utiliser le pays récupéré depuis DatoCMS directement
+    country, // Utiliser le pays déterminé intelligemment
     property_type: datoCmsProp.propertyType?.name || 'Propriété',
     bedrooms: datoCmsProp.bedrooms,
     bathrooms: datoCmsProp.bathrooms,
