@@ -37,7 +37,7 @@ serve(async (req) => {
 
     console.log("Démarrage de la synchronisation DatoCMS...");
 
-    // GraphQL query pour récupérer les propriétés depuis DatoCMS
+    // GraphQL query corrigée avec les vrais champs du schéma DatoCMS
     const query = `
       query GetAllProperties {
         allProperties {
@@ -78,9 +78,7 @@ serve(async (req) => {
           }
           documents {
             id
-            url
             title
-            filename
           }
           map {
             latitude
@@ -89,23 +87,19 @@ serve(async (req) => {
           city {
             id
             name
-            slug
           }
           currency {
             id
             name
             code
-            symbol
           }
           propertyType {
             id
             name
-            slug
           }
           propertyStatus {
             id
             name
-            slug
           }
           agent {
             id
@@ -116,7 +110,6 @@ serve(async (req) => {
           amenities {
             id
             name
-            slug
           }
           websiteHide
           portalsHide
@@ -195,13 +188,13 @@ serve(async (req) => {
 function convertDatoCmsProperty(datoCmsProp: any) {
   // Construire l'URL de la propriété
   const propertyUrl = datoCmsProp.partnerUrl || 
-    (datoCmsProp.slug ? `https://votre-site.com/properties/${datoCmsProp.slug}` : '');
+    (datoCmsProp.slug ? `https://gadait-international.com/properties/${datoCmsProp.slug}` : '');
 
   // Extraire les images de la galerie
   const images = datoCmsProp.gallery?.map((img: any) => img.url) || [];
   const mainImage = images[0] || '';
 
-  // Extraire les caractéristiques depuis les amenities
+  // Extraire les amenities comme features
   const features = datoCmsProp.amenities?.map((amenity: any) => amenity.name) || [];
 
   // Déterminer le prix et la devise
@@ -219,6 +212,19 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     .filter(Boolean)
     .join(', ');
 
+  // Déterminer le pays selon la ville/localisation
+  let country = "Spain"; // Par défaut
+  if (location) {
+    const locationLower = location.toLowerCase();
+    if (locationLower.includes('marbella') || locationLower.includes('málaga') || 
+        locationLower.includes('madrid') || locationLower.includes('barcelona')) {
+      country = "Spain";
+    } else if (locationLower.includes('cannes') || locationLower.includes('nice') ||
+               locationLower.includes('antibes') || locationLower.includes('paris')) {
+      country = "France";
+    }
+  }
+
   return {
     external_id: `datocms-${datoCmsProp.id}`,
     title: datoCmsProp.title || 'Propriété sans titre',
@@ -226,7 +232,7 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     price,
     currency,
     location: fullAddress || location,
-    country: "France", // À adapter selon vos données
+    country,
     property_type: datoCmsProp.propertyType?.name || 'Propriété',
     bedrooms: datoCmsProp.bedrooms,
     bathrooms: datoCmsProp.bathrooms,
@@ -235,10 +241,10 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     main_image: mainImage,
     images,
     features,
-    amenities: [], // Peut être enrichi selon vos besoins
+    amenities: features, // Utiliser les amenities comme amenities aussi
     url: propertyUrl,
-    is_available: datoCmsProp.propertyStatus?.slug !== 'sold' && datoCmsProp.propertyStatus?.slug !== 'rented',
-    is_featured: datoCmsProp.priceFrom || false, // Utiliser priceFrom comme indicateur de mise en avant
+    is_available: datoCmsProp.propertyStatus?.name !== 'Sold' && datoCmsProp.propertyStatus?.name !== 'Rented',
+    is_featured: datoCmsProp.priceFrom || false,
     // Métadonnées additionnelles
     created_at: datoCmsProp._createdAt,
     updated_at: datoCmsProp._updatedAt,
