@@ -94,15 +94,25 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
       </div>
       
       <CardContent className="p-5 space-y-4">
-        {/* Caractéristiques principales en haut */}
-        <div className="grid grid-cols-4 gap-3 border-b border-loro-pearl pb-3">
+        {/* Caractéristiques principales en haut - Maintenant avec 5 colonnes incluant le pays */}
+        <div className="grid grid-cols-5 gap-2 border-b border-loro-pearl pb-3">
           {/* Type de propriété */}
           <div className="flex flex-col items-center text-center">
             <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg mb-1">
               <Home className="h-4 w-4 text-loro-navy" />
             </div>
-            <span className="text-xs text-loro-navy/70 font-futura">
+            <span className="text-xs text-loro-navy/70 font-futura truncate">
               {property.property_type || 'N/A'}
+            </span>
+          </div>
+          
+          {/* Pays */}
+          <div className="flex flex-col items-center text-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-loro-pearl rounded-lg mb-1">
+              <Globe className="h-4 w-4 text-loro-navy" />
+            </div>
+            <span className="text-xs text-loro-navy/70 font-futura truncate">
+              {property.country || 'N/A'}
             </span>
           </div>
           
@@ -153,14 +163,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
           )}
           
           <div className="space-y-2">
-            {/* Localisation principale */}
+            {/* Localisation - Maintenant uniquement la ville/région */}
             <div className="flex items-center gap-1 text-sm text-loro-navy/70">
               <MapPin className="h-4 w-4 flex-shrink-0" />
               <span className="font-futura truncate">
-                {property.location && property.country 
-                  ? `${property.location}, ${property.country}`
-                  : property.location || property.country || 'Localisation non spécifiée'
-                }
+                {property.location || 'Localisation non spécifiée'}
               </span>
             </div>
             
