@@ -68,17 +68,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
 
   return (
     <Card 
-      className="group overflow-hidden hover:shadow-luxury-hover transition-all duration-300 border-loro-pearl bg-loro-white cursor-pointer"
+      className="group overflow-hidden hover:shadow-xl transition-all duration-500 border-loro-pearl bg-loro-white cursor-pointer hover:-translate-y-1 rounded-xl"
       onClick={handleCardClick}
     >
-      {/* Image avec overlay */}
-      <div className="relative aspect-video overflow-hidden">
+      {/* Image avec aspect ratio plus haut */}
+      <div className="relative aspect-[4/3] overflow-hidden">
         {property.main_image ? (
           <>
             <img
               src={property.main_image}
               alt={property.title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
                 (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
@@ -86,31 +86,31 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
             />
             {/* Fallback pour images cassées */}
             <div className="hidden absolute inset-0 bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
-              <Home className="h-12 w-12 text-loro-navy/30" />
+              <Home className="h-16 w-16 text-loro-navy/30" />
             </div>
             
-            {/* Overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            {/* Overlay gradient amélioré */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
             
-            {/* Badges */}
-            <div className="absolute top-3 left-3 flex gap-2">
+            {/* Badges repositionnés */}
+            <div className="absolute top-4 left-4 flex gap-2">
               {property.is_featured && (
-                <Badge className="bg-loro-sand text-loro-navy font-futura shadow-lg">
-                  <Star className="h-3 w-3 mr-1" />
+                <Badge className="bg-loro-sand/95 text-loro-navy font-futura shadow-lg backdrop-blur-sm">
+                  <Star className="h-3 w-3 mr-1 fill-current" />
                   Featured
                 </Badge>
               )}
               {property.property_type && (
-                <Badge variant="outline" className="bg-loro-white/90 text-loro-navy border-loro-pearl font-futura">
+                <Badge variant="outline" className="bg-loro-white/95 text-loro-navy border-loro-pearl font-futura backdrop-blur-sm">
                   {property.property_type}
                 </Badge>
               )}
             </div>
             
-            {/* Prix en overlay */}
-            <div className="absolute bottom-3 left-3">
-              <div className="bg-loro-white/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg">
-                <span className="text-lg font-semibold text-loro-navy font-futura">
+            {/* Prix en overlay repositionné */}
+            <div className="absolute bottom-4 left-4 right-4">
+              <div className="bg-loro-white/95 backdrop-blur-sm rounded-lg px-4 py-3 shadow-xl">
+                <span className="text-xl font-bold text-loro-navy font-futura">
                   {formatPrice(property.price, property.currency)}
                 </span>
               </div>
@@ -118,100 +118,75 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
           </>
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
-            <Home className="h-12 w-12 text-loro-navy/30" />
+            <Home className="h-16 w-16 text-loro-navy/30" />
           </div>
         )}
       </div>
       
       <CardContent className="p-5 space-y-4">
-        {/* Informations principales - mise en page améliorée */}
-        <div className="space-y-3">
-          {/* Ligne 1: Localisation avec pays */}
-          <div className="flex items-center justify-between gap-3">
+        {/* Titre et localisation condensés */}
+        <div className="space-y-2">
+          <h3 className="font-futura font-semibold text-lg text-loro-navy line-clamp-2 group-hover:text-loro-hazel transition-colors duration-300">
+            {property.title}
+          </h3>
+          
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <MapPin className="h-4 w-4 text-loro-navy/70 flex-shrink-0" />
+              <MapPin className="h-4 w-4 text-loro-navy/60 flex-shrink-0" />
               <span className="text-sm text-loro-navy/70 font-futura truncate">
                 {property.location || 'Localisation non spécifiée'}
               </span>
             </div>
             
             {property.country && property.country !== 'Non spécifié' && (
-              <Badge variant="outline" className="bg-loro-pearl/50 text-loro-navy border-loro-pearl font-futura">
+              <Badge variant="outline" className="bg-loro-pearl/30 text-loro-navy border-loro-pearl font-futura text-xs">
                 <Globe className="h-3 w-3 mr-1" />
                 {property.country}
               </Badge>
             )}
           </div>
+
+          {/* Référence si disponible */}
+          {displayReference && (
+            <div className="flex items-center gap-1 text-xs text-loro-navy/50">
+              <Hash className="h-3 w-3 flex-shrink-0" />
+              <span className="font-futura">Réf. {displayReference}</span>
+            </div>
+          )}
+        </div>
+        
+        {/* Caractéristiques en ligne compacte */}
+        <div className="flex items-center justify-between pt-3 border-t border-loro-pearl/50">
+          <div className="flex items-center gap-1 text-sm text-loro-navy/70">
+            <Maximize2 className="h-4 w-4" />
+            <span className="font-futura font-medium">
+              {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
+            </span>
+          </div>
           
-          {/* Ligne 2: Caractéristiques principales en grille 3 colonnes */}
-          <div className="grid grid-cols-3 gap-4 pt-3 border-t border-loro-pearl/50">
-            {/* Surface */}
-            <div className="flex flex-col items-center text-center">
-              <div className="flex items-center justify-center w-10 h-10 bg-loro-pearl/30 rounded-full mb-2">
-                <Maximize2 className="h-4 w-4 text-loro-navy" />
-              </div>
-              <span className="text-xs text-loro-navy/60 font-futura mb-1">Surface</span>
-              <span className="text-sm text-loro-navy font-futura font-medium">
-                {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
-              </span>
-            </div>
-            
-            {/* Chambres */}
-            <div className="flex flex-col items-center text-center">
-              <div className="flex items-center justify-center w-10 h-10 bg-loro-pearl/30 rounded-full mb-2">
-                <Bed className="h-4 w-4 text-loro-navy" />
-              </div>
-              <span className="text-xs text-loro-navy/60 font-futura mb-1">Chambres</span>
-              <span className="text-sm text-loro-navy font-futura font-medium">
-                {property.bedrooms || 'N/A'}
-              </span>
-            </div>
-            
-            {/* Salles de bain */}
-            <div className="flex flex-col items-center text-center">
-              <div className="flex items-center justify-center w-10 h-10 bg-loro-pearl/30 rounded-full mb-2">
-                <Bath className="h-4 w-4 text-loro-navy" />
-              </div>
-              <span className="text-xs text-loro-navy/60 font-futura mb-1">Bains</span>
-              <span className="text-sm text-loro-navy font-futura font-medium">
-                {property.bathrooms || 'N/A'}
-              </span>
-            </div>
+          <div className="flex items-center gap-1 text-sm text-loro-navy/70">
+            <Bed className="h-4 w-4" />
+            <span className="font-futura font-medium">
+              {property.bedrooms || 'N/A'}
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-1 text-sm text-loro-navy/70">
+            <Bath className="h-4 w-4" />
+            <span className="font-futura font-medium">
+              {property.bathrooms || 'N/A'}
+            </span>
           </div>
         </div>
         
-        {/* Titre et prix */}
-        <div>
-          <h3 className="font-futura font-medium text-lg text-loro-navy line-clamp-2 mb-2 group-hover:text-loro-hazel transition-colors">
-            {property.title}
-          </h3>
-          
-          {/* Prix si pas déjà affiché en overlay */}
-          {!property.main_image && (
-            <div className="mb-3">
-              <span className="text-xl font-semibold text-loro-navy font-futura">
-                {formatPrice(property.price, property.currency)}
-              </span>
-            </div>
-          )}
-          
-          {/* Affichage de la référence DatoCMS si elle existe et n'est pas auto-générée */}
-          {displayReference && (
-            <div className="flex items-center gap-1 text-xs text-loro-navy/60 mt-2">
-              <Hash className="h-3 w-3 flex-shrink-0" />
-              <span className="font-futura">Référence {displayReference}</span>
-            </div>
-          )}
-        </div>
-        
-        {/* CTA */}
+        {/* CTA avec animation */}
         <Button
           variant="outline"
-          className="w-full h-10 font-futura border-loro-sand text-loro-navy hover:bg-loro-sand hover:text-loro-navy transition-all duration-200"
+          className="w-full h-10 font-futura border-loro-sand text-loro-navy hover:bg-loro-sand hover:text-loro-navy hover:border-loro-hazel transition-all duration-300 hover:shadow-md"
           onClick={handleExternalLinkClick}
         >
-          <ExternalLink className="h-4 w-4 mr-2" />
-          Site Gadait
+          <ExternalLink className="h-4 w-4 mr-2 transition-transform group-hover:translate-x-1" />
+          Voir sur Gadait
         </Button>
       </CardContent>
     </Card>
