@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2 } from 'lucide-react';
 import { countryToFlag } from '@/utils/countryUtils';
+
 interface PropertyCardProps {
   property: {
     id: string;
@@ -25,10 +26,12 @@ interface PropertyCardProps {
     external_id?: string;
   };
 }
+
 const PropertyCard: React.FC<PropertyCardProps> = ({
   property
 }) => {
   const navigate = useNavigate();
+  
   const formatPrice = (price?: number, currency?: string) => {
     if (!price) return 'Prix sur demande';
 
@@ -49,22 +52,33 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     // Sinon, afficher la référence telle quelle (qu'elle soit numérique ou textuelle)
     return property.external_id;
   };
+  
   const displayReference = getDisplayReference();
+  
   const handleCardClick = () => {
     navigate(`/properties/${property.id}`);
   };
+  
   const handleExternalLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     window.open(property.url, '_blank');
   };
-  return <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500 border-loro-pearl bg-loro-white cursor-pointer hover:-translate-y-1 rounded-xl" onClick={handleCardClick}>
+
+  return (
+    <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500 border-loro-pearl bg-loro-white cursor-pointer hover:-translate-y-1 rounded-xl" onClick={handleCardClick}>
       {/* Image avec aspect ratio plus haut */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        {property.main_image ? <>
-            <img src={property.main_image} alt={property.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onError={e => {
-          (e.target as HTMLImageElement).style.display = 'none';
-          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-        }} />
+        {property.main_image ? (
+          <>
+            <img 
+              src={property.main_image} 
+              alt={property.title} 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+              }}
+            />
             {/* Fallback pour images cassées */}
             <div className="hidden absolute inset-0 bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
               <Home className="h-16 w-16 text-loro-navy/30" />
@@ -75,13 +89,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             
             {/* Badges repositionnés */}
             <div className="absolute top-4 left-4 flex gap-2">
-              {property.is_featured && <Badge className="bg-loro-sand/95 text-loro-navy font-futura shadow-lg backdrop-blur-sm">
+              {property.is_featured && (
+                <Badge className="bg-loro-sand/95 text-loro-navy font-futura shadow-lg backdrop-blur-sm">
                   <Star className="h-3 w-3 mr-1 fill-current" />
                   Featured
-                </Badge>}
-              {property.property_type && <Badge variant="outline" className="bg-loro-white/95 text-loro-navy border-loro-pearl font-futura backdrop-blur-sm">
+                </Badge>
+              )}
+              {property.property_type && (
+                <Badge variant="outline" className="bg-loro-white/95 text-loro-navy border-loro-pearl font-futura backdrop-blur-sm">
                   {property.property_type}
-                </Badge>}
+                </Badge>
+              )}
             </div>
             
             {/* Tag prix à droite */}
@@ -90,9 +108,28 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                 {formatPrice(property.price, property.currency)}
               </Badge>
             </div>
-          </> : <div className="w-full h-full bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
+
+            {/* Tags des caractéristiques en bas de l'image */}
+            <div className="absolute bottom-4 left-4 flex gap-2">
+              <Badge variant="outline" className="bg-loro-white/90 text-loro-navy border-loro-pearl font-futura text-xs backdrop-blur-sm">
+                <Maximize2 className="h-3 w-3 mr-1" />
+                {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
+              </Badge>
+              <Badge variant="outline" className="bg-loro-white/90 text-loro-navy border-loro-pearl font-futura text-xs backdrop-blur-sm">
+                <Bed className="h-3 w-3 mr-1" />
+                {property.bedrooms || 'N/A'}
+              </Badge>
+              <Badge variant="outline" className="bg-loro-white/90 text-loro-navy border-loro-pearl font-futura text-xs backdrop-blur-sm">
+                <Bath className="h-3 w-3 mr-1" />
+                {property.bathrooms || 'N/A'}
+              </Badge>
+            </div>
+          </>
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
             <Home className="h-16 w-16 text-loro-navy/30" />
-          </div>}
+          </div>
+        )}
       </div>
       
       <CardContent className="p-5 space-y-4">
@@ -110,49 +147,35 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               </span>
             </div>
             
-            {property.country && property.country !== 'Non spécifié' && <Badge variant="outline" className="bg-loro-pearl/30 text-loro-navy border-loro-pearl font-futura text-xs">
+            {property.country && property.country !== 'Non spécifié' && (
+              <Badge variant="outline" className="bg-loro-pearl/30 text-loro-navy border-loro-pearl font-futura text-xs">
                 <span className="mr-1">{countryToFlag(property.country)}</span>
                 {property.country}
-              </Badge>}
+              </Badge>
+            )}
           </div>
 
           {/* Référence si disponible */}
-          {displayReference && <div className="flex items-center gap-1 text-xs text-loro-navy/50">
+          {displayReference && (
+            <div className="flex items-center gap-1 text-xs text-loro-navy/50">
               <Hash className="h-3 w-3 flex-shrink-0" />
               <span className="font-futura">Réf. {displayReference}</span>
-            </div>}
-        </div>
-        
-        {/* Caractéristiques en ligne compacte */}
-        <div className="flex items-center justify-between pt-3 border-t border-loro-pearl/50">
-          <div className="flex items-center gap-1 text-sm text-loro-navy/70">
-            <Maximize2 className="h-4 w-4" />
-            <span className="font-futura font-medium">
-              {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-1 text-sm text-loro-navy/70">
-            <Bed className="h-4 w-4" />
-            <span className="font-futura font-medium">
-              {property.bedrooms || 'N/A'}
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-1 text-sm text-loro-navy/70">
-            <Bath className="h-4 w-4" />
-            <span className="font-futura font-medium">
-              {property.bathrooms || 'N/A'}
-            </span>
-          </div>
+            </div>
+          )}
         </div>
         
         {/* CTA avec animation */}
-        <Button variant="outline" className="w-full h-10 font-futura border-loro-sand text-loro-navy hover:bg-loro-sand hover:text-loro-navy hover:border-loro-hazel transition-all duration-300 hover:shadow-md" onClick={handleExternalLinkClick}>
+        <Button 
+          variant="outline" 
+          className="w-full h-10 font-futura border-loro-sand text-loro-navy hover:bg-loro-sand hover:text-loro-navy hover:border-loro-hazel transition-all duration-300 hover:shadow-md" 
+          onClick={handleExternalLinkClick}
+        >
           <ExternalLink className="h-4 w-4 mr-2 transition-transform group-hover:translate-x-1" />
           Voir sur Gadait
         </Button>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default PropertyCard;
