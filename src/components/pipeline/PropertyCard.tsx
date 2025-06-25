@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +35,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Combine main image with other images, filter out empty values
   const allImages = property.main_image 
@@ -73,19 +75,54 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     window.open(property.url, '_blank');
   };
 
+  const changeImage = (newIndex: number) => {
+    if (isTransitioning || newIndex === currentImageIndex) return;
+    
+    setIsTransitioning(true);
+    setCurrentImageIndex(newIndex);
+    
+    // Clear any existing timeout
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current);
+    }
+    
+    // Reset transition state after a short delay
+    transitionTimeoutRef.current = setTimeout(() => {
+      setIsTransitioning(false);
+    }, 150);
+  };
+
   const nextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (allImages.length > 1) {
-      setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+      const newIndex = (currentImageIndex + 1) % allImages.length;
+      changeImage(newIndex);
     }
   };
 
   const prevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (allImages.length > 1) {
-      setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+      const newIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
+      changeImage(newIndex);
     }
   };
+
+  // Preload next and previous images for faster transitions
+  React.useEffect(() => {
+    if (allImages.length > 1) {
+      const nextIndex = (currentImageIndex + 1) % allImages.length;
+      const prevIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
+      
+      // Preload next image
+      const nextImg = new Image();
+      nextImg.src = allImages[nextIndex];
+      
+      // Preload previous image
+      const prevImg = new Image();
+      prevImg.src = allImages[prevIndex];
+    }
+  }, [currentImageIndex, allImages]);
 
   const currentImage = allImages[currentImageIndex] || property.main_image;
 
@@ -93,13 +130,23 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       {/* Image avec aspect ratio plus haut */}
       <div className="relative aspect-[4/3] overflow-hidden">
         {currentImage ? <>
-            <img src={currentImage} alt={property.title} className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105" onError={e => {
-          (e.target as HTMLImageElement).style.display = 'none';
-          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-        }} />
-            {/* Fallback pour images cassées */}
-            <div className="hidden absolute inset-0 bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
-              <Home className="h-16 w-16 text-loro-navy/30" />
+            <div className="relative w-full h-full">
+              <img 
+                src={currentImage} 
+                alt={property.title} 
+                className={`w-full h-full object-cover transition-all duration-200 ease-out group-hover:scale-105 ${
+                  isTransitioning ? 'opacity-90 scale-[1.02]' : 'opacity-100 scale-100'
+                }`}
+                onError={e => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                }} 
+              />
+              
+              {/* Fallback pour images cassées */}
+              <div className="hidden absolute inset-0 bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
+                <Home className="h-16 w-16 text-loro-navy/30" />
+              </div>
             </div>
             
             {/* Overlay gradient amélioré */}
@@ -110,18 +157,22 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               <>
                 {/* Zone de clic gauche pour navigation précédente */}
                 <div 
-                  className="absolute left-0 top-0 bottom-0 w-1/4 z-40 cursor-pointer flex items-center justify-start pl-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  className="absolute left-0 top-0 bottom-0 w-1/4 z-40 cursor-pointer flex items-center justify-start pl-2 opacity-0 group-hover:opacity-100 transition-all duration-200"
                   onClick={prevImage}
                 >
-                  <ChevronLeft className="h-6 w-6 text-white/70 hover:text-white transition-colors duration-200" />
+                  <div className="p-1 rounded-full bg-black/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-150">
+                    <ChevronLeft className="h-5 w-5 text-white transition-transform duration-150 hover:scale-110" />
+                  </div>
                 </div>
                 
                 {/* Zone de clic droite pour navigation suivante */}
                 <div 
-                  className="absolute right-0 top-0 bottom-0 w-1/4 z-40 cursor-pointer flex items-center justify-end pr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  className="absolute right-0 top-0 bottom-0 w-1/4 z-40 cursor-pointer flex items-center justify-end pr-2 opacity-0 group-hover:opacity-100 transition-all duration-200"
                   onClick={nextImage}
                 >
-                  <ChevronRight className="h-6 w-6 text-white/70 hover:text-white transition-colors duration-200" />
+                  <div className="p-1 rounded-full bg-black/20 backdrop-blur-sm hover:bg-black/40 transition-all duration-150">
+                    <ChevronRight className="h-5 w-5 text-white transition-transform duration-150 hover:scale-110" />
+                  </div>
                 </div>
               </>
             )}
@@ -147,7 +198,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             {/* Indicateur du nombre d'images */}
             {allImages.length > 1 && (
               <div className="absolute top-4 left-1/2 -translate-x-1/2">
-                <Badge className="bg-black/50 text-white font-futura text-xs">
+                <Badge className={`bg-black/50 text-white font-futura text-xs transition-all duration-150 ${
+                  isTransitioning ? 'scale-110' : 'scale-100'
+                }`}>
                   {currentImageIndex + 1} / {allImages.length}
                 </Badge>
               </div>
