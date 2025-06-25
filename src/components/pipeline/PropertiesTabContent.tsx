@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Home, Bath, Bed, RefreshCw, Download, Database } from 'lucide-react';
+import { ExternalLink, MapPin, Home, Bath, Bed, RefreshCw, Download, Database, Zap } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import PropertyCard from './PropertyCard';
 
@@ -35,6 +35,7 @@ const PropertiesTabContent: React.FC = () => {
   const [properties, setProperties] = useState<GadaitProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [syncingDatoCms, setSyncingDatoCms] = useState(false);
   const [migrating, setMigrating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,12 +67,53 @@ const PropertiesTabContent: React.FC = () => {
     }
   };
 
+  const handleSyncFromDatoCms = async () => {
+    try {
+      setSyncingDatoCms(true);
+      
+      toast({
+        title: "Synchronisation DatoCMS en cours...",
+        description: "Récupération des propriétés depuis l'API DatoCMS",
+      });
+
+      console.log('Démarrage de la synchronisation DatoCMS');
+
+      const { data, error } = await supabase.functions.invoke('sync-datocms-properties', {
+        body: {}
+      });
+
+      if (error) {
+        console.error('Erreur lors de l\'appel de la fonction DatoCMS:', error);
+        throw error;
+      }
+
+      console.log('Réponse complète de la fonction DatoCMS:', data);
+
+      // Rafraîchir la liste des propriétés après la synchronisation
+      await fetchGadaitProperties();
+
+      toast({
+        title: "Synchronisation DatoCMS réussie",
+        description: `${data?.storedCount || 0} propriétés mises à jour (${data?.totalFromDatoCms || 0} récupérées depuis DatoCMS)`,
+      });
+    } catch (err) {
+      console.error('Erreur lors de la synchronisation DatoCMS:', err);
+      toast({
+        title: "Erreur de synchronisation DatoCMS",
+        description: "Impossible de synchroniser depuis DatoCMS. Vérifiez les logs pour plus de détails.",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncingDatoCms(false);
+    }
+  };
+
   const handleSyncProperties = async () => {
     try {
       setSyncing(true);
       
       toast({
-        title: "Synchronisation en cours...",
+        title: "Synchronisation scraping en cours...",
         description: "Récupération des nouvelles propriétés depuis Gadait (mode debug activé)",
       });
 
@@ -80,7 +122,7 @@ const PropertiesTabContent: React.FC = () => {
       const { data, error } = await supabase.functions.invoke('scrape-website', {
         body: {
           url: 'https://gadait-international.com/en/search/',
-          debug: true // Mode debug activé pour les logs détaillés
+          debug: true
         }
       });
 
@@ -90,14 +132,12 @@ const PropertiesTabContent: React.FC = () => {
       }
 
       console.log('Réponse complète de la fonction:', data);
-      console.log('Nombre de propriétés extraites:', data?.properties?.length || 0);
-      console.log('Nombre de propriétés stockées:', data?.storedCount || 0);
 
       // Rafraîchir la liste des propriétés après la synchronisation
       await fetchGadaitProperties();
 
       toast({
-        title: "Synchronisation réussie",
+        title: "Synchronisation scraping réussie",
         description: `${data?.storedCount || 0} propriétés synchronisées (${data?.properties?.length || 0} extraites)`,
       });
     } catch (err) {
@@ -232,7 +272,7 @@ const PropertiesTabContent: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold">Propriétés Gadait</h2>
-          <p className="text-gray-600 mt-1">Synchronisation automatique toutes les heures</p>
+          <p className="text-gray-600 mt-1">Synchronisation depuis DatoCMS ou scraping web</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="secondary">{properties.length} propriétés</Badge>
@@ -255,6 +295,24 @@ const PropertiesTabContent: React.FC = () => {
             )}
           </Button>
           <Button 
+            onClick={handleSyncFromDatoCms}
+            disabled={syncingDatoCms}
+            variant="default"
+            size="sm"
+          >
+            {syncingDatoCms ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Sync DatoCMS...
+              </>
+            ) : (
+              <>
+                <Zap className="h-4 w-4 mr-2" />
+                Sync DatoCMS
+              </>
+            )}
+          </Button>
+          <Button 
             onClick={handleSyncProperties}
             disabled={syncing}
             variant="outline"
@@ -263,12 +321,12 @@ const PropertiesTabContent: React.FC = () => {
             {syncing ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Synchronisation...
+                Scraping...
               </>
             ) : (
               <>
                 <Download className="h-4 w-4 mr-2" />
-                Synchroniser
+                Scraping
               </>
             )}
           </Button>
@@ -293,16 +351,29 @@ const PropertiesTabContent: React.FC = () => {
                 </>
               )}
             </Button>
-            <Button onClick={handleSyncProperties} disabled={syncing}>
+            <Button onClick={handleSyncFromDatoCms} disabled={syncingDatoCms}>
+              {syncingDatoCms ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Synchronisation DatoCMS...
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4 mr-2" />
+                  Synchroniser depuis DatoCMS
+                </>
+              )}
+            </Button>
+            <Button onClick={handleSyncProperties} disabled={syncing} variant="outline">
               {syncing ? (
                 <>
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Synchronisation en cours...
+                  Scraping en cours...
                 </>
               ) : (
                 <>
                   <Download className="h-4 w-4 mr-2" />
-                  Synchroniser depuis Gadait
+                  Synchroniser par scraping
                 </>
               )}
             </Button>
