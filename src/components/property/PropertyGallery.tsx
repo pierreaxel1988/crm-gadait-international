@@ -160,7 +160,27 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               <X className="h-6 w-6" />
             </Button>
             
-            {/* Navigation précédent */}
+            {/* Zone de clic gauche pour navigation précédente */}
+            {allImages.length > 1 && (
+              <div 
+                className="absolute left-0 top-0 bottom-0 w-1/4 z-40 cursor-pointer flex items-center justify-start pl-4"
+                onClick={prevImage}
+              >
+                <ChevronLeft className="h-8 w-8 text-white/50 opacity-0 hover:opacity-100 transition-opacity duration-200" />
+              </div>
+            )}
+            
+            {/* Zone de clic droite pour navigation suivante */}
+            {allImages.length > 1 && (
+              <div 
+                className="absolute right-0 top-0 bottom-0 w-1/4 z-40 cursor-pointer flex items-center justify-end pr-4"
+                onClick={nextImage}
+              >
+                <ChevronRight className="h-8 w-8 text-white/50 opacity-0 hover:opacity-100 transition-opacity duration-200" />
+              </div>
+            )}
+            
+            {/* Navigation précédent (bouton visible) */}
             {allImages.length > 1 && (
               <Button
                 variant="ghost"
@@ -184,7 +204,7 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({
               />
             </div>
             
-            {/* Navigation suivant */}
+            {/* Navigation suivant (bouton visible) */}
             {allImages.length > 1 && (
               <Button
                 variant="ghost"
