@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, TreePine } from 'lucide-react';
 import { countryToFlag } from '@/utils/countryUtils';
+
 interface PropertyCardProps {
   property: {
     id: string;
@@ -119,7 +120,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       <CardContent className="p-5 space-y-4">
         {/* Titre et localisation condensés */}
         <div className="space-y-2">
-          <h3 className="font-futura text-lg text-loro-navy line-clamp-2 group-hover:text-loro-500 transition-colors duration-300 font-medium">
+          <h3 className="font-futura text-lg text-loro-navy line-clamp-2 group-hover:text-loro-terracotta transition-colors duration-300 font-medium">
             {property.title}
           </h3>
           
