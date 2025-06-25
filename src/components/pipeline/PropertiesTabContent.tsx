@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -77,10 +78,11 @@ const PropertiesTabContent: React.FC = () => {
 
       console.log('Suppression de toutes les propriétés');
 
+      // Supprimer TOUTES les propriétés sans condition
       const { error } = await supabase
         .from('gadait_properties')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+        .gte('id', '00000000-0000-0000-0000-000000000000'); // Supprime tout
 
       if (error) {
         console.error('Erreur lors de la suppression:', error);
