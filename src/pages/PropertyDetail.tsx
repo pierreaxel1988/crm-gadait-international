@@ -1,10 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
+import PropertyGallery from '@/components/property/PropertyGallery';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,6 @@ const PropertyDetail = () => {
   const isMobile = useIsMobile();
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     fetchPropertyDetail();
@@ -87,7 +86,6 @@ const PropertyDetail = () => {
     return property.external_id;
   };
 
-  const allImages = property?.images ? [property.main_image, ...property.images].filter(Boolean) : [property?.main_image].filter(Boolean);
   const displayReference = getDisplayReference();
 
   if (loading) {
@@ -178,57 +176,13 @@ const PropertyDetail = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Galerie photos */}
+            {/* Nouvelle galerie photos */}
             <div className="lg:col-span-2">
-              <Card className="overflow-hidden">
-                <CardContent className="p-0">
-                  {allImages.length > 0 ? (
-                    <div>
-                      <div className="aspect-video relative">
-                        <img
-                          src={allImages[currentImageIndex]}
-                          alt={property.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      </div>
-                      
-                      {allImages.length > 1 && (
-                        <div className="p-4">
-                          <div className="grid grid-cols-6 gap-2">
-                            {allImages.slice(0, 6).map((image, index) => (
-                              <button
-                                key={index}
-                                onClick={() => setCurrentImageIndex(index)}
-                                className={`aspect-square overflow-hidden rounded border-2 transition-all ${
-                                  currentImageIndex === index ? 'border-loro-sand' : 'border-gray-200'
-                                }`}
-                              >
-                                <img
-                                  src={image}
-                                  alt={`Photo ${index + 1}`}
-                                  className="w-full h-full object-cover"
-                                />
-                              </button>
-                            ))}
-                          </div>
-                          {allImages.length > 6 && (
-                            <p className="text-sm text-gray-500 mt-2 text-center">
-                              +{allImages.length - 6} photos supplémentaires
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="aspect-video bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
-                      <Home className="h-16 w-16 text-loro-navy/30" />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <PropertyGallery
+                title={property.title}
+                images={property.images || []}
+                mainImage={property.main_image}
+              />
 
               {/* Description */}
               {property.description && (
