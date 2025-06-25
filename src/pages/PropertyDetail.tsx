@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +9,7 @@ import PropertyGallery from '@/components/property/PropertyGallery';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, Phone, Mail, Trees, Calendar, Layers } from 'lucide-react';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 
 interface PropertyDetail {
@@ -31,6 +32,15 @@ interface PropertyDetail {
   amenities?: string[];
   url: string;
   is_featured?: boolean;
+  // Nouvelles propriétés pour plus de détails
+  land_area?: number;
+  land_area_unit?: string;
+  floors?: number;
+  construction_year?: number;
+  rooms?: number;
+  parking_spaces?: number;
+  energy_class?: string;
+  orientation?: string[];
 }
 
 const PropertyDetail = () => {
@@ -206,6 +216,7 @@ const PropertyDetail = () => {
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold text-loro-navy mb-4">Caractéristiques</h2>
                   <div className="grid grid-cols-2 gap-4">
+                    {/* Surface habitable */}
                     <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
                       <Maximize2 className="h-6 w-6 text-loro-navy mx-auto mb-2" />
                       <div className="text-sm text-loro-navy/60">Surface</div>
@@ -213,6 +224,17 @@ const PropertyDetail = () => {
                         {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
                       </div>
                     </div>
+                    
+                    {/* Terrain (si disponible) */}
+                    {property.land_area && (
+                      <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
+                        <Trees className="h-6 w-6 text-loro-navy mx-auto mb-2" />
+                        <div className="text-sm text-loro-navy/60">Terrain</div>
+                        <div className="font-semibold text-loro-navy">
+                          {property.land_area} {property.land_area_unit || 'm²'}
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
                       <Bed className="h-6 w-6 text-loro-navy mx-auto mb-2" />
@@ -222,14 +244,62 @@ const PropertyDetail = () => {
                       </div>
                     </div>
                     
-                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg col-span-2">
+                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
                       <Bath className="h-6 w-6 text-loro-navy mx-auto mb-2" />
                       <div className="text-sm text-loro-navy/60">Salles de bain</div>
                       <div className="font-semibold text-loro-navy">
                         {property.bathrooms || 'N/A'}
                       </div>
                     </div>
+
+                    {/* Nombre d'étages */}
+                    {property.floors && (
+                      <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
+                        <Layers className="h-6 w-6 text-loro-navy mx-auto mb-2" />
+                        <div className="text-sm text-loro-navy/60">Étages</div>
+                        <div className="font-semibold text-loro-navy">
+                          {property.floors}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Année de construction */}
+                    {property.construction_year && (
+                      <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
+                        <Calendar className="h-6 w-6 text-loro-navy mx-auto mb-2" />
+                        <div className="text-sm text-loro-navy/60">Construction</div>
+                        <div className="font-semibold text-loro-navy">
+                          {property.construction_year}
+                        </div>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Informations supplémentaires */}
+                  {(property.rooms || property.parking_spaces || property.energy_class) && (
+                    <div className="mt-4 pt-4 border-t border-loro-pearl/50">
+                      <div className="grid grid-cols-1 gap-3">
+                        {property.rooms && (
+                          <div className="flex justify-between">
+                            <span className="text-loro-navy/60">Nombre de pièces</span>
+                            <span className="font-medium text-loro-navy">{property.rooms}</span>
+                          </div>
+                        )}
+                        {property.parking_spaces && (
+                          <div className="flex justify-between">
+                            <span className="text-loro-navy/60">Places de parking</span>
+                            <span className="font-medium text-loro-navy">{property.parking_spaces}</span>
+                          </div>
+                        )}
+                        {property.energy_class && (
+                          <div className="flex justify-between">
+                            <span className="text-loro-navy/60">Classe énergétique</span>
+                            <span className="font-medium text-loro-navy">{property.energy_class}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
