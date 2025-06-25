@@ -217,8 +217,8 @@ const PropertyDetail = () => {
                   <h2 className="text-xl font-semibold text-loro-navy mb-4">Caractéristiques</h2>
                   <div className="grid grid-cols-2 gap-4">
                     {/* Surface habitable */}
-                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
-                      <Maximize2 className="h-6 w-6 text-loro-navy mx-auto mb-2" />
+                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+                      <Maximize2 className="h-6 w-6 text-loro-navy mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
                       <div className="text-sm text-loro-navy/60">Surface</div>
                       <div className="font-semibold text-loro-navy">
                         {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
@@ -227,8 +227,8 @@ const PropertyDetail = () => {
                     
                     {/* Terrain (si disponible) */}
                     {property.land_area && (
-                      <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
-                        <Trees className="h-6 w-6 text-loro-navy mx-auto mb-2" />
+                      <div className="text-center p-3 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+                        <Trees className="h-6 w-6 text-loro-navy mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
                         <div className="text-sm text-loro-navy/60">Terrain</div>
                         <div className="font-semibold text-loro-navy">
                           {property.land_area} {property.land_area_unit || 'm²'}
@@ -236,16 +236,16 @@ const PropertyDetail = () => {
                       </div>
                     )}
                     
-                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
-                      <Bed className="h-6 w-6 text-loro-navy mx-auto mb-2" />
+                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+                      <Bed className="h-6 w-6 text-loro-navy mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
                       <div className="text-sm text-loro-navy/60">Chambres</div>
                       <div className="font-semibold text-loro-navy">
                         {property.bedrooms || 'N/A'}
                       </div>
                     </div>
                     
-                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
-                      <Bath className="h-6 w-6 text-loro-navy mx-auto mb-2" />
+                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+                      <Bath className="h-6 w-6 text-loro-navy mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
                       <div className="text-sm text-loro-navy/60">Salles de bain</div>
                       <div className="font-semibold text-loro-navy">
                         {property.bathrooms || 'N/A'}
@@ -254,8 +254,8 @@ const PropertyDetail = () => {
 
                     {/* Nombre d'étages */}
                     {property.floors && (
-                      <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
-                        <Layers className="h-6 w-6 text-loro-navy mx-auto mb-2" />
+                      <div className="text-center p-3 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+                        <Layers className="h-6 w-6 text-loro-navy mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
                         <div className="text-sm text-loro-navy/60">Étages</div>
                         <div className="font-semibold text-loro-navy">
                           {property.floors}
@@ -265,8 +265,8 @@ const PropertyDetail = () => {
 
                     {/* Année de construction */}
                     {property.construction_year && (
-                      <div className="text-center p-3 bg-loro-pearl/30 rounded-lg">
-                        <Calendar className="h-6 w-6 text-loro-navy mx-auto mb-2" />
+                      <div className="text-center p-3 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+                        <Calendar className="h-6 w-6 text-loro-navy mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
                         <div className="text-sm text-loro-navy/60">Construction</div>
                         <div className="font-semibold text-loro-navy">
                           {property.construction_year}
