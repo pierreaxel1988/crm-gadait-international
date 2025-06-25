@@ -1,4 +1,3 @@
-
 // Utility functions for intelligent country determination from city names
 
 // Import the locations mapping from the main utils
@@ -7,7 +6,8 @@ const LOCATIONS_BY_COUNTRY: Record<string, string[]> = {
     'Paris', 'Nice', 'Cannes', 'Saint-Tropez', 'Courchevel', 'Méribel', 'Megève',
     'Marseille', 'Lyon', 'Bordeaux', 'Toulouse', 'Strasbourg', 'Lille', 'Nantes',
     'Antibes', 'Aix-en-Provence', 'Biarritz', 'Chamonix', 'Val d\'Isère',
-    'Val-d\'Isère', 'Combloux'
+    'Val-d\'Isère', 'Combloux', 'Megeve', 'Saint-Gervais', 'Les Gets', 'Morzine',
+    'Avoriaz', 'Flaine', 'La Clusaz', 'Le Grand-Bornand'
   ],
   'Spain': [
     'Madrid', 'Barcelona', 'Ibiza', 'Marbella', 'Mallorca', 'Valencia', 'Seville',
@@ -113,10 +113,13 @@ function findCountryByPartialMatch(cityName: string): string | null {
 function findCountryByPattern(cityName: string): string | null {
   const normalizedCity = normalizeText(cityName);
   
-  // French patterns
+  // French patterns - améliorer la détection des stations de ski françaises
   if (normalizedCity.includes('saint-') || normalizedCity.includes('saint ') ||
       normalizedCity.includes('sur-') || normalizedCity.includes('-en-') ||
-      normalizedCity.includes('les ') || normalizedCity.includes('le ')) {
+      normalizedCity.includes('les ') || normalizedCity.includes('le ') ||
+      normalizedCity.includes('megeve') || normalizedCity.includes('meribel') ||
+      normalizedCity.includes('courchevel') || normalizedCity.includes('chamonix') ||
+      normalizedCity.includes('val d') || normalizedCity.includes('alpe d')) {
     console.log(`🇫🇷 French pattern detected: ${cityName} → France`);
     return 'France';
   }

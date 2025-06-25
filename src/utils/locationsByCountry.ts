@@ -1,10 +1,11 @@
-
 // Map of countries to their major locations
 export const LOCATIONS_BY_COUNTRY: Record<string, string[]> = {
   'France': [
     'Paris', 'Nice', 'Cannes', 'Saint-Tropez', 'Courchevel', 'Méribel', 'Megève',
     'Marseille', 'Lyon', 'Bordeaux', 'Toulouse', 'Strasbourg', 'Lille', 'Nantes',
-    'Antibes', 'Aix-en-Provence', 'Biarritz', 'Chamonix', 'Val d\'Isère'
+    'Antibes', 'Aix-en-Provence', 'Biarritz', 'Chamonix', 'Val d\'Isère',
+    'Megeve', 'Saint-Gervais', 'Les Gets', 'Morzine', 'Avoriaz', 'Flaine',
+    'La Clusaz', 'Le Grand-Bornand', 'Combloux', 'Saint-Martin-de-Belleville'
   ],
   'Spain': [
     'Madrid', 'Barcelona', 'Ibiza', 'Marbella', 'Mallorca', 'Valencia', 'Seville',
