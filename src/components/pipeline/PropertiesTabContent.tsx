@@ -452,7 +452,7 @@ const PropertiesTabContent: React.FC = () => {
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <Building2 className="h-8 w-8 text-loro-sand" />
+            <Home className="h-8 w-8 text-loro-sand" />
             <h2 className="text-2xl font-futura font-medium text-loro-navy">
               Propriétés Gadait International
             </h2>
