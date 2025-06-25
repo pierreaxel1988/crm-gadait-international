@@ -252,7 +252,7 @@ function convertDatoCmsProperty(datoCmsProp: any) {
   }
 
   return {
-    external_id: `datocms-${datoCmsProp.id}`,
+    external_id: datoCmsProp.reference || `datocms-${datoCmsProp.id}`, // Utiliser le champ reference de DatoCMS
     title: datoCmsProp.title || 'Propriété sans titre',
     description: datoCmsProp.description || '',
     price,

@@ -168,7 +168,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
             {property.external_id && (
               <div className="flex items-center gap-1 text-xs text-loro-navy/60">
                 <Hash className="h-3 w-3 flex-shrink-0" />
-                <span className="font-futura">Réf. {property.external_id}</span>
+                <span className="font-futura">Référence {property.external_id}</span>
               </div>
             )}
           </div>
