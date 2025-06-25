@@ -48,6 +48,7 @@ const PropertiesTabContent: React.FC = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [transactionType, setTransactionType] = useState<'all' | 'buy' | 'rent'>('all');
   const [currentSort, setCurrentSort] = useState<SortOption>('newest');
 
   useEffect(() => {
@@ -67,6 +68,24 @@ const PropertiesTabContent: React.FC = () => {
         property.country?.toLowerCase().includes(term) ||
         property.property_type?.toLowerCase().includes(term)
       );
+    }
+
+    // Filtre par type de transaction
+    if (transactionType !== 'all') {
+      filtered = filtered.filter(property => {
+        const title = property.title.toLowerCase();
+        const description = property.description?.toLowerCase() || '';
+        
+        if (transactionType === 'rent') {
+          return title.includes('location') || title.includes('louer') || title.includes('rent') ||
+                 description.includes('location') || description.includes('louer') || description.includes('rent');
+        } else if (transactionType === 'buy') {
+          // For buy, we exclude properties that seem to be for rent
+          return !(title.includes('location') || title.includes('louer') || title.includes('rent') ||
+                  description.includes('location') || description.includes('louer') || description.includes('rent'));
+        }
+        return true;
+      });
     }
 
     // Filtre par type
@@ -109,7 +128,7 @@ const PropertiesTabContent: React.FC = () => {
     });
 
     setFilteredProperties(filtered);
-  }, [properties, searchTerm, selectedTypes, selectedLocations, priceRange, currentSort]);
+  }, [properties, searchTerm, selectedTypes, selectedLocations, priceRange, currentSort, transactionType]);
 
   const fetchGadaitProperties = async () => {
     try {
@@ -140,6 +159,7 @@ const PropertiesTabContent: React.FC = () => {
     setSelectedTypes([]);
     setSelectedLocations([]);
     setPriceRange([0, 10000000]);
+    setTransactionType('all');
     setCurrentSort('newest');
   };
 
@@ -378,6 +398,11 @@ const PropertiesTabContent: React.FC = () => {
             <Badge variant="outline" className="bg-loro-white border-loro-pearl text-loro-navy/70 font-futura">
               {properties.length} au total
             </Badge>
+            {transactionType !== 'all' && (
+              <Badge variant="outline" className="bg-loro-sand border-loro-sand text-loro-navy font-futura">
+                {transactionType === 'buy' ? 'Achat' : 'Location'}
+              </Badge>
+            )}
           </div>
         </div>
         
@@ -467,6 +492,8 @@ const PropertiesTabContent: React.FC = () => {
           onTypesChange={setSelectedTypes}
           selectedLocations={selectedLocations}
           onLocationsChange={setSelectedLocations}
+          transactionType={transactionType}
+          onTransactionTypeChange={setTransactionType}
           isOpen={filtersOpen}
           onToggle={() => setFiltersOpen(!filtersOpen)}
           onClearFilters={clearAllFilters}

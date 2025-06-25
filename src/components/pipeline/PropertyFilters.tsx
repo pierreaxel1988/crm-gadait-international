@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Filter, SlidersHorizontal, X } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface PropertyFiltersProps {
   priceRange: [number, number];
@@ -12,6 +12,8 @@ interface PropertyFiltersProps {
   onTypesChange: (types: string[]) => void;
   selectedLocations: string[];
   onLocationsChange: (locations: string[]) => void;
+  transactionType: 'all' | 'buy' | 'rent';
+  onTransactionTypeChange: (type: 'all' | 'buy' | 'rent') => void;
   isOpen: boolean;
   onToggle: () => void;
   onClearFilters: () => void;
@@ -32,12 +34,15 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
   onTypesChange,
   selectedLocations,
   onLocationsChange,
+  transactionType,
+  onTransactionTypeChange,
   isOpen,
   onToggle,
   onClearFilters
 }) => {
   const activeFiltersCount = selectedTypes.length + selectedLocations.length + 
-    (priceRange[0] > 0 || priceRange[1] < 10000000 ? 1 : 0);
+    (priceRange[0] > 0 || priceRange[1] < 10000000 ? 1 : 0) +
+    (transactionType !== 'all' ? 1 : 0);
 
   const toggleType = (type: string) => {
     if (selectedTypes.includes(type)) {
@@ -88,6 +93,36 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
       {isOpen && (
         <Card className="border-loro-pearl shadow-luxury">
           <CardContent className="p-6 space-y-6">
+            {/* Transaction Type Filter */}
+            <div>
+              <h4 className="font-futura font-medium text-loro-navy mb-3">Type de transaction</h4>
+              <ToggleGroup 
+                type="single" 
+                value={transactionType} 
+                onValueChange={(value) => onTransactionTypeChange(value as 'all' | 'buy' | 'rent' || 'all')}
+                className="justify-start"
+              >
+                <ToggleGroupItem 
+                  value="all" 
+                  className="font-futura data-[state=on]:bg-loro-sand data-[state=on]:text-loro-navy border-loro-pearl"
+                >
+                  Tout
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="buy" 
+                  className="font-futura data-[state=on]:bg-loro-sand data-[state=on]:text-loro-navy border-loro-pearl"
+                >
+                  Achat
+                </ToggleGroupItem>
+                <ToggleGroupItem 
+                  value="rent" 
+                  className="font-futura data-[state=on]:bg-loro-sand data-[state=on]:text-loro-navy border-loro-pearl"
+                >
+                  Location
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+
             {/* Types de propriété */}
             <div>
               <h4 className="font-futura font-medium text-loro-navy mb-3">Type de propriété</h4>
