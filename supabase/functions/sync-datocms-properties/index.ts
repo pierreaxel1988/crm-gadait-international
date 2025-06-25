@@ -95,6 +95,11 @@ serve(async (req) => {
               city {
                 id
                 name
+                country {
+                  id
+                  name
+                  code
+                }
               }
               currency {
                 id
@@ -232,24 +237,39 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     price = null;
   }
 
-  // Construire la localisation
-  const location = datoCmsProp.city?.name || '';
-  const fullAddress = [datoCmsProp.address, datoCmsProp.postalCode, location]
+  // Récupérer les informations de localisation depuis DatoCMS
+  const cityName = datoCmsProp.city?.name || '';
+  const countryFromDatoCms = datoCmsProp.city?.country?.name || '';
+  
+  // Construire la localisation complète
+  const fullAddress = [datoCmsProp.address, datoCmsProp.postalCode, cityName]
     .filter(Boolean)
     .join(', ');
 
-  // Déterminer le pays selon la ville/localisation
-  let country = "Spain"; // Par défaut
-  if (location) {
-    const locationLower = location.toLowerCase();
-    if (locationLower.includes('marbella') || locationLower.includes('málaga') || 
-        locationLower.includes('madrid') || locationLower.includes('barcelona')) {
-      country = "Spain";
-    } else if (locationLower.includes('cannes') || locationLower.includes('nice') ||
-               locationLower.includes('antibes') || locationLower.includes('paris')) {
-      country = "France";
+  // Utiliser le pays depuis DatoCMS, avec fallback si nécessaire
+  let country = countryFromDatoCms;
+  if (!country) {
+    // Fallback seulement si aucun pays n'est défini dans DatoCMS
+    if (cityName) {
+      const cityLower = cityName.toLowerCase();
+      if (cityLower.includes('marbella') || cityLower.includes('málaga') || 
+          cityLower.includes('madrid') || cityLower.includes('barcelona')) {
+        country = "Spain";
+      } else if (cityLower.includes('cannes') || cityLower.includes('nice') ||
+                 cityLower.includes('antibes') || cityLower.includes('paris')) {
+        country = "France";
+      } else if (cityLower.includes('tamarin') || cityLower.includes('grand baie') ||
+                 cityLower.includes('port louis')) {
+        country = "Mauritius";
+      } else {
+        country = "Spain"; // Fallback par défaut
+      }
+    } else {
+      country = "Spain"; // Fallback par défaut
     }
   }
+
+  console.log(`Propriété ${datoCmsProp.title}: Ville=${cityName}, Pays DatoCMS=${countryFromDatoCms}, Pays final=${country}`);
 
   return {
     external_id: datoCmsProp.reference || `datocms-${datoCmsProp.id}`, // Utiliser le champ reference de DatoCMS
@@ -257,8 +277,8 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     description: datoCmsProp.description || '',
     price,
     currency,
-    location: fullAddress || location,
-    country,
+    location: fullAddress || cityName,
+    country, // Utiliser le pays récupéré depuis DatoCMS
     property_type: datoCmsProp.propertyType?.name || 'Propriété',
     bedrooms: datoCmsProp.bedrooms,
     bathrooms: datoCmsProp.bathrooms,
