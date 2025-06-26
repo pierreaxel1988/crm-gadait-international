@@ -19,6 +19,8 @@ interface PropertyFiltersProps {
   onCountriesChange: (countries: string[]) => void;
   transactionType: 'all' | 'buy' | 'rent';
   onTransactionTypeChange: (type: 'all' | 'buy' | 'rent') => void;
+  minBedrooms: number;
+  onMinBedroomsChange: (min: number) => void;
   isOpen: boolean;
   onToggle: () => void;
   onClearFilters: () => void;
@@ -39,13 +41,16 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
   onCountriesChange,
   transactionType,
   onTransactionTypeChange,
+  minBedrooms,
+  onMinBedroomsChange,
   isOpen,
   onToggle,
   onClearFilters
 }) => {
   const activeFiltersCount = selectedTypes.length + selectedLocations.length + selectedCountries.length +
     (priceRange[0] > 0 || priceRange[1] < 10000000 ? 1 : 0) +
-    (transactionType !== 'all' ? 1 : 0);
+    (transactionType !== 'all' ? 1 : 0) +
+    (minBedrooms > 0 ? 1 : 0);
 
   const toggleType = (type: string) => {
     if (selectedTypes.includes(type)) {
@@ -184,6 +189,28 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Nombre minimum de chambres */}
+            <div>
+              <h4 className="font-futura font-medium text-loro-navy mb-3">Nombre minimum de chambres</h4>
+              <div className="flex flex-wrap gap-2">
+                {[0, 1, 2, 3, 4, 5].map((bedroom) => (
+                  <Button
+                    key={bedroom}
+                    variant={minBedrooms === bedroom ? "default" : "outline"}
+                    size="sm"
+                    className={`font-futura transition-all duration-200 ${
+                      minBedrooms === bedroom
+                        ? 'bg-loro-sand text-loro-navy hover:bg-loro-sand/90'
+                        : 'border-loro-pearl text-loro-navy/70 hover:bg-loro-white hover:border-loro-sand'
+                    }`}
+                    onClick={() => onMinBedroomsChange(bedroom)}
+                  >
+                    {bedroom === 0 ? 'Toutes' : `${bedroom}+`}
+                  </Button>
+                ))}
+              </div>
             </div>
 
             {/* Gamme de prix */}

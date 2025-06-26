@@ -77,6 +77,7 @@ const PropertiesTabContent: React.FC = () => {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [transactionType, setTransactionType] = useState<'all' | 'buy' | 'rent'>('all');
+  const [minBedrooms, setMinBedrooms] = useState<number>(0);
   const [currentSort, setCurrentSort] = useState<SortOption>('newest');
 
   useEffect(() => {
@@ -180,6 +181,14 @@ const PropertiesTabContent: React.FC = () => {
       return price >= priceRange[0] && price <= priceRange[1];
     });
 
+    // Nouveau filtre par nombre minimum de chambres
+    if (minBedrooms > 0) {
+      filtered = filtered.filter(property => {
+        if (!property.bedrooms) return false;
+        return property.bedrooms >= minBedrooms;
+      });
+    }
+
     // Tri amélioré avec dates réelles
     filtered.sort((a, b) => {
       switch (currentSort) {
@@ -213,7 +222,7 @@ const PropertiesTabContent: React.FC = () => {
     if (currentPage > 1) {
       setCurrentPage(1);
     }
-  }, [properties, searchTerm, selectedTypes, selectedLocations, selectedCountries, priceRange, currentSort, transactionType]);
+  }, [properties, searchTerm, selectedTypes, selectedLocations, selectedCountries, priceRange, currentSort, transactionType, minBedrooms]);
 
   const fetchGadaitProperties = async () => {
     try {
@@ -278,6 +287,7 @@ const PropertiesTabContent: React.FC = () => {
     setSelectedCountries([]);
     setPriceRange([0, 10000000]);
     setTransactionType('all');
+    setMinBedrooms(0);
     setCurrentSort('newest');
     setCurrentPage(1);
   };
@@ -526,6 +536,11 @@ const PropertiesTabContent: React.FC = () => {
                 {transactionType === 'buy' ? 'Achat' : 'Location'}
               </Badge>
             )}
+            {minBedrooms > 0 && (
+              <Badge variant="outline" className="bg-loro-sand border-loro-sand text-loro-navy font-futura">
+                {minBedrooms}+ chambres
+              </Badge>
+            )}
           </div>
         </div>
         
@@ -619,6 +634,8 @@ const PropertiesTabContent: React.FC = () => {
           onCountriesChange={setSelectedCountries}
           transactionType={transactionType}
           onTransactionTypeChange={setTransactionType}
+          minBedrooms={minBedrooms}
+          onMinBedroomsChange={setMinBedrooms}
           isOpen={filtersOpen}
           onToggle={() => setFiltersOpen(!filtersOpen)}
           onClearFilters={clearAllFilters}
