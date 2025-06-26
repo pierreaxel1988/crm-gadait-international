@@ -1,5 +1,3 @@
-
-
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -75,11 +73,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const handleExternalLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Construire l'URL correcte vers gadait-international.com avec le préfixe de langue
+    // Construire l'URL correcte vers gadait-international.com avec le slug
     let targetUrl = 'https://gadait-international.com';
     
-    // Si on a un slug, construire l'URL spécifique de la propriété avec le préfixe /en/
+    // Si on a un slug, construire l'URL spécifique de la propriété
     if (property.slug && property.slug.trim() !== '') {
+      // Le slug doit être précédé de /en/ pour la version anglaise du site
       targetUrl = `https://gadait-international.com/en/${property.slug}`;
     } else if (property.url && property.url.includes('gadait-international.com')) {
       // Utiliser l'URL existante si elle pointe déjà vers gadait-international.com
@@ -307,4 +306,3 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 };
 
 export default PropertyCard;
-
