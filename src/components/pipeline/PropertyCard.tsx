@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -74,18 +75,18 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const handleExternalLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Construire l'URL correcte vers gadait-international.com en utilisant le slug
+    // Construire l'URL correcte vers gadait-international.com avec le préfixe de langue
     let targetUrl = 'https://gadait-international.com';
     
-    // Si on a un slug, construire l'URL spécifique de la propriété
+    // Si on a un slug, construire l'URL spécifique de la propriété avec le préfixe /en/
     if (property.slug && property.slug.trim() !== '') {
-      targetUrl = `https://gadait-international.com/${property.slug}`;
+      targetUrl = `https://gadait-international.com/en/${property.slug}`;
     } else if (property.url && property.url.includes('gadait-international.com')) {
       // Utiliser l'URL existante si elle pointe déjà vers gadait-international.com
       targetUrl = property.url;
     } else if (property.external_id && !property.external_id.startsWith('datocms-')) {
       // Fallback vers external_id si pas de slug
-      targetUrl = `https://gadait-international.com/propriete/${property.external_id}`;
+      targetUrl = `https://gadait-international.com/en/propriete/${property.external_id}`;
     }
     
     window.open(targetUrl, '_blank');
@@ -306,3 +307,4 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 };
 
 export default PropertyCard;
+
