@@ -76,17 +76,14 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     // Construire l'URL correcte vers gadait-international.com avec le slug
     let targetUrl = 'https://gadait-international.com';
     
-    // Si on a un slug, construire l'URL spécifique de la propriété
+    // Si on a un slug, construire l'URL spécifique de la propriété directement avec le slug
     if (property.slug && property.slug.trim() !== '') {
-      // Le slug doit être précédé de /en/ pour la version anglaise du site
       targetUrl = `https://gadait-international.com/en/${property.slug}`;
     } else if (property.url && property.url.includes('gadait-international.com')) {
       // Utiliser l'URL existante si elle pointe déjà vers gadait-international.com
       targetUrl = property.url;
-    } else if (property.external_id && !property.external_id.startsWith('datocms-')) {
-      // Fallback vers external_id si pas de slug
-      targetUrl = `https://gadait-international.com/en/propriete/${property.external_id}`;
     }
+    // Ne plus utiliser external_id comme fallback car cela génère de mauvaises URLs
     
     window.open(targetUrl, '_blank');
   };
