@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,6 +27,7 @@ interface PropertyCardProps {
     url: string;
     is_featured?: boolean;
     external_id?: string;
+    slug?: string;
   };
 }
 
@@ -72,15 +74,18 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const handleExternalLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Construire l'URL correcte vers gadait-international.com
+    // Construire l'URL correcte vers gadait-international.com en utilisant le slug
     let targetUrl = 'https://gadait-international.com';
     
-    // Si on a une référence externe valide, construire l'URL spécifique de la propriété
-    if (property.external_id && !property.external_id.startsWith('datocms-')) {
-      targetUrl = `https://gadait-international.com/propriete/${property.external_id}`;
+    // Si on a un slug, construire l'URL spécifique de la propriété
+    if (property.slug && property.slug.trim() !== '') {
+      targetUrl = `https://gadait-international.com/${property.slug}`;
     } else if (property.url && property.url.includes('gadait-international.com')) {
       // Utiliser l'URL existante si elle pointe déjà vers gadait-international.com
       targetUrl = property.url;
+    } else if (property.external_id && !property.external_id.startsWith('datocms-')) {
+      // Fallback vers external_id si pas de slug
+      targetUrl = `https://gadait-international.com/propriete/${property.external_id}`;
     }
     
     window.open(targetUrl, '_blank');
