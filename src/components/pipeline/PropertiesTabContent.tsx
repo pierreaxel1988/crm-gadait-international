@@ -522,23 +522,31 @@ const PropertiesTabContent: React.FC = () => {
             Collection exclusive de propriétés de prestige synchronisées depuis DatoCMS
           </p>
           <div className="flex items-center gap-4 mt-3">
-            <Badge variant="outline" className="bg-loro-white border-loro-sand text-loro-navy font-futura">
-              {filteredProperties.length} propriétés affichées
+            <Badge variant="outline" className="bg-gradient-to-r from-loro-white to-loro-pearl border-loro-sand/30 text-loro-navy font-futura shadow-sm hover:shadow-md transition-all duration-200">
+              <span className="text-sm font-medium">{filteredProperties.length}</span>
+              <span className="text-xs text-loro-navy/70 ml-1">propriétés affichées</span>
             </Badge>
-            <Badge variant="outline" className="bg-loro-white border-loro-pearl text-loro-navy/70 font-futura">
-              {properties.length} au total
+            <Badge variant="outline" className="bg-loro-white/50 border-loro-pearl/40 text-loro-navy/70 font-futura backdrop-blur-sm">
+              <span className="text-xs">{properties.length} au total</span>
             </Badge>
-            <Badge variant="outline" className="bg-loro-white border-loro-pearl text-loro-navy/70 font-futura">
-              Page {currentPage} sur {totalPages}
+            <Badge variant="outline" className="bg-loro-white/50 border-loro-pearl/40 text-loro-navy/70 font-futura backdrop-blur-sm">
+              <span className="text-xs">Page {currentPage} sur {totalPages}</span>
             </Badge>
             {transactionType !== 'all' && (
-              <Badge variant="outline" className="bg-loro-sand border-loro-sand text-loro-navy font-futura">
-                {transactionType === 'buy' ? 'Achat' : 'Location'}
+              <Badge className="bg-gradient-to-r from-loro-sand to-loro-sand/90 border-0 text-loro-navy font-futura shadow-luxury hover:shadow-luxury-hover transition-all duration-300 transform hover:scale-105">
+                <span className="text-sm font-medium">
+                  {transactionType === 'buy' ? '🏠 Achat' : '🏘️ Location'}
+                </span>
               </Badge>
             )}
             {minBedrooms > 0 && (
-              <Badge variant="outline" className="bg-loro-sand border-loro-sand text-loro-navy font-futura">
-                {minBedrooms}+ chambres
+              <Badge className="bg-gradient-to-r from-loro-hazel to-loro-hazel/90 border-0 text-loro-white font-futura shadow-luxury hover:shadow-luxury-hover transition-all duration-300 transform hover:scale-105">
+                <span className="text-sm font-medium">🛏️ {minBedrooms}+ chambres</span>
+              </Badge>
+            )}
+            {(selectedTypes.length > 0 || selectedLocations.length > 0 || selectedCountries.length > 0 || priceRange[0] > 0 || priceRange[1] < 10000000) && (
+              <Badge className="bg-gradient-to-r from-loro-terracotta/20 to-loro-terracotta/30 border-loro-terracotta/40 text-loro-terracotta font-futura shadow-sm hover:shadow-md transition-all duration-200">
+                <span className="text-xs">✨ Filtres actifs</span>
               </Badge>
             )}
           </div>
