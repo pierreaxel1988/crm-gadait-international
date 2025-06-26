@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { determineCountryIntelligently } from './cityToCountryUtils.ts';
@@ -210,12 +209,13 @@ serve(async (req) => {
     console.log(`${convertedProperties.length} propriétés à synchroniser après filtrage`);
 
     // Log détaillé des références pour diagnostic
-    console.log("=== DIAGNOSTIC DES RÉFÉRENCES ===");
+    console.log("=== DIAGNOSTIC DES RÉFÉRENCES ET SLUGS ===");
     const referenceSample = convertedProperties.slice(0, 5);
     referenceSample.forEach((prop: any, index: number) => {
       console.log(`Propriété ${index + 1}:`);
       console.log(`  - Titre: ${prop.title}`);
       console.log(`  - external_id final: "${prop.external_id}"`);
+      console.log(`  - slug: "${prop.slug}"`);
       console.log(`  - Est auto-généré: ${prop.external_id?.startsWith('datocms-') ? 'OUI' : 'NON'}`);
       console.log(`  - Vidéos: ${prop.video_urls?.length || 0} trouvées`);
     });
@@ -302,6 +302,7 @@ function convertDatoCmsProperty(datoCmsProp: any) {
   console.log(`Propriété: ${datoCmsProp.title}`);
   console.log(`ID DatoCMS: ${datoCmsProp.id}`);
   console.log(`Référence brute: "${datoCmsReference}"`);
+  console.log(`Slug: "${datoCmsProp.slug}"`);
   console.log(`Type: ${typeof datoCmsReference}`);
   console.log(`Est vide/null: ${!datoCmsReference}`);
   console.log(`Longueur: ${datoCmsReference?.length || 0}`);
@@ -336,6 +337,7 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     features,
     amenities: features, // Utiliser les amenities comme amenities aussi
     url: propertyUrl,
+    slug: datoCmsProp.slug || null, // 🔥 NOUVEAU: Ajouter le slug depuis DatoCMS
     video_urls: videoUrls, // Ajouter les URLs YouTube extraites
     is_available: datoCmsProp.propertyStatus?.name !== 'Sold' && datoCmsProp.propertyStatus?.name !== 'Rented',
     is_featured: datoCmsProp.priceFrom || false,

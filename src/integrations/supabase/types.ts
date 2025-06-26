@@ -112,6 +112,7 @@ export type Database = {
           price: number | null
           property_type: string | null
           scraped_at: string | null
+          slug: string | null
           title: string
           updated_at: string | null
           url: string
@@ -138,6 +139,7 @@ export type Database = {
           price?: number | null
           property_type?: string | null
           scraped_at?: string | null
+          slug?: string | null
           title: string
           updated_at?: string | null
           url: string
@@ -164,6 +166,7 @@ export type Database = {
           price?: number | null
           property_type?: string | null
           scraped_at?: string | null
+          slug?: string | null
           title?: string
           updated_at?: string | null
           url?: string
