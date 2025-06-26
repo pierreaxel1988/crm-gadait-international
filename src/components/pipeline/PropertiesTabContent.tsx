@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +33,10 @@ interface GadaitProperty {
   url: string;
   is_available?: boolean;
   is_featured?: boolean;
+  video_urls?: string[];
+  created_at?: string;
+  updated_at?: string;
+  scraped_at?: string;
 }
 
 const PROPERTIES_PER_PAGE = 24; // 24 propriétés par page (6x4 grid sur desktop)

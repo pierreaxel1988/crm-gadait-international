@@ -115,6 +115,7 @@ export type Database = {
           title: string
           updated_at: string | null
           url: string
+          video_urls: string[] | null
         }
         Insert: {
           amenities?: string[] | null
@@ -140,6 +141,7 @@ export type Database = {
           title: string
           updated_at?: string | null
           url: string
+          video_urls?: string[] | null
         }
         Update: {
           amenities?: string[] | null
@@ -165,6 +167,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
           url?: string
+          video_urls?: string[] | null
         }
         Relationships: []
       }

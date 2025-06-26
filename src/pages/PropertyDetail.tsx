@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,10 +5,11 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import PropertyGallery from '@/components/property/PropertyGallery';
+import YouTubePlayer from '@/components/property/YouTubePlayer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, Phone, Mail, Trees, Calendar, Layers } from 'lucide-react';
+import { ArrowLeft, ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, Phone, Mail, Trees, Calendar, Layers, Play } from 'lucide-react';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 
 interface PropertyDetail {
@@ -32,6 +32,7 @@ interface PropertyDetail {
   amenities?: string[];
   url: string;
   is_featured?: boolean;
+  video_urls?: string[];
   // Nouvelles propriétés pour plus de détails
   land_area?: number;
   land_area_unit?: string;
@@ -193,6 +194,28 @@ const PropertyDetail = () => {
                 images={property.images || []}
                 mainImage={property.main_image}
               />
+
+              {/* Section vidéos YouTube */}
+              {property.video_urls && property.video_urls.length > 0 && (
+                <Card className="mt-6">
+                  <CardContent className="p-6">
+                    <h2 className="text-xl font-semibold text-loro-navy mb-4 flex items-center gap-2">
+                      <Play className="h-5 w-5" />
+                      Vidéos de la propriété
+                    </h2>
+                    <div className="space-y-4">
+                      {property.video_urls.map((url, index) => (
+                        <YouTubePlayer
+                          key={index}
+                          url={url}
+                          title={`${property.title} - Vidéo ${index + 1}`}
+                          className="w-full"
+                        />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Description */}
               {property.description && (

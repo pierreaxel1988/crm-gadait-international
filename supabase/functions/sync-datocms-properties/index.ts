@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { determineCountryIntelligently } from './cityToCountryUtils.ts';
@@ -12,6 +13,31 @@ const corsHeaders = {
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Fonction pour extraire les URLs YouTube depuis différents champs
+const extractYouTubeUrls = (property: any): string[] => {
+  const youtubeUrls: string[] = [];
+  const youtubePattern = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g;
+  
+  // Chercher dans le champ virtualTour
+  if (property.virtualTour) {
+    const matches = property.virtualTour.match(youtubePattern);
+    if (matches) {
+      youtubeUrls.push(...matches);
+    }
+  }
+  
+  // Chercher dans la description
+  if (property.description) {
+    const matches = property.description.match(youtubePattern);
+    if (matches) {
+      youtubeUrls.push(...matches);
+    }
+  }
+  
+  // Supprimer les doublons
+  return [...new Set(youtubeUrls)];
+};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -191,6 +217,7 @@ serve(async (req) => {
       console.log(`  - Titre: ${prop.title}`);
       console.log(`  - external_id final: "${prop.external_id}"`);
       console.log(`  - Est auto-généré: ${prop.external_id?.startsWith('datocms-') ? 'OUI' : 'NON'}`);
+      console.log(`  - Vidéos: ${prop.video_urls?.length || 0} trouvées`);
     });
     console.log("=== FIN DIAGNOSTIC ===");
 
@@ -239,6 +266,9 @@ function convertDatoCmsProperty(datoCmsProp: any) {
 
   // Extraire les amenities comme features
   const features = datoCmsProp.amenities?.map((amenity: any) => amenity.name) || [];
+
+  // Extraire les URLs YouTube
+  const videoUrls = extractYouTubeUrls(datoCmsProp);
 
   // Déterminer le prix et la devise
   let price = datoCmsProp.price;
@@ -306,6 +336,7 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     features,
     amenities: features, // Utiliser les amenities comme amenities aussi
     url: propertyUrl,
+    video_urls: videoUrls, // Ajouter les URLs YouTube extraites
     is_available: datoCmsProp.propertyStatus?.name !== 'Sold' && datoCmsProp.propertyStatus?.name !== 'Rented',
     is_featured: datoCmsProp.priceFrom || false,
     // Métadonnées additionnelles
