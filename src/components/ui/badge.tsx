@@ -37,7 +37,7 @@ export interface BadgeProps
 
 function Badge({ className, variant, weight, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant, weight }), className)} {...props} />
+    <div className={cn(badgeVariants({ variant, weight }), "whitespace-nowrap", className)} {...props} />
   )
 }
 
