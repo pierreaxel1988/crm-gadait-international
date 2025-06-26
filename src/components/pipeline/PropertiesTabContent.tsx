@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Home, Bath, Bed, RefreshCw, Database, Zap, Trash2, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExternalLink, MapPin, Home, Bath, Bed, RefreshCw, Database as DatabaseIcon, Zap, Trash2, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import PropertyCard from './PropertyCard';
 import PropertySearchBar from './PropertySearchBar';
@@ -559,7 +559,7 @@ const PropertiesTabContent: React.FC = () => {
               </>
             ) : (
               <>
-                <Database className="h-4 w-4 mr-2" />
+                <DatabaseIcon className="h-4 w-4 mr-2" />
                 Migrer données
               </>
             )}
@@ -645,7 +645,7 @@ const PropertiesTabContent: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <Database className="h-4 w-4 mr-2" />
+                      <DatabaseIcon className="h-4 w-4 mr-2" />
                       Migrer les données
                     </>
                   )}
