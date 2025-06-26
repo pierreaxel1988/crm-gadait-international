@@ -1,4 +1,3 @@
-
 export type LeadSource = 
   | "Site web" 
   | "Réseaux sociaux" 
@@ -23,18 +22,14 @@ export type PropertyType =
   | "Villa" 
   | "Appartement" 
   | "Penthouse" 
+  | "Chalet"
   | "Maison"
   | "Duplex"
-  | "Chalet"
   | "Terrain" 
   | "Manoir"
   | "Maison de ville"
   | "Château"
-  | "Local commercial"
-  | "Commercial" 
-  | "Hotel" 
-  | "Vignoble" 
-  | "Autres";
+  | "Local commercial";
 
 export type Country = string;
 

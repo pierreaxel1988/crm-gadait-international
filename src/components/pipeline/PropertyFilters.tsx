@@ -25,7 +25,7 @@ interface PropertyFiltersProps {
 }
 
 const propertyTypes = [
-  'Villa', 'Appartement', 'Penthouse', 'Maison', 'Studio', 'Loft', 'Terrain'
+  'Villa', 'Appartement', 'Penthouse', 'Chalet', 'Maison', 'Duplex', 'Terrain', 'Manoir', 'Maison de ville', 'Château', 'Local commercial'
 ];
 
 const PropertyFilters: React.FC<PropertyFiltersProps> = ({

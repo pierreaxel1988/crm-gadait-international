@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LeadDetailed, PropertyType, AssetType, Equipment, PropertyState } from '@/types/lead';
 import { Label } from '@/components/ui/label';
@@ -18,9 +17,8 @@ const OwnerPropertySection: React.FC<OwnerPropertySectionProps> = ({
   onDataChange
 }) => {
   const propertyTypes: PropertyType[] = [
-    "Villa", "Appartement", "Penthouse", "Maison", "Duplex", "Chalet",
-    "Terrain", "Manoir", "Maison de ville", "Château", "Local commercial",
-    "Commercial", "Hotel", "Vignoble", "Autres"
+    "Villa", "Appartement", "Penthouse", "Chalet", "Maison", "Duplex",
+    "Terrain", "Manoir", "Maison de ville", "Château", "Local commercial"
   ];
 
   const assets: AssetType[] = [

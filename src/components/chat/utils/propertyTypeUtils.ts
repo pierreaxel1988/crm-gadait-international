@@ -10,6 +10,8 @@ export const normalizePropertyType = (type: string | undefined): PropertyType | 
   const typeMap: Record<string, PropertyType> = {
     'terrain': 'Terrain',
     'terrains': 'Terrain',
+    'land': 'Terrain',
+    'plot': 'Terrain',
     'villa': 'Villa',
     'villas': 'Villa',
     'apartment': 'Appartement',
@@ -35,22 +37,10 @@ export const normalizePropertyType = (type: string | undefined): PropertyType | 
     'chateau': 'Château',
     'châteaux': 'Château',
     'chateaux': 'Château',
+    'castle': 'Château',
     'local commercial': 'Local commercial',
-    'commercial': 'Commercial',
-    'hotel': 'Hotel',
-    'hôtel': 'Hotel',
-    'hotels': 'Hotel',
-    'hôtels': 'Hotel',
-    'vignoble': 'Vignoble',
-    'vineyard': 'Vignoble',
-    'vineyards': 'Vignoble',
-    'vignobles': 'Vignoble',
-    'plot': 'Terrain',
-    'land': 'Terrain',
-    'property': 'Autres',
-    'propriété': 'Autres',
-    'proprietes': 'Autres',
-    'propriétés': 'Autres'
+    'commercial': 'Local commercial',
+    'commercial space': 'Local commercial'
   };
   
   // Clean up input type for matching

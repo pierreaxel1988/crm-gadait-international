@@ -11,9 +11,9 @@ interface PropertyTypeFilterProps {
 
 const PropertyTypeFilter = ({ propertyType, onPropertyTypeChange }: PropertyTypeFilterProps) => {
   const propertyTypes: (PropertyType | null)[] = [
-    null, 'Villa', 'Appartement', 'Penthouse', 'Maison', 'Duplex', 'Chalet', 
-    'Terrain', 'Manoir', 'Maison de ville', 'Château', 'Local commercial', 
-    'Commercial', 'Hotel', 'Vignoble', 'Autres'
+    null, 'Villa', 'Appartement', 'Penthouse', 'Chalet', 'Maison', 
+    'Duplex', 'Terrain', 'Manoir', 'Maison de ville', 'Château', 
+    'Local commercial'
   ];
 
   return (
