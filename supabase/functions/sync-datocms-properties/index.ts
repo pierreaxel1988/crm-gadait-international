@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { determineCountryIntelligently } from './cityToCountryUtils.ts';
@@ -60,7 +61,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Démarrage de la synchronisation DatoCMS...");
+    console.log("🚀 Démarrage de la synchronisation DatoCMS complète...");
 
     // Fonction pour récupérer toutes les propriétés avec pagination
     const getAllProperties = async () => {
@@ -70,7 +71,7 @@ serve(async (req) => {
       const limit = 100; // DatoCMS limite généralement à 100 par requête
 
       while (hasMore) {
-        console.log(`Récupération des propriétés ${offset} à ${offset + limit}...`);
+        console.log(`📥 Récupération des propriétés ${offset} à ${offset + limit}...`);
         
         const query = `
           query GetProperties($offset: IntType!, $limit: IntType!) {
@@ -183,7 +184,7 @@ serve(async (req) => {
         }
 
         const properties = data.data.allProperties;
-        console.log(`Récupéré ${properties.length} propriétés dans cette page`);
+        console.log(`✅ Récupéré ${properties.length} propriétés dans cette page`);
         
         allProperties = allProperties.concat(properties);
         
@@ -199,39 +200,48 @@ serve(async (req) => {
     };
 
     const datoCmsProperties = await getAllProperties();
-    console.log(`TOTAL: ${datoCmsProperties.length} propriétés récupérées depuis DatoCMS`);
+    console.log(`🎯 TOTAL: ${datoCmsProperties.length} propriétés récupérées depuis DatoCMS`);
 
     // Convertir les propriétés DatoCMS vers le format Supabase
     const convertedProperties = datoCmsProperties
       .filter((prop: any) => !prop.websiteHide) // Exclure les propriétés cachées
       .map((prop: any) => convertDatoCmsProperty(prop));
 
-    console.log(`${convertedProperties.length} propriétés à synchroniser après filtrage`);
+    console.log(`📋 ${convertedProperties.length} propriétés à synchroniser après filtrage`);
 
-    // Log détaillé des références pour diagnostic
-    console.log("=== DIAGNOSTIC DES RÉFÉRENCES ET SLUGS ===");
-    const referenceSample = convertedProperties.slice(0, 5);
+    // Log détaillé des références et slugs pour diagnostic
+    console.log("=== 🔍 DIAGNOSTIC DES RÉFÉRENCES ET SLUGS ===");
+    const referenceSample = convertedProperties.slice(0, 3);
     referenceSample.forEach((prop: any, index: number) => {
       console.log(`Propriété ${index + 1}:`);
       console.log(`  - Titre: ${prop.title}`);
-      console.log(`  - external_id final: "${prop.external_id}"`);
+      console.log(`  - external_id: "${prop.external_id}"`);
       console.log(`  - slug: "${prop.slug}"`);
       console.log(`  - Est auto-généré: ${prop.external_id?.startsWith('datocms-') ? 'OUI' : 'NON'}`);
       console.log(`  - Vidéos: ${prop.video_urls?.length || 0} trouvées`);
     });
-    console.log("=== FIN DIAGNOSTIC ===");
+    console.log("=== 🔍 FIN DIAGNOSTIC ===");
 
-    // Stocker les propriétés dans la base de données
-    const storedCount = await storePropertiesInDatabase(convertedProperties);
+    // Nettoyer les doublons avant synchronisation
+    console.log("🧹 Nettoyage des doublons en cours...");
+    await cleanupDuplicateProperties();
+
+    // Stocker les propriétés dans la base de données avec mise à jour forcée
+    console.log("💾 Début de la mise à jour de toutes les propriétés...");
+    const storedCount = await storePropertiesInDatabase(convertedProperties, true);
+
+    console.log("✅ Synchronisation terminée avec succès !");
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Synchronisation DatoCMS réussie: ${storedCount} propriétés traitées`,
-        properties: convertedProperties,
-        totalFromDatoCms: datoCmsProperties.length,
-        filtered: convertedProperties.length,
-        storedCount,
+        message: `✅ Synchronisation DatoCMS complète réussie: ${storedCount} propriétés mises à jour avec leurs slugs`,
+        details: {
+          totalFromDatoCms: datoCmsProperties.length,
+          filtered: convertedProperties.length,
+          storedCount,
+          slugsUpdated: true
+        }
       }),
       {
         status: 200,
@@ -240,12 +250,12 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error("Erreur lors de la synchronisation DatoCMS:", error);
+    console.error("❌ Erreur lors de la synchronisation DatoCMS:", error);
     
     return new Response(
       JSON.stringify({
         success: false,
-        message: `Erreur synchronisation DatoCMS: ${error.message}`,
+        message: `❌ Erreur synchronisation DatoCMS: ${error.message}`,
       }),
       {
         status: 500,
@@ -295,29 +305,16 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     datoCmsProp.title
   );
 
-  // Récupérer la référence DatoCMS - LOG DÉTAILLÉ
+  // Récupérer la référence DatoCMS
   const datoCmsReference = datoCmsProp.reference;
-  
-  console.log(`=== ANALYSE RÉFÉRENCE ===`);
-  console.log(`Propriété: ${datoCmsProp.title}`);
-  console.log(`ID DatoCMS: ${datoCmsProp.id}`);
-  console.log(`Référence brute: "${datoCmsReference}"`);
-  console.log(`Slug: "${datoCmsProp.slug}"`);
-  console.log(`Type: ${typeof datoCmsReference}`);
-  console.log(`Est vide/null: ${!datoCmsReference}`);
-  console.log(`Longueur: ${datoCmsReference?.length || 0}`);
   
   // Déterminer l'external_id final
   let finalExternalId;
   if (datoCmsReference && datoCmsReference.trim() !== '') {
     finalExternalId = datoCmsReference.trim();
-    console.log(`✅ Utilisation référence DatoCMS: "${finalExternalId}"`);
   } else {
     finalExternalId = `datocms-${datoCmsProp.id}`;
-    console.log(`⚠️ Génération ID automatique: "${finalExternalId}"`);
   }
-  
-  console.log(`=== FIN ANALYSE ===`);
 
   return {
     external_id: finalExternalId,
@@ -326,7 +323,7 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     price,
     currency,
     location: fullAddress || cityName,
-    country, // Utiliser le pays déterminé intelligemment
+    country,
     property_type: datoCmsProp.propertyType?.name || 'Propriété',
     bedrooms: datoCmsProp.bedrooms,
     bathrooms: datoCmsProp.bathrooms,
@@ -335,10 +332,10 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     main_image: mainImage,
     images,
     features,
-    amenities: features, // Utiliser les amenities comme amenities aussi
+    amenities: features,
     url: propertyUrl,
-    slug: datoCmsProp.slug || null, // 🔥 NOUVEAU: Ajouter le slug depuis DatoCMS
-    video_urls: videoUrls, // Ajouter les URLs YouTube extraites
+    slug: datoCmsProp.slug || null, // 🔥 CRUCIAL: Slug depuis DatoCMS
+    video_urls: videoUrls,
     is_available: datoCmsProp.propertyStatus?.name !== 'Sold' && datoCmsProp.propertyStatus?.name !== 'Rented',
     is_featured: datoCmsProp.priceFrom || false,
     // Métadonnées additionnelles
@@ -347,39 +344,39 @@ function convertDatoCmsProperty(datoCmsProp: any) {
   };
 }
 
-async function storePropertiesInDatabase(properties: any[]): Promise<number> {
+async function storePropertiesInDatabase(properties: any[], forceUpdate: boolean = false): Promise<number> {
   if (properties.length === 0) {
     return 0;
   }
   
-  console.log(`Tentative de stockage de ${properties.length} propriétés en base`);
-  
-  // Nettoyer les doublons avant insertion
-  await cleanupDuplicateProperties();
+  console.log(`💾 Tentative de stockage de ${properties.length} propriétés en base (mise à jour forcée: ${forceUpdate})`);
   
   let storedCount = 0;
+  let updatedCount = 0;
+  let insertedCount = 0;
   
   // Traiter par batch de 50 pour éviter les timeouts
   const batchSize = 50;
   for (let i = 0; i < properties.length; i += batchSize) {
     const batch = properties.slice(i, i + batchSize);
-    console.log(`Traitement du batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(properties.length/batchSize)} (${batch.length} propriétés)`);
+    console.log(`🔄 Traitement du batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(properties.length/batchSize)} (${batch.length} propriétés)`);
     
     for (const property of batch) {
       try {
         // Vérifier si la propriété existe déjà
         const { data: existing } = await supabase
           .from('gadait_properties')
-          .select('id, updated_at')
+          .select('id, updated_at, slug')
           .eq('external_id', property.external_id)
           .single();
         
         if (existing) {
-          // Vérifier si la propriété a été mise à jour
+          // Vérifier si une mise à jour est nécessaire
           const existingUpdatedAt = new Date(existing.updated_at);
           const newUpdatedAt = new Date(property.updated_at);
+          const slugNeedsUpdate = !existing.slug && property.slug; // Mise à jour nécessaire si slug manquant
           
-          if (newUpdatedAt > existingUpdatedAt) {
+          if (forceUpdate || newUpdatedAt > existingUpdatedAt || slugNeedsUpdate) {
             // Mettre à jour la propriété existante
             const { error: updateError } = await supabase
               .from('gadait_properties')
@@ -390,11 +387,14 @@ async function storePropertiesInDatabase(properties: any[]): Promise<number> {
               .eq('external_id', property.external_id);
             
             if (updateError) {
-              console.error(`Erreur lors de la mise à jour de la propriété ${property.external_id}:`, updateError);
+              console.error(`❌ Erreur lors de la mise à jour de la propriété ${property.external_id}:`, updateError);
             } else {
-              console.log(`Propriété mise à jour: ${property.title}`);
+              console.log(`🔄 Propriété mise à jour: ${property.title} ${property.slug ? `(slug: ${property.slug})` : ''}`);
+              updatedCount++;
               storedCount++;
             }
+          } else {
+            console.log(`⏭️  Propriété déjà à jour: ${property.title}`);
           }
         } else {
           // Insérer une nouvelle propriété
@@ -406,23 +406,24 @@ async function storePropertiesInDatabase(properties: any[]): Promise<number> {
             });
           
           if (insertError) {
-            console.error(`Erreur lors de l'insertion de la propriété ${property.external_id}:`, insertError);
+            console.error(`❌ Erreur lors de l'insertion de la propriété ${property.external_id}:`, insertError);
           } else {
-            console.log(`Nouvelle propriété insérée: ${property.title}`);
+            console.log(`✅ Nouvelle propriété insérée: ${property.title} ${property.slug ? `(slug: ${property.slug})` : ''}`);
+            insertedCount++;
             storedCount++;
           }
         }
       } catch (error) {
-        console.error(`Erreur lors du traitement de la propriété ${property.external_id}:`, error);
+        console.error(`❌ Erreur lors du traitement de la propriété ${property.external_id}:`, error);
       }
     }
   }
   
-  console.log(`${storedCount} propriétés traitées avec succès`);
+  console.log(`📊 Résultats: ${storedCount} propriétés traitées (${updatedCount} mises à jour, ${insertedCount} nouvelles)`);
   return storedCount;
 }
 
-// Nouvelle fonction pour nettoyer les doublons
+// Fonction améliorée pour nettoyer les doublons
 async function cleanupDuplicateProperties(): Promise<void> {
   console.log('🧹 Nettoyage des doublons en cours...');
   
@@ -430,11 +431,11 @@ async function cleanupDuplicateProperties(): Promise<void> {
     // Récupérer toutes les propriétés avec des external_id auto-générés
     const { data: autoGeneratedProps, error: fetchError } = await supabase
       .from('gadait_properties')
-      .select('id, external_id, title, url')
+      .select('id, external_id, title, url, slug')
       .like('external_id', 'datocms-%');
     
     if (fetchError) {
-      console.error('Erreur lors de la récupération des propriétés auto-générées:', fetchError);
+      console.error('❌ Erreur lors de la récupération des propriétés auto-générées:', fetchError);
       return;
     }
     
@@ -453,12 +454,12 @@ async function cleanupDuplicateProperties(): Promise<void> {
         // Chercher une propriété avec le même titre et une vraie référence DatoCMS
         const { data: realProps, error: searchError } = await supabase
           .from('gadait_properties')
-          .select('id, external_id, title')
+          .select('id, external_id, title, slug')
           .eq('title', autoProp.title)
           .not('external_id', 'like', 'datocms-%');
         
         if (searchError) {
-          console.error(`Erreur lors de la recherche pour ${autoProp.title}:`, searchError);
+          console.error(`❌ Erreur lors de la recherche pour ${autoProp.title}:`, searchError);
           continue;
         }
         
@@ -470,20 +471,20 @@ async function cleanupDuplicateProperties(): Promise<void> {
             .eq('id', autoProp.id);
           
           if (deleteError) {
-            console.error(`Erreur lors de la suppression de ${autoProp.external_id}:`, deleteError);
+            console.error(`❌ Erreur lors de la suppression de ${autoProp.external_id}:`, deleteError);
           } else {
             console.log(`🗑️ Supprimé doublon: "${autoProp.title}" (ID auto: ${autoProp.external_id})`);
             deletedCount++;
           }
         }
       } catch (error) {
-        console.error(`Erreur lors du traitement de ${autoProp.external_id}:`, error);
+        console.error(`❌ Erreur lors du traitement de ${autoProp.external_id}:`, error);
       }
     }
     
     console.log(`✅ Nettoyage terminé: ${deletedCount} doublons supprimés`);
     
   } catch (error) {
-    console.error('Erreur lors du nettoyage des doublons:', error);
+    console.error('❌ Erreur lors du nettoyage des doublons:', error);
   }
 }
