@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -12,32 +11,10 @@ import PropertySort, { SortOption } from './PropertySort';
 import PropertySkeleton from './PropertySkeleton';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
-interface GadaitProperty {
-  id: string;
-  external_id?: string;
-  title: string;
-  description?: string;
-  price?: number;
-  currency?: string;
-  location?: string;
-  country?: string;
-  property_type?: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  area?: number;
-  area_unit?: string;
-  main_image?: string;
-  images: string[]; // Required, not optional
-  features: string[]; // Required, not optional
-  amenities: string[]; // Required, not optional
-  url: string;
-  is_available?: boolean;
-  is_featured?: boolean;
-  video_urls: string[]; // Required, not optional
-  created_at?: string;
-  updated_at?: string;
-  scraped_at?: string;
-}
+// Use the Supabase generated type directly to avoid conflicts
+import { Database } from '@/integrations/supabase/types';
+
+type GadaitProperty = Database['public']['Tables']['gadait_properties']['Row'];
 
 // Fonction pour vérifier la qualité d'une propriété
 const isPropertyQualityValid = (property: GadaitProperty): boolean => {
@@ -199,16 +176,21 @@ const PropertiesTabContent: React.FC = () => {
     // Filtre par prix
     filtered = filtered.filter(property => {
       if (!property.price) return true;
-      return property.price >= priceRange[0] && property.price <= priceRange[1];
+      const price = typeof property.price === 'string' ? parseFloat(property.price) : property.price;
+      return price >= priceRange[0] && price <= priceRange[1];
     });
 
     // Tri
     filtered.sort((a, b) => {
       switch (currentSort) {
         case 'price-asc':
-          return (a.price || 0) - (b.price || 0);
+          const priceA = typeof a.price === 'string' ? parseFloat(a.price) || 0 : a.price || 0;
+          const priceB = typeof b.price === 'string' ? parseFloat(b.price) || 0 : b.price || 0;
+          return priceA - priceB;
         case 'price-desc':
-          return (b.price || 0) - (a.price || 0);
+          const priceDescA = typeof a.price === 'string' ? parseFloat(a.price) || 0 : a.price || 0;
+          const priceDescB = typeof b.price === 'string' ? parseFloat(b.price) || 0 : b.price || 0;
+          return priceDescB - priceDescA;
         case 'title-asc':
           return a.title.localeCompare(b.title);
         case 'oldest':
@@ -431,7 +413,8 @@ const PropertiesTabContent: React.FC = () => {
         amenities: [],
         url: item['Property Link'] || 'https://gadait-international.com',
         is_available: true,
-        is_featured: item.is_exclusive || false
+        is_featured: item.is_exclusive || false,
+        video_urls: []
       }));
 
       // Insérer par batch pour éviter les erreurs
