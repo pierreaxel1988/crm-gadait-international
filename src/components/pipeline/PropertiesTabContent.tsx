@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -39,8 +38,6 @@ interface GadaitProperty {
   scraped_at?: string;
 }
 
-const PROPERTIES_PER_PAGE = 24; // 24 propriétés par page (6x4 grid sur desktop)
-
 // Fonction pour vérifier la qualité d'une propriété
 const isPropertyQualityValid = (property: GadaitProperty): boolean => {
   // Vérifier s'il y a une image principale
@@ -80,6 +77,8 @@ const removeDuplicates = (properties: GadaitProperty[]): GadaitProperty[] => {
   
   return validProperties;
 };
+
+const PROPERTIES_PER_PAGE = 24; // 24 propriétés par page (6x4 grid sur desktop)
 
 const PropertiesTabContent: React.FC = () => {
   const [properties, setProperties] = useState<GadaitProperty[]>([]);
@@ -250,6 +249,15 @@ const PropertiesTabContent: React.FC = () => {
       // Filtrer seulement les propriétés disponibles côté client
       let availableProperties = (data || []).filter(property => property.is_available !== false);
       console.log(`${availableProperties.length} propriétés disponibles après filtrage initial`);
+
+      // Normaliser les propriétés pour s'assurer que les champs optionnels ont des valeurs par défaut
+      availableProperties = availableProperties.map(property => ({
+        ...property,
+        amenities: property.amenities || [],
+        features: property.features || [],
+        video_urls: property.video_urls || [],
+        images: property.images || []
+      }));
 
       // Appliquer les filtres de qualité
       availableProperties = availableProperties.filter(isPropertyQualityValid);
