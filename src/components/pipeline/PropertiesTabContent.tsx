@@ -521,37 +521,36 @@ const PropertiesTabContent: React.FC = () => {
           <p className="text-loro-navy/70 font-futura">
             Collection exclusive de propriétés de prestige synchronisées depuis DatoCMS
           </p>
-          <div className="flex items-center gap-3 mt-4">
-            <Badge variant="outline" className="bg-gradient-to-r from-loro-white to-loro-pearl border-loro-sand/30 text-loro-navy font-futura shadow-sm hover:shadow-md transition-all duration-200 px-3 py-1.5">
-              <span className="text-base font-medium text-loro-navy">{filteredProperties.length}</span>
-              <span className="text-sm text-loro-navy/60 ml-2 font-light">propriétés affichées</span>
+          <div className="flex items-center gap-4 mt-6">
+            <Badge variant="outline" className="bg-white/90 border-loro-navy/15 text-loro-navy font-futura rounded-full px-5 py-2 shadow-none hover:bg-white hover:border-loro-navy/25 transition-all duration-200 backdrop-blur-sm">
+              <span className="text-sm font-normal tracking-wide">{filteredProperties.length} propriétés affichées</span>
             </Badge>
-            <Badge variant="outline" className="bg-loro-white/50 border-loro-pearl/40 text-loro-navy/70 font-futura backdrop-blur-sm px-3 py-1">
-              <span className="text-sm font-light">{properties.length} au total</span>
+            <Badge variant="outline" className="bg-white/60 border-loro-navy/10 text-loro-navy/70 font-futura rounded-full px-4 py-2 shadow-none hover:bg-white/80 transition-all duration-200 backdrop-blur-sm">
+              <span className="text-xs font-light tracking-wide">{properties.length} au total</span>
             </Badge>
-            <Badge variant="outline" className="bg-loro-white/50 border-loro-pearl/40 text-loro-navy/70 font-futura backdrop-blur-sm px-3 py-1">
-              <span className="text-sm font-light">Page {currentPage} sur {totalPages}</span>
+            <Badge variant="outline" className="bg-white/60 border-loro-navy/10 text-loro-navy/70 font-futura rounded-full px-4 py-2 shadow-none hover:bg-white/80 transition-all duration-200 backdrop-blur-sm">
+              <span className="text-xs font-light tracking-wide">Page {currentPage} sur {totalPages}</span>
             </Badge>
             {transactionType !== 'all' && (
-              <Badge className="bg-gradient-to-r from-loro-sand to-loro-sand/90 border-0 text-loro-navy font-futura shadow-luxury hover:shadow-luxury-hover transition-all duration-300 transform hover:scale-105 px-4 py-1.5">
-                <span className="text-sm font-medium flex items-center gap-1.5">
-                  <span className="text-base">{transactionType === 'buy' ? '🏠' : '🏘️'}</span>
-                  <span className="font-light">{transactionType === 'buy' ? 'Achat' : 'Location'}</span>
+              <Badge className="bg-loro-sand/90 border-0 text-loro-navy font-futura rounded-full px-5 py-2 shadow-none hover:bg-loro-sand transition-all duration-200">
+                <span className="text-sm font-normal tracking-wide flex items-center gap-2">
+                  <span className="text-xs opacity-70">{transactionType === 'buy' ? '○' : '●'}</span>
+                  <span>{transactionType === 'buy' ? 'Achat' : 'Location'}</span>
                 </span>
               </Badge>
             )}
             {minBedrooms > 0 && (
-              <Badge className="bg-gradient-to-r from-loro-hazel to-loro-hazel/90 border-0 text-loro-white font-futura shadow-luxury hover:shadow-luxury-hover transition-all duration-300 transform hover:scale-105 px-4 py-1.5">
-                <span className="text-sm font-medium flex items-center gap-1.5">
-                  <span className="text-base">🛏️</span>
-                  <span className="font-light">{minBedrooms}+ chambres</span>
+              <Badge className="bg-loro-hazel/90 border-0 text-white font-futura rounded-full px-5 py-2 shadow-none hover:bg-loro-hazel transition-all duration-200">
+                <span className="text-sm font-normal tracking-wide flex items-center gap-2">
+                  <span className="text-xs opacity-70">◦</span>
+                  <span>{minBedrooms}+ chambres</span>
                 </span>
               </Badge>
             )}
             {(selectedTypes.length > 0 || selectedLocations.length > 0 || selectedCountries.length > 0 || priceRange[0] > 0 || priceRange[1] < 10000000) && (
-              <Badge className="bg-gradient-to-r from-loro-terracotta/20 to-loro-terracotta/30 border-loro-terracotta/40 text-loro-terracotta font-futura shadow-sm hover:shadow-md transition-all duration-200 px-3 py-1">
-                <span className="text-sm font-light flex items-center gap-1">
-                  <span className="text-xs">✨</span>
+              <Badge className="bg-loro-terracotta/10 border-loro-terracotta/20 text-loro-terracotta font-futura rounded-full px-4 py-2 shadow-none hover:bg-loro-terracotta/15 transition-all duration-200">
+                <span className="text-xs font-light tracking-wide flex items-center gap-1.5">
+                  <span className="text-[10px] opacity-60">•</span>
                   <span>Filtres actifs</span>
                 </span>
               </Badge>
