@@ -6,41 +6,31 @@ import { MessageSquare, Calendar, ListTodo, File, ClipboardList } from 'lucide-r
 import { useBreakpoint } from '@/hooks/use-mobile';
 import { useNotifications } from '@/hooks/useNotifications';
 import NotificationBadge from './navbar/NotificationBadge';
+import { LayoutDashboard, Users, Brain, Home, UserCheck, CheckSquare, Calendar, BookOpen } from 'lucide-react';
 
 const SubNavigation = () => {
   const location = useLocation();
+  
+  const navItems = [
+    { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/pipeline', label: 'Pipeline', icon: Users },
+    { path: '/smart-matching', label: 'Smart Matching', icon: Brain },
+    { path: '/properties', label: 'Propriétés', icon: Home },
+    { path: '/leads', label: 'Leads', icon: UserCheck },
+    { path: '/actions', label: 'Actions', icon: CheckSquare },
+    { path: '/calendar', label: 'Agenda', icon: Calendar },
+    { path: '/api-guide', label: 'API Guide', icon: BookOpen }
+  ];
+
   const { isMobile, isTablet, isDesktop } = useBreakpoint();
   const { unreadCount } = useNotifications();
   
-  const navigationItems = [{
-    name: 'Pipeline',
-    path: '/pipeline',
-    icon: ListTodo
-  }, {
-    name: 'Actions',
-    path: '/actions',
-    icon: ClipboardList
-  }, {
-    name: 'Calendrier',
-    path: '/calendar',
-    icon: Calendar
-  }, {
-    name: 'Chat Gadait',
-    path: '/chat-gadait',
-    icon: MessageSquare,
-    showNotification: false
-  }, {
-    name: 'Propriétés',
-    path: '/properties',
-    icon: File
-  }];
-
   // Mobile navigation with horizontal scrolling - icons only
   if (isMobile) {
     return <div className="w-full border-b border-loro-pearl bg-loro-50 shadow-sm">
         <div className="overflow-x-auto py-2 bg-loro-50">
           <div className="flex justify-between px-2 w-full">
-            {navigationItems.map(item => <Link key={item.name} to={item.path} className={cn(
+            {navItems.map(item => <Link key={item.label} to={item.path} className={cn(
               "flex items-center justify-center whitespace-nowrap rounded-md p-2 flex-1 mx-1 transition-transform hover:scale-110 duration-200 bg-loro-50 relative", 
               location.pathname === item.path 
                 ? "text-loro-terracotta after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-[2px] after:bg-loro-terracotta" 
@@ -63,7 +53,7 @@ const SubNavigation = () => {
               "flex",
               isTablet ? "space-x-3" : "space-x-4 md:space-x-6 lg:space-x-8"
             )}>
-              {navigationItems.map(item => <NavigationMenuItem key={item.name}>
+              {navItems.map(item => <NavigationMenuItem key={item.label}>
                   <Link 
                     to={item.path} 
                     className={cn(
@@ -75,7 +65,7 @@ const SubNavigation = () => {
                     )}
                   >
                     {item.icon && <item.icon className="h-5 w-5 mr-2" />}
-                    <span className={cn("font-medium", isTablet ? "text-xs" : "text-sm")}>{item.name}</span>
+                    <span className={cn("font-medium", isTablet ? "text-xs" : "text-sm")}>{item.label}</span>
                     {item.showNotification && <NotificationBadge count={unreadCount} />}
                   </Link>
                 </NavigationMenuItem>)}
