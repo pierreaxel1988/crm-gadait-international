@@ -1,12 +1,13 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
-import { MessageSquare, Calendar, ListTodo, File, ClipboardList } from 'lucide-react';
+import { MessageSquare, ListTodo, File, ClipboardList } from 'lucide-react';
 import { useBreakpoint } from '@/hooks/use-mobile';
 import { useNotifications } from '@/hooks/useNotifications';
 import NotificationBadge from './navbar/NotificationBadge';
-import { LayoutDashboard, Users, Brain, Home, UserCheck, CheckSquare, Calendar, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Users, Brain, Home, UserCheck, CheckSquare, Calendar as CalendarIcon, BookOpen } from 'lucide-react';
 
 const SubNavigation = () => {
   const location = useLocation();
@@ -18,7 +19,7 @@ const SubNavigation = () => {
     { path: '/properties', label: 'Propriétés', icon: Home },
     { path: '/leads', label: 'Leads', icon: UserCheck },
     { path: '/actions', label: 'Actions', icon: CheckSquare },
-    { path: '/calendar', label: 'Agenda', icon: Calendar },
+    { path: '/calendar', label: 'Agenda', icon: CalendarIcon },
     { path: '/api-guide', label: 'API Guide', icon: BookOpen }
   ];
 
@@ -37,7 +38,6 @@ const SubNavigation = () => {
                 : "text-loro-navy hover:text-loro-terracotta"
             )}>
                 {item.icon && <item.icon className="h-5 w-5" />}
-                {item.showNotification && <NotificationBadge count={unreadCount} />}
               </Link>)}
           </div>
         </div>
@@ -66,7 +66,6 @@ const SubNavigation = () => {
                   >
                     {item.icon && <item.icon className="h-5 w-5 mr-2" />}
                     <span className={cn("font-medium", isTablet ? "text-xs" : "text-sm")}>{item.label}</span>
-                    {item.showNotification && <NotificationBadge count={unreadCount} />}
                   </Link>
                 </NavigationMenuItem>)}
             </NavigationMenuList>

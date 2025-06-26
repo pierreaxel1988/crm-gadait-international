@@ -255,6 +255,54 @@ export class AIMatchingEngine {
     }).format(price);
   }
 
+  // Mapper les données de la base vers le format LeadDetailed
+  private mapDatabaseLeadToDetailed(dbLead: any): LeadDetailed {
+    return {
+      id: dbLead.id,
+      name: dbLead.name,
+      email: dbLead.email,
+      phone: dbLead.phone,
+      location: dbLead.location,
+      status: dbLead.status,
+      tags: dbLead.tags || [],
+      createdAt: dbLead.created_at,
+      lastContactedAt: dbLead.last_contacted_at,
+      assignedTo: dbLead.assigned_to,
+      source: dbLead.source,
+      propertyReference: dbLead.property_reference,
+      budget: dbLead.budget,
+      budgetMin: dbLead.budget_min,
+      currency: dbLead.currency,
+      desiredLocation: dbLead.desired_location,
+      propertyType: dbLead.property_type,
+      propertyTypes: dbLead.property_types || [],
+      bedrooms: dbLead.bedrooms,
+      views: dbLead.views || [],
+      amenities: dbLead.amenities || [],
+      purchaseTimeframe: dbLead.purchase_timeframe,
+      financingMethod: dbLead.financing_method,
+      propertyUse: dbLead.property_use,
+      nationality: dbLead.nationality,
+      preferredLanguage: dbLead.preferred_language,
+      taskType: dbLead.task_type,
+      notes: dbLead.notes,
+      internal_notes: dbLead.internal_notes,
+      nextFollowUpDate: dbLead.next_follow_up_date,
+      country: dbLead.country,
+      url: dbLead.url,
+      pipelineType: dbLead.pipeline_type,
+      pipeline_type: dbLead.pipeline_type,
+      taxResidence: dbLead.tax_residence,
+      regions: dbLead.regions || [],
+      residenceCountry: dbLead.residence_country,
+      imported_at: dbLead.imported_at,
+      integration_source: dbLead.integration_source,
+      actionHistory: dbLead.action_history || [],
+      livingArea: dbLead.living_area,
+      external_id: dbLead.external_id
+    };
+  }
+
   // Analyser tous les leads et trouver les meilleurs matches
   async findTopMatches(limit: number = 50): Promise<Array<{
     lead: LeadDetailed;
@@ -281,7 +329,10 @@ export class AIMatchingEngine {
 
       const results = [];
       
-      for (const lead of leads) {
+      for (const dbLead of leads) {
+        // Mapper les données de la base vers le format LeadDetailed
+        const lead = this.mapDatabaseLeadToDetailed(dbLead);
+        
         const matches = await this.findMatches(lead, 5);
         if (matches.length > 0) {
           const totalScore = matches.reduce((sum, match) => sum + match.score, 0);
