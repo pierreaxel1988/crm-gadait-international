@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -72,7 +71,19 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 
   const handleExternalLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(property.url, '_blank');
+    
+    // Construire l'URL correcte vers gadait-international.com
+    let targetUrl = 'https://gadait-international.com';
+    
+    // Si on a une référence externe valide, construire l'URL spécifique de la propriété
+    if (property.external_id && !property.external_id.startsWith('datocms-')) {
+      targetUrl = `https://gadait-international.com/propriete/${property.external_id}`;
+    } else if (property.url && property.url.includes('gadait-international.com')) {
+      // Utiliser l'URL existante si elle pointe déjà vers gadait-international.com
+      targetUrl = property.url;
+    }
+    
+    window.open(targetUrl, '_blank');
   };
 
   const changeImage = (newIndex: number) => {
@@ -126,10 +137,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 
   const currentImage = allImages[currentImageIndex] || property.main_image;
 
-  return <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500 border-loro-pearl bg-loro-white cursor-pointer hover:-translate-y-1 rounded-xl" onClick={handleCardClick}>
+  return (
+    <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500 border-loro-pearl bg-loro-white cursor-pointer hover:-translate-y-1 rounded-xl" onClick={handleCardClick}>
       {/* Image avec aspect ratio plus haut */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        {currentImage ? <>
+        {currentImage ? (
+          <>
             <div className="relative w-full h-full">
               <img 
                 src={currentImage} 
@@ -179,13 +192,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             
             {/* Badges repositionnés */}
             <div className="absolute top-4 left-4 flex gap-2">
-              {property.is_featured && <Badge className="bg-loro-sand/95 text-loro-navy font-futura shadow-lg backdrop-blur-sm">
+              {property.is_featured && (
+                <Badge className="bg-loro-sand/95 text-loro-navy font-futura shadow-lg backdrop-blur-sm">
                   <Star className="h-3 w-3 mr-1 fill-current" />
                   Featured
-                </Badge>}
-              {property.property_type && <Badge variant="outline" className="bg-loro-white/95 text-loro-navy border-loro-pearl font-futura backdrop-blur-sm">
+                </Badge>
+              )}
+              {property.property_type && (
+                <Badge variant="outline" className="bg-loro-white/95 text-loro-navy border-loro-pearl font-futura backdrop-blur-sm">
                   {property.property_type}
-                </Badge>}
+                </Badge>
+              )}
             </div>
             
             {/* Tag prix à droite */}
@@ -231,7 +248,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                 </Badge>
               </div>
             )}
-          </> : <div className="w-full h-full bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
+          </>
+        ) : <div className="w-full h-full bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
             <Home className="h-16 w-16 text-loro-navy/30" />
           </div>}
       </div>
@@ -251,26 +269,35 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               </span>
             </div>
             
-            {property.country && property.country !== 'Non spécifié' && <Badge variant="outline" className="bg-loro-pearl/30 text-loro-navy border-loro-pearl font-futura text-xs">
+            {property.country && property.country !== 'Non spécifié' && (
+              <Badge variant="outline" className="bg-loro-pearl/30 text-loro-navy border-loro-pearl font-futura text-xs">
                 <span className="mr-1">{countryToFlag(property.country)}</span>
                 {property.country}
-              </Badge>}
+              </Badge>
+            )}
           </div>
 
           {/* Référence si disponible */}
-          {displayReference && <div className="flex items-center gap-1 text-xs text-loro-navy/70">
+          {displayReference && (
+            <div className="flex items-center gap-1 text-xs text-loro-navy/70">
               <Hash className="h-3 w-3 flex-shrink-0" />
               <span className="font-futura text-sm">Réf. {displayReference}</span>
-            </div>}
+            </div>
+          )}
         </div>
         
         {/* CTA avec animation */}
-        <Button variant="outline" className="w-full h-10 font-futura border-loro-sand text-loro-navy hover:bg-loro-sand hover:text-loro-navy hover:border-loro-hazel transition-all duration-300 hover:shadow-md" onClick={handleExternalLinkClick}>
+        <Button 
+          variant="outline" 
+          className="w-full h-10 font-futura border-loro-sand text-loro-navy hover:bg-loro-sand hover:text-loro-navy hover:border-loro-hazel transition-all duration-300 hover:shadow-md" 
+          onClick={handleExternalLinkClick}
+        >
           <ExternalLink className="h-4 w-4 mr-2 transition-transform group-hover:translate-x-1" />
           Voir sur Gadait
         </Button>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
 
 export default PropertyCard;
