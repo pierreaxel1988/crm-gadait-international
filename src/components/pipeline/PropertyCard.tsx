@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -73,18 +74,30 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const handleExternalLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // Log pour diagnostic
+    console.log('🔍 Diagnostic URL pour la propriété:', {
+      title: property.title,
+      slug: property.slug,
+      url: property.url,
+      external_id: property.external_id
+    });
+    
     // Construire l'URL correcte vers gadait-international.com avec le slug
     let targetUrl = 'https://gadait-international.com';
     
     // Si on a un slug, construire l'URL spécifique de la propriété directement avec le slug
     if (property.slug && property.slug.trim() !== '') {
       targetUrl = `https://gadait-international.com/en/${property.slug}`;
+      console.log('✅ URL construite avec slug:', targetUrl);
     } else if (property.url && property.url.includes('gadait-international.com')) {
       // Utiliser l'URL existante si elle pointe déjà vers gadait-international.com
       targetUrl = property.url;
+      console.log('✅ URL utilisée depuis property.url:', targetUrl);
+    } else {
+      console.log('⚠️ Aucun slug trouvé, redirection vers la page d\'accueil');
     }
-    // Ne plus utiliser external_id comme fallback car cela génère de mauvaises URLs
     
+    console.log('🌐 Ouverture de:', targetUrl);
     window.open(targetUrl, '_blank');
   };
 
