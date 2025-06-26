@@ -2,7 +2,7 @@ import React from 'react';
 import { LeadDetailed, Currency, PropertyType, ViewType, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Camera, MapPin, Home, Bed, Compass, Building, Clock, CreditCard, Star, Waves, Mountain, TreePine, MoreHorizontal, Droplets, DoorClosed, Car, Shield, Snowflake, Crown, Building2, Warehouse, Hotel, Grape } from 'lucide-react';
+import { Camera, MapPin, Home, Bed, Compass, Building, Clock, CreditCard, Star, Waves, Mountain, TreePine, MoreHorizontal, Droplets, DoorClosed, Car, Shield, Snowflake, Crown, Building2, Warehouse } from 'lucide-react';
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import StyledSelect from './StyledSelect';
@@ -98,14 +98,6 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
         return Crown;
       case "Local commercial":
         return Warehouse;
-      case "Commercial":
-        return Building;
-      case "Hotel":
-        return Hotel;
-      case "Vignoble":
-        return Grape;
-      case "Autres":
-        return MoreHorizontal;
       default:
         return Home;
     }
@@ -149,7 +141,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
     }
   };
   
-  const propertyTypesList: PropertyType[] = ["Villa", "Appartement", "Penthouse", "Maison", "Duplex", "Chalet", "Terrain", "Manoir", "Maison de ville", "Château", "Local commercial", "Commercial", "Hotel", "Vignoble", "Autres"];
+  const propertyTypesList: PropertyType[] = ["Villa", "Appartement", "Penthouse", "Chalet", "Maison", "Duplex", "Terrain", "Manoir", "Maison de ville", "Château", "Local commercial"];
   const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
   const viewTypesList: ViewType[] = ["Mer", "Montagne", "Golf", "Autres"];
   const amenitiesList = ["Piscine", "Terrasse", "Balcon", "Jardin", "Parking", "Ascenseur", "Sécurité", "Climatisation"];

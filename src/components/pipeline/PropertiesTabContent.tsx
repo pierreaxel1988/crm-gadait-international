@@ -36,6 +36,46 @@ interface GadaitProperty {
 
 const PROPERTIES_PER_PAGE = 24; // 24 propriétés par page (6x4 grid sur desktop)
 
+// Fonction pour vérifier la qualité d'une propriété
+const isPropertyQualityValid = (property: GadaitProperty): boolean => {
+  // Vérifier s'il y a une image principale
+  const hasValidImage = property.main_image && property.main_image.trim() !== '';
+  
+  // Vérifier s'il y a une référence valide (pas auto-générée)
+  const hasValidReference = property.external_id && 
+    !property.external_id.startsWith('datocms-') && 
+    property.external_id.trim() !== '' &&
+    property.external_id !== 'undefined' &&
+    property.external_id !== 'null';
+  
+  // Vérifier si le titre est valide
+  const hasValidTitle = property.title && 
+    property.title.trim() !== '' && 
+    property.title !== 'Propriété sans titre' &&
+    !property.title.toLowerCase().includes('sans titre');
+  
+  // La propriété doit avoir au moins une image ET (une référence valide OU un titre descriptif)
+  return hasValidImage && (hasValidReference || hasValidTitle);
+};
+
+// Fonction pour détecter et filtrer les doublons
+const removeDuplicates = (properties: GadaitProperty[]): GadaitProperty[] => {
+  const seen = new Set<string>();
+  const validProperties: GadaitProperty[] = [];
+  
+  for (const property of properties) {
+    // Créer une clé unique basée sur le titre et la localisation
+    const key = `${property.title?.toLowerCase().trim()}-${property.location?.toLowerCase().trim()}-${property.price}`;
+    
+    if (!seen.has(key)) {
+      seen.add(key);
+      validProperties.push(property);
+    }
+  }
+  
+  return validProperties;
+};
+
 const PropertiesTabContent: React.FC = () => {
   const [properties, setProperties] = useState<GadaitProperty[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<GadaitProperty[]>([]);
@@ -203,8 +243,16 @@ const PropertiesTabContent: React.FC = () => {
       console.log(`Récupéré ${data?.length || 0} propriétés depuis la base de données`);
       
       // Filtrer seulement les propriétés disponibles côté client
-      const availableProperties = (data || []).filter(property => property.is_available !== false);
-      console.log(`${availableProperties.length} propriétés disponibles après filtrage`);
+      let availableProperties = (data || []).filter(property => property.is_available !== false);
+      console.log(`${availableProperties.length} propriétés disponibles après filtrage initial`);
+
+      // Appliquer les filtres de qualité
+      availableProperties = availableProperties.filter(isPropertyQualityValid);
+      console.log(`${availableProperties.length} propriétés après filtre qualité`);
+
+      // Supprimer les doublons
+      availableProperties = removeDuplicates(availableProperties);
+      console.log(`${availableProperties.length} propriétés après suppression des doublons`);
 
       setProperties(availableProperties);
     } catch (err) {
@@ -574,7 +622,7 @@ const PropertiesTabContent: React.FC = () => {
         />
       </div>
       
-      {/* Contenu principal */}
+      {/* Contenu principal et pagination */}
       {filteredProperties.length === 0 && !loading ? (
         <div className="text-center py-16 bg-gradient-to-br from-loro-white to-loro-pearl rounded-lg">
           <Building2 className="h-16 w-16 mx-auto mb-6 text-loro-navy/30" />
@@ -630,7 +678,7 @@ const PropertiesTabContent: React.FC = () => {
                 Aucune propriété trouvée
               </h3>
               <p className="text-loro-navy/70 font-futura mb-6">
-                Essayez de modifier vos critères de recherche ou d'effacer les filtres.
+                Toutes les propriétés ont été filtrées car elles ne respectent pas les critères de qualité (image manquante ou référence inadéquate).
               </p>
               <Button 
                 onClick={clearAllFilters}
