@@ -180,7 +180,7 @@ const PropertiesTabContent: React.FC = () => {
       return price >= priceRange[0] && price <= priceRange[1];
     });
 
-    // Tri
+    // Tri amélioré avec dates réelles
     filtered.sort((a, b) => {
       switch (currentSort) {
         case 'price-asc':
@@ -194,10 +194,16 @@ const PropertiesTabContent: React.FC = () => {
         case 'title-asc':
           return a.title.localeCompare(b.title);
         case 'oldest':
-          return a.id.localeCompare(b.id);
+          // Utiliser created_at ou scraped_at pour le plus ancien
+          const oldestDateA = new Date(a.created_at || a.scraped_at || 0);
+          const oldestDateB = new Date(b.created_at || b.scraped_at || 0);
+          return oldestDateA.getTime() - oldestDateB.getTime();
         case 'newest':
         default:
-          return b.id.localeCompare(a.id);
+          // Utiliser created_at ou scraped_at pour le plus récent
+          const newestDateA = new Date(a.created_at || a.scraped_at || 0);
+          const newestDateB = new Date(b.created_at || b.scraped_at || 0);
+          return newestDateB.getTime() - newestDateA.getTime();
       }
     });
 
