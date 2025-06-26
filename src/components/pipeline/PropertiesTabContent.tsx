@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -26,13 +27,13 @@ interface GadaitProperty {
   area?: number;
   area_unit?: string;
   main_image?: string;
-  images?: string[];
-  features?: string[];
-  amenities?: string[];
+  images: string[]; // Required, not optional
+  features: string[]; // Required, not optional
+  amenities: string[]; // Required, not optional
   url: string;
   is_available?: boolean;
   is_featured?: boolean;
-  video_urls?: string[];
+  video_urls: string[]; // Required, not optional
   created_at?: string;
   updated_at?: string;
   scraped_at?: string;
