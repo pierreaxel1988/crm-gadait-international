@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy } from 'react';
 import {
   BrowserRouter as Router,
@@ -12,7 +13,6 @@ import Auth from './pages/Auth';
 import Pipeline from './pages/Pipeline';
 import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
-import SmartMatching from '@/pages/SmartMatching';
 
 // Lazy load other pages to use suspense
 const LeadsPage = lazy(() => import('./pages/Leads'));
@@ -39,9 +39,16 @@ function App() {
             <Route path="/auth" element={<Auth />} />
             
             {/* Routes accessibles à tous */}
-            <Route path="/properties" element={<Properties />} />
-            <Route path="/smart-matching" element={<SmartMatching />} />
-            <Route path="/pipeline" element={<Pipeline />} />
+            <Route path="/pipeline" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <Pipeline />
+              </ProtectedRoute>
+            } />
+            <Route path="/properties" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <Properties />
+              </ProtectedRoute>
+            } />
             <Route path="/properties/:id" element={
               <ProtectedRoute commercialAllowed={true}>
                 <PropertyDetail />
