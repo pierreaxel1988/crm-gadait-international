@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { ActionHistory } from '@/types/actionHistory';
 import { LeadDetailed } from '@/types/lead';
@@ -10,6 +9,7 @@ import { updateLead } from '@/services/leadService';
 import { mapToLeadDetailed } from '@/services/utils/leadMappers';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import ActionEditSheet from './ActionEditSheet';
 
 interface ActionsPanelMobileProps {
   leadId: string;
@@ -26,6 +26,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 }) => {
   const [lead, setLead] = useState<LeadDetailed | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedAction, setSelectedAction] = useState<ActionHistory | null>(null);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
 
   const fetchLead = useCallback(async () => {
     try {
@@ -80,6 +82,15 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       default:
         return <Target className="h-4 w-4" />;
     }
+  };
+
+  const handleActionClick = (action: ActionHistory) => {
+    setSelectedAction(action);
+    setIsEditSheetOpen(true);
+  };
+
+  const handleActionUpdate = (updatedLead: LeadDetailed) => {
+    setLead(updatedLead);
   };
 
   const handleMarkComplete = async (action: ActionHistory) => {
@@ -184,7 +195,11 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             Actions en attente ({pendingActions.length})
           </h4>
           {pendingActions.map(action => (
-            <div key={action.id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div 
+              key={action.id} 
+              className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 cursor-pointer hover:bg-yellow-100 transition-colors"
+              onClick={() => handleActionClick(action)}
+            >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center mb-2">
@@ -206,7 +221,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 </div>
                 <div className="flex space-x-1">
                   <Button 
-                    onClick={() => handleMarkComplete(action)} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMarkComplete(action);
+                    }} 
                     size="sm" 
                     variant="outline" 
                     className="text-green-600 border-green-600 hover:bg-green-50"
@@ -214,7 +232,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                     <CheckCircle className="h-4 w-4" />
                   </Button>
                   <Button 
-                    onClick={() => handleDeleteAction(action.id)} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteAction(action.id);
+                    }} 
                     size="sm" 
                     variant="outline" 
                     className="text-red-600 border-red-600 hover:bg-red-50"
@@ -235,7 +256,11 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
             Actions terminées ({completedActions.length})
           </h4>
           {completedActions.map(action => (
-            <div key={action.id} className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div 
+              key={action.id} 
+              className="bg-green-50 border border-green-200 rounded-lg p-4 cursor-pointer hover:bg-green-100 transition-colors"
+              onClick={() => handleActionClick(action)}
+            >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center mb-2">
@@ -256,7 +281,10 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   )}
                 </div>
                 <Button 
-                  onClick={() => handleDeleteAction(action.id)} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteAction(action.id);
+                  }} 
                   size="sm" 
                   variant="outline" 
                   className="text-red-600 border-red-600 hover:bg-red-50"
@@ -275,6 +303,17 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
           <p className="text-lg font-medium mb-2">Aucune action</p>
           <p className="text-sm">Ajoutez votre première action pour ce lead</p>
         </div>
+      )}
+
+      {lead && (
+        <ActionEditSheet
+          isOpen={isEditSheetOpen}
+          onClose={() => setIsEditSheetOpen(false)}
+          action={selectedAction}
+          lead={lead}
+          onUpdate={handleActionUpdate}
+          getActionTypeIcon={getActionTypeIcon}
+        />
       )}
     </div>
   );
