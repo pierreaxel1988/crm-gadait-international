@@ -61,13 +61,61 @@ export const useKanbanData = (
     try {
       setIsLoading(true);
       
-      console.log('=== FETCHING LEADS DATA ===');
+      console.log('=== FETCHING LEADS DATA IN KANBAN ===');
       console.log('Active tab:', activeTab);
       console.log('Filters:', filters);
       
+      // AJOUT DU FILTRAGE COMMERCIAL
+      // Get the current authenticated user
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData?.session?.user;
+      
+      console.log('Current user in Kanban:', user?.email);
+      
+      // Vérifier si c'est un utilisateur commercial
+      const adminEmails = [
+        'pierre@gadait-international.com',
+        'christelle@gadait-international.com',
+        'admin@gadait-international.com',
+        'chloe@gadait-international.com'
+      ];
+      
+      const commercialEmails = [
+        'jade@gadait-international.com',
+        'ophelie@gadait-international.com',
+        'jeanmarc@gadait-international.com',
+        'jacques@gadait-international.com',
+        'sharon@gadait-international.com',
+        'matthieu@gadait-international.com'
+      ];
+      
+      const isUserAdmin = adminEmails.includes(user?.email || '');
+      const isUserCommercial = commercialEmails.includes(user?.email || '');
+      
+      console.log('User type in Kanban:', { isUserAdmin, isUserCommercial, email: user?.email });
+
       let query = supabase
         .from('leads')
         .select('*');
+
+      // FILTRAGE COMMERCIAL: Si c'est un commercial (non admin), filtre pour n'afficher que ses leads
+      if (isUserCommercial && !isUserAdmin) {
+        // Trouver l'ID du commercial correspondant dans teamMembers
+        const currentTeamMember = teamMembers?.find(tm => tm.email === user?.email);
+        if (currentTeamMember) {
+          console.log("KANBAN FILTRAGE ACTIVÉ - Filtering leads for commercial:", currentTeamMember.name);
+          query = query.eq('assigned_to', currentTeamMember.id);
+        } else {
+          console.warn("Commercial user not found in team_members table for Kanban:", user?.email);
+          // Si le commercial n'est pas trouvé, ne retourner aucun lead pour sécurité
+          const convertedData: LeadDetailed[] = [];
+          setData(convertedData);
+          setLoadedColumns([]);
+          return;
+        }
+      } else {
+        console.log("Admin user in Kanban - showing all leads");
+      }
 
       // Only filter by pipeline_type if it's explicitly set and not empty
       if (activeTab && activeTab !== 'all') {
@@ -187,7 +235,7 @@ export const useKanbanData = (
     } finally {
       setIsLoading(false);
     }
-  }, [activeTab, filters, refreshTrigger]);
+  }, [activeTab, filters, refreshTrigger, teamMembers]);
 
   useEffect(() => {
     fetchTeamMembers();

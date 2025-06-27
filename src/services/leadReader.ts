@@ -39,30 +39,33 @@ export const getLeads = async (): Promise<LeadDetailed[]> => {
       'ophelie@gadait-international.com',
       'jeanmarc@gadait-international.com',
       'jacques@gadait-international.com',
-      'sharon@gadait-international.com'
+      'sharon@gadait-international.com',
+      'matthieu@gadait-international.com'
     ];
     
     const isUserAdmin = adminEmails.includes(user?.email || '');
     const isUserCommercial = commercialEmails.includes(user?.email || '');
     
-    console.log('User type:', { isUserAdmin, isUserCommercial });
+    console.log('User type:', { isUserAdmin, isUserCommercial, email: user?.email });
     
-    // Base query - get ALL leads for debugging
+    // Base query
     let query = supabase.from('leads').select('*');
     
-    // Temporarily disable commercial filtering to see all leads
-    // Si c'est un commercial, filtre pour n'afficher que ses leads
-    // DÉSACTIVÉ TEMPORAIREMENT POUR DEBUG
-    /*
+    // RÉACTIVÉ: Si c'est un commercial (non admin), filtre pour n'afficher que ses leads
     if (isUserCommercial && !isUserAdmin) {
       // Trouver l'ID du commercial correspondant
       const currentTeamMember = teamMembers?.find(tm => tm.email === user?.email);
       if (currentTeamMember) {
-        console.log("Filtering leads for commercial:", currentTeamMember.name);
+        console.log("FILTRAGE ACTIVÉ - Filtering leads for commercial:", currentTeamMember.name);
         query = query.eq('assigned_to', currentTeamMember.id);
+      } else {
+        console.warn("Commercial user not found in team_members table:", user?.email);
+        // Si le commercial n'est pas trouvé dans team_members, ne retourner aucun lead pour sécurité
+        return [];
       }
+    } else {
+      console.log("Admin user - showing all leads");
     }
-    */
     
     // Exécuter la requête
     const { data, error } = await query.order('created_at', { ascending: false });
@@ -134,7 +137,8 @@ export const getLead = async (id: string): Promise<LeadDetailed | null> => {
       'ophelie@gadait-international.com',
       'jeanmarc@gadait-international.com',
       'jacques@gadait-international.com',
-      'sharon@gadait-international.com'
+      'sharon@gadait-international.com',
+      'matthieu@gadait-international.com'
     ];
     
     const isUserAdmin = adminEmails.includes(user?.email || '');
@@ -152,9 +156,7 @@ export const getLead = async (id: string): Promise<LeadDetailed | null> => {
       throw new Error(`Failed to fetch lead: ${error.message}`);
     }
     
-    // Si c'est un commercial, vérifier si le lead lui est assigné
-    // DÉSACTIVÉ TEMPORAIREMENT POUR DEBUG
-    /*
+    // RÉACTIVÉ: Si c'est un commercial, vérifier si le lead lui est assigné
     if (isUserCommercial && !isUserAdmin) {
       const currentTeamMember = teamMembers?.find(tm => tm.email === user?.email);
       if (currentTeamMember && data.assigned_to !== currentTeamMember.id) {
@@ -162,7 +164,6 @@ export const getLead = async (id: string): Promise<LeadDetailed | null> => {
         return null;
       }
     }
-    */
 
     if (data) {
       return mapToLeadDetailed(data);
