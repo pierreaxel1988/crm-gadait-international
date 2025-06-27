@@ -1,4 +1,3 @@
-
 import { LeadDetailed } from "@/types/lead";
 
 // Important UUIDs for team members
@@ -11,6 +10,23 @@ const SHARON_ID = "e564a874-2520-4167-bfa8-26d39f119470";
  */
 export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
   
+  // Handle bedrooms - prioritize multiple values from raw_data if available
+  let bedrooms: number | number[] | undefined = supabaseData.bedrooms;
+  if (supabaseData.raw_data?.bedroom_values) {
+    try {
+      const bedroomValues = Array.isArray(supabaseData.raw_data.bedroom_values) 
+        ? supabaseData.raw_data.bedroom_values 
+        : JSON.parse(supabaseData.raw_data.bedroom_values);
+      if (Array.isArray(bedroomValues) && bedroomValues.length > 0) {
+        bedrooms = bedroomValues.length === 1 ? bedroomValues[0] : bedroomValues;
+      }
+    } catch (error) {
+      console.log("Error parsing bedroom_values from raw_data:", error);
+      // Fallback to single bedroom value
+      bedrooms = supabaseData.bedrooms;
+    }
+  }
+
   const lead: LeadDetailed = {
     id: supabaseData.id,
     name: supabaseData.name || '',
@@ -33,7 +49,7 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
     desiredLocation: supabaseData.desired_location || '',
     propertyType: supabaseData.property_type || '',
     propertyTypes: supabaseData.property_types || [],
-    bedrooms: supabaseData.bedrooms,
+    bedrooms: bedrooms,
     views: supabaseData.views || [],
     amenities: supabaseData.amenities || [],
     purchaseTimeframe: supabaseData.purchase_timeframe,
