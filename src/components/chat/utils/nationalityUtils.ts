@@ -81,6 +81,59 @@ export const deriveNationalityFromCountry = (country: string | undefined): strin
 };
 
 /**
+ * Converts nationality back to country name for flag display
+ */
+export const deriveCountryFromNationality = (nationality: string | undefined): string | undefined => {
+  if (!nationality) return undefined;
+  
+  const nationalityToCountry: Record<string, string> = {
+    'français': 'France',
+    'francais': 'France',
+    'belge': 'Belgium',
+    'suisse': 'Switzerland',
+    'britannique': 'United Kingdom',
+    'américain': 'United States',
+    'americain': 'United States',
+    'espagnol': 'Spain',
+    'italien': 'Italy',
+    'allemand': 'Germany',
+    'russe': 'Russia',
+    'néerlandais': 'Netherlands',
+    'neerlandais': 'Netherlands',
+    'hollandais': 'Netherlands',
+    'portugais': 'Portugal',
+    'grec': 'Greece',
+    'luxembourgeois': 'Luxembourg',
+    'maldivien': 'Maldives',
+    'mauricien': 'Mauritius',
+    'seychellois': 'Seychelles',
+    'croate': 'Croatia',
+    'émirati': 'United Arab Emirates',
+    'emiratic': 'United Arab Emirates',
+    'marocain': 'Morocco',
+    'tunisien': 'Tunisia',
+    'algérien': 'Algeria',
+    'algerien': 'Algeria'
+  };
+  
+  const cleanNationality = nationality.toLowerCase().trim();
+  
+  // Try direct match
+  if (nationalityToCountry[cleanNationality]) {
+    return nationalityToCountry[cleanNationality];
+  }
+  
+  // Try partial matches
+  for (const [key, value] of Object.entries(nationalityToCountry)) {
+    if (cleanNationality.includes(key)) {
+      return value;
+    }
+  }
+  
+  return undefined;
+};
+
+/**
  * Checks if a search term matches a country based on a flexible search approach
  * This function is used for the searchable dropdowns to find matches even when accents are different
  */

@@ -1,4 +1,6 @@
 
+import { deriveCountryFromNationality } from '@/components/chat/utils/nationalityUtils';
+
 /**
  * Converts a country code (two-letter ISO) to a flag emoji
  */
@@ -238,22 +240,32 @@ const countryToISOMap: Record<string, string> = {
 };
 
 /**
- * Converts a country name to its flag emoji
+ * Converts a country name or nationality to its flag emoji
  */
-export const countryToFlag = (country: string): string => {
-  if (!country) return '🌍';
+export const countryToFlag = (countryOrNationality: string): string => {
+  if (!countryOrNationality) return '🌍';
   
-  const countryKey = country.trim();
-  const isoCode = countryToISOMap[countryKey];
+  const input = countryOrNationality.trim();
   
+  // First try direct country match
+  const isoCode = countryToISOMap[input];
   if (isoCode) {
     return countryCodeToFlag(isoCode);
   }
   
+  // If no direct match, try to convert nationality to country
+  const countryFromNationality = deriveCountryFromNationality(input);
+  if (countryFromNationality) {
+    const isoCodeFromNationality = countryToISOMap[countryFromNationality];
+    if (isoCodeFromNationality) {
+      return countryCodeToFlag(isoCodeFromNationality);
+    }
+  }
+  
   // Try partial match if exact match fails
   for (const [key, code] of Object.entries(countryToISOMap)) {
-    if (countryKey.toLowerCase().includes(key.toLowerCase()) || 
-        key.toLowerCase().includes(countryKey.toLowerCase())) {
+    if (input.toLowerCase().includes(key.toLowerCase()) || 
+        key.toLowerCase().includes(input.toLowerCase())) {
       return countryCodeToFlag(code);
     }
   }
