@@ -60,13 +60,21 @@ const ActionEditSheet: React.FC<ActionEditSheetProps> = ({
 
     try {
       setIsLoading(true);
+      console.log("Saving action with:", {
+        actionId: editedAction.id,
+        scheduledDate,
+        scheduledTime,
+        notes
+      });
 
+      // Combiner la date et l'heure correctement
       let updatedScheduledDate = editedAction.scheduledDate;
       if (scheduledDate) {
         const [hours, minutes] = scheduledTime.split(':').map(Number);
-        const dateTime = new Date(scheduledDate);
-        dateTime.setHours(hours, minutes);
-        updatedScheduledDate = dateTime.toISOString();
+        const combinedDateTime = new Date(scheduledDate);
+        combinedDateTime.setHours(hours, minutes, 0, 0); // Reset seconds and milliseconds
+        updatedScheduledDate = combinedDateTime.toISOString();
+        console.log("Combined date/time:", updatedScheduledDate);
       }
 
       const updatedActionHistory = lead.actionHistory?.map(a => 
@@ -77,18 +85,28 @@ const ActionEditSheet: React.FC<ActionEditSheetProps> = ({
         } : a
       ) || [];
 
+      console.log("Updated action history:", updatedActionHistory);
+
       const updatedLead = await updateLead({
         ...lead,
         actionHistory: updatedActionHistory
       });
 
       if (updatedLead) {
+        console.log("Lead updated successfully:", updatedLead);
         onUpdate(updatedLead);
         toast({
           title: "Action mise à jour",
           description: "L'action a été mise à jour avec succès"
         });
         onClose();
+      } else {
+        console.error("Failed to update lead - no response");
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Aucune réponse lors de la mise à jour"
+        });
       }
     } catch (error) {
       console.error("Error updating action:", error);
@@ -199,7 +217,10 @@ const ActionEditSheet: React.FC<ActionEditSheetProps> = ({
                 <Input
                   type="time"
                   value={scheduledTime}
-                  onChange={(e) => setScheduledTime(e.target.value)}
+                  onChange={(e) => {
+                    console.log("Time changed to:", e.target.value);
+                    setScheduledTime(e.target.value);
+                  }}
                   className="w-24"
                 />
               </div>
