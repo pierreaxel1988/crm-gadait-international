@@ -144,8 +144,22 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     }
   };
 
-  const pendingActions = actionHistory.filter(action => !action.completedDate);
-  const completedActions = actionHistory.filter(action => action.completedDate);
+  // Sort actions chronologically - most recent first
+  const pendingActions = actionHistory
+    .filter(action => !action.completedDate)
+    .sort((a, b) => {
+      const dateA = a.scheduledDate ? new Date(a.scheduledDate).getTime() : new Date(a.createdAt).getTime();
+      const dateB = b.scheduledDate ? new Date(b.scheduledDate).getTime() : new Date(b.createdAt).getTime();
+      return dateB - dateA; // Most recent first
+    });
+    
+  const completedActions = actionHistory
+    .filter(action => action.completedDate)
+    .sort((a, b) => {
+      const dateA = new Date(a.completedDate!).getTime();
+      const dateB = new Date(b.completedDate!).getTime();
+      return dateB - dateA; // Most recent first
+    });
 
   if (isLoading) {
     return (
