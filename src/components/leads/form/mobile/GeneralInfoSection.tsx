@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadSource } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -6,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { COUNTRIES } from '@/utils/countries';
 import { deriveNationalityFromCountry, countryMatchesSearch } from '@/components/chat/utils/nationalityUtils';
 import { countryToFlag, phoneCodeToFlag } from '@/utils/countryUtils';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, X, Search } from 'lucide-react';
 import CountrySelector from '../selectors/CountrySelector';
 import NationalitySelector from '../selectors/NationalitySelector';
 
