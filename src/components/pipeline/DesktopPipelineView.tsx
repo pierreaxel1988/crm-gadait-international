@@ -1,7 +1,10 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
 import PipelineFilters from './PipelineFilters';
 import { useKanbanData } from '@/hooks/useKanbanData';
 import { useNavigate } from 'react-router-dom';
@@ -191,7 +194,15 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
           <SheetContent side="bottom" className="h-screen w-full p-0 rounded-t-none bg-white">
             <div className="flex flex-col h-full">
               <SheetHeader className="px-6 py-4 border-b bg-white sticky top-0 z-10">
-                <SheetTitle className="text-lg font-medium text-left text-gray-900">Filtres</SheetTitle>
+                <div className="flex items-center justify-between">
+                  <SheetTitle className="text-lg font-medium text-gray-900">Filtres</SheetTitle>
+                  <SheetClose asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">Fermer</span>
+                    </Button>
+                  </SheetClose>
+                </div>
               </SheetHeader>
               <ScrollArea className="flex-1 px-6 bg-white">
                 <div className="py-4">

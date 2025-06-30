@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobilePipelineHeader from './mobile/MobilePipelineHeader';
 import MobileColumnList from './mobile/MobileColumnList';
 import PipelineFilters, { FilterOptions } from './PipelineFilters';
 import { PipelineType } from '@/types/lead';
-import { SlidersHorizontal, ArrowDownAZ, Clock, Tag } from 'lucide-react';
+import { SlidersHorizontal, ArrowDownAZ, Clock, Tag, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -113,7 +113,15 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
           <SheetContent side="bottom" className="h-screen w-full p-0 rounded-t-none bg-white">
             <div className="flex flex-col h-full">
               <SheetHeader className="px-6 py-4 border-b bg-white sticky top-0 z-10">
-                <SheetTitle className="text-lg font-medium text-left text-gray-900">Filtres</SheetTitle>
+                <div className="flex items-center justify-between">
+                  <SheetTitle className="text-lg font-medium text-gray-900">Filtres</SheetTitle>
+                  <SheetClose asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">Fermer</span>
+                    </Button>
+                  </SheetClose>
+                </div>
               </SheetHeader>
               <ScrollArea className="flex-1 px-6 bg-white">
                 <div className="py-4">
