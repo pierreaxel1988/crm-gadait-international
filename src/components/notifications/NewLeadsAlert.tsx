@@ -197,8 +197,17 @@ export const NewLeadsAlert = () => {
             <Button variant="outline" onClick={handleDismiss} className="border-gray-300 hover:bg-gray-50 transition-colors px-6 py-2 font-futura rounded-lg">
               Masquer
             </Button>
-            <Button onClick={() => navigate('/pipeline')} className="bg-loro-terracotta hover:bg-loro-terracotta/90 text-white px-6 py-2 transition-colors font-futura rounded-lg shadow-md hover:shadow-lg">
-              Voir le pipeline
+            <Button 
+              onClick={() => navigate('/pipeline')} 
+              className="relative overflow-hidden group bg-loro-terracotta hover:bg-loro-terracotta/90 text-white px-6 py-2 transition-all duration-300 font-futura rounded-lg shadow-md hover:shadow-xl transform hover:scale-105 hover:-translate-y-0.5"
+            >
+              {/* Effet de brillance qui traverse le bouton */}
+              <div className="absolute inset-0 w-0 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:w-full transition-all duration-700 -skew-x-12"></div>
+              
+              {/* Pulse subtil en arrière-plan */}
+              <div className="absolute inset-0 bg-white/10 rounded-lg animate-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              
+              <span className="relative z-10">Voir le pipeline</span>
             </Button>
           </div>
         </div>
