@@ -108,91 +108,86 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   const totalLeadCount = leadsByStatus.length;
 
   return (
-    <div className="flex">
-      {/* Main content */}
-      <div className={`flex-1 transition-all duration-300 ${filtersOpen ? 'mr-80' : ''}`}>
-        <div className="flex flex-col">
-          <div className="sticky top-0 z-20 bg-white pb-4 border-b space-y-4">
-            <PipelineHeader
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onToggleFilters={toggleFilters}
-              filtersOpen={filtersOpen}
-              activeFilters={activeFiltersCount}
-              isFilterActive={isFilterActive}
-              filters={filters}
-              onFilterChange={onFilterChange}
-              onClearFilters={onClearFilters}
-              teamMembers={teamMembers}
-              handleRefresh={handleRefresh}
-              isRefreshing={isRefreshing}
-            />
+    <div className="flex flex-col">
+      <div className="sticky top-0 z-20 bg-white pb-4 border-b space-y-4">
+        <PipelineHeader
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onToggleFilters={toggleFilters}
+          filtersOpen={filtersOpen}
+          activeFilters={activeFiltersCount}
+          isFilterActive={isFilterActive}
+          filters={filters}
+          onFilterChange={onFilterChange}
+          onClearFilters={onClearFilters}
+          teamMembers={teamMembers}
+          handleRefresh={handleRefresh}
+          isRefreshing={isRefreshing}
+        />
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
-              <TabsList className="bg-gray-100 p-1 rounded-xl w-fit">
-                {pipelines.map(pipeline => (
-                  <TabsTrigger
-                    key={pipeline.value}
-                    value={pipeline.value}
-                    className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
-                  >
-                    {pipeline.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-            
-            <div className="overflow-x-auto pb-3">
-              <Tabs 
-                value={activeStatus} 
-                onValueChange={setActiveStatus} 
-                className="w-full"
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
+          <TabsList className="bg-gray-100 p-1 rounded-xl w-fit">
+            {pipelines.map(pipeline => (
+              <TabsTrigger
+                key={pipeline.value}
+                value={pipeline.value}
+                className="flex-1 rounded-lg text-sm font-medium text-zinc-700 data-[state=active]:text-zinc-900 data-[state=active]:bg-white"
               >
-                <TabsList className="inline-flex w-auto p-1 h-10 bg-gray-100 rounded-full">
+                {pipeline.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+        
+        <div className="overflow-x-auto pb-3">
+          <Tabs 
+            value={activeStatus} 
+            onValueChange={setActiveStatus} 
+            className="w-full"
+          >
+            <TabsList className="inline-flex w-auto p-1 h-10 bg-gray-100 rounded-full">
+              <TabsTrigger 
+                value="all" 
+                className="rounded-full px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              >
+                Tous ({totalLeadCount})
+              </TabsTrigger>
+              {filteredColumns.map(column => 
+                leadCountByStatus[column.status] > 0 && (
                   <TabsTrigger 
-                    value="all" 
-                    className="rounded-full px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                    key={column.status} 
+                    value={column.status} 
+                    className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm"
                   >
-                    Tous ({totalLeadCount})
+                    {statusTranslations[column.status]} ({leadCountByStatus[column.status]})
                   </TabsTrigger>
-                  {filteredColumns.map(column => 
-                    leadCountByStatus[column.status] > 0 && (
-                      <TabsTrigger 
-                        key={column.status} 
-                        value={column.status} 
-                        className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                      >
-                        {statusTranslations[column.status]} ({leadCountByStatus[column.status]})
-                      </TabsTrigger>
-                    )
-                  )}
-                </TabsList>
-              </Tabs>
-            </div>
-          </div>
-          
-          <SortingControls 
-            sortBy={sortBy} 
-            onSortChange={setSortBy} 
-          />
-          
-          <div className="overflow-y-auto">
-            <LeadsList 
-              leads={sortedLeads}
-              isLoading={isLoading}
-              onLeadClick={handleLeadClick}
-              onAddLead={handleAddLead}
-              teamMembers={teamMembers}
-            />
-          </div>
-          
-          <AddLeadButton onClick={handleAddLead} />
+                )
+              )}
+            </TabsList>
+          </Tabs>
         </div>
       </div>
+      
+      <SortingControls 
+        sortBy={sortBy} 
+        onSortChange={setSortBy} 
+      />
+      
+      <div className="overflow-y-auto">
+        <LeadsList 
+          leads={sortedLeads}
+          isLoading={isLoading}
+          onLeadClick={handleLeadClick}
+          onAddLead={handleAddLead}
+          teamMembers={teamMembers}
+        />
+      </div>
+      
+      <AddLeadButton onClick={handleAddLead} />
 
-      {/* Fixed position filters panel */}
+      {/* Full screen filters sheet for all devices */}
       {filtersOpen && (
-        <div className="fixed right-0 top-0 h-full w-80 bg-white border-l shadow-xl z-30 pt-[144px]">
+        <Sheet open={filtersOpen} onOpenChange={toggleFilters}>
           <PipelineFilters 
             filters={filters}
             onFilterChange={onFilterChange}
@@ -202,15 +197,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
             isMobile={false}
             onApplyFilters={handleApplyFilters}
           />
-        </div>
-      )}
-
-      {/* Overlay when filters are open */}
-      {filtersOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-20"
-          onClick={toggleFilters}
-        />
+        </Sheet>
       )}
     </div>
   );

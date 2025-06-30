@@ -71,7 +71,7 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   };
 
   const filtersContent = (
-    <div className={`${isMobile ? 'pt-2' : 'p-4'} space-y-6`}>
+    <div className="space-y-6">
       {/* Status filter */}
       <StatusFilter 
         status={filters.status} 
@@ -141,23 +141,7 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     </div>
   );
 
-  // For desktop, display as a smooth scrolling panel with better performance
-  if (!isMobile) {
-    return (
-      <div className="bg-background border rounded-lg shadow-lg max-w-md">
-        <div className="sticky top-0 bg-background border-b px-4 py-3 rounded-t-lg z-10">
-          <h3 className="text-sm font-medium">Filtres</h3>
-        </div>
-        <ScrollArea className="h-[calc(100vh-200px)] max-h-[600px]">
-          <div className="px-4 pb-4">
-            {filtersContent}
-          </div>
-        </ScrollArea>
-      </div>
-    );
-  }
-
-  // For mobile, display in full screen sheet
+  // Always display in full screen sheet for all devices
   return (
     <SheetContent side="bottom" className="h-screen w-full p-0 rounded-t-none">
       <div className="flex flex-col h-full">
