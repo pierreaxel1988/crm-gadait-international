@@ -5,11 +5,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+
 interface NewLead {
   id: string;
   name: string;
   created_at: string;
 }
+
 export const NewLeadsAlert = () => {
   const [visible, setVisible] = useState(false);
   const [newLeads, setNewLeads] = useState<NewLead[]>([]);
@@ -174,9 +176,17 @@ export const NewLeadsAlert = () => {
                   })}
                     </p>
                   </div>
-                  <Button onClick={() => handleViewLead(lead.id)} className="text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center space-x-2 font-futura bg-loro-text">
+                  <Button 
+                    onClick={() => handleViewLead(lead.id)} 
+                    className="relative overflow-hidden group text-white px-4 py-2 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 flex items-center space-x-2 font-futura bg-loro-text hover:bg-loro-text/90 transform hover:scale-105 hover:-translate-y-0.5"
+                  >
+                    {/* Effet de brillance qui traverse le bouton */}
+                    <div className="absolute inset-0 w-0 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:w-full transition-all duration-700 -skew-x-12"></div>
                     
-                    <span>Contacter</span>
+                    {/* Pulse subtil en arrière-plan */}
+                    <div className="absolute inset-0 bg-white/10 rounded-lg animate-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    <span className="relative z-10">Contacter</span>
                   </Button>
                 </div>
               </div>)}
@@ -195,4 +205,5 @@ export const NewLeadsAlert = () => {
       </div>
     </div>;
 };
+
 export default NewLeadsAlert;
