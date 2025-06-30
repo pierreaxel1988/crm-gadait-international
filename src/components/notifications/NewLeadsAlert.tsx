@@ -164,7 +164,7 @@ export const NewLeadsAlert = () => {
                     <h4 className="text-gray-800 font-futura mb-1 font-medium text-lg">
                       {lead.name}
                     </h4>
-                    <p className="text-sm text-gray-500 font-futura">
+                    <p className="font-futura text-xs text-loro-terracotta">
                       Créé le {new Date(lead.created_at).toLocaleDateString('fr-FR', {
                     day: '2-digit',
                     month: '2-digit',
