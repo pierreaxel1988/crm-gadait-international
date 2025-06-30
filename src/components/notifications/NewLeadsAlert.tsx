@@ -5,7 +5,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-
 interface NewLead {
   id: string;
   name: string;
@@ -133,7 +132,7 @@ export const NewLeadsAlert = () => {
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 rounded-full animate-pulse"></div>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-red-800 font-futura">
+                <h3 className="text-lg text-red-800 font-futura font-medium">
                   Nouveaux leads à traiter immédiatement
                 </h3>
                 <p className="text-sm text-red-600/80 font-futura">
