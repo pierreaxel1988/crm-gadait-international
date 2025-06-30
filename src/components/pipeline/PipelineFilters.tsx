@@ -143,12 +143,12 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 
   // Always display in full screen sheet for all devices
   return (
-    <SheetContent side="bottom" className="h-screen w-full p-0 rounded-t-none">
+    <SheetContent side="bottom" className="h-screen w-full p-0 rounded-t-none bg-white">
       <div className="flex flex-col h-full">
         <SheetHeader className="px-6 py-4 border-b bg-white sticky top-0 z-10">
-          <SheetTitle className="text-lg font-medium text-left">Filtres</SheetTitle>
+          <SheetTitle className="text-lg font-medium text-left text-gray-900">Filtres</SheetTitle>
         </SheetHeader>
-        <ScrollArea className="flex-1 px-6">
+        <ScrollArea className="flex-1 px-6 bg-white">
           <div className="py-4">
             {filtersContent}
           </div>
