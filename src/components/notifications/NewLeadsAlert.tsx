@@ -174,10 +174,8 @@ export const NewLeadsAlert = () => {
                   })}
                     </p>
                   </div>
-                  <Button onClick={() => handleViewLead(lead.id)} className="bg-loro-navy hover:bg-loro-navy/90 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center space-x-2 font-futura">
-                    <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center">
-                      <Phone className="h-4 w-4 text-green-600" strokeWidth={2.5} />
-                    </div>
+                  <Button onClick={() => handleViewLead(lead.id)} className="text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center space-x-2 font-futura bg-loro-text">
+                    
                     <span>Contacter</span>
                   </Button>
                 </div>
