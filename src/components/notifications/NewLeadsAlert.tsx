@@ -5,21 +5,23 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-
 interface NewLead {
   id: string;
   name: string;
   created_at: string;
 }
-
 export const NewLeadsAlert = () => {
   const [visible, setVisible] = useState(false);
   const [newLeads, setNewLeads] = useState<NewLead[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastShown, setLastShown] = useState(0);
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const NOTIFICATION_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
   const fetchNewLeads = async () => {
@@ -102,7 +104,6 @@ export const NewLeadsAlert = () => {
       supabase.removeChannel(channel);
     };
   }, [user]);
-
   const handleDismiss = () => {
     setVisible(false);
     // Update last shown time so it will show again after the interval
@@ -113,16 +114,12 @@ export const NewLeadsAlert = () => {
       description: `Vous pouvez toujours voir les nouveaux leads dans la colonne "Nouveaux" du pipeline.`
     });
   };
-
   const handleViewLead = (leadId: string) => {
     navigate(`/leads/${leadId}?tab=actions`);
     setVisible(false);
   };
-
   if (!visible || loading || newLeads.length === 0) return null;
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
+  return <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden animate-in fade-in-0 slide-in-from-top-5 duration-500 border border-red-100">
         {/* Header avec gradient plus élégant */}
         <div className="px-6 py-4 bg-gradient-to-r from-red-50 via-red-25 to-orange-50 border-b border-red-100/50">
@@ -143,10 +140,7 @@ export const NewLeadsAlert = () => {
                 </p>
               </div>
             </div>
-            <button 
-              onClick={handleDismiss} 
-              className="text-red-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-100/50"
-            >
+            <button onClick={handleDismiss} className="text-red-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-100/50">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -162,61 +156,45 @@ export const NewLeadsAlert = () => {
           
           {/* Liste des leads avec design amélioré */}
           <div className="space-y-3 max-h-60 overflow-auto">
-            {newLeads.map((lead, index) => (
-              <div 
-                key={lead.id} 
-                className="bg-gradient-to-r from-gray-50 to-gray-25 border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all duration-200 hover:border-gray-300"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
+            {newLeads.map((lead, index) => <div key={lead.id} className="bg-gradient-to-r from-gray-50 to-gray-25 border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all duration-200 hover:border-gray-300" style={{
+            animationDelay: `${index * 100}ms`
+          }}>
                 <div className="flex justify-between items-center">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-800 font-futura text-lg mb-1">
+                    <h4 className="text-gray-800 font-futura mb-1 font-medium text-lg">
                       {lead.name}
                     </h4>
                     <p className="text-sm text-gray-500 font-futura">
                       Créé le {new Date(lead.created_at).toLocaleDateString('fr-FR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                     </p>
                   </div>
-                  <Button 
-                    onClick={() => handleViewLead(lead.id)} 
-                    className="bg-loro-navy hover:bg-loro-navy/90 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center space-x-2 font-futura"
-                  >
+                  <Button onClick={() => handleViewLead(lead.id)} className="bg-loro-navy hover:bg-loro-navy/90 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center space-x-2 font-futura">
                     <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center">
                       <Phone className="h-4 w-4 text-green-600" strokeWidth={2.5} />
                     </div>
                     <span>Contacter</span>
                   </Button>
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
           
           {/* Boutons d'action avec design amélioré */}
           <div className="mt-6 flex justify-center gap-3">
-            <Button 
-              variant="outline" 
-              onClick={handleDismiss} 
-              className="border-gray-300 hover:bg-gray-50 transition-colors px-6 py-2 font-futura rounded-lg"
-            >
+            <Button variant="outline" onClick={handleDismiss} className="border-gray-300 hover:bg-gray-50 transition-colors px-6 py-2 font-futura rounded-lg">
               Masquer
             </Button>
-            <Button 
-              onClick={() => navigate('/pipeline')} 
-              className="bg-loro-terracotta hover:bg-loro-terracotta/90 text-white px-6 py-2 transition-colors font-futura rounded-lg shadow-md hover:shadow-lg"
-            >
+            <Button onClick={() => navigate('/pipeline')} className="bg-loro-terracotta hover:bg-loro-terracotta/90 text-white px-6 py-2 transition-colors font-futura rounded-lg shadow-md hover:shadow-lg">
               Voir le pipeline
             </Button>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default NewLeadsAlert;
