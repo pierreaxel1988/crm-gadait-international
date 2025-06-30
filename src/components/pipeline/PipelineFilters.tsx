@@ -157,15 +157,19 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     );
   }
 
-  // For mobile, display in a sheet/drawer
+  // For mobile, display in full screen sheet
   return (
-    <SheetContent side="right" className="w-full sm:max-w-md p-0 pt-12">
-      <SheetHeader className="px-4 py-2 border-b">
-        <SheetTitle className="text-sm font-normal">Filtres</SheetTitle>
-      </SheetHeader>
-      <ScrollArea className="h-[calc(100vh-6rem)] px-4 pb-6">
-        {filtersContent}
-      </ScrollArea>
+    <SheetContent side="bottom" className="h-screen w-full p-0 rounded-t-none">
+      <div className="flex flex-col h-full">
+        <SheetHeader className="px-6 py-4 border-b bg-white sticky top-0 z-10">
+          <SheetTitle className="text-lg font-medium text-left">Filtres</SheetTitle>
+        </SheetHeader>
+        <ScrollArea className="flex-1 px-6">
+          <div className="py-4">
+            {filtersContent}
+          </div>
+        </ScrollArea>
+      </div>
     </SheetContent>
   );
 };
