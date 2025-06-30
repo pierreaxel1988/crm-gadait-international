@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Sheet } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobilePipelineHeader from './mobile/MobilePipelineHeader';
 import MobileColumnList from './mobile/MobileColumnList';
@@ -109,15 +110,26 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
 
       {filtersOpen && (
         <Sheet open={filtersOpen} onOpenChange={toggleFilters}>
-          <PipelineFilters 
-            filters={filters}
-            onFilterChange={onFilterChange}
-            onClearFilters={onClearFilters}
-            assignedToOptions={teamMembers}
-            isFilterActive={isFilterActive}
-            isMobile={true}
-            onApplyFilters={handleApplyFilters}
-          />
+          <SheetContent side="bottom" className="h-screen w-full p-0 rounded-t-none bg-white">
+            <div className="flex flex-col h-full">
+              <SheetHeader className="px-6 py-4 border-b bg-white sticky top-0 z-10">
+                <SheetTitle className="text-lg font-medium text-left text-gray-900">Filtres</SheetTitle>
+              </SheetHeader>
+              <ScrollArea className="flex-1 px-6 bg-white">
+                <div className="py-4">
+                  <PipelineFilters 
+                    filters={filters}
+                    onFilterChange={onFilterChange}
+                    onClearFilters={onClearFilters}
+                    assignedToOptions={teamMembers}
+                    isFilterActive={isFilterActive}
+                    isMobile={true}
+                    onApplyFilters={handleApplyFilters}
+                  />
+                </div>
+              </ScrollArea>
+            </div>
+          </SheetContent>
         </Sheet>
       )}
     </div>
