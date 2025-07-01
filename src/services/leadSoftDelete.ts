@@ -95,8 +95,14 @@ export const getDeletedLeads = async (): Promise<LeadDetailed[]> => {
       throw error;
     }
 
-    // Map the data to LeadDetailed format
-    return (data || []).map(lead => mapToLeadDetailed(lead));
+    // Map the data to LeadDetailed format with additional deleted_at and deletion info
+    return (data || []).map(lead => ({
+      ...mapToLeadDetailed(lead),
+      deleted_at: lead.deleted_at,
+      deleted_by: lead.deleted_by,
+      deletion_reason: lead.deletion_reason,
+      deleted_by_member: lead.deleted_by_member
+    }));
   } catch (error) {
     console.error("Error in getDeletedLeads:", error);
     throw error;

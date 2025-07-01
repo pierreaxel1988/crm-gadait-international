@@ -247,4 +247,13 @@ export interface LeadDetailed {
 
   // Nouveau champ pour indiquer si une rénovation est nécessaire (pour les propriétaires)
   renovation_needed?: boolean;
+
+  // Soft delete fields (for admin interface)
+  deleted_at?: string | null;
+  deleted_by?: string | null;
+  deletion_reason?: string | null;
+  deleted_by_member?: {
+    name: string;
+    email: string;
+  } | null;
 }

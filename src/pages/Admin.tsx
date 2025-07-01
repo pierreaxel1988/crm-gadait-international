@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChartDataForm from '@/components/admin/ChartDataForm';
 import DashboardCard from '@/components/dashboard/DashboardCard';
-import { BarChart3, Settings2, Users } from 'lucide-react';
+import { BarChart3, Settings2, Users, Trash2 } from 'lucide-react';
 import UsersManagement from '@/components/admin/UsersManagement';
+import DeletedLeadsManagement from '@/components/admin/DeletedLeadsManagement';
 
 // Données mockées initiales pour le graphique
 const initialChartData = [
@@ -32,6 +32,7 @@ const Admin = () => {
           <TabsTrigger value="chart-data">Données du graphique</TabsTrigger>
           <TabsTrigger value="settings">Paramètres</TabsTrigger>
           <TabsTrigger value="users">Utilisateurs</TabsTrigger>
+          <TabsTrigger value="deleted-leads">Corbeille</TabsTrigger>
         </TabsList>
         
         <TabsContent value="chart-data" className="space-y-6">
@@ -78,6 +79,16 @@ const Admin = () => {
             icon={<Users className="h-5 w-5" />}
           >
             <UsersManagement />
+          </DashboardCard>
+        </TabsContent>
+
+        <TabsContent value="deleted-leads" className="space-y-6">
+          <DashboardCard 
+            title="Leads supprimés" 
+            subtitle="Visualisez et restaurez les leads dans la corbeille"
+            icon={<Trash2 className="h-5 w-5" />}
+          >
+            <DeletedLeadsManagement />
           </DashboardCard>
         </TabsContent>
       </Tabs>
