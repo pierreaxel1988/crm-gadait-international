@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { LeadDetailed, SimpleLead } from "@/types/lead";
-import { mapToLeadDetailed, mapToSimpleLead } from "./utils/leadMappers";
+import { LeadDetailed } from "@/types/lead";
+import { mapToLeadDetailed } from "./utils/leadMappers";
 
 /**
  * Fetches all leads from the database (excluding soft-deleted ones by default)
@@ -68,6 +68,18 @@ export const getLead = async (id: string, includeDeleted: boolean = false): Prom
 /**
  * Converts a detailed lead to a simple lead format
  */
-export const convertToSimpleLead = (lead: LeadDetailed): SimpleLead => {
-  return mapToSimpleLead(lead);
+export const convertToSimpleLead = (lead: LeadDetailed): any => {
+  return {
+    id: lead.id,
+    name: lead.name,
+    email: lead.email,
+    phone: lead.phone,
+    status: lead.status,
+    assignedTo: lead.assignedTo,
+    createdAt: lead.createdAt,
+    tags: lead.tags || [],
+    budget: lead.budget,
+    location: lead.desiredLocation || lead.location,
+    pipelineType: lead.pipelineType || 'purchase'
+  };
 };

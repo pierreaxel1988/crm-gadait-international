@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { LeadDetailed } from "@/types/lead";
+import { mapToLeadDetailed } from "./utils/leadMappers";
 import { toast } from "@/hooks/use-toast";
 
 /**
@@ -94,7 +95,8 @@ export const getDeletedLeads = async (): Promise<LeadDetailed[]> => {
       throw error;
     }
 
-    return data || [];
+    // Map the data to LeadDetailed format
+    return (data || []).map(lead => mapToLeadDetailed(lead));
   } catch (error) {
     console.error("Error in getDeletedLeads:", error);
     throw error;

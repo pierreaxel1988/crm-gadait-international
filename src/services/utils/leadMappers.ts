@@ -1,3 +1,4 @@
+
 import { LeadDetailed } from "@/types/lead";
 
 // Important UUIDs for team members
@@ -239,7 +240,7 @@ export const formatBudget = (budget: string | undefined, currency: string = 'EUR
 /**
  * Converts a lead to a simplified format for lists
  */
-export const convertToSimpleLead = (lead: LeadDetailed): any => {
+export const mapToSimpleLead = (lead: LeadDetailed): any => {
   return {
     id: lead.id,
     name: lead.name,
