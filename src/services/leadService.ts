@@ -7,7 +7,7 @@ import {
   updateLead,
 } from "./leadCore";
 import { softDeleteLead } from "./leadSoftDelete";
-import { convertToSimpleLead } from "./utils/leadMappers";
+import { mapToSimpleLead } from "./utils/leadMappers";
 import { addActionToLead } from "./leadActions";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -200,7 +200,7 @@ export {
   getLeads, 
   getLead, 
   updateLead, 
-  convertToSimpleLead,
+  mapToSimpleLead as convertToSimpleLead,
   addActionToLead
 };
 
