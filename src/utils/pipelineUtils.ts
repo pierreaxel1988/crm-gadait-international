@@ -31,6 +31,9 @@ export const OWNERS_STATUSES: LeadStatus[] = [
  * Checks if a status is valid for a given pipeline type
  */
 export const isStatusValidForPipeline = (status: LeadStatus, pipelineType: PipelineType): boolean => {
+  // "Deleted" is valid for all pipeline types (admin only)
+  if (status === 'Deleted') return true;
+  
   if (pipelineType === 'owners') {
     return OWNERS_STATUSES.includes(status);
   }

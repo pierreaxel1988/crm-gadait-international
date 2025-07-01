@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -14,6 +15,8 @@ import TaskTypeIndicator from './card/TaskTypeIndicator';
 import AssignedUser from './card/AssignedUser';
 import ImportInfo from './card/ImportInfo';
 import TagList from './card/TagList';
+import RestoreActions from './card/RestoreActions';
+import { useAuth } from '@/hooks/useAuth';
 
 export type TaskType = 
   | 'Call'
@@ -48,6 +51,7 @@ export interface KanbanItem {
   createdAt?: string;
   importedAt?: string;
   nextFollowUpDate?: string;
+  deleted_at?: string;
 }
 
 interface KanbanCardProps {
@@ -59,21 +63,32 @@ interface KanbanCardProps {
 
 const KanbanCard = ({ item, className, draggable = false, pipelineType }: KanbanCardProps) => {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   
   // Debug des informations du lead
   console.log(`KanbanCard: ${item.name}`, {
     id: item.id,
     status: item.status,
     pipelineType: item.pipelineType,
-    providedPipelineType: pipelineType
+    providedPipelineType: pipelineType,
+    deleted_at: item.deleted_at
   });
 
   const handleCardClick = () => {
+    // Don't navigate if this is a deleted lead (let admin decide if they want to restore first)
+    if (item.status === 'Deleted') return;
+    
     // Navigate to lead detail page with criteria tab preselected
     navigate(`/leads/${item.id}?tab=criteria`);
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    // Don't allow dragging deleted leads
+    if (item.status === 'Deleted') {
+      e.preventDefault();
+      return;
+    }
+    
     e.dataTransfer.setData('application/json', JSON.stringify(item));
     e.dataTransfer.effectAllowed = 'move';
     
@@ -109,7 +124,9 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
 
   // Déterminer la couleur de la bordure en fonction du statut de la tâche
   const getCardBorderClass = () => {
-    if (isOverdue()) {
+    if (item.status === 'Deleted') {
+      return 'bg-red-50 border-red-200'; // Special styling for deleted leads
+    } else if (isOverdue()) {
       return 'bg-[#FFDEE2]/30'; // Soft pink background for overdue tasks
     } else if (item.nextFollowUpDate && isToday(new Date(item.nextFollowUpDate))) {
       return 'bg-amber-50'; // Changed from border-amber-300 to a light amber background
@@ -119,24 +136,32 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     return '';
   };
 
+  const isDeleted = item.status === 'Deleted';
+
   return (
     <Card 
       className={cn(
         'border shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden',
         'bg-white',
-        draggable && 'cursor-grab active:cursor-grabbing',
+        draggable && !isDeleted && 'cursor-grab active:cursor-grabbing',
+        isDeleted && 'opacity-75',
         getCardBorderClass(),
         className
       )}
       onClick={handleCardClick}
-      draggable={draggable}
+      draggable={draggable && !isDeleted}
       onDragStart={draggable ? handleDragStart : undefined}
       onDragEnd={draggable ? handleDragEnd : undefined}
     >
       <CardContent className="p-4">
         {/* En-tête avec nom et tags */}
         <div className="flex justify-between items-start mb-3">
-          <h3 className="font-medium text-sm text-gray-900">{item.name}</h3>
+          <h3 className={cn(
+            "font-medium text-sm",
+            isDeleted ? "text-gray-500" : "text-gray-900"
+          )}>
+            {item.name}
+          </h3>
           <TagList tags={item.tags} />
         </div>
         
@@ -162,20 +187,34 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
         <ImportInfo importedAt={item.importedAt} createdAt={item.createdAt} />
         
         {/* Commercial assigné ou bouton pour assigner */}
-        <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-          <AssignedUser 
-            assignedToId={item.assignedTo} 
-            onAssignClick={handleAssignClick} 
+        {!isDeleted && (
+          <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
+            <AssignedUser 
+              assignedToId={item.assignedTo} 
+              onAssignClick={handleAssignClick} 
+            />
+            
+            {/* Type de tâche avec indication de statut */}
+            <TaskTypeIndicator 
+              taskType={item.taskType} 
+              phoneNumber={item.phone}
+              nextFollowUpDate={item.nextFollowUpDate}
+              isOverdue={isOverdue()}
+            />
+          </div>
+        )}
+        
+        {/* Actions de restauration pour les leads supprimés (visible seulement pour les admins) */}
+        {isDeleted && isAdmin && (
+          <RestoreActions 
+            leadId={item.id} 
+            leadName={item.name}
+            onRestore={() => {
+              // Force a refresh of the data
+              window.location.reload();
+            }}
           />
-          
-          {/* Type de tâche avec indication de statut */}
-          <TaskTypeIndicator 
-            taskType={item.taskType} 
-            phoneNumber={item.phone}
-            nextFollowUpDate={item.nextFollowUpDate}
-            isOverdue={isOverdue()}
-          />
-        </div>
+        )}
       </CardContent>
     </Card>
   );

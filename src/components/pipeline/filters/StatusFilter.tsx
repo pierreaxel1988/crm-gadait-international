@@ -5,6 +5,7 @@ import { LeadStatus } from '@/components/common/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { PipelineType } from '@/types/lead';
 import { getStatusesForPipeline } from '@/utils/pipelineUtils';
+import { useAuth } from '@/hooks/useAuth';
 
 interface StatusFilterProps {
   status: LeadStatus | null;
@@ -17,8 +18,13 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
   onStatusChange,
   pipelineType = 'purchase'
 }) => {
+  const { isAdmin } = useAuth();
+
   // Get statuses based on the current pipeline type
-  const statuses = [null, ...getStatusesForPipeline(pipelineType)];
+  const baseStatuses = [null, ...getStatusesForPipeline(pipelineType)];
+  
+  // Add "Deleted" status only for admins
+  const statuses = isAdmin ? [...baseStatuses, 'Deleted'] : baseStatuses;
 
   // Map status values to display labels
   const getStatusLabel = (status: LeadStatus | null): string => {
@@ -34,7 +40,8 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
       'Deposit': pipelineType === 'owners' ? 'Compromis signé' : 'Dépôt reçu',
       'Signed': pipelineType === 'owners' ? 'Mandat signé' : 'Signature finale',
       'Gagné': pipelineType === 'owners' ? 'Vente finalisée' : 'Conclus',
-      'Perdu': pipelineType === 'owners' ? 'Perdu/Annulé' : 'Perdu'
+      'Perdu': pipelineType === 'owners' ? 'Perdu/Annulé' : 'Perdu',
+      'Deleted': 'Supprimé'
     };
     
     return statusLabels[status] || status;

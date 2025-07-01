@@ -13,7 +13,8 @@ export type LeadStatus =
   | 'Deposit'          // Compromis signé / Dépôt reçu
   | 'Signed'           // Mandat signé / Signature finale
   | 'Gagné'            // Vente finalisée / Conclus
-  | 'Perdu';           // Perdu/Annulé / Perdu
+  | 'Perdu'            // Perdu/Annulé / Perdu
+  | 'Deleted';         // Supprimé (visible seulement pour les admins)
 
 interface StatusBadgeProps {
   status: LeadStatus;
@@ -43,6 +44,8 @@ const StatusBadge = ({ status, className }: StatusBadgeProps) => {
         return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
       case 'Perdu':
         return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+      case 'Deleted':
+        return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
     }

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Check, ChevronDown, Filter } from 'lucide-react';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { useAuth } from '@/hooks/useAuth';
 
 interface StatusFilterProps {
   selectedStatus: LeadStatus | 'All';
@@ -18,8 +19,10 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
   setShowStatusDropdown,
   setShowTagsDropdown
 }) => {
+  const { isAdmin } = useAuth();
+
   // Standardized statuses matching the database values
-  const statuses: (LeadStatus | 'All')[] = [
+  const baseStatuses: (LeadStatus | 'All')[] = [
     'All',
     'New',       // Nouveaux
     'Contacted', // Contactés
@@ -32,6 +35,9 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
     'Gagné',     // Conclus
     'Perdu'      // Perdu
   ];
+
+  // Add "Deleted" status only for admins
+  const statuses = isAdmin ? [...baseStatuses, 'Deleted'] : baseStatuses;
 
   return (
     <div className="relative w-full sm:w-auto">

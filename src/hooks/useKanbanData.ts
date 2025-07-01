@@ -12,6 +12,7 @@ export interface KanbanFilters {
   source?: string;
   country?: string;
   propertyType?: string;
+  status?: LeadStatus | null;
   priceRange?: {
     min?: number;
     max?: number;
@@ -122,7 +123,16 @@ export const useKanbanData = (
         query = query.eq('pipeline_type', activeTab);
       }
 
-      // Apply filters
+      // Handle deleted leads based on status filter
+      if (filters.status === 'Deleted') {
+        // When "Deleted" filter is selected, show only deleted leads
+        query = query.not('deleted_at', 'is', null);
+      } else {
+        // By default, exclude deleted leads (unless specifically filtering for them)
+        query = query.is('deleted_at', null);
+      }
+
+      // Apply other filters
       if (filters.assignedTo) {
         query = query.eq('assigned_to', filters.assignedTo);
       }
@@ -141,6 +151,11 @@ export const useKanbanData = (
 
       if (filters.tags && filters.tags.length > 0) {
         query = query.overlaps('tags', filters.tags);
+      }
+
+      // Apply status filter (except for "Deleted" which is handled above)
+      if (filters.status && filters.status !== 'Deleted') {
+        query = query.eq('status', filters.status);
       }
 
       if (filters.searchTerm) {
@@ -170,7 +185,15 @@ export const useKanbanData = (
       console.log('Raw data from Supabase:', rawData?.length || 0, 'leads');
       
       // Convert raw data to LeadDetailed format using mapToLeadDetailed
-      const convertedData = rawData?.map(mapToLeadDetailed) || [];
+      const convertedData = rawData?.map(lead => {
+        const mappedLead = mapToLeadDetailed(lead);
+        // If the lead is deleted, set its status to "Deleted" for display purposes
+        if (lead.deleted_at) {
+          mappedLead.status = 'Deleted' as LeadStatus;
+        }
+        return mappedLead;
+      }) || [];
+      
       console.log('Converted data:', convertedData.length, 'leads');
       
       // Log some sample leads for debugging
@@ -181,7 +204,8 @@ export const useKanbanData = (
             name: lead.name,
             status: lead.status,
             pipelineType: lead.pipelineType,
-            assignedTo: lead.assignedTo
+            assignedTo: lead.assignedTo,
+            deleted_at: lead.deleted_at
           });
         });
       }
@@ -209,10 +233,20 @@ export const useKanbanData = (
         { title: 'Fermé', status: 'Gagné' as LeadStatus, items: statusGroups['Gagné'] || [], pipelineType: activeTab }
       ];
       
+      // Add "Deleted" column if there are deleted leads and user is admin
+      if (statusGroups['Deleted'] && statusGroups['Deleted'].length > 0 && isUserAdmin) {
+        columns.push({
+          title: 'Supprimé',
+          status: 'Deleted' as LeadStatus,
+          items: statusGroups['Deleted'],
+          pipelineType: activeTab
+        });
+      }
+      
       // Add any additional status columns that exist in the data but aren't in our standard columns
       Object.keys(statusGroups).forEach(status => {
         const existingColumn = columns.find(col => col.status === status);
-        if (!existingColumn && statusGroups[status].length > 0) {
+        if (!existingColumn && statusGroups[status].length > 0 && status !== 'Deleted') {
           columns.push({
             title: status,
             status: status as LeadStatus,
