@@ -1,11 +1,9 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import { Card, CardContent } from "@/components/ui/card";
-import { isPast, isToday as isDateToday } from 'date-fns';
 import { PipelineType } from '@/types/lead';
 
 // Import sub-components
@@ -16,7 +14,13 @@ import AssignedUser from './card/AssignedUser';
 import ImportInfo from './card/ImportInfo';
 import TagList from './card/TagList';
 import RestoreActions from './card/RestoreActions';
+
+// Import hooks and utilities
 import { useAuth } from '@/hooks/useAuth';
+import { getTaskStatus } from './utils/taskStatusUtils';
+import { getCardBorderClass } from './utils/cardStyleUtils';
+import { useDragHandlers } from './hooks/useDragHandlers';
+import { useCardHandlers } from './hooks/useCardHandlers';
 
 export type TaskType = 
   | 'Call'
@@ -62,7 +66,6 @@ interface KanbanCardProps {
 }
 
 const KanbanCard = ({ item, className, draggable = false, pipelineType }: KanbanCardProps) => {
-  const navigate = useNavigate();
   const { isAdmin } = useAuth();
   
   // Debug des informations du lead
@@ -74,105 +77,21 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     deleted_at: item.deleted_at
   });
 
-  const handleCardClick = () => {
-    // Don't navigate if this is a deleted lead (let admin decide if they want to restore first)
-    if (item.status === 'Deleted') return;
-    
-    // Navigate to lead detail page with criteria tab preselected
-    navigate(`/leads/${item.id}?tab=criteria`);
-  };
+  // Get task status using utility function
+  const { isOverdue, isTaskToday, isFutureTask, hasScheduledAction } = getTaskStatus(item.nextFollowUpDate);
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    // Don't allow dragging deleted leads
-    if (item.status === 'Deleted') {
-      e.preventDefault();
-      return;
-    }
-    
-    e.dataTransfer.setData('application/json', JSON.stringify(item));
-    e.dataTransfer.effectAllowed = 'move';
-    
-    // Add a subtle visual effect
-    setTimeout(() => {
-      e.currentTarget.classList.add('opacity-50');
-    }, 0);
-  };
-  
-  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
-    e.currentTarget.classList.remove('opacity-50');
-  };
+  // Get handlers
+  const { handleCardClick, handleAssignClick, handleLinkClick } = useCardHandlers(item);
+  const { handleDragStart, handleDragEnd } = useDragHandlers(item, draggable);
 
-  const handleAssignClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // Navigation vers la page d'édition du lead pour assigner un commercial
-    navigate(`/leads/${item.id}?assign=true`);
-  };
-
-  const handleLinkClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (item.url) {
-      window.open(item.url, '_blank');
-    }
-  };
-  
-  // Déterminer si la tâche est en retard (seulement si une date est définie)
-  const isOverdue = () => {
-    if (!item.nextFollowUpDate) return false;
-    const followUpDateTime = new Date(item.nextFollowUpDate);
-    return isPast(followUpDateTime) && !isDateToday(followUpDateTime);
-  };
-
-  // Déterminer si la tâche est prévue pour aujourd'hui
-  const isTaskToday = () => {
-    if (!item.nextFollowUpDate) return false;
-    const followUpDateTime = new Date(item.nextFollowUpDate);
-    return isDateToday(followUpDateTime);
-  };
-
-  // Déterminer si la tâche est prévue dans le futur
-  const isFutureTask = () => {
-    if (!item.nextFollowUpDate) return false;
-    const followUpDateTime = new Date(item.nextFollowUpDate);
-    return !isPast(followUpDateTime) && !isDateToday(followUpDateTime);
-  };
-
-  // Déterminer la couleur de la bordure en fonction du statut de la tâche
-  const getCardBorderClass = () => {
-    // Leads supprimés - style spécial
-    if (item.status === 'Deleted') {
-      return 'bg-red-50 border-red-200';
-    }
-    
-    // Leads fermés (Gagné/Perdu) - style neutre même s'ils avaient des actions
-    const closedStatuses = ['Gagné', 'Perdu'];
-    if (closedStatuses.includes(item.status)) {
-      return 'bg-gray-50 border-gray-200';
-    }
-    
-    // Logique basée sur les actions prévues
-    if (!item.nextFollowUpDate) {
-      // Pas d'action prévue - style neutre/gris
-      return 'bg-gray-50/50 border-gray-200';
-    }
-    
-    // Actions en retard - rouge/rose
-    if (isOverdue()) {
-      return 'bg-red-50/80 border-red-200';
-    }
-    
-    // Actions prévues aujourd'hui - ambre
-    if (isTaskToday()) {
-      return 'bg-amber-50/80 border-amber-200';
-    }
-    
-    // Actions futures - vert léger
-    if (isFutureTask()) {
-      return 'bg-green-50/60 border-green-200';
-    }
-    
-    // Fallback - neutre
-    return 'bg-white border-gray-200';
-  };
+  // Get card styling
+  const cardBorderClass = getCardBorderClass(
+    item.status, 
+    isOverdue, 
+    isTaskToday, 
+    isFutureTask, 
+    hasScheduledAction
+  );
 
   const isDeleted = item.status === 'Deleted';
 
@@ -182,13 +101,13 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
         'border shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden',
         draggable && !isDeleted && 'cursor-grab active:cursor-grabbing',
         isDeleted && 'opacity-75',
-        getCardBorderClass(),
+        cardBorderClass,
         className
       )}
       onClick={handleCardClick}
       draggable={draggable && !isDeleted}
-      onDragStart={draggable ? handleDragStart : undefined}
-      onDragEnd={draggable ? handleDragEnd : undefined}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
     >
       <CardContent className="p-4">
         {/* En-tête avec nom et tags */}
@@ -236,7 +155,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
               taskType={item.taskType} 
               phoneNumber={item.phone}
               nextFollowUpDate={item.nextFollowUpDate}
-              isOverdue={isOverdue()}
+              isOverdue={isOverdue}
             />
           </div>
         )}
