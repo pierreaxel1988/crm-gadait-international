@@ -1,58 +1,44 @@
 
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { LeadStatus } from '@/components/common/StatusBadge';
-import { PipelineType } from '@/types/lead';
 
 interface StatusBadgeProps {
   status: LeadStatus;
-  pipelineType?: PipelineType;
+  className?: string;
 }
 
-const StatusBadge = ({ status, pipelineType = 'purchase' }: StatusBadgeProps) => {
-  const statusConfig = {
-    'New': { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
-    'Contacted': { bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-200' },
-    'Qualified': { bg: 'bg-indigo-100', text: 'text-indigo-800', border: 'border-indigo-200' },
-    'Proposal': { bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-200' },
-    'Visit': { bg: 'bg-pink-100', text: 'text-pink-800', border: 'border-pink-200' },
-    'Offre': { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
-    'Deposit': { bg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-200' },
-    'Signed': { bg: 'bg-emerald-100', text: 'text-emerald-800', border: 'border-emerald-200' },
-    'Negotiation': { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
-    'Won': { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
-    'Gagné': { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
-    'Lost': { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' },
-    'Perdu': { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' },
-    'Archived': { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-200' }
-  };
-  
-  const config = statusConfig[status] || { bg: 'bg-gray-100', text: 'text-gray-800', border: 'border-gray-200' };
-  
-  // Get the display label based on status and pipeline type
-  const getStatusLabel = (status: LeadStatus, pipelineType: PipelineType): string => {
-    if (pipelineType === 'owners') {
-      const ownerStatusLabels: Record<LeadStatus, string> = {
-        'New': 'Premier contact',
-        'Contacted': 'RDV programmé',
-        'Qualified': 'Visite effectuée',
-        'Proposal': 'Mandat en négo',
-        'Signed': 'Mandat signé',
-        'Visit': 'En commercialisation',
-        'Offre': 'Offre reçue',
-        'Deposit': 'Compromis signé',
-        'Gagné': 'Vente finalisée',
-        'Perdu': 'Perdu/Annulé'
-      };
-      return ownerStatusLabels[status] || status;
-    }
+const StatusBadge = ({ status, className }: StatusBadgeProps) => {
+  const getStatusStyles = (status: LeadStatus) => {
+    const statusStyles: Record<LeadStatus, string> = {
+      'New': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      'Contacted': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+      'Qualified': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+      'Proposal': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300',
+      'Visit': 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
+      'Offre': 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+      'Deposit': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+      'Signed': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+      'Gagné': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+      'Perdu': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+      'Deleted': 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+    };
     
-    return status;
+    return statusStyles[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
   };
-  
+
   return (
-    <div className={`px-2.5 py-0.5 rounded-full text-xs font-futura tracking-wide uppercase ${config.bg} ${config.text}`}>
-      {getStatusLabel(status, pipelineType)}
-    </div>
+    <Badge
+      weight="normal"
+      className={cn(
+        'luxury-badge font-futuraLight',
+        getStatusStyles(status),
+        className
+      )}
+    >
+      {status}
+    </Badge>
   );
 };
 

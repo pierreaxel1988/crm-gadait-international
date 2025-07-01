@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import ActiveFiltersList from '../filters/ActiveFiltersList';
 import SmartSearch from '@/components/common/SmartSearch';
 import { useLeadSearch, SearchResult } from '@/hooks/useLeadSearch';
+import { Trash2 } from 'lucide-react';
 
 interface MobilePipelineHeaderProps {
   searchTerm: string;
@@ -53,10 +54,22 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
 
   const renderLeadItem = (lead: SearchResult) => (
     <div className="flex flex-col">
-      <div className="font-medium">{lead.name}</div>
+      <div className="flex items-center gap-2">
+        <div className="font-medium">{lead.name}</div>
+        {lead.deleted_at && (
+          <div className="flex items-center gap-1 text-red-600">
+            <Trash2 className="h-3 w-3" />
+            <span className="text-xs font-medium">Supprimé</span>
+          </div>
+        )}
+      </div>
       <div className="flex text-xs text-muted-foreground gap-2 flex-wrap">
         {lead.status && (
-          <span className="bg-gray-100 px-1 rounded text-xs">{lead.status}</span>
+          <span className={`px-1 rounded text-xs ${
+            lead.status === 'Deleted' ? 'bg-red-100 text-red-700' : 'bg-gray-100'
+          }`}>
+            {lead.status === 'Deleted' ? 'Supprimé' : lead.status}
+          </span>
         )}
         {lead.desiredLocation && (
           <span className="text-xs truncate">{lead.desiredLocation}</span>

@@ -24,7 +24,7 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
   const baseStatuses = [null, ...getStatusesForPipeline(pipelineType)];
   
   // Add "Deleted" status only for admins
-  const statuses = isAdmin ? [...baseStatuses, 'Deleted'] : baseStatuses;
+  const statuses = isAdmin ? [...baseStatuses, 'Deleted' as LeadStatus] : baseStatuses;
 
   // Map status values to display labels
   const getStatusLabel = (status: LeadStatus | null): string => {
@@ -67,9 +67,9 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
             variant={status === statusValue ? "default" : "outline"}
             size="sm"
             className="text-xs"
-            onClick={() => onStatusChange(statusValue)}
+            onClick={() => onStatusChange(statusValue as LeadStatus)}
           >
-            {getStatusLabel(statusValue)}
+            {getStatusLabel(statusValue as LeadStatus)}
           </Button>
         ))}
       </div>

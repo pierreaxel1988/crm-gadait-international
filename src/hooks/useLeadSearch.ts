@@ -21,6 +21,7 @@ export interface SearchResult {
   createdAt?: string;
   tags?: string[];
   budget?: string;
+  deleted_at?: string;
 }
 
 export interface PropertyResult {
@@ -83,10 +84,10 @@ export function useLeadSearch(initialSearchTerm: string = '') {
         const searchTerm = debouncedSearchTerm.trim();
         console.log('Searching for:', searchTerm);
         
-        // Construire une requête qui recherche dans tous les champs pertinents
+        // Rechercher dans TOUS les leads, y compris les supprimés
         const { data, error } = await supabase
           .from('leads')
-          .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget')
+          .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget, deleted_at')
           .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,property_reference.ilike.%${searchTerm}%`)
           .order('created_at', { ascending: false })
           .limit(50);
@@ -97,13 +98,13 @@ export function useLeadSearch(initialSearchTerm: string = '') {
         } else if (data) {
           console.log(`Found ${data.length} results for "${searchTerm}"`);
           
-          // Transformer les résultats
+          // Transformer les résultats en ajoutant un statut "Deleted" si deleted_at existe
           const formattedResults = data.map(lead => ({
             id: lead.id,
             name: lead.name,
             email: lead.email,
             phone: lead.phone,
-            status: lead.status,
+            status: lead.deleted_at ? 'Deleted' : lead.status,
             desiredLocation: lead.desired_location,
             pipelineType: lead.pipeline_type,
             nationality: lead.nationality,
@@ -113,7 +114,8 @@ export function useLeadSearch(initialSearchTerm: string = '') {
             propertyReference: lead.property_reference,
             createdAt: lead.created_at,
             tags: lead.tags,
-            budget: lead.budget
+            budget: lead.budget,
+            deleted_at: lead.deleted_at
           }));
           
           // Log pour debug

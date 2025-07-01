@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -29,21 +28,23 @@ const AdminAssignmentSection: React.FC<AdminAssignmentSectionProps> = ({
   const availableStatuses = getStatusesForPipeline(pipelineType);
 
   // Status label mapping based on pipeline type
+  const statusLabels: Record<LeadStatus, string> = {
+    'New': 'Nouveau',
+    'Contacted': 'Contacté',
+    'Qualified': 'Qualifié',
+    'Proposal': 'Proposition',
+    'Visit': 'Visite',
+    'Offre': 'Offre',
+    'Deposit': 'Dépôt',
+    'Signed': 'Signé',
+    'Gagné': 'Gagné',
+    'Perdu': 'Perdu',
+    'Deleted': 'Supprimé'
+  };
+
   const getStatusLabel = (status: LeadStatus): string => {
     if (pipelineType === 'owners') {
-      const ownerStatusLabels: Record<LeadStatus, string> = {
-        'New': 'Premier contact',
-        'Contacted': 'Rendez-vous programmé',
-        'Qualified': 'Visite effectuée',
-        'Proposal': 'Mandat en négociation',
-        'Visit': 'Bien en commercialisation',
-        'Offre': 'Offre reçue',
-        'Deposit': 'Compromis signé',
-        'Signed': 'Mandat signé',
-        'Gagné': 'Vente finalisée',
-        'Perdu': 'Perdu/Annulé'
-      };
-      return ownerStatusLabels[status] || status;
+      return statusLabels[status] || status;
     }
     return status;
   };

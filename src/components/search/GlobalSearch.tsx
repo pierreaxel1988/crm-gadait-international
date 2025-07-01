@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CommandDialog, CommandInput, CommandList, CommandEmpty, Command, CommandGroup, CommandItem } from '@/components/ui/command';
 import { useLeadSearch, PropertyResult, SearchResult } from '@/hooks/useLeadSearch';
-import { Search, User, Building, Clock } from 'lucide-react';
+import { Search, User, Building, Clock, Trash2 } from 'lucide-react';
 
 interface GlobalSearchProps {
   open: boolean;
@@ -117,9 +117,23 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
                 >
                   <User className="h-4 w-4 shrink-0 opacity-50" />
                   <div className="flex flex-col">
-                    <span className="font-medium">{lead.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{lead.name}</span>
+                      {lead.deleted_at && (
+                        <div className="flex items-center gap-1 text-red-600">
+                          <Trash2 className="h-3 w-3" />
+                          <span className="text-xs font-medium">Supprimé</span>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
-                      {lead.status && <span className="bg-muted px-1 rounded">{lead.status}</span>}
+                      {lead.status && (
+                        <span className={`px-1 rounded ${
+                          lead.status === 'Deleted' ? 'bg-red-100 text-red-700' : 'bg-muted'
+                        }`}>
+                          {lead.status === 'Deleted' ? 'Supprimé' : lead.status}
+                        </span>
+                      )}
                       {lead.desiredLocation && (
                         <span className="flex items-center gap-0.5">
                           {lead.desiredLocation}
@@ -174,7 +188,15 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
                   className="flex items-center gap-2 p-2"
                 >
                   <Clock className="h-4 w-4 opacity-50" />
-                  <span>{item.name}</span>
+                  <div className="flex items-center gap-2">
+                    <span>{item.name}</span>
+                    {item.deleted_at && (
+                      <div className="flex items-center gap-1 text-red-600">
+                        <Trash2 className="h-3 w-3" />
+                        <span className="text-xs font-medium">Supprimé</span>
+                      </div>
+                    )}
+                  </div>
                 </CommandItem>
               ))}
             </CommandGroup>

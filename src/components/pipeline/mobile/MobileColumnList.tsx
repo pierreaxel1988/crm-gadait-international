@@ -21,7 +21,8 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Deposit': 'Dépôt reçu',
   'Signed': 'Signature finale',
   'Gagné': 'Conclus',
-  'Perdu': 'Perdu'
+  'Perdu': 'Perdu',
+  'Deleted': 'Supprimé'
 };
 
 interface MobileColumnListProps {
