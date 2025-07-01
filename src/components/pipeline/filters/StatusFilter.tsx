@@ -21,7 +21,7 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
   const { isAdmin } = useAuth();
 
   // Get statuses based on the current pipeline type
-  const baseStatuses = [null, ...getStatusesForPipeline(pipelineType)];
+  const baseStatuses = getStatusesForPipeline(pipelineType);
   
   // Add "Deleted" status only for admins
   const statuses = isAdmin ? [...baseStatuses, 'Deleted' as LeadStatus] : baseStatuses;
@@ -61,7 +61,7 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
         >
           Tous
         </Button>
-        {statuses.filter(s => s !== null).map((statusValue) => (
+        {statuses.map((statusValue) => (
           <Button
             key={statusValue}
             variant={status === statusValue ? "default" : "outline"}
