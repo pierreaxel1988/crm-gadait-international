@@ -1,14 +1,16 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LeadStatus } from '@/components/common/StatusBadge';
+import { LeadDetailed } from '@/types/lead';
 
 interface OwnerStatusSectionProps {
-  status: LeadStatus;
-  onStatusChange: (status: LeadStatus) => void;
+  lead: LeadDetailed;
+  onDataChange: (data: Partial<LeadDetailed>) => void;
 }
 
-const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ status, onStatusChange }) => {
+const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ lead, onDataChange }) => {
   const statuses: LeadStatus[] = [
     'New',
     'Contacted',
@@ -37,10 +39,14 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ status, onStatu
     'Deleted': 'Supprimé'
   };
 
+  const handleStatusChange = (status: LeadStatus) => {
+    onDataChange({ status });
+  };
+
   return (
     <div className="grid gap-2">
       <Label htmlFor="status">Statut</Label>
-      <Select onValueChange={(value) => onStatusChange(value as LeadStatus)} defaultValue={status}>
+      <Select onValueChange={handleStatusChange} defaultValue={lead.status}>
         <SelectTrigger id="status">
           <SelectValue placeholder="Sélectionner un statut" />
         </SelectTrigger>
