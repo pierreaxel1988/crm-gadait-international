@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { LeadTag } from '@/components/common/TagBadge';
 import { Card, CardContent } from "@/components/ui/card";
-import { isPast, isToday } from 'date-fns';
+import { isPast, isToday as isDateToday } from 'date-fns';
 import { PipelineType } from '@/types/lead';
 
 // Import sub-components
@@ -119,21 +119,21 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
   const isOverdue = () => {
     if (!item.nextFollowUpDate) return false;
     const followUpDateTime = new Date(item.nextFollowUpDate);
-    return isPast(followUpDateTime) && !isToday(followUpDateTime);
+    return isPast(followUpDateTime) && !isDateToday(followUpDateTime);
   };
 
   // Déterminer si la tâche est prévue pour aujourd'hui
-  const isToday = () => {
+  const isTaskToday = () => {
     if (!item.nextFollowUpDate) return false;
     const followUpDateTime = new Date(item.nextFollowUpDate);
-    return isToday(followUpDateTime);
+    return isDateToday(followUpDateTime);
   };
 
   // Déterminer si la tâche est prévue dans le futur
-  const isFuture = () => {
+  const isFutureTask = () => {
     if (!item.nextFollowUpDate) return false;
     const followUpDateTime = new Date(item.nextFollowUpDate);
-    return !isPast(followUpDateTime) && !isToday(followUpDateTime);
+    return !isPast(followUpDateTime) && !isDateToday(followUpDateTime);
   };
 
   // Déterminer la couleur de la bordure en fonction du statut de la tâche
@@ -152,7 +152,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     // Logique basée sur les actions prévues
     if (!item.nextFollowUpDate) {
       // Pas d'action prévue - style neutre/gris
-      return 'bg-gray-50/50 border-gray-100';
+      return 'bg-gray-50/50 border-gray-200';
     }
     
     // Actions en retard - rouge/rose
@@ -161,12 +161,12 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     }
     
     // Actions prévues aujourd'hui - ambre
-    if (isToday()) {
+    if (isTaskToday()) {
       return 'bg-amber-50/80 border-amber-200';
     }
     
     // Actions futures - vert léger
-    if (isFuture()) {
+    if (isFutureTask()) {
       return 'bg-green-50/60 border-green-200';
     }
     
