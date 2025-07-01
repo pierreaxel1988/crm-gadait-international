@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { LeadDetailed } from "@/types/lead";
 import { mapToLeadDetailed, mapToSupabaseFormat } from "./utils/leadMappers";
@@ -70,6 +71,7 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
         .from('leads')
         .update(dataWithoutBedrooms)
         .eq('id', leadData.id)
+        .is('deleted_at', null) // Only update non-deleted leads
         .select()
         .single();
       
@@ -98,6 +100,7 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
         .from('leads')
         .update(cleanedData)
         .eq('id', leadData.id)
+        .is('deleted_at', null) // Only update non-deleted leads
         .select()
         .single();
       
@@ -121,17 +124,42 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
 };
 
 /**
- * Deletes a lead from the database
+ * Soft deletes a lead from the database (marks as deleted instead of removing)
+ * @deprecated Use softDeleteLead from leadSoftDelete.ts instead
  */
-export const deleteLead = async (id: string): Promise<boolean> => {
+export const deleteLead = async (id: string, reason?: string): Promise<boolean> => {
   try {
+    // Get current user's team member ID
+    const { data: sessionData } = await supabase.auth.getSession();
+    const user = sessionData?.session?.user;
+    
+    if (!user) {
+      throw new Error("Utilisateur non connecté");
+    }
+
+    // Get team member ID from email
+    const { data: teamMember } = await supabase
+      .from('team_members')
+      .select('id')
+      .eq('email', user.email)
+      .single();
+
+    if (!teamMember) {
+      throw new Error("Membre d'équipe non trouvé");
+    }
+
+    // Soft delete the lead
     const { error } = await supabase
       .from('leads')
-      .delete()
+      .update({
+        deleted_at: new Date().toISOString(),
+        deleted_by: teamMember.id,
+        deletion_reason: reason || null
+      })
       .eq('id', id);
     
     if (error) {
-      console.error("Error deleting lead:", error);
+      console.error("Error soft deleting lead:", error);
       throw error;
     }
     

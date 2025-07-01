@@ -4,6 +4,7 @@ import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { LeadTag } from '@/components/common/TagBadge';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -20,7 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useNavigate } from 'react-router-dom';
-import { deleteLead } from '@/services/leadService';
+import { softDeleteLead } from '@/services/leadSoftDelete';
 import { toast } from '@/hooks/use-toast';
 
 const STATUS_OPTIONS: LeadStatus[] = [
@@ -58,6 +59,8 @@ const StatusSection: React.FC<StatusSectionProps> = ({
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletionReason, setDeletionReason] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -100,11 +103,14 @@ const StatusSection: React.FC<StatusSectionProps> = ({
 
   const handleDeleteLead = async () => {
     try {
-      await deleteLead(lead.id);
+      setIsDeleting(true);
+      await softDeleteLead(lead.id, deletionReason.trim() || undefined);
+      
       toast({
         title: "Lead supprimé",
-        description: "Le lead a été supprimé avec succès."
+        description: "Le lead a été déplacé dans la corbeille avec succès."
       });
+      
       navigate('/pipeline');
     } catch (error) {
       console.error("Error deleting lead:", error);
@@ -113,6 +119,10 @@ const StatusSection: React.FC<StatusSectionProps> = ({
         title: "Erreur",
         description: "Impossible de supprimer ce lead."
       });
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setDeletionReason('');
     }
   };
 
@@ -227,15 +237,31 @@ const StatusSection: React.FC<StatusSectionProps> = ({
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action ne peut pas être annulée. Cela supprimera définitivement le lead {lead.name} et toutes les données associées.
+              Le lead {lead.name} sera déplacé dans la corbeille. Cette action peut être annulée par un administrateur.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          
+          <div className="space-y-2">
+            <Label htmlFor="deletion-reason" className="text-sm">Raison de la suppression (optionnel)</Label>
+            <Textarea
+              id="deletion-reason"
+              placeholder="Ex: Doublon, faux contact, client non intéressé..."
+              value={deletionReason}
+              onChange={(e) => setDeletionReason(e.target.value)}
+              className="min-h-[80px]"
+            />
+          </div>
+          
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteLead} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Supprimer
+            <AlertDialogCancel disabled={isDeleting}>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteLead}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Suppression..." : "Supprimer"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

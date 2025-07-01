@@ -393,6 +393,9 @@ export type Database = {
           country: string | null
           created_at: string
           currency: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deletion_reason: string | null
           desired_location: string | null
           desired_price: string | null
           email: string | null
@@ -466,6 +469,9 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deletion_reason?: string | null
           desired_location?: string | null
           desired_price?: string | null
           email?: string | null
@@ -539,6 +545,9 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deletion_reason?: string | null
           desired_location?: string | null
           desired_price?: string | null
           email?: string | null
@@ -600,6 +609,13 @@ export type Database = {
           {
             foreignKeyName: "leads_assigned_to_fkey"
             columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_deleted_by_fkey"
+            columns: ["deleted_by"]
             isOneToOne: false
             referencedRelation: "team_members"
             referencedColumns: ["id"]

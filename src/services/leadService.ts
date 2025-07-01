@@ -5,8 +5,8 @@ import {
   getLeads,
   getLead,
   updateLead,
-  deleteLead
 } from "./leadCore";
+import { softDeleteLead } from "./leadSoftDelete";
 import { convertToSimpleLead } from "./utils/leadMappers";
 import { addActionToLead } from "./leadActions";
 import { toast } from "@/hooks/use-toast";
@@ -121,6 +121,9 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
   }
 };
 
+// Use soft delete instead of hard delete
+export const deleteLead = softDeleteLead;
+
 export const reassignJadeLeads = async () => {
   try {
     console.log("Starting reassignment of Jade's leads to her correct UUID:", JADE_ID);
@@ -129,7 +132,8 @@ export const reassignJadeLeads = async () => {
     const { error } = await supabase
       .from('leads')
       .update({ assigned_to: JADE_ID })
-      .in('assigned_to', ['jade', 'jade-diouane']);
+      .in('assigned_to', ['jade', 'jade-diouane'])
+      .is('deleted_at', null); // Only update non-deleted leads
 
     if (error) {
       console.error('Error reassigning Jade\'s leads:', error);
@@ -152,7 +156,8 @@ export const reassignJeanMarcLeads = async () => {
     const { error } = await supabase
       .from('leads')
       .update({ assigned_to: JEAN_MARC_ID })
-      .in('assigned_to', ['jean-marc', 'jean-marc-perrissol']);
+      .in('assigned_to', ['jean-marc', 'jean-marc-perrissol'])
+      .is('deleted_at', null); // Only update non-deleted leads
 
     if (error) {
       console.error('Error reassigning Jean Marc\'s leads:', error);
@@ -175,7 +180,8 @@ export const reassignSharonLeads = async () => {
     const { error } = await supabase
       .from('leads')
       .update({ assigned_to: SHARON_ID })
-      .in('assigned_to', ['sharon', 'sharon-ramdiane']);
+      .in('assigned_to', ['sharon', 'sharon-ramdiane'])
+      .is('deleted_at', null); // Only update non-deleted leads
 
     if (error) {
       console.error('Error reassigning Sharon\'s leads:', error);
@@ -194,7 +200,6 @@ export {
   getLeads, 
   getLead, 
   updateLead, 
-  deleteLead, 
   convertToSimpleLead,
   addActionToLead
 };

@@ -1,236 +1,241 @@
 
-import React from 'react';
-import { CalendarClock, CalendarDays, Activity, Home, MapPin } from 'lucide-react';
-import { LeadDetailed, LeadSource, PipelineType } from '@/types/lead';
-import { LeadStatus } from '@/components/common/StatusBadge';
+import React, { useState } from 'react';
+import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { LeadTag } from '@/components/common/TagBadge';
-import FormSection from './FormSection';
-import FormInput from './FormInput';
-import MultiSelectButtons from './MultiSelectButtons';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
-import { format } from 'date-fns';
-import RadioSelectButtons from './RadioSelectButtons';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Home, Activity, Trash2 } from 'lucide-react';
+import MultiSelectButtons from './MultiSelectButtons';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useNavigate } from 'react-router-dom';
+import { softDeleteLead } from '@/services/leadSoftDelete';
 import { toast } from '@/hooks/use-toast';
-import { getStatusesForPipeline, handlePipelineTypeTransition } from '@/utils/pipelineUtils';
-import LocationFilter from '@/components/pipeline/filters/LocationFilter';
+
+const STATUS_OPTIONS: LeadStatus[] = [
+  'New',
+  'Contacted',
+  'Qualified',
+  'Proposal',
+  'Visit',
+  'Offre',
+  'Deposit',
+  'Signed',
+  'Gagné',
+  'Perdu'
+];
+
+const TAG_OPTIONS: LeadTag[] = [
+  "Vip", 
+  "Hot", 
+  "Serious", 
+  "Cold", 
+  "No response", 
+  "No phone", 
+  "Fake"
+];
 
 interface StatusSectionProps {
-  formData: LeadDetailed;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  handleTagToggle?: (tag: LeadTag) => void;
-  leadStatuses?: LeadStatus[];
-  leadTags?: LeadTag[];
-  sources?: LeadSource[];
+  lead: LeadDetailed;
+  onDataChange: (data: Partial<LeadDetailed>) => void;
 }
 
-const StatusSection = ({
-  formData,
-  handleInputChange,
-  handleTagToggle,
-  leadTags = ["Vip", "Hot", "Serious", "Cold", "No response", "No phone", "Fake"] as LeadTag[],
-  sources
-}: StatusSectionProps) => {
-  const handleTagToggleInternal = handleTagToggle || ((tag: LeadTag) => {
-    const updatedTags = formData.tags?.includes(tag)
-      ? formData.tags.filter(t => t !== tag)
-      : [...(formData.tags || []), tag];
-    
-    const syntheticEvent = {
-      target: {
-        name: 'tags',
-        value: updatedTags
-      }
-    } as unknown as React.ChangeEvent<HTMLInputElement>;
-    
-    handleInputChange(syntheticEvent);
-  });
+const StatusSection: React.FC<StatusSectionProps> = ({
+  lead,
+  onDataChange
+}) => {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletionReason, setDeletionReason] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
 
-  const formattedLastContact = formData.lastContactedAt 
-    ? format(new Date(formData.lastContactedAt), 'dd/MM/yyyy HH:mm')
-    : '';
-    
-  const formattedNextFollowUp = formData.nextFollowUpDate 
-    ? format(new Date(formData.nextFollowUpDate), 'dd/MM/yyyy HH:mm')
-    : '';
+  const handleInputChange = (field: keyof LeadDetailed, value: any) => {
+    onDataChange({
+      [field]: value
+    } as Partial<LeadDetailed>);
+  };
 
-  const handleStatusChange = (newStatus: LeadStatus) => {
-    const statusEvent = {
-      target: {
-        name: 'status',
-        value: newStatus
-      }
-    } as unknown as React.ChangeEvent<HTMLInputElement>;
+  const handleTagToggle = (tag: LeadTag) => {
+    const updatedTags = lead.tags?.includes(tag)
+      ? lead.tags.filter(t => t !== tag)
+      : [...(lead.tags || []), tag];
     
-    handleInputChange(statusEvent);
+    handleInputChange('tags', updatedTags);
   };
 
   const handlePipelineTypeChange = (value: PipelineType) => {
-    if (value === formData.pipelineType) return;
-    
-    const originalPipelineType = formData.pipelineType || 'purchase';
-    
-    const pipelineEvent = {
-      target: {
-        name: 'pipelineType',
-        value: value
-      }
-    } as unknown as React.ChangeEvent<HTMLInputElement>;
-    
-    handleInputChange(pipelineEvent);
-    
-    if (formData.id) {
-      handlePipelineTypeTransition(
-        formData.id,
-        formData.status,
-        originalPipelineType, 
-        value,
-        handleStatusChange
-      );
-    }
+    handleInputChange('pipelineType', value);
   };
 
-  const handleLocationChange = (location: string) => {
-    const locationEvent = {
-      target: {
-        name: 'desiredLocation',
-        value: location
-      }
-    } as React.ChangeEvent<HTMLInputElement>;
-    
-    handleInputChange(locationEvent);
-  };
-
-  const availableStatuses = getStatusesForPipeline(formData.pipelineType || 'purchase');
-
-  const getStatusLabel = (status: LeadStatus): string => {
-    if (formData.pipelineType === 'owners') {
-      const ownerStatusLabels: Record<LeadStatus, string> = {
-        'New': 'Premier contact',
-        'Contacted': 'Rendez-vous programmé',
-        'Qualified': 'Visite effectuée',
-        'Proposal': 'Mandat en négociation',
-        'Signed': 'Mandat signé',
-        'Visit': 'Bien en commercialisation',
-        'Offre': 'Offre reçue',
-        'Deposit': 'Compromis signé',
-        'Gagné': 'Vente finalisée',
-        'Perdu': 'Perdu/Annulé'
-      };
-      return ownerStatusLabels[status] || status;
+  const handleDeleteLead = async () => {
+    try {
+      setIsDeleting(true);
+      await softDeleteLead(lead.id, deletionReason.trim() || undefined);
+      
+      toast({
+        title: "Lead supprimé",
+        description: "Le lead a été déplacé dans la corbeille avec succès."
+      });
+      
+      navigate('/pipeline');
+    } catch (error) {
+      console.error("Error deleting lead:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer ce lead."
+      });
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setDeletionReason('');
     }
-    return status;
   };
 
   return (
-    <FormSection title="Statut et Suivi">
-      <FormInput
-        label="Type de pipeline"
-        name="pipelineType"
-        value={formData.pipelineType || 'purchase'}
-        onChange={() => {}}
-        icon={Home}
-        renderCustomField={() => (
-          <RadioSelectButtons
-            options={['purchase', 'rental', 'owners'] as PipelineType[]}
-            selectedValue={formData.pipelineType || 'purchase'}
-            onSelect={handlePipelineTypeChange}
-            labelMapping={{
-              purchase: 'Achat',
-              rental: 'Location',
-              owners: 'Propriétaires'
-            }}
-          />
-        )}
-      />
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Type de pipeline</Label>
+          <div className="flex items-center space-x-2 p-3 bg-white border rounded-md">
+            <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 mr-2">
+              <Home className="h-4 w-4 text-gray-500" />
+            </div>
+            <RadioGroup 
+              value={lead.pipelineType || 'purchase'} 
+              onValueChange={(value) => handlePipelineTypeChange(value as PipelineType)}
+              className="flex space-x-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="purchase" id="purchase" />
+                <Label htmlFor="purchase" className="text-sm cursor-pointer">Achat</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="rental" id="rental" />
+                <Label htmlFor="rental" className="text-sm cursor-pointer">Location</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="owners" id="owners" />
+                <Label htmlFor="owners" className="text-sm cursor-pointer">Propriétaires</Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </div>
 
-      <FormInput
-        label="Statut du lead"
-        name="status"
-        type="select"
-        value={formData.status}
-        onChange={handleInputChange}
-        required
-        icon={Activity}
-        options={availableStatuses.map(status => ({ 
-          value: status, 
-          label: getStatusLabel(status)
-        }))}
-      />
+        <div className="space-y-2">
+          <Label htmlFor="status" className="text-sm font-medium">Statut du lead</Label>
+          <div className="flex">
+            <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 border border-r-0 rounded-l-md bg-white">
+              <Activity className="h-4 w-4 text-gray-500" />
+            </div>
+            <Select 
+              value={lead.status || ''} 
+              onValueChange={(value) => handleInputChange('status', value as LeadStatus)}
+            >
+              <SelectTrigger id="status" className="w-full rounded-l-none">
+                <SelectValue placeholder="Sélectionner un statut" />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_OPTIONS.map(status => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-      {formData.pipelineType === 'owners' && (
-        <FormInput
-          label="Localisation"
-          name="desiredLocation"
-          value={formData.desiredLocation || ''}
-          onChange={() => {}}
-          icon={MapPin}
-          renderCustomField={() => (
-            <LocationFilter
-              location={formData.desiredLocation || ''}
-              onLocationChange={handleLocationChange}
-            />
-          )}
-        />
-      )}
-
-      <FormInput
-        label="Tags"
-        name="tags"
-        value=""
-        onChange={() => {}}
-        icon={Activity}
-        renderCustomField={() => (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Tags</Label>
           <MultiSelectButtons
-            options={leadTags}
-            selectedValues={formData.tags || []}
-            onToggle={handleTagToggleInternal}
+            options={TAG_OPTIONS}
+            selectedValues={lead.tags || []}
+            onToggle={handleTagToggle}
           />
-        )}
-      />
+        </div>
 
-      <FormInput
-        label="Responsable du suivi"
-        name="assignedTo"
-        value={formData.assignedTo || ''}
-        onChange={() => {}}
-        renderCustomField={() => (
+        <div className="space-y-2">
+          <Label htmlFor="assignedTo" className="text-sm font-medium">Responsable du suivi</Label>
           <TeamMemberSelect
-            value={formData.assignedTo}
-            onChange={(value) => {
-              const event = {
-                target: {
-                  name: 'assignedTo',
-                  value: value || ''
-                }
-              } as React.ChangeEvent<HTMLInputElement>;
-              handleInputChange(event);
-            }}
+            value={lead.assignedTo}
+            onChange={(value) => handleInputChange('assignedTo', value)}
+            label=""
           />
-        )}
-      />
+        </div>
 
-      <FormInput
-        label="Date du dernier contact"
-        name="lastContactedAt"
-        type="text"
-        value={formattedLastContact}
-        onChange={() => {}}
-        icon={CalendarClock}
-        disabled={true}
-        helpText="Mise à jour automatique lors d'une action"
-      />
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Dernière interaction</Label>
+          <div className="p-3 bg-gray-50 rounded-md border text-sm text-gray-700">
+            {lead.lastContactedAt 
+              ? new Date(lead.lastContactedAt).toLocaleDateString('fr-FR', { 
+                  day: '2-digit', 
+                  month: '2-digit', 
+                  year: 'numeric', 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })
+              : 'Aucune interaction enregistrée'}
+          </div>
+        </div>
 
-      <FormInput
-        label="Prochain suivi prévu"
-        name="nextFollowUpDate"
-        type="text"
-        value={formattedNextFollowUp}
-        onChange={() => {}}
-        icon={CalendarDays}
-        disabled={true}
-        helpText="Programmé automatiquement lors de la création d'une action"
-      />
-    </FormSection>
+        <div className="pt-4 border-t mt-6">
+          <Button 
+            variant="destructive"
+            size="sm"
+            onClick={() => setIsDeleteDialogOpen(true)}
+            className="w-full flex items-center justify-center"
+          >
+            <Trash2 className="h-4 w-4 mr-2" /> Supprimer ce lead
+          </Button>
+        </div>
+      </div>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le lead {lead.name} sera déplacé dans la corbeille. Cette action peut être annulée par un administrateur.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-2">
+            <Label htmlFor="deletion-reason" className="text-sm">Raison de la suppression (optionnel)</Label>
+            <Textarea
+              id="deletion-reason"
+              placeholder="Ex: Doublon, faux contact, client non intéressé..."
+              value={deletionReason}
+              onChange={(e) => setDeletionReason(e.target.value)}
+              className="min-h-[80px]"
+            />
+          </div>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteLead}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Suppression..." : "Supprimer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 };
 
