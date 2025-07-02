@@ -26,23 +26,28 @@ const getStageScore = (status: string): number => {
 };
 
 /**
- * Calculate priority score based on lead tags
+ * Calculate priority score based on lead tags - Updated order based on user requirements
  */
 const getTagScore = (tags: string[] = []): number => {
   let maxScore = 0;
   
   tags.forEach(tag => {
     const tagLower = tag.toLowerCase();
+    // Ordre de priorité: Vip (plus important) → Hot → Serious → Cold → No response → No phone → Fake (moins important)
     if (tagLower.includes('vip')) {
-      maxScore = Math.max(maxScore, 100);
+      maxScore = Math.max(maxScore, 100); // Le plus important
     } else if (tagLower.includes('hot')) {
-      maxScore = Math.max(maxScore, 80);
+      maxScore = Math.max(maxScore, 85);
     } else if (tagLower.includes('serious')) {
-      maxScore = Math.max(maxScore, 60);
+      maxScore = Math.max(maxScore, 70);
     } else if (tagLower.includes('cold')) {
-      maxScore = Math.max(maxScore, 20);
-    } else if (tagLower.includes('no response') || tagLower.includes('no phone') || tagLower.includes('fake')) {
-      maxScore = Math.max(maxScore, -50);
+      maxScore = Math.max(maxScore, 55);
+    } else if (tagLower.includes('no response')) {
+      maxScore = Math.max(maxScore, 40);
+    } else if (tagLower.includes('no phone')) {
+      maxScore = Math.max(maxScore, 25);
+    } else if (tagLower.includes('fake')) {
+      maxScore = Math.max(maxScore, 10); // Le moins important
     }
   });
   
