@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Pipeline from "./pages/Pipeline";
 import Calendar from "./pages/Calendar";
 import Admin from "./pages/Admin";
+import Auth from "./pages/Auth";
 import LeadDetailDesktop from "./pages/LeadDetailDesktop";
 import LeadDetailMobile from "./pages/LeadDetailMobile";
 import LeadNew from "./pages/LeadNew";
@@ -27,6 +28,7 @@ const AppContent = () => {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
+      <Route path="/auth" element={<Auth />} />
       <Route path="/pipeline" element={<Pipeline />} />
       <Route path="/calendar" element={<Calendar />} />
       <Route path="/admin" element={<Admin />} />
