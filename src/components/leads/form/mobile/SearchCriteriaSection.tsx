@@ -22,7 +22,7 @@ const SearchCriteriaSection = ({
   const [activeTab, setActiveTab] = useState('budget');
   
   return (
-    <div className="space-y-4 px-4 pt-4">
+    <div className="space-y-4 px-2 pt-2">
       <h2 className="text-sm font-futura uppercase tracking-wider text-gray-800 pb-2 border-b mb-6">
         Critères de la Propriété
       </h2>
