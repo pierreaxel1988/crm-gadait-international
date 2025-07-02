@@ -122,18 +122,35 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     return isPast(followUpDateTime) && !isToday(followUpDateTime);
   };
 
-  // Déterminer la couleur de la bordure en fonction du statut de la tâche
+  // Améliorer la logique de couleurs selon les spécifications
   const getCardBorderClass = () => {
+    // Gris spécial pour les leads supprimés
     if (item.status === 'Deleted') {
-      return 'bg-red-50 border-red-200'; // Special styling for deleted leads
-    } else if (isOverdue()) {
-      return 'bg-[#FFDEE2]/30'; // Soft pink background for overdue tasks
-    } else if (item.nextFollowUpDate && isToday(new Date(item.nextFollowUpDate))) {
-      return 'bg-amber-50'; // Changed from border-amber-300 to a light amber background
-    } else if (item.nextFollowUpDate) {
-      return 'bg-[#e3f7ed]/80'; // Updated to #e3f7ed with 80% opacity for upcoming tasks
+      return 'bg-red-50 border-red-200';
     }
-    return '';
+    
+    // Gris spécial pour les leads fermés (Gagné/Perdu) même s'ils avaient des actions
+    if (item.status === 'Gagné' || item.status === 'Perdu') {
+      return 'bg-gray-50 border-gray-200';
+    }
+    
+    // Si pas de date de suivi prévue : gris neutre (plus de rouge !)
+    if (!item.nextFollowUpDate) {
+      return 'bg-gray-25 border-gray-100';
+    }
+    
+    // Rouge/Rose : Seulement pour les leads avec actions en retard
+    if (isOverdue()) {
+      return 'bg-red-50/80 border-red-200';
+    }
+    
+    // Ambre : Pour les actions prévues aujourd'hui
+    if (isToday(new Date(item.nextFollowUpDate))) {
+      return 'bg-amber-50 border-amber-200';
+    }
+    
+    // Vert léger : Pour les actions futures
+    return 'bg-green-50/60 border-green-200';
   };
 
   const isDeleted = item.status === 'Deleted';
