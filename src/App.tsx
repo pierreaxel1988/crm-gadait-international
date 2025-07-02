@@ -1,68 +1,119 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
-import Index from "./pages/Index";
-import Pipeline from "./pages/Pipeline";
-import Calendar from "./pages/Calendar";
-import Admin from "./pages/Admin";
-import LeadDetail from "./pages/LeadDetail";
-import LeadDetailMobile from "./pages/LeadDetailMobile";
-import NewLead from "./pages/NewLead";
-import ImportLead from "./pages/ImportLead";
-import Actions from "./pages/Actions";
-import ApiDocs from "./pages/ApiDocs";
-import SearchPage from "./pages/SearchPage";
-import { ThemeProvider } from "next-themes";
-import { useIsMobile } from "@/hooks/use-mobile";
+import React, { Suspense, lazy } from 'react';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate
+} from 'react-router-dom';
+import { AuthProvider } from './hooks/useAuth';
+import { Toaster } from '@/components/ui/toaster';
+import LoadingScreen from './components/layout/LoadingScreen';
+import Auth from './pages/Auth';
+import Pipeline from './pages/Pipeline';
+import Properties from './pages/Properties';
+import PropertyDetail from './pages/PropertyDetail';
 
-const queryClient = new QueryClient();
-
-const AppContent = () => {
-  const isMobile = useIsMobile();
-  
-  return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/pipeline" element={<Pipeline />} />
-      <Route path="/calendar" element={<Calendar />} />
-      <Route path="/admin" element={<Admin />} />
-      <Route path="/leads/new" element={<NewLead />} />
-      <Route path="/import-lead" element={<ImportLead />} />
-      <Route path="/actions" element={<Actions />} />
-      <Route path="/api-docs" element={<ApiDocs />} />
-      <Route path="/search" element={<SearchPage />} />
-      <Route 
-        path="/leads/:id" 
-        element={isMobile ? <LeadDetailMobile /> : <LeadDetail />} 
-      />
-    </Routes>
-  );
-};
+// Lazy load other pages to use suspense
+const LeadsPage = lazy(() => import('./pages/Leads'));
+const LeadDetail = lazy(() => import('./pages/LeadDetailMobile'));
+const LeadNew = lazy(() => import('./pages/LeadNew'));
+const LeadImport = lazy(() => import('./pages/LeadImport'));
+const MobileLeadImport = lazy(() => import('./pages/MobileLeadImport'));
+const ActionsPage = lazy(() => import('./pages/Actions'));
+const Calendar = lazy(() => import('./pages/Calendar'));
+const Admin = lazy(() => import('./pages/Admin'));
+const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const ChatGadaitPage = lazy(() => import('./pages/ChatGadaitPage'));
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="light"
-        enableSystem={false}
-        disableTransitionOnChange
-      >
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AppContent />
-            </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <Router>
+      <AuthProvider>
+        <Suspense fallback={<LoadingScreen />}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/pipeline" />} />
+            
+            {/* Route d'authentification - Auth component loaded directly */}
+            <Route path="/auth" element={<Auth />} />
+            
+            {/* Routes accessibles à tous */}
+            <Route path="/pipeline" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <Pipeline />
+              </ProtectedRoute>
+            } />
+            <Route path="/properties" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <Properties />
+              </ProtectedRoute>
+            } />
+            <Route path="/properties/:id" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <PropertyDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/leads" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <LeadsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/leads/:id" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <LeadDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/leads/new" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <LeadNew />
+              </ProtectedRoute>
+            } />
+            <Route path="/actions" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <ActionsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/calendar" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <Calendar />
+              </ProtectedRoute>
+            } />
+            <Route path="/notifications" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <Notifications />
+              </ProtectedRoute>
+            } />
+            <Route path="/chat" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <ChatGadaitPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Routes réservées aux administrateurs */}
+            <Route path="/leads/import" element={
+              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+                <LeadImport />
+              </ProtectedRoute>
+            } />
+            <Route path="/import-lead" element={
+              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+                <MobileLeadImport />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute adminOnly={true} commercialAllowed={false}>
+                <Admin />
+              </ProtectedRoute>
+            } />
+            
+            {/* Fallback pour les routes non trouvées */}
+            <Route path="*" element={<Navigate to="/pipeline" replace />} />
+          </Routes>
+          <Toaster />
+        </Suspense>
+      </AuthProvider>
+    </Router>
   );
 }
 

@@ -37,7 +37,7 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
   ];
 
   // Add "Deleted" status only for admins
-  const statuses = isAdmin ? [...baseStatuses, 'Deleted' as LeadStatus] : baseStatuses;
+  const statuses = isAdmin ? [...baseStatuses, 'Deleted'] : baseStatuses;
 
   return (
     <div className="relative w-full sm:w-auto">
@@ -62,7 +62,7 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
                 key={status}
                 className="flex items-center justify-between w-full px-4 py-2 text-sm text-foreground hover:bg-accent"
                 onClick={() => {
-                  setSelectedStatus(status);
+                  setSelectedStatus(status as LeadStatus | 'All');
                   setShowStatusDropdown(false);
                 }}
               >
