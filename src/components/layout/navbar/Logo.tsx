@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AdminBadgeWrapper from '../AdminBadgeWrapper';
 import CommercialBadgeWrapper from '../CommercialBadgeWrapper';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LogoProps {
   toggleSidebar?: () => void;
@@ -13,6 +14,7 @@ interface LogoProps {
 
 const Logo: React.FC<LogoProps> = ({ toggleSidebar }) => {
   const isMobile = useIsMobile();
+  const { userRole } = useAuth();
   
   return (
     <div className="flex items-center">
@@ -41,8 +43,8 @@ const Logo: React.FC<LogoProps> = ({ toggleSidebar }) => {
         >
           GADAIT.
         </span>
-        <AdminBadgeWrapper />
-        <CommercialBadgeWrapper />
+        {userRole === 'admin' && <AdminBadgeWrapper />}
+        {userRole === 'commercial' && <CommercialBadgeWrapper />}
       </Link>
     </div>
   );
