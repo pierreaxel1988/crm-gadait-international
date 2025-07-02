@@ -85,6 +85,27 @@ const getActionDateScore = (nextFollowUpDate?: string): number => {
 };
 
 /**
+ * Parse budget string to number for sorting
+ */
+const parseBudget = (budget?: string): number => {
+  if (!budget) return 0;
+  
+  // Remove currency symbols, spaces, and convert to number
+  const cleanBudget = budget.replace(/[€$£,\s]/g, '');
+  
+  // Handle 'k' and 'M' suffixes
+  if (cleanBudget.toLowerCase().includes('k')) {
+    return parseFloat(cleanBudget.replace(/k/i, '')) * 1000;
+  }
+  if (cleanBudget.toLowerCase().includes('m')) {
+    return parseFloat(cleanBudget.replace(/m/i, '')) * 1000000;
+  }
+  
+  const parsed = parseFloat(cleanBudget);
+  return isNaN(parsed) ? 0 : parsed;
+};
+
+/**
  * Calculate total priority score for a lead
  */
 const getLeadPriorityScore = (lead: any): number => {
@@ -115,7 +136,7 @@ export const getLeadPriority = (lead: any): number => {
  */
 export const sortLeadsByPriority = (
   leads: any[],
-  sortBy: 'priority' | 'newest' | 'oldest' | 'stage' | 'urgency' | 'importance' = 'priority'
+  sortBy: 'priority' | 'newest' | 'oldest' | 'stage' | 'urgency' | 'importance' | 'budget' = 'priority'
 ): any[] => {
   if (!leads || leads.length === 0) return [];
   
@@ -189,6 +210,22 @@ export const sortLeadsByPriority = (
         }
         
         // Si même importance, trier par date de création
+        const createdAtA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+        const createdAtB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+        return createdAtB.getTime() - createdAtA.getTime();
+      });
+
+    case 'budget':
+      // Tri par budget (du plus élevé au plus bas)
+      return leadsCopy.sort((a, b) => {
+        const budgetA = parseBudget(a.budget);
+        const budgetB = parseBudget(b.budget);
+        
+        if (budgetA !== budgetB) {
+          return budgetB - budgetA; // Budget le plus élevé en premier
+        }
+        
+        // Si même budget, trier par date de création
         const createdAtA = a.createdAt ? new Date(a.createdAt) : new Date(0);
         const createdAtB = b.createdAt ? new Date(b.createdAt) : new Date(0);
         return createdAtB.getTime() - createdAtA.getTime();

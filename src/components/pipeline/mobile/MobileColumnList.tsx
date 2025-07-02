@@ -41,7 +41,7 @@ interface MobileColumnListProps {
 
 const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand = () => {}, activeTab = 'purchase', searchTerm, filters }: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest' | 'stage' | 'urgency' | 'importance'>('priority');
+  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest' | 'stage' | 'urgency' | 'importance' | 'budget'>('priority');
   const navigate = useNavigate();
   
   const {
@@ -111,7 +111,7 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
     navigate(`/leads/${leadId}?tab=criteria`);
   };
   
-  const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest' | 'stage' | 'urgency' | 'importance') => {
+  const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest' | 'stage' | 'urgency' | 'importance' | 'budget') => {
     setSortBy(value);
   };
 
@@ -187,6 +187,14 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
                       : 'bg-gray-100 text-gray-600'}`}
                   >
                     Importance
+                  </button>
+                  <button 
+                    onClick={() => handleChangeSortBy('budget')}
+                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'budget' 
+                      ? 'bg-zinc-900 text-white' 
+                      : 'bg-gray-100 text-gray-600'}`}
+                  >
+                    Budget
                   </button>
                   <button 
                     onClick={() => handleChangeSortBy('newest')}
