@@ -9,13 +9,13 @@ import Index from "./pages/Index";
 import Pipeline from "./pages/Pipeline";
 import Calendar from "./pages/Calendar";
 import Admin from "./pages/Admin";
-import LeadDetailDesktop from "./pages/LeadDetailDesktop";
+import LeadDetail from "./pages/LeadDetail";
 import LeadDetailMobile from "./pages/LeadDetailMobile";
-import LeadNew from "./pages/LeadNew";
-import LeadImport from "./pages/LeadImport";
+import NewLead from "./pages/NewLead";
+import ImportLead from "./pages/ImportLead";
 import Actions from "./pages/Actions";
-import ApiGuide from "./pages/ApiGuide";
-import Leads from "./pages/Leads";
+import ApiDocs from "./pages/ApiDocs";
+import SearchPage from "./pages/SearchPage";
 import { ThemeProvider } from "next-themes";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -30,14 +30,14 @@ const AppContent = () => {
       <Route path="/pipeline" element={<Pipeline />} />
       <Route path="/calendar" element={<Calendar />} />
       <Route path="/admin" element={<Admin />} />
-      <Route path="/leads/new" element={<LeadNew />} />
-      <Route path="/import-lead" element={<LeadImport />} />
+      <Route path="/leads/new" element={<NewLead />} />
+      <Route path="/import-lead" element={<ImportLead />} />
       <Route path="/actions" element={<Actions />} />
-      <Route path="/api-docs" element={<ApiGuide />} />
-      <Route path="/search" element={<Leads />} />
+      <Route path="/api-docs" element={<ApiDocs />} />
+      <Route path="/search" element={<SearchPage />} />
       <Route 
         path="/leads/:id" 
-        element={isMobile ? <LeadDetailMobile /> : <LeadDetailDesktop />} 
+        element={isMobile ? <LeadDetailMobile /> : <LeadDetail />} 
       />
     </Routes>
   );
