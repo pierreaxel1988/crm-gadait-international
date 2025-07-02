@@ -10,8 +10,7 @@ import Pipeline from "./pages/Pipeline";
 import Calendar from "./pages/Calendar";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
-import LeadDetailDesktop from "./pages/LeadDetailDesktop";
-import LeadDetailMobile from "./pages/LeadDetailMobile";
+import LeadEdit from "./pages/LeadEdit";
 import LeadNew from "./pages/LeadNew";
 import LeadImport from "./pages/LeadImport";
 import Actions from "./pages/Actions";
@@ -23,8 +22,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const isMobile = useIsMobile();
-  
   return (
     <Routes>
       <Route path="/" element={<Index />} />
@@ -37,10 +34,7 @@ const AppContent = () => {
       <Route path="/actions" element={<Actions />} />
       <Route path="/api-docs" element={<ApiGuide />} />
       <Route path="/search" element={<Leads />} />
-      <Route 
-        path="/leads/:id" 
-        element={isMobile ? <LeadDetailMobile /> : <LeadDetailDesktop />} 
-      />
+      <Route path="/leads/:id" element={<LeadEdit />} />
     </Routes>
   );
 };
