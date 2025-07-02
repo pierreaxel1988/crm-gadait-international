@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Save, Check } from 'lucide-react';
+import { CheckCircle, Check } from 'lucide-react';
 
 interface NotesSectionProps {
   lead: LeadDetailed;
@@ -103,7 +102,7 @@ const NotesSection: React.FC<NotesSectionProps> = ({
           ) : showSaved ? (
             <Check className="h-4 w-4" />
           ) : (
-            <Save className="h-4 w-4" />
+            <CheckCircle className="h-4 w-4" />
           )}
         </Button>
       </div>
