@@ -46,13 +46,18 @@ export const NewLeadsAlert = () => {
         return;
       }
 
-      // Then fetch new leads assigned to this team member
+      // Then fetch new leads assigned to this team member, excluding deleted ones
       const {
         data: leadsData,
         error: leadsError
-      } = await supabase.from('leads').select('id, name, created_at').eq('assigned_to', teamMemberData.id).eq('status', 'New').order('created_at', {
-        ascending: false
-      });
+      } = await supabase
+        .from('leads')
+        .select('id, name, created_at')
+        .eq('assigned_to', teamMemberData.id)
+        .eq('status', 'New')
+        .is('deleted_at', null) // Exclure les leads supprimés
+        .order('created_at', { ascending: false });
+        
       if (leadsError) {
         console.error('Error fetching leads:', leadsError);
         setLoading(false);
