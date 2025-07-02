@@ -41,7 +41,7 @@ interface MobileColumnListProps {
 
 const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand = () => {}, activeTab = 'purchase', searchTerm, filters }: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest' | 'stage' | 'urgency' | 'importance'>('priority');
+  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
   const navigate = useNavigate();
   
   const {
@@ -111,7 +111,7 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
     navigate(`/leads/${leadId}?tab=criteria`);
   };
   
-  const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest' | 'stage' | 'urgency' | 'importance') => {
+  const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest') => {
     setSortBy(value);
   };
 
@@ -163,30 +163,6 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
                       : 'bg-gray-100 text-gray-600'}`}
                   >
                     Priorité
-                  </button>
-                  <button 
-                    onClick={() => handleChangeSortBy('stage')}
-                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'stage' 
-                      ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600'}`}
-                  >
-                    Stade
-                  </button>
-                  <button 
-                    onClick={() => handleChangeSortBy('urgency')}
-                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'urgency' 
-                      ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600'}`}
-                  >
-                    Urgence
-                  </button>
-                  <button 
-                    onClick={() => handleChangeSortBy('importance')}
-                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'importance' 
-                      ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600'}`}
-                  >
-                    Importance
                   </button>
                   <button 
                     onClick={() => handleChangeSortBy('newest')}
