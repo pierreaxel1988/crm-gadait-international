@@ -124,22 +124,55 @@ export const useActionsData = (refreshTrigger: number = 0) => {
       
       console.log(`Extracted ${allActions.length} actions`);
 
-      // Trier les actions en utilisant la même logique que les leads
-      // Créer des objets temporaires avec les propriétés nécessaires pour le tri
-      const actionsWithPriority = allActions.map(action => ({
-        ...action,
-        // Mapper les propriétés pour la fonction de tri
-        status: action.leadStatus,
-        tags: action.leadTags,
-        nextFollowUpDate: action.scheduledDate,
-        createdAt: action.createdAt
-      }));
-      
-      // Appliquer le tri par priorité
-      const sortedActionsByPriority = sortLeadsByPriority(actionsWithPriority, 'priority');
-      
-      // Remettre les actions dans le bon format
-      const sortedActions = sortedActionsByPriority.map(({ leadStatus, leadTags, ...action }) => action);
+      // Tri spécialisé pour les actions avec priorité sur les dates d'aujourd'hui et en retard
+      const sortedActions = allActions.sort((a, b) => {
+        // Priorité 1: Actions d'aujourd'hui (status todo avec date aujourd'hui)
+        const isATodayAction = a.status === 'todo' && a.scheduledDate && isToday(new Date(a.scheduledDate));
+        const isBTodayAction = b.status === 'todo' && b.scheduledDate && isToday(new Date(b.scheduledDate));
+        
+        if (isATodayAction && !isBTodayAction) return -1;
+        if (!isATodayAction && isBTodayAction) return 1;
+        
+        // Priorité 2: Actions en retard (status overdue)
+        if (a.status === 'overdue' && b.status !== 'overdue') return -1;
+        if (a.status !== 'overdue' && b.status === 'overdue') return 1;
+        
+        // Si même catégorie de date (aujourd'hui ou en retard), utiliser le tri par priorité des leads
+        if ((isATodayAction && isBTodayAction) || (a.status === 'overdue' && b.status === 'overdue')) {
+          // Créer des objets temporaires avec les propriétés nécessaires pour le tri
+          const actionAWithPriority = {
+            ...a,
+            status: a.leadStatus,
+            tags: a.leadTags,
+            nextFollowUpDate: a.scheduledDate,
+            createdAt: a.createdAt
+          };
+          
+          const actionBWithPriority = {
+            ...b,
+            status: b.leadStatus,
+            tags: b.leadTags,
+            nextFollowUpDate: b.scheduledDate,
+            createdAt: b.createdAt
+          };
+          
+          // Utiliser la fonction de tri par priorité
+          const sorted = sortLeadsByPriority([actionAWithPriority, actionBWithPriority], 'priority');
+          return sorted[0].id === a.id ? -1 : 1;
+        }
+        
+        // Pour les autres actions, tri par priorité normal
+        const actionsWithPriority = [a, b].map(action => ({
+          ...action,
+          status: action.leadStatus,
+          tags: action.leadTags,
+          nextFollowUpDate: action.scheduledDate,
+          createdAt: action.createdAt
+        }));
+        
+        const sortedByPriority = sortLeadsByPriority(actionsWithPriority, 'priority');
+        return sortedByPriority[0].id === a.id ? -1 : 1;
+      });
 
       setActions(sortedActions);
       
