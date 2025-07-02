@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ActionHistory, ActionItem, ActionStatus } from '@/types/actionHistory';
@@ -6,6 +5,7 @@ import { isPast, isToday } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { synchronizeLeadAssignments, GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
+import { sortLeadsByPriority } from '@/components/pipeline/mobile/utils/leadSortUtils';
 
 export const useActionsData = (refreshTrigger: number = 0) => {
   const [actions, setActions] = useState<ActionItem[]>([]);
@@ -57,7 +57,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
 
       // Récupérer tous les leads avec historique d'actions
       console.log("Fetching leads with action history...");
-      let query = supabase.from('leads').select('id, name, phone, email, action_history, assigned_to, status');
+      let query = supabase.from('leads').select('id, name, phone, email, action_history, assigned_to, status, tags');
       
       // Si l'utilisateur est un commercial, ne récupérer que ses leads assignés
       if (isCommercial && currentTeamMember) {
@@ -114,33 +114,32 @@ export const useActionsData = (refreshTrigger: number = 0) => {
             assignedToName: assignedTeamMember?.name || 'Non assigné',
             status,
             phoneNumber: lead.phone,
-            email: lead.email
+            email: lead.email,
+            // Ajouter les données du lead pour le tri par priorité
+            leadStatus: lead.status,
+            leadTags: lead.tags || []
           });
         });
       });
       
       console.log(`Extracted ${allActions.length} actions`);
 
-      // Trier les actions par statut (en retard d'abord, puis à faire, puis terminées)
-      // puis par date prévue
-      const sortedActions = allActions.sort((a, b) => {
-        // Priorité: 1. overdue, 2. todo, 3. done
-        const statusPriority = { 'overdue': 0, 'todo': 1, 'done': 2 };
-        if (statusPriority[a.status] !== statusPriority[b.status]) {
-          return statusPriority[a.status] - statusPriority[b.status];
-        }
-        
-        // Tri secondaire par date
-        const dateA = a.status === 'done' 
-          ? (a.completedDate ? new Date(a.completedDate) : new Date())
-          : (a.scheduledDate ? new Date(a.scheduledDate) : new Date());
-          
-        const dateB = b.status === 'done'
-          ? (b.completedDate ? new Date(b.completedDate) : new Date())
-          : (b.scheduledDate ? new Date(b.scheduledDate) : new Date());
-          
-        return dateA.getTime() - dateB.getTime();
-      });
+      // Trier les actions en utilisant la même logique que les leads
+      // Créer des objets temporaires avec les propriétés nécessaires pour le tri
+      const actionsWithPriority = allActions.map(action => ({
+        ...action,
+        // Mapper les propriétés pour la fonction de tri
+        status: action.leadStatus,
+        tags: action.leadTags,
+        nextFollowUpDate: action.scheduledDate,
+        createdAt: action.createdAt
+      }));
+      
+      // Appliquer le tri par priorité
+      const sortedActionsByPriority = sortLeadsByPriority(actionsWithPriority, 'priority');
+      
+      // Remettre les actions dans le bon format
+      const sortedActions = sortedActionsByPriority.map(({ leadStatus, leadTags, ...action }) => action);
 
       setActions(sortedActions);
       

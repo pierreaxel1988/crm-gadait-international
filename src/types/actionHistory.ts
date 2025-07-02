@@ -27,4 +27,7 @@ export interface ActionItem {
   status: ActionStatus;
   phoneNumber?: string;
   email?: string;
+  // Propriétés ajoutées pour le tri par priorité
+  leadStatus?: string;
+  leadTags?: string[];
 }
