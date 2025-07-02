@@ -1,27 +1,27 @@
-
 import { isPast, isToday, parseISO, isBefore } from 'date-fns';
 import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
 
 /**
- * Calculate priority score based on lead stage
+ * Calculate priority score based on lead stage - Updated order based on user requirements
  */
 const getStageScore = (status: string): number => {
   switch (status) {
-    case 'New':
-    case 'Contacted':
-      return 1000; // Priorité A - leads chauds à traiter
-    case 'Qualified':
-    case 'Proposal':
-      return 800;  // Priorité B - leads en négociation
+    case 'Deposit':
+      return 1000; // Priorité 1 - Le plus important
     case 'Visit':
     case 'Offre':
-    case 'Deposit':
-      return 600;  // Priorité C - leads avancés
+      return 800;  // Priorité 2
+    case 'Qualified':
+    case 'Proposal':
+      return 600;  // Priorité 3
+    case 'New':
+    case 'Contacted':
+      return 400;  // Priorité 4
     case 'Gagné':
     case 'Perdu':
-      return 100;  // Priorité D - leads fermés
+      return 200;  // Priorité 5 - Le moins important
     default:
-      return 400;  // Statuts non définis
+      return 300;  // Statuts non définis
   }
 };
 
