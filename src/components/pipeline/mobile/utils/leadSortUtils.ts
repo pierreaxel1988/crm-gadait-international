@@ -2,31 +2,31 @@ import { isPast, isToday, parseISO, isBefore } from 'date-fns';
 import { ExtendedKanbanItem } from '@/hooks/useKanbanData';
 
 /**
- * Calculate priority score based on lead stage - Updated order based on user requirements
+ * Calculate priority score based on lead stage - Updated order and scores for better balance
  */
 const getStageScore = (status: string): number => {
   switch (status) {
     case 'Deposit':
-      return 1000; // Priorité 1 - Le plus important
+      return 500; // Priorité 1 - Le plus important
     case 'Visit':
     case 'Offre':
-      return 800;  // Priorité 2
+      return 400; // Priorité 2
     case 'Qualified':
     case 'Proposal':
-      return 600;  // Priorité 3
+      return 300; // Priorité 3
     case 'New':
     case 'Contacted':
-      return 400;  // Priorité 4
+      return 200; // Priorité 4
     case 'Gagné':
     case 'Perdu':
-      return 200;  // Priorité 5 - Le moins important
+      return 100; // Priorité 5 - Le moins important
     default:
-      return 300;  // Statuts non définis
+      return 150; // Statuts non définis
   }
 };
 
 /**
- * Calculate priority score based on lead tags - Updated order based on user requirements
+ * Calculate priority score based on lead tags - Increased scores for better balance
  */
 const getTagScore = (tags: string[] = []): number => {
   let maxScore = 0;
@@ -35,19 +35,19 @@ const getTagScore = (tags: string[] = []): number => {
     const tagLower = tag.toLowerCase();
     // Ordre de priorité: Vip (plus important) → Hot → Serious → Cold → No response → No phone → Fake (moins important)
     if (tagLower.includes('vip')) {
-      maxScore = Math.max(maxScore, 100); // Le plus important
+      maxScore = Math.max(maxScore, 300); // Le plus important
     } else if (tagLower.includes('hot')) {
-      maxScore = Math.max(maxScore, 85);
+      maxScore = Math.max(maxScore, 250);
     } else if (tagLower.includes('serious')) {
-      maxScore = Math.max(maxScore, 70);
+      maxScore = Math.max(maxScore, 200);
     } else if (tagLower.includes('cold')) {
-      maxScore = Math.max(maxScore, 55);
+      maxScore = Math.max(maxScore, 150);
     } else if (tagLower.includes('no response')) {
-      maxScore = Math.max(maxScore, 40);
+      maxScore = Math.max(maxScore, 100);
     } else if (tagLower.includes('no phone')) {
-      maxScore = Math.max(maxScore, 25);
+      maxScore = Math.max(maxScore, 75);
     } else if (tagLower.includes('fake')) {
-      maxScore = Math.max(maxScore, 10); // Le moins important
+      maxScore = Math.max(maxScore, 50); // Le moins important
     }
   });
   
