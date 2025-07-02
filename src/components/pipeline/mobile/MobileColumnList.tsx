@@ -10,7 +10,6 @@ import LeadListItem from './LeadListItem';
 import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import { sortLeadsByPriority } from './utils/leadSortUtils';
 import LoadingScreen from '@/components/layout/LoadingScreen';
-
 const statusTranslations: Record<LeadStatus, string> = {
   'New': 'Nouveaux',
   'Contacted': 'Contactés',
@@ -24,7 +23,6 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Perdu': 'Perdu',
   'Deleted': 'Supprimé'
 };
-
 interface MobileColumnListProps {
   columns: Array<{
     title: string;
@@ -38,53 +36,37 @@ interface MobileColumnListProps {
   searchTerm?: string;
   filters?: FilterOptions;
 }
-
-const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand = () => {}, activeTab = 'purchase', searchTerm, filters }: MobileColumnListProps) => {
+const MobileColumnList = ({
+  columns,
+  expandedColumn = null,
+  toggleColumnExpand = () => {},
+  activeTab = 'purchase',
+  searchTerm,
+  filters
+}: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest' | 'stage' | 'urgency' | 'importance'>('priority');
+  const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest' | 'stage' | 'urgency' | 'importance' | 'budget'>('priority');
   const navigate = useNavigate();
-  
   const {
     loadedColumns,
     isLoading,
     teamMembers
   } = useKanbanData(activeTab, 0, filters);
-  
-  const filteredColumns = filters 
-    ? applyFiltersToColumns(loadedColumns.filter(column => 
-        !column.pipelineType || column.pipelineType === activeTab
-      ), filters)
-    : loadedColumns.filter(column => 
-        !column.pipelineType || column.pipelineType === activeTab
-      );
-
+  const filteredColumns = filters ? applyFiltersToColumns(loadedColumns.filter(column => !column.pipelineType || column.pipelineType === activeTab), filters) : loadedColumns.filter(column => !column.pipelineType || column.pipelineType === activeTab);
   useEffect(() => {
     if (filters?.status !== null) {
       setActiveStatus(filters.status);
     }
   }, [filters]);
-
-  const leadsByStatus = activeStatus === 'all' 
-    ? filteredColumns.flatMap(column => column.items.map(item => ({
-        ...item,
-        columnStatus: column.status
-      })))
-    : filteredColumns
-        .filter(column => column.status === activeStatus)
-        .flatMap(column => column.items.map(item => ({
-          ...item,
-          columnStatus: column.status
-        })));
-  
-  const searchFilteredLeads = searchTerm
-    ? leadsByStatus.filter(lead => 
-        lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead.desiredLocation?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : leadsByStatus;
-    
+  const leadsByStatus = activeStatus === 'all' ? filteredColumns.flatMap(column => column.items.map(item => ({
+    ...item,
+    columnStatus: column.status
+  }))) : filteredColumns.filter(column => column.status === activeStatus).flatMap(column => column.items.map(item => ({
+    ...item,
+    columnStatus: column.status
+  })));
+  const searchFilteredLeads = searchTerm ? leadsByStatus.filter(lead => lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) || lead.desiredLocation?.toLowerCase().includes(searchTerm.toLowerCase())) : leadsByStatus;
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
-
   useEffect(() => {
     console.log('Team Members in MobileColumnList:', teamMembers);
     console.log('First few leads:', sortedLeads.slice(0, 3).map(lead => ({
@@ -93,61 +75,35 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
       assignedToName: teamMembers?.find(m => m.id === lead.assignedTo)?.name
     })));
   }, [teamMembers, sortedLeads]);
-
   const leadCountByStatus = filteredColumns.reduce((acc, column) => {
     const countForStatus = column.items.length;
-    
     acc[column.status] = countForStatus;
     return acc;
   }, {} as Record<string, number>);
-  
   const totalLeadCount = leadsByStatus.length;
-
   const handleAddLead = (status: LeadStatus) => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
   };
-
   const handleLeadClick = (leadId: string) => {
     navigate(`/leads/${leadId}?tab=criteria`);
   };
-  
-  const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest' | 'stage' | 'urgency' | 'importance') => {
+  const handleChangeSortBy = (value: 'priority' | 'newest' | 'oldest' | 'stage' | 'urgency' | 'importance' | 'budget') => {
     setSortBy(value);
   };
-
-  return (
-    <div className="space-y-4">
-      {isLoading ? (
-        <div className="flex items-center justify-center h-40">
+  return <div className="space-y-4">
+      {isLoading ? <div className="flex items-center justify-center h-40">
           <LoadingScreen fullscreen={false} />
-        </div>
-      ) : (
-        <>
+        </div> : <>
           <div className="sticky top-[calc(var(--header-height)-1px)] pt-3 pb-3 z-40 bg-gray-50">
             <div className="overflow-x-auto pb-1">
-              <Tabs 
-                value={activeStatus === 'all' ? 'all' : activeStatus} 
-                onValueChange={value => setActiveStatus(value as LeadStatus | 'all')} 
-                className="w-full"
-              >
+              <Tabs value={activeStatus === 'all' ? 'all' : activeStatus} onValueChange={value => setActiveStatus(value as LeadStatus | 'all')} className="w-full">
                 <TabsList className="inline-flex w-auto p-1 h-10 bg-gray-100 rounded-full">
-                  <TabsTrigger 
-                    value="all" 
-                    className="rounded-full px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                  >
+                  <TabsTrigger value="all" className="rounded-full px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">
                     Tous ({totalLeadCount})
                   </TabsTrigger>
-                  {filteredColumns.map(column => 
-                    leadCountByStatus[column.status] > 0 && (
-                      <TabsTrigger 
-                        key={column.status} 
-                        value={column.status} 
-                        className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                      >
+                  {filteredColumns.map(column => leadCountByStatus[column.status] > 0 && <TabsTrigger key={column.status} value={column.status} className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm">
                         {statusTranslations[column.status]} ({leadCountByStatus[column.status]})
-                      </TabsTrigger>
-                    )
-                  )}
+                      </TabsTrigger>)}
                 </TabsList>
               </Tabs>
             </div>
@@ -156,52 +112,23 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
               <div className="flex items-center justify-between md:w-auto">
                 <span className="text-sm font-medium text-gray-700">Trier par:</span>
                 <div className="flex space-x-1 flex-wrap">
-                  <button 
-                    onClick={() => handleChangeSortBy('priority')}
-                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'priority' 
-                      ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600'}`}
-                  >
+                  <button onClick={() => handleChangeSortBy('priority')} className={`px-2 py-1 text-xs rounded-md ${sortBy === 'priority' ? 'bg-zinc-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
                     Priorité
                   </button>
-                  <button 
-                    onClick={() => handleChangeSortBy('stage')}
-                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'stage' 
-                      ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600'}`}
-                  >
-                    Stade
-                  </button>
-                  <button 
-                    onClick={() => handleChangeSortBy('urgency')}
-                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'urgency' 
-                      ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600'}`}
-                  >
+                  
+                  <button onClick={() => handleChangeSortBy('urgency')} className={`px-2 py-1 text-xs rounded-md ${sortBy === 'urgency' ? 'bg-zinc-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
                     Urgence
                   </button>
-                  <button 
-                    onClick={() => handleChangeSortBy('importance')}
-                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'importance' 
-                      ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600'}`}
-                  >
+                  <button onClick={() => handleChangeSortBy('importance')} className={`px-2 py-1 text-xs rounded-md ${sortBy === 'importance' ? 'bg-zinc-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
                     Importance
                   </button>
-                  <button 
-                    onClick={() => handleChangeSortBy('newest')}
-                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'newest' 
-                      ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600'}`}
-                  >
+                  <button onClick={() => handleChangeSortBy('newest')} className={`px-2 py-1 text-xs rounded-md ${sortBy === 'newest' ? 'bg-zinc-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
                     Plus récent
                   </button>
-                  <button 
-                    onClick={() => handleChangeSortBy('oldest')}
-                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'oldest' 
-                      ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600'}`}
-                  >
+                  <button onClick={() => handleChangeSortBy('budget')} className={`px-2 py-1 text-xs rounded-md ${sortBy === 'budget' ? 'bg-zinc-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                    Budget
+                  </button>
+                  <button onClick={() => handleChangeSortBy('oldest')} className={`px-2 py-1 text-xs rounded-md ${sortBy === 'oldest' ? 'bg-zinc-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
                     Plus ancien
                   </button>
                 </div>
@@ -210,66 +137,32 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
           </div>
           
           <div className="space-y-px">
-            {sortedLeads.length === 0 ? (
-              <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
+            {sortedLeads.length === 0 ? <div className="flex items-center justify-center h-40 border border-dashed border-border rounded-md bg-white">
                 <div className="text-center">
                   <p className="text-sm text-zinc-900 font-medium">Aucun lead trouvé</p>
-                  <button 
-                    onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
-                    className="mt-2 text-zinc-900 hover:text-zinc-700 text-sm flex items-center justify-center mx-auto"
-                  >
+                  <button onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} className="mt-2 text-zinc-900 hover:text-zinc-700 text-sm flex items-center justify-center mx-auto">
                     <PlusCircle className="h-4 w-4 mr-1" />
                     Ajouter un lead
                   </button>
                 </div>
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
+              </div> : <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
                 {sortedLeads.map(lead => {
-                  if (lead.name && lead.name.includes("HEINRICH SCHEMBERG")) {
-                    console.log("Found HEINRICH SCHEMBERG:", lead);
-                    console.log("Team members:", teamMembers);
-                    console.log("Assigned agent:", 
-                      teamMembers?.find(member => member.id === lead.assignedTo)?.name);
-                  }
-                  
-                  return (
-                    <LeadListItem 
-                      key={lead.id}
-                      id={lead.id}
-                      name={lead.name}
-                      columnStatus={lead.columnStatus}
-                      budget={lead.budget}
-                      currency={lead.currency}
-                      desiredLocation={lead.desiredLocation}
-                      taskType={lead.taskType}
-                      createdAt={lead.createdAt}
-                      nextFollowUpDate={lead.nextFollowUpDate}
-                      phone={lead.phone}
-                      email={lead.email}
-                      assignedTo={lead.assignedTo ? 
-                        teamMembers?.find(member => member.id === lead.assignedTo)?.name : 
-                        undefined}
-                      onClick={handleLeadClick}
-                    />
-                  );
-                })}
-              </div>
-            )}
+            if (lead.name && lead.name.includes("HEINRICH SCHEMBERG")) {
+              console.log("Found HEINRICH SCHEMBERG:", lead);
+              console.log("Team members:", teamMembers);
+              console.log("Assigned agent:", teamMembers?.find(member => member.id === lead.assignedTo)?.name);
+            }
+            return <LeadListItem key={lead.id} id={lead.id} name={lead.name} columnStatus={lead.columnStatus} budget={lead.budget} currency={lead.currency} desiredLocation={lead.desiredLocation} taskType={lead.taskType} createdAt={lead.createdAt} nextFollowUpDate={lead.nextFollowUpDate} phone={lead.phone} email={lead.email} assignedTo={lead.assignedTo ? teamMembers?.find(member => member.id === lead.assignedTo)?.name : undefined} onClick={handleLeadClick} />;
+          })}
+              </div>}
           </div>
           
           <div className="fixed bottom-20 right-6 z-50 md:hidden">
-            <button 
-              onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} 
-              className="text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-colors bg-zinc-900 hover:bg-zinc-800"
-            >
+            <button onClick={() => handleAddLead(activeStatus === 'all' ? 'New' : activeStatus)} className="text-white h-14 w-14 rounded-full flex items-center justify-center shadow-lg transition-colors bg-zinc-900 hover:bg-zinc-800">
               <PlusCircle className="h-6 w-6" />
             </button>
           </div>
-        </>
-      )}
-    </div>
-  );
+        </>}
+    </div>;
 };
-
 export default MobileColumnList;
