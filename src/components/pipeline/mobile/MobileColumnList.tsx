@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -189,20 +190,20 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
                     Importance
                   </button>
                   <button 
-                    onClick={() => handleChangeSortBy('budget')}
-                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'budget' 
-                      ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600'}`}
-                  >
-                    Budget
-                  </button>
-                  <button 
                     onClick={() => handleChangeSortBy('newest')}
                     className={`px-2 py-1 text-xs rounded-md ${sortBy === 'newest' 
                       ? 'bg-zinc-900 text-white' 
                       : 'bg-gray-100 text-gray-600'}`}
                   >
                     Plus récent
+                  </button>
+                  <button 
+                    onClick={() => handleChangeSortBy('budget')}
+                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'budget' 
+                      ? 'bg-zinc-900 text-white' 
+                      : 'bg-gray-100 text-gray-600'}`}
+                  >
+                    Budget
                   </button>
                   <button 
                     onClick={() => handleChangeSortBy('oldest')}
