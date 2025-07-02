@@ -83,18 +83,14 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
       )
     : leadsByStatus;
     
-  // Trier les leads avec la nouvelle logique de priorité
   const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
 
   useEffect(() => {
     console.log('Team Members in MobileColumnList:', teamMembers);
-    console.log('First few leads with priorities:', sortedLeads.slice(0, 3).map(lead => ({
+    console.log('First few leads:', sortedLeads.slice(0, 3).map(lead => ({
       name: lead.name,
       assignedTo: lead.assignedTo,
-      assignedToName: teamMembers?.find(m => m.id === lead.assignedTo)?.name,
-      nextFollowUpDate: lead.nextFollowUpDate,
-      status: lead.status,
-      tags: lead.tags
+      assignedToName: teamMembers?.find(m => m.id === lead.assignedTo)?.name
     })));
   }, [teamMembers, sortedLeads]);
 
@@ -162,25 +158,25 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
                 <div className="flex space-x-2">
                   <button 
                     onClick={() => handleChangeSortBy('priority')}
-                    className={`px-2 py-1 text-xs rounded-md transition-colors ${sortBy === 'priority' 
+                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'priority' 
                       ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                      : 'bg-gray-100 text-gray-600'}`}
                   >
                     Priorité
                   </button>
                   <button 
                     onClick={() => handleChangeSortBy('newest')}
-                    className={`px-2 py-1 text-xs rounded-md transition-colors ${sortBy === 'newest' 
+                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'newest' 
                       ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                      : 'bg-gray-100 text-gray-600'}`}
                   >
                     Plus récent
                   </button>
                   <button 
                     onClick={() => handleChangeSortBy('oldest')}
-                    className={`px-2 py-1 text-xs rounded-md transition-colors ${sortBy === 'oldest' 
+                    className={`px-2 py-1 text-xs rounded-md ${sortBy === 'oldest' 
                       ? 'bg-zinc-900 text-white' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                      : 'bg-gray-100 text-gray-600'}`}
                   >
                     Plus ancien
                   </button>
@@ -206,6 +202,13 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
             ) : (
               <div className="bg-white rounded-lg border border-slate-200 divide-y shadow-sm">
                 {sortedLeads.map(lead => {
+                  if (lead.name && lead.name.includes("HEINRICH SCHEMBERG")) {
+                    console.log("Found HEINRICH SCHEMBERG:", lead);
+                    console.log("Team members:", teamMembers);
+                    console.log("Assigned agent:", 
+                      teamMembers?.find(member => member.id === lead.assignedTo)?.name);
+                  }
+                  
                   return (
                     <LeadListItem 
                       key={lead.id}

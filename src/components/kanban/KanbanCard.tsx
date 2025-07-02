@@ -115,63 +115,25 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     }
   };
   
-  // Déterminer si la tâche est en retard (seulement si une date est définie)
+  // Déterminer si la tâche est en retard
   const isOverdue = () => {
     if (!item.nextFollowUpDate) return false;
     const followUpDateTime = new Date(item.nextFollowUpDate);
     return isPast(followUpDateTime) && !isToday(followUpDateTime);
   };
 
-  // Déterminer si la tâche est prévue pour aujourd'hui
-  const isToday = () => {
-    if (!item.nextFollowUpDate) return false;
-    const followUpDateTime = new Date(item.nextFollowUpDate);
-    return isToday(followUpDateTime);
-  };
-
-  // Déterminer si la tâche est prévue dans le futur
-  const isFuture = () => {
-    if (!item.nextFollowUpDate) return false;
-    const followUpDateTime = new Date(item.nextFollowUpDate);
-    return !isPast(followUpDateTime) && !isToday(followUpDateTime);
-  };
-
   // Déterminer la couleur de la bordure en fonction du statut de la tâche
   const getCardBorderClass = () => {
-    // Leads supprimés - style spécial
     if (item.status === 'Deleted') {
-      return 'bg-red-50 border-red-200';
+      return 'bg-red-50 border-red-200'; // Special styling for deleted leads
+    } else if (isOverdue()) {
+      return 'bg-[#FFDEE2]/30'; // Soft pink background for overdue tasks
+    } else if (item.nextFollowUpDate && isToday(new Date(item.nextFollowUpDate))) {
+      return 'bg-amber-50'; // Changed from border-amber-300 to a light amber background
+    } else if (item.nextFollowUpDate) {
+      return 'bg-[#e3f7ed]/80'; // Updated to #e3f7ed with 80% opacity for upcoming tasks
     }
-    
-    // Leads fermés (Gagné/Perdu) - style neutre même s'ils avaient des actions
-    const closedStatuses = ['Gagné', 'Perdu'];
-    if (closedStatuses.includes(item.status)) {
-      return 'bg-gray-50 border-gray-200';
-    }
-    
-    // Logique basée sur les actions prévues
-    if (!item.nextFollowUpDate) {
-      // Pas d'action prévue - style neutre/gris
-      return 'bg-gray-50/50 border-gray-100';
-    }
-    
-    // Actions en retard - rouge/rose
-    if (isOverdue()) {
-      return 'bg-red-50/80 border-red-200';
-    }
-    
-    // Actions prévues aujourd'hui - ambre
-    if (isToday()) {
-      return 'bg-amber-50/80 border-amber-200';
-    }
-    
-    // Actions futures - vert léger
-    if (isFuture()) {
-      return 'bg-green-50/60 border-green-200';
-    }
-    
-    // Fallback - neutre
-    return 'bg-white border-gray-200';
+    return '';
   };
 
   const isDeleted = item.status === 'Deleted';
@@ -180,6 +142,7 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
     <Card 
       className={cn(
         'border shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden',
+        'bg-white',
         draggable && !isDeleted && 'cursor-grab active:cursor-grabbing',
         isDeleted && 'opacity-75',
         getCardBorderClass(),
