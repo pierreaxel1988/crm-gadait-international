@@ -60,8 +60,9 @@ const ActionEditCard: React.FC<ActionEditCardProps> = ({
       
       console.log("=== DÉBUT SAUVEGARDE ACTION ===");
       console.log("Action originale:", editedAction);
-      console.log("Nouvelle date:", scheduledDate);
-      console.log("Nouvelle heure:", scheduledTime);
+      console.log("ID de l'action à modifier:", editedAction.id);
+      console.log("Nouvelle date sélectionnée:", scheduledDate);
+      console.log("Nouvelle heure sélectionnée:", scheduledTime);
       console.log("Nouvelles notes:", notes);
 
       let updatedScheduledDate = editedAction.scheduledDate;
@@ -73,25 +74,33 @@ const ActionEditCard: React.FC<ActionEditCardProps> = ({
         const day = scheduledDate.getDate();
         const combinedDateTime = new Date(year, month, day, hours, minutes, 0, 0);
         updatedScheduledDate = combinedDateTime.toISOString();
-        console.log("Date sélectionnée:", scheduledDate);
-        console.log("Heure sélectionnée:", scheduledTime);
+        console.log("Date sélectionnée décomposée:", { year, month, day, hours, minutes });
         console.log("Date combinée calculée:", updatedScheduledDate);
         console.log("Date combinée locale:", combinedDateTime.toLocaleDateString());
       }
 
-      const updatedActionHistory = lead.actionHistory?.map(a => 
-        a.id === editedAction.id ? {
-          ...a,
-          scheduledDate: updatedScheduledDate,
-          notes: notes
-        } : a
-      ) || [];
+      console.log("ActionHistory AVANT modification:", lead.actionHistory);
+      
+      const updatedActionHistory = lead.actionHistory?.map(a => {
+        if (a.id === editedAction.id) {
+          console.log("Action trouvée à modifier:", a);
+          const updated = {
+            ...a,
+            scheduledDate: updatedScheduledDate,
+            notes: notes
+          };
+          console.log("Action APRÈS modification:", updated);
+          return updated;
+        }
+        return a;
+      }) || [];
 
-      console.log("Action mise à jour dans l'historique:", 
+      console.log("ActionHistory APRÈS modification:", updatedActionHistory);
+      console.log("Action modifiée dans l'historique:", 
         updatedActionHistory.find(a => a.id === editedAction.id)
       );
 
-      console.log("Envoi vers updateLead avec actionHistory:", updatedActionHistory);
+      console.log("Envoi vers updateLead avec actionHistory:", updatedActionHistory.length, "actions");
 
       const updatedLead = await updateLead({
         ...lead,
