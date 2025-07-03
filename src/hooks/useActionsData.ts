@@ -130,20 +130,34 @@ export const useActionsData = (refreshTrigger: number = 0) => {
         if (a.status === 'done' && b.status !== 'done') return 1;
         if (a.status !== 'done' && b.status === 'done') return -1;
         
-        // Priorité 1: Actions d'aujourd'hui (status todo avec date aujourd'hui)
+        // Priorité 1: Actions en retard (status overdue) - les plus urgentes
+        if (a.status === 'overdue' && b.status !== 'overdue') return -1;
+        if (a.status !== 'overdue' && b.status === 'overdue') return 1;
+        
+        // Priorité 2: Actions d'aujourd'hui (status todo avec date aujourd'hui)
         const isATodayAction = a.status === 'todo' && a.scheduledDate && isToday(new Date(a.scheduledDate));
         const isBTodayAction = b.status === 'todo' && b.scheduledDate && isToday(new Date(b.scheduledDate));
         
         if (isATodayAction && !isBTodayAction) return -1;
         if (!isATodayAction && isBTodayAction) return 1;
         
-        // Priorité 2: Actions en retard (status overdue)
-        if (a.status === 'overdue' && b.status !== 'overdue') return -1;
-        if (a.status !== 'overdue' && b.status === 'overdue') return 1;
-        
-        // Si même catégorie de date (aujourd'hui ou en retard), utiliser le tri par priorité des leads
-        if ((isATodayAction && isBTodayAction) || (a.status === 'overdue' && b.status === 'overdue')) {
-          // Créer des objets temporaires avec les propriétés nécessaires pour le tri
+        // Priorité 3: Pour les actions futures (todo/overdue), organiser par programmation
+        if ((a.status === 'todo' || a.status === 'overdue') && (b.status === 'todo' || b.status === 'overdue')) {
+          // Actions non programmées en premier
+          const aNotScheduled = !a.scheduledDate;
+          const bNotScheduled = !b.scheduledDate;
+          
+          if (aNotScheduled && !bNotScheduled) return -1;
+          if (!aNotScheduled && bNotScheduled) return 1;
+          
+          // Si les deux sont programmées, trier par date (plus proche en premier)
+          if (!aNotScheduled && !bNotScheduled) {
+            const dateA = new Date(a.scheduledDate!);
+            const dateB = new Date(b.scheduledDate!);
+            return dateA.getTime() - dateB.getTime();
+          }
+          
+          // Si les deux sont non programmées ou de même statut, utiliser le tri par priorité
           const actionAWithPriority = {
             ...a,
             status: a.leadStatus,
@@ -160,7 +174,6 @@ export const useActionsData = (refreshTrigger: number = 0) => {
             createdAt: b.createdAt
           };
           
-          // Utiliser la fonction de tri par priorité
           const sorted = sortLeadsByPriority([actionAWithPriority, actionBWithPriority], 'priority');
           return sorted[0].id === a.id ? -1 : 1;
         }
