@@ -111,12 +111,6 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
         
         if (updatedLead) {
           setLead(updatedLead);
-          toast({
-            title: "Action ajoutée",
-            description: `${selectedAction} a été ajouté à ${lead.name}${
-              scheduledDateTime ? ` pour le ${format(new Date(scheduledDateTime), 'dd/MM/yyyy à HH:mm')}` : ''
-            }`
-          });
         }
         setIsActionDialogOpen(false);
       } catch (error) {
