@@ -6,6 +6,7 @@ import { Camera, MapPin, Home, Bed, Compass, Building, Clock, CreditCard, Star, 
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import StyledSelect from './StyledSelect';
+import CountrySelectModal from './CountrySelectModal';
 
 interface BuyerCriteriaSectionProps {
   lead: LeadDetailed;
@@ -187,24 +188,10 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             <MapPin className="h-4 w-4 text-loro-terracotta" />
             Pays recherché
           </Label>
-          <StyledSelect
-            id="country"
+          <CountrySelectModal
             value={lead.country || ''}
-            onChange={e => onDataChange({ country: e.target.value })}
+            onChange={(value) => onDataChange({ country: value })}
             placeholder="Sélectionner un pays"
-            options={[
-              { value: "France", label: "France" },
-              { value: "Spain", label: "Espagne" },
-              { value: "Portugal", label: "Portugal" },
-              { value: "Italy", label: "Italie" },
-              { value: "Switzerland", label: "Suisse" },
-              { value: "Monaco", label: "Monaco" },
-              { value: "United States", label: "United States" },
-              { value: "Etats-Unis", label: "Etats-Unis" },
-              { value: "Grèce", label: "Grèce" },
-              { value: "Mauritius", label: "Île Maurice" },
-              { value: "UAE", label: "Émirats Arabes Unis" }
-            ]}
           />
         </div>
 
