@@ -9,7 +9,7 @@ import { updateLead } from '@/services/leadService';
 import { mapToLeadDetailed } from '@/services/utils/leadMappers';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import ActionEditSheet from './ActionEditSheet';
+import ActionEditCard from './ActionEditCard';
 
 interface ActionsPanelMobileProps {
   leadId: string;
@@ -306,14 +306,14 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       )}
 
       {lead && (
-        <ActionEditSheet
-          isOpen={isEditSheetOpen}
-          onClose={() => setIsEditSheetOpen(false)}
-          action={selectedAction}
-          lead={lead}
-          onUpdate={handleActionUpdate}
-          getActionTypeIcon={getActionTypeIcon}
-        />
+      <ActionEditCard
+        isOpen={isEditSheetOpen}
+        onClose={() => setIsEditSheetOpen(false)}
+        action={selectedAction}
+        lead={lead}
+        onUpdate={handleActionUpdate}
+        getActionTypeIcon={getActionTypeIcon}
+      />
       )}
     </div>
   );
