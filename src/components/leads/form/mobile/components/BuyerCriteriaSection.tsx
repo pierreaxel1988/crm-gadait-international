@@ -21,6 +21,14 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
     const updatedTypes = currentTypes.includes(propertyType) 
       ? currentTypes.filter(type => type !== propertyType) 
       : [...currentTypes, propertyType];
+    
+    console.log('🏠 Property Type Change:', {
+      clicked: propertyType,
+      before: currentTypes,
+      after: updatedTypes,
+      leadId: lead.id
+    });
+    
     onDataChange({ propertyTypes: updatedTypes as PropertyType[] });
   };
   
@@ -30,6 +38,15 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
     const newBedrooms = currentBedrooms.includes(numValue) 
       ? currentBedrooms.filter(b => b !== numValue) 
       : [...currentBedrooms, numValue];
+    
+    console.log('🛏️ Bedrooms Change:', {
+      clicked: value,
+      numValue,
+      before: currentBedrooms,
+      after: newBedrooms,
+      leadId: lead.id
+    });
+    
     onDataChange({ bedrooms: newBedrooms.length ? newBedrooms : undefined });
   };
   
@@ -38,6 +55,14 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
     const updatedViews = currentViews.includes(view) 
       ? currentViews.filter(v => v !== view) 
       : [...currentViews, view];
+    
+    console.log('👀 Views Change:', {
+      clicked: view,
+      before: currentViews,
+      after: updatedViews,
+      leadId: lead.id
+    });
+    
     onDataChange({ views: updatedViews as ViewType[] });
   };
   
@@ -46,6 +71,14 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
     const updatedAmenities = currentAmenities.includes(amenity) 
       ? currentAmenities.filter(a => a !== amenity) 
       : [...currentAmenities, amenity];
+    
+    console.log('⭐ Amenities Change:', {
+      clicked: amenity,
+      before: currentAmenities,
+      after: updatedAmenities,
+      leadId: lead.id
+    });
+    
     onDataChange({ amenities: updatedAmenities });
   };
   

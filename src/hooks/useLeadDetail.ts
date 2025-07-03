@@ -172,7 +172,36 @@ export function useLeadDetail(id: string | undefined) {
   const handleDataChange = (data: Partial<LeadDetailed>) => {
     if (!lead) return;
     
-    console.log("Updating lead data:", data);
+    console.log("📝 Updating lead data:", data);
+    
+    // Special logging for buyer criteria fields
+    if (data.propertyTypes !== undefined) {
+      console.log("🏠 PropertyTypes change detected:", {
+        oldValue: lead.propertyTypes,
+        newValue: data.propertyTypes
+      });
+    }
+    
+    if (data.bedrooms !== undefined) {
+      console.log("🛏️ Bedrooms change detected:", {
+        oldValue: lead.bedrooms,
+        newValue: data.bedrooms
+      });
+    }
+    
+    if (data.views !== undefined) {
+      console.log("👀 Views change detected:", {
+        oldValue: lead.views,
+        newValue: data.views
+      });
+    }
+    
+    if (data.amenities !== undefined) {
+      console.log("⭐ Amenities change detected:", {
+        oldValue: lead.amenities,
+        newValue: data.amenities
+      });
+    }
     
     // Special logging for important owner fields
     if (data.propertyType !== undefined) {
