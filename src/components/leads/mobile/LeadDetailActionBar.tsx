@@ -38,13 +38,7 @@ const LeadDetailActionBar: React.FC<LeadDetailActionBarProps> = ({
         return scheduledDate >= now || scheduledDate < now;
       }).length;
       setPendingActionsCount(pending);
-      if (pending > 0 && !notificationShown) {
-        toast({
-          title: "Actions en attente",
-          description: `Vous avez ${pending} action${pending > 1 ? 's' : ''} à réaliser`
-        });
-        setNotificationShown(true);
-      }
+      // Notification supprimée - plus besoin d'alerter sur les actions en attente
     }
   }, [lead?.actionHistory, notificationShown]);
   useEffect(() => {

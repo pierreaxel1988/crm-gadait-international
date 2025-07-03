@@ -318,13 +318,7 @@ export function useLeadDetail(id: string | undefined) {
 
       const pendingActionsCount = pendingActions.length;
       
-      if (pendingActionsCount > 0 && !hasShownPendingActionsToast) {
-        toast({
-          title: "Actions en attente",
-          description: `Vous avez ${pendingActionsCount} action${pendingActionsCount > 1 ? 's' : ''} à réaliser`,
-        });
-        setHasShownPendingActionsToast(true);
-      }
+      // Notification supprimée - plus besoin d'alerter sur les actions en attente
     }
   }, [lead?.actionHistory, hasShownPendingActionsToast]);
 
