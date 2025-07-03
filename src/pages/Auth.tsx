@@ -85,11 +85,6 @@ const Auth = () => {
           description: "Veuillez vérifier votre email pour confirmer votre compte."
         });
       } else {
-        toast({
-          title: "Connexion réussie",
-          description: "Bienvenue sur votre espace personnel"
-        });
-        
         const redirectPath = getRedirectPath();
         navigate(redirectPath);
       }
