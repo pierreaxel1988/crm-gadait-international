@@ -91,6 +91,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
   const handleActionUpdate = (updatedLead: LeadDetailed) => {
     setLead(updatedLead);
+    // Forcer un rechargement des données
+    fetchLead();
   };
 
   const handleMarkComplete = async (action: ActionHistory) => {
@@ -155,8 +157,11 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
     }
   };
 
+  // Use actions from the local lead data to ensure consistency
+  const currentActions = lead?.actionHistory || actionHistory;
+  
   // Sort actions chronologically - most recent first
-  const pendingActions = actionHistory
+  const pendingActions = currentActions
     .filter(action => !action.completedDate)
     .sort((a, b) => {
       const dateA = a.scheduledDate ? new Date(a.scheduledDate).getTime() : new Date(a.createdAt).getTime();
@@ -164,7 +169,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       return dateB - dateA; // Most recent first
     });
     
-  const completedActions = actionHistory
+  const completedActions = currentActions
     .filter(action => action.completedDate)
     .sort((a, b) => {
       const dateA = new Date(a.completedDate!).getTime();
@@ -297,7 +302,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         </div>
       )}
 
-      {actionHistory.length === 0 && (
+      {currentActions.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
           <p className="text-lg font-medium mb-2">Aucune action</p>
