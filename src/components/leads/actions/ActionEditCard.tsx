@@ -67,10 +67,16 @@ const ActionEditCard: React.FC<ActionEditCardProps> = ({
       let updatedScheduledDate = editedAction.scheduledDate;
       if (scheduledDate) {
         const [hours, minutes] = scheduledTime.split(':').map(Number);
-        const combinedDateTime = new Date(scheduledDate);
-        combinedDateTime.setHours(hours, minutes, 0, 0);
+        // Créer une nouvelle date en utilisant les composants locaux pour éviter les problèmes de timezone
+        const year = scheduledDate.getFullYear();
+        const month = scheduledDate.getMonth();
+        const day = scheduledDate.getDate();
+        const combinedDateTime = new Date(year, month, day, hours, minutes, 0, 0);
         updatedScheduledDate = combinedDateTime.toISOString();
+        console.log("Date sélectionnée:", scheduledDate);
+        console.log("Heure sélectionnée:", scheduledTime);
         console.log("Date combinée calculée:", updatedScheduledDate);
+        console.log("Date combinée locale:", combinedDateTime.toLocaleDateString());
       }
 
       const updatedActionHistory = lead.actionHistory?.map(a => 
