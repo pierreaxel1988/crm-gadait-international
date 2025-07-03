@@ -65,6 +65,9 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           const dateTime = new Date(actionDate);
           dateTime.setHours(hours, minutes);
           scheduledDateTime = dateTime.toISOString();
+        } else {
+          // Si aucune date n'est spécifiée, utiliser la date et heure actuelle
+          scheduledDateTime = new Date().toISOString();
         }
         
         // Check for duplicates before adding
