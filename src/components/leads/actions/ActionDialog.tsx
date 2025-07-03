@@ -102,7 +102,7 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
               <CustomButton variant="chocolate" onClick={handleConfirmClick} className="flex-1 flex justify-center rounded-md" type="button" aria-label="Confirmer l'action">
                 Confirmer
               </CustomButton>
-            </div> : <CustomButton variant="outline" onClick={onClose} className="w-full rounded-md text-loro-terracotta bg-loro-text">
+            </div> : <CustomButton variant="outline" onClick={onClose} className="w-full rounded-md text-white bg-loro-text">
               Annuler
             </CustomButton>}
         </div>
