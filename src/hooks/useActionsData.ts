@@ -126,6 +126,10 @@ export const useActionsData = (refreshTrigger: number = 0) => {
 
       // Tri spécialisé pour les actions avec priorité sur les dates d'aujourd'hui et en retard
       const sortedActions = allActions.sort((a, b) => {
+        // Priorité 0: Actions terminées en dernier
+        if (a.status === 'done' && b.status !== 'done') return 1;
+        if (a.status !== 'done' && b.status === 'done') return -1;
+        
         // Priorité 1: Actions d'aujourd'hui (status todo avec date aujourd'hui)
         const isATodayAction = a.status === 'todo' && a.scheduledDate && isToday(new Date(a.scheduledDate));
         const isBTodayAction = b.status === 'todo' && b.scheduledDate && isToday(new Date(b.scheduledDate));
