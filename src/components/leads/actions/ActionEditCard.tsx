@@ -57,6 +57,12 @@ const ActionEditCard: React.FC<ActionEditCardProps> = ({
 
     try {
       setIsLoading(true);
+      
+      console.log("=== DÉBUT SAUVEGARDE ACTION ===");
+      console.log("Action originale:", editedAction);
+      console.log("Nouvelle date:", scheduledDate);
+      console.log("Nouvelle heure:", scheduledTime);
+      console.log("Nouvelles notes:", notes);
 
       let updatedScheduledDate = editedAction.scheduledDate;
       if (scheduledDate) {
@@ -64,6 +70,7 @@ const ActionEditCard: React.FC<ActionEditCardProps> = ({
         const combinedDateTime = new Date(scheduledDate);
         combinedDateTime.setHours(hours, minutes, 0, 0);
         updatedScheduledDate = combinedDateTime.toISOString();
+        console.log("Date combinée calculée:", updatedScheduledDate);
       }
 
       const updatedActionHistory = lead.actionHistory?.map(a => 
@@ -74,21 +81,37 @@ const ActionEditCard: React.FC<ActionEditCardProps> = ({
         } : a
       ) || [];
 
+      console.log("Action mise à jour dans l'historique:", 
+        updatedActionHistory.find(a => a.id === editedAction.id)
+      );
+
+      console.log("Envoi vers updateLead avec actionHistory:", updatedActionHistory);
+
       const updatedLead = await updateLead({
         ...lead,
         actionHistory: updatedActionHistory
       });
 
+      console.log("Réponse d'updateLead:", updatedLead);
+
       if (updatedLead) {
+        console.log("=== SAUVEGARDE RÉUSSIE ===");
         onUpdate(updatedLead);
         toast({
           title: "Action mise à jour",
           description: "L'action a été mise à jour avec succès"
         });
         onClose();
+      } else {
+        console.error("=== ERREUR: updateLead a retourné null ===");
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Aucune réponse lors de la mise à jour"
+        });
       }
     } catch (error) {
-      console.error("Error updating action:", error);
+      console.error("=== ERREUR LORS DE LA SAUVEGARDE ===", error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -190,6 +213,7 @@ const ActionEditCard: React.FC<ActionEditCardProps> = ({
                     selected={scheduledDate}
                     onSelect={setScheduledDate}
                     initialFocus
+                    className={cn("p-3 pointer-events-auto")}
                   />
                 </PopoverContent>
               </Popover>
