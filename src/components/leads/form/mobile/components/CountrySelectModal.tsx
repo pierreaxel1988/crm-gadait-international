@@ -24,7 +24,6 @@ const countries: Country[] = [
   { value: "Switzerland", label: "Suisse", flag: "🇨🇭" },
   { value: "Monaco", label: "Monaco", flag: "🇲🇨" },
   { value: "United States", label: "États-Unis", flag: "🇺🇸" },
-  { value: "Etats-Unis", label: "États-Unis", flag: "🇺🇸" },
   { value: "Grèce", label: "Grèce", flag: "🇬🇷" },
   { value: "Mauritius", label: "Île Maurice", flag: "🇲🇺" },
   { value: "UAE", label: "Émirats Arabes Unis", flag: "🇦🇪" },
