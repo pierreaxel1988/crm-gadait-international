@@ -74,9 +74,9 @@ const LeadDetailTabs: React.FC<LeadDetailTabsProps> = ({
           
           <TabsTrigger 
             value="actions" 
-            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 relative text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
+            className="data-[state=active]:text-loro-terracotta data-[state=active]:font-medium rounded-none pt-1 bg-loro-50 text-loro-navy hover:bg-transparent data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:w-full data-[state=active]:after:h-[2px] data-[state=active]:after:bg-loro-terracotta data-[state=active]:after:rounded-none"
           >
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center relative">
               <Activity className="h-4 w-4 mb-1" />
               <span className="text-xs">Actions</span>
               {pendingActionsCount > 0 && (
