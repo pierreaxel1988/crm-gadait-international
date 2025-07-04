@@ -75,7 +75,7 @@ const LeadDetailMobile = () => {
     actionSuggestions,
     acceptSuggestion,
     rejectSuggestion
-  } = useLeadActions(lead, setLead);
+  } = useLeadActions(lead, setLead, fetchLead);
   const handleBackClick = () => {
     navigate('/pipeline');
   };
