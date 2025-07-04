@@ -180,8 +180,8 @@ serve(async (req) => {
       const { leadId, reason = 'manual' } = await req.json();
       return await stopSequence(leadId, reason);
     } else if (action === 'start_sequence') {
-      const { leadId, campaignId } = await req.json();
-      return await startSequence(leadId, campaignId);
+      const { leadId, campaignId, immediateStart } = await req.json();
+      return await startSequence(leadId, campaignId, immediateStart);
     }
     
     return new Response(JSON.stringify({ error: 'Unknown action' }), {
@@ -292,11 +292,11 @@ async function findPendingEmails() {
   return sequences || [];
 }
 
-async function startSequence(leadId: string, campaignId: string) {
+async function startSequence(leadId: string, campaignId: string, immediateStart: boolean = false) {
   console.log(`Starting sequence for lead ${leadId} with campaign ${campaignId}`);
   
-  // Calculer la date du premier email (J+7)
-  const firstEmailDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  // Calculer la date du premier email (immédiat ou J+7)
+  const firstEmailDate = immediateStart ? new Date() : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   
   const { error } = await supabase
     .from('lead_email_sequences')
