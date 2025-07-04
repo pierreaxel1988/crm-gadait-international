@@ -9,6 +9,188 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      automated_email_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          min_budget: number | null
+          name: string
+          target_segments: Json
+          total_clicked: number
+          total_opened: number
+          total_replied: number
+          total_sent: number
+          trigger_days: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          min_budget?: number | null
+          name: string
+          target_segments?: Json
+          total_clicked?: number
+          total_opened?: number
+          total_replied?: number
+          total_sent?: number
+          trigger_days?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          min_budget?: number | null
+          name?: string
+          target_segments?: Json
+          total_clicked?: number
+          total_opened?: number
+          total_replied?: number
+          total_sent?: number
+          trigger_days?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automated_email_campaigns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automated_email_logs: {
+        Row: {
+          action_id: string
+          ai_generated_content: Json | null
+          campaign_id: string
+          clicked_at: string | null
+          content_html: string
+          created_at: string
+          id: string
+          lead_id: string
+          opened_at: string | null
+          personalization_data: Json | null
+          recipient_email: string
+          replied_at: string | null
+          sent_at: string
+          status: string
+          subject: string
+          template_id: string
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          action_id: string
+          ai_generated_content?: Json | null
+          campaign_id: string
+          clicked_at?: string | null
+          content_html: string
+          created_at?: string
+          id?: string
+          lead_id: string
+          opened_at?: string | null
+          personalization_data?: Json | null
+          recipient_email: string
+          replied_at?: string | null
+          sent_at?: string
+          status?: string
+          subject: string
+          template_id: string
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          action_id?: string
+          ai_generated_content?: Json | null
+          campaign_id?: string
+          clicked_at?: string | null
+          content_html?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+          opened_at?: string | null
+          personalization_data?: Json | null
+          recipient_email?: string
+          replied_at?: string | null
+          sent_at?: string
+          status?: string
+          subject?: string
+          template_id?: string
+          unsubscribed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automated_email_logs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "automated_email_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automated_email_logs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automated_email_logs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          campaign_id: string
+          content_template: string
+          created_at: string
+          day_number: number
+          id: string
+          is_active: boolean
+          subject_template: string
+          template_name: string
+        }
+        Insert: {
+          campaign_id: string
+          content_template: string
+          created_at?: string
+          day_number: number
+          id?: string
+          is_active?: boolean
+          subject_template: string
+          template_name: string
+        }
+        Update: {
+          campaign_id?: string
+          content_template?: string
+          created_at?: string
+          day_number?: number
+          id?: string
+          is_active?: boolean
+          subject_template?: string
+          template_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_templates_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "automated_email_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Gadait_Listings_Buy: {
         Row: {
           "Additional Image 1": string | null
@@ -309,6 +491,79 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_email_sequences: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_activity_date: string | null
+          last_activity_type: string | null
+          lead_id: string
+          next_email_date: string | null
+          next_email_day: number | null
+          sequence_started_at: string
+          stopped_at: string | null
+          stopped_by: string | null
+          stopped_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_activity_date?: string | null
+          last_activity_type?: string | null
+          lead_id: string
+          next_email_date?: string | null
+          next_email_day?: number | null
+          sequence_started_at?: string
+          stopped_at?: string | null
+          stopped_by?: string | null
+          stopped_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_activity_date?: string | null
+          last_activity_type?: string | null
+          lead_id?: string
+          next_email_date?: string | null
+          next_email_day?: number | null
+          sequence_started_at?: string
+          stopped_at?: string | null
+          stopped_by?: string | null
+          stopped_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_email_sequences_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "automated_email_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_email_sequences_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_email_sequences_stopped_by_fkey"
+            columns: ["stopped_by"]
+            isOneToOne: false
+            referencedRelation: "team_members"
             referencedColumns: ["id"]
           },
         ]
