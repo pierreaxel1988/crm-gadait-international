@@ -182,6 +182,9 @@ serve(async (req) => {
     } else if (action === 'start_sequence') {
       const { leadId, campaignId, immediateStart } = await req.json();
       return await startSequence(leadId, campaignId, immediateStart);
+    } else if (action === 'send_preview_emails') {
+      const { targetEmail, leadData } = await req.json();
+      return await sendPreviewEmails(targetEmail, leadData);
     }
     
     return new Response(JSON.stringify({ error: 'Unknown action' }), {
@@ -581,4 +584,70 @@ async function getDefaultCampaignId(): Promise<string> {
   }
   
   return campaign.id;
+}
+
+async function sendPreviewEmails(targetEmail: string, leadData: any) {
+  console.log(`Sending preview emails to ${targetEmail}`);
+  
+  // Récupérer la campagne par défaut
+  const campaignId = await getDefaultCampaignId();
+  
+  // Récupérer tous les templates
+  const { data: templates, error } = await supabase
+    .from('email_templates')
+    .select('*')
+    .eq('campaign_id', campaignId)
+    .order('day_number');
+    
+  if (error || !templates) {
+    throw new Error('Templates not found');
+  }
+  
+  let sentCount = 0;
+  
+  // Envoyer chaque email avec un délai de 2 secondes
+  for (const template of templates) {
+    try {
+      const personalizedSubject = personalizeTemplate(template.subject_template, leadData);
+      const emailHtml = await renderAsync(
+        React.createElement(LoroEmailTemplate, {
+          leadName: leadData.name,
+          leadSalutation: leadData.salutation,
+          subject: personalizedSubject,
+          content: template.content_template,
+          agentName: "Gadait International",
+          agentSignature: "L'équipe Gadait International"
+        })
+      );
+      
+      // Envoyer l'email via Resend
+      const { error: emailError } = await resend.emails.send({
+        from: 'Gadait International <contact@gadait.com>',
+        to: [targetEmail],
+        subject: `[PREVIEW J+${template.day_number}] ${personalizedSubject}`,
+        html: emailHtml,
+      });
+      
+      if (emailError) {
+        console.error(`Failed to send preview email ${template.day_number}:`, emailError);
+      } else {
+        sentCount++;
+        console.log(`Preview email J+${template.day_number} sent successfully`);
+      }
+      
+      // Délai de 2 secondes entre chaque email
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+    } catch (error) {
+      console.error(`Error sending preview email ${template.day_number}:`, error);
+    }
+  }
+  
+  return new Response(JSON.stringify({
+    success: true,
+    emailsSent: sentCount,
+    message: `Sent ${sentCount} preview emails to ${targetEmail}`
+  }), {
+    headers: { 'Content-Type': 'application/json', ...corsHeaders },
+  });
 }
