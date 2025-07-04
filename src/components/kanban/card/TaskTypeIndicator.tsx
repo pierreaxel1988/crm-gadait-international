@@ -1,10 +1,11 @@
 import React from 'react';
-import { Phone, Calendar, FileText, ClipboardCheck, Building, Send, Clock, FileSearch, Users } from 'lucide-react';
+import { Phone, Calendar, FileText, ClipboardCheck, Building, Send, Clock, FileSearch, Users, Mail, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TaskType } from '@/components/kanban/KanbanCard';
+import { ExtendedTaskType } from '@/types/actionHistory';
 
 interface TaskTypeIndicatorProps {
-  taskType?: TaskType;
+  taskType?: ExtendedTaskType;
   className?: string;
   phoneNumber?: string;
   phoneCountryCode?: string;
@@ -111,6 +112,22 @@ const TaskTypeIndicator = ({
           text: 'Prospection',
           classes: '',
           icon: <Users className="h-3 w-3" />,
+          isClickable: false
+        };
+      case 'Email Auto J+7':
+      case 'Email Auto J+14':
+      case 'Email Auto J+21':
+      case 'Email Auto J+30':
+        return {
+          color: 'text-blue-800 bg-blue-50 border-blue-200 relative',
+          text: taskType.replace('Email Auto ', ''),
+          classes: 'relative',
+          icon: (
+            <div className="relative">
+              <Mail className="h-3 w-3" />
+              <Zap className="h-2 w-2 absolute -top-1 -right-1 text-amber-500" />
+            </div>
+          ),
           isClickable: false
         };
       case 'Admin':

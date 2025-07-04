@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ActionHistory, ActionItem, ActionStatus } from '@/types/actionHistory';
+import { ActionHistory, ActionItem, ActionStatus, ExtendedTaskType } from '@/types/actionHistory';
+import { AutomatedActionItem, AutomatedActionType, LeadEmailSequence } from '@/types/automatedEmail';
 import { isPast, isToday } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -122,7 +123,78 @@ export const useActionsData = (refreshTrigger: number = 0) => {
         });
       });
       
-      console.log(`Extracted ${allActions.length} actions`);
+      console.log(`Extracted ${allActions.length} manual actions`);
+      
+      // Récupérer les séquences d'emails automatiques actives
+      console.log("Fetching automated email sequences...");
+      const { data: emailSequences, error: sequencesError } = await supabase
+        .from('lead_email_sequences')
+        .select(`
+          id, lead_id, campaign_id, next_email_date, next_email_day, sequence_started_at,
+          leads (
+            id, name, phone, email, assigned_to, status, tags
+          ),
+          automated_email_campaigns (
+            id, name
+          )
+        `)
+        .eq('is_active', true)
+        .not('next_email_date', 'is', null);
+
+      if (sequencesError) {
+        console.error('Error fetching email sequences:', sequencesError);
+      } else {
+        console.log(`Found ${emailSequences?.length || 0} active email sequences`);
+        
+        // Convertir les séquences en actions automatiques
+        emailSequences?.forEach((sequence: any) => {
+          const lead = sequence.leads;
+          if (!lead) return;
+          
+          // Filtrer par assignation si commercial
+          const assignedTeamMember = allTeamMembers?.find(tm => tm.id === lead.assigned_to);
+          if (isCommercial && currentTeamMember && lead.assigned_to !== currentTeamMember.id) {
+            return;
+          }
+          
+          // Déterminer le statut de l'action automatique
+          let status: ActionStatus = 'todo';
+          if (sequence.next_email_date) {
+            const scheduledDate = new Date(sequence.next_email_date);
+            if (isPast(scheduledDate) && !isToday(scheduledDate)) {
+              status = 'overdue';
+            }
+          }
+          
+          const actionType = `Email Auto J+${sequence.next_email_day}` as ExtendedTaskType;
+          const actionId = `auto_${sequence.id}_${sequence.next_email_day}`;
+          
+          const automatedAction: ActionItem = {
+            id: actionId,
+            leadId: lead.id,
+            leadName: lead.name || 'Lead sans nom',
+            actionType,
+            createdAt: sequence.sequence_started_at,
+            scheduledDate: sequence.next_email_date,
+            notes: `Email automatique programmé - ${sequence.automated_email_campaigns?.name || 'Campagne inconnue'}`,
+            assignedToId: lead.assigned_to,
+            assignedToName: assignedTeamMember?.name || 'Non assigné',
+            status,
+            phoneNumber: lead.phone,
+            email: lead.email,
+            leadStatus: lead.status,
+            leadTags: lead.tags || [],
+            // Métadonnées pour identifier les actions automatiques
+            isAutomated: true,
+            sequenceId: sequence.id,
+            canStopSequence: true
+          };
+          
+          allActions.push(automatedAction);
+        });
+      }
+      
+      console.log(`Total actions (manual + automated): ${allActions.length}`);
 
       // Tri spécialisé pour les actions avec priorité sur les dates d'aujourd'hui et en retard
       const sortedActions = allActions.sort((a, b) => {
@@ -208,6 +280,47 @@ export const useActionsData = (refreshTrigger: number = 0) => {
     
     return actions;
   }, [isCommercial, user]);
+
+  const stopEmailSequence = async (sequenceId: string, leadId: string) => {
+    try {
+      console.log(`Stopping email sequence ${sequenceId} for lead ${leadId}`);
+      
+      // Appeler l'edge function pour arrêter la séquence
+      const { error } = await supabase.functions.invoke('automated-email-system', {
+        body: {
+          action: 'stop_sequence',
+          leadId,
+          reason: 'manual'
+        }
+      });
+      
+      if (error) {
+        console.error('Error stopping sequence:', error);
+        throw error;
+      }
+      
+      // Mettre à jour l'état local en supprimant les actions automatiques de cette séquence
+      setActions(prevActions => 
+        prevActions.filter(action => action.sequenceId !== sequenceId)
+      );
+      
+      toast({
+        title: "Séquence arrêtée",
+        description: "La séquence d'emails automatiques a été arrêtée."
+      });
+      
+      // Récupérer à nouveau pour s'assurer que nous avons les dernières données
+      fetchActions();
+      
+    } catch (error) {
+      console.error('Error stopping email sequence:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'arrêter la séquence d'emails."
+      });
+    }
+  };
 
   const markActionComplete = async (actionId: string, leadId: string) => {
     try {
@@ -295,6 +408,7 @@ export const useActionsData = (refreshTrigger: number = 0) => {
     actions, 
     isLoading, 
     refreshActions: fetchActions,
-    markActionComplete
+    markActionComplete,
+    stopEmailSequence
   };
 };
