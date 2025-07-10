@@ -92,9 +92,15 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
         
         if (bedroomsError) {
           console.error("Error updating bedrooms:", bedroomsError);
+          throw new Error(`Database update failed: ${bedroomsError.message}`);
         }
       }
     } else {
+      // For single bedroom selection or no selection, ensure proper integer value
+      if (Array.isArray(leadData.bedrooms)) {
+        cleanedData.bedrooms = leadData.bedrooms.length > 0 ? leadData.bedrooms[0] : null;
+      }
+      
       // Standard update for simple cases
       result = await supabase
         .from('leads')

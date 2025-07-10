@@ -154,7 +154,7 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     desired_location: leadData.desiredLocation,
     property_type: leadData.propertyType,
     property_types: leadData.propertyTypes,
-    bedrooms: leadData.bedrooms,
+    bedrooms: Array.isArray(leadData.bedrooms) ? leadData.bedrooms[0] : leadData.bedrooms,
     views: leadData.views,
     amenities: leadData.amenities,
     purchase_timeframe: leadData.purchaseTimeframe,
