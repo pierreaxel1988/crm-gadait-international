@@ -2,6 +2,7 @@ import React from 'react';
 import { LeadDetailed, Currency, PropertyType, ViewType, PurchaseTimeframe, FinancingMethod, PropertyUse } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { Camera, MapPin, Home, Bed, Compass, Building, Clock, CreditCard, Star, Waves, Mountain, TreePine, MoreHorizontal, Droplets, DoorClosed, Car, Shield, Snowflake, Crown, Building2, Warehouse } from 'lucide-react';
 import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
@@ -216,24 +217,21 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             <Building className="h-4 w-4 text-loro-terracotta" />
             Type de propriété
           </h4>
-          <div className="grid grid-cols-2 gap-2">
-            {propertyTypesList.map(type => {
-              const IconComponent = getPropertyTypeIcon(type);
-              return (
-                <button
-                  key={type}
-                  onClick={() => handlePropertyTypeChange(type)}
-                  className={`flex items-center justify-center gap-2 p-2 rounded text-sm ${
-                    (lead.propertyTypes || []).includes(type)
-                      ? 'bg-chocolate-dark text-white'
-                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                  }`}
-                >
-                  <IconComponent className="h-4 w-4" />
-                  {type}
-                </button>
-              );
-            })}
+          <div className="flex flex-wrap gap-2">
+            {propertyTypesList.map(type => (
+              <Badge
+                key={type}
+                variant={(lead.propertyTypes || []).includes(type) ? "default" : "outline"}
+                className={`cursor-pointer font-futura transition-all duration-200 ${
+                  (lead.propertyTypes || []).includes(type)
+                    ? 'bg-loro-sand text-loro-navy hover:bg-loro-sand/90'
+                    : 'border-loro-pearl text-loro-navy/70 hover:bg-loro-white hover:border-loro-sand'
+                }`}
+                onClick={() => handlePropertyTypeChange(type)}
+              >
+                {type}
+              </Badge>
+            ))}
           </div>
         </div>
 
