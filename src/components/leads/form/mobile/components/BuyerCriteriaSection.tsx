@@ -35,10 +35,10 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
   
   const handleBedroomToggle = (value: string) => {
     const numValue = value === "8+" ? 8 : parseInt(value);
-    const currentBedrooms = Array.isArray(lead.bedrooms) ? [...lead.bedrooms] : lead.bedrooms ? [lead.bedrooms] : [];
-    const newBedrooms = currentBedrooms.includes(numValue) 
-      ? currentBedrooms.filter(b => b !== numValue) 
-      : [...currentBedrooms, numValue];
+    const currentBedrooms = lead.bedrooms;
+    
+    // Pour les buyers, on utilise une sélection simple (integer), pas multiple
+    const newBedrooms = currentBedrooms === numValue ? undefined : numValue;
     
     console.log('🛏️ Bedrooms Change:', {
       clicked: value,
@@ -48,7 +48,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
       leadId: lead.id
     });
     
-    onDataChange({ bedrooms: newBedrooms.length ? newBedrooms : undefined });
+    onDataChange({ bedrooms: newBedrooms });
   };
   
   const handleViewToggle = (view: string) => {
@@ -101,10 +101,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
   
   const getSelectedBedrooms = () => {
     if (!lead.bedrooms) return [];
-    if (Array.isArray(lead.bedrooms)) {
-      return lead.bedrooms.map(num => num >= 8 ? "8+" : num.toString());
-    }
-    const value = lead.bedrooms;
+    // Pour les buyers, on a une sélection simple (integer), pas un array
+    const value = typeof lead.bedrooms === 'number' ? lead.bedrooms : lead.bedrooms[0];
     return [value >= 8 ? "8+" : value.toString()];
   };
 
