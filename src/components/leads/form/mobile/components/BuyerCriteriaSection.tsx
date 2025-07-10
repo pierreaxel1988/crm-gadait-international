@@ -94,8 +94,16 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
   };
   
   const getSelectedBedrooms = () => {
-    // Retourne le nombre minimum sélectionné (0 pour "Toutes")
-    return lead.bedrooms || 0;
+    // Migration de l'ancien format vers le nouveau format
+    const bedrooms = lead.bedrooms;
+    if (!bedrooms) return 0; // "Toutes"
+    
+    // Handle both number and number[] types (legacy compatibility)
+    const bedroomValue = Array.isArray(bedrooms) ? bedrooms[0] : bedrooms;
+    if (!bedroomValue) return 0; // "Toutes"
+    
+    if (bedroomValue >= 5) return 5; // "5+" pour toutes les valeurs >= 5 (ancien "8+", "7", "6", "5")
+    return bedroomValue; // 1, 2, 3, 4 restent identiques
   };
 
   const getPropertyTypeIcon = (type: PropertyType) => {
