@@ -241,8 +241,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
                 onClick={() => handleBedroomToggle(option)}
                 className={`p-2 rounded text-center text-sm font-futura transition-all duration-200 ${
                   getSelectedBedrooms() === option
-                    ? 'bg-loro-sand text-loro-navy hover:bg-loro-sand/90'
-                    : 'border border-loro-pearl text-loro-navy/70 hover:bg-loro-white hover:border-loro-sand bg-white'
+                    ? 'bg-chocolate-dark text-white'
+                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                 }`}
               >
                 {option === 0 ? 'Toutes' : `${option}+`}
