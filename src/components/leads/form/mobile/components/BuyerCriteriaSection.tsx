@@ -33,22 +33,16 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
     onDataChange({ propertyTypes: updatedTypes as PropertyType[] });
   };
   
-  const handleBedroomToggle = (value: string) => {
-    const numValue = value === "8+" ? 8 : parseInt(value);
-    const currentBedrooms = lead.bedrooms;
-    
-    // Pour les buyers, on utilise une sélection simple (integer), pas multiple
-    const newBedrooms = currentBedrooms === numValue ? undefined : numValue;
-    
+  const handleBedroomToggle = (value: number) => {
     console.log('🛏️ Bedrooms Change:', {
       clicked: value,
-      numValue,
-      before: currentBedrooms,
-      after: newBedrooms,
+      before: lead.bedrooms,
+      after: value === 0 ? undefined : value,
       leadId: lead.id
     });
     
-    onDataChange({ bedrooms: newBedrooms });
+    // 0 = "Toutes" (pas de filtre), sinon c'est le minimum
+    onDataChange({ bedrooms: value === 0 ? undefined : value });
   };
   
   const handleViewToggle = (view: string) => {
@@ -100,10 +94,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
   };
   
   const getSelectedBedrooms = () => {
-    if (!lead.bedrooms) return [];
-    // Pour les buyers, on a une sélection simple (integer), pas un array
-    const value = typeof lead.bedrooms === 'number' ? lead.bedrooms : lead.bedrooms[0];
-    return [value >= 8 ? "8+" : value.toString()];
+    // Retourne le nombre minimum sélectionné (0 pour "Toutes")
+    return lead.bedrooms || 0;
   };
 
   const getPropertyTypeIcon = (type: PropertyType) => {
@@ -174,7 +166,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
   };
   
   const propertyTypesList: PropertyType[] = ["Villa", "Appartement", "Penthouse", "Chalet", "Maison", "Duplex", "Terrain", "Manoir", "Maison de ville", "Château", "Local commercial"];
-  const bedroomOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
+  const bedroomOptions = [0, 1, 2, 3, 4, 5];
   const viewTypesList: ViewType[] = ["Mer", "Montagne", "Golf", "Autres"];
   const amenitiesList = ["Piscine", "Terrasse", "Balcon", "Jardin", "Parking", "Ascenseur", "Sécurité", "Climatisation"];
   
@@ -240,20 +232,20 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
         <div className="space-y-2 pt-2">
           <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
             <Bed className="h-4 w-4 text-loro-terracotta" />
-            Nombre de chambres
+            Nombre minimum de chambres
           </h4>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="flex flex-wrap gap-2">
             {bedroomOptions.map(option => (
               <button
                 key={option}
                 onClick={() => handleBedroomToggle(option)}
-                className={`p-2 rounded text-center text-sm ${
-                  getSelectedBedrooms().includes(option)
-                    ? 'bg-chocolate-dark text-white'
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                className={`p-2 rounded text-center text-sm font-futura transition-all duration-200 ${
+                  getSelectedBedrooms() === option
+                    ? 'bg-loro-sand text-loro-navy hover:bg-loro-sand/90'
+                    : 'border border-loro-pearl text-loro-navy/70 hover:bg-loro-white hover:border-loro-sand bg-white'
                 }`}
               >
-                {option}
+                {option === 0 ? 'Toutes' : `${option}+`}
               </button>
             ))}
           </div>
