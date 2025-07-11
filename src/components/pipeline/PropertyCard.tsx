@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, LandPlot, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, LandPlot, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { countryToFlag } from '@/utils/countryUtils';
 
@@ -286,33 +286,29 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             
             {/* Checkbox de sélection et tag terrain en bas à droite */}
             <div className="absolute bottom-4 right-4 flex flex-col items-end gap-2">
-              {/* Checkbox de sélection */}
+              {/* Cœur de sélection */}
               {selectionMode && (
                 <div
                   onClick={handleSelectionClick}
-                  className={`group/checkbox relative p-2 rounded-xl backdrop-blur-md transition-all duration-300 cursor-pointer border shadow-lg z-50 ${
+                  className={`group/heart relative p-3 rounded-full backdrop-blur-md transition-all duration-300 cursor-pointer border shadow-lg z-50 ${
                     isSelected 
-                      ? 'bg-gradient-to-br from-loro-sand/95 to-loro-hazel/95 border-loro-sand/50 shadow-loro-sand/30' 
-                      : 'bg-white/95 border-white/30 hover:bg-gradient-to-br hover:from-loro-pearl/95 hover:to-white/95 hover:border-loro-pearl/50'
+                      ? 'bg-gradient-to-br from-red-400/95 to-red-500/95 border-red-400/50 shadow-red-400/30' 
+                      : 'bg-white/95 border-white/30 hover:bg-gradient-to-br hover:from-red-50/95 hover:to-white/95 hover:border-red-200/50'
                   }`}
                 >
                   {/* Effet de brillance au survol */}
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/checkbox:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/heart:opacity-100 transition-opacity duration-300" />
                   
-                  {/* Icône de check personnalisée */}
-                  <div className={`relative z-10 w-4 h-4 rounded-sm border-2 transition-all duration-300 flex items-center justify-center ${
+                  {/* Cœur */}
+                  <Heart className={`relative z-10 h-5 w-5 transition-all duration-300 ${
                     isSelected 
-                      ? 'bg-loro-navy border-loro-navy scale-100' 
-                      : 'bg-transparent border-loro-navy/30 group-hover/checkbox:border-loro-navy/60 group-hover/checkbox:scale-110'
-                  }`}>
-                    <Check className={`h-3 w-3 text-white transition-all duration-200 ${
-                      isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
-                    }`} />
-                  </div>
+                      ? 'text-white fill-current scale-110' 
+                      : 'text-red-400 group-hover/heart:text-red-500 group-hover/heart:scale-110'
+                  }`} />
                   
                   {/* Effet de pulsation pour les propriétés sélectionnées */}
                   {isSelected && (
-                    <div className="absolute inset-0 rounded-xl border-2 border-loro-sand/50 animate-pulse" />
+                    <div className="absolute inset-0 rounded-full border-2 border-red-400/50 animate-pulse" />
                   )}
                 </div>
               )}
