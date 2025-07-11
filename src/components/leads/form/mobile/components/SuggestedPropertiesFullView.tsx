@@ -231,7 +231,7 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
                 </Badge>
               )}
               {hasActiveFilters && (
-                <Badge className="bg-accent border-accent-foreground/20 text-accent-foreground font-futura rounded-lg px-3 py-1 text-xs font-medium tracking-wide shadow-sm hover:bg-accent/80 transition-colors">
+                <Badge className="bg-accent border-accent-foreground/20 text-accent-foreground font-futura rounded-md px-2 py-0.5 text-xs font-light tracking-wide shadow-none">
                   <span className="text-xs font-light flex items-center gap-1">
                     <span className="text-[8px] opacity-60">•</span>
                     <span>Critères appliqués</span>
