@@ -258,7 +258,7 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
         <div className="flex items-start justify-between">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <Sparkles className="h-6 w-6 text-loro-hazel" />
+              <Sparkles className="h-6 w-6 text-loro-terracotta" />
               <h3 className="text-xl font-futura font-medium text-loro-navy">
                 Propriétés suggérées pour {lead.name}
               </h3>
