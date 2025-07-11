@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, LandPlot, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, LandPlot, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { countryToFlag } from '@/utils/countryUtils';
 
 interface PropertyCardProps {
@@ -31,12 +32,18 @@ interface PropertyCardProps {
   };
   returnTo?: string;
   leadId?: string;
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelection?: (propertyId: string) => void;
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({
   property,
   returnTo,
-  leadId
+  leadId,
+  selectionMode = false,
+  isSelected = false,
+  onToggleSelection
 }) => {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -71,11 +78,26 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 
   const displayReference = getDisplayReference();
 
-  const handleCardClick = () => {
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Si on est en mode sélection, on toggle la sélection
+    if (selectionMode && onToggleSelection) {
+      e.preventDefault();
+      onToggleSelection(property.id);
+      return;
+    }
+    
+    // Sinon, navigation normale
     if (returnTo === 'lead' && leadId) {
       navigate(`/properties/${property.id}?returnTo=lead&leadId=${leadId}`);
     } else {
       navigate(`/properties/${property.id}`);
+    }
+  };
+
+  const handleSelectionClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onToggleSelection) {
+      onToggleSelection(property.id);
     }
   };
 
@@ -228,8 +250,20 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               )}
             </div>
             
-            {/* Tag prix à droite */}
-            <div className="absolute top-4 right-4">
+            {/* Checkbox de sélection et prix */}
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              {selectionMode && (
+                <div
+                  onClick={handleSelectionClick}
+                  className="p-1 rounded-md bg-white/90 backdrop-blur-sm hover:bg-white transition-all duration-150 cursor-pointer"
+                >
+                  <Checkbox
+                    checked={isSelected}
+                    onChange={() => {}}
+                    className="h-4 w-4"
+                  />
+                </div>
+              )}
               <Badge className="bg-loro-white/90 text-loro-navy border-loro-pearl font-futura shadow-sm backdrop-blur-sm">
                 {formatPrice(property.price, property.currency)}
               </Badge>
