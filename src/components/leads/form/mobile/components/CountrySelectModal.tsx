@@ -94,7 +94,7 @@ const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
         <DialogContent className="sm:max-w-full w-full h-full max-h-screen p-0 gap-0">
           <DialogHeader className="p-6 pb-4 border-b bg-loro-50">
             <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-futura text-chocolate-dark flex items-center gap-2">
+              <DialogTitle className="text-xl font-futura font-normal text-chocolate-dark flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
                 Sélectionner un pays
               </DialogTitle>
