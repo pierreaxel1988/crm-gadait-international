@@ -61,7 +61,7 @@ const ImportedLeadsPanel = ({ limit = 5, className }: ImportedLeadsPanelProps) =
   if (recentImports.length === 0) {
     return (
       <div className={`luxury-card p-6 ${className}`}>
-        <h2 className="text-xl font-semibold mb-4">Leads Importés Récemment</h2>
+        <h2 className="text-xl font-normal mb-4">Leads Importés Récemment</h2>
         <div className="py-8 text-center">
           <p className="text-muted-foreground">Aucun lead importé récemment</p>
           <p className="text-sm text-muted-foreground mt-2">
@@ -74,7 +74,7 @@ const ImportedLeadsPanel = ({ limit = 5, className }: ImportedLeadsPanelProps) =
 
   return (
     <div className={`luxury-card p-6 ${className}`}>
-      <h2 className="text-xl font-semibold mb-4">Leads Importés Récemment</h2>
+      <h2 className="text-xl font-normal mb-4">Leads Importés Récemment</h2>
       <div className="space-y-4">
         {recentImports.map((lead) => (
           <div key={lead.id} className="border-b border-border pb-4 last:border-0">

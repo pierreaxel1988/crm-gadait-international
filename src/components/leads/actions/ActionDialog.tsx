@@ -47,7 +47,7 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
       <div className={cn("bg-white dark:bg-gray-800 rounded-t-lg sm:rounded-lg w-full shadow-luxury transition-all duration-300 animate-slide-in", isMobile ? "max-h-[85vh] overflow-y-auto" : "max-w-md")} onClick={e => e.stopPropagation()}>
         <div className="sticky top-0 bg-white dark:bg-gray-800 z-10 p-4 border-b rounded-t-lg">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg font-medium text-left text-loro-text">
+            <h2 className="text-lg font-normal text-left text-loro-text">
               {!selectedAction ? "Nouvelle action" : `Planifier ${selectedAction}`}
             </h2>
             <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100" onClick={onClose}>

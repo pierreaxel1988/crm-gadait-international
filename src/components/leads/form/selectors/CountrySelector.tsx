@@ -62,7 +62,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-background">
-          <h2 className="text-lg font-semibold font-futura">{title}</h2>
+          <h2 className="text-lg font-normal font-futura">{title}</h2>
           <Button
             variant="ghost"
             size="sm"

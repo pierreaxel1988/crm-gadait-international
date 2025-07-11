@@ -12,7 +12,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose }) => {
     <div className="flex items-center justify-between px-6 py-4 border-b border-loro-sand/30 shadow-sm">
       <div className="flex items-center gap-2">
         <MessageSquare className="h-5 w-5 text-loro-hazel" />
-        <h2 className="font-futura text-xl text-loro-navy uppercase tracking-wide">Chat Gadait</h2>
+        <h2 className="font-futura font-normal text-xl text-loro-navy uppercase tracking-wide">Chat Gadait</h2>
       </div>
       <Button 
         variant="ghost" 

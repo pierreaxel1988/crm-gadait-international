@@ -57,7 +57,7 @@ const ChatGadaitFloatingButton: React.FC<ChatGadaitFloatingButtonProps> = ({
         <SheetContent side="bottom" className="p-0 sm:p-0 h-[100dvh] w-full max-w-none">
           <div className="h-full flex flex-col">
             <div className="border-b border-loro-sand/30 p-4 flex justify-between items-center bg-white">
-              <h2 className="text-lg font-medium flex items-center">
+              <h2 className="text-lg font-normal flex items-center">
                 <MessageSquare className="h-5 w-5 mr-2 text-loro-hazel" />
                 {leadData ? `Chat Gadait - ${leadData.name}` : 'Chat Gadait'}
               </h2>

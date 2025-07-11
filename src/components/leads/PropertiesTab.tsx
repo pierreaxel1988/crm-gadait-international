@@ -70,7 +70,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
   if (loading) {
     return (
       <div className="bg-white rounded-lg p-4">
-        <h2 className="text-xl font-bold mb-4">Propriétés Gadait</h2>
+        <h2 className="text-xl font-normal mb-4">Propriétés Gadait</h2>
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-loro-navy"></div>
         </div>
@@ -81,7 +81,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
   if (error) {
     return (
       <div className="bg-white rounded-lg p-4">
-        <h2 className="text-xl font-bold mb-4">Propriétés Gadait</h2>
+        <h2 className="text-xl font-normal mb-4">Propriétés Gadait</h2>
         <div className="text-center py-8 text-red-600">
           {error}
         </div>
@@ -92,7 +92,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
   return (
     <div className="bg-white rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">Propriétés Gadait</h2>
+        <h2 className="text-xl font-normal">Propriétés Gadait</h2>
         <Badge variant="secondary">{properties.length} propriétés</Badge>
       </div>
       

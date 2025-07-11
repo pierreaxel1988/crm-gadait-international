@@ -231,7 +231,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
   return (
     <div className="bg-white rounded-lg p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Actions pour le lead</h2>
+        <h2 className="text-xl font-normal">Actions pour le lead</h2>
         <Button 
           variant="outline" 
           size="sm" 

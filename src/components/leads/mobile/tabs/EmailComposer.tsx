@@ -89,7 +89,7 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
-        <h2 className="text-xl font-medium">Nouvel email</h2>
+        <h2 className="text-xl font-normal">Nouvel email</h2>
         <div className="w-20" />
       </div>
       

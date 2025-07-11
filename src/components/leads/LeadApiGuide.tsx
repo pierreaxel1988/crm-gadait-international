@@ -34,7 +34,7 @@ const LeadApiGuide = () => {
     description: 'Localisation souhaitée'
   }];
   return <div className="luxury-card p-6">
-      <h2 className="text-xl font-semibold mb-4">Guide d'intégration API</h2>
+      <h2 className="text-xl font-normal mb-4">Guide d'intégration API</h2>
       
       <Alert className="mb-6">
         <AlertTitle className="font-semibold">Important</AlertTitle>
