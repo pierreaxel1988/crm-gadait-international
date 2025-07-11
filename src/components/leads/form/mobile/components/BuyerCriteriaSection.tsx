@@ -277,22 +277,24 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             <Camera className="h-4 w-4 text-loro-terracotta" />
             Vue souhaitée
           </h4>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-wrap gap-2">
             {viewTypesList.map(view => {
               const IconComponent = getViewIcon(view);
               return (
-                <button
+                <Badge
                   key={view}
-                  onClick={() => handleViewToggle(view)}
-                  className={`flex items-center justify-center gap-2 p-2 rounded text-sm ${
+                  variant={(lead.views || []).includes(view) ? "default" : "outline"}
+                  weight="normal"
+                  className={`cursor-pointer transition-all duration-200 font-futura ${
                     (lead.views || []).includes(view)
-                      ? 'bg-chocolate-dark text-white'
-                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                      ? 'bg-chocolate-dark text-white hover:bg-chocolate-dark/90'
+                      : 'border-gray-300 text-gray-800 hover:bg-gray-100 hover:border-gray-400'
                   }`}
+                  onClick={() => handleViewToggle(view)}
                 >
-                  <IconComponent className="h-4 w-4" />
+                  <IconComponent className="h-4 w-4 mr-1" />
                   {view}
-                </button>
+                </Badge>
               );
             })}
           </div>
