@@ -251,17 +251,34 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </div>
             
             {/* Checkbox de sélection et prix */}
-            <div className="absolute top-4 right-4 flex items-center gap-2">
+            <div className="absolute top-4 right-4 flex items-center gap-3">
               {selectionMode && (
                 <div
                   onClick={handleSelectionClick}
-                  className="p-1 rounded-md bg-white/90 backdrop-blur-sm hover:bg-white transition-all duration-150 cursor-pointer"
+                  className={`group/checkbox relative p-2 rounded-xl backdrop-blur-md transition-all duration-300 cursor-pointer border shadow-lg ${
+                    isSelected 
+                      ? 'bg-gradient-to-br from-loro-sand/95 to-loro-hazel/95 border-loro-sand/50 shadow-loro-sand/30' 
+                      : 'bg-white/95 border-white/30 hover:bg-gradient-to-br hover:from-loro-pearl/95 hover:to-white/95 hover:border-loro-pearl/50'
+                  }`}
                 >
-                  <Checkbox
-                    checked={isSelected}
-                    onChange={() => {}}
-                    className="h-4 w-4"
-                  />
+                  {/* Effet de brillance au survol */}
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/checkbox:opacity-100 transition-opacity duration-300" />
+                  
+                  {/* Icône de check personnalisée */}
+                  <div className={`relative z-10 w-4 h-4 rounded-sm border-2 transition-all duration-300 flex items-center justify-center ${
+                    isSelected 
+                      ? 'bg-loro-navy border-loro-navy scale-100' 
+                      : 'bg-transparent border-loro-navy/30 group-hover/checkbox:border-loro-navy/60 group-hover/checkbox:scale-110'
+                  }`}>
+                    <Check className={`h-3 w-3 text-white transition-all duration-200 ${
+                      isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+                    }`} />
+                  </div>
+                  
+                  {/* Effet de pulsation pour les propriétés sélectionnées */}
+                  {isSelected && (
+                    <div className="absolute inset-0 rounded-xl border-2 border-loro-sand/50 animate-pulse" />
+                  )}
                 </div>
               )}
               <Badge className="bg-loro-white/90 text-loro-navy border-loro-pearl font-futura shadow-sm backdrop-blur-sm">
