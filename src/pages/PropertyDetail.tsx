@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Navbar from '@/components/layout/Navbar';
@@ -47,9 +47,14 @@ interface PropertyDetail {
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Récupérer les paramètres de retour
+  const returnTo = searchParams.get('returnTo');
+  const leadId = searchParams.get('leadId');
 
   useEffect(() => {
     fetchPropertyDetail();
@@ -134,14 +139,25 @@ const PropertyDetail = () => {
         <div className="max-w-7xl mx-auto">
           {/* Header avec bouton retour */}
           <div className="mb-6">
-            <Button 
-              onClick={() => navigate('/properties')} 
-              variant="outline" 
-              className="mb-4"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour aux propriétés
-            </Button>
+            {returnTo === 'lead' && leadId ? (
+              <Button 
+                onClick={() => navigate(`/leads/${leadId}?tab=criteria`)} 
+                variant="outline" 
+                className="mb-4"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Retour au lead
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => navigate('/properties')} 
+                variant="outline" 
+                className="mb-4"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Retour aux propriétés
+              </Button>
+            )}
             
             <div className="flex items-start justify-between flex-wrap gap-4">
               <div>

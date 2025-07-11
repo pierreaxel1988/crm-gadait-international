@@ -113,7 +113,7 @@ const SuggestedPropertiesSection: React.FC<SuggestedPropertiesSectionProps> = ({
   };
 
   const handlePropertyClick = (propertyId: string) => {
-    navigate(`/properties/${propertyId}`);
+    navigate(`/properties/${propertyId}?returnTo=lead&leadId=${lead.id}`);
   };
 
   if (!lead.country && !lead.desiredLocation && !lead.propertyTypes?.length) {
