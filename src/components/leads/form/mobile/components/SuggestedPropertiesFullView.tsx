@@ -146,6 +146,16 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
       return;
     }
 
+    // Vérifier que le lead a un email
+    if (!lead.email || lead.email.trim() === '') {
+      toast({
+        title: "Email manquant",
+        description: "Ce lead n'a pas d'adresse email. Veuillez ajouter une adresse email au lead avant d'envoyer une sélection.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke('send-property-selection', {
         body: {

@@ -55,6 +55,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Envoi de ${properties.length} propriétés à ${leadEmail} (Lead: ${leadName})`);
 
+    // Vérifier que l'email du lead est valide
+    if (!leadEmail || leadEmail.trim() === '') {
+      console.error('Erreur: Email du lead manquant', { leadId, leadName, leadEmail });
+      return new Response(
+        JSON.stringify({ 
+          error: 'Email du lead manquant. Veuillez ajouter une adresse email au lead avant d\'envoyer une sélection.',
+          leadEmail: leadEmail,
+          leadName: leadName 
+        }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
     // Générer le contenu HTML de l'email avec un design moderne
     const propertiesHtml = properties.map(property => `
       <div style="
