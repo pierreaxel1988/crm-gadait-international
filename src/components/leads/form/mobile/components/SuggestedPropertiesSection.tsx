@@ -118,7 +118,7 @@ const SuggestedPropertiesSection: React.FC<SuggestedPropertiesSectionProps> = ({
         <h3 className="text-lg font-normal text-brown-700">
           Propriétés suggérées
         </h3>
-        <Badge variant="outline" className="ml-auto">
+        <Badge variant="outline" className="ml-auto font-light">
           {properties.length} bien{properties.length > 1 ? 's' : ''}
         </Badge>
       </div>
