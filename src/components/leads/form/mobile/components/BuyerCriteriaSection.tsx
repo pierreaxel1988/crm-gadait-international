@@ -305,22 +305,24 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
             <Star className="h-4 w-4 text-loro-terracotta" />
             Commodités souhaitées
           </h4>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-wrap gap-2">
             {amenitiesList.map(amenity => {
               const IconComponent = getAmenityIcon(amenity);
               return (
-                <button
+                <Badge
                   key={amenity}
-                  onClick={() => handleAmenityToggle(amenity)}
-                  className={`flex items-center justify-center gap-2 p-2 rounded text-sm ${
+                  variant={(lead.amenities || []).includes(amenity) ? "default" : "outline"}
+                  weight="normal"
+                  className={`cursor-pointer transition-all duration-200 font-futura ${
                     (lead.amenities || []).includes(amenity)
-                      ? 'bg-chocolate-dark text-white'
-                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                      ? 'bg-chocolate-dark text-white hover:bg-chocolate-dark/90'
+                      : 'border-gray-300 text-gray-800 hover:bg-gray-100 hover:border-gray-400'
                   }`}
+                  onClick={() => handleAmenityToggle(amenity)}
                 >
-                  <IconComponent className="h-4 w-4" />
+                  <IconComponent className="h-4 w-4 mr-1" />
                   {amenity}
-                </button>
+                </Badge>
               );
             })}
           </div>
