@@ -28,6 +28,7 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
   const [totalCount, setTotalCount] = useState(0);
   const [selectedProperties, setSelectedProperties] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -132,18 +133,65 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
     }
   };
 
-  // Fonction d'envoi par email (à implémenter)
+  // Fonction d'envoi par email
   const sendPropertiesToClient = async () => {
     const selectedProps = properties.filter(p => selectedProperties.has(p.id));
     
-    toast({
-      title: "Sélection envoyée",
-      description: `${selectedProps.length} propriété(s) envoyée(s) à ${lead.name}`,
-    });
-    
-    // TODO: Implémenter l'envoi d'email
-    console.log("Propriétés sélectionnées:", selectedProps);
-    clearSelection();
+    if (selectedProps.length === 0) {
+      toast({
+        title: "Erreur",
+        description: "Aucune propriété sélectionnée",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-property-selection', {
+        body: {
+          leadId: lead.id,
+          properties: selectedProps.map(prop => ({
+            id: prop.id,
+            title: prop.title,
+            location: prop.location,
+            price: prop.price,
+            currency: prop.currency,
+            main_image: prop.main_image,
+            url: prop.url,
+            bedrooms: prop.bedrooms,
+            bathrooms: prop.bathrooms,
+            area: prop.area,
+            area_unit: prop.area_unit,
+            property_type: prop.property_type,
+          })),
+          leadName: lead.name,
+          leadEmail: lead.email,
+          senderName: "Équipe Gadait", // À adapter selon l'utilisateur connecté
+          criteriaLabel: "Sélection de propriétés personnalisée"
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Email envoyé avec succès !",
+        description: `${selectedProps.length} propriété(s) envoyée(s) à ${lead.name} avec copie à pierre@gadait-international.com`,
+      });
+
+      // Fermer le drawer et réinitialiser la sélection
+      setIsDrawerOpen(false);
+      clearSelection();
+
+    } catch (error: any) {
+      console.error("Erreur lors de l'envoi:", error);
+      toast({
+        title: "Erreur lors de l'envoi",
+        description: error.message || "Une erreur est survenue lors de l'envoi de l'email",
+        variant: "destructive"
+      });
+    }
   };
 
   const getSelectedProperties = () => {

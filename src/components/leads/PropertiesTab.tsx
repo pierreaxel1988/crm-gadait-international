@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Home } from 'lucide-react';
 import PropertyCard from '@/components/pipeline/PropertyCard';
+import PropertySelectionHistory from './PropertySelectionHistory';
 
 interface GadaitProperty {
   id: string;
@@ -90,24 +91,30 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-normal">Propriétés Gadait</h2>
-        <Badge variant="secondary">{properties.length} propriétés</Badge>
-      </div>
+    <div className="space-y-6">
+      {/* Historique des sélections envoyées */}
+      <PropertySelectionHistory leadId={leadId} />
       
-      {properties.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          <Home className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p>Aucune propriété disponible pour le moment.</p>
+      {/* Propriétés Gadait disponibles */}
+      <div className="bg-white rounded-lg p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-normal">Propriétés Gadait</h2>
+          <Badge variant="secondary">{properties.length} propriétés</Badge>
         </div>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {properties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
-      )}
+        
+        {properties.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <Home className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p>Aucune propriété disponible pour le moment.</p>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {properties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
