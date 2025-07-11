@@ -250,37 +250,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               )}
             </div>
             
-            {/* Checkbox de sélection et prix */}
-            <div className="absolute top-4 right-4 flex items-center gap-3">
-              {selectionMode && (
-                <div
-                  onClick={handleSelectionClick}
-                  className={`group/checkbox relative p-2 rounded-xl backdrop-blur-md transition-all duration-300 cursor-pointer border shadow-lg ${
-                    isSelected 
-                      ? 'bg-gradient-to-br from-loro-sand/95 to-loro-hazel/95 border-loro-sand/50 shadow-loro-sand/30' 
-                      : 'bg-white/95 border-white/30 hover:bg-gradient-to-br hover:from-loro-pearl/95 hover:to-white/95 hover:border-loro-pearl/50'
-                  }`}
-                >
-                  {/* Effet de brillance au survol */}
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/checkbox:opacity-100 transition-opacity duration-300" />
-                  
-                  {/* Icône de check personnalisée */}
-                  <div className={`relative z-10 w-4 h-4 rounded-sm border-2 transition-all duration-300 flex items-center justify-center ${
-                    isSelected 
-                      ? 'bg-loro-navy border-loro-navy scale-100' 
-                      : 'bg-transparent border-loro-navy/30 group-hover/checkbox:border-loro-navy/60 group-hover/checkbox:scale-110'
-                  }`}>
-                    <Check className={`h-3 w-3 text-white transition-all duration-200 ${
-                      isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
-                    }`} />
-                  </div>
-                  
-                  {/* Effet de pulsation pour les propriétés sélectionnées */}
-                  {isSelected && (
-                    <div className="absolute inset-0 rounded-xl border-2 border-loro-sand/50 animate-pulse" />
-                  )}
-                </div>
-              )}
+            {/* Prix en haut à droite */}
+            <div className="absolute top-4 right-4">
               <Badge className="bg-loro-white/90 text-loro-navy border-loro-pearl font-futura shadow-sm backdrop-blur-sm">
                 {formatPrice(property.price, property.currency)}
               </Badge>
@@ -313,15 +284,47 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               </Badge>
             </div>
             
-            {/* Tag terrain en bas à droite */}
-            {property.land_area && (
-              <div className="absolute bottom-4 right-4">
+            {/* Checkbox de sélection et tag terrain en bas à droite */}
+            <div className="absolute bottom-4 right-4 flex flex-col items-end gap-2">
+              {/* Checkbox de sélection */}
+              {selectionMode && (
+                <div
+                  onClick={handleSelectionClick}
+                  className={`group/checkbox relative p-2 rounded-xl backdrop-blur-md transition-all duration-300 cursor-pointer border shadow-lg z-50 ${
+                    isSelected 
+                      ? 'bg-gradient-to-br from-loro-sand/95 to-loro-hazel/95 border-loro-sand/50 shadow-loro-sand/30' 
+                      : 'bg-white/95 border-white/30 hover:bg-gradient-to-br hover:from-loro-pearl/95 hover:to-white/95 hover:border-loro-pearl/50'
+                  }`}
+                >
+                  {/* Effet de brillance au survol */}
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/checkbox:opacity-100 transition-opacity duration-300" />
+                  
+                  {/* Icône de check personnalisée */}
+                  <div className={`relative z-10 w-4 h-4 rounded-sm border-2 transition-all duration-300 flex items-center justify-center ${
+                    isSelected 
+                      ? 'bg-loro-navy border-loro-navy scale-100' 
+                      : 'bg-transparent border-loro-navy/30 group-hover/checkbox:border-loro-navy/60 group-hover/checkbox:scale-110'
+                  }`}>
+                    <Check className={`h-3 w-3 text-white transition-all duration-200 ${
+                      isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+                    }`} />
+                  </div>
+                  
+                  {/* Effet de pulsation pour les propriétés sélectionnées */}
+                  {isSelected && (
+                    <div className="absolute inset-0 rounded-xl border-2 border-loro-sand/50 animate-pulse" />
+                  )}
+                </div>
+              )}
+              
+              {/* Tag terrain */}
+              {property.land_area && (
                 <Badge variant="outline" className="bg-loro-white/90 text-loro-navy border-loro-pearl font-futura text-xs backdrop-blur-sm">
                   <LandPlot className="h-3 w-3 mr-1" />
                   {property.land_area} {property.land_area_unit || 'm²'}
                 </Badge>
-              </div>
-            )}
+              )}
+            </div>
           </>
         ) : <div className="w-full h-full bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
             <Home className="h-16 w-16 text-loro-navy/30" />
