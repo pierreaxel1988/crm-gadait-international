@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ActionsPanelMobile from './actions/ActionsPanelMobile';
+import PropertySelectionHistory from './PropertySelectionHistory';
 import { supabase } from "@/integrations/supabase/client";
 import { syncExistingActionsWithLeads } from '@/services/leadActions';
 
@@ -206,7 +207,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
 
   if (isMobile) {
     return (
-      <>
+      <div className="space-y-4">
         <div className="flex justify-end mb-2">
           <Button 
             variant="outline" 
@@ -217,6 +218,10 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
             <RefreshCw className="h-3 w-3" /> Synchroniser
           </Button>
         </div>
+        
+        {/* Section des sélections de propriétés envoyées - Mobile */}
+        <PropertySelectionHistory leadId={leadId} />
+        
         <ActionsPanelMobile 
           leadId={leadId} 
           onAddAction={fetchLeadActions} 
@@ -224,13 +229,13 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           actionHistory={actionHistory} 
         />
         {/* Le bouton ChatGadaitFloatingButton est maintenant géré au niveau des pages de détail */}
-      </>
+      </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg p-4">
-      <div className="flex justify-between items-center mb-4">
+    <div className="bg-white rounded-lg p-4 space-y-6">
+      <div className="flex justify-between items-center">
         <h2 className="text-xl font-normal">Actions pour le lead</h2>
         <Button 
           variant="outline" 
@@ -242,63 +247,74 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         </Button>
       </div>
       
-      {actionHistory && actionHistory.length > 0 ? (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Historique des actions</h3>
-          <div className="space-y-2">
-            {actionHistory.map((action) => {
-              const isPastAction = action.scheduledDate ? isPast(new Date(action.scheduledDate)) : false;
-              const isCompleted = !!action.completedDate;
-              
-              return (
-                <div 
-                  key={action.id} 
-                  className={`p-3 rounded-md border ${
-                    isCompleted 
-                      ? 'bg-green-50 border-green-200' 
-                      : isPastAction 
-                        ? 'bg-red-50 border-red-200' 
-                        : 'bg-blue-50 border-blue-200'
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="font-semibold">{action.actionType}</span>
-                      {action.scheduledDate && (
-                        <p className="text-sm text-gray-600">
-                          Prévu pour: {formatDateSafely(action.scheduledDate)}
-                        </p>
-                      )}
-                      {action.completedDate && (
-                        <p className="text-sm text-green-600">
-                          Complété le: {formatDateSafely(action.completedDate)}
-                        </p>
-                      )}
-                      {action.notes && (
-                        <p className="text-sm mt-1 p-2 bg-white rounded border border-gray-100">
-                          {action.notes}
-                        </p>
+      {/* Section des sélections de propriétés envoyées */}
+      <div>
+        <PropertySelectionHistory leadId={leadId} />
+      </div>
+      
+      {/* Section des actions classiques */}
+      <div>
+        {actionHistory && actionHistory.length > 0 ? (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Historique des actions</h3>
+            <div className="space-y-2">
+              {actionHistory.map((action) => {
+                const isPastAction = action.scheduledDate ? isPast(new Date(action.scheduledDate)) : false;
+                const isCompleted = !!action.completedDate;
+                
+                return (
+                  <div 
+                    key={action.id} 
+                    className={`p-3 rounded-md border ${
+                      isCompleted 
+                        ? 'bg-green-50 border-green-200' 
+                        : isPastAction 
+                          ? 'bg-red-50 border-red-200' 
+                          : 'bg-blue-50 border-blue-200'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="font-semibold">{action.actionType}</span>
+                        {action.scheduledDate && (
+                          <p className="text-sm text-gray-600">
+                            Prévu pour: {formatDateSafely(action.scheduledDate)}
+                          </p>
+                        )}
+                        {action.completedDate && (
+                          <p className="text-sm text-green-600">
+                            Complété le: {formatDateSafely(action.completedDate)}
+                          </p>
+                        )}
+                        {action.notes && (
+                          <p className="text-sm mt-1 p-2 bg-white rounded border border-gray-100">
+                            {action.notes}
+                          </p>
+                        )}
+                      </div>
+                      {!isCompleted && (
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleMarkComplete(action)}
+                          variant="outline"
+                          className="ml-2"
+                        >
+                          Marquer comme terminé
+                        </Button>
                       )}
                     </div>
-                    {!isCompleted && (
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleMarkComplete(action)}
-                        variant="outline"
-                        className="ml-2"
-                      >
-                        Marquer comme terminé
-                      </Button>
-                    )}
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ) : (
-        <p className="text-gray-500">Aucune action disponible pour le moment.</p>
-      )}
+        ) : (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Historique des actions</h3>
+            <p className="text-gray-500">Aucune action disponible pour le moment.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
