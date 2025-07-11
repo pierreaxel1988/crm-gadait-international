@@ -73,7 +73,7 @@ const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-gray-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-chocolate-dark focus:border-transparent transition duration-200 ease-in-out"
+        className="w-full flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-gray-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-chocolate-dark focus:border-transparent transition duration-200 ease-in-out"
       >
         <div className="flex items-center gap-3">
           <MapPin className="h-4 w-4 text-loro-terracotta" />
