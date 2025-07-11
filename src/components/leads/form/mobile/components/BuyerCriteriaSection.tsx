@@ -224,8 +224,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
                 variant={(lead.propertyTypes || []).includes(type) ? "default" : "outline"}
                 className={`cursor-pointer font-futura transition-all duration-200 ${
                   (lead.propertyTypes || []).includes(type)
-                    ? 'bg-loro-sand text-loro-navy hover:bg-loro-sand/90'
-                    : 'border-loro-pearl text-loro-navy/70 hover:bg-loro-white hover:border-loro-sand'
+                    ? 'bg-chocolate-dark text-white hover:bg-chocolate-dark/90'
+                    : 'border-gray-300 text-gray-800 hover:bg-gray-100 hover:border-gray-400'
                 }`}
                 onClick={() => handlePropertyTypeChange(type)}
               >
