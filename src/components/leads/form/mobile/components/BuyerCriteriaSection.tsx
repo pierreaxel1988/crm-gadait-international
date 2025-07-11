@@ -8,6 +8,7 @@ import LocationFilter from '@/components/pipeline/filters/LocationFilter';
 import BudgetFilter from '@/components/pipeline/filters/BudgetFilter';
 import StyledSelect from './StyledSelect';
 import CountrySelectModal from './CountrySelectModal';
+import SuggestedPropertiesSection from './SuggestedPropertiesSection';
 
 interface BuyerCriteriaSectionProps {
   lead: LeadDetailed;
@@ -402,6 +403,8 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
           </div>
         </div>
       </div>
+
+      <SuggestedPropertiesSection lead={lead} />
     </div>
   );
 };
