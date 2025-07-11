@@ -29,10 +29,14 @@ interface PropertyCardProps {
     external_id?: string;
     slug?: string;
   };
+  returnTo?: string;
+  leadId?: string;
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({
-  property
+  property,
+  returnTo,
+  leadId
 }) => {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -68,7 +72,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const displayReference = getDisplayReference();
 
   const handleCardClick = () => {
-    navigate(`/properties/${property.id}`);
+    if (returnTo === 'lead' && leadId) {
+      navigate(`/properties/${property.id}?returnTo=lead&leadId=${leadId}`);
+    } else {
+      navigate(`/properties/${property.id}`);
+    }
   };
 
   const handleExternalLinkClick = (e: React.MouseEvent) => {
