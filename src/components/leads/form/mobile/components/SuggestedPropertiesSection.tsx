@@ -62,11 +62,14 @@ const SuggestedPropertiesSection: React.FC<SuggestedPropertiesSectionProps> = ({
         query = query.in('property_type', lead.propertyTypes);
       }
 
-      // Filter by bedrooms (minimum)
+      // Filter by bedrooms (minimum) - limit to reasonable values
       if (lead.bedrooms) {
         const bedroomValue = Array.isArray(lead.bedrooms) ? lead.bedrooms[0] : lead.bedrooms;
-        if (bedroomValue && bedroomValue > 0) {
+        if (bedroomValue && bedroomValue > 0 && bedroomValue <= 10) {
           query = query.gte('bedrooms', bedroomValue);
+        } else if (bedroomValue && bedroomValue > 10) {
+          // For unrealistic values, search for properties with 5+ bedrooms instead
+          query = query.gte('bedrooms', 5);
         }
       }
 
