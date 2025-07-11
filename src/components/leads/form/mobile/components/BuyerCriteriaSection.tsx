@@ -222,6 +222,7 @@ const BuyerCriteriaSection: React.FC<BuyerCriteriaSectionProps> = ({
               <Badge
                 key={type}
                 variant={(lead.propertyTypes || []).includes(type) ? "default" : "outline"}
+                weight="normal"
                 className={`cursor-pointer transition-all duration-200 font-futura ${
                   (lead.propertyTypes || []).includes(type)
                     ? 'bg-chocolate-dark text-white hover:bg-chocolate-dark/90'
