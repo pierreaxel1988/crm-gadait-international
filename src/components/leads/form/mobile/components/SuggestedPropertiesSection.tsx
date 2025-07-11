@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LeadDetailed } from '@/types/lead';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -32,6 +33,7 @@ interface GadaitProperty {
 const SuggestedPropertiesSection: React.FC<SuggestedPropertiesSectionProps> = ({ lead }) => {
   const [properties, setProperties] = useState<GadaitProperty[]>([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchSuggestedProperties();
@@ -110,6 +112,10 @@ const SuggestedPropertiesSection: React.FC<SuggestedPropertiesSectionProps> = ({
     return `${formattedPrice} ${currencySymbol}`;
   };
 
+  const handlePropertyClick = (propertyId: string) => {
+    navigate(`/properties/${propertyId}`);
+  };
+
   if (!lead.country && !lead.desiredLocation && !lead.propertyTypes?.length) {
     return null;
   }
@@ -140,7 +146,11 @@ const SuggestedPropertiesSection: React.FC<SuggestedPropertiesSectionProps> = ({
       ) : properties.length > 0 ? (
         <div className="space-y-4">
           {properties.map((property) => (
-            <Card key={property.id} className="overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
+            <Card 
+              key={property.id} 
+              className="overflow-hidden border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => handlePropertyClick(property.id)}
+            >
               <CardContent className="p-4">
                 <div className="flex gap-3">
                   {property.main_image && (
@@ -205,7 +215,10 @@ const SuggestedPropertiesSection: React.FC<SuggestedPropertiesSectionProps> = ({
                         size="sm"
                         variant="outline"
                         className="text-xs px-2 py-1 h-6"
-                        onClick={() => window.open(property.url, '_blank')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(property.url, '_blank');
+                        }}
                       >
                         <ExternalLink className="h-3 w-3" />
                       </Button>
