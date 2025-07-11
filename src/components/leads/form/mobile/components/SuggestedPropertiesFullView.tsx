@@ -230,14 +230,6 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
                   <span className="text-xs font-light">Page {currentPage} sur {totalPages}</span>
                 </Badge>
               )}
-              {hasActiveFilters && (
-                <Badge className="bg-gray-50 border-gray-200 text-gray-600 font-futura rounded-md px-1 py-0.5 text-[9px] font-light tracking-wide shadow-none">
-                  <span className="text-xs font-light flex items-center gap-1">
-                    <span className="text-[8px] opacity-60">•</span>
-                    <span>Critères appliqués</span>
-                  </span>
-                </Badge>
-              )}
               {selectedProperties.size > 0 && (
                 <Badge className="bg-blue-50 border-blue-200 text-blue-700 font-futura rounded-md px-2 py-0.5 text-xs font-medium tracking-wide shadow-none">
                   <span className="text-xs font-medium">{selectedProperties.size} sélectionnée(s)</span>
