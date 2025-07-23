@@ -1,11 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { LeadDetailed, LeadSource } from '@/types/lead';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ChevronDown } from 'lucide-react';
 import FormInput from '../../FormInput';
 import { COUNTRIES } from '@/utils/countries';
+import { countryToFlag } from '@/utils/countryUtils';
+import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
+import NationalitySelector from '../../selectors/NationalitySelector';
 
 interface OwnerInfoSectionProps {
   lead: LeadDetailed;
@@ -16,6 +20,8 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
   lead,
   onDataChange
 }) => {
+  const [isNationalitySelectorOpen, setIsNationalitySelectorOpen] = useState(false);
+
   const LEAD_SOURCES: LeadSource[] = [
     "Site web", "Réseaux sociaux", "Portails immobiliers", "Network", 
     "Repeaters", "Recommandations", "Apporteur d'affaire", "Idealista",
@@ -23,30 +29,43 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
     "James Edition", "Annonce", "Email", "Téléphone", "Autre", "Recommendation"
   ];
 
-  const NATIONALITIES = [
-    "Française", "Britannique", "Allemande", "Italienne", "Espagnole", "Belge", 
-    "Suisse", "Américaine", "Canadienne", "Australienne", "Néerlandaise", 
-    "Portugaise", "Russe", "Japonaise", "Chinoise", "Indienne", "Brésilienne",
-    "Argentine", "Mexicaine", "Sud-africaine", "Égyptienne", "Marocaine", 
-    "Tunisienne", "Algérienne", "Mauricienne", "Seychelloise", "Maldivienne",
-    "Émirati", "Saoudienne", "Qatarie", "Koweïtienne", "Libanaise", "Jordanienne",
-    "Grecque", "Turque", "Norvégienne", "Suédoise", "Danoise", "Finlandaise",
-    "Polonaise", "Tchèque", "Hongroise", "Roumaine", "Bulgare", "Croate",
-    "Serbe", "Slovène", "Slovaque", "Estonienne", "Lettone", "Lituanienne",
-    "Ukrainienne", "Biélorusse", "Moldave", "Géorgienne", "Arménienne",
-    "Azerbaïdjanaise", "Kazakhe", "Ouzbèke", "Kirghize", "Tadjike", "Turkmène",
-    "Iranienne", "Irakienne", "Syrienne", "Afghane", "Pakistanaise", "Bangladaise",
-    "Sri-lankaise", "Népalaise", "Bhoutanaise", "Mongole", "Coréenne du Nord",
-    "Coréenne du Sud", "Thaïlandaise", "Vietnamienne", "Cambodgienne", "Laotienne",
-    "Birmane", "Malaisienne", "Singapourienne", "Indonésienne", "Philippine",
-    "Brunéienne", "Timor-Oriental", "Papouasie-Nouvelle-Guinée", "Australienne",
-    "Néo-zélandaise", "Fidjienne", "Tonguienne", "Samoane", "Vanuatuaise"
-  ];
-
   const LANGUAGES = [
     "Français", "English", "Español", "Deutsch", "Italiano", "Nederlands", 
     "Português", "русский", "中文", "العربية", "हिन्दी", "日本語"
   ];
+
+  const handleNationalitySelect = (nationality: string) => {
+    onDataChange({ nationality });
+    setIsNationalitySelectorOpen(false);
+  };
+
+  const getNationalityFromCountry = (countryName: string): string => {
+    return deriveNationalityFromCountry(countryName) || countryName;
+  };
+
+  const getCountryFromNationality = (nationality: string): string => {
+    // Logique simple pour retrouver le pays depuis la nationalité
+    const nationalityToCountry: Record<string, string> = {
+      'Française': 'France',
+      'Britannique': 'United Kingdom',
+      'Allemande': 'Germany',
+      'Italienne': 'Italy',
+      'Espagnole': 'Spain',
+      'Belge': 'Belgium',
+      'Suisse': 'Switzerland',
+      'Américaine': 'United States',
+      'Canadienne': 'Canada',
+      'Australienne': 'Australia',
+      'Néerlandaise': 'Netherlands',
+      'Portugaise': 'Portugal',
+      'Russe': 'Russia',
+      'Japonaise': 'Japan',
+      'Chinoise': 'China',
+      'Indienne': 'India',
+      'Brésilienne': 'Brazil'
+    };
+    return nationalityToCountry[nationality] || 'France';
+  };
 
   return (
     <div className="space-y-4">
@@ -126,16 +145,23 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
         searchable={true}
       />
 
-      <FormInput
-        label="Nationalité"
-        name="nationality"
-        type="select"
-        value={lead.nationality || ''}
-        onChange={e => onDataChange({ nationality: e.target.value })}
-        placeholder="Sélectionner une nationalité"
-        options={NATIONALITIES.map(nationality => ({ value: nationality, label: nationality }))}
-        searchable={true}
-      />
+      <div className="space-y-2">
+        <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
+        <div 
+          className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer hover:bg-accent transition-colors"
+          onClick={() => setIsNationalitySelectorOpen(true)}
+        >
+          {lead.nationality ? (
+            <div className="flex items-center gap-2">
+              <span className="text-lg">{countryToFlag(getCountryFromNationality(lead.nationality))}</span>
+              <span className="font-futura">{lead.nationality}</span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground font-futura">Sélectionner une nationalité</span>
+          )}
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        </div>
+      </div>
 
       <FormInput
         label="Langue préférée"
@@ -157,6 +183,15 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
         placeholder="Sélectionner une source"
         options={LEAD_SOURCES.map(source => ({ value: source, label: source }))}
         searchable={true}
+      />
+
+      <NationalitySelector
+        isOpen={isNationalitySelectorOpen}
+        onClose={() => setIsNationalitySelectorOpen(false)}
+        onSelect={handleNationalitySelect}
+        selectedNationality={lead.nationality}
+        title="Sélectionner une nationalité"
+        searchPlaceholder="Rechercher une nationalité..."
       />
     </div>
   );
