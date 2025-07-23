@@ -42,7 +42,7 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
   };
 
   const handleCountrySelect = (country: string) => {
-    onDataChange({ residenceCountry: country });
+    onDataChange({ taxResidence: country });
     setIsCountrySelectorOpen(false);
   };
 
@@ -147,10 +147,10 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
           className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer hover:bg-accent transition-colors"
           onClick={() => setIsCountrySelectorOpen(true)}
         >
-          {lead.residenceCountry ? (
+          {lead.taxResidence ? (
             <div className="flex items-center gap-2">
-              <span className="text-lg">{countryToFlag(lead.residenceCountry)}</span>
-              <span className="font-futura">{lead.residenceCountry}</span>
+              <span className="text-lg">{countryToFlag(lead.taxResidence)}</span>
+              <span className="font-futura">{lead.taxResidence}</span>
             </div>
           ) : (
             <span className="text-muted-foreground font-futura">Sélectionner un pays</span>
@@ -203,7 +203,7 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
         isOpen={isCountrySelectorOpen}
         onClose={() => setIsCountrySelectorOpen(false)}
         onSelect={handleCountrySelect}
-        selectedCountry={lead.residenceCountry}
+        selectedCountry={lead.taxResidence}
         title="Sélectionner un pays de résidence"
         searchPlaceholder="Rechercher un pays..."
       />
