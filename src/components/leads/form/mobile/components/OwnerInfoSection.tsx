@@ -10,6 +10,7 @@ import { COUNTRIES } from '@/utils/countries';
 import { countryToFlag } from '@/utils/countryUtils';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 import NationalitySelector from '../../selectors/NationalitySelector';
+import CountrySelector from '../../selectors/CountrySelector';
 
 interface OwnerInfoSectionProps {
   lead: LeadDetailed;
@@ -21,6 +22,7 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
   onDataChange
 }) => {
   const [isNationalitySelectorOpen, setIsNationalitySelectorOpen] = useState(false);
+  const [isCountrySelectorOpen, setIsCountrySelectorOpen] = useState(false);
 
   const LEAD_SOURCES: LeadSource[] = [
     "Site web", "Réseaux sociaux", "Portails immobiliers", "Network", 
@@ -37,6 +39,11 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
   const handleNationalitySelect = (nationality: string) => {
     onDataChange({ nationality });
     setIsNationalitySelectorOpen(false);
+  };
+
+  const handleCountrySelect = (country: string) => {
+    onDataChange({ residenceCountry: country });
+    setIsCountrySelectorOpen(false);
   };
 
   const getNationalityFromCountry = (countryName: string): string => {
@@ -134,16 +141,23 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
         showFlagsInDropdown={true}
       />
 
-      <FormInput
-        label="Pays de résidence"
-        name="residenceCountry"
-        type="select"
-        value={lead.residenceCountry || ''}
-        onChange={e => onDataChange({ residenceCountry: e.target.value })}
-        placeholder="Sélectionner un pays"
-        options={COUNTRIES.map(country => ({ value: country, label: country }))}
-        searchable={true}
-      />
+      <div className="space-y-2">
+        <Label htmlFor="residenceCountry" className="text-sm">Pays de résidence</Label>
+        <div 
+          className="flex items-center justify-between px-3 py-2 h-10 w-full border border-input rounded-md bg-background text-sm cursor-pointer hover:bg-accent transition-colors"
+          onClick={() => setIsCountrySelectorOpen(true)}
+        >
+          {lead.residenceCountry ? (
+            <div className="flex items-center gap-2">
+              <span className="text-lg">{countryToFlag(lead.residenceCountry)}</span>
+              <span className="font-futura">{lead.residenceCountry}</span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground font-futura">Sélectionner un pays</span>
+          )}
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        </div>
+      </div>
 
       <div className="space-y-2">
         <Label htmlFor="nationality" className="text-sm">Nationalité</Label>
@@ -183,6 +197,15 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
         placeholder="Sélectionner une source"
         options={LEAD_SOURCES.map(source => ({ value: source, label: source }))}
         searchable={true}
+      />
+
+      <CountrySelector
+        isOpen={isCountrySelectorOpen}
+        onClose={() => setIsCountrySelectorOpen(false)}
+        onSelect={handleCountrySelect}
+        selectedCountry={lead.residenceCountry}
+        title="Sélectionner un pays de résidence"
+        searchPlaceholder="Rechercher un pays..."
       />
 
       <NationalitySelector
