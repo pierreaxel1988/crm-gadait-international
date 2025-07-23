@@ -157,10 +157,18 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ lead, onDataCha
               <Home className="h-4 w-4 text-gray-500" />
             </div>
             <RadioGroup 
-              value="owners" 
+              value={lead.pipelineType || 'owners'} 
               onValueChange={(value) => handlePipelineTypeChange(value as PipelineType)}
               className="flex space-x-4"
             >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="purchase" id="purchase" />
+                <Label htmlFor="purchase" className="text-sm font-futura cursor-pointer">Achat</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="rental" id="rental" />
+                <Label htmlFor="rental" className="text-sm font-futura cursor-pointer">Location</Label>
+              </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="owners" id="owners" />
                 <Label htmlFor="owners" className="text-sm font-futura cursor-pointer">Propriétaires</Label>
