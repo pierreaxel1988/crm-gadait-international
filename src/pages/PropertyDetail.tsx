@@ -173,7 +173,7 @@ const PropertyDetail = () => {
           
           {/* Title */}
           <div className="mb-8">
-            <h1 className="text-[48px] leading-[52px] font-normal text-loro-navy mb-6">
+            <h1 className="text-[32px] leading-[36px] font-normal text-loro-navy mb-6">
               {property.title}
             </h1>
             <div className="border-b border-loro-navy/20 w-full mb-8"></div>
