@@ -62,7 +62,7 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({
       <div className="space-y-6">
         {/* Gallery Title */}
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-loro-navy mb-2">Gallery</h2>
+          <h2 className="text-3xl font-normal text-loro-navy mb-2">Gallery</h2>
           <div className="w-16 h-0.5 bg-loro-navy mx-auto"></div>
         </div>
 
