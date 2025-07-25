@@ -148,7 +148,11 @@ const PropertyDetail = () => {
             <div className="flex items-center gap-3">
               <Button variant="outline" size="icon" className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy" onClick={() => {
                 console.log('Back button clicked');
-                navigate(-1);
+                if (returnTo) {
+                  navigate(returnTo);
+                } else {
+                  navigate('/properties');
+                }
               }}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
