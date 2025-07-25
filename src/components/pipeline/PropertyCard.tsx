@@ -86,11 +86,13 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       return;
     }
     
-    // Sinon, navigation normale
+    // Sinon, navigation normale - utiliser le slug si disponible
+    const propertyPath = property.slug || `id/${property.id}`;
+    
     if (returnTo === 'lead' && leadId) {
-      navigate(`/properties/${property.id}?returnTo=lead&leadId=${leadId}`);
+      navigate(`/properties/${propertyPath}?returnTo=lead&leadId=${leadId}`);
     } else {
-      navigate(`/properties/${property.id}`);
+      navigate(`/properties/${propertyPath}`);
     }
   };
 

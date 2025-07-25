@@ -49,7 +49,12 @@ function App() {
                 <Properties />
               </ProtectedRoute>
             } />
-            <Route path="/properties/:id" element={
+            <Route path="/properties/:slug" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <PropertyDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/properties/id/:id" element={
               <ProtectedRoute commercialAllowed={true}>
                 <PropertyDetail />
               </ProtectedRoute>

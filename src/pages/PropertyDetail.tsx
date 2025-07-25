@@ -45,7 +45,7 @@ interface PropertyDetail {
 }
 
 const PropertyDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, slug } = useParams<{ id?: string; slug?: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isMobile = useIsMobile();
@@ -57,19 +57,27 @@ const PropertyDetail = () => {
   const leadId = searchParams.get('leadId');
 
   useEffect(() => {
-    fetchPropertyDetail();
-  }, [id]);
+    if (slug || id) {
+      fetchPropertyDetail();
+    }
+  }, [id, slug]);
 
   const fetchPropertyDetail = async () => {
-    if (!id) return;
+    if (!slug && !id) return;
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('gadait_properties')
-        .select('*')
-        .eq('id', id)
-        .single();
+      let query = supabase.from('gadait_properties').select('*');
+      
+      if (slug) {
+        // Try to find by slug first
+        query = query.eq('slug', slug);
+      } else if (id) {
+        // Fallback to ID lookup
+        query = query.eq('id', id);
+      }
+      
+      const { data, error } = await query.single();
 
       if (error) {
         console.error('Erreur lors du chargement de la propriété:', error);
@@ -77,6 +85,12 @@ const PropertyDetail = () => {
       }
 
       setProperty(data);
+      
+      // If accessed by ID but property has a slug, redirect to slug URL
+      if (id && !slug && data?.slug) {
+        const currentParams = searchParams.toString();
+        navigate(`/properties/${data.slug}${currentParams ? `?${currentParams}` : ''}`, { replace: true });
+      }
     } catch (err) {
       console.error('Erreur:', err);
     } finally {
