@@ -242,14 +242,6 @@ const PropertyDetail = () => {
                 </div>}
             </div>
 
-            {/* Features Tags */}
-            {property.features && property.features.length > 0 && <div className="mb-6">
-                <div className="flex flex-wrap gap-2">
-                  {property.features.map((feature, index) => <Badge key={index} variant="secondary" className="bg-loro-pearl/50 text-loro-navy border-0 text-xs px-3 py-1">
-                      {feature}
-                    </Badge>)}
-                </div>
-              </div>}
 
             {/* Amenities Tags */}
             {property.amenities && property.amenities.length > 0 && <div className="mb-6">
