@@ -193,7 +193,7 @@ const PropertyDetail = () => {
               </div>
               
               <div className="flex items-center gap-2">
-                <Expand className="h-5 w-5" />
+                <Maximize2 className="h-5 w-5" />
                 <span>{property.area ? `${property.area} m²` : '133 m²'}</span>
               </div>
               
