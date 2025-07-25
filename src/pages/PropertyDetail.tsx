@@ -265,7 +265,7 @@ const PropertyDetail = () => {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Nouvelle galerie photos */}
+            {/* Gallery Section */}
             <div className="lg:col-span-2">
               <PropertyGallery
                 title={property.title}
@@ -273,7 +273,7 @@ const PropertyDetail = () => {
                 mainImage={property.main_image}
               />
 
-              {/* Section vidéos YouTube */}
+              {/* Video Section */}
               {property.video_urls && property.video_urls.length > 0 && (
                 <Card className="mt-6">
                   <CardContent className="p-6">

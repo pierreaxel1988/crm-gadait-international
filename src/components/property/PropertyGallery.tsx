@@ -1,16 +1,7 @@
-
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from '@/components/ui/carousel';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { 
   Home, 
   Maximize2, 
@@ -54,97 +45,98 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({
 
   if (allImages.length === 0) {
     return (
-      <Card className="overflow-hidden">
-        <CardContent className="p-0">
-          <div className="aspect-video bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center">
-            <Home className="h-16 w-16 text-loro-navy/30" />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-loro-navy mb-2">Gallery</h2>
+          <div className="w-16 h-0.5 bg-loro-navy mx-auto"></div>
+        </div>
+        <div className="aspect-[16/9] bg-gradient-to-br from-loro-pearl to-loro-white flex items-center justify-center rounded-lg">
+          <Home className="h-16 w-16 text-loro-navy/30" />
+        </div>
+      </div>
     );
   }
 
   return (
     <>
-      <Card className="overflow-hidden">
-        <CardContent className="p-0">
-          {/* Image principale avec overlay */}
-          <div className="relative group">
-            <div className="aspect-video overflow-hidden">
-              <img
-                src={allImages[0]}
-                alt={title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer"
-                onClick={() => openLightbox(0)}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            </div>
-            
-            {/* Overlay avec bouton zoom */}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-              <Button
-                variant="secondary"
-                size="lg"
-                className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100 bg-white/90 hover:bg-white text-loro-navy"
-                onClick={() => openLightbox(0)}
-              >
-                <ZoomIn className="h-5 w-5 mr-2" />
-                Voir toutes les photos
-              </Button>
-            </div>
-            
-            {/* Badge nombre de photos */}
-            {allImages.length > 1 && (
-              <Badge 
-                className="absolute top-4 right-4 bg-black/70 text-white hover:bg-black/80"
-              >
-                <Maximize2 className="h-3 w-3 mr-1" />
-                {allImages.length} photos
-              </Badge>
-            )}
+      <div className="space-y-6">
+        {/* Gallery Title */}
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-loro-navy mb-2">Gallery</h2>
+          <div className="w-16 h-0.5 bg-loro-navy mx-auto"></div>
+        </div>
+
+        {/* Main Image */}
+        <div className="relative group cursor-pointer" onClick={() => openLightbox(0)}>
+          <div className="aspect-[16/9] overflow-hidden rounded-lg">
+            <img
+              src={allImages[0]}
+              alt={title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
           </div>
           
-          {/* Miniatures carousel */}
+          {/* Overlay avec bouton zoom */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center rounded-lg">
+            <Button
+              variant="secondary"
+              size="lg"
+              className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-90 group-hover:scale-100 bg-white/90 hover:bg-white text-loro-navy"
+            >
+              <ZoomIn className="h-5 w-5 mr-2" />
+              Voir toutes les photos
+            </Button>
+          </div>
+          
+          {/* Badge nombre de photos */}
           {allImages.length > 1 && (
-            <div className="p-4">
-              <Carousel
-                opts={{
-                  align: "start",
-                  slidesToScroll: 1,
-                }}
-                className="w-full"
-              >
-                <CarouselContent className="-ml-2">
-                  {allImages.slice(0, 8).map((image, index) => (
-                    <CarouselItem key={index} className="pl-2 basis-1/6 md:basis-1/8">
-                      <button
-                        onClick={() => openLightbox(index)}
-                        className="w-full aspect-square overflow-hidden rounded-lg border-2 border-transparent hover:border-loro-sand transition-all duration-200 group"
-                      >
-                        <img
-                          src={image}
-                          alt={`Photo ${index + 1}`}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
-                        />
-                      </button>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="left-2" />
-                <CarouselNext className="right-2" />
-              </Carousel>
-              
-              {allImages.length > 8 && (
-                <p className="text-sm text-gray-500 mt-2 text-center">
-                  +{allImages.length - 8} photos supplémentaires
-                </p>
-              )}
-            </div>
+            <Badge 
+              className="absolute top-4 right-4 bg-black/70 text-white hover:bg-black/80"
+            >
+              <Maximize2 className="h-3 w-3 mr-1" />
+              {allImages.length} photos
+            </Badge>
           )}
-        </CardContent>
-      </Card>
+        </div>
+        
+        {/* Image Grid */}
+        {allImages.length > 1 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {allImages.slice(1, 9).map((image, index) => (
+              <button
+                key={index + 1}
+                onClick={() => openLightbox(index + 1)}
+                className="aspect-square overflow-hidden rounded-lg group hover:shadow-lg transition-all duration-200"
+              >
+                <img
+                  src={image}
+                  alt={`Photo ${index + 2}`}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </button>
+            ))}
+            
+            {/* Plus d'images indicator */}
+            {allImages.length > 9 && (
+              <button
+                onClick={() => openLightbox(9)}
+                className="aspect-square overflow-hidden rounded-lg bg-black/80 flex items-center justify-center group hover:bg-black/70 transition-all duration-200"
+              >
+                <div className="text-center text-white">
+                  <Maximize2 className="h-6 w-6 mx-auto mb-1" />
+                  <span className="text-sm font-medium">+{allImages.length - 9}</span>
+                </div>
+              </button>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Lightbox Dialog */}
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
