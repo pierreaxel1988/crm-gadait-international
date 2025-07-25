@@ -149,7 +149,7 @@ const PropertyDetail = () => {
         <SubNavigation />
       </div>
       
-      {/* Hero Section */}
+      {/* Hero Section - Image Only */}
       <div className="relative h-[70vh] overflow-hidden">
         {property.main_image ? (
           <img
@@ -163,61 +163,57 @@ const PropertyDetail = () => {
           </div>
         )}
         
-        {/* Hero Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent">
-          <div className={`absolute bottom-0 left-0 right-0 p-6 ${isMobile ? 'px-4' : 'px-[35px]'}`}>
-            <div className="max-w-7xl mx-auto">
-              {/* Breadcrumb */}
-              <div className="flex items-center gap-2 text-white/80 text-sm mb-4">
-                <Home className="h-4 w-4" />
-                <span>/</span>
-                <span>Buy</span>
-                <span>/</span>
-                <span>{property.country || 'Property'}</span>
-                <span>/</span>
-                <span>{property.location || 'Location'}</span>
-              </div>
-              
-              {/* Title and Actions */}
-              <div className="flex items-end justify-between">
-                <div className="flex-1 mr-4">
-                  <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 leading-tight">
-                    {property.title}
-                  </h1>
-                  {displayReference && (
-                    <div className="flex items-center gap-1 text-white/70 text-sm">
-                      <Hash className="h-4 w-4" />
-                      <span>Référence {displayReference}</span>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy"
-                    onClick={() => navigate(-1)}
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy"
-                  >
-                    <Heart className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+        {/* Simple overlay for image enhancement */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent">
+          <div className={`absolute bottom-0 right-0 p-6 ${isMobile ? 'px-4' : 'px-[35px]'}`}>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy"
+              >
+                <Heart className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Content Section */}
+      {/* Content Section - All text content below hero */}
       <div className={`bg-white min-h-screen ${isMobile ? 'px-4' : 'px-[35px]'}`}>
         <div className="max-w-7xl mx-auto py-8">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-loro-navy/70 text-sm mb-6">
+            <Home className="h-4 w-4" />
+            <span>/</span>
+            <span>Buy</span>
+            <span>/</span>
+            <span>{property.country || 'Property'}</span>
+            <span>/</span>
+            <span>{property.location || 'Location'}</span>
+          </div>
+          
+          {/* Title and Reference */}
+          <div className="mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold text-loro-navy mb-2 leading-tight">
+              {property.title}
+            </h1>
+            {displayReference && (
+              <div className="flex items-center gap-1 text-loro-navy/60 text-sm">
+                <Hash className="h-4 w-4" />
+                <span>Référence {displayReference}</span>
+              </div>
+            )}
+          </div>
+          
           {/* Price and Property Info Section */}
           <div className="mb-8">
             <div className="text-4xl font-bold text-loro-navy mb-6">
@@ -295,19 +291,6 @@ const PropertyDetail = () => {
                 </Card>
               )}
 
-              {/* Description */}
-              {property.description && (
-                <Card className="mt-6">
-                  <CardContent className="p-6">
-                    <h2 className="text-xl font-semibold text-loro-navy mb-4">Description</h2>
-                    <div className="prose prose-gray max-w-none">
-                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                        {property.description}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
             </div>
 
             {/* Sidebar avec détails */}
