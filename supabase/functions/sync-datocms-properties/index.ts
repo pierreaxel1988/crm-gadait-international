@@ -338,6 +338,9 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     video_urls: videoUrls,
     is_available: datoCmsProp.propertyStatus?.name !== 'Sold' && datoCmsProp.propertyStatus?.name !== 'Rented',
     is_featured: datoCmsProp.priceFrom || false,
+    // Coordonnées GPS depuis DatoCMS
+    latitude: datoCmsProp.map?.latitude || null,
+    longitude: datoCmsProp.map?.longitude || null,
     // Métadonnées additionnelles
     created_at: datoCmsProp._createdAt,
     updated_at: datoCmsProp._updatedAt,

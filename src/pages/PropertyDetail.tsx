@@ -33,6 +33,9 @@ interface PropertyDetail {
   url: string;
   is_featured?: boolean;
   video_urls?: string[];
+  // Coordonnées GPS
+  latitude?: number;
+  longitude?: number;
   // Nouvelles propriétés pour plus de détails
   land_area?: number;
   land_area_unit?: string;
@@ -279,6 +282,8 @@ const PropertyDetail = () => {
           <PropertyMap 
             location={property.location} 
             country={property.country}
+            latitude={property.latitude}
+            longitude={property.longitude}
           />
 
           {/* Interested Section */}

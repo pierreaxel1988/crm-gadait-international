@@ -10,17 +10,27 @@ interface PropertyMapProps {
   location?: string;
   country?: string;
   coordinates?: [number, number]; // [longitude, latitude]
+  latitude?: number;
+  longitude?: number;
 }
 
-const PropertyMap: React.FC<PropertyMapProps> = ({ location, country, coordinates }) => {
+const PropertyMap: React.FC<PropertyMapProps> = ({ location, country, coordinates, latitude, longitude }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string>('');
   const [mapReady, setMapReady] = useState(false);
 
-  // Default coordinates for Méribel, France if none provided
-  const defaultCoords: [number, number] = [6.5667, 45.4000];
-  const mapCoords = coordinates || defaultCoords;
+  // Use coordinates from props (either as array or separate lat/lng), fallback to default
+  const defaultCoords: [number, number] = [6.5667, 45.4000]; // Méribel, France
+  let mapCoords: [number, number];
+  
+  if (coordinates) {
+    mapCoords = coordinates;
+  } else if (latitude && longitude) {
+    mapCoords = [longitude, latitude]; // Mapbox uses [lng, lat] format
+  } else {
+    mapCoords = defaultCoords;
+  }
 
   const initializeMap = () => {
     if (!mapContainer.current || !mapboxToken.trim()) return;
