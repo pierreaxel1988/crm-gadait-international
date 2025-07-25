@@ -5,6 +5,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import PropertyGallery from '@/components/property/PropertyGallery';
+import PropertyMap from '@/components/property/PropertyMap';
 import YouTubePlayer from '@/components/property/YouTubePlayer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -274,19 +275,11 @@ const PropertyDetail = () => {
             
           </Card>
 
-          {/* Location Map Section - Placeholder */}
-          <Card className="mb-8">
-            <CardContent className="p-0">
-              <div className="h-80 bg-gradient-to-br from-loro-sand/30 to-loro-pearl/50 flex items-center justify-center relative overflow-hidden">
-                <MapPin className="h-16 w-16 text-loro-navy/30" />
-                <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  <p className="text-sm font-medium text-loro-navy">
-                    {property.location}, {property.country}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Location Map Section */}
+          <PropertyMap 
+            location={property.location} 
+            country={property.country}
+          />
 
           {/* Interested Section */}
           <Card className="mb-8">
