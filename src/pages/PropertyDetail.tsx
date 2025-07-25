@@ -146,7 +146,10 @@ const PropertyDetail = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent">
           <div className={`absolute bottom-0 right-0 p-6 ${isMobile ? 'px-4' : 'px-[35px]'}`}>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="icon" className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy" onClick={() => navigate(-1)}>
+              <Button variant="outline" size="icon" className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy" onClick={() => {
+                console.log('Back button clicked');
+                navigate(-1);
+              }}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <Button variant="outline" size="icon" className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy">
