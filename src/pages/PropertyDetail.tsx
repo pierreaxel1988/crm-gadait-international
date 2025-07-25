@@ -260,192 +260,225 @@ const PropertyDetail = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Gallery Section */}
-            <div className="lg:col-span-2">
-              <PropertyGallery
-                title={property.title}
-                images={property.images || []}
-                mainImage={property.main_image}
-              />
-
-              {/* Video Section */}
-              {property.video_urls && property.video_urls.length > 0 && (
-                <Card className="mt-6">
-                  <CardContent className="p-6">
-                    <h2 className="text-xl font-semibold text-loro-navy mb-4 flex items-center gap-2">
-                      <Play className="h-5 w-5" />
-                      Vidéos de la propriété
-                    </h2>
-                    <div className="space-y-4">
-                      {property.video_urls.map((url, index) => (
-                        <YouTubePlayer
-                          key={index}
-                          url={url}
-                          title={`${property.title} - Vidéo ${index + 1}`}
-                          className="w-full"
-                        />
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+          {/* Features and Amenities Badges Section */}
+          <div className="mb-8">
+            {/* Status and Reference */}
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <div>
+                <h3 className="text-sm font-medium text-loro-navy/60 mb-2">Status</h3>
+                <span className="text-loro-navy font-medium">Buy</span>
+              </div>
+              {displayReference && (
+                <div>
+                  <h3 className="text-sm font-medium text-loro-navy/60 mb-2">Reference</h3>
+                  <span className="text-loro-navy font-medium">{displayReference}</span>
+                </div>
               )}
-
             </div>
 
-            {/* Sidebar avec détails */}
-            <div className="space-y-6">
-              {/* Caractéristiques principales */}
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold text-loro-navy mb-4">Caractéristiques</h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Surface habitable */}
-                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
-                      <Maximize2 className="h-6 w-6 text-loro-navy mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
-                      <div className="text-sm text-loro-navy/60">Surface</div>
-                      <div className="font-semibold text-loro-navy">
-                        {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
-                      </div>
+            {/* Features Tags */}
+            {property.features && property.features.length > 0 && (
+              <div className="mb-6">
+                <div className="flex flex-wrap gap-2">
+                  {property.features.map((feature, index) => (
+                    <Badge 
+                      key={index} 
+                      variant="secondary" 
+                      className="bg-loro-pearl/50 text-loro-navy border-0 text-xs px-3 py-1"
+                    >
+                      {feature}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Amenities Tags */}
+            {property.amenities && property.amenities.length > 0 && (
+              <div className="mb-6">
+                <div className="flex flex-wrap gap-2">
+                  {property.amenities.map((amenity, index) => (
+                    <Badge 
+                      key={index} 
+                      variant="outline" 
+                      className="border-loro-sand text-loro-navy text-xs px-3 py-1"
+                    >
+                      {amenity}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Gallery Section */}
+          <div className="mb-12">
+            <PropertyGallery
+              title={property.title}
+              images={property.images || []}
+              mainImage={property.main_image}
+            />
+          </div>
+
+          {/* Video Section */}
+          {property.video_urls && property.video_urls.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-xl font-semibold text-loro-navy mb-6 flex items-center gap-2">
+                <Play className="h-5 w-5" />
+                Vidéos de la propriété
+              </h2>
+              <div className="space-y-4">
+                {property.video_urls.map((url, index) => (
+                  <YouTubePlayer
+                    key={index}
+                    url={url}
+                    title={`${property.title} - Vidéo ${index + 1}`}
+                    className="w-full"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Detailed Characteristics Section */}
+          <Card className="mb-8">
+            <CardContent className="p-8">
+              <h2 className="text-xl font-semibold text-loro-navy mb-6">Caractéristiques détaillées</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {/* Surface habitable */}
+                <div className="text-center p-4 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+                  <Maximize2 className="h-8 w-8 text-loro-navy mx-auto mb-3 transition-transform duration-300 group-hover:scale-110" />
+                  <div className="text-sm text-loro-navy/60 mb-1">Surface</div>
+                  <div className="font-semibold text-loro-navy">
+                    {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
+                  </div>
+                </div>
+                
+                {/* Terrain (si disponible) */}
+                {property.land_area && (
+                  <div className="text-center p-4 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+                    <Trees className="h-8 w-8 text-loro-navy mx-auto mb-3 transition-transform duration-300 group-hover:scale-110" />
+                    <div className="text-sm text-loro-navy/60 mb-1">Terrain</div>
+                    <div className="font-semibold text-loro-navy">
+                      {property.land_area} {property.land_area_unit || 'm²'}
                     </div>
-                    
-                    {/* Terrain (si disponible) */}
-                    {property.land_area && (
-                      <div className="text-center p-3 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
-                        <Trees className="h-6 w-6 text-loro-navy mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
-                        <div className="text-sm text-loro-navy/60">Terrain</div>
-                        <div className="font-semibold text-loro-navy">
-                          {property.land_area} {property.land_area_unit || 'm²'}
-                        </div>
+                  </div>
+                )}
+                
+                <div className="text-center p-4 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+                  <Bed className="h-8 w-8 text-loro-navy mx-auto mb-3 transition-transform duration-300 group-hover:scale-110" />
+                  <div className="text-sm text-loro-navy/60 mb-1">Chambres</div>
+                  <div className="font-semibold text-loro-navy">
+                    {property.bedrooms || 'N/A'}
+                  </div>
+                </div>
+                
+                <div className="text-center p-4 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+                  <Bath className="h-8 w-8 text-loro-navy mx-auto mb-3 transition-transform duration-300 group-hover:scale-110" />
+                  <div className="text-sm text-loro-navy/60 mb-1">Salles de bain</div>
+                  <div className="font-semibold text-loro-navy">
+                    {property.bathrooms || 'N/A'}
+                  </div>
+                </div>
+
+                {/* Nombre d'étages */}
+                {property.floors && (
+                  <div className="text-center p-4 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+                    <Layers className="h-8 w-8 text-loro-navy mx-auto mb-3 transition-transform duration-300 group-hover:scale-110" />
+                    <div className="text-sm text-loro-navy/60 mb-1">Étages</div>
+                    <div className="font-semibold text-loro-navy">
+                      {property.floors}
+                    </div>
+                  </div>
+                )}
+
+                {/* Année de construction */}
+                {property.construction_year && (
+                  <div className="text-center p-4 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
+                    <Calendar className="h-8 w-8 text-loro-navy mx-auto mb-3 transition-transform duration-300 group-hover:scale-110" />
+                    <div className="text-sm text-loro-navy/60 mb-1">Construction</div>
+                    <div className="font-semibold text-loro-navy">
+                      {property.construction_year}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Informations supplémentaires */}
+              {(property.rooms || property.parking_spaces || property.energy_class) && (
+                <div className="mt-6 pt-6 border-t border-loro-pearl/50">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {property.rooms && (
+                      <div className="flex justify-between items-center p-3 bg-loro-pearl/20 rounded">
+                        <span className="text-loro-navy/60">Nombre de pièces</span>
+                        <span className="font-medium text-loro-navy">{property.rooms}</span>
                       </div>
                     )}
-                    
-                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
-                      <Bed className="h-6 w-6 text-loro-navy mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
-                      <div className="text-sm text-loro-navy/60">Chambres</div>
-                      <div className="font-semibold text-loro-navy">
-                        {property.bedrooms || 'N/A'}
-                      </div>
-                    </div>
-                    
-                    <div className="text-center p-3 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
-                      <Bath className="h-6 w-6 text-loro-navy mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
-                      <div className="text-sm text-loro-navy/60">Salles de bain</div>
-                      <div className="font-semibold text-loro-navy">
-                        {property.bathrooms || 'N/A'}
-                      </div>
-                    </div>
-
-                    {/* Nombre d'étages */}
-                    {property.floors && (
-                      <div className="text-center p-3 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
-                        <Layers className="h-6 w-6 text-loro-navy mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
-                        <div className="text-sm text-loro-navy/60">Étages</div>
-                        <div className="font-semibold text-loro-navy">
-                          {property.floors}
-                        </div>
+                    {property.parking_spaces && (
+                      <div className="flex justify-between items-center p-3 bg-loro-pearl/20 rounded">
+                        <span className="text-loro-navy/60">Places de parking</span>
+                        <span className="font-medium text-loro-navy">{property.parking_spaces}</span>
                       </div>
                     )}
-
-                    {/* Année de construction */}
-                    {property.construction_year && (
-                      <div className="text-center p-3 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
-                        <Calendar className="h-6 w-6 text-loro-navy mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
-                        <div className="text-sm text-loro-navy/60">Construction</div>
-                        <div className="font-semibold text-loro-navy">
-                          {property.construction_year}
-                        </div>
+                    {property.energy_class && (
+                      <div className="flex justify-between items-center p-3 bg-loro-pearl/20 rounded">
+                        <span className="text-loro-navy/60">Classe énergétique</span>
+                        <span className="font-medium text-loro-navy">{property.energy_class}</span>
                       </div>
                     )}
                   </div>
-
-                  {/* Informations supplémentaires */}
-                  {(property.rooms || property.parking_spaces || property.energy_class) && (
-                    <div className="mt-4 pt-4 border-t border-loro-pearl/50">
-                      <div className="grid grid-cols-1 gap-3">
-                        {property.rooms && (
-                          <div className="flex justify-between">
-                            <span className="text-loro-navy/60">Nombre de pièces</span>
-                            <span className="font-medium text-loro-navy">{property.rooms}</span>
-                          </div>
-                        )}
-                        {property.parking_spaces && (
-                          <div className="flex justify-between">
-                            <span className="text-loro-navy/60">Places de parking</span>
-                            <span className="font-medium text-loro-navy">{property.parking_spaces}</span>
-                          </div>
-                        )}
-                        {property.energy_class && (
-                          <div className="flex justify-between">
-                            <span className="text-loro-navy/60">Classe énergétique</span>
-                            <span className="font-medium text-loro-navy">{property.energy_class}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Équipements */}
-              {property.features && property.features.length > 0 && (
-                <Card>
-                  <CardContent className="p-6">
-                    <h2 className="text-xl font-semibold text-loro-navy mb-4">Équipements</h2>
-                    <div className="flex flex-wrap gap-2">
-                      {property.features.map((feature, index) => (
-                        <Badge key={index} variant="secondary" className="bg-loro-pearl/50 text-loro-navy">
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                </div>
               )}
+            </CardContent>
+          </Card>
 
-              {/* Commodités */}
-              {property.amenities && property.amenities.length > 0 && (
-                <Card>
-                  <CardContent className="p-6">
-                    <h2 className="text-xl font-semibold text-loro-navy mb-4">Commodités</h2>
-                    <div className="flex flex-wrap gap-2">
-                      {property.amenities.map((amenity, index) => (
-                        <Badge key={index} variant="outline" className="border-loro-sand text-loro-navy">
-                          {amenity}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+          {/* Location Map Section - Placeholder */}
+          <Card className="mb-8">
+            <CardContent className="p-0">
+              <div className="h-80 bg-gradient-to-br from-loro-sand/30 to-loro-pearl/50 flex items-center justify-center relative overflow-hidden">
+                <MapPin className="h-16 w-16 text-loro-navy/30" />
+                <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg">
+                  <p className="text-sm font-medium text-loro-navy">
+                    {property.location}, {property.country}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-              {/* Actions */}
-              <Card>
-                <CardContent className="p-6 space-y-4">
-                  <Button
-                    className="w-full bg-loro-sand hover:bg-loro-hazel text-loro-navy"
-                    onClick={() => window.open(property.url, '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Voir sur le site Gadait
-                  </Button>
-                  
-                  <div className="pt-4 border-t border-loro-pearl">
-                    <p className="text-sm text-loro-navy/60 mb-3">Intéressé par cette propriété ?</p>
-                    <div className="flex gap-2">
-                      <Button variant="outline" className="flex-1" size="sm">
-                        <Phone className="h-4 w-4 mr-2" />
-                        Appeler
-                      </Button>
-                      <Button variant="outline" className="flex-1" size="sm">
-                        <Mail className="h-4 w-4 mr-2" />
-                        Email
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          {/* Interested Section */}
+          <Card className="mb-8">
+            <CardContent className="p-8 text-center">
+              <h2 className="text-2xl font-semibold text-loro-navy mb-4">
+                Interested in this property?
+              </h2>
+              <div className="w-12 h-0.5 bg-loro-navy mx-auto mb-6"></div>
+              <p className="text-loro-navy/70 mb-6 max-w-2xl mx-auto">
+                For more information about this property, feel free to reach out to our expert team and we'll get in touch.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+                <Button
+                  className="bg-loro-sand hover:bg-loro-hazel text-loro-navy flex-1"
+                  onClick={() => window.open(property.url, '_blank')}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Learn more
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  <Phone className="h-4 w-4 mr-2" />
+                  Contact us
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* You might also like section - Placeholder */}
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-semibold text-loro-navy mb-4">
+              You might also like...
+            </h2>
+            <div className="w-12 h-0.5 bg-loro-navy mx-auto mb-8"></div>
+            <p className="text-loro-navy/60">Similar properties will be displayed here</p>
           </div>
         </div>
       </div>
