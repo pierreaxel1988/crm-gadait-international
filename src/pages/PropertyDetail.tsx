@@ -203,7 +203,7 @@ const PropertyDetail = () => {
           
           {/* Title and Reference */}
           <div className="mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold text-loro-navy mb-2 leading-tight">
+            <h1 className="font-luxury text-[36px] leading-[40px] font-bold text-loro-navy mb-2">
               {property.title}
             </h1>
             {displayReference && (
