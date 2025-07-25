@@ -181,7 +181,7 @@ const PropertyDetail = () => {
           
           {/* Price and Property Info Section */}
           <div className="mb-12">
-            <div className="text-[32px] font-bold text-loro-navy mb-8">
+            <div className="text-[24px] font-normal text-loro-navy mb-8">
               {formatPrice(property.price, property.currency)}
             </div>
             
