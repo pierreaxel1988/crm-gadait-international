@@ -171,20 +171,17 @@ const PropertyDetail = () => {
             <span>{property.location || 'Location'}</span>
           </div>
           
-          {/* Title and Reference */}
-          <div className="mb-6">
-            <h1 className="font-luxury text-[36px] leading-[40px] font-bold text-loro-navy mb-2">
+          {/* Title */}
+          <div className="mb-8">
+            <h1 className="text-[48px] leading-[52px] font-normal text-loro-navy mb-6">
               {property.title}
             </h1>
-            {displayReference && <div className="flex items-center gap-1 text-loro-navy/60 text-sm">
-                <Hash className="h-4 w-4" />
-                <span>Référence {displayReference}</span>
-              </div>}
+            <div className="border-b border-loro-navy/20 w-full mb-8"></div>
           </div>
           
           {/* Price and Property Info Section */}
-          <div className="mb-8">
-            <div className="text-4xl font-bold text-loro-navy mb-6">
+          <div className="mb-12">
+            <div className="text-[32px] font-bold text-loro-navy mb-8">
               {formatPrice(property.price, property.currency)}
             </div>
             
