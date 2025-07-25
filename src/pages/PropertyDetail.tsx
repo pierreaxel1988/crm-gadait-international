@@ -9,7 +9,7 @@ import YouTubePlayer from '@/components/property/YouTubePlayer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, Phone, Mail, Trees, Calendar, Layers, Play } from 'lucide-react';
+import { ArrowLeft, ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, Phone, Mail, Trees, Calendar, Layers, Play, Heart, Expand } from 'lucide-react';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 
 interface PropertyDetail {
@@ -149,72 +149,120 @@ const PropertyDetail = () => {
         <SubNavigation />
       </div>
       
-      <div className={`pt-[144px] bg-white min-h-screen ${isMobile ? 'px-4' : 'px-[35px]'}`}>
-        <div className="max-w-7xl mx-auto">
-          {/* Header avec bouton retour */}
-          <div className="mb-6">
-            {returnTo === 'lead' && leadId ? (
-              <Button 
-                onClick={() => navigate(`/leads/${leadId}?tab=criteria`)} 
-                variant="outline" 
-                className="mb-4"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Retour au lead
-              </Button>
-            ) : (
-              <Button 
-                onClick={() => navigate('/properties')} 
-                variant="outline" 
-                className="mb-4"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Retour aux propriétés
-              </Button>
-            )}
-            
-            <div className="flex items-start justify-between flex-wrap gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-loro-navy mb-2">{property.title}</h1>
-                <div className="flex items-center gap-2 text-loro-navy/70 mb-2">
-                  <MapPin className="h-5 w-5" />
-                  <span className="text-lg">{property.location || 'Localisation non spécifiée'}</span>
-                  {property.country && (
-                    <>
-                      <span>•</span>
-                      <Globe className="h-4 w-4" />
-                      <span>{property.country}</span>
-                    </>
-                  )}
-                </div>
-                {displayReference && (
-                  <div className="flex items-center gap-1 text-sm text-loro-navy/60">
-                    <Hash className="h-4 w-4" />
-                    <span>Référence {displayReference}</span>
-                  </div>
-                )}
+      {/* Hero Section */}
+      <div className="relative h-[70vh] overflow-hidden">
+        {property.main_image ? (
+          <img
+            src={property.main_image}
+            alt={property.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-loro-sand/30 to-loro-pearl/50 flex items-center justify-center">
+            <Home className="h-32 w-32 text-loro-navy/30" />
+          </div>
+        )}
+        
+        {/* Hero Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent">
+          <div className={`absolute bottom-0 left-0 right-0 p-6 ${isMobile ? 'px-4' : 'px-[35px]'}`}>
+            <div className="max-w-7xl mx-auto">
+              {/* Breadcrumb */}
+              <div className="flex items-center gap-2 text-white/80 text-sm mb-4">
+                <Home className="h-4 w-4" />
+                <span>/</span>
+                <span>Buy</span>
+                <span>/</span>
+                <span>{property.country || 'Property'}</span>
+                <span>/</span>
+                <span>{property.location || 'Location'}</span>
               </div>
               
-              <div className="text-right">
-                <div className="text-3xl font-bold text-loro-navy mb-2">
-                  {formatPrice(property.price, property.currency)}
+              {/* Title and Actions */}
+              <div className="flex items-end justify-between">
+                <div className="flex-1 mr-4">
+                  <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 leading-tight">
+                    {property.title}
+                  </h1>
+                  {displayReference && (
+                    <div className="flex items-center gap-1 text-white/70 text-sm">
+                      <Hash className="h-4 w-4" />
+                      <span>Référence {displayReference}</span>
+                    </div>
+                  )}
                 </div>
-                <div className="flex gap-2">
-                  {property.is_featured && (
-                    <Badge className="bg-loro-sand text-loro-navy">
-                      <Star className="h-3 w-3 mr-1" />
-                      Featured
-                    </Badge>
-                  )}
-                  {property.property_type && (
-                    <Badge variant="outline" className="border-loro-pearl text-loro-navy">
-                      {property.property_type}
-                    </Badge>
-                  )}
+                
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy"
+                    onClick={() => navigate(-1)}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy"
+                  >
+                    <Heart className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Content Section */}
+      <div className={`bg-white min-h-screen ${isMobile ? 'px-4' : 'px-[35px]'}`}>
+        <div className="max-w-7xl mx-auto py-8">
+          {/* Price and Property Info Section */}
+          <div className="mb-8">
+            <div className="text-4xl font-bold text-loro-navy mb-6">
+              {formatPrice(property.price, property.currency)}
+            </div>
+            
+            {/* Property Icons Row */}
+            <div className="flex items-center gap-8 text-loro-navy/70">
+              <div className="flex items-center gap-2">
+                <Home className="h-5 w-5" />
+                <span>{property.property_type || 'Apartment'}</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Expand className="h-5 w-5" />
+                <span>{property.area ? `${property.area} m²` : '133 m²'}</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Bed className="h-5 w-5" />
+                <span>{property.bedrooms || '2'}</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Bath className="h-5 w-5" />
+                <span>{property.bathrooms || '2'}</span>
+              </div>
+              
+              {property.floors && (
+                <div className="flex items-center gap-2">
+                  <Layers className="h-5 w-5" />
+                  <span>{property.floors}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Description */}
+          {property.description && (
+            <div className="mb-8">
+              <div className="prose prose-gray max-w-none text-loro-navy/80 leading-relaxed">
+                {property.description}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Nouvelle galerie photos */}
