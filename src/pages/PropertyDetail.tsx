@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, Phone, Mail, Trees, Calendar, Layers, Play, Heart, Expand } from 'lucide-react';
 import LoadingScreen from '@/components/layout/LoadingScreen';
-
 interface PropertyDetail {
   id: string;
   external_id?: string;
@@ -43,9 +42,14 @@ interface PropertyDetail {
   energy_class?: string;
   orientation?: string[];
 }
-
 const PropertyDetail = () => {
-  const { id, slug } = useParams<{ id?: string; slug?: string }>();
+  const {
+    id,
+    slug
+  } = useParams<{
+    id?: string;
+    slug?: string;
+  }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isMobile = useIsMobile();
@@ -55,20 +59,16 @@ const PropertyDetail = () => {
   // Récupérer les paramètres de retour
   const returnTo = searchParams.get('returnTo');
   const leadId = searchParams.get('leadId');
-
   useEffect(() => {
     if (slug || id) {
       fetchPropertyDetail();
     }
   }, [id, slug]);
-
   const fetchPropertyDetail = async () => {
     if (!slug && !id) return;
-
     try {
       setLoading(true);
       let query = supabase.from('gadait_properties').select('*');
-      
       if (slug) {
         // Try to find by slug first
         query = query.eq('slug', slug);
@@ -76,20 +76,22 @@ const PropertyDetail = () => {
         // Fallback to ID lookup
         query = query.eq('id', id);
       }
-      
-      const { data, error } = await query.single();
-
+      const {
+        data,
+        error
+      } = await query.single();
       if (error) {
         console.error('Erreur lors du chargement de la propriété:', error);
         return;
       }
-
       setProperty(data);
-      
+
       // If accessed by ID but property has a slug, redirect to slug URL
       if (id && !slug && data?.slug) {
         const currentParams = searchParams.toString();
-        navigate(`/properties/${data.slug}${currentParams ? `?${currentParams}` : ''}`, { replace: true });
+        navigate(`/properties/${data.slug}${currentParams ? `?${currentParams}` : ''}`, {
+          replace: true
+        });
       }
     } catch (err) {
       console.error('Erreur:', err);
@@ -97,34 +99,22 @@ const PropertyDetail = () => {
       setLoading(false);
     }
   };
-
   const formatPrice = (price?: number, currency?: string) => {
     if (!price) return 'Prix sur demande';
-    
-    const formatted = price >= 1000000 
-      ? `${(price / 1000000).toFixed(1)}M` 
-      : price >= 1000 
-      ? `${(price / 1000).toFixed(0)}K` 
-      : price.toLocaleString();
-    
+    const formatted = price >= 1000000 ? `${(price / 1000000).toFixed(1)}M` : price >= 1000 ? `${(price / 1000).toFixed(0)}K` : price.toLocaleString();
     return `${formatted} ${currency || 'EUR'}`;
   };
-
   const getDisplayReference = () => {
     if (!property?.external_id) return null;
     if (property.external_id.startsWith('datocms-')) return null;
     return property.external_id;
   };
-
   const displayReference = getDisplayReference();
-
   if (loading) {
     return <LoadingScreen />;
   }
-
   if (!property) {
-    return (
-      <div className="flex flex-col min-h-screen">
+    return <div className="flex flex-col min-h-screen">
         <div className="fixed top-0 left-0 right-0 z-50">
           <Navbar />
           <SubNavigation />
@@ -138,12 +128,9 @@ const PropertyDetail = () => {
             </Button>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="flex flex-col min-h-screen">
+  return <div className="flex flex-col min-h-screen">
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navbar />
         <SubNavigation />
@@ -151,35 +138,18 @@ const PropertyDetail = () => {
       
       {/* Hero Section - Image Only */}
       <div className="relative h-[70vh] overflow-hidden">
-        {property.main_image ? (
-          <img
-            src={property.main_image}
-            alt={property.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-loro-sand/30 to-loro-pearl/50 flex items-center justify-center">
+        {property.main_image ? <img src={property.main_image} alt={property.title} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gradient-to-br from-loro-sand/30 to-loro-pearl/50 flex items-center justify-center">
             <Home className="h-32 w-32 text-loro-navy/30" />
-          </div>
-        )}
+          </div>}
         
         {/* Simple overlay for image enhancement */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent">
           <div className={`absolute bottom-0 right-0 p-6 ${isMobile ? 'px-4' : 'px-[35px]'}`}>
             <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="icon"
-                className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy"
-                onClick={() => navigate(-1)}
-              >
+              <Button variant="outline" size="icon" className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy" onClick={() => navigate(-1)}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy"
-              >
+              <Button variant="outline" size="icon" className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy">
                 <Heart className="h-4 w-4" />
               </Button>
             </div>
@@ -206,12 +176,10 @@ const PropertyDetail = () => {
             <h1 className="font-luxury text-[36px] leading-[40px] font-bold text-loro-navy mb-2">
               {property.title}
             </h1>
-            {displayReference && (
-              <div className="flex items-center gap-1 text-loro-navy/60 text-sm">
+            {displayReference && <div className="flex items-center gap-1 text-loro-navy/60 text-sm">
                 <Hash className="h-4 w-4" />
                 <span>Référence {displayReference}</span>
-              </div>
-            )}
+              </div>}
           </div>
           
           {/* Price and Property Info Section */}
@@ -242,23 +210,19 @@ const PropertyDetail = () => {
                 <span>{property.bathrooms || '2'}</span>
               </div>
               
-              {property.floors && (
-                <div className="flex items-center gap-2">
+              {property.floors && <div className="flex items-center gap-2">
                   <Layers className="h-5 w-5" />
                   <span>{property.floors}</span>
-                </div>
-              )}
+                </div>}
             </div>
           </div>
           
           {/* Description */}
-          {property.description && (
-            <div className="mb-8">
+          {property.description && <div className="mb-8">
               <div className="prose prose-gray max-w-none text-loro-navy/80 leading-relaxed">
                 {property.description}
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* Features and Amenities Badges Section */}
           <div className="mb-8">
@@ -268,168 +232,50 @@ const PropertyDetail = () => {
                 <h3 className="text-sm font-medium text-loro-navy/60 mb-2">Status</h3>
                 <span className="text-loro-navy font-medium">Buy</span>
               </div>
-              {displayReference && (
-                <div>
+              {displayReference && <div>
                   <h3 className="text-sm font-medium text-loro-navy/60 mb-2">Reference</h3>
                   <span className="text-loro-navy font-medium">{displayReference}</span>
-                </div>
-              )}
+                </div>}
             </div>
 
             {/* Features Tags */}
-            {property.features && property.features.length > 0 && (
-              <div className="mb-6">
+            {property.features && property.features.length > 0 && <div className="mb-6">
                 <div className="flex flex-wrap gap-2">
-                  {property.features.map((feature, index) => (
-                    <Badge 
-                      key={index} 
-                      variant="secondary" 
-                      className="bg-loro-pearl/50 text-loro-navy border-0 text-xs px-3 py-1"
-                    >
+                  {property.features.map((feature, index) => <Badge key={index} variant="secondary" className="bg-loro-pearl/50 text-loro-navy border-0 text-xs px-3 py-1">
                       {feature}
-                    </Badge>
-                  ))}
+                    </Badge>)}
                 </div>
-              </div>
-            )}
+              </div>}
 
             {/* Amenities Tags */}
-            {property.amenities && property.amenities.length > 0 && (
-              <div className="mb-6">
+            {property.amenities && property.amenities.length > 0 && <div className="mb-6">
                 <div className="flex flex-wrap gap-2">
-                  {property.amenities.map((amenity, index) => (
-                    <Badge 
-                      key={index} 
-                      variant="outline" 
-                      className="border-loro-sand text-loro-navy text-xs px-3 py-1"
-                    >
+                  {property.amenities.map((amenity, index) => <Badge key={index} variant="outline" className="border-loro-sand text-loro-navy text-xs px-3 py-1">
                       {amenity}
-                    </Badge>
-                  ))}
+                    </Badge>)}
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
 
           {/* Gallery Section */}
           <div className="mb-12">
-            <PropertyGallery
-              title={property.title}
-              images={property.images || []}
-              mainImage={property.main_image}
-            />
+            <PropertyGallery title={property.title} images={property.images || []} mainImage={property.main_image} />
           </div>
 
           {/* Video Section */}
-          {property.video_urls && property.video_urls.length > 0 && (
-            <div className="mb-12">
+          {property.video_urls && property.video_urls.length > 0 && <div className="mb-12">
               <h2 className="text-xl font-semibold text-loro-navy mb-6 flex items-center gap-2">
                 <Play className="h-5 w-5" />
                 Vidéos de la propriété
               </h2>
               <div className="space-y-4">
-                {property.video_urls.map((url, index) => (
-                  <YouTubePlayer
-                    key={index}
-                    url={url}
-                    title={`${property.title} - Vidéo ${index + 1}`}
-                    className="w-full"
-                  />
-                ))}
+                {property.video_urls.map((url, index) => <YouTubePlayer key={index} url={url} title={`${property.title} - Vidéo ${index + 1}`} className="w-full" />)}
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* Detailed Characteristics Section */}
           <Card className="mb-8">
-            <CardContent className="p-8">
-              <h2 className="text-xl font-semibold text-loro-navy mb-6">Caractéristiques détaillées</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {/* Surface habitable */}
-                <div className="text-center p-4 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
-                  <Maximize2 className="h-8 w-8 text-loro-navy mx-auto mb-3 transition-transform duration-300 group-hover:scale-110" />
-                  <div className="text-sm text-loro-navy/60 mb-1">Surface</div>
-                  <div className="font-semibold text-loro-navy">
-                    {property.area ? `${property.area} ${property.area_unit || 'm²'}` : 'N/A'}
-                  </div>
-                </div>
-                
-                {/* Terrain (si disponible) */}
-                {property.land_area && (
-                  <div className="text-center p-4 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
-                    <Trees className="h-8 w-8 text-loro-navy mx-auto mb-3 transition-transform duration-300 group-hover:scale-110" />
-                    <div className="text-sm text-loro-navy/60 mb-1">Terrain</div>
-                    <div className="font-semibold text-loro-navy">
-                      {property.land_area} {property.land_area_unit || 'm²'}
-                    </div>
-                  </div>
-                )}
-                
-                <div className="text-center p-4 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
-                  <Bed className="h-8 w-8 text-loro-navy mx-auto mb-3 transition-transform duration-300 group-hover:scale-110" />
-                  <div className="text-sm text-loro-navy/60 mb-1">Chambres</div>
-                  <div className="font-semibold text-loro-navy">
-                    {property.bedrooms || 'N/A'}
-                  </div>
-                </div>
-                
-                <div className="text-center p-4 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
-                  <Bath className="h-8 w-8 text-loro-navy mx-auto mb-3 transition-transform duration-300 group-hover:scale-110" />
-                  <div className="text-sm text-loro-navy/60 mb-1">Salles de bain</div>
-                  <div className="font-semibold text-loro-navy">
-                    {property.bathrooms || 'N/A'}
-                  </div>
-                </div>
-
-                {/* Nombre d'étages */}
-                {property.floors && (
-                  <div className="text-center p-4 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
-                    <Layers className="h-8 w-8 text-loro-navy mx-auto mb-3 transition-transform duration-300 group-hover:scale-110" />
-                    <div className="text-sm text-loro-navy/60 mb-1">Étages</div>
-                    <div className="font-semibold text-loro-navy">
-                      {property.floors}
-                    </div>
-                  </div>
-                )}
-
-                {/* Année de construction */}
-                {property.construction_year && (
-                  <div className="text-center p-4 bg-loro-pearl/30 rounded-lg transition-all duration-300 hover:bg-loro-sand/40 hover:shadow-md hover:-translate-y-1 cursor-pointer group">
-                    <Calendar className="h-8 w-8 text-loro-navy mx-auto mb-3 transition-transform duration-300 group-hover:scale-110" />
-                    <div className="text-sm text-loro-navy/60 mb-1">Construction</div>
-                    <div className="font-semibold text-loro-navy">
-                      {property.construction_year}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Informations supplémentaires */}
-              {(property.rooms || property.parking_spaces || property.energy_class) && (
-                <div className="mt-6 pt-6 border-t border-loro-pearl/50">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {property.rooms && (
-                      <div className="flex justify-between items-center p-3 bg-loro-pearl/20 rounded">
-                        <span className="text-loro-navy/60">Nombre de pièces</span>
-                        <span className="font-medium text-loro-navy">{property.rooms}</span>
-                      </div>
-                    )}
-                    {property.parking_spaces && (
-                      <div className="flex justify-between items-center p-3 bg-loro-pearl/20 rounded">
-                        <span className="text-loro-navy/60">Places de parking</span>
-                        <span className="font-medium text-loro-navy">{property.parking_spaces}</span>
-                      </div>
-                    )}
-                    {property.energy_class && (
-                      <div className="flex justify-between items-center p-3 bg-loro-pearl/20 rounded">
-                        <span className="text-loro-navy/60">Classe énergétique</span>
-                        <span className="font-medium text-loro-navy">{property.energy_class}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </CardContent>
+            
           </Card>
 
           {/* Location Map Section - Placeholder */}
@@ -457,10 +303,7 @@ const PropertyDetail = () => {
                 For more information about this property, feel free to reach out to our expert team and we'll get in touch.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-                <Button
-                  className="bg-loro-sand hover:bg-loro-hazel text-loro-navy flex-1"
-                  onClick={() => window.open(property.url, '_blank')}
-                >
+                <Button className="bg-loro-sand hover:bg-loro-hazel text-loro-navy flex-1" onClick={() => window.open(property.url, '_blank')}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Learn more
                 </Button>
@@ -482,8 +325,6 @@ const PropertyDetail = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default PropertyDetail;
