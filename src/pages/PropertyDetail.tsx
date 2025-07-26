@@ -172,7 +172,7 @@ const PropertyDetail = () => {
       <div className={`bg-white min-h-screen ${isMobile ? 'px-4' : 'px-[35px]'}`}>
         <div className="max-w-7xl mx-auto py-8">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-loro-navy/70 text-sm mb-6">
+          <div className="flex items-center gap-2 text-black/60 text-sm mb-6">
             <Home className="h-4 w-4" />
             <span>/</span>
             <span>Buy</span>
