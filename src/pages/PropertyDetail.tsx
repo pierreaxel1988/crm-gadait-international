@@ -7,6 +7,7 @@ import SubNavigation from '@/components/layout/SubNavigation';
 import PropertyGallery from '@/components/property/PropertyGallery';
 import PropertyMap from '@/components/property/PropertyMap';
 import YouTubePlayer from '@/components/property/YouTubePlayer';
+import SimilarProperties from '@/components/property/SimilarProperties';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -424,13 +425,22 @@ const PropertyDetail = () => {
             </CardContent>
           </Card>
 
-          {/* You might also like section - Placeholder */}
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-semibold text-loro-navy mb-4">
-              You might also like...
-            </h2>
-            <div className="w-12 h-0.5 bg-loro-navy mx-auto mb-8"></div>
-            <p className="text-loro-navy/60">Similar properties will be displayed here</p>
+          {/* You might also like section */}
+          <div className="py-12">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-semibold text-loro-navy mb-4">
+                You might also like...
+              </h2>
+              <div className="w-12 h-0.5 bg-loro-navy mx-auto"></div>
+            </div>
+            
+            <SimilarProperties
+              currentPropertyId={property.id}
+              currentPropertyCountry={property.country}
+              currentPropertyType={property.property_type}
+              currentPropertyPrice={property.price}
+              limit={3}
+            />
           </div>
         </div>
       </div>
