@@ -10,7 +10,7 @@ import YouTubePlayer from '@/components/property/YouTubePlayer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, Phone, Mail, Trees, Calendar, Layers, Play, Heart, Expand } from 'lucide-react';
+import { ArrowLeft, ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, Phone, Mail, Trees, Calendar, Layers, Play, Heart, Expand, ChevronLeft, ChevronRight } from 'lucide-react';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 interface PropertyDetail {
   id: string;
@@ -59,6 +59,7 @@ const PropertyDetail = () => {
   const isMobile = useIsMobile();
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Récupérer les paramètres de retour
   const returnTo = searchParams.get('returnTo');
@@ -140,24 +141,100 @@ const PropertyDetail = () => {
         <SubNavigation />
       </div>
       
-      {/* Hero Section - Image Only */}
+      {/* Hero Section - Image Carousel */}
       <div className="relative h-[70vh] overflow-hidden">
-        {property.main_image ? <img src={property.main_image} alt={property.title} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gradient-to-br from-loro-sand/30 to-loro-pearl/50 flex items-center justify-center">
-            <Home className="h-32 w-32 text-loro-navy/30" />
-          </div>}
+        {(() => {
+          const allImages = [
+            ...(property.main_image ? [property.main_image] : []),
+            ...(property.images || [])
+          ].filter((img, index, array) => array.indexOf(img) === index); // Remove duplicates
+
+          const currentImage = allImages[currentImageIndex] || property.main_image;
+
+          const nextImage = () => {
+            setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+          };
+
+          const prevImage = () => {
+            setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+          };
+
+          return (
+            <>
+              {currentImage ? (
+                <img 
+                  src={currentImage} 
+                  alt={property.title} 
+                  className="w-full h-full object-cover transition-opacity duration-300" 
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-loro-sand/30 to-loro-pearl/50 flex items-center justify-center">
+                  <Home className="h-32 w-32 text-loro-navy/30" />
+                </div>
+              )}
+
+              {/* Navigation arrows - only show if there are multiple images */}
+              {allImages.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white p-3 rounded-full transition-all duration-200 hover:scale-105"
+                  >
+                    <ChevronLeft className="h-6 w-6" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white p-3 rounded-full transition-all duration-200 hover:scale-105"
+                  >
+                    <ChevronRight className="h-6 w-6" />
+                  </button>
+                </>
+              )}
+
+              {/* Image counter */}
+              {allImages.length > 1 && (
+                <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                  {currentImageIndex + 1} / {allImages.length}
+                </div>
+              )}
+
+              {/* Dots indicator */}
+              {allImages.length > 1 && (
+                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-2">
+                  {allImages.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                        index === currentImageIndex 
+                          ? 'bg-white scale-125' 
+                          : 'bg-white/50 hover:bg-white/70'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          );
+        })()}
         
-        {/* Simple overlay for image enhancement */}
+        {/* Overlay with action buttons */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent">
           <div className={`absolute bottom-0 right-0 p-6 ${isMobile ? 'px-4' : 'px-[35px]'}`}>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="icon" className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy" onClick={() => {
-                console.log('Back button clicked');
-                if (returnTo) {
-                  navigate(returnTo);
-                } else {
-                  navigate('/properties');
-                }
-              }}>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy" 
+                onClick={() => {
+                  console.log('Back button clicked');
+                  if (returnTo) {
+                    navigate(returnTo);
+                  } else {
+                    navigate('/properties');
+                  }
+                }}
+              >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <Button variant="outline" size="icon" className="bg-white/20 border-white/30 text-white hover:bg-white hover:text-loro-navy">
