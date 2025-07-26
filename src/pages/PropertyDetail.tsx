@@ -114,6 +114,26 @@ const PropertyDetail = () => {
     if (property.external_id.startsWith('datocms-')) return null;
     return property.external_id;
   };
+
+  // Navigation functions for image carousel
+  const nextImage = () => {
+    if (!property) return;
+    const allImages = [
+      ...(property.main_image ? [property.main_image] : []),
+      ...(property.images || [])
+    ].filter((img, index, array) => array.indexOf(img) === index);
+    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+  };
+
+  const prevImage = () => {
+    if (!property) return;
+    const allImages = [
+      ...(property.main_image ? [property.main_image] : []),
+      ...(property.images || [])
+    ].filter((img, index, array) => array.indexOf(img) === index);
+    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  };
+
   const displayReference = getDisplayReference();
   if (loading) {
     return <LoadingScreen />;
@@ -150,14 +170,6 @@ const PropertyDetail = () => {
           ].filter((img, index, array) => array.indexOf(img) === index); // Remove duplicates
 
           const currentImage = allImages[currentImageIndex] || property.main_image;
-
-          const nextImage = () => {
-            setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
-          };
-
-          const prevImage = () => {
-            setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
-          };
 
           return (
             <>
