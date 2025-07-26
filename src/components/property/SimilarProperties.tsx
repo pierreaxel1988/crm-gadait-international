@@ -106,15 +106,21 @@ const SimilarProperties: React.FC<SimilarPropertiesProps> = ({
         }
       }
 
-      // Filter out properties without images for better visual result
-      const propertiesWithImages = similarProperties.filter(prop => 
-        prop.main_image || (prop.images && prop.images.length > 0)
-      );
+      // Filter out properties without essential data (images, title, location, price)
+      const completeProperties = similarProperties.filter(prop => {
+        const hasImage = prop.main_image || (prop.images && prop.images.length > 0);
+        const hasEssentialData = prop.title && prop.title.trim() !== '' && 
+                                prop.location && prop.location.trim() !== '' &&
+                                prop.price && prop.price > 0;
+        const hasValidReference = !prop.external_id || 
+                                 (!prop.external_id.startsWith('datocms-') && 
+                                  !(prop.external_id.includes('-') && prop.external_id.length > 10));
+        
+        return hasImage && hasEssentialData && hasValidReference;
+      });
       
-      // If we have enough properties with images, use them; otherwise use all
-      const finalProperties = propertiesWithImages.length >= Math.min(limit, 2) 
-        ? propertiesWithImages.slice(0, limit)
-        : similarProperties.slice(0, limit);
+      // Use only complete properties
+      const finalProperties = completeProperties.slice(0, limit);
         
       setProperties(finalProperties);
     } catch (error) {
