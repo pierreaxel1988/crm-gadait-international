@@ -62,6 +62,10 @@ const PropertyDetail = () => {
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageTransitioning, setIsImageTransitioning] = useState(false);
+  const [showThumbnails, setShowThumbnails] = useState(false);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   // Récupérer les paramètres de retour
   const returnTo = searchParams.get('returnTo');
@@ -71,6 +75,48 @@ const PropertyDetail = () => {
       fetchPropertyDetail();
     }
   }, [id, slug]);
+
+  // Navigation au clavier pour les images
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (!property) return;
+      
+      const allImages = [
+        ...(property.main_image ? [property.main_image] : []),
+        ...(property.images || [])
+      ].filter((img, index, array) => array.indexOf(img) === index);
+      
+      if (allImages.length <= 1) return;
+      
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevImage();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextImage();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [property, currentImageIndex]);
+
+  // Auto-play optionnel (commenté par défaut)
+  // useEffect(() => {
+  //   if (!property) return;
+  //   const allImages = [
+  //     ...(property.main_image ? [property.main_image] : []),
+  //     ...(property.images || [])
+  //   ].filter((img, index, array) => array.indexOf(img) === index);
+  //   
+  //   if (allImages.length <= 1) return;
+  //   
+  //   const interval = setInterval(() => {
+  //     nextImage();
+  //   }, 5000); // Change d'image toutes les 5 secondes
+  //   
+  //   return () => clearInterval(interval);
+  // }, [property, currentImageIndex]);
   const fetchPropertyDetail = async () => {
     if (!slug && !id) return;
     try {
@@ -117,35 +163,65 @@ const PropertyDetail = () => {
     return property.external_id;
   };
 
-  // Navigation functions for image carousel
+  // Navigation functions for image carousel avec transitions améliorées
   const nextImage = () => {
-    console.log('Next image clicked', currentImageIndex);
-    if (!property) return;
+    if (!property || isImageTransitioning) return;
+    
+    setIsImageTransitioning(true);
+    
     const allImages = [
       ...(property.main_image ? [property.main_image] : []),
       ...(property.images || [])
     ].filter((img, index, array) => array.indexOf(img) === index);
-    console.log('All images:', allImages.length);
+    
     setCurrentImageIndex((prev) => {
       const newIndex = (prev + 1) % allImages.length;
-      console.log('Setting index from', prev, 'to', newIndex);
       return newIndex;
     });
+    
+    setTimeout(() => setIsImageTransitioning(false), 300);
   };
 
   const prevImage = () => {
-    console.log('Previous image clicked', currentImageIndex);
-    if (!property) return;
+    if (!property || isImageTransitioning) return;
+    
+    setIsImageTransitioning(true);
+    
     const allImages = [
       ...(property.main_image ? [property.main_image] : []),
       ...(property.images || [])
     ].filter((img, index, array) => array.indexOf(img) === index);
-    console.log('All images:', allImages.length);
+    
     setCurrentImageIndex((prev) => {
       const newIndex = (prev - 1 + allImages.length) % allImages.length;
-      console.log('Setting index from', prev, 'to', newIndex);
       return newIndex;
     });
+    
+    setTimeout(() => setIsImageTransitioning(false), 300);
+  };
+
+  // Gestion des gestes tactiles pour la navigation des images
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(0); // Reset touchEnd
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      nextImage();
+    } else if (isRightSwipe) {
+      prevImage();
+    }
   };
 
   const displayReference = getDisplayReference();
@@ -176,7 +252,12 @@ const PropertyDetail = () => {
       </div>
       
       {/* Hero Section - Image Carousel */}
-      <div className="relative h-[70vh] overflow-hidden">
+      <div 
+        className="relative h-[70vh] overflow-hidden"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {(() => {
           const allImages = [
             ...(property.main_image ? [property.main_image] : []),
@@ -191,7 +272,12 @@ const PropertyDetail = () => {
                 <img 
                   src={currentImage} 
                   alt={property.title} 
-                  className="w-full h-full object-cover transition-opacity duration-300" 
+                  className={`w-full h-full object-cover transition-all duration-500 ease-out ${
+                    isImageTransitioning ? 'scale-105 opacity-90' : 'scale-100 opacity-100'
+                  }`}
+                  style={{
+                    filter: isImageTransitioning ? 'blur(1px)' : 'blur(0px)'
+                  }}
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-loro-sand/30 to-loro-pearl/50 flex items-center justify-center">
