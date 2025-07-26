@@ -72,7 +72,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       return null;
     }
 
-    // Sinon, afficher la référence telle quelle (qu'elle soit numérique ou textuelle)
+    // Si c'est une référence technique longue (contient des tirets et est très longue), ne pas l'afficher
+    if (property.external_id.includes('-') && property.external_id.length > 10) {
+      return null;
+    }
+
+    // Sinon, afficher la référence telle quelle (qu'elle soit numérique ou textuelle courte)
     return property.external_id;
   };
 
