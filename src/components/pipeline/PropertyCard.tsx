@@ -361,7 +361,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           {displayReference && (
             <div className="flex items-center gap-1 text-xs text-loro-navy/70">
               <Hash className="h-3 w-3 flex-shrink-0" />
-              <span className="font-futura text-sm"># Réf. {displayReference}</span>
+              <span className="font-futura text-sm">Réf. {displayReference}</span>
             </div>
           )}
         </div>
