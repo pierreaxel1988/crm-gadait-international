@@ -53,7 +53,8 @@ const SimilarProperties: React.FC<SimilarPropertiesProps> = ({
         .select('id, title, price, currency, location, country, property_type, bedrooms, bathrooms, area, area_unit, main_image, images, url, is_featured, external_id, slug')
         .neq('id', currentPropertyId)
         .eq('is_available', true)
-        .limit(limit);
+        .not('main_image', 'is', null)  // Prioritize properties with main_image
+        .limit(limit * 2); // Get more to have better selection
 
       // First try to find properties in the same country
       if (currentPropertyCountry) {
@@ -79,8 +80,9 @@ const SimilarProperties: React.FC<SimilarPropertiesProps> = ({
           .select('id, title, price, currency, location, country, property_type, bedrooms, bathrooms, area, area_unit, main_image, images, url, is_featured, external_id, slug')
           .eq('property_type', currentPropertyType)
           .eq('is_available', true)
+          .not('main_image', 'is', null)  // Prioritize properties with images
           .not('id', 'in', `(${excludeIds.join(',')})`)
-          .limit(remainingLimit);
+          .limit(remainingLimit * 2);
 
         if (typeProperties) {
           similarProperties = [...similarProperties, ...typeProperties];
@@ -97,14 +99,24 @@ const SimilarProperties: React.FC<SimilarPropertiesProps> = ({
           .select('id, title, price, currency, location, country, property_type, bedrooms, bathrooms, area, area_unit, main_image, images, url, is_featured, external_id, slug')
           .eq('is_available', true)
           .not('id', 'in', `(${excludeIds.join(',')})`)
-          .limit(remainingLimit);
+          .limit(remainingLimit * 2);
 
         if (anyProperties) {
           similarProperties = [...similarProperties, ...anyProperties];
         }
       }
 
-      setProperties(similarProperties);
+      // Filter out properties without images for better visual result
+      const propertiesWithImages = similarProperties.filter(prop => 
+        prop.main_image || (prop.images && prop.images.length > 0)
+      );
+      
+      // If we have enough properties with images, use them; otherwise use all
+      const finalProperties = propertiesWithImages.length >= Math.min(limit, 2) 
+        ? propertiesWithImages.slice(0, limit)
+        : similarProperties.slice(0, limit);
+        
+      setProperties(finalProperties);
     } catch (error) {
       console.error('Error fetching similar properties:', error);
     } finally {
