@@ -15,6 +15,7 @@ import LoadingScreen from '@/components/layout/LoadingScreen';
 interface PropertyDetail {
   id: string;
   external_id?: string;
+  slug?: string;
   title: string;
   description?: string;
   price?: number;
@@ -398,7 +399,20 @@ const PropertyDetail = () => {
                 For more information about this property, feel free to reach out to our expert team and we'll get in touch.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-                <Button className="bg-loro-sand hover:bg-loro-hazel text-loro-navy flex-1" onClick={() => window.open(property.url, '_blank')}>
+                <Button className="bg-loro-sand hover:bg-loro-hazel text-loro-navy flex-1" onClick={() => {
+                  // Construire l'URL correcte vers gadait-international.com avec le slug
+                  let targetUrl = 'https://gadait-international.com';
+                  
+                  // Si on a un slug, construire l'URL spécifique de la propriété directement avec le slug
+                  if (property.slug && property.slug.trim() !== '') {
+                    targetUrl = `https://gadait-international.com/en/${property.slug}`;
+                  } else if (property.url && property.url.includes('gadait-international.com')) {
+                    // Utiliser l'URL existante si elle pointe déjà vers gadait-international.com
+                    targetUrl = property.url;
+                  }
+                  
+                  window.open(targetUrl, '_blank');
+                }}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Learn more
                 </Button>
