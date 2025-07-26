@@ -117,21 +117,33 @@ const PropertyDetail = () => {
 
   // Navigation functions for image carousel
   const nextImage = () => {
+    console.log('Next image clicked', currentImageIndex);
     if (!property) return;
     const allImages = [
       ...(property.main_image ? [property.main_image] : []),
       ...(property.images || [])
     ].filter((img, index, array) => array.indexOf(img) === index);
-    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+    console.log('All images:', allImages.length);
+    setCurrentImageIndex((prev) => {
+      const newIndex = (prev + 1) % allImages.length;
+      console.log('Setting index from', prev, 'to', newIndex);
+      return newIndex;
+    });
   };
 
   const prevImage = () => {
+    console.log('Previous image clicked', currentImageIndex);
     if (!property) return;
     const allImages = [
       ...(property.main_image ? [property.main_image] : []),
       ...(property.images || [])
     ].filter((img, index, array) => array.indexOf(img) === index);
-    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+    console.log('All images:', allImages.length);
+    setCurrentImageIndex((prev) => {
+      const newIndex = (prev - 1 + allImages.length) % allImages.length;
+      console.log('Setting index from', prev, 'to', newIndex);
+      return newIndex;
+    });
   };
 
   const displayReference = getDisplayReference();
