@@ -27,6 +27,7 @@ interface SimilarPropertiesProps {
   currentPropertyCountry?: string;
   currentPropertyType?: string;
   currentPropertyPrice?: number;
+  currentPropertyLocation?: string;
   limit?: number;
 }
 
@@ -35,6 +36,7 @@ const SimilarProperties: React.FC<SimilarPropertiesProps> = ({
   currentPropertyCountry,
   currentPropertyType,
   currentPropertyPrice,
+  currentPropertyLocation,
   limit = 3
 }) => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -48,65 +50,109 @@ const SimilarProperties: React.FC<SimilarPropertiesProps> = ({
     try {
       setLoading(true);
       
+      // Fonction pour déterminer la région de Maurice basée sur la localisation
+      const getMauritiusRegion = (location: string) => {
+        const locationLower = location.toLowerCase();
+        
+        // Région Nord
+        if (locationLower.includes('grand baie') || locationLower.includes('pereybere') || 
+            locationLower.includes('cap malheureux') || locationLower.includes('grand bay') ||
+            locationLower.includes('petit raffray') || locationLower.includes('mont mascal') ||
+            locationLower.includes('pointe aux piments') || locationLower.includes('trou aux biches')) {
+          return 'nord';
+        }
+        
+        // Région Est
+        if (locationLower.includes('belle mare') || locationLower.includes('palmar') || 
+            locationLower.includes('trou d\'eau douce') || locationLower.includes('flacq') ||
+            locationLower.includes('quatre cocos') || locationLower.includes('roches noires')) {
+          return 'est';
+        }
+        
+        // Région Sud
+        if (locationLower.includes('bel ombre') || locationLower.includes('le morne') || 
+            locationLower.includes('chamarel') || locationLower.includes('baie du cap') ||
+            locationLower.includes('souillac') || locationLower.includes('st felix')) {
+          return 'sud';
+        }
+        
+        // Région Ouest
+        if (locationLower.includes('rivière noire') || locationLower.includes('tamarin') || 
+            locationLower.includes('wolmar') || locationLower.includes('flic en flac') ||
+            locationLower.includes('albion') || locationLower.includes('mont choisy')) {
+          return 'ouest';
+        }
+        
+        // Région Centre (Port Louis et alentours)
+        if (locationLower.includes('port louis') || locationLower.includes('beau bassin') || 
+            locationLower.includes('rose hill') || locationLower.includes('quatre bornes') ||
+            locationLower.includes('vacoas') || locationLower.includes('phoenix')) {
+          return 'centre';
+        }
+        
+        return 'unknown';
+      };
+
+      const currentRegion = currentPropertyCountry === 'Mauritius' && currentPropertyLocation 
+        ? getMauritiusRegion(currentPropertyLocation) 
+        : null;
+
       let query = supabase
         .from('gadait_properties')
         .select('id, title, price, currency, location, country, property_type, bedrooms, bathrooms, area, area_unit, main_image, images, url, is_featured, external_id, slug')
         .neq('id', currentPropertyId)
         .eq('is_available', true)
-        .not('main_image', 'is', null)  // Prioritize properties with main_image
-        .limit(limit * 2); // Get more to have better selection
+        .not('main_image', 'is', null)
+        .limit(limit * 3); // Augmenter pour avoir plus de choix
 
-      // First try to find properties in the same country
-      if (currentPropertyCountry) {
+      // Si c'est Maurice et qu'on a identifié une région, prioriser cette région
+      if (currentPropertyCountry === 'Mauritius' && currentRegion && currentRegion !== 'unknown') {
+        query = query.eq('country', 'Mauritius');
+      } else if (currentPropertyCountry) {
         query = query.eq('country', currentPropertyCountry);
       }
 
-      const { data: countryProperties, error: countryError } = await query;
+      const { data: allProperties, error } = await query;
       
-      if (countryError) {
-        console.error('Error fetching similar properties:', countryError);
+      if (error) {
+        console.error('Error fetching similar properties:', error);
         return;
       }
 
-      let similarProperties = countryProperties || [];
+      let similarProperties = allProperties || [];
 
-      // If we don't have enough properties from the same country, add some from the same type
-      if (similarProperties.length < limit && currentPropertyType) {
-        const remainingLimit = limit - similarProperties.length;
-        const excludeIds = similarProperties.map(p => p.id).concat([currentPropertyId]);
-        
-        const { data: typeProperties } = await supabase
-          .from('gadait_properties')
-          .select('id, title, price, currency, location, country, property_type, bedrooms, bathrooms, area, area_unit, main_image, images, url, is_featured, external_id, slug')
-          .eq('property_type', currentPropertyType)
-          .eq('is_available', true)
-          .not('main_image', 'is', null)  // Prioritize properties with images
-          .not('id', 'in', `(${excludeIds.join(',')})`)
-          .limit(remainingLimit * 2);
-
-        if (typeProperties) {
-          similarProperties = [...similarProperties, ...typeProperties];
-        }
+      // Si c'est Maurice, trier par région pour prioriser la même région
+      if (currentPropertyCountry === 'Mauritius' && currentRegion && currentRegion !== 'unknown') {
+        similarProperties = similarProperties.sort((a, b) => {
+          const regionA = getMauritiusRegion(a.location || '');
+          const regionB = getMauritiusRegion(b.location || '');
+          
+          // Prioriser la même région
+          if (regionA === currentRegion && regionB !== currentRegion) return -1;
+          if (regionB === currentRegion && regionA !== currentRegion) return 1;
+          
+          // Puis par type de propriété si c'est la même région
+          if (regionA === currentRegion && regionB === currentRegion) {
+            if (currentPropertyType) {
+              if (a.property_type === currentPropertyType && b.property_type !== currentPropertyType) return -1;
+              if (b.property_type === currentPropertyType && a.property_type !== currentPropertyType) return 1;
+            }
+          }
+          
+          return 0;
+        });
+      } else {
+        // Logique de tri existante pour les autres pays
+        similarProperties = similarProperties.sort((a, b) => {
+          if (currentPropertyType) {
+            if (a.property_type === currentPropertyType && b.property_type !== currentPropertyType) return -1;
+            if (b.property_type === currentPropertyType && a.property_type !== currentPropertyType) return 1;
+          }
+          return 0;
+        });
       }
 
-      // If still not enough, fill with any available properties
-      if (similarProperties.length < limit) {
-        const remainingLimit = limit - similarProperties.length;
-        const excludeIds = similarProperties.map(p => p.id).concat([currentPropertyId]);
-        
-        const { data: anyProperties } = await supabase
-          .from('gadait_properties')
-          .select('id, title, price, currency, location, country, property_type, bedrooms, bathrooms, area, area_unit, main_image, images, url, is_featured, external_id, slug')
-          .eq('is_available', true)
-          .not('id', 'in', `(${excludeIds.join(',')})`)
-          .limit(remainingLimit * 2);
-
-        if (anyProperties) {
-          similarProperties = [...similarProperties, ...anyProperties];
-        }
-      }
-
-      // Filter out properties without essential data (images, title, location, price)
+      // Filter out properties without essential data
       const completeProperties = similarProperties.filter(prop => {
         const hasImage = prop.main_image || (prop.images && prop.images.length > 0);
         const hasEssentialData = prop.title && prop.title.trim() !== '' && 
