@@ -229,7 +229,25 @@ const SourceAnalytics = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
+              {/* Légende personnalisée à gauche */}
+              <div className="space-y-2 lg:order-1">
+                {sourceData.map((entry, index) => (
+                  <div key={entry.source} className="flex items-center gap-3">
+                    <div 
+                      className="w-4 h-4 rounded"
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">{entry.source}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {entry.count} leads ({entry.percentage}%)
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="lg:col-span-2 lg:order-2">
                 <ResponsiveContainer width="100%" height={400}>
                   <PieChart>
                     <Pie
@@ -248,24 +266,6 @@ const SourceAnalytics = () => {
                     <Tooltip formatter={(value, name) => [`${value} leads`, name]} />
                   </PieChart>
                 </ResponsiveContainer>
-              </div>
-              
-              {/* Légende personnalisée */}
-              <div className="space-y-2">
-                {sourceData.map((entry, index) => (
-                  <div key={entry.source} className="flex items-center gap-3">
-                    <div 
-                      className="w-4 h-4 rounded"
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                    />
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">{entry.source}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {entry.count} leads ({entry.percentage}%)
-                      </div>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           </CardContent>
