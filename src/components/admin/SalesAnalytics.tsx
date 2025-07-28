@@ -14,11 +14,9 @@ interface SalesPersonData {
   name: string;
   email: string;
   assigned_leads: number;
-  emails_sent: number;
-  ai_conversations: number;
   conversion_rate: number;
   leads_by_status: { [key: string]: number };
-  // Nouvelles métriques de session
+  // Métriques de session
   total_connection_time: number; // en minutes
   avg_session_duration: number; // en minutes
   total_sessions: number;
@@ -93,27 +91,6 @@ const SalesAnalytics = () => {
 
           if (leadsError) throw leadsError;
 
-          // Emails envoyés
-          const { data: emails, error: emailsError } = await supabase
-            .from('lead_emails')
-            .select('id')
-            .eq('user_id', member.id)
-            .eq('is_sent', true)
-            .gte('created_at', startDate + 'T00:00:00')
-            .lte('created_at', endDate + 'T23:59:59');
-
-          if (emailsError) throw emailsError;
-
-          // Conversations IA
-          const { data: conversations, error: conversationsError } = await supabase
-            .from('lead_ai_conversations')
-            .select('id')
-            .eq('user_id', member.id)
-            .gte('created_at', startDate + 'T00:00:00')
-            .lte('created_at', endDate + 'T23:59:59');
-
-          if (conversationsError) throw conversationsError;
-
           // Récupérer les statistiques de session pour ce commercial
           const sessionStats = await sessionTracker.getUserSessionStats(
             member.id,
@@ -140,11 +117,8 @@ const SalesAnalytics = () => {
             name: member.name,
             email: member.email,
             assigned_leads: totalLeads,
-            emails_sent: emails?.length || 0,
-            ai_conversations: conversations?.length || 0,
             conversion_rate: conversionRate,
             leads_by_status: leadsByStatus,
-            // Nouvelles métriques de session
             total_connection_time: sessionStats.totalMinutes,
             avg_session_duration: sessionStats.avgSessionDuration,
             total_sessions: sessionStats.totalSessions,
@@ -229,13 +203,12 @@ const SalesAnalytics = () => {
 
   const exportToCSV = () => {
     const csvContent = [
-      ['Commercial', 'Email', 'Leads assignés', 'Emails envoyés', 'Conversations IA', 'Taux conversion (%)'],
+      ['Commercial', 'Email', 'Leads assignés', 'Temps connexion', 'Taux conversion (%)'],
       ...salesData.map(person => [
         person.name,
         person.email,
         person.assigned_leads,
-        person.emails_sent,
-        person.ai_conversations,
+        formatDuration(person.total_connection_time),
         person.conversion_rate
       ])
     ];
@@ -253,8 +226,6 @@ const SalesAnalytics = () => {
   };
 
   const totalLeads = salesData.reduce((sum, person) => sum + person.assigned_leads, 0);
-  const totalEmails = salesData.reduce((sum, person) => sum + person.emails_sent, 0);
-  const totalConversations = salesData.reduce((sum, person) => sum + person.ai_conversations, 0);
   const totalConnectionTime = salesData.reduce((sum, person) => sum + person.total_connection_time, 0);
   const avgConversionRate = salesData.length > 0 
     ? Math.round(salesData.reduce((sum, person) => sum + person.conversion_rate, 0) / salesData.length)
@@ -298,7 +269,7 @@ const SalesAnalytics = () => {
       </Card>
 
       {/* Métriques globales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -307,30 +278,6 @@ const SalesAnalytics = () => {
                 <p className="text-2xl font-bold text-primary">{totalLeads}</p>
               </div>
               <Target className="h-8 w-8 text-primary/60" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Emails envoyés</p>
-                <p className="text-2xl font-bold text-primary">{totalEmails}</p>
-              </div>
-              <Mail className="h-8 w-8 text-primary/60" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Conversations IA</p>
-                <p className="text-2xl font-bold text-primary">{totalConversations}</p>
-              </div>
-              <MessageCircle className="h-8 w-8 text-primary/60" />
             </div>
           </CardContent>
         </Card>
@@ -388,8 +335,7 @@ const SalesAnalytics = () => {
               <YAxis />
               <Tooltip />
               <Bar dataKey="assigned_leads" name="Leads assignés" fill={COLORS[0]} />
-              <Bar dataKey="emails_sent" name="Emails envoyés" fill={COLORS[1]} />
-              <Bar dataKey="ai_conversations" name="Conversations IA" fill={COLORS[2]} />
+              <Bar dataKey="total_connection_time" name="Temps connexion (min)" fill={COLORS[1]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -425,7 +371,7 @@ const SalesAnalytics = () => {
         {/* Activité sur 7 jours */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal">Activité des 7 derniers jours</CardTitle>
+            <CardTitle className="font-normal">Temps de connexion des 7 derniers jours</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -436,22 +382,8 @@ const SalesAnalytics = () => {
                 <Tooltip />
                 <Line 
                   type="monotone" 
-                  dataKey="emails" 
-                  stroke={COLORS[0]} 
-                  name="Emails"
-                  strokeWidth={2}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="conversations" 
-                  stroke={COLORS[1]} 
-                  name="Conversations IA"
-                  strokeWidth={2}
-                />
-                <Line 
-                  type="monotone" 
                   dataKey="leads_created" 
-                  stroke={COLORS[2]} 
+                  stroke={COLORS[0]} 
                   name="Leads créés"
                   strokeWidth={2}
                 />
@@ -473,8 +405,6 @@ const SalesAnalytics = () => {
                 <tr className="border-b">
                   <th className="text-left p-2">Commercial</th>
                   <th className="text-right p-2">Leads assignés</th>
-                  <th className="text-right p-2">Emails envoyés</th>
-                  <th className="text-right p-2">Conversations IA</th>
                   <th className="text-right p-2">Temps connexion</th>
                   <th className="text-right p-2">Sessions</th>
                   <th className="text-right p-2">Heures travail</th>
@@ -491,8 +421,6 @@ const SalesAnalytics = () => {
                       </div>
                     </td>
                     <td className="text-right p-2">{person.assigned_leads}</td>
-                    <td className="text-right p-2">{person.emails_sent}</td>
-                    <td className="text-right p-2">{person.ai_conversations}</td>
                     <td className="text-right p-2">
                       <div className="text-sm font-medium">
                         {formatDuration(person.total_connection_time)}
