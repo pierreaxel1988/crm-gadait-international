@@ -82,7 +82,20 @@ const SalesAnalytics = () => {
         .select('*')
         .eq('role', 'commercial');
 
-      if (teamError) throw teamError;
+      if (teamError) {
+        console.error('Erreur lors de la récupération des commerciaux:', teamError);
+        throw teamError;
+      }
+
+      console.log('Commerciaux trouvés:', teamMembers);
+      
+      if (!teamMembers || teamMembers.length === 0) {
+        console.warn('Aucun commercial trouvé dans la base de données');
+        setSalesData([]);
+        setStatusDistribution([]);
+        setActivityData([]);
+        return;
+      }
 
       // Récupérer les données pour chaque commercial
       const salesPersonsData = await Promise.all(
@@ -295,6 +308,60 @@ const SalesAnalytics = () => {
   const selectedPersonName = selectedSalesperson === 'all' 
     ? 'Tous les commerciaux' 
     : salesData.find(p => p.email === selectedSalesperson)?.name || 'Commercial sélectionné';
+
+  // Afficher un message si aucun commercial trouvé
+  if (!loading && salesData.length === 0) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 font-normal">
+              <Calendar className="h-5 w-5" />
+              Période d'analyse
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4 items-end">
+              <div className="flex-1">
+                <Label htmlFor="start-date">Date de début</Label>
+                <Input
+                  id="start-date"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="end-date">Date de fin</Label>
+                <Input
+                  id="end-date"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+              <Button onClick={fetchSalesAnalytics} disabled={loading}>
+                {loading ? 'Chargement...' : 'Actualiser'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Users className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">Aucun commercial trouvé</h3>
+            <p className="text-muted-foreground mb-4">
+              Il n'y a actuellement aucun commercial avec le rôle "commercial" dans votre équipe.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Vous devez d'abord ajouter des commerciaux dans la section "Gestion des utilisateurs" avec le rôle "commercial".
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
