@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChartDataForm from '@/components/admin/ChartDataForm';
 import DashboardCard from '@/components/dashboard/DashboardCard';
@@ -22,7 +22,13 @@ const initialChartData = [
 
 const Admin = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const activeTab = searchParams.get('tab') || 'chart-data';
+
+  const handleTabChange = (value: string) => {
+    navigate(`/admin?tab=${value}`);
+  };
+
   return (
     <div className="p-6 lg:p-10 space-y-8 max-w-[1920px] mx-auto bg-white min-h-screen">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -32,7 +38,7 @@ const Admin = () => {
         </div>
       </div>
 
-      <Tabs value={activeTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="mb-8">
           <TabsTrigger value="chart-data">Données du graphique</TabsTrigger>
           <TabsTrigger value="analytics">Analyse des sources</TabsTrigger>
