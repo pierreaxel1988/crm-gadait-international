@@ -228,9 +228,9 @@ const SourceAnalytics = () => {
             <CardTitle className="font-normal">Répartition en pourcentage</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <div className="flex flex-col lg:flex-row gap-6 items-start">
               {/* Légende personnalisée à gauche */}
-              <div className="space-y-2 lg:order-1">
+              <div className="space-y-2 lg:w-1/3">
                 {sourceData.map((entry, index) => (
                   <div key={entry.source} className="flex items-center gap-3">
                     <div 
@@ -247,14 +247,14 @@ const SourceAnalytics = () => {
                 ))}
               </div>
               
-              <div className="lg:col-span-2 lg:order-2">
-                <ResponsiveContainer width="100%" height={400}>
+              <div className="lg:w-2/3 h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={sourceData}
                       cx="50%"
                       cy="50%"
-                      outerRadius={120}
+                      outerRadius={100}
                       fill="#8884d8"
                       dataKey="count"
                       label={false}
