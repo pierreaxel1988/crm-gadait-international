@@ -308,13 +308,30 @@ const SalesAnalytics = () => {
       const conversionScore = person.conversion_rate;
       
       // Score composite pondéré amélioré
-      const activityScore = Math.round(
-        (avgProgressionScore * 30) + // 30% pour la progression des statuts
-        (actionsPerLead * 25) + // 25% pour les actions par lead
-        (connectionTimePerLead * 0.1) + // 10% pour le temps de connexion par lead
-        (conversionScore * 0.35) + // 35% pour le taux de conversion
-        (person.assigned_leads * 0.1) // Bonus pour le volume de leads traités
-      );
+      const progressionPoints = avgProgressionScore * 30;
+      const actionPoints = actionsPerLead * 25;
+      const connectionPoints = connectionTimePerLead * 0.1;
+      const conversionPoints = conversionScore * 0.35;
+      const volumeBonus = person.assigned_leads * 0.1;
+      
+      const activityScore = Math.round(progressionPoints + actionPoints + connectionPoints + conversionPoints + volumeBonus);
+      
+      // Debug logging pour comprendre le classement
+      console.log(`Score détail pour ${person.name}:`, {
+        leads: person.assigned_leads,
+        actions: person.actions_completed,
+        actionsPerLead: actionsPerLead.toFixed(2),
+        avgProgressionScore: avgProgressionScore.toFixed(2),
+        conversionRate: conversionScore.toFixed(2),
+        breakdown: {
+          progression: progressionPoints.toFixed(1),
+          actions: actionPoints.toFixed(1),
+          connection: connectionPoints.toFixed(1),
+          conversion: conversionPoints.toFixed(1),
+          volume: volumeBonus.toFixed(1)
+        },
+        totalScore: activityScore
+      });
 
       return {
         name: person.name,
