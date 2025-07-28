@@ -143,15 +143,27 @@ const SalesAnalytics = () => {
             // Actions dans l'historique (complétées)
             if (lead.action_history && Array.isArray(lead.action_history)) {
               lead.action_history.forEach((action: any) => {
-                if (action.completed_at) {
+                // Vérifier si l'action est complétée (soit completedDate soit completed_at)
+                if (action.completedDate || action.completed_at) {
                   actionsCompleted++;
-                  const actionType = action.action_type || action.type || 'Autre';
+                  const actionType = action.actionType || action.action_type || action.type || 'Autre';
                   actionsByType[actionType] = (actionsByType[actionType] || 0) + 1;
+                } else {
+                  // Si l'action n'est pas complétée, c'est une action à faire
+                  actionsToDo++;
+                  // Vérifier si elle est en retard en regardant scheduledDate
+                  if (action.scheduledDate) {
+                    const actionDate = new Date(action.scheduledDate);
+                    const now = new Date();
+                    if (actionDate < now) {
+                      actionsOverdue++;
+                    }
+                  }
                 }
               });
             }
 
-            // Actions en cours (à faire et en retard)
+            // Actions en cours basées sur next_action_date (pour les nouvelles actions)
             if (lead.next_action_date) {
               actionsToDo++;
               const actionDate = new Date(lead.next_action_date);
