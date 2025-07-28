@@ -172,7 +172,7 @@ const SourceAnalytics = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-primary">
+          <div className="text-2xl text-primary">
             {totalLeads} leads au total
           </div>
           <div className="text-sm text-muted-foreground">
