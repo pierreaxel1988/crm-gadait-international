@@ -101,11 +101,12 @@ const SalesAnalytics = () => {
   const fetchSalesAnalytics = async () => {
     setLoading(true);
     try {
-      // Récupérer les agents et admins qui gèrent des leads
+      // Récupérer les agents et admins qui gèrent des leads (exclure les non-agents)
       const { data: teamMembers, error: teamError } = await supabase
         .from('team_members')
         .select('*')
-        .in('role', ['agent', 'admin']);
+        .in('role', ['agent', 'admin'])
+        .not('email', 'in', '(christelle@gadait-international.com,chloe@gadait-international.com,admin@gadait-international.com)');
 
       if (teamError) {
         console.error('Erreur lors de la récupération des agents:', teamError);
