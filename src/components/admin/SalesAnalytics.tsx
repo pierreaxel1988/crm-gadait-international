@@ -280,16 +280,40 @@ const SalesAnalytics = () => {
 
     // Calculer le classement des agents selon leur activité
     const agentRankingData = salesData.map(person => {
-      // Calcul du score d'activité (score composite)
+      // Calcul du score de progression basé sur les statuts des leads
+      const statusScores = {
+        'New': 1,
+        'Contacted': 2,
+        'Qualified': 4,
+        'Visit': 6,
+        'Proposal': 8,
+        'Offre': 8,
+        'Signed': 10,
+        'Deposit': 10,
+        'Vendu': 10,
+        'Perdu': 0.5
+      };
+      
+      let totalProgressionScore = 0;
+      Object.entries(person.leads_by_status).forEach(([status, count]) => {
+        const statusScore = statusScores[status] || 1;
+        totalProgressionScore += statusScore * count;
+      });
+      
+      const avgProgressionScore = person.assigned_leads > 0 ? totalProgressionScore / person.assigned_leads : 0;
+      
+      // Calcul des autres métriques
       const actionsPerLead = person.assigned_leads > 0 ? person.actions_completed / person.assigned_leads : 0;
       const connectionTimePerLead = person.assigned_leads > 0 ? person.total_connection_time / person.assigned_leads : 0;
       const conversionScore = person.conversion_rate;
       
-      // Score composite pondéré (on peut ajuster les poids selon l'importance)
+      // Score composite pondéré amélioré
       const activityScore = Math.round(
-        (actionsPerLead * 40) + // 40% d'importance pour les actions par lead
-        (connectionTimePerLead * 0.1) + // 10% pour le temps de connexion par lead (normalisé)
-        (conversionScore * 0.5) // 50% pour le taux de conversion
+        (avgProgressionScore * 30) + // 30% pour la progression des statuts
+        (actionsPerLead * 25) + // 25% pour les actions par lead
+        (connectionTimePerLead * 0.1) + // 10% pour le temps de connexion par lead
+        (conversionScore * 0.35) + // 35% pour le taux de conversion
+        (person.assigned_leads * 0.1) // Bonus pour le volume de leads traités
       );
 
       return {
