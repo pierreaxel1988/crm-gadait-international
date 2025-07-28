@@ -24,7 +24,7 @@ const DashboardCard = ({
     <Card className={cn('p-6 lg:p-8 shadow-luxury border-0 flex flex-col h-full', className)}>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-futura font-semibold text-gray-800">{title}</h3>
+          <h3 className="text-xl font-futura text-gray-800">{title}</h3>
           {subtitle && <p className="text-sm font-futura text-muted-foreground mt-1.5">{subtitle}</p>}
         </div>
         <div className="flex items-center gap-4">
