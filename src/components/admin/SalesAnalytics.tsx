@@ -427,6 +427,7 @@ const SalesAnalytics = () => {
       });
 
       const tagDistrib = Object.entries(globalTagCount)
+        .filter(([tag]) => tag !== 'imported') // Exclure le tag "imported"
         .map(([tag, count]) => ({
           tag,
           count,
