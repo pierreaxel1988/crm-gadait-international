@@ -228,7 +228,7 @@ const SourceAnalytics = () => {
             <CardTitle className="font-normal">Répartition en pourcentage</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-row gap-8 items-start">
+            <div className="flex flex-row gap-8 items-center">
               {/* Légende personnalisée à gauche */}
               <div className="space-y-3 min-w-[250px]">
                 {sourceData.map((entry, index) => (
