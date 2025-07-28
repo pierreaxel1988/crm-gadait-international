@@ -26,6 +26,8 @@ interface SalesPersonData {
   actions_completed: number;
   actions_overdue: number;
   actions_by_type: { [key: string]: number };
+  // Métriques financières
+  total_budget: number; // Budget total des leads assignés
 }
 
 interface StatusDistribution {
@@ -126,10 +128,10 @@ const SalesAnalytics = () => {
       // Récupérer les données pour chaque agent
       const salesPersonsData = await Promise.all(
         (teamMembers || []).map(async (member) => {
-          // Leads assignés avec leur historique d'actions et leurs tags
+          // Leads assignés avec leur historique d'actions, tags et budget
           const { data: leads, error: leadsError } = await supabase
             .from('leads')
-            .select('id, status, created_at, action_history, next_action_date, tags')
+            .select('id, status, created_at, action_history, next_action_date, tags, budget')
             .eq('assigned_to', member.id)
             .gte('created_at', startDate + 'T00:00:00')
             .lte('created_at', endDate + 'T23:59:59')
@@ -200,6 +202,17 @@ const SalesAnalytics = () => {
             }
           });
 
+          // Calculer le budget total des leads assignés
+          const totalBudget = leads?.reduce((sum, lead) => {
+            if (lead.budget) {
+              // Nettoyer le budget (enlever les espaces, virgules, symboles)
+              const cleanBudget = lead.budget.toString().replace(/[^\d]/g, '');
+              const numericBudget = parseInt(cleanBudget) || 0;
+              return sum + numericBudget;
+            }
+            return sum;
+          }, 0) || 0;
+
           return {
             name: member.name,
             email: member.email,
@@ -213,7 +226,8 @@ const SalesAnalytics = () => {
             actions_to_do: actionsToDo,
             actions_completed: actionsCompleted,
             actions_overdue: actionsOverdue,
-            actions_by_type: actionsByType
+            actions_by_type: actionsByType,
+            total_budget: totalBudget
           };
         })
       );
@@ -278,7 +292,7 @@ const SalesAnalytics = () => {
 
     setActionTypeDistribution(actionTypeDistrib);
 
-    // Calculer le classement des agents selon leur activité
+    // Calculer le classement des agents selon leur activité ET valeur commerciale
     const agentRankingData = salesData.map(person => {
       // Calcul du score de progression basé sur les statuts des leads
       const statusScores = {
@@ -302,24 +316,43 @@ const SalesAnalytics = () => {
       
       const avgProgressionScore = person.assigned_leads > 0 ? totalProgressionScore / person.assigned_leads : 0;
       
-      // Calcul des autres métriques
+      // Calcul des métriques d'activité
       const actionsPerLead = person.assigned_leads > 0 ? person.actions_completed / person.assigned_leads : 0;
       const connectionTimePerLead = person.assigned_leads > 0 ? person.total_connection_time / person.assigned_leads : 0;
       const conversionScore = person.conversion_rate;
       
-      // Score composite pondéré amélioré
-      const progressionPoints = avgProgressionScore * 30;
-      const actionPoints = actionsPerLead * 25;
-      const connectionPoints = connectionTimePerLead * 0.1;
-      const conversionPoints = conversionScore * 0.35;
-      const volumeBonus = person.assigned_leads * 0.1;
+      // Calcul des métriques financières
+      const potentialRevenue = person.total_budget || 0;
+      const avgBudgetPerLead = person.assigned_leads > 0 ? potentialRevenue / person.assigned_leads : 0;
       
-      const activityScore = Math.round(progressionPoints + actionPoints + connectionPoints + conversionPoints + volumeBonus);
+      // Revenus pondérés par statut (les leads avancés ont plus de valeur)
+      let weightedRevenue = 0;
+      Object.entries(person.leads_by_status).forEach(([status, count]) => {
+        const statusWeight = statusScores[status] / 10; // Normaliser sur 1
+        const revenueForStatus = (avgBudgetPerLead * count * statusWeight);
+        weightedRevenue += revenueForStatus;
+      });
+      
+      // Score financier normalisé (diviser par 100k pour avoir une échelle raisonnable)
+      const revenueScore = weightedRevenue / 100000;
+      
+      // Score composite pondéré avec dimension financière
+      const progressionPoints = avgProgressionScore * 20; // Réduit de 30 à 20
+      const actionPoints = actionsPerLead * 20; // Réduit de 25 à 20
+      const connectionPoints = connectionTimePerLead * 0.05; // Réduit de 0.1 à 0.05
+      const conversionPoints = conversionScore * 0.25; // Réduit de 0.35 à 0.25
+      const volumeBonus = person.assigned_leads * 0.05; // Réduit de 0.1 à 0.05
+      const revenuePoints = revenueScore * 30; // Nouveau: 30% pour la valeur financière
+      
+      const activityScore = Math.round(progressionPoints + actionPoints + connectionPoints + conversionPoints + volumeBonus + revenuePoints);
       
       // Debug logging pour comprendre le classement
       console.log(`Score détail pour ${person.name}:`, {
         leads: person.assigned_leads,
         actions: person.actions_completed,
+        totalBudget: potentialRevenue,
+        avgBudgetPerLead: avgBudgetPerLead.toFixed(0),
+        weightedRevenue: weightedRevenue.toFixed(0),
         actionsPerLead: actionsPerLead.toFixed(2),
         avgProgressionScore: avgProgressionScore.toFixed(2),
         conversionRate: conversionScore.toFixed(2),
@@ -328,7 +361,8 @@ const SalesAnalytics = () => {
           actions: actionPoints.toFixed(1),
           connection: connectionPoints.toFixed(1),
           conversion: conversionPoints.toFixed(1),
-          volume: volumeBonus.toFixed(1)
+          volume: volumeBonus.toFixed(1),
+          revenue: revenuePoints.toFixed(1)
         },
         totalScore: activityScore
       });
