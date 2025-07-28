@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Download, TrendingUp, Users, MessageCircle, Mail, Target, Clock, UserCheck, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import { Calendar, Download, TrendingUp, Users, MessageCircle, Mail, Target, Clock, UserCheck, CheckCircle, AlertCircle, XCircle, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -70,6 +70,8 @@ const SalesAnalytics = () => {
   const [statusDistribution, setStatusDistribution] = useState<StatusDistribution[]>([]);
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedSalesperson, setSelectedSalesperson] = useState<string>('all');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const fetchSalesAnalytics = async () => {
     setLoading(true);
@@ -239,6 +241,21 @@ const SalesAnalytics = () => {
     fetchSalesAnalytics();
   }, [startDate, endDate]);
 
+  // Fermer le dropdown quand on clique à l'extérieur
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownOpen) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.relative')) {
+          setDropdownOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [dropdownOpen]);
+
   const exportToCSV = () => {
     const csvContent = [
       ['Commercial', 'Email', 'Leads assignés', 'Temps connexion', 'Taux conversion (%)'],
@@ -263,14 +280,21 @@ const SalesAnalytics = () => {
     document.body.removeChild(link);
   };
 
-  const totalLeads = salesData.reduce((sum, person) => sum + person.assigned_leads, 0);
-  const totalConnectionTime = salesData.reduce((sum, person) => sum + person.total_connection_time, 0);
-  const totalActionsToDo = salesData.reduce((sum, person) => sum + person.actions_to_do, 0);
-  const totalActionsCompleted = salesData.reduce((sum, person) => sum + person.actions_completed, 0);
-  const totalActionsOverdue = salesData.reduce((sum, person) => sum + person.actions_overdue, 0);
-  const avgConversionRate = salesData.length > 0 
-    ? Math.round(salesData.reduce((sum, person) => sum + person.conversion_rate, 0) / salesData.length)
+  // Filtrer les données selon le commercial sélectionné
+  const filteredData = selectedSalesperson === 'all' ? salesData : salesData.filter(person => person.email === selectedSalesperson);
+  
+  const totalLeads = filteredData.reduce((sum, person) => sum + person.assigned_leads, 0);
+  const totalConnectionTime = filteredData.reduce((sum, person) => sum + person.total_connection_time, 0);
+  const totalActionsToDo = filteredData.reduce((sum, person) => sum + person.actions_to_do, 0);
+  const totalActionsCompleted = filteredData.reduce((sum, person) => sum + person.actions_completed, 0);
+  const totalActionsOverdue = filteredData.reduce((sum, person) => sum + person.actions_overdue, 0);
+  const avgConversionRate = filteredData.length > 0 
+    ? Math.round(filteredData.reduce((sum, person) => sum + person.conversion_rate, 0) / filteredData.length)
     : 0;
+
+  const selectedPersonName = selectedSalesperson === 'all' 
+    ? 'Tous les commerciaux' 
+    : salesData.find(p => p.email === selectedSalesperson)?.name || 'Commercial sélectionné';
 
   return (
     <div className="space-y-6">
@@ -309,7 +333,59 @@ const SalesAnalytics = () => {
         </CardContent>
       </Card>
 
-      {/* Métriques globales */}
+      {/* Sélecteur de commercial */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-normal">
+            <Users className="h-5 w-5" />
+            Commercial sélectionné
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="relative">
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-left flex items-center justify-between hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <span className="font-medium">{selectedPersonName}</span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {dropdownOpen && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                <div
+                  onClick={() => {
+                    setSelectedSalesperson('all');
+                    setDropdownOpen(false);
+                  }}
+                  className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
+                    selectedSalesperson === 'all' ? 'bg-blue-50 text-blue-600' : ''
+                  }`}
+                >
+                  Tous les commerciaux
+                </div>
+                {salesData.map((person) => (
+                  <div
+                    key={person.email}
+                    onClick={() => {
+                      setSelectedSalesperson(person.email);
+                      setDropdownOpen(false);
+                    }}
+                    className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
+                      selectedSalesperson === person.email ? 'bg-blue-50 text-blue-600' : ''
+                    }`}
+                  >
+                    <div className="font-medium">{person.name}</div>
+                    <div className="text-xs text-gray-500">{person.email}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Métriques pour le commercial sélectionné */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         <Card>
           <CardContent className="p-6">
@@ -490,7 +566,7 @@ const SalesAnalytics = () => {
                 </tr>
               </thead>
               <tbody>
-                {salesData.map((person, index) => (
+                {filteredData.map((person, index) => (
                   <tr key={index} className="border-b">
                     <td className="p-2">
                       <div>
