@@ -23,7 +23,7 @@ const Admin = () => {
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'chart-data';
   return (
-    <div className="p-6 lg:p-10 space-y-8 max-w-[1920px] mx-auto">
+    <div className="p-6 lg:p-10 space-y-8 max-w-[1920px] mx-auto bg-white min-h-screen">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-futuraMd">Administration</h1>
