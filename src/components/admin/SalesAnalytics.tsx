@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Download, TrendingUp, Users, MessageCircle, Mail, Target, Clock, UserCheck } from 'lucide-react';
+import { Calendar, Download, TrendingUp, Users, MessageCircle, Mail, Target, Clock, UserCheck, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,11 @@ interface SalesPersonData {
   avg_session_duration: number; // en minutes
   total_sessions: number;
   working_hours: { start: string; end: string };
+  // Métriques d'actions
+  actions_to_do: number;
+  actions_completed: number;
+  actions_overdue: number;
+  actions_by_type: { [key: string]: number };
 }
 
 interface StatusDistribution {
@@ -80,10 +85,10 @@ const SalesAnalytics = () => {
       // Récupérer les données pour chaque commercial
       const salesPersonsData = await Promise.all(
         (teamMembers || []).map(async (member) => {
-          // Leads assignés
+          // Leads assignés avec leur historique d'actions
           const { data: leads, error: leadsError } = await supabase
             .from('leads')
-            .select('id, status, created_at')
+            .select('id, status, created_at, action_history, next_action_date')
             .eq('assigned_to', member.id)
             .gte('created_at', startDate + 'T00:00:00')
             .lte('created_at', endDate + 'T23:59:59')
@@ -113,6 +118,35 @@ const SalesAnalytics = () => {
           // Calculer les heures de travail
           const workingHours = getWorkingHours(sessionStats.sessions);
 
+          // Calculer les métriques d'actions
+          let actionsToDo = 0;
+          let actionsCompleted = 0;
+          let actionsOverdue = 0;
+          const actionsByType: { [key: string]: number } = {};
+
+          leads?.forEach(lead => {
+            // Actions dans l'historique (complétées)
+            if (lead.action_history && Array.isArray(lead.action_history)) {
+              lead.action_history.forEach((action: any) => {
+                if (action.completed_at) {
+                  actionsCompleted++;
+                  const actionType = action.action_type || action.type || 'Autre';
+                  actionsByType[actionType] = (actionsByType[actionType] || 0) + 1;
+                }
+              });
+            }
+
+            // Actions en cours (à faire et en retard)
+            if (lead.next_action_date) {
+              actionsToDo++;
+              const actionDate = new Date(lead.next_action_date);
+              const now = new Date();
+              if (actionDate < now) {
+                actionsOverdue++;
+              }
+            }
+          });
+
           return {
             name: member.name,
             email: member.email,
@@ -122,7 +156,11 @@ const SalesAnalytics = () => {
             total_connection_time: sessionStats.totalMinutes,
             avg_session_duration: sessionStats.avgSessionDuration,
             total_sessions: sessionStats.totalSessions,
-            working_hours: workingHours
+            working_hours: workingHours,
+            actions_to_do: actionsToDo,
+            actions_completed: actionsCompleted,
+            actions_overdue: actionsOverdue,
+            actions_by_type: actionsByType
           };
         })
       );
@@ -227,6 +265,9 @@ const SalesAnalytics = () => {
 
   const totalLeads = salesData.reduce((sum, person) => sum + person.assigned_leads, 0);
   const totalConnectionTime = salesData.reduce((sum, person) => sum + person.total_connection_time, 0);
+  const totalActionsToDo = salesData.reduce((sum, person) => sum + person.actions_to_do, 0);
+  const totalActionsCompleted = salesData.reduce((sum, person) => sum + person.actions_completed, 0);
+  const totalActionsOverdue = salesData.reduce((sum, person) => sum + person.actions_overdue, 0);
   const avgConversionRate = salesData.length > 0 
     ? Math.round(salesData.reduce((sum, person) => sum + person.conversion_rate, 0) / salesData.length)
     : 0;
@@ -269,7 +310,7 @@ const SalesAnalytics = () => {
       </Card>
 
       {/* Métriques globales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -290,6 +331,42 @@ const SalesAnalytics = () => {
                 <p className="text-2xl font-bold text-primary">{formatDuration(totalConnectionTime)}</p>
               </div>
               <Clock className="h-8 w-8 text-primary/60" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Actions à faire</p>
+                <p className="text-2xl font-bold text-primary">{totalActionsToDo}</p>
+              </div>
+              <AlertCircle className="h-8 w-8 text-primary/60" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Actions réalisées</p>
+                <p className="text-2xl font-bold text-green-600">{totalActionsCompleted}</p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-600/60" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Actions en retard</p>
+                <p className="text-2xl font-bold text-red-600">{totalActionsOverdue}</p>
+              </div>
+              <XCircle className="h-8 w-8 text-red-600/60" />
             </div>
           </CardContent>
         </Card>
@@ -406,8 +483,9 @@ const SalesAnalytics = () => {
                   <th className="text-left p-2">Commercial</th>
                   <th className="text-right p-2">Leads assignés</th>
                   <th className="text-right p-2">Temps connexion</th>
-                  <th className="text-right p-2">Sessions</th>
-                  <th className="text-right p-2">Heures travail</th>
+                  <th className="text-right p-2">Actions à faire</th>
+                  <th className="text-right p-2">Actions réalisées</th>
+                  <th className="text-right p-2">Actions retard</th>
                   <th className="text-right p-2">Taux conversion</th>
                 </tr>
               </thead>
@@ -418,6 +496,9 @@ const SalesAnalytics = () => {
                       <div>
                         <div className="font-medium">{person.name}</div>
                         <div className="text-xs text-muted-foreground">{person.email}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {person.working_hours.start} - {person.working_hours.end}
+                        </div>
                       </div>
                     </td>
                     <td className="text-right p-2">{person.assigned_leads}</td>
@@ -426,14 +507,25 @@ const SalesAnalytics = () => {
                         {formatDuration(person.total_connection_time)}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Moy: {formatDuration(person.avg_session_duration)}
+                        {person.total_sessions} sessions
                       </div>
                     </td>
-                    <td className="text-right p-2">{person.total_sessions}</td>
                     <td className="text-right p-2">
-                      <div className="text-xs">
-                        {person.working_hours.start} - {person.working_hours.end}
-                      </div>
+                      <span className="text-sm font-medium text-blue-600">
+                        {person.actions_to_do}
+                      </span>
+                    </td>
+                    <td className="text-right p-2">
+                      <span className="text-sm font-medium text-green-600">
+                        {person.actions_completed}
+                      </span>
+                    </td>
+                    <td className="text-right p-2">
+                      <span className={`text-sm font-medium ${
+                        person.actions_overdue > 0 ? 'text-red-600' : 'text-gray-400'
+                      }`}>
+                        {person.actions_overdue}
+                      </span>
                     </td>
                     <td className="text-right p-2">
                       <span className={`font-medium ${
