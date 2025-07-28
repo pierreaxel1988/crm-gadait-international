@@ -201,40 +201,73 @@ const SalesAnalytics = () => {
 
       setSalesData(salesPersonsData);
 
-      // Calculer la distribution globale des statuts
-      const globalStatusCount: { [key: string]: number } = {};
-      let totalGlobalLeads = 0;
+    } catch (error) {
+      console.error('Erreur lors du chargement des analytics agents:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      salesPersonsData.forEach(person => {
-        Object.entries(person.leads_by_status).forEach(([status, count]) => {
-          globalStatusCount[status] = (globalStatusCount[status] || 0) + count;
-          totalGlobalLeads += count;
-        });
+  // Fonction pour recalculer les distributions selon l'agent sélectionné
+  const updateDistributions = () => {
+    if (salesData.length === 0) return;
+
+    // Calculer la distribution des statuts selon l'agent sélectionné
+    const globalStatusCount: { [key: string]: number } = {};
+    let totalGlobalLeads = 0;
+
+    const dataToAnalyze = selectedSalesperson === 'all' ? salesData : salesData.filter(p => p.email === selectedSalesperson);
+    
+    dataToAnalyze.forEach(person => {
+      Object.entries(person.leads_by_status).forEach(([status, count]) => {
+        globalStatusCount[status] = (globalStatusCount[status] || 0) + count;
+        totalGlobalLeads += count;
       });
+    });
 
-      const statusDistrib = Object.entries(globalStatusCount)
-        .map(([status, count]) => ({
-          status,
-          count,
-          percentage: Math.round((count / totalGlobalLeads) * 100)
-        }))
-        .sort((a, b) => b.count - a.count);
+    const statusDistrib = Object.entries(globalStatusCount)
+      .map(([status, count]) => ({
+        status,
+        count,
+        percentage: totalGlobalLeads > 0 ? Math.round((count / totalGlobalLeads) * 100) : 0
+      }))
+      .sort((a, b) => b.count - a.count);
 
-      setStatusDistribution(statusDistrib);
+    setStatusDistribution(statusDistrib);
 
-      // Calculer la distribution globale des tags
+    // Calculer la distribution des tags selon l'agent sélectionné
+    updateTagDistribution();
+  };
+
+  // Fonction séparée pour mettre à jour la distribution des tags
+  const updateTagDistribution = async () => {
+    try {
       const globalTagCount: { [key: string]: number } = {};
       let totalGlobalTags = 0;
 
-      // Récupérer tous les leads pour calculer les tags
-      const { data: allLeads } = await supabase
+      // Récupérer les leads selon l'agent sélectionné
+      let tagQuery = supabase
         .from('leads')
         .select('tags')
         .gte('created_at', startDate + 'T00:00:00')
         .lte('created_at', endDate + 'T23:59:59')
         .is('deleted_at', null);
 
-      allLeads?.forEach(lead => {
+      if (selectedSalesperson !== 'all') {
+        const { data: teamMember } = await supabase
+          .from('team_members')
+          .select('id')
+          .eq('email', selectedSalesperson)
+          .single();
+        
+        if (teamMember) {
+          tagQuery = tagQuery.eq('assigned_to', teamMember.id);
+        }
+      }
+
+      const { data: leadsForTags } = await tagQuery;
+
+      leadsForTags?.forEach(lead => {
         if (lead.tags && Array.isArray(lead.tags)) {
           lead.tags.forEach(tag => {
             if (tag && tag.trim()) {
@@ -254,53 +287,15 @@ const SalesAnalytics = () => {
         .sort((a, b) => b.count - a.count);
 
       setTagDistribution(tagDistrib);
-
-      // Activité quotidienne (derniers 7 jours)
-      const dailyActivity = [];
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dateStr = format(date, 'yyyy-MM-dd');
-        
-        // Emails du jour
-        const { data: dailyEmails } = await supabase
-          .from('lead_emails')
-          .select('id')
-          .eq('is_sent', true)
-          .gte('created_at', dateStr + 'T00:00:00')
-          .lte('created_at', dateStr + 'T23:59:59');
-
-        // Conversations du jour
-        const { data: dailyConversations } = await supabase
-          .from('lead_ai_conversations')
-          .select('id')
-          .gte('created_at', dateStr + 'T00:00:00')
-          .lte('created_at', dateStr + 'T23:59:59');
-
-        // Leads créés du jour
-        const { data: dailyLeads } = await supabase
-          .from('leads')
-          .select('id')
-          .gte('created_at', dateStr + 'T00:00:00')
-          .lte('created_at', dateStr + 'T23:59:59')
-          .is('deleted_at', null);
-
-        dailyActivity.push({
-          date: format(date, 'dd/MM', { locale: fr }),
-          emails: dailyEmails?.length || 0,
-          conversations: dailyConversations?.length || 0,
-          leads_created: dailyLeads?.length || 0
-        });
-      }
-
-      setActivityData(dailyActivity);
-
     } catch (error) {
-      console.error('Erreur lors du chargement des analytics agents:', error);
-    } finally {
-      setLoading(false);
+      console.error('Erreur lors du calcul des tags:', error);
     }
   };
+
+  // Hook pour déclencher le recalcul des distributions quand l'agent change
+  useEffect(() => {
+    updateDistributions();
+  }, [selectedSalesperson, salesData]);
 
   useEffect(() => {
     fetchSalesAnalytics();
