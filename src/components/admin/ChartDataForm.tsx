@@ -173,7 +173,7 @@ const ChartDataForm: React.FC<ChartDataFormProps> = ({ onSave }) => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Gestion des données du graphique</CardTitle>
+        <CardTitle className="font-normal">Gestion des données du graphique</CardTitle>
         <CardDescription>
           Modifiez les valeurs mensuelles, sources et coûts pour le graphique d'acquisition de leads
         </CardDescription>
