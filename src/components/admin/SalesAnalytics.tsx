@@ -323,10 +323,9 @@ const SalesAnalytics = () => {
 
   const exportToCSV = () => {
     const csvContent = [
-      ['Agent', 'Email', 'Leads assignés', 'Temps connexion', 'Taux conversion (%)'],
+      ['Agent', 'Leads assignés', 'Temps connexion', 'Taux conversion (%)'],
       ...salesData.map(person => [
         person.name,
-        person.email,
         person.assigned_leads,
         formatDuration(person.total_connection_time),
         person.conversion_rate
@@ -730,7 +729,7 @@ const SalesAnalytics = () => {
                     <td className="p-2">
                       <div>
                         <div className="font-medium">{person.name}</div>
-                        <div className="text-xs text-muted-foreground">{person.email}</div>
+                        
                         <div className="text-xs text-muted-foreground">
                           {person.working_hours.start} - {person.working_hours.end}
                         </div>
