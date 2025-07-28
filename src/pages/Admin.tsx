@@ -2,9 +2,10 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChartDataForm from '@/components/admin/ChartDataForm';
 import DashboardCard from '@/components/dashboard/DashboardCard';
-import { BarChart3, Settings2, Users, Trash2 } from 'lucide-react';
+import { BarChart3, Settings2, Users, Trash2, Download } from 'lucide-react';
 import UsersManagement from '@/components/admin/UsersManagement';
 import DeletedLeadsManagement from '@/components/admin/DeletedLeadsManagement';
+import LeadsExport from '@/components/admin/LeadsExport';
 
 // Données mockées initiales pour le graphique
 const initialChartData = [
@@ -30,6 +31,7 @@ const Admin = () => {
       <Tabs defaultValue="chart-data" className="w-full">
         <TabsList className="mb-8">
           <TabsTrigger value="chart-data">Données du graphique</TabsTrigger>
+          <TabsTrigger value="export">Export Leads</TabsTrigger>
           <TabsTrigger value="settings">Paramètres</TabsTrigger>
           <TabsTrigger value="users">Utilisateurs</TabsTrigger>
           <TabsTrigger value="deleted-leads">Corbeille</TabsTrigger>
@@ -58,6 +60,16 @@ const Admin = () => {
               </div>
             </DashboardCard>
           </div>
+        </TabsContent>
+
+        <TabsContent value="export" className="space-y-6">
+          <DashboardCard 
+            title="Export des leads" 
+            subtitle="Exportez votre base de données pour vos campagnes mailing"
+            icon={<Download className="h-5 w-5" />}
+          >
+            <LeadsExport />
+          </DashboardCard>
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
