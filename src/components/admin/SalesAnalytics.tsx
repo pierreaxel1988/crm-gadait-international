@@ -295,17 +295,18 @@ const SalesAnalytics = () => {
     // Calculer le classement des agents selon leur activité ET valeur commerciale
     const agentRankingData = salesData.map(person => {
       // Calcul du score de progression basé sur les statuts des leads
+      // Pondération axée sur la valeur commerciale réelle
       const statusScores = {
-        'New': 1,
-        'Contacted': 2,
-        'Qualified': 4,
-        'Visit': 6,
-        'Proposal': 8,
-        'Offre': 8,
-        'Signed': 10,
-        'Deposit': 10,
-        'Vendu': 10,
-        'Perdu': 0.5
+        'New': 0.5,
+        'Contacted': 1,
+        'Qualified': 2,
+        'Visit': 3,
+        'Proposal': 8,      // Offre en cours - revenus potentiels proches
+        'Offre': 8,         // Offre en cours - revenus potentiels proches
+        'Deposit': 15,      // Dépôt reçu - revenus quasi-garantis
+        'Signed': 12,       // Signature finale - revenus confirmés
+        'Vendu': 20,        // Conclus - revenus finalisés
+        'Perdu': 0.1
       };
       
       let totalProgressionScore = 0;
