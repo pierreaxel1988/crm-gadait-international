@@ -76,11 +76,11 @@ const SalesAnalytics = () => {
   const fetchSalesAnalytics = async () => {
     setLoading(true);
     try {
-      // Récupérer les agents
+      // Récupérer les agents et admins qui gèrent des leads
       const { data: teamMembers, error: teamError } = await supabase
         .from('team_members')
         .select('*')
-        .eq('role', 'agent');
+        .in('role', ['agent', 'admin']);
 
       if (teamError) {
         console.error('Erreur lors de la récupération des agents:', teamError);
