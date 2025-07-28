@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Save, Trash2 } from 'lucide-react';
+import { Plus, Check, Trash2 } from 'lucide-react';
 import CustomButton from '../ui/CustomButton';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -304,14 +304,14 @@ const ChartDataForm: React.FC<ChartDataFormProps> = ({ onSave }) => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        <CustomButton 
+        <Button 
           onClick={handleSave} 
-          className="bg-gray-900 hover:bg-gray-800 text-white"
+          className="rounded-full w-12 h-12 bg-gray-900 hover:bg-gray-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
           disabled={loading}
+          size="icon"
         >
-          <Save className="mr-2 h-4 w-4" />
-          {loading ? 'Sauvegarde...' : 'Sauvegarder'}
-        </CustomButton>
+          <Check className="h-5 w-5" />
+        </Button>
       </CardFooter>
     </Card>
   );
