@@ -76,28 +76,28 @@ const SalesAnalytics = () => {
   const fetchSalesAnalytics = async () => {
     setLoading(true);
     try {
-      // Récupérer les commerciaux
+      // Récupérer les agents
       const { data: teamMembers, error: teamError } = await supabase
         .from('team_members')
         .select('*')
-        .eq('role', 'commercial');
+        .eq('role', 'agent');
 
       if (teamError) {
-        console.error('Erreur lors de la récupération des commerciaux:', teamError);
+        console.error('Erreur lors de la récupération des agents:', teamError);
         throw teamError;
       }
 
-      console.log('Commerciaux trouvés:', teamMembers);
+      console.log('Agents trouvés:', teamMembers);
       
       if (!teamMembers || teamMembers.length === 0) {
-        console.warn('Aucun commercial trouvé dans la base de données');
+        console.warn('Aucun agent trouvé dans la base de données');
         setSalesData([]);
         setStatusDistribution([]);
         setActivityData([]);
         return;
       }
 
-      // Récupérer les données pour chaque commercial
+      // Récupérer les données pour chaque agent
       const salesPersonsData = await Promise.all(
         (teamMembers || []).map(async (member) => {
           // Leads assignés avec leur historique d'actions
@@ -244,7 +244,7 @@ const SalesAnalytics = () => {
       setActivityData(dailyActivity);
 
     } catch (error) {
-      console.error('Erreur lors du chargement des analytics commerciaux:', error);
+      console.error('Erreur lors du chargement des analytics agents:', error);
     } finally {
       setLoading(false);
     }
@@ -271,7 +271,7 @@ const SalesAnalytics = () => {
 
   const exportToCSV = () => {
     const csvContent = [
-      ['Commercial', 'Email', 'Leads assignés', 'Temps connexion', 'Taux conversion (%)'],
+      ['Agent', 'Email', 'Leads assignés', 'Temps connexion', 'Taux conversion (%)'],
       ...salesData.map(person => [
         person.name,
         person.email,
@@ -306,8 +306,8 @@ const SalesAnalytics = () => {
     : 0;
 
   const selectedPersonName = selectedSalesperson === 'all' 
-    ? 'Tous les commerciaux' 
-    : salesData.find(p => p.email === selectedSalesperson)?.name || 'Commercial sélectionné';
+    ? 'Tous les agents' 
+    : salesData.find(p => p.email === selectedSalesperson)?.name || 'Agent sélectionné';
 
   // Afficher un message si aucun commercial trouvé
   if (!loading && salesData.length === 0) {
@@ -350,12 +350,12 @@ const SalesAnalytics = () => {
         <Card>
           <CardContent className="p-8 text-center">
             <Users className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Aucun commercial trouvé</h3>
+            <h3 className="text-lg font-medium mb-2">Aucun agent trouvé</h3>
             <p className="text-muted-foreground mb-4">
-              Il n'y a actuellement aucun commercial avec le rôle "commercial" dans votre équipe.
+              Il n'y a actuellement aucun agent avec le rôle "agent" dans votre équipe.
             </p>
             <p className="text-sm text-muted-foreground">
-              Vous devez d'abord ajouter des commerciaux dans la section "Gestion des utilisateurs" avec le rôle "commercial".
+              Vous devez d'abord ajouter des agents dans la section "Gestion des utilisateurs" avec le rôle "agent".
             </p>
           </CardContent>
         </Card>
@@ -405,7 +405,7 @@ const SalesAnalytics = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 font-normal">
             <Users className="h-5 w-5" />
-            Commercial sélectionné
+            Agent sélectionné
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -429,7 +429,7 @@ const SalesAnalytics = () => {
                     selectedSalesperson === 'all' ? 'bg-blue-50 text-blue-600' : ''
                   }`}
                 >
-                  Tous les commerciaux
+                  Tous les agents
                 </div>
                 {salesData.map((person) => (
                   <div
@@ -533,7 +533,7 @@ const SalesAnalytics = () => {
           <CardTitle className="flex items-center justify-between font-normal">
             <span className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Performance par commercial
+              Performance par agent
             </span>
             <Button onClick={exportToCSV} variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
