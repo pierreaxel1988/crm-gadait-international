@@ -3,10 +3,11 @@ import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChartDataForm from '@/components/admin/ChartDataForm';
 import DashboardCard from '@/components/dashboard/DashboardCard';
-import { BarChart3, Settings2, Users, Trash2, Download } from 'lucide-react';
+import { BarChart3, Settings2, Users, Trash2, Download, TrendingUp } from 'lucide-react';
 import UsersManagement from '@/components/admin/UsersManagement';
 import DeletedLeadsManagement from '@/components/admin/DeletedLeadsManagement';
 import LeadsExport from '@/components/admin/LeadsExport';
+import SourceAnalytics from '@/components/admin/SourceAnalytics';
 
 // Données mockées initiales pour le graphique
 const initialChartData = [
@@ -34,6 +35,7 @@ const Admin = () => {
       <Tabs value={activeTab} className="w-full">
         <TabsList className="mb-8">
           <TabsTrigger value="chart-data">Données du graphique</TabsTrigger>
+          <TabsTrigger value="analytics">Analyse des sources</TabsTrigger>
           <TabsTrigger value="export">Export Leads</TabsTrigger>
           <TabsTrigger value="settings">Paramètres</TabsTrigger>
           <TabsTrigger value="users">Utilisateurs</TabsTrigger>
@@ -63,6 +65,10 @@ const Admin = () => {
               </div>
             </DashboardCard>
           </div>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
+          <SourceAnalytics />
         </TabsContent>
 
         <TabsContent value="export" className="space-y-6">
