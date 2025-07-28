@@ -155,6 +155,42 @@ export type Database = {
           },
         ]
       }
+      chart_data_entries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          leads_count: number
+          monthly_cost: number | null
+          period_date: string | null
+          period_name: string
+          source_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          leads_count?: number
+          monthly_cost?: number | null
+          period_date?: string | null
+          period_name: string
+          source_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          leads_count?: number
+          monthly_cost?: number | null
+          period_date?: string | null
+          period_name?: string
+          source_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_templates: {
         Row: {
           campaign_id: string
