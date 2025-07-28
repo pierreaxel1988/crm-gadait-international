@@ -3,7 +3,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChartDataForm from '@/components/admin/ChartDataForm';
 import DashboardCard from '@/components/dashboard/DashboardCard';
-import { BarChart3, Settings2, Users, Trash2, Download, TrendingUp, Activity } from 'lucide-react';
+import { BarChart3, Settings2, Users, Trash2, Download, TrendingUp, Activity, ArrowLeft } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import UsersManagement from '@/components/admin/UsersManagement';
 import DeletedLeadsManagement from '@/components/admin/DeletedLeadsManagement';
 import LeadsExport from '@/components/admin/LeadsExport';
@@ -37,6 +38,14 @@ const Admin = () => {
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-futuraMd">Administration</h1>
           <p className="text-muted-foreground mt-1">Gérez les données et paramètres de votre application.</p>
         </div>
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 hover:bg-muted"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Retour au menu
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
