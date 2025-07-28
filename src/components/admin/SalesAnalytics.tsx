@@ -427,7 +427,7 @@ const SalesAnalytics = () => {
       });
 
       const tagDistrib = Object.entries(globalTagCount)
-        .filter(([tag]) => tag !== 'imported') // Exclure le tag "imported"
+        .filter(([tag]) => tag.toLowerCase() !== 'imported') // Exclure le tag "imported" (insensible à la casse)
         .map(([tag, count]) => ({
           tag,
           count,
