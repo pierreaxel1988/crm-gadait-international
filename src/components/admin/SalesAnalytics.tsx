@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Download, TrendingUp, Users, MessageCircle, Mail, Target } from 'lucide-react';
+import { Calendar, Download, TrendingUp, Users, MessageCircle, Mail, Target, Clock, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { sessionTracker, formatDuration, getWorkingHours } from '@/services/sessionTracker';
 
 interface SalesPersonData {
   name: string;
@@ -17,6 +18,11 @@ interface SalesPersonData {
   ai_conversations: number;
   conversion_rate: number;
   leads_by_status: { [key: string]: number };
+  // Nouvelles métriques de session
+  total_connection_time: number; // en minutes
+  avg_session_duration: number; // en minutes
+  total_sessions: number;
+  working_hours: { start: string; end: string };
 }
 
 interface StatusDistribution {
@@ -108,6 +114,13 @@ const SalesAnalytics = () => {
 
           if (conversationsError) throw conversationsError;
 
+          // Récupérer les statistiques de session pour ce commercial
+          const sessionStats = await sessionTracker.getUserSessionStats(
+            member.id,
+            startDate + 'T00:00:00',
+            endDate + 'T23:59:59'
+          );
+
           // Calcul des statistiques par statut
           const leadsByStatus: { [key: string]: number } = {};
           leads?.forEach(lead => {
@@ -120,6 +133,9 @@ const SalesAnalytics = () => {
           const totalLeads = leads?.length || 0;
           const conversionRate = totalLeads > 0 ? Math.round((soldLeads / totalLeads) * 100) : 0;
 
+          // Calculer les heures de travail
+          const workingHours = getWorkingHours(sessionStats.sessions);
+
           return {
             name: member.name,
             email: member.email,
@@ -127,7 +143,12 @@ const SalesAnalytics = () => {
             emails_sent: emails?.length || 0,
             ai_conversations: conversations?.length || 0,
             conversion_rate: conversionRate,
-            leads_by_status: leadsByStatus
+            leads_by_status: leadsByStatus,
+            // Nouvelles métriques de session
+            total_connection_time: sessionStats.totalMinutes,
+            avg_session_duration: sessionStats.avgSessionDuration,
+            total_sessions: sessionStats.totalSessions,
+            working_hours: workingHours
           };
         })
       );
@@ -234,6 +255,7 @@ const SalesAnalytics = () => {
   const totalLeads = salesData.reduce((sum, person) => sum + person.assigned_leads, 0);
   const totalEmails = salesData.reduce((sum, person) => sum + person.emails_sent, 0);
   const totalConversations = salesData.reduce((sum, person) => sum + person.ai_conversations, 0);
+  const totalConnectionTime = salesData.reduce((sum, person) => sum + person.total_connection_time, 0);
   const avgConversionRate = salesData.length > 0 
     ? Math.round(salesData.reduce((sum, person) => sum + person.conversion_rate, 0) / salesData.length)
     : 0;
@@ -276,7 +298,7 @@ const SalesAnalytics = () => {
       </Card>
 
       {/* Métriques globales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -309,6 +331,18 @@ const SalesAnalytics = () => {
                 <p className="text-2xl font-bold text-primary">{totalConversations}</p>
               </div>
               <MessageCircle className="h-8 w-8 text-primary/60" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Temps connexion total</p>
+                <p className="text-2xl font-bold text-primary">{formatDuration(totalConnectionTime)}</p>
+              </div>
+              <Clock className="h-8 w-8 text-primary/60" />
             </div>
           </CardContent>
         </Card>
@@ -441,6 +475,9 @@ const SalesAnalytics = () => {
                   <th className="text-right p-2">Leads assignés</th>
                   <th className="text-right p-2">Emails envoyés</th>
                   <th className="text-right p-2">Conversations IA</th>
+                  <th className="text-right p-2">Temps connexion</th>
+                  <th className="text-right p-2">Sessions</th>
+                  <th className="text-right p-2">Heures travail</th>
                   <th className="text-right p-2">Taux conversion</th>
                 </tr>
               </thead>
@@ -456,6 +493,20 @@ const SalesAnalytics = () => {
                     <td className="text-right p-2">{person.assigned_leads}</td>
                     <td className="text-right p-2">{person.emails_sent}</td>
                     <td className="text-right p-2">{person.ai_conversations}</td>
+                    <td className="text-right p-2">
+                      <div className="text-sm font-medium">
+                        {formatDuration(person.total_connection_time)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Moy: {formatDuration(person.avg_session_duration)}
+                      </div>
+                    </td>
+                    <td className="text-right p-2">{person.total_sessions}</td>
+                    <td className="text-right p-2">
+                      <div className="text-xs">
+                        {person.working_hours.start} - {person.working_hours.end}
+                      </div>
+                    </td>
                     <td className="text-right p-2">
                       <span className={`font-medium ${
                         person.conversion_rate >= 20 ? 'text-green-600' :

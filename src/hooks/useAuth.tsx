@@ -2,6 +2,7 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
+import { sessionTracker } from '@/services/sessionTracker';
 
 interface AuthContextType {
   session: Session | null;
@@ -88,6 +89,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Only update state synchronously - NEVER return a promise here
       setSession(newSession);
       setUser(newSession?.user ?? null);
+      
+      // Gérer le tracking des sessions
+      if (event === 'SIGNED_IN' && newSession?.user) {
+        // Démarrer le tracking de session de manière asynchrone
+        setTimeout(() => {
+          sessionTracker.startSession(newSession.user.id);
+        }, 0);
+      } else if (event === 'SIGNED_OUT') {
+        // Arrêter le tracking de session
+        setTimeout(() => {
+          sessionTracker.endSession();
+        }, 0);
+      }
       
       // Check user role synchronously
       if (newSession?.user) {
