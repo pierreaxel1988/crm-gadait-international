@@ -67,7 +67,7 @@ const Admin = () => {
               className="h-full"
             >
               <div className="h-full pt-4">
-                <ChartDataForm initialData={initialChartData} />
+                <ChartDataForm />
               </div>
             </DashboardCard>
             
