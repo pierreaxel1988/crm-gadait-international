@@ -72,7 +72,7 @@ const UserActions = ({
           <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
         <div>
-          <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+          <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs">
             {user.role}
           </span>
         </div>
