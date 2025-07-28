@@ -46,6 +46,16 @@ interface ActionTypeDistribution {
   percentage: number;
 }
 
+interface AgentRanking {
+  name: string;
+  email: string;
+  activityScore: number;
+  leads: number;
+  actionsCompleted: number;
+  connectionTime: number;
+  rank: number;
+}
+
 interface ActivityData {
   date: string;
   emails: number;
@@ -82,6 +92,7 @@ const SalesAnalytics = () => {
   const [statusDistribution, setStatusDistribution] = useState<StatusDistribution[]>([]);
   const [tagDistribution, setTagDistribution] = useState<TagDistribution[]>([]);
   const [actionTypeDistribution, setActionTypeDistribution] = useState<ActionTypeDistribution[]>([]);
+  const [agentRanking, setAgentRanking] = useState<AgentRanking[]>([]);
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedSalesperson, setSelectedSalesperson] = useState<string>('all');
@@ -265,6 +276,35 @@ const SalesAnalytics = () => {
       .sort((a, b) => b.count - a.count);
 
     setActionTypeDistribution(actionTypeDistrib);
+
+    // Calculer le classement des agents selon leur activité
+    const agentRankingData = salesData.map(person => {
+      // Calcul du score d'activité (score composite)
+      const actionsPerLead = person.assigned_leads > 0 ? person.actions_completed / person.assigned_leads : 0;
+      const connectionTimePerLead = person.assigned_leads > 0 ? person.total_connection_time / person.assigned_leads : 0;
+      const conversionScore = person.conversion_rate;
+      
+      // Score composite pondéré (on peut ajuster les poids selon l'importance)
+      const activityScore = Math.round(
+        (actionsPerLead * 40) + // 40% d'importance pour les actions par lead
+        (connectionTimePerLead * 0.1) + // 10% pour le temps de connexion par lead (normalisé)
+        (conversionScore * 0.5) // 50% pour le taux de conversion
+      );
+
+      return {
+        name: person.name,
+        email: person.email,
+        activityScore,
+        leads: person.assigned_leads,
+        actionsCompleted: person.actions_completed,
+        connectionTime: person.total_connection_time,
+        rank: 0 // Sera calculé après le tri
+      };
+    })
+    .sort((a, b) => b.activityScore - a.activityScore) // Trier par score décroissant
+    .map((agent, index) => ({ ...agent, rank: index + 1 })); // Ajouter le rang
+
+    setAgentRanking(agentRankingData);
 
     // Calculer la distribution des tags selon l'agent sélectionné
     updateTagDistribution();
@@ -750,6 +790,54 @@ const SalesAnalytics = () => {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <p>Aucune action trouvée sur cette période</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Classement des agents */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-normal">
+              Classement des agents par activité
+              {agentRanking.length > 0 && (
+                <span className="text-sm font-normal text-muted-foreground ml-2">
+                  ({agentRanking.length} agents)
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {agentRanking.length > 0 ? (
+              <div className="space-y-4">
+                {agentRanking.map((agent, index) => (
+                  <div key={agent.email} className="flex items-center justify-between p-3 rounded-lg border">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                        agent.rank === 1 ? 'bg-yellow-100 text-yellow-800' :
+                        agent.rank === 2 ? 'bg-gray-100 text-gray-800' :
+                        agent.rank === 3 ? 'bg-orange-100 text-orange-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        #{agent.rank}
+                      </div>
+                      <div>
+                        <div className="font-medium">{agent.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {agent.leads} leads • {agent.actionsCompleted} actions
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-primary">{agent.activityScore}</div>
+                      <div className="text-xs text-muted-foreground">Score d'activité</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Aucun agent à classer sur cette période</p>
               </div>
             )}
           </CardContent>
