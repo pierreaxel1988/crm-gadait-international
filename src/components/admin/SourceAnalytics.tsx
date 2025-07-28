@@ -20,7 +20,18 @@ interface MonthlyData {
   [key: string]: string | number;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF7C7C'];
+const COLORS = [
+  '#8B7355', // Taupe
+  '#A0956B', // Beige doré
+  '#6B5B73', // Mauve grisé
+  '#9B8579', // Café au lait
+  '#7A8471', // Vert olive
+  '#B5A288', // Sable
+  '#8E7B68', // Châtaigne
+  '#A69C8E', // Gris chaud
+  '#9D8B7A', // Mushroom
+  '#786B5E'  // Graphite chaud
+];
 
 const SourceAnalytics = () => {
   const [startDate, setStartDate] = useState(format(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'));
@@ -201,7 +212,11 @@ const SourceAnalytics = () => {
                 />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="count" fill="#0088FE" />
+                <Bar dataKey="count">
+                  {sourceData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
