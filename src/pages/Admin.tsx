@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChartDataForm from '@/components/admin/ChartDataForm';
 import DashboardCard from '@/components/dashboard/DashboardCard';
@@ -19,6 +20,8 @@ const initialChartData = [
 ];
 
 const Admin = () => {
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'chart-data';
   return (
     <div className="p-6 lg:p-10 space-y-8 max-w-[1920px] mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -28,7 +31,7 @@ const Admin = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="chart-data" className="w-full">
+      <Tabs value={activeTab} className="w-full">
         <TabsList className="mb-8">
           <TabsTrigger value="chart-data">Données du graphique</TabsTrigger>
           <TabsTrigger value="export">Export Leads</TabsTrigger>
