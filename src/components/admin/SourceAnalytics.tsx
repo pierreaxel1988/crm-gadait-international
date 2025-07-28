@@ -125,7 +125,7 @@ const SourceAnalytics = () => {
       {/* Filtres de période */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-normal">
             <Calendar className="h-5 w-5" />
             Période d'analyse
           </CardTitle>
@@ -160,7 +160,7 @@ const SourceAnalytics = () => {
       {/* Résumé */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+          <CardTitle className="flex items-center justify-between font-normal">
             <span className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
               Résumé de la période
@@ -186,7 +186,7 @@ const SourceAnalytics = () => {
         {/* Graphique en barres */}
         <Card>
           <CardHeader>
-            <CardTitle>Répartition par source</CardTitle>
+            <CardTitle className="font-normal">Répartition par source</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -210,7 +210,7 @@ const SourceAnalytics = () => {
         {/* Graphique en secteurs */}
         <Card>
           <CardHeader>
-            <CardTitle>Répartition en pourcentage</CardTitle>
+            <CardTitle className="font-normal">Répartition en pourcentage</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -239,7 +239,7 @@ const SourceAnalytics = () => {
       {/* Tableau détaillé */}
       <Card>
         <CardHeader>
-          <CardTitle>Détail par source</CardTitle>
+          <CardTitle className="font-normal">Détail par source</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -269,7 +269,7 @@ const SourceAnalytics = () => {
       {monthlyData.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Évolution mensuelle</CardTitle>
+            <CardTitle className="font-normal">Évolution mensuelle</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
