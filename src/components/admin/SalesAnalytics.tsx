@@ -611,7 +611,14 @@ const SalesAnalytics = () => {
         {/* Distribution des statuts */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal">Distribution des leads par statut</CardTitle>
+            <CardTitle className="font-normal">
+              Distribution des leads par statut
+              {statusDistribution.length > 0 && (
+                <span className="text-sm font-normal text-muted-foreground ml-2">
+                  ({statusDistribution.reduce((sum, item) => sum + item.count, 0)} total)
+                </span>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -637,7 +644,14 @@ const SalesAnalytics = () => {
         {/* Distribution des tags */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal">Distribution des leads par tags</CardTitle>
+            <CardTitle className="font-normal">
+              Distribution des leads par tags
+              {tagDistribution.length > 0 && (
+                <span className="text-sm font-normal text-muted-foreground ml-2">
+                  ({tagDistribution.reduce((sum, item) => sum + item.count, 0)} total)
+                </span>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {tagDistribution.length > 0 ? (
