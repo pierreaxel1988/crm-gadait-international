@@ -40,6 +40,12 @@ interface TagDistribution {
   percentage: number;
 }
 
+interface ActionTypeDistribution {
+  actionType: string;
+  count: number;
+  percentage: number;
+}
+
 interface ActivityData {
   date: string;
   emails: number;
@@ -75,6 +81,7 @@ const SalesAnalytics = () => {
   const [salesData, setSalesData] = useState<SalesPersonData[]>([]);
   const [statusDistribution, setStatusDistribution] = useState<StatusDistribution[]>([]);
   const [tagDistribution, setTagDistribution] = useState<TagDistribution[]>([]);
+  const [actionTypeDistribution, setActionTypeDistribution] = useState<ActionTypeDistribution[]>([]);
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedSalesperson, setSelectedSalesperson] = useState<string>('all');
@@ -234,6 +241,27 @@ const SalesAnalytics = () => {
       .sort((a, b) => b.count - a.count);
 
     setStatusDistribution(statusDistrib);
+
+    // Calculer la distribution des types d'actions selon l'agent sélectionné
+    const globalActionTypeCount: { [key: string]: number } = {};
+    let totalGlobalActions = 0;
+
+    dataToAnalyze.forEach(person => {
+      Object.entries(person.actions_by_type).forEach(([actionType, count]) => {
+        globalActionTypeCount[actionType] = (globalActionTypeCount[actionType] || 0) + count;
+        totalGlobalActions += count;
+      });
+    });
+
+    const actionTypeDistrib = Object.entries(globalActionTypeCount)
+      .map(([actionType, count]) => ({
+        actionType,
+        count,
+        percentage: totalGlobalActions > 0 ? Math.round((count / totalGlobalActions) * 100) : 0
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    setActionTypeDistribution(actionTypeDistrib);
 
     // Calculer la distribution des tags selon l'agent sélectionné
     updateTagDistribution();
@@ -680,6 +708,45 @@ const SalesAnalytics = () => {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <p>Aucun tag trouvé sur cette période</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Distribution des types d'actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-normal">
+              Distribution des actions par type
+              {actionTypeDistribution.length > 0 && (
+                <span className="text-sm font-normal text-muted-foreground ml-2">
+                  ({actionTypeDistribution.reduce((sum, item) => sum + item.count, 0)} total)
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {actionTypeDistribution.length > 0 ? (
+              <div className="space-y-4">
+                {actionTypeDistribution.map((item, index) => (
+                  <div key={item.actionType} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-4 h-4 rounded"
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      />
+                      <span className="text-sm font-medium">{item.actionType}</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium">{item.count}</div>
+                      <div className="text-xs text-muted-foreground">{item.percentage}%</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Aucune action trouvée sur cette période</p>
               </div>
             )}
           </CardContent>
