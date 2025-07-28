@@ -228,34 +228,36 @@ const SourceAnalytics = () => {
             <CardTitle className="font-normal">Répartition en pourcentage</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4 h-[300px]">
-              {/* Légende à gauche */}
-              <div className="space-y-2 flex flex-col justify-center">
-                {sourceData.map((item, index) => (
-                  <div key={index} className="flex items-center gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+              {/* Légende personnalisée à gauche */}
+              <div className="space-y-2 lg:order-1">
+                {sourceData.map((entry, index) => (
+                  <div key={entry.source} className="flex items-center gap-3">
                     <div 
-                      className="w-4 h-4 rounded-sm flex-shrink-0"
+                      className="w-4 h-4 rounded"
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate">{item.source}</div>
-                      <div className="text-xs text-muted-foreground">{item.percentage}%</div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">{entry.source}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {entry.count} leads ({entry.percentage}%)
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
               
-              {/* Camembert à droite */}
-              <div className="flex items-center justify-center">
-                <ResponsiveContainer width="100%" height={250}>
+              <div className="lg:col-span-2 lg:order-2">
+                <ResponsiveContainer width="100%" height={400}>
                   <PieChart>
                     <Pie
                       data={sourceData}
                       cx="50%"
                       cy="50%"
-                      outerRadius={100}
+                      outerRadius={120}
                       fill="#8884d8"
                       dataKey="count"
+                      label={false}
                     >
                       {sourceData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
