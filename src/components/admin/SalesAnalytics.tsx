@@ -34,6 +34,12 @@ interface StatusDistribution {
   percentage: number;
 }
 
+interface TagDistribution {
+  tag: string;
+  count: number;
+  percentage: number;
+}
+
 interface ActivityData {
   date: string;
   emails: number;
@@ -68,6 +74,7 @@ const SalesAnalytics = () => {
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [salesData, setSalesData] = useState<SalesPersonData[]>([]);
   const [statusDistribution, setStatusDistribution] = useState<StatusDistribution[]>([]);
+  const [tagDistribution, setTagDistribution] = useState<TagDistribution[]>([]);
   const [activityData, setActivityData] = useState<ActivityData[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedSalesperson, setSelectedSalesperson] = useState<string>('all');
@@ -100,10 +107,10 @@ const SalesAnalytics = () => {
       // Récupérer les données pour chaque agent
       const salesPersonsData = await Promise.all(
         (teamMembers || []).map(async (member) => {
-          // Leads assignés avec leur historique d'actions
+          // Leads assignés avec leur historique d'actions et leurs tags
           const { data: leads, error: leadsError } = await supabase
             .from('leads')
-            .select('id, status, created_at, action_history, next_action_date')
+            .select('id, status, created_at, action_history, next_action_date, tags')
             .eq('assigned_to', member.id)
             .gte('created_at', startDate + 'T00:00:00')
             .lte('created_at', endDate + 'T23:59:59')
@@ -214,6 +221,39 @@ const SalesAnalytics = () => {
         .sort((a, b) => b.count - a.count);
 
       setStatusDistribution(statusDistrib);
+
+      // Calculer la distribution globale des tags
+      const globalTagCount: { [key: string]: number } = {};
+      let totalGlobalTags = 0;
+
+      // Récupérer tous les leads pour calculer les tags
+      const { data: allLeads } = await supabase
+        .from('leads')
+        .select('tags')
+        .gte('created_at', startDate + 'T00:00:00')
+        .lte('created_at', endDate + 'T23:59:59')
+        .is('deleted_at', null);
+
+      allLeads?.forEach(lead => {
+        if (lead.tags && Array.isArray(lead.tags)) {
+          lead.tags.forEach(tag => {
+            if (tag && tag.trim()) {
+              globalTagCount[tag] = (globalTagCount[tag] || 0) + 1;
+              totalGlobalTags++;
+            }
+          });
+        }
+      });
+
+      const tagDistrib = Object.entries(globalTagCount)
+        .map(([tag, count]) => ({
+          tag,
+          count,
+          percentage: totalGlobalTags > 0 ? Math.round((count / totalGlobalTags) * 100) : 0
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      setTagDistribution(tagDistrib);
 
       // Activité quotidienne (derniers 7 jours)
       const dailyActivity = [];
@@ -599,6 +639,46 @@ const SalesAnalytics = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Distribution des tags */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-normal">Distribution des leads par tags</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {tagDistribution.length > 0 ? (
+              <div className="space-y-4">
+                {tagDistribution.slice(0, 10).map((item, index) => (
+                  <div key={item.tag} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-4 h-4 rounded"
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      />
+                      <span className="text-sm font-medium">{item.tag}</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium">{item.count}</div>
+                      <div className="text-xs text-muted-foreground">{item.percentage}%</div>
+                    </div>
+                  </div>
+                ))}
+                {tagDistribution.length > 10 && (
+                  <div className="text-xs text-muted-foreground text-center pt-2">
+                    ... et {tagDistribution.length - 10} autres tags
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Aucun tag trouvé sur cette période</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Activité sur 7 jours */}
         <Card>
