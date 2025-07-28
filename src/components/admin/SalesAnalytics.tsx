@@ -678,30 +678,6 @@ const SalesAnalytics = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* Activité sur 7 jours */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-normal">Temps de connexion des 7 derniers jours</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={activityData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Line 
-                  type="monotone" 
-                  dataKey="leads_created" 
-                  stroke={COLORS[0]} 
-                  name="Leads créés"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Tableau détaillé */}
