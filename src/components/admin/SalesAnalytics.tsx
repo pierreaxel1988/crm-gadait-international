@@ -248,8 +248,11 @@ const SalesAnalytics = () => {
 
     dataToAnalyze.forEach(person => {
       Object.entries(person.actions_by_type).forEach(([actionType, count]) => {
-        globalActionTypeCount[actionType] = (globalActionTypeCount[actionType] || 0) + count;
-        totalGlobalActions += count;
+        // Exclure les actions de type "Creation"
+        if (actionType !== 'Creation') {
+          globalActionTypeCount[actionType] = (globalActionTypeCount[actionType] || 0) + count;
+          totalGlobalActions += count;
+        }
       });
     });
 
