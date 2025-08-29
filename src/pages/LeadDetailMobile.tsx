@@ -137,7 +137,7 @@ const LeadDetailMobile = () => {
     return lead.actionHistory.filter(action => !action.completedDate).length;
   };
   if (isLoading) {
-    return <LoadingState isLoading={isLoading} />;
+    return null;
   }
   if (!lead && id) {
     return <NotFoundState show={!lead && !!id} id={id} />;
