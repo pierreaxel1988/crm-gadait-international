@@ -14,6 +14,7 @@ import LeadDetailHeader from '@/components/leads/mobile/LeadDetailHeader';
 import LeadDetailTabs from '@/components/leads/mobile/LeadDetailTabs';
 import LeadDetailActionBar from '@/components/leads/mobile/LeadDetailActionBar';
 import { LoadingState, NotFoundState } from '@/components/leads/mobile/LeadDetailErrorStates';
+import LoadingScreen from '@/components/layout/LoadingScreen';
 import { useLeadDetail } from '@/hooks/useLeadDetail';
 import StatusSection from '@/components/leads/form/mobile/StatusSection';
 import GeneralInfoSection from '@/components/leads/form/mobile/GeneralInfoSection';
@@ -39,6 +40,7 @@ const LeadDetailMobile = () => {
   const searchParams = new URLSearchParams(location.search);
   const activeTab = searchParams.get('tab') || 'criteria';
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
+  const [loadingPhase, setLoadingPhase] = useState<'logo' | 'skeleton' | 'error'>('logo');
   const {
     lead,
     setLead,
@@ -136,8 +138,35 @@ const LeadDetailMobile = () => {
     if (!lead?.actionHistory) return 0;
     return lead.actionHistory.filter(action => !action.completedDate).length;
   };
-  // Always show the UI immediately, no loading screen
-  const showErrorState = !lead && id && !isLoading;
+  // Timer logic for loading phases
+  useEffect(() => {
+    if (!lead && id) {
+      // Phase 1: Show logo for first 2 seconds
+      setLoadingPhase('logo');
+      
+      const timer1 = setTimeout(() => {
+        if (!lead) {
+          setLoadingPhase('skeleton');
+        }
+      }, 2000);
+      
+      // Phase 3: Show error after 5 seconds if still no lead
+      const timer2 = setTimeout(() => {
+        if (!lead) {
+          setLoadingPhase('error');
+        }
+      }, 5000);
+      
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+      };
+    } else if (lead) {
+      setLoadingPhase('logo'); // Reset when lead is found
+    }
+  }, [lead, id]);
+
+  const showErrorState = !lead && id && loadingPhase === 'error';
   
   return (
     <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
@@ -179,8 +208,13 @@ const LeadDetailMobile = () => {
               <NotFoundState show={true} id={id} />
             ) : lead ? (
               renderTabContent()
+            ) : loadingPhase === 'logo' ? (
+              // Phase 1: Gadait logo loading
+              <div className="flex justify-center items-center h-[60vh]">
+                <LoadingScreen fullscreen={false} />
+              </div>
             ) : (
-              // Skeleton loading state
+              // Phase 2: Skeleton loading state
               <div className="space-y-6 animate-pulse">
                 <div className="h-8 bg-gray-200 rounded w-3/4"></div>
                 <div className="space-y-3">
