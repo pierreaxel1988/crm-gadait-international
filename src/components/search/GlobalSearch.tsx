@@ -13,7 +13,7 @@ interface GlobalSearchProps {
 const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const { results: leadResults, isLoading: isLeadsLoading, searchProperties } = useLeadSearch(query);
+  const { results: leadResults, isLoading: isLeadsLoading, searchProperties, setSearchTerm } = useLeadSearch();
   const [propertyResults, setPropertyResults] = useState<PropertyResult[]>([]);
   const [isPropertiesLoading, setIsPropertiesLoading] = useState(false);
   const [recentSearches, setRecentSearches] = useState<SearchResult[]>([]);
@@ -101,7 +101,10 @@ const GlobalSearch = ({ open, onOpenChange }: GlobalSearchProps) => {
         <CommandInput 
           placeholder="Rechercher des leads, propriétés..." 
           value={query} 
-          onValueChange={setQuery} 
+          onValueChange={(value) => {
+            setQuery(value);
+            setSearchTerm(value);
+          }}
           autoFocus
         />
         <CommandList>

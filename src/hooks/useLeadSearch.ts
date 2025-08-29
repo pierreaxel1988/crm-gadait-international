@@ -37,7 +37,7 @@ export function useLeadSearch(initialSearchTerm: string = '') {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const debouncedSearchTerm = useDebounce(searchTerm, 150);
 
   // Memoized search function to avoid recreating it on each render
   const searchProperties = useCallback(async (term: string): Promise<PropertyResult[]> => {
@@ -75,6 +75,7 @@ export function useLeadSearch(initialSearchTerm: string = '') {
     const searchLeads = async () => {
       if (!debouncedSearchTerm || debouncedSearchTerm.length < 1) {
         setResults([]);
+        setIsLoading(false);
         return;
       }
 
@@ -84,13 +85,14 @@ export function useLeadSearch(initialSearchTerm: string = '') {
         const searchTerm = debouncedSearchTerm.trim();
         console.log('Searching for:', searchTerm);
         
-        // Rechercher dans TOUS les leads, y compris les supprimés
+        // Rechercher dans TOUS les leads, y compris les supprimés avec une requête optimisée
         const { data, error } = await supabase
           .from('leads')
           .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget, deleted_at')
-          .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,property_reference.ilike.%${searchTerm}%`)
+          .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,property_reference.ilike.%${searchTerm}%,tags.cs.{${searchTerm}}`)
+          .order('deleted_at', { ascending: true, nullsFirst: true })
           .order('created_at', { ascending: false })
-          .limit(50);
+          .limit(30);
 
         if (error) {
           console.error('Error searching leads:', error);
