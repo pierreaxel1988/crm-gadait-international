@@ -25,7 +25,6 @@ export function useLeadDetail(id: string | undefined) {
   const fetchLead = useCallback(async () => {
     if (id) {
       try {
-        setIsLoading(true);
         const leadData = await getLead(id);
         console.log("Fetched lead data:", leadData);
         
