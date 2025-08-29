@@ -28,8 +28,10 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
   
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[400px]">
-        <LoadingScreen fullscreen={false} />
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="animate-pulse bg-gray-100 h-16 rounded-lg" />
+        ))}
       </div>
     );
   }

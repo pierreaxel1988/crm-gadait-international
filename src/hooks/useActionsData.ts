@@ -10,7 +10,7 @@ import { sortLeadsByPriority } from '@/components/pipeline/mobile/utils/leadSort
 
 export const useActionsData = (refreshTrigger: number = 0) => {
   const [actions, setActions] = useState<ActionItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const { user, isCommercial } = useAuth();
 
   useEffect(() => {

@@ -32,7 +32,7 @@ const AuthContext = createContext<AuthContextType>(defaultContext);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCommercial, setIsCommercial] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'commercial' | 'guest'>('guest');

@@ -38,7 +38,7 @@ export const useKanbanData = (
   filters: KanbanFilters = {}
 ) => {
   const [data, setData] = useState<LeadDetailed[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [loadedColumns, setLoadedColumns] = useState<KanbanColumn[]>([]);
 
