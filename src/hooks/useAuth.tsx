@@ -79,31 +79,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    console.log('AuthProvider - Setting up auth listeners');
+    let isMounted = true;
     
-    // IMPORTANT: Fix for the auth state change listener issue
-    // Only use synchronous code in the onAuthStateChange callback
+    // Récupération initiale de la session - plus rapide
+    const getInitialSession = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
+        
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+        
+        // Vérification du rôle utilisateur de manière synchrone
+        if (data.session?.user) {
+          checkAndSetUserRole(data.session.user);
+        } else {
+          setIsAdmin(false);
+          setIsCommercial(false);
+          setUserRole('guest');
+        }
+      } catch (error) {
+        console.error('Error getting initial session:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    // Listener optimisé pour les changements d'état
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      console.log('Auth state changed:', event, newSession?.user?.email);
+      if (!isMounted) return;
       
-      // Only update state synchronously - NEVER return a promise here
       setSession(newSession);
       setUser(newSession?.user ?? null);
       
-      // Gérer le tracking des sessions
+      // Gérer le tracking des sessions de manière asynchrone
       if (event === 'SIGNED_IN' && newSession?.user) {
-        // Démarrer le tracking de session de manière asynchrone
-        setTimeout(() => {
-          sessionTracker.startSession(newSession.user.id);
-        }, 0);
+        setTimeout(() => sessionTracker.startSession(newSession.user.id), 0);
       } else if (event === 'SIGNED_OUT') {
-        // Arrêter le tracking de session
-        setTimeout(() => {
-          sessionTracker.endSession();
-        }, 0);
+        setTimeout(() => sessionTracker.endSession(), 0);
       }
       
-      // Check user role synchronously
+      // Vérification du rôle de manière synchrone
       if (newSession?.user) {
         checkAndSetUserRole(newSession.user);
       } else {
@@ -112,33 +131,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUserRole('guest');
       }
       
-      // No longer loading
       setLoading(false);
     });
-
-    // Récupération initiale de la session
-    const getInitialSession = async () => {
-      try {
-        console.log('Getting initial session...');
-        const { data } = await supabase.auth.getSession();
-        console.log('Initial session retrieved:', data.session?.user?.email);
-        
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
-        
-        // Vérification du rôle utilisateur
-        checkAndSetUserRole(data.session?.user ?? null);
-      } catch (error) {
-        console.error('Error getting initial session:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
 
     getInitialSession();
 
     return () => {
-      console.log('Unsubscribing from auth state change events');
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);

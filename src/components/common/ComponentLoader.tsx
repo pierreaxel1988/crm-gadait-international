@@ -15,7 +15,18 @@ const ComponentLoader: React.FC<ComponentLoaderProps> = ({
   className,
   height = "100%" 
 }) => {
-  if (isLoading) {
+  const [showLoading, setShowLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => setShowLoading(true), 100);
+      return () => clearTimeout(timer);
+    } else {
+      setShowLoading(false);
+    }
+  }, [isLoading]);
+
+  if (isLoading && showLoading) {
     return <LoadingScreen fullscreen={false} className={className || `min-h-[${typeof height === 'number' ? `${height}px` : height}]`} />;
   }
   
