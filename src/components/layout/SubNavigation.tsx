@@ -25,11 +25,6 @@ const SubNavigation = () => {
     path: '/calendar',
     icon: Calendar
   }, {
-    name: 'Chat Gadait',
-    path: '/chat-gadait',
-    icon: MessageSquare,
-    showNotification: false
-  }, {
     name: 'Propriétés',
     path: '/properties',
     icon: File
@@ -47,7 +42,6 @@ const SubNavigation = () => {
                 : "text-loro-navy hover:text-loro-terracotta"
             )}>
                 {item.icon && <item.icon className="h-5 w-5" />}
-                {item.showNotification && <NotificationBadge count={unreadCount} />}
               </Link>)}
           </div>
         </div>
@@ -76,7 +70,6 @@ const SubNavigation = () => {
                   >
                     {item.icon && <item.icon className="h-5 w-5 mr-2" />}
                     <span className={cn("font-medium", isTablet ? "text-xs" : "text-sm")}>{item.name}</span>
-                    {item.showNotification && <NotificationBadge count={unreadCount} />}
                   </Link>
                 </NavigationMenuItem>)}
             </NavigationMenuList>
