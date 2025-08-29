@@ -96,11 +96,6 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           });
           
           if (isDuplicate) {
-            toast({
-              title: "Action similaire existe déjà",
-              description: "Une action similaire existe déjà pour cette date et heure.",
-              variant: "destructive"
-            });
             setIsActionDialogOpen(false);
             return;
           }
@@ -119,11 +114,6 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
         setIsActionDialogOpen(false);
       } catch (error) {
         console.error("Error in handleActionConfirm:", error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible d'ajouter l'action."
-        });
       }
     }
   };
@@ -148,12 +138,6 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           });
           
           if (isDuplicate) {
-            toast({
-              title: "Action similaire existe déjà",
-              description: "Une action similaire existe déjà pour cette date et heure.",
-              variant: "destructive"
-            });
-            
             // Remove the suggestion from the list
             setActionSuggestions(prev => prev.filter(s => 
               s.scheduledDate.getTime() !== suggestion.scheduledDate.getTime() || 
@@ -179,18 +163,9 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
             s.actionType !== suggestion.actionType
           ));
           
-          toast({
-            title: "Action ajoutée",
-            description: `${suggestion.actionType} a été ajouté à ${lead.name} pour le ${format(suggestion.scheduledDate, 'dd/MM/yyyy à HH:mm')}`
-          });
         }
       } catch (error) {
         console.error("Error in acceptSuggestion:", error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible d'ajouter l'action suggérée."
-        });
       }
     }
   };
@@ -227,19 +202,10 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           if (updatedLead) {
             setLead(updatedLead);
             
-            toast({
-              title: "Action complétée",
-              description: `${actionHistory[actionIndex].actionType} a été marquée comme complétée`
-            });
           }
         }
       } catch (error) {
         console.error("Error in markActionComplete:", error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de mettre à jour l'action."
-        });
       }
     }
   };
