@@ -11,7 +11,7 @@ const JACQUES_ID = "e59037a6-218d-4504-a3ad-d2c399784dc7";
 
 export function useLeadDetail(id: string | undefined) {
   const [lead, setLead] = useState<LeadDetailed | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
