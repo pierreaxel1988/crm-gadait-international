@@ -22,7 +22,7 @@ export function useLeadDetail(id: string | undefined) {
   const [isSilentSave, setIsSilentSave] = useState(false);
   const [hasShownPendingActionsToast, setHasShownPendingActionsToast] = useState(false);
 
-  const fetchLead = useCallback(async () => {
+  const fetchLead = useCallback(async (retryCount = 0) => {
     if (id) {
       try {
         const leadData = await getLead(id);
@@ -40,12 +40,27 @@ export function useLeadDetail(id: string | undefined) {
           
           setLead(leadData);
         } else {
+          // Retry once if no data found
+          if (retryCount < 1) {
+            console.log("Lead not found, retrying...");
+            setTimeout(() => fetchLead(retryCount + 1), 500);
+            return;
+          }
           setLead(undefined);
         }
         
         setHasChanges(false);
       } catch (error) {
         console.error("Error fetching lead:", error);
+        
+        // Retry once on error
+        if (retryCount < 1) {
+          console.log("Retrying fetch due to error...");
+          setTimeout(() => fetchLead(retryCount + 1), 500);
+          return;
+        }
+        
+        setLead(undefined);
         toast({
           variant: "destructive",
           title: "Erreur",

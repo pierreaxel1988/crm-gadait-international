@@ -136,16 +136,86 @@ const LeadDetailMobile = () => {
     if (!lead?.actionHistory) return 0;
     return lead.actionHistory.filter(action => !action.completedDate).length;
   };
-  if (isLoading) {
-    return null;
-  }
-  if (!lead && id) {
-    return <NotFoundState show={!lead && !!id} id={id} />;
-  }
-  if (!lead) return null;
+  // Always show the UI immediately, no loading screen
+  const showErrorState = !lead && id && !isLoading;
+  
+  return (
+    <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
+      <div className="fixed top-0 left-0 right-0 z-40 w-full">
+        <div className="bg-[#051B30] pt-[env(safe-area-inset-top)]">
+          <LeadDetailHeader 
+            name={lead?.name || ''} 
+            createdAt={lead?.createdAt || ''} 
+            phone={lead ? getFormattedPhoneForCall() : ''} 
+            email={lead?.email || ''} 
+            budget={lead?.budget || ''} 
+            desired_price={lead?.desired_price || ''} 
+            pipelineType={lead?.pipelineType || 'purchase'} 
+            currency={lead?.currency || 'EUR'} 
+            desiredLocation={lead?.pipelineType === 'owners' ? lead?.location : lead?.desiredLocation || ''} 
+            country={lead?.country || ''} 
+            purchaseTimeframe={lead?.purchaseTimeframe || ''} 
+            onBackClick={handleBackClick} 
+            onSave={handleSaveWithIndicator} 
+            isSaving={isSaving} 
+            hasChanges={hasChanges} 
+            tags={lead?.tags || []} 
+            onPhoneCall={handlePhoneCall} 
+            onWhatsAppClick={handleWhatsAppClick} 
+            onEmailClick={handleEmailClick} 
+            onCallComplete={() => {}} 
+          />
+        </div>
+        
+        <div className="bg-loro-50">
+          <LeadDetailTabs defaultTab={activeTab} pendingActionsCount={getPendingActionsCount()} />
+        </div>
+      </div>
+      
+      <ScrollArea className="flex-1 overflow-y-auto pt-20 no-scrollbar">
+        <Tabs value={activeTab} className="w-full h-full">
+          <div className="px-4 pb-36 h-full my-[100px]">
+            {showErrorState ? (
+              <NotFoundState show={true} id={id} />
+            ) : lead ? (
+              renderTabContent()
+            ) : (
+              // Skeleton loading state
+              <div className="space-y-6 animate-pulse">
+                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+                <div className="space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                  <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+                </div>
+                <div className="h-32 bg-gray-200 rounded"></div>
+              </div>
+            )}
+            
+            <TabsContent value="actions" className="mt-1 animate-[fade-in_0.2s_ease-out]">
+              {actionSuggestions && actionSuggestions.length > 0 && <ActionSuggestions suggestions={actionSuggestions} onAccept={acceptSuggestion} onReject={rejectSuggestion} />}
+              <ActionsPanelMobile leadId={lead?.id || ''} onAddAction={fetchLead} onMarkComplete={handleMarkComplete} actionHistory={lead?.actionHistory || []} />
+              
+              {lead && <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />}
+            </TabsContent>
+          </div>
+        </Tabs>
+      </ScrollArea>
+      
+      <LeadDetailActionBar autoSaveEnabled={autoSaveEnabled} onAddAction={handleAddAction} lead={lead} hasChanges={hasChanges} isSaving={isSaving} onManualSave={handleSaveWithIndicator} actionSuggestions={actionSuggestions} />
+
+      {showSaveIndicator && <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
+          <CheckCircle className="h-5 w-5" />
+        </div>}
+
+      <ActionDialog isOpen={isActionDialogOpen} onClose={() => setIsActionDialogOpen(false)} selectedAction={selectedAction} setSelectedAction={setSelectedAction} actionDate={actionDate} setActionDate={setActionDate} actionTime={actionTime} setActionTime={setActionTime} actionNotes={actionNotes} setActionNotes={setActionNotes} onConfirm={handleActionConfirm} getActionTypeIcon={getActionTypeIcon} />
+    </div>
+  );
 
   // Conditional rendering based on pipeline type
-  const renderTabContent = () => {
+  function renderTabContent() {
+    if (!lead) return null;
+    
     if (lead.pipelineType === 'owners') {
       return <>
           <TabsContent value="info" className="mt-1 animate-[fade-in_0.2s_ease-out]">
@@ -190,40 +260,6 @@ const LeadDetailMobile = () => {
           <NotesSection lead={lead} onDataChange={handleDataChange} />
         </TabsContent>
       </>;
-  };
-  return <div className="flex flex-col h-[100dvh] bg-white dark:bg-loro-night overflow-hidden">
-      <div className="fixed top-0 left-0 right-0 z-40 w-full">
-        <div className="bg-[#051B30] pt-[env(safe-area-inset-top)]">
-          <LeadDetailHeader name={lead.name} createdAt={lead.createdAt} phone={getFormattedPhoneForCall()} email={lead.email} budget={lead.budget} desired_price={lead.desired_price} pipelineType={lead.pipelineType} currency={lead.currency} desiredLocation={lead.pipelineType === 'owners' ? lead.location : lead.desiredLocation} country={lead.country} purchaseTimeframe={lead.purchaseTimeframe} onBackClick={handleBackClick} onSave={handleSaveWithIndicator} isSaving={isSaving} hasChanges={hasChanges} tags={lead.tags} onPhoneCall={handlePhoneCall} onWhatsAppClick={handleWhatsAppClick} onEmailClick={handleEmailClick} onCallComplete={() => {}} />
-        </div>
-        
-        <div className="bg-loro-50">
-          <LeadDetailTabs defaultTab={activeTab} pendingActionsCount={getPendingActionsCount()} />
-        </div>
-      </div>
-      
-      <ScrollArea className="flex-1 overflow-y-auto pt-20 no-scrollbar">
-        <Tabs value={activeTab} className="w-full h-full">
-          <div className="px-4 pb-36 h-full my-[100px]">
-            {renderTabContent()}
-            
-            <TabsContent value="actions" className="mt-1 animate-[fade-in_0.2s_ease-out]">
-              {actionSuggestions && actionSuggestions.length > 0 && <ActionSuggestions suggestions={actionSuggestions} onAccept={acceptSuggestion} onReject={rejectSuggestion} />}
-              <ActionsPanelMobile leadId={lead.id} onAddAction={fetchLead} onMarkComplete={handleMarkComplete} actionHistory={lead.actionHistory || []} />
-              
-              {lead && <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />}
-            </TabsContent>
-          </div>
-        </Tabs>
-      </ScrollArea>
-      
-      <LeadDetailActionBar autoSaveEnabled={autoSaveEnabled} onAddAction={handleAddAction} lead={lead} hasChanges={hasChanges} isSaving={isSaving} onManualSave={handleSaveWithIndicator} actionSuggestions={actionSuggestions} />
-
-      {showSaveIndicator && <div className="fixed top-16 right-4 bg-chocolate-dark text-white p-2 rounded-full shadow-md animate-[fade-in_0.3s_ease-out]">
-          <CheckCircle className="h-5 w-5" />
-        </div>}
-
-      <ActionDialog isOpen={isActionDialogOpen} onClose={() => setIsActionDialogOpen(false)} selectedAction={selectedAction} setSelectedAction={setSelectedAction} actionDate={actionDate} setActionDate={setActionDate} actionTime={actionTime} setActionTime={setActionTime} actionNotes={actionNotes} setActionNotes={setActionNotes} onConfirm={handleActionConfirm} getActionTypeIcon={getActionTypeIcon} />
-    </div>;
+  }
 };
 export default LeadDetailMobile;
