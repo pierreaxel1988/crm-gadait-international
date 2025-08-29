@@ -31,7 +31,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Suspense fallback={<LoadingScreen />}>
+        <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Navigate to="/pipeline" />} />
             

@@ -30,7 +30,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }, [user, loading, isAdmin, isCommercial, location.pathname]);
   
   if (loading) {
-    return <LoadingScreen />;
+    return null;
   }
   
   // Si l'utilisateur n'est pas connecté, rediriger vers la page d'authentification
