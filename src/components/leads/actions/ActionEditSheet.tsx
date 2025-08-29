@@ -143,11 +143,6 @@ const ActionEditSheet: React.FC<ActionEditSheetProps> = ({
       }
     } catch (error) {
       console.error("Error deleting action:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de supprimer l'action"
-      });
     } finally {
       setIsLoading(false);
     }

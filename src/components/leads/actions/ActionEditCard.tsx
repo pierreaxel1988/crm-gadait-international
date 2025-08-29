@@ -160,11 +160,6 @@ const ActionEditCard: React.FC<ActionEditCardProps> = ({
       }
     } catch (error) {
       console.error("Error deleting action:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de supprimer l'action"
-      });
     } finally {
       setIsLoading(false);
     }
