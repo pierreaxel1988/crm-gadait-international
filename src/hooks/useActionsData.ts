@@ -13,6 +13,19 @@ export const useActionsData = (refreshTrigger: number = 0) => {
   const [isLoading, setIsLoading] = useState(false);
   const { user, isCommercial } = useAuth();
 
+  // Load cached actions on mount to avoid blank screen
+  useEffect(() => {
+    const cachedActions = localStorage.getItem('cachedActions');
+    if (cachedActions) {
+      try {
+        const parsedActions = JSON.parse(cachedActions);
+        setActions(parsedActions);
+      } catch (error) {
+        console.error('Error parsing cached actions:', error);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     console.log("useActionsData useEffect triggered", { refreshTrigger });
     fetchActions();

@@ -59,6 +59,7 @@ const Actions = () => {
       <SubNavigation />
       <div className="p-4 md:p-6 bg-white min-h-screen">
         <div className="max-w-7xl mx-auto">
+          {/* Show page structure immediately */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <h1 className="text-2xl font-futuraLight tracking-wide text-loro-navy">Actions</h1>
             

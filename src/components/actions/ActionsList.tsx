@@ -26,12 +26,10 @@ const ActionsList: React.FC<ActionsListProps> = ({ actions, isLoading, onMarkCom
     navigate(`/leads/${leadId}?tab=actions`);
   };
   
-  if (isLoading) {
+  if (isLoading && actions.length === 0) {
     return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="animate-pulse bg-gray-100 h-16 rounded-lg" />
-        ))}
+      <div className="flex justify-center items-center py-20">
+        <LoadingScreen fullscreen={false} />
       </div>
     );
   }
