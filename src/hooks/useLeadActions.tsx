@@ -110,9 +110,11 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
         });
         
         console.log('✅ addActionToLead returned:', updatedLead);
+        console.log('🔍 Checking if updatedLead exists:', !!updatedLead);
         
         if (updatedLead) {
           console.log('🔄 Updating local state with new lead');
+          console.log('📊 New actionHistory length:', updatedLead.actionHistory?.length);
           setLead(updatedLead);
           console.log('📢 Calling onAddAction callback with updated lead');
           onAddAction?.(updatedLead);
