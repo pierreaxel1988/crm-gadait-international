@@ -11,6 +11,7 @@ import ActionsPanelMobile from './actions/ActionsPanelMobile';
 import PropertySelectionHistory from './PropertySelectionHistory';
 import { supabase } from "@/integrations/supabase/client";
 import { syncExistingActionsWithLeads } from '@/services/leadActions';
+import LoadingScreen from '@/components/layout/LoadingScreen';
 
 interface ActionsTabProps {
   leadId: string;
@@ -18,18 +19,38 @@ interface ActionsTabProps {
 
 const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
   const [actionHistory, setActionHistory] = useState<ActionHistory[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const isMobile = useIsMobile();
 
   useEffect(() => {
     if (leadId) {
-      // Synchroniser les actions avant de les charger
-      syncActions().then(() => {
-        fetchLeadActions();
-      });
+      // Charger les actions immédiatement, puis synchroniser en arrière-plan
+      fetchLeadActions();
+      
+      // Synchroniser en arrière-plan après un court délai
+      setTimeout(() => {
+        syncActionsInBackground();
+      }, 500);
     }
   }, [leadId]);
+
+  const syncActionsInBackground = async () => {
+    if (!leadId) return;
+    
+    try {
+      const success = await syncExistingActionsWithLeads(leadId);
+      if (success) {
+        console.log(`Actions du lead ${leadId} synchronisées avec succès`);
+        // Recharger les actions après synchronisation réussie
+        await fetchLeadActions();
+      }
+    } catch (error) {
+      console.error(`Erreur lors de la synchronisation des actions pour le lead ${leadId}:`, error);
+      // Ne pas afficher d'erreur pour la sync en arrière-plan
+    }
+  };
 
   const syncActions = async () => {
     if (!leadId) return;
@@ -39,15 +60,21 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       const success = await syncExistingActionsWithLeads(leadId);
       if (success) {
         console.log(`Actions du lead ${leadId} synchronisées avec succès`);
+        await fetchLeadActions();
       }
     } catch (error) {
       console.error(`Erreur lors de la synchronisation des actions pour le lead ${leadId}:`, error);
+      toast({
+        variant: "destructive",
+        title: "Erreur de synchronisation",
+        description: "Impossible de synchroniser les actions."
+      });
     } finally {
       setIsSyncing(false);
     }
   };
 
-  const fetchLeadActions = async () => {
+  const fetchLeadActions = async (showToastOnError = false) => {
     try {
       setIsLoading(true);
       console.log('Fetching actions for lead ID:', leadId);
@@ -56,12 +83,27 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         .from('leads')
         .select('action_history')
         .eq('id', leadId)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error("Error fetching lead actions:", error);
-        throw error;
+        
+        // Retry automatique pour les erreurs temporaires
+        if (retryCount < 2 && !showToastOnError) {
+          setRetryCount(prev => prev + 1);
+          setTimeout(() => fetchLeadActions(false), 1000 * (retryCount + 1));
+          return;
+        }
+        
+        // Afficher l'erreur seulement si explicitement demandé ou après plusieurs tentatives
+        if (showToastOnError || retryCount >= 2) {
+          throw error;
+        }
+        return;
       }
+      
+      // Reset retry count on success
+      setRetryCount(0);
       
       if (lead && Array.isArray(lead.action_history)) {
         // Ensure each item in action_history conforms to ActionHistory type
@@ -86,11 +128,17 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       }
     } catch (error) {
       console.error("Error fetching lead actions:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de charger les actions du lead."
-      });
+      
+      // Ne pas afficher d'erreur pour les erreurs UUID vides
+      const errorMessage = error?.message || '';
+      if (!errorMessage.includes('invalid input syntax for type uuid') && 
+          (showToastOnError || retryCount >= 2)) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger les actions du lead."
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +168,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         .from('leads')
         .select('action_history')
         .eq('id', leadId)
-        .single();
+        .maybeSingle();
       
       if (fetchError || !lead || !Array.isArray(lead.action_history)) {
         toast({
@@ -158,7 +206,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       }
       
       // Refresh the actions list
-      await fetchLeadActions();
+      await fetchLeadActions(true);
       
       toast({
         title: "Action complétée",
@@ -197,10 +245,10 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
     }
   };
 
-  if (isLoading || isSyncing) {
+  if (isLoading) {
     return (
-      <div className="bg-white rounded-lg p-4 flex justify-center items-center h-40">
-        <div className="animate-spin h-6 w-6 border-3 border-chocolate-dark rounded-full border-t-transparent"></div>
+      <div className="bg-white rounded-lg p-4">
+        <LoadingScreen fullscreen={false} />
       </div>
     );
   }
@@ -224,7 +272,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         
         <ActionsPanelMobile 
           leadId={leadId} 
-          onAddAction={fetchLeadActions} 
+          onAddAction={() => fetchLeadActions(true)} 
           onMarkComplete={handleMarkComplete} 
           actionHistory={actionHistory} 
         />
@@ -241,9 +289,11 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
           variant="outline" 
           size="sm" 
           onClick={syncActions}
+          disabled={isSyncing}
           className="text-sm flex items-center gap-1"
         >
-          <RefreshCw className="h-3.5 w-3.5" /> Synchroniser les actions
+          <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? 'animate-spin' : ''}`} /> 
+          {isSyncing ? 'Synchronisation...' : 'Synchroniser les actions'}
         </Button>
       </div>
       
