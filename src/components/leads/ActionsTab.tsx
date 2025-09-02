@@ -251,11 +251,15 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         <ActionsPanelMobile 
           leadId={leadId} 
           onAddAction={(updatedLead) => {
-            if (updatedLead?.action_history) {
-              setActionHistory(updatedLead.action_history);
+            console.log('🎯 ActionsTab received updatedLead:', updatedLead);
+            if (updatedLead?.actionHistory) {
+              console.log('📊 Updating actionHistory with', updatedLead.actionHistory.length, 'actions');
+              setActionHistory(updatedLead.actionHistory);
+            } else {
+              console.error('❌ No actionHistory found in updatedLead');
             }
             syncActionsInBackground();
-          }} 
+          }}
           onMarkComplete={handleMarkComplete} 
           actionHistory={actionHistory} 
         />
