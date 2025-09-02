@@ -61,11 +61,15 @@ export function useLeadDetail(id: string | undefined) {
         }
         
         setLead(undefined);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger les informations du lead."
-        });
+        // Ne pas afficher de toast d'erreur pour les erreurs UUID vides
+        const errorMessage = error?.message || '';
+        if (!errorMessage.includes('invalid input syntax for type uuid')) {
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de charger les informations du lead."
+          });
+        }
       } finally {
         setIsLoading(false);
       }
