@@ -116,9 +116,12 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
         if (updatedLead) {
           console.log('🔄 Updating local state with new lead');
           console.log('📊 New actionHistory length:', updatedLead.actionHistory?.length);
+          console.log('🎯 About to call setLead...');
           setLead(updatedLead);
-          console.log('📢 Calling onAddAction callback with updated lead');
+          console.log('✅ setLead called successfully');
+          console.log('📢 About to call onAddAction callback...');
           onAddAction?.(updatedLead);
+          console.log('✅ onAddAction callback called successfully');
         } else {
           console.error('❌ addActionToLead returned undefined/null');
         }
