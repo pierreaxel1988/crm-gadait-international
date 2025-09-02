@@ -109,6 +109,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           notes: actionNotes
         });
         
+        console.log('🎯 EXECUTION REACHED AFTER await addActionToLead');
         console.log('✅ addActionToLead returned:', updatedLead);
         console.log('🔍 Checking if updatedLead exists:', !!updatedLead);
         
