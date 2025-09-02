@@ -77,7 +77,12 @@ const LeadDetailMobile = () => {
     actionSuggestions,
     acceptSuggestion,
     rejectSuggestion
-  } = useLeadActions(lead, setLead, fetchLead);
+  } = useLeadActions(lead, setLead, (updatedLead) => {
+    // Mettre à jour immédiatement l'état local sans refetch
+    if (updatedLead) {
+      setLead(updatedLead);
+    }
+  });
   const handleBackClick = () => {
     navigate('/pipeline');
   };
@@ -228,7 +233,11 @@ const LeadDetailMobile = () => {
             
             <TabsContent value="actions" className="mt-1 animate-[fade-in_0.2s_ease-out]">
               {actionSuggestions && actionSuggestions.length > 0 && <ActionSuggestions suggestions={actionSuggestions} onAccept={acceptSuggestion} onReject={rejectSuggestion} />}
-              <ActionsPanelMobile leadId={lead?.id || ''} onAddAction={fetchLead} onMarkComplete={handleMarkComplete} actionHistory={lead?.actionHistory || []} />
+              <ActionsPanelMobile leadId={lead?.id || ''} onAddAction={(updatedLead) => {
+                if (updatedLead) {
+                  setLead(updatedLead);
+                }
+              }} onMarkComplete={handleMarkComplete} actionHistory={lead?.actionHistory || []} />
               
               {lead && <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />}
             </TabsContent>

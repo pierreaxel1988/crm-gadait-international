@@ -7,7 +7,7 @@ import { addActionToLead } from '@/services/leadActions';
 import { updateLead } from '@/services/leadUpdater';
 import { analyzeNoteText, ActionSuggestion } from '@/services/noteAnalysisService';
 
-export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: LeadDetailed) => void, onAddAction?: () => void) => {
+export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: LeadDetailed) => void, onAddAction?: (updatedLead?: LeadDetailed) => void) => {
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState<TaskType | null>(null);
   const [actionDate, setActionDate] = useState<Date | undefined>(undefined);
@@ -109,7 +109,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
         
         if (updatedLead) {
           setLead(updatedLead);
-          onAddAction?.();
+          onAddAction?.(updatedLead);
         }
         setIsActionDialogOpen(false);
       } catch (error) {
@@ -156,7 +156,7 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
         
         if (updatedLead) {
           setLead(updatedLead);
-          onAddAction?.();
+          onAddAction?.(updatedLead);
           // Remove the suggestion from the list
           setActionSuggestions(prev => prev.filter(s => 
             s.scheduledDate.getTime() !== suggestion.scheduledDate.getTime() || 
