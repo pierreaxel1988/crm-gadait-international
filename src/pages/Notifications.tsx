@@ -44,9 +44,7 @@ const Notifications = () => {
 
   const handleCompleteAction = async (notification) => {
     const success = await handleActionComplete(notification);
-    if (success) {
-      toast.success('Action marquée comme terminée');
-    } else {
+    if (!success) {
       toast.error("Impossible de marquer l'action comme terminée");
     }
   };

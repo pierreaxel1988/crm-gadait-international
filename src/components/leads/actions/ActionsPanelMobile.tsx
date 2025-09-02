@@ -115,10 +115,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       if (updatedLead) {
         setLead(updatedLead);
         onMarkComplete(action);
-        toast({
-          title: "Action marquée comme terminée",
-          description: "L'action a été marquée comme terminée avec succès"
-        });
       }
     } catch (error) {
       console.error("Error marking action complete:", error);
