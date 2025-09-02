@@ -13,7 +13,7 @@ import ActionEditCard from './ActionEditCard';
 
 interface ActionsPanelMobileProps {
   leadId: string;
-  onAddAction: () => void;
+  onAddAction: (updatedLead?: any) => void;
   onMarkComplete: (action: ActionHistory) => void;
   actionHistory: ActionHistory[];
 }
@@ -91,8 +91,8 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
   const handleActionUpdate = (updatedLead: LeadDetailed) => {
     setLead(updatedLead);
-    // Forcer un rechargement des données
-    fetchLead();
+    // Notifier le parent avec les données mises à jour
+    onAddAction(updatedLead);
   };
 
   const handleMarkComplete = async (action: ActionHistory) => {

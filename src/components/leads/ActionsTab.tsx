@@ -89,15 +89,10 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         console.error("Error fetching lead actions:", error);
         
         // Retry automatique pour les erreurs temporaires
-        if (retryCount < 2 && !showToastOnError) {
+        if (retryCount < 1 && actionHistory.length === 0) {
           setRetryCount(prev => prev + 1);
-          setTimeout(() => fetchLeadActions(false), 1000 * (retryCount + 1));
+          setTimeout(() => fetchLeadActions(false), 1000);
           return;
-        }
-        
-        // Afficher l'erreur seulement si explicitement demandé ou après plusieurs tentatives
-        if (showToastOnError || retryCount >= 2) {
-          throw error;
         }
         return;
       }
@@ -128,17 +123,6 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
       }
     } catch (error) {
       console.error("Error fetching lead actions:", error);
-      
-      // Ne pas afficher d'erreur pour les erreurs UUID vides
-      const errorMessage = error?.message || '';
-      if (!errorMessage.includes('invalid input syntax for type uuid') && 
-          (showToastOnError || retryCount >= 2)) {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger les actions du lead."
-        });
-      }
     } finally {
       setIsLoading(false);
     }
@@ -171,11 +155,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         .maybeSingle();
       
       if (fetchError || !lead || !Array.isArray(lead.action_history)) {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Lead introuvable ou historique d'actions inexistant."
-        });
+        console.error('Error fetching lead for completion:', fetchError);
         return;
       }
       
@@ -202,23 +182,21 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         .eq('id', leadId);
       
       if (updateError) {
-        throw updateError;
+        console.error('Error updating lead completion:', updateError);
+        return;
       }
       
-      // Refresh the actions list
-      await fetchLeadActions(true);
-      
+      // Mettre à jour l'état local immédiatement
+      setActionHistory(updatedActionHistory);
       toast({
         title: "Action complétée",
         description: "L'action a été marquée comme complétée."
       });
+      
+      // Sync en arrière-plan sans afficher d'erreurs
+      syncActionsInBackground();
     } catch (error) {
       console.error("Error marking action as complete:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de marquer l'action comme complétée."
-      });
     }
   };
 
@@ -272,7 +250,12 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
         
         <ActionsPanelMobile 
           leadId={leadId} 
-          onAddAction={() => fetchLeadActions(true)} 
+          onAddAction={(updatedLead) => {
+            if (updatedLead?.action_history) {
+              setActionHistory(updatedLead.action_history);
+            }
+            syncActionsInBackground();
+          }} 
           onMarkComplete={handleMarkComplete} 
           actionHistory={actionHistory} 
         />
