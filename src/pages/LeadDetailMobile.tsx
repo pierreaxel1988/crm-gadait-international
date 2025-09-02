@@ -103,10 +103,6 @@ const LeadDetailMobile = () => {
       const result = await updateLead(updatedLead);
       if (result) {
         setLead(result);
-        toast({
-          title: "Action supprimée",
-          description: "L'action a été supprimée avec succès"
-        });
       }
     } catch (error) {
       console.error("Error deleting action:", error);

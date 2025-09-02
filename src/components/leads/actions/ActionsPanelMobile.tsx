@@ -133,10 +133,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
 
       if (updatedLead) {
         setLead(updatedLead);
-        toast({
-          title: "Action supprimée",
-          description: "L'action a été supprimée avec succès"
-        });
       }
     } catch (error) {
       console.error("Error deleting action:", error);

@@ -152,10 +152,6 @@ const ActionEditCard: React.FC<ActionEditCardProps> = ({
 
       if (updatedLead) {
         onUpdate(updatedLead);
-        toast({
-          title: "Action supprimée",
-          description: "L'action a été supprimée avec succès"
-        });
         onClose();
       }
     } catch (error) {
