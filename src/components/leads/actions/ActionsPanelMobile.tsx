@@ -45,11 +45,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       setLead(convertedLead);
     } catch (error) {
       console.error('Error fetching lead:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de charger les données du lead."
-      });
     } finally {
       setIsLoading(false);
     }
