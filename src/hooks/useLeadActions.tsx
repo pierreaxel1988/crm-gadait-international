@@ -101,15 +101,23 @@ export const useLeadActions = (lead: LeadDetailed | undefined, setLead: (lead: L
           }
         }
         
+        console.log('🚀 About to call addActionToLead with:', { leadId: lead.id, action: { actionType: selectedAction, scheduledDate: scheduledDateTime, notes: actionNotes } });
+        
         const updatedLead = await addActionToLead(lead.id, {
           actionType: selectedAction,
           scheduledDate: scheduledDateTime,
           notes: actionNotes
         });
         
+        console.log('✅ addActionToLead returned:', updatedLead);
+        
         if (updatedLead) {
+          console.log('🔄 Updating local state with new lead');
           setLead(updatedLead);
+          console.log('📢 Calling onAddAction callback with updated lead');
           onAddAction?.(updatedLead);
+        } else {
+          console.error('❌ addActionToLead returned undefined/null');
         }
         setIsActionDialogOpen(false);
       } catch (error) {
