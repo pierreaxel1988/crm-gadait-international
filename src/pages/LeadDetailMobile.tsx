@@ -233,7 +233,15 @@ const LeadDetailMobile = () => {
                 if (updatedLead) {
                   setLead(updatedLead);
                 }
-              }} onMarkComplete={handleMarkComplete} actionHistory={lead?.actionHistory || []} />
+              }} onMarkComplete={handleMarkComplete} onDeleteAction={(actionId) => {
+                if (lead) {
+                  const updatedLead = {
+                    ...lead,
+                    actionHistory: lead.actionHistory?.filter(action => action.id !== actionId) || []
+                  };
+                  setLead(updatedLead);
+                }
+              }} actionHistory={lead?.actionHistory || []} />
               
               {lead && <ChatGadaitFloatingButton leadData={lead} position="bottom-right" />}
             </TabsContent>

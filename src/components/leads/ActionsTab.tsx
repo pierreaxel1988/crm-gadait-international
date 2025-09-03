@@ -261,6 +261,10 @@ const ActionsTab: React.FC<ActionsTabProps> = ({ leadId }) => {
             syncActionsInBackground();
           }}
           onMarkComplete={handleMarkComplete} 
+          onDeleteAction={(actionId) => {
+            const updatedHistory = actionHistory.filter(action => action.id !== actionId);
+            setActionHistory(updatedHistory);
+          }}
           actionHistory={actionHistory} 
         />
         {/* Le bouton ChatGadaitFloatingButton est maintenant géré au niveau des pages de détail */}

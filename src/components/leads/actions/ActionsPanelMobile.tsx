@@ -15,6 +15,7 @@ interface ActionsPanelMobileProps {
   leadId: string;
   onAddAction: (updatedLead?: any) => void;
   onMarkComplete: (action: ActionHistory) => void;
+  onDeleteAction: (actionId: string) => void;
   actionHistory: ActionHistory[];
 }
 
@@ -22,37 +23,12 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   leadId,
   onAddAction,
   onMarkComplete,
+  onDeleteAction,
   actionHistory = []
 }) => {
-  const [lead, setLead] = useState<LeadDetailed | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedAction, setSelectedAction] = useState<ActionHistory | null>(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
 
-  const fetchLead = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('leads')
-        .select('*')
-        .eq('id', leadId)
-        .single();
-
-      if (error) throw error;
-
-      // Convert database row to LeadDetailed format using mapToLeadDetailed
-      const convertedLead = mapToLeadDetailed(data);
-      setLead(convertedLead);
-    } catch (error) {
-      console.error('Error fetching lead:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [leadId]);
-
-  useEffect(() => {
-    fetchLead();
-  }, [fetchLead]);
 
   const getActionTypeIcon = (actionType: string) => {
     switch (actionType) {
@@ -85,62 +61,20 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
   };
 
   const handleActionUpdate = (updatedLead: LeadDetailed) => {
-    setLead(updatedLead);
     // Notifier le parent avec les données mises à jour
     onAddAction(updatedLead);
   };
 
-  const handleMarkComplete = async (action: ActionHistory) => {
-    if (!lead) return;
-
-    try {
-      const updatedActionHistory = lead.actionHistory?.map(a => 
-        a.id === action.id ? {
-          ...a,
-          completedDate: new Date().toISOString()
-        } : a
-      ) || [];
-
-      const updatedLead = await updateLead({
-        ...lead,
-        actionHistory: updatedActionHistory,
-        lastContactedAt: new Date().toISOString()
-      });
-
-      if (updatedLead) {
-        setLead(updatedLead);
-        onMarkComplete(action);
-      }
-    } catch (error) {
-      console.error("Error marking action complete:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de marquer l'action comme terminée"
-      });
-    }
+  const handleMarkCompleteLocal = (action: ActionHistory) => {
+    onMarkComplete(action);
   };
 
-  const handleDeleteAction = async (actionId: string) => {
-    if (!lead) return;
-
-    try {
-      const updatedActionHistory = lead.actionHistory?.filter(action => action.id !== actionId) || [];
-      const updatedLead = await updateLead({
-        ...lead,
-        actionHistory: updatedActionHistory
-      });
-
-      if (updatedLead) {
-        setLead(updatedLead);
-      }
-    } catch (error) {
-      console.error("Error deleting action:", error);
-    }
+  const handleDeleteActionLocal = (actionId: string) => {
+    onDeleteAction(actionId);
   };
 
-  // Use actions from the local lead data to ensure consistency
-  const currentActions = lead?.actionHistory || actionHistory;
+  // Use actions directly from props (real-time data from parent)
+  const currentActions = actionHistory;
   
   // Sort actions chronologically - most recent first
   const pendingActions = currentActions
@@ -159,13 +93,6 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
       return dateB - dateA; // Most recent first
     });
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-chocolate-dark"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6 py-[20px]">
@@ -210,7 +137,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   <Button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleMarkComplete(action);
+                      handleMarkCompleteLocal(action);
                     }} 
                     size="sm" 
                     variant="outline" 
@@ -221,7 +148,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                   <Button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDeleteAction(action.id);
+                      handleDeleteActionLocal(action.id);
                     }} 
                     size="sm" 
                     variant="outline" 
@@ -270,7 +197,7 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
                 <Button 
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDeleteAction(action.id);
+                    handleDeleteActionLocal(action.id);
                   }} 
                   size="sm" 
                   variant="outline" 
@@ -292,16 +219,14 @@ const ActionsPanelMobile: React.FC<ActionsPanelMobileProps> = ({
         </div>
       )}
 
-      {lead && (
       <ActionEditCard
         isOpen={isEditSheetOpen}
         onClose={() => setIsEditSheetOpen(false)}
         action={selectedAction}
-        lead={lead}
+        lead={{ id: leadId, actionHistory } as LeadDetailed}
         onUpdate={handleActionUpdate}
         getActionTypeIcon={getActionTypeIcon}
       />
-      )}
     </div>
   );
 };
