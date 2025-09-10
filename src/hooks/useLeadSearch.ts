@@ -84,12 +84,14 @@ export function useLeadSearch(initialSearchTerm: string = '', adminGlobalSearch:
       try {
         const searchTerm = debouncedSearchTerm.trim();
         console.log('Searching for:', searchTerm);
+        console.log('Search term length:', searchTerm.length);
+        console.log('Admin global search:', adminGlobalSearch);
         
         // Build query based on admin status
         let query = supabase
           .from('leads')
           .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget, deleted_at, assigned_to')
-          .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,property_reference.ilike.%${searchTerm}%,tags.cs.{${searchTerm}}`);
+          .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,property_reference.ilike.%${searchTerm}%`);
 
         // If not admin global search, apply role-based filtering
         if (!adminGlobalSearch) {
@@ -113,6 +115,9 @@ export function useLeadSearch(initialSearchTerm: string = '', adminGlobalSearch:
           .order('deleted_at', { ascending: true, nullsFirst: true })
           .order('created_at', { ascending: false })
           .limit(30);
+        
+        console.log('Query executed, error:', error);
+        console.log('Raw data received:', data?.length || 0, 'results');
 
         if (error) {
           console.error('Error searching leads:', error);
