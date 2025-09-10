@@ -63,7 +63,6 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
   // Debounce input changes to parent
   useEffect(() => {
     if (debouncedValue !== value) {
-      console.log('SmartSearch - sending to parent:', debouncedValue);
       onChange(debouncedValue);
     }
   }, [debouncedValue, onChange, value]);
@@ -129,7 +128,6 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
   }, [isOpen, results, selectedIndex, onSelect, onBlur]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('SmartSearch - input changed:', e.target.value);
     setInputValue(e.target.value);
     setSelectedIndex(-1);
   }, []);

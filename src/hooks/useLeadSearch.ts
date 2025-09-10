@@ -49,7 +49,7 @@ export function useLeadSearch(initialSearchTerm: string = '', adminGlobalSearch:
       const { data, error } = await supabase
         .from('properties')
         .select('id, title, price, location, property_type, external_id')
-        .or(`title.ilike.%${term}%, location.ilike.%${term}%, external_id.ilike.%${term}%`)
+        .or(`title.ilike.'%${term}%', location.ilike.'%${term}%', external_id.ilike.'%${term}%'`)
         .limit(15);
 
       if (error) {
@@ -83,15 +83,12 @@ export function useLeadSearch(initialSearchTerm: string = '', adminGlobalSearch:
       
       try {
         const searchTerm = debouncedSearchTerm.trim();
-        console.log('Searching for:', searchTerm);
-        console.log('Search term length:', searchTerm.length);
-        console.log('Admin global search:', adminGlobalSearch);
         
         // Build query based on admin status
         let query = supabase
           .from('leads')
           .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget, deleted_at, assigned_to')
-          .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,property_reference.ilike.%${searchTerm}%`);
+          .or(`name.ilike.'%${searchTerm}%',email.ilike.'%${searchTerm}%',phone.ilike.'%${searchTerm}%',property_reference.ilike.'%${searchTerm}%'`);
 
         // If not admin global search, apply role-based filtering
         if (!adminGlobalSearch) {
@@ -116,15 +113,11 @@ export function useLeadSearch(initialSearchTerm: string = '', adminGlobalSearch:
           .order('created_at', { ascending: false })
           .limit(30);
         
-        console.log('Query executed, error:', error);
-        console.log('Raw data received:', data?.length || 0, 'results');
 
         if (error) {
           console.error('Error searching leads:', error);
           setResults([]);
         } else if (data) {
-          console.log(`Found ${data.length} results for "${searchTerm}"`);
-          
           // Transformer les résultats en ajoutant un statut "Deleted" si deleted_at existe
           const formattedResults = data.map(lead => ({
             id: lead.id,
@@ -144,9 +137,6 @@ export function useLeadSearch(initialSearchTerm: string = '', adminGlobalSearch:
             budget: lead.budget,
             deleted_at: lead.deleted_at
           }));
-          
-          // Log pour debug
-          console.log('Formatted results:', formattedResults);
           
           setResults(formattedResults);
         }
