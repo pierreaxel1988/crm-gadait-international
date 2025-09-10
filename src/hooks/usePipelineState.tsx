@@ -217,8 +217,8 @@ export function usePipelineState() {
       { title: 'Offre en cours', status: 'Offre' as LeadStatus },
       { title: 'Dépôt reçu', status: 'Deposit' as LeadStatus },
       { title: 'Signature finale', status: 'Signed' as LeadStatus },
-      { title: 'Perdu', status: 'Perdu' as LeadStatus },
-      { title: 'Conclus', status: 'Gagné' as LeadStatus }
+      { title: 'Conclus', status: 'Gagné' as LeadStatus },
+      { title: 'Perdu', status: 'Perdu' as LeadStatus }
     ].map(col => ({
       ...col,
       items: [],
