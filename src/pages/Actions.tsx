@@ -68,7 +68,7 @@ const Actions = () => {
                 <PipelineSearchBar
                   searchTerm={searchTerm}
                   setSearchTerm={setSearchTerm}
-                  onRefresh={handleRefresh}
+                  placeholder="Rechercher une action par lead, email, téléphone..."
                 />
               </div>
               

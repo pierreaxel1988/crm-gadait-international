@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,6 +16,7 @@ import LeadsList from './components/LeadsList';
 import AddLeadButton from './components/AddLeadButton';
 import { DesktopPipelineViewProps, SortBy } from './types/pipelineTypes';
 import { PipelineType } from '@/types/lead';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const statusTranslations: Record<string, string> = {
   'New': 'Nouveaux',
@@ -51,6 +52,9 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   const [activeStatus, setActiveStatus] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortBy>('priority');
   const navigate = useNavigate();
+  
+  // Debounce search term like in Actions page
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const pipelines = [
     { label: "Achat", value: "purchase" },
@@ -71,23 +75,32 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
         !column.pipelineType || column.pipelineType === activeTab
       );
 
-  const leadsByStatus = filteredColumns.flatMap(column => column.items.map(item => ({
-    ...item,
-    columnStatus: column.status
-  })));
-  
-  const displayedLeads = activeStatus === 'all' 
-    ? leadsByStatus 
-    : leadsByStatus.filter(lead => lead.columnStatus === activeStatus);
-  
-  const searchFilteredLeads = searchTerm 
-    ? displayedLeads.filter(item => 
-        item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.desiredLocation?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : displayedLeads;
+  // Enhanced client-side search filtering like Actions page
+  const filteredLeadsWithSearch = useMemo(() => {
+    const leadsByStatus = filteredColumns.flatMap(column => column.items.map(item => ({
+      ...item,
+      columnStatus: column.status
+    })));
     
-  const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
+    const displayedLeads = activeStatus === 'all' 
+      ? leadsByStatus 
+      : leadsByStatus.filter(lead => lead.columnStatus === activeStatus);
+    
+    // Enhanced search filtering like Actions page
+    if (!debouncedSearchTerm) return displayedLeads;
+    
+    const searchLower = debouncedSearchTerm.toLowerCase();
+    return displayedLeads.filter(item => 
+      item.name?.toLowerCase().includes(searchLower) ||
+      item.email?.toLowerCase().includes(searchLower) ||
+      item.phone?.toLowerCase().includes(searchLower) ||
+      item.desiredLocation?.toLowerCase().includes(searchLower) ||
+      item.nationality?.toLowerCase().includes(searchLower) ||
+      item.source?.toLowerCase().includes(searchLower)
+    );
+  }, [filteredColumns, activeStatus, debouncedSearchTerm]);
+    
+  const sortedLeads = sortLeadsByPriority(filteredLeadsWithSearch, sortBy);
   
   const handleAddLead = () => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${activeStatus === 'all' ? 'New' : activeStatus}`);
@@ -108,7 +121,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     return acc;
   }, {} as Record<string, number>);
   
-  const totalLeadCount = leadsByStatus.length;
+  const totalLeadCount = filteredLeadsWithSearch.length;
 
   return (
     <div className="flex flex-col">

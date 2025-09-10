@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -44,6 +45,9 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
   const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
   const navigate = useNavigate();
   
+  // Debounce search term like in Actions page
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  
   const {
     loadedColumns,
     isLoading,
@@ -64,26 +68,35 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
     }
   }, [filters]);
 
-  const leadsByStatus = activeStatus === 'all' 
-    ? filteredColumns.flatMap(column => column.items.map(item => ({
-        ...item,
-        columnStatus: column.status
-      })))
-    : filteredColumns
-        .filter(column => column.status === activeStatus)
-        .flatMap(column => column.items.map(item => ({
+  // Enhanced client-side search filtering like Actions page
+  const filteredLeadsWithSearch = useMemo(() => {
+    const leadsByStatus = activeStatus === 'all' 
+      ? filteredColumns.flatMap(column => column.items.map(item => ({
           ...item,
           columnStatus: column.status
-        })));
-  
-  const searchFilteredLeads = searchTerm
-    ? leadsByStatus.filter(lead => 
-        lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead.desiredLocation?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : leadsByStatus;
+        })))
+      : filteredColumns
+          .filter(column => column.status === activeStatus)
+          .flatMap(column => column.items.map(item => ({
+            ...item,
+            columnStatus: column.status
+          })));
+          
+    // Enhanced search filtering like Actions page
+    if (!debouncedSearchTerm) return leadsByStatus;
     
-  const sortedLeads = sortLeadsByPriority(searchFilteredLeads, sortBy);
+    const searchLower = debouncedSearchTerm.toLowerCase();
+    return leadsByStatus.filter(item => 
+      item.name?.toLowerCase().includes(searchLower) ||
+      item.email?.toLowerCase().includes(searchLower) ||
+      item.phone?.toLowerCase().includes(searchLower) ||
+      item.desiredLocation?.toLowerCase().includes(searchLower) ||
+      item.nationality?.toLowerCase().includes(searchLower) ||
+      item.source?.toLowerCase().includes(searchLower)
+    );
+  }, [filteredColumns, activeStatus, debouncedSearchTerm]);
+  
+  const sortedLeads = sortLeadsByPriority(filteredLeadsWithSearch, sortBy);
 
   useEffect(() => {
     console.log('Team Members in MobileColumnList:', teamMembers);
@@ -101,7 +114,7 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
     return acc;
   }, {} as Record<string, number>);
   
-  const totalLeadCount = leadsByStatus.length;
+  const totalLeadCount = filteredLeadsWithSearch.length;
 
   const handleAddLead = (status: LeadStatus) => {
     navigate(`/leads/new?pipeline=${activeTab}&status=${status}`);
