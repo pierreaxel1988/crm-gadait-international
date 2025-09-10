@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLeadSearch } from '@/hooks/useLeadSearch';
+import { useEnhancedSearch } from '@/hooks/useEnhancedSearch';
 import SmartSearch from '@/components/common/SmartSearch';
 import { Trash2 } from 'lucide-react';
 
@@ -27,7 +27,7 @@ const LeadsSearchBar: React.FC<LeadsSearchBarProps> = ({
   isLoading: propIsLoading = false 
 }) => {
   const navigate = useNavigate();
-  const { results, isLoading } = useLeadSearch(searchTerm);
+  const { results, isLoading } = useEnhancedSearch(searchTerm, false);
   
   // Utiliser les résultats fournis par les props ou ceux de useLeadSearch
   const displayResults = propResults.length > 0 ? propResults : results;

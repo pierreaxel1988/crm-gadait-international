@@ -1,7 +1,7 @@
 
 import React, { useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAdminGlobalSearch, AdminSearchResult } from '@/hooks/useAdminGlobalSearch';
+import { useEnhancedSearch, SearchResult } from '@/hooks/useEnhancedSearch';
 import { useAuth } from '@/hooks/useAuth';
 import SmartSearch from '@/components/common/SmartSearch';
 import { Trash2 } from 'lucide-react';
@@ -25,9 +25,9 @@ const PipelineSearchBar: React.FC<PipelineSearchBarProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin } = useAuth();
-  const { results, isLoading } = useAdminGlobalSearch(searchTerm);
+  const { results, isLoading } = useEnhancedSearch(searchTerm, isAdmin);
 
-  const handleSelectLead = useCallback((lead: AdminSearchResult) => {
+  const handleSelectLead = useCallback((lead: SearchResult) => {
     // Smart navigation - redirect to correct pipeline if different
     if (isAdmin && lead.pipelineType && lead.pipelineType !== currentTab) {
       const pipelineMap: Record<string, string> = {
@@ -73,7 +73,7 @@ const PipelineSearchBar: React.FC<PipelineSearchBarProps> = ({
     }
   };
 
-  const renderLeadItem = useCallback((lead: AdminSearchResult) => (
+  const renderLeadItem = useCallback((lead: SearchResult) => (
     <div className="flex flex-col">
       <div className="flex items-center gap-2">
         <div className="font-medium">{lead.name}</div>
