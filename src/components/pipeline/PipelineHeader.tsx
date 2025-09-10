@@ -107,10 +107,14 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
       
       <div className="relative">
         <PipelineSearchBar 
-          searchTerm={searchTerm} 
+          searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           onRefresh={handleRefresh}
           isRefreshing={isRefreshing}
+          currentTab={window.location.pathname.includes('pipeline') 
+            ? new URLSearchParams(window.location.search).get('tab') || 'purchase'
+            : 'purchase'
+          }
         />
       </div>
 

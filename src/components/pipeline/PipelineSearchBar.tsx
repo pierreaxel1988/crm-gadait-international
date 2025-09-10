@@ -1,34 +1,87 @@
 
 import React, { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLeadSearch, SearchResult } from '@/hooks/useLeadSearch';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAdminGlobalSearch, AdminSearchResult } from '@/hooks/useAdminGlobalSearch';
+import { useAuth } from '@/hooks/useAuth';
 import SmartSearch from '@/components/common/SmartSearch';
 import { Trash2 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface PipelineSearchBarProps {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  currentTab?: string;
 }
 
 const PipelineSearchBar: React.FC<PipelineSearchBarProps> = ({
   searchTerm,
   setSearchTerm,
   onRefresh,
-  isRefreshing = false
+  isRefreshing = false,
+  currentTab = 'purchase'
 }) => {
   const navigate = useNavigate();
-  const { results, isLoading } = useLeadSearch(searchTerm);
+  const location = useLocation();
+  const { isAdmin } = useAuth();
+  const { results, isLoading } = useAdminGlobalSearch(searchTerm);
 
-  const handleSelectLead = useCallback((lead: SearchResult) => {
-    navigate(`/leads/${lead.id}?tab=actions`);
-  }, [navigate]);
+  const handleSelectLead = useCallback((lead: AdminSearchResult) => {
+    // Smart navigation - redirect to correct pipeline if different
+    if (isAdmin && lead.pipelineType && lead.pipelineType !== currentTab) {
+      const pipelineMap: Record<string, string> = {
+        'purchase': 'purchase',
+        'rental': 'rental', 
+        'owners': 'owners'
+      };
+      
+      const targetTab = pipelineMap[lead.pipelineType] || 'purchase';
+      
+      // Show notification about tab change
+      toast({
+        title: "Navigation intelligente",
+        description: `Redirection vers l'onglet ${lead.pipelineType === 'purchase' ? 'Achat' : lead.pipelineType === 'rental' ? 'Location' : 'Propriétaires'}...`,
+        duration: 2000,
+      });
+      
+      // Navigate to correct pipeline tab first, then to lead
+      navigate(`/pipeline?tab=${targetTab}`);
+      setTimeout(() => {
+        navigate(`/leads/${lead.id}?tab=actions`);
+      }, 100);
+    } else {
+      navigate(`/leads/${lead.id}?tab=actions`);
+    }
+  }, [navigate, isAdmin, currentTab]);
 
-  const renderLeadItem = useCallback((lead: SearchResult) => (
+  const getPipelineBadgeColor = (pipelineType: string) => {
+    switch (pipelineType) {
+      case 'purchase': return 'bg-blue-100 text-blue-700';
+      case 'rental': return 'bg-green-100 text-green-700';
+      case 'owners': return 'bg-purple-100 text-purple-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getPipelineLabel = (pipelineType: string) => {
+    switch (pipelineType) {
+      case 'purchase': return 'Achat';
+      case 'rental': return 'Location';
+      case 'owners': return 'Propriétaires';
+      default: return pipelineType;
+    }
+  };
+
+  const renderLeadItem = useCallback((lead: AdminSearchResult) => (
     <div className="flex flex-col">
       <div className="flex items-center gap-2">
         <div className="font-medium">{lead.name}</div>
+        {isAdmin && lead.pipelineType && (
+          <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${getPipelineBadgeColor(lead.pipelineType)}`}>
+            {getPipelineLabel(lead.pipelineType)}
+          </span>
+        )}
         {lead.deleted_at && (
           <div className="flex items-center gap-1 text-red-600">
             <Trash2 className="h-3 w-3" />
@@ -55,7 +108,7 @@ const PipelineSearchBar: React.FC<PipelineSearchBarProps> = ({
         )}
       </div>
     </div>
-  ), []);
+  ), [isAdmin]);
 
   const handleClearSearch = useCallback(() => {
     if (onRefresh) {
@@ -63,9 +116,13 @@ const PipelineSearchBar: React.FC<PipelineSearchBarProps> = ({
     }
   }, [onRefresh]);
 
+  const placeholder = isAdmin 
+    ? "Rechercher dans tous les pipelines..." 
+    : "Rechercher un lead...";
+
   return (
     <SmartSearch
-      placeholder="Rechercher un lead..."
+      placeholder={placeholder}
       value={searchTerm}
       onChange={setSearchTerm}
       onSelect={handleSelectLead}
@@ -76,7 +133,7 @@ const PipelineSearchBar: React.FC<PipelineSearchBarProps> = ({
       inputClassName="pl-9 pr-12 bg-gray-100 border-0"
       emptyMessage="Aucun résultat trouvé"
       loadingMessage="Recherche en cours..."
-      minChars={1} // Reduced to 1 character for immediate search
+      minChars={1}
       searchIcon={true}
       clearButton={true}
       onClear={handleClearSearch}

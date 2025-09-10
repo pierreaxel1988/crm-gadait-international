@@ -33,7 +33,7 @@ export interface PropertyResult {
   external_id?: string;
 }
 
-export function useLeadSearch(initialSearchTerm: string = '') {
+export function useLeadSearch(initialSearchTerm: string = '', adminGlobalSearch: boolean = false) {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -85,11 +85,31 @@ export function useLeadSearch(initialSearchTerm: string = '') {
         const searchTerm = debouncedSearchTerm.trim();
         console.log('Searching for:', searchTerm);
         
-        // Rechercher dans TOUS les leads, y compris les supprimés avec une requête optimisée
-        const { data, error } = await supabase
+        // Build query based on admin status
+        let query = supabase
           .from('leads')
-          .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget, deleted_at')
-          .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,property_reference.ilike.%${searchTerm}%,tags.cs.{${searchTerm}}`)
+          .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget, deleted_at, assigned_to')
+          .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,property_reference.ilike.%${searchTerm}%,tags.cs.{${searchTerm}}`);
+
+        // If not admin global search, apply role-based filtering
+        if (!adminGlobalSearch) {
+          // Get current user to apply commercial filtering
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: teamMember } = await supabase
+              .from('team_members')
+              .select('id, role, is_admin')
+              .eq('email', user.email)
+              .single();
+
+            // If commercial, only show their assigned leads
+            if (teamMember && teamMember.role === 'commercial' && !teamMember.is_admin) {
+              query = query.eq('assigned_to', teamMember.id);
+            }
+          }
+        }
+
+        const { data, error } = await query
           .order('deleted_at', { ascending: true, nullsFirst: true })
           .order('created_at', { ascending: false })
           .limit(30);
