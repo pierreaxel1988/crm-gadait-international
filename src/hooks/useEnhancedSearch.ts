@@ -47,14 +47,11 @@ export function useEnhancedSearch(initialSearchTerm: string = '', isAdminGlobalS
     }
 
     try {
-      // Use a more reliable approach with individual queries combined
+      // Use separate queries to avoid baseQuery reuse conflicts
       const searchPattern = `%${term.trim()}%`;
       
-      let baseQuery = supabase
-        .from('leads')
-        .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget, deleted_at, assigned_to');
-
-      // Apply role-based filtering first
+      // Get role-based filtering info once
+      let teamMemberFilter = null;
       if (!isAdminGlobalSearch && !isAdmin) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -65,41 +62,40 @@ export function useEnhancedSearch(initialSearchTerm: string = '', isAdminGlobalS
             .single();
 
           if (teamMember && teamMember.role === 'commercial' && !teamMember.is_admin) {
-            baseQuery = baseQuery.eq('assigned_to', teamMember.id);
+            teamMemberFilter = teamMember.id;
           }
         }
       }
 
-      // Perform multiple searches and combine results
+      console.log('🔍 Searching for:', term, 'Pattern:', searchPattern, 'Team filter:', teamMemberFilter);
+
+      // Create separate queries for each search type
+      const createQuery = (field: string) => {
+        let query = supabase
+          .from('leads')
+          .select('id, name, email, phone, status, desired_location, pipeline_type, nationality, source, tax_residence, preferred_language, property_reference, created_at, tags, budget, deleted_at, assigned_to')
+          .ilike(field, searchPattern);
+
+        if (teamMemberFilter) {
+          query = query.eq('assigned_to', teamMemberFilter);
+        }
+
+        return query
+          .order('deleted_at', { ascending: true, nullsFirst: true })
+          .order('created_at', { ascending: false })
+          .limit(10);
+      };
+
+      // Execute all queries in parallel
       const [nameResults, emailResults, phoneResults, refResults] = await Promise.all([
-        // Search by name
-        baseQuery
-          .ilike('name', searchPattern)
-          .order('deleted_at', { ascending: true, nullsFirst: true })
-          .order('created_at', { ascending: false })
-          .limit(10),
-        
-        // Search by email
-        baseQuery
-          .ilike('email', searchPattern)
-          .order('deleted_at', { ascending: true, nullsFirst: true })
-          .order('created_at', { ascending: false })
-          .limit(10),
-        
-        // Search by phone
-        baseQuery
-          .ilike('phone', searchPattern)
-          .order('deleted_at', { ascending: true, nullsFirst: true })
-          .order('created_at', { ascending: false })
-          .limit(10),
-        
-        // Search by property reference
-        baseQuery
-          .ilike('property_reference', searchPattern)
-          .order('deleted_at', { ascending: true, nullsFirst: true })
-          .order('created_at', { ascending: false })
-          .limit(10)
+        createQuery('name'),
+        createQuery('email'),
+        createQuery('phone'),
+        createQuery('property_reference')
       ]);
+
+      console.log('📧 Email search results:', emailResults.data?.length || 0, 'found');
+      console.log('👤 Name search results:', nameResults.data?.length || 0, 'found');
 
       // Check for errors
       if (nameResults.error) console.error('Name search error:', nameResults.error);
