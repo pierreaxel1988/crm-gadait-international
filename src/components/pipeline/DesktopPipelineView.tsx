@@ -28,9 +28,11 @@ const statusTranslations: Record<string, string> = {
   'Offre': 'Offre en cours',
   'Deposit': 'Dépôt reçu',
   'Signed': 'Signature finale',
-  'Gagné': 'Conclus',
-  'Perdu': 'Perdu'
+  'Perdu': 'Perdu',
+  'Gagné': 'Conclus'
 };
+
+const statusOrder = ['New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offer', 'Offre', 'Deposit', 'Signed', 'Perdu', 'Gagné'];
 
 const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   activeTab,
@@ -168,7 +170,9 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
               >
                 Tous ({totalLeadCount})
               </TabsTrigger>
-              {filteredColumns.map(column => 
+              {filteredColumns
+                .sort((a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status))
+                .map(column => 
                 leadCountByStatus[column.status] > 0 && (
                   <TabsTrigger 
                     key={column.status} 

@@ -21,10 +21,12 @@ const statusTranslations: Record<LeadStatus, string> = {
   'Offre': 'Offre en cours',
   'Deposit': 'Dépôt reçu',
   'Signed': 'Signature finale',
-  'Gagné': 'Conclus',
   'Perdu': 'Perdu',
+  'Gagné': 'Conclus',
   'Deleted': 'Supprimé'
 };
+
+const statusOrder = ['New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offre', 'Deposit', 'Signed', 'Perdu', 'Gagné', 'Deleted'];
 
 interface MobileColumnListProps {
   columns: Array<{
@@ -150,7 +152,9 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
                   >
                     Tous ({totalLeadCount})
                   </TabsTrigger>
-                  {filteredColumns.map(column => 
+                  {filteredColumns
+                    .sort((a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status))
+                    .map(column => 
                     leadCountByStatus[column.status] > 0 && (
                       <TabsTrigger 
                         key={column.status} 
