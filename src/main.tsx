@@ -7,6 +7,6 @@ import './index.css'
 const rootElement = document.getElementById("root")!;
 rootElement.classList.add('h-full');
 document.documentElement.classList.add('h-full');
-document.body.classList.add('h-full', 'bg-[#0A2540]');
+document.body.classList.add('h-full');
 
 createRoot(rootElement).render(<App />);
