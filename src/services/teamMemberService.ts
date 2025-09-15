@@ -11,6 +11,7 @@ const CHLOE_ID = "28c03acf-cb78-46b7-8dba-c1edee49c932";
 const CHRISTINE_ID = "af1c9117-f94f-44d0-921f-776dd5fd6f96";
 const OPHELIE_ID = "2d8bae00-a935-439d-8685-0adf238a612e";
 const MATTHIEU_ID = "875d6073-f9c5-4bf5-9909-1ac517853dc1";
+const FRANCK_ID = "14688125-e994-4841-b130-765610d6ac22";
 
 // Liste complète des membres garantis avec leur ID officiel
 export const GUARANTEED_TEAM_MEMBERS = [
@@ -23,7 +24,8 @@ export const GUARANTEED_TEAM_MEMBERS = [
   { id: CHLOE_ID, name: "Chloe Valentin", email: "chloe@gadait-international.com", role: "admin" },
   { id: CHRISTINE_ID, name: "Christine Francoise", email: "admin@gadait-international.com", role: "admin" },
   { id: OPHELIE_ID, name: "Ophelie Durand", email: "ophelie@gadait-international.com", role: "agent" },
-  { id: MATTHIEU_ID, name: "Matthieu Lapierre", email: "matthieu@gadait-international.com", role: "agent" }
+  { id: MATTHIEU_ID, name: "Matthieu Lapierre", email: "matthieu@gadait-international.com", role: "agent" },
+  { id: FRANCK_ID, name: "Franck Fontaine", email: "franck@gadait-international.com", role: "agent" }
 ];
 
 // Anciennes clés utilisées pour les agents, à remplacer par les UUIDs corrects
