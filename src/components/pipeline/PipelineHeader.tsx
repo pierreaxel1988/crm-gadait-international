@@ -89,19 +89,15 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
             </Button>
           )}
           <Button 
-            variant="outline" 
+            variant={activeFilters > 0 ? "default" : "outline"} 
             size="sm" 
-            onClick={() => {
-              console.log('Navigating to filters page...');
-              const currentTab = new URLSearchParams(window.location.search).get('tab') || 'purchase';
-              navigate(`/pipeline/filters?tab=${currentTab}`);
-            }}
+            onClick={onToggleFilters} 
             className="h-10 px-4 relative font-medium"
           >
             <SlidersHorizontal className="h-4 w-4 mr-2" />
-            Filtres avancés
+            Filtres
             {activeFilters > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+              <span className="absolute -top-1 -right-1 bg-white text-primary rounded-full h-5 w-5 flex items-center justify-center text-xs">
                 {activeFilters}
               </span>
             )}
