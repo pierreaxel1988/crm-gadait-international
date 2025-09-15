@@ -1,6 +1,6 @@
 import React from 'react';
 import { Globe } from 'lucide-react';
-import { COUNTRIES } from '@/utils/countries';
+import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
 import {
   Select,
   SelectContent,
@@ -15,6 +15,11 @@ interface CountryFilterProps {
 }
 
 const CountryFilter = ({ country, onCountryChange }: CountryFilterProps) => {
+  // Extract only the countries where we sell properties
+  const availableCountries = Object.keys(LOCATIONS_BY_COUNTRY).filter(countryName => 
+    // Remove duplicates (USA, Etats-Unis, Greece/Grèce)
+    !['USA', 'Etats-Unis', 'Grèce'].includes(countryName)
+  ).sort();
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -26,7 +31,7 @@ const CountryFilter = ({ country, onCountryChange }: CountryFilterProps) => {
         </SelectTrigger>
         <SelectContent className="max-h-48 overflow-y-auto">
           <SelectItem value="all">Tous les pays</SelectItem>
-          {COUNTRIES.map((countryName) => (
+          {availableCountries.map((countryName) => (
             <SelectItem key={countryName} value={countryName}>
               {countryName}
             </SelectItem>
