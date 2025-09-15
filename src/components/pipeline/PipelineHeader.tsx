@@ -93,8 +93,9 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
             size="sm" 
             onClick={() => {
               console.log('Navigating to filters page...');
-              navigate('/pipeline/filters');
-            }} 
+              const currentTab = new URLSearchParams(window.location.search).get('tab') || 'purchase';
+              navigate(`/pipeline/filters?tab=${currentTab}`);
+            }}
             className="h-10 px-4 relative font-medium"
           >
             <SlidersHorizontal className="h-4 w-4 mr-2" />
