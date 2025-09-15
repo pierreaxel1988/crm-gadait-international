@@ -116,6 +116,23 @@ const MobilePipelineHeader: React.FC<MobilePipelineHeaderProps> = ({
               </span>
             )}
           </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => {
+              const currentTab = new URLSearchParams(window.location.search).get('tab') || 'purchase';
+              navigate(`/pipeline/filters?tab=${currentTab}`);
+            }}
+            className="h-9 relative font-normal text-sm"
+          >
+            <SlidersHorizontal className="h-4 w-4 mr-1" />
+            Filtres avancés
+            {activeFiltersCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+                {activeFiltersCount}
+              </span>
+            )}
+          </Button>
         </div>
       </div>
       
