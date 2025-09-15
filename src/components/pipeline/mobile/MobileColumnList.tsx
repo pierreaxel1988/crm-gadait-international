@@ -40,9 +40,10 @@ interface MobileColumnListProps {
   activeTab?: PipelineType;
   searchTerm?: string;
   filters?: FilterOptions;
+  refreshTrigger?: number;
 }
 
-const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand = () => {}, activeTab = 'purchase', searchTerm, filters }: MobileColumnListProps) => {
+const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand = () => {}, activeTab = 'purchase', searchTerm, filters, refreshTrigger = 0 }: MobileColumnListProps) => {
   const [activeStatus, setActiveStatus] = useState<LeadStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'priority' | 'newest' | 'oldest'>('priority');
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
     loadedColumns,
     isLoading,
     teamMembers
-  } = useKanbanData(activeTab, 0, filters);
+  } = useKanbanData(activeTab, refreshTrigger || 0, filters);
   
   const filteredColumns = filters 
     ? applyFiltersToColumns(loadedColumns.filter(column => 

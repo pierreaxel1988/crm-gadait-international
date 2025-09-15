@@ -27,6 +27,7 @@ interface MobilePipelineViewProps {
   isRefreshing: boolean;
   isFilterActive: (filterName: string) => boolean;
   teamMembers: { id: string; name: string }[];
+  refreshTrigger: number;
 }
 
 const pipelines = [
@@ -50,7 +51,8 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
   handleRefresh,
   isRefreshing,
   isFilterActive,
-  teamMembers
+  teamMembers,
+  refreshTrigger
 }) => {
   console.log(`MobilePipelineView - activeTab: ${activeTab}`);
   
@@ -104,6 +106,7 @@ const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
             activeTab={activeTab as PipelineType}
             searchTerm={searchTerm}
             filters={filters}
+            refreshTrigger={refreshTrigger}
           />
         </div>
       </div>

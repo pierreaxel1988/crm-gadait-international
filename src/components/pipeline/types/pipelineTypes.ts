@@ -20,6 +20,26 @@ export interface DesktopPipelineViewProps {
   isRefreshing: boolean;
   isFilterActive: (filterName: string) => boolean;
   teamMembers: { id: string; name: string }[];
+  refreshTrigger: number;
+}
+
+export interface MobilePipelineViewProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  filtersOpen: boolean;
+  toggleFilters: () => void;
+  activeFiltersCount: number;
+  filters: FilterOptions;
+  onFilterChange: (filters: FilterOptions) => void;
+  onClearFilters: () => void;
+  columns: any[];
+  handleRefresh: () => void;
+  isRefreshing: boolean;
+  isFilterActive: (filterName: string) => boolean;
+  teamMembers: { id: string; name: string }[];
+  refreshTrigger: number;
 }
 
 export interface SortingControlsProps {

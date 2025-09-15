@@ -49,7 +49,8 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   handleRefresh,
   isRefreshing,
   isFilterActive,
-  teamMembers
+  teamMembers,
+  refreshTrigger
 }) => {
   const [activeStatus, setActiveStatus] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortBy>('priority');
@@ -67,7 +68,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   const {
     loadedColumns,
     isLoading,
-  } = useKanbanData(activeTab as PipelineType, 0, filters);
+  } = useKanbanData(activeTab as PipelineType, refreshTrigger, filters);
 
   const filteredColumns = filters 
     ? applyFiltersToColumns(loadedColumns.filter(column => 
