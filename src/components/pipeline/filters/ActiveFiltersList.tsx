@@ -50,7 +50,7 @@ const ActiveFiltersList = ({
       
       {filters.statuses && filters.statuses.map(status => (
         <div key={status} className="flex items-center gap-0.5 bg-muted/60 rounded-full px-2 py-1 text-xs">
-          <span className="text-foreground font-medium">{status}</span>
+          <span className="text-xs text-foreground font-medium">{status}</span>
           <button 
             onClick={() => onFilterChange({...filters, statuses: filters.statuses.filter(s => s !== status)})}
             className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
@@ -63,7 +63,7 @@ const ActiveFiltersList = ({
       
       {filters.status && (
         <div className="flex items-center gap-0.5 bg-muted/60 rounded-full px-2 py-1 text-xs">
-          <span className="text-foreground font-medium">{filters.status}</span>
+          <span className="text-xs text-foreground font-medium">{filters.status}</span>
           <button 
             onClick={() => onFilterChange({...filters, status: null})}
             className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
@@ -76,7 +76,7 @@ const ActiveFiltersList = ({
       
       {filters.tags.map(tag => (
         <div key={tag} className="flex items-center gap-0.5 bg-amber-100/70 dark:bg-amber-900/30 rounded-full px-2 py-1 text-xs">
-          <span className="text-foreground font-medium">{tag}</span>
+          <span className="text-xs text-foreground font-medium">{tag}</span>
           <button 
             onClick={() => onFilterChange({...filters, tags: filters.tags.filter(t => t !== tag)})}
             className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
@@ -89,7 +89,7 @@ const ActiveFiltersList = ({
       
       {filters.assignedTo && (
         <div className="flex items-center gap-0.5 bg-blue-100/70 dark:bg-blue-900/30 rounded-full px-2 py-1 text-xs">
-          <span className="text-foreground font-medium">{getTeamMemberName(filters.assignedTo)}</span>
+          <span className="text-xs text-foreground font-medium">{getTeamMemberName(filters.assignedTo)}</span>
           <button 
             onClick={() => onFilterChange({...filters, assignedTo: null})}
             className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
@@ -102,7 +102,7 @@ const ActiveFiltersList = ({
       
       {filters.country && (
         <div className="flex items-center gap-0.5 bg-green-100/70 dark:bg-green-900/30 rounded-full px-2 py-1 text-xs">
-          <span className="text-foreground font-medium">{filters.country}</span>
+          <span className="text-xs text-foreground font-medium">{filters.country}</span>
           <button 
             onClick={() => onFilterChange({...filters, country: ''})}
             className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
@@ -115,7 +115,7 @@ const ActiveFiltersList = ({
       
       {(filters.minBudget || filters.maxBudget) && (
         <div className="flex items-center gap-0.5 bg-emerald-100/70 dark:bg-emerald-900/30 rounded-full px-2 py-1 text-xs">
-          <span className="text-foreground font-medium">{filters.minBudget ? `${filters.minBudget}` : '0€'} - {filters.maxBudget ? `${filters.maxBudget}` : '∞'}</span>
+          <span className="text-xs text-foreground font-medium">{filters.minBudget ? `${filters.minBudget}` : '0€'} - {filters.maxBudget ? `${filters.maxBudget}` : '∞'}</span>
           <button 
             onClick={() => onFilterChange({...filters, minBudget: '', maxBudget: ''})}
             className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
@@ -128,7 +128,7 @@ const ActiveFiltersList = ({
       
       {filters.location && (
         <div className="flex items-center gap-0.5 bg-purple-100/70 dark:bg-purple-900/30 rounded-full px-2 py-1 text-xs">
-          <span className="text-foreground font-medium">{filters.location}</span>
+          <span className="text-xs text-foreground font-medium">{filters.location}</span>
           <button 
             onClick={() => onFilterChange({...filters, location: ''})}
             className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
@@ -141,7 +141,7 @@ const ActiveFiltersList = ({
       
       {filters.propertyTypes && filters.propertyTypes.map(type => (
         <div key={type} className="flex items-center gap-0.5 bg-rose-100/70 dark:bg-rose-900/30 rounded-full px-2 py-1 text-xs">
-          <span className="text-foreground font-medium">{type}</span>
+          <span className="text-xs text-foreground font-medium">{type}</span>
           <button 
             onClick={() => onFilterChange({...filters, propertyTypes: filters.propertyTypes.filter(t => t !== type)})}
             className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
@@ -154,7 +154,7 @@ const ActiveFiltersList = ({
       
       {filters.purchaseTimeframe && (
         <div className="flex items-center gap-0.5 bg-orange-100/70 dark:bg-orange-900/30 rounded-full px-2 py-1 text-xs">
-          <span className="text-foreground font-medium">{filters.purchaseTimeframe === 'Moins de trois mois' ? '< 3 mois' : '> 3 mois'}</span>
+          <span className="text-xs text-foreground font-medium">{filters.purchaseTimeframe === 'Moins de trois mois' ? '< 3 mois' : '> 3 mois'}</span>
           <button 
             onClick={() => onFilterChange({...filters, purchaseTimeframe: null})}
             className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
@@ -167,7 +167,7 @@ const ActiveFiltersList = ({
       
       {filters.propertyType && (
         <div className="flex items-center gap-0.5 bg-slate-100/70 dark:bg-slate-800/30 rounded-full px-2 py-1 text-xs">
-          <span className="text-foreground font-medium">{filters.propertyType}</span>
+          <span className="text-xs text-foreground font-medium">{filters.propertyType}</span>
           <button 
             onClick={() => onFilterChange({...filters, propertyType: null})}
             className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
