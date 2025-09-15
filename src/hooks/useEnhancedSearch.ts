@@ -159,19 +159,19 @@ export function useEnhancedSearch(initialSearchTerm: string = '', isAdminGlobalS
       
       const [titleResults, locationResults, externalIdResults] = await Promise.all([
         supabase
-          .from('properties')
+          .from('gadait_properties')
           .select('id, title, price, location, property_type, external_id')
           .ilike('title', searchPattern)
           .limit(5),
         
         supabase
-          .from('properties')
+          .from('gadait_properties')
           .select('id, title, price, location, property_type, external_id')
           .ilike('location', searchPattern)
           .limit(5),
         
         supabase
-          .from('properties')
+          .from('gadait_properties')
           .select('id, title, price, location, property_type, external_id')
           .ilike('external_id', searchPattern)
           .limit(5)

@@ -47,7 +47,7 @@ export function useLeadSearch(initialSearchTerm: string = '', adminGlobalSearch:
 
     try {
       const { data, error } = await supabase
-        .from('properties')
+        .from('gadait_properties')
         .select('id, title, price, location, property_type, external_id')
         .or(`title.ilike.'%${term}%', location.ilike.'%${term}%', external_id.ilike.'%${term}%'`)
         .limit(15);
