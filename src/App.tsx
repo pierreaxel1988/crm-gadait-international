@@ -26,7 +26,7 @@ const Admin = lazy(() => import('./pages/Admin'));
 const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const ChatGadaitPage = lazy(() => import('./pages/ChatGadaitPage'));
-const PipelineFilters = lazy(() => import('./pages/PipelineFilters'));
+const PipelineFiltersPage = lazy(() => import('./pages/PipelineFilters'));
 
 function App() {
   return (
@@ -47,7 +47,7 @@ function App() {
             } />
             <Route path="/pipeline/filters" element={
               <ProtectedRoute commercialAllowed={true}>
-                <PipelineFilters />
+                <PipelineFiltersPage />
               </ProtectedRoute>
             } />
             <Route path="/properties" element={
