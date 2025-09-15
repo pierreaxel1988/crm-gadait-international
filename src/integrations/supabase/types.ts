@@ -2471,6 +2471,69 @@ export type Database = {
         }
         Relationships: []
       }
+      view_figaro_feed_mu_vente: {
+        Row: {
+          country: string | null
+          cp: string | null
+          descriptif: string | null
+          id: string | null
+          identifiant_agence: number | null
+          images: string[] | null
+          latitude: number | null
+          longitude: number | null
+          main_image: string | null
+          nb_pieces: number | null
+          precision_gps: number | null
+          prix: number | null
+          ref_agence: string | null
+          surface: number | null
+          type_annonce: string | null
+          type_bien: string | null
+          updated_at: string | null
+          ville: string | null
+        }
+        Insert: {
+          country?: string | null
+          cp?: never
+          descriptif?: never
+          id?: string | null
+          identifiant_agence?: never
+          images?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          main_image?: string | null
+          nb_pieces?: never
+          precision_gps?: never
+          prix?: number | null
+          ref_agence?: never
+          surface?: number | null
+          type_annonce?: never
+          type_bien?: never
+          updated_at?: string | null
+          ville?: never
+        }
+        Update: {
+          country?: string | null
+          cp?: never
+          descriptif?: never
+          id?: string | null
+          identifiant_agence?: never
+          images?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          main_image?: string | null
+          nb_pieces?: never
+          precision_gps?: never
+          prix?: number | null
+          ref_agence?: never
+          surface?: number | null
+          type_annonce?: never
+          type_bien?: never
+          updated_at?: string | null
+          ville?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
       bytea_to_text: {
