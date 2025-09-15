@@ -190,10 +190,11 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 
       {/* Action buttons - Only show if no active filters */}
       {activeFiltersCount === 0 && (
-        <div className="flex justify-center pt-2">
+        <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t pt-4 mt-6 flex justify-between items-center px-4 -mx-4">
           <ActionButtons 
             onClearFilters={onClearFilters} 
-            onApply={onApplyFilters} 
+            onApply={onApplyFilters}
+            elegant={true}
           />
         </div>
       )}

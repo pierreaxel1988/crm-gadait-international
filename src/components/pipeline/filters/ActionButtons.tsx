@@ -9,9 +9,10 @@ interface ActionButtonsProps {
   onClearFilters?: () => void;
   onApplyFilters?: () => void;
   compact?: boolean;
+  elegant?: boolean;
 }
 
-const ActionButtons = ({ onClear, onApply, onClearFilters, onApplyFilters, compact = false }: ActionButtonsProps) => {
+const ActionButtons = ({ onClear, onApply, onClearFilters, onApplyFilters, compact = false, elegant = false }: ActionButtonsProps) => {
   const handleClear = () => {
     if (onClear) onClear();
     if (onClearFilters) onClearFilters();
@@ -21,6 +22,30 @@ const ActionButtons = ({ onClear, onApply, onClearFilters, onApplyFilters, compa
     if (onApply) onApply();
     if (onApplyFilters) onApplyFilters();
   };
+
+  if (elegant) {
+    return (
+      <div className="flex justify-between items-center w-full gap-6">
+        <Button 
+          variant="outline" 
+          size="default" 
+          onClick={handleClear} 
+          className="font-medium px-8 py-2 border-2 hover:bg-muted/50 transition-all duration-200"
+        >
+          <X className="h-4 w-4 mr-2" /> 
+          Effacer tous les filtres
+        </Button>
+        <Button 
+          size="default" 
+          onClick={handleApply} 
+          className="font-medium px-8 py-2 bg-primary hover:bg-primary/90 transition-all duration-200 shadow-lg"
+        >
+          <Check className="h-4 w-4 mr-2" /> 
+          Appliquer les filtres
+        </Button>
+      </div>
+    );
+  }
 
   if (compact) {
     return (
