@@ -33,17 +33,26 @@ const ActiveFiltersList = ({
     isFilterActive('purchaseTimeframe') || 
     isFilterActive('propertyType');
 
-  if (!hasActiveFilters) return null;
+  if (!hasActiveFilters) {
+    return (
+      <div className="text-sm text-muted-foreground italic">
+        Aucun filtre actif - Affichage de tous les leads
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-wrap gap-2 items-center mt-4">
-      <span className="text-sm text-muted-foreground mr-1">Filtres actifs:</span>
+    <div className="flex flex-wrap gap-1.5 items-center">
+      {/* Remove the "Filtres actifs:" label since it's now in the header */}
       
       {filters.status && (
-        <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-          {filters.status}
-          <button onClick={() => onFilterChange({...filters, status: null})}>
-            <X className="h-3 w-3 ml-1" />
+        <div className="bg-primary/15 text-primary text-xs rounded-md px-2 py-1 flex items-center gap-1 border border-primary/20">
+          <span className="font-medium">Statut:</span> {filters.status}
+          <button 
+            onClick={() => onFilterChange({...filters, status: null})}
+            className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+          >
+            <X className="h-3 w-3" />
           </button>
         </div>
       )}
@@ -61,59 +70,63 @@ const ActiveFiltersList = ({
       ))}
       
       {filters.assignedTo && (
-        <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-          {getTeamMemberName(filters.assignedTo)}
-          <button onClick={() => onFilterChange({...filters, assignedTo: null})}>
-            <X className="h-3 w-3 ml-1" />
+        <div className="bg-primary/15 text-primary text-xs rounded-md px-2 py-1 flex items-center gap-1 border border-primary/20">
+          <span className="font-medium">Agent:</span> {getTeamMemberName(filters.assignedTo)}
+          <button 
+            onClick={() => onFilterChange({...filters, assignedTo: null})}
+            className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+          >
+            <X className="h-3 w-3" />
           </button>
         </div>
       )}
       
       {(filters.minBudget || filters.maxBudget) && (
-        <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-          Budget: {filters.minBudget ? `${filters.minBudget}` : '0€'} - {filters.maxBudget ? `${filters.maxBudget}` : '∞'}
-          <button onClick={() => onFilterChange({...filters, minBudget: '', maxBudget: ''})}>
-            <X className="h-3 w-3 ml-1" />
+        <div className="bg-primary/15 text-primary text-xs rounded-md px-2 py-1 flex items-center gap-1 border border-primary/20">
+          <span className="font-medium">Budget:</span> {filters.minBudget ? `${filters.minBudget}` : '0€'} - {filters.maxBudget ? `${filters.maxBudget}` : '∞'}
+          <button 
+            onClick={() => onFilterChange({...filters, minBudget: '', maxBudget: ''})}
+            className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+          >
+            <X className="h-3 w-3" />
           </button>
         </div>
       )}
       
       {filters.location && (
-        <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-          {filters.location}
-          <button onClick={() => onFilterChange({...filters, location: ''})}>
-            <X className="h-3 w-3 ml-1" />
+        <div className="bg-primary/15 text-primary text-xs rounded-md px-2 py-1 flex items-center gap-1 border border-primary/20">
+          <span className="font-medium">Lieu:</span> {filters.location}
+          <button 
+            onClick={() => onFilterChange({...filters, location: ''})}
+            className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+          >
+            <X className="h-3 w-3" />
           </button>
         </div>
       )}
       
       {filters.purchaseTimeframe && (
-        <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-          {filters.purchaseTimeframe === 'Moins de trois mois' ? '< 3 mois' : '> 3 mois'}
-          <button onClick={() => onFilterChange({...filters, purchaseTimeframe: null})}>
-            <X className="h-3 w-3 ml-1" />
+        <div className="bg-primary/15 text-primary text-xs rounded-md px-2 py-1 flex items-center gap-1 border border-primary/20">
+          <span className="font-medium">Délai:</span> {filters.purchaseTimeframe === 'Moins de trois mois' ? '< 3 mois' : '> 3 mois'}
+          <button 
+            onClick={() => onFilterChange({...filters, purchaseTimeframe: null})}
+            className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+          >
+            <X className="h-3 w-3" />
           </button>
         </div>
       )}
       
       {filters.propertyType && (
-        <div className="bg-primary/10 text-primary text-xs rounded-full px-3 py-1 flex items-center gap-1">
-          {filters.propertyType}
-          <button onClick={() => onFilterChange({...filters, propertyType: null})}>
-            <X className="h-3 w-3 ml-1" />
+        <div className="bg-primary/15 text-primary text-xs rounded-md px-2 py-1 flex items-center gap-1 border border-primary/20">
+          <span className="font-medium">Type:</span> {filters.propertyType}
+          <button 
+            onClick={() => onFilterChange({...filters, propertyType: null})}
+            className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+          >
+            <X className="h-3 w-3" />
           </button>
         </div>
-      )}
-      
-      {hasActiveFilters && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-xs text-muted-foreground hover:text-foreground"
-          onClick={onClearFilters}
-        >
-          Tout effacer
-        </Button>
       )}
     </div>
   );

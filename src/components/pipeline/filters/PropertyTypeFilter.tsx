@@ -21,7 +21,7 @@ const PropertyTypeFilter = ({ propertyType, onPropertyTypeChange }: PropertyType
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
         <Home className="h-4 w-4" /> Type de bien
       </h4>
-      <div className="grid grid-cols-3 gap-2 max-h-[100px] overflow-y-auto">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-1.5">
         <Button
           variant={propertyType === null ? "default" : "outline"}
           size="sm"
