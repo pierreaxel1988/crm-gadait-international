@@ -25,7 +25,7 @@ const TimeframeFilter = ({ purchaseTimeframe, onTimeframeChange }: TimeframeFilt
             key={timeframe || 'all'}
             variant={purchaseTimeframe === timeframe ? "default" : "outline"}
             size="sm"
-            className="text-xs h-7 px-1.5 min-w-0 whitespace-nowrap"
+            className="text-xs h-7 px-3 min-w-0 whitespace-nowrap"
             onClick={() => onTimeframeChange(timeframe)}
           >
             {timeframe ? (timeframe === 'Moins de trois mois' ? '< 3m' : '> 3m') : 'Tous'}
