@@ -19,6 +19,7 @@ const PropertyTypeFilter = ({
   onPropertyTypesChange, 
   allowMultiple = true 
 }: PropertyTypeFilterProps) => {
+  // Liste des types de propriétés utilisés dans la fiche des leads
   const availablePropertyTypes: (PropertyType | null)[] = [
     null, 'Villa', 'Appartement', 'Penthouse', 'Chalet', 'Maison', 
     'Duplex', 'Terrain', 'Manoir', 'Maison de ville', 'Château', 
