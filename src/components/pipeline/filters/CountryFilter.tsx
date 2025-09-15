@@ -20,12 +20,12 @@ const CountryFilter = ({ country, onCountryChange }: CountryFilterProps) => {
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
         <Globe className="h-4 w-4" /> Pays
       </h4>
-      <Select value={country} onValueChange={onCountryChange}>
+      <Select value={country || "all"} onValueChange={(value) => onCountryChange(value === "all" ? "" : value)}>
         <SelectTrigger className="h-8 text-sm">
           <SelectValue placeholder="Sélectionner un pays" />
         </SelectTrigger>
         <SelectContent className="max-h-48 overflow-y-auto">
-          <SelectItem value="">Tous les pays</SelectItem>
+          <SelectItem value="all">Tous les pays</SelectItem>
           {COUNTRIES.map((countryName) => (
             <SelectItem key={countryName} value={countryName}>
               {countryName}
