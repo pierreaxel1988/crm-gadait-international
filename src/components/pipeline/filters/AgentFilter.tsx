@@ -62,11 +62,11 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
           <span className="ml-1 text-primary font-medium">: {selectedAgentName}</span>
         )}
       </h4>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="flex flex-wrap gap-1">
         <Button
           variant={assignedTo === null ? "default" : "outline"}
           size="sm"
-          className="text-xs"
+          className="text-xs px-2 py-1 h-auto"
           onClick={() => handleAgentSelect(null)}
         >
           Tous
@@ -76,7 +76,7 @@ const AgentFilter = ({ assignedTo, onAssignedToChange, assignedToOptions }: Agen
             key={member.id}
             variant={assignedTo === member.id ? "default" : "outline"}
             size="sm"
-            className="text-xs"
+            className="text-xs px-2 py-1 h-auto"
             onClick={() => handleAgentSelect(member.id)}
           >
             {member.name}
