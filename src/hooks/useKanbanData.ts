@@ -12,6 +12,7 @@ export interface KanbanFilters {
   source?: string;
   country?: string;
   propertyType?: string;
+  propertyTypes?: string[];
   status?: LeadStatus | null;
   priceRange?: {
     min?: number;
@@ -97,8 +98,11 @@ export const useKanbanData = (
         query = query.eq('country', filters.country);
       }
 
-      if (filters.propertyType) {
-        query = query.eq('property_type', filters.propertyType);
+      // Filter by property types (supporting both single property type and multiple property types)
+      if (filters.propertyTypes && filters.propertyTypes.length > 0) {
+        query = query.overlaps('property_types', filters.propertyTypes);
+      } else if (filters.propertyType) {
+        query = query.contains('property_types', [filters.propertyType]);
       }
 
       if (filters.tags && filters.tags.length > 0) {

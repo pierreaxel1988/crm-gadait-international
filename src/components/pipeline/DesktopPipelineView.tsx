@@ -65,10 +65,25 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     { label: "Propriétaires", value: "owners" },
   ];
 
+  // Convert FilterOptions to KanbanFilters
+  const kanbanFilters = useMemo(() => ({
+    assignedTo: filters.assignedTo || undefined,
+    tags: filters.tags || [],
+    country: filters.country || undefined,
+    propertyType: filters.propertyType || undefined,
+    propertyTypes: filters.propertyTypes || [],
+    status: filters.status || undefined,
+    searchTerm: debouncedSearchTerm || undefined,
+    priceRange: {
+      min: filters.minBudget ? parseInt(filters.minBudget) : undefined,
+      max: filters.maxBudget ? parseInt(filters.maxBudget) : undefined,
+    }
+  }), [filters, debouncedSearchTerm]);
+
   const {
     loadedColumns,
     isLoading,
-  } = useKanbanData(activeTab as PipelineType, refreshTrigger, filters);
+  } = useKanbanData(activeTab as PipelineType, refreshTrigger, kanbanFilters);
 
   const filteredColumns = filters 
     ? applyFiltersToColumns(loadedColumns.filter(column => 

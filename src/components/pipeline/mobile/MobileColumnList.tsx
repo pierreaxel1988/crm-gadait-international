@@ -51,11 +51,26 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
   // Debounce search term like in Actions page
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   
+  // Convert FilterOptions to KanbanFilters
+  const kanbanFilters = useMemo(() => ({
+    assignedTo: filters.assignedTo || undefined,
+    tags: filters.tags || [],
+    country: filters.country || undefined,
+    propertyType: filters.propertyType || undefined,
+    propertyTypes: filters.propertyTypes || [],
+    status: filters.status || undefined,
+    searchTerm: debouncedSearchTerm || undefined,
+    priceRange: {
+      min: filters.minBudget ? parseInt(filters.minBudget) : undefined,
+      max: filters.maxBudget ? parseInt(filters.maxBudget) : undefined,
+    }
+  }), [filters, debouncedSearchTerm]);
+  
   const {
     loadedColumns,
     isLoading,
     teamMembers
-  } = useKanbanData(activeTab, refreshTrigger || 0, filters);
+  } = useKanbanData(activeTab, refreshTrigger || 0, kanbanFilters);
   
   const filteredColumns = filters 
     ? applyFiltersToColumns(loadedColumns.filter(column => 
