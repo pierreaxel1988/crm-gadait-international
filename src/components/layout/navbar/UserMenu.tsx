@@ -14,7 +14,8 @@ const UserMenu = () => {
   const navigate = useNavigate();
   const {
     signOut,
-    isAdmin
+    isAdmin,
+    userName
   } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -46,12 +47,19 @@ const UserMenu = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
-              <button className="rounded-md p-1.5 transition-transform duration-200 hover:scale-110">
+              <div className="flex items-center space-x-2 rounded-md p-1.5 transition-transform duration-200 hover:scale-110 cursor-pointer">
+                {userName && (
+                  <span className="text-white text-sm font-medium hidden sm:block">
+                    {userName}
+                  </span>
+                )}
                 <User className="h-5 w-5 text-white" />
-              </button>
+              </div>
             </DropdownMenuTrigger>
           </TooltipTrigger>
-          
+          <TooltipContent>
+            <p>{userName || 'Utilisateur'}</p>
+          </TooltipContent>
         </Tooltip>
       </TooltipProvider>
       

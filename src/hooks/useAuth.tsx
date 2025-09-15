@@ -13,6 +13,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isCommercial: boolean;
   userRole: 'admin' | 'commercial' | 'guest';
+  userName: string | null;
 }
 
 // Création du contexte avec une valeur par défaut complète
@@ -24,7 +25,8 @@ const defaultContext: AuthContextType = {
   signInWithGoogle: async () => {},
   isAdmin: false,
   isCommercial: false,
-  userRole: 'guest'
+  userRole: 'guest',
+  userName: null
 };
 
 const AuthContext = createContext<AuthContextType>(defaultContext);
@@ -36,45 +38,80 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCommercial, setIsCommercial] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'commercial' | 'guest'>('guest');
+  const [userName, setUserName] = useState<string | null>(null);
 
   // Helper function to check user role and set states
-  const checkAndSetUserRole = (currentUser: User | null) => {
+  const checkAndSetUserRole = async (currentUser: User | null) => {
     if (!currentUser) {
       setIsAdmin(false);
       setIsCommercial(false);
       setUserRole('guest');
+      setUserName(null);
       return;
     }
 
     const userEmail = currentUser.email;
-    const adminEmails = [
-      'pierre@gadait-international.com',
-      'christelle@gadait-international.com',
-      'admin@gadait-international.com',
-      'chloe@gadait-international.com'
-    ];
     
-    const commercialEmails = [
-      'jade@gadait-international.com',
-      'ophelie@gadait-international.com',
-      'jeanmarc@gadait-international.com',
-      'jacques@gadait-international.com',
-      'sharon@gadait-international.com',
-      'matthieu@gadait-international.com'
-    ];
-    
-    const isUserAdmin = adminEmails.includes(userEmail || '');
-    const isUserCommercial = commercialEmails.includes(userEmail || '');
-    
-    setIsAdmin(isUserAdmin);
-    setIsCommercial(isUserCommercial);
-    
-    if (isUserAdmin) {
-      setUserRole('admin');
-    } else if (isUserCommercial) {
-      setUserRole('commercial');
-    } else {
-      setUserRole('guest');
+    // Récupérer le nom depuis la table team_members
+    try {
+      const { data: teamMember, error } = await supabase
+        .from('team_members')
+        .select('name, role, is_admin')
+        .eq('email', userEmail)
+        .single();
+
+      if (teamMember) {
+        setUserName(teamMember.name);
+        const isUserAdmin = teamMember.role === 'admin' || teamMember.is_admin;
+        const isUserCommercial = teamMember.role === 'agent';
+        
+        setIsAdmin(isUserAdmin);
+        setIsCommercial(isUserCommercial);
+        
+        if (isUserAdmin) {
+          setUserRole('admin');
+        } else if (isUserCommercial) {
+          setUserRole('commercial');
+        } else {
+          setUserRole('guest');
+        }
+      } else {
+        // Fallback vers l'ancienne méthode si pas trouvé dans team_members
+        const adminEmails = [
+          'pierre@gadait-international.com',
+          'christelle@gadait-international.com',
+          'admin@gadait-international.com',
+          'chloe@gadait-international.com'
+        ];
+        
+        const commercialEmails = [
+          'jade@gadait-international.com',
+          'ophelie@gadait-international.com',
+          'jeanmarc@gadait-international.com',
+          'jacques@gadait-international.com',
+          'sharon@gadait-international.com',
+          'matthieu@gadait-international.com',
+          'franck.fontaine@gadait-international.com'
+        ];
+        
+        const isUserAdmin = adminEmails.includes(userEmail || '');
+        const isUserCommercial = commercialEmails.includes(userEmail || '');
+        
+        setIsAdmin(isUserAdmin);
+        setIsCommercial(isUserCommercial);
+        setUserName(userEmail?.split('@')[0] || null);
+        
+        if (isUserAdmin) {
+          setUserRole('admin');
+        } else if (isUserCommercial) {
+          setUserRole('commercial');
+        } else {
+          setUserRole('guest');
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des informations utilisateur:', error);
+      setUserName(userEmail?.split('@')[0] || null);
     }
   };
 
@@ -91,13 +128,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(data.session);
         setUser(data.session?.user ?? null);
         
-        // Vérification du rôle utilisateur de manière synchrone
+        // Vérification du rôle utilisateur de manière asynchrone
         if (data.session?.user) {
-          checkAndSetUserRole(data.session.user);
+          setTimeout(() => checkAndSetUserRole(data.session.user), 0);
         } else {
           setIsAdmin(false);
           setIsCommercial(false);
           setUserRole('guest');
+          setUserName(null);
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
@@ -122,13 +160,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setTimeout(() => sessionTracker.endSession(), 0);
       }
       
-      // Vérification du rôle de manière synchrone
+      // Vérification du rôle de manière asynchrone
       if (newSession?.user) {
-        checkAndSetUserRole(newSession.user);
+        setTimeout(() => checkAndSetUserRole(newSession.user), 0);
       } else {
         setIsAdmin(false);
         setIsCommercial(false);
         setUserRole('guest');
+        setUserName(null);
       }
       
       setLoading(false);
@@ -182,7 +221,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signInWithGoogle,
     isAdmin,
     isCommercial,
-    userRole
+    userRole,
+    userName
   };
 
   console.log('AuthProvider rendering with user:', user?.email);
