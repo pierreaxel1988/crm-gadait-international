@@ -45,7 +45,7 @@ const ActiveFiltersList = ({
   }
 
   return (
-    <div className="flex flex-wrap gap-1 items-center mt-2 pt-2 border-t border-border/50">
+    <div className="flex flex-wrap gap-2 items-center mt-3 pt-3 border-t border-border/50">
       {/* Remove the "Filtres actifs:" label since it's now in the header */}
       
       {filters.statuses && filters.statuses.map(status => (
