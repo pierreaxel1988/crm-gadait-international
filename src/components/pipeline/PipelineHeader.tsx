@@ -91,7 +91,10 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={() => navigate('/pipeline/filters')} 
+            onClick={() => {
+              console.log('Navigating to filters page...');
+              navigate('/pipeline/filters');
+            }} 
             className="h-10 px-4 relative font-medium"
           >
             <SlidersHorizontal className="h-4 w-4 mr-2" />
