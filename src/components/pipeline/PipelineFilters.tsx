@@ -26,6 +26,7 @@ export interface FilterOptions {
   country: string;
   purchaseTimeframe: PurchaseTimeframe | null;
   propertyType: PropertyType | null;
+  propertyTypes: PropertyType[];
 }
 
 export interface PipelineFiltersProps {
@@ -79,7 +80,8 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     (filters.location ? 1 : 0) +
     (filters.country ? 1 : 0) +
     (filters.purchaseTimeframe ? 1 : 0) +
-    (filters.propertyType ? 1 : 0);
+    (filters.propertyType ? 1 : 0) +
+    filters.propertyTypes.length;
 
   return (
     <div className="space-y-4">
@@ -164,7 +166,10 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 
           <PropertyTypeFilter 
             propertyType={filters.propertyType} 
-            onPropertyTypeChange={type => handleFilterChange('propertyType', type)} 
+            onPropertyTypeChange={type => handleFilterChange('propertyType', type)}
+            propertyTypes={filters.propertyTypes}
+            onPropertyTypesChange={types => handleFilterChange('propertyTypes', types)}
+            allowMultiple={true}
           />
         </div>
       </div>

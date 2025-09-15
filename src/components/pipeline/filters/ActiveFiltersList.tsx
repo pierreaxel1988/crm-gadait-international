@@ -32,7 +32,8 @@ const ActiveFiltersList = ({
     isFilterActive('location') || 
     isFilterActive('country') || 
     isFilterActive('purchaseTimeframe') || 
-    isFilterActive('propertyType');
+    isFilterActive('propertyType') ||
+    isFilterActive('propertyTypes');
 
   if (!hasActiveFilters) {
     return (
@@ -111,6 +112,18 @@ const ActiveFiltersList = ({
           <span className="font-medium">Lieu:</span> {filters.location}
           <button 
             onClick={() => onFilterChange({...filters, location: ''})}
+            className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        </div>
+      )}
+      
+      {filters.propertyTypes && filters.propertyTypes.length > 0 && (
+        <div className="bg-primary/15 text-primary text-xs rounded-md px-2 py-1 flex items-center gap-1 border border-primary/20">
+          <span className="font-medium">Types:</span> {filters.propertyTypes.join(', ')}
+          <button 
+            onClick={() => onFilterChange({...filters, propertyTypes: []})}
             className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
           >
             <X className="h-3 w-3" />

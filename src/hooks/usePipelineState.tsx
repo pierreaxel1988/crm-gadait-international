@@ -35,7 +35,8 @@ export function usePipelineState() {
     location: '',
     country: '',
     purchaseTimeframe: null,
-    propertyType: null
+    propertyType: null,
+    propertyTypes: []
   });
 
   const updateAgentFilter = useCallback((agentId: string | null) => {
@@ -100,6 +101,7 @@ export function usePipelineState() {
     if (filters.country !== '') count++;
     if (filters.purchaseTimeframe !== null) count++;
     if (filters.propertyType !== null) count++;
+    if (filters.propertyTypes.length > 0) count++;
     return count;
   }, [filters]);
 
@@ -121,6 +123,8 @@ export function usePipelineState() {
         return filters.purchaseTimeframe !== null;
       case 'propertyType':
         return filters.propertyType !== null;
+      case 'propertyTypes':
+        return filters.propertyTypes.length > 0;
       default:
         return false;
     }
@@ -176,7 +180,8 @@ export function usePipelineState() {
       location: '',
       country: '',
       purchaseTimeframe: null,
-      propertyType: null
+      propertyType: null,
+      propertyTypes: []
     });
     
     toast({

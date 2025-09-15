@@ -88,6 +88,13 @@ export const applyFiltersToColumns = (
       );
     }
     
+    // Filter by multiple property types
+    if (filters.propertyTypes && filters.propertyTypes.length > 0) {
+      filteredItems = filteredItems.filter(item => 
+        item.propertyType && filters.propertyTypes!.includes(item.propertyType as PropertyType)
+      );
+    }
+    
     return {
       ...column,
       items: filteredItems
