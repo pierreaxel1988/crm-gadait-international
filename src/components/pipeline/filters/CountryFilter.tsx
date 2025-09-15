@@ -1,6 +1,7 @@
 import React from 'react';
 import { Globe } from 'lucide-react';
-import { LOCATIONS_BY_COUNTRY } from '@/utils/locationsByCountry';
+import { COUNTRIES } from '@/utils/countries';
+import SmartSearch from '@/components/common/SmartSearch';
 import {
   Select,
   SelectContent,
@@ -15,29 +16,48 @@ interface CountryFilterProps {
 }
 
 const CountryFilter = ({ country, onCountryChange }: CountryFilterProps) => {
-  // Extract only the countries where we sell properties
-  const availableCountries = Object.keys(LOCATIONS_BY_COUNTRY).filter(countryName => 
-    // Remove duplicates (USA, Etats-Unis, Greece/Grèce)
-    !['USA', 'Etats-Unis', 'Grèce'].includes(countryName)
-  ).sort();
+  // Get filtered countries based on search term
+  const getFilteredCountries = (searchTerm: string) => {
+    if (!searchTerm || searchTerm.length < 1) {
+      // Show top 10 most popular countries when no search term
+      return COUNTRIES.slice(0, 10);
+    }
+    
+    return COUNTRIES
+      .filter(countryName => 
+        countryName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+      )
+      .slice(0, 15); // Show more results when searching
+  };
+
+  const handleCountrySelect = (selectedCountry: string) => {
+    onCountryChange(selectedCountry);
+  };
+
+  const renderCountryItem = (countryName: string) => (
+    <div className="text-sm py-1">{countryName}</div>
+  );
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
         <Globe className="h-4 w-4" /> Pays
       </h4>
-      <Select value={country || "all"} onValueChange={(value) => onCountryChange(value === "all" ? "" : value)}>
-        <SelectTrigger className="h-8 text-sm">
-          <SelectValue placeholder="Sélectionner un pays" />
-        </SelectTrigger>
-        <SelectContent className="max-h-48 overflow-y-auto">
-          <SelectItem value="all">Tous les pays</SelectItem>
-          {availableCountries.map((countryName) => (
-            <SelectItem key={countryName} value={countryName}>
-              {countryName}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="relative">
+        <SmartSearch
+          placeholder="Rechercher un pays..."
+          value={country || ''}
+          onChange={(value) => onCountryChange(value)}
+          onSelect={handleCountrySelect}
+          results={getFilteredCountries(country || '')}
+          renderItem={renderCountryItem}
+          className="w-full"
+          inputClassName="h-8 text-sm"
+          minChars={0}
+          searchIcon={true}
+          clearButton={true}
+        />
+      </div>
     </div>
   );
 };
