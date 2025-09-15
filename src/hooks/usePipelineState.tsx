@@ -37,11 +37,15 @@ export function usePipelineState() {
     propertyType: null
   });
 
-  const updateAgentFilter = useCallback((agentId: string | null) => {
+const updateAgentFilter = useCallback((agentId: string | null) => {
     setFilters(prevFilters => ({
       ...prevFilters,
       assignedTo: agentId
     }));
+  }, []);
+
+  const handleFilterChange = useCallback((newFilters: FilterOptions) => {
+    setFilters(newFilters);
   }, []);
 
   useEffect(() => {
@@ -240,6 +244,7 @@ export function usePipelineState() {
     isFilterActive,
     handleRefresh,
     handleClearFilters,
+    handleFilterChange,
     getAllColumns,
     updateAgentFilter
   };

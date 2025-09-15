@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { X, Filter } from 'lucide-react';
 import PipelineFilters from './PipelineFilters';
 import { useKanbanData } from '@/hooks/useKanbanData';
 import { useNavigate } from 'react-router-dom';
