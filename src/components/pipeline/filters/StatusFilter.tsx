@@ -52,25 +52,25 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
         <Filter className="h-4 w-4" /> Statut
       </h4>
-      <div className="grid grid-cols-2 gap-2">
-        <Button
-          variant={status === null ? "default" : "outline"}
-          size="sm"
-          className="text-xs"
-          onClick={() => onStatusChange(null)}
-        >
-          Tous
-        </Button>
-        {statuses.filter(s => s !== null).map((statusValue) => (
+      <div className="flex flex-wrap gap-1.5">
           <Button
-            key={statusValue}
-            variant={status === statusValue ? "default" : "outline"}
+            variant={status === null ? "default" : "outline"}
             size="sm"
-            className="text-xs"
-            onClick={() => onStatusChange(statusValue as LeadStatus)}
+            className="text-xs h-7 px-2 whitespace-nowrap"
+            onClick={() => onStatusChange(null)}
           >
-            {getStatusLabel(statusValue as LeadStatus)}
+            Tous
           </Button>
+        {statuses.filter(s => s !== null).map((statusValue) => (
+            <Button
+              key={statusValue}
+              variant={status === statusValue ? "default" : "outline"}
+              size="sm"
+              className="text-xs h-7 px-2 whitespace-nowrap"
+              onClick={() => onStatusChange(statusValue as LeadStatus)}
+            >
+              {getStatusLabel(statusValue as LeadStatus)}
+            </Button>
         ))}
       </div>
     </div>
