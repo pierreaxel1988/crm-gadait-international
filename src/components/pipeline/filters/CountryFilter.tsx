@@ -1,6 +1,5 @@
 import React from 'react';
 import { Globe } from 'lucide-react';
-import { COUNTRIES } from '@/utils/countries';
 import SmartSearch from '@/components/common/SmartSearch';
 import {
   Select,
@@ -9,6 +8,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
+// Liste des pays où vous vendez
+const AVAILABLE_COUNTRIES = [
+  'Croatia',
+  'France', 
+  'Greece',
+  'Maldives',
+  'Mauritius',
+  'Portugal',
+  'Seychelles',
+  'Spain',
+  'Switzerland',
+  'United Arab Emirates',
+  'United Kingdom',
+  'United States'
+];
 
 interface CountryFilterProps {
   country: string;
@@ -19,16 +34,15 @@ const CountryFilter = ({ country, onCountryChange }: CountryFilterProps) => {
   // Get filtered countries based on search term
   const getFilteredCountries = (searchTerm: string) => {
     if (!searchTerm || searchTerm.length < 1) {
-      // Show top 10 most popular countries when no search term
-      return COUNTRIES.slice(0, 10);
+      // Show all available countries when no search term
+      return AVAILABLE_COUNTRIES;
     }
     
-    return COUNTRIES
+    return AVAILABLE_COUNTRIES
       .filter(countryName => 
         countryName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
         .includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
-      )
-      .slice(0, 15); // Show more results when searching
+      );
   };
 
   const handleCountrySelect = (selectedCountry: string) => {
