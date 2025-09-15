@@ -21,25 +21,25 @@ const PropertyTypeFilter = ({ propertyType, onPropertyTypeChange }: PropertyType
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
         <Home className="h-4 w-4" /> Type de bien
       </h4>
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-1.5">
+      <div className="flex flex-wrap gap-1.5">
         <Button
           variant={propertyType === null ? "default" : "outline"}
           size="sm"
-          className="text-xs"
+          className="text-xs h-7 px-2 whitespace-nowrap"
           onClick={() => onPropertyTypeChange(null)}
         >
           Tous
         </Button>
         {propertyTypes.filter(t => t !== null).map((type) => (
-          <Button
-            key={type}
-            variant={propertyType === type ? "default" : "outline"}
-            size="sm"
-            className="text-xs truncate"
-            onClick={() => onPropertyTypeChange(type as PropertyType)}
-          >
-            {type}
-          </Button>
+            <Button
+              key={type}
+              variant={propertyType === type ? "default" : "outline"}
+              size="sm"
+              className="text-xs h-7 px-2 whitespace-nowrap"
+              onClick={() => onPropertyTypeChange(type as PropertyType)}
+            >
+              {type}
+            </Button>
         ))}
       </div>
     </div>
