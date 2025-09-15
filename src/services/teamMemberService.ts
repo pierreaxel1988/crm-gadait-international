@@ -25,7 +25,7 @@ export const GUARANTEED_TEAM_MEMBERS = [
   { id: CHRISTINE_ID, name: "Christine Francoise", email: "admin@gadait-international.com", role: "admin" },
   { id: OPHELIE_ID, name: "Ophelie Durand", email: "ophelie@gadait-international.com", role: "agent" },
   { id: MATTHIEU_ID, name: "Matthieu Lapierre", email: "matthieu@gadait-international.com", role: "agent" },
-  { id: FRANCK_ID, name: "Franck Fontaine", email: "franck@gadait-international.com", role: "agent" }
+  { id: FRANCK_ID, name: "Franck Fontaine", email: "franck.fontaine@gadait-international.com", role: "agent" }
 ];
 
 // Anciennes clés utilisées pour les agents, à remplacer par les UUIDs corrects
