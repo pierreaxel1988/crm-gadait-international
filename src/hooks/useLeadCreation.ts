@@ -63,7 +63,19 @@ export const useLeadCreation = () => {
       if (isAdmin && assignedAgent) {
         newLeadData.assignedTo = assignedAgent;
       } else if (!isAdmin && user) {
-        newLeadData.assignedTo = user.id;
+        // Pour les agents non-admin, récupérer l'ID team_member basé sur l'email
+        const { data: teamMember } = await supabase
+          .from('team_members')
+          .select('id')
+          .eq('email', user.email)
+          .single();
+        
+        if (teamMember) {
+          newLeadData.assignedTo = teamMember.id;
+          console.log(`Agent auto-assigné: ${teamMember.id}`);
+        } else {
+          console.warn(`Aucun team_member trouvé pour l'email: ${user.email}`);
+        }
       }
       
       newLeadData.pipelineType = pipelineType;

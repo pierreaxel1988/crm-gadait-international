@@ -39,13 +39,15 @@ export const createLead = async (leadData: Omit<LeadDetailed, "id" | "createdAt"
     const { data: sessionData } = await supabase.auth.getSession();
     const user = sessionData?.session?.user;
     
-    // Liste des emails commerciaux
+    // Liste des emails commerciaux (agents)
     const commercialEmails = [
       'jade@gadait-international.com',
       'ophelie@gadait-international.com',
       'jeanmarc@gadait-international.com',
       'jacques@gadait-international.com',
-      'sharon@gadait-international.com'
+      'sharon@gadait-international.com',
+      'matthieu@gadait-international.com',
+      'franck.fontaine@gadait-international.com'
     ];
     
     // Si c'est un commercial, s'assurer que le lead est assigné à lui-même
