@@ -19,16 +19,16 @@ const TimeframeFilter = ({ purchaseTimeframe, onTimeframeChange }: TimeframeFilt
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
         <Clock className="h-4 w-4" /> Délai d'achat
       </h4>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {timeframes.map((timeframe) => (
           <Button
             key={timeframe || 'all'}
             variant={purchaseTimeframe === timeframe ? "default" : "outline"}
             size="sm"
-            className="text-xs"
+            className="text-xs h-7 px-1.5 min-w-0 whitespace-nowrap"
             onClick={() => onTimeframeChange(timeframe)}
           >
-            {timeframe ? (timeframe === 'Moins de trois mois' ? '< 3 mois' : '> 3 mois') : 'Tous'}
+            {timeframe ? (timeframe === 'Moins de trois mois' ? '< 3m' : '> 3m') : 'Tous'}
           </Button>
         ))}
       </div>
