@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import BudgetPresets from './BudgetPresets';
 
 interface BudgetFilterProps {
   minBudget?: string;
@@ -79,15 +78,6 @@ const BudgetFilter = ({
     }
   };
 
-  const handlePresetSelect = (min: string, max: string) => {
-    if (onBudgetChange) {
-      onBudgetChange('min', min);
-      onBudgetChange('max', max);
-    }
-    if (onMinBudgetChange) onMinBudgetChange(min);
-    if (onMaxBudgetChange) onMaxBudgetChange(max);
-  };
-
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -118,7 +108,7 @@ const BudgetFilter = ({
         </div>
       </div>
       
-      <BudgetPresets onPresetSelect={handlePresetSelect} />
+      
       
       {onCurrencyChange && (
         <div className="mt-2">
