@@ -26,6 +26,13 @@ export const applyFiltersToColumns = (
       filteredItems = filteredItems.filter(item => item.status === filters.status);
     }
     
+    // Apply multiple statuses filter if provided
+    if (filters.statuses && filters.statuses.length > 0) {
+      filteredItems = filteredItems.filter(item => 
+        filters.statuses!.includes(item.status)
+      );
+    }
+    
     // Filter by tags if any are selected
     if (filters.tags.length > 0) {
       filteredItems = filteredItems.filter(item => 

@@ -28,6 +28,7 @@ export function usePipelineState() {
   
   const [filters, setFilters] = useState<FilterOptions>({
     status: null,
+    statuses: [],
     tags: [],
     assignedTo: null,
     minBudget: '',
@@ -93,6 +94,7 @@ export function usePipelineState() {
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (filters.status !== null) count++;
+    if (filters.statuses.length > 0) count++;
     if (filters.tags.length > 0) count++;
     if (filters.assignedTo !== null) count++;
     if (filters.minBudget !== '') count++;
@@ -109,6 +111,8 @@ export function usePipelineState() {
     switch (filterName) {
       case 'status':
         return filters.status !== null;
+      case 'statuses':
+        return filters.statuses.length > 0;
       case 'tags':
         return filters.tags.length > 0;
       case 'assignedTo':
@@ -173,6 +177,7 @@ export function usePipelineState() {
   const handleClearFilters = () => {
     setFilters({
       status: null,
+      statuses: [],
       tags: [],
       assignedTo: null,
       minBudget: '',

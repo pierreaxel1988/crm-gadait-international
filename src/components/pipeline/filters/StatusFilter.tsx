@@ -10,12 +10,18 @@ import { useAuth } from '@/hooks/useAuth';
 interface StatusFilterProps {
   status: LeadStatus | null;
   onStatusChange: (status: LeadStatus | null) => void;
+  statuses?: LeadStatus[];
+  onStatusesChange?: (statuses: LeadStatus[]) => void;
+  allowMultiple?: boolean;
   pipelineType?: PipelineType;
 }
 
 const StatusFilter: React.FC<StatusFilterProps> = ({
   status,
   onStatusChange,
+  statuses = [],
+  onStatusesChange,
+  allowMultiple = true,
   pipelineType = 'purchase'
 }) => {
   const { isAdmin } = useAuth();
@@ -24,7 +30,36 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
   const baseStatuses = [null, ...getStatusesForPipeline(pipelineType)];
   
   // Add "Deleted" status only for admins
-  const statuses = isAdmin ? [...baseStatuses, 'Deleted' as LeadStatus] : baseStatuses;
+  const availableStatuses = isAdmin ? [...baseStatuses, 'Deleted' as LeadStatus] : baseStatuses;
+
+  const toggleStatus = (statusValue: LeadStatus | null) => {
+    if (allowMultiple && onStatusesChange && statusValue !== null) {
+      if (statuses.includes(statusValue)) {
+        onStatusesChange(statuses.filter(s => s !== statusValue));
+      } else {
+        onStatusesChange([...statuses, statusValue]);
+      }
+    } else {
+      onStatusChange(status === statusValue ? null : statusValue);
+    }
+  };
+
+  const clearAllStatuses = () => {
+    if (allowMultiple && onStatusesChange) {
+      onStatusesChange([]);
+    } else {
+      onStatusChange(null);
+    }
+  };
+
+  const isSelected = (statusValue: LeadStatus | null) => {
+    if (allowMultiple && statusValue !== null) {
+      return statuses.includes(statusValue);
+    }
+    return status === statusValue;
+  };
+
+  const hasSelection = allowMultiple ? statuses.length > 0 : status !== null;
 
   // Map status values to display labels
   const getStatusLabel = (status: LeadStatus | null): string => {
@@ -51,26 +86,31 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
         <Filter className="h-4 w-4" /> Statut
+        {allowMultiple && statuses.length > 0 && (
+          <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
+            {statuses.length}
+          </span>
+        )}
       </h4>
       <div className="flex flex-wrap gap-1.5">
+        <Button
+          variant={!hasSelection ? "default" : "outline"}
+          size="sm"
+          className="text-xs h-7 px-2 whitespace-nowrap"
+          onClick={clearAllStatuses}
+        >
+          {allowMultiple ? "Aucun" : "Tous"}
+        </Button>
+        {availableStatuses.filter(s => s !== null).map((statusValue) => (
           <Button
-            variant={status === null ? "default" : "outline"}
+            key={statusValue}
+            variant={isSelected(statusValue as LeadStatus) ? "default" : "outline"}
             size="sm"
             className="text-xs h-7 px-2 whitespace-nowrap"
-            onClick={() => onStatusChange(null)}
+            onClick={() => toggleStatus(statusValue as LeadStatus)}
           >
-            Tous
+            {getStatusLabel(statusValue as LeadStatus)}
           </Button>
-        {statuses.filter(s => s !== null).map((statusValue) => (
-            <Button
-              key={statusValue}
-              variant={status === statusValue ? "default" : "outline"}
-              size="sm"
-              className="text-xs h-7 px-2 whitespace-nowrap"
-              onClick={() => onStatusChange(statusValue as LeadStatus)}
-            >
-              {getStatusLabel(statusValue as LeadStatus)}
-            </Button>
         ))}
       </div>
     </div>

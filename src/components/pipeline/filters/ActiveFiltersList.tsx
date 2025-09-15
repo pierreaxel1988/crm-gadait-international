@@ -26,6 +26,7 @@ const ActiveFiltersList = ({
   // Check if any filters are active by using the isFilterActive function
   const hasActiveFilters = 
     isFilterActive('status') || 
+    isFilterActive('statuses') ||
     isFilterActive('tags') || 
     isFilterActive('assignedTo') || 
     isFilterActive('budget') || 
@@ -46,6 +47,18 @@ const ActiveFiltersList = ({
   return (
     <div className="flex flex-wrap gap-1.5 items-center">
       {/* Remove the "Filtres actifs:" label since it's now in the header */}
+      
+      {filters.statuses && filters.statuses.length > 0 && (
+        <div className="bg-primary/15 text-primary text-xs rounded-md px-2 py-1 flex items-center gap-1 border border-primary/20">
+          <span className="font-medium">Statuts:</span> {filters.statuses.join(', ')}
+          <button 
+            onClick={() => onFilterChange({...filters, statuses: []})}
+            className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        </div>
+      )}
       
       {filters.status && (
         <div className="bg-primary/15 text-primary text-xs rounded-md px-2 py-1 flex items-center gap-1 border border-primary/20">

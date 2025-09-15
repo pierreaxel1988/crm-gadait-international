@@ -18,6 +18,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export interface FilterOptions {
   status: LeadStatus | null;
+  statuses: LeadStatus[];
   tags: LeadTag[];
   assignedTo: string | null;
   minBudget: string;
@@ -74,6 +75,7 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
   // Count active filters
   const activeFiltersCount = 
     (filters.status ? 1 : 0) +
+    filters.statuses.length +
     filters.tags.length +
     (filters.assignedTo ? 1 : 0) +
     (filters.minBudget || filters.maxBudget ? 1 : 0) +
@@ -119,7 +121,10 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           <StatusFilter 
             status={filters.status} 
-            onStatusChange={status => handleFilterChange('status', status)} 
+            onStatusChange={status => handleFilterChange('status', status)}
+            statuses={filters.statuses}
+            onStatusesChange={statuses => handleFilterChange('statuses', statuses)}
+            allowMultiple={true}
           />
           
           <TagsFilter 
