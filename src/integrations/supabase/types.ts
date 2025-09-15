@@ -1076,6 +1076,159 @@ export type Database = {
           },
         ]
       }
+      newsletter_analytics: {
+        Row: {
+          bounce_reason: string | null
+          clicked_at: string | null
+          created_at: string
+          id: string
+          newsletter_id: string | null
+          opened_at: string | null
+          recipient_email: string
+          sent_at: string | null
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          bounce_reason?: string | null
+          clicked_at?: string | null
+          created_at?: string
+          id?: string
+          newsletter_id?: string | null
+          opened_at?: string | null
+          recipient_email: string
+          sent_at?: string | null
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          bounce_reason?: string | null
+          clicked_at?: string | null
+          created_at?: string
+          id?: string
+          newsletter_id?: string | null
+          opened_at?: string | null
+          recipient_email?: string
+          sent_at?: string | null
+          unsubscribed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_analytics_newsletter_id_fkey"
+            columns: ["newsletter_id"]
+            isOneToOne: false
+            referencedRelation: "newsletters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_templates: {
+        Row: {
+          category: string | null
+          content: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          thumbnail: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          thumbnail?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          thumbnail?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletters: {
+        Row: {
+          analytics: Json | null
+          content: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+          target_countries: string[] | null
+          target_locations: string[] | null
+          target_segments: Json | null
+          template_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          analytics?: Json | null
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          target_countries?: string[] | null
+          target_locations?: string[] | null
+          target_segments?: Json | null
+          template_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          analytics?: Json | null
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          target_countries?: string[] | null
+          target_locations?: string[] | null
+          target_segments?: Json | null
+          template_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletters_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_units: {
         Row: {
           bathrooms: number | null
