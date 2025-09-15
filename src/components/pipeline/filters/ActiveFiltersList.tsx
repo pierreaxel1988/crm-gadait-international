@@ -30,6 +30,7 @@ const ActiveFiltersList = ({
     isFilterActive('assignedTo') || 
     isFilterActive('budget') || 
     isFilterActive('location') || 
+    isFilterActive('country') || 
     isFilterActive('purchaseTimeframe') || 
     isFilterActive('propertyType');
 
@@ -74,6 +75,18 @@ const ActiveFiltersList = ({
           <span className="font-medium">Agent:</span> {getTeamMemberName(filters.assignedTo)}
           <button 
             onClick={() => onFilterChange({...filters, assignedTo: null})}
+            className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        </div>
+      )}
+      
+      {filters.country && (
+        <div className="bg-primary/15 text-primary text-xs rounded-md px-2 py-1 flex items-center gap-1 border border-primary/20">
+          <span className="font-medium">Pays:</span> {filters.country}
+          <button 
+            onClick={() => onFilterChange({...filters, country: ''})}
             className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
           >
             <X className="h-3 w-3" />

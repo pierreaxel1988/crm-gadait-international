@@ -33,6 +33,7 @@ export function usePipelineState() {
     minBudget: '',
     maxBudget: '',
     location: '',
+    country: '',
     purchaseTimeframe: null,
     propertyType: null
   });
@@ -96,6 +97,7 @@ export function usePipelineState() {
     if (filters.minBudget !== '') count++;
     if (filters.maxBudget !== '') count++;
     if (filters.location !== '') count++;
+    if (filters.country !== '') count++;
     if (filters.purchaseTimeframe !== null) count++;
     if (filters.propertyType !== null) count++;
     return count;
@@ -113,6 +115,8 @@ export function usePipelineState() {
         return filters.minBudget !== '' || filters.maxBudget !== '';
       case 'location':
         return filters.location !== '';
+      case 'country':
+        return filters.country !== '';
       case 'purchaseTimeframe':
         return filters.purchaseTimeframe !== null;
       case 'propertyType':
@@ -170,6 +174,7 @@ export function usePipelineState() {
       minBudget: '',
       maxBudget: '',
       location: '',
+      country: '',
       purchaseTimeframe: null,
       propertyType: null
     });

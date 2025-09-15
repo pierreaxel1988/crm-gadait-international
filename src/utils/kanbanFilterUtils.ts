@@ -67,6 +67,13 @@ export const applyFiltersToColumns = (
       );
     }
     
+    // Filter by country
+    if (filters.country) {
+      filteredItems = filteredItems.filter(item => 
+        item.country?.toLowerCase().includes(filters.country.toLowerCase())
+      );
+    }
+    
     // Filter by purchase timeframe - fixed comparison
     if (filters.purchaseTimeframe !== null) {
       filteredItems = filteredItems.filter(item => 

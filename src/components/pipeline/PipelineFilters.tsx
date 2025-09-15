@@ -6,6 +6,7 @@ import TagsFilter from './filters/TagsFilter';
 import AgentFilter from './filters/AgentFilter';
 import BudgetFilter from './filters/BudgetFilter';
 import LocationFilter from './filters/LocationFilter';
+import CountryFilter from './filters/CountryFilter';
 import TimeframeFilter from './filters/TimeframeFilter';
 import PropertyTypeFilter from './filters/PropertyTypeFilter';
 import ActionButtons from './filters/ActionButtons';
@@ -22,6 +23,7 @@ export interface FilterOptions {
   minBudget: string;
   maxBudget: string;
   location: string;
+  country: string;
   purchaseTimeframe: PurchaseTimeframe | null;
   propertyType: PropertyType | null;
 }
@@ -75,6 +77,7 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     (filters.assignedTo ? 1 : 0) +
     (filters.minBudget || filters.maxBudget ? 1 : 0) +
     (filters.location ? 1 : 0) +
+    (filters.country ? 1 : 0) +
     (filters.purchaseTimeframe ? 1 : 0) +
     (filters.propertyType ? 1 : 0);
 
@@ -135,10 +138,15 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
       {/* Secondary filters - Search criteria */}
       <div className="bg-background/30 rounded-lg p-4 border">
         <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Critères de recherche</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
           <LocationFilter 
             location={filters.location} 
             onLocationChange={handleLocationChange} 
+          />
+
+          <CountryFilter 
+            country={filters.country} 
+            onCountryChange={country => handleFilterChange('country', country)} 
           />
 
           <BudgetFilter 
