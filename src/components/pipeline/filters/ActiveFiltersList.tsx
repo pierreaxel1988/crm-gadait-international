@@ -48,132 +48,132 @@ const ActiveFiltersList = ({
     <div className="flex flex-wrap gap-2 items-center mt-3 pt-3 border-t border-border/50">
       {/* Remove the "Filtres actifs:" label since it's now in the header */}
       
-      {filters.statuses && filters.statuses.length > 0 && (
-        <div className="flex items-center gap-1 bg-muted/60 rounded-full px-3 py-1.5 text-sm">
-          <span className="text-foreground font-medium">{filters.statuses.join(', ')}</span>
+      {filters.statuses && filters.statuses.map(status => (
+        <div key={status} className="flex items-center gap-0.5 bg-muted/60 rounded-full px-2 py-1 text-xs">
+          <span className="text-foreground font-medium">{status}</span>
           <button 
-            onClick={() => onFilterChange({...filters, statuses: []})}
-            className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors"
-            aria-label="Supprimer les filtres statuts"
+            onClick={() => onFilterChange({...filters, statuses: filters.statuses.filter(s => s !== status)})}
+            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            aria-label={`Supprimer le statut ${status}`}
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-2.5 w-2.5" />
           </button>
         </div>
-      )}
+      ))}
       
       {filters.status && (
-        <div className="flex items-center gap-1 bg-muted/60 rounded-full px-3 py-1.5 text-sm">
+        <div className="flex items-center gap-0.5 bg-muted/60 rounded-full px-2 py-1 text-xs">
           <span className="text-foreground font-medium">{filters.status}</span>
           <button 
             onClick={() => onFilterChange({...filters, status: null})}
-            className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
             aria-label="Supprimer le filtre statut"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-2.5 w-2.5" />
           </button>
         </div>
       )}
       
       {filters.tags.map(tag => (
-        <div key={tag} className="flex items-center gap-1 bg-amber-100/70 dark:bg-amber-900/30 rounded-full px-3 py-1.5 text-sm">
+        <div key={tag} className="flex items-center gap-0.5 bg-amber-100/70 dark:bg-amber-900/30 rounded-full px-2 py-1 text-xs">
           <span className="text-foreground font-medium">{tag}</span>
           <button 
             onClick={() => onFilterChange({...filters, tags: filters.tags.filter(t => t !== tag)})}
-            className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
             aria-label={`Supprimer le tag ${tag}`}
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-2.5 w-2.5" />
           </button>
         </div>
       ))}
       
       {filters.assignedTo && (
-        <div className="flex items-center gap-1 bg-blue-100/70 dark:bg-blue-900/30 rounded-full px-3 py-1.5 text-sm">
+        <div className="flex items-center gap-0.5 bg-blue-100/70 dark:bg-blue-900/30 rounded-full px-2 py-1 text-xs">
           <span className="text-foreground font-medium">{getTeamMemberName(filters.assignedTo)}</span>
           <button 
             onClick={() => onFilterChange({...filters, assignedTo: null})}
-            className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
             aria-label="Supprimer le filtre agent"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-2.5 w-2.5" />
           </button>
         </div>
       )}
       
       {filters.country && (
-        <div className="flex items-center gap-1 bg-green-100/70 dark:bg-green-900/30 rounded-full px-3 py-1.5 text-sm">
+        <div className="flex items-center gap-0.5 bg-green-100/70 dark:bg-green-900/30 rounded-full px-2 py-1 text-xs">
           <span className="text-foreground font-medium">{filters.country}</span>
           <button 
             onClick={() => onFilterChange({...filters, country: ''})}
-            className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
             aria-label="Supprimer le filtre pays"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-2.5 w-2.5" />
           </button>
         </div>
       )}
       
       {(filters.minBudget || filters.maxBudget) && (
-        <div className="flex items-center gap-1 bg-emerald-100/70 dark:bg-emerald-900/30 rounded-full px-3 py-1.5 text-sm">
+        <div className="flex items-center gap-0.5 bg-emerald-100/70 dark:bg-emerald-900/30 rounded-full px-2 py-1 text-xs">
           <span className="text-foreground font-medium">{filters.minBudget ? `${filters.minBudget}` : '0€'} - {filters.maxBudget ? `${filters.maxBudget}` : '∞'}</span>
           <button 
             onClick={() => onFilterChange({...filters, minBudget: '', maxBudget: ''})}
-            className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
             aria-label="Supprimer le filtre budget"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-2.5 w-2.5" />
           </button>
         </div>
       )}
       
       {filters.location && (
-        <div className="flex items-center gap-1 bg-purple-100/70 dark:bg-purple-900/30 rounded-full px-3 py-1.5 text-sm">
+        <div className="flex items-center gap-0.5 bg-purple-100/70 dark:bg-purple-900/30 rounded-full px-2 py-1 text-xs">
           <span className="text-foreground font-medium">{filters.location}</span>
           <button 
             onClick={() => onFilterChange({...filters, location: ''})}
-            className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
             aria-label="Supprimer le filtre lieu"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-2.5 w-2.5" />
           </button>
         </div>
       )}
       
-      {filters.propertyTypes && filters.propertyTypes.length > 0 && (
-        <div className="flex items-center gap-1 bg-rose-100/70 dark:bg-rose-900/30 rounded-full px-3 py-1.5 text-sm">
-          <span className="text-foreground font-medium">{filters.propertyTypes.join(', ')}</span>
+      {filters.propertyTypes && filters.propertyTypes.map(type => (
+        <div key={type} className="flex items-center gap-0.5 bg-rose-100/70 dark:bg-rose-900/30 rounded-full px-2 py-1 text-xs">
+          <span className="text-foreground font-medium">{type}</span>
           <button 
-            onClick={() => onFilterChange({...filters, propertyTypes: []})}
-            className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors"
-            aria-label="Supprimer les filtres types"
+            onClick={() => onFilterChange({...filters, propertyTypes: filters.propertyTypes.filter(t => t !== type)})}
+            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            aria-label={`Supprimer le type ${type}`}
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-2.5 w-2.5" />
           </button>
         </div>
-      )}
+      ))}
       
       {filters.purchaseTimeframe && (
-        <div className="flex items-center gap-1 bg-orange-100/70 dark:bg-orange-900/30 rounded-full px-3 py-1.5 text-sm">
+        <div className="flex items-center gap-0.5 bg-orange-100/70 dark:bg-orange-900/30 rounded-full px-2 py-1 text-xs">
           <span className="text-foreground font-medium">{filters.purchaseTimeframe === 'Moins de trois mois' ? '< 3 mois' : '> 3 mois'}</span>
           <button 
             onClick={() => onFilterChange({...filters, purchaseTimeframe: null})}
-            className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
             aria-label="Supprimer le filtre délai"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-2.5 w-2.5" />
           </button>
         </div>
       )}
       
       {filters.propertyType && (
-        <div className="flex items-center gap-1 bg-slate-100/70 dark:bg-slate-800/30 rounded-full px-3 py-1.5 text-sm">
+        <div className="flex items-center gap-0.5 bg-slate-100/70 dark:bg-slate-800/30 rounded-full px-2 py-1 text-xs">
           <span className="text-foreground font-medium">{filters.propertyType}</span>
           <button 
             onClick={() => onFilterChange({...filters, propertyType: null})}
-            className="ml-1 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
             aria-label="Supprimer le filtre type"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-2.5 w-2.5" />
           </button>
         </div>
       )}
