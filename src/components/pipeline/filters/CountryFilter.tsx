@@ -49,6 +49,10 @@ const CountryFilter = ({ country, onCountryChange }: CountryFilterProps) => {
     onCountryChange(selectedCountry);
   };
 
+  const handleClear = () => {
+    onCountryChange('');
+  };
+
   const renderCountryItem = (countryName: string) => (
     <div className="text-sm py-1">{countryName}</div>
   );
@@ -63,6 +67,7 @@ const CountryFilter = ({ country, onCountryChange }: CountryFilterProps) => {
           value={country || ''}
           onChange={(value) => onCountryChange(value)}
           onSelect={handleCountrySelect}
+          onClear={handleClear}
           results={getFilteredCountries(country || '')}
           renderItem={renderCountryItem}
           className="w-full"

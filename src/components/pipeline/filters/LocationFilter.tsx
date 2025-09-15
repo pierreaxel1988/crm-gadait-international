@@ -33,6 +33,10 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
     onLocationChange(selectedLocation);
   };
 
+  const handleClear = () => {
+    onLocationChange('');
+  };
+
   const renderLocationItem = (location: string) => (
     <div className="text-sm py-1">{location}</div>
   );
@@ -49,6 +53,7 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
           value={location}
           onChange={onLocationChange}
           onSelect={handleLocationSelect}
+          onClear={handleClear}
           results={getFilteredLocations(location)}
           renderItem={renderLocationItem}
           className="w-full"
