@@ -42,39 +42,41 @@ const TagsFilter: React.FC<TagsFilterProps> = ({
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
         <Tag className="h-4 w-4" /> Tags
       </h4>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="flex flex-wrap gap-1.5 mb-3">
         {tags.map((tag) => (
           <Button
             key={tag}
             variant={selectedTags.includes(tag) ? "default" : "outline"}
             size="sm"
-            className="text-xs"
+            className="text-xs h-7 px-2 whitespace-nowrap"
             onClick={() => toggleTag(tag)}
           >
-            <TagBadge tag={tag} className="text-xs py-0" />
+            {tag}
           </Button>
         ))}
         
         {selectedTags.length > 0 && (
           <Button 
-            variant="outline" 
+            variant="ghost" 
             size="sm" 
-            className="text-xs text-muted-foreground col-span-2 mt-1"
+            className="text-xs text-muted-foreground h-7 px-2"
             onClick={clearTags}
           >
-            Effacer tous les tags
+            Tout effacer
           </Button>
         )}
       </div>
       
       {selectedTags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
+        <div className="flex flex-wrap gap-1.5 items-center">
+          <span className="text-xs text-muted-foreground">Sélectionnés:</span>
           {selectedTags.map(tag => (
             <div key={tag} className="flex items-center">
-              <TagBadge tag={tag} className="text-xs" />
+              <TagBadge tag={tag} className="text-xs h-6" />
               <button 
                 onClick={() => toggleTag(tag)}
-                className="ml-1 rounded-full w-4 h-4 flex items-center justify-center bg-muted-foreground/10 hover:bg-muted-foreground/20"
+                className="ml-1 bg-background rounded-full w-4 h-4 flex items-center justify-center hover:bg-muted transition-colors"
+                aria-label={`Supprimer le tag ${tag}`}
               >
                 <X className="h-3 w-3" />
               </button>
