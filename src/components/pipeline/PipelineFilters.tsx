@@ -139,14 +139,15 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
       <div className="bg-background/30 rounded-lg p-4 border">
         <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Critères de recherche</h3>
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
-          <LocationFilter 
-            location={filters.location} 
-            onLocationChange={handleLocationChange} 
-          />
-
           <CountryFilter 
             country={filters.country} 
             onCountryChange={country => handleFilterChange('country', country)} 
+          />
+
+          <LocationFilter 
+            location={filters.location} 
+            onLocationChange={handleLocationChange}
+            country={filters.country}
           />
 
           <BudgetFilter 

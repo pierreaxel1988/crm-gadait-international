@@ -16,12 +16,17 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
     // If a country is selected, only show locations from that country
     const locations = country ? getLocationsByCountry(country) : getAllLocations();
     
+    if (!searchTerm || searchTerm.length < 1) {
+      // Show top 10 most popular locations when no search term
+      return locations.slice(0, 10);
+    }
+    
     return locations
       .filter(loc => 
         loc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
         .includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
       )
-      .slice(0, 10); // Limit to 10 suggestions
+      .slice(0, 15); // Show more results when searching
   };
 
   const handleLocationSelect = (selectedLocation: string) => {
@@ -36,10 +41,11 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
         <MapPin className="h-4 w-4" /> Localisation
+        {country && <span className="text-xs text-muted-foreground">({country})</span>}
       </h4>
       <div className="relative">
         <SmartSearch
-          placeholder="Ville, région..."
+          placeholder={country ? `Ville, région dans ${country}...` : "Ville, région..."}
           value={location}
           onChange={onLocationChange}
           onSelect={handleLocationSelect}
@@ -47,7 +53,7 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
           renderItem={renderLocationItem}
           className="w-full"
           inputClassName="h-8 text-sm"
-          minChars={1}
+          minChars={0}
           searchIcon={true}
           clearButton={true}
         />
