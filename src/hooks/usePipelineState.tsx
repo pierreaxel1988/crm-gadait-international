@@ -136,23 +136,21 @@ export function usePipelineState() {
     
     const checkLeads = async () => {
       try {
-        const { count, error } = await supabase
+        const { data, error } = await supabase
           .from('leads')
-          .select('*', { count: 'exact', head: true });
+          .select('id, name')
+          .is('deleted_at', null)
+          .limit(1);
           
         if (error) {
           console.error('Error checking leads:', error);
           return;
         }
         
-        console.log(`Nombre de leads dans la base de données: ${count}`);
+        console.log(`Leads accessibles: ${data?.length || 0}`);
         
-        if (count === 0) {
-          toast({
-            title: "Aucun lead trouvé",
-            description: "La base de données ne contient pas de leads. Ajoutez-en un pour commencer.",
-            duration: 3000,
-          });
+        if (!data || data.length === 0) {
+          console.log("Aucun lead accessible pour cet utilisateur");
         }
       } catch (error) {
         console.error('Unexpected error:', error);
