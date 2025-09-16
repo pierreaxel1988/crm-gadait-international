@@ -27,15 +27,25 @@ const PropertyTypeFilter = ({
   ];
   
   const togglePropertyType = (type: PropertyType) => {
+    console.log('=== PROPERTY TYPE FILTER CLICK DEBUG ===');
+    console.log('Clicked type:', type);
+    console.log('Allow multiple:', allowMultiple);
+    console.log('Current propertyTypes array:', propertyTypes);
+    console.log('Current propertyType single:', propertyType);
+    
     if (allowMultiple && onPropertyTypesChange) {
-      if (propertyTypes.includes(type)) {
-        onPropertyTypesChange(propertyTypes.filter(t => t !== type));
-      } else {
-        onPropertyTypesChange([...propertyTypes, type]);
-      }
+      const newTypes = propertyTypes.includes(type) 
+        ? propertyTypes.filter(t => t !== type)
+        : [...propertyTypes, type];
+      
+      console.log('New property types array:', newTypes);
+      onPropertyTypesChange(newTypes);
     } else {
-      onPropertyTypeChange(propertyType === type ? null : type);
+      const newType = propertyType === type ? null : type;
+      console.log('New property type single:', newType);
+      onPropertyTypeChange(newType);
     }
+    console.log('========================================');
   };
 
   const clearAllTypes = () => {

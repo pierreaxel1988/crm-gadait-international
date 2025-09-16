@@ -65,14 +65,55 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
     { label: "Propriétaires", value: "owners" },
   ];
 
-  // Convert FilterOptions to KanbanFilters
+  // Convert FilterOptions to KanbanFilters with robust validation
   const kanbanFilters = useMemo(() => {
+    console.log('=== DESKTOP PIPELINE FILTERS CONVERSION DEBUG ===');
+    console.log('Raw filters object:', filters);
+    console.log('Raw property types:', filters.propertyTypes);
+    console.log('Raw property type:', filters.propertyType);
+    console.log('Raw assigned to:', filters.assignedTo);
+    console.log('Raw country:', filters.country);
+    
+    // Clean and validate property types array
+    const cleanPropertyTypes = Array.isArray(filters.propertyTypes) 
+      ? filters.propertyTypes.filter(type => 
+          type && 
+          typeof type === 'string' && 
+          String(type) !== 'undefined' && 
+          type.trim() !== ''
+        )
+      : [];
+    
+    // Clean and validate single property type
+    const cleanPropertyType = filters.propertyType && 
+      typeof filters.propertyType === 'string' && 
+      String(filters.propertyType) !== 'undefined' && 
+      filters.propertyType.trim() !== '' 
+        ? filters.propertyType 
+        : undefined;
+    
+    // Clean and validate assigned to
+    const cleanAssignedTo = filters.assignedTo && 
+      typeof filters.assignedTo === 'string' && 
+      filters.assignedTo !== 'undefined' && 
+      filters.assignedTo.trim() !== '' 
+        ? filters.assignedTo 
+        : undefined;
+    
+    // Clean and validate country
+    const cleanCountry = filters.country && 
+      typeof filters.country === 'string' && 
+      filters.country !== 'undefined' && 
+      filters.country.trim() !== '' 
+        ? filters.country 
+        : undefined;
+    
     const kanbanFilters = {
-      assignedTo: filters.assignedTo || undefined,
-      tags: filters.tags || [],
-      country: filters.country || undefined,
-      propertyType: filters.propertyType || undefined,
-      propertyTypes: filters.propertyTypes || [],
+      assignedTo: cleanAssignedTo,
+      tags: Array.isArray(filters.tags) ? filters.tags : [],
+      country: cleanCountry,
+      propertyType: cleanPropertyType,
+      propertyTypes: cleanPropertyTypes,
       status: filters.status || undefined,
       searchTerm: debouncedSearchTerm || undefined,
       priceRange: {
@@ -81,12 +122,13 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
       }
     };
     
-    // DEBUG: Log filter values
-    console.log('=== DESKTOP PIPELINE FILTERS DEBUG ===');
-    console.log('Original filters:', filters);
-    console.log('Country filter value:', filters.country);
-    console.log('Kanban filters:', kanbanFilters);
-    console.log('===================================');
+    console.log('Cleaned filters:');
+    console.log('- Property types (array):', cleanPropertyTypes);
+    console.log('- Property type (single):', cleanPropertyType);
+    console.log('- Assigned to:', cleanAssignedTo);
+    console.log('- Country:', cleanCountry);
+    console.log('Final kanban filters:', kanbanFilters);
+    console.log('=============================================');
     
     return kanbanFilters;
   }, [filters, debouncedSearchTerm]);

@@ -114,11 +114,27 @@ export const useKanbanData = (
       if (filters.propertyTypes && filters.propertyTypes.length > 0) {
         console.log('=== PROPERTY TYPES FILTER DEBUG ===');
         console.log('Applying property types filter:', filters.propertyTypes);
-        query = query.overlaps('property_types', filters.propertyTypes);
+        console.log('Filter values types:', filters.propertyTypes.map(t => typeof t));
+        console.log('Valid filter values:', filters.propertyTypes.filter(t => t && typeof t === 'string'));
+        
+        const validTypes = filters.propertyTypes.filter(t => t && typeof t === 'string');
+        if (validTypes.length > 0) {
+          query = query.overlaps('property_types', validTypes);
+          console.log('Applied overlaps filter with:', validTypes);
+        } else {
+          console.log('No valid property types to filter on');
+        }
       } else if (filters.propertyType) {
         console.log('=== PROPERTY TYPE FILTER DEBUG ===');
         console.log('Applying property type filter:', filters.propertyType);
-        query = query.overlaps('property_types', [filters.propertyType]);
+        console.log('Filter value type:', typeof filters.propertyType);
+        
+        if (typeof filters.propertyType === 'string') {
+          query = query.overlaps('property_types', [filters.propertyType]);
+          console.log('Applied overlaps filter with single type:', [filters.propertyType]);
+        } else {
+          console.log('Invalid property type value, skipping filter');
+        }
       }
 
       if (filters.tags && filters.tags.length > 0) {
