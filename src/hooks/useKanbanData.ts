@@ -105,9 +105,9 @@ export const useKanbanData = (
 
       // Filter by property types (supporting both single property type and multiple property types)
       if (filters.propertyTypes && filters.propertyTypes.length > 0) {
-        query = query.overlaps('property_types', filters.propertyTypes);
+        query = query.in('property_type', filters.propertyTypes);
       } else if (filters.propertyType) {
-        query = query.contains('property_types', [filters.propertyType]);
+        query = query.eq('property_type', filters.propertyType);
       }
 
       if (filters.tags && filters.tags.length > 0) {
