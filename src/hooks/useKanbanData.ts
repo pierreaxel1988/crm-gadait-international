@@ -11,6 +11,7 @@ export interface KanbanFilters {
   tags?: string[];
   source?: string;
   country?: string;
+  location?: string;
   propertyType?: string;
   propertyTypes?: string[];
   status?: LeadStatus | null;
@@ -96,6 +97,10 @@ export const useKanbanData = (
 
       if (filters.country) {
         query = query.eq('country', filters.country);
+      }
+
+      if (filters.location) {
+        query = query.eq('desired_location', filters.location);
       }
 
       // Filter by property types (supporting both single property type and multiple property types)
