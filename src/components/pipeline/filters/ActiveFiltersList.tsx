@@ -91,7 +91,11 @@ const ActiveFiltersList = ({
         <div className="flex items-center gap-0.5 bg-blue-100/70 dark:bg-blue-900/30 rounded-full px-2 py-1 text-xs">
           <span className="text-xs text-foreground font-medium">{getTeamMemberName(filters.assignedTo)}</span>
           <button 
-            onClick={() => onFilterChange({...filters, assignedTo: null})}
+            onClick={() => {
+              console.log('Removing assignedTo filter. Current filters:', filters);
+              onFilterChange({...filters, assignedTo: null});
+              console.log('After filter change, new filters should be:', {...filters, assignedTo: null});
+            }}
             className="ml-0.5 hover:bg-destructive/10 active:bg-destructive/20 hover:text-destructive active:scale-95 rounded-full p-0.5 transition-all duration-150"
             aria-label="Supprimer le filtre agent"
           >
