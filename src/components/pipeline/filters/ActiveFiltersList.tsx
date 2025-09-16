@@ -53,7 +53,7 @@ const ActiveFiltersList = ({
           <span className="text-xs text-foreground font-medium">{status}</span>
           <button 
             onClick={() => onFilterChange({...filters, statuses: filters.statuses.filter(s => s !== status)})}
-            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-destructive/10 active:bg-destructive/20 hover:text-destructive active:scale-95 rounded-full p-0.5 transition-all duration-150"
             aria-label={`Supprimer le statut ${status}`}
           >
             <X className="h-2.5 w-2.5" />
@@ -66,7 +66,7 @@ const ActiveFiltersList = ({
           <span className="text-xs text-foreground font-medium">{filters.status}</span>
           <button 
             onClick={() => onFilterChange({...filters, status: null})}
-            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-destructive/10 active:bg-destructive/20 hover:text-destructive active:scale-95 rounded-full p-0.5 transition-all duration-150"
             aria-label="Supprimer le filtre statut"
           >
             <X className="h-2.5 w-2.5" />
@@ -79,7 +79,7 @@ const ActiveFiltersList = ({
           <span className="text-xs text-foreground font-medium">{tag}</span>
           <button 
             onClick={() => onFilterChange({...filters, tags: filters.tags.filter(t => t !== tag)})}
-            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-destructive/10 active:bg-destructive/20 hover:text-destructive active:scale-95 rounded-full p-0.5 transition-all duration-150"
             aria-label={`Supprimer le tag ${tag}`}
           >
             <X className="h-2.5 w-2.5" />
@@ -92,7 +92,7 @@ const ActiveFiltersList = ({
           <span className="text-xs text-foreground font-medium">{getTeamMemberName(filters.assignedTo)}</span>
           <button 
             onClick={() => onFilterChange({...filters, assignedTo: null})}
-            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-destructive/10 active:bg-destructive/20 hover:text-destructive active:scale-95 rounded-full p-0.5 transition-all duration-150"
             aria-label="Supprimer le filtre agent"
           >
             <X className="h-2.5 w-2.5" />
@@ -105,7 +105,7 @@ const ActiveFiltersList = ({
           <span className="text-xs text-foreground font-medium">{filters.country}</span>
           <button 
             onClick={() => onFilterChange({...filters, country: ''})}
-            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-destructive/10 active:bg-destructive/20 hover:text-destructive active:scale-95 rounded-full p-0.5 transition-all duration-150"
             aria-label="Supprimer le filtre pays"
           >
             <X className="h-2.5 w-2.5" />
@@ -118,7 +118,7 @@ const ActiveFiltersList = ({
           <span className="text-xs text-foreground font-medium">{filters.minBudget ? `${filters.minBudget}` : '0€'} - {filters.maxBudget ? `${filters.maxBudget}` : '∞'}</span>
           <button 
             onClick={() => onFilterChange({...filters, minBudget: '', maxBudget: ''})}
-            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-destructive/10 active:bg-destructive/20 hover:text-destructive active:scale-95 rounded-full p-0.5 transition-all duration-150"
             aria-label="Supprimer le filtre budget"
           >
             <X className="h-2.5 w-2.5" />
@@ -131,7 +131,7 @@ const ActiveFiltersList = ({
           <span className="text-xs text-foreground font-medium">{filters.location}</span>
           <button 
             onClick={() => onFilterChange({...filters, location: ''})}
-            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-destructive/10 active:bg-destructive/20 hover:text-destructive active:scale-95 rounded-full p-0.5 transition-all duration-150"
             aria-label="Supprimer le filtre lieu"
           >
             <X className="h-2.5 w-2.5" />
@@ -144,7 +144,7 @@ const ActiveFiltersList = ({
           <span className="text-xs text-foreground font-medium">{type}</span>
           <button 
             onClick={() => onFilterChange({...filters, propertyTypes: filters.propertyTypes.filter(t => t !== type)})}
-            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-destructive/10 active:bg-destructive/20 hover:text-destructive active:scale-95 rounded-full p-0.5 transition-all duration-150"
             aria-label={`Supprimer le type ${type}`}
           >
             <X className="h-2.5 w-2.5" />
@@ -157,7 +157,7 @@ const ActiveFiltersList = ({
           <span className="text-xs text-foreground font-medium">{filters.purchaseTimeframe === 'Moins de trois mois' ? '< 3 mois' : '> 3 mois'}</span>
           <button 
             onClick={() => onFilterChange({...filters, purchaseTimeframe: null})}
-            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-destructive/10 active:bg-destructive/20 hover:text-destructive active:scale-95 rounded-full p-0.5 transition-all duration-150"
             aria-label="Supprimer le filtre délai"
           >
             <X className="h-2.5 w-2.5" />
@@ -170,7 +170,7 @@ const ActiveFiltersList = ({
           <span className="text-xs text-foreground font-medium">{filters.propertyType}</span>
           <button 
             onClick={() => onFilterChange({...filters, propertyType: null})}
-            className="ml-0.5 hover:bg-background/80 rounded-full p-0.5 transition-colors"
+            className="ml-0.5 hover:bg-destructive/10 active:bg-destructive/20 hover:text-destructive active:scale-95 rounded-full p-0.5 transition-all duration-150"
             aria-label="Supprimer le filtre type"
           >
             <X className="h-2.5 w-2.5" />
