@@ -27,6 +27,7 @@ export function usePipelineState() {
   const [teamMembers, setTeamMembers] = useState<{id: string, name: string}[]>([]);
   
   const [filters, setFilters] = useState<FilterOptions>({
+    pipelineType: 'all',
     status: null,
     statuses: [],
     tags: [],
@@ -177,6 +178,7 @@ export function usePipelineState() {
 
   const handleClearFilters = () => {
     setFilters({
+      pipelineType: 'all',
       status: null,
       statuses: [],
       tags: [],

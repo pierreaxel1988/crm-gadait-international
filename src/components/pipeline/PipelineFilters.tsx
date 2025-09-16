@@ -9,6 +9,7 @@ import LocationFilter from './filters/LocationFilter';
 import CountryFilter from './filters/CountryFilter';
 import TimeframeFilter from './filters/TimeframeFilter';
 import PropertyTypeFilter from './filters/PropertyTypeFilter';
+import PipelineTypeFilter from './filters/PipelineTypeFilter';
 import ActionButtons from './filters/ActionButtons';
 import ActiveFiltersList from './filters/ActiveFiltersList';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -17,6 +18,7 @@ import { PurchaseTimeframe, PropertyType } from '@/types/lead';
 import { useAuth } from '@/hooks/useAuth';
 
 export interface FilterOptions {
+  pipelineType: string;
   status: LeadStatus | null;
   statuses: LeadStatus[];
   tags: LeadTag[];
@@ -120,6 +122,11 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
       <div className="bg-background/30 rounded-lg p-4 border">
         <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Filtres principaux</h3>
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <PipelineTypeFilter
+            pipelineType={filters.pipelineType}
+            onPipelineTypeChange={pipelineType => handleFilterChange('pipelineType', pipelineType)}
+          />
+          
           <StatusFilter 
             status={filters.status} 
             onStatusChange={status => handleFilterChange('status', status)}

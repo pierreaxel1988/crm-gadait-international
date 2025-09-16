@@ -7,6 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { LeadStatus } from '@/components/common/StatusBadge';
 
 export interface KanbanFilters {
+  pipelineType?: string;
   assignedTo?: string;
   tags?: string[];
   source?: string;
@@ -74,9 +75,11 @@ export const useKanbanData = (
         .from('leads')
         .select('*');
 
-      // Only filter by pipeline_type if it's explicitly set and not empty
-      if (activeTab && activeTab !== 'all') {
+      // Only filter by pipeline_type if it's explicitly set and not 'all'
+      if (activeTab && activeTab !== 'all' && (!filters.pipelineType || filters.pipelineType === 'all')) {
         query = query.eq('pipeline_type', activeTab);
+      } else if (filters.pipelineType && filters.pipelineType !== 'all') {
+        query = query.eq('pipeline_type', filters.pipelineType);
       }
 
       // Handle deleted leads based on status filter
