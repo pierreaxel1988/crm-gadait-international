@@ -110,11 +110,15 @@ export const useKanbanData = (
         query = query.eq('desired_location', filters.location);
       }
 
-      // Filter by property types (supporting both single property type and multiple property types)
+      // Filter by property types using the property_types array column
       if (filters.propertyTypes && filters.propertyTypes.length > 0) {
-        query = query.in('property_type', filters.propertyTypes);
+        console.log('=== PROPERTY TYPES FILTER DEBUG ===');
+        console.log('Applying property types filter:', filters.propertyTypes);
+        query = query.overlaps('property_types', filters.propertyTypes);
       } else if (filters.propertyType) {
-        query = query.eq('property_type', filters.propertyType);
+        console.log('=== PROPERTY TYPE FILTER DEBUG ===');
+        console.log('Applying property type filter:', filters.propertyType);
+        query = query.overlaps('property_types', [filters.propertyType]);
       }
 
       if (filters.tags && filters.tags.length > 0) {
