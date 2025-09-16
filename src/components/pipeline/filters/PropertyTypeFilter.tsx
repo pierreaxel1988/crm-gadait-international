@@ -32,8 +32,11 @@ const PropertyTypeFilter = ({
     console.log('Allow multiple:', allowMultiple);
     console.log('Current propertyTypes array:', propertyTypes);
     console.log('Current propertyType single:', propertyType);
+    console.log('onPropertyTypesChange exists:', !!onPropertyTypesChange);
+    console.log('onPropertyTypeChange exists:', !!onPropertyTypeChange);
     
     if (allowMultiple && onPropertyTypesChange) {
+      console.log('Using multiple mode');
       const newTypes = propertyTypes.includes(type) 
         ? propertyTypes.filter(t => t !== type)
         : [...propertyTypes, type];
@@ -41,6 +44,7 @@ const PropertyTypeFilter = ({
       console.log('New property types array:', newTypes);
       onPropertyTypesChange(newTypes);
     } else {
+      console.log('Using single mode');
       const newType = propertyType === type ? null : type;
       console.log('New property type single:', newType);
       onPropertyTypeChange(newType);
