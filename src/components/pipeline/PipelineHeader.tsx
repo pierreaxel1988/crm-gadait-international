@@ -125,7 +125,7 @@ const PipelineHeader: React.FC<PipelineHeaderProps> = ({
 
       {/* Filters panel - only shown when filtersOpen is true */}
       {filtersOpen && (
-        <div className="mt-4">
+        <div className="mt-4 animate-fade-in">
           <PipelineFilters 
             filters={filters}
             onFilterChange={onFilterChange}
