@@ -35,6 +35,7 @@ export function usePipelineState() {
     maxBudget: '',
     location: '',
     country: '',
+    currency: '',
     purchaseTimeframe: null,
     propertyType: null,
     propertyTypes: []
@@ -184,6 +185,7 @@ export function usePipelineState() {
       maxBudget: '',
       location: '',
       country: '',
+      currency: '',
       purchaseTimeframe: null,
       propertyType: null,
       propertyTypes: []

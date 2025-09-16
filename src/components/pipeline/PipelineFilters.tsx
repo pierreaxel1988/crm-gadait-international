@@ -25,6 +25,7 @@ export interface FilterOptions {
   maxBudget: string;
   location: string;
   country: string;
+  currency: string;
   purchaseTimeframe: PurchaseTimeframe | null;
   propertyType: PropertyType | null;
   propertyTypes: PropertyType[];
@@ -160,6 +161,8 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
           <BudgetFilter 
             minBudget={filters.minBudget} 
             maxBudget={filters.maxBudget} 
+            currency={filters.currency}
+            onCurrencyChange={currency => handleFilterChange('currency', currency)}
             onBudgetChange={(type, value) => {
               if (type === 'min') {
                 handleFilterChange('minBudget', value);
