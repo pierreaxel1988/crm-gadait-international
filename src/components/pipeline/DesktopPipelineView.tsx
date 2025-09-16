@@ -66,19 +66,30 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   ];
 
   // Convert FilterOptions to KanbanFilters
-  const kanbanFilters = useMemo(() => ({
-    assignedTo: filters.assignedTo || undefined,
-    tags: filters.tags || [],
-    country: filters.country || undefined,
-    propertyType: filters.propertyType || undefined,
-    propertyTypes: filters.propertyTypes || [],
-    status: filters.status || undefined,
-    searchTerm: debouncedSearchTerm || undefined,
-    priceRange: {
-      min: filters.minBudget ? parseInt(filters.minBudget) : undefined,
-      max: filters.maxBudget ? parseInt(filters.maxBudget) : undefined,
-    }
-  }), [filters, debouncedSearchTerm]);
+  const kanbanFilters = useMemo(() => {
+    const kanbanFilters = {
+      assignedTo: filters.assignedTo || undefined,
+      tags: filters.tags || [],
+      country: filters.country || undefined,
+      propertyType: filters.propertyType || undefined,
+      propertyTypes: filters.propertyTypes || [],
+      status: filters.status || undefined,
+      searchTerm: debouncedSearchTerm || undefined,
+      priceRange: {
+        min: filters.minBudget ? parseInt(filters.minBudget) : undefined,
+        max: filters.maxBudget ? parseInt(filters.maxBudget) : undefined,
+      }
+    };
+    
+    // DEBUG: Log filter values
+    console.log('=== DESKTOP PIPELINE FILTERS DEBUG ===');
+    console.log('Original filters:', filters);
+    console.log('Country filter value:', filters.country);
+    console.log('Kanban filters:', kanbanFilters);
+    console.log('===================================');
+    
+    return kanbanFilters;
+  }, [filters, debouncedSearchTerm]);
 
   const {
     loadedColumns,

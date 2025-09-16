@@ -101,6 +101,8 @@ export const useKanbanData = (
       }
 
       if (filters.country) {
+        console.log('=== COUNTRY FILTER DEBUG ===');
+        console.log('Applying country filter:', filters.country);
         query = query.eq('country', filters.country);
       }
 
@@ -157,6 +159,13 @@ export const useKanbanData = (
       }
 
       console.log('Raw data from Supabase:', rawData?.length || 0, 'leads');
+      
+      // DEBUG: Log country distribution
+      if (filters.country) {
+        const countryMatches = rawData?.filter(lead => lead.country === filters.country).length || 0;
+        console.log(`Leads matching country "${filters.country}":`, countryMatches);
+        console.log('Sample countries in data:', [...new Set(rawData?.map(lead => lead.country).filter(Boolean))]);
+      }
       
       // Convert raw data to LeadDetailed format using mapToLeadDetailed
       const convertedData = rawData?.map(lead => {
