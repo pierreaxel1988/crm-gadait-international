@@ -126,7 +126,7 @@ export const useKanbanData = (
 
       // Add price range filter if provided
       if (filters.priceRange?.min) {
-        query = query.gte('budget', filters.priceRange.min.toString());
+        query = query.gte('budget_min', filters.priceRange.min.toString());
       }
       if (filters.priceRange?.max) {
         query = query.lte('budget', filters.priceRange.max.toString());
