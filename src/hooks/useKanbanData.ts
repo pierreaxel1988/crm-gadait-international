@@ -15,6 +15,7 @@ export interface KanbanFilters {
   propertyType?: string;
   propertyTypes?: string[];
   purchaseTimeframe?: string;
+  currency?: string;
   status?: LeadStatus | null;
   priceRange?: {
     min?: number;
@@ -134,6 +135,10 @@ export const useKanbanData = (
 
       if (filters.purchaseTimeframe) {
         query = query.eq('purchase_timeframe', filters.purchaseTimeframe);
+      }
+
+      if (filters.currency) {
+        query = query.eq('currency', filters.currency);
       }
 
       const { data: rawData, error } = await query.order('created_at', { ascending: false });
