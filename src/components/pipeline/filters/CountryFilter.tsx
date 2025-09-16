@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Globe } from 'lucide-react';
 import SmartSearch from '@/components/common/SmartSearch';
 import {
@@ -31,6 +31,8 @@ interface CountryFilterProps {
 }
 
 const CountryFilter = ({ country, onCountryChange }: CountryFilterProps) => {
+  const [searchValue, setSearchValue] = useState('');
+
   // Get filtered countries based on search term
   const getFilteredCountries = (searchTerm: string) => {
     if (!searchTerm || searchTerm.length < 1) {
@@ -46,16 +48,30 @@ const CountryFilter = ({ country, onCountryChange }: CountryFilterProps) => {
   };
 
   const handleCountrySelect = (selectedCountry: string) => {
-    onCountryChange(selectedCountry);
+    // Only update filter if the selected country is in our available list
+    if (AVAILABLE_COUNTRIES.includes(selectedCountry)) {
+      onCountryChange(selectedCountry);
+      setSearchValue(''); // Clear search after selection
+    }
   };
 
   const handleClear = () => {
     onCountryChange('');
+    setSearchValue('');
+  };
+
+  const handleInputChange = (value: string) => {
+    setSearchValue(value);
+    // Don't update the filter on input change, only on selection
   };
 
   const renderCountryItem = (countryName: string) => (
     <div className="text-sm py-1">{countryName}</div>
   );
+
+  // Show selected country or search value
+  const displayValue = country || searchValue;
+
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -64,11 +80,11 @@ const CountryFilter = ({ country, onCountryChange }: CountryFilterProps) => {
       <div className="relative">
         <SmartSearch
           placeholder="Rechercher un pays..."
-          value={country || ''}
-          onChange={(value) => onCountryChange(value)}
+          value={displayValue}
+          onChange={handleInputChange}
           onSelect={handleCountrySelect}
           onClear={handleClear}
-          results={getFilteredCountries(country || '')}
+          results={getFilteredCountries(searchValue)}
           renderItem={renderCountryItem}
           className="w-full"
           inputClassName="h-8 text-sm"
