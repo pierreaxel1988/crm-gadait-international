@@ -1,13 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Globe } from 'lucide-react';
-import SmartSearch from '@/components/common/SmartSearch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 // Liste des pays où vous vendez
 const AVAILABLE_COUNTRIES = [
@@ -31,67 +24,43 @@ interface CountryFilterProps {
 }
 
 const CountryFilter = ({ country, onCountryChange }: CountryFilterProps) => {
-  const [searchValue, setSearchValue] = useState('');
-
-  // Get filtered countries based on search term
-  const getFilteredCountries = (searchTerm: string) => {
-    if (!searchTerm || searchTerm.length < 1) {
-      // Show all available countries when no search term
-      return AVAILABLE_COUNTRIES;
-    }
-    
-    return AVAILABLE_COUNTRIES
-      .filter(countryName => 
-        countryName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        .includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
-      );
-  };
-
   const handleCountrySelect = (selectedCountry: string) => {
-    // Only update filter if the selected country is in our available list
-    if (AVAILABLE_COUNTRIES.includes(selectedCountry)) {
+    // Si le pays est déjà sélectionné, le désélectionner
+    if (country === selectedCountry) {
+      onCountryChange('');
+    } else {
       onCountryChange(selectedCountry);
-      setSearchValue(''); // Clear search after selection
     }
   };
-
-  const handleClear = () => {
-    onCountryChange('');
-    setSearchValue('');
-  };
-
-  const handleInputChange = (value: string) => {
-    setSearchValue(value);
-    // Don't update the filter on input change, only on selection
-  };
-
-  const renderCountryItem = (countryName: string) => (
-    <div className="text-sm py-1">{countryName}</div>
-  );
-
-  // Show selected country or search value
-  const displayValue = country || searchValue;
 
   return (
     <div>
       <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
         <Globe className="h-4 w-4" /> Pays
+        {country && (
+          <span className="ml-1 text-primary font-medium">: {country}</span>
+        )}
       </h4>
-      <div className="relative">
-        <SmartSearch
-          placeholder="Rechercher un pays..."
-          value={displayValue}
-          onChange={handleInputChange}
-          onSelect={handleCountrySelect}
-          onClear={handleClear}
-          results={getFilteredCountries(searchValue)}
-          renderItem={renderCountryItem}
-          className="w-full"
-          inputClassName="h-8 text-sm"
-          minChars={0}
-          searchIcon={true}
-          clearButton={true}
-        />
+      <div className="flex flex-wrap gap-1.5">
+        <Button
+          variant={!country ? "default" : "outline"}
+          size="sm"
+          className="text-xs h-7 px-3 min-w-0 whitespace-nowrap"
+          onClick={() => onCountryChange('')}
+        >
+          Tous
+        </Button>
+        {AVAILABLE_COUNTRIES.map((countryOption) => (
+          <Button
+            key={countryOption}
+            variant={country === countryOption ? "default" : "outline"}
+            size="sm"
+            className="text-xs h-7 px-3 min-w-0 whitespace-nowrap"
+            onClick={() => handleCountrySelect(countryOption)}
+          >
+            {countryOption}
+          </Button>
+        ))}
       </div>
     </div>
   );
