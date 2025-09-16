@@ -119,7 +119,17 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
       priceRange: {
         min: filters.minBudget ? parseInt(filters.minBudget) : undefined,
         max: filters.maxBudget ? parseInt(filters.maxBudget) : undefined,
-      }
+      },
+      // Nouveaux filtres
+      nationality: filters.nationality?.trim() || undefined,
+      preferredLanguage: filters.preferredLanguage?.trim() || undefined,
+      views: Array.isArray(filters.views) ? filters.views : [],
+      amenities: Array.isArray(filters.amenities) ? filters.amenities : [],
+      minBedrooms: filters.minBedrooms,
+      maxBedrooms: filters.maxBedrooms,
+      financingMethod: filters.financingMethod?.trim() || undefined,
+      propertyUse: filters.propertyUse?.trim() || undefined,
+      regions: Array.isArray(filters.regions) ? filters.regions : []
     };
     
     console.log('Cleaned filters:');

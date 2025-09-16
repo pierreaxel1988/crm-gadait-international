@@ -39,7 +39,17 @@ export function usePipelineState() {
     currency: '',
     purchaseTimeframe: null,
     propertyType: null,
-    propertyTypes: []
+    propertyTypes: [],
+    // Nouveaux filtres
+    nationality: '',
+    preferredLanguage: '',
+    views: [],
+    amenities: [],
+    minBedrooms: null,
+    maxBedrooms: null,
+    financingMethod: '',
+    propertyUse: '',
+    regions: []
   });
 
   const updateAgentFilter = useCallback((agentId: string | null) => {
@@ -190,7 +200,17 @@ export function usePipelineState() {
       currency: '',
       purchaseTimeframe: null,
       propertyType: null,
-      propertyTypes: []
+      propertyTypes: [],
+      // Nouveaux filtres
+      nationality: '',
+      preferredLanguage: '',
+      views: [],
+      amenities: [],
+      minBedrooms: null,
+      maxBedrooms: null,
+      financingMethod: '',
+      propertyUse: '',
+      regions: []
     });
     
     toast({

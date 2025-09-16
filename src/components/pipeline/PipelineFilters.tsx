@@ -10,6 +10,14 @@ import CountryFilter from './filters/CountryFilter';
 import TimeframeFilter from './filters/TimeframeFilter';
 import PropertyTypeFilter from './filters/PropertyTypeFilter';
 import PipelineTypeFilter from './filters/PipelineTypeFilter';
+import NationalityFilter from './filters/NationalityFilter';
+import ViewTypeFilter from './filters/ViewTypeFilter';
+import AmenitiesFilter from './filters/AmenitiesFilter';
+import BedroomsFilter from './filters/BedroomsFilter';
+import FinancingMethodFilter from './filters/FinancingMethodFilter';
+import PropertyUseFilter from './filters/PropertyUseFilter';
+import RegionsFilter from './filters/RegionsFilter';
+import PreferredLanguageFilter from './filters/PreferredLanguageFilter';
 import ActionButtons from './filters/ActionButtons';
 import ActiveFiltersList from './filters/ActiveFiltersList';
 import { LeadStatus } from '@/components/common/StatusBadge';
@@ -31,6 +39,16 @@ export interface FilterOptions {
   purchaseTimeframe: PurchaseTimeframe | null;
   propertyType: PropertyType | null;
   propertyTypes: PropertyType[];
+  // Nouveaux filtres
+  nationality: string;
+  preferredLanguage: string;
+  views: string[];
+  amenities: string[];
+  minBedrooms: number | null;
+  maxBedrooms: number | null;
+  financingMethod: string;
+  propertyUse: string;
+  regions: string[];
 }
 
 export interface PipelineFiltersProps {
@@ -86,7 +104,15 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
     (filters.country ? 1 : 0) +
     (filters.purchaseTimeframe ? 1 : 0) +
     (filters.propertyType ? 1 : 0) +
-    filters.propertyTypes.length;
+    filters.propertyTypes.length +
+    (filters.nationality ? 1 : 0) +
+    (filters.preferredLanguage ? 1 : 0) +
+    filters.views.length +
+    filters.amenities.length +
+    (filters.minBedrooms || filters.maxBedrooms ? 1 : 0) +
+    (filters.financingMethod ? 1 : 0) +
+    (filters.propertyUse ? 1 : 0) +
+    filters.regions.length;
 
   return (
     <div className="space-y-4">
@@ -189,17 +215,70 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
         </div>
       </div>
 
+      {/* Profile filters - Client profile */}
+      <div className="bg-background/30 rounded-lg p-4 border">
+        <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Profil client</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <NationalityFilter 
+            nationality={filters.nationality} 
+            onNationalityChange={nationality => handleFilterChange('nationality', nationality)} 
+          />
+          
+          <PreferredLanguageFilter 
+            preferredLanguage={filters.preferredLanguage} 
+            onPreferredLanguageChange={language => handleFilterChange('preferredLanguage', language)} 
+          />
+
+          <RegionsFilter 
+            selectedRegions={filters.regions as any} 
+            onRegionsChange={regions => handleFilterChange('regions', regions)} 
+          />
+        </div>
+      </div>
+
+      {/* Property criteria filters */}
+      <div className="bg-background/30 rounded-lg p-4 border">
+        <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Critères propriété</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <ViewTypeFilter 
+            selectedViews={filters.views as any} 
+            onViewsChange={views => handleFilterChange('views', views)} 
+          />
+          
+          <AmenitiesFilter 
+            selectedAmenities={filters.amenities} 
+            onAmenitiesChange={amenities => handleFilterChange('amenities', amenities)} 
+          />
+
+          <BedroomsFilter 
+            minBedrooms={filters.minBedrooms} 
+            maxBedrooms={filters.maxBedrooms} 
+            onBedroomsChange={(min, max) => {
+              handleFilterChange('minBedrooms', min);
+              handleFilterChange('maxBedrooms', max);
+            }} 
+          />
+        </div>
+      </div>
+
       {/* Tertiary filters - Additional criteria */}
       <div className="bg-background/30 rounded-lg p-4 border">
-        <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Critères additionnels</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Critères financiers et usage</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           <TimeframeFilter 
             purchaseTimeframe={filters.purchaseTimeframe} 
             onTimeframeChange={timeframe => handleFilterChange('purchaseTimeframe', timeframe)} 
           />
           
-          {/* Space for future filters */}
-          <div></div>
+          <FinancingMethodFilter 
+            financingMethod={filters.financingMethod as any} 
+            onFinancingMethodChange={method => handleFilterChange('financingMethod', method)} 
+          />
+
+          <PropertyUseFilter 
+            propertyUse={filters.propertyUse as any} 
+            onPropertyUseChange={use => handleFilterChange('propertyUse', use)} 
+          />
         </div>
       </div>
 

@@ -23,6 +23,16 @@ export interface KanbanFilters {
     max?: number;
   };
   searchTerm?: string;
+  // Nouveaux filtres
+  nationality?: string;
+  preferredLanguage?: string;
+  views?: string[];
+  amenities?: string[];
+  minBedrooms?: number | null;
+  maxBedrooms?: number | null;
+  financingMethod?: string;
+  propertyUse?: string;
+  regions?: string[];
 }
 
 export interface ExtendedKanbanItem extends LeadDetailed {
@@ -164,6 +174,73 @@ export const useKanbanData = (
 
       if (filters.currency) {
         query = query.eq('currency', filters.currency);
+      }
+
+      // Apply nationality filter
+      if (filters.nationality && filters.nationality.trim() !== '') {
+        query = query.eq('nationality', filters.nationality);
+        console.log("Applied nationality filter:", filters.nationality);
+      }
+
+      // Apply preferred language filter
+      if (filters.preferredLanguage && filters.preferredLanguage.trim() !== '') {
+        query = query.eq('preferred_language', filters.preferredLanguage);
+        console.log("Applied preferred_language filter:", filters.preferredLanguage);
+      }
+
+      // Apply views filter (ARRAY column)
+      if (filters.views && Array.isArray(filters.views) && filters.views.length > 0) {
+        const cleanedViews = filters.views.filter(view => 
+          typeof view === 'string' && view.trim() !== ''
+        );
+        if (cleanedViews.length > 0) {
+          query = query.overlaps('views', cleanedViews);
+          console.log("Applied views overlaps filter with:", cleanedViews);
+        }
+      }
+
+      // Apply amenities filter (ARRAY column)
+      if (filters.amenities && Array.isArray(filters.amenities) && filters.amenities.length > 0) {
+        const cleanedAmenities = filters.amenities.filter(amenity => 
+          typeof amenity === 'string' && amenity.trim() !== ''
+        );
+        if (cleanedAmenities.length > 0) {
+          query = query.overlaps('amenities', cleanedAmenities);
+          console.log("Applied amenities overlaps filter with:", cleanedAmenities);
+        }
+      }
+
+      // Apply bedrooms range filter
+      if (filters.minBedrooms !== null && filters.minBedrooms !== undefined) {
+        query = query.gte('bedrooms', filters.minBedrooms);
+        console.log("Applied min bedrooms filter:", filters.minBedrooms);
+      }
+      if (filters.maxBedrooms !== null && filters.maxBedrooms !== undefined) {
+        query = query.lte('bedrooms', filters.maxBedrooms);
+        console.log("Applied max bedrooms filter:", filters.maxBedrooms);
+      }
+
+      // Apply financing method filter
+      if (filters.financingMethod && filters.financingMethod.trim() !== '') {
+        query = query.eq('financing_method', filters.financingMethod);
+        console.log("Applied financing_method filter:", filters.financingMethod);
+      }
+
+      // Apply property use filter
+      if (filters.propertyUse && filters.propertyUse.trim() !== '') {
+        query = query.eq('property_use', filters.propertyUse);
+        console.log("Applied property_use filter:", filters.propertyUse);
+      }
+
+      // Apply regions filter (ARRAY column)
+      if (filters.regions && Array.isArray(filters.regions) && filters.regions.length > 0) {
+        const cleanedRegions = filters.regions.filter(region => 
+          typeof region === 'string' && region.trim() !== ''
+        );
+        if (cleanedRegions.length > 0) {
+          query = query.overlaps('regions', cleanedRegions);
+          console.log("Applied regions overlaps filter with:", cleanedRegions);
+        }
       }
 
       const { data: rawData, error } = await query.order('created_at', { ascending: false });
