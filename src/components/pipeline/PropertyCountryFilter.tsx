@@ -11,14 +11,14 @@ interface PropertyCountryFilterProps {
 const availableCountries = [
   'Croatia',
   'France', 
-  'Greece',
+  'Grèce',
   'Maldives',
   'Mauritius',
   'Portugal',
   'Seychelles',
   'Spain',
   'Switzerland',
-  'United Arab Emirates',
+  'UAE',
   'United Kingdom',
   'United States'
 ];

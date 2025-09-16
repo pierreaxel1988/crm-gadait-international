@@ -2,18 +2,18 @@ import React from 'react';
 import { Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Liste des pays où vous vendez
+// Liste des pays où vous vendez (harmonisée avec la base de données)
 const AVAILABLE_COUNTRIES = [
   'Croatia',
   'France', 
-  'Greece',
+  'Grèce',
   'Maldives',
   'Mauritius',
   'Portugal',
   'Seychelles',
   'Spain',
   'Switzerland',
-  'United Arab Emirates',
+  'UAE',
   'United Kingdom',
   'United States'
 ];
