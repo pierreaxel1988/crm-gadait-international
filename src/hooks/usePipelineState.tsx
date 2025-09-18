@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { LeadStatus } from '@/components/common/StatusBadge';
 import { toast } from '@/hooks/use-toast';
 import { PipelineType } from '@/types/lead';
+import { usePersistentFilters } from './usePersistentFilters';
 
 export function usePipelineState() {
   const location = useLocation();
@@ -26,42 +27,21 @@ export function usePipelineState() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [teamMembers, setTeamMembers] = useState<{id: string, name: string}[]>([]);
   
-  const [filters, setFilters] = useState<FilterOptions>({
-    pipelineType: 'all',
-    status: null,
-    statuses: [],
-    tags: [],
-    assignedTo: null,
-    minBudget: '',
-    maxBudget: '',
-    location: '',
-    country: '',
-    currency: '',
-    purchaseTimeframe: null,
-    propertyType: null,
-    propertyTypes: [],
-    // Nouveaux filtres
-    nationality: '',
-    preferredLanguage: '',
-    views: [],
-    amenities: [],
-    minBedrooms: null,
-    maxBedrooms: null,
-    financingMethod: '',
-    propertyUse: '',
-    regions: []
-  });
-
-  const updateAgentFilter = useCallback((agentId: string | null) => {
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      assignedTo: agentId
-    }));
-  }, []);
+  // Utiliser les filtres persistants
+  const { 
+    filters, 
+    setFilters, 
+    clearFilters, 
+    updateAgentFilter: persistentUpdateAgentFilter,
+    isLoaded: filtersLoaded 
+  } = usePersistentFilters();
 
   useEffect(() => {
-    handleRefresh();
-  }, []);
+    // Attendre que les filtres soient chargés avant le premier refresh
+    if (filtersLoaded) {
+      handleRefresh();
+    }
+  }, [filtersLoaded]);
 
   useEffect(() => {
     navigate(`/pipeline?tab=${activeTab}`, { replace: true });
@@ -153,7 +133,7 @@ export function usePipelineState() {
     if (activeFiltersCount > 0) {
       toast({
         title: "Filtres appliqués",
-        description: `${activeFiltersCount} filtres actifs`,
+        description: `${activeFiltersCount} filtres actifs (sauvegardés)`,
         duration: 2000,
       });
     }
@@ -187,35 +167,11 @@ export function usePipelineState() {
   };
 
   const handleClearFilters = () => {
-    setFilters({
-      pipelineType: 'all',
-      status: null,
-      statuses: [],
-      tags: [],
-      assignedTo: null,
-      minBudget: '',
-      maxBudget: '',
-      location: '',
-      country: '',
-      currency: '',
-      purchaseTimeframe: null,
-      propertyType: null,
-      propertyTypes: [],
-      // Nouveaux filtres
-      nationality: '',
-      preferredLanguage: '',
-      views: [],
-      amenities: [],
-      minBedrooms: null,
-      maxBedrooms: null,
-      financingMethod: '',
-      propertyUse: '',
-      regions: []
-    });
+    clearFilters();
     
     toast({
       title: "Filtres effacés",
-      description: "Tous les filtres ont été supprimés",
+      description: "Tous les filtres ont été supprimés (localStorage effacé)",
       duration: 2000,
     });
     
@@ -280,6 +236,6 @@ export function usePipelineState() {
     handleRefresh,
     handleClearFilters,
     getAllColumns,
-    updateAgentFilter
+    updateAgentFilter: persistentUpdateAgentFilter
   };
 }
