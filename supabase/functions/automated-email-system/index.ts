@@ -54,12 +54,99 @@ interface EmailCampaign {
   is_active: boolean;
 }
 
+// Interface pour les propriétés suggérées
+interface SuggestedProperty {
+  id: string;
+  reference: string;
+  title: string;
+  slug: string;
+  price: number;
+  currency: string;
+  bedrooms: number;
+  bathrooms: number;
+  surface: number;
+  images: string[];
+  location: string;
+  country: string;
+}
+
+// Fonction pour générer les URLs de propriétés avec slugs
+function generatePropertyUrl(property: SuggestedProperty, language: string, leadId?: string): string {
+  const baseUrl = 'https://gadait-international.com';
+  const langPrefix = language === 'FR' ? 'fr' : (language === 'ES' ? 'es' : 'en');
+  const propertyUrl = `${baseUrl}/${langPrefix}/${property.slug}`;
+  
+  // Ajouter le tracking via l'edge function track-property-click
+  if (leadId) {
+    const trackingUrl = `${SUPABASE_URL}/functions/v1/track-property-click?lead_id=${leadId}&property_id=${property.id}&redirect_url=${encodeURIComponent(propertyUrl)}`;
+    return trackingUrl;
+  }
+  
+  return propertyUrl;
+}
+
+// Composant PropertyCard pour React Email
+const PropertyCard = ({ 
+  property, 
+  language, 
+  leadId 
+}: { 
+  property: SuggestedProperty; 
+  language: string; 
+  leadId?: string;
+}) => {
+  const propertyUrl = generatePropertyUrl(property, language, leadId);
+  const mainImage = property.images?.[0] || '';
+  const labels = {
+    FR: { bedrooms: 'chambres', bathrooms: 'salles de bain', surface: 'm²', discover: '✨ Découvrir cette propriété' },
+    EN: { bedrooms: 'bedrooms', bathrooms: 'bathrooms', surface: 'm²', discover: '✨ Discover this property' },
+    ES: { bedrooms: 'habitaciones', bathrooms: 'baños', surface: 'm²', discover: '✨ Descubrir esta propiedad' }
+  };
+  const label = labels[language] || labels.EN;
+  
+  return React.createElement('div', { className: 'property-card', style: 'margin: 20px 0; border: 1px solid #E5E5E5; border-radius: 8px; overflow: hidden; background: #FFFFFF;' },
+    mainImage && React.createElement('a', { href: propertyUrl, style: 'display: block; text-decoration: none;' },
+      React.createElement('img', { 
+        src: mainImage, 
+        alt: property.title,
+        style: 'width: 100%; height: 250px; object-fit: cover; display: block;'
+      })
+    ),
+    React.createElement('div', { style: 'padding: 20px;' },
+      React.createElement('h3', { style: 'margin: 0 0 10px 0; font-size: 18px; color: #2C3E50; font-weight: 500;' }, 
+        property.title
+      ),
+      React.createElement('p', { style: 'margin: 0 0 15px 0; font-size: 14px; color: #7F8C8D;' },
+        `📍 ${property.location}, ${property.country}`
+      ),
+      React.createElement('div', { style: 'display: flex; gap: 15px; margin: 15px 0; font-size: 14px; color: #34495E;' },
+        React.createElement('span', {}, `🛏️ ${property.bedrooms} ${label.bedrooms}`),
+        React.createElement('span', {}, `🚿 ${property.bathrooms} ${label.bathrooms}`),
+        React.createElement('span', {}, `📐 ${property.surface} ${label.surface}`)
+      ),
+      React.createElement('div', { style: 'margin: 15px 0;' },
+        React.createElement('p', { style: 'margin: 0; font-size: 22px; font-weight: 600; color: #8B4513;' },
+          `${property.price.toLocaleString()} ${property.currency}`
+        )
+      ),
+      React.createElement('a', { 
+        href: propertyUrl,
+        className: 'cta-button',
+        style: 'display: inline-block; background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%); color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; margin-top: 10px;'
+      }, label.discover)
+    )
+  );
+};
+
 // Template React Email Loro Piana
 const LoroEmailTemplate = ({ 
   leadName, 
   leadSalutation,
   subject, 
   content, 
+  properties = [],
+  language = 'FR',
+  leadId,
   agentName = "Gadait International",
   agentSignature = "L'équipe Gadait International"
 }: {
@@ -67,6 +154,9 @@ const LoroEmailTemplate = ({
   leadSalutation?: string;
   subject: string;
   content: string;
+  properties?: SuggestedProperty[];
+  language?: string;
+  leadId?: string;
   agentName?: string;
   agentSignature?: string;
 }) => {
@@ -137,12 +227,35 @@ const LoroEmailTemplate = ({
           margin: 20px 0; 
           font-weight: 500;
         }
+        .properties-section {
+          margin: 40px 0;
+          padding: 30px 0;
+          border-top: 2px solid #E5E5E5;
+        }
+        .properties-title {
+          font-size: 20px;
+          font-weight: 500;
+          color: #2C3E50;
+          margin-bottom: 20px;
+          text-align: center;
+        }
+        .property-card {
+          margin: 20px 0;
+          border: 1px solid #E5E5E5;
+          border-radius: 8px;
+          overflow: hidden;
+          background: #FFFFFF;
+        }
       `)
     ),
     React.createElement('body', {},
       React.createElement('div', { className: 'container' },
         React.createElement('div', { className: 'header' },
-          React.createElement('h1', {}, 'GADAIT INTERNATIONAL')
+          React.createElement('img', { 
+            src: 'https://www.gadait-international.com/static/media/logo.c86ab9e0598ca0f55b0db0ab4a7c6256.svg',
+            alt: 'Gadait International',
+            style: 'height: 50px; width: auto;'
+          })
         ),
         React.createElement('div', { className: 'content' },
           React.createElement('div', { className: 'greeting' },
@@ -152,11 +265,19 @@ const LoroEmailTemplate = ({
             className: 'main-content',
             dangerouslySetInnerHTML: { __html: content }
           }),
+          properties.length > 0 && React.createElement('div', { className: 'properties-section' },
+            React.createElement('h2', { className: 'properties-title' }, 
+              language === 'FR' ? '🏡 Nos propriétés sélectionnées pour vous' : 
+              language === 'ES' ? '🏡 Nuestras propiedades seleccionadas para usted' : 
+              '🏡 Our selected properties for you'
+            ),
+            ...properties.map(property => PropertyCard({ property, language, leadId }))
+          ),
           React.createElement('div', { className: 'signature' },
             React.createElement('p', {}, `Cordialement,`),
             React.createElement('p', {}, agentSignature),
             React.createElement('p', {}, `📞 +230 268 2828`),
-            React.createElement('p', {}, `✉️ contact@gadait.com`)
+            React.createElement('p', {}, `✉️ contact@gadait-international.com`)
           )
         ),
         React.createElement('div', { className: 'footer' },
@@ -418,6 +539,10 @@ async function sendScheduledEmail(emailData: any) {
     return;
   }
   
+  // Récupérer les propriétés suggérées
+  const suggestedProperties = await fetchSuggestedProperties(lead, 3);
+  const detectedLanguage = detectLeadLanguage(lead);
+  
   // Générer le contenu personnalisé avec l'IA
   const personalizedContent = await generatePersonalizedContent(lead, template);
   const personalizedSubject = personalizeTemplate(template.subject_template, lead);
@@ -432,6 +557,9 @@ async function sendScheduledEmail(emailData: any) {
       leadSalutation: lead.salutation,
       subject: personalizedSubject,
       content: personalizedContent,
+      properties: suggestedProperties,
+      language: detectedLanguage,
+      leadId: lead.id,
       agentName: "Gadait International",
       agentSignature: "L'équipe Gadait International"
     })
@@ -562,6 +690,102 @@ function determineSegment(lead: EnrichedLead): 'A' | 'B' | 'C' | 'D' {
   return 'D';
 }
 
+// Fonction pour récupérer les propriétés suggérées basées sur le profil du lead
+async function fetchSuggestedProperties(lead: EnrichedLead, limit: number = 3): Promise<SuggestedProperty[]> {
+  try {
+    // Construire la requête avec filtres intelligents
+    let query = supabase
+      .from('properties_backoffice')
+      .select('id, reference, title_fr, title_en, slug_fr, slug_en, price, currency, bedrooms, bathrooms, surface, images, location, country, property_type, amenities, views, status')
+      .eq('status', 'published')
+      .not('slug_fr', 'is', null)
+      .not('slug_en', 'is', null);
+    
+    // Filtrer par pays/localisation si spécifié
+    if (lead.country) {
+      query = query.ilike('country', `%${lead.country}%`);
+    } else if (lead.location) {
+      query = query.or(`location.ilike.%${lead.location}%,country.ilike.%${lead.location}%`);
+    }
+    
+    // Filtrer par budget (avec marge de 20%)
+    if (lead.budget) {
+      const budget = parseFloat(lead.budget.replace(/[^0-9.]/g, ''));
+      if (!isNaN(budget)) {
+        const maxPrice = budget * 1.2;
+        query = query.lte('price', maxPrice);
+      }
+    }
+    
+    // Filtrer par type de propriété
+    if (lead.property_types && lead.property_types.length > 0) {
+      const types = lead.property_types.map(t => `property_type.ilike.%${t}%`).join(',');
+      query = query.or(types);
+    }
+    
+    // Filtrer par vue si spécifié
+    if (lead.views && lead.views.includes('mer')) {
+      query = query.or('views.cs.{mer},views.cs.{ocean},views.cs.{sea}');
+    }
+    
+    // Ordonner par pertinence et limiter
+    query = query.order('created_at', { ascending: false }).limit(limit);
+    
+    const { data: properties, error } = await query;
+    
+    if (error) {
+      console.error('[FETCH PROPERTIES] Error:', error);
+      return [];
+    }
+    
+    if (!properties || properties.length === 0) {
+      console.log('[FETCH PROPERTIES] No properties found, using fallback');
+      // Fallback : récupérer les propriétés les plus récentes
+      const { data: fallbackProperties } = await supabase
+        .from('properties_backoffice')
+        .select('id, reference, title_fr, title_en, slug_fr, slug_en, price, currency, bedrooms, bathrooms, surface, images, location, country')
+        .eq('status', 'published')
+        .not('slug_fr', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      
+      return (fallbackProperties || []).map(p => ({
+        id: p.id,
+        reference: p.reference || '',
+        title: p.title_fr || p.title_en || 'Propriété',
+        slug: p.slug_fr || p.slug_en || '',
+        price: p.price || 0,
+        currency: p.currency || 'EUR',
+        bedrooms: p.bedrooms || 0,
+        bathrooms: p.bathrooms || 0,
+        surface: p.surface || 0,
+        images: p.images || [],
+        location: p.location || '',
+        country: p.country || ''
+      }));
+    }
+    
+    // Mapper au format SuggestedProperty
+    return properties.map(p => ({
+      id: p.id,
+      reference: p.reference || '',
+      title: p.title_fr || p.title_en || 'Propriété',
+      slug: p.slug_fr || p.slug_en || '',
+      price: p.price || 0,
+      currency: p.currency || 'EUR',
+      bedrooms: p.bedrooms || 0,
+      bathrooms: p.bathrooms || 0,
+      surface: p.surface || 0,
+      images: p.images || [],
+      location: p.location || '',
+      country: p.country || ''
+    }));
+  } catch (error) {
+    console.error('[FETCH PROPERTIES] Exception:', error);
+    return [];
+  }
+}
+
 async function generatePersonalizedContent(lead: any, template: any): Promise<string> {
   const detectedLanguage = detectLeadLanguage(lead);
   const segment = determineSegment(lead);
@@ -604,8 +828,8 @@ Jour: J+${template.day_number}
 5. Si "purchase_timeframe" = court → Crée de l'urgence
 6. Si budget >2M€ → Ton ultra-premium, biens exceptionnels uniquement
 7. Si nationality renseignée → Ajoute insights fiscaux pertinents pour ce pays
-8. Maximum 200 mots
-9. Inclure 2-3 exemples de propriétés fictives mais réalistes
+8. Maximum 150 mots (les propriétés seront affichées automatiquement en dessous)
+9. NE PAS mentionner de propriétés spécifiques - elles seront affichées visuellement
 10. Format HTML simple: <p>, <strong>, <ul>, <li> uniquement
 11. Call-to-action adapté au segment et au jour
 
@@ -846,6 +1070,9 @@ async function sendTestEmailWithRealLead(leadId: string, templateDay: number) {
     });
   }
   
+  // Récupérer les propriétés suggérées
+  const suggestedProperties = await fetchSuggestedProperties(lead, 3);
+  
   // Personnaliser avec l'IA
   const content = await generatePersonalizedContent(lead, template);
   const subject = personalizeTemplate(template.subject_template, lead);
@@ -857,7 +1084,8 @@ async function sendTestEmailWithRealLead(leadId: string, templateDay: number) {
       <strong style="color: #856404;">🧪 EMAIL DE TEST - Ne pas répondre</strong><br>
       <span style="color: #856404;">Lead: ${lead.name} (${lead.email})</span><br>
       <span style="color: #856404;">Template: J+${templateDay} - ${template.template_name}</span><br>
-      <span style="color: #856404;">Langue: ${language} | Segment: ${segment}</span>
+      <span style="color: #856404;">Langue: ${language} | Segment: ${segment}</span><br>
+      <span style="color: #856404;">Propriétés suggérées: ${suggestedProperties.length}</span>
     </div>
   `;
   
@@ -868,6 +1096,9 @@ async function sendTestEmailWithRealLead(leadId: string, templateDay: number) {
       leadSalutation: lead.salutation,
       subject: subject,
       content: testNotice + content,
+      properties: suggestedProperties,
+      language: language,
+      leadId: lead.id,
       agentName: "Gadait International",
       agentSignature: "L'équipe Gadait International"
     })
