@@ -104,35 +104,35 @@ const PropertyCard = ({
   };
   const label = labels[language] || labels.EN;
   
-  return React.createElement('div', { className: 'property-card', style: 'margin: 20px 0; border: 1px solid #E5E5E5; border-radius: 8px; overflow: hidden; background: #FFFFFF;' },
-    mainImage && React.createElement('a', { href: propertyUrl, style: 'display: block; text-decoration: none;' },
+  return React.createElement('div', { className: 'property-card', style: { margin: '20px 0', border: '1px solid #E5E5E5', borderRadius: '8px', overflow: 'hidden', background: '#FFFFFF' } },
+    mainImage && React.createElement('a', { href: propertyUrl, style: { display: 'block', textDecoration: 'none' } },
       React.createElement('img', { 
         src: mainImage, 
         alt: property.title,
-        style: 'width: 100%; height: 250px; object-fit: cover; display: block;'
+        style: { width: '100%', height: '250px', objectFit: 'cover', display: 'block' }
       })
     ),
-    React.createElement('div', { style: 'padding: 20px;' },
-      React.createElement('h3', { style: 'margin: 0 0 10px 0; font-size: 18px; color: #2C3E50; font-weight: 500;' }, 
+    React.createElement('div', { style: { padding: '20px' } },
+      React.createElement('h3', { style: { margin: '0 0 10px 0', fontSize: '18px', color: '#2C3E50', fontWeight: '500' } }, 
         property.title
       ),
-      React.createElement('p', { style: 'margin: 0 0 15px 0; font-size: 14px; color: #7F8C8D;' },
+      React.createElement('p', { style: { margin: '0 0 15px 0', fontSize: '14px', color: '#7F8C8D' } },
         `📍 ${property.location}, ${property.country}`
       ),
-      React.createElement('div', { style: 'display: flex; gap: 15px; margin: 15px 0; font-size: 14px; color: #34495E;' },
+      React.createElement('div', { style: { display: 'flex', gap: '15px', margin: '15px 0', fontSize: '14px', color: '#34495E' } },
         React.createElement('span', {}, `🛏️ ${property.bedrooms} ${label.bedrooms}`),
         React.createElement('span', {}, `🚿 ${property.bathrooms} ${label.bathrooms}`),
         React.createElement('span', {}, `📐 ${property.surface} ${label.surface}`)
       ),
-      React.createElement('div', { style: 'margin: 15px 0;' },
-        React.createElement('p', { style: 'margin: 0; font-size: 22px; font-weight: 600; color: #8B4513;' },
+      React.createElement('div', { style: { margin: '15px 0' } },
+        React.createElement('p', { style: { margin: '0', fontSize: '22px', fontWeight: '600', color: '#8B4513' } },
           `${property.price.toLocaleString()} ${property.currency}`
         )
       ),
       React.createElement('a', { 
         href: propertyUrl,
         className: 'cta-button',
-        style: 'display: inline-block; background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%); color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; margin-top: 10px;'
+        style: { display: 'inline-block', background: 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)', color: '#FFFFFF', padding: '12px 24px', textDecoration: 'none', borderRadius: '6px', fontWeight: '500', marginTop: '10px' }
       }, label.discover)
     )
   );
@@ -254,7 +254,7 @@ const LoroEmailTemplate = ({
           React.createElement('img', { 
             src: 'https://www.gadait-international.com/static/media/logo.c86ab9e0598ca0f55b0db0ab4a7c6256.svg',
             alt: 'Gadait International',
-            style: 'height: 50px; width: auto;'
+            style: { height: '50px', width: 'auto' }
           })
         ),
         React.createElement('div', { className: 'content' },
