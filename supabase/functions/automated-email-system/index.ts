@@ -37,6 +37,11 @@ interface EnrichedLead {
   status: string;
   last_contacted_at?: string;
   created_at: string;
+  views?: string;
+  amenities?: string;
+  purchase_timeframe?: string;
+  financing_method?: string;
+  tax_residence?: string;
 }
 
 // Interface pour les campagnes
@@ -241,34 +246,38 @@ async function processEmailSequences() {
 }
 
 async function findEligibleLeads(): Promise<EnrichedLead[]> {
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  // MODE TEST : Cibler uniquement les leads "Serious + No response"
+  console.log('[TEST PILOT] Finding eligible leads: Serious + No response');
   
-  // Chercher les leads sans réponse depuis 7 jours et pas déjà en séquence
   const { data: leads, error } = await supabase
     .from('leads')
     .select(`
       id, name, email, salutation, location, country, budget, currency,
       property_types, nationality, preferred_language, assigned_to, tags, status,
-      last_contacted_at, created_at
+      last_contacted_at, created_at, views, amenities, purchase_timeframe, 
+      financing_method, tax_residence
     `)
-    .eq('status', 'No response')
+    .contains('tags', ['Serious'])
+    .contains('tags', ['No response'])
     .not('email', 'is', null)
-    .lt('last_contacted_at', sevenDaysAgo)
     .not('id', 'in', `(
       SELECT lead_id FROM lead_email_sequences 
       WHERE is_active = true
     )`);
     
   if (error) {
-    console.error('Error finding eligible leads:', error);
+    console.error('[TEST PILOT] Error finding eligible leads:', error);
     return [];
   }
   
-  // Filtrer par budget minimum (500k EUR)
-  return (leads || []).filter(lead => {
+  // Filtrer par budget minimum (400k EUR pour inclure plus de leads du test)
+  const filtered = (leads || []).filter(lead => {
     const budget = parseInt(lead.budget?.replace(/[^\d]/g, '') || '0');
-    return budget >= 500000;
+    return budget >= 400000;
   });
+  
+  console.log(`[TEST PILOT] Found ${filtered.length} eligible leads`);
+  return filtered;
 }
 
 async function findPendingEmails() {
@@ -280,7 +289,8 @@ async function findPendingEmails() {
       id, lead_id, campaign_id, next_email_date, next_email_day,
       leads (
         id, name, email, salutation, location, country, budget, currency,
-        property_types, nationality, preferred_language, assigned_to, tags
+        property_types, nationality, preferred_language, assigned_to, tags,
+        views, amenities, purchase_timeframe, financing_method, tax_residence
       )
     `)
     .eq('is_active', true)
@@ -288,18 +298,35 @@ async function findPendingEmails() {
     .lte('next_email_date', now);
     
   if (error) {
-    console.error('Error finding pending emails:', error);
+    console.error('[TEST PILOT] Error finding pending emails:', error);
     return [];
   }
   
+  console.log(`[TEST PILOT] Found ${sequences?.length || 0} pending emails`);
   return sequences || [];
 }
 
 async function startSequence(leadId: string, campaignId: string, immediateStart: boolean = false) {
-  console.log(`Starting sequence for lead ${leadId} with campaign ${campaignId}`);
+  console.log(`[TEST PILOT] Starting sequence for lead ${leadId} with campaign ${campaignId}`);
   
-  // Calculer la date du premier email (immédiat ou J+7)
-  const firstEmailDate = immediateStart ? new Date() : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  // Récupérer le lead pour déterminer le segment
+  const { data: lead, error: leadError } = await supabase
+    .from('leads')
+    .select('*')
+    .eq('id', leadId)
+    .single();
+    
+  if (leadError || !lead) {
+    console.error(`[TEST PILOT] Error fetching lead ${leadId}:`, leadError);
+    throw leadError;
+  }
+  
+  // Déterminer le segment et le premier jour
+  const segment = determineSegment(lead);
+  const firstDay = segment === 'A' ? 3 : 7; // Segment A commence à J+3
+  
+  // Calculer la date du premier email (immédiat pour le test)
+  const firstEmailDate = immediateStart ? new Date(Date.now() + 60000) : new Date(Date.now() + firstDay * 24 * 60 * 60 * 1000);
   
   const { error } = await supabase
     .from('lead_email_sequences')
@@ -307,18 +334,20 @@ async function startSequence(leadId: string, campaignId: string, immediateStart:
       lead_id: leadId,
       campaign_id: campaignId,
       next_email_date: firstEmailDate.toISOString(),
-      next_email_day: 7,
+      next_email_day: firstDay,
       last_activity_date: new Date().toISOString(),
       last_activity_type: 'sequence_started'
     });
     
   if (error) {
-    console.error(`Error starting sequence for lead ${leadId}:`, error);
+    console.error(`[TEST PILOT] Error starting sequence for lead ${leadId}:`, error);
     throw error;
   }
   
+  console.log(`[TEST PILOT] Sequence started for lead ${leadId}, Segment ${segment}, First email: J+${firstDay}`);
+  
   // Ajouter une action dans l'historique du lead
-  await addActionToLead(leadId, 'Email Auto J+7', firstEmailDate.toISOString(), 'Séquence d\'emails automatiques démarrée');
+  await addActionToLead(leadId, `Email Auto J+${firstDay}`, firstEmailDate.toISOString(), `Séquence d'emails automatiques démarrée (Segment ${segment})`);
 }
 
 async function stopSequence(leadId: string, reason: string) {
@@ -351,7 +380,14 @@ async function stopSequence(leadId: string, reason: string) {
 
 async function sendScheduledEmail(emailData: any) {
   const lead = emailData.leads;
-  console.log(`Sending scheduled email to ${lead.email} (Day ${emailData.next_email_day})`);
+  console.log(`[TEST PILOT] Sending scheduled email to ${lead.email} (Day ${emailData.next_email_day})`);
+  
+  // Vérifier les conditions d'arrêt automatique
+  const shouldStop = await checkAutoStopConditions(lead.id, emailData.id);
+  if (shouldStop) {
+    console.log(`[TEST PILOT] Auto-stop triggered for lead ${lead.id}`);
+    return;
+  }
   
   // Récupérer le template pour ce jour
   const { data: template, error: templateError } = await supabase
@@ -362,7 +398,7 @@ async function sendScheduledEmail(emailData: any) {
     .single();
     
   if (templateError || !template) {
-    console.error('Template not found:', templateError);
+    console.error('[TEST PILOT] Template not found:', templateError);
     return;
   }
   
@@ -385,18 +421,21 @@ async function sendScheduledEmail(emailData: any) {
     })
   );
   
-  // Envoyer l'email via Resend
+  // Envoyer l'email via Resend avec Pierre en CC
   const { data: emailResult, error: emailError } = await resend.emails.send({
     from: 'Gadait International <contact@gadait.com>',
     to: [lead.email],
+    cc: ['pierre@gadait-international.com'],
     subject: personalizedSubject,
     html: emailHtml,
   });
   
   if (emailError) {
-    console.error('Failed to send email:', emailError);
+    console.error('[TEST PILOT] Failed to send email:', emailError);
     throw emailError;
   }
+  
+  console.log(`[TEST PILOT] Email sent successfully to ${lead.email}, CC to pierre@gadait-international.com`);
   
   // Logger l'envoi
   await supabase
@@ -456,31 +495,105 @@ async function sendScheduledEmail(emailData: any) {
   }
 }
 
-async function generatePersonalizedContent(lead: any, template: any): Promise<string> {
-  const prompt = `
-Tu es un expert en immobilier de luxe pour Gadait International. 
-Génère un contenu d'email personnalisé et élégant pour ce lead:
+function detectLeadLanguage(lead: EnrichedLead): string {
+  // 1. Priorité à preferred_language
+  if (lead.preferred_language) {
+    const lang = lead.preferred_language.toLowerCase();
+    if (lang.includes('fr') || lang.includes('français')) return 'FR';
+    if (lang.includes('en') || lang.includes('english') || lang.includes('anglais')) return 'EN';
+    if (lang.includes('es') || lang.includes('español') || lang.includes('espagnol')) return 'ES';
+  }
+  
+  // 2. Déduction par nationalité
+  const frenchNationalities = ['Français', 'France', 'Suisse', 'Belgique', 'Belgian'];
+  const englishNationalities = ['Britannique', 'British', 'Ireland', 'American', 'Canadian', 'Australian'];
+  const spanishNationalities = ['Espagnol', 'Spanish', 'Mexicain', 'Mexican'];
+  
+  if (frenchNationalities.some(n => lead.nationality?.includes(n))) return 'FR';
+  if (englishNationalities.some(n => lead.nationality?.includes(n))) return 'EN';
+  if (spanishNationalities.some(n => lead.nationality?.includes(n))) return 'ES';
+  
+  // 3. Déduction par pays
+  if (lead.country?.includes('France') || lead.country?.includes('Suisse')) return 'FR';
+  if (lead.country?.includes('United Kingdom') || lead.country?.includes('Ireland')) return 'EN';
+  
+  // 4. Par défaut : Français
+  return 'FR';
+}
 
-Profil du lead:
+function determineSegment(lead: EnrichedLead): 'A' | 'B' | 'C' | 'D' {
+  const budget = parseInt(lead.budget?.replace(/[^\d]/g, '') || '0');
+  const hasHotTag = lead.tags?.includes('Hot');
+  const hasSeriousTag = lead.tags?.includes('Serious');
+  const hasColdTag = lead.tags?.includes('Cold');
+  
+  // Segment A - Ultra-Premium
+  if ((hasHotTag || hasSeriousTag) && budget >= 2000000) {
+    return 'A';
+  }
+  
+  // Segment B - Premium Qualifié
+  if (budget >= 500000 && (lead.location || lead.property_types?.length)) {
+    return 'B';
+  }
+  
+  // Segment C - À Réchauffer
+  if (hasColdTag || budget < 500000) {
+    return 'C';
+  }
+  
+  // Segment D - Par défaut
+  return 'D';
+}
+
+async function generatePersonalizedContent(lead: any, template: any): Promise<string> {
+  const detectedLanguage = detectLeadLanguage(lead);
+  const segment = determineSegment(lead);
+  
+  const languageInstructions = {
+    FR: 'Réponds en français formel (vouvoiement), ton élégant et professionnel style Loro Piana',
+    EN: 'Respond in professional British English, elegant and sophisticated tone',
+    ES: 'Responde en español formal (usted), tono elegante y profesional'
+  };
+  
+  const prompt = `
+Tu es un expert en immobilier de luxe pour Gadait International.
+Génère un contenu d'email HYPER-PERSONNALISÉ pour ce lead premium.
+
+📋 PROFIL DU LEAD:
 - Nom: ${lead.name}
-- Localisation recherchée: ${lead.location || 'Non spécifié'}
-- Pays: ${lead.country || 'Non spécifié'}
+- Segment: ${segment} (A=Ultra-Premium, B=Premium, C=Réchauffer, D=Standard)
 - Budget: ${lead.budget || 'Non spécifié'} ${lead.currency || 'EUR'}
+- Localisation: ${lead.location || 'Non spécifié'}
+- Pays: ${lead.country || 'Non spécifié'}
 - Types de propriétés: ${lead.property_types?.join(', ') || 'Non spécifié'}
 - Nationalité: ${lead.nationality || 'Non spécifié'}
+- Langue préférée: ${lead.preferred_language || 'Non spécifié'}
+- Vues souhaitées: ${lead.views || 'Non spécifié'}
+- Équipements: ${lead.amenities || 'Non spécifié'}
+- Délai d'achat: ${lead.purchase_timeframe || 'Non spécifié'}
+- Financement: ${lead.financing_method || 'Non spécifié'}
+
+🎯 INSTRUCTIONS:
+${languageInstructions[detectedLanguage]}
 
 Template de base: ${template.content_template}
-Jour de la séquence: J+${template.day_number}
+Jour: J+${template.day_number}
 
-Règles:
-1. Ton professionnel mais chaleureux, style Loro Piana
-2. Personnalisation subtile basée sur le profil
-3. Maximum 200 mots
-4. Inclure un appel à l'action approprié
-5. Utiliser des informations de marché pertinentes
-6. Format HTML simple (p, br, strong uniquement)
+✅ RÈGLES STRICTES:
+1. ${languageInstructions[detectedLanguage]}
+2. Personnalise PROFONDÉMENT basé sur TOUS les critères disponibles
+3. Si "views" = "Vue mer" → Mentionne explicitement des villas avec vue mer
+4. Si "amenities" rempli → Intègre ces équipements dans les suggestions
+5. Si "purchase_timeframe" = court → Crée de l'urgence
+6. Si budget >2M€ → Ton ultra-premium, biens exceptionnels uniquement
+7. Si nationality renseignée → Ajoute insights fiscaux pertinents pour ce pays
+8. Maximum 200 mots
+9. Inclure 2-3 exemples de propriétés fictives mais réalistes
+10. Format HTML simple: <p>, <strong>, <ul>, <li> uniquement
+11. Call-to-action adapté au segment et au jour
 
-Génère UNIQUEMENT le contenu HTML personnalisé, sans les formules de politesse (déjà gérées par le template).
+Génère UNIQUEMENT le contenu HTML personnalisé (sans formules de politesse, gérées par le template).
 `;
 
   try {
@@ -493,10 +606,10 @@ Génère UNIQUEMENT le contenu HTML personnalisé, sans les formules de politess
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'Tu es un expert en communication immobilière de luxe.' },
+          { role: 'system', content: 'Tu es un expert en communication immobilière de luxe multilingue.' },
           { role: 'user', content: prompt }
         ],
-        max_tokens: 500,
+        max_tokens: 600,
         temperature: 0.7,
       }),
     });
@@ -504,12 +617,79 @@ Génère UNIQUEMENT le contenu HTML personnalisé, sans les formules de politess
     const data = await response.json();
     return data.choices[0].message.content;
   } catch (error) {
-    console.error('Error generating AI content:', error);
-    // Fallback vers un contenu par défaut
-    return `<p>Nous espérons que vous allez bien et que votre projet immobilier avance selon vos souhaits.</p>
-            <p>Nous avons sélectionné de nouvelles opportunités qui pourraient correspondre à vos critères de recherche${lead.location ? ` sur ${lead.location}` : ''}.</p>
-            <p>N'hésitez pas à nous contacter pour échanger sur ces biens d'exception.</p>`;
+    console.error('[TEST PILOT] Error generating AI content:', error);
+    // Fallback multilingue
+    const fallbacks = {
+      FR: `<p>Nous espérons que vous allez bien et que votre projet immobilier avance selon vos souhaits.</p>
+            <p>Nous avons sélectionné de nouvelles opportunités qui correspondent à vos critères${lead.location ? ` sur ${lead.location}` : ''}.</p>`,
+      EN: `<p>We hope you are well and that your real estate project is progressing as planned.</p>
+            <p>We have selected new opportunities that match your criteria${lead.location ? ` in ${lead.location}` : ''}.</p>`,
+      ES: `<p>Esperamos que se encuentre bien y que su proyecto inmobiliario avance según lo previsto.</p>
+            <p>Hemos seleccionado nuevas oportunidades que corresponden a sus criterios${lead.location ? ` en ${lead.location}` : ''}.</p>`
+    };
+    return fallbacks[detectedLanguage] || fallbacks.FR;
   }
+}
+
+async function checkAutoStopConditions(leadId: string, sequenceId: string): Promise<boolean> {
+  // 1. Vérifier si le lead a cliqué sur 2+ propriétés
+  const { data: clicks, error: clicksError } = await supabase
+    .from('property_clicks')
+    .select('id')
+    .eq('lead_id', leadId)
+    .gte('clicked_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+    
+  if (clicks && clicks.length >= 2) {
+    await stopSequence(leadId, 'clicked_properties');
+    console.log(`[TEST PILOT] Sequence stopped for ${leadId}: Multiple property clicks detected`);
+    return true;
+  }
+  
+  // 2. Vérifier si le lead a répondu à un email
+  const { data: emailLog, error: emailError } = await supabase
+    .from('automated_email_logs')
+    .select('replied_at')
+    .eq('lead_id', leadId)
+    .not('replied_at', 'is', null)
+    .single();
+    
+  if (emailLog) {
+    await stopSequence(leadId, 'replied');
+    console.log(`[TEST PILOT] Sequence stopped for ${leadId}: Lead replied`);
+    return true;
+  }
+  
+  // 3. Vérifier si le statut du lead a changé manuellement
+  const { data: lead, error: leadError } = await supabase
+    .from('leads')
+    .select('status, tags')
+    .eq('id', leadId)
+    .single();
+    
+  if (lead && !lead.tags?.includes('No response')) {
+    await stopSequence(leadId, 'status_changed');
+    console.log(`[TEST PILOT] Sequence stopped for ${leadId}: Status changed manually`);
+    return true;
+  }
+  
+  // 4. Vérifier si 4 emails envoyés sans interaction
+  const { data: sentEmails, error: sentError } = await supabase
+    .from('automated_email_logs')
+    .select('id, opened_at, clicked_at')
+    .eq('lead_id', leadId)
+    .order('sent_at', { ascending: false })
+    .limit(4);
+    
+  if (sentEmails && sentEmails.length >= 4) {
+    const hasAnyInteraction = sentEmails.some(e => e.opened_at || e.clicked_at);
+    if (!hasAnyInteraction) {
+      await stopSequence(leadId, 'no_engagement');
+      console.log(`[TEST PILOT] Sequence stopped for ${leadId}: No engagement after 4 emails`);
+      return true;
+    }
+  }
+  
+  return false;
 }
 
 function personalizeTemplate(template: string, lead: any): string {
@@ -522,7 +702,7 @@ function personalizeTemplate(template: string, lead: any): string {
 }
 
 function getNextEmailDay(currentDay: number): number | null {
-  const sequence = [7, 14, 21, 30];
+  const sequence = [3, 7, 14, 21, 30, 60]; // Ajout de J+3 et J+60
   const currentIndex = sequence.indexOf(currentDay);
   return currentIndex !== -1 && currentIndex < sequence.length - 1 
     ? sequence[currentIndex + 1] 
