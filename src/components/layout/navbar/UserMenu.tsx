@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Settings, LogOut, Users, Download } from 'lucide-react';
+import { User, Settings, LogOut, Users, Download, BarChart3 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -42,6 +42,10 @@ const UserMenu = () => {
     navigate('/admin?tab=export');
   };
 
+  const handleAnalyticsClick = () => {
+    navigate('/analytics');
+  };
+
   return <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <TooltipProvider>
         <Tooltip>
@@ -59,6 +63,11 @@ const UserMenu = () => {
       </TooltipProvider>
       
       <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuItem onClick={handleAnalyticsClick}>
+          <BarChart3 className="mr-2 h-4 w-4" />
+          <span>Analytics des leads</span>
+        </DropdownMenuItem>
+
         <DropdownMenuItem onClick={handleSettingsClick}>
           <Settings className="mr-2 h-4 w-4" />
           <span>Paramètres</span>

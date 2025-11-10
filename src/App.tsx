@@ -26,6 +26,7 @@ const Admin = lazy(() => import('./pages/Admin'));
 const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const ChatGadaitPage = lazy(() => import('./pages/ChatGadaitPage'));
+const LeadsAnalytics = lazy(() => import('./pages/LeadsAnalytics'));
 
 function App() {
   return (
@@ -92,6 +93,11 @@ function App() {
             <Route path="/chat" element={
               <ProtectedRoute commercialAllowed={true}>
                 <ChatGadaitPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/analytics" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <LeadsAnalytics />
               </ProtectedRoute>
             } />
             
