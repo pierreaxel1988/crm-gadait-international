@@ -60,6 +60,7 @@ interface SuggestedProperty {
   reference: string;
   title: string;
   slug: string;
+  external_url: string;
   price: number;
   currency: string;
   bedrooms: number;
@@ -72,9 +73,14 @@ interface SuggestedProperty {
 
 // Fonction pour générer les URLs de propriétés avec slugs
 function generatePropertyUrl(property: SuggestedProperty, language: string, leadId?: string): string {
-  const baseUrl = 'https://gadait-international.com';
-  const langPrefix = language === 'FR' ? 'fr' : (language === 'ES' ? 'es' : 'en');
-  const propertyUrl = `${baseUrl}/${langPrefix}/${property.slug}`;
+  if (!property.external_url) {
+    return '#';
+  }
+  
+  // Utiliser external_url + slug comme dans PropertyCard.tsx
+  const propertyUrl = property.slug 
+    ? `${property.external_url}${property.slug}/`
+    : property.external_url;
   
   // Ajouter le tracking via l'edge function track-property-click
   if (leadId) {
@@ -700,7 +706,7 @@ async function fetchSuggestedProperties(lead: EnrichedLead, limit: number = 3): 
     // Construire la requête avec filtres intelligents
     let query = supabase
       .from('properties_backoffice')
-      .select('id, reference, title_fr, title_en, slug_fr, slug_en, price, currency, bedrooms, bathrooms, surface, images, location, country, property_type, amenities, views, status')
+      .select('id, reference, title_fr, title_en, slug_fr, slug_en, external_url, price, currency, bedrooms, bathrooms, surface, images, location, country, property_type, amenities, views, status')
       .eq('status', 'published')
       .not('slug_fr', 'is', null)
       .not('slug_en', 'is', null);
@@ -747,7 +753,7 @@ async function fetchSuggestedProperties(lead: EnrichedLead, limit: number = 3): 
       // Fallback : récupérer les propriétés les plus récentes
       const { data: fallbackProperties } = await supabase
         .from('properties_backoffice')
-        .select('id, reference, title_fr, title_en, slug_fr, slug_en, price, currency, bedrooms, bathrooms, surface, images, location, country')
+        .select('id, reference, title_fr, title_en, slug_fr, slug_en, external_url, price, currency, bedrooms, bathrooms, surface, images, location, country')
         .eq('status', 'published')
         .not('slug_fr', 'is', null)
         .order('created_at', { ascending: false })
@@ -758,6 +764,7 @@ async function fetchSuggestedProperties(lead: EnrichedLead, limit: number = 3): 
         reference: p.reference || '',
         title: p.title_fr || p.title_en || 'Propriété',
         slug: p.slug_fr || p.slug_en || '',
+        external_url: p.external_url || '',
         price: p.price || 0,
         currency: p.currency || 'EUR',
         bedrooms: p.bedrooms || 0,
@@ -775,6 +782,7 @@ async function fetchSuggestedProperties(lead: EnrichedLead, limit: number = 3): 
       reference: p.reference || '',
       title: p.title_fr || p.title_en || 'Propriété',
       slug: p.slug_fr || p.slug_en || '',
+      external_url: p.external_url || '',
       price: p.price || 0,
       currency: p.currency || 'EUR',
       bedrooms: p.bedrooms || 0,
