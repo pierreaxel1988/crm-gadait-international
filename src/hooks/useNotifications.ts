@@ -3,6 +3,7 @@ import { useActionsData } from './useActionsData';
 import { format, isPast, isToday } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Notification {
   id: string;
@@ -12,9 +13,10 @@ export interface Notification {
   timestamp: Date;
   actionId?: string;
   leadId?: string;
-  type: 'action' | 'system';
+  type: 'action' | 'system' | 'hot_lead' | 'inactive_lead';
   actionType?: string;
   assignedToName?: string;
+  metadata?: any;
 }
 
 export const useNotifications = () => {
@@ -24,6 +26,78 @@ export const useNotifications = () => {
   const [notificationToastShown, setNotificationToastShown] = useState<boolean>(true); // Default to true to prevent initial toast
   const { actions, markActionComplete } = useActionsData();
   const { user, isAdmin, isCommercial, userRole } = useAuth();
+  
+  // Charger les notifications depuis Supabase
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchSupabaseNotifications = async () => {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching notifications:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const supabaseNotifications: Notification[] = data.map((notif: any) => ({
+          id: `db-${notif.id}`,
+          title: notif.title,
+          message: notif.message,
+          read: notif.is_read,
+          timestamp: new Date(notif.created_at),
+          leadId: notif.lead_id,
+          type: notif.type,
+          metadata: notif.metadata
+        }));
+
+        setNotifications(prev => {
+          const existingIds = new Set(prev.map(n => n.id));
+          const newNotifs = supabaseNotifications.filter(n => !existingIds.has(n.id));
+          return [...newNotifs, ...prev];
+        });
+      }
+    };
+
+    fetchSupabaseNotifications();
+
+    // S'abonner aux changements en temps réel
+    const channel = supabase
+      .channel('notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const newNotif = payload.new as any;
+          const notification: Notification = {
+            id: `db-${newNotif.id}`,
+            title: newNotif.title,
+            message: newNotif.message,
+            read: newNotif.is_read,
+            timestamp: new Date(newNotif.created_at),
+            leadId: newNotif.lead_id,
+            type: newNotif.type,
+            metadata: newNotif.metadata
+          };
+
+          setNotifications(prev => [notification, ...prev]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
   
   // Load system notifications only once and don't show them by default
   useEffect(() => {
@@ -125,7 +199,16 @@ export const useNotifications = () => {
     }
   }, [actions, processedActionIds, isCommercial, user]);
   
-  const markAsRead = (id: string) => {
+  const markAsRead = async (id: string) => {
+    // Si c'est une notification de la base de données
+    if (id.startsWith('db-')) {
+      const dbId = id.replace('db-', '');
+      await supabase
+        .from('notifications')
+        .update({ is_read: true, read_at: new Date().toISOString() })
+        .eq('id', dbId);
+    }
+
     setNotifications(notifications.map(notification => 
       notification.id === id ? {
         ...notification,
@@ -134,7 +217,16 @@ export const useNotifications = () => {
     ));
   };
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
+    if (user) {
+      // Marquer toutes les notifications de la base de données comme lues
+      await supabase
+        .from('notifications')
+        .update({ is_read: true, read_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+        .eq('is_read', false);
+    }
+
     setNotifications(notifications.map(notification => ({
       ...notification,
       read: true

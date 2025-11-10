@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Calendar, CheckCheck } from 'lucide-react';
+import { Bell, Calendar, CheckCheck, Flame, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Card } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -19,12 +19,21 @@ const Notifications = () => {
   const isMobile = useIsMobile();
   const { notifications, markAllAsRead, handleActionComplete } = useNotifications();
 
-  const getActionIcon = (actionType?: string) => {
-    switch (actionType?.toLowerCase()) {
-      case 'call':
-      case 'email':
-      case 'followup':
-        return <Calendar size={isMobile ? 14 : 16} className="text-loro-terracotta" />;
+  const getActionIcon = (notification: any) => {
+    switch (notification.type) {
+      case 'hot_lead':
+        return <Flame size={isMobile ? 16 : 18} className="text-red-500" />;
+      case 'inactive_lead':
+        return <Clock size={isMobile ? 16 : 18} className="text-orange-500" />;
+      case 'action':
+        switch (notification.actionType?.toLowerCase()) {
+          case 'call':
+          case 'email':
+          case 'followup':
+            return <Calendar size={isMobile ? 14 : 16} className="text-loro-terracotta" />;
+          default:
+            return <Bell size={isMobile ? 14 : 16} className="text-loro-terracotta" />;
+        }
       default:
         return <Bell size={isMobile ? 14 : 16} className="text-loro-terracotta" />;
     }
@@ -45,12 +54,16 @@ const Notifications = () => {
   const handleCompleteAction = async (notification) => {
     const success = await handleActionComplete(notification);
     if (!success) {
-      toast.error("Impossible de marquer l'action comme terminée");
+      toast({
+        title: "Erreur",
+        description: "Impossible de marquer l'action comme terminée",
+        variant: "destructive"
+      });
     }
   };
 
   const handleNotificationClick = (notification) => {
-    if (notification.type === 'action' && notification.leadId) {
+    if ((notification.type === 'action' || notification.type === 'hot_lead' || notification.type === 'inactive_lead') && notification.leadId) {
       navigate(`/leads/${notification.leadId}`);
     }
   };
@@ -105,8 +118,12 @@ const Notifications = () => {
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 mt-1">
-                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-loro-pearl/30 flex items-center justify-center">
-                        {getActionIcon(notification.actionType)}
+                      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center ${
+                        notification.type === 'hot_lead' ? 'bg-red-500/10' :
+                        notification.type === 'inactive_lead' ? 'bg-orange-500/10' :
+                        'bg-loro-pearl/30'
+                      }`}>
+                        {getActionIcon(notification)}
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -121,6 +138,16 @@ const Notifications = () => {
                       <p className="text-xs text-loro-navy/80 mt-1.5">
                         {notification.message}
                       </p>
+                      {notification.metadata?.click_count && (
+                        <div className="mt-1 text-xs text-loro-terracotta/70">
+                          {notification.metadata.click_count} propriétés consultées
+                        </div>
+                      )}
+                      {notification.metadata?.days_inactive && (
+                        <div className="mt-1 text-xs text-orange-600/70">
+                          {notification.metadata.days_inactive} jours d'inactivité
+                        </div>
+                      )}
                       {notification.type === 'action' && (
                         <Button 
                           variant="ghost" 

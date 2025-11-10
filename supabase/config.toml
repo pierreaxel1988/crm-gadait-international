@@ -42,3 +42,6 @@ verify_jwt = true
 
 [functions.track-property-click]
 verify_jwt = false
+
+[functions.check-inactive-leads]
+verify_jwt = false

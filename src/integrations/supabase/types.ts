@@ -2031,6 +2031,60 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          lead_id: string | null
+          message: string
+          metadata: Json | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          lead_id?: string | null
+          message: string
+          metadata?: Json | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          lead_id?: string | null
+          message?: string
+          metadata?: Json | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_no_response_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_documents: {
         Row: {
           created_at: string
@@ -3897,6 +3951,55 @@ export type Database = {
           },
         ]
       }
+      property_clicks: {
+        Row: {
+          clicked_at: string
+          id: string
+          lead_id: string
+          metadata: Json | null
+          property_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          clicked_at?: string
+          id?: string
+          lead_id: string
+          metadata?: Json | null
+          property_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          clicked_at?: string
+          id?: string
+          lead_id?: string
+          metadata?: Json | null
+          property_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_clicks_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_clicks_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_no_response_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_clicks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "gadait_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_floor_plans: {
         Row: {
           created_at: string | null
@@ -4856,6 +4959,7 @@ export type Database = {
     }
     Functions: {
       bytea_to_text: { Args: { data: string }; Returns: string }
+      cleanup_old_notifications: { Args: never; Returns: undefined }
       close_stale_sessions: { Args: never; Returns: number }
       exec_sql: { Args: { params?: Json; query: string }; Returns: Json[] }
       get_country_facets_i18n: {
