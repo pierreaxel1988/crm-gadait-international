@@ -249,6 +249,21 @@ async function findEligibleLeads(): Promise<EnrichedLead[]> {
   // MODE TEST : Cibler uniquement les leads "Serious + No response"
   console.log('[TEST PILOT] Finding eligible leads: Serious + No response');
   
+  // ÉTAPE 1 : Récupérer les leads qui ont déjà une séquence active
+  const { data: activeSequences, error: seqError } = await supabase
+    .from('lead_email_sequences')
+    .select('lead_id')
+    .eq('is_active', true);
+    
+  if (seqError) {
+    console.error('[TEST PILOT] Error fetching active sequences:', seqError);
+    return [];
+  }
+  
+  const excludedLeadIds = activeSequences?.map(s => s.lead_id) || [];
+  console.log(`[TEST PILOT] Excluding ${excludedLeadIds.length} leads with active sequences`);
+  
+  // ÉTAPE 2 : Récupérer les leads "Serious + No response"
   const { data: leads, error } = await supabase
     .from('leads')
     .select(`
@@ -259,25 +274,26 @@ async function findEligibleLeads(): Promise<EnrichedLead[]> {
     `)
     .contains('tags', ['Serious'])
     .contains('tags', ['No response'])
-    .not('email', 'is', null)
-    .not('id', 'in', `(
-      SELECT lead_id FROM lead_email_sequences 
-      WHERE is_active = true
-    )`);
+    .not('email', 'is', null);
     
   if (error) {
     console.error('[TEST PILOT] Error finding eligible leads:', error);
     return [];
   }
   
-  // Filtrer par budget minimum (400k EUR pour inclure plus de leads du test)
-  const filtered = (leads || []).filter(lead => {
+  // Filtrer manuellement pour exclure les leads avec séquence active
+  const filteredLeads = (leads || []).filter(lead => 
+    !excludedLeadIds.includes(lead.id)
+  );
+  
+  // Filtrer par budget minimum (400k EUR pour le test pilote)
+  const eligibleLeads = filteredLeads.filter(lead => {
     const budget = parseInt(lead.budget?.replace(/[^\d]/g, '') || '0');
     return budget >= 400000;
   });
   
-  console.log(`[TEST PILOT] Found ${filtered.length} eligible leads`);
-  return filtered;
+  console.log(`[TEST PILOT] Found ${eligibleLeads.length} eligible leads for test`);
+  return eligibleLeads;
 }
 
 async function findPendingEmails() {
