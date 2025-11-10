@@ -11,6 +11,7 @@ import { countryToFlag } from '@/utils/countryUtils';
 import { deriveNationalityFromCountry } from '@/components/chat/utils/nationalityUtils';
 import NationalitySelector from '../../selectors/NationalitySelector';
 import CountrySelector from '../../selectors/CountrySelector';
+import PropertyClickStats from '@/components/leads/PropertyClickStats';
 
 interface OwnerInfoSectionProps {
   lead: LeadDetailed;
@@ -216,6 +217,11 @@ const OwnerInfoSection: React.FC<OwnerInfoSectionProps> = ({
         title="Sélectionner une nationalité"
         searchPlaceholder="Rechercher une nationalité..."
       />
+
+      {/* Statistiques de consultation des propriétés */}
+      <div className="pt-4">
+        <PropertyClickStats leadId={lead.id} />
+      </div>
     </div>
   );
 };

@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadSource } from '@/types/lead';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import { countryToFlag, phoneCodeToFlag } from '@/utils/countryUtils';
 import { ChevronDown, X, Search } from 'lucide-react';
 import CountrySelector from '../selectors/CountrySelector';
 import NationalitySelector from '../selectors/NationalitySelector';
+import PropertyClickStats from '@/components/leads/PropertyClickStats';
 
 const LANGUAGE_OPTIONS = [
   { value: "Français", label: "Français" },
@@ -628,6 +630,11 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
         title="Sélectionner une nationalité"
         searchPlaceholder="Rechercher une nationalité..."
       />
+
+      {/* Statistiques de consultation des propriétés */}
+      <div className="pt-4">
+        <PropertyClickStats leadId={lead.id} />
+      </div>
     </>
   );
 };
