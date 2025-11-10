@@ -39,3 +39,6 @@ verify_jwt = true
 
 [functions.gmail-sync]
 verify_jwt = true
+
+[functions.track-property-click]
+verify_jwt = false

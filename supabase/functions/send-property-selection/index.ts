@@ -71,8 +71,38 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Générer le contenu HTML de l'email avec un design moderne
-    const propertiesHtml = properties.map(property => `
+    // Enregistrer d'abord la sélection pour obtenir l'ID
+    const { data: selectionData, error: selectionError } = await supabase
+      .from('property_selections')
+      .insert({
+        lead_id: leadId,
+        name: criteriaLabel,
+        properties: properties.map(p => p.id),
+        property_criteria: {
+          lead_name: leadName,
+          lead_email: leadEmail,
+          sender_name: senderName,
+          properties_count: properties.length
+        },
+        email_sent_at: new Date().toISOString(),
+        status: 'sent'
+      })
+      .select()
+      .single();
+
+    if (selectionError) {
+      console.error("Erreur lors de l'enregistrement de la sélection:", selectionError);
+      throw new Error("Impossible d'enregistrer la sélection");
+    }
+
+    console.log("Sélection enregistrée:", selectionData);
+
+    // Générer le contenu HTML de l'email avec un design moderne et URLs trackées
+    const propertiesHtml = properties.map(property => {
+      // Créer l'URL trackée
+      const trackedUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/track-property-click?selection_id=${selectionData.id}&property_id=${property.id}&redirect_url=${encodeURIComponent(property.url)}`;
+      
+      return `
       <div style="
         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
         border-radius: 16px;
@@ -193,7 +223,7 @@ const handler = async (req: Request): Promise<Response> => {
           
           ${property.url ? `
             <div style="text-align: center; margin-top: 24px;">
-              <a href="${property.url}" 
+              <a href="${trackedUrl}" 
                  style="
                    display: inline-block;
                    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
@@ -213,7 +243,8 @@ const handler = async (req: Request): Promise<Response> => {
           ` : ''}
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -425,31 +456,6 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     console.log("Email envoyé avec succès:", emailResponse);
-
-    // Enregistrer la sélection en base de données
-    const { data: selectionData, error: selectionError } = await supabase
-      .from('property_selections')
-      .insert({
-        lead_id: leadId,
-        name: criteriaLabel,
-        properties: properties.map(p => p.id),
-        property_criteria: {
-          lead_name: leadName,
-          lead_email: leadEmail,
-          sender_name: senderName,
-          properties_count: properties.length
-        },
-        email_sent_at: new Date().toISOString(),
-        status: 'sent'
-      })
-      .select()
-      .single();
-
-    if (selectionError) {
-      console.error("Erreur lors de l'enregistrement de la sélection:", selectionError);
-    } else {
-      console.log("Sélection enregistrée:", selectionData);
-    }
 
     return new Response(JSON.stringify({
       success: true,

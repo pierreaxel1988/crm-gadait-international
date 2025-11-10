@@ -14,6 +14,344 @@ export type Database = {
   }
   public: {
     Tables: {
+      _backup_assigned_to_before_email: {
+        Row: {
+          address: string | null
+          advanced_technologies: string[] | null
+          amenities: string[] | null
+          amenities_translations: Json | null
+          area: number | null
+          area_unit: string | null
+          assigned_to: string | null
+          backed_up_at: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          co2_emissions_class: string | null
+          commission_percentage: number | null
+          construction_status: string | null
+          construction_year: number | null
+          country: string | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          description_en: string | null
+          description_translations: Json | null
+          documents: string[] | null
+          energy_class: string | null
+          external_id: string | null
+          external_url: string | null
+          features: string[] | null
+          floor_number: number | null
+          floor_plans: string[] | null
+          floors: number | null
+          garden_area: number | null
+          has_elevator: boolean | null
+          has_garden: boolean | null
+          has_pool: boolean | null
+          hide_price: boolean | null
+          highlights: string[] | null
+          id: string | null
+          images: string[] | null
+          is_exclusive: boolean | null
+          is_featured: boolean | null
+          is_new: boolean | null
+          land_area: number | null
+          land_area_unit: string | null
+          latitude: number | null
+          listing_type: string | null
+          location: string | null
+          location_privileges: string[] | null
+          longitude: number | null
+          main_image: string | null
+          mandate_duration: string | null
+          mandate_status: string | null
+          meta_description: string | null
+          meta_description_translations: Json | null
+          meta_title: string | null
+          meta_title_translations: Json | null
+          monthly_charges: number | null
+          orientation: string[] | null
+          owner_email: string | null
+          owner_first_name: string | null
+          owner_id: string | null
+          owner_name: string | null
+          owner_notes: string | null
+          owner_phone: string | null
+          owner_phone_2: string | null
+          parking_spaces: number | null
+          parking_type: string | null
+          partner_commission_ht: number | null
+          partner_email: string | null
+          partner_name: string | null
+          partner_phone: string | null
+          partner_property_url: string | null
+          pool_details: string | null
+          postal_code: string | null
+          premium_services: string[] | null
+          price: number | null
+          price_eur: number | null
+          price_from: number | null
+          price_on_request: boolean | null
+          property_condition: string | null
+          property_type: string | null
+          published_at: string | null
+          reference: string | null
+          resort_facilities: string[] | null
+          rooms: number | null
+          slug: string | null
+          slug_en: string | null
+          slug_fr: string | null
+          status: string | null
+          surface: number | null
+          tags: string[] | null
+          terrace_area: number | null
+          title: string | null
+          title_en: string | null
+          title_translations: Json | null
+          updated_at: string | null
+          video_urls: string[] | null
+          view_type: string[] | null
+          virtual_tour: string | null
+          xml_all_keys: string[] | null
+          xml_external_id: string | null
+          xml_last_sync: string | null
+          xml_raw: Json | null
+          xml_source: string | null
+        }
+        Insert: {
+          address?: string | null
+          advanced_technologies?: string[] | null
+          amenities?: string[] | null
+          amenities_translations?: Json | null
+          area?: number | null
+          area_unit?: string | null
+          assigned_to?: string | null
+          backed_up_at?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          co2_emissions_class?: string | null
+          commission_percentage?: number | null
+          construction_status?: string | null
+          construction_year?: number | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          description_en?: string | null
+          description_translations?: Json | null
+          documents?: string[] | null
+          energy_class?: string | null
+          external_id?: string | null
+          external_url?: string | null
+          features?: string[] | null
+          floor_number?: number | null
+          floor_plans?: string[] | null
+          floors?: number | null
+          garden_area?: number | null
+          has_elevator?: boolean | null
+          has_garden?: boolean | null
+          has_pool?: boolean | null
+          hide_price?: boolean | null
+          highlights?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          is_exclusive?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          land_area?: number | null
+          land_area_unit?: string | null
+          latitude?: number | null
+          listing_type?: string | null
+          location?: string | null
+          location_privileges?: string[] | null
+          longitude?: number | null
+          main_image?: string | null
+          mandate_duration?: string | null
+          mandate_status?: string | null
+          meta_description?: string | null
+          meta_description_translations?: Json | null
+          meta_title?: string | null
+          meta_title_translations?: Json | null
+          monthly_charges?: number | null
+          orientation?: string[] | null
+          owner_email?: string | null
+          owner_first_name?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          owner_notes?: string | null
+          owner_phone?: string | null
+          owner_phone_2?: string | null
+          parking_spaces?: number | null
+          parking_type?: string | null
+          partner_commission_ht?: number | null
+          partner_email?: string | null
+          partner_name?: string | null
+          partner_phone?: string | null
+          partner_property_url?: string | null
+          pool_details?: string | null
+          postal_code?: string | null
+          premium_services?: string[] | null
+          price?: number | null
+          price_eur?: number | null
+          price_from?: number | null
+          price_on_request?: boolean | null
+          property_condition?: string | null
+          property_type?: string | null
+          published_at?: string | null
+          reference?: string | null
+          resort_facilities?: string[] | null
+          rooms?: number | null
+          slug?: string | null
+          slug_en?: string | null
+          slug_fr?: string | null
+          status?: string | null
+          surface?: number | null
+          tags?: string[] | null
+          terrace_area?: number | null
+          title?: string | null
+          title_en?: string | null
+          title_translations?: Json | null
+          updated_at?: string | null
+          video_urls?: string[] | null
+          view_type?: string[] | null
+          virtual_tour?: string | null
+          xml_all_keys?: string[] | null
+          xml_external_id?: string | null
+          xml_last_sync?: string | null
+          xml_raw?: Json | null
+          xml_source?: string | null
+        }
+        Update: {
+          address?: string | null
+          advanced_technologies?: string[] | null
+          amenities?: string[] | null
+          amenities_translations?: Json | null
+          area?: number | null
+          area_unit?: string | null
+          assigned_to?: string | null
+          backed_up_at?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          co2_emissions_class?: string | null
+          commission_percentage?: number | null
+          construction_status?: string | null
+          construction_year?: number | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          description_en?: string | null
+          description_translations?: Json | null
+          documents?: string[] | null
+          energy_class?: string | null
+          external_id?: string | null
+          external_url?: string | null
+          features?: string[] | null
+          floor_number?: number | null
+          floor_plans?: string[] | null
+          floors?: number | null
+          garden_area?: number | null
+          has_elevator?: boolean | null
+          has_garden?: boolean | null
+          has_pool?: boolean | null
+          hide_price?: boolean | null
+          highlights?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          is_exclusive?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          land_area?: number | null
+          land_area_unit?: string | null
+          latitude?: number | null
+          listing_type?: string | null
+          location?: string | null
+          location_privileges?: string[] | null
+          longitude?: number | null
+          main_image?: string | null
+          mandate_duration?: string | null
+          mandate_status?: string | null
+          meta_description?: string | null
+          meta_description_translations?: Json | null
+          meta_title?: string | null
+          meta_title_translations?: Json | null
+          monthly_charges?: number | null
+          orientation?: string[] | null
+          owner_email?: string | null
+          owner_first_name?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          owner_notes?: string | null
+          owner_phone?: string | null
+          owner_phone_2?: string | null
+          parking_spaces?: number | null
+          parking_type?: string | null
+          partner_commission_ht?: number | null
+          partner_email?: string | null
+          partner_name?: string | null
+          partner_phone?: string | null
+          partner_property_url?: string | null
+          pool_details?: string | null
+          postal_code?: string | null
+          premium_services?: string[] | null
+          price?: number | null
+          price_eur?: number | null
+          price_from?: number | null
+          price_on_request?: boolean | null
+          property_condition?: string | null
+          property_type?: string | null
+          published_at?: string | null
+          reference?: string | null
+          resort_facilities?: string[] | null
+          rooms?: number | null
+          slug?: string | null
+          slug_en?: string | null
+          slug_fr?: string | null
+          status?: string | null
+          surface?: number | null
+          tags?: string[] | null
+          terrace_area?: number | null
+          title?: string | null
+          title_en?: string | null
+          title_translations?: Json | null
+          updated_at?: string | null
+          video_urls?: string[] | null
+          view_type?: string[] | null
+          virtual_tour?: string | null
+          xml_all_keys?: string[] | null
+          xml_external_id?: string | null
+          xml_last_sync?: string | null
+          xml_raw?: Json | null
+          xml_source?: string | null
+        }
+        Relationships: []
+      }
+      agent_email_map: {
+        Row: {
+          email: string
+          team_member_id: string
+        }
+        Insert: {
+          email: string
+          team_member_id: string
+        }
+        Update: {
+          email?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_email_map_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agents: {
         Row: {
           created_at: string | null
@@ -56,6 +394,18 @@ export type Database = {
           id?: string
           name?: string
           slug?: string | null
+        }
+        Relationships: []
+      }
+      amenities_ref: {
+        Row: {
+          amenity: string
+        }
+        Insert: {
+          amenity: string
+        }
+        Update: {
+          amenity?: string
         }
         Relationships: []
       }
@@ -192,6 +542,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "automated_email_logs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_no_response_candidates"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "automated_email_logs_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
@@ -260,6 +617,33 @@ export type Database = {
         }
         Relationships: []
       }
+      countries_ref: {
+        Row: {
+          iso2: string | null
+          iso3: string | null
+          label_en: string
+          label_fr: string
+          slug: string
+          synonyms: string[]
+        }
+        Insert: {
+          iso2?: string | null
+          iso3?: string | null
+          label_en: string
+          label_fr: string
+          slug: string
+          synonyms?: string[]
+        }
+        Update: {
+          iso2?: string | null
+          iso3?: string | null
+          label_en?: string
+          label_fr?: string
+          slug?: string
+          synonyms?: string[]
+        }
+        Relationships: []
+      }
       currencies: {
         Row: {
           code: string | null
@@ -322,6 +706,351 @@ export type Database = {
           },
         ]
       }
+      destination_content: {
+        Row: {
+          created_at: string
+          destination_id: string
+          hero_description: string | null
+          id: string
+          intro_text_1: string | null
+          intro_text_2: string | null
+          locale: string
+          meta_description: string | null
+          meta_title: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          destination_id: string
+          hero_description?: string | null
+          id?: string
+          intro_text_1?: string | null
+          intro_text_2?: string | null
+          locale: string
+          meta_description?: string | null
+          meta_title?: string | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          destination_id?: string
+          hero_description?: string | null
+          id?: string
+          intro_text_1?: string | null
+          intro_text_2?: string | null
+          locale?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destination_content_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      destination_features: {
+        Row: {
+          created_at: string
+          description_en: string
+          description_fr: string
+          destination_id: string
+          feature_type: string
+          icon: string | null
+          id: string
+          order_index: number
+          title_en: string
+          title_fr: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description_en: string
+          description_fr: string
+          destination_id: string
+          feature_type: string
+          icon?: string | null
+          id?: string
+          order_index?: number
+          title_en: string
+          title_fr: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description_en?: string
+          description_fr?: string
+          destination_id?: string
+          feature_type?: string
+          icon?: string | null
+          id?: string
+          order_index?: number
+          title_en?: string
+          title_fr?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destination_features_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      destination_lifestyle_features: {
+        Row: {
+          created_at: string
+          description_en: string
+          description_fr: string
+          destination_id: string
+          id: string
+          image_url: string | null
+          order_index: number
+          title_en: string
+          title_fr: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description_en: string
+          description_fr: string
+          destination_id: string
+          id?: string
+          image_url?: string | null
+          order_index?: number
+          title_en: string
+          title_fr: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description_en?: string
+          description_fr?: string
+          destination_id?: string
+          id?: string
+          image_url?: string | null
+          order_index?: number
+          title_en?: string
+          title_fr?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destination_lifestyle_features_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      destination_projects: {
+        Row: {
+          created_at: string
+          description_en: string
+          description_fr: string
+          destination_id: string
+          external_id: string | null
+          id: string
+          image_url: string | null
+          location_en: string
+          location_fr: string
+          order_index: number
+          price_currency: string | null
+          price_from: number | null
+          status: string
+          title_en: string
+          title_fr: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description_en: string
+          description_fr: string
+          destination_id: string
+          external_id?: string | null
+          id?: string
+          image_url?: string | null
+          location_en: string
+          location_fr: string
+          order_index?: number
+          price_currency?: string | null
+          price_from?: number | null
+          status: string
+          title_en: string
+          title_fr: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description_en?: string
+          description_fr?: string
+          destination_id?: string
+          external_id?: string | null
+          id?: string
+          image_url?: string | null
+          location_en?: string
+          location_fr?: string
+          order_index?: number
+          price_currency?: string | null
+          price_from?: number | null
+          status?: string
+          title_en?: string
+          title_fr?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destination_projects_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      destination_services: {
+        Row: {
+          created_at: string
+          description_en: string
+          description_fr: string
+          destination_id: string
+          features_en: Json | null
+          features_fr: Json | null
+          icon: string | null
+          id: string
+          order_index: number
+          service_type: string
+          title_en: string
+          title_fr: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description_en: string
+          description_fr: string
+          destination_id: string
+          features_en?: Json | null
+          features_fr?: Json | null
+          icon?: string | null
+          id?: string
+          order_index?: number
+          service_type: string
+          title_en: string
+          title_fr: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description_en?: string
+          description_fr?: string
+          destination_id?: string
+          features_en?: Json | null
+          features_fr?: Json | null
+          icon?: string | null
+          id?: string
+          order_index?: number
+          service_type?: string
+          title_en?: string
+          title_fr?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destination_services_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      destination_stats: {
+        Row: {
+          created_at: string
+          destination_id: string
+          id: string
+          label_en: string
+          label_fr: string
+          order_index: number
+          stat_key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          destination_id: string
+          id?: string
+          label_en: string
+          label_fr: string
+          order_index?: number
+          stat_key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          destination_id?: string
+          id?: string
+          label_en?: string
+          label_fr?: string
+          order_index?: number
+          stat_key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destination_stats_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      destinations: {
+        Row: {
+          country_code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          country_code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_templates: {
         Row: {
           campaign_id: string
@@ -363,6 +1092,18 @@ export type Database = {
           },
         ]
       }
+      features_ref: {
+        Row: {
+          feature: string
+        }
+        Insert: {
+          feature: string
+        }
+        Update: {
+          feature?: string
+        }
+        Relationships: []
+      }
       fx_rates: {
         Row: {
           id: number
@@ -384,87 +1125,6 @@ export type Database = {
         }
         Relationships: []
       }
-      Gadait_Listings_Buy: {
-        Row: {
-          "Additional Image 1": string | null
-          "Additional Image 10": string | null
-          "Additional Image 2": string | null
-          "Additional Image 3": string | null
-          "Additional Image 4": string | null
-          "Additional Image 5": string | null
-          "Additional Image 6": string | null
-          "Additional Image 7": string | null
-          "Additional Image 8": string | null
-          "Additional Image 9": string | null
-          Area: string | null
-          Bedrooms: number | null
-          city: string | null
-          country: string | null
-          is_exclusive: boolean | null
-          is_new: boolean | null
-          "Main Image": string | null
-          Position: number
-          price: string | null
-          "Price and Location": string | null
-          "Property Link": string | null
-          "Property Type": string | null
-          "Secondary Image": string | null
-          Title: string | null
-        }
-        Insert: {
-          "Additional Image 1"?: string | null
-          "Additional Image 10"?: string | null
-          "Additional Image 2"?: string | null
-          "Additional Image 3"?: string | null
-          "Additional Image 4"?: string | null
-          "Additional Image 5"?: string | null
-          "Additional Image 6"?: string | null
-          "Additional Image 7"?: string | null
-          "Additional Image 8"?: string | null
-          "Additional Image 9"?: string | null
-          Area?: string | null
-          Bedrooms?: number | null
-          city?: string | null
-          country?: string | null
-          is_exclusive?: boolean | null
-          is_new?: boolean | null
-          "Main Image"?: string | null
-          Position: number
-          price?: string | null
-          "Price and Location"?: string | null
-          "Property Link"?: string | null
-          "Property Type"?: string | null
-          "Secondary Image"?: string | null
-          Title?: string | null
-        }
-        Update: {
-          "Additional Image 1"?: string | null
-          "Additional Image 10"?: string | null
-          "Additional Image 2"?: string | null
-          "Additional Image 3"?: string | null
-          "Additional Image 4"?: string | null
-          "Additional Image 5"?: string | null
-          "Additional Image 6"?: string | null
-          "Additional Image 7"?: string | null
-          "Additional Image 8"?: string | null
-          "Additional Image 9"?: string | null
-          Area?: string | null
-          Bedrooms?: number | null
-          city?: string | null
-          country?: string | null
-          is_exclusive?: boolean | null
-          is_new?: boolean | null
-          "Main Image"?: string | null
-          Position?: number
-          price?: string | null
-          "Price and Location"?: string | null
-          "Property Link"?: string | null
-          "Property Type"?: string | null
-          "Secondary Image"?: string | null
-          Title?: string | null
-        }
-        Relationships: []
-      }
       gadait_properties: {
         Row: {
           amenities: string[] | null
@@ -476,6 +1136,7 @@ export type Database = {
           created_at: string | null
           currency: string | null
           description: string | null
+          description_translations: Json | null
           external_id: string | null
           features: string[] | null
           id: string
@@ -489,8 +1150,11 @@ export type Database = {
           price: number | null
           property_type: string | null
           scraped_at: string | null
+          seo_description_translations: Json | null
+          seo_title_translations: Json | null
           slug: string | null
           title: string
+          title_translations: Json | null
           updated_at: string | null
           url: string
           video_urls: string[] | null
@@ -505,6 +1169,7 @@ export type Database = {
           created_at?: string | null
           currency?: string | null
           description?: string | null
+          description_translations?: Json | null
           external_id?: string | null
           features?: string[] | null
           id?: string
@@ -518,8 +1183,11 @@ export type Database = {
           price?: number | null
           property_type?: string | null
           scraped_at?: string | null
+          seo_description_translations?: Json | null
+          seo_title_translations?: Json | null
           slug?: string | null
           title: string
+          title_translations?: Json | null
           updated_at?: string | null
           url: string
           video_urls?: string[] | null
@@ -534,6 +1202,7 @@ export type Database = {
           created_at?: string | null
           currency?: string | null
           description?: string | null
+          description_translations?: Json | null
           external_id?: string | null
           features?: string[] | null
           id?: string
@@ -547,11 +1216,62 @@ export type Database = {
           price?: number | null
           property_type?: string | null
           scraped_at?: string | null
+          seo_description_translations?: Json | null
+          seo_title_translations?: Json | null
           slug?: string | null
           title?: string
+          title_translations?: Json | null
           updated_at?: string | null
           url?: string
           video_urls?: string[] | null
+        }
+        Relationships: []
+      }
+      highlights_ref: {
+        Row: {
+          highlight: string
+        }
+        Insert: {
+          highlight: string
+        }
+        Update: {
+          highlight?: string
+        }
+        Relationships: []
+      }
+      home_content: {
+        Row: {
+          content_en: string | null
+          content_fr: string | null
+          content_key: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          section: string
+          updated_at: string
+        }
+        Insert: {
+          content_en?: string | null
+          content_fr?: string | null
+          content_key: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          section: string
+          updated_at?: string
+        }
+        Update: {
+          content_en?: string | null
+          content_fr?: string | null
+          content_key?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          section?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -630,6 +1350,13 @@ export type Database = {
             referencedRelation: "leads"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "lead_ai_conversations_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_no_response_candidates"
+            referencedColumns: ["id"]
+          },
         ]
       }
       lead_ai_history: {
@@ -690,6 +1417,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_chat_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_no_response_candidates"
             referencedColumns: ["id"]
           },
         ]
@@ -759,6 +1493,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "lead_email_sequences_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_no_response_candidates"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "lead_email_sequences_stopped_by_fkey"
             columns: ["stopped_by"]
             isOneToOne: false
@@ -822,10 +1563,65 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "lead_emails_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_no_response_candidates"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "lead_emails_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_followups: {
+        Row: {
+          channel: string
+          error_message: string | null
+          id: string
+          lead_id: string
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+          step: number
+        }
+        Insert: {
+          channel?: string
+          error_message?: string | null
+          id?: string
+          lead_id: string
+          scheduled_at: string
+          sent_at?: string | null
+          status?: string
+          step: number
+        }
+        Update: {
+          channel?: string
+          error_message?: string | null
+          id?: string
+          lead_id?: string
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          step?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_followups_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_followups_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_no_response_candidates"
             referencedColumns: ["id"]
           },
         ]
@@ -870,6 +1666,7 @@ export type Database = {
           land_area: string | null
           last_contact_date: string | null
           last_contacted_at: string | null
+          last_email_sequence_step: number | null
           living_area: string | null
           location: string | null
           mandate_type: string | null
@@ -877,6 +1674,7 @@ export type Database = {
           name: string
           nationality: string | null
           next_action_date: string | null
+          next_follow_up_at: string | null
           next_follow_up_date: string | null
           notes: string | null
           orientation: string[] | null
@@ -946,6 +1744,7 @@ export type Database = {
           land_area?: string | null
           last_contact_date?: string | null
           last_contacted_at?: string | null
+          last_email_sequence_step?: number | null
           living_area?: string | null
           location?: string | null
           mandate_type?: string | null
@@ -953,6 +1752,7 @@ export type Database = {
           name: string
           nationality?: string | null
           next_action_date?: string | null
+          next_follow_up_at?: string | null
           next_follow_up_date?: string | null
           notes?: string | null
           orientation?: string[] | null
@@ -1022,6 +1822,7 @@ export type Database = {
           land_area?: string | null
           last_contact_date?: string | null
           last_contacted_at?: string | null
+          last_email_sequence_step?: number | null
           living_area?: string | null
           location?: string | null
           mandate_type?: string | null
@@ -1029,6 +1830,7 @@ export type Database = {
           name?: string
           nationality?: string | null
           next_action_date?: string | null
+          next_follow_up_at?: string | null
           next_follow_up_date?: string | null
           notes?: string | null
           orientation?: string[] | null
@@ -1229,6 +2031,51 @@ export type Database = {
           },
         ]
       }
+      owner_documents: {
+        Row: {
+          created_at: string
+          doc_type: string
+          file_name: string
+          id: string
+          is_deleted: boolean
+          mime_type: string
+          owner_id: string
+          property_id: string
+          size_bytes: number
+          storage_path: string
+          uploaded_by: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          doc_type: string
+          file_name: string
+          id?: string
+          is_deleted?: boolean
+          mime_type: string
+          owner_id: string
+          property_id: string
+          size_bytes: number
+          storage_path: string
+          uploaded_by: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          doc_type?: string
+          file_name?: string
+          id?: string
+          is_deleted?: boolean
+          mime_type?: string
+          owner_id?: string
+          property_id?: string
+          size_bytes?: number
+          storage_path?: string
+          uploaded_by?: string
+          version?: number
+        }
+        Relationships: []
+      }
       project_units: {
         Row: {
           bathrooms: number | null
@@ -1322,6 +2169,7 @@ export type Database = {
           currency: string | null
           delivery_date: string | null
           description: string | null
+          description_translations: Json | null
           developer_name: string | null
           estimated_charges: number | null
           estimated_notary_fees: number | null
@@ -1341,7 +2189,9 @@ export type Database = {
           marketing_tags: string[] | null
           masterplan_url: string | null
           meta_description: string | null
+          meta_description_translations: Json | null
           meta_title: string | null
+          meta_title_translations: Json | null
           other_documents: Json | null
           ownership_type: string | null
           payment_terms: string | null
@@ -1361,6 +2211,7 @@ export type Database = {
           target_audience: string | null
           tax_benefits: string | null
           title: string
+          title_translations: Json | null
           total_units: number | null
           updated_at: string
           usp_points: Json | null
@@ -1388,6 +2239,7 @@ export type Database = {
           currency?: string | null
           delivery_date?: string | null
           description?: string | null
+          description_translations?: Json | null
           developer_name?: string | null
           estimated_charges?: number | null
           estimated_notary_fees?: number | null
@@ -1407,7 +2259,9 @@ export type Database = {
           marketing_tags?: string[] | null
           masterplan_url?: string | null
           meta_description?: string | null
+          meta_description_translations?: Json | null
           meta_title?: string | null
+          meta_title_translations?: Json | null
           other_documents?: Json | null
           ownership_type?: string | null
           payment_terms?: string | null
@@ -1427,6 +2281,7 @@ export type Database = {
           target_audience?: string | null
           tax_benefits?: string | null
           title: string
+          title_translations?: Json | null
           total_units?: number | null
           updated_at?: string
           usp_points?: Json | null
@@ -1454,6 +2309,7 @@ export type Database = {
           currency?: string | null
           delivery_date?: string | null
           description?: string | null
+          description_translations?: Json | null
           developer_name?: string | null
           estimated_charges?: number | null
           estimated_notary_fees?: number | null
@@ -1473,7 +2329,9 @@ export type Database = {
           marketing_tags?: string[] | null
           masterplan_url?: string | null
           meta_description?: string | null
+          meta_description_translations?: Json | null
           meta_title?: string | null
+          meta_title_translations?: Json | null
           other_documents?: Json | null
           ownership_type?: string | null
           payment_terms?: string | null
@@ -1493,6 +2351,7 @@ export type Database = {
           target_audience?: string | null
           tax_benefits?: string | null
           title?: string
+          title_translations?: Json | null
           total_units?: number | null
           updated_at?: string
           usp_points?: Json | null
@@ -1686,9 +2545,12 @@ export type Database = {
           address: string | null
           advanced_technologies: string[] | null
           amenities: string[] | null
+          amenities_en: string[] | null
+          amenities_translations: Json | null
           area: number | null
           area_unit: string | null
           assigned_to: string | null
+          assigned_to_email: string | null
           bathrooms: number | null
           bedrooms: number | null
           co2_emissions_class: string | null
@@ -1699,7 +2561,10 @@ export type Database = {
           created_at: string
           created_by: string | null
           currency: string | null
+          db_inserted_at: string
           description: string | null
+          description_en: string | null
+          description_translations: Json | null
           documents: string[] | null
           energy_class: string | null
           external_id: string | null
@@ -1707,6 +2572,7 @@ export type Database = {
           features: string[] | null
           floor_number: number | null
           floor_plans: string[] | null
+          floor_plans_hd: string[] | null
           floors: number | null
           garden_area: number | null
           has_elevator: boolean | null
@@ -1716,6 +2582,7 @@ export type Database = {
           highlights: string[] | null
           id: string
           images: string[] | null
+          images_hd: string[] | null
           is_exclusive: boolean | null
           is_featured: boolean | null
           is_new: boolean | null
@@ -1727,10 +2594,13 @@ export type Database = {
           location_privileges: string[] | null
           longitude: number | null
           main_image: string | null
+          main_image_hd: string | null
           mandate_duration: string | null
           mandate_status: string | null
           meta_description: string | null
+          meta_description_translations: Json | null
           meta_title: string | null
+          meta_title_translations: Json | null
           monthly_charges: number | null
           orientation: string[] | null
           owner_email: string | null
@@ -1756,28 +2626,42 @@ export type Database = {
           price_on_request: boolean | null
           property_condition: string | null
           property_type: string | null
+          published: boolean | null
           published_at: string | null
           reference: string | null
           resort_facilities: string[] | null
           rooms: number | null
           slug: string | null
+          slug_en: string | null
+          slug_fr: string | null
+          source: string | null
           status: string
           surface: number | null
           tags: string[] | null
           terrace_area: number | null
           title: string
+          title_en: string | null
+          title_translations: Json | null
           updated_at: string
           video_urls: string[] | null
           view_type: string[] | null
           virtual_tour: string | null
+          xml_all_keys: string[] | null
+          xml_external_id: string | null
+          xml_last_sync: string | null
+          xml_raw: Json | null
+          xml_source: string | null
         }
         Insert: {
           address?: string | null
           advanced_technologies?: string[] | null
           amenities?: string[] | null
+          amenities_en?: string[] | null
+          amenities_translations?: Json | null
           area?: number | null
           area_unit?: string | null
           assigned_to?: string | null
+          assigned_to_email?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
           co2_emissions_class?: string | null
@@ -1788,7 +2672,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string | null
+          db_inserted_at?: string
           description?: string | null
+          description_en?: string | null
+          description_translations?: Json | null
           documents?: string[] | null
           energy_class?: string | null
           external_id?: string | null
@@ -1796,6 +2683,7 @@ export type Database = {
           features?: string[] | null
           floor_number?: number | null
           floor_plans?: string[] | null
+          floor_plans_hd?: string[] | null
           floors?: number | null
           garden_area?: number | null
           has_elevator?: boolean | null
@@ -1805,6 +2693,7 @@ export type Database = {
           highlights?: string[] | null
           id?: string
           images?: string[] | null
+          images_hd?: string[] | null
           is_exclusive?: boolean | null
           is_featured?: boolean | null
           is_new?: boolean | null
@@ -1816,10 +2705,13 @@ export type Database = {
           location_privileges?: string[] | null
           longitude?: number | null
           main_image?: string | null
+          main_image_hd?: string | null
           mandate_duration?: string | null
           mandate_status?: string | null
           meta_description?: string | null
+          meta_description_translations?: Json | null
           meta_title?: string | null
+          meta_title_translations?: Json | null
           monthly_charges?: number | null
           orientation?: string[] | null
           owner_email?: string | null
@@ -1845,28 +2737,42 @@ export type Database = {
           price_on_request?: boolean | null
           property_condition?: string | null
           property_type?: string | null
+          published?: boolean | null
           published_at?: string | null
           reference?: string | null
           resort_facilities?: string[] | null
           rooms?: number | null
           slug?: string | null
+          slug_en?: string | null
+          slug_fr?: string | null
+          source?: string | null
           status?: string
           surface?: number | null
           tags?: string[] | null
           terrace_area?: number | null
           title: string
+          title_en?: string | null
+          title_translations?: Json | null
           updated_at?: string
           video_urls?: string[] | null
           view_type?: string[] | null
           virtual_tour?: string | null
+          xml_all_keys?: string[] | null
+          xml_external_id?: string | null
+          xml_last_sync?: string | null
+          xml_raw?: Json | null
+          xml_source?: string | null
         }
         Update: {
           address?: string | null
           advanced_technologies?: string[] | null
           amenities?: string[] | null
+          amenities_en?: string[] | null
+          amenities_translations?: Json | null
           area?: number | null
           area_unit?: string | null
           assigned_to?: string | null
+          assigned_to_email?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
           co2_emissions_class?: string | null
@@ -1877,7 +2783,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string | null
+          db_inserted_at?: string
           description?: string | null
+          description_en?: string | null
+          description_translations?: Json | null
           documents?: string[] | null
           energy_class?: string | null
           external_id?: string | null
@@ -1885,6 +2794,7 @@ export type Database = {
           features?: string[] | null
           floor_number?: number | null
           floor_plans?: string[] | null
+          floor_plans_hd?: string[] | null
           floors?: number | null
           garden_area?: number | null
           has_elevator?: boolean | null
@@ -1894,6 +2804,7 @@ export type Database = {
           highlights?: string[] | null
           id?: string
           images?: string[] | null
+          images_hd?: string[] | null
           is_exclusive?: boolean | null
           is_featured?: boolean | null
           is_new?: boolean | null
@@ -1905,10 +2816,13 @@ export type Database = {
           location_privileges?: string[] | null
           longitude?: number | null
           main_image?: string | null
+          main_image_hd?: string | null
           mandate_duration?: string | null
           mandate_status?: string | null
           meta_description?: string | null
+          meta_description_translations?: Json | null
           meta_title?: string | null
+          meta_title_translations?: Json | null
           monthly_charges?: number | null
           orientation?: string[] | null
           owner_email?: string | null
@@ -1934,22 +2848,61 @@ export type Database = {
           price_on_request?: boolean | null
           property_condition?: string | null
           property_type?: string | null
+          published?: boolean | null
           published_at?: string | null
           reference?: string | null
           resort_facilities?: string[] | null
           rooms?: number | null
           slug?: string | null
+          slug_en?: string | null
+          slug_fr?: string | null
+          source?: string | null
           status?: string
           surface?: number | null
           tags?: string[] | null
           terrace_area?: number | null
           title?: string
+          title_en?: string | null
+          title_translations?: Json | null
           updated_at?: string
           video_urls?: string[] | null
           view_type?: string[] | null
           virtual_tour?: string | null
+          xml_all_keys?: string[] | null
+          xml_external_id?: string | null
+          xml_last_sync?: string | null
+          xml_raw?: Json | null
+          xml_source?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_country_ref"
+            columns: ["country"]
+            isOneToOne: false
+            referencedRelation: "countries_ref"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "fk_country_ref"
+            columns: ["country"]
+            isOneToOne: false
+            referencedRelation: "country_facets"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "fk_property_type_ref"
+            columns: ["property_type"]
+            isOneToOne: false
+            referencedRelation: "property_types_facets"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "fk_property_type_ref"
+            columns: ["property_type"]
+            isOneToOne: false
+            referencedRelation: "property_types_ref"
+            referencedColumns: ["slug"]
+          },
           {
             foreignKeyName: "properties_backoffice_assigned_to_fkey"
             columns: ["assigned_to"]
@@ -2241,6 +3194,618 @@ export type Database = {
           },
         ]
       }
+      properties_backoffice_backup_20250921: {
+        Row: {
+          address: string | null
+          advanced_technologies: string[] | null
+          amenities: string[] | null
+          area: number | null
+          area_unit: string | null
+          assigned_to: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          co2_emissions_class: string | null
+          commission_percentage: number | null
+          construction_status: string | null
+          construction_year: number | null
+          country: string | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          description_translations: Json | null
+          documents: string[] | null
+          energy_class: string | null
+          external_id: string | null
+          external_url: string | null
+          features: string[] | null
+          floor_number: number | null
+          floor_plans: string[] | null
+          floors: number | null
+          garden_area: number | null
+          has_elevator: boolean | null
+          has_garden: boolean | null
+          has_pool: boolean | null
+          hide_price: boolean | null
+          highlights: string[] | null
+          id: string | null
+          images: string[] | null
+          is_exclusive: boolean | null
+          is_featured: boolean | null
+          is_new: boolean | null
+          land_area: number | null
+          land_area_unit: string | null
+          latitude: number | null
+          listing_type: string | null
+          location: string | null
+          location_privileges: string[] | null
+          longitude: number | null
+          main_image: string | null
+          mandate_duration: string | null
+          mandate_status: string | null
+          meta_description: string | null
+          meta_description_translations: Json | null
+          meta_title: string | null
+          meta_title_translations: Json | null
+          monthly_charges: number | null
+          orientation: string[] | null
+          owner_email: string | null
+          owner_first_name: string | null
+          owner_id: string | null
+          owner_name: string | null
+          owner_notes: string | null
+          owner_phone: string | null
+          owner_phone_2: string | null
+          parking_spaces: number | null
+          parking_type: string | null
+          partner_commission_ht: number | null
+          partner_email: string | null
+          partner_name: string | null
+          partner_phone: string | null
+          partner_property_url: string | null
+          pool_details: string | null
+          postal_code: string | null
+          premium_services: string[] | null
+          price: number | null
+          price_eur: number | null
+          price_from: number | null
+          price_on_request: boolean | null
+          property_condition: string | null
+          property_type: string | null
+          published_at: string | null
+          reference: string | null
+          resort_facilities: string[] | null
+          rooms: number | null
+          slug: string | null
+          status: string | null
+          surface: number | null
+          tags: string[] | null
+          terrace_area: number | null
+          title: string | null
+          title_translations: Json | null
+          updated_at: string | null
+          video_urls: string[] | null
+          view_type: string[] | null
+          virtual_tour: string | null
+          xml_external_id: string | null
+          xml_last_sync: string | null
+          xml_source: string | null
+        }
+        Insert: {
+          address?: string | null
+          advanced_technologies?: string[] | null
+          amenities?: string[] | null
+          area?: number | null
+          area_unit?: string | null
+          assigned_to?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          co2_emissions_class?: string | null
+          commission_percentage?: number | null
+          construction_status?: string | null
+          construction_year?: number | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          description_translations?: Json | null
+          documents?: string[] | null
+          energy_class?: string | null
+          external_id?: string | null
+          external_url?: string | null
+          features?: string[] | null
+          floor_number?: number | null
+          floor_plans?: string[] | null
+          floors?: number | null
+          garden_area?: number | null
+          has_elevator?: boolean | null
+          has_garden?: boolean | null
+          has_pool?: boolean | null
+          hide_price?: boolean | null
+          highlights?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          is_exclusive?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          land_area?: number | null
+          land_area_unit?: string | null
+          latitude?: number | null
+          listing_type?: string | null
+          location?: string | null
+          location_privileges?: string[] | null
+          longitude?: number | null
+          main_image?: string | null
+          mandate_duration?: string | null
+          mandate_status?: string | null
+          meta_description?: string | null
+          meta_description_translations?: Json | null
+          meta_title?: string | null
+          meta_title_translations?: Json | null
+          monthly_charges?: number | null
+          orientation?: string[] | null
+          owner_email?: string | null
+          owner_first_name?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          owner_notes?: string | null
+          owner_phone?: string | null
+          owner_phone_2?: string | null
+          parking_spaces?: number | null
+          parking_type?: string | null
+          partner_commission_ht?: number | null
+          partner_email?: string | null
+          partner_name?: string | null
+          partner_phone?: string | null
+          partner_property_url?: string | null
+          pool_details?: string | null
+          postal_code?: string | null
+          premium_services?: string[] | null
+          price?: number | null
+          price_eur?: number | null
+          price_from?: number | null
+          price_on_request?: boolean | null
+          property_condition?: string | null
+          property_type?: string | null
+          published_at?: string | null
+          reference?: string | null
+          resort_facilities?: string[] | null
+          rooms?: number | null
+          slug?: string | null
+          status?: string | null
+          surface?: number | null
+          tags?: string[] | null
+          terrace_area?: number | null
+          title?: string | null
+          title_translations?: Json | null
+          updated_at?: string | null
+          video_urls?: string[] | null
+          view_type?: string[] | null
+          virtual_tour?: string | null
+          xml_external_id?: string | null
+          xml_last_sync?: string | null
+          xml_source?: string | null
+        }
+        Update: {
+          address?: string | null
+          advanced_technologies?: string[] | null
+          amenities?: string[] | null
+          area?: number | null
+          area_unit?: string | null
+          assigned_to?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          co2_emissions_class?: string | null
+          commission_percentage?: number | null
+          construction_status?: string | null
+          construction_year?: number | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          description_translations?: Json | null
+          documents?: string[] | null
+          energy_class?: string | null
+          external_id?: string | null
+          external_url?: string | null
+          features?: string[] | null
+          floor_number?: number | null
+          floor_plans?: string[] | null
+          floors?: number | null
+          garden_area?: number | null
+          has_elevator?: boolean | null
+          has_garden?: boolean | null
+          has_pool?: boolean | null
+          hide_price?: boolean | null
+          highlights?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          is_exclusive?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          land_area?: number | null
+          land_area_unit?: string | null
+          latitude?: number | null
+          listing_type?: string | null
+          location?: string | null
+          location_privileges?: string[] | null
+          longitude?: number | null
+          main_image?: string | null
+          mandate_duration?: string | null
+          mandate_status?: string | null
+          meta_description?: string | null
+          meta_description_translations?: Json | null
+          meta_title?: string | null
+          meta_title_translations?: Json | null
+          monthly_charges?: number | null
+          orientation?: string[] | null
+          owner_email?: string | null
+          owner_first_name?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          owner_notes?: string | null
+          owner_phone?: string | null
+          owner_phone_2?: string | null
+          parking_spaces?: number | null
+          parking_type?: string | null
+          partner_commission_ht?: number | null
+          partner_email?: string | null
+          partner_name?: string | null
+          partner_phone?: string | null
+          partner_property_url?: string | null
+          pool_details?: string | null
+          postal_code?: string | null
+          premium_services?: string[] | null
+          price?: number | null
+          price_eur?: number | null
+          price_from?: number | null
+          price_on_request?: boolean | null
+          property_condition?: string | null
+          property_type?: string | null
+          published_at?: string | null
+          reference?: string | null
+          resort_facilities?: string[] | null
+          rooms?: number | null
+          slug?: string | null
+          status?: string | null
+          surface?: number | null
+          tags?: string[] | null
+          terrace_area?: number | null
+          title?: string | null
+          title_translations?: Json | null
+          updated_at?: string | null
+          video_urls?: string[] | null
+          view_type?: string[] | null
+          virtual_tour?: string | null
+          xml_external_id?: string | null
+          xml_last_sync?: string | null
+          xml_source?: string | null
+        }
+        Relationships: []
+      }
+      properties_backoffice_new: {
+        Row: {
+          address: string | null
+          advanced_technologies: string[] | null
+          amenities: string[] | null
+          amenities_translations: Json | null
+          area: number | null
+          area_unit: string | null
+          assigned_to: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          co2_emissions_class: string | null
+          commission_percentage: number | null
+          construction_status: string | null
+          construction_year: number | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          description_en: string | null
+          description_main: string | null
+          description_translations: Json | null
+          documents: string[] | null
+          energy_class: string | null
+          external_id: string | null
+          external_url: string | null
+          features: string[] | null
+          floor_number: number | null
+          floor_plans: string[] | null
+          floors: number | null
+          garden_area: number | null
+          has_elevator: boolean | null
+          has_garden: boolean | null
+          has_pool: boolean | null
+          hide_price: boolean | null
+          highlights: string[] | null
+          id: string
+          images: string[] | null
+          is_exclusive: boolean | null
+          is_featured: boolean | null
+          is_new: boolean | null
+          land_area: number | null
+          land_area_unit: string | null
+          latitude: number | null
+          listing_type: string
+          location: string | null
+          location_privileges: string[] | null
+          longitude: number | null
+          main_image: string | null
+          mandate_duration: string | null
+          mandate_status: string | null
+          meta_description: string | null
+          meta_description_translations: Json | null
+          meta_title: string | null
+          meta_title_translations: Json | null
+          monthly_charges: number | null
+          orientation: string[] | null
+          owner_email: string | null
+          owner_first_name: string | null
+          owner_id: string | null
+          owner_name: string | null
+          owner_notes: string | null
+          owner_phone: string | null
+          owner_phone_2: string | null
+          parking_spaces: number | null
+          parking_type: string | null
+          partner_commission_ht: number | null
+          partner_email: string | null
+          partner_name: string | null
+          partner_phone: string | null
+          partner_property_url: string | null
+          pool_details: string | null
+          postal_code: string | null
+          premium_services: string[] | null
+          price: number | null
+          price_eur: number | null
+          price_from: number | null
+          price_on_request: boolean | null
+          property_condition: string | null
+          property_type: string | null
+          published_at: string | null
+          reference: string | null
+          resort_facilities: string[] | null
+          rooms: number | null
+          slug: string | null
+          slug_en: string | null
+          slug_fr: string | null
+          source: string | null
+          status: string
+          surface: number | null
+          tags: string[] | null
+          terrace_area: number | null
+          title: string
+          title_en: string | null
+          title_main: string | null
+          title_translations: Json | null
+          updated_at: string
+          video_urls: string[] | null
+          view_type: string[] | null
+          virtual_tour: string | null
+          xml_all_keys: string[] | null
+          xml_external_id: string | null
+          xml_last_sync: string | null
+          xml_raw: Json | null
+          xml_source: string | null
+        }
+        Insert: {
+          address?: string | null
+          advanced_technologies?: string[] | null
+          amenities?: string[] | null
+          amenities_translations?: Json | null
+          area?: number | null
+          area_unit?: string | null
+          assigned_to?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          co2_emissions_class?: string | null
+          commission_percentage?: number | null
+          construction_status?: string | null
+          construction_year?: number | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          description_en?: string | null
+          description_main?: string | null
+          description_translations?: Json | null
+          documents?: string[] | null
+          energy_class?: string | null
+          external_id?: string | null
+          external_url?: string | null
+          features?: string[] | null
+          floor_number?: number | null
+          floor_plans?: string[] | null
+          floors?: number | null
+          garden_area?: number | null
+          has_elevator?: boolean | null
+          has_garden?: boolean | null
+          has_pool?: boolean | null
+          hide_price?: boolean | null
+          highlights?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_exclusive?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          land_area?: number | null
+          land_area_unit?: string | null
+          latitude?: number | null
+          listing_type?: string
+          location?: string | null
+          location_privileges?: string[] | null
+          longitude?: number | null
+          main_image?: string | null
+          mandate_duration?: string | null
+          mandate_status?: string | null
+          meta_description?: string | null
+          meta_description_translations?: Json | null
+          meta_title?: string | null
+          meta_title_translations?: Json | null
+          monthly_charges?: number | null
+          orientation?: string[] | null
+          owner_email?: string | null
+          owner_first_name?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          owner_notes?: string | null
+          owner_phone?: string | null
+          owner_phone_2?: string | null
+          parking_spaces?: number | null
+          parking_type?: string | null
+          partner_commission_ht?: number | null
+          partner_email?: string | null
+          partner_name?: string | null
+          partner_phone?: string | null
+          partner_property_url?: string | null
+          pool_details?: string | null
+          postal_code?: string | null
+          premium_services?: string[] | null
+          price?: number | null
+          price_eur?: number | null
+          price_from?: number | null
+          price_on_request?: boolean | null
+          property_condition?: string | null
+          property_type?: string | null
+          published_at?: string | null
+          reference?: string | null
+          resort_facilities?: string[] | null
+          rooms?: number | null
+          slug?: string | null
+          slug_en?: string | null
+          slug_fr?: string | null
+          source?: string | null
+          status?: string
+          surface?: number | null
+          tags?: string[] | null
+          terrace_area?: number | null
+          title: string
+          title_en?: string | null
+          title_main?: string | null
+          title_translations?: Json | null
+          updated_at?: string
+          video_urls?: string[] | null
+          view_type?: string[] | null
+          virtual_tour?: string | null
+          xml_all_keys?: string[] | null
+          xml_external_id?: string | null
+          xml_last_sync?: string | null
+          xml_raw?: Json | null
+          xml_source?: string | null
+        }
+        Update: {
+          address?: string | null
+          advanced_technologies?: string[] | null
+          amenities?: string[] | null
+          amenities_translations?: Json | null
+          area?: number | null
+          area_unit?: string | null
+          assigned_to?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          co2_emissions_class?: string | null
+          commission_percentage?: number | null
+          construction_status?: string | null
+          construction_year?: number | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          description_en?: string | null
+          description_main?: string | null
+          description_translations?: Json | null
+          documents?: string[] | null
+          energy_class?: string | null
+          external_id?: string | null
+          external_url?: string | null
+          features?: string[] | null
+          floor_number?: number | null
+          floor_plans?: string[] | null
+          floors?: number | null
+          garden_area?: number | null
+          has_elevator?: boolean | null
+          has_garden?: boolean | null
+          has_pool?: boolean | null
+          hide_price?: boolean | null
+          highlights?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_exclusive?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          land_area?: number | null
+          land_area_unit?: string | null
+          latitude?: number | null
+          listing_type?: string
+          location?: string | null
+          location_privileges?: string[] | null
+          longitude?: number | null
+          main_image?: string | null
+          mandate_duration?: string | null
+          mandate_status?: string | null
+          meta_description?: string | null
+          meta_description_translations?: Json | null
+          meta_title?: string | null
+          meta_title_translations?: Json | null
+          monthly_charges?: number | null
+          orientation?: string[] | null
+          owner_email?: string | null
+          owner_first_name?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          owner_notes?: string | null
+          owner_phone?: string | null
+          owner_phone_2?: string | null
+          parking_spaces?: number | null
+          parking_type?: string | null
+          partner_commission_ht?: number | null
+          partner_email?: string | null
+          partner_name?: string | null
+          partner_phone?: string | null
+          partner_property_url?: string | null
+          pool_details?: string | null
+          postal_code?: string | null
+          premium_services?: string[] | null
+          price?: number | null
+          price_eur?: number | null
+          price_from?: number | null
+          price_on_request?: boolean | null
+          property_condition?: string | null
+          property_type?: string | null
+          published_at?: string | null
+          reference?: string | null
+          resort_facilities?: string[] | null
+          rooms?: number | null
+          slug?: string | null
+          slug_en?: string | null
+          slug_fr?: string | null
+          source?: string | null
+          status?: string
+          surface?: number | null
+          tags?: string[] | null
+          terrace_area?: number | null
+          title?: string
+          title_en?: string | null
+          title_main?: string | null
+          title_translations?: Json | null
+          updated_at?: string
+          video_urls?: string[] | null
+          view_type?: string[] | null
+          virtual_tour?: string | null
+          xml_all_keys?: string[] | null
+          xml_external_id?: string | null
+          xml_last_sync?: string | null
+          xml_raw?: Json | null
+          xml_source?: string | null
+        }
+        Relationships: []
+      }
       property_amenities: {
         Row: {
           amenity_id: string
@@ -2270,6 +3835,64 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_click_tracking: {
+        Row: {
+          clicked_at: string | null
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          lead_id: string | null
+          property_id: string
+          redirect_url: string
+          selection_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          clicked_at?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          lead_id?: string | null
+          property_id: string
+          redirect_url: string
+          selection_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          clicked_at?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          lead_id?: string | null
+          property_id?: string
+          redirect_url?: string
+          selection_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_click_tracking_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_click_tracking_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_no_response_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_click_tracking_selection_id_fkey"
+            columns: ["selection_id"]
+            isOneToOne: false
+            referencedRelation: "property_selections"
             referencedColumns: ["id"]
           },
         ]
@@ -2394,6 +4017,13 @@ export type Database = {
             referencedRelation: "leads"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "property_selections_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_no_response_candidates"
+            referencedColumns: ["id"]
+          },
         ]
       }
       property_statuses: {
@@ -2435,6 +4065,27 @@ export type Database = {
           id?: string
           name?: string
           slug?: string | null
+        }
+        Relationships: []
+      }
+      property_types_ref: {
+        Row: {
+          label_en: string
+          label_fr: string
+          slug: string
+          synonyms: string[]
+        }
+        Insert: {
+          label_en: string
+          label_fr: string
+          slug: string
+          synonyms?: string[]
+        }
+        Update: {
+          label_en?: string
+          label_fr?: string
+          slug?: string
+          synonyms?: string[]
         }
         Relationships: []
       }
@@ -2484,7 +4135,53 @@ export type Database = {
             referencedRelation: "leads"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "public_criteria_links_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_no_response_candidates"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      sitemap_cache: {
+        Row: {
+          content: string
+          generated_at: string
+          id: string
+          last_modified: string
+          locale: string
+          urls_count: number
+        }
+        Insert: {
+          content: string
+          generated_at?: string
+          id?: string
+          last_modified?: string
+          locale: string
+          urls_count?: number
+        }
+        Update: {
+          content?: string
+          generated_at?: string
+          id?: string
+          last_modified?: string
+          locale?: string
+          urls_count?: number
+        }
+        Relationships: []
+      }
+      tags_ref: {
+        Row: {
+          tag: string
+        }
+        Insert: {
+          tag: string
+        }
+        Update: {
+          tag?: string
+        }
+        Relationships: []
       }
       team_members: {
         Row: {
@@ -2614,13 +4311,467 @@ export type Database = {
         }
         Relationships: []
       }
+      view_types_ref: {
+        Row: {
+          view: string
+        }
+        Insert: {
+          view: string
+        }
+        Update: {
+          view?: string
+        }
+        Relationships: []
+      }
+      xml_sync_logs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          properties_created: number | null
+          properties_deleted: number | null
+          properties_processed: number | null
+          properties_updated: number | null
+          source: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          properties_created?: number | null
+          properties_deleted?: number | null
+          properties_processed?: number | null
+          properties_updated?: number | null
+          source: string
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          properties_created?: number | null
+          properties_deleted?: number | null
+          properties_processed?: number | null
+          properties_updated?: number | null
+          source?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
+      country_facets: {
+        Row: {
+          count: number | null
+          label_en: string | null
+          label_fr: string | null
+          slug: string | null
+        }
+        Relationships: []
+      }
+      country_facets_ui: {
+        Row: {
+          count: number | null
+          label_en: string | null
+          label_fr: string | null
+          slug: string | null
+        }
+        Relationships: []
+      }
+      country_property_counts: {
+        Row: {
+          country_code: string | null
+          country_names: Json | null
+          total_active: number | null
+        }
+        Relationships: []
+      }
       fx_latest: {
         Row: {
           rate_mur_to_eur: number | null
           rate_usd_to_eur: number | null
           updated_at: string | null
+        }
+        Relationships: []
+      }
+      properties_active: {
+        Row: {
+          amenities: string[] | null
+          area: number | null
+          area_unit: string | null
+          assigned_to: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          construction_status: string | null
+          country: string | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          energy_class: string | null
+          external_url: string | null
+          features: string[] | null
+          has_garden: boolean | null
+          has_pool: boolean | null
+          hide_price: boolean | null
+          id: string | null
+          images: string[] | null
+          is_exclusive: boolean | null
+          is_featured: boolean | null
+          is_new: boolean | null
+          latitude: number | null
+          listing_type: string | null
+          location: string | null
+          longitude: number | null
+          main_image: string | null
+          meta_description: string | null
+          meta_title: string | null
+          orientation: string[] | null
+          parking_spaces: number | null
+          price: number | null
+          price_eur: number | null
+          price_on_request: boolean | null
+          property_type: string | null
+          published_at: string | null
+          slug: string | null
+          status: string | null
+          surface: number | null
+          title: string | null
+          updated_at: string | null
+          video_urls: string[] | null
+          view_type: string[] | null
+        }
+        Insert: {
+          amenities?: string[] | null
+          area?: number | null
+          area_unit?: string | null
+          assigned_to?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          construction_status?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          energy_class?: string | null
+          external_url?: string | null
+          features?: string[] | null
+          has_garden?: boolean | null
+          has_pool?: boolean | null
+          hide_price?: boolean | null
+          id?: string | null
+          images?: string[] | null
+          is_exclusive?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          latitude?: number | null
+          listing_type?: string | null
+          location?: string | null
+          longitude?: number | null
+          main_image?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          orientation?: string[] | null
+          parking_spaces?: number | null
+          price?: number | null
+          price_eur?: number | null
+          price_on_request?: boolean | null
+          property_type?: string | null
+          published_at?: string | null
+          slug?: string | null
+          status?: string | null
+          surface?: number | null
+          title?: string | null
+          updated_at?: string | null
+          video_urls?: string[] | null
+          view_type?: string[] | null
+        }
+        Update: {
+          amenities?: string[] | null
+          area?: number | null
+          area_unit?: string | null
+          assigned_to?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          construction_status?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          energy_class?: string | null
+          external_url?: string | null
+          features?: string[] | null
+          has_garden?: boolean | null
+          has_pool?: boolean | null
+          hide_price?: boolean | null
+          id?: string | null
+          images?: string[] | null
+          is_exclusive?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          latitude?: number | null
+          listing_type?: string | null
+          location?: string | null
+          longitude?: number | null
+          main_image?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          orientation?: string[] | null
+          parking_spaces?: number | null
+          price?: number | null
+          price_eur?: number | null
+          price_on_request?: boolean | null
+          property_type?: string | null
+          published_at?: string | null
+          slug?: string | null
+          status?: string | null
+          surface?: number | null
+          title?: string | null
+          updated_at?: string | null
+          video_urls?: string[] | null
+          view_type?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_country_ref"
+            columns: ["country"]
+            isOneToOne: false
+            referencedRelation: "countries_ref"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "fk_country_ref"
+            columns: ["country"]
+            isOneToOne: false
+            referencedRelation: "country_facets"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "fk_property_type_ref"
+            columns: ["property_type"]
+            isOneToOne: false
+            referencedRelation: "property_types_facets"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "fk_property_type_ref"
+            columns: ["property_type"]
+            isOneToOne: false
+            referencedRelation: "property_types_ref"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "properties_backoffice_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      properties_localized_new: {
+        Row: {
+          amenities: string[] | null
+          area: number | null
+          area_unit: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          country: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_fr: string | null
+          features: string[] | null
+          hide_price: boolean | null
+          id: string | null
+          images: string[] | null
+          listing_type: string | null
+          location: string | null
+          main_image: string | null
+          meta_description_en: string | null
+          meta_description_fr: string | null
+          meta_title_en: string | null
+          meta_title_fr: string | null
+          price: number | null
+          price_on_request: boolean | null
+          property_type: string | null
+          published_at: string | null
+          reference: string | null
+          slug_en: string | null
+          slug_fr: string | null
+          status: string | null
+          title_en: string | null
+          title_fr: string | null
+          updated_at: string | null
+          video_urls: string[] | null
+        }
+        Insert: {
+          amenities?: string[] | null
+          area?: number | null
+          area_unit?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          country?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: never
+          description_fr?: never
+          features?: string[] | null
+          hide_price?: boolean | null
+          id?: string | null
+          images?: string[] | null
+          listing_type?: string | null
+          location?: string | null
+          main_image?: string | null
+          meta_description_en?: never
+          meta_description_fr?: never
+          meta_title_en?: never
+          meta_title_fr?: never
+          price?: number | null
+          price_on_request?: boolean | null
+          property_type?: string | null
+          published_at?: string | null
+          reference?: string | null
+          slug_en?: never
+          slug_fr?: never
+          status?: string | null
+          title_en?: never
+          title_fr?: never
+          updated_at?: string | null
+          video_urls?: string[] | null
+        }
+        Update: {
+          amenities?: string[] | null
+          area?: number | null
+          area_unit?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          country?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: never
+          description_fr?: never
+          features?: string[] | null
+          hide_price?: boolean | null
+          id?: string | null
+          images?: string[] | null
+          listing_type?: string | null
+          location?: string | null
+          main_image?: string | null
+          meta_description_en?: never
+          meta_description_fr?: never
+          meta_title_en?: never
+          meta_title_fr?: never
+          price?: number | null
+          price_on_request?: boolean | null
+          property_type?: string | null
+          published_at?: string | null
+          reference?: string | null
+          slug_en?: never
+          slug_fr?: never
+          status?: string | null
+          title_en?: never
+          title_fr?: never
+          updated_at?: string | null
+          video_urls?: string[] | null
+        }
+        Relationships: []
+      }
+      property_price_bounds: {
+        Row: {
+          country: string | null
+          max_price_eur: number | null
+          min_price_eur: number | null
+          p10: number | null
+          p90: number | null
+          property_count: number | null
+        }
+        Relationships: []
+      }
+      property_price_stats: {
+        Row: {
+          avg_price: number | null
+          max_price: number | null
+          min_price: number | null
+          p10: number | null
+          p25: number | null
+          p75: number | null
+          p90: number | null
+          total_count: number | null
+        }
+        Relationships: []
+      }
+      property_types_facets: {
+        Row: {
+          count: number | null
+          label_en: string | null
+          label_fr: string | null
+          slug: string | null
+        }
+        Relationships: []
+      }
+      v_no_response_candidates: {
+        Row: {
+          amenities: string[] | null
+          budget_label: string | null
+          budget_min: string | null
+          currency: string | null
+          email: string | null
+          id: string | null
+          name: string | null
+          preferred_language: string | null
+          property_types: string[] | null
+          regions: string[] | null
+          target_location: string | null
+          views: string[] | null
+        }
+        Insert: {
+          amenities?: string[] | null
+          budget_label?: never
+          budget_min?: never
+          currency?: never
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          preferred_language?: string | null
+          property_types?: string[] | null
+          regions?: string[] | null
+          target_location?: never
+          views?: string[] | null
+        }
+        Update: {
+          amenities?: string[] | null
+          budget_label?: never
+          budget_min?: never
+          currency?: never
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          preferred_language?: string | null
+          property_types?: string[] | null
+          regions?: string[] | null
+          target_location?: never
+          views?: string[] | null
+        }
+        Relationships: []
+      }
+      v_properties_with_agents: {
+        Row: {
+          agent_email: string | null
+          agent_name: string | null
+          id: string | null
+          reference: string | null
+          status: string | null
+          title: string | null
         }
         Relationships: []
       }
@@ -2685,20 +4836,38 @@ export type Database = {
           updated_at?: string | null
           ville?: never
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_country_ref"
+            columns: ["country"]
+            isOneToOne: false
+            referencedRelation: "countries_ref"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "fk_country_ref"
+            columns: ["country"]
+            isOneToOne: false
+            referencedRelation: "country_facets"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
     }
     Functions: {
-      bytea_to_text: {
-        Args: { data: string }
-        Returns: string
-      }
-      close_stale_sessions: {
-        Args: Record<PropertyKey, never>
-        Returns: number
+      bytea_to_text: { Args: { data: string }; Returns: string }
+      close_stale_sessions: { Args: never; Returns: number }
+      exec_sql: { Args: { params?: Json; query: string }; Returns: Json[] }
+      get_country_facets_i18n: {
+        Args: { lang?: string }
+        Returns: {
+          count: number
+          label: string
+          slug: string
+        }[]
       }
       get_cron_jobs: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active: boolean
           command: string
@@ -2711,38 +4880,95 @@ export type Database = {
           username: string
         }[]
       }
-      get_current_team_member_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
+      get_current_team_member_id: { Args: never; Returns: string }
+      get_property_facets: { Args: never; Returns: Json }
+      get_property_type_facets_i18n: {
+        Args: { lang?: string }
+        Returns: {
+          count: number
+          label: string
+          slug: string
+        }[]
       }
-      get_team_member_id_by_email: {
-        Args: Record<PropertyKey, never>
+      get_team_member_id_by_email: { Args: never; Returns: string }
+      get_translation: {
+        Args: { language?: string; translations: Json }
         Returns: string
       }
       http: {
         Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "http_request"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      http_delete: {
-        Args:
-          | { content: string; content_type: string; uri: string }
-          | { uri: string }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
-      }
-      http_get: {
-        Args: { data: Json; uri: string } | { uri: string }
-        Returns: Database["public"]["CompositeTypes"]["http_response"]
-      }
+      http_delete:
+        | {
+            Args: { uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { content: string; content_type: string; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+      http_get:
+        | {
+            Args: { uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { data: Json; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       http_head: {
         Args: { uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "*"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       http_header: {
         Args: { field: string; value: string }
         Returns: Database["public"]["CompositeTypes"]["http_header"]
+        SetofOptions: {
+          from: "*"
+          to: "http_header"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       http_list_curlopt: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           curlopt: string
           value: string
@@ -2751,37 +4977,119 @@ export type Database = {
       http_patch: {
         Args: { content: string; content_type: string; uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "*"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      http_post: {
-        Args:
-          | { content: string; content_type: string; uri: string }
-          | { data: Json; uri: string }
-          | { headers?: Json; payload: Json; url: string }
-        Returns: Json
-      }
+      http_post:
+        | {
+            Args: { content: string; content_type: string; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { headers?: Json; payload: Json; url: string }
+            Returns: Json
+          }
+        | {
+            Args: { data: Json; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
       http_put: {
         Args: { content: string; content_type: string; uri: string }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "*"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      http_reset_curlopt: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      http_reset_curlopt: { Args: never; Returns: boolean }
       http_set_curlopt: {
         Args: { curlopt: string; value: string }
         Returns: boolean
       }
-      text_to_bytea: {
-        Args: { data: string }
+      normalize_property_type_value: {
+        Args: { p_value: string }
         Returns: string
       }
+      properties_localized: {
+        Args: { lang?: string }
+        Returns: {
+          amenities: string[]
+          area: number
+          area_unit: string
+          bathrooms: number
+          bedrooms: number
+          country: string
+          created_at: string
+          currency: string
+          description: string
+          features: string[]
+          id: string
+          images: string[]
+          is_exclusive: boolean
+          is_featured: boolean
+          is_new: boolean
+          listing_type: string
+          location: string
+          main_image: string
+          meta_description: string
+          meta_title: string
+          price: number
+          property_type: string
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+        }[]
+      }
+      seo_truncate: {
+        Args: { input: string; max_len?: number }
+        Returns: string
+      }
+      slugify: { Args: { txt: string }; Returns: string }
+      strip_html: { Args: { input: string }; Returns: string }
+      text_to_bytea: { Args: { data: string }; Returns: string }
+      trigger_sitemap_regeneration: { Args: never; Returns: undefined }
+      trigger_xml_sync: { Args: never; Returns: Json }
+      unaccent: { Args: { "": string }; Returns: string }
       update_lead_bedrooms: {
         Args: { bedroom_values: string; lead_id: string }
         Returns: undefined
       }
-      urlencode: {
-        Args: { data: Json } | { string: string } | { string: string }
-        Returns: string
+      urlencode:
+        | { Args: { data: Json }; Returns: string }
+        | {
+            Args: { string: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.urlencode(string => bytea), public.urlencode(string => varchar). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+        | {
+            Args: { string: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.urlencode(string => bytea), public.urlencode(string => varchar). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+      validate_destination_locales: {
+        Args: { destination_id: string }
+        Returns: boolean
       }
     }
     Enums: {
@@ -2793,7 +5101,7 @@ export type Database = {
         value: string | null
       }
       http_request: {
-        method: unknown | null
+        method: unknown
         uri: string | null
         headers: Database["public"]["CompositeTypes"]["http_header"][] | null
         content_type: string | null
