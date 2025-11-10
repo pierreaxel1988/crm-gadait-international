@@ -177,18 +177,18 @@ serve(async (req) => {
   try {
     console.log('Automated email system triggered');
     
-    const { action = 'process_sequences' } = await req.json().catch(() => ({}));
+    const body = await req.json().catch(() => ({}));
+    const { action = 'process_sequences', leadId, reason, campaignId, immediateStart, templateDay, targetEmail, leadData } = body;
     
     if (action === 'process_sequences') {
       return await processEmailSequences();
     } else if (action === 'stop_sequence') {
-      const { leadId, reason = 'manual' } = await req.json();
-      return await stopSequence(leadId, reason);
+      return await stopSequence(leadId, reason || 'manual');
     } else if (action === 'start_sequence') {
-      const { leadId, campaignId, immediateStart } = await req.json();
       return await startSequence(leadId, campaignId, immediateStart);
+    } else if (action === 'send_test_email') {
+      return await sendTestEmailWithRealLead(leadId, templateDay || 3);
     } else if (action === 'send_preview_emails') {
-      const { targetEmail, leadData } = await req.json();
       return await sendPreviewEmails(targetEmail, leadData);
     }
     
@@ -780,6 +780,147 @@ async function getDefaultCampaignId(): Promise<string> {
   }
   
   return campaign.id;
+}
+
+async function sendTestEmailWithRealLead(leadId: string, templateDay: number) {
+  console.log(`[TEST EMAIL] Sending test with real lead ${leadId}, template J+${templateDay}`);
+  
+  // Récupérer les données du lead
+  const { data: lead, error: leadError } = await supabase
+    .from('leads')
+    .select(`
+      id, name, email, country, location, budget, currency,
+      preferred_language, salutation, property_types, nationality,
+      bedrooms, tags, notes, assigned_to, views, amenities,
+      purchase_timeframe, financing_method, tax_residence
+    `)
+    .eq('id', leadId)
+    .single();
+    
+  if (leadError || !lead) {
+    console.error('[TEST EMAIL] Lead not found:', leadError);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: 'Lead not found' 
+    }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
+  
+  if (!lead.email) {
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: 'Lead has no email' 
+    }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
+  
+  // Déterminer la langue et le segment
+  const language = detectLeadLanguage(lead);
+  const segment = determineSegment(lead);
+  
+  console.log(`[TEST EMAIL] Lead: ${lead.name}, Language: ${language}, Segment: ${segment}`);
+  
+  // Récupérer la campagne par défaut
+  const campaignId = await getDefaultCampaignId();
+  
+  // Récupérer le template
+  const { data: template, error: templateError } = await supabase
+    .from('email_templates')
+    .select('*')
+    .eq('campaign_id', campaignId)
+    .eq('day_number', templateDay)
+    .single();
+    
+  if (templateError || !template) {
+    console.error('[TEST EMAIL] Template not found:', templateError);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: `Template J+${templateDay} not found` 
+    }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
+  
+  // Personnaliser avec l'IA
+  const content = await generatePersonalizedContent(lead, template);
+  const subject = personalizeTemplate(template.subject_template, lead);
+  
+  // Envoyer l'email de test
+  const testSubject = `[TEST] ${subject}`;
+  const testNotice = `
+    <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 5px; font-family: Arial, sans-serif;">
+      <strong style="color: #856404;">🧪 EMAIL DE TEST - Ne pas répondre</strong><br>
+      <span style="color: #856404;">Lead: ${lead.name} (${lead.email})</span><br>
+      <span style="color: #856404;">Template: J+${templateDay} - ${template.template_name}</span><br>
+      <span style="color: #856404;">Langue: ${language} | Segment: ${segment}</span>
+    </div>
+  `;
+  
+  // Render l'email avec React Email
+  const emailHtml = await renderAsync(
+    React.createElement(LoroEmailTemplate, {
+      leadName: lead.name,
+      leadSalutation: lead.salutation,
+      subject: subject,
+      content: testNotice + content,
+      agentName: "Gadait International",
+      agentSignature: "L'équipe Gadait International"
+    })
+  );
+  
+  try {
+    const { data: emailData, error: emailError } = await resend.emails.send({
+      from: 'Gadait International <contact@gadait.com>',
+      to: ['pierre@gadait-international.com'],
+      subject: testSubject,
+      html: emailHtml,
+    });
+    
+    if (emailError) {
+      console.error('[TEST EMAIL] Error sending:', emailError);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: emailError 
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
+    
+    console.log('[TEST EMAIL] Sent successfully to pierre@gadait-international.com');
+    return new Response(JSON.stringify({ 
+      success: true, 
+      emailId: emailData,
+      lead: {
+        name: lead.name,
+        email: lead.email,
+        language,
+        segment
+      },
+      template: {
+        day: templateDay,
+        name: template.template_name,
+        subject
+      }
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+    
+  } catch (error) {
+    console.error('[TEST EMAIL] Exception:', error);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: error.message 
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
 }
 
 async function sendPreviewEmails(targetEmail: string, leadData: any) {
