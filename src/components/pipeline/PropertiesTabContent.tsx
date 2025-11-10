@@ -343,7 +343,7 @@ const PropertiesTabContent: React.FC = () => {
       const {
         data: oldData,
         error: fetchError
-      } = await supabase.from('Gadait_Listings_Buy').select('*').limit(100);
+      } = await supabase.from('gadait_properties').select('*').limit(100);
       if (fetchError) {
         throw fetchError;
       }
