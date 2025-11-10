@@ -299,16 +299,20 @@ serve(async (req) => {
     console.log('Automated email system triggered');
     
     const body = await req.json().catch(() => ({}));
-    const { action = 'process_sequences', leadId, reason, campaignId, immediateStart, templateDay, targetEmail, leadData } = body;
+    console.log('[DEBUG] Request body:', JSON.stringify(body));
+    const { action = 'process_sequences', leadId, lead_id, reason, campaignId, immediateStart, templateDay, template_day, targetEmail, leadData } = body;
+    const finalLeadId = leadId || lead_id;
+    const finalTemplateDay = templateDay || template_day;
+    console.log('[DEBUG] finalLeadId:', finalLeadId, 'finalTemplateDay:', finalTemplateDay);
     
     if (action === 'process_sequences') {
       return await processEmailSequences();
     } else if (action === 'stop_sequence') {
-      return await stopSequence(leadId, reason || 'manual');
+      return await stopSequence(finalLeadId, reason || 'manual');
     } else if (action === 'start_sequence') {
-      return await startSequence(leadId, campaignId, immediateStart);
+      return await startSequence(finalLeadId, campaignId, immediateStart);
     } else if (action === 'send_test_email') {
-      return await sendTestEmailWithRealLead(leadId, templateDay || 3);
+      return await sendTestEmailWithRealLead(finalLeadId, finalTemplateDay || 3);
     } else if (action === 'send_preview_emails') {
       return await sendPreviewEmails(targetEmail, leadData);
     }

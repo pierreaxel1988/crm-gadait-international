@@ -45,3 +45,6 @@ verify_jwt = false
 
 [functions.check-inactive-leads]
 verify_jwt = false
+
+[functions.automated-email-system]
+verify_jwt = false
