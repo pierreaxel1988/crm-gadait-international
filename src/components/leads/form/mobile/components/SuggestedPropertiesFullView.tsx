@@ -133,6 +133,24 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
     }
   };
 
+  // Fonction pour déterminer la langue en fonction du pays du lead
+  const getLanguageFromCountry = (country: string | null): 'fr' | 'en' => {
+    if (!country) return 'en';
+    
+    const frenchSpeakingCountries = [
+      'France', 'Monaco', 'Belgium', 'Belgique', 'Switzerland', 'Suisse', 'Luxembourg',
+      'Senegal', 'Sénégal', 'Ivory Coast', "Côte d'Ivoire", 'Mali', 'Burkina Faso',
+      'Niger', 'Chad', 'Tchad', 'Guinea', 'Guinée', 'Rwanda', 'Burundi', 'Benin', 'Bénin',
+      'Togo', 'Central African Republic', 'République centrafricaine', 'Congo', 
+      'Democratic Republic of the Congo', 'République démocratique du Congo', 'Gabon',
+      'Comoros', 'Comores', 'Djibouti', 'Seychelles', 'Vanuatu', 'Madagascar',
+      'Cameroon', 'Cameroun', 'Haiti', 'Haïti', 'Mauritius', 'Maurice', 'Tunisia', 'Tunisie',
+      'Algeria', 'Algérie', 'Morocco', 'Maroc'
+    ];
+    
+    return frenchSpeakingCountries.includes(country) ? 'fr' : 'en';
+  };
+
   // Fonction d'envoi par email
   const sendPropertiesToClient = async () => {
     const selectedProps = properties.filter(p => selectedProperties.has(p.id));
@@ -157,23 +175,33 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
     }
 
     try {
+      const language = getLanguageFromCountry(lead.country);
+      
       const { data, error } = await supabase.functions.invoke('send-property-selection', {
         body: {
           leadId: lead.id,
-          properties: selectedProps.map(prop => ({
-            id: prop.id,
-            title: prop.title,
-            location: prop.location,
-            price: prop.price,
-            currency: prop.currency,
-            main_image: prop.main_image,
-            url: prop.url,
-            bedrooms: prop.bedrooms,
-            bathrooms: prop.bathrooms,
-            area: prop.area,
-            area_unit: prop.area_unit,
-            property_type: prop.property_type,
-          })),
+          properties: selectedProps.map(prop => {
+            // Générer l'URL correcte avec le slug et les paramètres UTM
+            const baseUrl = 'https://gadait-international.com';
+            const propertyUrl = prop.slug 
+              ? `${baseUrl}/${language}/${prop.slug}?utm_source=crm&utm_medium=email&utm_campaign=property_selection&lead_id=${lead.id}`
+              : baseUrl;
+            
+            return {
+              id: prop.id,
+              title: prop.title,
+              location: prop.location,
+              price: prop.price,
+              currency: prop.currency,
+              main_image: prop.main_image,
+              url: propertyUrl,
+              bedrooms: prop.bedrooms,
+              bathrooms: prop.bathrooms,
+              area: prop.area,
+              area_unit: prop.area_unit,
+              property_type: prop.property_type,
+            };
+          }),
           leadName: lead.name,
           leadEmail: lead.email,
           senderName: "Équipe Gadait", // À adapter selon l'utilisateur connecté
