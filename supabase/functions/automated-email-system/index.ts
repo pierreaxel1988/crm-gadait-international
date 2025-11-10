@@ -439,7 +439,7 @@ async function sendScheduledEmail(emailData: any) {
   
   // Envoyer l'email via Resend avec Pierre en CC
   const { data: emailResult, error: emailError } = await resend.emails.send({
-    from: 'Gadait International <contact@gadait.com>',
+    from: 'Gadait International <contact@gadait-international.com>',
     to: [lead.email],
     cc: ['pierre@gadait-international.com'],
     subject: personalizedSubject,
@@ -875,7 +875,7 @@ async function sendTestEmailWithRealLead(leadId: string, templateDay: number) {
   
   try {
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: 'Gadait International <contact@gadait.com>',
+      from: 'Gadait International <contact@gadait-international.com>',
       to: ['pierre@gadait-international.com'],
       subject: testSubject,
       html: emailHtml,
@@ -959,7 +959,7 @@ async function sendPreviewEmails(targetEmail: string, leadData: any) {
       
       // Envoyer l'email via Resend
       const { error: emailError } = await resend.emails.send({
-        from: 'Gadait International <contact@gadait.com>',
+        from: 'Gadait International <contact@gadait-international.com>',
         to: [targetEmail],
         subject: `[PREVIEW J+${template.day_number}] ${personalizedSubject}`,
         html: emailHtml,
