@@ -13,6 +13,7 @@ import Auth from './pages/Auth';
 import Pipeline from './pages/Pipeline';
 import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
+import '@/utils/testDatoCmsSync'; // Utilitaire de test disponible via window.testDatoCmsSync()
 
 // Lazy load other pages to use suspense
 const LeadsPage = lazy(() => import('./pages/Leads'));
