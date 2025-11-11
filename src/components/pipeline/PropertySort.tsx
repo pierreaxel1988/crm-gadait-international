@@ -14,7 +14,6 @@ const sortOptions = [
   { value: 'newest' as SortOption, label: 'Plus récent' },
   { value: 'price-desc' as SortOption, label: 'Prix décroissant' },
   { value: 'price-asc' as SortOption, label: 'Prix croissant' },
-  { value: 'title-asc' as SortOption, label: 'Alphabétique' },
 ];
 
 const PropertySort: React.FC<PropertySortProps> = ({ currentSort, onSortChange }) => {
