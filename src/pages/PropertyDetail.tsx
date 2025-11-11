@@ -32,7 +32,8 @@ interface PropertyDetail {
   images?: string[];
   features?: string[];
   amenities?: string[];
-  url: string;
+  external_url?: string;
+  status?: string;
   is_featured?: boolean;
   video_urls?: string[];
   // Coordonnées GPS
@@ -121,7 +122,7 @@ const PropertyDetail = () => {
     if (!slug && !id) return;
     try {
       setLoading(true);
-      let query = supabase.from('gadait_properties').select('*');
+      let query = supabase.from('properties_backoffice').select('*');
       if (slug) {
         // Try to find by slug first
         query = query.eq('slug', slug);
@@ -493,9 +494,9 @@ const PropertyDetail = () => {
                   // Si on a un slug, construire l'URL spécifique de la propriété directement avec le slug
                   if (property.slug && property.slug.trim() !== '') {
                     targetUrl = `https://gadait-international.com/en/${property.slug}`;
-                  } else if (property.url && property.url.includes('gadait-international.com')) {
+                  } else if (property.external_url && property.external_url.includes('gadait-international.com')) {
                     // Utiliser l'URL existante si elle pointe déjà vers gadait-international.com
-                    targetUrl = property.url;
+                    targetUrl = property.external_url;
                   }
                   
                   window.open(targetUrl, '_blank');

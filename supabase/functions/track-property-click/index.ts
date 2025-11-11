@@ -64,7 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Get property details
     const { data: property, error: propertyError } = await supabase
-      .from('gadait_properties')
+      .from('properties_backoffice')
       .select('title, location, price, currency, main_image')
       .eq('id', propertyId)
       .single();

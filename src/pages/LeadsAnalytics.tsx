@@ -68,7 +68,7 @@ const LeadsAnalytics = () => {
       const uniquePropertyIds = [...new Set((clicks || []).map((c: any) => c.property_id).filter(Boolean))];
       
       const { data: properties, error: propertiesError } = await supabase
-        .from('gadait_properties')
+        .from('properties_backoffice')
         .select('id, title')
         .in('id', uniquePropertyIds);
 

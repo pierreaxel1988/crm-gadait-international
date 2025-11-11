@@ -14,7 +14,7 @@ interface PropertyClickData {
   property_id: string;
   clicked_at: string;
   redirect_url: string;
-  gadait_properties?: {
+  properties_backoffice?: {
     title: string;
     location: string;
     main_image: string;
@@ -72,7 +72,7 @@ const PropertyClickStats: React.FC<PropertyClickStatsProps> = ({ leadId }) => {
 
       // Récupérer les détails des propriétés
       const { data: properties, error: propertiesError } = await supabase
-        .from('gadait_properties')
+        .from('properties_backoffice')
         .select('id, title, location, main_image, price, currency')
         .in('id', uniquePropertyIds);
 
@@ -92,7 +92,7 @@ const PropertyClickStats: React.FC<PropertyClickStatsProps> = ({ leadId }) => {
       if (lastClickProperty) {
         setLastClick({
           ...clicks[0],
-          gadait_properties: lastClickProperty,
+          properties_backoffice: lastClickProperty,
         } as PropertyClickData);
       }
 
@@ -301,34 +301,34 @@ const PropertyClickStats: React.FC<PropertyClickStatsProps> = ({ leadId }) => {
         )}
 
         {/* Dernier clic détaillé */}
-        {lastClick && lastClick.gadait_properties && (
+        {lastClick && lastClick.properties_backoffice && (
           <div className="pt-4 border-t border-gray-200">
             <h4 className="font-semibold text-loro-navy mb-3 flex items-center gap-2">
               <Clock className="h-4 w-4 text-loro-terracotta" />
               Dernière propriété consultée
             </h4>
             <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
-              {lastClick.gadait_properties.main_image && (
+              {lastClick.properties_backoffice.main_image && (
                 <img
-                  src={lastClick.gadait_properties.main_image}
-                  alt={lastClick.gadait_properties.title}
+                  src={lastClick.properties_backoffice.main_image}
+                  alt={lastClick.properties_backoffice.title}
                   className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
                 />
               )}
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-loro-navy text-sm">
-                  {lastClick.gadait_properties.title}
+                  {lastClick.properties_backoffice.title}
                 </p>
                 <p className="text-xs text-gray-600 mb-2">
-                  📍 {lastClick.gadait_properties.location}
+                  📍 {lastClick.properties_backoffice.location}
                 </p>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-xs border-blue-300 text-blue-700">
                     {formatDate(lastClick.clicked_at)}
                   </Badge>
                   <span className="text-xs font-semibold text-loro-sand">
-                    {lastClick.gadait_properties.price
-                      ? `${lastClick.gadait_properties.price.toLocaleString()} ${lastClick.gadait_properties.currency}`
+                    {lastClick.properties_backoffice.price
+                      ? `${lastClick.properties_backoffice.price.toLocaleString()} ${lastClick.properties_backoffice.currency}`
                       : 'Prix sur demande'}
                   </span>
                 </div>

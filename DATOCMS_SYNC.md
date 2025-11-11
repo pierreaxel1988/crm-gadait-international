@@ -192,13 +192,15 @@ curl -X POST https://hxqoqkfnhbpwzkjgukrc.supabase.co/functions/v1/sync-datocms-
 SELECT 
   external_id,
   title_en,
-  title_fr,
+  title_translations,
   slug_en,
   slug_fr,
-  main_image
-FROM gadait_properties
+  main_image,
+  status
+FROM properties_backoffice
 WHERE title_en IS NOT NULL 
-  AND title_fr IS NOT NULL
+  AND title_translations IS NOT NULL
+  AND status = 'published'
 LIMIT 10;
 
 -- Compter les propriétés avec images
@@ -206,7 +208,8 @@ SELECT
   COUNT(*) as total,
   COUNT(main_image) as with_image,
   COUNT(NULLIF(main_image, '')) as with_valid_image
-FROM gadait_properties;
+FROM properties_backoffice
+WHERE status = 'published';
 ```
 
 ## Filtrage Côté Frontend

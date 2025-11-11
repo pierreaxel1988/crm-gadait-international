@@ -16,10 +16,10 @@ interface Property {
   area_unit?: string;
   main_image?: string;
   images?: string[];
-  url: string;
+  external_url?: string;
+  slug?: string;
   is_featured?: boolean;
   external_id?: string;
-  slug?: string;
 }
 
 interface SimilarPropertiesProps {
@@ -98,10 +98,10 @@ const SimilarProperties: React.FC<SimilarPropertiesProps> = ({
         : null;
 
       let query = supabase
-        .from('gadait_properties')
-        .select('id, title, price, currency, location, country, property_type, bedrooms, bathrooms, area, area_unit, main_image, images, url, is_featured, external_id, slug')
+        .from('properties_backoffice')
+        .select('id, title, price, currency, location, country, property_type, bedrooms, bathrooms, area, area_unit, main_image, images, external_url, is_featured, external_id, slug')
         .neq('id', currentPropertyId)
-        .eq('is_available', true)
+        .eq('status', 'published')
         .not('main_image', 'is', null)
         .limit(limit * 3); // Augmenter pour avoir plus de choix
 

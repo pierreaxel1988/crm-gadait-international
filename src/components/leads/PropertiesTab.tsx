@@ -26,8 +26,9 @@ interface GadaitProperty {
   images?: string[];
   features?: string[];
   amenities?: string[];
-  url: string;
-  is_available?: boolean;
+  external_url?: string;
+  slug?: string;
+  status?: string;
   is_featured?: boolean;
 }
 
@@ -49,9 +50,9 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('gadait_properties')
+        .from('properties_backoffice')
         .select('*')
-        .eq('is_available', true)
+        .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(20);
 

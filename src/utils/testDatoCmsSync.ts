@@ -21,8 +21,8 @@ export async function testDatoCmsSync() {
     
     // Vérifier les données dans la base
     const { data: properties, error: dbError } = await supabase
-      .from('gadait_properties')
-      .select('id, title, title_en, title_fr, slug, slug_en, slug_fr, external_id')
+      .from('properties_backoffice')
+      .select('id, title, title_en, title_translations, slug, slug_en, slug_fr, external_id')
       .order('updated_at', { ascending: false })
       .limit(5);
     
@@ -34,7 +34,7 @@ export async function testDatoCmsSync() {
     console.log('📊 Propriétés dans la base (5 plus récentes):', properties);
     
     // Vérifier si les champs multilingues sont remplis
-    const hasMultilingual = properties?.some(p => p.title_en || p.title_fr || p.slug_en || p.slug_fr);
+    const hasMultilingual = properties?.some(p => p.title_en || p.title_translations || p.slug_en || p.slug_fr);
     console.log(`${hasMultilingual ? '✅' : '⚠️'} Champs multilingues ${hasMultilingual ? 'présents' : 'absents'}`);
     
     return { 

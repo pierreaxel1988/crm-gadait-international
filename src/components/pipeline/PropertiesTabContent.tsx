@@ -13,7 +13,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 
 // Use the Supabase generated type directly to avoid conflicts
 import { Database } from '@/integrations/supabase/types';
-type GadaitProperty = Database['public']['Tables']['gadait_properties']['Row'];
+type GadaitProperty = Database['public']['Tables']['properties_backoffice']['Row'];
 
 // Fonction pour vérifier la qualité d'une propriété
 const isPropertyQualityValid = (property: GadaitProperty): boolean => {
@@ -73,7 +73,7 @@ const PropertiesTabContent: React.FC = () => {
       const {
         count,
         error
-      } = await supabase.from('gadait_properties').select('*', {
+      } = await supabase.from('properties_backoffice').select('*', {
         count: 'exact',
         head: true
       });
@@ -170,15 +170,15 @@ const PropertiesTabContent: React.FC = () => {
         case 'title-asc':
           return a.title.localeCompare(b.title);
         case 'oldest':
-          // Utiliser created_at ou scraped_at pour le plus ancien
-          const oldestDateA = new Date(a.created_at || a.scraped_at || 0);
-          const oldestDateB = new Date(b.created_at || b.scraped_at || 0);
+          // Utiliser created_at pour le plus ancien
+          const oldestDateA = new Date(a.created_at || 0);
+          const oldestDateB = new Date(b.created_at || 0);
           return oldestDateA.getTime() - oldestDateB.getTime();
         case 'newest':
         default:
-          // Utiliser created_at ou scraped_at pour le plus récent
-          const newestDateA = new Date(a.created_at || a.scraped_at || 0);
-          const newestDateB = new Date(b.created_at || b.scraped_at || 0);
+          // Utiliser created_at pour le plus récent
+          const newestDateA = new Date(a.created_at || 0);
+          const newestDateB = new Date(b.created_at || 0);
           return newestDateB.getTime() - newestDateA.getTime();
       }
     });
@@ -201,7 +201,7 @@ const PropertiesTabContent: React.FC = () => {
       const {
         data,
         error
-      } = await supabase.from('gadait_properties').select('*').order('created_at', {
+      } = await supabase.from('properties_backoffice').select('*').eq('status', 'published').order('created_at', {
         ascending: false
       });
       if (error) {
@@ -209,9 +209,9 @@ const PropertiesTabContent: React.FC = () => {
       }
       console.log(`Récupéré ${data?.length || 0} propriétés depuis la base de données`);
 
-      // Filtrer seulement les propriétés disponibles côté client
-      let availableProperties = (data || []).filter(property => property.is_available !== false);
-      console.log(`${availableProperties.length} propriétés disponibles après filtrage initial`);
+      // Filtrer seulement les propriétés publiées côté client
+      let availableProperties = (data || []).filter(property => property.status === 'published');
+      console.log(`${availableProperties.length} propriétés publiées après filtrage initial`);
 
       // Normaliser les propriétés pour s'assurer que les champs optionnels ont des valeurs par défaut
       availableProperties = availableProperties.map(property => ({
@@ -266,7 +266,7 @@ const PropertiesTabContent: React.FC = () => {
       // Supprimer TOUTES les propriétés sans condition
       const {
         error
-      } = await supabase.from('gadait_properties').delete().gte('id', '00000000-0000-0000-0000-000000000000'); // Supprime tout
+      } = await supabase.from('properties_backoffice').delete().gte('id', '00000000-0000-0000-0000-000000000000'); // Supprime tout
 
       if (error) {
         console.error('Erreur lors de la suppression:', error);
@@ -339,7 +339,7 @@ const PropertiesTabContent: React.FC = () => {
       const {
         data: oldData,
         error: fetchError
-      } = await supabase.from('gadait_properties').select('*').limit(100);
+      } = await supabase.from('properties_backoffice').select('*').limit(100);
       if (fetchError) {
         throw fetchError;
       }
@@ -381,7 +381,7 @@ const PropertiesTabContent: React.FC = () => {
         try {
           const {
             error: insertError
-          } = await supabase.from('gadait_properties').upsert(property, {
+          } = await supabase.from('properties_backoffice').upsert(property, {
             onConflict: 'external_id',
             ignoreDuplicates: false
           });

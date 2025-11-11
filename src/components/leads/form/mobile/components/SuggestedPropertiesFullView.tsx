@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 
 // Use the Supabase generated type directly
 import { Database } from '@/integrations/supabase/types';
-type GadaitProperty = Database['public']['Tables']['gadait_properties']['Row'];
+type GadaitProperty = Database['public']['Tables']['properties_backoffice']['Row'];
 
 interface SuggestedPropertiesFullViewProps {
   lead: LeadDetailed;
@@ -44,7 +44,7 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
 
     setLoading(true);
     try {
-      let query = supabase.from('gadait_properties').select('*', { count: 'exact' });
+      let query = supabase.from('properties_backoffice').select('*', { count: 'exact' });
 
       // Filter by country
       if (lead.country) {
@@ -159,7 +159,6 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
     return 'en';
   };
 
-  // Fonction d'envoi par email
   const sendPropertiesToClient = async () => {
     const selectedProps = properties.filter(p => selectedProperties.has(p.id));
     
@@ -190,17 +189,15 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
         body: {
           leadId: lead.id,
           properties: selectedProps.map(prop => {
-            // Utiliser les champs multilingues selon la langue du lead
-            const title = language === 'en' 
-              ? (prop.title_en || prop.title) 
-              : (prop.title_fr || prop.title);
+            // Pour properties_backoffice, utiliser title directement (ou title_en si disponible)
+            const title = prop.title_en || prop.title;
             
             const slug = language === 'en'
               ? (prop.slug_en || prop.slug)
               : (prop.slug_fr || prop.slug);
             
             // Construire l'URL complète avec la langue appropriée
-            const baseUrl = prop.url || 'https://gadait-international.com';
+            const baseUrl = 'https://gadait-international.com';
             const propertyUrl = slug
               ? `${baseUrl}${languagePrefix}${slug}/?utm_source=crm&utm_medium=email&utm_campaign=property_selection&lead_id=${lead.id}`
               : `${baseUrl}#`;

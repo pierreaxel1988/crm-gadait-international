@@ -25,7 +25,7 @@ interface PropertyCardProps {
     land_area_unit?: string;
     main_image?: string;
     images?: string[];
-    url: string;
+    external_url?: string;
     is_featured?: boolean;
     external_id?: string;
     slug?: string;
@@ -115,7 +115,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     console.log('🔍 Diagnostic URL pour la propriété:', {
       title: property.title,
       slug: property.slug,
-      url: property.url,
+      external_url: property.external_url,
       external_id: property.external_id
     });
     
@@ -126,10 +126,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     if (property.slug && property.slug.trim() !== '') {
       targetUrl = `https://gadait-international.com/en/${property.slug}`;
       console.log('✅ URL construite avec slug:', targetUrl);
-    } else if (property.url && property.url.includes('gadait-international.com')) {
+    } else if (property.external_url && property.external_url.includes('gadait-international.com')) {
       // Utiliser l'URL existante si elle pointe déjà vers gadait-international.com
-      targetUrl = property.url;
-      console.log('✅ URL utilisée depuis property.url:', targetUrl);
+      targetUrl = property.external_url;
+      console.log('✅ URL utilisée depuis property.external_url:', targetUrl);
     } else {
       console.log('⚠️ Aucun slug trouvé, redirection vers la page d\'accueil');
     }
