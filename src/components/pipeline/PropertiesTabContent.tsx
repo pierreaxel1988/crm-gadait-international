@@ -15,6 +15,26 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Database } from '@/integrations/supabase/types';
 type GadaitProperty = Database['public']['Tables']['properties_backoffice']['Row'];
 
+interface PropertiesTabContentProps {
+  locale?: 'fr' | 'en';
+}
+
+// Helper function to get localized title
+const getLocalizedTitle = (property: GadaitProperty, locale: 'fr' | 'en'): string => {
+  try {
+    if (property.title_translations) {
+      const translations = typeof property.title_translations === 'string' 
+        ? JSON.parse(property.title_translations)
+        : property.title_translations;
+      
+      if (translations[locale]) return translations[locale];
+    }
+  } catch (e) {
+    console.error('Error parsing title_translations:', e);
+  }
+  return property.title || 'Propriété sans titre';
+};
+
 // Fonction pour vérifier la qualité d'une propriété
 const isPropertyQualityValid = (property: GadaitProperty): boolean => {
   // Filtre assoupli: accepter toute propriété avec un titre valide
@@ -42,7 +62,7 @@ const removeDuplicates = (properties: GadaitProperty[]): GadaitProperty[] => {
 };
 const PROPERTIES_PER_PAGE = 24; // 24 propriétés par page (6x4 grid sur desktop)
 
-const PropertiesTabContent: React.FC = () => {
+const PropertiesTabContent: React.FC<PropertiesTabContentProps> = ({ locale = 'fr' }) => {
   const [properties, setProperties] = useState<GadaitProperty[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<GadaitProperty[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -90,12 +110,13 @@ const PropertiesTabContent: React.FC = () => {
   useEffect(() => {
     let filtered = [...properties];
 
-    // Filtre de recherche amélioré pour inclure les références
+    // Filtre de recherche amélioré pour inclure les références et traductions
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(property => {
-        // Recherche dans le titre
-        const titleMatch = property.title.toLowerCase().includes(term);
+        // Recherche dans le titre localisé
+        const localizedTitle = getLocalizedTitle(property, locale);
+        const titleMatch = localizedTitle.toLowerCase().includes(term);
 
         // Recherche dans la localisation
         const locationMatch = property.location?.toLowerCase().includes(term);
@@ -106,8 +127,9 @@ const PropertiesTabContent: React.FC = () => {
         // Recherche dans le type de propriété
         const typeMatch = property.property_type?.toLowerCase().includes(term);
 
-        // Recherche dans la référence externe (si elle existe et n'est pas auto-générée)
-        const referenceMatch = property.external_id && !property.external_id.startsWith('datocms-') && property.external_id.toLowerCase().includes(term);
+        // Recherche dans la référence
+        const referenceMatch = property.reference?.toLowerCase().includes(term) || 
+                               (property.external_id && !property.external_id.startsWith('datocms-') && property.external_id.toLowerCase().includes(term));
         return titleMatch || locationMatch || countryMatch || typeMatch || referenceMatch;
       });
     }
@@ -569,7 +591,7 @@ const PropertiesTabContent: React.FC = () => {
         </div> : <>
           {/* Grille des propriétés */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-fade-in">
-            {currentProperties.map(property => <PropertyCard key={property.id} property={property} />)}
+            {currentProperties.map(property => <PropertyCard key={property.id} property={property} locale={locale} />)}
           </div>
           
           {/* Pagination */}

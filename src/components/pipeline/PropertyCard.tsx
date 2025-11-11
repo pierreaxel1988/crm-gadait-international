@@ -13,6 +13,7 @@ interface PropertyCardProps {
   property: {
     id: string;
     title: string;
+    title_translations?: any;
     price?: number;
     currency?: string;
     location?: string;
@@ -43,7 +44,24 @@ interface PropertyCardProps {
   selectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelection?: (propertyId: string) => void;
+  locale?: 'fr' | 'en';
 }
+
+// Helper function to get localized title
+const getLocalizedTitle = (property: PropertyCardProps['property'], locale: 'fr' | 'en' = 'fr'): string => {
+  try {
+    if (property.title_translations) {
+      const translations = typeof property.title_translations === 'string' 
+        ? JSON.parse(property.title_translations)
+        : property.title_translations;
+      
+      if (translations[locale]) return translations[locale];
+    }
+  } catch (e) {
+    console.error('Error parsing title_translations:', e);
+  }
+  return property.title || 'Propriété sans titre';
+};
 
 const PropertyCard: React.FC<PropertyCardProps> = ({
   property,
@@ -51,7 +69,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   leadId,
   selectionMode = false,
   isSelected = false,
-  onToggleSelection
+  onToggleSelection,
+  locale = 'fr'
 }) => {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -314,7 +333,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         {/* Titre et localisation condensés */}
         <div className="space-y-2">
           <h3 className="font-futura text-lg text-loro-navy line-clamp-2 transition-colors duration-300 font-medium">
-            {property.title}
+            {getLocalizedTitle(property, locale)}
           </h3>
           
           <div className="flex items-center justify-between gap-2">
