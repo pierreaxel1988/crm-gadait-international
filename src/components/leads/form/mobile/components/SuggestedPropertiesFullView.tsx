@@ -36,27 +36,24 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
   }, [lead.country, lead.desiredLocation, lead.propertyTypes, lead.budget, lead.bedrooms, currentPage]);
 
   const fetchSuggestedProperties = async () => {
-    if (!lead.country && !lead.desiredLocation && !lead.propertyTypes?.length) {
-      setProperties([]);
-      setTotalCount(0);
-      return;
-    }
-
     setLoading(true);
     try {
       let query = supabase.from('properties_backoffice').select('*', { count: 'exact' });
 
-      // Filter by country
+      // Filter by published status
+      query = query.eq('status', 'published');
+
+      // Filter by country (optional)
       if (lead.country) {
         query = query.eq('country', lead.country);
       }
 
-      // Filter by location
+      // Filter by location (optional)
       if (lead.desiredLocation) {
         query = query.ilike('location', `%${lead.desiredLocation}%`);
       }
 
-      // Filter by property types
+      // Filter by property types (optional)
       if (lead.propertyTypes && lead.propertyTypes.length > 0) {
         query = query.in('property_type', lead.propertyTypes);
       }
@@ -252,27 +249,6 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
   };
 
   const totalPages = Math.ceil(totalCount / PROPERTIES_PER_PAGE);
-  const hasActiveFilters = lead.country || lead.desiredLocation || lead.propertyTypes?.length || lead.budget || lead.bedrooms;
-
-  if (!hasActiveFilters) {
-    return (
-      <div className="space-y-4 pt-6 border-t border-gray-200">
-        <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="h-5 w-5 text-loro-terracotta" />
-          <h3 className="text-lg font-normal text-brown-700">
-            Propriétés suggérées
-          </h3>
-        </div>
-        
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <Building2 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-          <p className="text-gray-600 font-futura">
-            Remplissez les critères de recherche pour voir les propriétés suggérées
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
