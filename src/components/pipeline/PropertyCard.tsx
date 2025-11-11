@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, LandPlot, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { countryToFlag } from '@/utils/countryUtils';
+import { getExternalPropertyUrl } from '@/utils/slugUtils';
 
 interface PropertyCardProps {
   property: {
@@ -28,7 +29,14 @@ interface PropertyCardProps {
     external_url?: string;
     is_featured?: boolean;
     external_id?: string;
+    reference?: string;
     slug?: string;
+    slug_fr?: string;
+    slug_en?: string;
+    source?: string;
+    url?: string;
+    url_fr?: string;
+    url_en?: string;
   };
   returnTo?: string;
   leadId?: string;
@@ -63,25 +71,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     return `${formatted} ${currency || 'EUR'}`;
   };
 
-  // Fonction pour déterminer si on doit afficher la référence et comment
-  const getDisplayReference = () => {
-    if (!property.external_id) return null;
-
-    // Si c'est une référence auto-générée (commence par 'datocms-'), ne pas l'afficher
-    if (property.external_id.startsWith('datocms-')) {
-      return null;
-    }
-
-    // Si c'est une référence technique longue (contient des tirets et est très longue), ne pas l'afficher
-    if (property.external_id.includes('-') && property.external_id.length > 10) {
-      return null;
-    }
-
-    // Sinon, afficher la référence telle quelle (qu'elle soit numérique ou textuelle courte)
-    return property.external_id;
-  };
-
-  const displayReference = getDisplayReference();
+  // Use reference column directly
+  const displayReference = property.reference;
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Si on est en mode sélection, on toggle la sélection
@@ -111,30 +102,15 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const handleExternalLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Log pour diagnostic
-    console.log('🔍 Diagnostic URL pour la propriété:', {
+    // Use utility function to get the correct URL
+    const targetUrl = getExternalPropertyUrl(property, 'en');
+    
+    console.log('🌐 Opening external URL:', {
       title: property.title,
-      slug: property.slug,
-      external_url: property.external_url,
-      external_id: property.external_id
+      source: property.source,
+      url: targetUrl
     });
     
-    // Construire l'URL correcte vers gadait-international.com avec le slug
-    let targetUrl = 'https://gadait-international.com';
-    
-    // Si on a un slug, construire l'URL spécifique de la propriété directement avec le slug
-    if (property.slug && property.slug.trim() !== '') {
-      targetUrl = `https://gadait-international.com/en/${property.slug}`;
-      console.log('✅ URL construite avec slug:', targetUrl);
-    } else if (property.external_url && property.external_url.includes('gadait-international.com')) {
-      // Utiliser l'URL existante si elle pointe déjà vers gadait-international.com
-      targetUrl = property.external_url;
-      console.log('✅ URL utilisée depuis property.external_url:', targetUrl);
-    } else {
-      console.log('⚠️ Aucun slug trouvé, redirection vers la page d\'accueil');
-    }
-    
-    console.log('🌐 Ouverture de:', targetUrl);
     window.open(targetUrl, '_blank');
   };
 

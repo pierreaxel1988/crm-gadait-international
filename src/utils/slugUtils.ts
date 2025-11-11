@@ -72,3 +72,37 @@ export const getPropertyUrl = (property: { id: string; slug?: string }, options?
   const queryString = searchParams.toString();
   return `/properties/${propertyPath}${queryString ? `?${queryString}` : ''}`;
 };
+
+/**
+ * Builds external URL to the public site (gadait-international.com)
+ * For properties from DatoCMS (source='dato'), uses url_fr/url_en directly
+ * Otherwise constructs URL from slug
+ */
+export const getExternalPropertyUrl = (property: {
+  source?: string;
+  url_fr?: string;
+  url_en?: string;
+  url?: string;
+  slug_fr?: string;
+  slug_en?: string;
+  slug?: string;
+}, locale: 'fr' | 'en' = 'en') => {
+  // For DatoCMS properties, use the complete URLs directly
+  if (property.source === 'dato') {
+    if (locale === 'fr' && property.url_fr) return property.url_fr;
+    if (locale === 'en' && property.url_en) return property.url_en;
+    if (property.url) return property.url;
+  }
+  
+  // Fallback: construct URL from slug
+  const slug = locale === 'fr' 
+    ? (property.slug_fr || property.slug)
+    : (property.slug_en || property.slug);
+    
+  if (slug) {
+    return `https://gadait-international.com/${locale}/${slug}`;
+  }
+  
+  // Ultimate fallback
+  return 'https://gadait-international.com';
+};

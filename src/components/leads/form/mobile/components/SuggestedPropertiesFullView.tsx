@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { LeadDetailed } from '@/types/lead';
 import { supabase } from '@/integrations/supabase/client';
+import { getExternalPropertyUrl } from '@/utils/slugUtils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Home, Building2, Sparkles, Mail, Share2, X } from 'lucide-react';
@@ -186,18 +187,32 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
         body: {
           leadId: lead.id,
           properties: selectedProps.map(prop => {
-            // Pour properties_backoffice, utiliser title directement (ou title_en si disponible)
-            const title = prop.title_en || prop.title;
+            // Cast to any to access new DB columns not yet in generated types
+            const property = prop as any;
             
-            const slug = language === 'en'
-              ? (prop.slug_en || prop.slug)
-              : (prop.slug_fr || prop.slug);
+            // Get the appropriate title based on language
+            const title = language === 'en' 
+              ? (property.title_en || property.title_translations?.en || property.title)
+              : (property.title_fr || property.title_translations?.fr || property.title);
             
-            // Construire l'URL complète avec la langue appropriée
-            const baseUrl = 'https://gadait-international.com';
-            const propertyUrl = slug
-              ? `${baseUrl}${languagePrefix}${slug}/?utm_source=crm&utm_medium=email&utm_campaign=property_selection&lead_id=${lead.id}`
-              : `${baseUrl}#`;
+            // Use the complete URL from the database (url_fr or url_en for DatoCMS properties)
+            const propertyUrl = getExternalPropertyUrl(
+              {
+                source: property.source,
+                url_fr: property.url_fr,
+                url_en: property.url_en,
+                url: property.url,
+                slug_fr: property.slug_fr,
+                slug_en: property.slug_en,
+                slug: property.slug,
+              },
+              language === 'fr' ? 'fr' : 'en'
+            );
+            
+            // Add tracking parameters
+            const urlWithTracking = propertyUrl.includes('?')
+              ? `${propertyUrl}&utm_source=crm&utm_medium=email&utm_campaign=property_selection&lead_id=${lead.id}`
+              : `${propertyUrl}?utm_source=crm&utm_medium=email&utm_campaign=property_selection&lead_id=${lead.id}`;
             
             return {
               id: prop.id,
@@ -206,7 +221,7 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
               price: prop.price,
               currency: prop.currency,
               main_image: prop.main_image,
-              url: propertyUrl,
+              url: urlWithTracking,
               bedrooms: prop.bedrooms,
               bathrooms: prop.bathrooms,
               area: prop.area,

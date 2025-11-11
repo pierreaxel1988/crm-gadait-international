@@ -13,11 +13,19 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ExternalLink, MapPin, Bed, Bath, Home, Star, Globe, Hash, Maximize2, Phone, Mail, Trees, Calendar, Layers, Play, Heart, Expand, ChevronLeft, ChevronRight } from 'lucide-react';
 import LoadingScreen from '@/components/layout/LoadingScreen';
+import { getExternalPropertyUrl } from '@/utils/slugUtils';
+
 interface PropertyDetail {
   id: string;
   external_id?: string;
   reference?: string;
   slug?: string;
+  slug_fr?: string;
+  slug_en?: string;
+  source?: string;
+  url?: string;
+  url_fr?: string;
+  url_en?: string;
   title: string;
   description?: string;
   price?: number;
@@ -488,17 +496,7 @@ const PropertyDetail = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
                 <Button className="bg-loro-sand hover:bg-loro-hazel text-loro-navy flex-1" onClick={() => {
-                  // Construire l'URL correcte vers gadait-international.com avec le slug
-                  let targetUrl = 'https://gadait-international.com';
-                  
-                  // Si on a un slug, construire l'URL spécifique de la propriété directement avec le slug
-                  if (property.slug && property.slug.trim() !== '') {
-                    targetUrl = `https://gadait-international.com/en/${property.slug}`;
-                  } else if (property.external_url && property.external_url.includes('gadait-international.com')) {
-                    // Utiliser l'URL existante si elle pointe déjà vers gadait-international.com
-                    targetUrl = property.external_url;
-                  }
-                  
+                  const targetUrl = getExternalPropertyUrl(property, 'en');
                   window.open(targetUrl, '_blank');
                 }}>
                   <ExternalLink className="h-4 w-4 mr-2" />
