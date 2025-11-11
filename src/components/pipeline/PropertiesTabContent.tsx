@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MapPin, Home, Bath, Bed, RefreshCw, Database as DatabaseIcon, Zap, Trash2, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExternalLink, MapPin, Bath, Bed, RefreshCw, Database as DatabaseIcon, Zap, Trash2, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import PropertyCard from './PropertyCard';
 import PropertySearchBar from './PropertySearchBar';
@@ -14,7 +14,6 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 // Use the Supabase generated type directly to avoid conflicts
 import { Database } from '@/integrations/supabase/types';
 type GadaitProperty = Database['public']['Tables']['properties_backoffice']['Row'];
-
 interface PropertiesTabContentProps {
   locale?: 'fr' | 'en';
 }
@@ -23,10 +22,7 @@ interface PropertiesTabContentProps {
 const getLocalizedTitle = (property: GadaitProperty, locale: 'fr' | 'en'): string => {
   try {
     if (property.title_translations) {
-      const translations = typeof property.title_translations === 'string' 
-        ? JSON.parse(property.title_translations)
-        : property.title_translations;
-      
+      const translations = typeof property.title_translations === 'string' ? JSON.parse(property.title_translations) : property.title_translations;
       if (translations[locale]) return translations[locale];
     }
   } catch (e) {
@@ -38,11 +34,7 @@ const getLocalizedTitle = (property: GadaitProperty, locale: 'fr' | 'en'): strin
 // Fonction pour vérifier la qualité d'une propriété
 const isPropertyQualityValid = (property: GadaitProperty): boolean => {
   // Filtre assoupli: accepter toute propriété avec un titre valide
-  const hasValidTitle = property.title && 
-    property.title.trim() !== '' && 
-    property.title !== 'Propriété sans titre' &&
-    !property.title.toLowerCase().includes('sans titre');
-  
+  const hasValidTitle = property.title && property.title.trim() !== '' && property.title !== 'Propriété sans titre' && !property.title.toLowerCase().includes('sans titre');
   return hasValidTitle;
 };
 
@@ -62,7 +54,9 @@ const removeDuplicates = (properties: GadaitProperty[]): GadaitProperty[] => {
 };
 const PROPERTIES_PER_PAGE = 24; // 24 propriétés par page (6x4 grid sur desktop)
 
-const PropertiesTabContent: React.FC<PropertiesTabContentProps> = ({ locale = 'fr' }) => {
+const PropertiesTabContent: React.FC<PropertiesTabContentProps> = ({
+  locale = 'fr'
+}) => {
   const [properties, setProperties] = useState<GadaitProperty[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<GadaitProperty[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -128,8 +122,7 @@ const PropertiesTabContent: React.FC<PropertiesTabContentProps> = ({ locale = 'f
         const typeMatch = property.property_type?.toLowerCase().includes(term);
 
         // Recherche dans la référence
-        const referenceMatch = property.reference?.toLowerCase().includes(term) || 
-                               (property.external_id && !property.external_id.startsWith('datocms-') && property.external_id.toLowerCase().includes(term));
+        const referenceMatch = property.reference?.toLowerCase().includes(term) || property.external_id && !property.external_id.startsWith('datocms-') && property.external_id.toLowerCase().includes(term);
         return titleMatch || locationMatch || countryMatch || typeMatch || referenceMatch;
       });
     }
@@ -466,7 +459,7 @@ const PropertiesTabContent: React.FC<PropertiesTabContentProps> = ({ locale = 'f
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <Home className="h-8 w-8 text-loro-sand" />
+            
             <h2 className="text-2xl font-futura font-medium text-loro-navy">
               Propriétés Gadait International
             </h2>
