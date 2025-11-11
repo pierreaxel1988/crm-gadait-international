@@ -79,18 +79,10 @@ serve(async (req) => {
               id
               _updatedAt
               _createdAt
-              _allTitleLocales {
-                locale
-                value
-              }
-              _allDescriptionLocales {
-                locale
-                value
-              }
-              _allSlugLocales {
-                locale
-                value
-              }
+              title
+              description
+              slug
+              reference
               price
               priceFrom
               hidePrice
@@ -103,26 +95,19 @@ serve(async (req) => {
               constructionYear
               address
               postalCode
-              reference
-              slug
               partnerUrl
               virtualTour
               gallery {
-                id
-                url
-                alt
-                title
+                path
+                format
                 width
                 height
-              }
-              floorPlans {
-                id
-                url
                 alt
                 title
               }
-              documents {
-                id
+              floorPlans {
+                path
+                alt
                 title
               }
               map {
@@ -151,18 +136,11 @@ serve(async (req) => {
                 id
                 name
               }
-              agent {
-                id
-                name
-                email
-                phone
-              }
               amenities {
                 id
                 name
               }
               websiteHide
-              portalsHide
               ownerName
               ownerEmail
               ownerPhone
@@ -188,19 +166,16 @@ serve(async (req) => {
 
         const data = await response.json();
         
-        // 🔍 DIAGNOSTIC: Afficher la structure de la première propriété pour voir les champs multilingues
+        // 🔍 DIAGNOSTIC: Afficher la structure de la première propriété
         if (offset === 0 && data?.data?.allProperties?.[0]) {
           console.log('🔍 === DIAGNOSTIC: STRUCTURE DATOCMS ===');
           const firstProp = data.data.allProperties[0];
-          console.log('📋 Première propriété complète:', JSON.stringify(firstProp, null, 2));
-          console.log('🔍 Champs multilingues présents:');
-          console.log('  - _allTitleLocales:', firstProp._allTitleLocales ? `OUI (${firstProp._allTitleLocales.length} langues)` : 'NON');
-          console.log('  - _allDescriptionLocales:', firstProp._allDescriptionLocales ? `OUI (${firstProp._allDescriptionLocales.length} langues)` : 'NON');
-          console.log('  - _allSlugLocales:', firstProp._allSlugLocales ? `OUI (${firstProp._allSlugLocales.length} langues)` : 'NON');
-          console.log('🔍 Champs standards présents:');
-          console.log('  - title:', firstProp.title ? 'OUI' : 'NON');
-          console.log('  - description:', firstProp.description ? 'OUI' : 'NON');
-          console.log('  - slug:', firstProp.slug ? 'OUI' : 'NON');
+          console.log('📋 Champs multilingues (objets):');
+          console.log('  - title:', typeof firstProp.title, firstProp.title);
+          console.log('  - description:', typeof firstProp.description, firstProp.description ? 'présent' : 'absent');
+          console.log('  - slug:', typeof firstProp.slug, firstProp.slug);
+          console.log('📋 Galerie:');
+          console.log('  - gallery[0]:', firstProp.gallery?.[0] || 'vide');
           console.log('🔍 === FIN DIAGNOSTIC ===');
         }
         
@@ -292,13 +267,13 @@ serve(async (req) => {
 });
 
 function convertDatoCmsProperty(datoCmsProp: any) {
-  // Extraire les champs multilingues
-  const titleEn = datoCmsProp._allTitleLocales?.find((l: any) => l.locale === 'en')?.value || '';
-  const titleFr = datoCmsProp._allTitleLocales?.find((l: any) => l.locale === 'fr')?.value || '';
-  const descriptionEn = datoCmsProp._allDescriptionLocales?.find((l: any) => l.locale === 'en')?.value || '';
-  const descriptionFr = datoCmsProp._allDescriptionLocales?.find((l: any) => l.locale === 'fr')?.value || '';
-  const slugEn = datoCmsProp._allSlugLocales?.find((l: any) => l.locale === 'en')?.value || null;
-  const slugFr = datoCmsProp._allSlugLocales?.find((l: any) => l.locale === 'fr')?.value || null;
+  // Extraire les champs multilingues depuis les objets DatoCMS
+  const titleEn = datoCmsProp.title?.en || '';
+  const titleFr = datoCmsProp.title?.fr || '';
+  const descriptionEn = datoCmsProp.description?.en || '';
+  const descriptionFr = datoCmsProp.description?.fr || '';
+  const slugEn = datoCmsProp.slug?.en || null;
+  const slugFr = datoCmsProp.slug?.fr || null;
 
   // Générer un slug si DatoCMS n'en fournit pas
   const generateSlug = (title: string): string | null => {
@@ -314,8 +289,11 @@ function convertDatoCmsProperty(datoCmsProp: any) {
   // Construire l'URL de la propriété
   const propertyUrl = datoCmsProp.partnerUrl || 'https://gadait-international.com';
 
-  // Extraire les images de la galerie
-  const images = datoCmsProp.gallery?.map((img: any) => img.url) || [];
+  // ✅ CORRECTION: Construire les URLs complètes des images depuis path
+  const DATOCMS_CDN = 'https://www.datocms-assets.com';
+  const images = datoCmsProp.gallery?.map((img: any) => 
+    img.path ? `${DATOCMS_CDN}${img.path}` : ''
+  ).filter(Boolean) || [];
   const mainImage = images[0] || '';
 
   // Extraire les amenities comme features
@@ -346,7 +324,7 @@ function convertDatoCmsProperty(datoCmsProp: any) {
   const country = determineCountryIntelligently(
     countryFromDatoCms,
     cityName,
-    datoCmsProp.title
+    titleFr || titleEn
   );
 
   // Récupérer la référence DatoCMS
