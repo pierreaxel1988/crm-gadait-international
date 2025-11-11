@@ -17,17 +17,13 @@ type GadaitProperty = Database['public']['Tables']['gadait_properties']['Row'];
 
 // Fonction pour vérifier la qualité d'une propriété
 const isPropertyQualityValid = (property: GadaitProperty): boolean => {
-  // Vérifier s'il y a une image principale
-  const hasValidImage = property.main_image && property.main_image.trim() !== '';
-
-  // Vérifier s'il y a une référence valide (pas auto-générée)
-  const hasValidReference = property.external_id && !property.external_id.startsWith('datocms-') && property.external_id.trim() !== '' && property.external_id !== 'undefined' && property.external_id !== 'null';
-
-  // Vérifier si le titre est valide
-  const hasValidTitle = property.title && property.title.trim() !== '' && property.title !== 'Propriété sans titre' && !property.title.toLowerCase().includes('sans titre');
-
-  // La propriété doit avoir au moins une image ET (une référence valide OU un titre descriptif)
-  return hasValidImage && (hasValidReference || hasValidTitle);
+  // Filtre assoupli: accepter toute propriété avec un titre valide
+  const hasValidTitle = property.title && 
+    property.title.trim() !== '' && 
+    property.title !== 'Propriété sans titre' &&
+    !property.title.toLowerCase().includes('sans titre');
+  
+  return hasValidTitle;
 };
 
 // Fonction pour détecter et filtrer les doublons

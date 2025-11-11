@@ -188,6 +188,22 @@ serve(async (req) => {
 
         const data = await response.json();
         
+        // 🔍 DIAGNOSTIC: Afficher la structure de la première propriété pour voir les champs multilingues
+        if (offset === 0 && data?.data?.allProperties?.[0]) {
+          console.log('🔍 === DIAGNOSTIC: STRUCTURE DATOCMS ===');
+          const firstProp = data.data.allProperties[0];
+          console.log('📋 Première propriété complète:', JSON.stringify(firstProp, null, 2));
+          console.log('🔍 Champs multilingues présents:');
+          console.log('  - _allTitleLocales:', firstProp._allTitleLocales ? `OUI (${firstProp._allTitleLocales.length} langues)` : 'NON');
+          console.log('  - _allDescriptionLocales:', firstProp._allDescriptionLocales ? `OUI (${firstProp._allDescriptionLocales.length} langues)` : 'NON');
+          console.log('  - _allSlugLocales:', firstProp._allSlugLocales ? `OUI (${firstProp._allSlugLocales.length} langues)` : 'NON');
+          console.log('🔍 Champs standards présents:');
+          console.log('  - title:', firstProp.title ? 'OUI' : 'NON');
+          console.log('  - description:', firstProp.description ? 'OUI' : 'NON');
+          console.log('  - slug:', firstProp.slug ? 'OUI' : 'NON');
+          console.log('🔍 === FIN DIAGNOSTIC ===');
+        }
+        
         if (data.errors) {
           console.error('Erreurs GraphQL:', data.errors);
           throw new Error(`Erreurs GraphQL: ${data.errors.map((e: any) => e.message).join(', ')}`);
