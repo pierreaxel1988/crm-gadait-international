@@ -181,11 +181,10 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
         body: {
           leadId: lead.id,
           properties: selectedProps.map(prop => {
-            // Générer l'URL correcte avec le slug et les paramètres UTM
-            const baseUrl = 'https://gadait-international.com';
-            const propertyUrl = prop.slug 
-              ? `${baseUrl}/${language}/${prop.slug}?utm_source=crm&utm_medium=email&utm_campaign=property_selection&lead_id=${lead.id}`
-              : baseUrl;
+            // Utiliser le champ url de la propriété (déjà complet) + slug
+            const propertyUrl = prop.url && prop.slug
+              ? `${prop.url}${prop.slug}/?utm_source=crm&utm_medium=email&utm_campaign=property_selection&lead_id=${lead.id}`
+              : (prop.url || '#');
             
             return {
               id: prop.id,
