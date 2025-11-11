@@ -59,7 +59,14 @@ interface SuggestedProperty {
   id: string;
   reference: string;
   title: string;
+  title_en?: string;
+  title_fr?: string;
+  description?: string;
+  description_en?: string;
+  description_fr?: string;
   slug: string;
+  slug_en?: string;
+  slug_fr?: string;
   external_url: string;
   price: number;
   currency: string;
@@ -71,16 +78,22 @@ interface SuggestedProperty {
   country: string;
 }
 
-// Fonction pour générer les URLs de propriétés avec slugs
-function generatePropertyUrl(property: SuggestedProperty, language: string, leadId?: string): string {
-  if (!property.external_url) {
-    return '#';
-  }
+// Fonction pour générer les URLs de propriétés avec slugs multilingues
+function generatePropertyUrl(property: any, language: string, leadId?: string): string {
+  const baseUrl = property.external_url || 'https://gadait-international.com';
   
-  // Utiliser external_url + slug comme dans PropertyCard.tsx
-  const propertyUrl = property.slug 
-    ? `${property.external_url}${property.slug}/`
-    : property.external_url;
+  // Déterminer le slug selon la langue
+  const slug = language === 'EN' 
+    ? (property.slug_en || property.slug)
+    : (property.slug_fr || property.slug);
+  
+  // Construire le chemin selon la langue
+  const languagePath = language === 'EN' ? '/en/properties/' : '/fr/proprietes/';
+  
+  // Construire l'URL complète
+  const propertyUrl = slug 
+    ? `${baseUrl}${languagePath}${slug}/`
+    : baseUrl;
   
   // Ajouter le tracking via l'edge function track-property-click
   if (leadId) {
@@ -97,12 +110,18 @@ const PropertyCard = ({
   language, 
   leadId 
 }: { 
-  property: SuggestedProperty; 
+  property: any; 
   language: string; 
   leadId?: string;
 }) => {
   const propertyUrl = generatePropertyUrl(property, language, leadId);
   const mainImage = property.images?.[0] || '';
+  
+  // Utiliser le titre selon la langue
+  const title = language === 'EN'
+    ? (property.title_en || property.title)
+    : (property.title_fr || property.title);
+  
   const labels = {
     FR: { bedrooms: 'chambres', bathrooms: 'salles de bain', surface: 'm²', discover: '✨ Découvrir cette propriété' },
     EN: { bedrooms: 'bedrooms', bathrooms: 'bathrooms', surface: 'm²', discover: '✨ Discover this property' },
@@ -114,13 +133,13 @@ const PropertyCard = ({
     mainImage && React.createElement('a', { href: propertyUrl, style: { display: 'block', textDecoration: 'none' } },
       React.createElement('img', { 
         src: mainImage, 
-        alt: property.title,
+        alt: title,
         style: { width: '100%', height: '250px', objectFit: 'cover', display: 'block' }
       })
     ),
     React.createElement('div', { style: { padding: '20px' } },
       React.createElement('h3', { style: { margin: '0 0 10px 0', fontSize: '18px', color: '#2C3E50', fontWeight: '500' } }, 
-        property.title
+        title
       ),
       React.createElement('p', { style: { margin: '0 0 15px 0', fontSize: '14px', color: '#7F8C8D' } },
         `📍 ${property.location}, ${property.country}`

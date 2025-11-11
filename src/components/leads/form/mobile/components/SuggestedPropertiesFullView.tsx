@@ -133,22 +133,30 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
     }
   };
 
-  // Fonction pour déterminer la langue en fonction du pays du lead
-  const getLanguageFromCountry = (country: string | null): 'fr' | 'en' => {
-    if (!country) return 'en';
+  // Fonction pour déterminer la langue du lead
+  const getLeadLanguage = (): 'en' | 'fr' => {
+    // Priorité 1: preferredLanguage du lead
+    if (lead.preferredLanguage) {
+      return lead.preferredLanguage.toLowerCase() === 'english' ? 'en' : 'fr';
+    }
     
-    const frenchSpeakingCountries = [
-      'France', 'Monaco', 'Belgium', 'Belgique', 'Switzerland', 'Suisse', 'Luxembourg',
-      'Senegal', 'Sénégal', 'Ivory Coast', "Côte d'Ivoire", 'Mali', 'Burkina Faso',
-      'Niger', 'Chad', 'Tchad', 'Guinea', 'Guinée', 'Rwanda', 'Burundi', 'Benin', 'Bénin',
-      'Togo', 'Central African Republic', 'République centrafricaine', 'Congo', 
-      'Democratic Republic of the Congo', 'République démocratique du Congo', 'Gabon',
-      'Comoros', 'Comores', 'Djibouti', 'Seychelles', 'Vanuatu', 'Madagascar',
-      'Cameroon', 'Cameroun', 'Haiti', 'Haïti', 'Mauritius', 'Maurice', 'Tunisia', 'Tunisie',
-      'Algeria', 'Algérie', 'Morocco', 'Maroc'
-    ];
+    // Priorité 2: pays du lead
+    if (lead.country) {
+      const frenchSpeakingCountries = [
+        'France', 'Monaco', 'Belgium', 'Belgique', 'Switzerland', 'Suisse', 'Luxembourg',
+        'Senegal', 'Sénégal', 'Ivory Coast', "Côte d'Ivoire", 'Mali', 'Burkina Faso',
+        'Niger', 'Chad', 'Tchad', 'Guinea', 'Guinée', 'Rwanda', 'Burundi', 'Benin', 'Bénin',
+        'Togo', 'Central African Republic', 'République centrafricaine', 'Congo', 
+        'Democratic Republic of the Congo', 'République démocratique du Congo', 'Gabon',
+        'Comoros', 'Comores', 'Djibouti', 'Seychelles', 'Vanuatu', 'Madagascar',
+        'Cameroon', 'Cameroun', 'Haiti', 'Haïti', 'Mauritius', 'Maurice', 'Tunisia', 'Tunisie',
+        'Algeria', 'Algérie', 'Morocco', 'Maroc'
+      ];
+      return frenchSpeakingCountries.includes(lead.country) ? 'fr' : 'en';
+    }
     
-    return frenchSpeakingCountries.includes(country) ? 'fr' : 'en';
+    // Par défaut: anglais
+    return 'en';
   };
 
   // Fonction d'envoi par email
@@ -175,20 +183,31 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
     }
 
     try {
-      const language = getLanguageFromCountry(lead.country);
+      const language = getLeadLanguage();
+      const languagePrefix = language === 'en' ? '/en/properties/' : '/fr/proprietes/';
       
       const { data, error } = await supabase.functions.invoke('send-property-selection', {
         body: {
           leadId: lead.id,
           properties: selectedProps.map(prop => {
-            // Utiliser le champ url de la propriété (déjà complet) + slug
-            const propertyUrl = prop.url && prop.slug
-              ? `${prop.url}${prop.slug}/?utm_source=crm&utm_medium=email&utm_campaign=property_selection&lead_id=${lead.id}`
-              : (prop.url || '#');
+            // Utiliser les champs multilingues selon la langue du lead
+            const title = language === 'en' 
+              ? (prop.title_en || prop.title) 
+              : (prop.title_fr || prop.title);
+            
+            const slug = language === 'en'
+              ? (prop.slug_en || prop.slug)
+              : (prop.slug_fr || prop.slug);
+            
+            // Construire l'URL complète avec la langue appropriée
+            const baseUrl = prop.url || 'https://gadait-international.com';
+            const propertyUrl = slug
+              ? `${baseUrl}${languagePrefix}${slug}/?utm_source=crm&utm_medium=email&utm_campaign=property_selection&lead_id=${lead.id}`
+              : `${baseUrl}#`;
             
             return {
               id: prop.id,
-              title: prop.title,
+              title,
               location: prop.location,
               price: prop.price,
               currency: prop.currency,

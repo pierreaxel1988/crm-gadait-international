@@ -79,8 +79,18 @@ serve(async (req) => {
               id
               _updatedAt
               _createdAt
-              title
-              description
+              _allTitleLocales {
+                locale
+                value
+              }
+              _allDescriptionLocales {
+                locale
+                value
+              }
+              _allSlugLocales {
+                locale
+                value
+              }
               price
               priceFrom
               hidePrice
@@ -266,9 +276,27 @@ serve(async (req) => {
 });
 
 function convertDatoCmsProperty(datoCmsProp: any) {
+  // Extraire les champs multilingues
+  const titleEn = datoCmsProp._allTitleLocales?.find((l: any) => l.locale === 'en')?.value || '';
+  const titleFr = datoCmsProp._allTitleLocales?.find((l: any) => l.locale === 'fr')?.value || '';
+  const descriptionEn = datoCmsProp._allDescriptionLocales?.find((l: any) => l.locale === 'en')?.value || '';
+  const descriptionFr = datoCmsProp._allDescriptionLocales?.find((l: any) => l.locale === 'fr')?.value || '';
+  const slugEn = datoCmsProp._allSlugLocales?.find((l: any) => l.locale === 'en')?.value || null;
+  const slugFr = datoCmsProp._allSlugLocales?.find((l: any) => l.locale === 'fr')?.value || null;
+
+  // Générer un slug si DatoCMS n'en fournit pas
+  const generateSlug = (title: string): string | null => {
+    if (!title) return null;
+    return title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Retirer les accents
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
   // Construire l'URL de la propriété
-  const propertyUrl = datoCmsProp.partnerUrl || 
-    (datoCmsProp.slug ? `https://gadait-international.com/properties/${datoCmsProp.slug}` : '');
+  const propertyUrl = datoCmsProp.partnerUrl || 'https://gadait-international.com';
 
   // Extraire les images de la galerie
   const images = datoCmsProp.gallery?.map((img: any) => img.url) || [];
@@ -318,8 +346,18 @@ function convertDatoCmsProperty(datoCmsProp: any) {
 
   return {
     external_id: finalExternalId,
-    title: datoCmsProp.title || 'Propriété sans titre',
-    description: datoCmsProp.description || '',
+    // Champs multilingues
+    title_en: titleEn,
+    title_fr: titleFr,
+    description_en: descriptionEn,
+    description_fr: descriptionFr,
+    slug_en: slugEn || generateSlug(titleEn),
+    slug_fr: slugFr || generateSlug(titleFr),
+    // Champs de fallback (utiliser FR par défaut, puis EN)
+    title: titleFr || titleEn || 'Propriété sans titre',
+    description: descriptionFr || descriptionEn || '',
+    slug: slugFr || slugEn || generateSlug(titleFr || titleEn),
+    // Reste des champs
     price,
     currency,
     location: fullAddress || cityName,
@@ -334,7 +372,6 @@ function convertDatoCmsProperty(datoCmsProp: any) {
     features,
     amenities: features,
     url: propertyUrl,
-    slug: datoCmsProp.slug || null, // 🔥 CRUCIAL: Slug depuis DatoCMS
     video_urls: videoUrls,
     is_available: datoCmsProp.propertyStatus?.name !== 'Sold' && datoCmsProp.propertyStatus?.name !== 'Rented',
     is_featured: datoCmsProp.priceFrom || false,

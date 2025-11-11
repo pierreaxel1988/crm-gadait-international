@@ -1136,6 +1136,8 @@ export type Database = {
           created_at: string | null
           currency: string | null
           description: string | null
+          description_en: string | null
+          description_fr: string | null
           description_translations: Json | null
           external_id: string | null
           features: string[] | null
@@ -1153,7 +1155,11 @@ export type Database = {
           seo_description_translations: Json | null
           seo_title_translations: Json | null
           slug: string | null
+          slug_en: string | null
+          slug_fr: string | null
           title: string
+          title_en: string | null
+          title_fr: string | null
           title_translations: Json | null
           updated_at: string | null
           url: string
@@ -1169,6 +1175,8 @@ export type Database = {
           created_at?: string | null
           currency?: string | null
           description?: string | null
+          description_en?: string | null
+          description_fr?: string | null
           description_translations?: Json | null
           external_id?: string | null
           features?: string[] | null
@@ -1186,7 +1194,11 @@ export type Database = {
           seo_description_translations?: Json | null
           seo_title_translations?: Json | null
           slug?: string | null
+          slug_en?: string | null
+          slug_fr?: string | null
           title: string
+          title_en?: string | null
+          title_fr?: string | null
           title_translations?: Json | null
           updated_at?: string | null
           url: string
@@ -1202,6 +1214,8 @@ export type Database = {
           created_at?: string | null
           currency?: string | null
           description?: string | null
+          description_en?: string | null
+          description_fr?: string | null
           description_translations?: Json | null
           external_id?: string | null
           features?: string[] | null
@@ -1219,7 +1233,11 @@ export type Database = {
           seo_description_translations?: Json | null
           seo_title_translations?: Json | null
           slug?: string | null
+          slug_en?: string | null
+          slug_fr?: string | null
           title?: string
+          title_en?: string | null
+          title_fr?: string | null
           title_translations?: Json | null
           updated_at?: string | null
           url?: string
