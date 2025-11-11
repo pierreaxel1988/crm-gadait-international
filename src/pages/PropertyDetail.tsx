@@ -16,6 +16,7 @@ import LoadingScreen from '@/components/layout/LoadingScreen';
 interface PropertyDetail {
   id: string;
   external_id?: string;
+  reference?: string;
   slug?: string;
   title: string;
   description?: string;
@@ -159,9 +160,8 @@ const PropertyDetail = () => {
     return `${formatted} ${currency || 'EUR'}`;
   };
   const getDisplayReference = () => {
-    if (!property?.external_id) return null;
-    if (property.external_id.startsWith('datocms-')) return null;
-    return property.external_id;
+    if (!property?.reference) return null;
+    return property.reference;
   };
 
   // Navigation functions for image carousel avec transitions améliorées
