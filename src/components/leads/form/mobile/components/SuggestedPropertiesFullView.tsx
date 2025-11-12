@@ -54,9 +54,9 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
         query = query.ilike('location', `%${lead.desiredLocation}%`);
       }
 
-      // Filter by property types (optional)
+      // Filter by property types (optional) - convert to lowercase for case-insensitive matching
       if (lead.propertyTypes && lead.propertyTypes.length > 0) {
-        query = query.in('property_type', lead.propertyTypes);
+        query = query.in('property_type', lead.propertyTypes.map(t => t.toLowerCase()));
       }
 
       // Filter by bedrooms (minimum) - limit to reasonable values
