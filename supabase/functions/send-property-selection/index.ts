@@ -2,6 +2,33 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { Resend } from "npm:resend@2.0.0";
 
+// Import slug utility functions
+const getExternalPropertyUrl = (property: {
+  source?: string;
+  url_fr?: string;
+  url_en?: string;
+  url?: string;
+  slug_fr?: string;
+  slug_en?: string;
+  slug?: string;
+}, locale: 'fr' | 'en' = 'fr') => {
+  if (property.source === 'dato') {
+    if (locale === 'fr' && property.url_fr) return property.url_fr;
+    if (locale === 'en' && property.url_en) return property.url_en;
+    if (property.url) return property.url;
+  }
+  
+  const slug = locale === 'fr' 
+    ? (property.slug_fr || property.slug)
+    : (property.slug_en || property.slug);
+    
+  if (slug) {
+    return `https://gadait-international.com/${locale}/${slug}`;
+  }
+  
+  return 'https://gadait-international.com';
+};
+
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
@@ -25,6 +52,12 @@ interface PropertySelectionRequest {
     area?: number;
     area_unit?: string;
     property_type?: string;
+    source?: string;
+    url_fr?: string;
+    url_en?: string;
+    slug?: string;
+    slug_fr?: string;
+    slug_en?: string;
   }>;
   leadName: string;
   leadEmail: string;
@@ -99,12 +132,15 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Générer le contenu HTML de l'email avec un design moderne et URLs trackées
     const propertiesHtml = properties.map(property => {
-      // Créer l'URL trackée
-      const trackedUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/track-property-click?selection_id=${selectionData.id}&property_id=${property.id}&redirect_url=${encodeURIComponent(property.url)}`;
+      // Créer l'URL finale vers gadait-international.com
+      const externalUrl = getExternalPropertyUrl(property, 'fr');
+      
+      // Créer l'URL trackée qui redirigera vers gadait-international.com
+      const trackedUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/track-property-click?selection_id=${selectionData.id}&property_id=${property.id}&redirect_url=${encodeURIComponent(externalUrl)}`;
       
       return `
       <!-- Carte entièrement cliquable -->
-      <a href="${trackedUrl}" 
+      <a href="${trackedUrl}"
          target="_blank" 
          style="
            display: block;
@@ -152,20 +188,23 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
             ` : ''}
             
-            <!-- Indicateur cliquable -->
+            <!-- Badge de lien cliquable -->
             <div style="
               position: absolute;
               bottom: 16px;
               right: 16px;
               background: white;
-              padding: 8px 12px;
-              border-radius: 20px;
-              font-size: 12px;
+              padding: 10px 16px;
+              border-radius: 24px;
+              font-size: 13px;
               font-weight: 600;
               color: #2563eb;
-              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+              box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
             ">
-              🔗 Voir sur gadait-international.com
+              <span style="font-size: 14px;">🔗</span> Voir sur gadait-international.com
             </div>
           </div>
         ` : ''}
@@ -389,13 +428,20 @@ const handler = async (req: Request): Promise<Response> => {
           <div class="container">
             <div class="header">
               <div style="margin-bottom: 24px;">
-                <img src="https://www.gadait-international.com/static/media/logo.c86ab9e0598ca0f55b0db0ab4a7c6256.svg" 
-                     alt="GADAIT International" 
-                     style="
-                       height: 50px;
-                       width: auto;
-                       filter: brightness(0) invert(1);
-                     " />
+                <div style="
+                  background: white;
+                  padding: 12px 20px;
+                  border-radius: 12px;
+                  display: inline-block;
+                ">
+                  <img src="https://www.gadait-international.com/static/media/logo.c86ab9e0598ca0f55b0db0ab4a7c6256.svg" 
+                       alt="GADAIT International" 
+                       style="
+                         height: 40px;
+                         width: auto;
+                         display: block;
+                       " />
+                </div>
               </div>
               <h1 style="
                 font-size: 32px;
