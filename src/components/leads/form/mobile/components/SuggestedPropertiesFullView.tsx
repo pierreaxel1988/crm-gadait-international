@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Home, Building2, Sparkles, Mail, Share2, X } from 'lucide-react';
 import PropertyCard from '@/components/pipeline/PropertyCard';
 import PropertySkeleton from '@/components/pipeline/PropertySkeleton';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Card, CardContent } from '@/components/ui/card';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { useToast } from '@/hooks/use-toast';
@@ -20,25 +19,34 @@ interface SuggestedPropertiesFullViewProps {
   lead: LeadDetailed;
 }
 
-const PROPERTIES_PER_PAGE = 12; // Moins de propriétés par page pour les suggestions
+const PROPERTIES_PER_PAGE = 12; // Propriétés chargées à chaque fois
 
 const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = ({ lead }) => {
   const [properties, setProperties] = useState<GadaitProperty[]>([]);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [selectedProperties, setSelectedProperties] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchSuggestedProperties();
-  }, [lead.country, lead.desiredLocation, lead.propertyTypes, lead.budget, lead.bedrooms, currentPage]);
+    // Reset et charger la première page
+    setProperties([]);
+    setHasMore(true);
+    fetchSuggestedProperties(true);
+  }, [lead.country, lead.desiredLocation, lead.propertyTypes, lead.budget, lead.bedrooms]);
 
-  const fetchSuggestedProperties = async () => {
-    setLoading(true);
+  const fetchSuggestedProperties = async (reset: boolean = false) => {
+    if (reset) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
+    
     try {
+      const currentLength = reset ? 0 : properties.length;
       let query = supabase.from('properties_backoffice').select('*', { count: 'exact' });
 
       // Filter by published status
@@ -78,9 +86,8 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
         }
       }
 
-      // Pagination
-      const startIndex = (currentPage - 1) * PROPERTIES_PER_PAGE;
-      query = query.range(startIndex, startIndex + PROPERTIES_PER_PAGE - 1);
+      // Pagination pour scroll infini
+      query = query.range(currentLength, currentLength + PROPERTIES_PER_PAGE - 1);
 
       // Order by price desc to show expensive properties first
       query = query.order('price', { ascending: false });
@@ -92,12 +99,27 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
         return;
       }
 
-      setProperties(data || []);
-      setTotalCount(count || 0);
+      const newProperties = data || [];
+      
+      if (reset) {
+        setProperties(newProperties);
+      } else {
+        setProperties(prev => [...prev, ...newProperties]);
+      }
+      
+      // Vérifier s'il reste des propriétés à charger
+      setHasMore(newProperties.length === PROPERTIES_PER_PAGE && (currentLength + newProperties.length) < (count || 0));
     } catch (error) {
       console.error('Error fetching suggested properties:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (!loadingMore && hasMore) {
+      fetchSuggestedProperties(false);
     }
   };
 
@@ -263,8 +285,6 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
     return properties.filter(p => selectedProperties.has(p.id));
   };
 
-  const totalPages = Math.ceil(totalCount / PROPERTIES_PER_PAGE);
-
   if (loading) {
     return (
       <div className="space-y-4 pt-6 border-t border-gray-200">
@@ -314,14 +334,6 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
               <Badge variant="outline" className="bg-white border-gray-200 text-gray-700 font-futura rounded-md px-2 py-0.5 text-xs font-normal tracking-wide shadow-none">
                 <span className="text-xs font-medium">{properties.length} propriétés affichées</span>
               </Badge>
-              <Badge variant="outline" className="bg-gray-50 border-gray-200 text-gray-600 font-futura rounded-md px-2 py-0.5 text-xs font-light tracking-wide shadow-none">
-                <span className="text-xs font-light">{totalCount} au total</span>
-              </Badge>
-              {totalPages > 1 && (
-                <Badge variant="outline" className="bg-gray-50 border-gray-200 text-gray-600 font-futura rounded-md px-2 py-0.5 text-xs font-light tracking-wide shadow-none">
-                  <span className="text-xs font-light">Page {currentPage} sur {totalPages}</span>
-                </Badge>
-              )}
               {selectedProperties.size > 0 && (
                 <Badge className="bg-blue-50 border-blue-200 text-blue-700 font-futura rounded-md px-2 py-0.5 text-xs font-medium tracking-wide shadow-none">
                   <span className="text-xs font-medium">{selectedProperties.size} sélectionnée(s)</span>
@@ -459,52 +471,17 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
               ))}
             </div>
             
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="mt-8">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
-                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'} 
-                      />
-                    </PaginationItem>
-                    
-                    {/* Pages numérotées */}
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNumber;
-                      if (totalPages <= 5) {
-                        pageNumber = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNumber = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNumber = totalPages - 4 + i;
-                      } else {
-                        pageNumber = currentPage - 2 + i;
-                      }
-                      
-                      return (
-                        <PaginationItem key={pageNumber}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(pageNumber)}
-                            isActive={currentPage === pageNumber}
-                            className="cursor-pointer"
-                          >
-                            {pageNumber}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    })}
-                    
-                    <PaginationItem>
-                      <PaginationNext 
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
-                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'} 
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+            {/* Bouton "Voir plus" pour scroll infini */}
+            {hasMore && !loading && (
+              <div className="flex justify-center pt-6">
+                <Button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  variant="outline"
+                  className="font-futura"
+                >
+                  {loadingMore ? 'Chargement...' : 'Voir plus de propriétés'}
+                </Button>
               </div>
             )}
           </>
