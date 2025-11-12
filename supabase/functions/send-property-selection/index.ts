@@ -103,146 +103,237 @@ const handler = async (req: Request): Promise<Response> => {
       const trackedUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/track-property-click?selection_id=${selectionData.id}&property_id=${property.id}&redirect_url=${encodeURIComponent(property.url)}`;
       
       return `
-      <div style="
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        border-radius: 16px;
-        overflow: hidden;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        transition: transform 0.3s ease;
-        border: 1px solid #e2e8f0;
-      ">
+      <!-- Carte entièrement cliquable -->
+      <a href="${trackedUrl}" 
+         target="_blank" 
+         style="
+           display: block;
+           text-decoration: none;
+           color: inherit;
+           background: white;
+           border-radius: 16px;
+           overflow: hidden;
+           margin-bottom: 24px;
+           box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+           border: 1px solid #e2e8f0;
+           transition: all 0.3s ease;
+         "
+         onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.12)';"
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.08)';">
+        
         ${property.main_image ? `
-          <div style="position: relative; height: 250px; overflow: hidden;">
+          <!-- Image de la propriété -->
+          <div style="position: relative; height: 280px; overflow: hidden; background: #f1f5f9;">
             <img src="${property.main_image}" 
                  alt="${property.title}" 
                  style="
                    width: 100%; 
                    height: 100%; 
                    object-fit: cover;
-                   transition: transform 0.3s ease;
+                   display: block;
                  " />
+            
+            <!-- Badge type de propriété -->
+            ${property.property_type ? `
+              <div style="
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                background: rgba(0, 0, 0, 0.75);
+                backdrop-filter: blur(8px);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 24px;
+                font-size: 13px;
+                font-weight: 600;
+                text-transform: capitalize;
+              ">
+                ${property.property_type}
+              </div>
+            ` : ''}
+            
+            <!-- Indicateur cliquable -->
             <div style="
               position: absolute;
-              top: 16px;
+              bottom: 16px;
               right: 16px;
-              background: rgba(0, 0, 0, 0.7);
-              color: white;
-              padding: 6px 12px;
+              background: white;
+              padding: 8px 12px;
               border-radius: 20px;
               font-size: 12px;
               font-weight: 600;
+              color: #2563eb;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             ">
-              ${property.property_type || 'Propriété'}
+              🔗 Voir sur gadait-international.com
             </div>
           </div>
         ` : ''}
         
+        <!-- Contenu de la carte -->
         <div style="padding: 24px;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-            <h3 style="
-              margin: 0;
-              color: #1a202c;
-              font-size: 22px;
-              font-weight: 700;
-              line-height: 1.3;
-              flex: 1;
-            ">
-              ${property.title}
-            </h3>
-          </div>
+          <!-- Titre -->
+          <h3 style="
+            margin: 0 0 12px 0;
+            color: #0f172a;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          ">
+            ${property.title}
+          </h3>
           
+          <!-- Localisation -->
           <div style="
             display: flex;
             align-items: center;
             margin-bottom: 16px;
             color: #64748b;
-            font-size: 16px;
+            font-size: 15px;
           ">
-            <span style="margin-right: 8px;">📍</span>
+            <span style="margin-right: 6px; font-size: 16px;">📍</span>
             <span style="font-weight: 500;">${property.location}</span>
           </div>
           
+          <!-- Prix -->
           <div style="
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
             color: white;
-            padding: 12px 20px;
+            padding: 16px 20px;
             border-radius: 12px;
             margin-bottom: 20px;
             text-align: center;
           ">
             <div style="
-              font-size: 24px;
+              font-size: 28px;
               font-weight: 800;
-              margin-bottom: 4px;
+              margin-bottom: 2px;
+              letter-spacing: -0.5px;
             ">
-              ${property.price ? `${property.price.toLocaleString()} ${property.currency || 'EUR'}` : 'Prix sur demande'}
+              ${property.price ? `${property.price.toLocaleString('fr-FR')} ${property.currency || 'EUR'}` : 'Prix sur demande'}
             </div>
-            <div style="
-              font-size: 14px;
-              opacity: 0.9;
-            ">
-              Prix de vente
-            </div>
+            ${property.price ? `
+              <div style="
+                font-size: 13px;
+                opacity: 0.9;
+                font-weight: 500;
+              ">
+                Prix de vente
+              </div>
+            ` : ''}
           </div>
           
+          <!-- Caractéristiques -->
           ${property.bedrooms || property.bathrooms || property.area ? `
             <div style="
-              display: grid;
-              grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-              gap: 16px;
-              margin-bottom: 20px;
+              display: flex;
+              gap: 12px;
               padding: 16px;
               background: #f8fafc;
               border-radius: 12px;
               border: 1px solid #e2e8f0;
+              justify-content: space-around;
             ">
               ${property.bedrooms ? `
-                <div style="text-align: center;">
-                  <div style="font-size: 24px; margin-bottom: 4px;">🛏️</div>
-                  <div style="font-weight: 600; color: #1a202c;">${property.bedrooms}</div>
-                  <div style="font-size: 12px; color: #64748b;">Chambres</div>
+                <div style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  gap: 4px;
+                  flex: 1;
+                ">
+                  <div style="font-size: 22px;">🛏️</div>
+                  <div style="
+                    font-weight: 700;
+                    color: #0f172a;
+                    font-size: 16px;
+                  ">${property.bedrooms}</div>
+                  <div style="
+                    font-size: 11px;
+                    color: #64748b;
+                    font-weight: 500;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  ">Chambres</div>
                 </div>
               ` : ''}
+              
               ${property.bathrooms ? `
-                <div style="text-align: center;">
-                  <div style="font-size: 24px; margin-bottom: 4px;">🚿</div>
-                  <div style="font-weight: 600; color: #1a202c;">${property.bathrooms}</div>
-                  <div style="font-size: 12px; color: #64748b;">Salles de bain</div>
+                <div style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  gap: 4px;
+                  flex: 1;
+                ">
+                  <div style="font-size: 22px;">🚿</div>
+                  <div style="
+                    font-weight: 700;
+                    color: #0f172a;
+                    font-size: 16px;
+                  ">${property.bathrooms}</div>
+                  <div style="
+                    font-size: 11px;
+                    color: #64748b;
+                    font-weight: 500;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  ">Salles de bain</div>
                 </div>
               ` : ''}
+              
               ${property.area ? `
-                <div style="text-align: center;">
-                  <div style="font-size: 24px; margin-bottom: 4px;">📐</div>
-                  <div style="font-weight: 600; color: #1a202c;">${property.area} ${property.area_unit || 'm²'}</div>
-                  <div style="font-size: 12px; color: #64748b;">Surface</div>
+                <div style="
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  gap: 4px;
+                  flex: 1;
+                ">
+                  <div style="font-size: 22px;">📐</div>
+                  <div style="
+                    font-weight: 700;
+                    color: #0f172a;
+                    font-size: 16px;
+                  ">${property.area}</div>
+                  <div style="
+                    font-size: 11px;
+                    color: #64748b;
+                    font-weight: 500;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  ">${property.area_unit || 'm²'}</div>
                 </div>
               ` : ''}
             </div>
           ` : ''}
           
-          ${property.url ? `
-            <div style="text-align: center; margin-top: 24px;">
-              <a href="${trackedUrl}" 
-                 style="
-                   display: inline-block;
-                   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-                   color: white;
-                   text-decoration: none;
-                   padding: 14px 32px;
-                   border-radius: 12px;
-                   font-weight: 700;
-                   font-size: 16px;
-                   transition: all 0.3s ease;
-                   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-                 "
-                 target="_blank">
-                ✨ Découvrir cette propriété
-              </a>
+          <!-- Call to action -->
+          <div style="
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+          ">
+            <div style="
+              display: inline-block;
+              background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+              color: white;
+              padding: 12px 28px;
+              border-radius: 10px;
+              font-weight: 700;
+              font-size: 15px;
+              box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            ">
+              ✨ Découvrir cette propriété →
             </div>
-          ` : ''}
+          </div>
         </div>
-      </div>
+      </a>
     `;
     }).join('');
 
