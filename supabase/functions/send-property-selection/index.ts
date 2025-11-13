@@ -39,6 +39,7 @@ const corsHeaders = {
 
 interface PropertySelectionRequest {
   leadId: string;
+  locale?: 'fr' | 'en'; // Language selected by the agent
   properties: Array<{
     id: string;
     title: string;
@@ -80,6 +81,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { 
       leadId, 
+      locale, // Language selected manually by the agent
       properties, 
       leadName, 
       leadEmail, 
@@ -133,7 +135,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    const leadLanguage = leadData?.preferred_language || 'fr';
+    // Use manually selected locale if provided, otherwise use lead's preferred language
+    const leadLanguage = locale || leadData?.preferred_language || 'fr';
+    console.log(`Using language: ${leadLanguage} (locale: ${locale}, preferred: ${leadData?.preferred_language})`);
 
     // Enregistrer d'abord la sélection pour obtenir l'ID
     const { data: selectionData, error: selectionError } = await supabase
@@ -417,15 +421,15 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <!-- Référence -->
-          ${property.reference ? `
-            <div style="
-              color: #64748b;
-              font-size: 14px;
-              margin-bottom: 16px;
-            ">
-              Réf. ${property.reference}
-            </div>
-          ` : ''}
+              ${property.reference ? `
+                <div style="
+                  color: #64748b;
+                  font-size: 14px;
+                  margin-bottom: 16px;
+                ">
+                  ${t.ref} ${property.reference}
+                </div>
+              ` : ''}
           
           <!-- Boutons CTA -->
           <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -473,13 +477,42 @@ const handler = async (req: Request): Promise<Response> => {
     `;
     }).join('');
 
+    // Translations based on selected language
+    const t = leadLanguage === 'en' ? {
+      emailTitle: 'Property Selection - GADAIT International',
+      greeting: 'Dear',
+      intro: 'We have selected properties that match your criteria and might interest you:',
+      readyNext: '🤝 Ready for the next step?',
+      teamMessage: 'Our team of experts is at your disposal to organize visits, answer your questions or support you in your investment project.',
+      callUs: '📞 Call us',
+      writeUs: 'Write to us',
+      regards: 'Best regards,',
+      teamSignature: 'The GADAIT International Team',
+      footer: 'GADAIT International - Your trusted partner for luxury real estate',
+      unsubscribe: 'You received this email because you are registered in our database. To unsubscribe, click here.',
+      ref: 'Ref.',
+    } : {
+      emailTitle: 'Sélection de propriétés - GADAIT International',
+      greeting: 'Bonjour',
+      intro: 'Nous avons sélectionné pour vous des propriétés correspondant à vos critères et qui pourraient vous intéresser :',
+      readyNext: '🤝 Prêt pour la suite ?',
+      teamMessage: 'Notre équipe d\'experts est à votre disposition pour organiser des visites, répondre à vos questions ou vous accompagner dans votre projet d\'investissement.',
+      callUs: '📞 Nous appeler',
+      writeUs: 'Nous écrire',
+      regards: 'Cordialement,',
+      teamSignature: 'L\'équipe GADAIT International',
+      footer: 'GADAIT International - Votre partenaire de confiance pour l\'immobilier de luxe',
+      unsubscribe: 'Vous recevez cet email car vous êtes inscrit dans notre base de données. Pour vous désinscrire, cliquez ici.',
+      ref: 'Réf.',
+    };
+
     const emailHtml = `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Sélection de propriétés - Gadait International</title>
+          <title>${t.emailTitle}</title>
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
             
@@ -565,7 +598,7 @@ const handler = async (req: Request): Promise<Response> => {
                   font-weight: 700;
                   margin: 0 0 16px 0;
                 ">
-                  🤝 Prêt pour la suite ?
+                  ${t.readyNext}
                 </h3>
                 <p style="
                   color: #4a5568;
@@ -573,7 +606,7 @@ const handler = async (req: Request): Promise<Response> => {
                   margin: 0 0 24px 0;
                   line-height: 1.6;
                 ">
-                  Notre équipe d'experts est à votre disposition pour organiser des visites, répondre à vos questions ou vous accompagner dans votre projet d'investissement.
+                  ${t.teamMessage}
                 </p>
                 <div style="
                   display: flex;
@@ -592,7 +625,7 @@ const handler = async (req: Request): Promise<Response> => {
                     font-size: 14px;
                     box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
                   ">
-                    📞 Nous appeler
+                    ${t.callUs}
                   </a>
                   <a href="mailto:contact@gadait-international.com" style="
                     display: inline-block;
@@ -605,7 +638,7 @@ const handler = async (req: Request): Promise<Response> => {
                     font-size: 14px;
                     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
                   ">
-                    Nous écrire
+                    ${t.writeUs}
                   </a>
                 </div>
               </div>
@@ -622,7 +655,7 @@ const handler = async (req: Request): Promise<Response> => {
                   margin: 0 0 8px 0;
                   font-weight: 500;
                 ">
-                  Cordialement,
+                  ${t.regards}
                 </p>
                 <p style="
                   color: #1a202c;
@@ -630,7 +663,7 @@ const handler = async (req: Request): Promise<Response> => {
                   font-weight: 700;
                   margin: 0;
                 ">
-                  L'équipe GADAIT International
+                  ${t.teamSignature}
                 </p>
               </div>
             </div>
@@ -642,7 +675,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Générer un objet d'email dynamique et personnalisé
     const generateSubject = () => {
       const count = properties.length;
-      const plural = count > 1 ? 's' : '';
+      const isEN = leadLanguage === 'en';
       
       // Extraire les informations clés des propriétés
       const countries = [...new Set(properties.map(p => p.country).filter(Boolean))];
@@ -660,49 +693,69 @@ const handler = async (req: Request): Promise<Response> => {
       // Cas 1: Une seule propriété - très spécifique avec localisation précise
       if (count === 1) {
         const prop = properties[0];
-        const type = prop.property_type || 'Propriété';
+        const type = prop.property_type || (isEN ? 'Property' : 'Propriété');
         // Prioriser location puis country
         const mainLocation = locations[0] || countries[0] || '';
         if (mainLocation) {
-          return `${type} d'exception à ${mainLocation}`;
+          return isEN 
+            ? `Exceptional ${type} in ${mainLocation}`
+            : `${type} d'exception à ${mainLocation}`;
         }
-        return `${type} d'exception - Sélection personnalisée`;
+        return isEN 
+          ? `Exceptional ${type} - Personalized Selection`
+          : `${type} d'exception - Sélection personnalisée`;
       }
       
       // Cas 2: Toutes les propriétés dans la même ville/localisation
       if (locations.length === 1 && locations[0]) {
         const location = locations[0];
         if (propertyTypes.length === 1 && propertyTypes[0]) {
-          return `${count} ${propertyTypes[0]}${plural} à ${location}`;
+          return isEN
+            ? `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} in ${location}`
+            : `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} à ${location}`;
         }
-        return `${count} bien${plural} d'exception à ${location}`;
+        return isEN
+          ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} in ${location}`
+          : `${count} bien${count > 1 ? 's' : ''} d'exception à ${location}`;
       }
       
       // Cas 3: Toutes les propriétés dans le même pays (mais différentes villes)
       if (countries.length === 1 && countries[0]) {
         const country = countries[0];
         if (propertyTypes.length === 1 && propertyTypes[0]) {
-          return `${count} ${propertyTypes[0]}${plural} ${country}`;
+          return isEN
+            ? `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} in ${country}`
+            : `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} ${country}`;
         }
-        return `${count} propriété${plural} d'exception ${country}`;
+        return isEN
+          ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} in ${country}`
+          : `${count} propriété${count > 1 ? 's' : ''} d'exception ${country}`;
       }
       
       // Cas 4: Plusieurs localisations spécifiques (2-3 villes)
       if (locations.length >= 2 && locations.length <= 3) {
-        return `${count} bien${plural} ${locations.join(', ')}`;
+        return isEN
+          ? `${count} ${count > 1 ? 'properties' : 'property'} in ${locations.join(', ')}`
+          : `${count} bien${count > 1 ? 's' : ''} ${locations.join(', ')}`;
       }
       
       // Cas 5: Plusieurs pays (2-3 pays)
       if (countries.length >= 2 && countries.length <= 3) {
-        return `${count} propriété${plural} ${countries.join(', ')}`;
+        return isEN
+          ? `${count} ${count > 1 ? 'properties' : 'property'} in ${countries.join(', ')}`
+          : `${count} propriété${count > 1 ? 's' : ''} ${countries.join(', ')}`;
       }
       
       // Cas par défaut - avec au moins un pays si disponible
       if (countries.length > 0) {
-        return `${count} bien${plural} d'exception - ${countries[0]} et plus`;
+        return isEN
+          ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} - ${countries[0]} and more`
+          : `${count} bien${count > 1 ? 's' : ''} d'exception - ${countries[0]} et plus`;
       }
       
-      return `${count} propriété${plural} d'exception - Sélection personnalisée`;
+      return isEN
+        ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} - Personalized Selection`
+        : `${count} propriété${count > 1 ? 's' : ''} d'exception - Sélection personnalisée`;
     };
 
     // Envoyer l'email

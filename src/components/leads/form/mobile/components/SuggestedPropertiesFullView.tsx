@@ -204,12 +204,14 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
     }
 
     try {
-      const language = getLeadLanguage();
+      // Use the manually selected locale instead of automatic detection
+      const language = locale; // Use the locale from the selector (FR/EN)
       const languagePrefix = language === 'en' ? '/en/properties/' : '/fr/proprietes/';
       
       const { data, error } = await supabase.functions.invoke('send-property-selection', {
         body: {
           leadId: lead.id,
+          locale: locale, // Pass the selected locale to the edge function
           properties: selectedProps.map(prop => {
             // Cast to any to access new DB columns not yet in generated types
             const property = prop as any;
