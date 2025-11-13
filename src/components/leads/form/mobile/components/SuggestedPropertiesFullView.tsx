@@ -249,6 +249,13 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
               area: prop.area,
               area_unit: prop.area_unit,
               property_type: prop.property_type,
+              reference: prop.reference,
+              source: property.source,
+              url_fr: property.url_fr,
+              url_en: property.url_en,
+              slug: property.slug,
+              slug_fr: property.slug_fr,
+              slug_en: property.slug_en,
             };
           }),
           leadName: lead.name,

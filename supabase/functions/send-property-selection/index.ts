@@ -52,6 +52,7 @@ interface PropertySelectionRequest {
     area?: number;
     area_unit?: string;
     property_type?: string;
+    reference?: string;
     source?: string;
     url_fr?: string;
     url_en?: string;
