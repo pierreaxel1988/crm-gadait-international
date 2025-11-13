@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getExternalPropertyUrl } from '@/utils/slugUtils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Home, Building2, Sparkles, Mail, Share2, X } from 'lucide-react';
+import { Home, Building2, Sparkles, Mail, Share2, X, Globe } from 'lucide-react';
 import PropertyCard from '@/components/pipeline/PropertyCard';
 import PropertySkeleton from '@/components/pipeline/PropertySkeleton';
 import { Card, CardContent } from '@/components/ui/card';
@@ -29,6 +29,7 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
   const [selectedProperties, setSelectedProperties] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [locale, setLocale] = useState<'fr' | 'en'>('fr');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -353,6 +354,27 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
 
           {/* Boutons d'action */}
           <div className="flex items-center gap-2">
+            {/* Sélecteur de langue */}
+            <div className="flex items-center gap-1 border border-border rounded-lg p-1 mr-2">
+              <Globe className="h-3 w-3 text-muted-foreground ml-1" />
+              <Button
+                variant={locale === 'fr' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setLocale('fr')}
+                className="h-7 px-2 text-xs font-futura"
+              >
+                FR
+              </Button>
+              <Button
+                variant={locale === 'en' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setLocale('en')}
+                className="h-7 px-2 text-xs font-futura"
+              >
+                EN
+              </Button>
+            </div>
+
             <Button
               variant={selectionMode ? "default" : "outline"}
               size="sm"
@@ -476,6 +498,7 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
                   selectionMode={selectionMode}
                   isSelected={selectedProperties.has(property.id)}
                   onToggleSelection={togglePropertySelection}
+                  locale={locale}
                 />
               ))}
             </div>
