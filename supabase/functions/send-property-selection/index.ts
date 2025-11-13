@@ -445,7 +445,7 @@ const handler = async (req: Request): Promise<Response> => {
                  border: 1px solid #e5e7eb;
                  box-sizing: border-box;
                ">
-              <span style="margin-right: 6px;">🔗</span> ${leadLanguage === 'en' ? 'View on GADAIT' : 'Voir sur GADAIT'}
+              ${leadLanguage === 'en' ? 'View on GADAIT' : 'Voir sur GADAIT'}
             </a>
             ${whatsappUrl ? `
             <a href="${whatsappUrl}" 
@@ -464,7 +464,7 @@ const handler = async (req: Request): Promise<Response> => {
                  border: none;
                  box-sizing: border-box;
                ">
-              <span style="margin-right: 6px;">💬</span> ${leadLanguage === 'en' ? 'Discuss on WhatsApp' : 'Discuter sur WhatsApp'}
+              ${leadLanguage === 'en' ? 'Discuss on WhatsApp' : 'Discuter sur WhatsApp'}
             </a>
             ` : ''}
           </div>
@@ -536,7 +536,7 @@ const handler = async (req: Request): Promise<Response> => {
                   font-weight: 700;
                   margin: 0 0 16px 0;
                 ">
-                  Bonjour ${leadName} 👋
+                  Bonjour ${leadName}
                 </h2>
                 <p style="
                   color: #4a5568;
@@ -605,7 +605,7 @@ const handler = async (req: Request): Promise<Response> => {
                     font-size: 14px;
                     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
                   ">
-                    ✉️ Nous écrire
+                    Nous écrire
                   </a>
                 </div>
               </div>
@@ -630,7 +630,7 @@ const handler = async (req: Request): Promise<Response> => {
                   font-weight: 700;
                   margin: 0;
                 ">
-                  🏡 L'équipe Gadait International
+                  L'équipe GADAIT International
                 </p>
               </div>
             </div>
