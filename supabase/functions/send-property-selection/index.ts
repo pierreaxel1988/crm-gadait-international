@@ -112,18 +112,24 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('id', leadId)
       .single();
 
-    // Récupérer le numéro WhatsApp de l'agent assigné
+    // Récupérer le numéro WhatsApp et l'email de l'agent assigné
     let agentWhatsApp = null;
+    let agentEmail = null;
     if (leadData?.assigned_to) {
       const { data: agentData } = await supabase
         .from('team_members')
-        .select('whatsapp_number')
+        .select('whatsapp_number, email')
         .eq('id', leadData.assigned_to)
         .single();
       
       if (agentData?.whatsapp_number) {
         agentWhatsApp = agentData.whatsapp_number;
         console.log(`Agent WhatsApp trouvé: ${agentWhatsApp}`);
+      }
+      
+      if (agentData?.email) {
+        agentEmail = agentData.email;
+        console.log(`Agent email trouvé: ${agentEmail}`);
       }
     }
 
@@ -678,10 +684,15 @@ const handler = async (req: Request): Promise<Response> => {
     };
 
     // Envoyer l'email
+    const ccEmails = ["pierre@gadait-international.com"];
+    if (agentEmail && agentEmail !== "pierre@gadait-international.com") {
+      ccEmails.push(agentEmail);
+    }
+    
     const emailResponse = await resend.emails.send({
       from: "Gadait International <noreply@gadait-international.com>",
       to: [leadEmail],
-      cc: ["pierre@gadait-international.com"], // Ajout de la copie
+      cc: ccEmails,
       subject: generateSubject(),
       html: emailHtml,
     });
