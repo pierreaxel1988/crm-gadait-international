@@ -105,6 +105,30 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Récupérer les informations du lead pour obtenir l'agent assigné et la langue
+    const { data: leadData } = await supabase
+      .from('leads')
+      .select('assigned_to, preferred_language')
+      .eq('id', leadId)
+      .single();
+
+    // Récupérer le numéro WhatsApp de l'agent assigné
+    let agentWhatsApp = null;
+    if (leadData?.assigned_to) {
+      const { data: agentData } = await supabase
+        .from('team_members')
+        .select('whatsapp_number')
+        .eq('id', leadData.assigned_to)
+        .single();
+      
+      if (agentData?.whatsapp_number) {
+        agentWhatsApp = agentData.whatsapp_number;
+        console.log(`Agent WhatsApp trouvé: ${agentWhatsApp}`);
+      }
+    }
+
+    const leadLanguage = leadData?.preferred_language || 'fr';
+
     // Enregistrer d'abord la sélection pour obtenir l'ID
     const { data: selectionData, error: selectionError } = await supabase
       .from('property_selections')
@@ -134,10 +158,19 @@ const handler = async (req: Request): Promise<Response> => {
     // Générer le contenu HTML de l'email avec un design moderne et URLs trackées
     const propertiesHtml = properties.map((property, index) => {
       // Créer l'URL finale vers gadait-international.com
-      const externalUrl = getExternalPropertyUrl(property, 'fr');
+      const externalUrl = getExternalPropertyUrl(property, leadLanguage);
       
       // Créer l'URL trackée qui redirigera vers gadait-international.com
       const trackedUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/track-property-click?selection_id=${selectionData.id}&property_id=${property.id}&redirect_url=${encodeURIComponent(externalUrl)}`;
+      
+      // Créer le message WhatsApp pré-rempli
+      const whatsappMessage = leadLanguage === 'en' 
+        ? `Hello GADAIT International, I would like more information about this property.\nLink: ${externalUrl}`
+        : `Bonjour GADAIT International, je souhaite avoir plus d'informations sur ce bien.\nLien : ${externalUrl}`;
+      
+      const whatsappUrl = agentWhatsApp 
+        ? `https://wa.me/${agentWhatsApp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappMessage)}`
+        : null;
       
       // Formater le prix comme dans PropertyCard
       const formatPrice = (price?: number, currency?: string) => {
@@ -388,25 +421,47 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
           ` : ''}
           
-          <!-- Bouton CTA -->
-          <a href="${trackedUrl}" 
-             target="_blank" 
-             style="
-               display: block;
-               width: 100%;
-               background: white;
-               color: #1e293b;
-               text-align: center;
-               padding: 10px 20px;
-               border-radius: 8px;
-               font-weight: 600;
-               font-size: 14px;
-               text-decoration: none;
-               border: 1px solid #e5e7eb;
-               box-sizing: border-box;
-             ">
-            <span style="margin-right: 6px;">🔗</span> Voir sur Gadait
-          </a>
+          <!-- Boutons CTA -->
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <a href="${trackedUrl}" 
+               target="_blank" 
+               style="
+                 display: block;
+                 width: 100%;
+                 background: white;
+                 color: #1e293b;
+                 text-align: center;
+                 padding: 10px 20px;
+                 border-radius: 8px;
+                 font-weight: 600;
+                 font-size: 14px;
+                 text-decoration: none;
+                 border: 1px solid #e5e7eb;
+                 box-sizing: border-box;
+               ">
+              <span style="margin-right: 6px;">🔗</span> ${leadLanguage === 'en' ? 'View on GADAIT' : 'Voir sur GADAIT'}
+            </a>
+            ${whatsappUrl ? `
+            <a href="${whatsappUrl}" 
+               target="_blank" 
+               style="
+                 display: block;
+                 width: 100%;
+                 background: #25D366;
+                 color: white;
+                 text-align: center;
+                 padding: 10px 20px;
+                 border-radius: 8px;
+                 font-weight: 600;
+                 font-size: 14px;
+                 text-decoration: none;
+                 border: none;
+                 box-sizing: border-box;
+               ">
+              <span style="margin-right: 6px;">💬</span> ${leadLanguage === 'en' ? 'Discuss on WhatsApp' : 'Discuter sur WhatsApp'}
+            </a>
+            ` : ''}
+          </div>
         </div>
       </div>
     `;
