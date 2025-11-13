@@ -619,12 +619,56 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
+    // Générer un objet d'email dynamique et personnalisé
+    const generateSubject = () => {
+      const count = properties.length;
+      const plural = count > 1 ? 's' : '';
+      
+      // Extraire les informations clés des propriétés
+      const countries = [...new Set(properties.map(p => p.country).filter(Boolean))];
+      const propertyTypes = [...new Set(properties.map(p => p.property_type).filter(Boolean))];
+      
+      // Cas 1: Une seule propriété - très spécifique
+      if (count === 1) {
+        const prop = properties[0];
+        const type = prop.property_type || 'Propriété';
+        const location = prop.country || prop.location || '';
+        if (location) {
+          return `${type} exclusive ${location} - Sélectionnée pour vous`;
+        }
+        return `${type} exclusive - Sélectionnée pour vous`;
+      }
+      
+      // Cas 2: Toutes les propriétés dans le même pays
+      if (countries.length === 1 && countries[0]) {
+        const country = countries[0];
+        // Si toutes les propriétés sont du même type
+        if (propertyTypes.length === 1 && propertyTypes[0]) {
+          return `${count} ${propertyTypes[0]}${plural} en ${country} - Sélection personnalisée`;
+        }
+        return `${count} propriété${plural} en ${country} - Sélection personnalisée`;
+      }
+      
+      // Cas 3: Un seul type de propriété mais plusieurs pays
+      if (propertyTypes.length === 1 && propertyTypes[0]) {
+        return `${count} ${propertyTypes[0]}${plural} d'exception - Sélection personnalisée`;
+      }
+      
+      // Cas 4: Plusieurs types dans plusieurs pays
+      if (countries.length > 1 && countries.length <= 3) {
+        return `${count} propriété${plural} ${countries.join(', ')} - Sélection personnalisée`;
+      }
+      
+      // Cas par défaut
+      return `${count} propriété${plural} d'exception - Sélectionnées pour vous`;
+    };
+
     // Envoyer l'email
     const emailResponse = await resend.emails.send({
       from: "Gadait International <noreply@gadait-international.com>",
       to: [leadEmail],
       cc: ["pierre@gadait-international.com"], // Ajout de la copie
-      subject: `${criteriaLabel} - ${properties.length} propriété${properties.length > 1 ? 's' : ''} sélectionnée${properties.length > 1 ? 's' : ''} pour vous`,
+      subject: generateSubject(),
       html: emailHtml,
     });
 
