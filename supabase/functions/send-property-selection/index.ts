@@ -463,48 +463,53 @@ const handler = async (req: Request): Promise<Response> => {
         <body style="margin: 0; padding: 0; background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); min-height: 100vh;">
           <div class="container">
             <div class="header">
-              <div style="margin-bottom: 24px;">
+              <div style="margin-bottom: 32px;">
                 <div style="
                   background: white;
-                  padding: 12px 20px;
-                  border-radius: 12px;
+                  padding: 16px 28px;
+                  border-radius: 16px;
                   display: inline-block;
+                  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
                 ">
                   <img src="https://www.gadait-international.com/static/media/logo.c86ab9e0598ca0f55b0db0ab4a7c6256.svg" 
                        alt="GADAIT International" 
                        style="
-                         height: 40px;
+                         height: 48px;
                          width: auto;
                          display: block;
                        " />
                 </div>
               </div>
               <h1 style="
-                font-size: 32px;
-                font-weight: 800;
-                margin: 0 0 8px 0;
-                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                font-size: 36px;
+                font-weight: 900;
+                margin: 0 0 12px 0;
+                text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                letter-spacing: -0.5px;
+                line-height: 1.2;
               ">
-                ✨ ${criteriaLabel}
+                ${criteriaLabel}
               </h1>
               <p style="
-                font-size: 18px;
-                margin: 0;
-                opacity: 0.9;
-                font-weight: 500;
+                font-size: 19px;
+                margin: 0 0 24px 0;
+                opacity: 0.95;
+                font-weight: 600;
+                letter-spacing: 0.2px;
               ">
                 Sélection personnalisée par ${senderName}
               </p>
               <div style="
-                margin-top: 16px;
-                padding: 8px 16px;
-                background: rgba(255,255,255,0.2);
-                border-radius: 20px;
+                margin-top: 0;
+                padding: 12px 24px;
+                background: rgba(255,255,255,0.25);
+                border-radius: 24px;
                 display: inline-block;
-                font-size: 14px;
-                font-weight: 600;
+                font-size: 15px;
+                font-weight: 700;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
               ">
-                🏠 ${properties.length} propriété${properties.length > 1 ? 's' : ''} sélectionnée${properties.length > 1 ? 's' : ''}
+                ${properties.length} propriété${properties.length > 1 ? 's' : ''} d'exception pour vous
               </div>
             </div>
             
