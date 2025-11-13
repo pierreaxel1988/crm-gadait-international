@@ -646,41 +646,63 @@ const handler = async (req: Request): Promise<Response> => {
       
       // Extraire les informations clés des propriétés
       const countries = [...new Set(properties.map(p => p.country).filter(Boolean))];
+      const locations = [...new Set(properties.map(p => {
+        // Extraire la ville/région de la localisation complète
+        const loc = p.location || '';
+        if (loc.includes(',')) {
+          // Prendre la partie avant la première virgule (généralement la ville)
+          return loc.split(',')[0].trim();
+        }
+        return loc;
+      }).filter(Boolean))];
       const propertyTypes = [...new Set(properties.map(p => p.property_type).filter(Boolean))];
       
-      // Cas 1: Une seule propriété - très spécifique
+      // Cas 1: Une seule propriété - très spécifique avec localisation précise
       if (count === 1) {
         const prop = properties[0];
         const type = prop.property_type || 'Propriété';
-        const location = prop.country || prop.location || '';
-        if (location) {
-          return `${type} exclusive ${location} - Sélectionnée pour vous`;
+        // Prioriser location puis country
+        const mainLocation = locations[0] || countries[0] || '';
+        if (mainLocation) {
+          return `${type} d'exception à ${mainLocation}`;
         }
-        return `${type} exclusive - Sélectionnée pour vous`;
+        return `${type} d'exception - Sélection personnalisée`;
       }
       
-      // Cas 2: Toutes les propriétés dans le même pays
+      // Cas 2: Toutes les propriétés dans la même ville/localisation
+      if (locations.length === 1 && locations[0]) {
+        const location = locations[0];
+        if (propertyTypes.length === 1 && propertyTypes[0]) {
+          return `${count} ${propertyTypes[0]}${plural} à ${location}`;
+        }
+        return `${count} bien${plural} d'exception à ${location}`;
+      }
+      
+      // Cas 3: Toutes les propriétés dans le même pays (mais différentes villes)
       if (countries.length === 1 && countries[0]) {
         const country = countries[0];
-        // Si toutes les propriétés sont du même type
         if (propertyTypes.length === 1 && propertyTypes[0]) {
-          return `${count} ${propertyTypes[0]}${plural} en ${country} - Sélection personnalisée`;
+          return `${count} ${propertyTypes[0]}${plural} ${country}`;
         }
-        return `${count} propriété${plural} en ${country} - Sélection personnalisée`;
+        return `${count} propriété${plural} d'exception ${country}`;
       }
       
-      // Cas 3: Un seul type de propriété mais plusieurs pays
-      if (propertyTypes.length === 1 && propertyTypes[0]) {
-        return `${count} ${propertyTypes[0]}${plural} d'exception - Sélection personnalisée`;
+      // Cas 4: Plusieurs localisations spécifiques (2-3 villes)
+      if (locations.length >= 2 && locations.length <= 3) {
+        return `${count} bien${plural} ${locations.join(', ')}`;
       }
       
-      // Cas 4: Plusieurs types dans plusieurs pays
-      if (countries.length > 1 && countries.length <= 3) {
-        return `${count} propriété${plural} ${countries.join(', ')} - Sélection personnalisée`;
+      // Cas 5: Plusieurs pays (2-3 pays)
+      if (countries.length >= 2 && countries.length <= 3) {
+        return `${count} propriété${plural} ${countries.join(', ')}`;
       }
       
-      // Cas par défaut
-      return `${count} propriété${plural} d'exception - Sélectionnées pour vous`;
+      // Cas par défaut - avec au moins un pays si disponible
+      if (countries.length > 0) {
+        return `${count} bien${plural} d'exception - ${countries[0]} et plus`;
+      }
+      
+      return `${count} propriété${plural} d'exception - Sélection personnalisée`;
     };
 
     // Envoyer l'email
