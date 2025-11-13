@@ -131,248 +131,270 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sélection enregistrée:", selectionData);
 
     // Générer le contenu HTML de l'email avec un design moderne et URLs trackées
-    const propertiesHtml = properties.map(property => {
+    const propertiesHtml = properties.map((property, index) => {
       // Créer l'URL finale vers gadait-international.com
       const externalUrl = getExternalPropertyUrl(property, 'fr');
       
       // Créer l'URL trackée qui redirigera vers gadait-international.com
       const trackedUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/track-property-click?selection_id=${selectionData.id}&property_id=${property.id}&redirect_url=${encodeURIComponent(externalUrl)}`;
       
+      // Formater le prix comme dans PropertyCard
+      const formatPrice = (price?: number, currency?: string) => {
+        if (!price) return 'Prix sur demande';
+        const formatted = price >= 1000000 ? `${(price / 1000000).toFixed(1)}M` : price >= 1000 ? `${(price / 1000).toFixed(0)}K` : price.toLocaleString('fr-FR');
+        return `${formatted} ${currency || 'EUR'}`;
+      };
+
+      // Get country flag
+      const getCountryFlag = (country?: string) => {
+        if (!country || country === 'Non spécifié') return '';
+        const flags: { [key: string]: string } = {
+          'France': '🇫🇷',
+          'Mauritius': '🇲🇺',
+          'Maurice': '🇲🇺',
+          'Spain': '🇪🇸',
+          'Espagne': '🇪🇸',
+          'Portugal': '🇵🇹',
+          'Italy': '🇮🇹',
+          'Italie': '🇮🇹',
+          'Greece': '🇬🇷',
+          'Grèce': '🇬🇷',
+          'Dubai': '🇦🇪',
+          'United Arab Emirates': '🇦🇪',
+          'Émirats arabes unis': '🇦🇪',
+          'Thailand': '🇹🇭',
+          'Thaïlande': '🇹🇭',
+          'USA': '🇺🇸',
+          'États-Unis': '🇺🇸',
+          'United States': '🇺🇸',
+        };
+        return flags[country] || '';
+      };
+
+      const countryFlag = getCountryFlag(property.location?.split(',').pop()?.trim());
+      
       return `
-      <!-- Carte entièrement cliquable -->
-      <a href="${trackedUrl}"
-         target="_blank" 
-         style="
-           display: block;
-           text-decoration: none;
-           color: inherit;
-           background: white;
-           border-radius: 16px;
-           overflow: hidden;
-           margin-bottom: 24px;
-           box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-           border: 1px solid #e2e8f0;
-           transition: all 0.3s ease;
-         "
-         onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.12)';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 12px rgba(0, 0, 0, 0.08)';">
+      <!-- Carte de propriété -->
+      <div style="
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+      ">
         
         ${property.main_image ? `
-          <!-- Image de la propriété -->
-          <div style="position: relative; height: 280px; overflow: hidden; background: #f1f5f9;">
-            <img src="${property.main_image}" 
-                 alt="${property.title}" 
-                 style="
-                   width: 100%; 
-                   height: 100%; 
-                   object-fit: cover;
-                   display: block;
-                 " />
+          <!-- Image de la propriété avec overlay -->
+          <div style="position: relative; height: 300px; overflow: hidden; background: #f3f4f6;">
+            <a href="${trackedUrl}" target="_blank" style="display: block; width: 100%; height: 100%;">
+              <img src="${property.main_image}" 
+                   alt="${property.title}" 
+                   style="
+                     width: 100%; 
+                     height: 100%; 
+                     object-fit: cover;
+                     display: block;
+                   " />
+            </a>
             
-            <!-- Badge type de propriété -->
+            <!-- Overlay gradient -->
+            <div style="
+              position: absolute;
+              inset: 0;
+              background: linear-gradient(to top, rgba(0,0,0,0.4), transparent, transparent);
+              pointer-events: none;
+            "></div>
+            
+            <!-- Badge type de propriété (en haut à gauche) -->
             ${property.property_type ? `
               <div style="
                 position: absolute;
                 top: 16px;
-                right: 16px;
-                background: rgba(0, 0, 0, 0.75);
-                backdrop-filter: blur(8px);
-                color: white;
-                padding: 8px 16px;
-                border-radius: 24px;
-                font-size: 13px;
+                left: 16px;
+                background: rgba(255, 255, 255, 0.95);
+                color: #1e293b;
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-size: 12px;
                 font-weight: 600;
-                text-transform: capitalize;
+                text-transform: lowercase;
+                border: 1px solid rgba(226, 232, 240, 0.8);
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
               ">
                 ${property.property_type}
               </div>
             ` : ''}
             
-            <!-- Badge de lien cliquable -->
+            <!-- Prix (en haut à droite) -->
+            <div style="
+              position: absolute;
+              top: 16px;
+              right: 16px;
+              background: rgba(255, 255, 255, 0.9);
+              color: #1e293b;
+              padding: 6px 12px;
+              border-radius: 6px;
+              font-size: 14px;
+              font-weight: 700;
+              border: 1px solid rgba(226, 232, 240, 0.8);
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            ">
+              ${formatPrice(property.price, property.currency)}
+            </div>
+            
+            <!-- Caractéristiques (en bas à gauche) -->
             <div style="
               position: absolute;
               bottom: 16px;
-              right: 16px;
-              background: white;
-              padding: 10px 16px;
-              border-radius: 24px;
-              font-size: 13px;
-              font-weight: 600;
-              color: #2563eb;
-              box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-              display: inline-flex;
-              align-items: center;
-              gap: 6px;
-            ">
-              <span style="font-size: 14px;">🔗</span> Voir sur gadait-international.com
-            </div>
-          </div>
-        ` : ''}
-        
-        <!-- Contenu de la carte -->
-        <div style="padding: 24px;">
-          <!-- Titre -->
-          <h3 style="
-            margin: 0 0 12px 0;
-            color: #0f172a;
-            font-size: 20px;
-            font-weight: 700;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          ">
-            ${property.title}
-          </h3>
-          
-          <!-- Localisation -->
-          <div style="
-            display: flex;
-            align-items: center;
-            margin-bottom: 16px;
-            color: #64748b;
-            font-size: 15px;
-          ">
-            <span style="margin-right: 6px; font-size: 16px;">📍</span>
-            <span style="font-weight: 500;">${property.location}</span>
-          </div>
-          
-          <!-- Prix -->
-          <div style="
-            background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
-            color: white;
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            text-align: center;
-          ">
-            <div style="
-              font-size: 28px;
-              font-weight: 800;
-              margin-bottom: 2px;
-              letter-spacing: -0.5px;
-            ">
-              ${property.price ? `${property.price.toLocaleString('fr-FR')} ${property.currency || 'EUR'}` : 'Prix sur demande'}
-            </div>
-            ${property.price ? `
-              <div style="
-                font-size: 13px;
-                opacity: 0.9;
-                font-weight: 500;
-              ">
-                Prix de vente
-              </div>
-            ` : ''}
-          </div>
-          
-          <!-- Caractéristiques -->
-          ${property.bedrooms || property.bathrooms || property.area ? `
-            <div style="
+              left: 16px;
               display: flex;
-              gap: 12px;
-              padding: 16px;
-              background: #f8fafc;
-              border-radius: 12px;
-              border: 1px solid #e2e8f0;
-              justify-content: space-around;
+              gap: 8px;
+              flex-wrap: wrap;
             ">
-              ${property.bedrooms ? `
+              ${property.area ? `
                 <div style="
-                  display: flex;
-                  flex-direction: column;
+                  background: rgba(255, 255, 255, 0.9);
+                  color: #1e293b;
+                  padding: 6px 10px;
+                  border-radius: 6px;
+                  font-size: 11px;
+                  font-weight: 600;
+                  border: 1px solid rgba(226, 232, 240, 0.8);
+                  display: inline-flex;
                   align-items: center;
                   gap: 4px;
-                  flex: 1;
                 ">
-                  <div style="font-size: 22px;">🛏️</div>
-                  <div style="
-                    font-weight: 700;
-                    color: #0f172a;
-                    font-size: 16px;
-                  ">${property.bedrooms}</div>
-                  <div style="
-                    font-size: 11px;
-                    color: #64748b;
-                    font-weight: 500;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                  ">Chambres</div>
+                  <span style="font-size: 12px;">📐</span>
+                  ${property.area} ${property.area_unit || 'm²'}
+                </div>
+              ` : ''}
+              
+              ${property.bedrooms ? `
+                <div style="
+                  background: rgba(255, 255, 255, 0.9);
+                  color: #1e293b;
+                  padding: 6px 10px;
+                  border-radius: 6px;
+                  font-size: 11px;
+                  font-weight: 600;
+                  border: 1px solid rgba(226, 232, 240, 0.8);
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 4px;
+                ">
+                  <span style="font-size: 12px;">🛏️</span>
+                  ${property.bedrooms}
                 </div>
               ` : ''}
               
               ${property.bathrooms ? `
                 <div style="
-                  display: flex;
-                  flex-direction: column;
+                  background: rgba(255, 255, 255, 0.9);
+                  color: #1e293b;
+                  padding: 6px 10px;
+                  border-radius: 6px;
+                  font-size: 11px;
+                  font-weight: 600;
+                  border: 1px solid rgba(226, 232, 240, 0.8);
+                  display: inline-flex;
                   align-items: center;
                   gap: 4px;
-                  flex: 1;
                 ">
-                  <div style="font-size: 22px;">🚿</div>
-                  <div style="
-                    font-weight: 700;
-                    color: #0f172a;
-                    font-size: 16px;
-                  ">${property.bathrooms}</div>
-                  <div style="
-                    font-size: 11px;
-                    color: #64748b;
-                    font-weight: 500;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                  ">Salles de bain</div>
+                  <span style="font-size: 12px;">🚿</span>
+                  ${property.bathrooms}
                 </div>
               ` : ''}
-              
-              ${property.area ? `
-                <div style="
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  gap: 4px;
-                  flex: 1;
-                ">
-                  <div style="font-size: 22px;">📐</div>
-                  <div style="
-                    font-weight: 700;
-                    color: #0f172a;
-                    font-size: 16px;
-                  ">${property.area}</div>
-                  <div style="
-                    font-size: 11px;
-                    color: #64748b;
-                    font-weight: 500;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                  ">${property.area_unit || 'm²'}</div>
-                </div>
-              ` : ''}
+            </div>
+          </div>
+        ` : ''}
+        
+        <!-- Contenu de la carte -->
+        <div style="padding: 20px;">
+          <!-- Titre -->
+          <a href="${trackedUrl}" target="_blank" style="text-decoration: none; color: inherit;">
+            <h3 style="
+              margin: 0 0 12px 0;
+              color: #1e293b;
+              font-size: 18px;
+              font-weight: 600;
+              line-height: 1.4;
+            ">
+              ${property.title}
+            </h3>
+          </a>
+          
+          <!-- Localisation et pays -->
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 8px;
+          ">
+            <div style="
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              color: #64748b;
+              font-size: 14px;
+              flex: 1;
+            ">
+              <span style="font-size: 14px;">📍</span>
+              <span style="font-weight: 500;">${property.location || 'Localisation non spécifiée'}</span>
+            </div>
+            
+            ${countryFlag ? `
+              <div style="
+                background: rgba(241, 245, 249, 0.5);
+                color: #1e293b;
+                padding: 4px 10px;
+                border-radius: 6px;
+                font-size: 11px;
+                font-weight: 600;
+                border: 1px solid #e2e8f0;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+              ">
+                <span>${countryFlag}</span>
+                ${property.location?.split(',').pop()?.trim() || ''}
+              </div>
+            ` : ''}
+          </div>
+          
+          <!-- Référence -->
+          ${property.reference ? `
+            <div style="
+              color: #64748b;
+              font-size: 14px;
+              margin-bottom: 16px;
+            ">
+              Réf. ${property.reference}
             </div>
           ` : ''}
           
-          <!-- Call to action -->
-          <div style="
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-            text-align: center;
-          ">
-            <div style="
-              display: inline-block;
-              background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-              color: white;
-              padding: 12px 28px;
-              border-radius: 10px;
-              font-weight: 700;
-              font-size: 15px;
-              box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-            ">
-              ✨ Découvrir cette propriété →
-            </div>
-          </div>
+          <!-- Bouton CTA -->
+          <a href="${trackedUrl}" 
+             target="_blank" 
+             style="
+               display: block;
+               width: 100%;
+               background: white;
+               color: #1e293b;
+               text-align: center;
+               padding: 10px 20px;
+               border-radius: 8px;
+               font-weight: 600;
+               font-size: 14px;
+               text-decoration: none;
+               border: 1px solid #e5e7eb;
+               box-sizing: border-box;
+             ">
+            <span style="margin-right: 6px;">🔗</span> Voir sur Gadait
+          </a>
         </div>
-      </a>
+      </div>
     `;
     }).join('');
 
