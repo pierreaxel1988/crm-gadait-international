@@ -165,6 +165,35 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sélection enregistrée:", selectionData);
 
+    // Translations based on selected language (must be defined BEFORE use)
+    const t = leadLanguage === 'en' ? {
+      emailTitle: 'Property Selection - GADAIT International',
+      greeting: 'Dear',
+      intro: 'We have selected properties that match your criteria and might interest you:',
+      readyNext: '🤝 Ready for the next step?',
+      teamMessage: 'Our team of experts is at your disposal to organize visits, answer your questions or support you in your investment project.',
+      callUs: '📞 Call us',
+      writeUs: 'Write to us',
+      regards: 'Best regards,',
+      teamSignature: 'The GADAIT International Team',
+      footer: 'GADAIT International - Your trusted partner for luxury real estate',
+      unsubscribe: 'You received this email because you are registered in our database. To unsubscribe, click here.',
+      ref: 'Ref.',
+    } : {
+      emailTitle: 'Sélection de propriétés - GADAIT International',
+      greeting: 'Bonjour',
+      intro: 'Nous avons sélectionné pour vous des propriétés correspondant à vos critères et qui pourraient vous intéresser :',
+      readyNext: '🤝 Prêt pour la suite ?',
+      teamMessage: 'Notre équipe d\'experts est à votre disposition pour organiser des visites, répondre à vos questions ou vous accompagner dans votre projet d\'investissement.',
+      callUs: '📞 Nous appeler',
+      writeUs: 'Nous écrire',
+      regards: 'Cordialement,',
+      teamSignature: 'L\'équipe GADAIT International',
+      footer: 'GADAIT International - Votre partenaire de confiance pour l\'immobilier de luxe',
+      unsubscribe: 'Vous recevez cet email car vous êtes inscrit dans notre base de données. Pour vous désinscrire, cliquez ici.',
+      ref: 'Réf.',
+    };
+
     // Générer le contenu HTML de l'email avec un design moderne et URLs trackées
     const propertiesHtml = properties.map((property, index) => {
       // Créer l'URL finale vers gadait-international.com
@@ -476,35 +505,6 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
     }).join('');
-
-    // Translations based on selected language
-    const t = leadLanguage === 'en' ? {
-      emailTitle: 'Property Selection - GADAIT International',
-      greeting: 'Dear',
-      intro: 'We have selected properties that match your criteria and might interest you:',
-      readyNext: '🤝 Ready for the next step?',
-      teamMessage: 'Our team of experts is at your disposal to organize visits, answer your questions or support you in your investment project.',
-      callUs: '📞 Call us',
-      writeUs: 'Write to us',
-      regards: 'Best regards,',
-      teamSignature: 'The GADAIT International Team',
-      footer: 'GADAIT International - Your trusted partner for luxury real estate',
-      unsubscribe: 'You received this email because you are registered in our database. To unsubscribe, click here.',
-      ref: 'Ref.',
-    } : {
-      emailTitle: 'Sélection de propriétés - GADAIT International',
-      greeting: 'Bonjour',
-      intro: 'Nous avons sélectionné pour vous des propriétés correspondant à vos critères et qui pourraient vous intéresser :',
-      readyNext: '🤝 Prêt pour la suite ?',
-      teamMessage: 'Notre équipe d\'experts est à votre disposition pour organiser des visites, répondre à vos questions ou vous accompagner dans votre projet d\'investissement.',
-      callUs: '📞 Nous appeler',
-      writeUs: 'Nous écrire',
-      regards: 'Cordialement,',
-      teamSignature: 'L\'équipe GADAIT International',
-      footer: 'GADAIT International - Votre partenaire de confiance pour l\'immobilier de luxe',
-      unsubscribe: 'Vous recevez cet email car vous êtes inscrit dans notre base de données. Pour vous désinscrire, cliquez ici.',
-      ref: 'Réf.',
-    };
 
     const emailHtml = `
       <!DOCTYPE html>
