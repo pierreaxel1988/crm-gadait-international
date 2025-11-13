@@ -463,6 +463,11 @@ const handler = async (req: Request): Promise<Response> => {
         <body style="margin: 0; padding: 0; background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); min-height: 100vh;">
           <div class="container">
             <div class="content" style="padding-top: 40px;">
+              <div style="text-align: center; margin-bottom: 40px;">
+                <img src="https://hxqoqkfnhbpwzkjgukrc.supabase.co/storage/v1/object/public/properties/logo-gadait.svg" 
+                     alt="GADAIT International" 
+                     style="height: 42px; width: auto;" />
+              </div>
               <div style="margin-bottom: 32px;">
                 <h2 style="
                   color: #1a202c;
