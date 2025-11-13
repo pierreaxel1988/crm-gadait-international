@@ -323,8 +323,9 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
   }
 
   return (
-    <div className="space-y-4 pt-6 border-t border-gray-200">
-      <div className="space-y-6">
+    <>
+      <div className="space-y-4 pt-6 border-t border-gray-200">
+        <div className="space-y-6">
         {/* En-tête moderne avec boutons de sélection */}
         <div className="flex items-start justify-between">
           <div className="space-y-2">
@@ -495,6 +496,29 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
         )}
       </div>
     </div>
+
+    {/* Bouton fixe en bas quand des propriétés sont sélectionnées */}
+    {selectedProperties.size > 0 && (
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-loro-night border-t shadow-lg p-4 z-50 animate-[slide-up_0.3s_ease-out]">
+        <div className="flex gap-3">
+          <Button
+            onClick={clearSelection}
+            variant="outline"
+            className="flex-1 font-futura"
+          >
+            Annuler ({selectedProperties.size})
+          </Button>
+          <Button
+            onClick={sendPropertiesToClient}
+            className="flex-1 font-futura bg-loro-sand text-loro-navy hover:bg-loro-sand/90"
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            Envoyer Sélection
+          </Button>
+        </div>
+      </div>
+    )}
+  </>
   );
 };
 
