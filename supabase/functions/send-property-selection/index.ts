@@ -44,6 +44,7 @@ interface PropertySelectionRequest {
     id: string;
     title: string;
     location: string;
+    country?: string;
     price: number;
     currency: string;
     main_image: string;
@@ -52,6 +53,8 @@ interface PropertySelectionRequest {
     bathrooms?: number;
     area?: number;
     area_unit?: string;
+    land_area?: number;
+    land_area_unit?: string;
     property_type?: string;
     reference?: string;
     source?: string;
