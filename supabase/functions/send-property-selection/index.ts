@@ -107,10 +107,10 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Récupérer les informations du lead pour obtenir l'agent assigné et la langue
+    // Récupérer les informations du lead pour obtenir l'agent assigné, la langue et le type de pipeline
     const { data: leadData } = await supabase
       .from('leads')
-      .select('assigned_to, preferred_language')
+      .select('assigned_to, preferred_language, pipeline_type, property_use')
       .eq('id', leadId)
       .single();
 
@@ -673,7 +673,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     // Générer un objet d'email dynamique et personnalisé basé sur "Votre projet à..."
-    const generateSubject = () => {
+    const generateSubject = (pipelineType?: string, propertyUse?: string) => {
       const count = properties.length;
       const isEN = leadLanguage === 'en';
       
@@ -691,33 +691,33 @@ const handler = async (req: Request): Promise<Response> => {
       const propertyTypes = [...new Set(properties.map(p => p.property_type).filter(Boolean))];
       
       // Déterminer le contexte du projet selon le lead
-      const pipelineType = lead?.pipeline_type || 'purchase';
-      const propertyUse = lead?.property_use;
+      const leadPipelineType = pipelineType || 'purchase';
+      const leadPropertyUse = propertyUse;
       
       // Fonction pour obtenir le préfixe "Votre projet"
       const getProjectPrefix = (): string => {
         // Cas spécifique: Investissement
-        if (pipelineType === 'purchase' && propertyUse === 'investment') {
+        if (leadPipelineType === 'purchase' && leadPropertyUse === 'investment') {
           return isEN ? 'Your investment project' : 'Votre projet d\'investissement';
         }
         
         // Cas spécifique: Résidence principale
-        if (pipelineType === 'purchase' && propertyUse === 'primary_residence') {
+        if (leadPipelineType === 'purchase' && leadPropertyUse === 'primary_residence') {
           return isEN ? 'Your future residence' : 'Votre future résidence';
         }
         
         // Cas spécifique: Résidence secondaire / Vacances
-        if (pipelineType === 'purchase' && (propertyUse === 'secondary_residence' || propertyUse === 'vacation')) {
+        if (leadPipelineType === 'purchase' && (leadPropertyUse === 'secondary_residence' || leadPropertyUse === 'vacation')) {
           return isEN ? 'Your vacation home' : 'Votre résidence de vacances';
         }
         
         // Cas spécifique: Location
-        if (pipelineType === 'rental') {
+        if (leadPipelineType === 'rental') {
           return isEN ? 'Your rental project' : 'Votre projet de location';
         }
         
         // Cas spécifique: Propriétaire (vente)
-        if (pipelineType === 'owners') {
+        if (leadPipelineType === 'owners') {
           return isEN ? 'Opportunities for your property' : 'Opportunités pour votre bien';
         }
         
@@ -832,7 +832,7 @@ const handler = async (req: Request): Promise<Response> => {
       from: "Gadait International <noreply@gadait-international.com>",
       to: [leadEmail],
       cc: ccEmails,
-      subject: generateSubject(),
+      subject: generateSubject(leadData?.pipeline_type, leadData?.property_use),
       html: emailHtml,
     });
 
