@@ -30,7 +30,51 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
   const [selectionMode, setSelectionMode] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [locale, setLocale] = useState<'fr' | 'en'>('fr');
+  const [exchangeRates, setExchangeRates] = useState<{ usd_to_eur: number; mur_to_eur: number } | null>(null);
   const { toast } = useToast();
+
+  // Fetch exchange rates on component mount
+  useEffect(() => {
+    const fetchExchangeRates = async () => {
+      const { data } = await supabase.from('fx_rates').select('rate_usd_to_eur, rate_mur_to_eur').single();
+      if (data) {
+        setExchangeRates({
+          usd_to_eur: data.rate_usd_to_eur,
+          mur_to_eur: data.rate_mur_to_eur
+        });
+      }
+    };
+    fetchExchangeRates();
+  }, []);
+
+  // Convert price to lead's currency
+  const convertPrice = (price: number | null, fromCurrency: string | null): number | null => {
+    if (!price || !exchangeRates) return price;
+    
+    const targetCurrency = lead.currency || 'EUR';
+    const sourceCurrency = (fromCurrency || 'EUR').toUpperCase();
+    
+    if (sourceCurrency === targetCurrency) return price;
+    
+    // Convert to EUR first (as base)
+    let priceInEur = price;
+    if (sourceCurrency === 'USD') {
+      priceInEur = price * exchangeRates.usd_to_eur;
+    } else if (sourceCurrency === 'MUR') {
+      priceInEur = price * exchangeRates.mur_to_eur;
+    }
+    
+    // Convert from EUR to target currency
+    if (targetCurrency === 'EUR') {
+      return priceInEur;
+    } else if (targetCurrency === 'USD') {
+      return priceInEur / exchangeRates.usd_to_eur;
+    } else if (targetCurrency === 'MUR') {
+      return priceInEur / exchangeRates.mur_to_eur;
+    }
+    
+    return priceInEur;
+  };
 
   useEffect(() => {
     // Reset et charger la première page
@@ -102,10 +146,17 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
 
       const newProperties = data || [];
       
+      // Convert all property prices to lead's currency
+      const convertedProperties = newProperties.map(property => ({
+        ...property,
+        price: convertPrice(property.price, property.currency),
+        currency: lead.currency || 'EUR'
+      }));
+      
       if (reset) {
-        setProperties(newProperties);
+        setProperties(convertedProperties);
       } else {
-        setProperties(prev => [...prev, ...newProperties]);
+        setProperties(prev => [...prev, ...convertedProperties]);
       }
       
       // Vérifier s'il reste des propriétés à charger
