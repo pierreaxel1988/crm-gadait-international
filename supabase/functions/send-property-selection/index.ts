@@ -339,9 +339,10 @@ const handler = async (req: Request): Promise<Response> => {
                   gap: 4px;
                 ">
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" x2="12" y1="15" y2="3"/>
+                    <path d="M21 14h-5"/>
+                    <path d="M14 21v-5"/>
+                    <path d="M3 10h5"/>
+                    <path d="M10 3v5"/>
                   </svg>
                   ${property.area} ${property.area_unit || 'm²'}
                 </div>
@@ -385,13 +386,43 @@ const handler = async (req: Request): Promise<Response> => {
                 ">
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
                     <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1 0l-1 1a1.5 1.5 0 0 0 0 1L7 9"/>
-                    <path d="M15 5 5 15"/>
-                    <path d="M12 18c0-4.5 1.5-7 3-9 1.5 1.5 3 4.5 3 9Z"/>
+                    <path d="m15 5-1.912 1.913A2 2 0 0 0 12.5 8.5V12"/>
+                    <path d="M13 17h6"/>
+                    <path d="M13 21h6"/>
                   </svg>
                   ${property.bathrooms}
                 </div>
               ` : ''}
             </div>
+            
+            <!-- Badge terrain en bas à droite -->
+            ${property.land_area ? `
+              <div style="
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                background: rgba(255, 255, 255, 0.9);
+                color: #1e293b;
+                padding: 6px 10px;
+                border-radius: 6px;
+                font-size: 11px;
+                font-weight: 600;
+                border: 1px solid rgba(226, 232, 240, 0.8);
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+              ">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                  <path d="m12 8 6-3-6-3v10"/>
+                  <path d="M8 11.99 2 9l6-3"/>
+                  <path d="M2 9v8.5l6 3"/>
+                  <path d="M12 18v-7"/>
+                  <path d="M12 11l6 3v8.5l-6-3"/>
+                </svg>
+                ${property.land_area} ${property.land_area_unit || 'm²'}
+              </div>
+            ` : ''}
+          </div>
           </div>
         ` : ''}
         
