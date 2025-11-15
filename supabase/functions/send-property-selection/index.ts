@@ -169,7 +169,7 @@ const handler = async (req: Request): Promise<Response> => {
     const t = leadLanguage === 'en' ? {
       emailTitle: 'Property Selection - GADAIT International',
       greeting: 'Dear',
-      intro: 'We have selected properties that match your criteria and might interest you:',
+      intro: 'We have carefully selected these properties that perfectly match your search criteria. Each property has been chosen for its exceptional quality and investment potential.',
       readyNext: '🤝 Ready for the next step?',
       teamMessage: 'Our team of experts is at your disposal to organize visits, answer your questions or support you in your investment project.',
       callUs: '📞 Call us',
@@ -182,7 +182,7 @@ const handler = async (req: Request): Promise<Response> => {
     } : {
       emailTitle: 'Sélection de propriétés - GADAIT International',
       greeting: 'Bonjour',
-      intro: 'Nous avons sélectionné pour vous des propriétés correspondant à vos critères et qui pourraient vous intéresser :',
+      intro: 'Nous avons soigneusement sélectionné ces propriétés qui correspondent parfaitement à vos critères de recherche. Chaque propriété a été choisie pour sa qualité exceptionnelle et son potentiel d\'investissement.',
       readyNext: '🤝 Prêt pour la suite ?',
       teamMessage: 'Notre équipe d\'experts est à votre disposition pour organiser des visites, répondre à vos questions ou vous accompagner dans votre projet d\'investissement.',
       callUs: '📞 Nous appeler',
