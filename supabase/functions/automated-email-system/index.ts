@@ -136,30 +136,10 @@ const translations = {
   }
 };
 
-// Fonction pour obtenir le drapeau du pays
-function getCountryFlag(country?: string): string {
-  if (!country || country === 'Non spécifié') return '';
-  const flags: { [key: string]: string } = {
-    'France': '🇫🇷',
-    'Mauritius': '🇲🇺',
-    'Maurice': '🇲🇺',
-    'Spain': '🇪🇸',
-    'Espagne': '🇪🇸',
-    'Portugal': '🇵🇹',
-    'Italy': '🇮🇹',
-    'Italie': '🇮🇹',
-    'Greece': '🇬🇷',
-    'Grèce': '🇬🇷',
-    'Dubai': '🇦🇪',
-    'United Arab Emirates': '🇦🇪',
-    'Émirats arabes unis': '🇦🇪',
-    'Thailand': '🇹🇭',
-    'Thaïlande': '🇹🇭',
-    'USA': '🇺🇸',
-    'États-Unis': '🇺🇸',
-    'United States': '🇺🇸',
-  };
-  return flags[country] || '';
+// Fonction pour obtenir le nom du pays pour affichage
+function getCountryDisplay(country?: string): string {
+  if (!country || country === 'Non specifie') return '';
+  return country;
 }
 
 // Fonction pour formater le prix
@@ -191,48 +171,417 @@ function generatePropertyCardHtml(property: any, language: string, leadId: strin
     : (property.title_fr || property.title);
   
   const mainImage = property.images?.[0] || '';
-  const countryFlag = getCountryFlag(property.country);
+  const countryDisplay = getCountryDisplay(property.country);
   const formattedPrice = formatPrice(property.price, property.currency);
   
   return `
-    EN: { bedrooms: 'bedrooms', bathrooms: 'bathrooms', surface: 'm²', discover: '✨ Discover this property' },
-    ES: { bedrooms: 'habitaciones', bathrooms: 'baños', surface: 'm²', discover: '✨ Descubrir esta propiedad' }
-  };
-  const label = labels[language] || labels.EN;
+  <div style="
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+  ">
+    ${mainImage ? `
+      <div style="position: relative; height: 300px; overflow: hidden; background: #f3f4f6;">
+        <a href="${trackedUrl}" target="_blank" style="display: block; width: 100%; height: 100%;">
+          <img src="${mainImage}" 
+               alt="${title}" 
+               style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+        </a>
+        
+        <div style="
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, rgba(0,0,0,0.4), transparent, transparent);
+          pointer-events: none;
+        "></div>
+        
+        ${property.property_type ? `
+          <div style="
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1e293b;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+          ">
+            ${property.property_type}
+          </div>
+        ` : ''}
+        
+        ${property.surface ? `
+          <div style="
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e293b;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+          ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18"/>
+              <path d="M9 21V9"/>
+            </svg>
+            ${property.surface} m²
+          </div>
+        ` : ''}
+      </div>
+    ` : ''}
+    
+    <div style="padding: 20px;">
+      <a href="${trackedUrl}" target="_blank" style="text-decoration: none; color: inherit;">
+        <h3 style="
+          margin: 0 0 12px 0;
+          color: #1e293b;
+          font-size: 18px;
+          font-weight: 600;
+          line-height: 1.4;
+        ">
+          ${title}
+        </h3>
+      </a>
+      
+      <div style="
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        gap: 8px;
+      ">
+        <div style="
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: #64748b;
+          font-size: 14px;
+          flex: 1;
+        ">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <span style="font-weight: 500;">${property.location || 'Localisation non specifiee'}</span>
+        </div>
+        
+        ${countryDisplay ? `
+          <div style="
+            background: rgba(241, 245, 249, 0.5);
+            color: #1e293b;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid #e2e8f0;
+          ">
+            ${countryDisplay}
+          </div>
+        ` : ''}
+      </div>
+      
+      ${property.reference ? `
+        <div style="color: #64748b; font-size: 14px; margin-bottom: 16px;">
+          ${t.ref} ${property.reference}
+        </div>
+      ` : ''}
+      
+      <div style="
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin: 16px 0;
+        flex-wrap: wrap;
+      ">
+        ${property.bedrooms ? `
+          <div style="
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #475569;
+            font-size: 14px;
+          ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/>
+              <path d="M3 9l18 0"/>
+            </svg>
+            ${property.bedrooms} ${t.bedrooms}
+          </div>
+        ` : ''}
+        
+        ${property.bathrooms ? `
+          <div style="
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #475569;
+            font-size: 14px;
+          ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1 2.5L7 8"/>
+              <path d="M15 5a2 2 0 0 1 2 2v6"/>
+              <path d="M5 13v6"/>
+              <path d="M18 13v6"/>
+              <path d="M5 17h14"/>
+            </svg>
+            ${property.bathrooms} ${t.bathrooms}
+          </div>
+        ` : ''}
+      </div>
+      
+      <div style="
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 16px 0;
+      ">
+        ${formattedPrice}
+      </div>
+      
+      <a href="${trackedUrl}" 
+         target="_blank" 
+         style="
+           display: block;
+           width: 100%;
+           background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+           color: white;
+           text-align: center;
+           padding: 12px 20px;
+           border-radius: 8px;
+           font-weight: 600;
+           font-size: 14px;
+           text-decoration: none;
+           box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+         ">
+        ${t.viewProperty}
+      </a>
+    </div>
+  </div>
+  `;
+}
+
+// Fonction pour générer le HTML complet de l'email
+function generateEmailHtml({
+  leadName,
+  leadSalutation,
+  aiContent,
+  properties,
+  language,
+  leadId,
+  agentWhatsApp,
+  agentPhone,
+  agentEmail
+}: {
+  leadName: string;
+  leadSalutation?: string;
+  aiContent: string;
+  properties: SuggestedProperty[];
+  language: string;
+  leadId: string;
+  agentWhatsApp?: string;
+  agentPhone?: string;
+  agentEmail?: string;
+}): string {
+  const t = translations[language] || translations.FR;
   
-  return React.createElement('div', { className: 'property-card', style: { margin: '20px 0', border: '1px solid #E5E5E5', borderRadius: '8px', overflow: 'hidden', background: '#FFFFFF' } },
-    mainImage && React.createElement('a', { href: propertyUrl, style: { display: 'block', textDecoration: 'none' } },
-      React.createElement('img', { 
-        src: mainImage, 
-        alt: title,
-        style: { width: '100%', height: '250px', objectFit: 'cover', display: 'block' }
-      })
-    ),
-    React.createElement('div', { style: { padding: '20px' } },
-      React.createElement('h3', { style: { margin: '0 0 10px 0', fontSize: '18px', color: '#2C3E50', fontWeight: '500' } }, 
-        title
-      ),
-      React.createElement('p', { style: { margin: '0 0 15px 0', fontSize: '14px', color: '#7F8C8D' } },
-        `📍 ${property.location}, ${property.country}`
-      ),
-      React.createElement('div', { style: { display: 'flex', gap: '15px', margin: '15px 0', fontSize: '14px', color: '#34495E' } },
-        React.createElement('span', {}, `🛏️ ${property.bedrooms} ${label.bedrooms}`),
-        React.createElement('span', {}, `🚿 ${property.bathrooms} ${label.bathrooms}`),
-        React.createElement('span', {}, `📐 ${property.surface} ${label.surface}`)
-      ),
-      React.createElement('div', { style: { margin: '15px 0' } },
-        React.createElement('p', { style: { margin: '0', fontSize: '22px', fontWeight: '600', color: '#8B4513' } },
-          `${property.price.toLocaleString()} ${property.currency}`
-        )
-      ),
-      React.createElement('a', { 
-        href: propertyUrl,
-        className: 'cta-button',
-        style: { display: 'inline-block', background: 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)', color: '#FFFFFF', padding: '12px 24px', textDecoration: 'none', borderRadius: '6px', fontWeight: '500', marginTop: '10px' }
-      }, label.discover)
-    )
-  );
-};
+  // Generer les cartes de proprietes
+  const propertiesHtml = properties.map(property => 
+    generatePropertyCardHtml(property, language, leadId)
+  ).join('');
+  
+  // Message WhatsApp pre-rempli
+  const whatsappMessages = {
+    FR: `Bonjour, je souhaite discuter de mon projet immobilier avec vous.`,
+    EN: `Hello, I would like to discuss my real estate project with you.`,
+    ES: `Hola, me gustaria discutir mi proyecto inmobiliario con ustedes.`
+  };
+  const whatsappMessage = whatsappMessages[language] || whatsappMessages.FR;
+  const whatsappUrl = agentWhatsApp 
+    ? `https://wa.me/${agentWhatsApp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappMessage)}`
+    : null;
+  
+  return `
+  <!DOCTYPE html>
+  <html lang="${language.toLowerCase()}">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Gadait International</title>
+    </head>
+    <body style="
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f8fafc;
+    ">
+      <div style="
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+      ">
+        <div style="
+          background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+          padding: 32px;
+          text-align: center;
+        ">
+          <div style="
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+          ">
+            GADAIT INTERNATIONAL
+          </div>
+        </div>
+        
+        <div style="padding: 40px 32px;">
+          <h2 style="
+            color: #1a202c;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+          ">
+            ${t.greeting} ${leadSalutation ? leadSalutation + ' ' : ''}${leadName}
+          </h2>
+          
+          <div style="
+            color: #4a5568;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 32px;
+          ">
+            ${aiContent}
+          </div>
+          
+          ${properties.length > 0 ? `
+            <h3 style="
+              color: #1a202c;
+              font-size: 20px;
+              font-weight: 700;
+              margin: 32px 0 24px 0;
+            ">
+              ${t.suggestedProperties}
+            </h3>
+            ${propertiesHtml}
+          ` : ''}
+          
+          <div style="
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            margin-top: 32px;
+          ">
+            <h3 style="
+              color: #1a202c;
+              font-size: 20px;
+              font-weight: 700;
+              margin: 0 0 16px 0;
+            ">
+              ${t.readyNext}
+            </h3>
+            <p style="
+              color: #4a5568;
+              font-size: 16px;
+              margin: 0 0 24px 0;
+              line-height: 1.6;
+            ">
+              ${t.teamMessage}
+            </p>
+            <div style="
+              display: flex;
+              gap: 12px;
+              justify-content: center;
+              flex-wrap: wrap;
+            ">
+              ${whatsappUrl ? `
+                <a href="${whatsappUrl}" style="
+                  display: inline-block;
+                  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+                  color: white;
+                  text-decoration: none;
+                  padding: 12px 24px;
+                  border-radius: 12px;
+                  font-weight: 600;
+                  font-size: 14px;
+                  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+                ">
+                  ${t.discussWhatsApp}
+                </a>
+              ` : ''}
+              ${agentPhone ? `
+                <a href="tel:${agentPhone}" style="
+                  display: inline-block;
+                  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+                  color: white;
+                  text-decoration: none;
+                  padding: 12px 24px;
+                  border-radius: 12px;
+                  font-weight: 600;
+                  font-size: 14px;
+                  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+                ">
+                  ${t.callUs}
+                </a>
+              ` : ''}
+              <a href="mailto:${agentEmail || 'contact@gadait-international.com'}" style="
+                display: inline-block;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                text-decoration: none;
+                padding: 12px 24px;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 14px;
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+              ">
+                ${t.writeUs}
+              </a>
+            </div>
+          </div>
+          
+          <div style="
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+          ">
+            <p style="
+              color: #718096;
+              font-size: 14px;
+              margin: 0 0 8px 0;
+              font-weight: 500;
+            ">
+              ${t.regards}
+            </p>
+            <p style="
+              color: #1a202c;
+              font-size: 16px;
+              font-weight: 700;
+              margin: 0;
+            ">
+              ${t.teamSignature}
+            </p>
+          </div>
+        </div>
+      </div>
+    </body>
+  </html>
+  `;
+}
 
 // Template React Email Loro Piana
 const LoroEmailTemplate = ({ 
@@ -363,17 +712,17 @@ const LoroEmailTemplate = ({
           }),
           properties.length > 0 && React.createElement('div', { className: 'properties-section' },
             React.createElement('h2', { className: 'properties-title' }, 
-              language === 'FR' ? '🏡 Nos propriétés sélectionnées pour vous' : 
-              language === 'ES' ? '🏡 Nuestras propiedades seleccionadas para usted' : 
-              '🏡 Our selected properties for you'
+              language === 'FR' ? 'Nos proprietes selectionnees pour vous' : 
+              language === 'ES' ? 'Nuestras propiedades seleccionadas para usted' : 
+              'Our selected properties for you'
             ),
             ...properties.map(property => PropertyCard({ property, language, leadId }))
           ),
           React.createElement('div', { className: 'signature' },
             React.createElement('p', {}, `Cordialement,`),
             React.createElement('p', {}, agentSignature),
-            React.createElement('p', {}, `📞 +230 268 2828`),
-            React.createElement('p', {}, `✉️ contact@gadait-international.com`)
+            React.createElement('p', {}, `Tel: +230 268 2828`),
+            React.createElement('p', {}, `Email: contact@gadait-international.com`)
           )
         ),
         React.createElement('div', { className: 'footer' },
