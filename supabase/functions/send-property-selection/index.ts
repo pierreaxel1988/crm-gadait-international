@@ -569,7 +569,7 @@ const handler = async (req: Request): Promise<Response> => {
                   font-weight: 700;
                   margin: 0 0 16px 0;
                 ">
-                  Bonjour ${leadName}
+                  ${t.greeting} ${leadName}
                 </h2>
                 <p style="
                   color: #4a5568;
@@ -577,7 +577,7 @@ const handler = async (req: Request): Promise<Response> => {
                   line-height: 1.6;
                   margin: 0;
                 ">
-                  Nous avons soigneusement sélectionné ${properties.length > 1 ? 'ces propriétés' : 'cette propriété'} qui correspondent parfaitement à vos critères de recherche. Chaque propriété a été choisie pour sa qualité exceptionnelle et son potentiel d'investissement.
+                  ${t.intro}
                 </p>
               </div>
 

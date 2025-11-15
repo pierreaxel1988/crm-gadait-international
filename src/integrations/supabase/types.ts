@@ -2715,6 +2715,10 @@ export type Database = {
           title_en: string | null
           title_translations: Json | null
           updated_at: string
+          url: string | null
+          url_en: string | null
+          url_fr: string | null
+          url_translations: Json | null
           video_urls: string[] | null
           view_type: string[] | null
           virtual_tour: string | null
@@ -2826,6 +2830,10 @@ export type Database = {
           title_en?: string | null
           title_translations?: Json | null
           updated_at?: string
+          url?: string | null
+          url_en?: string | null
+          url_fr?: string | null
+          url_translations?: Json | null
           video_urls?: string[] | null
           view_type?: string[] | null
           virtual_tour?: string | null
@@ -2937,6 +2945,10 @@ export type Database = {
           title_en?: string | null
           title_translations?: Json | null
           updated_at?: string
+          url?: string | null
+          url_en?: string | null
+          url_fr?: string | null
+          url_translations?: Json | null
           video_urls?: string[] | null
           view_type?: string[] | null
           virtual_tour?: string | null
@@ -4312,6 +4324,7 @@ export type Database = {
           is_admin: boolean | null
           name: string
           role: string | null
+          whatsapp_number: string | null
         }
         Insert: {
           created_at?: string
@@ -4320,6 +4333,7 @@ export type Database = {
           is_admin?: boolean | null
           name: string
           role?: string | null
+          whatsapp_number?: string | null
         }
         Update: {
           created_at?: string
@@ -4328,6 +4342,7 @@ export type Database = {
           is_admin?: boolean | null
           name?: string
           role?: string | null
+          whatsapp_number?: string | null
         }
         Relationships: []
       }
