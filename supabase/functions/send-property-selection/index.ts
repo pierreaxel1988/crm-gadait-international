@@ -694,12 +694,26 @@ const handler = async (req: Request): Promise<Response> => {
       if (count === 1) {
         const prop = properties[0];
         const type = prop.property_type || (isEN ? 'Property' : 'Propriété');
-        // Prioriser location puis country
-        const mainLocation = locations[0] || countries[0] || '';
-        if (mainLocation) {
+        const location = locations[0] || '';
+        const country = countries[0] || '';
+        
+        // Avec localisation ET pays
+        if (location && country) {
           return isEN 
-            ? `Exceptional ${type} in ${mainLocation}`
-            : `${type} d'exception à ${mainLocation}`;
+            ? `Exceptional ${type} in ${location}, ${country}`
+            : `${type} d'exception à ${location}, ${country}`;
+        }
+        // Avec pays uniquement
+        if (country) {
+          return isEN 
+            ? `Exceptional ${type} in ${country}`
+            : `${type} d'exception en ${country}`;
+        }
+        // Avec localisation uniquement (fallback)
+        if (location) {
+          return isEN 
+            ? `Exceptional ${type} in ${location}`
+            : `${type} d'exception à ${location}`;
         }
         return isEN 
           ? `Exceptional ${type} - Personalized Selection`
@@ -709,14 +723,17 @@ const handler = async (req: Request): Promise<Response> => {
       // Cas 2: Toutes les propriétés dans la même ville/localisation
       if (locations.length === 1 && locations[0]) {
         const location = locations[0];
+        const country = countries.length === 1 ? countries[0] : '';
+        const locationStr = country ? `${location}, ${country}` : location;
+        
         if (propertyTypes.length === 1 && propertyTypes[0]) {
           return isEN
-            ? `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} in ${location}`
-            : `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} à ${location}`;
+            ? `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} in ${locationStr}`
+            : `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} à ${locationStr}`;
         }
         return isEN
-          ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} in ${location}`
-          : `${count} bien${count > 1 ? 's' : ''} d'exception à ${location}`;
+          ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} in ${locationStr}`
+          : `${count} bien${count > 1 ? 's' : ''} d'exception à ${locationStr}`;
       }
       
       // Cas 3: Toutes les propriétés dans le même pays (mais différentes villes)
@@ -725,18 +742,19 @@ const handler = async (req: Request): Promise<Response> => {
         if (propertyTypes.length === 1 && propertyTypes[0]) {
           return isEN
             ? `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} in ${country}`
-            : `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} ${country}`;
+            : `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} en ${country}`;
         }
         return isEN
           ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} in ${country}`
-          : `${count} propriété${count > 1 ? 's' : ''} d'exception ${country}`;
+          : `${count} propriété${count > 1 ? 's' : ''} d'exception en ${country}`;
       }
       
-      // Cas 4: Plusieurs localisations spécifiques (2-3 villes)
+      // Cas 4: Plusieurs localisations spécifiques (2-3 villes) - ajouter le pays si unique
       if (locations.length >= 2 && locations.length <= 3) {
+        const country = countries.length === 1 ? `, ${countries[0]}` : '';
         return isEN
-          ? `${count} ${count > 1 ? 'properties' : 'property'} in ${locations.join(', ')}`
-          : `${count} bien${count > 1 ? 's' : ''} ${locations.join(', ')}`;
+          ? `${count} ${count > 1 ? 'properties' : 'property'} in ${locations.join(', ')}${country}`
+          : `${count} bien${count > 1 ? 's' : ''} ${locations.join(', ')}${country}`;
       }
       
       // Cas 5: Plusieurs pays (2-3 pays)
@@ -749,8 +767,8 @@ const handler = async (req: Request): Promise<Response> => {
       // Cas par défaut - avec au moins un pays si disponible
       if (countries.length > 0) {
         return isEN
-          ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} - ${countries[0]} and more`
-          : `${count} bien${count > 1 ? 's' : ''} d'exception - ${countries[0]} et plus`;
+          ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} - ${countries[0]}${countries.length > 1 ? ' and more' : ''}`
+          : `${count} bien${count > 1 ? 's' : ''} d'exception - ${countries[0]}${countries.length > 1 ? ' et plus' : ''}`;
       }
       
       return isEN
