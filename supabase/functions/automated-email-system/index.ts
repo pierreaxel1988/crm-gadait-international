@@ -78,52 +78,123 @@ interface SuggestedProperty {
   country: string;
 }
 
-// Fonction pour générer les URLs de propriétés avec slugs multilingues
-function generatePropertyUrl(property: any, language: string, leadId?: string): string {
-  const baseUrl = property.external_url || 'https://gadait-international.com';
+// Traductions complètes pour les emails
+const translations = {
+  FR: {
+    greeting: 'Bonjour',
+    intro: 'Voici notre sélection personnalisée de propriétés pour vous',
+    suggestedProperties: 'Propriétés suggérées pour vous',
+    bedrooms: 'chambres',
+    bathrooms: 'salles de bain',
+    area: 'Surface',
+    landArea: 'Terrain',
+    ref: 'Réf.',
+    viewProperty: 'Voir la propriété',
+    discussWhatsApp: 'Discuter sur WhatsApp',
+    callUs: 'Nous appeler',
+    writeUs: 'Nous écrire',
+    readyNext: 'Prêt pour la prochaine étape ?',
+    teamMessage: 'Notre équipe est à votre disposition pour répondre à toutes vos questions et vous accompagner dans votre projet.',
+    regards: 'Cordialement',
+    teamSignature: "L'équipe Gadait International"
+  },
+  EN: {
+    greeting: 'Hello',
+    intro: 'Here is our personalized selection of properties for you',
+    suggestedProperties: 'Properties suggested for you',
+    bedrooms: 'bedrooms',
+    bathrooms: 'bathrooms',
+    area: 'Area',
+    landArea: 'Land',
+    ref: 'Ref.',
+    viewProperty: 'View property',
+    discussWhatsApp: 'Discuss on WhatsApp',
+    callUs: 'Call us',
+    writeUs: 'Write to us',
+    readyNext: 'Ready for the next step?',
+    teamMessage: 'Our team is at your disposal to answer all your questions and support you in your project.',
+    regards: 'Best regards',
+    teamSignature: 'The Gadait International Team'
+  },
+  ES: {
+    greeting: 'Hola',
+    intro: 'Aquí está nuestra selección personalizada de propiedades para usted',
+    suggestedProperties: 'Propiedades sugeridas para usted',
+    bedrooms: 'habitaciones',
+    bathrooms: 'baños',
+    area: 'Superficie',
+    landArea: 'Terreno',
+    ref: 'Ref.',
+    viewProperty: 'Ver propiedad',
+    discussWhatsApp: 'Hablar por WhatsApp',
+    callUs: 'Llamarnos',
+    writeUs: 'Escribirnos',
+    readyNext: '¿Listo para el siguiente paso?',
+    teamMessage: 'Nuestro equipo está a su disposición para responder a todas sus preguntas y apoyarle en su proyecto.',
+    regards: 'Cordialmente',
+    teamSignature: 'El equipo de Gadait International'
+  }
+};
+
+// Fonction pour obtenir le drapeau du pays
+function getCountryFlag(country?: string): string {
+  if (!country || country === 'Non spécifié') return '';
+  const flags: { [key: string]: string } = {
+    'France': '🇫🇷',
+    'Mauritius': '🇲🇺',
+    'Maurice': '🇲🇺',
+    'Spain': '🇪🇸',
+    'Espagne': '🇪🇸',
+    'Portugal': '🇵🇹',
+    'Italy': '🇮🇹',
+    'Italie': '🇮🇹',
+    'Greece': '🇬🇷',
+    'Grèce': '🇬🇷',
+    'Dubai': '🇦🇪',
+    'United Arab Emirates': '🇦🇪',
+    'Émirats arabes unis': '🇦🇪',
+    'Thailand': '🇹🇭',
+    'Thaïlande': '🇹🇭',
+    'USA': '🇺🇸',
+    'États-Unis': '🇺🇸',
+    'United States': '🇺🇸',
+  };
+  return flags[country] || '';
+}
+
+// Fonction pour formater le prix
+function formatPrice(price?: number, currency?: string): string {
+  if (!price) return 'Prix sur demande';
+  const formatted = price >= 1000000 
+    ? `${(price / 1000000).toFixed(1)}M` 
+    : price >= 1000 
+    ? `${(price / 1000).toFixed(0)}K` 
+    : price.toLocaleString('fr-FR');
+  return `${formatted} ${currency || 'EUR'}`;
+}
+
+// Fonction pour générer une carte de propriété en HTML moderne
+function generatePropertyCardHtml(property: any, language: string, leadId: string): string {
+  const t = translations[language] || translations.FR;
   
-  // Déterminer le slug selon la langue
+  // Générer l'URL de la propriété avec tracking
+  const baseUrl = property.external_url || 'https://gadait-international.com';
   const slug = language === 'EN' 
     ? (property.slug_en || property.slug)
     : (property.slug_fr || property.slug);
-  
-  // Construire le chemin selon la langue
   const languagePath = language === 'EN' ? '/en/properties/' : '/fr/proprietes/';
+  const propertyUrl = slug ? `${baseUrl}${languagePath}${slug}/` : baseUrl;
+  const trackedUrl = `${SUPABASE_URL}/functions/v1/track-property-click?lead_id=${leadId}&property_id=${property.id}&redirect_url=${encodeURIComponent(propertyUrl)}`;
   
-  // Construire l'URL complète
-  const propertyUrl = slug 
-    ? `${baseUrl}${languagePath}${slug}/`
-    : baseUrl;
-  
-  // Ajouter le tracking via l'edge function track-property-click
-  if (leadId) {
-    const trackingUrl = `${SUPABASE_URL}/functions/v1/track-property-click?lead_id=${leadId}&property_id=${property.id}&redirect_url=${encodeURIComponent(propertyUrl)}`;
-    return trackingUrl;
-  }
-  
-  return propertyUrl;
-}
-
-// Composant PropertyCard pour React Email
-const PropertyCard = ({ 
-  property, 
-  language, 
-  leadId 
-}: { 
-  property: any; 
-  language: string; 
-  leadId?: string;
-}) => {
-  const propertyUrl = generatePropertyUrl(property, language, leadId);
-  const mainImage = property.images?.[0] || '';
-  
-  // Utiliser le titre selon la langue
   const title = language === 'EN'
     ? (property.title_en || property.title)
     : (property.title_fr || property.title);
   
-  const labels = {
-    FR: { bedrooms: 'chambres', bathrooms: 'salles de bain', surface: 'm²', discover: '✨ Découvrir cette propriété' },
+  const mainImage = property.images?.[0] || '';
+  const countryFlag = getCountryFlag(property.country);
+  const formattedPrice = formatPrice(property.price, property.currency);
+  
+  return `
     EN: { bedrooms: 'bedrooms', bathrooms: 'bathrooms', surface: 'm²', discover: '✨ Discover this property' },
     ES: { bedrooms: 'habitaciones', bathrooms: 'baños', surface: 'm²', discover: '✨ Descubrir esta propiedad' }
   };
@@ -568,6 +639,24 @@ async function sendScheduledEmail(emailData: any) {
     return;
   }
   
+  // Récupérer les informations de l'agent assigné
+  let agentWhatsApp = null;
+  let agentPhone = null;
+  let agentEmail = null;
+  if (lead.assigned_to) {
+    const { data: agentData } = await supabase
+      .from('team_members')
+      .select('whatsapp_number, phone, email')
+      .eq('id', lead.assigned_to)
+      .single();
+    
+    if (agentData) {
+      agentWhatsApp = agentData.whatsapp_number;
+      agentPhone = agentData.phone;
+      agentEmail = agentData.email;
+    }
+  }
+  
   // Récupérer les propriétés suggérées
   const suggestedProperties = await fetchSuggestedProperties(lead, 3);
   const detectedLanguage = detectLeadLanguage(lead);
@@ -579,20 +668,18 @@ async function sendScheduledEmail(emailData: any) {
   // Générer l'ID d'action unique
   const actionId = `auto_email_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
-  // Render l'email avec React Email
-  const emailHtml = await renderAsync(
-    React.createElement(LoroEmailTemplate, {
-      leadName: lead.name,
-      leadSalutation: lead.salutation,
-      subject: personalizedSubject,
-      content: personalizedContent,
-      properties: suggestedProperties,
-      language: detectedLanguage,
-      leadId: lead.id,
-      agentName: "Gadait International",
-      agentSignature: "L'équipe Gadait International"
-    })
-  );
+  // Générer l'email HTML avec le nouveau design
+  const emailHtml = generateEmailHtml({
+    leadName: lead.name,
+    leadSalutation: lead.salutation,
+    aiContent: personalizedContent,
+    properties: suggestedProperties,
+    language: detectedLanguage,
+    leadId: lead.id,
+    agentWhatsApp,
+    agentPhone,
+    agentEmail
+  });
   
   // Envoyer l'email via Resend avec Pierre en CC
   const { data: emailResult, error: emailError } = await resend.emails.send({
@@ -863,6 +950,7 @@ Jour: J+${template.day_number}
 9. NE PAS mentionner de propriétés spécifiques - elles seront affichées visuellement
 10. Format HTML simple: <p>, <strong>, <ul>, <li> uniquement
 11. Call-to-action adapté au segment et au jour
+12. L'équipe est joignable par WhatsApp, téléphone et email - encourage le contact
 
 Génère UNIQUEMENT le contenu HTML personnalisé (sans formules de politesse, gérées par le template).
 `;
