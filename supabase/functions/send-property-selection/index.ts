@@ -672,7 +672,7 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    // Générer un objet d'email dynamique et personnalisé
+    // Générer un objet d'email dynamique et personnalisé basé sur "Votre projet à..."
     const generateSubject = () => {
       const count = properties.length;
       const isEN = leadLanguage === 'en';
@@ -690,34 +690,74 @@ const handler = async (req: Request): Promise<Response> => {
       }).filter(Boolean))];
       const propertyTypes = [...new Set(properties.map(p => p.property_type).filter(Boolean))];
       
-      // Cas 1: Une seule propriété - très spécifique avec localisation précise
+      // Déterminer le contexte du projet selon le lead
+      const pipelineType = lead?.pipeline_type || 'purchase';
+      const propertyUse = lead?.property_use;
+      
+      // Fonction pour obtenir le préfixe "Votre projet"
+      const getProjectPrefix = (): string => {
+        // Cas spécifique: Investissement
+        if (pipelineType === 'purchase' && propertyUse === 'investment') {
+          return isEN ? 'Your investment project' : 'Votre projet d\'investissement';
+        }
+        
+        // Cas spécifique: Résidence principale
+        if (pipelineType === 'purchase' && propertyUse === 'primary_residence') {
+          return isEN ? 'Your future residence' : 'Votre future résidence';
+        }
+        
+        // Cas spécifique: Résidence secondaire / Vacances
+        if (pipelineType === 'purchase' && (propertyUse === 'secondary_residence' || propertyUse === 'vacation')) {
+          return isEN ? 'Your vacation home' : 'Votre résidence de vacances';
+        }
+        
+        // Cas spécifique: Location
+        if (pipelineType === 'rental') {
+          return isEN ? 'Your rental project' : 'Votre projet de location';
+        }
+        
+        // Cas spécifique: Propriétaire (vente)
+        if (pipelineType === 'owners') {
+          return isEN ? 'Opportunities for your property' : 'Opportunités pour votre bien';
+        }
+        
+        // Par défaut: projet immobilier générique
+        return isEN ? 'Your real estate project' : 'Votre projet immobilier';
+      };
+      
+      const prefix = getProjectPrefix();
+      
+      // Cas 1: Une seule propriété
       if (count === 1) {
         const prop = properties[0];
-        const type = prop.property_type || (isEN ? 'Property' : 'Propriété');
+        const type = prop.property_type || '';
         const location = locations[0] || '';
         const country = countries[0] || '';
         
         // Avec localisation ET pays
         if (location && country) {
+          const typeStr = type ? ` - ${type}` : '';
           return isEN 
-            ? `Exceptional ${type} in ${location}, ${country}`
-            : `${type} d'exception à ${location}, ${country}`;
+            ? `${prefix} in ${location}, ${country}${typeStr}`
+            : `${prefix} à ${location}, ${country}${typeStr}`;
         }
         // Avec pays uniquement
         if (country) {
+          const typeStr = type ? ` - ${type}` : '';
           return isEN 
-            ? `Exceptional ${type} in ${country}`
-            : `${type} d'exception en ${country}`;
+            ? `${prefix} in ${country}${typeStr}`
+            : `${prefix} en ${country}${typeStr}`;
         }
         // Avec localisation uniquement (fallback)
         if (location) {
+          const typeStr = type ? ` - ${type}` : '';
           return isEN 
-            ? `Exceptional ${type} in ${location}`
-            : `${type} d'exception à ${location}`;
+            ? `${prefix} in ${location}${typeStr}`
+            : `${prefix} à ${location}${typeStr}`;
         }
         return isEN 
-          ? `Exceptional ${type} - Personalized Selection`
-          : `${type} d'exception - Sélection personnalisée`;
+          ? `${prefix} - Exceptional Property`
+          : `${prefix} - Bien d'exception`;
       }
       
       // Cas 2: Toutes les propriétés dans la même ville/localisation
@@ -726,54 +766,60 @@ const handler = async (req: Request): Promise<Response> => {
         const country = countries.length === 1 ? countries[0] : '';
         const locationStr = country ? `${location}, ${country}` : location;
         
+        // Avec type de propriété spécifique
         if (propertyTypes.length === 1 && propertyTypes[0]) {
           return isEN
-            ? `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} in ${locationStr}`
-            : `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} à ${locationStr}`;
+            ? `${prefix} in ${locationStr} - ${count} ${propertyTypes[0]}${count > 1 ? 's' : ''}`
+            : `${prefix} à ${locationStr} - ${count} ${propertyTypes[0]}${count > 1 ? 's' : ''}`;
         }
         return isEN
-          ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} in ${locationStr}`
-          : `${count} bien${count > 1 ? 's' : ''} d'exception à ${locationStr}`;
+          ? `${prefix} in ${locationStr} - ${count} ${count > 1 ? 'properties' : 'property'}`
+          : `${prefix} à ${locationStr} - ${count} bien${count > 1 ? 's' : ''}`;
       }
       
       // Cas 3: Toutes les propriétés dans le même pays (mais différentes villes)
       if (countries.length === 1 && countries[0]) {
         const country = countries[0];
+        
+        // Avec type de propriété spécifique
         if (propertyTypes.length === 1 && propertyTypes[0]) {
           return isEN
-            ? `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} in ${country}`
-            : `${count} ${propertyTypes[0]}${count > 1 ? 's' : ''} en ${country}`;
+            ? `${prefix} in ${country} - ${count} ${propertyTypes[0]}${count > 1 ? 's' : ''}`
+            : `${prefix} en ${country} - ${count} ${propertyTypes[0]}${count > 1 ? 's' : ''}`;
         }
         return isEN
-          ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} in ${country}`
-          : `${count} propriété${count > 1 ? 's' : ''} d'exception en ${country}`;
+          ? `${prefix} in ${country} - ${count} ${count > 1 ? 'properties' : 'property'}`
+          : `${prefix} en ${country} - ${count} propriété${count > 1 ? 's' : ''}`;
       }
       
       // Cas 4: Plusieurs localisations spécifiques (2-3 villes) - ajouter le pays si unique
       if (locations.length >= 2 && locations.length <= 3) {
         const country = countries.length === 1 ? `, ${countries[0]}` : '';
+        const locationsList = locations.join(', ');
         return isEN
-          ? `${count} ${count > 1 ? 'properties' : 'property'} in ${locations.join(', ')}${country}`
-          : `${count} bien${count > 1 ? 's' : ''} ${locations.join(', ')}${country}`;
+          ? `${prefix} - ${count} ${count > 1 ? 'properties' : 'property'} in ${locationsList}${country}`
+          : `${prefix} - ${count} bien${count > 1 ? 's' : ''} ${locationsList}${country}`;
       }
       
       // Cas 5: Plusieurs pays (2-3 pays)
       if (countries.length >= 2 && countries.length <= 3) {
         return isEN
-          ? `${count} ${count > 1 ? 'properties' : 'property'} in ${countries.join(', ')}`
-          : `${count} propriété${count > 1 ? 's' : ''} ${countries.join(', ')}`;
+          ? `${prefix} - ${count} ${count > 1 ? 'properties' : 'property'} in ${countries.join(', ')}`
+          : `${prefix} - ${count} bien${count > 1 ? 's' : ''} ${countries.join(', ')}`;
       }
       
       // Cas par défaut - avec au moins un pays si disponible
       if (countries.length > 0) {
+        const moreText = countries.length > 1 ? (isEN ? ' and more' : ' et plus') : '';
         return isEN
-          ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} - ${countries[0]}${countries.length > 1 ? ' and more' : ''}`
-          : `${count} bien${count > 1 ? 's' : ''} d'exception - ${countries[0]}${countries.length > 1 ? ' et plus' : ''}`;
+          ? `${prefix} - ${count} ${count > 1 ? 'properties' : 'property'} in ${countries[0]}${moreText}`
+          : `${prefix} - ${count} bien${count > 1 ? 's' : ''} en ${countries[0]}${moreText}`;
       }
       
+      // Fallback final
       return isEN
-        ? `${count} exceptional ${count > 1 ? 'properties' : 'property'} - Personalized Selection`
-        : `${count} propriété${count > 1 ? 's' : ''} d'exception - Sélection personnalisée`;
+        ? `${prefix} - ${count} exceptional ${count > 1 ? 'properties' : 'property'}`
+        : `${prefix} - ${count} bien${count > 1 ? 's' : ''} d'exception`;
     };
 
     // Envoyer l'email
