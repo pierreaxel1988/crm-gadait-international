@@ -792,13 +792,22 @@ const handler = async (req: Request): Promise<Response> => {
           : `${prefix} en ${country} - ${count} propriété${count > 1 ? 's' : ''}`;
       }
       
-      // Cas 4: Plusieurs localisations spécifiques (2-3 villes) - ajouter le pays si unique
+      // Cas 4: Plusieurs localisations spécifiques (2-3 villes) - mettre le pays en avant
       if (locations.length >= 2 && locations.length <= 3) {
-        const country = countries.length === 1 ? `, ${countries[0]}` : '';
+        const country = countries.length === 1 ? countries[0] : '';
         const locationsList = locations.join(', ');
+        
+        if (country) {
+          // Format: "Votre projet en France - 2 biens à Nice, Cannes"
+          return isEN
+            ? `${prefix} in ${country} - ${count} ${count > 1 ? 'properties' : 'property'} in ${locationsList}`
+            : `${prefix} en ${country} - ${count} bien${count > 1 ? 's' : ''} à ${locationsList}`;
+        }
+        
+        // Sans pays unique
         return isEN
-          ? `${prefix} - ${count} ${count > 1 ? 'properties' : 'property'} in ${locationsList}${country}`
-          : `${prefix} - ${count} bien${count > 1 ? 's' : ''} ${locationsList}${country}`;
+          ? `${prefix} - ${count} ${count > 1 ? 'properties' : 'property'} in ${locationsList}`
+          : `${prefix} - ${count} bien${count > 1 ? 's' : ''} ${locationsList}`;
       }
       
       // Cas 5: Plusieurs pays (2-3 pays)
