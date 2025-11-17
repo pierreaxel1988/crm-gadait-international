@@ -10,6 +10,7 @@ import DeletedLeadsManagement from '@/components/admin/DeletedLeadsManagement';
 import LeadsExport from '@/components/admin/LeadsExport';
 import SourceAnalytics from '@/components/admin/SourceAnalytics';
 import SalesAnalytics from '@/components/admin/SalesAnalytics';
+import AutomatedEmailsManagement from '@/components/admin/AutomatedEmailsManagement';
 
 // Données mockées initiales pour le graphique
 const initialChartData = [
@@ -53,6 +54,7 @@ const Admin = () => {
           <TabsTrigger value="chart-data">Données du graphique</TabsTrigger>
           <TabsTrigger value="analytics">Analyse des sources</TabsTrigger>
           <TabsTrigger value="sales-analytics">Activité commerciaux</TabsTrigger>
+          <TabsTrigger value="automated-emails">Emails automatiques</TabsTrigger>
           <TabsTrigger value="export">Export Leads</TabsTrigger>
           <TabsTrigger value="settings">Paramètres</TabsTrigger>
           <TabsTrigger value="users">Utilisateurs</TabsTrigger>
@@ -96,6 +98,16 @@ const Admin = () => {
 
         <TabsContent value="analytics" className="space-y-6">
           <SourceAnalytics />
+        </TabsContent>
+
+        <TabsContent value="automated-emails" className="space-y-6">
+          <DashboardCard 
+            title="Gestion des emails automatiques" 
+            subtitle="Gérez et prévisualisez vos campagnes d'emails automatiques"
+            icon={<Activity className="h-5 w-5" />}
+          >
+            <AutomatedEmailsManagement />
+          </DashboardCard>
         </TabsContent>
 
         <TabsContent value="export" className="space-y-6">
