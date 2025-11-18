@@ -1,8 +1,6 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1";
 import { Resend } from "npm:resend@4.0.0";
-import { renderAsync } from "npm:@react-email/components@0.0.22";
-import React from "npm:react@18.3.1";
 
 // Environment variables
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -583,156 +581,6 @@ function generateEmailHtml({
   `;
 }
 
-// Template React Email Loro Piana
-const LoroEmailTemplate = ({ 
-  leadName, 
-  leadSalutation,
-  subject, 
-  content, 
-  properties = [],
-  language = 'FR',
-  leadId,
-  agentName = "Gadait International",
-  agentSignature = "L'équipe Gadait International"
-}: {
-  leadName: string;
-  leadSalutation?: string;
-  subject: string;
-  content: string;
-  properties?: SuggestedProperty[];
-  language?: string;
-  leadId?: string;
-  agentName?: string;
-  agentSignature?: string;
-}) => {
-  return React.createElement('html', {},
-    React.createElement('head', {},
-      React.createElement('meta', { charSet: 'utf-8' }),
-      React.createElement('meta', { name: 'viewport', content: 'width=device-width, initial-scale=1' }),
-      React.createElement('style', {}, `
-        body { 
-          font-family: 'Optima', 'Helvetica Neue', Arial, sans-serif; 
-          line-height: 1.6; 
-          color: #2C3E50; 
-          background-color: #FEFEFE;
-          margin: 0;
-          padding: 0;
-        }
-        .container { 
-          max-width: 600px; 
-          margin: 0 auto; 
-          background-color: #FFFFFF;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .header { 
-          background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%); 
-          color: #FFFFFF; 
-          padding: 40px 30px; 
-          text-align: center;
-        }
-        .header h1 { 
-          margin: 0; 
-          font-size: 28px; 
-          font-weight: 300; 
-          letter-spacing: 2px;
-        }
-        .content { 
-          padding: 40px 30px; 
-        }
-        .greeting { 
-          font-size: 18px; 
-          margin-bottom: 30px; 
-          color: #2C3E50;
-        }
-        .main-content { 
-          margin-bottom: 30px; 
-          color: #34495E;
-          line-height: 1.8;
-        }
-        .signature { 
-          margin-top: 40px; 
-          padding-top: 25px; 
-          border-top: 1px solid #E5E5E5; 
-          color: #7F8C8D;
-        }
-        .footer { 
-          background-color: #F8F9FA; 
-          padding: 30px; 
-          text-align: center; 
-          color: #95A5A6; 
-          font-size: 12px;
-        }
-        .cta-button { 
-          display: inline-block; 
-          background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%); 
-          color: #FFFFFF; 
-          padding: 15px 30px; 
-          text-decoration: none; 
-          border-radius: 6px; 
-          margin: 20px 0; 
-          font-weight: 500;
-        }
-        .properties-section {
-          margin: 40px 0;
-          padding: 30px 0;
-          border-top: 2px solid #E5E5E5;
-        }
-        .properties-title {
-          font-size: 20px;
-          font-weight: 500;
-          color: #2C3E50;
-          margin-bottom: 20px;
-          text-align: center;
-        }
-        .property-card {
-          margin: 20px 0;
-          border: 1px solid #E5E5E5;
-          border-radius: 8px;
-          overflow: hidden;
-          background: #FFFFFF;
-        }
-      `)
-    ),
-    React.createElement('body', {},
-      React.createElement('div', { className: 'container' },
-        React.createElement('div', { className: 'header' },
-          React.createElement('img', { 
-            src: 'https://www.gadait-international.com/static/media/logo.c86ab9e0598ca0f55b0db0ab4a7c6256.svg',
-            alt: 'Gadait International',
-            style: { height: '50px', width: 'auto' }
-          })
-        ),
-        React.createElement('div', { className: 'content' },
-          React.createElement('div', { className: 'greeting' },
-            `${leadSalutation || 'Cher/Chère'} ${leadName},`
-          ),
-          React.createElement('div', { 
-            className: 'main-content',
-            dangerouslySetInnerHTML: { __html: content }
-          }),
-          properties.length > 0 && React.createElement('div', { className: 'properties-section' },
-            React.createElement('h2', { className: 'properties-title' }, 
-              language === 'FR' ? 'Nos proprietes selectionnees pour vous' : 
-              language === 'ES' ? 'Nuestras propiedades seleccionadas para usted' : 
-              'Our selected properties for you'
-            ),
-            ...properties.map(property => PropertyCard({ property, language, leadId }))
-          ),
-          React.createElement('div', { className: 'signature' },
-            React.createElement('p', {}, `Cordialement,`),
-            React.createElement('p', {}, agentSignature),
-            React.createElement('p', {}, `Tel: +230 268 2828`),
-            React.createElement('p', {}, `Email: contact@gadait-international.com`)
-          )
-        ),
-        React.createElement('div', { className: 'footer' },
-          React.createElement('p', {}, `Gadait International - Immobilier de prestige`),
-          React.createElement('p', {}, `Si vous ne souhaitez plus recevoir nos communications, `)
-        )
-      )
-    )
-  );
-};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -1557,20 +1405,25 @@ async function sendTestEmailWithRealLead(leadId: string, templateDay: number) {
     </div>
   `;
   
-  // Render l'email avec React Email
-  const emailHtml = await renderAsync(
-    React.createElement(LoroEmailTemplate, {
-      leadName: lead.name,
-      leadSalutation: lead.salutation,
-      subject: subject,
-      content: testNotice + content,
-      properties: suggestedProperties,
-      language: language,
-      leadId: lead.id,
-      agentName: "Gadait International",
-      agentSignature: "L'équipe Gadait International"
-    })
-  );
+  // Récupérer les infos de l'agent assigné
+  const { data: agentData } = lead.assigned_to ? await supabase
+    .from('team_members')
+    .select('whatsapp_number, phone, email')
+    .eq('id', lead.assigned_to)
+    .single() : { data: null };
+
+  // Générer l'email avec le bon template HTML
+  const emailHtml = generateEmailHtml({
+    leadName: lead.name,
+    leadSalutation: lead.salutation,
+    aiContent: testNotice + content,
+    properties: suggestedProperties,
+    language: language,
+    leadId: lead.id,
+    agentWhatsApp: agentData?.whatsapp_number || '+33750260304',
+    agentPhone: agentData?.phone || '+33 7 50 26 03 04',
+    agentEmail: agentData?.email || 'pierre@gadait-international.com'
+  });
   
   try {
     const { data: emailData, error: emailError } = await resend.emails.send({
@@ -1645,16 +1498,30 @@ async function sendPreviewEmails(targetEmail: string, leadData: any) {
   for (const template of templates) {
     try {
       const personalizedSubject = personalizeTemplate(template.subject_template, leadData);
-      const emailHtml = await renderAsync(
-        React.createElement(LoroEmailTemplate, {
-          leadName: leadData.name,
-          leadSalutation: leadData.salutation,
-          subject: personalizedSubject,
-          content: template.content_template,
-          agentName: "Gadait International",
-          agentSignature: "L'équipe Gadait International"
-        })
+      
+      // Récupérer les propriétés suggérées pour chaque email
+      const suggestedProperties = await fetchSuggestedProperties(leadData, 3);
+      
+      // Générer le contenu personnalisé avec l'IA
+      const { personalizedContent } = await generatePersonalizedContent(
+        leadData,
+        template.day_number,
+        detectLeadLanguage(leadData),
+        determineSegment(leadData)
       );
+      
+      // Générer l'email avec le bon template HTML
+      const emailHtml = generateEmailHtml({
+        leadName: leadData.name,
+        leadSalutation: leadData.salutation,
+        aiContent: personalizedContent,
+        properties: suggestedProperties,
+        language: detectLeadLanguage(leadData),
+        leadId: 'preview',
+        agentWhatsApp: '+33750260304',
+        agentPhone: '+33 7 50 26 03 04',
+        agentEmail: 'pierre@gadait-international.com'
+      });
       
       // Envoyer l'email via Resend
       const { error: emailError } = await resend.emails.send({
