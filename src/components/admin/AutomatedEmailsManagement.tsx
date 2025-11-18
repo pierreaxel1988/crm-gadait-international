@@ -64,6 +64,7 @@ const AutomatedEmailsManagement = () => {
   const [testEmail, setTestEmail] = useState('');
   const [testLeadId, setTestLeadId] = useState('');
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
+  const [isSendingPreview, setIsSendingPreview] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -147,6 +148,9 @@ const AutomatedEmailsManagement = () => {
     }
 
     try {
+      setIsSendingPreview(true);
+      toast.info('Envoi des emails en cours... Cela peut prendre jusqu\'à 15 secondes.');
+
       const { error } = await supabase.functions.invoke('automated-email-system', {
         body: {
           action: 'send_preview_emails',
@@ -169,6 +173,8 @@ const AutomatedEmailsManagement = () => {
     } catch (error) {
       console.error('Error sending preview emails:', error);
       toast.error('Erreur lors de l\'envoi des emails de prévisualisation');
+    } finally {
+      setIsSendingPreview(false);
     }
   };
 
@@ -513,9 +519,21 @@ const AutomatedEmailsManagement = () => {
                 />
               </div>
 
-              <Button onClick={sendPreviewEmails} disabled={!testEmail} className="w-full">
-                <Mail className="h-4 w-4 mr-2" />
-                Envoyer toute la séquence
+              <Button onClick={sendPreviewEmails} disabled={!testEmail || isSendingPreview} className="w-full">
+                {isSendingPreview ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Envoi en cours...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Envoyer toute la séquence
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>

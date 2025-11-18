@@ -58,10 +58,8 @@ interface SuggestedProperty {
   reference: string;
   title: string;
   title_en?: string;
-  title_fr?: string;
   description?: string;
   description_en?: string;
-  description_fr?: string;
   slug: string;
   slug_en?: string;
   slug_fr?: string;
@@ -166,7 +164,7 @@ function generatePropertyCardHtml(property: any, language: string, leadId: strin
   
   const title = language === 'EN'
     ? (property.title_en || property.title)
-    : (property.title_fr || property.title);
+    : property.title;
   
   const mainImage = property.images?.[0] || '';
   const countryDisplay = getCountryDisplay(property.country);
@@ -1009,7 +1007,7 @@ async function fetchSuggestedProperties(lead: EnrichedLead, limit: number = 3): 
     // Construire la requête avec filtres intelligents
     let query = supabase
       .from('properties_backoffice')
-      .select('id, reference, title_fr, title_en, slug_fr, slug_en, external_url, price, currency, bedrooms, bathrooms, surface, images, location, country, property_type, amenities, views, status')
+      .select('id, reference, title, title_en, slug_fr, slug_en, external_url, price, currency, bedrooms, bathrooms, surface, images, location, country, property_type, amenities, views, status')
       .eq('status', 'published')
       .not('slug_fr', 'is', null)
       .not('slug_en', 'is', null);
@@ -1056,7 +1054,7 @@ async function fetchSuggestedProperties(lead: EnrichedLead, limit: number = 3): 
       // Fallback : récupérer les propriétés les plus récentes
       const { data: fallbackProperties } = await supabase
         .from('properties_backoffice')
-        .select('id, reference, title_fr, title_en, slug_fr, slug_en, external_url, price, currency, bedrooms, bathrooms, surface, images, location, country')
+        .select('id, reference, title, title_en, slug_fr, slug_en, external_url, price, currency, bedrooms, bathrooms, surface, images, location, country')
         .eq('status', 'published')
         .not('slug_fr', 'is', null)
         .order('created_at', { ascending: false })
@@ -1065,7 +1063,7 @@ async function fetchSuggestedProperties(lead: EnrichedLead, limit: number = 3): 
       return (fallbackProperties || []).map(p => ({
         id: p.id,
         reference: p.reference || '',
-        title: p.title_fr || p.title_en || 'Propriété',
+        title: p.title || p.title_en || 'Propriété',
         slug: p.slug_fr || p.slug_en || '',
         external_url: p.external_url || '',
         price: p.price || 0,
@@ -1083,7 +1081,7 @@ async function fetchSuggestedProperties(lead: EnrichedLead, limit: number = 3): 
     return properties.map(p => ({
       id: p.id,
       reference: p.reference || '',
-      title: p.title_fr || p.title_en || 'Propriété',
+      title: p.title || p.title_en || 'Propriété',
       slug: p.slug_fr || p.slug_en || '',
       external_url: p.external_url || '',
       price: p.price || 0,
