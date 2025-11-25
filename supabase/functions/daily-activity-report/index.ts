@@ -114,6 +114,7 @@ async function getStatusChangesToday(): Promise<StatusChange[]> {
       
       const actionDate = new Date(action.timestamp);
       if (actionDate >= today) {
+        // Status changes
         if (action.type === "status_change" && action.oldStatus && action.newStatus) {
           changes.push({
             lead_name: lead.name,
@@ -122,6 +123,32 @@ async function getStatusChangesToday(): Promise<StatusChange[]> {
             new_status: action.newStatus,
             changed_at: action.timestamp,
           });
+        }
+        // Tags added/removed
+        else if (action.type === "tag_change") {
+          const oldTags = action.oldTags || [];
+          const newTags = action.newTags || [];
+          const added = newTags.filter((t: string) => !oldTags.includes(t));
+          const removed = oldTags.filter((t: string) => !newTags.includes(t));
+          
+          if (added.length > 0) {
+            changes.push({
+              lead_name: lead.name,
+              agent_name: lead.team_members?.name || "Non assigné",
+              old_status: "Tags",
+              new_status: `Ajouté: ${added.join(", ")}`,
+              changed_at: action.timestamp,
+            });
+          }
+          if (removed.length > 0) {
+            changes.push({
+              lead_name: lead.name,
+              agent_name: lead.team_members?.name || "Non assigné",
+              old_status: "Tags",
+              new_status: `Retiré: ${removed.join(", ")}`,
+              changed_at: action.timestamp,
+            });
+          }
         }
       }
     });
@@ -163,6 +190,7 @@ async function getActionsCreatedToday(): Promise<ActionStats[]> {
       
       const actionDate = new Date(action.timestamp);
       if (actionDate >= today) {
+        // Count all types of actions including status_change, tag_change, notes, calls, etc.
         const actionType = action.type || "other";
         const key = `${agentName}|${actionType}`;
         actionsByAgent[key] = (actionsByAgent[key] || 0) + 1;
@@ -214,11 +242,14 @@ function getPipelineTypeLabel(type: string): string {
 function getActionTypeLabel(type: string): string {
   const labels: { [key: string]: string } = {
     status_change: "Changement de statut",
+    tag_change: "Modification de tags",
     call: "Appel",
     email: "Email",
     meeting: "Rendez-vous",
     note: "Note",
     property_sent: "Propriété envoyée",
+    comment: "Commentaire",
+    task: "Tâche",
   };
   return labels[type] || type;
 }
@@ -337,7 +368,7 @@ function generateDailyReportHtml(
         
         <!-- Header with Logo -->
         <div style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); padding: 40px 30px; border-radius: 16px 16px 0 0; text-align: center;">
-          <img src="https://hxqoqkfnhbpwzkjgukrc.supabase.co/storage/v1/object/public/gadait-assets/logo-gadait.svg" alt="Gadait International" style="height: 50px; margin-bottom: 20px;">
+          <div style="font-family: 'Futura', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 36px; font-weight: 500; color: white; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 20px;">GADAIT.</div>
           <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">Rapport d'Activité Quotidien</h1>
           <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">${today}</p>
         </div>
