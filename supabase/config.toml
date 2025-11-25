@@ -48,3 +48,6 @@ verify_jwt = false
 
 [functions.automated-email-system]
 verify_jwt = false
+
+[functions.daily-activity-report]
+verify_jwt = false
