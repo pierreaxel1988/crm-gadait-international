@@ -10,8 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Eye, Send, BarChart3, Mail, Calendar, Users, TrendingUp, Edit } from 'lucide-react';
+import { Eye, Send, BarChart3, Mail, Calendar, Users, TrendingUp, Edit, CheckCircle2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { TemplateEditorDialog } from './TemplateEditorDialog';
 
 interface EmailCampaign {
   id: string;
@@ -37,6 +38,9 @@ interface EmailTemplate {
   subject_template: string;
   content_template: string;
   is_active: boolean;
+  is_validated: boolean;
+  validated_at?: string;
+  validated_by?: string;
   created_at: string;
 }
 
@@ -65,6 +69,8 @@ const AutomatedEmailsManagement = () => {
   const [testLeadId, setTestLeadId] = useState('');
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
   const [isSendingPreview, setIsSendingPreview] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
+  const [editorOpen, setEditorOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -374,12 +380,34 @@ const AutomatedEmailsManagement = () => {
                             ) : (
                               <Badge variant="secondary" className="text-xs">Inactif</Badge>
                             )}
+                            {template.is_validated && (
+                              <Badge variant="default" className="bg-green-600 text-xs">
+                                <CheckCircle2 className="w-3 h-3 mr-1" />
+                                Validé
+                              </Badge>
+                            )}
+                            {!template.is_validated && (
+                              <Badge variant="outline" className="text-xs">
+                                En attente
+                              </Badge>
+                            )}
                           </div>
                           <div className="text-sm text-muted-foreground">
                             Objet: {template.subject_template}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setEditingTemplate(template);
+                              setEditorOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Éditer
+                          </Button>
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button
@@ -412,7 +440,7 @@ const AutomatedEmailsManagement = () => {
                                   </div>
                                 </div>
                                 <div className="text-sm text-muted-foreground">
-                                  <strong>Variables disponibles:</strong> {'{'}nom{'}'},  {'{'}langue{'}'},  {'{'}propriétés suggérées{'}'}
+                                  <strong>Variables disponibles:</strong> {'{'}nom{'}'},  {'{'}salutation{'}'},  {'{'}location{'}'},  {'{'}budget{'}'},  {'{'}agent_name{'}'},  {'{'}cal_booking_link{'}'}
                                 </div>
                               </div>
                             </DialogContent>
@@ -539,6 +567,18 @@ const AutomatedEmailsManagement = () => {
           </Card>
         </TabsContent>
       </Tabs>
+      
+      <TemplateEditorDialog
+        template={editingTemplate}
+        open={editorOpen}
+        onClose={() => {
+          setEditorOpen(false);
+          setEditingTemplate(null);
+        }}
+        onSave={() => {
+          loadData();
+        }}
+      />
     </div>
   );
 };
