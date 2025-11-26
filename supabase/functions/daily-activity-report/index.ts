@@ -60,6 +60,14 @@ interface AgentPipelineDistribution {
   total: number;
 }
 
+interface AgentVisitsProposals {
+  agent_name: string;
+  visites_en_retard: number;
+  visites_futures: number;
+  prochaine_visite: string | null;
+  proposals: number;
+}
+
 // Helper function to get today's date at midnight in Paris timezone
 function getTodayParis(): Date {
   const now = new Date();
@@ -181,6 +189,83 @@ async function getAgentPipelineDistribution(): Promise<AgentPipelineDistribution
 
   return Object.values(agentStats).sort((a, b) => 
     b.total - a.total
+  );
+}
+
+// Get visits and proposals by agent
+async function getAgentVisitsProposals(): Promise<AgentVisitsProposals[]> {
+  const { data: leads, error } = await supabase
+    .from("leads")
+    .select(`
+      id,
+      assigned_to,
+      action_history,
+      deleted_at,
+      team_members!leads_assigned_to_fkey(name)
+    `)
+    .is("deleted_at", null);
+
+  if (error) {
+    console.error("Error fetching visits and proposals:", error);
+    return [];
+  }
+
+  const agentStats: { [key: string]: AgentVisitsProposals } = {};
+  const now = new Date();
+
+  leads?.forEach((lead: any) => {
+    const agentName = lead.team_members?.name || "Non assigné";
+    
+    if (!agentStats[agentName]) {
+      agentStats[agentName] = {
+        agent_name: agentName,
+        visites_en_retard: 0,
+        visites_futures: 0,
+        prochaine_visite: null,
+        proposals: 0,
+      };
+    }
+
+    if (lead.action_history && Array.isArray(lead.action_history)) {
+      const futureVisits: Date[] = [];
+      
+      lead.action_history.forEach((action: any) => {
+        // Count proposals
+        if (action.actionType === 'proposal' || action.actionType === 'Proposition') {
+          agentStats[agentName].proposals++;
+        }
+
+        // Count visits
+        if (action.actionType === 'visit' || action.actionType === 'Visite' || action.actionType === 'meeting') {
+          if (action.scheduledDate) {
+            const scheduledDate = new Date(action.scheduledDate);
+            
+            // Check if visit is not completed
+            if (!action.completedDate) {
+              if (scheduledDate < now) {
+                agentStats[agentName].visites_en_retard++;
+              } else {
+                agentStats[agentName].visites_futures++;
+                futureVisits.push(scheduledDate);
+              }
+            }
+          }
+        }
+      });
+
+      // Find the closest future visit
+      if (futureVisits.length > 0) {
+        futureVisits.sort((a, b) => a.getTime() - b.getTime());
+        const nextVisit = futureVisits[0];
+        if (!agentStats[agentName].prochaine_visite || new Date(agentStats[agentName].prochaine_visite!) > nextVisit) {
+          agentStats[agentName].prochaine_visite = nextVisit.toISOString();
+        }
+      }
+    }
+  });
+
+  return Object.values(agentStats).sort((a, b) => 
+    b.visites_futures + b.visites_en_retard - (a.visites_futures + a.visites_en_retard)
   );
 }
 
@@ -408,7 +493,8 @@ function generateDailyReportHtml(
   actionsCreated: ActionStats[],
   globalStats: GlobalStats,
   agentPerformance: AgentPerformance[],
-  pipelineDistribution: AgentPipelineDistribution[]
+  pipelineDistribution: AgentPipelineDistribution[],
+  visitsProposals: AgentVisitsProposals[]
 ): string {
   const today = new Date().toLocaleDateString("fr-FR", {
     weekday: "long",
@@ -612,6 +698,54 @@ function generateDailyReportHtml(
             </table>
           </div>
 
+          <!-- Visits and Proposals Table -->
+          <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <h2 style="color: #1e293b; margin: 0 0 25px 0; font-size: 22px; font-weight: 600; border-bottom: 3px solid #0ea5e9; padding-bottom: 15px;">📅 Visites & Propositions</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                  <th style="padding: 15px; text-align: left; font-weight: 600; color: #475569;">Agent</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Visites en Retard</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Visites Futures</th>
+                  <th style="padding: 15px; text-align: left; font-weight: 600; color: #475569;">Prochaine Visite</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Proposals</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${visitsProposals.map((agent, index) => {
+                  const nextVisitFormatted = agent.prochaine_visite 
+                    ? new Date(agent.prochaine_visite).toLocaleDateString('fr-FR', { 
+                        weekday: 'short', 
+                        day: 'numeric', 
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })
+                    : '-';
+                  
+                  return `
+                  <tr style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                    <td style="padding: 15px; font-weight: 500; color: #1e293b;">${agent.agent_name}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 700; color: ${agent.visites_en_retard > 0 ? '#ef4444' : '#10b981'};">
+                      ${agent.visites_en_retard > 0 ? '⚠️ ' : ''}${agent.visites_en_retard}
+                    </td>
+                    <td style="padding: 15px; text-align: center; font-weight: 600; color: #3b82f6;">${agent.visites_futures}</td>
+                    <td style="padding: 15px; color: #64748b; font-size: 13px;">${nextVisitFormatted}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 600; color: #8b5cf6;">${agent.proposals}</td>
+                  </tr>
+                `;
+                }).join('')}
+                <tr style="background: #f1f5f9; border-top: 3px solid #0ea5e9; font-weight: 700;">
+                  <td style="padding: 15px; color: #1e293b; font-size: 15px;">TOTAL</td>
+                  <td style="padding: 15px; text-align: center; color: #ef4444; font-size: 15px;">${visitsProposals.reduce((sum, a) => sum + a.visites_en_retard, 0)}</td>
+                  <td style="padding: 15px; text-align: center; color: #3b82f6; font-size: 15px;">${visitsProposals.reduce((sum, a) => sum + a.visites_futures, 0)}</td>
+                  <td style="padding: 15px; color: #64748b;">-</td>
+                  <td style="padding: 15px; text-align: center; color: #8b5cf6; font-size: 15px;">${visitsProposals.reduce((sum, a) => sum + a.proposals, 0)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <!-- New Leads Section -->
           <div style="margin-bottom: 40px;">
             <h2 style="color: #1f2937; font-size: 22px; font-weight: 600; margin: 0 0 20px 0; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;">
@@ -692,7 +826,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const [newLeads, statusChanges, actionsCreated, globalStats, agentPerformance, pipelineDistribution] =
+    const [newLeads, statusChanges, actionsCreated, globalStats, agentPerformance, pipelineDistribution, visitsProposals] =
       await Promise.all([
         getNewLeadsToday(),
         getStatusChangesToday(),
@@ -700,6 +834,7 @@ const handler = async (req: Request): Promise<Response> => {
         getGlobalStats(),
         getAgentPerformanceStats(),
         getAgentPipelineDistribution(),
+        getAgentVisitsProposals(),
       ]);
 
     const emailHtml = generateDailyReportHtml(
@@ -708,7 +843,8 @@ const handler = async (req: Request): Promise<Response> => {
       actionsCreated,
       globalStats,
       agentPerformance,
-      pipelineDistribution
+      pipelineDistribution,
+      visitsProposals
     );
 
     const emailResponse = await resend.emails.send({
