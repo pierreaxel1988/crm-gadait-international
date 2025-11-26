@@ -38,14 +38,95 @@ interface ActionStats {
 }
 
 interface GlobalStats {
-  total_active_leads: number;
-  leads_in_negotiation: number;
-  signed_deals: number;
+  total_active: number;
+  new_today: number;
+  signed_today: number;
+  in_negotiation: number;
+}
+
+interface AgentPerformance {
+  agent_name: string;
+  leads_actifs: number;
+  actions_en_retard: number;
+  hot_leads: number;
+  no_response_leads: number;
+}
+
+// Helper function to get today's date at midnight in Paris timezone
+function getTodayParis(): Date {
+  const now = new Date();
+  const parisTime = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+  parisTime.setHours(0, 0, 0, 0);
+  return parisTime;
+}
+
+// Get agent performance stats (CEO table data)
+async function getAgentPerformanceStats(): Promise<AgentPerformance[]> {
+  const { data: leads, error } = await supabase
+    .from("leads")
+    .select(`
+      id,
+      assigned_to,
+      tags,
+      action_history,
+      deleted_at,
+      team_members!leads_assigned_to_fkey(name)
+    `)
+    .is("deleted_at", null);
+
+  if (error) {
+    console.error("Error fetching agent performance:", error);
+    return [];
+  }
+
+  const agentStats: { [key: string]: AgentPerformance } = {};
+
+  leads?.forEach((lead: any) => {
+    const agentName = lead.team_members?.name || "Non assigné";
+    
+    if (!agentStats[agentName]) {
+      agentStats[agentName] = {
+        agent_name: agentName,
+        leads_actifs: 0,
+        actions_en_retard: 0,
+        hot_leads: 0,
+        no_response_leads: 0,
+      };
+    }
+
+    // Count active leads
+    agentStats[agentName].leads_actifs++;
+
+    // Count Hot leads
+    if (lead.tags && lead.tags.includes("Hot")) {
+      agentStats[agentName].hot_leads++;
+    }
+
+    // Count No Response leads
+    if (lead.tags && lead.tags.includes("No response")) {
+      agentStats[agentName].no_response_leads++;
+    }
+
+    // Count overdue actions
+    const actions = lead.action_history || [];
+    actions.forEach((action: any) => {
+      if (action.scheduledDate && !action.completedDate) {
+        const scheduledDate = new Date(action.scheduledDate);
+        const now = new Date();
+        if (scheduledDate < now) {
+          agentStats[agentName].actions_en_retard++;
+        }
+      }
+    });
+  });
+
+  return Object.values(agentStats).sort((a, b) => 
+    b.leads_actifs - a.leads_actifs
+  );
 }
 
 async function getNewLeadsToday(): Promise<NewLeadStats[]> {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getTodayParis();
   const todayStr = today.toISOString();
 
   const { data, error } = await supabase
@@ -82,9 +163,7 @@ async function getNewLeadsToday(): Promise<NewLeadStats[]> {
 }
 
 async function getStatusChangesToday(): Promise<StatusChange[]> {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayStr = today.toISOString();
+  const today = getTodayParis();
 
   const { data, error } = await supabase
     .from("leads")
@@ -108,24 +187,25 @@ async function getStatusChangesToday(): Promise<StatusChange[]> {
     if (!lead.action_history) return;
 
     const history = Array.isArray(lead.action_history) ? lead.action_history : [];
+    const agentName = lead.team_members?.name || "Non assigné";
     
     history.forEach((action: any) => {
-      if (!action.timestamp) return;
+      if (!action.createdAt) return;
       
-      const actionDate = new Date(action.timestamp);
+      const actionDate = new Date(action.createdAt);
       if (actionDate >= today) {
         // Status changes
-        if (action.type === "status_change" && action.oldStatus && action.newStatus) {
+        if (action.actionType === "status_change" && action.oldStatus && action.newStatus) {
           changes.push({
             lead_name: lead.name,
-            agent_name: lead.team_members?.name || "Non assigné",
+            agent_name: agentName,
             old_status: action.oldStatus,
             new_status: action.newStatus,
-            changed_at: action.timestamp,
+            changed_at: action.createdAt,
           });
         }
         // Tags added/removed
-        else if (action.type === "tag_change") {
+        else if (action.actionType === "tag_change") {
           const oldTags = action.oldTags || [];
           const newTags = action.newTags || [];
           const added = newTags.filter((t: string) => !oldTags.includes(t));
@@ -134,19 +214,19 @@ async function getStatusChangesToday(): Promise<StatusChange[]> {
           if (added.length > 0) {
             changes.push({
               lead_name: lead.name,
-              agent_name: lead.team_members?.name || "Non assigné",
+              agent_name: agentName,
               old_status: "Tags",
               new_status: `Ajouté: ${added.join(", ")}`,
-              changed_at: action.timestamp,
+              changed_at: action.createdAt,
             });
           }
           if (removed.length > 0) {
             changes.push({
               lead_name: lead.name,
-              agent_name: lead.team_members?.name || "Non assigné",
+              agent_name: agentName,
               old_status: "Tags",
               new_status: `Retiré: ${removed.join(", ")}`,
-              changed_at: action.timestamp,
+              changed_at: action.createdAt,
             });
           }
         }
@@ -158,9 +238,7 @@ async function getStatusChangesToday(): Promise<StatusChange[]> {
 }
 
 async function getActionsCreatedToday(): Promise<ActionStats[]> {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayStr = today.toISOString();
+  const today = getTodayParis();
 
   const { data, error } = await supabase
     .from("leads")
@@ -186,12 +264,12 @@ async function getActionsCreatedToday(): Promise<ActionStats[]> {
     const agentName = lead.team_members?.name || "Non assigné";
     
     history.forEach((action: any) => {
-      if (!action.timestamp) return;
+      if (!action.createdAt) return;
       
-      const actionDate = new Date(action.timestamp);
+      const actionDate = new Date(action.createdAt);
       if (actionDate >= today) {
         // Count all types of actions including status_change, tag_change, notes, calls, etc.
-        const actionType = action.type || "other";
+        const actionType = action.actionType || "other";
         const key = `${agentName}|${actionType}`;
         actionsByAgent[key] = (actionsByAgent[key] || 0) + 1;
       }
@@ -205,27 +283,38 @@ async function getActionsCreatedToday(): Promise<ActionStats[]> {
 }
 
 async function getGlobalStats(): Promise<GlobalStats> {
-  const { data: activeLeads } = await supabase
+  const today = getTodayParis();
+  const todayStr = today.toISOString();
+
+  const { data: activeLeads, count: activeCount } = await supabase
     .from("leads")
     .select("id", { count: "exact", head: true })
     .is("deleted_at", null);
 
-  const { data: negotiationLeads } = await supabase
+  const { data: newToday, count: newCount } = await supabase
     .from("leads")
     .select("id", { count: "exact", head: true })
-    .eq("status", "Négociation")
+    .gte("created_at", todayStr)
     .is("deleted_at", null);
 
-  const { data: signedLeads } = await supabase
+  const { data: negotiationLeads, count: negCount } = await supabase
+    .from("leads")
+    .select("id", { count: "exact", head: true })
+    .in("status", ["Négociation", "Proposition", "Acompte"])
+    .is("deleted_at", null);
+
+  const { data: signedToday, count: signedCount } = await supabase
     .from("leads")
     .select("id", { count: "exact", head: true })
     .eq("status", "Signé")
+    .gte("created_at", todayStr)
     .is("deleted_at", null);
 
   return {
-    total_active_leads: activeLeads?.length || 0,
-    leads_in_negotiation: negotiationLeads?.length || 0,
-    signed_deals: signedLeads?.length || 0,
+    total_active: activeCount || 0,
+    new_today: newCount || 0,
+    in_negotiation: negCount || 0,
+    signed_today: signedCount || 0,
   };
 }
 
@@ -258,7 +347,8 @@ function generateDailyReportHtml(
   newLeads: NewLeadStats[],
   statusChanges: StatusChange[],
   actionsCreated: ActionStats[],
-  globalStats: GlobalStats
+  globalStats: GlobalStats,
+  agentPerformance: AgentPerformance[]
 ): string {
   const today = new Date().toLocaleDateString("fr-FR", {
     weekday: "long",
@@ -364,7 +454,7 @@ function generateDailyReportHtml(
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f9fafb;">
-      <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+      <div style="max-width: 900px; margin: 0 auto; padding: 40px 20px;">
         
         <!-- Header with Logo -->
         <div style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); padding: 40px 30px; border-radius: 16px 16px 0 0; text-align: center;">
@@ -376,20 +466,56 @@ function generateDailyReportHtml(
         <!-- Main Content -->
         <div style="background: white; padding: 40px 30px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
           
-          <!-- Global Stats -->
-          <div style="display: flex; gap: 20px; margin-bottom: 40px; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 24px; border-radius: 12px; border-left: 4px solid #0ea5e9;">
-              <div style="color: #0369a1; font-size: 14px; font-weight: 600; margin-bottom: 8px;">Leads Actifs</div>
-              <div style="color: #0c4a6e; font-size: 32px; font-weight: 700;">${globalStats.total_active_leads}</div>
+          <!-- Global Statistics -->
+          <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <h2 style="color: #1e293b; margin: 0 0 25px 0; font-size: 22px; font-weight: 600; border-bottom: 3px solid #0ea5e9; padding-bottom: 15px;">📊 Vue d'ensemble</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+              <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 8px;">Leads Actifs</div>
+                <div style="color: white; font-size: 36px; font-weight: 700;">${globalStats.total_active}</div>
+              </div>
+              <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 8px;">Nouveaux Aujourd'hui</div>
+                <div style="color: white; font-size: 36px; font-weight: 700;">${globalStats.new_today}</div>
+              </div>
+              <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 8px;">En Négociation</div>
+                <div style="color: white; font-size: 36px; font-weight: 700;">${globalStats.in_negotiation}</div>
+              </div>
+              <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 8px;">Signés Aujourd'hui</div>
+                <div style="color: white; font-size: 36px; font-weight: 700;">${globalStats.signed_today}</div>
+              </div>
             </div>
-            <div style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 24px; border-radius: 12px; border-left: 4px solid #f59e0b;">
-              <div style="color: #92400e; font-size: 14px; font-weight: 600; margin-bottom: 8px;">En Négociation</div>
-              <div style="color: #78350f; font-size: 32px; font-weight: 700;">${globalStats.leads_in_negotiation}</div>
-            </div>
-            <div style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); padding: 24px; border-radius: 12px; border-left: 4px solid #10b981;">
-              <div style="color: #065f46; font-size: 14px; font-weight: 600; margin-bottom: 8px;">Signés</div>
-              <div style="color: #064e3b; font-size: 32px; font-weight: 700;">${globalStats.signed_deals}</div>
-            </div>
+          </div>
+
+          <!-- CEO Performance Table -->
+          <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <h2 style="color: #1e293b; margin: 0 0 25px 0; font-size: 22px; font-weight: 600; border-bottom: 3px solid #0ea5e9; padding-bottom: 15px;">👥 Performance des Agents</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                  <th style="padding: 15px; text-align: left; font-weight: 600; color: #475569;">Agent</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Leads Actifs</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Actions en Retard</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">🔥 Hot</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">❌ No Response</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${agentPerformance.map((agent, index) => `
+                  <tr style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                    <td style="padding: 15px; font-weight: 500; color: #1e293b;">${agent.agent_name}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 600; color: #3b82f6;">${agent.leads_actifs}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 700; color: ${agent.actions_en_retard > 20 ? '#ef4444' : agent.actions_en_retard > 10 ? '#f59e0b' : '#10b981'};">
+                      ${agent.actions_en_retard}
+                    </td>
+                    <td style="padding: 15px; text-align: center; font-weight: 600; color: #f97316;">${agent.hot_leads}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 600; color: #64748b;">${agent.no_response_leads}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
           </div>
 
           <!-- New Leads Section -->
@@ -434,7 +560,7 @@ function generateDailyReportHtml(
           <!-- Actions Created Section -->
           <div style="margin-bottom: 20px;">
             <h2 style="color: #1f2937; font-size: 22px; font-weight: 600; margin: 0 0 20px 0; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;">
-              ⚡ Actions Créées
+              ⚡ Actions du Jour
             </h2>
             ${actionsCreated.length > 0 ? `
               <table style="width: 100%; border-collapse: collapse;">
@@ -472,54 +598,47 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    console.log("Starting daily activity report generation...");
+    const [newLeads, statusChanges, actionsCreated, globalStats, agentPerformance] =
+      await Promise.all([
+        getNewLeadsToday(),
+        getStatusChangesToday(),
+        getActionsCreatedToday(),
+        getGlobalStats(),
+        getAgentPerformanceStats(),
+      ]);
 
-    // Fetch all data
-    const [newLeads, statusChanges, actionsCreated, globalStats] = await Promise.all([
-      getNewLeadsToday(),
-      getStatusChangesToday(),
-      getActionsCreatedToday(),
-      getGlobalStats(),
-    ]);
-
-    console.log("Data fetched:", {
-      newLeads: newLeads.length,
-      statusChanges: statusChanges.length,
-      actionsCreated: actionsCreated.length,
-      globalStats,
-    });
-
-    // Generate HTML
-    const htmlContent = generateDailyReportHtml(
+    const emailHtml = generateDailyReportHtml(
       newLeads,
       statusChanges,
       actionsCreated,
-      globalStats
+      globalStats,
+      agentPerformance
     );
 
-    // Send email via Resend
     const emailResponse = await resend.emails.send({
       from: FROM_EMAIL,
       to: [REPORT_EMAIL],
-      subject: `📊 Rapport d'activité quotidien - ${new Date().toLocaleDateString("fr-FR")}`,
-      html: htmlContent,
+      subject: `📊 Rapport Quotidien GADAIT - ${new Date().toLocaleDateString("fr-FR")}`,
+      html: emailHtml,
     });
 
     console.log("Email sent successfully:", emailResponse);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Daily report sent successfully",
-        data: {
-          newLeads: newLeads.length,
-          statusChanges: statusChanges.length,
-          actionsCreated: actionsCreated.length,
-        }
+      JSON.stringify({
+        success: true,
+        message: "Rapport quotidien envoyé avec succès",
+        stats: {
+          new_leads: newLeads.length,
+          status_changes: statusChanges.length,
+          actions_created: actionsCreated.length,
+          agents_performance: agentPerformance.length,
+          global: globalStats,
+        },
       }),
       {
         status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
   } catch (error: any) {
@@ -528,7 +647,7 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({ error: error.message }),
       {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
   }
