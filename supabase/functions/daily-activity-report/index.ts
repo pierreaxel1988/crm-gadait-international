@@ -52,6 +52,14 @@ interface AgentPerformance {
   no_response_leads: number;
 }
 
+interface AgentPipelineDistribution {
+  agent_name: string;
+  achat: number;
+  location: number;
+  proprietaire: number;
+  total: number;
+}
+
 // Helper function to get today's date at midnight in Paris timezone
 function getTodayParis(): Date {
   const now = new Date();
@@ -122,6 +130,57 @@ async function getAgentPerformanceStats(): Promise<AgentPerformance[]> {
 
   return Object.values(agentStats).sort((a, b) => 
     b.leads_actifs - a.leads_actifs
+  );
+}
+
+// Get pipeline distribution by agent
+async function getAgentPipelineDistribution(): Promise<AgentPipelineDistribution[]> {
+  const { data: leads, error } = await supabase
+    .from("leads")
+    .select(`
+      id,
+      assigned_to,
+      pipeline_type,
+      deleted_at,
+      team_members!leads_assigned_to_fkey(name)
+    `)
+    .is("deleted_at", null);
+
+  if (error) {
+    console.error("Error fetching pipeline distribution:", error);
+    return [];
+  }
+
+  const agentStats: { [key: string]: AgentPipelineDistribution } = {};
+
+  leads?.forEach((lead: any) => {
+    const agentName = lead.team_members?.name || "Non assigné";
+    
+    if (!agentStats[agentName]) {
+      agentStats[agentName] = {
+        agent_name: agentName,
+        achat: 0,
+        location: 0,
+        proprietaire: 0,
+        total: 0,
+      };
+    }
+
+    // Count by pipeline type
+    const pipelineType = lead.pipeline_type?.toLowerCase();
+    if (pipelineType === 'purchase') {
+      agentStats[agentName].achat++;
+    } else if (pipelineType === 'rental') {
+      agentStats[agentName].location++;
+    } else if (pipelineType === 'owner') {
+      agentStats[agentName].proprietaire++;
+    }
+    
+    agentStats[agentName].total++;
+  });
+
+  return Object.values(agentStats).sort((a, b) => 
+    b.total - a.total
   );
 }
 
@@ -348,7 +407,8 @@ function generateDailyReportHtml(
   statusChanges: StatusChange[],
   actionsCreated: ActionStats[],
   globalStats: GlobalStats,
-  agentPerformance: AgentPerformance[]
+  agentPerformance: AgentPerformance[],
+  pipelineDistribution: AgentPipelineDistribution[]
 ): string {
   const today = new Date().toLocaleDateString("fr-FR", {
     weekday: "long",
@@ -518,6 +578,40 @@ function generateDailyReportHtml(
             </table>
           </div>
 
+          <!-- Pipeline Distribution Table -->
+          <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <h2 style="color: #1e293b; margin: 0 0 25px 0; font-size: 22px; font-weight: 600; border-bottom: 3px solid #0ea5e9; padding-bottom: 15px;">📈 Répartition des Leads par Pipeline</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                  <th style="padding: 15px; text-align: left; font-weight: 600; color: #475569;">Agent</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Achat</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Location</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Propriétaire</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${pipelineDistribution.map((agent, index) => `
+                  <tr style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                    <td style="padding: 15px; font-weight: 500; color: #1e293b;">${agent.agent_name}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 600; color: #3b82f6;">${agent.achat}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 600; color: #8b5cf6;">${agent.location}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 600; color: #10b981;">${agent.proprietaire}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 700; color: #1e293b; background: ${index % 2 === 0 ? '#f8fafc' : '#f1f5f9'};">${agent.total}</td>
+                  </tr>
+                `).join('')}
+                <tr style="background: #f1f5f9; border-top: 3px solid #0ea5e9; font-weight: 700;">
+                  <td style="padding: 15px; color: #1e293b; font-size: 15px;">TOTAL</td>
+                  <td style="padding: 15px; text-align: center; color: #3b82f6; font-size: 15px;">${pipelineDistribution.reduce((sum, a) => sum + a.achat, 0)}</td>
+                  <td style="padding: 15px; text-align: center; color: #8b5cf6; font-size: 15px;">${pipelineDistribution.reduce((sum, a) => sum + a.location, 0)}</td>
+                  <td style="padding: 15px; text-align: center; color: #10b981; font-size: 15px;">${pipelineDistribution.reduce((sum, a) => sum + a.proprietaire, 0)}</td>
+                  <td style="padding: 15px; text-align: center; color: #1e293b; font-size: 16px; background: #cbd5e1;">${pipelineDistribution.reduce((sum, a) => sum + a.total, 0)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <!-- New Leads Section -->
           <div style="margin-bottom: 40px;">
             <h2 style="color: #1f2937; font-size: 22px; font-weight: 600; margin: 0 0 20px 0; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;">
@@ -598,13 +692,14 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const [newLeads, statusChanges, actionsCreated, globalStats, agentPerformance] =
+    const [newLeads, statusChanges, actionsCreated, globalStats, agentPerformance, pipelineDistribution] =
       await Promise.all([
         getNewLeadsToday(),
         getStatusChangesToday(),
         getActionsCreatedToday(),
         getGlobalStats(),
         getAgentPerformanceStats(),
+        getAgentPipelineDistribution(),
       ]);
 
     const emailHtml = generateDailyReportHtml(
@@ -612,7 +707,8 @@ const handler = async (req: Request): Promise<Response> => {
       statusChanges,
       actionsCreated,
       globalStats,
-      agentPerformance
+      agentPerformance,
+      pipelineDistribution
     );
 
     const emailResponse = await resend.emails.send({
