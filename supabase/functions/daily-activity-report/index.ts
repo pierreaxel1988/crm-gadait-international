@@ -172,7 +172,7 @@ async function getAgentPipelineDistribution(): Promise<AgentPipelineDistribution
       agentStats[agentName].achat++;
     } else if (pipelineType === 'rental') {
       agentStats[agentName].location++;
-    } else if (pipelineType === 'owner') {
+    } else if (pipelineType === 'owners') {
       agentStats[agentName].proprietaire++;
     }
     
