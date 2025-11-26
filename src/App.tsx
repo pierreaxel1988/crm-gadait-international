@@ -6,9 +6,10 @@ import {
   Routes,
   Navigate
 } from 'react-router-dom';
-import { AuthProvider } from './hooks/useAuth';
+import { AuthProvider, useAuth } from './hooks/useAuth';
 import { Toaster } from '@/components/ui/toaster';
 import LoadingScreen from './components/layout/LoadingScreen';
+import { usePageTracking } from '@/hooks/usePageTracking';
 import Auth from './pages/Auth';
 import Pipeline from './pages/Pipeline';
 import Properties from './pages/Properties';
@@ -29,12 +30,13 @@ const Notifications = lazy(() => import('./pages/Notifications'));
 const ChatGadaitPage = lazy(() => import('./pages/ChatGadaitPage'));
 const LeadsAnalytics = lazy(() => import('./pages/LeadsAnalytics'));
 
-function App() {
+const AppContent = () => {
+  const { user } = useAuth();
+  usePageTracking(user?.id);
+  
   return (
-    <Router>
-      <AuthProvider>
-        <Suspense fallback={<LoadingScreen fullscreen={true} />}>
-          <Routes>
+    <Suspense fallback={<LoadingScreen fullscreen={true} />}>
+      <Routes>
             <Route path="/" element={<Navigate to="/pipeline" />} />
             
             {/* Route d'authentification - Auth component loaded directly */}
@@ -121,9 +123,17 @@ function App() {
             
             {/* Fallback pour les routes non trouvées */}
             <Route path="*" element={<Navigate to="/pipeline" replace />} />
-          </Routes>
-          <Toaster />
-        </Suspense>
+      </Routes>
+    </Suspense>
+  );
+};
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <AppContent />
+        <Toaster />
       </AuthProvider>
     </Router>
   );

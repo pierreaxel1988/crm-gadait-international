@@ -2166,6 +2166,53 @@ export type Database = {
         }
         Relationships: []
       }
+      page_views: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          entered_at: string
+          id: string
+          left_at: string | null
+          page_path: string
+          page_title: string | null
+          session_id: string | null
+          tab_name: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          entered_at?: string
+          id?: string
+          left_at?: string | null
+          page_path: string
+          page_title?: string | null
+          session_id?: string | null
+          tab_name?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          entered_at?: string
+          id?: string
+          left_at?: string | null
+          page_path?: string
+          page_title?: string | null
+          session_id?: string | null
+          tab_name?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_views_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "user_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_units: {
         Row: {
           bathrooms: number | null

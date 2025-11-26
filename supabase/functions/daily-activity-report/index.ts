@@ -192,7 +192,6 @@ async function getAgentPipelineDistribution(): Promise<AgentPipelineDistribution
   );
 }
 
-// Get visits and proposals by agent
 async function getAgentVisitsProposals(): Promise<AgentVisitsProposals[]> {
   const { data: leads, error } = await supabase
     .from("leads")
@@ -267,6 +266,96 @@ async function getAgentVisitsProposals(): Promise<AgentVisitsProposals[]> {
   return Object.values(agentStats).sort((a, b) => 
     b.visites_futures + b.visites_en_retard - (a.visites_futures + a.visites_en_retard)
   );
+}
+
+interface AgentConnectionTime {
+  agent_name: string;
+  total_time: string;
+  first_login: string;
+  last_activity: string;
+  sessions: number;
+}
+
+// Get agent connection time for today
+async function getAgentConnectionTime(): Promise<AgentConnectionTime[]> {
+  try {
+    const today = getTodayParis();
+    const todayStr = today.toISOString();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString();
+
+    // Get all commercials
+    const { data: agents, error: agentsError } = await supabase
+      .from('team_members')
+      .select('id, name, email')
+      .eq('role', 'commercial')
+      .order('name');
+
+    if (agentsError) throw agentsError;
+
+    const connectionStats: AgentConnectionTime[] = [];
+
+    for (const agent of agents || []) {
+      // Get auth.users to find user_id by email
+      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+      
+      if (authError) {
+        console.error('Error fetching auth users:', authError);
+        continue;
+      }
+
+      const authUser = authData.users.find(u => u.email === agent.email);
+      if (!authUser) continue;
+
+      const { data: sessions, error: sessionsError } = await supabase
+        .from('user_sessions')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .gte('login_time', todayStr)
+        .lt('login_time', tomorrowStr);
+
+      if (sessionsError) {
+        console.error('Error fetching sessions:', sessionsError);
+        continue;
+      }
+
+      // Calculate total time
+      const totalMinutes = (sessions || []).reduce((sum, session) => {
+        return sum + (session.session_duration || 0);
+      }, 0);
+
+      // Get first login and last activity
+      const loginTimes = (sessions || [])
+        .map(s => s.login_time ? new Date(s.login_time) : null)
+        .filter(d => d !== null) as Date[];
+      
+      const logoutTimes = (sessions || [])
+        .map(s => s.logout_time ? new Date(s.logout_time) : null)
+        .filter(d => d !== null) as Date[];
+
+      const firstLogin = loginTimes.length > 0 
+        ? Math.min(...loginTimes.map(d => d.getTime()))
+        : null;
+      
+      const lastActivity = logoutTimes.length > 0
+        ? Math.max(...logoutTimes.map(d => d.getTime()))
+        : null;
+
+      connectionStats.push({
+        agent_name: agent.name,
+        total_time: totalMinutes > 0 ? `${Math.floor(totalMinutes / 60)}h${Math.round(totalMinutes % 60).toString().padStart(2, '0')}` : '-',
+        first_login: firstLogin ? new Date(firstLogin).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '-',
+        last_activity: lastActivity ? new Date(lastActivity).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '-',
+        sessions: sessions?.length || 0
+      });
+    }
+
+    return connectionStats;
+  } catch (error) {
+    console.error('Error getting connection time:', error);
+    return [];
+  }
 }
 
 async function getNewLeadsToday(): Promise<NewLeadStats[]> {
@@ -494,7 +583,8 @@ function generateDailyReportHtml(
   globalStats: GlobalStats,
   agentPerformance: AgentPerformance[],
   pipelineDistribution: AgentPipelineDistribution[],
-  visitsProposals: AgentVisitsProposals[]
+  visitsProposals: AgentVisitsProposals[],
+  connectionTime: AgentConnectionTime[]
 ): string {
   const today = new Date().toLocaleDateString("fr-FR", {
     weekday: "long",
@@ -746,6 +836,33 @@ function generateDailyReportHtml(
             </table>
           </div>
 
+          <!-- Connection Time Table -->
+          <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <h2 style="color: #1e293b; margin: 0 0 25px 0; font-size: 22px; font-weight: 600; border-bottom: 3px solid #10b981; padding-bottom: 15px;">⏱️ Temps de Connexion</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                  <th style="padding: 15px; text-align: left; font-weight: 600; color: #475569;">Agent</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Temps Total</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Première Connexion</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Dernière Activité</th>
+                  <th style="padding: 15px; text-align: center; font-weight: 600; color: #475569;">Sessions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${connectionTime.map((agent, index) => `
+                  <tr style="border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                    <td style="padding: 15px; font-weight: 500; color: #1e293b;">${agent.agent_name}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 700; color: #10b981;">${agent.total_time}</td>
+                    <td style="padding: 15px; text-align: center; color: #64748b;">${agent.first_login}</td>
+                    <td style="padding: 15px; text-align: center; color: #64748b;">${agent.last_activity}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 600; color: #3b82f6;">${agent.sessions}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+
           <!-- New Leads Section -->
           <div style="margin-bottom: 40px;">
             <h2 style="color: #1f2937; font-size: 22px; font-weight: 600; margin: 0 0 20px 0; padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;">
@@ -826,7 +943,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const [newLeads, statusChanges, actionsCreated, globalStats, agentPerformance, pipelineDistribution, visitsProposals] =
+    const [newLeads, statusChanges, actionsCreated, globalStats, agentPerformance, pipelineDistribution, visitsProposals, connectionTime] =
       await Promise.all([
         getNewLeadsToday(),
         getStatusChangesToday(),
@@ -835,6 +952,7 @@ const handler = async (req: Request): Promise<Response> => {
         getAgentPerformanceStats(),
         getAgentPipelineDistribution(),
         getAgentVisitsProposals(),
+        getAgentConnectionTime(),
       ]);
 
     const emailHtml = generateDailyReportHtml(
@@ -844,7 +962,8 @@ const handler = async (req: Request): Promise<Response> => {
       globalStats,
       agentPerformance,
       pipelineDistribution,
-      visitsProposals
+      visitsProposals,
+      connectionTime
     );
 
     const emailResponse = await resend.emails.send({

@@ -9,6 +9,7 @@ interface SessionData {
 class SessionTracker {
   private currentSessionId: string | null = null;
   private heartbeatInterval: NodeJS.Timeout | null = null;
+  private currentPageViewId: string | null = null;
 
   async startSession(userId: string): Promise<void> {
     try {
@@ -38,9 +39,6 @@ class SessionTracker {
 
       // Démarrer le heartbeat pour maintenir la session active
       this.startHeartbeat();
-
-      // Écouter les événements de fermeture de page
-      this.setupEventListeners();
 
       console.log('Session démarrée:', this.currentSessionId);
     } catch (error) {
@@ -122,31 +120,21 @@ class SessionTracker {
   }
 
   private setupEventListeners(): void {
-    // Fermer la session quand l'utilisateur ferme la page/onglet
+    // Fermer la session quand l'utilisateur ferme la page/onglet (uniquement)
     const handleBeforeUnload = () => {
       if (this.currentSessionId) {
-        // Fermer la session de manière synchrone lors de la fermeture
         this.endSession();
       }
     };
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        // La page devient invisible (minimisée, changement d'onglet, etc.)
-        this.endSession();
-      }
-    };
-
-    // Événements de fermeture
+    // Événements de fermeture définitive
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('unload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Nettoyer les événements à la destruction
     const cleanup = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('unload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
 
     // Stocker la fonction de nettoyage pour usage ultérieur
@@ -207,6 +195,61 @@ class SessionTracker {
         avgSessionDuration: 0,
         sessions: []
       };
+    }
+  }
+
+  // Track page view
+  async trackPageView(userId: string, pagePath: string, pageTitle?: string, tabName?: string): Promise<void> {
+    if (!this.currentSessionId) {
+      console.warn('Aucune session active pour tracker la page');
+      return;
+    }
+
+    try {
+      // Close previous page view if exists
+      if (this.currentPageViewId) {
+        await this.closePageView();
+      }
+
+      // Create new page view
+      const { data, error } = await supabase
+        .from('page_views')
+        .insert({
+          session_id: this.currentSessionId,
+          user_id: userId,
+          page_path: pagePath,
+          page_title: pageTitle,
+          tab_name: tabName,
+          entered_at: new Date().toISOString()
+        })
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error('Erreur lors du tracking de page:', error);
+        return;
+      }
+
+      this.currentPageViewId = data.id;
+      console.log('Page view tracked:', pagePath);
+    } catch (error) {
+      console.error('Erreur lors du tracking de page:', error);
+    }
+  }
+
+  // Close current page view
+  private async closePageView(): Promise<void> {
+    if (!this.currentPageViewId) return;
+
+    try {
+      await supabase
+        .from('page_views')
+        .update({ left_at: new Date().toISOString() })
+        .eq('id', this.currentPageViewId);
+
+      this.currentPageViewId = null;
+    } catch (error) {
+      console.error('Erreur lors de la fermeture de page view:', error);
     }
   }
 }
