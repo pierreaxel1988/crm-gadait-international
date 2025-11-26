@@ -662,8 +662,8 @@ async function processEmailSequences() {
 }
 
 async function findEligibleLeads(): Promise<EnrichedLead[]> {
-  // MODE TEST : Cibler uniquement les leads "Serious + No response"
-  console.log('[TEST PILOT] Finding eligible leads: Serious + No response');
+  // Cibler uniquement les leads avec tag "No response"
+  console.log('Finding eligible leads: No response');
   
   // ÉTAPE 1 : Récupérer les leads qui ont déjà une séquence active
   const { data: activeSequences, error: seqError } = await supabase
@@ -672,14 +672,14 @@ async function findEligibleLeads(): Promise<EnrichedLead[]> {
     .eq('is_active', true);
     
   if (seqError) {
-    console.error('[TEST PILOT] Error fetching active sequences:', seqError);
+    console.error('Error fetching active sequences:', seqError);
     return [];
   }
   
   const excludedLeadIds = activeSequences?.map(s => s.lead_id) || [];
-  console.log(`[TEST PILOT] Excluding ${excludedLeadIds.length} leads with active sequences`);
+  console.log(`Excluding ${excludedLeadIds.length} leads with active sequences`);
   
-  // ÉTAPE 2 : Récupérer les leads "Serious + No response"
+  // ÉTAPE 2 : Récupérer les leads avec tag "No response" uniquement
   const { data: leads, error } = await supabase
     .from('leads')
     .select(`
@@ -688,7 +688,6 @@ async function findEligibleLeads(): Promise<EnrichedLead[]> {
       last_contacted_at, created_at, views, amenities, purchase_timeframe, 
       financing_method, tax_residence
     `)
-    .contains('tags', ['Serious'])
     .contains('tags', ['No response'])
     .not('email', 'is', null);
     
@@ -856,9 +855,16 @@ async function sendScheduledEmail(emailData: any) {
   const suggestedProperties = await fetchSuggestedProperties(lead, 3);
   const detectedLanguage = detectLeadLanguage(lead);
   
-  // Générer le contenu personnalisé avec l'IA
-  const personalizedContent = await generatePersonalizedContent(lead, template);
-  const personalizedSubject = personalizeTemplate(template.subject_template, lead);
+  // Générer le contenu personnalisé à partir du template (SANS IA)
+  const personalizedContent = personalizeTemplate(template.content_template, {
+    ...lead,
+    agent_name: agentName,
+    cal_booking_link: agentCalBookingLink
+  });
+  const personalizedSubject = personalizeTemplate(template.subject_template, {
+    ...lead,
+    agent_name: agentName
+  });
   
   // Générer l'ID d'action unique
   const actionId = `auto_email_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -1099,26 +1105,32 @@ async function fetchSuggestedProperties(lead: EnrichedLead, limit: number = 3): 
   }
 }
 
-async function generatePersonalizedContent(lead: any, template: any): Promise<string> {
-  const detectedLanguage = detectLeadLanguage(lead);
-  const segment = determineSegment(lead);
+// Fonction de remplacement des variables dans les templates
+function personalizeTemplate(template: string, data: any): string {
+  let result = template;
   
-  const languageInstructions = {
-    FR: 'Réponds en français formel (vouvoiement), ton élégant et professionnel style Loro Piana',
-    EN: 'Respond in professional British English, elegant and sophisticated tone',
-    ES: 'Responde en español formal (usted), tono elegante y profesional'
+  // Remplacer les variables communes
+  const replacements: Record<string, string> = {
+    '{{nom}}': data.name || '',
+    '{{salutation}}': data.salutation || (data.name?.includes('Mme') ? 'Madame' : 'Monsieur'),
+    '{{location}}': data.location || data.country || '',
+    '{{budget}}': data.budget ? `${data.budget} ${data.currency || 'EUR'}` : '',
+    '{{agent_name}}': data.agent_name || 'notre équipe',
+    '{{cal_booking_link}}': data.cal_booking_link || '#'
   };
   
-  const prompt = `
-Tu es un expert en immobilier de luxe pour Gadait International.
-Génère un contenu d'email HYPER-PERSONNALISÉ pour ce lead premium.
+  // Appliquer les remplacements
+  for (const [key, value] of Object.entries(replacements)) {
+    result = result.replace(new RegExp(key, 'g'), value);
+  }
+  
+  return result;
+}
 
-📋 PROFIL DU LEAD:
-- Nom: ${lead.name}
-- Segment: ${segment} (A=Ultra-Premium, B=Premium, C=Réchauffer, D=Standard)
-- Budget: ${lead.budget || 'Non spécifié'} ${lead.currency || 'EUR'}
-- Localisation: ${lead.location || 'Non spécifié'}
-- Pays: ${lead.country || 'Non spécifié'}
+// Fonction de génération de contenu personnalisé (désactivée - on utilise maintenant les templates fixes)
+async function generatePersonalizedContent(lead: any, template: any): Promise<string> {
+  console.warn('generatePersonalizedContent() is deprecated - using template-based content instead');
+  return personalizeTemplate(template.content_template, lead);
 - Types de propriétés: ${lead.property_types?.join(', ') || 'Non spécifié'}
 - Nationalité: ${lead.nationality || 'Non spécifié'}
 - Langue préférée: ${lead.preferred_language || 'Non spécifié'}

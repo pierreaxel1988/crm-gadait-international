@@ -1077,8 +1077,11 @@ export type Database = {
           day_number: number
           id: string
           is_active: boolean
+          is_validated: boolean | null
           subject_template: string
           template_name: string
+          validated_at: string | null
+          validated_by: string | null
         }
         Insert: {
           campaign_id: string
@@ -1087,8 +1090,11 @@ export type Database = {
           day_number: number
           id?: string
           is_active?: boolean
+          is_validated?: boolean | null
           subject_template: string
           template_name: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Update: {
           campaign_id?: string
@@ -1097,8 +1103,11 @@ export type Database = {
           day_number?: number
           id?: string
           is_active?: boolean
+          is_validated?: boolean | null
           subject_template?: string
           template_name?: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Relationships: [
           {
@@ -1106,6 +1115,13 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: false
             referencedRelation: "automated_email_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_templates_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "team_members"
             referencedColumns: ["id"]
           },
         ]
@@ -4386,6 +4402,7 @@ export type Database = {
       }
       team_members: {
         Row: {
+          cal_booking_link: string | null
           created_at: string
           email: string
           id: string
@@ -4395,6 +4412,7 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
+          cal_booking_link?: string | null
           created_at?: string
           email: string
           id?: string
@@ -4404,6 +4422,7 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
+          cal_booking_link?: string | null
           created_at?: string
           email?: string
           id?: string
