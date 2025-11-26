@@ -230,8 +230,8 @@ async function getAgentVisitsProposals(): Promise<AgentVisitsProposals[]> {
       const futureVisits: Date[] = [];
       
       lead.action_history.forEach((action: any) => {
-        // Count proposals
-        if (action.actionType === 'proposal' || action.actionType === 'Proposition' || action.actionType === 'Proposal') {
+        // Count proposals (note: it's "Propositions" with an 's' in the database)
+        if (action.actionType === 'Propositions' || action.actionType === 'proposal' || action.actionType === 'Proposition' || action.actionType === 'Proposal') {
           agentStats[agentName].proposals++;
         }
 
