@@ -231,12 +231,12 @@ async function getAgentVisitsProposals(): Promise<AgentVisitsProposals[]> {
       
       lead.action_history.forEach((action: any) => {
         // Count proposals
-        if (action.actionType === 'proposal' || action.actionType === 'Proposition') {
+        if (action.actionType === 'proposal' || action.actionType === 'Proposition' || action.actionType === 'Proposal') {
           agentStats[agentName].proposals++;
         }
 
-        // Count visits
-        if (action.actionType === 'visit' || action.actionType === 'Visite' || action.actionType === 'meeting') {
+        // Count visits (including "Visites" with s)
+        if (action.actionType === 'visit' || action.actionType === 'Visite' || action.actionType === 'Visites' || action.actionType === 'meeting') {
           if (action.scheduledDate) {
             const scheduledDate = new Date(action.scheduledDate);
             
