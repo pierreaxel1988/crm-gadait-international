@@ -24,7 +24,10 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
     // If a country is selected, only show locations from that country
     const locations = country ? getLocationsByCountry(country) : getAllLocations();
     
-    if (!searchTerm || searchTerm.length < 1) {
+    // Ensure searchTerm is a string and not undefined
+    const term = String(searchTerm || '');
+    
+    if (!term || term.length < 1) {
       // Show top 10 most popular locations when no search term
       return locations.slice(0, 10);
     }
@@ -32,7 +35,7 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
     return locations
       .filter(loc => 
         loc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        .includes(searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+        .includes(term.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
       )
       .slice(0, 15); // Show more results when searching
   };
