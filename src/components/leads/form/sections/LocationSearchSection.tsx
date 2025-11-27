@@ -87,24 +87,24 @@ const LocationSearchSection: React.FC<LocationSearchSectionProps> = ({
           <MapPin className="h-4 w-4" /> Localisations (plusieurs possibles)
         </Label>
         
-        {/* Selected locations */}
-        {locationArray.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-2">
-            {locationArray.map((location) => (
-              <Badge 
-                key={location} 
-                variant="secondary"
-                className="gap-1"
-              >
-                {location}
-                <X 
-                  className="h-3 w-3 cursor-pointer hover:text-destructive" 
-                  onClick={() => handleLocationRemove(location)}
-                />
-              </Badge>
-            ))}
-          </div>
-        )}
+      {/* Selected locations */}
+      {locationArray.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {locationArray.map((location) => (
+            <Badge 
+              key={location} 
+              variant="secondary"
+              className="gap-1.5 px-2.5"
+            >
+              {location}
+              <X 
+                className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                onClick={() => handleLocationRemove(location)}
+              />
+            </Badge>
+          ))}
+        </div>
+      )}
         
         <SmartSearch
           placeholder={country ? `Ville, région dans ${country}...` : "Ville, région..."}

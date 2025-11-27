@@ -74,7 +74,7 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
             <Badge 
               key={loc} 
               variant="secondary"
-              className="gap-1"
+              className="gap-1.5 px-2.5"
             >
               {loc}
               <X 
