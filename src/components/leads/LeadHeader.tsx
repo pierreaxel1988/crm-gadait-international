@@ -156,7 +156,7 @@ const LeadHeader: React.FC<LeadHeaderProps> = ({
           
           {lead.desiredLocation && (
             <LeadTag 
-              label={lead.desiredLocation} 
+              label={Array.isArray(lead.desiredLocation) ? lead.desiredLocation.join(', ') : lead.desiredLocation} 
               bgColor="bg-[#F5F3EE]" 
               textColor="text-[#7A6C5D]" 
               className="font-futuraLight" 

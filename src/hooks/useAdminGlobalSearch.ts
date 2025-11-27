@@ -11,7 +11,7 @@ export interface AdminSearchResult {
   phoneCountryCode?: string;
   phoneCountryCodeDisplay?: string;
   status?: string;
-  desiredLocation?: string;
+  desiredLocation?: string | string[];
   pipelineType?: string;
   nationality?: string;
   source?: string;

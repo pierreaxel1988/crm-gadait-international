@@ -117,7 +117,12 @@ export const useKanbanData = (
       }
 
       if (filters.location) {
-        query = query.eq('desired_location', filters.location);
+        // Handle both string and array formats
+        if (Array.isArray(filters.location)) {
+          query = query.contains('desired_location', filters.location);
+        } else {
+          query = query.contains('desired_location', [filters.location]);
+        }
       }
 
       // Filter by property types using the property_types array column

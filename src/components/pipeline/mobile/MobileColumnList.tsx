@@ -104,14 +104,20 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
     if (!debouncedSearchTerm) return leadsByStatus;
     
     const searchLower = debouncedSearchTerm.toLowerCase();
-    return leadsByStatus.filter(item => 
-      item.name?.toLowerCase().includes(searchLower) ||
-      item.email?.toLowerCase().includes(searchLower) ||
-      item.phone?.toLowerCase().includes(searchLower) ||
-      item.desiredLocation?.toLowerCase().includes(searchLower) ||
-      item.nationality?.toLowerCase().includes(searchLower) ||
-      item.source?.toLowerCase().includes(searchLower)
-    );
+    return leadsByStatus.filter(item => {
+      const locationStr = item.desiredLocation 
+        ? (Array.isArray(item.desiredLocation) 
+            ? item.desiredLocation.join(' ').toLowerCase()
+            : item.desiredLocation.toLowerCase())
+        : '';
+      
+      return item.name?.toLowerCase().includes(searchLower) ||
+        item.email?.toLowerCase().includes(searchLower) ||
+        item.phone?.toLowerCase().includes(searchLower) ||
+        locationStr.includes(searchLower) ||
+        item.nationality?.toLowerCase().includes(searchLower) ||
+        item.source?.toLowerCase().includes(searchLower);
+    });
   }, [filteredColumns, activeStatus, debouncedSearchTerm]);
   
   const sortedLeads = sortLeadsByPriority(filteredLeadsWithSearch, sortBy);

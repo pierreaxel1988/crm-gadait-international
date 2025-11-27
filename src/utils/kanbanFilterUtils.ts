@@ -69,9 +69,15 @@ export const applyFiltersToColumns = (
     
     // Filter by location
     if (filters.location) {
-      filteredItems = filteredItems.filter(item => 
-        item.desiredLocation?.toLowerCase().includes(filters.location.toLowerCase())
-      );
+      filteredItems = filteredItems.filter(item => {
+        if (!item.desiredLocation) return false;
+        
+        const locationStr = Array.isArray(item.desiredLocation) 
+          ? item.desiredLocation.join(' ').toLowerCase()
+          : item.desiredLocation.toLowerCase();
+        
+        return locationStr.includes(filters.location.toLowerCase());
+      });
     }
     
     // Filter by country

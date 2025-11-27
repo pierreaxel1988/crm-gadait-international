@@ -1,16 +1,24 @@
 
 import React from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, X } from 'lucide-react';
 import { getAllLocations, getLocationsByCountry } from '@/utils/locationsByCountry';
 import SmartSearch from '@/components/common/SmartSearch';
+import { Badge } from '@/components/ui/badge';
 
 interface LocationFilterProps {
-  location: string;
-  onLocationChange: (location: string) => void;
+  location: string | string[];
+  onLocationChange: (location: string | string[]) => void;
   country?: string;
 }
 
 const LocationFilter = ({ location, onLocationChange, country }: LocationFilterProps) => {
+  const [searchValue, setSearchValue] = React.useState('');
+  
+  // Convert location to array if it's a string
+  const locationArray = Array.isArray(location) 
+    ? location 
+    : location ? [location] : [];
+    
   // Get locations based on selected country
   const getFilteredLocations = (searchTerm: string) => {
     // If a country is selected, only show locations from that country
@@ -30,11 +38,19 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
   };
 
   const handleLocationSelect = (selectedLocation: string) => {
-    onLocationChange(selectedLocation);
+    if (!locationArray.includes(selectedLocation)) {
+      onLocationChange([...locationArray, selectedLocation]);
+      setSearchValue('');
+    }
+  };
+
+  const handleLocationRemove = (loc: string) => {
+    onLocationChange(locationArray.filter(l => l !== loc));
   };
 
   const handleClear = () => {
-    onLocationChange('');
+    onLocationChange([]);
+    setSearchValue('');
   };
 
   const renderLocationItem = (location: string) => (
@@ -47,14 +63,34 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
         <MapPin className="h-4 w-4" /> Localisation
         {country && <span className="text-xs text-muted-foreground">({country})</span>}
       </h4>
+      
+      {/* Selected locations */}
+      {locationArray.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {locationArray.map((loc) => (
+            <Badge 
+              key={loc} 
+              variant="secondary"
+              className="gap-1"
+            >
+              {loc}
+              <X 
+                className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                onClick={() => handleLocationRemove(loc)}
+              />
+            </Badge>
+          ))}
+        </div>
+      )}
+      
       <div className="relative">
         <SmartSearch
           placeholder={country ? `Ville, région dans ${country}...` : "Ville, région..."}
-          value={location}
-          onChange={onLocationChange}
+          value={searchValue}
+          onChange={setSearchValue}
           onSelect={handleLocationSelect}
           onClear={handleClear}
-          results={getFilteredLocations(location)}
+          results={getFilteredLocations(searchValue)}
           renderItem={renderLocationItem}
           className="w-full"
           inputClassName="h-8 text-sm"

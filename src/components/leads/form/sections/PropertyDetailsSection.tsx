@@ -13,7 +13,7 @@ interface PropertyDetailsSectionProps {
     views?: ViewType[];
     amenities?: Amenity[];
     country?: string;
-    desiredLocation?: string;
+    desiredLocation?: string | string[];
     url?: string;
     livingArea?: string;
     landArea?: string;
@@ -62,7 +62,7 @@ const PropertyDetailsSection: React.FC<PropertyDetailsSectionProps> = ({
 
       <LocationSearchSection
         country={formData.country || ''}
-        desiredLocation={formData.desiredLocation || ''}
+        desiredLocation={formData.desiredLocation || []}
         onCountryChange={(value) => {
           const syntheticEvent = {
             target: {
