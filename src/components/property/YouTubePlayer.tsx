@@ -10,6 +10,11 @@ interface YouTubePlayerProps {
 
 // Fonction pour extraire l'ID YouTube depuis différents formats d'URL
 const extractYouTubeId = (url: string): string | null => {
+  // Ensure url is a valid string
+  if (!url || typeof url !== 'string') {
+    return null;
+  }
+  
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
     /youtube\.com\/v\/([^&\n?#]+)/,
