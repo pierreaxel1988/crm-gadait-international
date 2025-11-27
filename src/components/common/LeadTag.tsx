@@ -25,6 +25,11 @@ const LeadTag = ({
 }: LeadTagProps) => {
   // Format numeric values in the label with proper thousand separators
   const formattedLabel = React.useMemo(() => {
+    // Ensure label is a valid string
+    if (!label || typeof label !== 'string') {
+      return String(label || '');
+    }
+    
     // Check if label is a budget value by detecting currency symbols or K/M suffix
     const budgetRegex = /^(\D*)(\d+(?:[,.]\d+)?)(\s*[KkMm€$£]*|\s*EUR|\s*USD|\s*GBP)?$/;
     const match = label.match(budgetRegex);
