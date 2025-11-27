@@ -1698,7 +1698,7 @@ export type Database = {
           deleted_at: string | null
           deleted_by: string | null
           deletion_reason: string | null
-          desired_location: string | null
+          desired_location: string[] | null
           desired_price: string | null
           email: string | null
           email_envoye: boolean | null
@@ -1776,7 +1776,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           deletion_reason?: string | null
-          desired_location?: string | null
+          desired_location?: string[] | null
           desired_price?: string | null
           email?: string | null
           email_envoye?: boolean | null
@@ -1854,7 +1854,7 @@ export type Database = {
           deleted_at?: string | null
           deleted_by?: string | null
           deletion_reason?: string | null
-          desired_location?: string | null
+          desired_location?: string[] | null
           desired_price?: string | null
           email?: string | null
           email_envoye?: boolean | null
@@ -4944,48 +4944,59 @@ export type Database = {
       }
       v_no_response_candidates: {
         Row: {
-          amenities: string[] | null
-          budget_label: string | null
-          budget_min: string | null
-          currency: string | null
+          assigned_to: string | null
+          budget: string | null
+          country: string | null
+          created_at: string | null
+          desired_location: string[] | null
           email: string | null
           id: string | null
+          last_contacted_at: string | null
           name: string | null
-          preferred_language: string | null
-          property_types: string[] | null
-          regions: string[] | null
-          target_location: string | null
-          views: string[] | null
+          phone: string | null
+          pipeline_type: string | null
+          status: string | null
+          tags: string[] | null
         }
         Insert: {
-          amenities?: string[] | null
-          budget_label?: never
-          budget_min?: never
-          currency?: never
+          assigned_to?: string | null
+          budget?: string | null
+          country?: string | null
+          created_at?: string | null
+          desired_location?: string[] | null
           email?: string | null
           id?: string | null
+          last_contacted_at?: string | null
           name?: string | null
-          preferred_language?: string | null
-          property_types?: string[] | null
-          regions?: string[] | null
-          target_location?: never
-          views?: string[] | null
+          phone?: string | null
+          pipeline_type?: string | null
+          status?: string | null
+          tags?: string[] | null
         }
         Update: {
-          amenities?: string[] | null
-          budget_label?: never
-          budget_min?: never
-          currency?: never
+          assigned_to?: string | null
+          budget?: string | null
+          country?: string | null
+          created_at?: string | null
+          desired_location?: string[] | null
           email?: string | null
           id?: string | null
+          last_contacted_at?: string | null
           name?: string | null
-          preferred_language?: string | null
-          property_types?: string[] | null
-          regions?: string[] | null
-          target_location?: never
-          views?: string[] | null
+          phone?: string | null
+          pipeline_type?: string | null
+          status?: string | null
+          tags?: string[] | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "leads_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       v_properties_with_agents: {
         Row: {

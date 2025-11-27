@@ -20,7 +20,7 @@ interface LeadDetailHeaderProps {
   desired_price?: string;
   pipelineType?: string;
   currency?: Currency;
-  desiredLocation?: string;
+  desiredLocation?: string | string[];
   country?: string;
   purchaseTimeframe?: string;
   onBackClick: () => void;

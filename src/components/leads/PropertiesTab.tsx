@@ -44,17 +44,52 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
 
   useEffect(() => {
     fetchGadaitProperties();
-  }, []);
+  }, [lead.country, lead.desiredLocation, lead.propertyTypes, lead.budget, lead.bedrooms]);
 
   const fetchGadaitProperties = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Build dynamic query based on lead criteria
+      let query = supabase
         .from('properties_backoffice')
         .select('*')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .limit(20);
+        .eq('status', 'published');
+
+      // Filter by country
+      if (lead.country) {
+        query = query.eq('country', lead.country);
+      }
+
+      // Filter by location(s)
+      if (lead.desiredLocation && Array.isArray(lead.desiredLocation) && lead.desiredLocation.length > 0) {
+        query = query.in('location', lead.desiredLocation);
+      } else if (lead.desiredLocation && typeof lead.desiredLocation === 'string') {
+        query = query.eq('location', lead.desiredLocation);
+      }
+
+      // Filter by property type(s)
+      if (lead.propertyTypes && lead.propertyTypes.length > 0) {
+        query = query.in('property_type', lead.propertyTypes);
+      }
+
+      // Filter by bedrooms (minimum)
+      const bedroomsValue = Array.isArray(lead.bedrooms) ? lead.bedrooms[0] : lead.bedrooms;
+      if (bedroomsValue && bedroomsValue > 0) {
+        query = query.gte('bedrooms', bedroomsValue);
+      }
+
+      // Filter by budget (maximum price)
+      if (lead.budget) {
+        const budgetNum = parseFloat(lead.budget.replace(/[^0-9.]/g, ''));
+        if (!isNaN(budgetNum)) {
+          query = query.lte('price_eur', budgetNum);
+        }
+      }
+
+      query = query.order('created_at', { ascending: false }).limit(50);
+
+      const { data, error } = await query;
 
       if (error) {
         throw error;
@@ -99,14 +134,24 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
       {/* Propriétés Gadait disponibles */}
       <div className="bg-white rounded-lg p-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-normal">Propriétés Gadait</h2>
+          <div>
+            <h2 className="text-xl font-normal">Propriétés Matchées</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              {lead.country && `Pays: ${lead.country}`}
+              {lead.desiredLocation && Array.isArray(lead.desiredLocation) && lead.desiredLocation.length > 0 && 
+                ` • Localisations: ${lead.desiredLocation.join(', ')}`}
+              {lead.propertyTypes && lead.propertyTypes.length > 0 && 
+                ` • Types: ${lead.propertyTypes.join(', ')}`}
+            </p>
+          </div>
           <Badge variant="secondary">{properties.length} propriétés</Badge>
         </div>
         
         {properties.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <Home className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p>Aucune propriété disponible pour le moment.</p>
+            <p>Aucune propriété ne correspond aux critères du lead.</p>
+            <p className="text-xs mt-2">Modifiez les critères de recherche pour voir plus de résultats.</p>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

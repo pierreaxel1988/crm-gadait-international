@@ -136,7 +136,7 @@ export interface LeadDetailed {
   budget?: string;
   budgetMin?: string;
   currency?: Currency;
-  desiredLocation?: string;
+  desiredLocation?: string | string[];
   propertyType?: string;
   propertyTypes?: PropertyType[];
   bedrooms?: number | number[];
