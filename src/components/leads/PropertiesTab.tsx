@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Home } from 'lucide-react';
 import PropertyCard from '@/components/pipeline/PropertyCard';
 import PropertySelectionHistory from './PropertySelectionHistory';
+import { normalizeCountryForDatoCMS, normalizePropertyTypesForDatoCMS } from '@/utils/propertyMatchingUtils';
 
 interface GadaitProperty {
   id: string;
@@ -56,21 +57,29 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
         .select('*')
         .eq('status', 'published');
 
-      // Filter by country
+      // Filter by country - normalize to DatoCMS format
       if (lead.country) {
-        query = query.eq('country', lead.country);
+        const normalizedCountry = normalizeCountryForDatoCMS(lead.country);
+        if (normalizedCountry) {
+          query = query.eq('country', normalizedCountry);
+        }
       }
 
-      // Filter by location(s)
+      // Filter by location(s) - handle both array and string formats
       if (lead.desiredLocation && Array.isArray(lead.desiredLocation) && lead.desiredLocation.length > 0) {
-        query = query.in('location', lead.desiredLocation);
+        // Use OR conditions for multiple locations with ILIKE for partial matches
+        const locationConditions = lead.desiredLocation.map(loc => `location.ilike.%${loc}%`).join(',');
+        query = query.or(locationConditions);
       } else if (lead.desiredLocation && typeof lead.desiredLocation === 'string') {
-        query = query.eq('location', lead.desiredLocation);
+        query = query.ilike('location', `%${lead.desiredLocation}%`);
       }
 
-      // Filter by property type(s)
+      // Filter by property type(s) - normalize to DatoCMS format (English lowercase)
       if (lead.propertyTypes && lead.propertyTypes.length > 0) {
-        query = query.in('property_type', lead.propertyTypes);
+        const normalizedTypes = normalizePropertyTypesForDatoCMS(lead.propertyTypes);
+        if (normalizedTypes && normalizedTypes.length > 0) {
+          query = query.in('property_type', normalizedTypes);
+        }
       }
 
       // Filter by bedrooms (minimum)
@@ -79,7 +88,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
         query = query.gte('bedrooms', bedroomsValue);
       }
 
-      // Filter by budget (maximum price)
+      // Filter by budget (maximum price) - use price_eur for consistency
       if (lead.budget) {
         const budgetNum = parseFloat(lead.budget.replace(/[^0-9.]/g, ''));
         if (!isNaN(budgetNum)) {
