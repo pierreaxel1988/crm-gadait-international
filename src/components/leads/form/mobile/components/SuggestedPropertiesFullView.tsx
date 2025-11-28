@@ -10,6 +10,7 @@ import PropertySkeleton from '@/components/pipeline/PropertySkeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { useToast } from '@/hooks/use-toast';
+import { normalizeCountryForDatoCMS, normalizePropertyTypesForDatoCMS } from '@/utils/propertyMatchingUtils';
 
 // Use the Supabase generated type directly
 import { Database } from '@/integrations/supabase/types';
@@ -97,19 +98,29 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
       // Filter by published status
       query = query.eq('status', 'published');
 
-      // Filter by country (optional)
+      // Filter by country - normalize to DatoCMS format
       if (lead.country) {
-        query = query.eq('country', lead.country);
+        const normalizedCountry = normalizeCountryForDatoCMS(lead.country);
+        if (normalizedCountry) {
+          query = query.eq('country', normalizedCountry);
+        }
       }
 
-      // Filter by location (optional)
-      if (lead.desiredLocation) {
+      // Filter by location(s) - handle both array and string formats
+      if (lead.desiredLocation && Array.isArray(lead.desiredLocation) && lead.desiredLocation.length > 0) {
+        // Use OR conditions for multiple locations with ILIKE for partial matches
+        const locationConditions = lead.desiredLocation.map(loc => `location.ilike.%${loc}%`).join(',');
+        query = query.or(locationConditions);
+      } else if (lead.desiredLocation && typeof lead.desiredLocation === 'string') {
         query = query.ilike('location', `%${lead.desiredLocation}%`);
       }
 
-      // Filter by property types (optional) - convert to lowercase for case-insensitive matching
+      // Filter by property types - normalize to DatoCMS format (English lowercase)
       if (lead.propertyTypes && lead.propertyTypes.length > 0) {
-        query = query.in('property_type', lead.propertyTypes.map(t => t.toLowerCase()));
+        const normalizedTypes = normalizePropertyTypesForDatoCMS(lead.propertyTypes);
+        if (normalizedTypes && normalizedTypes.length > 0) {
+          query = query.in('property_type', normalizedTypes);
+        }
       }
 
       // Filter by bedrooms (minimum) - limit to reasonable values
@@ -123,11 +134,11 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
         }
       }
 
-      // Filter by budget (maximum)
+      // Filter by budget (maximum) - use price_eur for consistency
       if (lead.budget) {
         const budgetNumber = parseFloat(lead.budget.replace(/[^\d.-]/g, ''));
         if (!isNaN(budgetNumber)) {
-          query = query.lte('price', budgetNumber);
+          query = query.lte('price_eur', budgetNumber);
         }
       }
 
