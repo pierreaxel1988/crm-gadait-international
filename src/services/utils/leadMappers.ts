@@ -160,7 +160,7 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     budget: leadData.budget,
     budget_min: leadData.budgetMin,
     currency: leadData.currency,
-    desired_location: leadData.desiredLocation,
+    desired_location: normalizeArrayField(leadData.desiredLocation),
     property_type: leadData.propertyType,
     property_types: normalizeArrayField(leadData.propertyTypes),
     bedrooms: Array.isArray(leadData.bedrooms) ? leadData.bedrooms[0] : leadData.bedrooms,
