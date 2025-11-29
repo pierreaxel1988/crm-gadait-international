@@ -142,7 +142,7 @@ const normalizeArrayField = (value: any): any[] | null => {
  * Maps a LeadDetailed object to Supabase format
  */
 export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
-  return {
+  const data = {
     id: leadData.id,
     name: leadData.name,
     salutation: leadData.salutation,
@@ -228,6 +228,11 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     // Map coordinates
     map_coordinates: leadData.mapCoordinates || ''
   };
+  
+  // Nettoyer les valeurs undefined avant d'envoyer à Supabase
+  return Object.fromEntries(
+    Object.entries(data).filter(([_, value]) => value !== undefined)
+  );
 };
 
 /**
