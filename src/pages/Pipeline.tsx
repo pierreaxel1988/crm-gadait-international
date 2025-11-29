@@ -8,7 +8,6 @@ import SubNavigation from '@/components/layout/SubNavigation';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import ComponentLoader from '@/components/common/ComponentLoader';
-import { reassignJadeLeads, reassignJeanMarcLeads, reassignSharonLeads } from '@/services/leadService';
 import NewLeadsAlert from '@/components/notifications/NewLeadsAlert';
 
 const Pipeline = () => {
@@ -50,21 +49,6 @@ const Pipeline = () => {
   
   useEffect(() => {
     handleRefresh();
-  }, []);
-  
-  useEffect(() => {
-    const fixLeadsAssignment = async () => {
-      try {
-        console.log("Running lead reassignment for Jade, Jean Marc, and Sharon...");
-        await reassignJadeLeads();
-        await reassignJeanMarcLeads();
-        await reassignSharonLeads();
-        console.log("Lead reassignments completed successfully");
-      } catch (error) {
-        console.error('Error fixing lead assignments:', error);
-      }
-    };
-    fixLeadsAssignment();
   }, []);
   
   useEffect(() => {
