@@ -130,6 +130,15 @@ export const mapToLeadDetailed = (supabaseData: any): LeadDetailed => {
 };
 
 /**
+ * Helper to normalize array fields for Supabase (prevents "malformed array literal" errors)
+ */
+const normalizeArrayField = (value: any): any[] | null => {
+  if (!value || value === '' || value === '""') return null;
+  if (Array.isArray(value)) return value.length > 0 ? value : null;
+  return null;
+};
+
+/**
  * Maps a LeadDetailed object to Supabase format
  */
 export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
@@ -143,7 +152,7 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     phone_country_code_display: leadData.phoneCountryCodeDisplay,
     location: leadData.location,
     status: leadData.status,
-    tags: leadData.tags,
+    tags: normalizeArrayField(leadData.tags),
     last_contacted_at: leadData.lastContactedAt,
     assigned_to: leadData.assignedTo,
     source: leadData.source,
@@ -153,10 +162,10 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     currency: leadData.currency,
     desired_location: leadData.desiredLocation,
     property_type: leadData.propertyType,
-    property_types: leadData.propertyTypes,
+    property_types: normalizeArrayField(leadData.propertyTypes),
     bedrooms: Array.isArray(leadData.bedrooms) ? leadData.bedrooms[0] : leadData.bedrooms,
-    views: leadData.views,
-    amenities: leadData.amenities,
+    views: normalizeArrayField(leadData.views),
+    amenities: normalizeArrayField(leadData.amenities),
     purchase_timeframe: leadData.purchaseTimeframe,
     financing_method: leadData.financingMethod,
     property_use: leadData.propertyUse,
@@ -170,7 +179,7 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     url: leadData.url,
     pipeline_type: leadData.pipelineType,
     tax_residence: leadData.taxResidence,
-    regions: leadData.regions,
+    regions: normalizeArrayField(leadData.regions),
     
     // Property details
     living_area: leadData.livingArea,
@@ -182,9 +191,9 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     // Additional fields - only include fields that exist in the database
     parking_spaces: leadData.parkingSpaces,
     floors: leadData.floors,
-    orientation: leadData.orientation,
-    assets: leadData.assets,
-    equipment: leadData.equipment,
+    orientation: normalizeArrayField(leadData.orientation),
+    assets: normalizeArrayField(leadData.assets),
+    equipment: normalizeArrayField(leadData.equipment),
     
     // Owner-specific fields
     desired_price: leadData.desired_price,
@@ -208,7 +217,7 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     furniture_price: leadData.furniture_price,
     
     // Action history
-    action_history: leadData.actionHistory,
+    action_history: normalizeArrayField(leadData.actionHistory),
     
     // Email related
     email_envoye: leadData.email_envoye,
