@@ -223,10 +223,10 @@ export const mapToSupabaseFormat = (leadData: LeadDetailed): any => {
     email_envoye: leadData.email_envoye,
     
     // Google Drive link
-    google_drive_link: leadData.google_drive_link || '',
+    google_drive_link: leadData.google_drive_link || null,
     
-    // Map coordinates
-    map_coordinates: leadData.mapCoordinates || ''
+    // Map coordinates  
+    map_coordinates: leadData.mapCoordinates || null
   };
   
   // Nettoyer les valeurs undefined avant d'envoyer à Supabase
