@@ -47,6 +47,9 @@ export const useLeadCreation = () => {
       return;
     }
     
+    console.log("=== DÉBUT CRÉATION LEAD ===");
+    console.log("1. Données reçues:", data);
+    
     setIsSubmitting(true);
     setError(null);
     
@@ -56,9 +59,13 @@ export const useLeadCreation = () => {
         throw new Error("Vous devez être connecté pour créer un lead.");
       }
       
+      console.log("2. Session valide, utilisateur:", authData.session.user.email);
+      
       const newLeadData = structuredClone(data);
       delete newLeadData.id;
       delete newLeadData.createdAt;
+      
+      console.log("3. Données après nettoyage:", newLeadData);
       
       if (isAdmin && assignedAgent) {
         newLeadData.assignedTo = assignedAgent;
@@ -82,6 +89,13 @@ export const useLeadCreation = () => {
       newLeadData.pipeline_type = pipelineType;
       newLeadData.status = leadStatus;
       
+      console.log("4. Pipeline et statut configurés:", { 
+        pipelineType: newLeadData.pipelineType, 
+        pipeline_type: newLeadData.pipeline_type,
+        status: newLeadData.status,
+        assignedTo: newLeadData.assignedTo
+      });
+      
       if (!newLeadData.actionHistory || newLeadData.actionHistory.length === 0) {
         newLeadData.actionHistory = [{
           id: crypto.randomUUID(),
@@ -92,7 +106,9 @@ export const useLeadCreation = () => {
         }];
       }
       
+      console.log("5. Appel createLead avec données finales:", newLeadData);
       const createdLead = await createLead(newLeadData);
+      console.log("6. Lead créé avec succès:", createdLead);
       
       if (createdLead) {
         let successMessage = "Le lead a été créé avec succès.";
@@ -118,7 +134,11 @@ export const useLeadCreation = () => {
         throw new Error("Aucune donnée de lead retournée après création");
       }
     } catch (error) {
-      console.error("Error creating lead:", error);
+      console.error("=== ERREUR CRÉATION LEAD ===");
+      console.error("Type d'erreur:", error);
+      console.error("Message:", error instanceof Error ? error.message : "Erreur inconnue");
+      console.error("Stack:", error instanceof Error ? error.stack : "N/A");
+      
       setError(error instanceof Error ? error.message : "Une erreur inconnue est survenue");
       toast({
         variant: "destructive",
@@ -126,6 +146,7 @@ export const useLeadCreation = () => {
         description: "Impossible de créer le nouveau lead. Veuillez réessayer."
       });
     } finally {
+      console.log("=== FIN CRÉATION LEAD ===");
       setIsSubmitting(false);
     }
   };
