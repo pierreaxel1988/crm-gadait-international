@@ -4,13 +4,10 @@ import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { MessageSquare, Calendar, ListTodo, File, ClipboardList } from 'lucide-react';
 import { useBreakpoint } from '@/hooks/use-mobile';
-import { useNotifications } from '@/hooks/useNotifications';
-import NotificationBadge from './navbar/NotificationBadge';
 
 const SubNavigation = () => {
   const location = useLocation();
   const { isMobile, isTablet, isDesktop } = useBreakpoint();
-  const { unreadCount } = useNotifications();
   
   const navigationItems = [{
     name: 'Pipeline',

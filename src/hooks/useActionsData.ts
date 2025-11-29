@@ -15,14 +15,23 @@ export const useActionsData = (refreshTrigger: number = 0) => {
 
   // Load cached actions on mount to avoid blank screen
   useEffect(() => {
-    const cachedActions = localStorage.getItem('cachedActions');
-    if (cachedActions) {
-      try {
+    try {
+      const cachedActions = localStorage.getItem('cachedActions');
+      if (cachedActions) {
+        // Si le cache dépasse 1MB, le supprimer
+        if (cachedActions.length > 1000000) {
+          console.warn('Cache trop volumineux (>1MB), supprimé');
+          localStorage.removeItem('cachedActions');
+          return;
+        }
+        
         const parsedActions = JSON.parse(cachedActions);
         setActions(parsedActions);
-      } catch (error) {
-        console.error('Error parsing cached actions:', error);
       }
+    } catch (error) {
+      // QuotaExceededError ou erreur de parsing - supprimer le cache corrompu
+      console.warn('Cache corrompu ou erreur, nettoyage...', error);
+      localStorage.removeItem('cachedActions');
     }
   }, []);
 
@@ -278,14 +287,23 @@ export const useActionsData = (refreshTrigger: number = 0) => {
 
       setActions(sortedActions);
       
-      // Cache actions for calendar sync
-      localStorage.setItem('cachedActions', JSON.stringify(sortedActions));
+      // Cache intelligent : ne stocker que les actions non terminées pour éviter quota localStorage
+      try {
+        const actionsToCache = sortedActions.filter(a => a.status !== 'done');
+        localStorage.setItem('cachedActions', JSON.stringify(actionsToCache));
+        console.log(`Cached ${actionsToCache.length}/${sortedActions.length} actions (non-completed only)`);
+      } catch (error) {
+        // Si quota dépassé, vider le cache sans bloquer l'application
+        console.warn('Cache localStorage plein, nettoyage...', error);
+        localStorage.removeItem('cachedActions');
+      }
     } catch (error) {
       console.error('Error fetching actions:', error);
+      // Afficher le toast uniquement pour les erreurs de fetch Supabase, pas pour les erreurs de cache
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de charger les actions."
+        description: "Impossible de charger les actions depuis la base de données."
       });
     } finally {
       setIsLoading(false);
@@ -394,15 +412,16 @@ export const useActionsData = (refreshTrigger: number = 0) => {
         description: "L'action a été marquée comme terminée."
       });
       
-      // Update cached actions for calendar sync
-      const cachedActions = JSON.parse(localStorage.getItem('cachedActions') || '[]');
-      const updatedCachedActions = cachedActions.map((action: ActionItem) => {
-        if (action.id === actionId) {
-          return { ...action, status: 'done', completedDate: new Date().toISOString() };
-        }
-        return action;
-      });
-      localStorage.setItem('cachedActions', JSON.stringify(updatedCachedActions));
+      // Update cached actions for calendar sync - supprimer l'action complétée du cache
+      try {
+        const cachedActions = JSON.parse(localStorage.getItem('cachedActions') || '[]');
+        // Supprimer l'action terminée du cache (cache intelligent)
+        const updatedCachedActions = cachedActions.filter((action: ActionItem) => action.id !== actionId);
+        localStorage.setItem('cachedActions', JSON.stringify(updatedCachedActions));
+      } catch (error) {
+        console.warn('Erreur mise à jour cache, nettoyage...', error);
+        localStorage.removeItem('cachedActions');
+      }
       
       // Récupérer à nouveau pour s'assurer que nous avons les dernières données
       fetchActions();
