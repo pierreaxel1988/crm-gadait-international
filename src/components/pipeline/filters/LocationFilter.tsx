@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { MapPin, X } from 'lucide-react';
-import { getAllLocations, getLocationsByCountry } from '@/utils/locationsByCountry';
 import SmartSearch from '@/components/common/SmartSearch';
 import { Badge } from '@/components/ui/badge';
+import { usePropertyLocations } from '@/hooks/usePropertyLocations';
+import { Loader2 } from 'lucide-react';
 
 interface LocationFilterProps {
   location: string | string[];
@@ -14,6 +15,9 @@ interface LocationFilterProps {
 const LocationFilter = ({ location, onLocationChange, country }: LocationFilterProps) => {
   const [searchValue, setSearchValue] = React.useState('');
   
+  // Fetch locations dynamically from DatoCMS
+  const { data: availableLocations, isLoading } = usePropertyLocations(country);
+  
   // Convert location to array if it's a string
   const locationArray = Array.isArray(location) 
     ? location 
@@ -21,8 +25,7 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
     
   // Get locations based on selected country
   const getFilteredLocations = (searchTerm: string) => {
-    // If a country is selected, only show locations from that country
-    const locations = country ? getLocationsByCountry(country) : getAllLocations();
+    const locations = availableLocations || [];
     
     // Ensure searchTerm is a string and not undefined
     const term = String(searchTerm || '');
@@ -87,20 +90,27 @@ const LocationFilter = ({ location, onLocationChange, country }: LocationFilterP
       )}
       
       <div className="relative">
-        <SmartSearch
-          placeholder={country ? `Ville, région dans ${country}...` : "Ville, région..."}
-          value={searchValue}
-          onChange={setSearchValue}
-          onSelect={handleLocationSelect}
-          onClear={handleClear}
-          results={getFilteredLocations(searchValue)}
-          renderItem={renderLocationItem}
-          className="w-full"
-          inputClassName="h-8 text-sm"
-          minChars={0}
-          searchIcon={true}
-          clearButton={true}
-        />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-2">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            <span className="ml-2 text-sm text-muted-foreground">Chargement des localisations...</span>
+          </div>
+        ) : (
+          <SmartSearch
+            placeholder={country ? `Ville, région dans ${country}...` : "Ville, région..."}
+            value={searchValue}
+            onChange={setSearchValue}
+            onSelect={handleLocationSelect}
+            onClear={handleClear}
+            results={getFilteredLocations(searchValue)}
+            renderItem={renderLocationItem}
+            className="w-full"
+            inputClassName="h-8 text-sm"
+            minChars={0}
+            searchIcon={true}
+            clearButton={true}
+          />
+        )}
       </div>
     </div>
   );
