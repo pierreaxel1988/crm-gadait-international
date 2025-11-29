@@ -6,6 +6,7 @@ import {
   Routes,
   Navigate
 } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import { Toaster } from '@/components/ui/toaster';
 import LoadingScreen from './components/layout/LoadingScreen';
@@ -15,6 +16,16 @@ import Pipeline from './pages/Pipeline';
 import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
 import '@/utils/testDatoCmsSync'; // Utilitaire de test disponible via window.testDatoCmsSync()
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 // Lazy load other pages to use suspense
 const LeadsPage = lazy(() => import('./pages/Leads'));
@@ -130,12 +141,14 @@ const AppContent = () => {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <AppContent />
-        <Toaster />
-      </AuthProvider>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AuthProvider>
+          <AppContent />
+          <Toaster />
+        </AuthProvider>
+      </Router>
+    </QueryClientProvider>
   );
 }
 
