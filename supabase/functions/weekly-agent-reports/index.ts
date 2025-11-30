@@ -8,7 +8,7 @@ const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
 
 const RESEND_FROM = Deno.env.get("RESEND_FROM")!; // "Gadait Team <team@gadait-international.com>"
-const RESEND_TO = Deno.env.get("RESEND_TO")!;     // "pierre@gadait-international.com"
+const RESEND_TO = Deno.env.get("RESEND_TO")!; // "pierre@gadait-international.com"
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const resend = new Resend(resendApiKey);
@@ -18,13 +18,12 @@ const MANAGER_RECIPIENTS = RESEND_TO.split(",")
   .map((email) => email.trim())
   .filter(Boolean);
 
+// ⏸️ Mode prévisualisation : false = seulement les managers reçoivent
+// Quand tu seras prêt à envoyer aux agents, mets cette constante à true.
+const SEND_TO_AGENTS = false;
+
 // On commence avec ces 4 agents
-const FOCUS_AGENT_NAMES = [
-  "Jade Diouane",
-  "Franck Fontaine",
-  "Fleurs Samuelson",
-  "Matthieu Lapierre",
-];
+const FOCUS_AGENT_NAMES = ["Jade Diouane", "Franck Fontaine", "Fleurs Samuelson", "Matthieu Lapierre"];
 
 interface TeamMember {
   id: string;
@@ -83,8 +82,7 @@ interface LeadResponseTime {
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 // ---- HELPERS ----
@@ -92,9 +90,7 @@ const corsHeaders = {
 function getParisDate(daysAgo: number = 0): Date {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);
-  const parisDate = new Date(
-    date.toLocaleString("en-US", { timeZone: "Europe/Paris" }),
-  );
+  const parisDate = new Date(date.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
   parisDate.setHours(0, 0, 0, 0);
   return parisDate;
 }
@@ -129,11 +125,7 @@ function getPreviousWeekRange() {
 }
 
 function getActionStatDate(action: any): Date | null {
-  const dateStr =
-    action.completedDate ||
-    action.scheduledDate ||
-    action.createdAt ||
-    action.date;
+  const dateStr = action.completedDate || action.scheduledDate || action.createdAt || action.date;
 
   if (!dateStr) return null;
   const d = new Date(dateStr);
@@ -172,10 +164,7 @@ function getEvolutionPercentage(current: number, previous: number): string {
 // ---- DATA FETCHERS ----
 
 async function getFocusedAgents(): Promise<TeamMember[]> {
-  const { data, error } = await supabase
-    .from("team_members")
-    .select("id, name, email")
-    .in("name", FOCUS_AGENT_NAMES);
+  const { data, error } = await supabase.from("team_members").select("id, name, email").in("name", FOCUS_AGENT_NAMES);
 
   if (error || !data) {
     console.error("Error fetching focused agents:", error);
@@ -187,8 +176,7 @@ async function getFocusedAgents(): Promise<TeamMember[]> {
 
 async function getAgentWeeklyStats(agentId: string): Promise<WeeklyStatsAgent> {
   const { startDate, endDate } = getWeekRange();
-  const { startDate: prevStartDate, endDate: prevEndDate } =
-    getPreviousWeekRange();
+  const { startDate: prevStartDate, endDate: prevEndDate } = getPreviousWeekRange();
 
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -272,21 +260,11 @@ async function getAgentWeeklyStats(agentId: string): Promise<WeeklyStatsAgent> {
   };
 }
 
-async function getAgentDailyBreakdown(
-  agentId: string,
-): Promise<DailyBreakdown[]> {
+async function getAgentDailyBreakdown(agentId: string): Promise<DailyBreakdown[]> {
   const { startDate } = getWeekRange();
   const dailyData: DailyBreakdown[] = [];
 
-  const dayNames = [
-    "Dimanche",
-    "Lundi",
-    "Mardi",
-    "Mercredi",
-    "Jeudi",
-    "Vendredi",
-    "Samedi",
-  ];
+  const dayNames = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
 
   // On récupère une fois les leads + actions de l'agent
   const { data: leadsWithActions } = await supabase
@@ -301,20 +279,13 @@ async function getAgentDailyBreakdown(
     const dayEnd = new Date(dayStart);
     dayEnd.setDate(dayEnd.getDate() + 1);
 
-    const dayStartIso = dayStart.toISOString();
-    const dayEndIso = dayEnd.toISOString();
-
     let newLeadsCount = 0;
     let actionsCount = 0;
 
     if (leadsWithActions) {
       for (const lead of leadsWithActions) {
         const createdAt = new Date(lead.created_at);
-        if (
-          !isNaN(createdAt.getTime()) &&
-          createdAt >= dayStart &&
-          createdAt < dayEnd
-        ) {
+        if (!isNaN(createdAt.getTime()) && createdAt >= dayStart && createdAt < dayEnd) {
           newLeadsCount++;
         }
 
@@ -345,9 +316,7 @@ async function getAgentDailyBreakdown(
   return dailyData;
 }
 
-async function getAgentActionTypeBreakdown(
-  agentId: string,
-): Promise<AgentActionBreakdown> {
+async function getAgentActionTypeBreakdown(agentId: string): Promise<AgentActionBreakdown> {
   const { startDate, endDate } = getWeekRange();
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -386,9 +355,7 @@ async function getAgentActionTypeBreakdown(
   return { actions_by_type };
 }
 
-async function getAgentPipelineStats(
-  agentId: string,
-): Promise<AgentPipelineStatsRow[]> {
+async function getAgentPipelineStats(agentId: string): Promise<AgentPipelineStatsRow[]> {
   const { startDate, endDate } = getWeekRange();
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -493,9 +460,7 @@ async function getAgentPipelineStats(
 async function getLeadResponseTimesAll(): Promise<LeadResponseTime[]> {
   const { startDate, endDate } = getWeekRange();
 
-  const { data: teamMembers } = await supabase
-    .from("team_members")
-    .select("id, name");
+  const { data: teamMembers } = await supabase.from("team_members").select("id, name");
 
   const nameById = new Map<string, string>();
   teamMembers?.forEach((m: any) => nameById.set(m.id, m.name));
@@ -583,13 +548,10 @@ function buildAgentReportHtml(
 
   const dateRange = `${weekStart.toLocaleDateString("fr-FR")} - ${weekEnd.toLocaleDateString("fr-FR")}`;
 
-  const agentRt = responseTimesAll.find(
-    (r) => r.agent_name === agent.name,
-  );
+  const agentRt = responseTimesAll.find((r) => r.agent_name === agent.name);
   const teamAvgHours =
     responseTimesAll.length > 0
-      ? responseTimesAll.reduce((s, r) => s + r.average_hours, 0) /
-        responseTimesAll.length
+      ? responseTimesAll.reduce((s, r) => s + r.average_hours, 0) / responseTimesAll.length
       : null;
 
   let responseTimeHtml = "";
@@ -602,14 +564,10 @@ function buildAgentReportHtml(
     responseTimeHtml = `
       <p><strong>Temps moyen de prise en charge de tes leads :</strong> ${formatHoursToHuman(
         agentRt.average_hours,
-      )} (sur ${agentRt.lead_count} lead${
-      agentRt.lead_count > 1 ? "s" : ""
-    }).</p>
+      )} (sur ${agentRt.lead_count} lead${agentRt.lead_count > 1 ? "s" : ""}).</p>
       ${
         teamAvgHours !== null
-          ? `<p><strong>Moyenne globale équipe :</strong> ${formatHoursToHuman(
-              teamAvgHours,
-            )}</p>`
+          ? `<p><strong>Moyenne globale équipe :</strong> ${formatHoursToHuman(teamAvgHours)}</p>`
           : ""
       }
     `;
@@ -635,22 +593,13 @@ function buildAgentReportHtml(
       : pipelineStats
           .map((row) => {
             const contact = row.call + row.follow_up + row.prospection;
-            const advancement =
-              row.visites_faites +
-              row.visites_futures +
-              row.estimation +
-              row.propositions;
-            const closing =
-              row.compromis + row.acte_vente + row.contrat_location;
+            const advancement = row.visites_faites + row.visites_futures + row.estimation + row.propositions;
+            const closing = row.compromis + row.acte_vente + row.contrat_location;
 
-            const contactBadgeClass =
-              contact > 0 ? "badge-info" : "badge-muted";
-            const advBadgeClass =
-              advancement > 0 ? "badge-success" : "badge-muted";
-            const closingBadgeClass =
-              closing > 0 ? "badge-warning" : "badge-muted";
-            const overdueBadgeClass =
-              row.overdue > 0 ? "badge-warning" : "badge-success";
+            const contactBadgeClass = contact > 0 ? "badge-info" : "badge-muted";
+            const advBadgeClass = advancement > 0 ? "badge-success" : "badge-muted";
+            const closingBadgeClass = closing > 0 ? "badge-warning" : "badge-muted";
+            const overdueBadgeClass = row.overdue > 0 ? "badge-warning" : "badge-success";
 
             return `
         <tr>
@@ -723,38 +672,18 @@ function buildAgentReportHtml(
     <div class="stat-card">
       <div class="stat-label">Nouveaux Leads</div>
       <div class="stat-value">${stats.newLeadsCount}</div>
-      <div class="evolution ${
-        stats.newLeadsCount >= stats.previousWeekNewLeads
-          ? "positive"
-          : "negative"
-      }">
-        ${getEvolutionEmoji(
-          stats.newLeadsCount,
-          stats.previousWeekNewLeads,
-        )}
-        ${getEvolutionPercentage(
-          stats.newLeadsCount,
-          stats.previousWeekNewLeads,
-        )}
+      <div class="evolution ${stats.newLeadsCount >= stats.previousWeekNewLeads ? "positive" : "negative"}">
+        ${getEvolutionEmoji(stats.newLeadsCount, stats.previousWeekNewLeads)}
+        ${getEvolutionPercentage(stats.newLeadsCount, stats.previousWeekNewLeads)}
       </div>
     </div>
 
     <div class="stat-card">
       <div class="stat-label">Actions réalisées (hors Emails Auto)</div>
       <div class="stat-value">${stats.totalActionsCount}</div>
-      <div class="evolution ${
-        stats.totalActionsCount >= stats.previousWeekActionsCount
-          ? "positive"
-          : "negative"
-      }">
-        ${getEvolutionEmoji(
-          stats.totalActionsCount,
-          stats.previousWeekActionsCount,
-        )}
-        ${getEvolutionPercentage(
-          stats.totalActionsCount,
-          stats.previousWeekActionsCount,
-        )}
+      <div class="evolution ${stats.totalActionsCount >= stats.previousWeekActionsCount ? "positive" : "negative"}">
+        ${getEvolutionEmoji(stats.totalActionsCount, stats.previousWeekActionsCount)}
+        ${getEvolutionPercentage(stats.totalActionsCount, stats.previousWeekActionsCount)}
       </div>
     </div>
 
@@ -867,13 +796,10 @@ const handler = async (req: Request): Promise<Response> => {
     const agents = await getFocusedAgents();
     if (agents.length === 0) {
       console.log("No focused agents found.");
-      return new Response(
-        JSON.stringify({ success: false, message: "No agents found" }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      return new Response(JSON.stringify({ success: false, message: "No agents found" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const responseTimesAll = await getLeadResponseTimesAll();
@@ -886,24 +812,37 @@ const handler = async (req: Request): Promise<Response> => {
       const actionsBreakdown = await getAgentActionTypeBreakdown(agent.id);
       const pipelineStats = await getAgentPipelineStats(agent.id);
 
-      const html = buildAgentReportHtml(
-        agent,
-        stats,
-        daily,
-        actionsBreakdown,
-        pipelineStats,
-        responseTimesAll,
-      );
+      const html = buildAgentReportHtml(agent, stats, daily, actionsBreakdown, pipelineStats, responseTimesAll);
 
-      const toAddress = agent.email || MANAGER_RECIPIENTS[0];
+      const agentEmail = agent.email || undefined;
 
-      const { data, error } = await resend.emails.send({
+      // 🎯 Logique d'envoi :
+      // - SEND_TO_AGENTS = false  -> uniquement MANAGER_RECIPIENTS reçoivent
+      // - SEND_TO_AGENTS = true   -> agent en "to", managers en "cc"
+      let toRecipients: string[] = [];
+      let ccRecipients: string[] = [];
+
+      if (SEND_TO_AGENTS && agentEmail) {
+        toRecipients = [agentEmail];
+        ccRecipients = MANAGER_RECIPIENTS;
+      } else {
+        // Mode prévisualisation : on envoie tout aux managers uniquement
+        toRecipients = MANAGER_RECIPIENTS;
+        ccRecipients = [];
+      }
+
+      const mailPayload: any = {
         from: RESEND_FROM,
-        to: [toAddress],
-        cc: MANAGER_RECIPIENTS,
+        to: toRecipients,
         subject: `📊 Rapport Hebdomadaire - ${agent.name}`,
         html,
-      });
+      };
+
+      if (ccRecipients.length > 0) {
+        mailPayload.cc = ccRecipients;
+      }
+
+      const { data, error } = await resend.emails.send(mailPayload);
 
       if (error) {
         console.error(`❌ Error sending report for ${agent.name}:`, error);
@@ -928,13 +867,10 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (err: unknown) {
     console.error("❌ Error in weekly-agent-reports:", err);
     const message = err instanceof Error ? err.message : String(err);
-    return new Response(
-      JSON.stringify({ error: "Internal server error", details: message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+    return new Response(JSON.stringify({ error: "Internal server error", details: message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 };
 
