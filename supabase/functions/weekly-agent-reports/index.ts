@@ -20,6 +20,7 @@ const MANAGER_RECIPIENTS = RESEND_TO.split(",")
 
 // On commence avec ces 4 agents (on filtre maintenant par EMAIL)
 const FOCUS_AGENT_EMAILS = [
+  "pierre@gadait-international.com",
   "jade@gadait-international.com",
   "franck.fontaine@gadait-international.com",
   "fleurs@gadait-international.com",
