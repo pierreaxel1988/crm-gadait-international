@@ -20,7 +20,7 @@ const MANAGER_RECIPIENTS = RESEND_TO.split(",")
 
 // Mode : si false → uniquement MANAGER_RECIPIENTS reçoivent les rapports
 // si true → l'agent reçoit le mail, les managers sont en copie.
-const SEND_TO_AGENTS = false;
+const SEND_TO_AGENTS = true;
 
 // On commence avec ces 4 agents (on filtre maintenant par EMAIL)
 const FOCUS_AGENT_EMAILS = [
