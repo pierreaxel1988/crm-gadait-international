@@ -2,15 +2,19 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "npm:resend@2.0.0";
 
+// --- ENV VARS ---
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
+const resendApiKey = Deno.env.get("RESEND_API_KEY")!; // re_GW2FFSS5_...
+
+const RESEND_FROM = Deno.env.get("RESEND_FROM")!; // "Gadait Team <team@gadait-international.com>"
+const RESEND_TO = Deno.env.get("RESEND_TO")!;     // "pierre@gadait-international.com" (ou liste séparée par des virgules)
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const resend = new Resend(resendApiKey);
 
-const RECIPIENTS = ["elie@gadait-international.com"];
-const FROM_EMAIL = "Gadait CRM <crm@gadait-international.com>";
+// On supporte plusieurs destinataires séparés par des virgules si tu veux élargir plus tard
+const RECIPIENTS = RESEND_TO.split(",").map((email) => email.trim()).filter(Boolean);
 
 interface WeeklyStats {
   newLeadsCount: number;
@@ -56,7 +60,6 @@ const corsHeaders = {
 function getParisDate(daysAgo: number = 0): Date {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);
-  // Convert to Paris timezone (UTC+1 or UTC+2 depending on DST)
   const parisDate = new Date(date.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
   parisDate.setHours(0, 0, 0, 0);
   return parisDate;
@@ -64,7 +67,7 @@ function getParisDate(daysAgo: number = 0): Date {
 
 function getLastSunday(): Date {
   const today = getParisDate(0);
-  const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const dayOfWeek = today.getDay(); // 0 = Sunday
   const daysToLastSunday = dayOfWeek === 0 ? 7 : dayOfWeek;
   return getParisDate(daysToLastSunday);
 }
@@ -72,8 +75,8 @@ function getLastSunday(): Date {
 function getWeekRange() {
   const lastSunday = getLastSunday();
   const endDate = new Date(lastSunday);
-  endDate.setDate(endDate.getDate() + 7); // End of week (next Sunday)
-  
+  endDate.setDate(endDate.getDate() + 7); // next Sunday
+
   return {
     startDate: lastSunday.toISOString(),
     endDate: endDate.toISOString(),
@@ -84,7 +87,7 @@ function getPreviousWeekRange() {
   const lastSunday = getLastSunday();
   const previousSunday = new Date(lastSunday);
   previousSunday.setDate(previousSunday.getDate() - 7);
-  
+
   return {
     startDate: previousSunday.toISOString(),
     endDate: lastSunday.toISOString(),
@@ -96,14 +99,14 @@ async function getWeeklyStats(): Promise<WeeklyStats> {
   const { startDate: prevStartDate, endDate: prevEndDate } = getPreviousWeekRange();
 
   // Current week stats
-  const { data: newLeads } = await supabase
+  const { count: newLeadsCountRaw } = await supabase
     .from("leads")
     .select("id", { count: "exact", head: true })
     .gte("created_at", startDate)
     .lt("created_at", endDate)
     .is("deleted_at", null);
 
-  const { data: signedLeads } = await supabase
+  const { count: signedLeadsCountRaw } = await supabase
     .from("leads")
     .select("id", { count: "exact", head: true })
     .eq("status", "Signé")
@@ -111,7 +114,23 @@ async function getWeeklyStats(): Promise<WeeklyStats> {
     .lt("created_at", endDate)
     .is("deleted_at", null);
 
-  // Count actions from action_history JSON field
+  // Previous week stats
+  const { count: prevNewLeadsRaw } = await supabase
+    .from("leads")
+    .select("id", { count: "exact", head: true })
+    .gte("created_at", prevStartDate)
+    .lt("created_at", prevEndDate)
+    .is("deleted_at", null);
+
+  const { count: prevSignedLeadsRaw } = await supabase
+    .from("leads")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "Signé")
+    .gte("created_at", prevStartDate)
+    .lt("created_at", prevEndDate)
+    .is("deleted_at", null);
+
+  // Count actions from action_history JSON field (pour la semaine en cours)
   const { data: leadsWithActions } = await supabase
     .from("leads")
     .select("action_history")
@@ -128,35 +147,18 @@ async function getWeeklyStats(): Promise<WeeklyStats> {
     }
   }
 
-  // Previous week stats
-  const { data: prevNewLeads } = await supabase
-    .from("leads")
-    .select("id", { count: "exact", head: true })
-    .gte("created_at", prevStartDate)
-    .lt("created_at", prevEndDate)
-    .is("deleted_at", null);
-
-  const { data: prevSignedLeads } = await supabase
-    .from("leads")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "Signé")
-    .gte("created_at", prevStartDate)
-    .lt("created_at", prevEndDate)
-    .is("deleted_at", null);
-
   return {
-    newLeadsCount: newLeads?.length || 0,
-    signedLeadsCount: signedLeads?.length || 0,
+    newLeadsCount: newLeadsCountRaw ?? 0,
+    signedLeadsCount: signedLeadsCountRaw ?? 0,
     totalActionsCount,
-    previousWeekNewLeads: prevNewLeads?.length || 0,
-    previousWeekSignedLeads: prevSignedLeads?.length || 0,
+    previousWeekNewLeads: prevNewLeadsRaw ?? 0,
+    previousWeekSignedLeads: prevSignedLeadsRaw ?? 0,
   };
 }
 
 async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
   const { startDate, endDate } = getWeekRange();
 
-  // Get team members
   const { data: teamMembers } = await supabase
     .from("team_members")
     .select("id, name, email");
@@ -167,7 +169,7 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
 
   for (const member of teamMembers) {
     // New leads assigned to this agent
-    const { data: newLeads } = await supabase
+    const { count: newLeadsCountRaw } = await supabase
       .from("leads")
       .select("id", { count: "exact", head: true })
       .eq("assigned_to", member.id)
@@ -176,7 +178,7 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
       .is("deleted_at", null);
 
     // Signed leads by this agent
-    const { data: signedLeads } = await supabase
+    const { count: signedLeadsCountRaw } = await supabase
       .from("leads")
       .select("id", { count: "exact", head: true })
       .eq("assigned_to", member.id)
@@ -185,7 +187,7 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
       .lt("created_at", endDate)
       .is("deleted_at", null);
 
-    // Actions by this agent
+    // Actions by this agent (tous les leads de l'agent, puis filtrage par date en JS)
     const { data: leadsWithActions } = await supabase
       .from("leads")
       .select("action_history")
@@ -213,15 +215,16 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
       .gte("login_time", startDate)
       .lt("login_time", endDate);
 
-    const connectionMinutes = sessions?.reduce((sum, s) => sum + (s.session_duration || 0), 0) || 0;
+    const connectionMinutes =
+      sessions?.reduce((sum, s) => sum + (s.session_duration || 0), 0) || 0;
 
     agentActivities.push({
       agent_id: member.id,
       agent_name: member.name,
       agent_email: member.email,
-      new_leads_count: newLeads?.length || 0,
+      new_leads_count: newLeadsCountRaw ?? 0,
       actions_count: actionsCount,
-      signed_leads_count: signedLeads?.length || 0,
+      signed_leads_count: signedLeadsCountRaw ?? 0,
       connection_minutes: Math.round(connectionMinutes),
     });
   }
@@ -241,7 +244,7 @@ async function getDailyBreakdown(): Promise<DailyBreakdown[]> {
     const dayEnd = new Date(dayStart);
     dayEnd.setDate(dayEnd.getDate() + 1);
 
-    const { data: newLeads } = await supabase
+    const { count: newLeadsCountRaw } = await supabase
       .from("leads")
       .select("id", { count: "exact", head: true })
       .gte("created_at", dayStart.toISOString())
@@ -269,7 +272,7 @@ async function getDailyBreakdown(): Promise<DailyBreakdown[]> {
     dailyData.push({
       day_name: dayNames[dayStart.getDay()],
       date: dayStart.toLocaleDateString("fr-FR"),
-      new_leads: newLeads?.length || 0,
+      new_leads: newLeadsCountRaw ?? 0,
       actions: actionsCount,
     });
   }
@@ -357,7 +360,9 @@ async function generateWeeklyReportHtml(): Promise<string> {
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 6);
 
-  const dateRange = `${weekStart.toLocaleDateString("fr-FR")} - ${weekEnd.toLocaleDateString("fr-FR")}`;
+  const dateRange = `${weekStart.toLocaleDateString("fr-FR")} - ${weekEnd.toLocaleDateString(
+    "fr-FR",
+  )}`;
 
   return `
 <!DOCTYPE html>
@@ -404,16 +409,16 @@ async function generateWeeklyReportHtml(): Promise<string> {
     <div class="stat-card">
       <div class="stat-label">Nouveaux Leads</div>
       <div class="stat-value">${weeklyStats.newLeadsCount}</div>
-      <div class="evolution ${weeklyStats.newLeadsCount >= weeklyStats.previousWeekNewLeads ? 'positive' : 'negative'}">
-        ${getEvolutionEmoji(weeklyStats.newLeadsCount, weeklyStats.previousWeekNewLeads)} 
+      <div class="evolution ${weeklyStats.newLeadsCount >= weeklyStats.previousWeekNewLeads ? "positive" : "negative"}">
+        ${getEvolutionEmoji(weeklyStats.newLeadsCount, weeklyStats.previousWeekNewLeads)}
         ${getEvolutionPercentage(weeklyStats.newLeadsCount, weeklyStats.previousWeekNewLeads)}
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Leads Signés</div>
       <div class="stat-value">${weeklyStats.signedLeadsCount}</div>
-      <div class="evolution ${weeklyStats.signedLeadsCount >= weeklyStats.previousWeekSignedLeads ? 'positive' : 'negative'}">
-        ${getEvolutionEmoji(weeklyStats.signedLeadsCount, weeklyStats.previousWeekSignedLeads)} 
+      <div class="evolution ${weeklyStats.signedLeadsCount >= weeklyStats.previousWeekSignedLeads ? "positive" : "negative"}">
+        ${getEvolutionEmoji(weeklyStats.signedLeadsCount, weeklyStats.previousWeekSignedLeads)}
         ${getEvolutionPercentage(weeklyStats.signedLeadsCount, weeklyStats.previousWeekSignedLeads)}
       </div>
     </div>
@@ -438,10 +443,14 @@ async function generateWeeklyReportHtml(): Promise<string> {
         </tr>
       </thead>
       <tbody>
-        ${agentActivities.map((agent, index) => `
+        ${agentActivities
+          .map(
+            (agent, index) => `
           <tr>
             <td>
-              <span class="rank ${index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'rank-other'}">
+              <span class="rank ${
+                index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : "rank-other"
+              }">
                 ${index + 1}
               </span>
             </td>
@@ -451,7 +460,9 @@ async function generateWeeklyReportHtml(): Promise<string> {
             <td><span class="badge badge-success">${agent.signed_leads_count}</span></td>
             <td>${formatMinutesToHours(agent.connection_minutes)}</td>
           </tr>
-        `).join('')}
+        `,
+          )
+          .join("")}
       </tbody>
     </table>
   </div>
@@ -468,21 +479,27 @@ async function generateWeeklyReportHtml(): Promise<string> {
         </tr>
       </thead>
       <tbody>
-        ${dailyBreakdown.map(day => `
+        ${dailyBreakdown
+          .map(
+            (day) => `
           <tr>
             <td><strong>${day.day_name}</strong></td>
             <td>${day.date}</td>
             <td>${day.new_leads}</td>
             <td>${day.actions}</td>
           </tr>
-        `).join('')}
+        `,
+          )
+          .join("")}
       </tbody>
     </table>
   </div>
 
   <div class="section">
     <div class="section-title">⚡ Actions par Type et Agent</div>
-    ${actionBreakdown.map(agent => `
+    ${actionBreakdown
+      .map(
+        (agent) => `
       <div style="margin-bottom: 20px;">
         <h3 style="color: #374151; font-size: 16px; margin-bottom: 10px;">${agent.agent_name}</h3>
         <table>
@@ -493,16 +510,22 @@ async function generateWeeklyReportHtml(): Promise<string> {
             </tr>
           </thead>
           <tbody>
-            ${agent.actions_by_type.map(action => `
+            ${agent.actions_by_type
+              .map(
+                (action) => `
               <tr>
                 <td>${action.action_type}</td>
                 <td><span class="badge badge-info">${action.count}</span></td>
               </tr>
-            `).join('')}
+            `,
+              )
+              .join("")}
           </tbody>
         </table>
       </div>
-    `).join('')}
+    `,
+      )
+      .join("")}
   </div>
 
   <div class="footer">
@@ -525,9 +548,9 @@ const handler = async (req: Request): Promise<Response> => {
     const htmlContent = await generateWeeklyReportHtml();
 
     const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
+      from: RESEND_FROM,
       to: RECIPIENTS,
-      subject: `📊 Rapport Hebdomadaire - Gadait CRM`,
+      subject: "📊 Rapport Hebdomadaire - Gadait CRM",
       html: htmlContent,
     });
 
@@ -538,7 +561,7 @@ const handler = async (req: Request): Promise<Response> => {
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
@@ -549,16 +572,17 @@ const handler = async (req: Request): Promise<Response> => {
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
-  } catch (error) {
-    console.error("❌ Error in weekly-activity-report:", error);
+  } catch (err: unknown) {
+    console.error("❌ Error in weekly-activity-report:", err);
+    const message = err instanceof Error ? err.message : String(err);
     return new Response(
-      JSON.stringify({ error: "Internal server error", details: error.message }),
+      JSON.stringify({ error: "Internal server error", details: message }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 };
