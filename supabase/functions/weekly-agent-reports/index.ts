@@ -13,10 +13,15 @@ const RESEND_TO = Deno.env.get("RESEND_TO")!; // "pierre@gadait-international.co
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const resend = new Resend(resendApiKey);
 
-// Les destinataires en copie (toi, éventuellement d'autres)
-const MANAGER_RECIPIENTS = RESEND_TO.split(",")
-  .map((email) => email.trim())
-  .filter(Boolean);
+// Les destinataires managers : RESEND_TO + Christelle
+const EXTRA_MANAGER_EMAILS = ["christelle@gadait-international.com"];
+
+const MANAGER_RECIPIENTS = [
+  ...RESEND_TO.split(",")
+    .map((email) => email.trim())
+    .filter(Boolean),
+  ...EXTRA_MANAGER_EMAILS,
+];
 
 // Mode : si false → uniquement MANAGER_RECIPIENTS reçoivent les rapports
 // si true → l'agent reçoit le mail, les managers sont en copie.
