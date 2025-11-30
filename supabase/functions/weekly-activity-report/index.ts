@@ -703,6 +703,7 @@ async function generateWeeklyReportHtml(): Promise<string> {
     .badge-success { background: #d1fae5; color: #065f46; }
     .badge-info { background: #dbeafe; color: #1e40af; }
     .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-muted { background: #e5e7eb; color: #4b5563; }
     .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; margin-top: 30px; }
   </style>
 </head>
@@ -726,7 +727,9 @@ async function generateWeeklyReportHtml(): Promise<string> {
     <div class="stat-card">
       <div class="stat-label">Actions Réalisées (hors Emails Auto)</div>
       <div class="stat-value">${weeklyStats.totalActionsCount}</div>
-      <div class="evolution ${weeklyStats.totalActionsCount >= weeklyStats.previousWeekActionsCount ? "positive" : "negative"}">
+      <div class="evolution ${
+        weeklyStats.totalActionsCount >= weeklyStats.previousWeekActionsCount ? "positive" : "negative"
+      }">
         ${getEvolutionEmoji(weeklyStats.totalActionsCount, weeklyStats.previousWeekActionsCount)}
         ${getEvolutionPercentage(weeklyStats.totalActionsCount, weeklyStats.previousWeekActionsCount)}
       </div>
@@ -784,7 +787,9 @@ async function generateWeeklyReportHtml(): Promise<string> {
             <td><strong>${agent.agent_name}</strong></td>
             <td>${agent.new_leads_count}</td>
             <td><span class="badge badge-info">${agent.actions_count}</span></td>
-            <td><span class="badge ${agent.overdue_actions_count > 0 ? "badge-warning" : "badge-success"}">${agent.overdue_actions_count}</span></td>
+            <td><span class="badge ${
+              agent.overdue_actions_count > 0 ? "badge-warning" : "badge-success"
+            }">${agent.overdue_actions_count}</span></td>
           </tr>
         `,
           )
@@ -856,47 +861,47 @@ async function generateWeeklyReportHtml(): Promise<string> {
 
   <div class="section">
     <div class="section-title">🎯 Actions par Agent & Pipeline</div>
+    <p style="font-size:13px; color:#6b7280; margin-bottom:10px;">
+      Lecture rapide : <strong>Contact</strong> = Call + Follow up + Prospection ·
+      <strong>Avancement</strong> = Visites + Estimations + Propositions ·
+      <strong>Closing</strong> = Compromis + Actes de vente + Contrats de location.
+    </p>
     <table>
       <thead>
         <tr>
           <th>Agent</th>
           <th>Pipeline</th>
           <th>Total</th>
-          <th>Call</th>
-          <th>Follow up</th>
-          <th>Visites faites</th>
-          <th>Visites futures</th>
-          <th>Estim.</th>
-          <th>Prop.</th>
-          <th>Prospect.</th>
-          <th>Compromis</th>
-          <th>Acte vente</th>
-          <th>Contrat loc.</th>
+          <th>Contact</th>
+          <th>Avancement</th>
+          <th>Closing</th>
           <th>Retards</th>
         </tr>
       </thead>
       <tbody>
         ${pipelineStats
-          .map(
-            (row) => `
+          .map((row) => {
+            const contact = row.call + row.follow_up + row.prospection;
+            const advancement = row.visites_faites + row.visites_futures + row.estimation + row.propositions;
+            const closing = row.compromis + row.acte_vente + row.contrat_location;
+
+            const contactBadgeClass = contact > 0 ? "badge-info" : "badge-muted";
+            const advBadgeClass = advancement > 0 ? "badge-success" : "badge-muted";
+            const closingBadgeClass = closing > 0 ? "badge-warning" : "badge-muted";
+            const overdueBadgeClass = row.overdue > 0 ? "badge-warning" : "badge-success";
+
+            return `
           <tr>
             <td>${row.agent_name}</td>
             <td>${row.pipeline}</td>
             <td><span class="badge badge-info">${row.total_actions}</span></td>
-            <td>${row.call}</td>
-            <td>${row.follow_up}</td>
-            <td>${row.visites_faites}</td>
-            <td>${row.visites_futures}</td>
-            <td>${row.estimation}</td>
-            <td>${row.propositions}</td>
-            <td>${row.prospection}</td>
-            <td>${row.compromis}</td>
-            <td>${row.acte_vente}</td>
-            <td>${row.contrat_location}</td>
-            <td><span class="badge ${row.overdue > 0 ? "badge-warning" : "badge-success"}">${row.overdue}</span></td>
+            <td><span class="badge ${contactBadgeClass}">${contact}</span></td>
+            <td><span class="badge ${advBadgeClass}">${advancement}</span></td>
+            <td><span class="badge ${closingBadgeClass}">${closing}</span></td>
+            <td><span class="badge ${overdueBadgeClass}">${row.overdue}</span></td>
           </tr>
-        `,
-          )
+        `;
+          })
           .join("")}
       </tbody>
     </table>
