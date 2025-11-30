@@ -18,12 +18,13 @@ const MANAGER_RECIPIENTS = RESEND_TO.split(",")
   .map((email) => email.trim())
   .filter(Boolean);
 
-// ⏸️ Mode prévisualisation : false = seulement les managers reçoivent
-// Quand tu seras prêt à envoyer aux agents, mets cette constante à true.
-const SEND_TO_AGENTS = false;
-
-// On commence avec ces 4 agents
-const FOCUS_AGENT_NAMES = ["Jade Diouane", "Franck Fontaine", "Fleurs Samuelson", "Matthieu Lapierre"];
+// On commence avec ces 4 agents (on filtre maintenant par EMAIL)
+const FOCUS_AGENT_EMAILS = [
+  "jade@gadait-international.com",
+  "franck@gadait-international.com",
+  "fleurs@gadait-international.com",
+  "matthieu@gadait-international.com",
+];
 
 interface TeamMember {
   id: string;
@@ -163,8 +164,9 @@ function getEvolutionPercentage(current: number, previous: number): string {
 
 // ---- DATA FETCHERS ----
 
+// On filtre maintenant les agents par leurs EMAILS (plus fiable que le nom)
 async function getFocusedAgents(): Promise<TeamMember[]> {
-  const { data, error } = await supabase.from("team_members").select("id, name, email").in("name", FOCUS_AGENT_NAMES);
+  const { data, error } = await supabase.from("team_members").select("id, name, email").in("email", FOCUS_AGENT_EMAILS);
 
   if (error || !data) {
     console.error("Error fetching focused agents:", error);
@@ -266,7 +268,6 @@ async function getAgentDailyBreakdown(agentId: string): Promise<DailyBreakdown[]
 
   const dayNames = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
 
-  // On récupère une fois les leads + actions de l'agent
   const { data: leadsWithActions } = await supabase
     .from("leads")
     .select("created_at, action_history")
@@ -456,7 +457,6 @@ async function getAgentPipelineStats(agentId: string): Promise<AgentPipelineStat
   return rows;
 }
 
-// même logique que dans ton rapport global, mais on garde tout le monde
 async function getLeadResponseTimesAll(): Promise<LeadResponseTime[]> {
   const { startDate, endDate } = getWeekRange();
 
@@ -814,35 +814,16 @@ const handler = async (req: Request): Promise<Response> => {
 
       const html = buildAgentReportHtml(agent, stats, daily, actionsBreakdown, pipelineStats, responseTimesAll);
 
-      const agentEmail = agent.email || undefined;
-
-      // 🎯 Logique d'envoi :
-      // - SEND_TO_AGENTS = false  -> uniquement MANAGER_RECIPIENTS reçoivent
-      // - SEND_TO_AGENTS = true   -> agent en "to", managers en "cc"
-      let toRecipients: string[] = [];
-      let ccRecipients: string[] = [];
-
-      if (SEND_TO_AGENTS && agentEmail) {
-        toRecipients = [agentEmail];
-        ccRecipients = MANAGER_RECIPIENTS;
-      } else {
-        // Mode prévisualisation : on envoie tout aux managers uniquement
-        toRecipients = MANAGER_RECIPIENTS;
-        ccRecipients = [];
-      }
-
-      const mailPayload: any = {
+      // 🔒 POUR L'INSTANT : on envoie UNIQUEMENT au/aux managers
+      // Quand tu voudras envoyer aux commerciaux :
+      //   remplace "MANAGER_RECIPIENTS" par "[agent.email || MANAGER_RECIPIENTS[0]]"
+      //   et mets les managers en "cc" si tu veux.
+      const { data, error } = await resend.emails.send({
         from: RESEND_FROM,
-        to: toRecipients,
+        to: MANAGER_RECIPIENTS,
         subject: `📊 Rapport Hebdomadaire - ${agent.name}`,
         html,
-      };
-
-      if (ccRecipients.length > 0) {
-        mailPayload.cc = ccRecipients;
-      }
-
-      const { data, error } = await resend.emails.send(mailPayload);
+      });
 
       if (error) {
         console.error(`❌ Error sending report for ${agent.name}:`, error);
