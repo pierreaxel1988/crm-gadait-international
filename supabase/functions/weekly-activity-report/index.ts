@@ -13,7 +13,7 @@ const RESEND_TO = Deno.env.get("RESEND_TO")!; // "pierre@gadait-international.co
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const resend = new Resend(resendApiKey);
 
-// On supporte plusieurs destinataires séparés par des virgules si tu veux élargir plus tard
+// On supporte plusieurs destinataires séparés par des virgules
 const RECIPIENTS = RESEND_TO.split(",")
   .map((email) => email.trim())
   .filter(Boolean);
@@ -33,7 +33,7 @@ interface AgentWeeklyActivity {
   new_leads_count: number;
   actions_count: number;
   signed_leads_count: number;
-  connection_minutes: number;
+  overdue_actions_count: number; // 🔥 remplace le temps
 }
 
 interface DailyBreakdown {
@@ -72,12 +72,18 @@ interface AgentPipelineActionStats {
   overdue_actions_count: number;
 }
 
+interface Alerts {
+  agentsWithNoActions: { agent_id: string; agent_name: string }[];
+  leadsNoActionThisWeek: number;
+  overdueFollowUps: number;
+}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Helper to get Paris timezone dates
+// Helper timezone Paris
 function getParisDate(daysAgo: number = 0): Date {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);
@@ -128,7 +134,6 @@ function getActionStatDate(action: any): Date | null {
 
 async function getWeeklyStats(): Promise<WeeklyStats> {
   const { startDate, endDate } = getWeekRange();
-
   const { startDate: prevStartDate, endDate: prevEndDate } = getPreviousWeekRange();
 
   // Current week stats
@@ -163,7 +168,7 @@ async function getWeeklyStats(): Promise<WeeklyStats> {
     .lt("created_at", prevEndDate)
     .is("deleted_at", null);
 
-  // Count actions from action_history JSON field (semaine en cours)
+  // Actions semaine en cours
   const { data: leadsWithActions } = await supabase
     .from("leads")
     .select("action_history")
@@ -193,6 +198,7 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
   const { startDate, endDate } = getWeekRange();
   const start = new Date(startDate);
   const end = new Date(endDate);
+  const now = new Date();
 
   const { data: teamMembers } = await supabase.from("team_members").select("id, name, email");
 
@@ -201,7 +207,7 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
   const agentActivities: AgentWeeklyActivity[] = [];
 
   for (const member of teamMembers) {
-    // New leads assigned to this agent
+    // Nouveaux leads assignés à cet agent
     const { count: newLeadsCountRaw } = await supabase
       .from("leads")
       .select("id", { count: "exact", head: true })
@@ -210,7 +216,7 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
       .lt("created_at", endDate)
       .is("deleted_at", null);
 
-    // Signed leads by this agent
+    // Leads signés par cet agent
     const { count: signedLeadsCountRaw } = await supabase
       .from("leads")
       .select("id", { count: "exact", head: true })
@@ -220,7 +226,7 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
       .lt("created_at", endDate)
       .is("deleted_at", null);
 
-    // Actions by this agent (tous les leads de l'agent, filtrage par date)
+    // Actions de cet agent
     const { data: leadsWithActions } = await supabase
       .from("leads")
       .select("action_history")
@@ -228,27 +234,28 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
       .is("deleted_at", null);
 
     let actionsCount = 0;
+    let overdueActions = 0;
+
     if (leadsWithActions) {
       for (const lead of leadsWithActions) {
         if (lead.action_history && Array.isArray(lead.action_history)) {
-          const weekActions = lead.action_history.filter((action: any) => {
+          for (const action of lead.action_history) {
             const actionDate = getActionStatDate(action);
-            return actionDate !== null && actionDate >= start && actionDate < end;
-          });
-          actionsCount += weekActions.length;
+            if (actionDate === null || actionDate < start || actionDate >= end) {
+              continue;
+            }
+            actionsCount++;
+
+            const scheduledDate = action.scheduledDate ? new Date(action.scheduledDate) : null;
+            const completedDate = action.completedDate ? new Date(action.completedDate) : null;
+
+            if (scheduledDate && !completedDate && scheduledDate < now) {
+              overdueActions++;
+            }
+          }
         }
       }
     }
-
-    // Connection time
-    const { data: sessions } = await supabase
-      .from("user_sessions")
-      .select("session_duration")
-      .eq("user_id", member.id)
-      .gte("login_time", startDate)
-      .lt("login_time", endDate);
-
-    const connectionMinutes = sessions?.reduce((sum, s) => sum + (s.session_duration || 0), 0) || 0;
 
     agentActivities.push({
       agent_id: member.id,
@@ -257,7 +264,7 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
       new_leads_count: newLeadsCountRaw ?? 0,
       actions_count: actionsCount,
       signed_leads_count: signedLeadsCountRaw ?? 0,
-      connection_minutes: Math.round(connectionMinutes),
+      overdue_actions_count: overdueActions,
     });
   }
 
@@ -360,7 +367,7 @@ async function getActionTypeBreakdown(): Promise<AgentActionBreakdown[]> {
   return agentBreakdowns;
 }
 
-// NEW: stats par agent & par pipeline, avec chaque type d'action
+// 🔥 Stats par agent & par pipeline
 async function getAgentPipelineActionStats(): Promise<AgentPipelineActionStats[]> {
   const { startDate, endDate } = getWeekRange();
   const start = new Date(startDate);
@@ -452,13 +459,13 @@ async function getAgentPipelineActionStats(): Promise<AgentPipelineActionStats[]
               stats.admin_count++;
               break;
             case "Visites":
-              // On gère les visites plus bas (done / planned)
+              // géré plus bas
               break;
             default:
               break;
           }
 
-          // Visites : réalisées vs futures
+          // Visites : faites vs futures
           if (type === "Visites") {
             if (completedDate) {
               stats.visit_done_count++;
@@ -467,7 +474,7 @@ async function getAgentPipelineActionStats(): Promise<AgentPipelineActionStats[]
             }
           }
 
-          // Actions en retard : scheduled < now et pas complétées
+          // Retards
           if (scheduledDate && !completedDate && scheduledDate < now) {
             stats.overdue_actions_count++;
           }
@@ -478,14 +485,84 @@ async function getAgentPipelineActionStats(): Promise<AgentPipelineActionStats[]
     allStats.push(...statsByPipeline.values());
   }
 
-  // Tri par total d'actions desc
   return allStats.sort((a, b) => b.total_actions - a.total_actions);
 }
 
-function formatMinutesToHours(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours}h${mins.toString().padStart(2, "0")}`;
+// 🔔 Alertes globales
+async function getAlerts(): Promise<Alerts> {
+  const { startDate, endDate } = getWeekRange();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const now = new Date();
+
+  const alerts: Alerts = {
+    agentsWithNoActions: [],
+    leadsNoActionThisWeek: 0,
+    overdueFollowUps: 0,
+  };
+
+  // 1) Agents sans aucune action sur la semaine
+  const { data: teamMembers } = await supabase.from("team_members").select("id, name");
+  if (teamMembers) {
+    for (const member of teamMembers) {
+      const { data: leads } = await supabase
+        .from("leads")
+        .select("action_history")
+        .eq("assigned_to", member.id)
+        .is("deleted_at", null);
+
+      let hasAction = false;
+      if (leads) {
+        for (const lead of leads) {
+          if (lead.action_history && Array.isArray(lead.action_history)) {
+            const weekActions = lead.action_history.filter((action: any) => {
+              const actionDate = getActionStatDate(action);
+              return actionDate !== null && actionDate >= start && actionDate < end;
+            });
+            if (weekActions.length > 0) {
+              hasAction = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!hasAction) {
+        alerts.agentsWithNoActions.push({
+          agent_id: member.id,
+          agent_name: member.name,
+        });
+      }
+    }
+  }
+
+  // 2) Leads créés cette semaine sans aucune action
+  const { data: newLeads } = await supabase
+    .from("leads")
+    .select("action_history")
+    .gte("created_at", startDate)
+    .lt("created_at", endDate)
+    .is("deleted_at", null);
+
+  if (newLeads) {
+    for (const lead of newLeads) {
+      if (!lead.action_history || !Array.isArray(lead.action_history) || lead.action_history.length === 0) {
+        alerts.leadsNoActionThisWeek++;
+      }
+    }
+  }
+
+  // 3) Follow-up en retard (next_follow_up_at dépassé)
+  const { count: overdueFollowUpsRaw } = await supabase
+    .from("leads")
+    .select("id", { count: "exact", head: true })
+    .lt("next_follow_up_at", now.toISOString())
+    .neq("status", "Signé")
+    .is("deleted_at", null);
+
+  alerts.overdueFollowUps = overdueFollowUpsRaw ?? 0;
+
+  return alerts;
 }
 
 function getEvolutionEmoji(current: number, previous: number): string {
@@ -506,6 +583,7 @@ async function generateWeeklyReportHtml(): Promise<string> {
   const dailyBreakdown = await getDailyBreakdown();
   const actionBreakdown = await getActionTypeBreakdown();
   const agentPipelineStats = await getAgentPipelineActionStats();
+  const alerts = await getAlerts();
 
   const { startDate } = getWeekRange();
   const weekStart = new Date(startDate);
@@ -513,6 +591,9 @@ async function generateWeeklyReportHtml(): Promise<string> {
   weekEnd.setDate(weekEnd.getDate() + 6);
 
   const dateRange = `${weekStart.toLocaleDateString("fr-FR")} - ${weekEnd.toLocaleDateString("fr-FR")}`;
+
+  const agentsNoActionsList =
+    alerts.agentsWithNoActions.length === 0 ? "Aucun." : alerts.agentsWithNoActions.map((a) => a.agent_name).join(", ");
 
   return `
 <!DOCTYPE html>
@@ -555,6 +636,13 @@ async function generateWeeklyReportHtml(): Promise<string> {
     <p>${dateRange}</p>
   </div>
 
+  <div class="section">
+    <div class="section-title">🚨 Alertes</div>
+    <p><strong>Agents sans action cette semaine :</strong> ${agentsNoActionsList}</p>
+    <p><strong>Nouveaux leads sans aucune action :</strong> ${alerts.leadsNoActionThisWeek}</p>
+    <p><strong>Follow-ups en retard (next_follow_up_at dépassé) :</strong> ${alerts.overdueFollowUps}</p>
+  </div>
+
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-label">Nouveaux Leads</div>
@@ -589,7 +677,7 @@ async function generateWeeklyReportHtml(): Promise<string> {
           <th>Leads</th>
           <th>Actions</th>
           <th>Signés</th>
-          <th>Temps</th>
+          <th>Retards</th>
         </tr>
       </thead>
       <tbody>
@@ -608,7 +696,7 @@ async function generateWeeklyReportHtml(): Promise<string> {
             <td>${agent.new_leads_count}</td>
             <td><span class="badge badge-info">${agent.actions_count}</span></td>
             <td><span class="badge badge-success">${agent.signed_leads_count}</span></td>
-            <td>${formatMinutesToHours(agent.connection_minutes)}</td>
+            <td>${agent.overdue_actions_count}</td>
           </tr>
         `,
           )
